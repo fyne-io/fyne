@@ -95,7 +95,7 @@ func TestSelect_Disable(t *testing.T) {
 						</widget>
 						<rectangle fillColor="button" pos="4,4" size="128x29"/>
 						<widget pos="8,4" size="100x29" type="*widget.textProvider">
-							<text bold color="disabled text" pos="4,4" size="92x21">(Select one)</text>
+							<text bold color="disabled" pos="4,4" size="92x21">(Select one)</text>
 						</widget>
 						<widget pos="108,8" size="20x20" type="*widget.Icon">
 							<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>
@@ -297,7 +297,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 							</widget>
 							<rectangle fillColor="button" pos="4,4" size="128x29"/>
 							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold color="disabled text" pos="4,4" size="92x21">(Select one)</text>
+								<text bold color="disabled" pos="4,4" size="92x21">(Select one)</text>
 							</widget>
 							<widget pos="108,8" size="20x20" type="*widget.Icon">
 								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>

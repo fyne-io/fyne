@@ -100,7 +100,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"image themed resource": {
-			content: canvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}), nil)),
+			content: canvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}))),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"default\"/>\n" +
@@ -242,7 +242,7 @@ func Test_snapshot(t *testing.T) {
 			size:    fyne.NewSize(50, 10),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<linearGradient angle=\"13.25\" endColor=\"disabled text\" pos=\"6,13\" size=\"50x10\" startColor=\"rgba(1,2,3,4)\"/>\n" +
+				"\t\t<linearGradient angle=\"13.25\" endColor=\"disabled\" pos=\"6,13\" size=\"50x10\" startColor=\"rgba(1,2,3,4)\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -250,7 +250,7 @@ func Test_snapshot(t *testing.T) {
 			content: canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<radialGradient endColor=\"disabled text\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
+				"\t\t<radialGradient endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -263,7 +263,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<radialGradient centerOffset=\"1.5,-13.7\" endColor=\"disabled text\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
+				"\t\t<radialGradient centerOffset=\"1.5,-13.7\" endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -447,7 +447,7 @@ func Test_snapshot(t *testing.T) {
 			content: &markupRendererTestWidget{bgColor: theme.TextColor()},
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<widget backgroundColor=\"text\" size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
+				"\t\t<widget backgroundColor=\"foreground\" size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
 				"\t\t</widget>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",

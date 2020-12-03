@@ -97,6 +97,6 @@ func (r *separatorRenderer) MinSize() fyne.Size {
 }
 
 func (r *separatorRenderer) Refresh() {
-	r.bar.FillColor = theme.DisabledTextColor()
+	r.bar.FillColor = theme.DisabledColor()
 	canvas.Refresh(r.d)
 }

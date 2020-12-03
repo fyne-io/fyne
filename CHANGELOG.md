@@ -10,6 +10,9 @@ More detailed release notes can be found on the [releases page](https://github.c
 These changes likely break some apps, please read the 
 [upgrading doc](https://developer.fyne.io/api/v2.0/upgrading) for more info
 
+* The second parameter of `theme.NewThemedResource` was removed, it was previously ignored
+* `fyne.Theme` moved to `fyne.LegacyTheme` and can be load to a new theme using `theme.FromLegacy`
+* A new, more flexible, Theme interface has been created that we encourage developers to use
 * The desktop.Cursor definition was renamed desktop.StandardCursor to make way for custom cursors
 
 ### Added

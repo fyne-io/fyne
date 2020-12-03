@@ -46,7 +46,7 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="36,81" size="70x29" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="70x29">Test</text>
+								<text color="disabled" pos="32,0" size="70x29">Test</text>
 							</widget>
 						</container>
 					</content>
@@ -81,7 +81,7 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="36,81" size="70x29" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="70x29">Test</text>
+								<text color="disabled" pos="32,0" size="70x29">Test</text>
 							</widget>
 						</container>
 					</content>
@@ -116,7 +116,7 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="36,81" size="70x29" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="70x29">Test</text>
+								<text color="disabled" pos="32,0" size="70x29">Test</text>
 							</widget>
 						</container>
 					</content>
@@ -153,7 +153,7 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="36,81" size="70x29" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="70x29">Test</text>
+								<text color="disabled" pos="32,0" size="70x29">Test</text>
 							</widget>
 						</container>
 					</content>
@@ -189,10 +189,10 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="37,67" size="67x58" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="67x29">Foo</text>
+								<text color="disabled" pos="32,0" size="67x29">Foo</text>
 								<circle fillColor="background" pos="0,29" size="28x28"/>
 								<image pos="4,33" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,29" size="67x29">Bar</text>
+								<text color="disabled" pos="32,29" size="67x29">Bar</text>
 							</widget>
 						</container>
 					</content>
@@ -230,10 +230,10 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="5,81" size="132x29" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="66x29">Foo</text>
+								<text color="disabled" pos="32,0" size="66x29">Foo</text>
 								<circle fillColor="background" pos="66,0" size="28x28"/>
 								<image pos="70,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="98,0" size="66x29">Bar</text>
+								<text color="disabled" pos="98,0" size="66x29">Bar</text>
 							</widget>
 						</container>
 					</content>
@@ -271,10 +271,10 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="37,67" size="67x58" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="67x29">Foo</text>
+								<text color="disabled" pos="32,0" size="67x29">Foo</text>
 								<circle fillColor="background" pos="0,29" size="28x28"/>
 								<image pos="4,33" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,29" size="67x29">Bar</text>
+								<text color="disabled" pos="32,29" size="67x29">Bar</text>
 							</widget>
 						</container>
 					</content>
@@ -314,10 +314,10 @@ func TestRadio_Layout(t *testing.T) {
 							<widget pos="5,81" size="132x29" type="*widget.Radio">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="66x29">Foo</text>
+								<text color="disabled" pos="32,0" size="66x29">Foo</text>
 								<circle fillColor="background" pos="66,0" size="28x28"/>
 								<image pos="70,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="98,0" size="66x29">Bar</text>
+								<text color="disabled" pos="98,0" size="66x29">Bar</text>
 							</widget>
 						</container>
 					</content>

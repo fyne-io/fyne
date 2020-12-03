@@ -62,19 +62,19 @@ func TestTable_Hovered(t *testing.T) {
 						</widget>
 					</widget>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="1x168"/>
+						<rectangle fillColor="disabled" size="1x168"/>
 					</widget>
 					<widget pos="4,41" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
+						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
+						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
+						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
 				</widget>
 			</content>
@@ -127,19 +127,19 @@ func TestTable_Hovered(t *testing.T) {
 					<rectangle fillColor="hover" pos="4,0" size="101x4"/>
 					<rectangle fillColor="hover" pos="0,42" size="4x37"/>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="1x168"/>
+						<rectangle fillColor="disabled" size="1x168"/>
 					</widget>
 					<widget pos="4,41" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,79" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
+						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
+						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
 				</widget>
 			</content>

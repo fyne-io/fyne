@@ -41,8 +41,8 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 			<content>
 				<widget pos="4,4" size="212x42" type="*widget.Slider">
 					<rectangle fillColor="shadow" pos="12,21" size="188x4"/>
-					<rectangle fillColor="icon" pos="12,21" size="0x4"/>
-					<circle fillColor="icon" pos="6,15" size="16x16"/>
+					<rectangle fillColor="foreground" pos="12,21" size="0x4"/>
+					<circle fillColor="foreground" pos="6,15" size="16x16"/>
 				</widget>
 			</content>
 		</canvas>
@@ -88,8 +88,8 @@ func TestSlider_VerticalLayout(t *testing.T) {
 			<content>
 				<widget pos="4,4" size="42x212" type="*widget.Slider">
 					<rectangle fillColor="shadow" pos="21,12" size="4x188"/>
-					<rectangle fillColor="icon" pos="21,200" size="4x0"/>
-					<circle fillColor="icon" pos="15,194" size="16x16"/>
+					<rectangle fillColor="foreground" pos="21,200" size="4x0"/>
+					<circle fillColor="foreground" pos="15,194" size="16x16"/>
 				</widget>
 			</content>
 		</canvas>

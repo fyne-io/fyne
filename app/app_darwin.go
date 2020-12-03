@@ -29,14 +29,14 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
+func defaultVariant() fyne.ThemeVariant {
 	if fyne.CurrentDevice().IsMobile() { // this is called in mobile simulate mode
-		return theme.LightTheme()
+		return theme.Variants.Light
 	}
 	if C.isDarkMode() {
-		return theme.DarkTheme()
+		return theme.Variants.Dark
 	}
-	return theme.LightTheme()
+	return theme.Variants.Light
 }
 
 func rootConfigDir() string {

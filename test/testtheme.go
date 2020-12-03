@@ -13,111 +13,35 @@ var (
 	blue  = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
 )
 
-const testTextSize = 18
-
-var _ fyne.Theme = testTheme{}
-
-// testTheme is a simple theme variation used for testing that widgets adapt correctly
-type testTheme struct {
-}
-
 // NewTheme returns a new testTheme.
 func NewTheme() fyne.Theme {
-	return &testTheme{}
-}
-
-func (testTheme) BackgroundColor() color.Color {
-	return red
-}
-
-func (testTheme) ButtonColor() color.Color {
-	return color.Black
-}
-
-func (testTheme) DisabledButtonColor() color.Color {
-	return color.White
-}
-
-func (testTheme) DisabledIconColor() color.Color {
-	return color.Black
-}
-
-func (testTheme) DisabledTextColor() color.Color {
-	return color.Black
-}
-
-func (testTheme) FocusColor() color.Color {
-	return green
-}
-
-func (testTheme) HoverColor() color.Color {
-	return green
-}
-
-func (testTheme) HyperlinkColor() color.Color {
-	return green
-}
-
-func (testTheme) IconColor() color.Color {
-	return color.White
-}
-
-func (testTheme) IconInlineSize() int {
-	return 24
-}
-
-func (testTheme) Padding() int {
-	return 10
-}
-
-func (testTheme) PlaceHolderColor() color.Color {
-	return blue
-}
-
-func (testTheme) PrimaryColor() color.Color {
-	return green
-}
-
-func (testTheme) ScrollBarColor() color.Color {
-	return blue
-}
-
-func (testTheme) ScrollBarSize() int {
-	return 10
-}
-
-func (testTheme) ScrollBarSmallSize() int {
-	return 2
-}
-
-func (testTheme) ShadowColor() color.Color {
-	return blue
-}
-
-func (testTheme) TextBoldFont() fyne.Resource {
-	return theme.DefaultTextItalicFont()
-}
-
-func (testTheme) TextBoldItalicFont() fyne.Resource {
-	return theme.DefaultTextMonospaceFont()
-}
-
-func (testTheme) TextColor() color.Color {
-	return color.White
-}
-
-func (testTheme) TextFont() fyne.Resource {
-	return theme.DefaultTextBoldFont()
-}
-
-func (testTheme) TextItalicFont() fyne.Resource {
-	return theme.DefaultTextBoldItalicFont()
-}
-
-func (testTheme) TextMonospaceFont() fyne.Resource {
-	return theme.DefaultTextFont()
-}
-
-func (testTheme) TextSize() int {
-	return testTextSize
+	return &configurableTheme{
+		colors: map[fyne.ThemeColorName]color.Color{
+			theme.Colors.Background:     red,
+			theme.Colors.Button:         color.Black,
+			theme.Colors.Disabled:       color.Black,
+			theme.Colors.DisabledButton: color.White,
+			theme.Colors.Focus:          green,
+			theme.Colors.Foreground:     color.White,
+			theme.Colors.Hover:          green,
+			theme.Colors.PlaceHolder:    blue,
+			theme.Colors.Primary:        green,
+			theme.Colors.ScrollBar:      blue,
+			theme.Colors.Shadow:         blue,
+		},
+		fonts: map[fyne.TextStyle]fyne.Resource{
+			fyne.TextStyle{}:                         theme.DefaultTextBoldFont(),
+			fyne.TextStyle{Bold: true}:               theme.DefaultTextItalicFont(),
+			fyne.TextStyle{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
+			fyne.TextStyle{Italic: true}:             theme.DefaultTextBoldItalicFont(),
+			fyne.TextStyle{Monospace: true}:          theme.DefaultTextFont(),
+		},
+		sizes: map[fyne.ThemeSizeName]int{
+			theme.Sizes.InlineIcon:     24,
+			theme.Sizes.Padding:        10,
+			theme.Sizes.ScrollBar:      10,
+			theme.Sizes.ScrollBarSmall: 2,
+			theme.Sizes.Text:           18,
+		},
+	}
 }

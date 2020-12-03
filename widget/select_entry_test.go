@@ -97,12 +97,12 @@ func TestSelectEntry_Disableable(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
-					<rectangle fillColor="disabled text" pos="0,33" size="130x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="130x4"/>
 					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="134x21"></text>
+						<text color="disabled" pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="134x21"></text>
+						<text color="disabled" pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="disabled button" pos="2,2" size="16x16"/>
