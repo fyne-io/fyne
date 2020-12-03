@@ -104,6 +104,7 @@ var (
 	}
 
 	currentVariant = Variants.Dark
+	defaultTheme = setupDefaultTheme()
 )
 
 type builtinTheme struct {
@@ -154,6 +155,10 @@ var (
 //
 // Since 2.0.0
 func DefaultTheme() fyne.Theme {
+	return defaultTheme
+}
+
+func setupDefaultTheme() fyne.Theme {
 	theme := &builtinTheme{}
 
 	theme.initFonts()
