@@ -20,7 +20,7 @@ type legacyWrapper struct {
 	old fyne.LegacyTheme
 }
 
-func (l *legacyWrapper) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+func (l *legacyWrapper) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	switch n {
 	case Colors.Background:
 		return l.old.BackgroundColor()
@@ -45,7 +45,7 @@ func (l *legacyWrapper) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.
 	case Colors.Shadow:
 		return l.old.ShadowColor()
 	default:
-		return color.Transparent
+		return DefaultTheme().Color(n, v)
 	}
 }
 
@@ -62,7 +62,7 @@ func (l *legacyWrapper) Size(n fyne.ThemeSizeName) int {
 	case Sizes.Text:
 		return l.old.TextSize()
 	default:
-		return 0
+		return DefaultTheme().Size(n)
 	}
 }
 
