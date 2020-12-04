@@ -82,6 +82,12 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
+	if mode == canvas.ImageScaleLinear || mode == canvas.ImageScaleNearest {
+		// do not perform software scaling on new image and draw image directly
+		drawTex(x, y, width, height, base, origImg, clip)
+		return
+	}
+
 	scaledBounds := image.Rect(0, 0, width, height)
 	scaledImg := image.NewNRGBA(scaledBounds)
 	switch mode {
