@@ -21,7 +21,7 @@ These changes likely break some apps, please read the
 
 ### Changed
 
-*
+* Change bundled resources to use more efficient string storage
 
 ### Fixed
 
