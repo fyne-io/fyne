@@ -997,15 +997,12 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	} // key repeat will fall through to TypedKey and TypedShortcut
 
 	if keyName == fyne.KeyTab {
+		// at this point we know action != glfw.Release
 		if keyDesktopModifier == 0 {
-			if action != glfw.Release {
-				w.canvas.FocusNext()
-			}
+			w.canvas.FocusNext()
 			return
 		} else if keyDesktopModifier == desktop.ShiftModifier {
-			if action != glfw.Release {
-				w.canvas.FocusPrevious()
-			}
+			w.canvas.FocusPrevious()
 			return
 		}
 	}
