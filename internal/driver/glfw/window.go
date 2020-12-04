@@ -829,6 +829,8 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 		}
 	case glfw.MouseButton2:
 		button = desktop.RightMouseButton
+	case glfw.MouseButton3:
+		button = desktop.MiddleMouseButton
 	}
 	return button, modifier
 }
