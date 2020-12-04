@@ -12,7 +12,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Changed
 
 * Run validation on content change instead of on each Refresh in widget.Entry
-* Run onValidationChanged() when calling entry.SetValidationError()
 
 ### Fixed
 
