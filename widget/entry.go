@@ -1000,15 +1000,7 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if validate := e.Validator; validate != nil {
-		if err := validate(text); err != e.validationError {
-			e.validationError = err
-
-			if f := e.onValidationChanged; f != nil {
-				f(err)
-			}
-		}
-
-		e.validationStatus.Refresh()
+		e.SetValidationError(validate(text))
 	}
 
 	if callback != nil {
