@@ -739,7 +739,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mousePressed = co
 		} else if action == glfw.Release {
 			if co == w.mousePressed {
-				if button == desktop.RightMouseButton && altTap {
+				if button == desktop.MouseButtonSecondary && altTap {
 					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
 				}
 			}
@@ -747,7 +747,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	// Check for double click/tap on left mouse button
-	if action == glfw.Release && button == desktop.LeftMouseButton {
+	if action == glfw.Release && button == desktop.MouseButtonPrimary {
 		_, doubleTap := co.(fyne.DoubleTappable)
 		if doubleTap {
 			w.mouseClickCount++
@@ -823,14 +823,14 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 	switch btn {
 	case glfw.MouseButton1:
 		if rightClick {
-			button = desktop.RightMouseButton
+			button = desktop.MouseButtonSecondary
 		} else {
-			button = desktop.LeftMouseButton
+			button = desktop.MouseButtonPrimary
 		}
 	case glfw.MouseButton2:
-		button = desktop.RightMouseButton
+		button = desktop.MouseButtonSecondary
 	case glfw.MouseButton3:
-		button = desktop.MiddleMouseButton
+		button = desktop.MouseButtonTertiary
 	}
 	return button, modifier
 }

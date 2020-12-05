@@ -320,13 +320,13 @@ func TestEntry_DragSelect(t *testing.T) {
 	ev2.Position.X += 2
 
 	// mouse down and drag from 'r' to 'z'
-	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
+	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
 		de := &fyne.DragEvent{PointEvent: *ev1, DraggedX: 1, DraggedY: 0}
 		entry.Dragged(de)
 	}
-	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
+	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseUp(me)
 
 	assert.Equal(t, "r the laz", entry.SelectedText())
@@ -603,13 +603,13 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
 	ev := &fyne.PointEvent{Position: pos}
 
-	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.RightMouseButton}
+	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonSecondary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
 	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
 
-	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
+	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
