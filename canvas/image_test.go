@@ -3,6 +3,8 @@ package canvas_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/canvas"
@@ -48,6 +50,10 @@ func TestNewImageFromReader(t *testing.T) {
 func TestNewImageFromURI_File(t *testing.T) {
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
+
+	if runtime.GOOS == "windows" {
+		path = strings.ReplaceAll(path, "\\\\", "/")
+	}
 
 	img := canvas.NewImageFromURI(storage.NewURI("file://" + path))
 	assert.NotNil(t, img)
