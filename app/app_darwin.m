@@ -1,6 +1,8 @@
 // +build !ci
 // +build !ios
 
+extern void themeChanged();
+
 #import <Foundation/Foundation.h>
 
 @interface FyneUserNotificationCenterDelegate : NSObject<NSUserNotificationCenterDelegate>
@@ -28,6 +30,11 @@ bool isBundled() {
     return [[NSBundle mainBundle] bundleIdentifier] != nil;
 }
 
+bool isDarkMode() {
+    NSString *style = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
+    return [@"Dark" isEqualToString:style];
+}
+
 void sendNotification(const char *title, const char *body) {
     NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
     if (center.delegate == nil) {
@@ -38,4 +45,11 @@ void sendNotification(const char *title, const char *body) {
     notification.informativeText = [NSString stringWithUTF8String:body];
     notification.identifier = [NSString stringWithFormat:@"%@-fyne-notify-%d", [[NSBundle mainBundle] bundleIdentifier], ++notifyNum];
     [center scheduleNotification:notification];
+}
+
+void watchTheme() {
+    [[NSDistributedNotificationCenter defaultCenter] addObserverForName:@"AppleInterfaceThemeChangedNotification" object:nil queue:nil
+        usingBlock:^(NSNotification *note) {
+        themeChanged(); // calls back into Go
+    }];
 }

@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -25,17 +26,48 @@ func TestNewPopUp(t *testing.T) {
 }
 
 func TestShowPopUp(t *testing.T) {
-	require.Nil(t, test.Canvas().Overlays().Top())
+	test.NewApp()
+	defer test.NewApp()
+
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 200))
+	require.Nil(t, w.Canvas().Overlays().Top())
 
 	label := NewLabel("Hi")
-	ShowPopUp(label, test.Canvas())
-	pop := test.Canvas().Overlays().Top()
+	ShowPopUp(label, w.Canvas())
+	pop := w.Canvas().Overlays().Top()
 	if assert.NotNil(t, pop) {
-		defer test.Canvas().Overlays().Remove(pop)
+		defer w.Canvas().Overlays().Remove(pop)
 
 		assert.True(t, pop.Visible())
-		assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
+
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="200x200">
+			<content>
+				<rectangle pos="4,4" size="192x192"/>
+			</content>
+			<overlay>
+				<widget size="200x200" type="*widget.PopUp">
+					<widget size="32x37" type="*widget.Shadow">
+						<radialGradient centerOffset="0.5,0.5" pos="-8,-8" size="8x8" startColor="shadow"/>
+						<linearGradient endColor="shadow" pos="0,-8" size="32x8"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="32,-8" size="8x8" startColor="shadow"/>
+						<linearGradient angle="270" pos="32,0" size="8x37" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="32,37" size="8x8" startColor="shadow"/>
+						<linearGradient pos="0,37" size="32x8" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-8,37" size="8x8" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x37"/>
+					</widget>
+					<rectangle fillColor="background" size="32x37"/>
+					<widget pos="4,4" size="24x29" type="*widget.Label">
+						<text pos="4,4" size="16x21">Hi</text>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 }
 
 func TestShowPopUpAtPosition(t *testing.T) {
@@ -53,17 +85,48 @@ func TestShowPopUpAtPosition(t *testing.T) {
 }
 
 func TestShowModalPopUp(t *testing.T) {
-	require.Nil(t, test.Canvas().Overlays().Top())
+	test.NewApp()
+	defer test.NewApp()
+
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 200))
+	require.Nil(t, w.Canvas().Overlays().Top())
 
 	label := NewLabel("Hi")
-	ShowModalPopUp(label, test.Canvas())
-	pop := test.Canvas().Overlays().Top()
+	ShowModalPopUp(label, w.Canvas())
+	pop := w.Canvas().Overlays().Top()
 	if assert.NotNil(t, pop) {
-		defer test.Canvas().Overlays().Remove(pop)
+		defer w.Canvas().Overlays().Remove(pop)
 
 		assert.True(t, pop.Visible())
-		assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
+
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="200x200">
+			<content>
+				<rectangle pos="4,4" size="192x192"/>
+			</content>
+			<overlay>
+				<widget backgroundColor="shadow" size="200x200" type="*widget.PopUp">
+					<widget pos="84,81" size="32x37" type="*widget.Shadow">
+						<radialGradient centerOffset="0.5,0.5" pos="-24,-24" size="24x24" startColor="shadow"/>
+						<linearGradient endColor="shadow" pos="0,-24" size="32x24"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="32,-24" size="24x24" startColor="shadow"/>
+						<linearGradient angle="270" pos="32,0" size="24x37" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="32,37" size="24x24" startColor="shadow"/>
+						<linearGradient pos="0,37" size="32x24" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-24,37" size="24x24" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-24,0" size="24x37"/>
+					</widget>
+					<rectangle fillColor="background" pos="84,81" size="32x37"/>
+					<widget pos="88,85" size="24x29" type="*widget.Label">
+						<text pos="4,4" size="16x21">Hi</text>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 }
 
 func TestPopUp_Show(t *testing.T) {

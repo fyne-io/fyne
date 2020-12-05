@@ -1,0 +1,48 @@
+name: Platform Tests
+on: [push, pull_request]
+
+jobs:
+  platform_tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: [1.12.x, 1.15.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Get dependencies
+      run: sudo apt-get update && sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      if: ${{ runner.os == 'Linux' }}
+
+    #- name: Verify go modules
+    #  run: |
+    #    if [ "$GO111MODULE" == "on" ]
+    #    then
+    #        # For some reason `git diff-index HEAD` does not work properly if the following line is missing.
+    #        git diff
+    #        # check that go mod tidy does not change go.mod/go.sum
+    #        go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
+    #    fi
+
+    - name: Tests
+      run: go test -tags ci ./...
+
+    - name: Update coverage
+      run: |
+        GO111MODULE=off go get github.com/mattn/goveralls
+
+        set -e
+        go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
+        if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Update PR Coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: coverage.out
+      if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}

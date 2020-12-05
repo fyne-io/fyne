@@ -21,7 +21,7 @@ func TestSVG_ReplaceFillColor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := s.replaceFillColor(rdr, red); err != nil {
+	if err := s.replaceFillColor(red); err != nil {
 		t.Fatal(err)
 	}
 	res, err := xml.Marshal(s)

@@ -56,13 +56,20 @@ func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Siz
 }
 
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32, pad int) {
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad int) {
 
 	texture := getTexture(o, creator)
 	if texture == NoTexture {
 		return
 	}
 
+	aspect := float32(0)
+	if img, ok := o.(*canvas.Image); ok {
+		aspect = painter.GetAspect(img)
+		if aspect == 0 {
+			aspect = 1 // fallback, should not occur - normally an image load error
+		}
+	}
 	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
 	vbo := p.glCreateBuffer(points)
 
@@ -75,38 +82,34 @@ func (p *glPainter) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Si
 		return
 	}
 
-	p.drawTextureWithDetails(wid, p.newGlRectTexture, pos, wid.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
+	p.drawTextureWithDetails(wid, p.newGlRectTexture, pos, wid.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
 }
 
 func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
-		1.0, 0.0, painter.VectorPad(circle))
+		1.0, painter.VectorPad(circle))
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(line, p.newGlLineTexture, pos, line.Size(), frame, canvas.ImageFillStretch,
-		1.0, 0.0, painter.VectorPad(line))
+		1.0, painter.VectorPad(line))
 }
 
 func (p *glPainter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	aspect := painter.GetAspect(img)
-	if aspect == 0 {
-		aspect = 1
-	}
-	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), aspect, 0)
+	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
 }
 
 func (p *glPainter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0.0, 0)
+	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
 }
 
 func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) Texture, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
+	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
-		1.0, 0.0, painter.VectorPad(rect))
+		1.0, painter.VectorPad(rect))
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
@@ -127,7 +130,7 @@ func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Si
 		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
 	}
 
-	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
+	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 }
 
 func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {

@@ -21,10 +21,11 @@ var (
 
 	darwinEnv map[string][]string
 
-	androidArmNM string
-	darwinArmNM  string
+	darwinArmNM string
 
-	allArchs = []string{"arm", "arm64", "386", "amd64"}
+	allArchs = map[string][]string{
+		"android": {"arm", "arm64", "386", "amd64"},
+		"ios":     {"arm64", "amd64"}}
 
 	bitcodeEnabled bool
 )
@@ -84,15 +85,17 @@ func envInit() (err error) {
 	// An arbitrary standard package ('runtime' here) is given to go-list.
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
-	cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
-	cmd.Stderr = os.Stderr
-	out, err := cmd.Output()
-	if err != nil {
-		return err
-	}
-	if len(strings.TrimSpace(string(out))) > 0 {
-		bitcodeEnabled = true
-	}
+
+	// TODO re-enable once we find out what broke after September event 2020
+	//cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
+	//cmd.Stderr = os.Stderr
+	//out, err := cmd.Output()
+	//if err != nil {
+	//	return err
+	//}
+	//if len(strings.TrimSpace(string(out))) > 0 {
+	//		bitcodeEnabled = true
+	//}
 
 	// Setup the cross-compiler environments.
 	if ndkRoot, err := ndkRoot(); err == nil {
@@ -114,7 +117,7 @@ func envInit() (err error) {
 				for _, tool := range tools {
 					_, err = os.Stat(tool)
 					if err != nil {
-						return fmt.Errorf("No compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
+						return fmt.Errorf("no compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
 					}
 				}
 			}
@@ -137,7 +140,7 @@ func envInit() (err error) {
 
 	darwinArmNM = "nm"
 	darwinEnv = make(map[string][]string)
-	for _, arch := range allArchs {
+	for _, arch := range allArchs["ios"] {
 		var env []string
 		var err error
 		var clang, cflags string
@@ -271,16 +274,6 @@ func environ(kv []string) []string {
 		new = append(new, k+"="+v)
 	}
 	return new
-}
-
-func getenv(env []string, key string) string {
-	prefix := key + "="
-	for _, kv := range env {
-		if strings.HasPrefix(kv, prefix) {
-			return kv[len(prefix):]
-		}
-	}
-	return ""
 }
 
 func archNDK() string {

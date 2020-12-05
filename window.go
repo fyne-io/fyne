@@ -64,6 +64,12 @@ type Window interface {
 	// SetOnClosed sets a function that runs when the window is closed.
 	SetOnClosed(func())
 
+	// SetCloseIntercept sets a function that runs instead of closing if defined.
+	// Close() should be called explicitly in the interceptor to close the window.
+	//
+	// Since: 1.4
+	SetCloseIntercept(func())
+
 	// Show the window on screen.
 	Show()
 	// Hide the window from the user.

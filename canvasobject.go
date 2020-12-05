@@ -9,19 +9,30 @@ package fyne
 // Resize(Size) or Move(Position).
 type CanvasObject interface {
 	// geometry
-	Size() Size
-	Resize(Size)
-	Position() Position
-	Move(Position)
+
+	// MinSize returns the minimum size this object needs to be drawn.
 	MinSize() Size
+	// Move moves this object to the given position relative to its parent.
+	// This should only be called if your object is not in a container with a layout manager.
+	Move(Position)
+	// Position returns the current position of the object relative to its parent.
+	Position() Position
+	// Resize resizes this object to the given size.
+	// This should only be called if your object is not in a container with a layout manager.
+	Resize(Size)
+	// Size returns the current size of this object.
+	Size() Size
 
 	// visibility
+
+	// Hide hides this object.
+	Hide()
+	// Visible returns whether this object is visible or not.
 	Visible() bool
 	// Show shows this object.
 	Show()
-	// Hide hides this object.
-	Hide()
 
+	// Refresh must be called if this object should be redrawn because its inner state changed.
 	Refresh()
 }
 
@@ -66,12 +77,20 @@ type Draggable interface {
 // It will receive the FocusGained and FocusLost events appropriately.
 // When focused it will also have TypedRune called as text is input and
 // TypedKey called when other keys are pressed.
+//
+// Note: You must not change canvas state (including overlays or focus) in FocusGained or FocusLost
+// or you would end up with a dead-lock.
 type Focusable interface {
+	// FocusGained is a hook called by the focus handling logic after this object gained the focus.
 	FocusGained()
+	// FocusLost is a hook called by the focus handling logic after this object lost the focus.
 	FocusLost()
-	Focused() bool // Deprecated: this is an internal detail, canvas tracks current focused object
+	// Deprecated: this is an internal detail, canvas tracks current focused object
+	Focused() bool
 
+	// TypedRune is a hook called by the input handling logic on text input events if this object is focused.
 	TypedRune(rune)
+	// TypedKey is a hook called by the input handling logic on key events if this object is focused.
 	TypedKey(*KeyEvent)
 }
 

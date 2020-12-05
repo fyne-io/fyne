@@ -12,6 +12,10 @@ type themedApp struct {
 	theme fyne.Theme
 }
 
+func (t *themedApp) BuildType() fyne.BuildType {
+	return fyne.BuildStandard
+}
+
 func (t *themedApp) NewWindow(title string) fyne.Window {
 	return nil
 }
@@ -48,8 +52,16 @@ func (t *themedApp) Settings() fyne.Settings {
 	return t
 }
 
+func (t *themedApp) Storage() fyne.Storage {
+	return nil
+}
+
 func (t *themedApp) Preferences() fyne.Preferences {
 	return nil
+}
+
+func (t *themedApp) PrimaryColor() string {
+	return ColorBlue
 }
 
 func (t *themedApp) Theme() fyne.Theme {
@@ -58,6 +70,10 @@ func (t *themedApp) Theme() fyne.Theme {
 
 func (t *themedApp) SetTheme(theme fyne.Theme) {
 	t.theme = theme
+}
+
+func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
+	return Variants.Dark
 }
 
 func (t *themedApp) Scale() float32 {

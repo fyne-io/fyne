@@ -3,6 +3,7 @@
 package app
 
 import (
+	"path/filepath"
 	"unsafe"
 
 	"fyne.io/fyne"
@@ -114,10 +115,11 @@ func (p *iOSPreferences) RemoveValue(key string) {
 	C.removePreferenceValue(cKey)
 }
 
-func newPreferences() *iOSPreferences {
+func newPreferences(_ *fyneApp) *iOSPreferences {
 	return &iOSPreferences{}
 }
 
-func loadPreferences(_ string) *iOSPreferences {
-	return newPreferences() // iOS stores the ID itself so load == new
+// storageRoot returns the location of the app storage
+func (a *fyneApp) storageRoot() string {
+	return filepath.Join(rootConfigDir(), a.uniqueID)
 }

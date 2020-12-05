@@ -34,6 +34,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 }
 
 // CreateRenderer returns a new renderer for the menu bar.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), b.Items...)
@@ -50,25 +51,35 @@ func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// IsActive returns whether the menu bar is active or not.
+// An active menu bar shows the current selected menu and should have the focus.
+func (b *MenuBar) IsActive() bool {
+	return b.active
+}
+
 // Hide hides the menu bar.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) Hide() {
 	widget.HideWidget(&b.Base, b)
 }
 
 // MinSize returns the minimal size of the menu bar.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) MinSize() fyne.Size {
 	return widget.MinSizeOf(b)
 }
 
 // Move sets the position of the widget relative to its parent.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) Move(pos fyne.Position) {
 	widget.MoveWidget(&b.Base, b, pos)
 }
 
 // Refresh triggers a redraw of the menu bar.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) Refresh() {
 	widget.RefreshWidget(b)
@@ -76,12 +87,14 @@ func (b *MenuBar) Refresh() {
 
 // Resize resizes the menu bar.
 // It only affects the width because menu bars are always displayed with their minimal height.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) Resize(size fyne.Size) {
 	widget.ResizeWidget(&b.Base, b, size)
 }
 
 // Show makes the menu bar visible.
+//
 // Implements: fyne.Widget
 func (b *MenuBar) Show() {
 	widget.ShowWidget(&b.Base, b)

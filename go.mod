@@ -7,7 +7,7 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/mobile v0.0.2
+	github.com/fyne-io/mobile v0.1.1
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3
 	github.com/godbus/dbus/v5 v5.0.3
@@ -23,9 +23,11 @@ require (
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 	golang.org/x/mod v0.2.0
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
-	golang.org/x/sys v0.0.0-20200327173247-9dae0f8f5775 // indirect
+	golang.org/x/sys v0.0.0-20200720211630-cb9d2d5c5666
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20200328031815-3db5fc6bac03
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
+
+replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201114140358-a39598fbf952

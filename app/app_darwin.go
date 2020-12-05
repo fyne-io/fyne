@@ -11,7 +11,9 @@ package app
 #include <AppKit/AppKit.h>
 
 bool isBundled();
+bool isDarkMode();
 void sendNotification(const char *title, const char *content);
+void watchTheme();
 */
 import "C"
 import (
@@ -27,12 +29,14 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
+func defaultVariant() fyne.ThemeVariant {
 	if fyne.CurrentDevice().IsMobile() { // this is called in mobile simulate mode
-		return theme.LightTheme()
+		return theme.Variants.Light
 	}
-	// TODO read the macOS setting in Mojave onwards
-	return theme.DarkTheme()
+	if C.isDarkMode() {
+		return theme.Variants.Dark
+	}
+	return theme.Variants.Light
 }
 
 func rootConfigDir() string {
@@ -73,4 +77,13 @@ func (app *fyneApp) SendNotification(n *fyne.Notification) {
 func escapeNotificationString(in string) string {
 	noSlash := strings.ReplaceAll(in, "\\", "\\\\")
 	return strings.ReplaceAll(noSlash, "\"", "\\\"")
+}
+
+//export themeChanged
+func themeChanged() {
+	fyne.CurrentApp().Settings().(*settings).setupTheme()
+}
+
+func watchTheme() {
+	C.watchTheme()
 }

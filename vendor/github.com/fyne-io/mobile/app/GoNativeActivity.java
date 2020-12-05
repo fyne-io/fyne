@@ -94,7 +94,7 @@ public class GoNativeActivity extends NativeActivity {
                         inputType = DEFAULT_INPUT_TYPE | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
                         break;
                     default:
-                        Log.e("GoLog", "unknown keyboard type, use default");
+                        Log.e("Fyne", "unknown keyboard type, use default");
                 }
                 mTextEdit.setImeOptions(imeOptions);
                 mTextEdit.setInputType(inputType);
@@ -134,13 +134,17 @@ public class GoNativeActivity extends NativeActivity {
 
     void doShowFileOpen(String mimes) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if ("application/x-directory".equals(mimes) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE); // ask for a directory picker if OS supports it
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.setType("*/*");
             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else {
             intent.setType(mimes);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
@@ -154,7 +158,7 @@ public class GoNativeActivity extends NativeActivity {
 		} catch (KeyCharacterMap.UnavailableException e) {
 			return -1;
 		} catch (Exception e) {
-			Log.e("GoLog", "exception reading KeyCharacterMap", e);
+			Log.e("Fyne", "exception reading KeyCharacterMap", e);
 			return -1;
 		}
 	}
@@ -172,13 +176,13 @@ public class GoNativeActivity extends NativeActivity {
 			ActivityInfo ai = getPackageManager().getActivityInfo(
 					getIntent().getComponent(), PackageManager.GET_META_DATA);
 			if (ai.metaData == null) {
-				Log.e("GoLog", "loadLibrary: no manifest metadata found");
+				Log.e("Fyne", "loadLibrary: no manifest metadata found");
 				return;
 			}
 			String libName = ai.metaData.getString("android.app.lib_name");
 			System.loadLibrary(libName);
 		} catch (Exception e) {
-			Log.e("GoLog", "loadLibrary failed", e);
+			Log.e("Fyne", "loadLibrary failed", e);
 		}
 	}
 

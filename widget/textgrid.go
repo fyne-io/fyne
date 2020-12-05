@@ -24,12 +24,6 @@ var (
 	TextGridStyleWhitespace TextGridStyle
 )
 
-// define the types separately to the var definition so the custom style API is not leaked in their instances.
-func init() {
-	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
-}
-
 // TextGridCell represents a single cell in a text grid.
 // It has a rune for the text content and a style associated with it.
 type TextGridCell struct {
@@ -114,6 +108,10 @@ func (t *TextGrid) Text() string {
 		count += len(row.Cells)
 	}
 
+	if count <= 0 {
+		return ""
+	}
+
 	runes := make([]rune, count)
 	c := 0
 	for i, row := range t.Rows {
@@ -131,7 +129,7 @@ func (t *TextGrid) Text() string {
 	return string(runes)
 }
 
-// Row returns the content of a specified row as a TextGridRow.
+// Row returns a copy of the content in a specified row as a TextGridRow.
 // If the index is out of bounds it returns an empty row object.
 func (t *TextGrid) Row(row int) TextGridRow {
 	if row < 0 || row >= len(t.Rows) {
@@ -139,6 +137,20 @@ func (t *TextGrid) Row(row int) TextGridRow {
 	}
 
 	return t.Rows[row]
+}
+
+// RowText returns a string representation of the content at the row specified.
+// If the index is out of bounds it returns an empty string.
+func (t *TextGrid) RowText(row int) string {
+	rowData := t.Row(row)
+	runes := make([]rune, len(rowData.Cells))
+	c := 0
+	for _, r := range rowData.Cells {
+		runes[c] = r.Rune
+		c++
+	}
+
+	return string(runes)
 }
 
 // SetRow updates the specified row of the grid's contents using the specified content and style and then refreshes.
@@ -155,21 +167,49 @@ func (t *TextGrid) SetRow(row int, content TextGridRow) {
 	t.Refresh()
 }
 
-// SetStyle sets a grid style to the cell at named row and column
-func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
-	if row < 0 || col < 0 {
+// SetRowStyle sets a grid style to all the cells cell at the specified row.
+// Any cells in this row with their own style will override this value when displayed.
+func (t *TextGrid) SetRowStyle(row int, style TextGridStyle) {
+	if row < 0 {
 		return
 	}
 	for len(t.Rows) <= row {
 		t.Rows = append(t.Rows, TextGridRow{})
 	}
-	data := t.Rows[row]
+	t.Rows[row].Style = style
+}
 
-	for len(data.Cells) <= col {
-		data.Cells = append(data.Cells, TextGridCell{})
-		t.Rows[row] = data
+// SetCell sets a grid data to the cell at named row and column.
+func (t *TextGrid) SetCell(row, col int, cell TextGridCell) {
+	if row < 0 || col < 0 {
+		return
 	}
-	data.Cells[col].Style = style
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col] = cell
+	t.refreshCell(row, col)
+}
+
+// SetRune sets a character to the cell at named row and column.
+func (t *TextGrid) SetRune(row, col int, r rune) {
+	if row < 0 || col < 0 {
+		return
+	}
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col].Rune = r
+	t.refreshCell(row, col)
+}
+
+// SetStyle sets a grid style to the cell at named row and column.
+func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
+	if row < 0 || col < 0 {
+		return
+	}
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col].Style = style
+	t.refreshCell(row, col)
 }
 
 // SetStyleRange sets a grid style to all the cells between the start row and column through to the end row and column.
@@ -217,7 +257,27 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	render := &textGridRenderer{text: t}
 	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
+	TextGridStyleDefault = &CustomTextGridStyle{}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+
 	return render
+}
+
+func (t *TextGrid) ensureCells(row, col int) {
+	for len(t.Rows) <= row {
+		t.Rows = append(t.Rows, TextGridRow{})
+	}
+	data := t.Rows[row]
+
+	for len(data.Cells) <= col {
+		data.Cells = append(data.Cells, TextGridCell{})
+		t.Rows[row] = data
+	}
+}
+
+func (t *TextGrid) refreshCell(row, col int) {
+	// TODO trigger single cell refresh
+	t.Refresh()
 }
 
 // NewTextGrid creates a new empty TextGrid widget.
@@ -252,29 +312,34 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-	text := t.objects[pos*2+1].(*canvas.Text)
 	if str == 0 {
-		text.Text = " "
-	} else {
-		text.Text = string(str)
+		str = ' '
 	}
 
+	text := t.objects[pos*2+1].(*canvas.Text)
 	fg := theme.TextColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
-	text.Color = fg
+	if (text.Text == "" || str != []rune(text.Text)[0]) || fg != text.Color {
+		text.Text = string(str)
+		text.Color = fg
+		canvas.Refresh(text)
+	}
 
+	rect := t.objects[pos*2].(*canvas.Rectangle)
 	bg := color.Color(color.Transparent)
 	if style != nil && style.BackgroundColor() != nil {
 		bg = style.BackgroundColor()
 	} else if rowStyle != nil && rowStyle.BackgroundColor() != nil {
 		bg = rowStyle.BackgroundColor()
 	}
-	rect.FillColor = bg
+	if bg != rect.FillColor {
+		rect.FillColor = bg
+		canvas.Refresh(rect)
+	}
 }
 
 func (t *textGridRenderer) addCellsIfRequired() {
@@ -344,7 +409,6 @@ func (t *textGridRenderer) refreshGrid() {
 	for ; x < len(t.objects)/2; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
-	canvas.Refresh(t.text)
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
@@ -402,6 +466,9 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRenderer) Refresh() {
+	// theme could change text size
+	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()

@@ -16,14 +16,14 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
+func defaultVariant() fyne.ThemeVariant {
+	return theme.Variants.Dark
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
 	cmd := app.exec("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	return cmd.Run()
+	return cmd.Start()
 }
 
 func (app *fyneApp) SendNotification(n *fyne.Notification) {
@@ -50,4 +50,8 @@ func rootConfigDir() string {
 
 	desktopConfig := filepath.Join(homeDir, ".config")
 	return filepath.Join(desktopConfig, "fyne")
+}
+
+func watchTheme() {
+	// no-op, not able to read linux theme in a standard way
 }

@@ -10,8 +10,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
+func defaultVariant() fyne.ThemeVariant {
+	return theme.Variants.Dark
 }
 
 func rootConfigDir() string {
@@ -24,4 +24,8 @@ func (app *fyneApp) OpenURL(_ *url.URL) error {
 
 func (app *fyneApp) SendNotification(_ *fyne.Notification) {
 	fyne.LogError("Refusing to show notification for unknown operating system", nil)
+}
+
+func watchTheme() {
+	// no-op
 }

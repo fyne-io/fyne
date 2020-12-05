@@ -17,7 +17,7 @@ type rasterInfo struct {
 }
 
 var cacheDuration = time.Minute * 5
-var rasters = make(map[fyne.Resource]*rasterInfo)
+var rasters = make(map[string]*rasterInfo)
 var aspects = make(map[interface{}]float32, 16)
 var rasterMutex sync.RWMutex
 var janitorOnce sync.Once
@@ -61,10 +61,10 @@ func svgCacheJanitor() {
 	})
 }
 
-func svgCacheGet(res fyne.Resource, w int, h int) *image.NRGBA {
+func svgCacheGet(name string, w int, h int) *image.NRGBA {
 	rasterMutex.RLock()
 	defer rasterMutex.RUnlock()
-	v, ok := rasters[res]
+	v, ok := rasters[name]
 	if !ok || v == nil || v.w != w || v.h != h {
 		return nil
 	}
@@ -72,14 +72,14 @@ func svgCacheGet(res fyne.Resource, w int, h int) *image.NRGBA {
 	return v.pix
 }
 
-func svgCachePut(res fyne.Resource, pix *image.NRGBA, w int, h int) {
+func svgCachePut(name string, pix *image.NRGBA, w int, h int) {
 	rasterMutex.Lock()
 	defer rasterMutex.Unlock()
 	defer func() {
 		recover()
 	}()
 
-	rasters[res] = &rasterInfo{
+	rasters[name] = &rasterInfo{
 		pix:     pix,
 		w:       w,
 		h:       h,
@@ -90,7 +90,7 @@ func svgCachePut(res fyne.Resource, pix *image.NRGBA, w int, h int) {
 // SvgCacheReset clears the SVG cache.
 func SvgCacheReset() {
 	rasterMutex.Lock()
-	rasters = make(map[fyne.Resource]*rasterInfo)
+	rasters = make(map[string]*rasterInfo)
 	rasterMutex.Unlock()
 }
 

@@ -7,6 +7,11 @@ import (
 	"runtime"
 )
 
+// HintsEnabled returns true to indicate that hints are currently switched on.
+func HintsEnabled() bool {
+	return true
+}
+
 // LogHint reports a developer hint that should be followed to improve their app.
 func LogHint(reason string) {
 	log.Println("Fyne hint: ", reason)

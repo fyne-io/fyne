@@ -9,10 +9,11 @@ import (
 )
 
 type window struct {
-	title    string
-	visible  bool
-	onClosed func()
-	isChild  bool
+	title              string
+	visible            bool
+	onClosed           func()
+	onCloseIntercepted func()
+	isChild            bool
 
 	clipboard fyne.Clipboard
 	canvas    *mobileCanvas
@@ -92,6 +93,10 @@ func (w *window) SetOnClosed(callback func()) {
 	w.onClosed = callback
 }
 
+func (w *window) SetCloseIntercept(callback func()) {
+	w.onCloseIntercepted = callback
+}
+
 func (w *window) Show() {
 	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
 	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
@@ -103,7 +108,7 @@ func (w *window) Show() {
 
 	if w.isChild {
 		exit := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
-			w.Close()
+			w.tryClose()
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
@@ -127,6 +132,15 @@ func (w *window) Hide() {
 	if w.Content() != nil {
 		w.Content().Hide()
 	}
+}
+
+func (w *window) tryClose() {
+	if w.onCloseIntercepted != nil {
+		w.onCloseIntercepted()
+		return
+	}
+
+	w.Close()
 }
 
 func (w *window) Close() {

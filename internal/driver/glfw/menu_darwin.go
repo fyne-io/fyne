@@ -56,7 +56,7 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 	return nextItemID
 }
 
-func addNativeSubMenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Menu, nextItemID int) int {
+func addNativeSubmenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Menu, nextItemID int) int {
 	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
 	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
 	return nextItemID
@@ -74,7 +74,7 @@ func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointe
 		)
 		nextItemID = registerCallback(w, item, nextItemID)
 		if item.ChildMenu != nil {
-			nextItemID = addNativeSubMenu(w, nsMenuItem, item.ChildMenu, nextItemID)
+			nextItemID = addNativeSubmenu(w, nsMenuItem, item.ChildMenu, nextItemID)
 		}
 	}
 	return nsMenu, nextItemID

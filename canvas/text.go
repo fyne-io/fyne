@@ -43,6 +43,6 @@ func NewText(text string, color color.Color) *Text {
 	return &Text{
 		Color:    color,
 		Text:     text,
-		TextSize: fyne.CurrentApp().Settings().Theme().TextSize(),
+		TextSize: fyne.CurrentApp().Settings().Theme().Size("text"), // manually name the size to avoid import loop
 	}
 }

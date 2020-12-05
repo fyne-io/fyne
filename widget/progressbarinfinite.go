@@ -92,7 +92,7 @@ func (p *infProgressRenderer) doRefresh() {
 	p.bar.FillColor = theme.PrimaryColor()
 
 	p.updateBar()
-	canvas.Refresh(p.progress)
+	canvas.Refresh(p.progress.super())
 }
 
 func (p *infProgressRenderer) isRunning() bool {
@@ -130,10 +130,8 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 		ticker := p.ticker.C
 		p.progress.propertyLock.RUnlock()
 
-		select {
-		case <-ticker:
-			p.doRefresh()
-		}
+		<-ticker
+		p.doRefresh()
 	}
 
 	p.progress.propertyLock.RLock()

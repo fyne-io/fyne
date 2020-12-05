@@ -354,6 +354,7 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 
 			mimeType := mime.TypeByExtension(ext)
 			if mimeType == "" {
+				mimeType = "*/*" // could not find one, so allow all
 				continue
 			}
 

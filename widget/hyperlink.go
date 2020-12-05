@@ -94,7 +94,7 @@ func (hl *Hyperlink) textStyle() fyne.TextStyle {
 
 // textColor tells the rendering textProvider our color
 func (hl *Hyperlink) textColor() color.Color {
-	return theme.HyperlinkColor()
+	return theme.PrimaryColor()
 }
 
 // concealed tells the rendering textProvider if we are a concealed field
@@ -127,5 +127,8 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
 	hl.ExtendBaseWidget(hl)
+	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
+		p.setText(hl.Text)
+	}
 	return hl.BaseWidget.MinSize()
 }

@@ -5,11 +5,12 @@ import (
 )
 
 type testWindow struct {
-	title      string
-	fullScreen bool
-	fixedSize  bool
-	focused    bool
-	onClosed   func()
+	title              string
+	fullScreen         bool
+	fixedSize          bool
+	focused            bool
+	onClosed           func()
+	onCloseIntercepted func()
 
 	canvas    *testCanvas
 	clipboard fyne.Clipboard
@@ -110,6 +111,10 @@ func (w *testWindow) SetMaster() {
 
 func (w *testWindow) SetOnClosed(closed func()) {
 	w.onClosed = closed
+}
+
+func (w *testWindow) SetCloseIntercept(callback func()) {
+	w.onCloseIntercepted = callback
 }
 
 func (w *testWindow) SetPadded(padded bool) {

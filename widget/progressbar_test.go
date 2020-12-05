@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"testing"
 
 	"fyne.io/fyne"
@@ -17,6 +18,24 @@ func TestProgressBar_SetValue(t *testing.T) {
 
 	bar.SetValue(.5)
 	assert.Equal(t, .5, bar.Value)
+}
+
+func TestProgressBar_TextFormatter(t *testing.T) {
+	bar := NewProgressBar()
+	formatted := false
+
+	bar.SetValue(0.2)
+	assert.Equal(t, false, formatted)
+
+	formatter := func() string {
+		formatted = true
+		return fmt.Sprintf("%.2f out of %.2f", bar.Value, bar.Max)
+	}
+	bar.TextFormatter = formatter
+
+	bar.SetValue(0.4)
+
+	assert.Equal(t, true, formatted)
 }
 
 func TestProgressRenderer_Layout(t *testing.T) {

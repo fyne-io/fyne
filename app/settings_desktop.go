@@ -61,6 +61,8 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 
 func (s *settings) watchSettings() {
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
+
+	watchTheme()
 }
 
 func (s *settings) stopWatching() {

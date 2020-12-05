@@ -5,6 +5,8 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -43,6 +45,23 @@ func NewSlider(min, max float64) *Slider {
 		Orientation: Horizontal,
 	}
 	slider.ExtendBaseWidget(slider)
+	return slider
+}
+
+// NewSliderWithData returns a slider connected with the specified data source.
+func NewSliderWithData(min, max float64, data binding.Float) *Slider {
+	slider := NewSlider(min, max)
+
+	data.AddListener(binding.NewDataListener(func() {
+		slider.Value = data.Get()
+		if cache.IsRendered(slider) { // don't invalidate values set after constructor like Step
+			slider.Refresh()
+		}
+	}))
+	slider.OnChanged = func(f float64) {
+		data.Set(f)
+	}
+
 	return slider
 }
 
@@ -122,6 +141,22 @@ func (s *Slider) updateValue(ratio float64) {
 	s.clampValueToRange()
 }
 
+// SetValue updates the value of the slider and clamps the value to be within the range.
+func (s *Slider) SetValue(value float64) {
+	if s.Value == value {
+		return
+	}
+
+	s.Value = value
+	s.clampValueToRange()
+
+	if s.OnChanged != nil {
+		s.OnChanged(s.Value)
+	}
+
+	s.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (s *Slider) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
@@ -172,35 +207,39 @@ func (s *sliderRenderer) Refresh() {
 func (s *sliderRenderer) Layout(size fyne.Size) {
 	trackWidth := theme.Padding()
 	diameter := s.slider.buttonDiameter()
-	activeOffset := s.getOffset()
 	endPad := s.slider.endOffset()
 
 	var trackPos, activePos, thumbPos fyne.Position
 	var trackSize, activeSize fyne.Size
 
+	// some calculations are relative to trackSize, so we must update that first
 	switch s.slider.Orientation {
 	case Vertical:
 		trackPos = fyne.NewPos(size.Width/2, endPad)
-		activePos = fyne.NewPos(trackPos.X, activeOffset)
-
 		trackSize = fyne.NewSize(trackWidth, size.Height-endPad*2)
-		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset-endPad)
+
+	case Horizontal:
+		trackPos = fyne.NewPos(endPad, size.Height/2)
+		trackSize = fyne.NewSize(size.Width-endPad*2, trackWidth)
+	}
+	s.track.Move(trackPos)
+	s.track.Resize(trackSize)
+
+	activeOffset := s.getOffset() // TODO based on old size...0
+	switch s.slider.Orientation {
+	case Vertical:
+		activePos = fyne.NewPos(trackPos.X, activeOffset)
+		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset+endPad)
 
 		thumbPos = fyne.NewPos(
 			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
 	case Horizontal:
-		trackPos = fyne.NewPos(endPad, size.Height/2)
 		activePos = trackPos
-
-		trackSize = fyne.NewSize(size.Width-endPad*2, trackWidth)
 		activeSize = fyne.NewSize(activeOffset-endPad, trackWidth)
 
 		thumbPos = fyne.NewPos(
 			activeOffset-((diameter-theme.Padding())/2), trackPos.Y-(diameter-trackSize.Height)/2)
 	}
-
-	s.track.Move(trackPos)
-	s.track.Resize(trackSize)
 
 	s.active.Move(activePos)
 	s.active.Resize(activeSize)
@@ -228,7 +267,12 @@ func (s *sliderRenderer) getOffset() int {
 	w := s.slider
 	size := s.track.Size()
 	if w.Value == w.Min || w.Min == w.Max {
-		return endPad
+		switch w.Orientation {
+		case Vertical:
+			return size.Height + endPad
+		case Horizontal:
+			return endPad
+		}
 	}
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
 

@@ -155,6 +155,9 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 			f2 = loadFont(theme.DefaultTextFont())
 		}
 
+		if f1 == nil {
+			f1 = f2
+		}
 		comp = &fontCacheItem{font: f1, fallback: f2, faces: make(map[truetype.Options]font.Face)}
 		fontCache[style] = comp
 	}

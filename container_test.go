@@ -6,20 +6,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMinSize(t *testing.T) {
+func TestContainer_Add(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout()
+	assert.Equal(t, 0, len(container.Objects))
+
+	container.Add(box)
+	assert.Equal(t, 1, len(container.Objects))
+}
+
+func TestContainer_CustomLayout(t *testing.T) {
+	box := new(dummyObject)
+	layout := new(customLayout)
+	container := NewContainerWithLayout(layout, box)
+
+	size := layout.MinSize(container.Objects)
+	assert.Equal(t, size, container.MinSize())
+	assert.Equal(t, size, container.Size())
+	assert.Equal(t, size, box.Size())
+}
+
+func TestContainer_Hide(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout(box)
+
+	assert.True(t, container.Visible())
+	assert.True(t, box.Visible())
+	container.Hide()
+	assert.False(t, container.Visible())
+	assert.True(t, box.Visible())
+}
+
+func TestContainer_MinSize(t *testing.T) {
 	box := new(dummyObject)
 	minSize := box.MinSize()
 
-	container := NewContainer(box)
-	assert.Equal(t, minSize, container.MinSize())
-
-	container.AddObject(box)
+	container := NewContainerWithoutLayout(box)
 	assert.Equal(t, minSize, container.MinSize())
 }
 
-func TestMove(t *testing.T) {
+func TestContainer_Move(t *testing.T) {
 	box := new(dummyObject)
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 
 	size := NewSize(100, 100)
 	pos := NewPos(0, 0)
@@ -35,18 +63,37 @@ func TestMove(t *testing.T) {
 	assert.Equal(t, pos, box.Position())
 }
 
-func TestNilLayout(t *testing.T) {
+func TestContainer_NilLayout(t *testing.T) {
 	box := new(dummyObject)
 	boxSize := box.size
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 
 	size := NewSize(100, 100)
 	container.Resize(size)
 	assert.Equal(t, size, container.Size())
 	assert.Equal(t, boxSize, box.Size())
+}
 
-	container.AddObject(box)
-	assert.Equal(t, boxSize, box.Size())
+func TestContainer_Remove(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout(box)
+	assert.Equal(t, 1, len(container.Objects))
+
+	container.Remove(box)
+	assert.Equal(t, 0, len(container.Objects))
+}
+
+func TestContainer_Show(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout(box)
+
+	container.Hide()
+	assert.True(t, box.Visible())
+	assert.False(t, container.Visible())
+
+	container.Show()
+	assert.True(t, box.Visible())
+	assert.True(t, container.Visible())
 }
 
 type customLayout struct {
@@ -58,46 +105,8 @@ func (c *customLayout) Layout(objs []CanvasObject, size Size) {
 	}
 }
 
-func (c *customLayout) MinSize(objects []CanvasObject) Size {
+func (c *customLayout) MinSize(_ []CanvasObject) Size {
 	return NewSize(10, 10)
-}
-
-func TestCustomLayout(t *testing.T) {
-	box := new(dummyObject)
-	layout := new(customLayout)
-	container := NewContainerWithLayout(layout, box)
-
-	size := layout.MinSize(container.Objects)
-	assert.Equal(t, size, container.MinSize())
-	assert.Equal(t, size, container.Size())
-	assert.Equal(t, size, box.Size())
-
-	container.AddObject(box)
-	assert.Equal(t, size, box.Size())
-}
-
-func TestContainer_Hide(t *testing.T) {
-	box := new(dummyObject)
-	container := NewContainer(box)
-
-	assert.True(t, container.Visible())
-	assert.True(t, box.Visible())
-	container.Hide()
-	assert.False(t, container.Visible())
-	assert.True(t, box.Visible())
-}
-
-func TestContainer_Show(t *testing.T) {
-	box := new(dummyObject)
-	container := NewContainer(box)
-
-	container.Hide()
-	assert.True(t, box.Visible())
-	assert.False(t, container.Visible())
-
-	container.Show()
-	assert.True(t, box.Visible())
-	assert.True(t, container.Visible())
 }
 
 type dummyObject struct {

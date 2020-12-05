@@ -26,7 +26,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 	m := &Menu{Items: items}
 	for i, item := range menu.Items {
 		if item.IsSeparator {
-			items[i] = newMenuItemSeparator()
+			items[i] = NewSeparator()
 		} else {
 			items[i] = newMenuItem(item, m, m.activateChild)
 		}
@@ -35,6 +35,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 }
 
 // CreateRenderer returns a new renderer for the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	box := newMenuBox(m.Items)
@@ -64,42 +65,49 @@ func (m *Menu) DeactivateChild() {
 }
 
 // Hide hides the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
 	widget.HideWidget(&m.Base, m)
 }
 
 // MinSize returns the minimal size of the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
 	return widget.MinSizeOf(m)
 }
 
 // Move sets the position of the widget relative to its parent.
+//
 // Implements: fyne.Widget
 func (m *Menu) Move(pos fyne.Position) {
 	widget.MoveWidget(&m.Base, m, pos)
 }
 
 // Refresh triggers a redraw of the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) Refresh() {
 	widget.RefreshWidget(m)
 }
 
 // Resize has no effect because menus are always displayed with their minimal size.
+//
 // Implements: fyne.Widget
 func (m *Menu) Resize(size fyne.Size) {
 	widget.ResizeWidget(&m.Base, m, size)
 }
 
 // Show makes the menu visible.
+//
 // Implements: fyne.Widget
 func (m *Menu) Show() {
 	widget.ShowWidget(&m.Base, m)
 }
 
 // Tapped catches taps on separators and the menu background. It doesn’t perform any action.
+//
 // Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
@@ -152,7 +160,9 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	scrollSize := boxSize
 	if c := fyne.CurrentApp().Driver().CanvasForObject(r.m); c != nil {
 		ap := fyne.CurrentApp().Driver().AbsolutePositionForObject(r.m)
-		if ah := c.Size().Height - ap.Y; ah < boxSize.Height {
+		pos, size := c.InteractiveArea()
+		bottomPad := c.Size().Height - pos.Y - size.Height
+		if ah := c.Size().Height - bottomPad - ap.Y; ah < boxSize.Height {
 			scrollSize = fyne.NewSize(boxSize.Width, ah)
 		}
 	}

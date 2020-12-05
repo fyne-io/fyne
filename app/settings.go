@@ -14,8 +14,9 @@ import (
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
-	ThemeName string  `json:"theme"`
-	Scale     float32 `json:"scale"`
+	ThemeName    string  `json:"theme"`
+	Scale        float32 `json:"scale"`
+	PrimaryColor string  `json:"primary_color"`
 }
 
 // StoragePath returns the location of the settings storage
@@ -30,12 +31,32 @@ type settings struct {
 	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
+	variant        fyne.ThemeVariant
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
 	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
+}
+
+func (s *settings) BuildType() fyne.BuildType {
+	return buildMode
+}
+
+func (s *settings) PrimaryColor() string {
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
+	return s.schema.PrimaryColor
+}
+
+// OverrideTheme allows the settings app to temporarily preview different theme details.
+// Please make sure that you remember the original settings and call this again to revert the change.
+func (s *settings) OverrideTheme(theme fyne.Theme, name string) {
+	s.propertyLock.Lock()
+	defer s.propertyLock.Unlock()
+	s.schema.PrimaryColor = name
+	s.theme = theme
 }
 
 func (s *settings) Theme() fyne.Theme {
@@ -46,12 +67,17 @@ func (s *settings) Theme() fyne.Theme {
 
 func (s *settings) SetTheme(theme fyne.Theme) {
 	s.themeSpecified = true
-	s.applyTheme(theme)
+	s.applyTheme(theme, s.variant)
 }
 
-func (s *settings) applyTheme(theme fyne.Theme) {
+func (s *settings) ThemeVariant() fyne.ThemeVariant {
+	return s.variant
+}
+
+func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
+	s.variant = variant
 	s.theme = theme
 	s.apply()
 }
@@ -120,11 +146,11 @@ func (s *settings) setupTheme() {
 	}
 
 	if name == "light" {
-		s.applyTheme(theme.LightTheme())
+		s.applyTheme(theme.LightTheme(), theme.Variants.Light)
 	} else if name == "dark" {
-		s.applyTheme(theme.DarkTheme())
+		s.applyTheme(theme.DarkTheme(), theme.Variants.Dark)
 	} else {
-		s.applyTheme(defaultTheme())
+		s.applyTheme(theme.DefaultTheme(), defaultVariant())
 	}
 }
 

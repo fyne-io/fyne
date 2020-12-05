@@ -65,6 +65,17 @@ func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
 
+// Resize on an image will usually scale the content or reposition it according to FillMode..
+// If the content of the File or Resource is an SVG file, however, this will cause a Refresh.
+func (i *Image) Resize(s fyne.Size) {
+	i.baseObject.Resize(s)
+
+	if (i.File != "" && filepath.Ext(i.File) == ".svg") ||
+		(i.Resource != nil && filepath.Ext(i.Resource.Name()) == ".svg") {
+		Refresh(i)
+	}
+}
+
 // Refresh causes this object to be redrawn in it's current state
 func (i *Image) Refresh() {
 	Refresh(i)
