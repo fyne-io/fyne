@@ -124,7 +124,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 }
 
 func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {
-	if scale == canvas.ImageScaleLinear || scale == canvas.ImageScaleNearest {
+	if scale == canvas.ImageScaleFastest || scale == canvas.ImageScalePixels {
 		// do not perform software scaling
 		return pixels
 	}
