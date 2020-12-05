@@ -91,8 +91,10 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 	scaledBounds := image.Rect(0, 0, width, height)
 	scaledImg := image.NewNRGBA(scaledBounds)
 	switch mode {
-	case canvas.ImageScalePixels, canvas.ImageScaleFastest:
+	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
+	case canvas.ImageScaleFastest:
+		draw.ApproxBiLinear.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	default:
 		if mode != canvas.ImageScaleSmooth {
 			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", mode), nil)
