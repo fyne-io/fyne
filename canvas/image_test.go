@@ -40,11 +40,3 @@ func TestNewImageFromURI_File(t *testing.T) {
 	assert.NotNil(t, img)
 	assert.Equal(t, path, img.File)
 }
-
-func TestNewImageFromURI_HTTPS(t *testing.T) {
-	url := "https://fyne.io/img/favicon.png"
-
-	img := canvas.NewImageFromURI(storage.NewURI(url))
-	assert.NotNil(t, img)
-	assert.Equal(t, "favicon.png", img.Resource.Name())
-}

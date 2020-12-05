@@ -4,7 +4,6 @@ import (
 	"image"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"path/filepath"
 
 	"fyne.io/fyne"
@@ -91,9 +90,11 @@ func NewImageFromFile(file string) *Image {
 }
 
 // NewImageFromURI creates a new image from named resource.
-// File URIs will read the file path and other schemes will download the data into a resource
+// File URIs will read the file path and other schemes will download the data into a resource.
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
+//
+// Since: 2.0.0
 func NewImageFromURI(uri fyne.URI) *Image {
 	if uri.Scheme() == "file" && len(uri.String()) > 7 {
 		return &Image{
@@ -105,17 +106,8 @@ func NewImageFromURI(uri fyne.URI) *Image {
 
 	read, err := storage.OpenFileFromURI(uri) // attempt unknown file type
 	if err != nil {
-		if uri.Scheme() != "http" && uri.Scheme() != "https" {
-			fyne.LogError("unsupported URI scheme, "+uri.Scheme(), nil)
-			return nil
-		}
-
-		resp, err := http.Get(uri.String())
-		if err != nil {
-			fyne.LogError("Failed to read image data", err)
-			return nil
-		}
-		read = resp.Body
+		fyne.LogError("Failed to open image URI", err)
+		return nil
 	}
 
 	data, err := ioutil.ReadAll(read)
