@@ -56,10 +56,10 @@ func TestEntry_SetValidationError(t *testing.T) {
 	entry.Validator = validator
 
 	entry.SetText("2020-30-30")
-	entry.SetValidationError(errors.New("Forced to be incorrect"))
+	entry.SetValidationError(errors.New("set invalid"))
 	test.AssertImageMatches(t, "entry/validation_set_invalid.png", c.Capture())
 
-	entry.SetText("forced to be valid")
+	entry.SetText("set valid")
 	entry.SetValidationError(nil)
 	test.AssertImageMatches(t, "entry/validation_set_valid.png", c.Capture())
 }
