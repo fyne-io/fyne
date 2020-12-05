@@ -52,7 +52,7 @@ func TestNewImageFromURI_File(t *testing.T) {
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
 
 	if runtime.GOOS == "windows" {
-		path = strings.ReplaceAll(path, "\\\\", "/")
+		path = strings.ReplaceAll(path, "\\", "/")
 	}
 
 	img := canvas.NewImageFromURI(storage.NewURI("file://" + path))
