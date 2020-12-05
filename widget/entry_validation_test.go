@@ -70,10 +70,7 @@ func TestEntry_SetOnValidationChanged(t *testing.T) {
 
 	modified := false
 	entry.SetOnValidationChanged(func(err error) {
-		if entry.Text != "18:00" {
-			assert.Equal(t, err, entry.Validator(entry.Text))
-		}
-
+		assert.Equal(t, err, entry.Validator(entry.Text))
 		modified = true
 	})
 
@@ -82,10 +79,5 @@ func TestEntry_SetOnValidationChanged(t *testing.T) {
 
 	modified = false
 	test.Type(entry, "-01-01")
-	assert.True(t, modified)
-
-	modified = false
-	entry.SetText("18:00")
-	entry.SetValidationError(nil)
 	assert.True(t, modified)
 }
