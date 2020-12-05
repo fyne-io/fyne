@@ -347,12 +347,12 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	if e.selectKeyDown {
 		e.selecting = true
 	}
-	if e.selecting && !e.selectKeyDown && m.Button == desktop.LeftMouseButton {
+	if e.selecting && !e.selectKeyDown && m.Button == desktop.MouseButtonPrimary {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
 
-	e.updateMousePointer(&m.PointEvent, m.Button == desktop.RightMouseButton)
+	e.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
 }
 
 // MouseUp called on mouse release

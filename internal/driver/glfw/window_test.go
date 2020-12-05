@@ -304,14 +304,14 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	assert.Equal(t,
 		&desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5), AbsolutePosition: fyne.NewPos(9, 9)},
-			Button:     desktop.LeftMouseButton,
+			Button:     desktop.MouseButtonPrimary,
 		},
 		d1.popMouseEvent(),
 	)
 	assert.Equal(t,
 		&desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 5), AbsolutePosition: fyne.NewPos(19, 9)},
-			Button:     desktop.LeftMouseButton,
+			Button:     desktop.MouseButtonPrimary,
 		},
 		d1.popMouseEvent(),
 	)
