@@ -33,6 +33,7 @@ type Entry struct {
 	DisableableWidget
 	shortcut    fyne.ShortcutHandler
 	Text        string
+	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
@@ -950,7 +951,7 @@ func (e *Entry) textProvider() *textProvider {
 
 // textStyle tells the rendering textProvider our style
 func (e *Entry) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{}
+	return e.TextStyle
 }
 
 // textWrap tells the rendering textProvider our wrapping
