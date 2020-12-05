@@ -17,11 +17,12 @@ These changes likely break some apps, please read the
 
 ### Added
 
-*
+* Add MouseButtonTertiary for middle mouse button events on desktop
 
 ### Changed
 
 * Change bundled resources to use more efficient string storage
+* Desktop left and right mouse buttons renamed to MouseButtonPrimary and MouseButtonSecondary
 
 ### Fixed
 
