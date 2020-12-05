@@ -43,5 +43,5 @@ jobs:
 
     - name: Update PR Coverage
       run: |
-        $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken ${{ COVERALLS_TOKEN }}
+        $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken ${{ secrets.COVERALLS_TOKEN }}
       if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
