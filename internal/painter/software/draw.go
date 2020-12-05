@@ -82,14 +82,8 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
-	if mode == canvas.ImageScaleFastest {
-		// do not perform software scaling on new image and draw image directly
-		drawTex(x, y, width, height, base, origImg, clip)
-		return
-	}
-
 	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
-		// do not scale or duplicate image, draw directly
+		// do not scale or duplicate image since not needed, draw directly
 		drawTex(x, y, width, height, base, origImg, clip)
 		return
 	}
@@ -97,7 +91,7 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 	scaledBounds := image.Rect(0, 0, width, height)
 	scaledImg := image.NewNRGBA(scaledBounds)
 	switch mode {
-	case canvas.ImageScalePixels:
+	case canvas.ImageScalePixels, canvas.ImageScaleFastest:
 		draw.NearestNeighbor.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	default:
 		if mode != canvas.ImageScaleSmooth {
