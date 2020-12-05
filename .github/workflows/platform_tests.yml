@@ -42,6 +42,7 @@ jobs:
       if: ${{ runner.os == 'Linux' }}
 
     - name: Update PR Coverage
-      run: |
-        $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken ${{ secrets.COVERALLS_TOKEN }}
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: coverage.out
       if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
