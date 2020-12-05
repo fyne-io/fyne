@@ -23,6 +23,8 @@ type ringBuffer struct {
 	start int // Start of ringBuffer can be anywhere in array.
 	bufferWidth int
 	width int                     // Width of draw area
+	separator rune                // Separator character
+	entryPadding int              // Any padding around entries
 	labelFontSize int             // Font size in label
 	labelTextStyle fyne.TextStyle // font text style
 	forward bool                  // Dragg direction
@@ -63,29 +65,35 @@ func (rb *ringBuffer) Seek(position int) {
 }
 
 // GetSelected -- given pixel offset, returns selected text.
-func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separator rune) string {
+func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int) string {
 	currentData := rb.Data(false)
 
 	// Seek the offset by character widths.
 	width := popupTickerPosX
 	nearestIndex := 0
 	for i := 0; i < len(currentData); i++ {
+		if (currentData[i] == rb.separator) {
+			width = width + rb.entryPadding
+		}
 		charWidth := fyne.MeasureText(string(currentData[i]), rb.labelFontSize, rb.labelTextStyle).Width
 		width = width + charWidth
 		if width >= selectedPosX {
 			nearestIndex = i
 			break
 		}
+		if (currentData[i] == rb.separator) {
+			width = width + rb.entryPadding
+		}
 	}
 
-	if currentData[nearestIndex] == separator {
+	if currentData[nearestIndex] == rb.separator {
 		// Don't start on a separator.
 		nearestIndex = nearestIndex + 1
 	}
 
 	nearestSeparatorFound := false
 	for i := nearestIndex; i >= 0; i-- {
-		if currentData[i] == separator {
+		if currentData[i] == rb.separator {
 			nearestSeparatorFound = true
 			break
 		}
@@ -96,7 +104,7 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 	farthestSeparatorFound := false
 
 	for i := nearestIndex; i < len(currentData); i++ {
-		if currentData[i] == separator {
+		if currentData[i] == rb.separator {
 			farthestSeparatorFound = true
 			endIndex = i
 			break
@@ -108,7 +116,7 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 		fullData := rb.Data(true)
 
 		for i := len(fullData) - 1; i >= 0; i-- {
-			if fullData[i] == separator {
+			if fullData[i] == rb.separator {
 				nearestSeparatorFound = true
 				break
 			}
@@ -123,7 +131,7 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 		fullData := rb.Data(true)
 
 		for i := nearestIndex; i < len(fullData); i++ {
-			if fullData[i] == separator {
+			if fullData[i] == rb.separator {
 				farthestSeparatorFound = true
 				endIndex = i
 				break
@@ -150,11 +158,17 @@ func (rb *ringBuffer) Data(complete bool) []rune {
 		width := 0
 		boundIndex := 0
 		for i := 0; i < len(data); i++ {
+			if (data[i] == rb.separator) {
+				width = width + rb.entryPadding
+			}
 			charWidth := fyne.MeasureText(string(data[i]), rb.labelFontSize, rb.labelTextStyle).Width
 			width = width + charWidth
 			if width >= rb.width {
 				boundIndex = i
 				break
+			}
+			if (data[i] == rb.separator) {
+				width = width + rb.entryPadding
 			}
 		}
 
@@ -276,8 +290,8 @@ func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
 	}
 }
 
-func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string {
-	selected := p.rb.GetSelected(p.innerPos.X + theme.Padding(), pos.X, separatorChar)
+func (p *TickerPopUp) GetSelected(pos *fyne.Position) string {
+	selected := p.rb.GetSelected(p.Content.Position().X + theme.Padding(), pos.X)
 	return selected
 }
 
@@ -369,20 +383,20 @@ func (p *TickerPopUp) CreateRenderer() fyne.WidgetRenderer {
 // It will then display the popup on the passed canvas.
 //
 // Deprecated: Use ShowTickerPopUpAtPosition() instead.
-func NewTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, pos fyne.Position, size fyne.Size, fontSize int) *TickerPopUp {
-	p := newTickerPopUp(content, canvas, popupTickerListener, size, fontSize)
+func NewTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, pos fyne.Position, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
+	p := newTickerPopUp(content, canvas, popupTickerListener, size, fontSize, separator, entryPadding)
 	p.ShowAtPosition(pos)
 	return p
 }
 
 // ShowTickerPopUpAtPosition creates a new tickerPopUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
-func ShowTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) {
-	newTickerPopUp(content, canvas, popupTickerListener, size, fontSize).ShowAtPosition(pos)
+func ShowTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) {
+	newTickerPopUp(content, canvas, popupTickerListener, size, fontSize, separator, entryPadding).ShowAtPosition(pos)
 }
 
-func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) *TickerPopUp {
-	rb := ringBuffer{ start: 0, labelFontSize: fontSize, width: size.Width, forward: true }
+func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
+	rb := ringBuffer{ start: 0, labelFontSize: fontSize, width: size.Width, forward: true, separator: separator, entryPadding: entryPadding }
 
 	// TODO: would be nice if Label and Entry implemented GetText() and TextStyle().  Then remove switch and access directly.
 	switch content.(type) {
@@ -411,13 +425,13 @@ func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerLi
 // NewTickerPopUp creates a new tickerPopUp for the specified content and displays it on the passed canvas.
 //
 // Deprecated: This will no longer show the pop-up in 2.0. Use ShowTickerPopUp() instead.
-func NewTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) *TickerPopUp {
-	return NewTickerPopUpAtPosition(content, canvas, popupTickerListener, fyne.NewPos(0, 0), size, fontSize)
+func NewTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
+	return NewTickerPopUpAtPosition(content, canvas, popupTickerListener, fyne.NewPos(0, 0), size, fontSize, separator, entryPadding)
 }
 
 // ShowTickerPopUp creates a new tickerPopUp for the specified content and displays it on the passed canvas.
-func ShowTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) {
-	newTickerPopUp(content, canvas, popupTickerListener, size, fontSize).Show()
+func ShowTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) {
+	newTickerPopUp(content, canvas, popupTickerListener, size, fontSize, separator, entryPadding).Show()
 }
 
 func newModalTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *TickerPopUp {
