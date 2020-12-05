@@ -10,7 +10,7 @@ import (
 )
 
 func TestGLDriver_StartAnimation(t *testing.T) {
-	done := make(chan float32)
+	done := make(chan float32, 10)
 	run := &Runner{}
 	a := &fyne.Animation{
 		Duration: time.Millisecond * 100,
@@ -28,7 +28,7 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 }
 
 func TestGLDriver_StopAnimation(t *testing.T) {
-	done := make(chan float32)
+	done := make(chan float32, 10)
 	run := &Runner{}
 	a := &fyne.Animation{
 		Duration: time.Second * 10,
