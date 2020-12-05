@@ -39,7 +39,7 @@ func (e *Entry) SetValidationError(err error) {
 	}
 
 	e.validationError = err
-	e.validationStatus.Refresh()
+	e.Refresh()
 }
 
 var _ fyne.Widget = (*validationStatus)(nil)
