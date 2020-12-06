@@ -55,6 +55,14 @@ func (s *OverlayStack) List() []fyne.CanvasObject {
 	return s.overlays
 }
 
+// ListFocusManagers returns all focus managers on the stack from bottom to top.
+func (s *OverlayStack) ListFocusManagers() []*app.FocusManager {
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
+
+	return s.focusManagers
+}
+
 // Remove deletes an overlay and all overlays above it from the stack.
 //
 // Implements: fyne.OverlayStack
