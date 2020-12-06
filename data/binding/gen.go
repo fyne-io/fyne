@@ -200,6 +200,51 @@ func (s *stringTo{{ .Name }}) DataChanged() {
 }
 `
 
+const listBindTemplate = `
+// {{ .Name }}List supports binding a list of {{ .Type }} values.
+type {{ .Name }}List interface {
+	DataList
+
+	Append({{ .Type }})
+	Get(int) {{ .Type }}
+	Prepend({{ .Type }})
+	Set(int, {{ .Type }})
+}
+
+// New{{ .Name }}List returns a bindable list of {{ .Type }} values.
+func New{{ .Name }}List() {{ .Name }}List {
+	return &bound{{ .Name }}List{}
+}
+
+type bound{{ .Name }}List struct {
+	listBase
+}
+
+func (l *bound{{ .Name }}List) Append(val {{ .Type }}) {
+	l.appendItem(Bind{{ .Name }}(&val))
+}
+
+func (l *bound{{ .Name }}List) Get(i int) {{ .Type }} {
+	if i > l.Length() {
+		return {{ .Default }}
+	}
+
+	return l.GetItem(i).({{ .Name }}).Get()
+}
+
+func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) {
+	l.prependItem(Bind{{ .Name }}(&val))
+}
+
+func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) {
+	if i > l.Length() {
+		return
+	}
+
+	l.GetItem(i).({{ .Name }}).Set(v)
+}
+`
+
 type bindValues struct {
 	Name, Type, Default string
 	Format              string
@@ -262,10 +307,17 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 var prefBinds = make(map[string]DataItem)
 `)
 
+	listFile, err := newFile("bindlists")
+	if err != nil {
+		return
+	}
+	defer listFile.Close()
+
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
+	list := template.Must(template.New("list").Parse(listBindTemplate))
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
@@ -281,6 +333,7 @@ var prefBinds = make(map[string]DataItem)
 		if b.Format != "" {
 			writeFile(convertFile, toString, b)
 		}
+		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {
