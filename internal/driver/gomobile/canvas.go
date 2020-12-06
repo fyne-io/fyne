@@ -21,6 +21,8 @@ const (
 	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
 )
 
+var _ fyne.Canvas = (*mobileCanvas)(nil)
+
 type mobileCanvas struct {
 	content          fyne.CanvasObject
 	windowHead, menu fyne.CanvasObject
@@ -99,6 +101,14 @@ func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 	} else {
 		hideVirtualKeyboard()
 	}
+}
+
+func (c *mobileCanvas) FocusNext() {
+	// not yet implemented, see #1625
+}
+
+func (c *mobileCanvas) FocusPrevious() {
+	// not yet implemented, see #1625
 }
 
 func (c *mobileCanvas) Focused() fyne.Focusable {
