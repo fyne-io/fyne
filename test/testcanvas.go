@@ -20,8 +20,6 @@ var (
 type WindowlessCanvas interface {
 	fyne.Canvas
 
-	FocusNext()
-	FocusPrevious()
 	Padded() bool
 	Resize(fyne.Size)
 	SetPadded(bool)
