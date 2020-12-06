@@ -82,11 +82,19 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
+	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
+		// do not scale or duplicate image since not needed, draw directly
+		drawTex(x, y, width, height, base, origImg, clip)
+		return
+	}
+
 	scaledBounds := image.Rect(0, 0, width, height)
 	scaledImg := image.NewNRGBA(scaledBounds)
 	switch mode {
 	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
+	case canvas.ImageScaleFastest:
+		draw.ApproxBiLinear.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	default:
 		if mode != canvas.ImageScaleSmooth {
 			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", mode), nil)
