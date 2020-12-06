@@ -67,14 +67,11 @@ func (i *menuBarItem) MinSize() fyne.Size {
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
+	i.hovered = true
 	if i.Parent.active {
-		i.hovered = true
 		i.Parent.activateChild(i)
-		i.Refresh()
-	} else {
-		i.hovered = true
-		i.Refresh()
 	}
+	i.Refresh()
 }
 
 // MouseMoved does nothing.
