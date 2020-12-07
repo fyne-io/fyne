@@ -320,6 +320,10 @@ func (p *TickerPopUp) SetText(data []rune) {
 	}
 }
 
+func (p *TickerPopUp) IsDragging() bool {
+	return p.dragging != 0
+}
+
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 	p.dragging = 2
 	if p.draggedX.X == 0 {
