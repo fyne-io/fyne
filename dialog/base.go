@@ -239,9 +239,8 @@ func newLabel(message string) fyne.CanvasObject {
 
 func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 	list := fyne.NewContainerWithLayout(layout.NewGridLayout(len(buttons)))
-
 	for _, button := range buttons {
-		list.AddObject(button)
+		list.Add(button)
 	}
 
 	return list
