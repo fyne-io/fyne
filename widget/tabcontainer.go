@@ -352,11 +352,7 @@ func (r *tabContainerRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Co
 		lay = layout.NewHBoxLayout()
 	}
 
-	tabBar := fyne.NewContainerWithLayout(lay)
-	for _, button := range buttons {
-		tabBar.AddObject(button)
-	}
-	return tabBar
+	return fyne.NewContainerWithLayout(lay, buttons...)
 }
 
 func (r *tabContainerRenderer) moveSelection() {
@@ -442,7 +438,10 @@ func (r *tabContainerRenderer) updateTabs() bool {
 	} else {
 		iconPos = buttonIconInline
 	}
-	var buttons, objects []fyne.CanvasObject
+
+	length := len(r.container.Items)
+	buttons := make([]fyne.CanvasObject, length)
+	objects := make([]fyne.CanvasObject, length)
 	for i, item := range r.container.Items {
 		button := r.buildButton(item, iconPos)
 		if i == r.container.current {
@@ -451,12 +450,13 @@ func (r *tabContainerRenderer) updateTabs() bool {
 		} else {
 			item.Content.Hide()
 		}
-		buttons = append(buttons, button)
-		objects = append(objects, item.Content)
+		buttons[i] = button
+		objects[i] = item.Content
 	}
 	r.tabBar = r.buildTabBar(buttons)
 	r.objects = objects
 	r.moveSelection()
+
 	return true
 }
 
