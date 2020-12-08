@@ -12,6 +12,23 @@ import (
 
 var _ fyne.Draggable = (*TickerPopUp)(nil)
 
+type ScrollMode uint8
+
+var (
+	ScrollNone = ScrollMode(0)
+	ScrollLeft = ScrollMode(1)
+	ScrollRight = ScrollMode(2)
+	ScrollFreeLeftBound = ScrollMode(3)
+	ScrollFreeRightBound = ScrollMode(4)
+	ScrollFree = ScrollMode(5)
+)
+
+type DragStyle bool
+var (
+	DragNatural = DragStyle(true)
+	DragAnti = DragStyle(false)
+)
+
 type TextWidget interface {
 	GetText() string
 	SetText(string)
@@ -20,16 +37,19 @@ type TextWidget interface {
 }
 
 type ringBuffer struct {
+	ScrollMode ScrollMode
 	data []rune
-	start int // Start of ringBuffer can be anywhere in array.
+	start int                     // Start of ringBuffer can be anywhere in array.
 	bufferWidth int
 	width int                     // Width of draw area
 	SeparatorRune rune            // Separator character
 	entryPadding int              // Any padding around entries
 	labelFontSize int             // Font size in label
 	labelTextStyle fyne.TextStyle // font text style
-	forward bool                  // Dragg direction
+	dragStyle DragStyle           // Drag or Anti-drag  true == with turn.
 }
+
+var charSizeCache = map[string]*fyne.Size{}
 
 type PopupTickerListener interface {
 	TapCallback(fyne.Tappable, *fyne.PointEvent)
@@ -41,9 +61,9 @@ func (rb *ringBuffer) Init(start int, data []rune) {
 }
 
 // Turn - rotates the ringbuffer by appropriate offset.  -offset is left, +offset is right.
-func (rb *ringBuffer) Turn(offset int) {
-	if len(rb.data) == 0 {
-		return
+func (rb *ringBuffer) Turn(offset int) bool {
+	if len(rb.data) == 0 || rb.ScrollMode == ScrollNone {
+		return false
 	}
 	if offset > 0 {
 		offset = 1
@@ -51,22 +71,63 @@ func (rb *ringBuffer) Turn(offset int) {
 		offset = -1
 	}
 
-	if rb.forward {
-		rb.start = rb.start - offset
+	var start int
+	direction := offset
+
+	if rb.dragStyle == DragNatural {
+		start = rb.start - offset
 	} else {
-		rb.start = rb.start + offset
+		direction = -offset
+		start = rb.start + offset
 	}
+
+	switch rb.ScrollMode {
+	case ScrollLeft:
+		if direction > 0 {
+			return false
+		}
+		break
+	case ScrollRight:
+		if direction < 0 {
+			return false
+		}
+		break
+	case ScrollFreeLeftBound:
+		if start < 0 {
+			start = 0
+		}
+		break
+	case ScrollFreeRightBound:
+		if start > len(rb.data) {
+			start = len(rb.data) - 1
+		}
+		break
+	case ScrollFree:
+		break
+	default:
+	}
+	if start == rb.start {
+		return false
+	}
+	rb.start = start
+
 	if rb.start > len(rb.data) {
 		rb.start = rb.start % len(rb.data)
 	} else if rb.start < 0 {
 		rb.start = len(rb.data) + rb.start
 	}
+	return true
 }
 
-// Turn - rotates the ringbuffer by appropriate offset.  -offset is left, +offset is right.
-func (rb *ringBuffer) Seek(position int) {
-	rb.Turn(position)
+func (rb *ringBuffer) MeasureText(text string, size int, style fyne.TextStyle) *fyne.Size {
+	if charSize, ok := charSizeCache[text]; ok {
+		return charSize
+	}
+	charSize := fyne.MeasureText(text, size, style)
+	charSizeCache[text] = &charSize
+	return &charSize
 }
+
 
 // GetSelected -- given pixel offset, returns selected text.
 func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int) string {
@@ -82,8 +143,8 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int) string 
 		if (currentData[i] == rb.SeparatorRune) {
 			width = width + rb.entryPadding
 		}
-		charWidth := fyne.MeasureText(string(currentData[i]), rb.labelFontSize, rb.labelTextStyle).Width
-		width = width + charWidth
+		charSize := rb.MeasureText(string(currentData[i]), rb.labelFontSize, rb.labelTextStyle)
+		width = width + (*charSize).Width
 		if width >= selectedPosX {
 			nearestIndex = i
 			break
@@ -168,8 +229,8 @@ func (rb *ringBuffer) Data(complete bool) []rune {
 			if (data[i] == rb.SeparatorRune) {
 				width = width + rb.entryPadding
 			}
-			charWidth := fyne.MeasureText(string(data[i]), rb.labelFontSize, rb.labelTextStyle).Width
-			width = width + charWidth
+			charSize := rb.MeasureText(string(data[i]), rb.labelFontSize, rb.labelTextStyle)
+			width = width + (*charSize).Width
 			if width >= rb.width {
 				boundIndex = i
 				break
@@ -348,7 +409,11 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 	}
 
 	if p.dsCount != 0 {
-		p.rb.Seek(int(diffPosition.X))
+		turned := p.rb.Turn(int(diffPosition.X))
+		if !turned {
+			return
+		}
+
 		switch p.Content.(type) {
 		case *commonwidget.Label:
 			p.Content.(*commonwidget.Label).Text = string(p.rb.Data(false))
@@ -400,20 +465,20 @@ func (p *TickerPopUp) GetSeparatorRune() rune {
 // It will then display the popup on the passed canvas.
 //
 // Deprecated: Use ShowTickerPopUpAtPosition() instead.
-func NewTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, pos fyne.Position, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
-	p := newTickerPopUp(content, canvas, popupTickerListener, size, fontSize, separator, entryPadding)
+func NewTickerPopUpAtPosition(scrollMode ScrollMode, content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, pos fyne.Position, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
+	p := newTickerPopUp(scrollMode, content, canvas, popupTickerListener, size, fontSize, separator, entryPadding)
 	p.ShowAtPosition(pos)
 	return p
 }
 
 // ShowTickerPopUpAtPosition creates a new tickerPopUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
-func ShowTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) {
-	newTickerPopUp(content, canvas, popupTickerListener, size, fontSize, separator, entryPadding).ShowAtPosition(pos)
+func ShowTickerPopUpAtPosition(scrollMode ScrollMode, content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) {
+	newTickerPopUp(scrollMode, content, canvas, popupTickerListener, size, fontSize, separator, entryPadding).ShowAtPosition(pos)
 }
 
-func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
-	rb := ringBuffer{ start: 0, labelFontSize: fontSize, width: size.Width, forward: true, SeparatorRune: separator, entryPadding: entryPadding }
+func newTickerPopUp(scrollMode ScrollMode, content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
+	rb := ringBuffer{ ScrollMode: scrollMode, start: 0, labelFontSize: fontSize, width: size.Width, dragStyle: DragNatural, SeparatorRune: separator, entryPadding: entryPadding }
 
 	// TODO: would be nice if Label and Entry implemented GetText() and TextStyle().  Then remove switch and access directly.
 	switch content.(type) {
@@ -442,17 +507,17 @@ func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerLi
 // NewTickerPopUp creates a new tickerPopUp for the specified content and displays it on the passed canvas.
 //
 // Deprecated: This will no longer show the pop-up in 2.0. Use ShowTickerPopUp() instead.
-func NewTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
-	return NewTickerPopUpAtPosition(content, canvas, popupTickerListener, fyne.NewPos(0, 0), size, fontSize, separator, entryPadding)
+func NewTickerPopUp(scrollMode ScrollMode, content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) *TickerPopUp {
+	return NewTickerPopUpAtPosition(scrollMode, content, canvas, popupTickerListener, fyne.NewPos(0, 0), size, fontSize, separator, entryPadding)
 }
 
 // ShowTickerPopUp creates a new tickerPopUp for the specified content and displays it on the passed canvas.
-func ShowTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) {
-	newTickerPopUp(content, canvas, popupTickerListener, size, fontSize, separator, entryPadding).Show()
+func ShowTickerPopUp(scrollMode ScrollMode, content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int, separator rune, entryPadding int) {
+	newTickerPopUp(scrollMode, content, canvas, popupTickerListener, size, fontSize, separator, entryPadding).Show()
 }
 
 func newModalTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *TickerPopUp {
-	p := &TickerPopUp{Content: content, Canvas: canvas, modal: true}
+	p := &TickerPopUp{ Content: content, Canvas: canvas, modal: true}
 	p.ExtendBaseWidget(p)
 	return p
 }
