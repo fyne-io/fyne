@@ -15,8 +15,11 @@ import (
 
 const mainGoroutineID = 1
 
-var canvasMutex sync.RWMutex
-var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
+var (
+	canvasMutex sync.RWMutex
+	canvases    = make(map[fyne.CanvasObject]fyne.Canvas)
+	isWayland   = false
+)
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)

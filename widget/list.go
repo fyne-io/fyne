@@ -21,6 +21,8 @@ var _ fyne.Widget = (*List)(nil)
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
 // List requires that all items are the same size.
+//
+// Since: 1.4
 type List struct {
 	BaseWidget
 
@@ -38,6 +40,8 @@ type List struct {
 
 // NewList creates and returns a list widget for displaying items in
 // a vertical layout with scrolling and caching for performance.
+//
+// Since: 1.4
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(ListItemID, fyne.CanvasObject)) *List {
 	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem}
 	list.ExtendBaseWidget(list)
@@ -211,7 +215,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 }
 
 func (l *listRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize()
+	return l.scroller.MinSize().Max(l.list.itemMin)
 }
 
 func (l *listRenderer) Refresh() {

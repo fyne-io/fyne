@@ -56,5 +56,7 @@ type Canvas interface {
 
 	// InteractiveArea returns the position and size of the central interactive area.
 	// Operating system elements may overlap the portions outside this area and widgets should avoid being outside.
+	//
+	// Since: 1.4
 	InteractiveArea() (Position, Size)
 }

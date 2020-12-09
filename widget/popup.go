@@ -232,7 +232,9 @@ type modalPopUpRenderer struct {
 
 func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	padding := r.padding()
-	requestedSize := r.popUp.innerSize.Subtract(padding)
+	innerSize := r.popUp.innerSize.Max(r.popUp.Content.MinSize().Add(padding))
+
+	requestedSize := innerSize.Subtract(padding)
 	size := r.popUp.Content.MinSize().Max(requestedSize)
 	size = size.Min(canvasSize.Subtract(padding))
 	pos := fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
@@ -242,7 +244,7 @@ func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	innerPos := pos.Subtract(r.offset())
 	r.bg.Move(innerPos)
 	r.bg.Resize(size.Add(padding))
-	r.LayoutShadow(r.popUp.innerSize, innerPos)
+	r.LayoutShadow(innerSize, innerPos)
 }
 
 func (r *modalPopUpRenderer) MinSize() fyne.Size {
