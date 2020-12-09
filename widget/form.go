@@ -153,9 +153,8 @@ func (f *Form) updateLabels() {
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
 
-	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
-	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
-	f.submitButton.Importance = HighImportance
+	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
+	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
 	objects := make([]fyne.CanvasObject, len(f.Items)*2)
