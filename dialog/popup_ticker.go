@@ -331,6 +331,7 @@ func (p *TickerPopUp) DragEnd() {
 // Tapped is called when the user taps the tickerPopUp background - if not modal then dismiss this widget
 func (p *TickerPopUp) Tapped(e *fyne.PointEvent) {
 	if e.AbsolutePosition.X < p.innerPos.X || e.AbsolutePosition.Y < p.innerPos.Y || e.AbsolutePosition.X > (p.innerPos.X + p.innerSize.Width) || e.AbsolutePosition.Y > (p.innerPos.Y + p.innerSize.Height) {
+		p.CurrentSelection = ""
 		p.Hide()
 		return
 	}
@@ -362,8 +363,13 @@ func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
 	}
 }
 
-func (p *TickerPopUp) GetSelected(pos *fyne.Position) string {
-	p.CurrentSelection = p.rb.GetSelected(p.Content.Position().X + theme.Padding(), pos.X)
+func (p *TickerPopUp) GetSelected(absolutePos *fyne.Position) string {
+	if absolutePos.X < p.innerPos.X || absolutePos.Y < p.innerPos.Y || absolutePos.X > (p.innerPos.X + p.innerSize.Width) || absolutePos.Y > (p.innerPos.Y + p.innerSize.Height) {
+		p.CurrentSelection = ""
+		p.Hide()
+		return ""
+	}
+	p.CurrentSelection = p.rb.GetSelected(p.Content.Position().X + theme.Padding(), absolutePos.X)
 	return p.CurrentSelection
 }
 
