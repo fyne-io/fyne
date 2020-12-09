@@ -16,13 +16,13 @@ import (
 
 type funcData struct {
 	f    func()
-	done chan bool
+	done chan struct{} // Zero allocation signalling channel
 }
 
 type drawData struct {
 	f    func()
 	win  *window
-	done chan bool
+	done chan struct{} // Zero allocation signalling channel
 }
 
 // channel for queuing functions on the main thread
@@ -50,7 +50,7 @@ func runOnMain(f func()) {
 	if !running() {
 		f()
 	} else {
-		done := make(chan bool)
+		done := make(chan struct{})
 
 		funcQueue <- funcData{f: f, done: done}
 		<-done
@@ -59,7 +59,7 @@ func runOnMain(f func()) {
 
 // force a function f to run on the draw thread
 func runOnDraw(w *window, f func()) {
-	done := make(chan bool)
+	done := make(chan struct{})
 
 	drawFuncQueue <- drawData{f: f, win: w, done: done}
 	<-done
@@ -96,7 +96,7 @@ func (d *gLDriver) runGL() {
 		case f := <-funcQueue:
 			f.f()
 			if f.done != nil {
-				f.done <- true
+				f.done <- struct{}{}
 			}
 		case <-eventTick.C:
 			d.tryPollEvents()
@@ -189,7 +189,7 @@ func (d *gLDriver) startDrawThread() {
 			case f := <-drawFuncQueue:
 				f.win.RunWithContext(f.f)
 				if f.done != nil {
-					f.done <- true
+					f.done <- struct{}{}
 				}
 			case <-settingsChange:
 				painter.ClearFontCache()
