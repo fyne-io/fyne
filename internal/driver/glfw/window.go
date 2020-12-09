@@ -162,6 +162,10 @@ func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
 }
 
 func (w *window) RequestFocus() {
+	if isWayland {
+		return
+	}
+
 	w.runOnMainWhenCreated(w.viewport.Focus)
 }
 
@@ -1213,8 +1217,10 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 
 func (w *window) create() {
 	runOnMain(func() {
-		// make the window hidden, we will set it up and then show it later
-		glfw.WindowHint(glfw.Visible, 0)
+		if !isWayland {
+			// make the window hidden, we will set it up and then show it later
+			glfw.WindowHint(glfw.Visible, 0)
+		}
 		if w.decorate {
 			glfw.WindowHint(glfw.Decorated, 1)
 		} else {
