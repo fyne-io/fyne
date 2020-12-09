@@ -106,15 +106,7 @@ var (
 	}
 
 	defaultTheme = setupDefaultTheme()
-)
 
-type builtinTheme struct {
-	variant fyne.ThemeVariant
-
-	regular, bold, italic, boldItalic, monospace fyne.Resource
-}
-
-var (
 	primaryColors = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
@@ -151,6 +143,12 @@ var (
 		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
 )
+
+type builtinTheme struct {
+	variant fyne.ThemeVariant
+
+	regular, bold, italic, boldItalic, monospace fyne.Resource
+}
 
 // DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
 //

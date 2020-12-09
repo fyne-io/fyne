@@ -34,6 +34,10 @@ func (customTheme) Color(c fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color
 	}
 }
 
+func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
+	return theme.DarkTheme().Font(style)
+}
+
 func (customTheme) Size(s fyne.ThemeSizeName) int {
 	switch s {
 	case theme.Sizes.Padding:
@@ -49,10 +53,6 @@ func (customTheme) Size(s fyne.ThemeSizeName) int {
 	default:
 		return 0
 	}
-}
-
-func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
-	return theme.DarkTheme().Font(style)
 }
 
 func newCustomTheme() fyne.Theme {

@@ -49,6 +49,22 @@ func (l *legacyWrapper) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.
 	}
 }
 
+func (l *legacyWrapper) Font(s fyne.TextStyle) fyne.Resource {
+	if s.Monospace {
+		return l.old.TextMonospaceFont()
+	}
+	if s.Bold {
+		if s.Italic {
+			return l.old.TextBoldItalicFont()
+		}
+		return l.old.TextBoldFont()
+	}
+	if s.Italic {
+		return l.old.TextItalicFont()
+	}
+	return l.old.TextFont()
+}
+
 func (l *legacyWrapper) Size(n fyne.ThemeSizeName) int {
 	switch n {
 	case Sizes.InlineIcon:
@@ -64,20 +80,4 @@ func (l *legacyWrapper) Size(n fyne.ThemeSizeName) int {
 	default:
 		return DefaultTheme().Size(n)
 	}
-}
-
-func (l *legacyWrapper) Font(s fyne.TextStyle) fyne.Resource {
-	if s.Monospace {
-		return l.old.TextMonospaceFont()
-	}
-	if s.Bold {
-		if s.Italic {
-			return l.old.TextBoldItalicFont()
-		}
-		return l.old.TextBoldFont()
-	}
-	if s.Italic {
-		return l.old.TextItalicFont()
-	}
-	return l.old.TextFont()
 }

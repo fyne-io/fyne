@@ -22,8 +22,8 @@ type ThemeSizeName string
 // Since 2.0.0
 type Theme interface {
 	Color(ThemeColorName, ThemeVariant) color.Color
-	Size(ThemeSizeName) int
 	Font(TextStyle) Resource
+	Size(ThemeSizeName) int
 }
 
 // LegacyTheme defines the requirements of any Fyne theme.
