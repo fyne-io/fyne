@@ -145,9 +145,10 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int) string 
 		}
 		charSize := rb.MeasureText(string(currentData[i]), rb.labelFontSize, rb.labelTextStyle)
 		width = width + (*charSize).Width
-		if width >= selectedPosX {
-			nearestIndex = i
+		if width > selectedPosX {
 			break
+		} else {
+			nearestIndex = i
 		}
 		if (currentData[i] == rb.SeparatorRune) {
 			width = width + rb.entryPadding
@@ -231,9 +232,10 @@ func (rb *ringBuffer) Data(complete bool) []rune {
 			}
 			charSize := rb.MeasureText(string(data[i]), rb.labelFontSize, rb.labelTextStyle)
 			width = width + (*charSize).Width
-			if width >= rb.width {
-				boundIndex = i
+			if width > rb.width {
 				break
+			} else {
+				boundIndex = i
 			}
 			if (data[i] == rb.SeparatorRune) {
 				width = width + rb.entryPadding
@@ -331,6 +333,7 @@ func (p *TickerPopUp) DragEnd() {
 // Tapped is called when the user taps the tickerPopUp background - if not modal then dismiss this widget
 func (p *TickerPopUp) Tapped(e *fyne.PointEvent) {
 	if e.AbsolutePosition.X < p.innerPos.X || e.AbsolutePosition.Y < p.innerPos.Y || e.AbsolutePosition.X > (p.innerPos.X + p.innerSize.Width) || e.AbsolutePosition.Y > (p.innerPos.Y + p.innerSize.Height) {
+		p.dragging = 0
 		p.CurrentSelection = ""
 		p.Hide()
 		return
