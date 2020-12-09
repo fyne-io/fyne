@@ -65,20 +65,20 @@ func TestButton_Tapped(t *testing.T) {
 }
 
 func TestButton_Disable(t *testing.T) {
-	tapped := make(chan bool)
-	button := widget.NewButton("Test", func() {
-		tapped <- true
+	tapped := false
+	button := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {
+		tapped = true
 	})
-
 	button.Disable()
-	go test.Tap(button)
-	func() {
-		select {
-		case <-tapped:
-			assert.Fail(t, "Button should have been disabled")
-		case <-time.After(1 * time.Second):
-		}
-	}()
+	w := test.NewWindow(button)
+	defer w.Close()
+
+	test.Tap(button)
+	assert.False(t, tapped, "Button should have been disabled")
+	test.AssertImageMatches(t, "button/disabled.png", w.Canvas().Capture())
+
+	button.Enable()
+	test.AssertImageMatches(t, "button/initial.png", w.Canvas().Capture())
 }
 
 func TestButton_Enable(t *testing.T) {
