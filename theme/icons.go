@@ -42,7 +42,7 @@ func (res *ThemedResource) Content() []byte {
 	return colorizeResource(res.source, clr)
 }
 
-// Error resturns a different resource for indicating an error.
+// Error returns a different resource for indicating an error.
 func (res *ThemedResource) Error() *ErrorThemedResource {
 	return NewErrorThemedResource(res)
 }

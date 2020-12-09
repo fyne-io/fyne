@@ -64,7 +64,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 
 				icon.SetTarget(0, 0, float64(texW), float64(texH))
 				// this is used by our render code, so let's set it to the file aspect
-				aspects[img.Resource] = aspect
+				aspects[name] = aspect
 				// if the image specifies it should be original size we need at least that many pixels on screen
 				if img.FillMode == canvas.ImageFillOriginal {
 					if !checkImageMinSize(img, c, origW, origH) {
@@ -97,7 +97,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		}
 		origSize := pixels.Bounds().Size()
 		// this is used by our render code, so let's set it to the file aspect
-		aspects[img] = float32(origSize.X) / float32(origSize.Y)
+		aspects[name] = float32(origSize.X) / float32(origSize.Y)
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
 			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
