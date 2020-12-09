@@ -65,6 +65,10 @@ func (l *legacyWrapper) Font(s fyne.TextStyle) fyne.Resource {
 	return l.old.TextFont()
 }
 
+func (l *legacyWrapper) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return DefaultTheme().Icon(n)
+}
+
 func (l *legacyWrapper) Size(n fyne.ThemeSizeName) int {
 	switch n {
 	case Sizes.InlineIcon:

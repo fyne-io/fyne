@@ -38,6 +38,10 @@ func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return theme.DarkTheme().Font(style)
 }
 
+func (customTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return theme.DefaultTheme().Icon(n)
+}
+
 func (customTheme) Size(s fyne.ThemeSizeName) int {
 	switch s {
 	case theme.Sizes.Padding:

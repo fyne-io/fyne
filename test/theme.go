@@ -61,6 +61,10 @@ func (t *configurableTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return t.fonts[style]
 }
 
+func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return theme.DefaultTheme().Icon(n)
+}
+
 func (t *configurableTheme) Size(s fyne.ThemeSizeName) int {
 	return t.sizes[s]
 }

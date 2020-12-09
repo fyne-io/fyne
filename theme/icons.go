@@ -9,6 +9,142 @@ import (
 	"fyne.io/fyne"
 )
 
+var (
+	// Icons specifies each of the known icon names that a theme can contain.
+	//
+	// Since 2.0.0
+	Icons = struct {
+		Cancel, Confirm, Delete, Search, SearchReplace, Menu, MenuExpand                fyne.ThemeIconName
+		CheckButtonChecked, CheckButton, RadioButton, RadioButtonChecked                fyne.ThemeIconName
+		ColorAchromatic, ColorChromatic, ColorPalette                                   fyne.ThemeIconName
+		ContentAdd, ContentRemove, ContentCut, ContentCopy, ContentPaste                fyne.ThemeIconName
+		ContentClear, ContentRedo, ContentUndo, Info, Question, Warning, Error          fyne.ThemeIconName
+		Document, DocumentCreate, DocumentPrint, DocumentSave                           fyne.ThemeIconName
+		MailAttachment, MailCompose, MailForward, MailReply, MailReplyAll, MailSend     fyne.ThemeIconName
+		MediaFastForward, MediaFastRewind, MediaPause, MediaPlay                        fyne.ThemeIconName
+		MediaRecord, MediaReplay, MediaSkipNext, MediaSkipPrevious, MediaStop           fyne.ThemeIconName
+		NavigateBack, MoveDown, NavigateNext, MoveUp, ArrowDropDown, ArrowDropUp        fyne.ThemeIconName
+		File, FileApplication, FileAudio, FileImage, FileText, FileVideo                fyne.ThemeIconName
+		Folder, FolderNew, FolderOpen, Help, History, Home, Settings, Storage, Upload   fyne.ThemeIconName
+		ViewFullScreen, ViewRefresh, ViewZoomFit, ViewZoomIn, ViewZoomOut, ViewRestore  fyne.ThemeIconName
+		Visibility, VisibilityOff, VolumeDown, VolumeMute, VolumeUp, Download, Computer fyne.ThemeIconName
+	}{
+		"cancel", "confirm", "delete", "search", "searchReplace", "menu", "menuExpand",
+		"checked", "unchecked", "radioButton", "radioButtonChecked",
+		"colorAchromatic", "colorChromatic", "colorPalette",
+		"contentAdd", "contentRemove", "contentCut", "contentCopy", "contentPaste",
+		"contentClear", "contentRedo", "contentUndo", "info", "question", "warning", "errori",
+		"document", "documentCreate", "documentPrint", "documentSave",
+		"mailAttachment", "mailCompose", "mailForward", "mailReply", "mailReplyAll", "mailSend",
+		"mediaFastForward", "mediaFastRewind", "mediaPause", "mediaPlay",
+		"mediaRecord", "mediaReplay", "mediaSkipNext", "mediaSkipPrevious", "mediaStop",
+		"arrowBack", "arrowDown", "arrowForward", "arrowUp", "arrowDropDown", "arrowDropUp",
+		"file", "fileApplication", "fileAudio", "fileImage", "fileText", "fileVideo",
+		"folder", "folderNew", "folderOpen", "help", "history", "home", "settings", "storage", "upload",
+		"viewFullScreen", "viewRefresh", "viewZoomFit", "viewZoomIn", "viewZoomOut", "viewRestore",
+		"visibility", "visibilityOff", "volumeDown", "volumeMute", "volumeUp", "download", "computer",
+	}
+
+	icons = map[fyne.ThemeIconName]fyne.Resource{
+		Icons.Cancel:        NewThemedResource(cancelIconRes),
+		Icons.Confirm:       NewThemedResource(checkIconRes),
+		Icons.Delete:        NewThemedResource(deleteIconRes),
+		Icons.Search:        NewThemedResource(searchIconRes),
+		Icons.SearchReplace: NewThemedResource(searchreplaceIconRes),
+		Icons.Menu:          NewThemedResource(menuIconRes),
+		Icons.MenuExpand:    NewThemedResource(menuexpandIconRes),
+
+		Icons.CheckButton:        NewThemedResource(checkboxblankIconRes),
+		Icons.CheckButtonChecked: NewThemedResource(checkboxIconRes),
+		Icons.RadioButton:        NewThemedResource(radiobuttonIconRes),
+		Icons.RadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
+
+		Icons.ContentAdd:    NewThemedResource(contentaddIconRes),
+		Icons.ContentClear:  NewThemedResource(cancelIconRes),
+		Icons.ContentRemove: NewThemedResource(contentremoveIconRes),
+		Icons.ContentCut:    NewThemedResource(contentcutIconRes),
+		Icons.ContentCopy:   NewThemedResource(contentcopyIconRes),
+		Icons.ContentPaste:  NewThemedResource(contentpasteIconRes),
+		Icons.ContentRedo:   NewThemedResource(contentredoIconRes),
+		Icons.ContentUndo:   NewThemedResource(contentundoIconRes),
+
+		Icons.ColorAchromatic: NewThemedResource(colorachromaticIconRes),
+		Icons.ColorChromatic:  NewThemedResource(colorchromaticIconRes),
+		Icons.ColorPalette:    NewThemedResource(colorpaletteIconRes),
+
+		Icons.Document:       NewThemedResource(documentIconRes),
+		Icons.DocumentCreate: NewThemedResource(documentcreateIconRes),
+		Icons.DocumentPrint:  NewThemedResource(documentprintIconRes),
+		Icons.DocumentSave:   NewThemedResource(documentsaveIconRes),
+
+		Icons.Info:     NewThemedResource(infoIconRes),
+		Icons.Question: NewThemedResource(questionIconRes),
+		Icons.Warning:  NewThemedResource(warningIconRes),
+		Icons.Error:    NewThemedResource(errorIconRes),
+
+		Icons.MailAttachment: NewThemedResource(mailattachmentIconRes),
+		Icons.MailCompose:    NewThemedResource(mailcomposeIconRes),
+		Icons.MailForward:    NewThemedResource(mailforwardIconRes),
+		Icons.MailReply:      NewThemedResource(mailreplyIconRes),
+		Icons.MailReplyAll:   NewThemedResource(mailreplyallIconRes),
+		Icons.MailSend:       NewThemedResource(mailsendIconRes),
+
+		Icons.MediaFastForward:  NewThemedResource(mediafastforwardIconRes),
+		Icons.MediaFastRewind:   NewThemedResource(mediafastrewindIconRes),
+		Icons.MediaPause:        NewThemedResource(mediapauseIconRes),
+		Icons.MediaPlay:         NewThemedResource(mediaplayIconRes),
+		Icons.MediaRecord:       NewThemedResource(mediarecordIconRes),
+		Icons.MediaReplay:       NewThemedResource(mediareplayIconRes),
+		Icons.MediaSkipNext:     NewThemedResource(mediaskipnextIconRes),
+		Icons.MediaSkipPrevious: NewThemedResource(mediaskippreviousIconRes),
+		Icons.MediaStop:         NewThemedResource(mediastopIconRes),
+
+		Icons.NavigateBack:  NewThemedResource(arrowbackIconRes),
+		Icons.MoveDown:      NewThemedResource(arrowdownIconRes),
+		Icons.NavigateNext:  NewThemedResource(arrowforwardIconRes),
+		Icons.MoveUp:        NewThemedResource(arrowupIconRes),
+		Icons.ArrowDropDown: NewThemedResource(arrowdropdownIconRes),
+		Icons.ArrowDropUp:   NewThemedResource(arrowdropupIconRes),
+
+		Icons.File:            NewThemedResource(fileIconRes),
+		Icons.FileApplication: NewThemedResource(fileapplicationIconRes),
+		Icons.FileAudio:       NewThemedResource(fileaudioIconRes),
+		Icons.FileImage:       NewThemedResource(fileimageIconRes),
+		Icons.FileText:        NewThemedResource(filetextIconRes),
+		Icons.FileVideo:       NewThemedResource(filevideoIconRes),
+		Icons.Folder:          NewThemedResource(folderIconRes),
+		Icons.FolderNew:       NewThemedResource(foldernewIconRes),
+		Icons.FolderOpen:      NewThemedResource(folderopenIconRes),
+		Icons.Help:            NewThemedResource(helpIconRes),
+		Icons.History:         NewThemedResource(historyIconRes),
+		Icons.Home:            NewThemedResource(homeIconRes),
+		Icons.Settings:        NewThemedResource(settingsIconRes),
+
+		Icons.ViewFullScreen: NewThemedResource(viewfullscreenIconRes),
+		Icons.ViewRefresh:    NewThemedResource(viewrefreshIconRes),
+		Icons.ViewRestore:    NewThemedResource(viewzoomfitIconRes),
+		Icons.ViewZoomFit:    NewThemedResource(viewzoomfitIconRes),
+		Icons.ViewZoomIn:     NewThemedResource(viewzoominIconRes),
+		Icons.ViewZoomOut:    NewThemedResource(viewzoomoutIconRes),
+
+		Icons.Visibility:    NewThemedResource(visibilityIconRes),
+		Icons.VisibilityOff: NewThemedResource(visibilityoffIconRes),
+
+		Icons.VolumeDown: NewThemedResource(volumedownIconRes),
+		Icons.VolumeMute: NewThemedResource(volumemuteIconRes),
+		Icons.VolumeUp:   NewThemedResource(volumeupIconRes),
+
+		Icons.Download: NewThemedResource(downloadIconRes),
+		Icons.Computer: NewThemedResource(computerIconRes),
+		Icons.Storage:  NewThemedResource(storageIconRes),
+		Icons.Upload:   NewThemedResource(uploadIconRes),
+	}
+)
+
+func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return icons[n]
+}
+
 // ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for the currently selected theme.
 type ThemedResource struct {
@@ -164,118 +300,6 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 	return b
 }
 
-var (
-	cancel, confirm, delete, search, searchReplace, menu, menuExpand                *ThemedResource
-	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
-	colorAchromatic, colorChromatic, colorPalette                                   *ThemedResource
-	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
-	contentClear, contentRedo, contentUndo, info, question, warning, errori         *ThemedResource
-	document, documentCreate, documentPrint, documentSave                           *ThemedResource
-	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
-	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
-	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious, mediaStop           *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
-	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
-	folder, folderNew, folderOpen, help, history, home, settings, storage, upload   *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut, viewRestore  *ThemedResource
-	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
-)
-
-func init() {
-	cancel = NewThemedResource(cancelIconRes)
-	confirm = NewThemedResource(checkIconRes)
-	delete = NewThemedResource(deleteIconRes)
-	search = NewThemedResource(searchIconRes)
-	searchReplace = NewThemedResource(searchreplaceIconRes)
-	menu = NewThemedResource(menuIconRes)
-	menuExpand = NewThemedResource(menuexpandIconRes)
-
-	checked = NewThemedResource(checkboxIconRes)
-	unchecked = NewThemedResource(checkboxblankIconRes)
-	radioButton = NewThemedResource(radiobuttonIconRes)
-	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes)
-
-	contentAdd = NewThemedResource(contentaddIconRes)
-	contentClear = NewThemedResource(cancelIconRes)
-	contentRemove = NewThemedResource(contentremoveIconRes)
-	contentCut = NewThemedResource(contentcutIconRes)
-	contentCopy = NewThemedResource(contentcopyIconRes)
-	contentPaste = NewThemedResource(contentpasteIconRes)
-	contentRedo = NewThemedResource(contentredoIconRes)
-	contentUndo = NewThemedResource(contentundoIconRes)
-
-	colorAchromatic = NewThemedResource(colorachromaticIconRes)
-	colorChromatic = NewThemedResource(colorchromaticIconRes)
-	colorPalette = NewThemedResource(colorpaletteIconRes)
-
-	document = NewThemedResource(documentIconRes)
-	documentCreate = NewThemedResource(documentcreateIconRes)
-	documentPrint = NewThemedResource(documentprintIconRes)
-	documentSave = NewThemedResource(documentsaveIconRes)
-
-	info = NewThemedResource(infoIconRes)
-	question = NewThemedResource(questionIconRes)
-	warning = NewThemedResource(warningIconRes)
-	errori = NewThemedResource(errorIconRes)
-
-	mailAttachment = NewThemedResource(mailattachmentIconRes)
-	mailCompose = NewThemedResource(mailcomposeIconRes)
-	mailForward = NewThemedResource(mailforwardIconRes)
-	mailReply = NewThemedResource(mailreplyIconRes)
-	mailReplyAll = NewThemedResource(mailreplyallIconRes)
-	mailSend = NewThemedResource(mailsendIconRes)
-
-	mediaFastForward = NewThemedResource(mediafastforwardIconRes)
-	mediaFastRewind = NewThemedResource(mediafastrewindIconRes)
-	mediaPause = NewThemedResource(mediapauseIconRes)
-	mediaPlay = NewThemedResource(mediaplayIconRes)
-	mediaRecord = NewThemedResource(mediarecordIconRes)
-	mediaReplay = NewThemedResource(mediareplayIconRes)
-	mediaSkipNext = NewThemedResource(mediaskipnextIconRes)
-	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes)
-	mediaStop = NewThemedResource(mediastopIconRes)
-
-	arrowBack = NewThemedResource(arrowbackIconRes)
-	arrowDown = NewThemedResource(arrowdownIconRes)
-	arrowForward = NewThemedResource(arrowforwardIconRes)
-	arrowUp = NewThemedResource(arrowupIconRes)
-	arrowDropDown = NewThemedResource(arrowdropdownIconRes)
-	arrowDropUp = NewThemedResource(arrowdropupIconRes)
-
-	file = NewThemedResource(fileIconRes)
-	fileApplication = NewThemedResource(fileapplicationIconRes)
-	fileAudio = NewThemedResource(fileaudioIconRes)
-	fileImage = NewThemedResource(fileimageIconRes)
-	fileText = NewThemedResource(filetextIconRes)
-	fileVideo = NewThemedResource(filevideoIconRes)
-	folder = NewThemedResource(folderIconRes)
-	folderNew = NewThemedResource(foldernewIconRes)
-	folderOpen = NewThemedResource(folderopenIconRes)
-	help = NewThemedResource(helpIconRes)
-	history = NewThemedResource(historyIconRes)
-	home = NewThemedResource(homeIconRes)
-	settings = NewThemedResource(settingsIconRes)
-
-	viewFullScreen = NewThemedResource(viewfullscreenIconRes)
-	viewRefresh = NewThemedResource(viewrefreshIconRes)
-	viewRestore = NewThemedResource(viewzoomfitIconRes)
-	viewZoomFit = NewThemedResource(viewzoomfitIconRes)
-	viewZoomIn = NewThemedResource(viewzoominIconRes)
-	viewZoomOut = NewThemedResource(viewzoomoutIconRes)
-
-	visibility = NewThemedResource(visibilityIconRes)
-	visibilityOff = NewThemedResource(visibilityoffIconRes)
-
-	volumeDown = NewThemedResource(volumedownIconRes)
-	volumeMute = NewThemedResource(volumemuteIconRes)
-	volumeUp = NewThemedResource(volumeupIconRes)
-
-	download = NewThemedResource(downloadIconRes)
-	computer = NewThemedResource(computerIconRes)
-	storage = NewThemedResource(storageIconRes)
-	upload = NewThemedResource(uploadIconRes)
-}
-
 // FyneLogo returns a resource containing the Fyne logo
 func FyneLogo() fyne.Resource {
 	return fynelogo
@@ -283,395 +307,395 @@ func FyneLogo() fyne.Resource {
 
 // CancelIcon returns a resource containing the standard cancel icon for the current theme
 func CancelIcon() fyne.Resource {
-	return cancel
+	return current().Icon(Icons.Cancel)
 }
 
 // ConfirmIcon returns a resource containing the standard confirm icon for the current theme
 func ConfirmIcon() fyne.Resource {
-	return confirm
+	return current().Icon(Icons.Confirm)
 }
 
 // DeleteIcon returns a resource containing the standard delete icon for the current theme
 func DeleteIcon() fyne.Resource {
-	return delete
+	return current().Icon(Icons.Delete)
 }
 
 // SearchIcon returns a resource containing the standard search icon for the current theme
 func SearchIcon() fyne.Resource {
-	return search
+	return current().Icon(Icons.Search)
 }
 
 // SearchReplaceIcon returns a resource containing the standard search and replace icon for the current theme
 func SearchReplaceIcon() fyne.Resource {
-	return searchReplace
+	return current().Icon(Icons.SearchReplace)
 }
 
 // MenuIcon returns a resource containing the standard (mobile) menu icon for the current theme
 func MenuIcon() fyne.Resource {
-	return menu
+	return current().Icon(Icons.Menu)
 }
 
 // MenuExpandIcon returns a resource containing the standard (mobile) expand "submenu icon for the current theme
 func MenuExpandIcon() fyne.Resource {
-	return menuExpand
+	return current().Icon(Icons.MenuExpand)
 }
 
 // CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme
 func CheckButtonIcon() fyne.Resource {
-	return unchecked
+	return current().Icon(Icons.CheckButton)
 }
 
 // CheckButtonCheckedIcon returns a resource containing the standard checkbox checked icon for the current theme
 func CheckButtonCheckedIcon() fyne.Resource {
-	return checked
+	return current().Icon(Icons.CheckButtonChecked)
 }
 
 // RadioButtonIcon returns a resource containing the standard radio button icon for the current theme
 func RadioButtonIcon() fyne.Resource {
-	return radioButton
+	return current().Icon(Icons.RadioButton)
 }
 
 // RadioButtonCheckedIcon returns a resource containing the standard radio button checked icon for the current theme
 func RadioButtonCheckedIcon() fyne.Resource {
-	return radioButtonChecked
+	return current().Icon(Icons.RadioButtonChecked)
 }
 
 // ContentAddIcon returns a resource containing the standard content add icon for the current theme
 func ContentAddIcon() fyne.Resource {
-	return contentAdd
+	return current().Icon(Icons.ContentAdd)
 }
 
 // ContentRemoveIcon returns a resource containing the standard content remove icon for the current theme
 func ContentRemoveIcon() fyne.Resource {
-	return contentRemove
+	return current().Icon(Icons.ContentRemove)
 }
 
 // ContentClearIcon returns a resource containing the standard content clear icon for the current theme
 func ContentClearIcon() fyne.Resource {
-	return contentClear
+	return current().Icon(Icons.ContentClear)
 }
 
 // ContentCutIcon returns a resource containing the standard content cut icon for the current theme
 func ContentCutIcon() fyne.Resource {
-	return contentCut
+	return current().Icon(Icons.ContentCut)
 }
 
 // ContentCopyIcon returns a resource containing the standard content copy icon for the current theme
 func ContentCopyIcon() fyne.Resource {
-	return contentCopy
+	return current().Icon(Icons.ContentCopy)
 }
 
 // ContentPasteIcon returns a resource containing the standard content paste icon for the current theme
 func ContentPasteIcon() fyne.Resource {
-	return contentPaste
+	return current().Icon(Icons.ContentPaste)
 }
 
 // ContentRedoIcon returns a resource containing the standard content redo icon for the current theme
 func ContentRedoIcon() fyne.Resource {
-	return contentRedo
+	return current().Icon(Icons.ContentRedo)
 }
 
 // ContentUndoIcon returns a resource containing the standard content undo icon for the current theme
 func ContentUndoIcon() fyne.Resource {
-	return contentUndo
+	return current().Icon(Icons.ContentUndo)
 }
 
 // ColorAchromaticIcon returns a resource containing the standard achromatic color icon for the current theme
 func ColorAchromaticIcon() fyne.Resource {
-	return colorAchromatic
+	return current().Icon(Icons.ColorAchromatic)
 }
 
 // ColorChromaticIcon returns a resource containing the standard chromatic color icon for the current theme
 func ColorChromaticIcon() fyne.Resource {
-	return colorChromatic
+	return current().Icon(Icons.ColorChromatic)
 }
 
 // ColorPaletteIcon returns a resource containing the standard color palette icon for the current theme
 func ColorPaletteIcon() fyne.Resource {
-	return colorPalette
+	return current().Icon(Icons.ColorPalette)
 }
 
 // DocumentIcon returns a resource containing the standard document icon for the current theme
 func DocumentIcon() fyne.Resource {
-	return document
+	return current().Icon(Icons.Document)
 }
 
 // DocumentCreateIcon returns a resource containing the standard document create icon for the current theme
 func DocumentCreateIcon() fyne.Resource {
-	return documentCreate
+	return current().Icon(Icons.DocumentCreate)
 }
 
 // DocumentPrintIcon returns a resource containing the standard document print icon for the current theme
 func DocumentPrintIcon() fyne.Resource {
-	return documentPrint
+	return current().Icon(Icons.DocumentPrint)
 }
 
 // DocumentSaveIcon returns a resource containing the standard document save icon for the current theme
 func DocumentSaveIcon() fyne.Resource {
-	return documentSave
+	return current().Icon(Icons.DocumentSave)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
 func InfoIcon() fyne.Resource {
-	return info
+	return current().Icon(Icons.Info)
 }
 
 // QuestionIcon returns a resource containing the standard dialog question icon for the current theme
 func QuestionIcon() fyne.Resource {
-	return question
+	return current().Icon(Icons.Question)
 }
 
 // WarningIcon returns a resource containing the standard dialog warning icon for the current theme
 func WarningIcon() fyne.Resource {
-	return warning
+	return current().Icon(Icons.Warning)
 }
 
 // ErrorIcon returns a resource containing the standard dialog error icon for the current theme
 func ErrorIcon() fyne.Resource {
-	return errori
+	return current().Icon(Icons.Error)
 }
 
 // FileIcon returns a resource containing the appropriate file icon for the current theme
 func FileIcon() fyne.Resource {
-	return file
+	return current().Icon(Icons.File)
 }
 
 // FileApplicationIcon returns a resource containing the file icon representing application files for the current theme
 func FileApplicationIcon() fyne.Resource {
-	return fileApplication
+	return current().Icon(Icons.FileApplication)
 }
 
 // FileAudioIcon returns a resource containing the file icon representing audio files for the current theme
 func FileAudioIcon() fyne.Resource {
-	return fileAudio
+	return current().Icon(Icons.FileAudio)
 }
 
 // FileImageIcon returns a resource containing the file icon representing image files for the current theme
 func FileImageIcon() fyne.Resource {
-	return fileImage
+	return current().Icon(Icons.FileImage)
 }
 
 // FileTextIcon returns a resource containing the file icon representing text files for the current theme
 func FileTextIcon() fyne.Resource {
-	return fileText
+	return current().Icon(Icons.FileText)
 }
 
 // FileVideoIcon returns a resource containing the file icon representing video files for the current theme
 func FileVideoIcon() fyne.Resource {
-	return fileVideo
+	return current().Icon(Icons.FileVideo)
 }
 
 // FolderIcon returns a resource containing the standard folder icon for the current theme
 func FolderIcon() fyne.Resource {
-	return folder
+	return current().Icon(Icons.Folder)
 }
 
 // FolderNewIcon returns a resource containing the standard folder creation icon for the current theme
 func FolderNewIcon() fyne.Resource {
-	return folderNew
+	return current().Icon(Icons.FolderNew)
 }
 
 // FolderOpenIcon returns a resource containing the standard folder open icon for the current theme
 func FolderOpenIcon() fyne.Resource {
-	return folderOpen
+	return current().Icon(Icons.FolderOpen)
 }
 
 // HelpIcon returns a resource containing the standard help icon for the current theme
 func HelpIcon() fyne.Resource {
-	return help
+	return current().Icon(Icons.Help)
 }
 
 // HistoryIcon returns a resource containing the standard history icon for the current theme
 func HistoryIcon() fyne.Resource {
-	return history
+	return current().Icon(Icons.History)
 }
 
 // HomeIcon returns a resource containing the standard home folder icon for the current theme
 func HomeIcon() fyne.Resource {
-	return home
+	return current().Icon(Icons.Home)
 }
 
 // SettingsIcon returns a resource containing the standard settings icon for the current theme
 func SettingsIcon() fyne.Resource {
-	return settings
+	return current().Icon(Icons.Settings)
 }
 
 // MailAttachmentIcon returns a resource containing the standard mail attachment icon for the current theme
 func MailAttachmentIcon() fyne.Resource {
-	return mailAttachment
+	return current().Icon(Icons.MailAttachment)
 }
 
 // MailComposeIcon returns a resource containing the standard mail compose icon for the current theme
 func MailComposeIcon() fyne.Resource {
-	return mailCompose
+	return current().Icon(Icons.MailCompose)
 }
 
 // MailForwardIcon returns a resource containing the standard mail forward icon for the current theme
 func MailForwardIcon() fyne.Resource {
-	return mailForward
+	return current().Icon(Icons.MailForward)
 }
 
 // MailReplyIcon returns a resource containing the standard mail reply icon for the current theme
 func MailReplyIcon() fyne.Resource {
-	return mailReply
+	return current().Icon(Icons.MailReply)
 }
 
 // MailReplyAllIcon returns a resource containing the standard mail reply all icon for the current theme
 func MailReplyAllIcon() fyne.Resource {
-	return mailReplyAll
+	return current().Icon(Icons.MailReplyAll)
 }
 
 // MailSendIcon returns a resource containing the standard mail send icon for the current theme
 func MailSendIcon() fyne.Resource {
-	return mailSend
+	return current().Icon(Icons.MailSend)
 }
 
 // MediaFastForwardIcon returns a resource containing the standard media fast-forward icon for the current theme
 func MediaFastForwardIcon() fyne.Resource {
-	return mediaFastForward
+	return current().Icon(Icons.MediaFastForward)
 }
 
 // MediaFastRewindIcon returns a resource containing the standard media fast-rewind icon for the current theme
 func MediaFastRewindIcon() fyne.Resource {
-	return mediaFastRewind
+	return current().Icon(Icons.MediaFastRewind)
 }
 
 // MediaPauseIcon returns a resource containing the standard media pause icon for the current theme
 func MediaPauseIcon() fyne.Resource {
-	return mediaPause
+	return current().Icon(Icons.MediaPause)
 }
 
 // MediaPlayIcon returns a resource containing the standard media play icon for the current theme
 func MediaPlayIcon() fyne.Resource {
-	return mediaPlay
+	return current().Icon(Icons.MediaPlay)
 }
 
 // MediaRecordIcon returns a resource containing the standard media record icon for the current theme
 func MediaRecordIcon() fyne.Resource {
-	return mediaRecord
+	return current().Icon(Icons.MediaRecord)
 }
 
 // MediaReplayIcon returns a resource containing the standard media replay icon for the current theme
 func MediaReplayIcon() fyne.Resource {
-	return mediaReplay
+	return current().Icon(Icons.MediaReplay)
 }
 
 // MediaSkipNextIcon returns a resource containing the standard media skip next icon for the current theme
 func MediaSkipNextIcon() fyne.Resource {
-	return mediaSkipNext
+	return current().Icon(Icons.MediaSkipNext)
 }
 
 // MediaSkipPreviousIcon returns a resource containing the standard media skip previous icon for the current theme
 func MediaSkipPreviousIcon() fyne.Resource {
-	return mediaSkipPrevious
+	return current().Icon(Icons.MediaSkipPrevious)
 }
 
 // MediaStopIcon returns a resource containing the standard media stop icon for the current theme
 func MediaStopIcon() fyne.Resource {
-	return mediaStop
+	return current().Icon(Icons.MediaStop)
 }
 
 // MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
 func MoveDownIcon() fyne.Resource {
-	return arrowDown
+	return current().Icon(Icons.MoveDown)
 }
 
 // MoveUpIcon returns a resource containing the standard up arrow icon for the current theme
 func MoveUpIcon() fyne.Resource {
-	return arrowUp
+	return current().Icon(Icons.MoveUp)
 }
 
 // NavigateBackIcon returns a resource containing the standard backward navigation icon for the current theme
 func NavigateBackIcon() fyne.Resource {
-	return arrowBack
+	return current().Icon(Icons.NavigateBack)
 }
 
 // NavigateNextIcon returns a resource containing the standard forward navigation icon for the current theme
 func NavigateNextIcon() fyne.Resource {
-	return arrowForward
+	return current().Icon(Icons.NavigateNext)
 }
 
 // MenuDropDownIcon returns a resource containing the standard menu drop down icon for the current theme
 func MenuDropDownIcon() fyne.Resource {
-	return arrowDropDown
+	return current().Icon(Icons.ArrowDropDown)
 }
 
 // MenuDropUpIcon returns a resource containing the standard menu drop up icon for the current theme
 func MenuDropUpIcon() fyne.Resource {
-	return arrowDropUp
+	return current().Icon(Icons.ArrowDropUp)
 }
 
 // ViewFullScreenIcon returns a resource containing the standard fullscreen icon for the current theme
 func ViewFullScreenIcon() fyne.Resource {
-	return viewFullScreen
+	return current().Icon(Icons.ViewFullScreen)
 }
 
 // ViewRestoreIcon returns a resource containing the standard exit fullscreen icon for the current theme
 func ViewRestoreIcon() fyne.Resource {
-	return viewRestore
+	return current().Icon(Icons.ViewRestore)
 }
 
 // ViewRefreshIcon returns a resource containing the standard refresh icon for the current theme
 func ViewRefreshIcon() fyne.Resource {
-	return viewRefresh
+	return current().Icon(Icons.ViewRefresh)
 }
 
 // ZoomFitIcon returns a resource containing the standard zoom fit icon for the current theme
 func ZoomFitIcon() fyne.Resource {
-	return viewZoomFit
+	return current().Icon(Icons.ViewZoomFit)
 }
 
 // ZoomInIcon returns a resource containing the standard zoom in icon for the current theme
 func ZoomInIcon() fyne.Resource {
-	return viewZoomIn
+	return current().Icon(Icons.ViewZoomIn)
 }
 
 // ZoomOutIcon returns a resource containing the standard zoom out icon for the current theme
 func ZoomOutIcon() fyne.Resource {
-	return viewZoomOut
+	return current().Icon(Icons.ViewZoomOut)
 }
 
 // VisibilityIcon returns a resource containing the standard visibity icon for the current theme
 func VisibilityIcon() fyne.Resource {
-	return visibility
+	return current().Icon(Icons.Visibility)
 }
 
 // VisibilityOffIcon returns a resource containing the standard visibity off icon for the current theme
 func VisibilityOffIcon() fyne.Resource {
-	return visibilityOff
+	return current().Icon(Icons.VisibilityOff)
 }
 
 // VolumeDownIcon returns a resource containing the standard volume down icon for the current theme
 func VolumeDownIcon() fyne.Resource {
-	return volumeDown
+	return current().Icon(Icons.VolumeDown)
 }
 
 // VolumeMuteIcon returns a resource containing the standard volume mute icon for the current theme
 func VolumeMuteIcon() fyne.Resource {
-	return volumeMute
+	return current().Icon(Icons.VolumeMute)
 }
 
 // VolumeUpIcon returns a resource containing the standard volume up icon for the current theme
 func VolumeUpIcon() fyne.Resource {
-	return volumeUp
+	return current().Icon(Icons.VolumeUp)
 }
 
 // ComputerIcon returns a resource containing the standard computer icon for the current theme
 func ComputerIcon() fyne.Resource {
-	return computer
+	return current().Icon(Icons.Computer)
 }
 
 // DownloadIcon returns a resource containing the standard download icon for the current theme
 func DownloadIcon() fyne.Resource {
-	return download
+	return current().Icon(Icons.Download)
 }
 
 // StorageIcon returns a resource containing the standard storage icon for the current theme
 func StorageIcon() fyne.Resource {
-	return storage
+	return current().Icon(Icons.Storage)
 }
 
 // UploadIcon returns a resource containing the standard upload icon for the current theme
 func UploadIcon() fyne.Resource {
-	return upload
+	return current().Icon(Icons.Upload)
 }
