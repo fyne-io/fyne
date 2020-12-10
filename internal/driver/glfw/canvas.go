@@ -198,6 +198,12 @@ func (c *glCanvas) Scale() float32 {
 	return c.scale
 }
 
+func (c *glCanvas) TextureScale() float32 {
+	c.RLock()
+	defer c.RUnlock()
+	return c.texScale
+}
+
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Lock()
 	c.setContent(content)

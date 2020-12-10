@@ -3,6 +3,7 @@ package gl
 import (
 	"image"
 	"image/color"
+	"runtime"
 
 	"fyne.io/fyne"
 )
@@ -25,9 +26,18 @@ func (c *captureImage) At(x, y int) color.Color {
 	return color.RGBA{R: c.pix[start], G: c.pix[start+1], B: c.pix[start+2], A: c.pix[start+3]}
 }
 
+type glCanvas interface {
+	fyne.Canvas
+	TextureScale() float32
+}
+
 func (p *glPainter) Capture(c fyne.Canvas) image.Image {
-	width := int(float32(c.Size().Width) * c.Scale())
-	height := int(float32(c.Size().Height) * c.Scale())
+	scale := c.Scale()
+	if gc, ok := c.(glCanvas); ok && runtime.GOOS == "darwin" { // macOS scaling is done at the texture level
+		scale = gc.TextureScale()
+	}
+	width := int(float32(c.Size().Width) * scale)
+	height := int(float32(c.Size().Height) * scale)
 	pixels := make([]uint8, width*height*4)
 
 	p.context.RunWithContext(func() {
