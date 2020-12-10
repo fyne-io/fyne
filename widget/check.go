@@ -100,6 +100,30 @@ type Check struct {
 
 	focused bool
 	hovered bool
+
+	checkSource   binding.Bool
+	checkListener binding.DataListener
+}
+
+// Bind connects the specified data source to this Check.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Check will set the value into the data source.
+//
+// Since: 2.0.0
+func (c *Check) Bind(data binding.Bool) {
+	c.checkSource = data
+
+	c.checkListener = binding.NewDataListener(func() {
+		c.Checked = data.Get()
+		if cache.IsRendered(c) {
+			c.Refresh()
+		}
+	})
+	data.AddListener(c.checkListener)
+
+	c.OnChanged = func(b bool) {
+		data.Set(b)
+	}
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -190,12 +214,9 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
-		DisableableWidget{},
-		label,
-		false,
-		changed,
-		false,
-		false,
+		DisableableWidget: DisableableWidget{},
+		Text:              label,
+		OnChanged:         changed,
 	}
 
 	c.ExtendBaseWidget(c)
@@ -203,17 +224,11 @@ func NewCheck(label string, changed func(bool)) *Check {
 }
 
 // NewCheckWithData returns a check widget connected with the specified data source.
+//
+// Since: 2.0.0
 func NewCheckWithData(label string, data binding.Bool) *Check {
-	check := NewCheck(label, func(b bool) {
-		data.Set(b)
-	})
-
-	data.AddListener(binding.NewDataListener(func() {
-		check.Checked = data.Get()
-		if cache.IsRendered(check) {
-			check.Refresh()
-		}
-	}))
+	check := NewCheck(label, nil)
+	check.Bind(data)
 
 	return check
 }
@@ -257,3 +272,17 @@ func (c *Check) TypedRune(r rune) {
 
 // TypedKey receives key input events when the Check is focused.
 func (c *Check) TypedKey(key *fyne.KeyEvent) {}
+
+// Unbind disconnects any configured data source from this Check.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (c *Check) Unbind() {
+	c.OnChanged = nil
+	if c.checkSource == nil || c.checkListener == nil {
+		return
+	}
+
+	c.checkSource.RemoveListener(c.checkListener)
+	c.checkListener = nil
+}

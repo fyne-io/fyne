@@ -4,11 +4,46 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewSliderWithData(t *testing.T) {
+	val := binding.NewFloat()
+	val.Set(4)
+
+	s := NewSliderWithData(0, 10, val)
+	waitForBinding()
+	assert.Equal(t, 4.0, s.Value)
+
+	s.SetValue(2.0)
+	assert.Equal(t, 2.0, val.Get())
+}
+
+func TestSlider_Binding(t *testing.T) {
+	s := NewSlider(0, 10)
+	s.SetValue(2)
+	assert.Equal(t, 2.0, s.Value)
+
+	val := binding.NewFloat()
+	s.Bind(val)
+	waitForBinding()
+	assert.Equal(t, 0.0, s.Value)
+
+	val.Set(3)
+	waitForBinding()
+	assert.Equal(t, 3.0, s.Value)
+
+	s.SetValue(5)
+	assert.Equal(t, 5.0, val.Get())
+
+	s.Unbind()
+	waitForBinding()
+	assert.Equal(t, 5.0, s.Value)
+}
 
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()

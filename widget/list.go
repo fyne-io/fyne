@@ -47,15 +47,11 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 	return list
 }
 
-
 // NewListWithData creates a new list widget that will display the contents of the provided data.
+//
+// Since: 2.0.0
 func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject, updateItem func(binding.DataItem, fyne.CanvasObject)) *List {
-	var l *List
-	listener := binding.NewDataListener(func() {
-		l.Refresh()
-	})
-
-	l = NewList(
+	l := NewList(
 		func() int {
 			return data.Length()
 		},
@@ -63,13 +59,9 @@ func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject,
 		func(i ListItemID, o fyne.CanvasObject) {
 			item := data.GetItem(i)
 			updateItem(item, o)
-
-			// TODO we should remove this when it is re-used but for now the binding will just avoid duplication
-			//			item.RemoveListener(listener)
-			item.AddListener(listener)
 		})
 
-	data.AddListener(listener)
+	data.AddListener(binding.NewDataListener(l.Refresh))
 	return l
 }
 

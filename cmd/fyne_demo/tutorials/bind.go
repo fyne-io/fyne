@@ -1,8 +1,6 @@
 package tutorials
 
 import (
-	"fmt"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/data/binding"
@@ -56,12 +54,13 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 				widget.NewLabel("item x.y"))
 		},
 		func(item binding.DataItem, obj fyne.CanvasObject) {
-			btn := obj.(*fyne.Container).Objects[1].(*widget.Button)
 			text := obj.(*fyne.Container).Objects[0].(*widget.Label)
+			text.Bind(binding.FloatToStringWithFormat(item.(binding.Float), "item %0.1f"))
+
+			btn := obj.(*fyne.Container).Objects[1].(*widget.Button)
 			btn.OnTapped = func() {
 				item.(binding.Float).Set(item.(binding.Float).Get() + 1)
 			}
-			text.SetText(fmt.Sprintf("item %0.1f", item.(binding.Float).Get()))
 		}))
 
 	return container.NewBorder(item, nil, nil, nil, list)
