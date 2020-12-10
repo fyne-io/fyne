@@ -1,6 +1,8 @@
 package binding
 
 // DataList is the base interface for all bindable data lists.
+//
+// Since: 2.0.0
 type DataList interface {
 	DataItem
 	GetItem(int) DataItem

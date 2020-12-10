@@ -18,6 +18,8 @@ type prefBoundBool struct {
 
 // BindPreferenceBool returns a bindable bool value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+//
+// Since: 2.0.0
 func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 	if listen, ok := prefBinds[key]; ok {
 		if l, ok := listen.(Bool); ok {
@@ -49,6 +51,8 @@ type prefBoundFloat struct {
 
 // BindPreferenceFloat returns a bindable float64 value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+//
+// Since: 2.0.0
 func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 	if listen, ok := prefBinds[key]; ok {
 		if l, ok := listen.(Float); ok {
@@ -80,6 +84,8 @@ type prefBoundInt struct {
 
 // BindPreferenceInt returns a bindable int value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+//
+// Since: 2.0.0
 func BindPreferenceInt(key string, p fyne.Preferences) Int {
 	if listen, ok := prefBinds[key]; ok {
 		if l, ok := listen.(Int); ok {
@@ -111,6 +117,8 @@ type prefBoundString struct {
 
 // BindPreferenceString returns a bindable string value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+//
+// Since: 2.0.0
 func BindPreferenceString(key string, p fyne.Preferences) String {
 	if listen, ok := prefBinds[key]; ok {
 		if l, ok := listen.(String); ok {

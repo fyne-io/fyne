@@ -4,6 +4,8 @@
 package binding
 
 // BoolList supports binding a list of bool values.
+//
+// Since: 2.0.0
 type BoolList interface {
 	DataList
 
@@ -14,6 +16,8 @@ type BoolList interface {
 }
 
 // NewBoolList returns a bindable list of bool values.
+//
+// Since: 2.0.0
 func NewBoolList() BoolList {
 	return &boundBoolList{}
 }
@@ -47,6 +51,8 @@ func (l *boundBoolList) Set(i int, v bool) {
 }
 
 // FloatList supports binding a list of float64 values.
+//
+// Since: 2.0.0
 type FloatList interface {
 	DataList
 
@@ -57,6 +63,8 @@ type FloatList interface {
 }
 
 // NewFloatList returns a bindable list of float64 values.
+//
+// Since: 2.0.0
 func NewFloatList() FloatList {
 	return &boundFloatList{}
 }
@@ -90,6 +98,8 @@ func (l *boundFloatList) Set(i int, v float64) {
 }
 
 // IntList supports binding a list of int values.
+//
+// Since: 2.0.0
 type IntList interface {
 	DataList
 
@@ -100,6 +110,8 @@ type IntList interface {
 }
 
 // NewIntList returns a bindable list of int values.
+//
+// Since: 2.0.0
 func NewIntList() IntList {
 	return &boundIntList{}
 }
@@ -133,6 +145,8 @@ func (l *boundIntList) Set(i int, v int) {
 }
 
 // RuneList supports binding a list of rune values.
+//
+// Since: 2.0.0
 type RuneList interface {
 	DataList
 
@@ -143,6 +157,8 @@ type RuneList interface {
 }
 
 // NewRuneList returns a bindable list of rune values.
+//
+// Since: 2.0.0
 func NewRuneList() RuneList {
 	return &boundRuneList{}
 }
@@ -176,6 +192,8 @@ func (l *boundRuneList) Set(i int, v rune) {
 }
 
 // StringList supports binding a list of string values.
+//
+// Since: 2.0.0
 type StringList interface {
 	DataList
 
@@ -186,6 +204,8 @@ type StringList interface {
 }
 
 // NewStringList returns a bindable list of string values.
+//
+// Since: 2.0.0
 func NewStringList() StringList {
 	return &boundStringList{}
 }

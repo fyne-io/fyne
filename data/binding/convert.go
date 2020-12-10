@@ -19,6 +19,8 @@ type stringFromBool struct {
 // BoolToString creates a binding that connects a Bool data item to a String.
 // Changes to the Bool will be pushed to the String and setting the string will parse and set the
 // Bool if the parse was successful.
+//
+// Since: 2.0.0
 func BoolToString(v Bool) String {
 	return BoolToStringWithFormat(v, "%t")
 }
@@ -26,6 +28,8 @@ func BoolToString(v Bool) String {
 // BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
 // presented using the specified format. Changes to the Bool will be pushed to the String and setting
 // the string will parse and set the Bool if the string matches the format and its parse was successful.
+//
+// Since: 2.0.0
 func BoolToStringWithFormat(v Bool, format string) String {
 	str := &stringFromBool{from: v, format: format}
 	v.AddListener(str)
@@ -67,6 +71,8 @@ type stringFromFloat struct {
 // FloatToString creates a binding that connects a Float data item to a String.
 // Changes to the Float will be pushed to the String and setting the string will parse and set the
 // Float if the parse was successful.
+//
+// Since: 2.0.0
 func FloatToString(v Float) String {
 	return FloatToStringWithFormat(v, "%f")
 }
@@ -74,6 +80,8 @@ func FloatToString(v Float) String {
 // FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
 // presented using the specified format. Changes to the Float will be pushed to the String and setting
 // the string will parse and set the Float if the string matches the format and its parse was successful.
+//
+// Since: 2.0.0
 func FloatToStringWithFormat(v Float, format string) String {
 	str := &stringFromFloat{from: v, format: format}
 	v.AddListener(str)
@@ -115,6 +123,8 @@ type stringFromInt struct {
 // IntToString creates a binding that connects a Int data item to a String.
 // Changes to the Int will be pushed to the String and setting the string will parse and set the
 // Int if the parse was successful.
+//
+// Since: 2.0.0
 func IntToString(v Int) String {
 	return IntToStringWithFormat(v, "%d")
 }
@@ -122,6 +132,8 @@ func IntToString(v Int) String {
 // IntToStringWithFormat creates a binding that connects a Int data item to a String and is
 // presented using the specified format. Changes to the Int will be pushed to the String and setting
 // the string will parse and set the Int if the string matches the format and its parse was successful.
+//
+// Since: 2.0.0
 func IntToStringWithFormat(v Int, format string) String {
 	str := &stringFromInt{from: v, format: format}
 	v.AddListener(str)
@@ -163,6 +175,8 @@ type stringToBool struct {
 // StringToBool creates a binding that connects a String data item to a Bool.
 // Changes to the String will be parsed and pushed to the Bool if the parse was successful, and setting
 // the Bool update the String binding.
+//
+// Since: 2.0.0
 func StringToBool(str String) Bool {
 	return StringToBoolWithFormat(str, "%t")
 }
@@ -171,6 +185,8 @@ func StringToBool(str String) Bool {
 // presented using the specified format. Changes to the Bool will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the Bool will push a formatted value
 // into the String.
+//
+// Since: 2.0.0
 func StringToBoolWithFormat(str String, format string) Bool {
 	v := &stringToBool{from: str, format: format}
 	str.AddListener(v)
@@ -217,6 +233,8 @@ type stringToFloat struct {
 // StringToFloat creates a binding that connects a String data item to a Float.
 // Changes to the String will be parsed and pushed to the Float if the parse was successful, and setting
 // the Float update the String binding.
+//
+// Since: 2.0.0
 func StringToFloat(str String) Float {
 	return StringToFloatWithFormat(str, "%f")
 }
@@ -225,6 +243,8 @@ func StringToFloat(str String) Float {
 // presented using the specified format. Changes to the Float will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the Float will push a formatted value
 // into the String.
+//
+// Since: 2.0.0
 func StringToFloatWithFormat(str String, format string) Float {
 	v := &stringToFloat{from: str, format: format}
 	str.AddListener(v)
@@ -271,6 +291,8 @@ type stringToInt struct {
 // StringToInt creates a binding that connects a String data item to a Int.
 // Changes to the String will be parsed and pushed to the Int if the parse was successful, and setting
 // the Int update the String binding.
+//
+// Since: 2.0.0
 func StringToInt(str String) Int {
 	return StringToIntWithFormat(str, "%d")
 }
@@ -279,6 +301,8 @@ func StringToInt(str String) Int {
 // presented using the specified format. Changes to the Int will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the Int will push a formatted value
 // into the String.
+//
+// Since: 2.0.0
 func StringToIntWithFormat(str String, format string) Int {
 	v := &stringToInt{from: str, format: format}
 	str.AddListener(v)
