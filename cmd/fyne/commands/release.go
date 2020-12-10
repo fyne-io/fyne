@@ -15,6 +15,17 @@ import (
 	"fyne.io/fyne/cmd/fyne/internal/util"
 )
 
+var (
+	macAppStoreCategories = []string{
+		"business", "developer-tools", "education", "entertainment", "finance", "games", "action-games",
+		"adventure-games", "arcade-games", "board-games", "card-games", "casino-games", "dice-games",
+		"educational-games", "family-games", "kids-games", "music-games", "puzzle-games", "racing-games",
+		"role-playing-games", "simulation-games", "sports-games", "strategy-games", "trivia-games", "word-games",
+		"graphics-design", "healthcare-fitness", "lifestyle", "medical", "music", "news", "photography",
+		"productivity", "reference", "social-networking", "sports", "travel", "utilities", "video", "weather",
+	}
+)
+
 // Declare conformity to Command interface
 var _ Command = (*releaser)(nil)
 
@@ -47,6 +58,8 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
 	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
+	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
+	flag.StringVar(&r.category, "category", "", "macOS: category of the app for store listing")
 }
 
 func (r *releaser) PrintHelp(indent string) {
@@ -78,6 +91,9 @@ func (r *releaser) afterPackage() error {
 			return err
 		}
 		return r.signAndroid(apk)
+	}
+	if r.os == "darwin" {
+		return r.packageMacOSRelease()
 	}
 	if r.os == "ios" {
 		return r.packageIOSRelease()
@@ -139,7 +155,7 @@ func (r *releaser) packageIOSRelease() error {
 		TeamID: team,
 		AppID:  r.appID,
 	}
-	err = templates.EntitlementsDarwin.Execute(entitlements, entitlementData)
+	err = templates.EntitlementsDarwinMobile.Execute(entitlements, entitlementData)
 	entitlements.Close()
 	if err != nil {
 		return errors.New("failed to write entitlements plist template")
@@ -153,6 +169,44 @@ func (r *releaser) packageIOSRelease() error {
 	}
 
 	return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
+}
+
+func (r *releaser) packageMacOSRelease() error {
+	appCert := r.certificate // try to derive two certificates from one name (they will be consistent)
+	if strings.Contains(appCert, "Installer") {
+		appCert = strings.Replace(appCert, "Installer", "Application", 1)
+	}
+	installCert := strings.Replace(appCert, "Application", "Installer", 1)
+	unsignedPath := r.name + "-unsigned.pkg"
+
+	defer os.RemoveAll(r.name + ".app") // this was the output of package and it can get in the way of future builds
+	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
+	entitlements, _ := os.Create(entitlementPath)
+	err := templates.EntitlementsDarwin.Execute(entitlements, nil)
+	entitlements.Close()
+	if err != nil {
+		return errors.New("failed to write entitlements plist template")
+	}
+	defer os.Remove(entitlementPath)
+
+	cmd := exec.Command("codesign", "-vfs", appCert, "--entitlement", "entitlements.plist", r.name+".app")
+	err = cmd.Run()
+	if err != nil {
+		fyne.LogError("Codesign failed", err)
+		return errors.New("unable to codesign application bundle")
+	}
+
+	cmd = exec.Command("productbuild", "--component", r.name+".app", "/Applications/",
+		"--product", r.name+".app/Contents/Info.plist", unsignedPath)
+	err = cmd.Run()
+	if err != nil {
+		fyne.LogError("Product build failed", err)
+		return errors.New("unable to build macOS app package")
+	}
+	defer os.Remove(unsignedPath)
+
+	cmd = exec.Command("productsign", "--sign", installCert, unsignedPath, r.name+".pkg")
+	return cmd.Run()
 }
 
 func (r *releaser) packageWindowsRelease(outFile string) error {
@@ -255,6 +309,16 @@ func (r *releaser) validate() error {
 		if r.keyStore == "" {
 			return errors.New("missing required -keyStore parameter for android release")
 		}
+	} else if r.os == "darwin" {
+		if r.certificate == "" {
+			r.certificate = "3rd Party Mac Developer Application"
+		}
+		if r.category == "" {
+			return errors.New("missing required -category parameter for macOS release")
+		} else if !isValidMacOSCategory(r.category) {
+			return errors.New("category does not match one of the supported list: " +
+				strings.Join(macAppStoreCategories, ", "))
+		}
 	} else if r.os == "ios" {
 		if r.certificate == "" {
 			r.certificate = "Apple Distribution"
@@ -294,4 +358,15 @@ func findWindowsSDKBin() (string, error) {
 	}
 
 	return filepath.Dir(matches[0]), nil
+}
+
+func isValidMacOSCategory(in string) bool {
+	found := false
+	for _, cat := range macAppStoreCategories {
+		if cat == strings.ToLower(in) {
+			found = true
+			break
+		}
+	}
+	return found
 }

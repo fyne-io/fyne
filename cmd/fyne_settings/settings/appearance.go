@@ -62,10 +62,6 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
 
-	current := s.fyneSettings.PrimaryColor
-	if current == "" {
-		current = theme.ColorBlue
-	}
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)

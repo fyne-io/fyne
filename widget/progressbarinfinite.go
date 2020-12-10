@@ -56,7 +56,6 @@ func (p *infProgressRenderer) updateBar() {
 		if barWidth <= minBarWidth {
 			// loop around to start when bar goes to end
 			barPos.X = 0
-			stepSize = 0
 			newBoxSize := fyne.Size{Width: minBarWidth, Height: progressSize.Height}
 			p.bar.Resize(newBoxSize)
 		} else if barPos.X+barWidth > progressSize.Width {

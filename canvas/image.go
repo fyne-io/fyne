@@ -36,6 +36,10 @@ const (
 	ImageScaleSmooth ImageScale = 0
 	// ImageScalePixels will scale the image using NearestNeighbor filter (or GL equivalent)
 	ImageScalePixels ImageScale = 1
+	// ImageScaleFastest will scale the image using hardware GPU if available
+	//
+	// Since: 2.0.0
+	ImageScaleFastest ImageScale = 2
 )
 
 // Declare conformity with CanvasObject interface

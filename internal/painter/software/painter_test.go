@@ -125,6 +125,20 @@ func TestPainter_paintImage_scaleSmooth(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_ImageScaleSmooth.png", target)
 }
 
+func TestPainter_paintImage_scaleFastest(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+	img.ScaleMode = canvas.ImageScaleFastest
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_ImageScaleFastest.png", target)
+}
+
 func TestPainter_paintImage_stretchX(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)

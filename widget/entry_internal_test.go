@@ -105,7 +105,7 @@ func TestEntry_MouseClickAndDragOutsideText(t *testing.T) {
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
 	ev := &fyne.PointEvent{Position: pos}
 
-	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
+	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	de := &fyne.DragEvent{PointEvent: *ev, DraggedX: 1, DraggedY: 0}
 	entry.Dragged(de)

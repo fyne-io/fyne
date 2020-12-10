@@ -162,6 +162,10 @@ func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
 }
 
 func (w *window) RequestFocus() {
+	if isWayland {
+		return
+	}
+
 	w.runOnMainWhenCreated(w.viewport.Focus)
 }
 
@@ -739,7 +743,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mousePressed = co
 		} else if action == glfw.Release {
 			if co == w.mousePressed {
-				if button == desktop.RightMouseButton && altTap {
+				if button == desktop.MouseButtonSecondary && altTap {
 					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
 				}
 			}
@@ -747,7 +751,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	// Check for double click/tap on left mouse button
-	if action == glfw.Release && button == desktop.LeftMouseButton {
+	if action == glfw.Release && button == desktop.MouseButtonPrimary {
 		_, doubleTap := co.(fyne.DoubleTappable)
 		if doubleTap {
 			w.mouseClickCount++
@@ -823,14 +827,14 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 	switch btn {
 	case glfw.MouseButton1:
 		if rightClick {
-			button = desktop.RightMouseButton
+			button = desktop.MouseButtonSecondary
 		} else {
-			button = desktop.LeftMouseButton
+			button = desktop.MouseButtonPrimary
 		}
 	case glfw.MouseButton2:
-		button = desktop.RightMouseButton
+		button = desktop.MouseButtonSecondary
 	case glfw.MouseButton3:
-		button = desktop.MiddleMouseButton
+		button = desktop.MouseButtonTertiary
 	}
 	return button, modifier
 }
@@ -977,19 +981,6 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
 
-	if keyName == fyne.KeyTab {
-		if keyDesktopModifier == 0 {
-			if action != glfw.Release {
-				w.canvas.FocusNext()
-			}
-			return
-		} else if keyDesktopModifier == desktop.ShiftModifier {
-			if action != glfw.Release {
-				w.canvas.FocusPrevious()
-			}
-			return
-		}
-	}
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
@@ -1008,6 +999,17 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		}
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
+
+	if keyName == fyne.KeyTab {
+		// at this point we know action != glfw.Release
+		if keyDesktopModifier == 0 {
+			w.canvas.FocusNext()
+			return
+		} else if keyDesktopModifier == desktop.ShiftModifier {
+			w.canvas.FocusPrevious()
+			return
+		}
+	}
 
 	var shortcut fyne.Shortcut
 	ctrlMod := desktop.ControlModifier
@@ -1215,8 +1217,10 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 
 func (w *window) create() {
 	runOnMain(func() {
-		// make the window hidden, we will set it up and then show it later
-		glfw.WindowHint(glfw.Visible, 0)
+		if !isWayland {
+			// make the window hidden, we will set it up and then show it later
+			glfw.WindowHint(glfw.Visible, 0)
+		}
 		if w.decorate {
 			glfw.WindowHint(glfw.Decorated, 1)
 		} else {

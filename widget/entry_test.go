@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -344,13 +343,13 @@ func TestEntry_DragSelect(t *testing.T) {
 	ev2.Position.X += 2
 
 	// mouse down and drag from 'r' to 'z'
-	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
+	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
 		de := &fyne.DragEvent{PointEvent: *ev1, DraggedX: 1, DraggedY: 0}
 		entry.Dragged(de)
 	}
-	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
+	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseUp(me)
 
 	assert.Equal(t, "r the laz", entry.SelectedText())
@@ -627,13 +626,13 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
 	ev := &fyne.PointEvent{Position: pos}
 
-	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.RightMouseButton}
+	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonSecondary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
 	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
 
-	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
+	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
@@ -2792,69 +2791,6 @@ func TestEntry_TextWrap(t *testing.T) {
 			test.AssertRendersToMarkup(t, tt.want, c)
 		})
 	}
-}
-
-func TestEntry_ValidatedEntry(t *testing.T) {
-	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
-	c := window.Canvas()
-
-	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
-	entry.Validator = r
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
-
-	test.Type(entry, "2020-02")
-	assert.Error(t, r(entry.Text))
-	entry.FocusLost()
-	// TODO: error color should be named “error” in the future
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="rgba(244,67,54,255)" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">2020-02</text>
-					</widget>
-					<widget pos="92,8" size="20x20" type="*widget.validationStatus">
-						<image rsc="errorIcon" size="iconInlineSize" themed="error"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
-
-	test.Type(entry, "-12")
-	assert.NoError(t, r(entry.Text))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">2020-02-12</text>
-					</widget>
-					<rectangle fillColor="focus" pos="87,8" size="2x21"/>
-					<widget pos="92,8" size="20x20" type="*widget.validationStatus">
-						<image rsc="confirmIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
