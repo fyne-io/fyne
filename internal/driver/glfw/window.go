@@ -976,7 +976,18 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	if keyName == "" {
 		return
 	}
+
 	keyEvent := &fyne.KeyEvent{Name: keyName}
+	if action == glfw.Release {
+		if w.canvas.Focused() != nil {
+			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+				w.queueEvent(func() { focused.KeyUp(keyEvent) })
+			}
+		} else if w.canvas.onKeyUp != nil {
+			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
+		}
+		return // ignore key up in core events
+	}
 
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
@@ -986,16 +997,8 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		} else if w.canvas.onKeyDown != nil {
 			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
-	} else if action == glfw.Release { // ignore key up in core events
-		if w.canvas.Focused() != nil {
-			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.queueEvent(func() { focused.KeyUp(keyEvent) })
-			}
-		} else if w.canvas.onKeyUp != nil {
-			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
-		}
-		return
-	} // key repeat will fall through to TypedKey and TypedShortcut
+	}
+	// key repeat will fall through to TypedKey and TypedShortcut
 
 	keyDesktopModifier := desktopModifier(mods)
 	switch keyName {
@@ -1009,6 +1012,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 			return
 		}
 	}
+
 	var shortcut fyne.Shortcut
 	ctrlMod := desktop.ControlModifier
 	if runtime.GOOS == "darwin" {
