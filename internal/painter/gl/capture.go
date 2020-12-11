@@ -25,11 +25,6 @@ func (c *captureImage) At(x, y int) color.Color {
 	return color.RGBA{R: c.pix[start], G: c.pix[start+1], B: c.pix[start+2], A: c.pix[start+3]}
 }
 
-type glCanvas interface {
-	fyne.Canvas
-	TextureScale() float32
-}
-
 func (p *glPainter) Capture(c fyne.Canvas) image.Image {
 	pos := fyne.NewPos(c.Size().Width, c.Size().Height)
 	width, height := c.PixelCoordinateForPosition(pos)
