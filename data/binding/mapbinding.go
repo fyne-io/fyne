@@ -114,10 +114,6 @@ func (b *mapBase) Keys() []string {
 	return ret
 }
 
-type untypedMap struct {
-	mapBase
-}
-
 func (b *mapBase) Delete(key string) {
 	b.val[key] = nil
 
