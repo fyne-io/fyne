@@ -30,7 +30,7 @@ func BindBoolList(v *[]bool) BoolList {
 		return NewBoolList()
 	}
 
-	b := &boundBoolList{val: v}
+	b := &boundBoolList{}
 
 	for _, i := range *v {
 		b.Append(i)
@@ -110,7 +110,7 @@ func BindFloatList(v *[]float64) FloatList {
 		return NewFloatList()
 	}
 
-	b := &boundFloatList{val: v}
+	b := &boundFloatList{}
 
 	for _, i := range *v {
 		b.Append(i)
@@ -190,7 +190,7 @@ func BindIntList(v *[]int) IntList {
 		return NewIntList()
 	}
 
-	b := &boundIntList{val: v}
+	b := &boundIntList{}
 
 	for _, i := range *v {
 		b.Append(i)
@@ -270,7 +270,7 @@ func BindRuneList(v *[]rune) RuneList {
 		return NewRuneList()
 	}
 
-	b := &boundRuneList{val: v}
+	b := &boundRuneList{}
 
 	for _, i := range *v {
 		b.Append(i)
@@ -350,7 +350,7 @@ func BindStringList(v *[]string) StringList {
 		return NewStringList()
 	}
 
-	b := &boundStringList{val: v}
+	b := &boundStringList{}
 
 	for _, i := range *v {
 		b.Append(i)
