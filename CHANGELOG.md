@@ -28,7 +28,6 @@ These changes likely break some apps, please read the
 ### Fixed
 
 * Validating a widget in widget.Form before renderer was created could cause a panic
-* Appended items in widget.Form had validation set up twice
 
 
 ## 1.4.1 - 20 November 2020
