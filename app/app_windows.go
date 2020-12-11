@@ -51,9 +51,9 @@ func isDark() bool {
 
 func defaultVariant() fyne.ThemeVariant {
 	if isDark() {
-		return theme.Variants.Dark
+		return theme.VariantNameDark
 	}
-	return theme.Variants.Light
+	return theme.VariantNameLight
 }
 
 func rootConfigDir() string {
