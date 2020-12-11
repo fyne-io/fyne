@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -45,33 +44,6 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			cnf.SetDismissText("Nah")
 			cnf.SetConfirmText("Oh Yes!")
 			cnf.Show()
-		}),
-		widget.NewButton("Progress (deprecated)", func() {
-			prog := dialog.NewProgress("MyProgress", "Nearly there...", win)
-
-			go func() {
-				num := 0.0
-				for num < 1.0 {
-					time.Sleep(50 * time.Millisecond)
-					prog.SetValue(num)
-					num += 0.01
-				}
-
-				prog.SetValue(1)
-				prog.Hide()
-			}()
-
-			prog.Show()
-		}),
-		widget.NewButton("ProgressInfinite (deprecated)", func() {
-			prog := dialog.NewProgressInfinite("MyProgress", "Closes after 5 seconds...", win)
-
-			go func() {
-				time.Sleep(time.Second * 5)
-				prog.Hide()
-			}()
-
-			prog.Show()
 		}),
 		widget.NewButton("File Open With Filter (.txt or .png)", func() {
 			fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {

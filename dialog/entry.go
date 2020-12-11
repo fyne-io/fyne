@@ -57,6 +57,7 @@ func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.W
 			i.onClosed()
 		}
 
+		i.entry.Text = ""
 		i.win.Hide() // Close directly without executing the callback. This is the callback.
 	}, parent).(*formDialog)
 
