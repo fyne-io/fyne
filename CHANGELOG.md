@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Fix crash when showing file open dialog on iPadOS
 * Fix possible missing icon on initial show of disabled button
+* Capturing a canvas on macOS retina display would not capture full resolution
 
 
 ## 1.4.2 - 9 December 2020
