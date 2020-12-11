@@ -17,7 +17,7 @@ import (
 
 func TestDefaultTheme(t *testing.T) {
 	if runtime.GOOS != "darwin" && runtime.GOOS != "windows" { // system defines default for macOS and Windows
-		assert.Equal(t, theme.Variants.Dark, defaultVariant())
+		assert.Equal(t, theme.VariantNameDark, defaultVariant())
 	}
 }
 

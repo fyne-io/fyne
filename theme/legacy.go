@@ -22,27 +22,27 @@ type legacyWrapper struct {
 
 func (l *legacyWrapper) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	switch n {
-	case Colors.Background:
+	case ColorNameBackground:
 		return l.old.BackgroundColor()
-	case Colors.Foreground:
+	case ColorNameForeground:
 		return l.old.TextColor()
-	case Colors.Button:
+	case ColorNameButton:
 		return l.old.ButtonColor()
-	case Colors.DisabledButton:
+	case ColorNameDisabledButton:
 		return l.old.DisabledButtonColor()
-	case Colors.Disabled:
+	case ColorNameDisabled:
 		return l.old.DisabledTextColor()
-	case Colors.Focus:
+	case ColorNameFocus:
 		return l.old.FocusColor()
-	case Colors.Hover:
+	case ColorNameHover:
 		return l.old.HoverColor()
-	case Colors.PlaceHolder:
+	case ColorNamePlaceHolder:
 		return l.old.PlaceHolderColor()
-	case Colors.Primary:
+	case ColorNamePrimary:
 		return l.old.PrimaryColor()
-	case Colors.ScrollBar:
+	case ColorNameScrollBar:
 		return l.old.ScrollBarColor()
-	case Colors.Shadow:
+	case ColorNameShadow:
 		return l.old.ShadowColor()
 	default:
 		return DefaultTheme().Color(n, v)
@@ -71,15 +71,15 @@ func (l *legacyWrapper) Icon(n fyne.ThemeIconName) fyne.Resource {
 
 func (l *legacyWrapper) Size(n fyne.ThemeSizeName) int {
 	switch n {
-	case Sizes.InlineIcon:
+	case SizeNameInlineIcon:
 		return l.old.IconInlineSize()
-	case Sizes.Padding:
+	case SizeNamePadding:
 		return l.old.Padding()
-	case Sizes.ScrollBar:
+	case SizeNameScrollBar:
 		return l.old.ScrollBarSize()
-	case Sizes.ScrollBarSmall:
+	case SizeNameScrollBarSmall:
 		return l.old.ScrollBarSmallSize()
-	case Sizes.Text:
+	case SizeNameText:
 		return l.old.TextSize()
 	default:
 		return DefaultTheme().Size(n)

@@ -42,69 +42,102 @@ const (
 	//
 	// Since: 1.4.0
 	ColorGray = "gray"
+
+	// ColorNameBackground is the name of theme lookup for background color.
+	//
+	// Since 2.0.0
+	ColorNameBackground fyne.ThemeColorName = "background"
+
+	// ColorNameButton is the name of theme lookup for button color.
+	//
+	// Since 2.0.0
+	ColorNameButton fyne.ThemeColorName = "button"
+
+	// ColorNameDisabledButton is the name of theme lookup for disabled button color.
+	//
+	// Since 2.0.0
+	ColorNameDisabledButton fyne.ThemeColorName = "disabledButton"
+
+	// ColorNameDisabled is the name of theme lookup for disabled foreground color.
+	//
+	// Since 2.0.0
+	ColorNameDisabled fyne.ThemeColorName = "disabled"
+
+	// ColorNameFocus is the name of theme lookup for focus color.
+	//
+	// Since 2.0.0
+	ColorNameFocus fyne.ThemeColorName = "focus"
+
+	// ColorNameForeground is the name of theme lookup for foreground color.
+	//
+	// Since 2.0.0
+	ColorNameForeground fyne.ThemeColorName = "foreground"
+
+	// ColorNameHover is the name of theme lookup for hover color.
+	//
+	// Since 2.0.0
+	ColorNameHover fyne.ThemeColorName = "hover"
+
+	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
+	//
+	// Since 2.0.0
+	ColorNamePlaceHolder fyne.ThemeColorName = "placeholder"
+
+	// ColorNamePrimary is the name of theme lookup for primary color.
+	//
+	// Since 2.0.0
+	ColorNamePrimary fyne.ThemeColorName = "primary"
+
+	// ColorNameScrollBar is the name of theme lookup for scrollbar color.
+	//
+	// Since 2.0.0
+	ColorNameScrollBar fyne.ThemeColorName = "scrollBar"
+
+	// ColorNameShadow is the name of theme lookup for shadow color.
+	//
+	// Since 2.0.0
+	ColorNameShadow fyne.ThemeColorName = "shadow"
+
+	// SizeNameInlineIcon is the name of theme lookup for inline icons size.
+	//
+	// Since 2.0.0
+	SizeNameInlineIcon fyne.ThemeSizeName = "iconInline"
+
+	// SizeNamePadding is the name of theme lookup for padding size.
+	//
+	// Since 2.0.0
+	SizeNamePadding fyne.ThemeSizeName = "padding"
+
+	// SizeNameScrollBar is the name of theme lookup for the scrollbar size.
+	//
+	// Since 2.0.0
+	SizeNameScrollBar fyne.ThemeSizeName = "scrollBar"
+
+	// SizeNameScrollBarSmall is the name of theme lookup for the shrunk scrollbar size.
+	//
+	// Since 2.0.0
+	SizeNameScrollBarSmall fyne.ThemeSizeName = "scrollBarSmall"
+
+	// SizeNameText is the name of theme lookup for text size.
+	//
+	// Since 2.0.0
+	SizeNameText fyne.ThemeSizeName = "text"
+
+	// VariantNameDark is the version of a theme that satisfies a user preference for a light look.
+	//
+	// Since 2.0.0
+	VariantNameDark fyne.ThemeVariant = 0
+
+	// VariantNameLight is the version of a theme that satisfies a user preference for a dark look.
+	//
+	// Since 2.0.0
+	VariantNameLight fyne.ThemeVariant = 1
+
+	// potential for adding theme types such as high visibility or monochrome...
+	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
 )
 
 var (
-	// Colors specifies each of the known colour names that a theme can contain.
-	//
-	// Since 2.0.0
-	Colors = struct {
-		Background     fyne.ThemeColorName
-		Button         fyne.ThemeColorName
-		DisabledButton fyne.ThemeColorName
-		Disabled       fyne.ThemeColorName
-		Focus          fyne.ThemeColorName
-		Foreground     fyne.ThemeColorName
-		Hover          fyne.ThemeColorName
-		PlaceHolder    fyne.ThemeColorName
-		Primary        fyne.ThemeColorName
-		ScrollBar      fyne.ThemeColorName
-		Shadow         fyne.ThemeColorName
-	}{
-		"background",
-		"button",
-		"disabledButton",
-		"disabled",
-		"focus",
-		"foreground",
-		"hover",
-		"placeholder",
-		"primary",
-		"scrollBar",
-		"shadow",
-	}
-
-	// Sizes specifies each of the known size names that a theme can contain.
-	//
-	// Since 2.0.0
-	Sizes = struct {
-		InlineIcon     fyne.ThemeSizeName
-		Padding        fyne.ThemeSizeName
-		ScrollBar      fyne.ThemeSizeName
-		ScrollBarSmall fyne.ThemeSizeName
-		Text           fyne.ThemeSizeName
-	}{
-		"iconInline",
-		"padding",
-		"scrollBar",
-		"scrollBarSmall",
-		"text",
-	}
-
-	// Variants lists each of the known theme variants that can apply to a color lookup.
-	//
-	// Since 2.0.0
-	Variants = struct {
-		Dark  fyne.ThemeVariant
-		Light fyne.ThemeVariant
-		// potential for adding theme types such as high visibility or monochrome...
-		userPreference fyne.ThemeVariant // locally used in builtinTheme for backward compatibility
-	}{
-		0,
-		1,
-		2,
-	}
-
 	defaultTheme = setupDefaultTheme()
 
 	primaryColors = map[string]color.Color{
@@ -159,7 +192,7 @@ func DefaultTheme() fyne.Theme {
 
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
-	theme := &builtinTheme{variant: Variants.Light}
+	theme := &builtinTheme{variant: VariantNameLight}
 
 	theme.initFonts()
 	return theme
@@ -167,7 +200,7 @@ func LightTheme() fyne.Theme {
 
 // DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{variant: Variants.Dark}
+	theme := &builtinTheme{variant: VariantNameDark}
 
 	theme.initFonts()
 	return theme
@@ -195,11 +228,11 @@ func (t *builtinTheme) initFonts() {
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	colors := darkPalette
-	if v == Variants.Light {
+	if v == VariantNameLight {
 		colors = lightPalette
 	}
 
-	if n == Colors.Primary || n == Colors.Focus { // TODO new focus color
+	if n == ColorNamePrimary || n == ColorNameFocus { // TODO new focus color
 		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	}
 
@@ -228,15 +261,15 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 
 func (t *builtinTheme) Size(s fyne.ThemeSizeName) int {
 	switch s {
-	case Sizes.InlineIcon:
+	case SizeNameInlineIcon:
 		return 20
-	case Sizes.Padding:
+	case SizeNamePadding:
 		return 4
-	case Sizes.ScrollBar:
+	case SizeNameScrollBar:
 		return 16
-	case Sizes.ScrollBarSmall:
+	case SizeNameScrollBarSmall:
 		return 3
-	case Sizes.Text:
+	case SizeNameText:
 		return 14
 	default:
 		return 0
@@ -253,80 +286,80 @@ func current() fyne.Theme {
 
 // BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
-	return current().Color(Colors.Background, currentVariant())
+	return current().Color(ColorNameBackground, currentVariant())
 }
 
 // ButtonColor returns the theme's standard button color.
 func ButtonColor() color.Color {
-	return current().Color(Colors.Button, currentVariant())
+	return current().Color(ColorNameButton, currentVariant())
 }
 
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
-	return current().Color(Colors.DisabledButton, currentVariant())
+	return current().Color(ColorNameDisabledButton, currentVariant())
 }
 
 // TextColor returns the theme's standard text color
 //
 // Deprecated: Use theme.Foreground colour instead
 func TextColor() color.Color {
-	return current().Color(Colors.Foreground, currentVariant())
+	return current().Color(ColorNameForeground, currentVariant())
 }
 
 // DisabledColor returns the foreground color for a disabled UI element
 //
 // Since: 2.0.0
 func DisabledColor() color.Color {
-	return current().Color(Colors.Disabled, currentVariant())
+	return current().Color(ColorNameDisabled, currentVariant())
 }
 
 // DisabledTextColor returns the color for a disabledIcon UI element
 //
 // Deprecated: Use DisabledColor() instead
 func DisabledTextColor() color.Color {
-	return current().Color(Colors.Disabled, currentVariant())
+	return current().Color(ColorNameDisabled, currentVariant())
 }
 
 // PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
-	return current().Color(Colors.PlaceHolder, currentVariant())
+	return current().Color(ColorNamePlaceHolder, currentVariant())
 }
 
 // PrimaryColor returns the color used to highlight primary features
 func PrimaryColor() color.Color {
-	return current().Color(Colors.Primary, currentVariant())
+	return current().Color(ColorNamePrimary, currentVariant())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor
 func HoverColor() color.Color {
-	return current().Color(Colors.Hover, currentVariant())
+	return current().Color(ColorNameHover, currentVariant())
 }
 
 // FocusColor returns the color used to highlight a focused widget
 func FocusColor() color.Color {
-	return current().Color(Colors.Focus, currentVariant())
+	return current().Color(ColorNameFocus, currentVariant())
 }
 
 // ForegroundColor returns the theme's standard foreground color for text and icons
 //
 // Since: 2.0.0
 func ForegroundColor() color.Color {
-	return current().Color(Colors.Foreground, currentVariant())
+	return current().Color(ColorNameForeground, currentVariant())
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
-	return current().Color(Colors.ScrollBar, currentVariant())
+	return current().Color(ColorNameScrollBar, currentVariant())
 }
 
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
-	return current().Color(Colors.Shadow, currentVariant())
+	return current().Color(ColorNameShadow, currentVariant())
 }
 
 // TextSize returns the standard text size
 func TextSize() int {
-	return current().Size(Sizes.Text)
+	return current().Size(SizeNameText)
 }
 
 // TextFont returns the font resource for the regular font style
@@ -357,22 +390,22 @@ func TextMonospaceFont() fyne.Resource {
 // Padding is the standard gap between elements and the border around interface
 // elements
 func Padding() int {
-	return current().Size(Sizes.Padding)
+	return current().Size(SizeNamePadding)
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() int {
-	return current().Size(Sizes.InlineIcon)
+	return current().Size(SizeNameInlineIcon)
 }
 
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer
 func ScrollBarSize() int {
-	return current().Size(Sizes.ScrollBar)
+	return current().Size(SizeNameScrollBar)
 }
 
 // ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
 func ScrollBarSmallSize() int {
-	return current().Size(Sizes.ScrollBarSmall)
+	return current().Size(SizeNameScrollBarSmall)
 }
 
 // DefaultTextFont returns the font resource for the built-in regular font style
@@ -420,7 +453,7 @@ func PrimaryColorNamed(name string) color.Color {
 
 func currentVariant() fyne.ThemeVariant {
 	if std, ok := current().(*builtinTheme); ok {
-		if std.variant != Variants.userPreference {
+		if std.variant != variantNameUserPreference {
 			return std.variant // override if using the old LightTheme() or DarkTheme() constructor
 		}
 	}
