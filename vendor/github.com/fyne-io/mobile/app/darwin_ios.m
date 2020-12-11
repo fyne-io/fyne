@@ -327,7 +327,6 @@ void showFileOpenPicker(char* mimes, char *exts) {
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
         initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
     documentPicker.delegate = appDelegate;
-    documentPicker.modalPresentationStyle = UIModalPresentationPopover;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];

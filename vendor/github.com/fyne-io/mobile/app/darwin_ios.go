@@ -76,8 +76,8 @@ func main(f func(App)) {
 var pixelsPerPt float32
 var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
 
-var DisplayMetrics struct{
-	WidthPx int
+var DisplayMetrics struct {
+	WidthPx  int
 	HeightPx int
 }
 
@@ -210,7 +210,7 @@ func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	for workAvailable := theApp.worker.WorkAvailable();;{
+	for workAvailable := theApp.worker.WorkAvailable(); ; {
 		select {
 		case <-workAvailable:
 			theApp.worker.DoWork()
