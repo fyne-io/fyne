@@ -25,17 +25,12 @@ var resourceAppxmanifestXML = &fyne.StaticResource{
 	StaticName:    "appxmanifest.XML",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Package xmlns=\"http://schemas.microsoft.com/appx/2010/manifest\">\n  <Identity Name=\"{{.AppID}}\"\n            Version=\"{{.Version}}\"\n            Publisher=\"{{.Developer}}\" />\n  <Properties>\n    <DisplayName>{{.Name}}</DisplayName>\n    <PublisherDisplayName>{{.DeveloperName}}</PublisherDisplayName>\n    <Logo>Icon.png</Logo>\n  </Properties>\n  <Prerequisites>\n    <OSMinVersion>6.2</OSMinVersion>\n    <OSMaxVersionTested>10.0</OSMaxVersionTested>\n  </Prerequisites>\n  <Resources>\n    <Resource Language=\"en-us\" />\n  </Resources>\n\n  <!-- TODO <Applications> -->\n</Package>"),
 }
-<<<<<<< HEAD
 var resourceEntitlementsDarwinPlist = &fyne.StaticResource{
 	StaticName:    "entitlements-darwin.plist",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>com.apple.security.app-sandbox</key>\n    <true/>\n</dict>\n</plist>"),
 }
 var resourceEntitlementsIosPlist = &fyne.StaticResource{
 	StaticName:    "entitlements-ios.plist",
-=======
-var resourceEntitlementsPlist = &fyne.StaticResource{
-	StaticName:    "entitlements.plist",
->>>>>>> 331753c6 (Happy now? Looking at you, goimports...)
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>application-identifier</key>\n    <string>{{.TeamID}}.{{.AppID}}</string>\n</dict>\n</plist>"),
 }
 var resourceXcassetsJSON = &fyne.StaticResource{
