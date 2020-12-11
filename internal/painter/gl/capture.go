@@ -3,7 +3,6 @@ package gl
 import (
 	"image"
 	"image/color"
-	"runtime"
 
 	"fyne.io/fyne"
 )
@@ -32,12 +31,8 @@ type glCanvas interface {
 }
 
 func (p *glPainter) Capture(c fyne.Canvas) image.Image {
-	scale := c.Scale()
-	if gc, ok := c.(glCanvas); ok && runtime.GOOS == "darwin" { // macOS scaling is done at the texture level
-		scale = gc.TextureScale()
-	}
-	width := int(float32(c.Size().Width) * scale)
-	height := int(float32(c.Size().Height) * scale)
+	pos := fyne.NewPos(c.Size().Width, c.Size().Height)
+	width, height := c.PixelCoordinateForPosition(pos)
 	pixels := make([]uint8, width*height*4)
 
 	p.context.RunWithContext(func() {
