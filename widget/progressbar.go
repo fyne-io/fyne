@@ -100,6 +100,7 @@ type ProgressBar struct {
 //
 // Since: 2.0.0
 func (p *ProgressBar) Bind(data binding.Float) {
+	p.Unbind()
 	p.valueSource = data
 
 	p.valueListener = binding.NewDataListener(func() {
@@ -145,6 +146,7 @@ func (p *ProgressBar) Unbind() {
 
 	p.valueSource.RemoveListener(p.valueListener)
 	p.valueListener = nil
+	p.valueSource = nil
 }
 
 // NewProgressBar creates a new progress bar widget.

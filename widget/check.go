@@ -111,6 +111,7 @@ type Check struct {
 //
 // Since: 2.0.0
 func (c *Check) Bind(data binding.Bool) {
+	c.Unbind()
 	c.checkSource = data
 
 	c.checkListener = binding.NewDataListener(func() {
@@ -285,4 +286,5 @@ func (c *Check) Unbind() {
 
 	c.checkSource.RemoveListener(c.checkListener)
 	c.checkListener = nil
+	c.checkSource = nil
 }

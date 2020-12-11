@@ -50,12 +50,6 @@ func (b *base) AddListener(l DataListener) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	for _, listen := range b.listeners { // TODO maybe fix? workaround for list not being able to de-register
-		if listen == l {
-			return
-		}
-	}
-
 	b.listeners = append(b.listeners, l)
 	queueItem(l.DataChanged)
 }

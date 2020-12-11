@@ -76,6 +76,7 @@ func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 //
 // Since: 2.0.0
 func (s *Slider) Bind(data binding.Float) {
+	s.Unbind()
 	s.valueSource = data
 
 	s.valueListener = binding.NewDataListener(func() {
@@ -214,6 +215,7 @@ func (s *Slider) Unbind() {
 
 	s.valueSource.RemoveListener(s.valueListener)
 	s.valueListener = nil
+	s.valueSource = nil
 }
 
 const (

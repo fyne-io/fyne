@@ -16,7 +16,7 @@ type listBase struct {
 
 // GetItem returns the DataItem at the specified index.
 func (b *listBase) GetItem(i int) DataItem {
-	if i >= len(b.val) {
+	if i < 0 || i >= len(b.val) {
 		return nil
 	}
 

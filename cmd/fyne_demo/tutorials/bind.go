@@ -48,20 +48,19 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 		dataList.Append(float64(dataList.Length()+1) / 10)
 	})
 
-	list := container.NewBorder(nil, button, nil, nil, widget.NewListWithData(dataList,
+	return container.NewBorder(item, button, nil, nil, widget.NewListWithData(dataList,
 		func() fyne.CanvasObject {
 			return container.NewBorder(nil, nil, nil, widget.NewButton("+", nil),
 				widget.NewLabel("item x.y"))
 		},
 		func(item binding.DataItem, obj fyne.CanvasObject) {
+			f := item.(binding.Float)
 			text := obj.(*fyne.Container).Objects[0].(*widget.Label)
-			text.Bind(binding.FloatToStringWithFormat(item.(binding.Float), "item %0.1f"))
+			text.Bind(binding.FloatToStringWithFormat(f, "item %0.1f"))
 
 			btn := obj.(*fyne.Container).Objects[1].(*widget.Button)
 			btn.OnTapped = func() {
-				item.(binding.Float).Set(item.(binding.Float).Get() + 1)
+				f.Set(f.Get() + 1)
 			}
 		}))
-
-	return container.NewBorder(item, nil, nil, nil, list)
 }

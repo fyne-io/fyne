@@ -124,6 +124,7 @@ func NewPasswordEntry() *Entry {
 //
 // Since: 2.0.0
 func (e *Entry) Bind(data binding.String) {
+	e.Unbind()
 	e.textSource = data
 
 	e.textListener = binding.NewDataListener(func() {
@@ -702,6 +703,7 @@ func (e *Entry) Unbind() {
 
 	e.textSource.RemoveListener(e.textListener)
 	e.textListener = nil
+	e.textSource = nil
 }
 
 // concealed tells the rendering textProvider if we are a concealed field

@@ -52,6 +52,7 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 //
 // Since: 2.0.0
 func (l *Label) Bind(data binding.String) {
+	l.Unbind()
 	l.textSource = data
 	l.textListener = binding.NewDataListener(func() {
 		l.SetText(l.textSource.Get())
@@ -104,6 +105,7 @@ func (l *Label) Unbind() {
 
 	l.textSource.RemoveListener(l.textListener)
 	l.textListener = nil
+	l.textSource = nil
 }
 
 // textAlign tells the rendering textProvider our alignment
