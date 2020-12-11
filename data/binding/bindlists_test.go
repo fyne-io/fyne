@@ -6,6 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestBindFloatList(t *testing.T) {
+	l := []float64{1.0, 5.0, 2.3}
+	f := BindFloatList(&l)
+
+	assert.Equal(t, 3, f.Length())
+	assert.Equal(t, 5.0, f.Get(1))
+}
+
 func TestNewFloatList(t *testing.T) {
 	f := NewFloatList()
 	assert.Equal(t, 0, f.Length())

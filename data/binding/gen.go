@@ -236,29 +236,62 @@ func New{{ .Name }}List() {{ .Name }}List {
 	return &bound{{ .Name }}List{}
 }
 
+// Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
+//
+// Since: 2.0.0
+func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
+	if v == nil {
+		return New{{ .Name }}List()
+	}
+
+	b := &bound{{ .Name }}List{val: v}
+
+	for _, i := range *v {
+		b.Append(i)
+	}
+
+	return b
+}
+
 type bound{{ .Name }}List struct {
 	listBase
+
+	val *[]{{ .Type }}
 }
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) {
+	if l.val != nil {
+		*l.val = append(*l.val, val)
+	}
+
 	l.appendItem(Bind{{ .Name }}(&val))
 }
 
 func (l *bound{{ .Name }}List) Get(i int) {{ .Type }} {
-	if i > l.Length() {
+	if i < 0 || i > l.Length() {
 		return {{ .Default }}
+	}
+	if l.val != nil {
+		return (*l.val)[i]
 	}
 
 	return l.GetItem(i).({{ .Name }}).Get()
 }
 
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) {
+	if l.val != nil {
+		*l.val = append([]{{ .Type }}{val}, *l.val...)
+	}
+
 	l.prependItem(Bind{{ .Name }}(&val))
 }
 
 func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) {
 	if i > l.Length() {
 		return
+	}
+	if l.val != nil {
+		(*l.val)[i] = v
 	}
 
 	l.GetItem(i).({{ .Name }}).Set(v)

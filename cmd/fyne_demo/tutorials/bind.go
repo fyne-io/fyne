@@ -39,10 +39,7 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	checks := container.NewGridWithColumns(3, check, checkLabel, checkEntry)
 	item := container.NewVBox(floats, slide, bar, buttons, widget.NewSeparator(), checks, widget.NewSeparator())
 
-	dataList := binding.NewFloatList()
-	dataList.Append(0.1)
-	dataList.Append(0.2)
-	dataList.Append(0.3)
+	dataList := binding.BindFloatList(&[]float64{0.1, 0.2, 0.3})
 
 	button := widget.NewButton("Append", func() {
 		dataList.Append(float64(dataList.Length()+1) / 10)
