@@ -20,7 +20,8 @@ var (
 	ScrollRight = ScrollMode(2)
 	ScrollFreeLeftBound = ScrollMode(3)
 	ScrollFreeRightBound = ScrollMode(4)
-	ScrollFree = ScrollMode(5)
+	ScrollFreeLeftRightBound = ScrollMode(5)
+	ScrollFree = ScrollMode(6)
 )
 
 type DragStyle bool
@@ -90,6 +91,16 @@ func (rb *ringBuffer) Turn(offset int) bool {
 	case ScrollRight:
 		if direction < 0 {
 			return false
+		}
+		break
+	case ScrollFreeLeftRightBound:
+		if start < 0 {
+			start = 0
+		} else {
+			currentLen := len(rb.Data(false))
+			if (start + currentLen) > len(rb.data) {
+				start = len(rb.data) - currentLen - 1
+			}
 		}
 		break
 	case ScrollFreeLeftBound:
