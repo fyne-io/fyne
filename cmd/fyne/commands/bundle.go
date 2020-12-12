@@ -4,6 +4,7 @@ package commands
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -12,6 +13,9 @@ import (
 
 	"fyne.io/fyne"
 )
+
+const fileHeader = "// auto-generated\n" + // to exclude this file in goreportcard
+	"// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //"
 
 // Declare conformity to Command interface
 var _ Command = (*bundler)(nil)
@@ -101,6 +105,7 @@ func (b *bundler) dirBundle(dirpath string, out *os.File) {
 		}
 
 		b.name = ""
+
 		b.doBundle(path.Join(dirpath, filename), out)
 		if i == 0 { // only show header on first iteration
 			b.noheader = true
@@ -117,7 +122,6 @@ func (b *bundler) doBundle(filepath string, out *os.File) {
 	if !b.noheader {
 		writeHeader(b.pkg, out)
 	}
-	fmt.Fprintln(out)
 
 	if b.name == "" {
 		b.name = sanitiseName(path.Base(filepath), b.prefix)
@@ -135,19 +139,30 @@ func sanitiseName(file, prefix string) string {
 }
 
 func writeHeader(pkg string, out *os.File) {
-	fmt.Fprintln(out, "// auto-generated")
+	fmt.Fprintln(out, fileHeader)
 	fmt.Fprintln(out)
 	fmt.Fprintln(out, "package", pkg)
 	fmt.Fprintln(out)
 	fmt.Fprintln(out, "import \"fyne.io/fyne\"")
+	fmt.Fprintln(out)
 }
 
-func writeResource(file, name string, out *os.File) {
+func writeResource(file, name string, f io.Writer) {
 	res, err := fyne.LoadResourceFromPath(file)
 	if err != nil {
 		fyne.LogError("Unable to load file "+file, err)
 		return
 	}
 
-	fmt.Fprintf(out, "var %s = %#v\n", name, res)
+	staticRes, ok := res.(*fyne.StaticResource)
+	if !ok {
+		fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
+		return
+	}
+
+	v := fmt.Sprintf("var %s = &fyne.StaticResource{\n\tStaticName:    %q,\n\tStaticContent: []byte(%q),\n}\n", name, staticRes.StaticName, staticRes.StaticContent)
+	_, err = f.Write([]byte(v))
+	if err != nil {
+		fyne.LogError("Unable to write to bundled file", err)
+	}
 }
