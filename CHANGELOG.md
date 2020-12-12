@@ -23,10 +23,11 @@ These changes likely break some apps, please read the
 
 * Change bundled resources to use more efficient string storage
 * Desktop left and right mouse buttons renamed to MouseButtonPrimary and MouseButtonSecondary
+* Many optimisations and widget performance enhancements
 
 ### Fixed
 
-*
+* Validating a widget in widget.Form before renderer was created could cause a panic
 
 
 ## 1.4.2 - 9 December 2020
