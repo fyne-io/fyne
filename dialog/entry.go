@@ -6,6 +6,7 @@ import (
 )
 
 // EntryDialog is a variation of a dialog which prompts the user to enter some text.
+//
 // Deprecated: Use dialog.NewFormDialog() or dialog.ShowFormDialog() with a widget.Entry inside instead.
 type EntryDialog struct {
 	*formDialog
@@ -43,6 +44,7 @@ func (i *EntryDialog) SetOnClosed(callback func()) {
 //
 // onConfirm is a callback that runs when the user enters a string of
 // text and clicks the "confirm" button. May be nil.
+//
 // Deprecated: Use dialog.NewFormDialog() with a widget.Entry inside instead.
 func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) *EntryDialog {
 	i := &EntryDialog{entry: widget.NewEntry()}
@@ -65,6 +67,7 @@ func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.W
 }
 
 // ShowEntryDialog creates a new entry dialog and shows it immediately.
+//
 // Deprecated: Use dialog.ShowFormDialog() with a widget.Entry inside instead.
 func ShowEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) {
 	NewEntryDialog(title, message, onConfirm, parent).Show()
