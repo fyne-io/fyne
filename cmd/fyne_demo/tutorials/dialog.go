@@ -144,7 +144,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 				})),
 			}
 
-			dialog.ShowFormDialog("Login...", "Log In", "Cancel", items, func(b bool) {
+			dialog.ShowForm("Login...", "Log In", "Cancel", items, func(b bool) {
 				if !b {
 					return
 				}
