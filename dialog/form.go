@@ -37,13 +37,15 @@ func (d *formDialog) validateItems(err error) {
 	d.confirm.Enable()
 }
 
-// NewFormDialog creates and returns a dialog over the specified application using
+// NewForm creates and returns a dialog over the specified application using
 // the provided FormItems. The cancel button will have the dismiss text set and the confirm button will
 // use the confirm text. The response callback is called on user action after validation passes.
 // If any Validatable widget reports that validation has failed, then the confirm
 // button will be disabled. The initial state of the confirm button will reflect the initial
 // validation state of the items added to the form dialog.
-func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
+//
+// Since: 2.0.0
+func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
 	parent fyne.Window) Dialog {
 	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
 	for i, item := range items {
@@ -84,14 +86,16 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 	return formDialog
 }
 
-// ShowFormDialog shows a dialog over the specified application using
+// ShowForm shows a dialog over the specified application using
 // the provided FormItems. The cancel button will have the dismiss text set and the confirm button will
 // use the confirm text. The response callback is called on user action after validation passes.
 // If any Validatable widget reports that validation has failed, then the confirm
 // button will be disabled. The initial state of the confirm button will reflect the initial
 // validation state of the items added to the form dialog.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func ShowFormDialog(title, confirm, dismiss string, content []*widget.FormItem,
+//
+// Since: 2.0.0
+func ShowForm(title, confirm, dismiss string, content []*widget.FormItem,
 	callback func(bool), parent fyne.Window) {
-	NewFormDialog(title, confirm, dismiss, content, callback, parent).Show()
+	NewForm(title, confirm, dismiss, content, callback, parent).Show()
 }
