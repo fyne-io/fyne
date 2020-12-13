@@ -2,18 +2,15 @@ package dialog
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
-// EntryDialog is a variation of a dialog which prompts the user to enter some
-// text.
+// EntryDialog is a variation of a dialog which prompts the user to enter some text.
+// Deprecated: Use dialog.NewFormDialog() or dialog.ShowFormDialog() with a widget.Entry inside instead.
 type EntryDialog struct {
-	*dialog
+	*formDialog
 
 	entry *widget.Entry
-
-	confirmButton *widget.Button
 
 	onClosed func()
 }
@@ -42,65 +39,32 @@ func (i *EntryDialog) SetOnClosed(callback func()) {
 	i.onClosed = callback
 }
 
-// NewEntryDialog creates a dialog over the specified window for the user to
-// enter a value.
+// NewEntryDialog creates a dialog over the specified window for the user to enter a value.
 //
 // onConfirm is a callback that runs when the user enters a string of
 // text and clicks the "confirm" button. May be nil.
-//
+// Deprecated: Use dialog.NewFormDialog() with a widget.Entry inside instead.
 func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) *EntryDialog {
-	i := &EntryDialog{nil, nil, nil, nil}
-
-	// create the widgets necessary for the dialog
-	entry := widget.NewEntry()
-
-	// content container for our widgets
-	content := widget.NewHBox(
-		widget.NewLabel(message),
-		entry,
-	)
-
-	// instantiate the dialog, and override the content
-	d := newDialog(title, message, theme.QuestionIcon(), func(response bool) {}, parent)
-	d.content = content
-
-	// hide the dialog, and empty the text
-	d.dismiss = widget.NewButton("Cancel", func() {
-		entry.Text = ""
-		d.Hide()
-		if i.onClosed != nil {
-			i.onClosed()
-		}
-	})
-	d.dismiss.Icon = theme.CancelIcon()
-
-	// create confirmation button
-	confirm := widget.NewButton("Ok", func() {
+	i := &EntryDialog{entry: widget.NewEntry()}
+	items := []*widget.FormItem{widget.NewFormItem(message, i.entry)}
+	i.formDialog = NewForm(title, "Ok", "Cancel", items, func(_ bool) {
 		// User has confirmed and entered an input
 		if onConfirm != nil {
-			onConfirm(entry.Text)
+			onConfirm(i.entry.Text)
 		}
 
 		if i.onClosed != nil {
 			i.onClosed()
 		}
 
-		// Also hide the dialog, and trigger it's callback
-		d.hideWithResponse(true)
-	})
-
-	// attach response buttons to the dialog
-	d.setButtons(newButtonList(d.dismiss, confirm))
-
-	i.dialog = d
-	i.entry = entry
-	i.confirmButton = confirm
-	i.onClosed = nil
+		i.win.Hide() // Close directly without executing the callback. This is the callback.
+	}, parent).(*formDialog)
 
 	return i
 }
 
 // ShowEntryDialog creates a new entry dialog and shows it immediately.
+// Deprecated: Use dialog.ShowFormDialog() with a widget.Entry inside instead.
 func ShowEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) {
 	NewEntryDialog(title, message, onConfirm, parent).Show()
 }

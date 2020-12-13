@@ -45,16 +45,16 @@ func (d *formDialog) validateItems(err error) {
 // validation state of the items added to the form dialog.
 //
 // Since: 2.0.0
-func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
-	parent fyne.Window) Dialog {
+func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool), parent fyne.Window) Dialog {
 	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
 	for i, item := range items {
 		itemObjects[i*2] = widget.NewLabel(item.Text)
 		itemObjects[i*2+1] = item.Widget
 	}
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
-	d := &dialog{content: content, title: title, icon: nil, parent: parent}
-	d.callback = callback
+
+	d := &dialog{content: content, callback: callback, title: title, parent: parent}
+
 	// TODO: Copied from NewCustomConfirm above.
 	// This is still a problem because commenting out the `.Show()` call below will still result in the
 	// dialog being shown.
@@ -63,18 +63,16 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	confirmBtn := &widget.Button{Text: confirm, Icon: nil, Importance: widget.HighImportance,
-		OnTapped: func() {
-			d.hideWithResponse(true)
-		}}
-	// Mitigation for issue #1553
-	confirmBtn.SetIcon(theme.ConfirmIcon())
+	confirmBtn := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
+		OnTapped: func() { d.hideWithResponse(true) },
+	}
 	formDialog := &formDialog{
 		dialog:  d,
 		items:   items,
 		confirm: confirmBtn,
 		cancel:  d.dismiss,
 	}
+
 	formDialog.validateItems(nil)
 
 	for _, item := range items {
@@ -95,7 +93,6 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 //
 // Since: 2.0.0
-func ShowForm(title, confirm, dismiss string, content []*widget.FormItem,
-	callback func(bool), parent fyne.Window) {
+func ShowForm(title, confirm, dismiss string, content []*widget.FormItem, callback func(bool), parent fyne.Window) {
 	NewForm(title, confirm, dismiss, content, callback, parent).Show()
 }

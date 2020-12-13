@@ -46,7 +46,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			cnf.SetConfirmText("Oh Yes!")
 			cnf.Show()
 		}),
-		widget.NewButton("Progress", func() {
+		widget.NewButton("Progress (deprecated)", func() {
 			prog := dialog.NewProgress("MyProgress", "Nearly there...", win)
 
 			go func() {
@@ -63,7 +63,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 
 			prog.Show()
 		}),
-		widget.NewButton("ProgressInfinite", func() {
+		widget.NewButton("ProgressInfinite (deprecated)", func() {
 			prog := dialog.NewProgressInfinite("MyProgress", "Closes after 5 seconds...", win)
 
 			go func() {
@@ -155,13 +155,6 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 
 				log.Println("Please Authenticate", username.Text, password.Text, rememberText)
 			}, win)
-		}),
-		widget.NewButton("Text Entry Dialog", func() {
-			dialog.ShowEntryDialog("Text Entry", "Enter some text: ",
-				func(response string) {
-					fmt.Printf("User entered text, response was: %v\n", response)
-				},
-				win)
 		}),
 	))
 }
