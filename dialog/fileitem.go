@@ -18,12 +18,11 @@ const (
 
 type fileDialogItem struct {
 	widget.BaseWidget
+	name      string
+	location  fyne.URI
 	picker    *fileDialog
 	isCurrent bool
-
-	name     string
-	location fyne.URI
-	dir      bool
+	dir       bool
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {

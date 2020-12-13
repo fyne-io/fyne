@@ -22,11 +22,11 @@ var (
 // Animation represents an animated element within a Fyne canvas.
 // These animations may control individual objects or entire scenes.
 type Animation struct {
-	AutoReverse bool
 	Curve       AnimationCurve
 	Duration    time.Duration
-	Repeat      bool
 	Tick        func(float32)
+	AutoReverse bool
+	Repeat      bool
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
