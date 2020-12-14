@@ -78,9 +78,7 @@ func (s *Slider) Bind(data binding.Float) {
 	})
 	data.AddListener(s.valueListener)
 
-	s.OnChanged = func(f float64) {
-		data.Set(f)
-	}
+	s.OnChanged = data.Set
 }
 
 // DragEnd function.

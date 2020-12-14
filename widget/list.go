@@ -52,9 +52,7 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 // Since: 2.0.0
 func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject, updateItem func(binding.DataItem, fyne.CanvasObject)) *List {
 	l := NewList(
-		func() int {
-			return data.Length()
-		},
+		data.Length,
 		createItem,
 		func(i ListItemID, o fyne.CanvasObject) {
 			item := data.GetItem(i)
