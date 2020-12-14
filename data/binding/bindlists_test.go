@@ -12,6 +12,9 @@ func TestBindFloatList(t *testing.T) {
 
 	assert.Equal(t, 3, f.Length())
 	assert.Equal(t, 5.0, f.Get(1))
+
+	assert.NotNil(t, f.(*boundFloatList).val)
+	assert.Equal(t, 3, len(*(f.(*boundFloatList).val)))
 }
 
 func TestNewFloatList(t *testing.T) {
