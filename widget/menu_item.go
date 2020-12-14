@@ -28,13 +28,6 @@ func newMenuItem(item *fyne.MenuItem, parent *Menu, onActivateChild func(*menuIt
 	return &menuItem{Item: item, Parent: parent, onActivateChild: onActivateChild}
 }
 
-// newMenuItemSeparator creates a separator meant to separate MenuItems.
-func newMenuItemSeparator() fyne.CanvasObject {
-	s := canvas.NewRectangle(theme.DisabledTextColor())
-	s.SetMinSize(fyne.NewSize(1, 2))
-	return s
-}
-
 func (i *menuItem) Child() *Menu {
 	if i.Item.ChildMenu != nil && i.child == nil {
 		child := NewMenu(i.Item.ChildMenu)

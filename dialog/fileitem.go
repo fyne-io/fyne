@@ -31,22 +31,12 @@ func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 	i.Refresh()
 }
 
-func (i *fileDialogItem) TappedSecondary(_ *fyne.PointEvent) {
-}
-
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
+	icon := widget.NewFileIcon(i.location)
 
-	var icon fyne.CanvasObject
-	if i.dir {
-		icon = canvas.NewImageFromResource(theme.FolderIcon())
-	} else {
-		icon = widget.NewFileIcon(i.location)
-	}
-
-	return &fileItemRenderer{item: i,
-		icon: icon, text: text, objects: []fyne.CanvasObject{icon, text}}
+	return &fileItemRenderer{item: i, icon: icon, text: text, objects: []fyne.CanvasObject{icon, text}}
 }
 
 func fileName(path fyne.URI) (name string) {
@@ -63,27 +53,26 @@ func (i *fileDialogItem) isDirectory() bool {
 }
 
 func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
-	var name string
-	if dir {
-		name = location.Name()
-	} else {
-		name = fileName(location)
-	}
-
-	ret := &fileDialogItem{
+	item := &fileDialogItem{
 		picker:   f,
-		name:     name,
 		location: location,
 		dir:      dir,
 	}
-	ret.ExtendBaseWidget(ret)
-	return ret
+
+	if dir {
+		item.name = location.Name()
+	} else {
+		item.name = fileName(location)
+	}
+
+	item.ExtendBaseWidget(item)
+	return item
 }
 
 type fileItemRenderer struct {
 	item *fileDialogItem
 
-	icon    fyne.CanvasObject
+	icon    *widget.FileIcon
 	text    *widget.Label
 	objects []fyne.CanvasObject
 }
@@ -102,23 +91,7 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 }
 
 func (s fileItemRenderer) Refresh() {
-	if s.item.isCurrent {
-		if i, ok := s.icon.(*canvas.Image); ok {
-			if _, ok := i.Resource.(*theme.InvertedThemedResource); !ok {
-				i.Resource = theme.NewInvertedThemedResource(i.Resource)
-			}
-		} else if i, ok := s.icon.(*widget.FileIcon); ok {
-			i.SetSelected(true)
-		}
-	} else {
-		if i, ok := s.icon.(*canvas.Image); ok {
-			if res, ok := i.Resource.(*theme.InvertedThemedResource); ok {
-				i.Resource = res.Original()
-			}
-		} else if i, ok := s.icon.(*widget.FileIcon); ok {
-			i.SetSelected(false)
-		}
-	}
+	s.icon.SetSelected(s.item.isCurrent)
 	canvas.Refresh(s.item)
 }
 

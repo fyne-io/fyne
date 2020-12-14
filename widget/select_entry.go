@@ -30,6 +30,26 @@ func (e *SelectEntry) CreateRenderer() fyne.WidgetRenderer {
 	return e.Entry.CreateRenderer()
 }
 
+// Enable this widget, updating any style or features appropriately.
+//
+// Implements: fyne.DisableableWidget
+func (e *SelectEntry) Enable() {
+	if e.ActionItem != nil {
+		e.ActionItem.(fyne.Disableable).Enable()
+	}
+	e.Entry.Enable()
+}
+
+// Disable this widget so that it cannot be interacted with, updating any style appropriately.
+//
+// Implements: fyne.DisableableWidget
+func (e *SelectEntry) Disable() {
+	if e.ActionItem != nil {
+		e.ActionItem.(fyne.Disableable).Disable()
+	}
+	e.Entry.Disable()
+}
+
 // MinSize returns the minimal size of the select entry.
 //
 // Implements: fyne.Widget
@@ -68,10 +88,13 @@ func (e *SelectEntry) SetOptions(options []string) {
 
 	if e.ActionItem == nil {
 		e.ActionItem = e.setupDropDown()
+		if e.Disabled() {
+			e.ActionItem.(fyne.Disableable).Disable()
+		}
 	}
 }
 
-func (e *SelectEntry) setupDropDown() fyne.CanvasObject {
+func (e *SelectEntry) setupDropDown() *Button {
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 

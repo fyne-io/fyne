@@ -12,9 +12,13 @@ import (
 
 // TabItem represents a single view in a TabContainer.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
+//
+// Since: 1.4
 type TabItem = widget.TabItem
 
 // TabLocation is the location where the tabs of a tab container should be rendered
+//
+// Since: 1.4
 type TabLocation = widget.TabLocation
 
 // TabLocation values
@@ -26,11 +30,15 @@ const (
 )
 
 // NewTabItem creates a new item for a tabbed widget - each item specifies the content and a label for its tab.
+//
+// Since: 1.4
 func NewTabItem(text string, content fyne.CanvasObject) *TabItem {
 	return widget.NewTabItem(text, content)
 }
 
 // NewTabItemWithIcon creates a new item for a tabbed widget - each item specifies the content and a label with an icon for its tab.
+//
+// Since: 1.4
 func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObject) *TabItem {
 	return widget.NewTabItemWithIcon(text, icon, content)
 }
@@ -65,7 +73,34 @@ func (c *baseTabs) Remove(item *TabItem) {
 
 // RemoveIndex removes tab by index
 func (c *baseTabs) RemoveIndex(index int) {
+	if index < 0 || index >= len(c.Items) {
+		return
+	}
 	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
+}
+
+// Select sets the specified TabItem to be selected and its content visible.
+func (c *baseTabs) Select(item *TabItem) {
+	for i, child := range c.Items {
+		if child == item {
+			c.SelectIndex(i)
+			return
+		}
+	}
+}
+
+// SelectIndex sets the TabItem at the specific index to be selected and its content visible.
+func (c *baseTabs) SelectIndex(index int) {
+	if index < 0 || index >= len(c.Items) || c.current == index {
+		return
+	}
+
+	c.current = index
+	c.Refresh()
+
+	if f := c.OnSelectionChanged; f != nil {
+		f(c.Items[c.current])
+	}
 }
 
 // Selection returns the currently selected TabItem.
@@ -97,30 +132,6 @@ func (c *baseTabs) SetItems(items []*TabItem) {
 	c.Refresh()
 }
 
-// SetSelection sets the specified TabItem to be selected and its content visible.
-func (c *baseTabs) SetSelection(item *TabItem) {
-	for i, child := range c.Items {
-		if child == item {
-			c.SetSelectionByIndex(i)
-			return
-		}
-	}
-}
-
-// SetSelectionByIndex sets the TabItem at the specific index to be selected and its content visible.
-func (c *baseTabs) SetSelectionByIndex(index int) {
-	if index < 0 || index >= len(c.Items) || c.current == index {
-		return
-	}
-
-	c.current = index
-	c.Refresh()
-
-	if f := c.OnSelectionChanged; f != nil {
-		f(c.Items[c.current])
-	}
-}
-
 // SetTabLocation sets the location of the tab bar
 func (c *baseTabs) SetTabLocation(l TabLocation) {
 	c.tabLocation = l
@@ -130,7 +141,7 @@ func (c *baseTabs) SetTabLocation(l TabLocation) {
 // Show this widget, if it was previously hidden
 func (c *baseTabs) Show() {
 	c.BaseWidget.Show()
-	c.SetSelectionByIndex(c.current)
+	c.SelectIndex(c.current)
 	c.Refresh()
 }
 

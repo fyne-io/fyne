@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/cmd/fyne/commands"
+	"fyne.io/fyne/cmd/fyne/internal/util"
 )
 
 const (
@@ -29,84 +31,27 @@ const (
 )
 
 // Declare conformity to command interface
-var _ command = (*vendor)(nil)
+var _ commands.Command = (*vendor)(nil)
 
 type vendor struct {
 }
 
-func (v *vendor) addFlags() {
+func (v *vendor) AddFlags() {
 }
 
-func (v *vendor) printHelp(indent string) {
+func (v *vendor) PrintHelp(indent string) {
 	fmt.Println(indent, "The vendor command packages an application's dependencies and all the extra")
 	fmt.Println(indent, "files required into it's vendor folder. Your project must have a "+goModFile+" file.")
 	fmt.Println(indent, "Command usage: fyne vendor")
 }
 
-// cacheModPath returns the cache path and target directory for the GLFW module
-func cacheModPath(r io.Reader) (string, string, error) {
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		s := strings.Split(scanner.Text(), " ")
-		if len(s) != 3 {
-			continue
-		}
-
-		r, _ := regexp.Compile(glfwModNew)
-		if r.Match([]byte(s[1])) {
-			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]), s[1], nil
-		}
-
-		r, _ = regexp.Compile(glfwModOld)
-		if r.Match([]byte(s[1])) {
-			extra := "/v3.2/glfw"
-			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]+extra), s[1] + extra, nil
-		}
+func (v *vendor) Run(args []string) {
+	if len(args) != 0 {
+		fyne.LogError("Unexpected parameter after flags", nil)
+		return
 	}
 
-	if err := scanner.Err(); err != nil {
-		return "", "", fmt.Errorf("cannot read content: %v", err)
-	}
-	return "", "", nil
-}
-
-func recursiveCopy(src, target string) error {
-	files, err := ioutil.ReadDir(src)
-	if err != nil {
-		return fmt.Errorf("cannot read dir %s: %v", src, err)
-	}
-	err = ensureDir(target)
-	if err != nil {
-		return err
-	}
-
-	for _, file := range files {
-		srcFile := filepath.Join(src, file.Name())
-		targetFile := filepath.Join(target, file.Name())
-		if file.IsDir() {
-			err = recursiveCopy(srcFile, targetFile)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		err = copyFile(srcFile, targetFile)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func ensureDir(dir string) error {
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err2 := os.Mkdir(dir, 0750)
-		if err2 != nil {
-			return err2
-		}
-	}
-	return nil
+	v.main()
 }
 
 func (v *vendor) main() {
@@ -168,11 +113,68 @@ func (v *vendor) main() {
 	fmt.Println("All set. To test using vendor dependencies: go test ./... -mod=vendor -v -count=1")
 }
 
-func (v *vendor) run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
+// cacheModPath returns the cache path and target directory for the GLFW module
+func cacheModPath(r io.Reader) (string, string, error) {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		s := strings.Split(scanner.Text(), " ")
+		if len(s) != 3 {
+			continue
+		}
+
+		r, _ := regexp.Compile(glfwModNew)
+		if r.Match([]byte(s[1])) {
+			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]), s[1], nil
+		}
+
+		r, _ = regexp.Compile(glfwModOld)
+		if r.Match([]byte(s[1])) {
+			extra := "/v3.2/glfw"
+			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]+extra), s[1] + extra, nil
+		}
 	}
 
-	v.main()
+	if err := scanner.Err(); err != nil {
+		return "", "", fmt.Errorf("cannot read content: %v", err)
+	}
+	return "", "", nil
+}
+
+func recursiveCopy(src, target string) error {
+	files, err := ioutil.ReadDir(src)
+	if err != nil {
+		return fmt.Errorf("cannot read dir %s: %v", src, err)
+	}
+	err = ensureDir(target)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		srcFile := filepath.Join(src, file.Name())
+		targetFile := filepath.Join(target, file.Name())
+		if file.IsDir() {
+			err = recursiveCopy(srcFile, targetFile)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		err = util.CopyFile(srcFile, targetFile)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ensureDir(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err2 := os.Mkdir(dir, 0750)
+		if err2 != nil {
+			return err2
+		}
+	}
+	return nil
 }

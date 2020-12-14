@@ -31,13 +31,17 @@ type settings struct {
 	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
-	color          string
+	variant        fyne.ThemeVariant
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
 	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
+}
+
+func (s *settings) BuildType() fyne.BuildType {
+	return buildMode
 }
 
 func (s *settings) PrimaryColor() string {
@@ -63,12 +67,17 @@ func (s *settings) Theme() fyne.Theme {
 
 func (s *settings) SetTheme(theme fyne.Theme) {
 	s.themeSpecified = true
-	s.applyTheme(theme)
+	s.applyTheme(theme, s.variant)
 }
 
-func (s *settings) applyTheme(theme fyne.Theme) {
+func (s *settings) ThemeVariant() fyne.ThemeVariant {
+	return s.variant
+}
+
+func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
+	s.variant = variant
 	s.theme = theme
 	s.apply()
 }
@@ -137,11 +146,11 @@ func (s *settings) setupTheme() {
 	}
 
 	if name == "light" {
-		s.applyTheme(theme.LightTheme())
+		s.applyTheme(theme.LightTheme(), theme.VariantNameLight)
 	} else if name == "dark" {
-		s.applyTheme(theme.DarkTheme())
+		s.applyTheme(theme.DarkTheme(), theme.VariantNameDark)
 	} else {
-		s.applyTheme(defaultTheme())
+		s.applyTheme(theme.DefaultTheme(), defaultVariant())
 	}
 }
 

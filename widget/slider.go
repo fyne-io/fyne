@@ -5,6 +5,8 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -43,6 +45,23 @@ func NewSlider(min, max float64) *Slider {
 		Orientation: Horizontal,
 	}
 	slider.ExtendBaseWidget(slider)
+	return slider
+}
+
+// NewSliderWithData returns a slider connected with the specified data source.
+func NewSliderWithData(min, max float64, data binding.Float) *Slider {
+	slider := NewSlider(min, max)
+
+	data.AddListener(binding.NewDataListener(func() {
+		slider.Value = data.Get()
+		if cache.IsRendered(slider) { // don't invalidate values set after constructor like Step
+			slider.Refresh()
+		}
+	}))
+	slider.OnChanged = func(f float64) {
+		data.Set(f)
+	}
+
 	return slider
 }
 
@@ -210,7 +229,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	switch s.slider.Orientation {
 	case Vertical:
 		activePos = fyne.NewPos(trackPos.X, activeOffset)
-		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset-endPad)
+		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset+endPad)
 
 		thumbPos = fyne.NewPos(
 			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
@@ -248,7 +267,12 @@ func (s *sliderRenderer) getOffset() int {
 	w := s.slider
 	size := s.track.Size()
 	if w.Value == w.Min || w.Min == w.Max {
-		return endPad
+		switch w.Orientation {
+		case Vertical:
+			return size.Height + endPad
+		case Horizontal:
+			return endPad
+		}
 	}
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
 

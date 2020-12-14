@@ -22,12 +22,13 @@ var _ fyne.Canvas = (*glCanvas)(nil)
 type glCanvas struct {
 	sync.RWMutex
 
-	content  fyne.CanvasObject
-	menu     fyne.CanvasObject
-	overlays *overlayStack
-	padded   bool
-	size     fyne.Size
-	focusMgr *app.FocusManager
+	content         fyne.CanvasObject
+	contentFocusMgr *app.FocusManager
+	menu            fyne.CanvasObject
+	menuFocusMgr    *app.FocusManager
+	overlays        *overlayStack
+	padded          bool
+	size            fyne.Size
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -65,7 +66,23 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
-	c.focusManager().Focus(obj)
+	focusMgr := c.focusManager()
+	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+		return
+	}
+
+	c.RLock()
+	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
+	c.RUnlock()
+
+	for _, mgr := range focusMgrs {
+		if focusMgr != mgr {
+			if mgr.Focus(obj) {
+				return
+			}
+		}
+	}
+	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
@@ -86,6 +103,10 @@ func (c *glCanvas) FocusNext() {
 
 func (c *glCanvas) FocusPrevious() {
 	c.focusManager().FocusPrevious()
+}
+
+func (c *glCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	return fyne.Position{}, c.Size()
 }
 
 func (c *glCanvas) MinSize() fyne.Size {
@@ -249,6 +270,8 @@ func (c *glCanvas) Unfocus() {
 }
 
 func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
+	c.Lock()
+	defer c.Unlock()
 	c.setMenuOverlay(nil)
 	if m == nil {
 		return
@@ -260,6 +283,10 @@ func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
 	}
 }
 
+func (c *glCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.RemoveShortcut(shortcut)
+}
+
 // canvasSize computes the needed canvas size for the given content size
 func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 	canvasSize := contentSize.Add(fyne.NewSize(0, c.menuHeight()))
@@ -268,10 +295,6 @@ func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
 	}
 	return canvasSize
-}
-
-func (c *glCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
-	c.shortcut.RemoveShortcut(shortcut)
 }
 
 func (c *glCanvas) contentPos() fyne.Position {
@@ -354,7 +377,10 @@ func (c *glCanvas) focusManager() *app.FocusManager {
 	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
 		return focusMgr
 	}
-	return c.focusMgr
+	if c.isMenuActive() {
+		return c.menuFocusMgr
+	}
+	return c.contentFocusMgr
 }
 
 func (c *glCanvas) isDirty() bool {
@@ -364,18 +390,18 @@ func (c *glCanvas) isDirty() bool {
 	return c.dirty
 }
 
+func (c *glCanvas) isMenuActive() bool {
+	return c.menu != nil && c.menu.(*MenuBar).IsActive()
+}
+
 func (c *glCanvas) menuHeight() int {
-	switch c.menuOverlay() {
+	switch c.menu {
 	case nil:
 		// no menu or native menu -> does not consume space on the canvas
 		return 0
 	default:
-		return c.menuOverlay().MinSize().Height
+		return c.menu.MinSize().Height
 	}
-}
-
-func (c *glCanvas) menuOverlay() fyne.CanvasObject {
-	return c.menu
 }
 
 func (c *glCanvas) objectTrees() []fyne.CanvasObject {
@@ -424,7 +450,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 func (c *glCanvas) setContent(content fyne.CanvasObject) {
 	c.content = content
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
-	c.focusMgr = app.NewFocusManager(c.content)
+	c.contentFocusMgr = app.NewFocusManager(c.content)
 }
 
 func (c *glCanvas) setDirty(dirty bool) {
@@ -435,10 +461,9 @@ func (c *glCanvas) setDirty(dirty bool) {
 }
 
 func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
-	c.Lock()
 	c.menu = b
 	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
-	c.Unlock()
+	c.menuFocusMgr = app.NewFocusManager(c.menu)
 }
 
 func (c *glCanvas) setupThemeListener() {
@@ -602,6 +627,7 @@ func newCanvas() *glCanvas {
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: c.overlayChanged,
+			Canvas:   c,
 		},
 	}
 

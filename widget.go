@@ -14,7 +14,7 @@ type Widget interface {
 }
 
 // WidgetRenderer defines the behaviour of a widget's implementation.
-// This is returned from a widget's declarative object through the Render()
+// This is returned from a widget's declarative object through the CreateRenderer()
 // function and should be exactly one instance per widget in memory.
 type WidgetRenderer interface {
 	// BackgroundColor returns the color that should be used to draw the background of this renderer’s widget.

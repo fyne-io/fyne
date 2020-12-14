@@ -9,14 +9,18 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/animation"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 )
 
 const mainGoroutineID = 1
 
-var canvasMutex sync.RWMutex
-var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
+var (
+	canvasMutex sync.RWMutex
+	canvases    = make(map[fyne.CanvasObject]fyne.Canvas)
+	isWayland   = false
+)
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
@@ -27,6 +31,8 @@ type gLDriver struct {
 	device     *glDevice
 	done       chan interface{}
 	drawDone   chan interface{}
+
+	animation *animation.Runner
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -120,6 +126,7 @@ func NewGLDriver() fyne.Driver {
 	d := new(gLDriver)
 	d.done = make(chan interface{})
 	d.drawDone = make(chan interface{})
+	d.animation = &animation.Runner{}
 
 	return d
 }

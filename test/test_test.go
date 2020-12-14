@@ -1,11 +1,13 @@
 package test_test
 
 import (
+	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 )
@@ -25,6 +27,67 @@ func TestAssertCanvasTappableAt(t *testing.T) {
 	tt = &testing.T{}
 	assert.False(t, test.AssertCanvasTappableAt(tt, c, fyne.NewPos(99, 99)), "tappable not found")
 	assert.True(t, tt.Failed(), "test failed")
+}
+
+func TestAssertRendersToMarkup(t *testing.T) {
+	for name, tt := range map[string]struct {
+		expected    string
+		explanation string
+		wantFail    bool
+	}{
+		"equal expectation": {
+			expected: "<canvas padded size=\"9x9\">\n" +
+				"\t<content>\n" +
+				"\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+			explanation: "equal expectation should match",
+			wantFail:    false,
+		},
+		"indented (heredoc) matching expectation": {
+			expected: "\n" +
+				"  \t  \t<canvas padded size=\"9x9\">\n" +
+				"  \t  \t\t<content>\n" +
+				"  \t  \t\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
+				"  \t  \t\t</content>\n" +
+				"  \t  \t</canvas>\n",
+			explanation: "expectation which only differs in indentation should match",
+			wantFail:    false,
+		},
+		"not matching expectation": {
+			expected: "<canvas padded size=\"9x9\">\n" +
+				"\t<content>\n" +
+				"\t\t<rectangle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+			explanation: "non-equal expectation should not match",
+			wantFail:    true,
+		},
+		"indented (heredoc) not matching expectation": {
+			expected: "\n" +
+				"  \t  \t<canvas padded size=\"9x9\">\n" +
+				"  \t  \t\t<content>\n" +
+				"      \t\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
+				"  \t  \t\t</content>\n" +
+				"  \t  \t</canvas>\n",
+			explanation: "expectation which differs in indentation but with different indent strings should not match",
+			wantFail:    true,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			c := test.NewCanvas()
+			c.SetContent(canvas.NewCircle(color.Black))
+			ttt := &testing.T{}
+			if tt.wantFail {
+				assert.False(t, test.AssertRendersToMarkup(ttt, tt.expected, c), tt.explanation)
+				assert.True(t, ttt.Failed(), tt.explanation)
+			} else {
+				test.AssertRendersToMarkup(t, tt.expected, c)
+				assert.True(t, test.AssertRendersToMarkup(ttt, tt.expected, c), tt.explanation)
+				assert.False(t, ttt.Failed(), tt.explanation)
+			}
+		})
+	}
 }
 
 func TestDrag(t *testing.T) {

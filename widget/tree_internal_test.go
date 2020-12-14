@@ -1,16 +1,14 @@
 package widget
 
 import (
-	"io/ioutil"
-	"os"
-	"path"
+	"image/color"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -103,20 +101,27 @@ func TestTree(t *testing.T) {
 		assert.Equal(t, "e", leaves[3])
 		assert.Equal(t, "f", leaves[4])
 	})
-	t.Run("NewTreeWithFiles", func(t *testing.T) {
-		tempDir, err := ioutil.TempDir("", "test")
-		assert.NoError(t, err)
-		defer os.RemoveAll(tempDir)
-		err = os.MkdirAll(path.Join(tempDir, "A"), os.ModePerm)
-		assert.NoError(t, err)
-		err = os.MkdirAll(path.Join(tempDir, "B"), os.ModePerm)
-		assert.NoError(t, err)
-		err = ioutil.WriteFile(path.Join(tempDir, "B", "C"), []byte("c"), os.ModePerm)
-		assert.NoError(t, err)
-
-		root := storage.NewURI("file://" + tempDir)
-		tree := NewTreeWithFiles(root)
-		tree.OpenAllBranches()
+	t.Run("NewTree", func(t *testing.T) {
+		tree := NewTree(
+			func(uid string) (children []string) {
+				if uid == "" {
+					children = append(children, "a", "b", "c")
+				} else if uid == "c" {
+					children = append(children, "d", "e", "f")
+				}
+				return
+			},
+			func(uid string) bool {
+				return uid == "" || uid == "c"
+			},
+			func(branch bool) fyne.CanvasObject {
+				return &Label{}
+			},
+			func(uid string, branch bool, node fyne.CanvasObject) {
+				node.(*Label).SetText(uid)
+			},
+		)
+		tree.OpenBranch("c")
 		var branches []string
 		var leaves []string
 		tree.walkAll(func(uid string, branch bool, depth int) {
@@ -126,20 +131,15 @@ func TestTree(t *testing.T) {
 				leaves = append(leaves, uid)
 			}
 		})
-		assert.Equal(t, 3, len(branches))
-		assert.Equal(t, root.String(), branches[0]) // Root
-		b1, err := storage.Child(root, "A")
-		assert.NoError(t, err)
-		assert.Equal(t, b1.String(), branches[1])
-		b2, err := storage.Child(root, "B")
-		assert.NoError(t, err)
-		assert.Equal(t, b2.String(), branches[2])
-		assert.Equal(t, 1, len(leaves))
-		l1, err := storage.Child(root, "B")
-		assert.NoError(t, err)
-		l1, err = storage.Child(l1, "C")
-		assert.NoError(t, err)
-		assert.Equal(t, l1.String(), leaves[0])
+		assert.Equal(t, 2, len(branches))
+		assert.Equal(t, "", branches[0])
+		assert.Equal(t, "c", branches[1])
+		assert.Equal(t, 5, len(leaves))
+		assert.Equal(t, "a", leaves[0])
+		assert.Equal(t, "b", leaves[1])
+		assert.Equal(t, "d", leaves[2])
+		assert.Equal(t, "e", leaves[3])
+		assert.Equal(t, "f", leaves[4])
 	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -196,7 +196,7 @@ func TestTree_Resize(t *testing.T) {
 	tree.OpenBranch("B")
 
 	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + doublePadding + theme.Padding()
-	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + treeDividerHeight*2
+	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + separatorThickness*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
 	a := getLeaf(t, tree, "A")
@@ -209,12 +209,12 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
 
 	assert.Equal(t, 0, b.Position().X)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight, b.Position().Y)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness, b.Position().Y)
 	assert.Equal(t, treeSize, b.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
 
 	assert.Equal(t, 0, c.Position().X)
-	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight), c.Position().Y)
+	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness), c.Position().Y)
 	assert.Equal(t, treeSize, c.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
 }
@@ -223,22 +223,47 @@ func TestTree_MinSize(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
-		assert.Equal(t, 32, min.Width)
-		assert.Equal(t, 32, min.Height)
+		assert.Equal(t, scrollContainerMinSize, min.Width)
+		assert.Equal(t, scrollContainerMinSize, min.Height)
 	})
 	t.Run("Callback", func(t *testing.T) {
-		tree := &Tree{
-			CreateNode: func(isBranch bool) fyne.CanvasObject {
-				if isBranch {
-					return NewLabel("Branch")
-				}
-				return NewLabel("Leaf")
+		for name, tt := range map[string]struct {
+			leafSize        fyne.Size
+			branchSize      fyne.Size
+			expectedMinSize fyne.Size
+		}{
+			"small": {
+				fyne.NewSize(1, 1),
+				fyne.NewSize(1, 1),
+				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), scrollContainerMinSize), scrollContainerMinSize),
 			},
+			"large-leaf": {
+				fyne.NewSize(100, 100),
+				fyne.NewSize(1, 1),
+				fyne.NewSize(100+3*theme.Padding()+theme.IconInlineSize(), 100+2*theme.Padding()),
+			},
+			"large-branch": {
+				fyne.NewSize(1, 1),
+				fyne.NewSize(100, 100),
+				fyne.NewSize(100+3*theme.Padding()+theme.IconInlineSize(), 100+2*theme.Padding()),
+			},
+		} {
+			t.Run(name, func(t *testing.T) {
+				assert.Equal(t, tt.expectedMinSize, (&Tree{
+					CreateNode: func(isBranch bool) fyne.CanvasObject {
+						r := canvas.NewRectangle(color.Black)
+						if isBranch {
+							r.SetMinSize(tt.branchSize)
+							r.Resize(tt.branchSize)
+						} else {
+							r.SetMinSize(tt.leafSize)
+							r.Resize(tt.leafSize)
+						}
+						return r
+					},
+				}).MinSize())
+			})
 		}
-		tMin := tree.MinSize()
-		bMin := newBranch(tree, NewLabel("Branch")).MinSize()
-		assert.Equal(t, fyne.Max(32, bMin.Width), tMin.Width)
-		assert.Equal(t, fyne.Max(32, bMin.Height), tMin.Height)
 	})
 
 	for name, tt := range map[string]struct {
@@ -248,7 +273,7 @@ func TestTree_MinSize(t *testing.T) {
 	}{
 		"single_item": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -259,49 +284,49 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"single_item_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
 			opened: []string{"A"},
 			want: fyne.NewSize(
 				templateMinSize.Width+indentation()+theme.Padding()+theme.IconInlineSize()+doublePadding,
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+treeDividerHeight,
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+separatorThickness,
 			),
 		},
 		"multiple_items": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
 			want: fyne.NewSize(
 				templateMinSize.Width+theme.Padding()+theme.IconInlineSize()+doublePadding,
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+treeDividerHeight,
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+separatorThickness,
 			),
 		},
 		"multiple_items_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
 			opened: []string{"A", "B", "C"},
 			want: fyne.NewSize(
 				templateMinSize.Width+2*indentation()+doublePadding+theme.IconInlineSize()+theme.Padding(),
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*6+(5*treeDividerHeight),
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*6+(5*separatorThickness),
 			),
 		},
 	} {
@@ -320,6 +345,85 @@ func TestTree_MinSize(t *testing.T) {
 	}
 }
 
+func TestTree_Select(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+
+	selection := make(chan string, 1)
+	tree.OnSelected = func(uid TreeNodeID) {
+		selection <- uid
+	}
+
+	tree.Select("A")
+	assert.Equal(t, 1, len(tree.selected))
+	assert.Equal(t, "A", tree.selected[0])
+	select {
+	case s := <-selection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have occurred")
+	}
+}
+
+func TestTree_Select_Unselects(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+	tree.Select("A")
+
+	unselection := make(chan string, 1)
+	tree.OnUnselected = func(uid TreeNodeID) {
+		unselection <- uid
+	}
+
+	tree.Select("B")
+	assert.Equal(t, 1, len(tree.selected))
+	select {
+	case s := <-unselection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been unselected")
+	}
+}
+
+func TestTree_ScrollToSelection(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A")
+	widget.AddTreePath(data, "B")
+	widget.AddTreePath(data, "C")
+	widget.AddTreePath(data, "D")
+	widget.AddTreePath(data, "E")
+	widget.AddTreePath(data, "F")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+
+	a := getLeaf(t, tree, "A")
+	m := a.MinSize()
+
+	// Make tree tall enough to display two nodes
+	tree.Resize(fyne.NewSize(m.Width, m.Height*2+separatorThickness))
+
+	// Above
+	tree.scroller.Offset.Y = m.Height*3 + separatorThickness*3 // Showing "D" & "E"
+	tree.Refresh()                                             // Force layout
+	tree.Select("A")
+	// Tree should scroll to the top to show A
+	assert.Equal(t, 0, tree.scroller.Offset.Y)
+
+	// Below
+	tree.scroller.Offset.Y = 0 // Showing "A" & "B"
+	tree.Refresh()             // Force layout
+	tree.Select("F")
+	// Tree should scroll to the bottom to show F
+	assert.Equal(t, m.Height*4+separatorThickness*3, tree.scroller.Offset.Y)
+}
+
 func TestTree_Tap(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -328,16 +432,15 @@ func TestTree_Tap(t *testing.T) {
 
 		tree.Refresh() // Force layout
 
-		tapped := make(chan bool)
-		tree.OnBranchOpened = func(uid string) {
-			tapped <- true
+		selected := make(chan bool)
+		tree.OnSelected = func(uid string) {
+			selected <- true
 		}
-		go test.DoubleTap(getBranch(t, tree, "A"))
+		go test.Tap(getBranch(t, tree, "A"))
 		select {
-		case open := <-tapped:
-			assert.True(t, open, "Branch should be open")
+		case <-selected:
 		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Branch should have been changed")
+			assert.Fail(t, "Branch should have been selected")
 		}
 	})
 	t.Run("BranchIcon", func(t *testing.T) {
@@ -348,7 +451,7 @@ func TestTree_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		tapped := make(chan bool)
-		tree.OnBranchOpened = func(uid string) {
+		tree.OnBranchOpened = func(uid TreeNodeID) {
 			tapped <- true
 		}
 		go test.Tap(getBranch(t, tree, "A").icon.(*branchIcon))
@@ -367,7 +470,7 @@ func TestTree_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		selected := make(chan bool)
-		tree.OnNodeSelected = func(uid string) {
+		tree.OnSelected = func(uid TreeNodeID) {
 			selected <- true
 		}
 		go test.Tap(getLeaf(t, tree, "A"))
@@ -377,6 +480,29 @@ func TestTree_Tap(t *testing.T) {
 			assert.Fail(t, "Leaf should have been selected")
 		}
 	})
+}
+
+func TestTree_Unselect(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+	tree.Select("A")
+
+	unselection := make(chan string, 1)
+	tree.OnUnselected = func(uid TreeNodeID) {
+		unselection <- uid
+	}
+
+	tree.Unselect("A")
+	assert.Equal(t, 0, len(tree.selected))
+	select {
+	case s := <-unselection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been cleared")
+	}
 }
 
 func TestTree_Walk(t *testing.T) {

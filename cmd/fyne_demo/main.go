@@ -7,9 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/cmd/fyne_demo/data"
-	"fyne.io/fyne/cmd/fyne_demo/screens"
+	"fyne.io/fyne/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/cmd/fyne_settings/settings"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
@@ -17,16 +15,9 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-const preferenceCurrentTab = "currentTab"
+const preferenceCurrentTutorial = "currentTutorial"
 
-func parseURL(urlStr string) *url.URL {
-	link, err := url.Parse(urlStr)
-	if err != nil {
-		fyne.LogError("Could not parse URL", err)
-	}
-
-	return link
-}
+var topWindow fyne.Window
 
 func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
@@ -34,47 +25,11 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	}
 }
 
-func welcomeScreen(a fyne.App) fyne.CanvasObject {
-	logo := canvas.NewImageFromResource(data.FyneScene)
-	if fyne.CurrentDevice().IsMobile() {
-		logo.SetMinSize(fyne.NewSize(171, 125))
-	} else {
-		logo.SetMinSize(fyne.NewSize(228, 167))
-	}
-
-	return widget.NewVBox(
-		layout.NewSpacer(),
-		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
-
-		widget.NewHBox(layout.NewSpacer(),
-			widget.NewHyperlink("fyne.io", parseURL("https://fyne.io/")),
-			widget.NewLabel("-"),
-			widget.NewHyperlink("documentation", parseURL("https://fyne.io/develop/")),
-			widget.NewLabel("-"),
-			widget.NewHyperlink("sponsor", parseURL("https://github.com/sponsors/fyne-io")),
-			layout.NewSpacer(),
-		),
-		layout.NewSpacer(),
-
-		widget.NewCard("Choose theme", "",
-			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-				widget.NewButton("Dark", func() {
-					a.Settings().SetTheme(theme.DarkTheme())
-				}),
-				widget.NewButton("Light", func() {
-					a.Settings().SetTheme(theme.LightTheme())
-				}),
-			),
-		),
-	)
-}
-
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(theme.FyneLogo())
-
 	w := a.NewWindow("Fyne Demo")
+	topWindow = w
 
 	newItem := fyne.NewMenuItem("New", nil)
 	otherItem := fyne.NewMenuItem("Other", nil)
@@ -90,6 +45,7 @@ func main() {
 	settingsItem := fyne.NewMenuItem("Settings", func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
+		w.Resize(fyne.NewSize(480, 480))
 		w.Show()
 	})
 
@@ -133,20 +89,86 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	tabs := container.NewAppTabs(
-		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
-		container.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
-		container.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
-		container.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
-		container.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
+	content := container.NewMax()
+	title := widget.NewLabel("Component name")
+	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
+	intro.Wrapping = fyne.TextWrapWord
+	setTutorial := func(t tutorials.Tutorial) {
+		if fyne.CurrentDevice().IsMobile() {
+			child := a.NewWindow(t.Title)
+			topWindow = child
+			child.SetContent(t.View(topWindow))
+			child.Show()
+			child.SetOnClosed(func() {
+				topWindow = w
+			})
+			return
+		}
 
-	if !fyne.CurrentDevice().IsMobile() {
-		tabs.Append(container.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+		title.SetText(t.Title)
+		intro.SetText(t.Intro)
+
+		content.Objects = []fyne.CanvasObject{t.View(w)}
+		content.Refresh()
 	}
-	tabs.SetTabLocation(container.TabLocationLeading)
-	tabs.SetSelectionByIndex(a.Preferences().Int(preferenceCurrentTab))
-	w.SetContent(tabs)
 
+	tutorial := container.NewBorder(
+		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
+	if fyne.CurrentDevice().IsMobile() {
+		w.SetContent(makeNav(setTutorial, false))
+	} else {
+		split := container.NewHSplit(makeNav(setTutorial, true), tutorial)
+		split.Offset = 0.2
+		w.SetContent(split)
+	}
+	w.Resize(fyne.NewSize(640, 460))
 	w.ShowAndRun()
-	a.Preferences().SetInt(preferenceCurrentTab, tabs.SelectionIndex())
+}
+
+func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
+	a := fyne.CurrentApp()
+
+	tree := &widget.Tree{
+		ChildUIDs: func(uid string) []string {
+			return tutorials.TutorialIndex[uid]
+		},
+		IsBranch: func(uid string) bool {
+			children, ok := tutorials.TutorialIndex[uid]
+
+			return ok && len(children) > 0
+		},
+		CreateNode: func(branch bool) fyne.CanvasObject {
+			return widget.NewLabel("Collection Widgets")
+		},
+		UpdateNode: func(uid string, branch bool, obj fyne.CanvasObject) {
+			t, ok := tutorials.Tutorials[uid]
+			if !ok {
+				fyne.LogError("Missing tutorial panel: "+uid, nil)
+				return
+			}
+			obj.(*widget.Label).SetText(t.Title)
+		},
+		OnSelected: func(uid string) {
+			if t, ok := tutorials.Tutorials[uid]; ok {
+				a.Preferences().SetString(preferenceCurrentTutorial, uid)
+				setTutorial(t)
+			}
+		},
+	}
+
+	if loadPrevious {
+		currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
+		tree.Select(currentPref)
+	}
+
+	themes := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+		widget.NewButton("Dark", func() {
+			a.Settings().SetTheme(theme.DarkTheme())
+		}),
+		widget.NewButton("Light", func() {
+			a.Settings().SetTheme(theme.LightTheme())
+		}),
+	)
+
+	return container.NewBorder(nil, themes, nil, nil, tree)
 }

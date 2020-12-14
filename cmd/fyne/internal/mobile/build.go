@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"go/build"
 	"io"
 	"os"
 	"os/exec"
@@ -114,7 +113,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 		cmd.usage()
 		os.Exit(1)
 	}
-	pkgs, err := packages.Load(packagesConfig(targetOS), buildPath)
+	pkgs, err := packages.Load(packagesConfig(targetOS, targetArchs[0]), buildPath)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +143,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName)
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build)
 		if err != nil {
 			return nil, err
 		}
@@ -153,7 +152,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			return nil, fmt.Errorf("-os=ios requires XCode")
 		}
 		if buildRelease {
-			targetArchs = []string{"arm", "arm64"}
+			targetArchs = []string{"arm64"}
 		}
 
 		if pkg.Name != "main" {
@@ -164,7 +163,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName)
+		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build, cmd.Cert, cmd.Profile)
 		if err != nil {
 			return nil, err
 		}
@@ -216,16 +215,6 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 	return nmpkgs, nil
 }
 
-func importsApp(pkg *build.Package) error {
-	// Building a program, make sure it is appropriate for mobile.
-	for _, path := range pkg.Imports {
-		if path == "github.com/fyne-io/mobile/app" {
-			return nil
-		}
-	}
-	return fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.ImportPath)
-}
-
 var xout io.Writer = os.Stderr
 
 func printcmd(format string, args ...interface{}) {
@@ -269,7 +258,7 @@ var (
 )
 
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name string, release bool) error {
+func RunNewBuild(target, appID, icon, name, version string, build int, release bool, cert, profile string) error {
 	buildTarget = target
 	buildBundleID = appID
 	buildRelease = release
@@ -278,6 +267,10 @@ func RunNewBuild(target, appID, icon, name string, release bool) error {
 	cmd.Flag = flag.FlagSet{}
 	cmd.IconPath = icon
 	cmd.AppName = name
+	cmd.Version = version
+	cmd.Build = build
+	cmd.Cert = cert
+	cmd.Profile = profile
 	return runBuild(cmd)
 }
 
@@ -303,11 +296,6 @@ func addBuildFlagsNVXWork(cmd *command) {
 	cmd.Flag.BoolVar(&buildWork, "work", false, "")
 }
 
-type binInfo struct {
-	hasPkgApp bool
-	hasPkgAL  bool
-}
-
 func init() {
 	addBuildFlags(cmdBuild)
 	addBuildFlagsNVXWork(cmdBuild)
@@ -317,10 +305,6 @@ func init() {
 
 func goBuild(src string, env []string, args ...string) error {
 	return goCmd("build", []string{src}, env, args...)
-}
-
-func goBuildAt(at string, src string, env []string, args ...string) error {
-	return goCmdAt(at, "build", []string{src}, env, args...)
 }
 
 func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
@@ -397,8 +381,8 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 	}
 
 	// verify all archs are supported one while deduping.
-	isSupported := func(arch string) bool {
-		for _, a := range allArchs {
+	isSupported := func(os, arch string) bool {
+		for _, a := range allArchs[os] {
 			if a == arch {
 				return true
 			}
@@ -411,7 +395,7 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 		if _, ok := seen[arch]; ok {
 			continue
 		}
-		if !isSupported(arch) {
+		if !isSupported(os, arch) {
 			return "", nil, fmt.Errorf(`unsupported arch: %q`, arch)
 		}
 
@@ -424,7 +408,7 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 		targetOS = "darwin"
 	}
 	if all {
-		return targetOS, allArchs, nil
+		return targetOS, allArchs[os], nil
 	}
 	return targetOS, archs, nil
 }

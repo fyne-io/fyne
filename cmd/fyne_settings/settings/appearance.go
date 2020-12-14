@@ -41,7 +41,7 @@ func NewSettings() *Settings {
 
 // AppearanceIcon returns the icon for appearance settings
 func (s *Settings) AppearanceIcon() fyne.Resource {
-	return theme.NewThemedResource(appearanceIcon, nil)
+	return theme.NewThemedResource(appearanceIcon)
 }
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
@@ -62,10 +62,6 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
 
-	current := s.fyneSettings.PrimaryColor
-	if current == "" {
-		current = theme.ColorBlue
-	}
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)
@@ -108,14 +104,13 @@ func (s *Settings) createPreview() image.Image {
 	oldTheme := fyne.CurrentApp().Settings().Theme()
 	oldColor := fyne.CurrentApp().Settings().PrimaryColor()
 
-	th := theme.DarkTheme()
+	th := oldTheme
 	if s.fyneSettings.ThemeName == "light" {
 		th = theme.LightTheme()
 	} else if s.fyneSettings.ThemeName == "dark" {
 		th = theme.DarkTheme()
-	} else {
-		th = oldTheme
 	}
+
 	painter.SvgCacheReset() // reset icon cache
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
@@ -181,9 +176,8 @@ func (s *Settings) saveToFile(path string) error {
 
 type colorButton struct {
 	widget.BaseWidget
-	name    string
-	color   color.Color
-	current bool
+	name  string
+	color color.Color
 
 	s *Settings
 }

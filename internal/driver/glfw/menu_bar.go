@@ -51,6 +51,12 @@ func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// IsActive returns whether the menu bar is active or not.
+// An active menu bar shows the current selected menu and should have the focus.
+func (b *MenuBar) IsActive() bool {
+	return b.active
+}
+
 // Hide hides the menu bar.
 //
 // Implements: fyne.Widget

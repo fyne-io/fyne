@@ -70,20 +70,9 @@ func TestIconThemeChangeContent(t *testing.T) {
 	assert.NotEqual(t, content, cancel.Content())
 }
 
-func TestNewThemedResource_TwoStaticResourceSupport(t *testing.T) {
+func TestNewThemedResource_StaticResourceSupport(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	custom := NewThemedResource(helperNewStaticResource(), helperNewStaticResource())
-	content := custom.Content()
-	name := custom.Name()
-
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
-	assert.NotEqual(t, content, custom.Content())
-	assert.Equal(t, name, custom.Name())
-}
-
-func TestNewThemedResource_OneStaticResourceSupport(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	custom := NewThemedResource(helperNewStaticResource(), nil)
+	custom := NewThemedResource(helperNewStaticResource())
 	content := custom.Content()
 	name := custom.Name()
 

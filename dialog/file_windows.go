@@ -2,7 +2,6 @@ package dialog
 
 import (
 	"os"
-	"path/filepath"
 	"syscall"
 
 	"fyne.io/fyne"
@@ -35,7 +34,7 @@ func listDrives() []string {
 	var drives []string
 	mask := driveMask()
 
-	for i := 0; i < 24; i++ {
+	for i := 0; i < 26; i++ {
 		if mask&1 == 1 {
 			letter := string('A' + rune(i))
 			drives = append(drives, letter+":")
@@ -59,8 +58,13 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	return places
 }
 
-func isHidden(file, dir string) bool {
-	path := filepath.Join(dir, file)
+func isHidden(file fyne.URI) bool {
+	if file.Scheme() != "file" {
+		fyne.LogError("Cannot check if non file is hidden", nil)
+		return false
+	}
+
+	path := file.String()[len(file.Scheme())+3:]
 
 	point, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
@@ -82,4 +86,37 @@ func fileOpenOSOverride(*FileDialog) bool {
 
 func fileSaveOSOverride(*FileDialog) bool {
 	return false
+}
+
+func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	homeURI := storage.NewFileURI(homeDir)
+
+	favoriteNames := getFavoriteOrder()
+	favoriteLocations := make(map[string]fyne.ListableURI)
+	for _, favName := range favoriteNames {
+		var uri fyne.URI
+		var err1 error
+		if favName == "Home" {
+			uri = homeURI
+		} else {
+			uri, err1 = storage.Child(homeURI, favName)
+		}
+		if err1 != nil {
+			err = err1
+			continue
+		}
+
+		listURI, err1 := storage.ListerForURI(uri)
+		if err1 != nil {
+			err = err1
+			continue
+		}
+		favoriteLocations[favName] = listURI
+	}
+
+	return favoriteLocations, err
 }

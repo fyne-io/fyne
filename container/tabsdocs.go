@@ -13,11 +13,15 @@ var _ fyne.Widget = (*DocTabs)(nil)
 // DocTabs container is used to display various pieces of content identified by tabs.
 // The tabs contain text and/or an icon and allow the user to switch between the content specified in each TabItem.
 // Each item is represented by a button at the edge of the container.
+//
+// Since: 2.0.0
 type DocTabs struct {
 	baseTabs
 }
 
 // NewDocTabs creates a new tab container that allows the user to choose between various pieces of content.
+//
+// Since: 2.0.0
 func NewDocTabs(items ...*TabItem) *DocTabs {
 	tabs := &DocTabs{
 		baseTabs: baseTabs{
@@ -67,7 +71,7 @@ func (r *docTabsRenderer) MinSize() (min fyne.Size) {
 
 func (r *docTabsRenderer) Objects() []fyne.CanvasObject {
 	objects := []fyne.CanvasObject{r.bar, r.divider, r.indicator}
-	if i, is := r.appTabs.current, r.appTabs.Items; i >= 0 && i < len(is) {
+	if i, is := r.docTabs.current, r.docTabs.Items; i >= 0 && i < len(is) {
 		objects = append(objects, is[i].Content)
 	}
 	return objects

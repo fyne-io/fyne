@@ -354,7 +354,7 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 
 			mimeType := mime.TypeByExtension(ext)
 			if mimeType == "" {
-				mimeType = "*/*" // could not find one, so allow all	
+				mimeType = "*/*" // could not find one, so allow all
 				continue
 			}
 
@@ -544,6 +544,9 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 	k := key.Event{
 		Rune: rune(C.getKeyRune(env, e)),
 		Code: convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e))),
+	}
+	if k.Rune >= '0' && k.Rune <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
+		return
 	}
 	switch C.AKeyEvent_getAction(e) {
 	case C.AKEY_STATE_DOWN:
