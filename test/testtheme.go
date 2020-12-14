@@ -17,17 +17,17 @@ var (
 func NewTheme() fyne.Theme {
 	return &configurableTheme{
 		colors: map[fyne.ThemeColorName]color.Color{
-			theme.Colors.Background:     red,
-			theme.Colors.Button:         color.Black,
-			theme.Colors.Disabled:       color.Black,
-			theme.Colors.DisabledButton: color.White,
-			theme.Colors.Focus:          green,
-			theme.Colors.Foreground:     color.White,
-			theme.Colors.Hover:          green,
-			theme.Colors.PlaceHolder:    blue,
-			theme.Colors.Primary:        green,
-			theme.Colors.ScrollBar:      blue,
-			theme.Colors.Shadow:         blue,
+			theme.ColorNameBackground:     red,
+			theme.ColorNameButton:         color.Black,
+			theme.ColorNameDisabled:       color.Black,
+			theme.ColorNameDisabledButton: color.White,
+			theme.ColorNameFocus:          green,
+			theme.ColorNameForeground:     color.White,
+			theme.ColorNameHover:          green,
+			theme.ColorNamePlaceHolder:    blue,
+			theme.ColorNamePrimary:        green,
+			theme.ColorNameScrollBar:      blue,
+			theme.ColorNameShadow:         blue,
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
 			fyne.TextStyle{}:                         theme.DefaultTextBoldFont(),
@@ -37,11 +37,11 @@ func NewTheme() fyne.Theme {
 			fyne.TextStyle{Monospace: true}:          theme.DefaultTextFont(),
 		},
 		sizes: map[fyne.ThemeSizeName]int{
-			theme.Sizes.InlineIcon:     24,
-			theme.Sizes.Padding:        10,
-			theme.Sizes.ScrollBar:      10,
-			theme.Sizes.ScrollBarSmall: 2,
-			theme.Sizes.Text:           18,
+			theme.SizeNameInlineIcon:     24,
+			theme.SizeNamePadding:        10,
+			theme.SizeNameScrollBar:      10,
+			theme.SizeNameScrollBarSmall: 2,
+			theme.SizeNameText:           18,
 		},
 	}
 }

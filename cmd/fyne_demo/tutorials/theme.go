@@ -19,40 +19,44 @@ type customTheme struct {
 
 func (customTheme) Color(c fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
 	switch c {
-	case theme.Colors.Background:
+	case theme.ColorNameBackground:
 		return purple
-	case theme.Colors.Button, theme.Colors.Disabled:
+	case theme.ColorNameButton, theme.ColorNameDisabled:
 		return color.Black
-	case theme.Colors.PlaceHolder, theme.Colors.ScrollBar:
+	case theme.ColorNamePlaceHolder, theme.ColorNameScrollBar:
 		return grey
-	case theme.Colors.Primary, theme.Colors.Hover, theme.Colors.Focus:
+	case theme.ColorNamePrimary, theme.ColorNameHover, theme.ColorNameFocus:
 		return orange
-	case theme.Colors.Shadow:
+	case theme.ColorNameShadow:
 		return &color.RGBA{R: 0xcc, G: 0xcc, B: 0xcc, A: 0xcc}
 	default:
 		return color.White
 	}
 }
 
+func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
+	return theme.DarkTheme().Font(style)
+}
+
+func (customTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return theme.DefaultTheme().Icon(n)
+}
+
 func (customTheme) Size(s fyne.ThemeSizeName) int {
 	switch s {
-	case theme.Sizes.Padding:
+	case theme.SizeNamePadding:
 		return 10
-	case theme.Sizes.InlineIcon:
+	case theme.SizeNameInlineIcon:
 		return 20
-	case theme.Sizes.ScrollBar:
+	case theme.SizeNameScrollBar:
 		return 10
-	case theme.Sizes.ScrollBarSmall:
+	case theme.SizeNameScrollBarSmall:
 		return 5
-	case theme.Sizes.Text:
+	case theme.SizeNameText:
 		return 12
 	default:
 		return 0
 	}
-}
-
-func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
-	return theme.DarkTheme().Font(style)
 }
 
 func newCustomTheme() fyne.Theme {

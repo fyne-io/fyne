@@ -7,12 +7,17 @@ import "image/color"
 // Since 2.0.0
 type ThemeVariant uint
 
-// ThemeColorName is used to look up a colour based on it's name.
+// ThemeColorName is used to look up a colour based on its name.
 //
 // Since 2.0.0
 type ThemeColorName string
 
-// ThemeSizeName is used to look up a size based on it's name.
+// ThemeIconName is used to look up an icon based on its name.
+//
+// Since 2.0.0
+type ThemeIconName string
+
+// ThemeSizeName is used to look up a size based on its name.
 //
 // Since 2.0.0
 type ThemeSizeName string
@@ -22,8 +27,9 @@ type ThemeSizeName string
 // Since 2.0.0
 type Theme interface {
 	Color(ThemeColorName, ThemeVariant) color.Color
-	Size(ThemeSizeName) int
 	Font(TextStyle) Resource
+	Icon(ThemeIconName) Resource
+	Size(ThemeSizeName) int
 }
 
 // LegacyTheme defines the requirements of any Fyne theme.

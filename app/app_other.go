@@ -11,7 +11,7 @@ import (
 )
 
 func defaultVariant() fyne.ThemeVariant {
-	return theme.Variants.Dark
+	return theme.VariantNameDark
 }
 
 func rootConfigDir() string {

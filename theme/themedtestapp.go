@@ -73,7 +73,7 @@ func (t *themedApp) SetTheme(theme fyne.Theme) {
 }
 
 func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
-	return Variants.Dark
+	return VariantNameDark
 }
 
 func (t *themedApp) Scale() float32 {
