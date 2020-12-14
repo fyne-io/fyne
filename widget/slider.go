@@ -56,16 +56,7 @@ func NewSlider(min, max float64) *Slider {
 // Since: 2.0.0
 func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 	slider := NewSlider(min, max)
-
-	data.AddListener(binding.NewDataListener(func() {
-		slider.Value = data.Get()
-		if cache.IsRendered(slider) { // don't invalidate values set after constructor like Step
-			slider.Refresh()
-		}
-	}))
-	slider.OnChanged = func(f float64) {
-		data.Set(f)
-	}
+	slider.Bind(data)
 
 	return slider
 }
@@ -80,7 +71,10 @@ func (s *Slider) Bind(data binding.Float) {
 	s.valueSource = data
 
 	s.valueListener = binding.NewDataListener(func() {
-		s.SetValue(data.Get())
+		s.Value = data.Get()
+		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
+			s.Refresh()
+		}
 	})
 	data.AddListener(s.valueListener)
 

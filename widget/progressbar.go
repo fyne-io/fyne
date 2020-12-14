@@ -104,7 +104,10 @@ func (p *ProgressBar) Bind(data binding.Float) {
 	p.valueSource = data
 
 	p.valueListener = binding.NewDataListener(func() {
-		p.SetValue(data.Get())
+		p.Value = data.Get()
+		if cache.IsRendered(p) {
+			p.Refresh()
+		}
 	})
 	data.AddListener(p.valueListener)
 }
@@ -164,13 +167,7 @@ func NewProgressBar() *ProgressBar {
 // Since: 2.0.0
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
-
-	data.AddListener(binding.NewDataListener(func() {
-		p.Value = data.Get()
-		if cache.IsRendered(p) {
-			p.Refresh()
-		}
-	}))
+	p.Bind(data)
 
 	return p
 }

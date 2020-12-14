@@ -89,16 +89,7 @@ func NewEntry() *Entry {
 // Since: 2.0.0
 func NewEntryWithData(data binding.String) *Entry {
 	entry := NewEntry()
-
-	data.AddListener(binding.NewDataListener(func() {
-		entry.Text = data.Get()
-		if cache.IsRendered(entry) {
-			entry.Refresh()
-		}
-	}))
-	entry.OnChanged = func(s string) {
-		data.Set(s)
-	}
+	entry.Bind(data)
 
 	return entry
 }
@@ -128,13 +119,14 @@ func (e *Entry) Bind(data binding.String) {
 	e.textSource = data
 
 	e.textListener = binding.NewDataListener(func() {
-		e.SetText(data.Get())
+		e.Text = data.Get()
+		if cache.IsRendered(e) {
+			e.Refresh()
+		}
 	})
 	data.AddListener(e.textListener)
 
-	e.OnChanged = func(s string) {
-		data.Set(s)
-	}
+	e.OnChanged = data.Set
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer

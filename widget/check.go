@@ -122,9 +122,7 @@ func (c *Check) Bind(data binding.Bool) {
 	})
 	data.AddListener(c.checkListener)
 
-	c.OnChanged = func(b bool) {
-		data.Set(b)
-	}
+	c.OnChanged = data.Set
 }
 
 // SetChecked sets the the checked state and refreshes widget
