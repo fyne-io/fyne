@@ -9,19 +9,28 @@ import (
 )
 
 func Test_pkgModPath(t *testing.T) {
-	const mockModulesTxtMissing = `# github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2
-github.com/go-gl/gl/v3.2-core/gl
-# github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-`
-	const mockModulesTxtMatch = `# github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2
-github.com/go-gl/gl/v3.2-core/gl
-# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20181213070059-819e8ce5125f
-github.com/go-gl/glfw/v3.3/glfw
-# github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-`
-	const mockModulesTxtOld = `# github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
-github.com/go-gl/glfw/v3.2/glfw
-`
+	const (
+		mockModulesTxtMissing = `# github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2
+		github.com/go-gl/gl/v3.2-core/gl
+		# github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+		`
+		mockModulesTxtMatch = `# github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2
+		github.com/go-gl/gl/v3.2-core/gl
+		# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20181213070059-819e8ce5125f
+		github.com/go-gl/glfw/v3.3/glfw
+		# github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+		`
+
+		mockModulesTxtOld = `# github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
+		github.com/go-gl/glfw/v3.2/glfw
+		`
+
+		// Make sure to test correct escape for dots in regexp
+		mockModulesOldMalicious = `# github\com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
+		github.com/go-gl/glfw/v3.2/glfw
+		`
+	)
+
 	type args struct {
 		r io.Reader
 	}
@@ -56,6 +65,14 @@ github.com/go-gl/glfw/v3.2/glfw
 			},
 			want:    filepath.Join(build.Default.GOPATH, "pkg/mod/github.com/go-gl/glfw@v0.0.0-20181213070059-819e8ce5125f/v3.2/glfw"),
 			target:  "github.com/go-gl/glfw/v3.2/glfw",
+			wantErr: false,
+		},
+		{
+			name: "No match (malicious)",
+			args: args{
+				r: strings.NewReader(mockModulesOldMalicious),
+			},
+			want:    "",
 			wantErr: false,
 		},
 	}

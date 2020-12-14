@@ -22,12 +22,15 @@ const (
 	goModFile = "go.mod"
 	// goModVendorFile is the vendor module file
 	goModVendorFile = "vendor/modules.txt"
-	// glfwModNew is the glfw module regexp for 3.3+
-	glfwModNew = `github\.com/go-gl/glfw/(v(\d+\.)?(\*|\d)?(\*|\d+))/glfw`
-	// glfwModOld is the glfw module regexp for 3.2
-	glfwModOld = "github.com/go-gl/glfw"
 	// glfwModSrcDir is the glfw dir containing the c source code to copy
 	glfwModSrcDir = "glfw"
+)
+
+var (
+	// glfwModNew is the glfw module regexp for 3.3+
+	glfwModNew = regexp.MustCompile(`github\.com/go-gl/glfw/(v(\d+\.)?(\*|\d)?(\*|\d+))/glfw`)
+	// glfwModOld is the glfw module regexp for 3.2
+	glfwModOld = regexp.MustCompile(`github\.com/go-gl/glfw`)
 )
 
 // Declare conformity to command interface
@@ -122,13 +125,11 @@ func cacheModPath(r io.Reader) (string, string, error) {
 			continue
 		}
 
-		r, _ := regexp.Compile(glfwModNew)
-		if r.Match([]byte(s[1])) {
+		if glfwModNew.MatchString(s[1]) {
 			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]), s[1], nil
 		}
 
-		r, _ = regexp.Compile(glfwModOld)
-		if r.Match([]byte(s[1])) {
+		if glfwModOld.MatchString(s[1]) {
 			extra := "/v3.2/glfw"
 			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]+extra), s[1] + extra, nil
 		}
