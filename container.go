@@ -33,7 +33,8 @@ func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 	return ret
 }
 
-// NewContainerWithLayout returns a new Container instance holding the specified CanvasObjects which will be laid out according to the specified Layout.
+// NewContainerWithLayout returns a new Container instance holding the specified
+// CanvasObjects which will be laid out according to the specified Layout.
 //
 // Deprecated: Use container.New() instead
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
