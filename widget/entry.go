@@ -1040,10 +1040,6 @@ type entryRenderer struct {
 	entry   *Entry
 }
 
-func (r *entryRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
 func (r *entryRenderer) Destroy() {
 }
 

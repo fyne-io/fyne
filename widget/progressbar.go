@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fmt"
-	"image/color"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -16,7 +15,7 @@ const defaultText = "%d%%"
 
 type progressRenderer struct {
 	widget.BaseRenderer
-	bar      *canvas.Rectangle
+	bg, bar  *canvas.Rectangle
 	label    *canvas.Text
 	progress *ProgressBar
 }
@@ -57,19 +56,17 @@ func (p *progressRenderer) updateBar() {
 
 // Layout the components of the check widget
 func (p *progressRenderer) Layout(size fyne.Size) {
+	p.bg.Resize(size)
 	p.label.Resize(size)
 	p.updateBar()
 }
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
+	p.bg.FillColor = theme.ShadowColor()
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.TextColor()
 	p.label.TextSize = theme.TextSize()
-}
-
-func (p *progressRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
 }
 
 func (p *progressRenderer) Refresh() {
@@ -112,10 +109,11 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
+	bg := canvas.NewRectangle(theme.ShadowColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	label := canvas.NewText("0%", theme.TextColor())
 	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
+	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bg, bar, label}), bg, bar, label, p}
 }
 
 // NewProgressBar creates a new progress bar widget.

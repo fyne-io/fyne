@@ -418,7 +418,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"widget": {
-			content: &markupRendererTestWidget{bgColor: theme.BackgroundColor()},
+			content: &markupRendererTestWidget{},
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<widget size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
@@ -428,7 +428,6 @@ func Test_snapshot(t *testing.T) {
 		},
 		"widget with subobjects": {
 			content: &markupRendererTestWidget{
-				bgColor: theme.BackgroundColor(),
 				objs: []fyne.CanvasObject{
 					canvas.NewCircle(color.Black),
 					canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250}),
@@ -439,15 +438,6 @@ func Test_snapshot(t *testing.T) {
 				"\t\t<widget size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
 				"\t\t\t<circle fillColor=\"rgba(0,0,0,255)\" size=\"0x0\"/>\n" +
 				"\t\t\t<line size=\"0x0\" strokeColor=\"rgba(250,250,250,250)\"/>\n" +
-				"\t\t</widget>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"widget with non-default background color": {
-			content: &markupRendererTestWidget{bgColor: theme.TextColor()},
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<widget backgroundColor=\"foreground\" size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
 				"\t\t</widget>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
@@ -535,11 +525,10 @@ func Test_snapshot(t *testing.T) {
 }
 
 type markupRendererTestWidget struct {
-	bgColor color.Color
-	hidden  bool
-	objs    []fyne.CanvasObject
-	pos     fyne.Position
-	size    fyne.Size
+	hidden bool
+	objs   []fyne.CanvasObject
+	pos    fyne.Position
+	size   fyne.Size
 }
 
 var _ fyne.Widget = (*markupRendererTestWidget)(nil)
@@ -571,10 +560,6 @@ func (w *markupRendererTestWidget) Resize(size fyne.Size) {
 	w.size = size
 }
 
-func (w *markupRendererTestWidget) SetBgColor(c color.Color) {
-	w.bgColor = c
-}
-
 func (w *markupRendererTestWidget) SetObjects(objects ...fyne.CanvasObject) {
 	w.objs = objects
 }
@@ -593,10 +578,6 @@ func (w *markupRendererTestWidget) Visible() bool {
 
 type markupRendererTestWidgetRenderer struct {
 	w *markupRendererTestWidget
-}
-
-func (r *markupRendererTestWidgetRenderer) BackgroundColor() color.Color {
-	return r.w.bgColor
 }
 
 func (r *markupRendererTestWidgetRenderer) Destroy() {

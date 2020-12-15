@@ -359,10 +359,6 @@ func (r *textRenderer) Refresh() {
 	}
 }
 
-func (r *textRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 // splitLines accepts a slice of runes and returns a slice containing the
 // start and end indicies of each line delimited by the newline character.
 func splitLines(text []rune) [][2]int {

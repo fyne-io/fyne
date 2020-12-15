@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"time"
 
 	"fyne.io/fyne"
@@ -20,7 +19,7 @@ const (
 
 type infProgressRenderer struct {
 	widget.BaseRenderer
-	bar      *canvas.Rectangle
+	bg, bar  *canvas.Rectangle
 	ticker   *time.Ticker
 	running  bool
 	progress *ProgressBarInfinite
@@ -71,11 +70,8 @@ func (p *infProgressRenderer) updateBar() {
 
 // Layout the components of the infinite progress bar
 func (p *infProgressRenderer) Layout(size fyne.Size) {
+	p.bg.Resize(size)
 	p.updateBar()
-}
-
-func (p *infProgressRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
 }
 
 // Refresh updates the size and position of the horizontal scrolling infinite progress bar
@@ -88,6 +84,7 @@ func (p *infProgressRenderer) Refresh() {
 }
 
 func (p *infProgressRenderer) doRefresh() {
+	p.bg.FillColor = theme.ShadowColor()
 	p.bar.FillColor = theme.PrimaryColor()
 
 	p.updateBar()
@@ -190,9 +187,11 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
+	bg := canvas.NewRectangle(theme.ShadowColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar}),
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bg, bar}),
+		bg:           bg,
 		bar:          bar,
 		progress:     p,
 	}

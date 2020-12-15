@@ -234,10 +234,12 @@ func newMenuBox(items []fyne.CanvasObject) *menuBox {
 }
 
 func (b *menuBox) CreateRenderer() fyne.WidgetRenderer {
+	bg := canvas.NewRectangle(theme.BackgroundColor())
 	cont := fyne.NewContainerWithLayout(layout.NewVBoxLayout(), b.items...)
 	return &menuBoxRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{cont}),
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bg, cont}),
 		b:            b,
+		bg:           bg,
 		cont:         cont,
 	}
 }
@@ -245,13 +247,16 @@ func (b *menuBox) CreateRenderer() fyne.WidgetRenderer {
 type menuBoxRenderer struct {
 	widget.BaseRenderer
 	b    *menuBox
+	bg   *canvas.Rectangle
 	cont *fyne.Container
 }
 
 var _ fyne.WidgetRenderer = (*menuBoxRenderer)(nil)
 
 func (r *menuBoxRenderer) Layout(size fyne.Size) {
-	r.cont.Resize(fyne.NewSize(size.Width, size.Height+2*theme.Padding()))
+	s := fyne.NewSize(size.Width, size.Height+2*theme.Padding())
+	r.bg.Resize(s)
+	r.cont.Resize(s)
 	r.cont.Move(fyne.NewPos(0, theme.Padding()))
 }
 
@@ -260,5 +265,6 @@ func (r *menuBoxRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuBoxRenderer) Refresh() {
+	r.bg.FillColor = theme.BackgroundColor()
 	canvas.Refresh(r.b)
 }

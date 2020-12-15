@@ -221,10 +221,6 @@ func (r *popUpRenderer) Refresh() {
 	}
 }
 
-func (r *popUpRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 type modalPopUpRenderer struct {
 	*widget.ShadowingRenderer
 	popUpBaseRenderer

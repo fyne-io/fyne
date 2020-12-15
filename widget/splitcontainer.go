@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -79,10 +77,6 @@ type splitContainerRenderer struct {
 	split   *SplitContainer
 	divider *divider
 	objects []fyne.CanvasObject
-}
-
-func (r *splitContainerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (r *splitContainerRenderer) Destroy() {
@@ -201,11 +195,13 @@ func newDivider(split *SplitContainer) *divider {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (d *divider) CreateRenderer() fyne.WidgetRenderer {
 	d.ExtendBaseWidget(d)
-	r := canvas.NewRectangle(theme.TextColor())
+	bg := canvas.NewRectangle(theme.ShadowColor())
+	fg := canvas.NewRectangle(theme.TextColor())
 	return &dividerRenderer{
-		divider:   d,
-		rectangle: r,
-		objects:   []fyne.CanvasObject{r},
+		divider: d,
+		bg:      bg,
+		fg:      fg,
+		objects: []fyne.CanvasObject{bg, fg},
 	}
 }
 
@@ -244,22 +240,16 @@ func (d *divider) MouseOut() {
 var _ fyne.WidgetRenderer = (*dividerRenderer)(nil)
 
 type dividerRenderer struct {
-	divider   *divider
-	rectangle *canvas.Rectangle
-	objects   []fyne.CanvasObject
-}
-
-func (r *dividerRenderer) BackgroundColor() color.Color {
-	if r.divider.hovered {
-		return theme.HoverColor()
-	}
-	return theme.ShadowColor()
+	divider *divider
+	bg, fg  *canvas.Rectangle
+	objects []fyne.CanvasObject
 }
 
 func (r *dividerRenderer) Destroy() {
 }
 
 func (r *dividerRenderer) Layout(size fyne.Size) {
+	r.bg.Resize(size)
 	var x, y, w, h int
 	if r.divider.split.Horizontal {
 		x = (dividerThickness() - handleThickness()) / 2
@@ -272,8 +262,8 @@ func (r *dividerRenderer) Layout(size fyne.Size) {
 		w = handleLength()
 		h = handleThickness()
 	}
-	r.rectangle.Move(fyne.NewPos(x, y))
-	r.rectangle.Resize(fyne.NewSize(w, h))
+	r.fg.Move(fyne.NewPos(x, y))
+	r.fg.Resize(fyne.NewSize(w, h))
 }
 
 func (r *dividerRenderer) MinSize() fyne.Size {
@@ -288,7 +278,12 @@ func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *dividerRenderer) Refresh() {
-	r.rectangle.FillColor = theme.TextColor()
+	if r.divider.hovered {
+		r.bg.FillColor = theme.HoverColor()
+	} else {
+		r.bg.FillColor = theme.ShadowColor()
+	}
+	r.fg.FillColor = theme.TextColor()
 	r.Layout(r.divider.Size())
 }
 

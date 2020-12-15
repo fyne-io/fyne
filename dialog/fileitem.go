@@ -1,7 +1,6 @@
 package dialog
 
 import (
-	"image/color"
 	"path/filepath"
 
 	"fyne.io/fyne"
@@ -93,13 +92,6 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 func (s fileItemRenderer) Refresh() {
 	s.icon.SetSelected(s.item.isCurrent)
 	canvas.Refresh(s.item)
-}
-
-func (s fileItemRenderer) BackgroundColor() color.Color {
-	if s.item.isCurrent {
-		return theme.PrimaryColor()
-	}
-	return theme.BackgroundColor()
 }
 
 func (s fileItemRenderer) Objects() []fyne.CanvasObject {

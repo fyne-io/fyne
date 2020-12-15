@@ -76,13 +76,13 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 }
 
 func (c *testCanvas) Capture() image.Image {
-	if c.painter != nil {
-		return c.painter.Paint(c)
-	}
-
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
+
+	if c.painter != nil {
+		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+	}
 
 	return img
 }

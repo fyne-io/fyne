@@ -24,13 +24,6 @@ func newExtendedRadio(opts []string, f func(string)) *extendedRadio {
 	return ret
 }
 
-func TestRadio_Extended_BackgroundStyle(t *testing.T) {
-	radio := newExtendedRadio([]string{"Hi"}, nil)
-	bg := cache.Renderer(radio).BackgroundColor()
-
-	assert.Equal(t, bg, theme.BackgroundColor())
-}
-
 func TestRadio_Extended_Selected(t *testing.T) {
 	selected := ""
 	radio := newExtendedRadio([]string{"Hi"}, func(sel string) {

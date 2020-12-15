@@ -204,10 +204,6 @@ type buttonRenderer struct {
 	layout fyne.Layout
 }
 
-func (r *buttonRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 // Layout the components of the button widget
 func (r *buttonRenderer) Layout(size fyne.Size) {
 	var inset fyne.Position

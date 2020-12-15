@@ -2,13 +2,11 @@ package software
 
 import (
 	"image"
-	"image/draw"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/theme"
 )
 
 // Painter is a simple software painter that can paint a canvas in memory.
@@ -26,7 +24,6 @@ func NewPainter() *Painter {
 func (*Painter) Paint(c fyne.Canvas) image.Image {
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	base := image.NewNRGBA(bounds)
-	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 		clip := image.Rect(
@@ -50,8 +47,6 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 			drawRaster(c, o, pos, base, clip)
 		case *canvas.Rectangle:
 			drawRectangle(c, o, pos, base, clip)
-		case fyne.Widget:
-			drawWidget(c, o, pos, base, clip)
 		}
 
 		return false

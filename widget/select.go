@@ -301,10 +301,6 @@ type selectRenderer struct {
 	combo *Select
 }
 
-func (s *selectRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
 	doublePad := theme.Padding() * 2

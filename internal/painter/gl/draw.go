@@ -1,11 +1,8 @@
 package gl
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 )
 
@@ -77,14 +74,6 @@ func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(can
 	p.glFreeBuffer(vbo)
 }
 
-func (p *glPainter) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Size) {
-	if cache.Renderer(wid).BackgroundColor() == color.Transparent {
-		return
-	}
-
-	p.drawTextureWithDetails(wid, p.newGlRectTexture, pos, wid.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
-}
-
 func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
 		1.0, painter.VectorPad(circle))
@@ -154,7 +143,5 @@ func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyn
 		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
 	case *canvas.RadialGradient:
 		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
-	case fyne.Widget:
-		p.drawWidget(obj, pos, frame)
 	}
 }

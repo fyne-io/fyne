@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -591,7 +593,7 @@ func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeNode:     n,
-		indicator:    canvas.NewRectangle(theme.BackgroundColor()),
+		indicator:    canvas.NewRectangle(color.Transparent),
 	}
 }
 
@@ -702,7 +704,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 	} else if r.treeNode.hovered {
 		r.indicator.FillColor = theme.HoverColor()
 	} else {
-		r.indicator.FillColor = theme.BackgroundColor()
+		r.indicator.FillColor = color.Transparent
 	}
 	r.indicator.Refresh()
 	canvas.Refresh(r.treeNode.super())

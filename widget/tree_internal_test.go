@@ -607,12 +607,12 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
 		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
-		assert.Equal(t, theme.BackgroundColor(), ar.BackgroundColor())
+		assert.Equal(t, color.Transparent, ar.indicator.FillColor)
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
 		br := test.WidgetRenderer(b).(*treeNodeRenderer)
-		assert.Equal(t, theme.BackgroundColor(), br.BackgroundColor())
+		assert.Equal(t, color.Transparent, br.indicator.FillColor)
 	})
 }
 
@@ -628,7 +628,7 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		a.MouseIn(&desktop.MouseEvent{})
 		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
 		a.MouseOut()
-		assert.Equal(t, theme.BackgroundColor(), ar.BackgroundColor())
+		assert.Equal(t, color.Transparent, ar.indicator.FillColor)
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
@@ -636,6 +636,6 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		b.MouseIn(&desktop.MouseEvent{})
 		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
 		b.MouseOut()
-		assert.Equal(t, theme.BackgroundColor(), br.BackgroundColor())
+		assert.Equal(t, color.Transparent, br.indicator.FillColor)
 	})
 }

@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -37,14 +35,12 @@ const (
 type scrollBarRenderer struct {
 	widget.BaseRenderer
 	scrollBar *scrollBar
+	bg        *canvas.Rectangle
 	minSize   fyne.Size
 }
 
-func (r *scrollBarRenderer) BackgroundColor() color.Color {
-	return theme.ScrollBarColor()
-}
-
-func (r *scrollBarRenderer) Layout(_ fyne.Size) {
+func (r *scrollBarRenderer) Layout(size fyne.Size) {
+	r.bg.Resize(size)
 }
 
 func (r *scrollBarRenderer) MinSize() fyne.Size {
@@ -52,6 +48,7 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarRenderer) Refresh() {
+	r.bg.FillColor = theme.ScrollBarColor()
 }
 
 var _ desktop.Hoverable = (*scrollBar)(nil)
@@ -67,7 +64,13 @@ type scrollBar struct {
 }
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	return &scrollBarRenderer{scrollBar: b}
+	bg := canvas.NewRectangle(theme.ScrollBarColor())
+	r := &scrollBarRenderer{
+		scrollBar: b,
+		bg:        bg,
+	}
+	r.SetObjects([]fyne.CanvasObject{bg})
+	return r
 }
 
 func (b *scrollBar) Cursor() desktop.Cursor {
@@ -120,10 +123,6 @@ type scrollBarAreaRenderer struct {
 	widget.BaseRenderer
 	area *scrollBarArea
 	bar  *scrollBar
-}
-
-func (r *scrollBarAreaRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {

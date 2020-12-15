@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -193,10 +191,6 @@ type tabContainerRenderer struct {
 	line, underline *canvas.Rectangle
 	objects         []fyne.CanvasObject // holds only the CanvasObject of the tabs' content
 	tabBar          *fyne.Container
-}
-
-func (r *tabContainerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (r *tabContainerRenderer) Destroy() {
@@ -483,6 +477,7 @@ type tabButton struct {
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
+	bg := canvas.NewRectangle(theme.HoverColor())
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
@@ -492,13 +487,14 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	label.TextStyle.Bold = true
 	label.Alignment = fyne.TextAlignCenter
 
-	objects := []fyne.CanvasObject{label}
+	objects := []fyne.CanvasObject{bg, label}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
 	r := &tabButtonRenderer{
 		button:  b,
+		bg:      bg,
 		icon:    icon,
 		label:   label,
 		objects: objects,
@@ -540,24 +536,17 @@ func (b *tabButton) setText(text string) {
 
 type tabButtonRenderer struct {
 	button  *tabButton
+	bg      *canvas.Rectangle
 	icon    *canvas.Image
 	label   *canvas.Text
 	objects []fyne.CanvasObject
-}
-
-func (r *tabButtonRenderer) BackgroundColor() color.Color {
-	switch {
-	case r.button.hovered:
-		return theme.HoverColor()
-	default:
-		return theme.BackgroundColor()
-	}
 }
 
 func (r *tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
+	r.bg.Resize(size)
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
@@ -622,6 +611,13 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
+	if r.button.hovered {
+		r.bg.FillColor = theme.HoverColor()
+		r.bg.Show()
+	} else {
+		r.bg.Hide()
+	}
+
 	r.label.Text = r.button.Text
 	if r.button.Importance == HighImportance {
 		r.label.Color = theme.PrimaryColor()

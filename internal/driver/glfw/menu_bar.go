@@ -1,8 +1,6 @@
 package glfw
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -237,10 +235,6 @@ type menuBackgroundRenderer struct {
 }
 
 var _ fyne.WidgetRenderer = (*menuBackgroundRenderer)(nil)
-
-func (r *menuBackgroundRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
 
 func (r *menuBackgroundRenderer) Layout(fyne.Size) {
 }

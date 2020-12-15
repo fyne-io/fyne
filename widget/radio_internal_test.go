@@ -26,13 +26,6 @@ func TestRadio_MinSize(t *testing.T) {
 	assert.Greater(t, min2.Height, min.Height)
 }
 
-func TestRadio_BackgroundStyle(t *testing.T) {
-	radio := NewRadio([]string{"Hi"}, nil)
-	bg := test.WidgetRenderer(radio).BackgroundColor()
-
-	assert.Equal(t, bg, theme.BackgroundColor())
-}
-
 func TestRadio_MinSize_Horizontal(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 	min := radio.MinSize()
