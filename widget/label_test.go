@@ -4,12 +4,31 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestLabel_Binding(t *testing.T) {
+	label := NewLabel("Init")
+	assert.Equal(t, "Init", label.Text)
+
+	str := binding.NewString()
+	label.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "", label.Text)
+
+	str.Set("Updated")
+	waitForBinding()
+	assert.Equal(t, "Updated", label.Text)
+
+	label.Unbind()
+	waitForBinding()
+	assert.Equal(t, "Updated", label.Text)
+}
 
 func TestLabel_Hide(t *testing.T) {
 	label := NewLabel("Test")
@@ -189,4 +208,12 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 			</content>
 		</canvas>
 	`, c)
+}
+
+func TestNewLabelWithData(t *testing.T) {
+	str := binding.NewString()
+	str.Set("Init")
+
+	label := NewLabelWithData(str)
+	assert.Equal(t, "Init", label.Text)
 }

@@ -37,6 +37,27 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	checkLabel := widget.NewLabelWithData(binding.BoolToString(boolData))
 	checkEntry := widget.NewEntryWithData(binding.BoolToString(boolData))
 	checks := container.NewGridWithColumns(3, check, checkLabel, checkEntry)
+	item := container.NewVBox(floats, slide, bar, buttons, widget.NewSeparator(), checks, widget.NewSeparator())
 
-	return container.NewVBox(floats, slide, bar, buttons, widget.NewSeparator(), checks)
+	dataList := binding.BindFloatList(&[]float64{0.1, 0.2, 0.3})
+
+	button := widget.NewButton("Append", func() {
+		dataList.Append(float64(dataList.Length()+1) / 10)
+	})
+
+	return container.NewBorder(item, button, nil, nil, widget.NewListWithData(dataList,
+		func() fyne.CanvasObject {
+			return container.NewBorder(nil, nil, nil, widget.NewButton("+", nil),
+				widget.NewLabel("item x.y"))
+		},
+		func(item binding.DataItem, obj fyne.CanvasObject) {
+			f := item.(binding.Float)
+			text := obj.(*fyne.Container).Objects[0].(*widget.Label)
+			text.Bind(binding.FloatToStringWithFormat(f, "item %0.1f"))
+
+			btn := obj.(*fyne.Container).Objects[1].(*widget.Button)
+			btn.OnTapped = func() {
+				f.Set(f.Get() + 1)
+			}
+		}))
 }

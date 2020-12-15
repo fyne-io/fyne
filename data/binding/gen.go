@@ -12,7 +12,9 @@ import (
 )
 
 const itemBindTemplate = `
-// {{ .Name }} supports binding a {{ .Type }} value in a Fyne application
+// {{ .Name }} supports binding a {{ .Type }} value.
+//
+// Since: 2.0.0
 type {{ .Name }} interface {
 	DataItem
 	Get() {{ .Type }}
@@ -20,12 +22,16 @@ type {{ .Name }} interface {
 }
 
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
+//
+// Since: 2.0.0
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
+//
+// Since: 2.0.0
 func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
 	if v == nil {
 		return New{{ .Name }}() // never allow a nil value pointer
@@ -70,6 +76,8 @@ type prefBound{{ .Name }} struct {
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+//
+// Since: 2.0.0
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 	if listen, ok := prefBinds[key]; ok {
 		if l, ok := listen.({{ .Name }}); ok {
@@ -105,6 +113,8 @@ type stringFrom{{ .Name }} struct {
 // {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
 // Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
 // {{ .Name }} if the parse was successful.
+//
+// Since: 2.0.0
 func {{ .Name }}ToString(v {{ .Name }}) String {
 	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
 }
@@ -112,6 +122,8 @@ func {{ .Name }}ToString(v {{ .Name }}) String {
 // {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
 // presented using the specified format. Changes to the {{ .Name }} will be pushed to the String and setting
 // the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
+//
+// Since: 2.0.0
 func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
@@ -155,6 +167,8 @@ type stringTo{{ .Name }} struct {
 // StringTo{{ .Name }} creates a binding that connects a String data item to a {{ .Name }}.
 // Changes to the String will be parsed and pushed to the {{ .Name }} if the parse was successful, and setting
 // the {{ .Name }} update the String binding.
+//
+// Since: 2.0.0
 func StringTo{{ .Name }}(str String) {{ .Name }} {
 	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
 }
@@ -163,6 +177,8 @@ func StringTo{{ .Name }}(str String) {{ .Name }} {
 // presented using the specified format. Changes to the {{ .Name }} will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the {{ .Name }} will push a formatted value
 // into the String.
+//
+// Since: 2.0.0
 func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
@@ -197,6 +213,88 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) {
 
 func (s *stringTo{{ .Name }}) DataChanged() {
 	s.trigger()
+}
+`
+
+const listBindTemplate = `
+// {{ .Name }}List supports binding a list of {{ .Type }} values.
+//
+// Since: 2.0.0
+type {{ .Name }}List interface {
+	DataList
+
+	Append({{ .Type }})
+	Get(int) {{ .Type }}
+	Prepend({{ .Type }})
+	Set(int, {{ .Type }})
+}
+
+// New{{ .Name }}List returns a bindable list of {{ .Type }} values.
+//
+// Since: 2.0.0
+func New{{ .Name }}List() {{ .Name }}List {
+	return &bound{{ .Name }}List{}
+}
+
+// Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
+//
+// Since: 2.0.0
+func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
+	if v == nil {
+		return New{{ .Name }}List()
+	}
+
+	b := &bound{{ .Name }}List{val: v}
+
+	for _, i := range *v {
+		b.appendItem(Bind{{ .Name }}(&i))
+	}
+
+	return b
+}
+
+type bound{{ .Name }}List struct {
+	listBase
+
+	val *[]{{ .Type }}
+}
+
+func (l *bound{{ .Name }}List) Append(val {{ .Type }}) {
+	if l.val != nil {
+		*l.val = append(*l.val, val)
+	}
+
+	l.appendItem(Bind{{ .Name }}(&val))
+}
+
+func (l *bound{{ .Name }}List) Get(i int) {{ .Type }} {
+	if i < 0 || i > l.Length() {
+		return {{ .Default }}
+	}
+	if l.val != nil {
+		return (*l.val)[i]
+	}
+
+	return l.GetItem(i).({{ .Name }}).Get()
+}
+
+func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) {
+	if l.val != nil {
+		*l.val = append([]{{ .Type }}{val}, *l.val...)
+	}
+
+	l.prependItem(Bind{{ .Name }}(&val))
+}
+
+func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) {
+	if i > l.Length() {
+		return
+	}
+	if l.val != nil {
+		(*l.val)[i] = v
+	}
+
+	l.GetItem(i).({{ .Name }}).Set(v)
 }
 `
 
@@ -262,10 +360,17 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 var prefBinds = make(map[string]DataItem)
 `)
 
+	listFile, err := newFile("bindlists")
+	if err != nil {
+		return
+	}
+	defer listFile.Close()
+
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
+	list := template.Must(template.New("list").Parse(listBindTemplate))
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
@@ -281,6 +386,7 @@ var prefBinds = make(map[string]DataItem)
 		if b.Format != "" {
 			writeFile(convertFile, toString, b)
 		}
+		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {

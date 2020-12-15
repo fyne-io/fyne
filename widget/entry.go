@@ -72,7 +72,9 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	ActionItem fyne.CanvasObject
+	ActionItem   fyne.CanvasObject
+	textSource   binding.String
+	textListener binding.DataListener
 }
 
 // NewEntry creates a new single line entry widget.
@@ -83,18 +85,11 @@ func NewEntry() *Entry {
 }
 
 // NewEntryWithData returns an Entry widget connected to the specified data source.
+//
+// Since: 2.0.0
 func NewEntryWithData(data binding.String) *Entry {
 	entry := NewEntry()
-
-	data.AddListener(binding.NewDataListener(func() {
-		entry.Text = data.Get()
-		if cache.IsRendered(entry) {
-			entry.Refresh()
-		}
-	}))
-	entry.OnChanged = func(s string) {
-		data.Set(s)
-	}
+	entry.Bind(data)
 
 	return entry
 }
@@ -112,6 +107,26 @@ func NewPasswordEntry() *Entry {
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
+}
+
+// Bind connects the specified data source to this Entry.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Entry will set the value into the data source.
+//
+// Since: 2.0.0
+func (e *Entry) Bind(data binding.String) {
+	e.Unbind()
+	e.textSource = data
+
+	e.textListener = binding.NewDataListener(func() {
+		e.Text = data.Get()
+		if cache.IsRendered(e) {
+			e.Refresh()
+		}
+	})
+	data.AddListener(e.textListener)
+
+	e.OnChanged = data.Set
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -666,6 +681,21 @@ func (e *Entry) TypedRune(r rune) {
 // Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
+}
+
+// Unbind disconnects any configured data source from this Entry.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (e *Entry) Unbind() {
+	e.OnChanged = nil
+	if e.textSource == nil || e.textListener == nil {
+		return
+	}
+
+	e.textSource.RemoveListener(e.textListener)
+	e.textListener = nil
+	e.textSource = nil
 }
 
 // concealed tells the rendering textProvider if we are a concealed field

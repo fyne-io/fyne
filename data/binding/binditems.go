@@ -3,7 +3,9 @@
 
 package binding
 
-// Bool supports binding a bool value in a Fyne application
+// Bool supports binding a bool value.
+//
+// Since: 2.0.0
 type Bool interface {
 	DataItem
 	Get() bool
@@ -11,12 +13,16 @@ type Bool interface {
 }
 
 // NewBool returns a bindable bool value that is managed internally.
+//
+// Since: 2.0.0
 func NewBool() Bool {
 	blank := false
 	return &boundBool{val: &blank}
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
+//
+// Since: 2.0.0
 func BindBool(v *bool) Bool {
 	if v == nil {
 		return NewBool() // never allow a nil value pointer
@@ -51,7 +57,9 @@ func (b *boundBool) Set(val bool) {
 	b.trigger()
 }
 
-// Float supports binding a float64 value in a Fyne application
+// Float supports binding a float64 value.
+//
+// Since: 2.0.0
 type Float interface {
 	DataItem
 	Get() float64
@@ -59,12 +67,16 @@ type Float interface {
 }
 
 // NewFloat returns a bindable float64 value that is managed internally.
+//
+// Since: 2.0.0
 func NewFloat() Float {
 	blank := 0.0
 	return &boundFloat{val: &blank}
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
+//
+// Since: 2.0.0
 func BindFloat(v *float64) Float {
 	if v == nil {
 		return NewFloat() // never allow a nil value pointer
@@ -99,7 +111,9 @@ func (b *boundFloat) Set(val float64) {
 	b.trigger()
 }
 
-// Int supports binding a int value in a Fyne application
+// Int supports binding a int value.
+//
+// Since: 2.0.0
 type Int interface {
 	DataItem
 	Get() int
@@ -107,12 +121,16 @@ type Int interface {
 }
 
 // NewInt returns a bindable int value that is managed internally.
+//
+// Since: 2.0.0
 func NewInt() Int {
 	blank := 0
 	return &boundInt{val: &blank}
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
+//
+// Since: 2.0.0
 func BindInt(v *int) Int {
 	if v == nil {
 		return NewInt() // never allow a nil value pointer
@@ -147,7 +165,9 @@ func (b *boundInt) Set(val int) {
 	b.trigger()
 }
 
-// Rune supports binding a rune value in a Fyne application
+// Rune supports binding a rune value.
+//
+// Since: 2.0.0
 type Rune interface {
 	DataItem
 	Get() rune
@@ -155,12 +175,16 @@ type Rune interface {
 }
 
 // NewRune returns a bindable rune value that is managed internally.
+//
+// Since: 2.0.0
 func NewRune() Rune {
 	blank := rune(0)
 	return &boundRune{val: &blank}
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
+//
+// Since: 2.0.0
 func BindRune(v *rune) Rune {
 	if v == nil {
 		return NewRune() // never allow a nil value pointer
@@ -195,7 +219,9 @@ func (b *boundRune) Set(val rune) {
 	b.trigger()
 }
 
-// String supports binding a string value in a Fyne application
+// String supports binding a string value.
+//
+// Since: 2.0.0
 type String interface {
 	DataItem
 	Get() string
@@ -203,12 +229,16 @@ type String interface {
 }
 
 // NewString returns a bindable string value that is managed internally.
+//
+// Since: 2.0.0
 func NewString() String {
 	blank := ""
 	return &boundString{val: &blank}
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
+//
+// Since: 2.0.0
 func BindString(v *string) String {
 	if v == nil {
 		return NewString() // never allow a nil value pointer

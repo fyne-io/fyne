@@ -5,9 +5,38 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewProgressBarWithData(t *testing.T) {
+	val := binding.NewFloat()
+	val.Set(0.4)
+
+	label := NewProgressBarWithData(val)
+	waitForBinding()
+	assert.Equal(t, 0.4, label.Value)
+}
+
+func TestProgressBar_Binding(t *testing.T) {
+	bar := NewProgressBar()
+	assert.Equal(t, 0.0, bar.Value)
+
+	val := binding.NewFloat()
+	val.Set(0.1)
+	bar.Bind(val)
+	waitForBinding()
+	assert.Equal(t, 0.1, bar.Value)
+
+	val.Set(0.4)
+	waitForBinding()
+	assert.Equal(t, 0.4, bar.Value)
+
+	bar.Unbind()
+	waitForBinding()
+	assert.Equal(t, 0.4, bar.Value)
+}
 
 func TestProgressBar_SetValue(t *testing.T) {
 	bar := NewProgressBar()
