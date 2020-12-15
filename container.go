@@ -21,7 +21,8 @@ func NewContainer(objects ...CanvasObject) *Container {
 	return NewContainerWithoutLayout(objects...)
 }
 
-// NewContainerWithoutLayout returns a new Container instance holding the specified CanvasObjects that are manually arranged.
+// NewContainerWithoutLayout returns a new Container instance holding the specified
+// CanvasObjects that are manually arranged.
 //
 // Deprecated: Use container.NewWithoutLayout() instead
 func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
