@@ -52,7 +52,7 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 
 func (c *glCanvas) Capture() image.Image {
 	var img image.Image
-	runOnMain(func() {
+	runOnDraw(c.context.(*window), func() {
 		img = c.painter.Capture(c)
 	})
 	return img
