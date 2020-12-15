@@ -16,6 +16,7 @@ const (
 	fileIconCellWidth = fileIconSize * 1.25
 )
 
+// NOTE: These structs are not in alphabetical order. They are structured using structslop to reduce padding and memory usage.
 type fileDialogItem struct {
 	widget.BaseWidget
 	name      string

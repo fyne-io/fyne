@@ -21,7 +21,7 @@ var (
 
 // Animation represents an animated element within a Fyne canvas.
 // These animations may control individual objects or entire scenes.
-type Animation struct {
+type Animation struct { // NOTE: These structs are not in alphabetical order. They are structured using structslop to reduce padding and memory usage.
 	Curve       AnimationCurve
 	Duration    time.Duration
 	Tick        func(float32)
