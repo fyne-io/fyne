@@ -1,4 +1,4 @@
-package container
+package container // import "fyne.io/fyne/container"
 
 import (
 	"fyne.io/fyne"
