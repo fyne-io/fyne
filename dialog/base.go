@@ -30,9 +30,9 @@ type Dialog interface {
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	callback     func(bool)
-	title        string
-	icon         fyne.Resource
+	callback func(bool)
+	title    string
+	icon     fyne.Resource
 
 	win            *widget.PopUp
 	bg             *canvas.Rectangle
