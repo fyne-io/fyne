@@ -92,9 +92,9 @@ func (b *scrollBar) Dragged(e *fyne.DragEvent) {
 
 	switch b.orientation {
 	case scrollBarOrientationHorizontal:
-		b.draggedDistance += e.DraggedX
+		b.draggedDistance += e.Dragged.X
 	case scrollBarOrientationVertical:
-		b.draggedDistance += e.DraggedY
+		b.draggedDistance += e.Dragged.Y
 	}
 	b.area.moveBar(b.draggedDistance+b.dragStart, b.Size())
 }
@@ -167,7 +167,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 		length = scrollLength
 	}
 	if contentOffset != 0 {
-		lengthOffset = (scrollLength-length) * (contentOffset / (contentLength-scrollLength))
+		lengthOffset = (scrollLength - length) * (contentOffset / (contentLength - scrollLength))
 	}
 	if r.area.isLarge {
 		width = theme.ScrollBarSize()
@@ -227,7 +227,7 @@ func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, conten
 		offset = maxOffset
 	}
 	ratio := offset / maxOffset
-	scrollOffset := ratio * (contentLength-scrollLength)
+	scrollOffset := ratio * (contentLength - scrollLength)
 	return scrollOffset
 }
 
@@ -398,7 +398,7 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 		return
 	}
 
-	if s.updateOffset(e.DraggedX, e.DraggedY) {
+	if s.updateOffset(e.Dragged.X, e.Dragged.Y) {
 		s.refreshWithoutOffsetUpdate()
 	}
 }
@@ -442,7 +442,7 @@ func (s *ScrollContainer) Resize(size fyne.Size) {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
-	dx, dy := ev.DeltaX, ev.DeltaY
+	dx, dy := ev.Delta.X, ev.Delta.Y
 	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
 		dx, dy = dy, dx
 	}

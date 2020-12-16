@@ -36,14 +36,14 @@ func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Siz
 	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 
-	xPos := (pos.X-pad) / frame.Width
+	xPos := (pos.X - pad) / frame.Width
 	x1 := -1 + xPos*2
-	x2Pos := (pos.X+size.Width+pad) / frame.Width
+	x2Pos := (pos.X + size.Width + pad) / frame.Width
 	x2 := -1 + x2Pos*2
 
-	yPos := (pos.Y-pad) / frame.Height
+	yPos := (pos.Y - pad) / frame.Height
 	y1 := 1 - yPos*2
-	y2Pos := (pos.Y+size.Height+pad) / frame.Height
+	y2Pos := (pos.Y + size.Height + pad) / frame.Height
 	y2 := 1 - y2Pos*2
 
 	return []float32{

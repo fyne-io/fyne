@@ -730,6 +730,6 @@ func optionsMinSize(options []string) fyne.Size {
 		minHeight += label.MinSize().Height
 	}
 	// padding between all options
-	minHeight += float32(len(labels) - 1) * theme.Padding()
+	minHeight += float32(len(labels)-1) * theme.Padding()
 	return fyne.NewSize(minWidth, minHeight)
 }

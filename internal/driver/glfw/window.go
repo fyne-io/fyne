@@ -637,8 +637,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
 			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
-			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
-			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
+			ev.Dragged = fyne.NewVector(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
 
@@ -804,8 +803,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 			xoff, yoff = yoff, xoff
 		}
 		ev := &fyne.ScrollEvent{}
-		ev.DeltaX = float32(xoff) * scrollSpeed
-		ev.DeltaY = float32(yoff) * scrollSpeed
+		ev.Delta = fyne.NewVector(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
 		wid.Scrolled(ev)
 	}
 }

@@ -269,7 +269,7 @@ func (c *mobileCanvas) ensureMinSize() {
 			objToLayout = parent
 		} else {
 			size := obj.Size()
-			expectedSize := minSize.Union(size)
+			expectedSize := minSize.Max(size)
 			if expectedSize != size && size != c.size {
 				objToLayout = nil
 				obj.Resize(expectedSize)
@@ -406,8 +406,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 
 	ev := new(fyne.DragEvent)
 	ev.Position = objPos
-	ev.DraggedX = deltaX
-	ev.DraggedY = deltaY
+	ev.Dragged = fyne.Vector{X: deltaX, Y: deltaY}
 
 	dragCallback(c.dragging, ev)
 }

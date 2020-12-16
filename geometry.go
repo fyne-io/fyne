@@ -1,5 +1,14 @@
 package fyne
 
+type Vector struct {
+	X, Y float32
+}
+
+// NewVector returns a newly allocated Vector representing a generic X, Y coordinate.
+func NewVector(x float32, y float32) Vector {
+	return Vector{x, y}
+}
+
 // Position describes a generic X, Y coordinate relative to a parent Canvas
 // or CanvasObject.
 type Position struct {

@@ -222,9 +222,9 @@ func (d *divider) DragEnd() {
 func (d *divider) Dragged(event *fyne.DragEvent) {
 	offset := d.split.Offset
 	if d.split.Horizontal {
-		offset += float64(event.DraggedX) / float64(d.split.Size().Width)
+		offset += float64(event.Dragged.X) / float64(d.split.Size().Width)
 	} else {
-		offset += float64(event.DraggedY) / float64(d.split.Size().Height)
+		offset += float64(event.Dragged.Y) / float64(d.split.Size().Height)
 	}
 	d.split.SetOffset(offset)
 }

@@ -309,7 +309,7 @@ func (s *sliderRenderer) getOffset() float32 {
 
 	switch w.Orientation {
 	case Vertical:
-		y := size.Height-ratio*size.Height + endPad
+		y := size.Height - ratio*size.Height + endPad
 		return y
 	case Horizontal:
 		x := ratio*size.Width + endPad

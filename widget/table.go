@@ -339,7 +339,7 @@ func (t *tableRenderer) moveIndicators() {
 	}
 
 	i = 0
-	count := int(t.scroll.Offset.Y) % int(t.cellSize.Height + separatorThickness)
+	count := int(t.scroll.Offset.Y) % int(t.cellSize.Height+separatorThickness)
 	for y := theme.Padding() + t.scroll.Offset.Y - float32(count) - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + separatorThickness {
 		if y < theme.Padding()+t.scroll.Offset.Y {
 			continue
@@ -528,7 +528,7 @@ func (r *tableCellsRenderer) Refresh() {
 	if len(visibleColWidths) == 0 { // we can't show anything until we have some dimensions
 		return
 	}
-	offY := r.cells.t.offset.Y - float32(int(r.cells.t.offset.Y) % int(r.cells.cellSize.Height + separatorThickness))
+	offY := r.cells.t.offset.Y - float32(int(r.cells.t.offset.Y)%int(r.cells.cellSize.Height+separatorThickness))
 	minRow := int(offY / (r.cells.cellSize.Height + separatorThickness))
 	maxRow := int(fyne.Min(float32(minRow+rows), float32(dataRows)))
 

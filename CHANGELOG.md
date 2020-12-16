@@ -14,6 +14,7 @@ These changes likely break some apps, please read the
   * Size and Position units were changed from int to float32
   * `Text.TextSize` moved to float32 and `fyne.MeasureText` now takes a float32 size parameter
   * Removed `Size.Union`
+  * Added fyne.Vector for generic X, Y storage
 
 * Theme API update
   * `fyne.Theme` moved to `fyne.LegacyTheme` and can be load to a new theme using `theme.FromLegacy`
@@ -25,8 +26,12 @@ These changes likely break some apps, please read the
 ### Added
 
 * Add MouseButtonTertiary for middle mouse button events on desktop
+* Add fyne.Vector for simple x/y coordinates
 
 ### Changed
+
+* Coordinate system is now float32 - see breaking changes above
+* ScrollEvent and DragEvent moved to Vector from (int, int)
 
 * Change bundled resources to use more efficient string storage
 * Desktop left and right mouse buttons renamed to MouseButtonPrimary and MouseButtonSecondary

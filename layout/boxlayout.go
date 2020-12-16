@@ -78,9 +78,9 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	x, y := float32(0), float32(0)
 	var extra float32
 	if g.horizontal {
-		extra = size.Width - total - (theme.Padding() * float32(len(objects) - len(spacers) - 1))
+		extra = size.Width - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
 	} else {
-		extra = size.Height - total - (theme.Padding() * float32(len(objects) - len(spacers) - 1))
+		extra = size.Height - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
 	}
 	extraCell := float32(0)
 	if len(spacers) > 0 {
