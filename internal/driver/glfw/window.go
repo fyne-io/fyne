@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	scrollSpeed      = 10
+	scrollSpeed      = float32(10)
 	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
 )
 
@@ -804,8 +804,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 			xoff, yoff = yoff, xoff
 		}
 		ev := &fyne.ScrollEvent{}
-		ev.DeltaX = int(xoff * scrollSpeed)
-		ev.DeltaY = int(yoff * scrollSpeed)
+		ev.DeltaX = float32(xoff) * scrollSpeed
+		ev.DeltaY = float32(yoff) * scrollSpeed
 		wid.Scrolled(ev)
 	}
 }
@@ -1234,11 +1234,11 @@ func (w *window) create() {
 		initWindowHints()
 
 		pixWidth, pixHeight := w.screenSize(w.canvas.size)
-		pixWidth = fyne.Max(pixWidth, w.width)
+		pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
 		if pixWidth == 0 {
 			pixWidth = 10
 		}
-		pixHeight = fyne.Max(pixHeight, w.height)
+		pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
 		if pixHeight == 0 {
 			pixHeight = 10
 		}

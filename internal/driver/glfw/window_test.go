@@ -748,7 +748,7 @@ func TestWindow_Padded(t *testing.T) {
 }
 
 func TestWindow_SetPadded(t *testing.T) {
-	var menuHeight int
+	var menuHeight float32
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
@@ -759,8 +759,8 @@ func TestWindow_SetPadded(t *testing.T) {
 		name               string
 		padding            bool
 		menu               bool
-		expectedPad        int
-		expectedMenuHeight int
+		expectedPad        float32
+		expectedMenuHeight float32
 	}{
 		{"window without padding", false, false, 0, 0},
 		{"window with padding", true, false, 4, 0},

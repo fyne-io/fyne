@@ -141,15 +141,15 @@ func (s *fileIconRenderer) MinSize() fyne.Size {
 func (s *fileIconRenderer) Layout(size fyne.Size) {
 	isize := fyne.Min(size.Width, size.Height)
 
-	xoff := 0
+	xoff := float32(0)
 	yoff := (size.Height - isize) / 2
 
 	if size.Width > size.Height {
 		xoff = (size.Width - isize) / 2
 	}
-	yoff += int(float64(isize) * ratioDown)
+	yoff += isize * ratioDown
 
-	s.ext.TextSize = int(float64(isize) * ratioTextSize)
+	s.ext.TextSize = float32(int(isize * ratioTextSize))
 	s.ext.Resize(fyne.NewSize(isize, s.ext.MinSize().Height))
 	s.ext.Move(fyne.NewPos(xoff, yoff))
 

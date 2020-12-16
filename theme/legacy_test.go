@@ -34,9 +34,9 @@ func TestLegacyWrapper_Font(t *testing.T) {
 
 func TestLegacyWrapper_Size(t *testing.T) {
 	newTheme := FromLegacy(oldTheme)
-	assert.Equal(t, oldTheme.IconInlineSize(), newTheme.Size(SizeNameInlineIcon))
-	assert.Equal(t, oldTheme.Padding(), newTheme.Size(SizeNamePadding))
-	assert.Equal(t, oldTheme.TextSize(), newTheme.Size(SizeNameText))
+	assert.Equal(t, oldTheme.IconInlineSize(), int(newTheme.Size(SizeNameInlineIcon)))
+	assert.Equal(t, oldTheme.Padding(), int(newTheme.Size(SizeNamePadding)))
+	assert.Equal(t, oldTheme.TextSize(), int(newTheme.Size(SizeNameText)))
 }
 
 var _ fyne.LegacyTheme = (*legacyTheme)(nil)
@@ -89,7 +89,7 @@ func (t *legacyTheme) TextColor() color.Color {
 }
 
 func (t *legacyTheme) TextSize() int {
-	return TextSize()
+	return int(TextSize())
 }
 
 func (t *legacyTheme) TextFont() fyne.Resource {
@@ -113,17 +113,17 @@ func (t *legacyTheme) TextMonospaceFont() fyne.Resource {
 }
 
 func (t *legacyTheme) Padding() int {
-	return Padding()
+	return int(Padding())
 }
 
 func (t *legacyTheme) IconInlineSize() int {
-	return IconInlineSize()
+	return int(IconInlineSize())
 }
 
 func (t *legacyTheme) ScrollBarSize() int {
-	return ScrollBarSize()
+	return int(ScrollBarSize())
 }
 
 func (t *legacyTheme) ScrollBarSmallSize() int {
-	return ScrollBarSmallSize()
+	return int(ScrollBarSmallSize())
 }

@@ -32,7 +32,7 @@ func TestTabContainer_Empty(t *testing.T) {
 	assert.Equal(t, -1, tabs.CurrentTabIndex())
 	assert.Nil(t, tabs.CurrentTab())
 	min := tabs.MinSize()
-	assert.Equal(t, 0, min.Width)
+	assert.Equal(t, float32(0), min.Width)
 	assert.Equal(t, theme.Padding(), min.Height)
 }
 
@@ -56,8 +56,8 @@ func TestTabContainer_Resize_Empty(t *testing.T) {
 	tabs := widget.NewTabContainer()
 	tabs.Resize(fyne.NewSize(10, 10))
 	size := tabs.Size()
-	assert.Equal(t, 10, size.Height)
-	assert.Equal(t, 10, size.Width)
+	assert.Equal(t, float32(10), size.Height)
+	assert.Equal(t, float32(10), size.Width)
 }
 
 func TestTabContainer_SelectTab(t *testing.T) {

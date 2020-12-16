@@ -455,7 +455,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 
 func TestGlCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	var menuHeight int
+	var menuHeight float32
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
@@ -465,8 +465,8 @@ func TestGlCanvas_SetContent(t *testing.T) {
 		name               string
 		padding            bool
 		menu               bool
-		expectedPad        int
-		expectedMenuHeight int
+		expectedPad        float32
+		expectedMenuHeight float32
 	}{
 		{"window without padding", false, false, 0, 0},
 		{"window with padding", true, false, theme.Padding(), 0},
@@ -481,7 +481,7 @@ func TestGlCanvas_SetContent(t *testing.T) {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
 			content := canvas.NewCircle(color.Black)
-			canvasSize := 200
+			canvasSize := float32(200)
 			w.SetContent(content)
 			w.Resize(fyne.NewSize(canvasSize, canvasSize))
 

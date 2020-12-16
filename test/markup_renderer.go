@@ -110,19 +110,19 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setIntAttrWithDefault(attrs map[string]*string, name string, i int, d int) {
-	if i == d {
+func (r *markupRenderer) setIntAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+	if int(i) == int(d) {
 		return
 	}
-	value := fmt.Sprintf("%d", i)
+	value := fmt.Sprintf("%d", int(i))
 	attrs[name] = &value
 }
 
 func (r *markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
-	if pos.X == 0 && pos.Y == 0 {
+	if int(pos.X) == 0 && int(pos.Y) == 0 {
 		return
 	}
-	value := fmt.Sprintf("%d,%d", pos.X, pos.Y)
+	value := fmt.Sprintf("%d,%d", int(pos.X), int(pos.Y))
 	attrs[name] = &value
 }
 
@@ -174,7 +174,7 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 }
 
 func (r *markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
-	value := fmt.Sprintf("%dx%d", size.Width, size.Height)
+	value := fmt.Sprintf("%dx%d", int(size.Width), int(size.Height))
 	attrs[name] = &value
 }
 

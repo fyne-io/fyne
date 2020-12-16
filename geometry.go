@@ -3,12 +3,12 @@ package fyne
 // Position describes a generic X, Y coordinate relative to a parent Canvas
 // or CanvasObject.
 type Position struct {
-	X int // The position from the parent's left edge
-	Y int // The position from the parent's top edge
+	X float32 // The position from the parent's left edge
+	Y float32 // The position from the parent's top edge
 }
 
 // NewPos returns a newly allocated Position representing the specified coordinates.
-func NewPos(x int, y int) Position {
+func NewPos(x float32, y float32) Position {
 	return Position{x, y}
 }
 
@@ -20,7 +20,7 @@ func (p Position) Add(p2 Position) Position {
 
 // IsZero returns whether the Position is at the zero-point.
 func (p Position) IsZero() bool {
-	return p.X == 0 && p.Y == 0
+	return p.X == 0.0 && p.Y == 0.0
 }
 
 // Subtract returns a new Position that is the result of offsetting the current
@@ -31,12 +31,12 @@ func (p Position) Subtract(p2 Position) Position {
 
 // Size describes something with width and height.
 type Size struct {
-	Width  int // The number of units along the X axis.
-	Height int // The number of units along the Y axis.
+	Width  float32 // The number of units along the X axis.
+	Height float32 // The number of units along the Y axis.
 }
 
 // NewSize returns a newly allocated Size of the specified dimensions.
-func NewSize(w int, h int) Size {
+func NewSize(w float32, h float32) Size {
 	return Size{w, h}
 }
 
@@ -48,7 +48,7 @@ func (s Size) Add(s2 Size) Size {
 
 // IsZero returns whether the Size has zero width and zero height.
 func (s Size) IsZero() bool {
-	return s.Width == 0 && s.Height == 0
+	return s.Width == 0.0 && s.Height == 0.0
 }
 
 // Max returns a new Size that is the maximum of the current Size and s2.

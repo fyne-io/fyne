@@ -129,7 +129,7 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 	assert.True(t, min2.Width < min.Width)
 	assert.True(t, min2.Height > min.Height)
 
-	yPos := -1
+	yPos := float32(-1)
 	for _, text := range test.WidgetRenderer(textMultiLine).(*textRenderer).texts {
 		assert.True(t, text.Size().Height < min2.Height)
 		assert.True(t, text.Position().Y > yPos)

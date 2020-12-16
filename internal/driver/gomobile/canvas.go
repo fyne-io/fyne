@@ -61,8 +61,8 @@ func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 		return fyne.NewPos(0, 0), c.Size() // running in test mode
 	}
 
-	return fyne.NewPos(int(float32(dev.safeLeft)/scale), int(float32(dev.safeTop)/scale)),
-		fyne.NewSize(int(float32(dev.safeWidth)/scale), int(float32(dev.safeHeight)/scale))
+	return fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale),
+		fyne.NewSize(float32(dev.safeWidth)/scale, float32(dev.safeHeight)/scale)
 }
 
 func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
