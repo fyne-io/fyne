@@ -67,6 +67,7 @@ func TestConfirmDialog_Resize(t *testing.T) {
 	d := NewConfirm("Test", "Test", nil, window)
 
 	theDialog := d.dialog
+	d.dialog.Show() // we cannot check window size if not shown
 
 	//Test resize - normal size scenario
 	size := fyne.NewSize(300, 180) //normal size to fit (600,400)
