@@ -148,3 +148,4 @@ func TestVector_IsZero(t *testing.T) {
 	v.X = 1
 	assert.False(t, v.IsZero())
 }
+
