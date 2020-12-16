@@ -515,7 +515,7 @@ func setupPopUpMenuTest() (*PopUpMenu, fyne.Window) {
 
 	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
-	m := newPopUpMenu(fyne.NewMenu(
+	m := NewPopUpMenu(fyne.NewMenu(
 		"",
 		fyne.NewMenuItem("Option A", nil),
 		fyne.NewMenuItem("Option B", nil),

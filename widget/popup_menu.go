@@ -12,14 +12,10 @@ type PopUpMenu struct {
 	overlay *widget.OverlayContainer
 }
 
-// ShowPopUpMenuAtPosition creates a PopUp menu populated with items from the passed menu structure.
-// It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
-func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
-	m := newPopUpMenu(menu, c)
-	m.ShowAtPosition(pos)
-}
-
-func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
+// NewPopUpMenu creates a new, reusable popup menu. You can show it using ShowAtPosition.
+//
+// Since: 2.0.0
+func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p := &PopUpMenu{Menu: NewMenu(menu), canvas: c}
 	p.Menu.Resize(p.Menu.MinSize())
 	p.Menu.customSized = true
@@ -30,6 +26,13 @@ func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 		p.Hide()
 	}
 	return p
+}
+
+// ShowPopUpMenuAtPosition creates a PopUp menu populated with items from the passed menu structure.
+// It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
+func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
+	m := NewPopUpMenu(menu, c)
+	m.ShowAtPosition(pos)
 }
 
 // CreateRenderer returns a new renderer for the pop-up menu.

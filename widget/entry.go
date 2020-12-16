@@ -492,7 +492,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
 
-	e.popUp = newPopUpMenu(menu, c)
+	e.popUp = NewPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
