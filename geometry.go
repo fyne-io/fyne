@@ -1,5 +1,12 @@
 package fyne
 
+// Vec2 marks geometry types that can operate as a coordinate vector
+type Vec2 interface {
+	Get() (float32, float32)
+	IsZero() bool
+}
+
+// Vector is a generic X, Y coordinate type
 type Vector struct {
 	X, Y float32
 }
@@ -7,6 +14,16 @@ type Vector struct {
 // NewVector returns a newly allocated Vector representing a generic X, Y coordinate.
 func NewVector(x float32, y float32) Vector {
 	return Vector{x, y}
+}
+
+// Get returns the X and Y elements of this Vector
+func (v Vector) Get() (float32, float32) {
+	return v.X, v.Y
+}
+
+// IsZero returns whether the Position is at the zero-point.
+func (v Vector) IsZero() bool {
+	return v.X == 0.0 && v.Y == 0.0
 }
 
 // Position describes a generic X, Y coordinate relative to a parent Canvas
@@ -23,8 +40,14 @@ func NewPos(x float32, y float32) Position {
 
 // Add returns a new Position that is the result of offsetting the current
 // position by p2 X and Y.
-func (p Position) Add(p2 Position) Position {
-	return Position{p.X + p2.X, p.Y + p2.Y}
+func (p Position) Add(v Vec2) Position {
+	x, y := v.Get()
+	return Position{p.X + x, p.Y + y}
+}
+
+// Get returns the X and Y elements of this Position
+func (p Position) Get() (float32, float32) {
+	return p.X, p.Y
 }
 
 // IsZero returns whether the Position is at the zero-point.
@@ -34,8 +57,9 @@ func (p Position) IsZero() bool {
 
 // Subtract returns a new Position that is the result of offsetting the current
 // position by p2 -X and -Y.
-func (p Position) Subtract(p2 Position) Position {
-	return Position{p.X - p2.X, p.Y - p2.Y}
+func (p Position) Subtract(v Vec2) Position {
+	x, y := v.Get()
+	return Position{p.X - x, p.Y - y}
 }
 
 // Size describes something with width and height.
@@ -51,8 +75,9 @@ func NewSize(w float32, h float32) Size {
 
 // Add returns a new Size that is the result of increasing the current size by
 // s2 Width and Height.
-func (s Size) Add(s2 Size) Size {
-	return Size{s.Width + s2.Width, s.Height + s2.Height}
+func (s Size) Add(v Vec2) Size {
+	w, h := v.Get()
+	return Size{s.Width + w, s.Height + h}
 }
 
 // IsZero returns whether the Size has zero width and zero height.
@@ -61,23 +86,33 @@ func (s Size) IsZero() bool {
 }
 
 // Max returns a new Size that is the maximum of the current Size and s2.
-func (s Size) Max(s2 Size) Size {
-	maxW := Max(s.Width, s2.Width)
-	maxH := Max(s.Height, s2.Height)
+func (s Size) Max(v Vec2) Size {
+	x, y := v.Get()
+
+	maxW := Max(s.Width, x)
+	maxH := Max(s.Height, y)
 
 	return NewSize(maxW, maxH)
 }
 
 // Min returns a new Size that is the minimum of the current Size and s2.
-func (s Size) Min(s2 Size) Size {
-	minW := Min(s.Width, s2.Width)
-	minH := Min(s.Height, s2.Height)
+func (s Size) Min(v Vec2) Size {
+	x, y := v.Get()
+
+	minW := Min(s.Width, x)
+	minH := Min(s.Height, y)
 
 	return NewSize(minW, minH)
 }
 
+// Get returns the Width and Height elements of this Size
+func (s Size) Get() (float32, float32) {
+	return s.Width, s.Height
+}
+
 // Subtract returns a new Size that is the result of decreasing the current size
 // by s2 Width and Height.
-func (s Size) Subtract(s2 Size) Size {
-	return Size{s.Width - s2.Width, s.Height - s2.Height}
+func (s Size) Subtract(v Vec2) Size {
+	w, h := v.Get()
+	return Size{s.Width - w, s.Height - h}
 }
