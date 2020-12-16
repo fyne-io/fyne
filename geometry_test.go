@@ -99,13 +99,3 @@ func TestSize_Subtract(t *testing.T) {
 	assert.Equal(t, float32(15), size3.Width)
 	assert.Equal(t, float32(15), size3.Height)
 }
-
-func TestSize_Union(t *testing.T) {
-	size1 := NewSize(10, 100)
-	size2 := NewSize(100, 10)
-
-	size3 := size1.Union(size2)
-
-	assert.Equal(t, float32(100), size3.Width)
-	assert.Equal(t, float32(100), size3.Height)
-}

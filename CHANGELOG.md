@@ -13,6 +13,7 @@ These changes likely break some apps, please read the
 * Coordinate system to float32
   * Size and Position units were changed from int to float32
   * `Text.TextSize` moved to float32 and `fyne.MeasureText` now takes a float32 size parameter
+  * Removed `Size.Union`
 
 * Theme API update
   * `fyne.Theme` moved to `fyne.LegacyTheme` and can be load to a new theme using `theme.FromLegacy`

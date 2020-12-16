@@ -266,7 +266,7 @@ func (r *tabContainerRenderer) MinSize() fyne.Size {
 
 	childMin := fyne.NewSize(0, 0)
 	for _, child := range r.container.Items {
-		childMin = childMin.Union(child.Content.MinSize())
+		childMin = childMin.Max(child.Content.MinSize())
 	}
 
 	tabLocation := r.container.tabLocation

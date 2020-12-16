@@ -73,7 +73,7 @@ func (c *Container) MinSize() Size {
 
 	minSize := NewSize(1, 1)
 	for _, child := range c.Objects {
-		minSize = minSize.Union(child.MinSize())
+		minSize = minSize.Max(child.MinSize())
 	}
 
 	return minSize

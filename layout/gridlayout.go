@@ -132,7 +132,7 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			continue
 		}
 
-		minSize = minSize.Union(child.MinSize())
+		minSize = minSize.Max(child.MinSize())
 	}
 
 	if g.horizontal() {
