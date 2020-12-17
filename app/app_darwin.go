@@ -31,12 +31,12 @@ import (
 
 func defaultVariant() fyne.ThemeVariant {
 	if fyne.CurrentDevice().IsMobile() { // this is called in mobile simulate mode
-		return theme.Variants.Light
+		return theme.VariantNameLight
 	}
 	if C.isDarkMode() {
-		return theme.Variants.Dark
+		return theme.VariantNameDark
 	}
-	return theme.Variants.Light
+	return theme.VariantNameLight
 }
 
 func rootConfigDir() string {

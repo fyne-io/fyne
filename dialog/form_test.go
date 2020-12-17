@@ -100,7 +100,7 @@ func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDia
 	}
 
 	items := []*widget.FormItem{validatingItem, controlItem}
-	return NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
+	return NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		if confirm {
 			*result = formDialogConfirm
 		} else {
@@ -121,7 +121,7 @@ func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog
 		Widget: controlEntry2,
 	}
 	items := []*widget.FormItem{controlItem, controlItem2}
-	return NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
+	return NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		if confirm {
 			*result = formDialogConfirm
 		} else {

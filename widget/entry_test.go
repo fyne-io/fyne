@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"image/color"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -14,6 +16,28 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestEntry_Binding(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Init")
+	assert.Equal(t, "Init", entry.Text)
+
+	str := binding.NewString()
+	entry.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "", entry.Text)
+
+	str.Set("Updated")
+	waitForBinding()
+	assert.Equal(t, "Updated", entry.Text)
+
+	entry.SetText("Typed")
+	assert.Equal(t, "Typed", str.Get())
+
+	entry.Unbind()
+	waitForBinding()
+	assert.Equal(t, "Typed", entry.Text)
+}
 
 func TestEntry_Cursor(t *testing.T) {
 	entry := widget.NewEntry()
@@ -2784,6 +2808,18 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
 
+func TestNewEntryWithData(t *testing.T) {
+	str := binding.NewString()
+	str.Set("Init")
+
+	entry := widget.NewEntryWithData(str)
+	waitForBinding()
+	assert.Equal(t, "Init", entry.Text)
+
+	entry.SetText("Typed")
+	assert.Equal(t, "Typed", str.Get())
+}
+
 func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	e := widget.NewEntry()
 	b := widget.NewButton("", func() {})
@@ -3210,4 +3246,8 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 func teardownImageTest(w fyne.Window) {
 	w.Close()
 	test.NewApp()
+}
+
+func waitForBinding() {
+	time.Sleep(time.Millisecond * 100) // data resolves on background thread
 }

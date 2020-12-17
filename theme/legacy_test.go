@@ -19,9 +19,9 @@ func TestFromLegacy(t *testing.T) {
 
 func TestLegacyWrapper_Color(t *testing.T) {
 	newTheme := FromLegacy(oldTheme)
-	assert.Equal(t, oldTheme.BackgroundColor(), newTheme.Color(Colors.Background, Variants.Light))
-	assert.Equal(t, oldTheme.ShadowColor(), newTheme.Color(Colors.Shadow, Variants.Light))
-	assert.Equal(t, oldTheme.TextColor(), newTheme.Color(Colors.Foreground, Variants.Light))
+	assert.Equal(t, oldTheme.BackgroundColor(), newTheme.Color(ColorNameBackground, VariantNameLight))
+	assert.Equal(t, oldTheme.ShadowColor(), newTheme.Color(ColorNameShadow, VariantNameLight))
+	assert.Equal(t, oldTheme.TextColor(), newTheme.Color(ColorNameForeground, VariantNameLight))
 }
 
 func TestLegacyWrapper_Font(t *testing.T) {
@@ -34,9 +34,9 @@ func TestLegacyWrapper_Font(t *testing.T) {
 
 func TestLegacyWrapper_Size(t *testing.T) {
 	newTheme := FromLegacy(oldTheme)
-	assert.Equal(t, oldTheme.IconInlineSize(), newTheme.Size(Sizes.InlineIcon))
-	assert.Equal(t, oldTheme.Padding(), newTheme.Size(Sizes.Padding))
-	assert.Equal(t, oldTheme.TextSize(), newTheme.Size(Sizes.Text))
+	assert.Equal(t, oldTheme.IconInlineSize(), newTheme.Size(SizeNameInlineIcon))
+	assert.Equal(t, oldTheme.Padding(), newTheme.Size(SizeNamePadding))
+	assert.Equal(t, oldTheme.TextSize(), newTheme.Size(SizeNameText))
 }
 
 var _ fyne.LegacyTheme = (*legacyTheme)(nil)

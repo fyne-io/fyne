@@ -3,11 +3,36 @@ package widget_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 )
+
+func TestCheck_Binding(t *testing.T) {
+	c := widget.NewCheck("", nil)
+	c.SetChecked(true)
+	assert.Equal(t, true, c.Checked)
+
+	val := binding.NewBool()
+	c.Bind(val)
+	waitForBinding()
+	assert.Equal(t, false, c.Checked)
+
+	val.Set(true)
+	waitForBinding()
+	assert.Equal(t, true, c.Checked)
+
+	c.SetChecked(false)
+	assert.Equal(t, false, val.Get())
+
+	c.Unbind()
+	waitForBinding()
+	assert.Equal(t, false, c.Checked)
+}
 
 func TestCheck_Layout(t *testing.T) {
 	test.NewApp()
@@ -105,4 +130,16 @@ func TestCheck_Layout(t *testing.T) {
 			window.Close()
 		})
 	}
+}
+
+func TestNewCheckWithData(t *testing.T) {
+	val := binding.NewBool()
+	val.Set(true)
+
+	c := widget.NewCheckWithData("", val)
+	waitForBinding()
+	assert.Equal(t, true, c.Checked)
+
+	c.SetChecked(false)
+	assert.Equal(t, false, val.Get())
 }

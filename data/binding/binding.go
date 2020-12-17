@@ -5,6 +5,8 @@ package binding
 import "sync"
 
 // DataItem is the base interface for all bindable data items.
+//
+// Since: 2.0.0
 type DataItem interface {
 	// AddListener attaches a new change listener to this DataItem.
 	// Listeners are called each time the data inside this DataItem changes.
@@ -17,11 +19,15 @@ type DataItem interface {
 
 // DataListener is any object that can register for changes in a bindable DataItem.
 // See NewDataListener to define a new listener using just an inline function.
+//
+// Since: 2.0.0
 type DataListener interface {
 	DataChanged()
 }
 
 // NewDataListener is a helper function that creates a new listener type from a simple callback function.
+//
+// Since: 2.0.0
 func NewDataListener(fn func()) DataListener {
 	return &listener{fn}
 }

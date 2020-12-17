@@ -33,6 +33,9 @@ type Slider struct {
 
 	Orientation Orientation
 	OnChanged   func(float64)
+
+	valueSource   binding.Float
+	valueListener binding.DataListener
 }
 
 // NewSlider returns a basic slider.
@@ -49,20 +52,33 @@ func NewSlider(min, max float64) *Slider {
 }
 
 // NewSliderWithData returns a slider connected with the specified data source.
+//
+// Since: 2.0.0
 func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 	slider := NewSlider(min, max)
-
-	data.AddListener(binding.NewDataListener(func() {
-		slider.Value = data.Get()
-		if cache.IsRendered(slider) { // don't invalidate values set after constructor like Step
-			slider.Refresh()
-		}
-	}))
-	slider.OnChanged = func(f float64) {
-		data.Set(f)
-	}
+	slider.Bind(data)
 
 	return slider
+}
+
+// Bind connects the specified data source to this Slider.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Slider will set the value into the data source.
+//
+// Since: 2.0.0
+func (s *Slider) Bind(data binding.Float) {
+	s.Unbind()
+	s.valueSource = data
+
+	s.valueListener = binding.NewDataListener(func() {
+		s.Value = data.Get()
+		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
+			s.Refresh()
+		}
+	})
+	data.AddListener(s.valueListener)
+
+	s.OnChanged = data.Set
 }
 
 // DragEnd function.
@@ -177,6 +193,21 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
 	slide.Refresh() // prepare for first draw
 	return slide
+}
+
+// Unbind disconnects any configured data source from this Slider.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (s *Slider) Unbind() {
+	s.OnChanged = nil
+	if s.valueSource == nil || s.valueListener == nil {
+		return
+	}
+
+	s.valueSource.RemoveListener(s.valueListener)
+	s.valueListener = nil
+	s.valueSource = nil
 }
 
 const (
