@@ -75,6 +75,8 @@ type URI interface {
 	// usually be possible to use Parent() to create a reference to
 	// a resource which does not exist, though future operations on this
 	// resource may fail.
+	//
+	// Since: 2.0
 	Parent() (URI, error)
 
 	// Child should return a URI referencing a resource nested
@@ -99,6 +101,8 @@ type URI interface {
 	// usually be possible to use Child() to create a reference to
 	// a resource which does not exist, though future operations on this
 	// resource may fail.
+	//
+	// Since: 2.0
 	Child(URI, string) (URI, error)
 
 	// Exists should determine if the resource referenced by the URI
@@ -115,6 +119,8 @@ type URI interface {
 	// return false along with the error. It is understood that a non-nil
 	// error value signals that the existence or non-existence of the
 	// resource cannot be determined and is undefined.
+	//
+	// Since: 2.0
 	Exists(URI) (bool, error)
 
 	// Destroy should destroy, delete, or otherwise remove the resource
@@ -128,6 +134,8 @@ type URI interface {
 	//
 	// * If the referenced resource does not exist, attempting to destroy
 	//   it should throw an error.
+	//
+	// Since: 2.0
 	Destroy(URI) error
 }
 
