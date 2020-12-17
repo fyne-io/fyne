@@ -16,7 +16,7 @@ These changes likely break some apps, please read the
 * The desktop.Cursor definition was renamed desktop.StandardCursor to make way for custom cursors
 
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
-* Removed deprecated types including dialog.FileIcon 
+* Removed deprecated types including dialog.FileIcon (now widget.FileIcon)
 
 ### Added
 
