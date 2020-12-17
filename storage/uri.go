@@ -123,6 +123,8 @@ func parentGeneric(location string) (string, error) {
 // removing the last item.
 //
 // Since: 1.4
+//
+// Deprecated: Parent() is a member of the URI interface now.
 func Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
@@ -166,6 +168,8 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 // Child appends a new path element to a URI, separated by a '/' character.
 //
 // Since: 1.4
+//
+// Deprecated: Child is now a member of the URI interface.
 func Child(u fyne.URI, component string) (fyne.URI, error) {
 	// While as implemented this does not need to return an error, it is
 	// reasonable to expect that future implementations of this, especially
@@ -187,6 +191,8 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 // return.
 //
 // Since: 1.4
+//
+// Deprecated: Exists is now a member of the URI interface
 func Exists(u fyne.URI) (bool, error) {
 	if u.Scheme() != "file" {
 		return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())
