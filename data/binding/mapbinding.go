@@ -35,10 +35,13 @@ func NewUntypedMap() UntypedMap {
 // BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
 //
 // Since: 2.0.0
-func BindUntypedMap(d map[string]interface{}) UntypedMap {
+func BindUntypedMap(d *map[string]interface{}) UntypedMap {
+	if d == nil {
+		return NewUntypedMap()
+	}
 	m := &mapBase{val: make(map[string]DataItem)}
 
-	for k, v := range d {
+	for k, v := range *d {
 		m.Set(k, v)
 	}
 
@@ -47,39 +50,33 @@ func BindUntypedMap(d map[string]interface{}) UntypedMap {
 
 // BindStruct creates a new map biding of string to interface{} using the struct passed as data.
 // The key in for each item is a string representation of each exported field with the value set as an interface{}.
-// Only exported fields are included
+// Only exported fields are included.
 //
 // Since: 2.0.0
-func BindStruct(i interface{}) UntypedMap {
+func BindStruct(i interface{}) DataMap {
+	if i == nil {
+		return NewUntypedMap()
+	}
 	t := reflect.TypeOf(i)
-	if t.Kind() != reflect.Struct {
-		fyne.LogError("Invalid type passed to BindStruct", nil)
+	if t.Kind() != reflect.Ptr ||
+		(reflect.TypeOf(reflect.ValueOf(i).Elem()).Kind() != reflect.Struct) {
+		fyne.LogError("Invalid type passed to BindStruct, must be pointer to struct", nil)
+		return NewUntypedMap()
 	}
 
-	data := make(map[string]interface{})
-	v := reflect.ValueOf(i)
+	m := &mapBase{val: make(map[string]DataItem)}
+	v := reflect.ValueOf(i).Elem()
+	t = v.Type()
 	for j := 0; j < v.NumField(); j++ {
-		name := t.Field(j).Name
 		f := v.Field(j)
-		if !f.CanInterface() {
+		if !f.CanSet() {
 			continue
 		}
 
-		switch v.Field(j).Kind() {
-		case reflect.Bool:
-			data[name] = f.Bool()
-		case reflect.Float32, reflect.Float64:
-			data[name] = f.Float()
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			data[name] = f.Int()
-		case reflect.String:
-			data[name] = f.String()
-		default:
-			data[name] = f.Interface()
-		}
+		m.setItem(t.Field(j).Name, bindReflect(f))
 	}
 
-	return BindUntypedMap(data)
+	return m
 }
 
 type mapBase struct {
@@ -122,7 +119,7 @@ func (b *mapBase) Delete(key string) {
 
 func (b *mapBase) Get(key string) interface{} {
 	if i, ok := b.val[key]; ok {
-		return i.(untyped).Get()
+		return i.(untyped).get()
 	}
 
 	return nil
@@ -130,7 +127,7 @@ func (b *mapBase) Get(key string) interface{} {
 
 func (b *mapBase) Set(key string, d interface{}) {
 	if i, ok := b.val[key]; ok {
-		i.(untyped).Set(d)
+		i.(untyped).set(d)
 		return
 	}
 
@@ -145,8 +142,8 @@ func (b *mapBase) setItem(key string, d DataItem) {
 
 type untyped interface {
 	DataItem
-	Get() interface{}
-	Set(interface{})
+	get() interface{}
+	set(interface{})
 }
 
 func bindUntyped(v *interface{}) untyped {
@@ -163,14 +160,14 @@ type boundUntyped struct {
 	val *interface{}
 }
 
-func (b *boundUntyped) Get() interface{} {
+func (b *boundUntyped) get() interface{} {
 	if b.val == nil {
 		return 0
 	}
 	return *b.val
 }
 
-func (b *boundUntyped) Set(val interface{}) {
+func (b *boundUntyped) set(val interface{}) {
 	if *b.val == val {
 		return
 	}
@@ -181,4 +178,106 @@ func (b *boundUntyped) Set(val interface{}) {
 	}
 
 	b.trigger()
+}
+
+type boundReflect struct {
+	base
+
+	val reflect.Value
+}
+
+func (b *boundReflect) get() interface{} {
+	return b.val.Interface()
+}
+
+func (b *boundReflect) set(val interface{}) {
+	b.val.Set(reflect.ValueOf(val))
+
+	b.trigger()
+}
+
+type reflectBool struct {
+	boundReflect
+}
+
+func (r *reflectBool) Get() bool {
+	return r.val.Bool()
+}
+
+func (r *reflectBool) Set(b bool) {
+	r.val.SetBool(b)
+}
+
+func bindReflectBool(f reflect.Value) DataItem {
+	r := &reflectBool{}
+	r.val = f
+	return r
+}
+
+type reflectFloat struct {
+	boundReflect
+}
+
+func (r *reflectFloat) Get() float64 {
+	return r.val.Float()
+}
+
+func (r *reflectFloat) Set(f float64) {
+	r.val.SetFloat(f)
+}
+
+func bindReflectFloat(f reflect.Value) DataItem {
+	r := &reflectFloat{}
+	r.val = f
+	return r
+}
+
+type reflectInt struct {
+	boundReflect
+}
+
+func (r *reflectInt) Get() int {
+	return int(r.val.Int())
+}
+
+func (r *reflectInt) Set(i int) {
+	r.val.SetInt(int64(i))
+}
+
+func bindReflectInt(f reflect.Value) DataItem {
+	r := &reflectInt{}
+	r.val = f
+	return r
+}
+
+type reflectString struct {
+	boundReflect
+}
+
+func (r *reflectString) Get() string {
+	return r.val.String()
+}
+
+func (r *reflectString) Set(s string) {
+	r.val.SetString(s)
+}
+
+func bindReflectString(f reflect.Value) DataItem {
+	r := &reflectString{}
+	r.val = f
+	return r
+}
+
+func bindReflect(field reflect.Value) DataItem {
+	switch field.Kind() {
+	case reflect.Bool:
+		return bindReflectBool(field)
+	case reflect.Float32, reflect.Float64:
+		return bindReflectFloat(field)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return bindReflectInt(field)
+	case reflect.String:
+		return bindReflectString(field)
+	}
+	return &boundReflect{val: field}
 }

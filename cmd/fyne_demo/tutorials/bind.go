@@ -1,6 +1,8 @@
 package tutorials
 
 import (
+	"fmt"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/data/binding"
@@ -38,5 +40,16 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	checkEntry := widget.NewEntryWithData(binding.BoolToString(boolData))
 	checks := container.NewGridWithColumns(3, check, checkLabel, checkEntry)
 
-	return container.NewVBox(floats, slide, bar, buttons, widget.NewSeparator(), checks)
+	formStruct := struct {
+		Name, Email string
+		Subscribe   bool
+	}{}
+
+	formData := binding.BindStruct(&formStruct)
+	form := widget.NewFormWithData(formData)
+	form.OnSubmit = func() {
+		fmt.Println("Struct:\n", formStruct)
+	}
+	return container.NewBorder(container.NewVBox(floats, slide, bar, buttons, widget.NewSeparator(), checks, widget.NewSeparator()),
+		nil, nil, nil, form)
 }

@@ -17,13 +17,13 @@ func TestBindStruct(t *testing.T) {
 		0.2,
 	}
 
-	b := BindStruct(s)
+	b := BindStruct(&s)
 
 	assert.Equal(t, 3, len(b.Keys()))
-	assert.Equal(t, "bar", b.Get("Foo"))
+	assert.Equal(t, "bar", b.GetItem("Foo").(String).Get())
 
-	b.Set("Foo", "Content")
-	assert.Equal(t, "Content", b.Get("Foo"))
+	b.GetItem("Foo").(String).Set("Content")
+	assert.Equal(t, "Content", b.GetItem("Foo").(String).Get())
 }
 
 func TestBindUntypedMap(t *testing.T) {
@@ -33,7 +33,7 @@ func TestBindUntypedMap(t *testing.T) {
 		"bas": 0.2,
 	}
 
-	b := BindUntypedMap(m)
+	b := BindUntypedMap(&m)
 
 	assert.Equal(t, 3, len(b.Keys()))
 	assert.Equal(t, "bar", b.Get("foo"))
