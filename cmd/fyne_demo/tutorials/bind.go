@@ -41,7 +41,7 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	checks := container.NewGridWithColumns(3, check, checkLabel, checkEntry)
 	item := container.NewVBox(floats, slide, bar, buttons, widget.NewSeparator(), checks, widget.NewSeparator())
 
-  dataList := binding.BindFloatList(&[]float64{0.1, 0.2, 0.3})
+	dataList := binding.BindFloatList(&[]float64{0.1, 0.2, 0.3})
 
 	button := widget.NewButton("Append", func() {
 		dataList.Append(float64(dataList.Length()+1) / 10)
@@ -62,8 +62,8 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 				f.Set(f.Get() + 1)
 			}
 		})
-  
-  	formStruct := struct {
+
+	formStruct := struct {
 		Name, Email string
 		Subscribe   bool
 	}{}
@@ -74,5 +74,6 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 		fmt.Println("Struct:\n", formStruct)
 	}
 
-	return container.NewBorder(item, button, nil, nil, container.NewGridWithColumnds(2, list, form))
+	listPanel := container.NewBorder(nil, button, nil, nil, list)
+	return container.NewBorder(item, nil, nil, nil, container.NewGridWithColumns(2, listPanel, form))
 }
