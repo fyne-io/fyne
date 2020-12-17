@@ -246,8 +246,8 @@ func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
 
 	b := &bound{{ .Name }}List{val: v}
 
-	for _, i := range *v {
-		b.appendItem(Bind{{ .Name }}(&i))
+	for i := range *v {
+		b.appendItem(Bind{{ .Name }}(&((*v)[i])))
 	}
 
 	return b
