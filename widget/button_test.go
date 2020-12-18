@@ -65,6 +65,10 @@ func TestButton_Tapped(t *testing.T) {
 }
 
 func TestButton_Disable(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
 	tapped := false
 	button := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {
 		tapped = true
