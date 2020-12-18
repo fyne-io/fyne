@@ -110,7 +110,7 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setIntAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
 	if int(i) == int(d) {
 		return
 	}
@@ -360,7 +360,7 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
 	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.TextColor())
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
-	r.setIntAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
+	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
 	r.setBoolAttr(attrs, "italic", t.TextStyle.Italic)
 	r.setBoolAttr(attrs, "monospace", t.TextStyle.Monospace)

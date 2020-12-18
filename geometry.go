@@ -1,12 +1,12 @@
 package fyne
 
-// Vec2 marks geometry types that can operate as a coordinate vector
+// Vec2 marks geometry types that can operate as a coordinate vector.
 type Vec2 interface {
-	Get() (float32, float32)
+	Components() (float32, float32)
 	IsZero() bool
 }
 
-// Vector is a generic X, Y coordinate type
+// Vector is a generic X, Y coordinate or size representation.
 type Vector struct {
 	X, Y float32
 }
@@ -16,8 +16,8 @@ func NewVector(x float32, y float32) Vector {
 	return Vector{x, y}
 }
 
-// Get returns the X and Y elements of this Vector
-func (v Vector) Get() (float32, float32) {
+// Components returns the X and Y elements of this Vector.
+func (v Vector) Components() (float32, float32) {
 	return v.X, v.Y
 }
 
@@ -41,12 +41,12 @@ func NewPos(x float32, y float32) Position {
 // Add returns a new Position that is the result of offsetting the current
 // position by p2 X and Y.
 func (p Position) Add(v Vec2) Position {
-	x, y := v.Get()
+	x, y := v.Components()
 	return Position{p.X + x, p.Y + y}
 }
 
-// Get returns the X and Y elements of this Position
-func (p Position) Get() (float32, float32) {
+// Components returns the X and Y elements of this Position
+func (p Position) Components() (float32, float32) {
 	return p.X, p.Y
 }
 
@@ -58,7 +58,7 @@ func (p Position) IsZero() bool {
 // Subtract returns a new Position that is the result of offsetting the current
 // position by p2 -X and -Y.
 func (p Position) Subtract(v Vec2) Position {
-	x, y := v.Get()
+	x, y := v.Components()
 	return Position{p.X - x, p.Y - y}
 }
 
@@ -76,7 +76,7 @@ func NewSize(w float32, h float32) Size {
 // Add returns a new Size that is the result of increasing the current size by
 // s2 Width and Height.
 func (s Size) Add(v Vec2) Size {
-	w, h := v.Get()
+	w, h := v.Components()
 	return Size{s.Width + w, s.Height + h}
 }
 
@@ -87,7 +87,7 @@ func (s Size) IsZero() bool {
 
 // Max returns a new Size that is the maximum of the current Size and s2.
 func (s Size) Max(v Vec2) Size {
-	x, y := v.Get()
+	x, y := v.Components()
 
 	maxW := Max(s.Width, x)
 	maxH := Max(s.Height, y)
@@ -97,7 +97,7 @@ func (s Size) Max(v Vec2) Size {
 
 // Min returns a new Size that is the minimum of the current Size and s2.
 func (s Size) Min(v Vec2) Size {
-	x, y := v.Get()
+	x, y := v.Components()
 
 	minW := Min(s.Width, x)
 	minH := Min(s.Height, y)
@@ -105,14 +105,14 @@ func (s Size) Min(v Vec2) Size {
 	return NewSize(minW, minH)
 }
 
-// Get returns the Width and Height elements of this Size
-func (s Size) Get() (float32, float32) {
+// Components returns the Width and Height elements of this Size
+func (s Size) Components() (float32, float32) {
 	return s.Width, s.Height
 }
 
 // Subtract returns a new Size that is the result of decreasing the current size
 // by s2 Width and Height.
 func (s Size) Subtract(v Vec2) Size {
-	w, h := v.Get()
+	w, h := v.Components()
 	return Size{s.Width - w, s.Height - h}
 }
