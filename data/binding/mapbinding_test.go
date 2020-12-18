@@ -40,4 +40,8 @@ func TestBindUntypedMap(t *testing.T) {
 
 	b.Set("Extra", "Content")
 	assert.Equal(t, "Content", b.Get("Extra"))
+
+	b.Set("foo", "new")
+	assert.Equal(t, "new", b.Get("foo"))
+	assert.Equal(t, "Content", b.Get("Extra"))
 }

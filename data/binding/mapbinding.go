@@ -29,7 +29,7 @@ type UntypedMap interface {
 //
 // Since: 2.0.0
 func NewUntypedMap() UntypedMap {
-	return &mapBase{val: make(map[string]DataItem)}
+	return &mapBase{items: make(map[string]DataItem)}
 }
 
 // BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
@@ -39,10 +39,10 @@ func BindUntypedMap(d *map[string]interface{}) UntypedMap {
 	if d == nil {
 		return NewUntypedMap()
 	}
-	m := &mapBase{val: make(map[string]DataItem)}
+	m := &mapBase{items: make(map[string]DataItem), val: d}
 
-	for k, v := range *d {
-		m.Set(k, v)
+	for k := range *d {
+		m.setItem(k, bindUntyped(d, k))
 	}
 
 	return m
@@ -64,7 +64,7 @@ func BindStruct(i interface{}) DataMap {
 		return NewUntypedMap()
 	}
 
-	m := &mapBase{val: make(map[string]DataItem)}
+	m := &mapBase{items: make(map[string]DataItem)}
 	v := reflect.ValueOf(i).Elem()
 	t = v.Type()
 	for j := 0; j < v.NumField(); j++ {
@@ -73,7 +73,7 @@ func BindStruct(i interface{}) DataMap {
 			continue
 		}
 
-		m.setItem(t.Field(j).Name, bindReflect(f))
+		m.items[t.Field(j).Name] = bindReflect(f)
 	}
 
 	return m
@@ -81,7 +81,8 @@ func BindStruct(i interface{}) DataMap {
 
 type mapBase struct {
 	base
-	val map[string]DataItem
+	items map[string]DataItem
+	val   *map[string]interface{}
 }
 
 // GetItem returns the DataItem at the specified key.
@@ -89,7 +90,7 @@ type mapBase struct {
 //
 // Since: 2.0.0
 func (b *mapBase) GetItem(key string) DataItem {
-	if v, ok := b.val[key]; ok {
+	if v, ok := b.items[key]; ok {
 		return v
 	}
 
@@ -100,10 +101,10 @@ func (b *mapBase) GetItem(key string) DataItem {
 //
 // Since: 2.0.0
 func (b *mapBase) Keys() []string {
-	ret := make([]string, len(b.val))
+	ret := make([]string, len(b.items))
 	// TODO lock
 	i := 0
-	for k := range b.val {
+	for k := range b.items {
 		ret[i] = k
 		i++
 	}
@@ -124,7 +125,7 @@ func (b *mapBase) Delete(key string) {
 //
 // Since: 2.0.0
 func (b *mapBase) Get(key string) interface{} {
-	if i, ok := b.val[key]; ok {
+	if i, ok := b.items[key]; ok {
 		return i.(untyped).get()
 	}
 
@@ -136,16 +137,18 @@ func (b *mapBase) Get(key string) interface{} {
 //
 // Since: 2.0.0
 func (b *mapBase) Set(key string, d interface{}) {
-	if i, ok := b.val[key]; ok {
+	if i, ok := b.items[key]; ok {
 		i.(untyped).set(d)
 		return
 	}
 
-	b.setItem(key, bindUntyped(&d))
+	item := bindUntyped(b.val, key)
+	item.set(d)
+	b.setItem(key, item)
 }
 
 func (b *mapBase) setItem(key string, d DataItem) {
-	b.val[key] = d
+	b.items[key] = d
 
 	b.trigger()
 }
@@ -156,36 +159,29 @@ type untyped interface {
 	set(interface{})
 }
 
-func bindUntyped(v *interface{}) untyped {
-	if v == nil {
-		return &boundUntyped{val: nil}
-	}
-
-	return &boundUntyped{val: v}
+func bindUntyped(m *map[string]interface{}, key string) untyped {
+	return &boundUntyped{val: m, key: key}
 }
 
 type boundUntyped struct {
 	base
 
-	val *interface{}
+	key string
+	val *map[string]interface{}
 }
 
 func (b *boundUntyped) get() interface{} {
 	if b.val == nil {
 		return 0
 	}
-	return *b.val
+	return (*b.val)[b.key]
 }
 
 func (b *boundUntyped) set(val interface{}) {
-	if *b.val == val {
+	if b.val == nil {
 		return
 	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	(*b.val)[b.key] = val
 
 	b.trigger()
 }
