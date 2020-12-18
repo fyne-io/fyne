@@ -586,6 +586,7 @@ type treeNode struct {
 	depth   int
 	hovered bool
 	icon    fyne.CanvasObject
+	isLeaf  bool
 	content fyne.CanvasObject
 }
 
@@ -694,7 +695,9 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 
 func (r *treeNodeRenderer) Refresh() {
 	if c := r.treeNode.content; c != nil {
-		c.Refresh()
+		if f := r.treeNode.tree.UpdateNode; f != nil {
+			f(r.treeNode.uid, r.treeNode.isLeaf, c)
+		}
 	}
 	r.partialRefresh()
 }
@@ -725,6 +728,7 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 		treeNode: &treeNode{
 			tree:    tree,
 			icon:    newBranchIcon(tree),
+			isLeaf:  false,
 			content: content,
 		},
 	}
@@ -782,6 +786,7 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		&treeNode{
 			tree:    tree,
 			content: content,
+			isLeaf:  false,
 		},
 	}
 	l.ExtendBaseWidget(l)

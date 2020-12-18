@@ -366,10 +366,38 @@ func TestTree_Move(t *testing.T) {
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
 
-	tree.Refresh() // Force layout
-
 	test.AssertImageMatches(t, "tree/move_initial.png", window.Canvas().Capture())
 
 	tree.Move(fyne.NewPos(20, 20))
 	test.AssertImageMatches(t, "tree/move_moved.png", window.Canvas().Capture())
+}
+
+func TestTree_Refresh(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	value := "Foo Leaf"
+	data := make(map[string][]string)
+	internalwidget.AddTreePath(data, "foo", "foobar")
+	tree := widget.NewTreeWithStrings(data)
+	tree.UpdateNode = func(uid widget.TreeNodeID, branch bool, node fyne.CanvasObject) {
+		if uid == "foobar" {
+			node.(*widget.Label).SetText(value)
+		} else {
+			node.(*widget.Label).SetText(uid)
+		}
+	}
+	tree.OpenBranch("foo")
+
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
+
+	test.AssertImageMatches(t, "tree/refresh_initial.png", window.Canvas().Capture())
+
+	value = "Replaced"
+	tree.Refresh()
+
+	test.AssertImageMatches(t, "tree/refresh_replaced.png", window.Canvas().Capture())
 }
