@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne"
 )
 
-// DataMap is the base interface for all bindable data lists.
+// DataMap is the base interface for all bindable data maps.
 //
 // Since: 2.0.0
 type DataMap interface {
@@ -48,8 +48,8 @@ func BindUntypedMap(d *map[string]interface{}) UntypedMap {
 	return m
 }
 
-// BindStruct creates a new map biding of string to interface{} using the struct passed as data.
-// The key in for each item is a string representation of each exported field with the value set as an interface{}.
+// BindStruct creates a new map binding of string to interface{} using the struct passed as data.
+// The key for each item is a string representation of each exported field with the value set as an interface{}.
 // Only exported fields are included.
 //
 // Since: 2.0.0
@@ -111,12 +111,18 @@ func (b *mapBase) Keys() []string {
 	return ret
 }
 
+// Delete removes the specified key and tha value associated with it.
+//
+// Since: 2.0.0
 func (b *mapBase) Delete(key string) {
-	delete(b.val, key)
+	delete(b.items, key)
 
 	b.trigger()
 }
 
+// Get returns the value stored at the specified key.
+//
+// Since: 2.0.0
 func (b *mapBase) Get(key string) interface{} {
 	if i, ok := b.val[key]; ok {
 		return i.(untyped).get()
@@ -125,6 +131,10 @@ func (b *mapBase) Get(key string) interface{} {
 	return nil
 }
 
+// Set stores the value d at the specified key.
+// If the key is not present it will create a new binding internally.
+//
+// Since: 2.0.0
 func (b *mapBase) Set(key string, d interface{}) {
 	if i, ok := b.val[key]; ok {
 		i.(untyped).set(d)
