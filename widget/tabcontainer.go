@@ -123,11 +123,17 @@ func (c *TabContainer) Remove(item *TabItem) {
 // RemoveIndex removes tab by index
 func (c *TabContainer) RemoveIndex(index int) {
 	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
+	if c.current == index {
+		c.setTabIndex(-1)
+	}
 }
 
 // SetItems sets the container’s items and refreshes.
 func (c *TabContainer) SetItems(items []*TabItem) {
 	c.Items = items
+	if c.current >= len(c.Items) {
+		c.setTabIndex(-1)
+	}
 	c.Refresh()
 }
 
@@ -146,7 +152,10 @@ func (c *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(c.Items) || c.current == index {
 		return
 	}
+	c.setTabIndex(index)
+}
 
+func (c *TabContainer) setTabIndex(index int) {
 	c.current = index
 	c.Refresh()
 
@@ -360,6 +369,7 @@ func (r *tabContainerRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Co
 
 func (r *tabContainerRenderer) moveSelection() {
 	if r.container.current < 0 {
+		r.underline.Hide()
 		return
 	}
 	selected := r.tabBar.Objects[r.container.current]
@@ -380,6 +390,7 @@ func (r *tabContainerRenderer) moveSelection() {
 		underlinePos = fyne.NewPos(r.tabBar.Position().X-theme.Padding(), selected.Position().Y)
 		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
 	}
+	r.underline.Show()
 	r.underline.Resize(underlineSize)
 	r.underline.Move(underlinePos)
 }
