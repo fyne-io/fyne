@@ -15,6 +15,9 @@ These changes likely break some apps, please read the
 * A new, more flexible, Theme interface has been created that we encourage developers to use
 * The desktop.Cursor definition was renamed desktop.StandardCursor to make way for custom cursors
 
+* Dialogs no longer show when created, unless using the ShowXxx convenience methods
+* Removed deprecated types including dialog.FileIcon (now widget.FileIcon)
+
 ### Added
 
 * Add MouseButtonTertiary for middle mouse button events on desktop

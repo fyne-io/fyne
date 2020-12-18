@@ -30,10 +30,9 @@ type Dialog interface {
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	callback     func(bool)
-	sendResponse bool
-	title        string
-	icon         fyne.Resource
+	callback func(bool)
+	title    string
+	icon     fyne.Resource
 
 	win            *widget.PopUp
 	bg             *canvas.Rectangle
@@ -64,10 +63,6 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
-	// TODO: This is required to avoid confusion.
-	// Normally this function should only provide the dialog, but currently it is also displayed, which is wrong.
-	// For this case the ShowCustomConfirm() method was built.
-	d.sendResponse = true
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
@@ -103,7 +98,6 @@ func (d *dialog) Hide() {
 }
 
 func (d *dialog) Show() {
-	d.sendResponse = true
 	d.win.Show()
 }
 
@@ -191,10 +185,9 @@ func (d *dialog) applyTheme() {
 
 func (d *dialog) hideWithResponse(resp bool) {
 	d.win.Hide()
-	if d.sendResponse && d.callback != nil {
+	if d.callback != nil {
 		d.callback(resp)
 	}
-	d.sendResponse = false
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {

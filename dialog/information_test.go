@@ -28,6 +28,7 @@ func TestDialog_Resize(t *testing.T) {
 	defer window.Close()
 	d := NewInformation("Looooooooooooooong title", "message...", window)
 	theDialog := d.(*dialog)
+	d.Show() // we cannot check window size if not shown
 
 	//Test resize - normal size scenario
 	size := fyne.NewSize(300, 180) //normal size to fit (600,400)
