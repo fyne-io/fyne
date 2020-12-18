@@ -122,10 +122,13 @@ func (c *TabContainer) Remove(item *TabItem) {
 
 // RemoveIndex removes tab by index
 func (c *TabContainer) RemoveIndex(index int) {
-	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
 	if c.current == index {
 		c.setTabIndex(-1)
 	}
+	if c.current > index {
+		c.setTabIndex(c.current - 1)
+	}
+	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
 }
 
 // SetItems sets the container’s items and refreshes.
