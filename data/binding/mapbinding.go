@@ -112,7 +112,7 @@ func (b *mapBase) Keys() []string {
 }
 
 func (b *mapBase) Delete(key string) {
-	b.val[key] = nil
+	delete(b.val, key)
 
 	b.trigger()
 }
