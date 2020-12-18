@@ -61,16 +61,13 @@ func (g *Getter) Run(args []string) {
 func (g *Getter) get() error {
 	path := filepath.Join(goPath(), "src", g.pkg)
 
-	cmd := exec.Command("go", "get", "-u", g.pkg)
+	cmd := exec.Command("go", "get", "-u", "-d", g.pkg)
+	cmd.Env = append(os.Environ(), "GO111MODULE=off")
 
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", string(out))
+	_, err := cmd.CombinedOutput()
+
+	if !util.Exists(path) { // the error above may be ignorable, unless the path was not found
 		return err
-	}
-
-	if !util.Exists(path) {
-		return errors.New("Package download not found in expected location")
 	}
 
 	install := &installer{srcDir: path}
