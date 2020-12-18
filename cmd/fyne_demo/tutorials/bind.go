@@ -69,11 +69,38 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	}{}
 
 	formData := binding.BindStruct(&formStruct)
-	form := widget.NewFormWithData(formData)
+	form := newFormWithData(formData)
 	form.OnSubmit = func() {
 		fmt.Println("Struct:\n", formStruct)
 	}
 
 	listPanel := container.NewBorder(nil, button, nil, nil, list)
 	return container.NewBorder(item, nil, nil, nil, container.NewGridWithColumns(2, listPanel, form))
+}
+
+func newFormWithData(data binding.DataMap) *widget.Form {
+	keys := data.Keys()
+	items := make([]*widget.FormItem, len(keys))
+	for i, k := range keys {
+		items[i] = widget.NewFormItem(k, createBoundItem(data.GetItem(k)))
+	}
+
+	return widget.NewForm(items...)
+}
+
+func createBoundItem(v binding.DataItem) fyne.CanvasObject {
+	switch val := v.(type) {
+	case binding.Bool:
+		return widget.NewCheckWithData("", val)
+	case binding.Float:
+		s := widget.NewSliderWithData(0, 1, val)
+		s.Step = 0.01
+		return s
+	case binding.Int:
+		return widget.NewEntryWithData(binding.IntToString(val))
+	case binding.String:
+		return widget.NewEntryWithData(val)
+	default:
+		return widget.NewLabel("")
+	}
 }

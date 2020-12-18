@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -179,35 +178,4 @@ func NewForm(items ...*FormItem) *Form {
 	form.ExtendBaseWidget(form)
 
 	return form
-}
-
-// NewFormWithData creates and populates a form using all of the items in the specified DataMap.
-// Strings and Ints will use Entry, Float will use Slider and Bool will use a CheckBox.
-//
-// Since: 2.0.0
-func NewFormWithData(data binding.DataMap) *Form {
-	keys := data.Keys()
-	items := make([]*FormItem, len(keys))
-	for i, k := range keys {
-		items[i] = NewFormItem(k, createBoundItem(data.GetItem(k)))
-	}
-
-	return NewForm(items...)
-}
-
-func createBoundItem(v binding.DataItem) fyne.CanvasObject {
-	switch val := v.(type) {
-	case binding.Bool:
-		return NewCheckWithData("", val)
-	case binding.Float:
-		s := NewSliderWithData(0, 1, val)
-		s.Step = 0.01
-		return s
-	case binding.Int:
-		return NewEntryWithData(binding.IntToString(val))
-	case binding.String:
-		return NewEntryWithData(val)
-	default:
-		return NewLabel("")
-	}
 }
