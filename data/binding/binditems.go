@@ -111,27 +111,27 @@ func (b *boundFloat) Set(val float64) {
 	b.trigger()
 }
 
-// Int supports binding a int value.
+// Int supports binding a int64 value.
 //
 // Since: 2.0.0
 type Int interface {
 	DataItem
-	Get() int
-	Set(int)
+	Get() int64
+	Set(int64)
 }
 
-// NewInt returns a bindable int value that is managed internally.
+// NewInt returns a bindable int64 value that is managed internally.
 //
 // Since: 2.0.0
 func NewInt() Int {
-	blank := 0
+	blank := int64(0)
 	return &boundInt{val: &blank}
 }
 
-// BindInt returns a new bindable value that controls the contents of the provided int variable.
+// BindInt returns a new bindable value that controls the contents of the provided int64 variable.
 //
 // Since: 2.0.0
-func BindInt(v *int) Int {
+func BindInt(v *int64) Int {
 	if v == nil {
 		return NewInt() // never allow a nil value pointer
 	}
@@ -142,17 +142,17 @@ func BindInt(v *int) Int {
 type boundInt struct {
 	base
 
-	val *int
+	val *int64
 }
 
-func (b *boundInt) Get() int {
+func (b *boundInt) Get() int64 {
 	if b.val == nil {
-		return 0
+		return int64(0)
 	}
 	return *b.val
 }
 
-func (b *boundInt) Set(val int) {
+func (b *boundInt) Set(val int64) {
 	if *b.val == val {
 		return
 	}

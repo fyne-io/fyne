@@ -17,11 +17,11 @@ type Preferences interface {
 	SetFloat(key string, value float64)
 
 	// Int looks up an integer value for the key
-	Int(key string) int
+	Int(key string) int64
 	// IntWithFallback looks up an integer value and returns the given fallback if not found
-	IntWithFallback(key string, fallback int) int
+	IntWithFallback(key string, fallback int64) int64
 	// SetInt saves an integer value for the given key
-	SetInt(key string, value int)
+	SetInt(key string, value int64)
 
 	// String looks up a string value for the key
 	String(key string) string

@@ -374,7 +374,7 @@ var prefBinds = make(map[string]DataItem)
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
-		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
+		bindValues{Name: "Int", Type: "int64", Default: "int64(0)", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
 	}

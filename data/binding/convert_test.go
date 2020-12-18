@@ -63,7 +63,7 @@ func TestIntToString(t *testing.T) {
 	assert.Equal(t, "3", s.Get())
 
 	s.Set("5")
-	assert.Equal(t, 5, i.Get())
+	assert.Equal(t, int64(5), i.Get())
 }
 
 func TestIntToStringWithFormat(t *testing.T) {
@@ -75,7 +75,7 @@ func TestIntToStringWithFormat(t *testing.T) {
 	assert.Equal(t, "num3", s.Get())
 
 	s.Set("num5")
-	assert.Equal(t, 5, i.Get())
+	assert.Equal(t, int64(5), i.Get())
 }
 
 func TestStringToBool(t *testing.T) {
@@ -131,10 +131,10 @@ func TestStringToFloatWithFormat(t *testing.T) {
 func TestStringToInt(t *testing.T) {
 	s := NewString()
 	i := StringToInt(s)
-	assert.Equal(t, 0, i.Get())
+	assert.Equal(t, int64(0), i.Get())
 
 	s.Set("3")
-	assert.Equal(t, 3, i.Get())
+	assert.Equal(t, int64(3), i.Get())
 
 	i.Set(5)
 	assert.Equal(t, "5", s.Get())
@@ -144,10 +144,10 @@ func TestStringToIntWithFormat(t *testing.T) {
 	start := "num0"
 	s := BindString(&start)
 	i := StringToIntWithFormat(s, "num%d")
-	assert.Equal(t, 0, i.Get())
+	assert.Equal(t, int64(0), i.Get())
 
 	s.Set("num3")
-	assert.Equal(t, 3, i.Get())
+	assert.Equal(t, int64(3), i.Get())
 
 	i.Set(5)
 	assert.Equal(t, "num5", s.Get())

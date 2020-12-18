@@ -82,7 +82,7 @@ type prefBoundInt struct {
 	p   fyne.Preferences
 }
 
-// BindPreferenceInt returns a bindable int value that is managed by the application preferences.
+// BindPreferenceInt returns a bindable int64 value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
 //
 // Since: 2.0.0
@@ -99,11 +99,11 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 	return listen
 }
 
-func (b *prefBoundInt) Get() int {
+func (b *prefBoundInt) Get() int64 {
 	return b.p.Int(b.key)
 }
 
-func (b *prefBoundInt) Set(v int) {
+func (b *prefBoundInt) Set(v int64) {
 	b.p.SetInt(b.key, v)
 
 	b.trigger()

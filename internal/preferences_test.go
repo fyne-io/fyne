@@ -66,28 +66,28 @@ func TestPrefs_SetInt(t *testing.T) {
 	p := NewInMemoryPreferences()
 	p.SetInt("testInt", 5)
 
-	assert.Equal(t, 5, p.Int("testInt"))
+	assert.Equal(t, int64(5), p.Int("testInt"))
 }
 
 func TestPrefs_Int(t *testing.T) {
 	p := NewInMemoryPreferences()
-	p.Values()["testInt"] = 5
+	p.Values()["testInt"] = int64(5)
 
-	assert.Equal(t, 5, p.Int("testInt"))
+	assert.Equal(t, int64(5), p.Int("testInt"))
 }
 
 func TestPrefs_IntWithFallback(t *testing.T) {
 	p := NewInMemoryPreferences()
 
-	assert.Equal(t, 2, p.IntWithFallback("testInt", 2))
-	p.Values()["testInt"] = 5
-	assert.Equal(t, 5, p.IntWithFallback("testInt", 2))
+	assert.Equal(t, int64(2), p.IntWithFallback("testInt", 2))
+	p.Values()["testInt"] = int64(5)
+	assert.Equal(t, int64(5), p.IntWithFallback("testInt", 2))
 }
 
 func TestPrefs_Int_Zero(t *testing.T) {
 	p := NewInMemoryPreferences()
 
-	assert.Equal(t, 0, p.Int("testInt"))
+	assert.Equal(t, int64(0), p.Int("testInt"))
 }
 
 func TestPrefs_SetString(t *testing.T) {
@@ -145,6 +145,6 @@ func TestRemoveValue(t *testing.T) {
 
 	assert.Equal(t, false, p.Bool("dummy"))
 	assert.Equal(t, float64(0), p.Float("pi"))
-	assert.Equal(t, 0, p.Int("number"))
+	assert.Equal(t, int64(0), p.Int("number"))
 	assert.Equal(t, "", p.String("month"))
 }

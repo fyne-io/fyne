@@ -43,11 +43,11 @@ func TestBindPreferenceInt(t *testing.T) {
 
 	p.SetInt(key, 4)
 	bind := BindPreferenceInt(key, p)
-	assert.Equal(t, 4, bind.Get())
+	assert.Equal(t, int64(4), bind.Get())
 
 	bind.Set(7)
-	assert.Equal(t, 7, bind.Get())
-	assert.Equal(t, 7, p.Int(key))
+	assert.Equal(t, int64(7), bind.Get())
+	assert.Equal(t, int64(7), p.Int(key))
 }
 
 func TestBindPreferenceString(t *testing.T) {

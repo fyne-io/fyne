@@ -43,7 +43,7 @@ func TestPreferences_Load(t *testing.T) {
 	p.loadFromFile(filepath.Join("testdata", "preferences.json"))
 
 	assert.Equal(t, "value", p.String("keyString"))
-	assert.Equal(t, 4, p.Int("keyInt"))
+	assert.Equal(t, int64(4), p.Int("keyInt"))
 	assert.Equal(t, 3.5, p.Float("keyFloat"))
 	assert.Equal(t, true, p.Bool("keyBool"))
 }

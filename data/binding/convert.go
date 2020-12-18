@@ -147,7 +147,7 @@ func (s *stringFromInt) Get() string {
 }
 
 func (s *stringFromInt) Set(str string) {
-	var val int
+	var val int64
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("int parse error", err)
@@ -309,23 +309,23 @@ func StringToIntWithFormat(str String, format string) Int {
 	return v
 }
 
-func (s *stringToInt) Get() int {
+func (s *stringToInt) Get() int64 {
 	str := s.from.Get()
 	if str == "" {
-		return 0
+		return int64(0)
 	}
 
-	var val int
+	var val int64
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("int parse error", err)
-		return 0
+		return int64(0)
 	}
 
 	return val
 }
 
-func (s *stringToInt) Set(val int) {
+func (s *stringToInt) Set(val int64) {
 	str := fmt.Sprintf(s.format, val)
 	if str == s.from.Get() {
 		return

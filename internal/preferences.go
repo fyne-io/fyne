@@ -105,30 +105,37 @@ func (p *InMemoryPreferences) SetFloat(key string, value float64) {
 }
 
 // Int looks up an integer value for the key
-func (p *InMemoryPreferences) Int(key string) int {
+func (p *InMemoryPreferences) Int(key string) int64 {
 	return p.IntWithFallback(key, 0)
 }
 
 // IntWithFallback looks up an integer value and returns the given fallback if not found
-func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
+func (p *InMemoryPreferences) IntWithFallback(key string, fallback int64) int64 {
 	value, ok := p.get(key)
 	if !ok {
 		return fallback
 	}
 
 	// integers can be de-serialised as floats, so support both
-	if intVal, ok := value.(int); ok {
+	if intVal, ok := value.(int64); ok {
 		return intVal
+	}
+	if intVal, ok := value.(int); ok {
+		return int64(intVal)
 	}
 	val, ok := value.(float64)
 	if !ok {
-		return 0
+		val2, ok := value.(float32)
+		if !ok {
+			return 0
+		}
+		val = float64(val2)
 	}
-	return int(val)
+	return int64(val)
 }
 
 // SetInt saves an integer value for the given key
-func (p *InMemoryPreferences) SetInt(key string, value int) {
+func (p *InMemoryPreferences) SetInt(key string, value int64) {
 	p.set(key, value)
 }
 

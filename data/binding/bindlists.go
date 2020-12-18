@@ -163,29 +163,29 @@ func (l *boundFloatList) Set(i int, v float64) {
 	l.GetItem(i).(Float).Set(v)
 }
 
-// IntList supports binding a list of int values.
+// IntList supports binding a list of int64 values.
 //
 // Since: 2.0.0
 type IntList interface {
 	DataList
 
-	Append(int)
-	Get(int) int
-	Prepend(int)
-	Set(int, int)
+	Append(int64)
+	Get(int) int64
+	Prepend(int64)
+	Set(int, int64)
 }
 
-// NewIntList returns a bindable list of int values.
+// NewIntList returns a bindable list of int64 values.
 //
 // Since: 2.0.0
 func NewIntList() IntList {
 	return &boundIntList{}
 }
 
-// BindIntList returns a bound list of int values, based on the contents of the passed slice.
+// BindIntList returns a bound list of int64 values, based on the contents of the passed slice.
 //
 // Since: 2.0.0
-func BindIntList(v *[]int) IntList {
+func BindIntList(v *[]int64) IntList {
 	if v == nil {
 		return NewIntList()
 	}
@@ -202,10 +202,10 @@ func BindIntList(v *[]int) IntList {
 type boundIntList struct {
 	listBase
 
-	val *[]int
+	val *[]int64
 }
 
-func (l *boundIntList) Append(val int) {
+func (l *boundIntList) Append(val int64) {
 	if l.val != nil {
 		*l.val = append(*l.val, val)
 	}
@@ -213,9 +213,9 @@ func (l *boundIntList) Append(val int) {
 	l.appendItem(BindInt(&val))
 }
 
-func (l *boundIntList) Get(i int) int {
+func (l *boundIntList) Get(i int) int64 {
 	if i < 0 || i > l.Length() {
-		return 0
+		return int64(0)
 	}
 	if l.val != nil {
 		return (*l.val)[i]
@@ -224,15 +224,15 @@ func (l *boundIntList) Get(i int) int {
 	return l.GetItem(i).(Int).Get()
 }
 
-func (l *boundIntList) Prepend(val int) {
+func (l *boundIntList) Prepend(val int64) {
 	if l.val != nil {
-		*l.val = append([]int{val}, *l.val...)
+		*l.val = append([]int64{val}, *l.val...)
 	}
 
 	l.prependItem(BindInt(&val))
 }
 
-func (l *boundIntList) Set(i int, v int) {
+func (l *boundIntList) Set(i int, v int64) {
 	if i > l.Length() {
 		return
 	}
