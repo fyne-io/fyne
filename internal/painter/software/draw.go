@@ -29,8 +29,8 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawCircle(circle, pad, func(in float32) int {
-		return int(math.Round(float64(in) * float64(c.Scale())))
+	raw := painter.DrawCircle(circle, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -112,8 +112,8 @@ func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.N
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawLine(line, pad, func(in float32) int {
-		return int(math.Round(float64(in) * float64(c.Scale())))
+	raw := painter.DrawLine(line, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -141,8 +141,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	var opts truetype.Options
-	fontSize := float64(text.TextSize) * float64(c.Scale())
-	opts.Size = fontSize
+	fontSize := text.TextSize * c.Scale()
+	opts.Size = float64(fontSize)
 	opts.DPI = painter.TextDPI
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
@@ -154,8 +154,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.DrawString(text.Text)
 
 	size := text.Size()
-	offsetX := 0
-	offsetY := 0
+	offsetX := float32(0)
+	offsetY := float32(0)
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
 		offsetX = size.Width - bounds.Width
@@ -197,8 +197,8 @@ func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Positio
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawRectangle(rect, pad, func(in float32) int {
-		return int(math.Round(float64(in) * float64(c.Scale())))
+	raw := painter.DrawRectangle(rect, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate

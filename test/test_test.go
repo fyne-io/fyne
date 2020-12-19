@@ -106,8 +106,7 @@ func TestDrag(t *testing.T) {
 	test.Drag(c, fyne.NewPos(15, 15), 17, 42)
 	assert.Equal(t, &fyne.DragEvent{
 		PointEvent: fyne.PointEvent{Position: fyne.Position{X: 5, Y: 5}},
-		DraggedX:   17,
-		DraggedY:   42,
+		Dragged:    fyne.NewDelta(17, 42),
 	}, d.event)
 	assert.True(t, d.wasDragged)
 }
@@ -199,7 +198,7 @@ func TestScroll(t *testing.T) {
 	assert.Nil(t, s.event, "nothing happens if no scrollable was found at position")
 
 	test.Scroll(c, fyne.NewPos(15, 15), 17, 42)
-	assert.Equal(t, &fyne.ScrollEvent{DeltaX: 17, DeltaY: 42}, s.event)
+	assert.Equal(t, &fyne.ScrollEvent{Scrolled: fyne.NewDelta(17, 42)}, s.event)
 }
 
 var _ fyne.Draggable = (*draggable)(nil)

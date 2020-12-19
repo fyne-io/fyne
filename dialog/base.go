@@ -105,7 +105,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	d.bg.Move(fyne.NewPos(0, 0))
 	d.bg.Resize(size)
 
-	btnMin := obj[3].MinSize().Union(obj[3].Size())
+	btnMin := obj[3].MinSize().Max(obj[3].Size())
 
 	// icon
 	iconHeight := padHeight*2 + d.label.MinSize().Height*2 - theme.Padding()
@@ -125,7 +125,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	contentMin := obj[2].MinSize()
-	btnMin := obj[3].MinSize().Union(obj[3].Size())
+	btnMin := obj[3].MinSize().Max(obj[3].Size())
 
 	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
 	height := contentMin.Height + btnMin.Height + d.label.MinSize().Height + theme.Padding() + padHeight*2

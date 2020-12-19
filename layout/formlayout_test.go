@@ -129,6 +129,6 @@ func TestFormLayout_MinSize_Hidden(t *testing.T) {
 	l := layout.NewFormLayout()
 	layoutMin := l.MinSize(container.Objects)
 	expectedRowWidth := 50 + 100 + theme.Padding()
-	expectedRowHeight := 100
+	expectedRowHeight := float32(100)
 	assert.Equal(t, fyne.NewSize(expectedRowWidth, expectedRowHeight), layoutMin)
 }

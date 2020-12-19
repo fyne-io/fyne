@@ -266,7 +266,7 @@ func (r *tabContainerRenderer) MinSize() fyne.Size {
 
 	childMin := fyne.NewSize(0, 0)
 	for _, child := range r.container.Items {
-		childMin = childMin.Union(child.Content.MinSize())
+		childMin = childMin.Max(child.Content.MinSize())
 	}
 
 	tabLocation := r.container.tabLocation
@@ -561,7 +561,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
-	labelShift := 0
+	labelShift := float32(0)
 	if r.icon != nil {
 		var iconOffset fyne.Position
 		if r.button.IconPosition == buttonIconTop {
@@ -589,7 +589,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
-	var contentWidth, contentHeight int
+	var contentWidth, contentHeight float32
 	textSize := r.label.MinSize()
 	if r.button.IconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, r.iconSize())
@@ -653,7 +653,7 @@ func (r *tabButtonRenderer) Refresh() {
 	canvas.Refresh(r.button)
 }
 
-func (r *tabButtonRenderer) iconSize() int {
+func (r *tabButtonRenderer) iconSize() float32 {
 	switch r.button.IconPosition {
 	case buttonIconTop:
 		return 2 * theme.IconInlineSize()

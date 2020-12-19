@@ -10,7 +10,7 @@ type Driver interface {
 
 	// RenderedTextSize returns the size required to render the given string of specified
 	// font size and style.
-	RenderedTextSize(string, int, TextStyle) Size
+	RenderedTextSize(string, float32, TextStyle) Size
 
 	// FileReaderForURI opens a file reader for the given resource indicator.
 	// This may refer to a filesystem (typical on desktop) or data from another application.

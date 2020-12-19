@@ -52,10 +52,10 @@ func (p *glPainter) Clear() {
 }
 
 func (p *glPainter) StartClipping(pos fyne.Position, size fyne.Size) {
-	x := p.textureScaleInt(pos.X)
-	y := p.textureScaleInt(pos.Y)
-	w := p.textureScaleInt(size.Width)
-	h := p.textureScaleInt(size.Height)
+	x := p.textureScale(pos.X)
+	y := p.textureScale(pos.Y)
+	w := p.textureScale(size.Width)
+	h := p.textureScale(size.Height)
 	p.glScissorOpen(int32(x), int32(y), int32(w), int32(h))
 }
 
@@ -73,18 +73,11 @@ func (p *glPainter) Free(obj fyne.CanvasObject) {
 	p.freeTexture(obj)
 }
 
-func (p *glPainter) textureScaleInt(v int) int {
+func (p *glPainter) textureScale(v float32) float32 {
 	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
 		return v
 	}
-	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
-}
-
-func (p *glPainter) textureScale(v float32) int {
-	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
-		return int(v)
-	}
-	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
+	return float32(math.Round(float64(v * p.canvas.Scale() * p.texScale)))
 }
 
 var startCacheMonitor = &sync.Once{}

@@ -31,7 +31,7 @@ type scrollBarOrientation int
 const (
 	scrollBarOrientationVertical   scrollBarOrientation = 0
 	scrollBarOrientationHorizontal scrollBarOrientation = 1
-	scrollContainerMinSize                              = 32 // TODO consider the smallest useful scroll view?
+	scrollContainerMinSize                              = float32(32) // TODO consider the smallest useful scroll view?
 )
 
 type scrollBarRenderer struct {
@@ -60,8 +60,8 @@ var _ fyne.Draggable = (*scrollBar)(nil)
 type scrollBar struct {
 	BaseWidget
 	area            *scrollBarArea
-	draggedDistance int
-	dragStart       int
+	draggedDistance float32
+	dragStart       float32
 	isDragged       bool
 	orientation     scrollBarOrientation
 }
@@ -92,9 +92,9 @@ func (b *scrollBar) Dragged(e *fyne.DragEvent) {
 
 	switch b.orientation {
 	case scrollBarOrientationHorizontal:
-		b.draggedDistance += e.DraggedX
+		b.draggedDistance += e.Dragged.DX
 	case scrollBarOrientationVertical:
-		b.draggedDistance += e.DraggedY
+		b.draggedDistance += e.Dragged.DY
 	}
 	b.area.moveBar(b.draggedDistance+b.dragStart, b.Size())
 }
@@ -127,7 +127,7 @@ func (r *scrollBarAreaRenderer) BackgroundColor() color.Color {
 }
 
 func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
-	var barHeight, barWidth, barX, barY int
+	var barHeight, barWidth, barX, barY float32
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
 		barWidth, barHeight, barX, barY = r.barSizeAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
@@ -139,8 +139,7 @@ func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
 }
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
-	var min int
-	min = theme.ScrollBarSize()
+	min := theme.ScrollBarSize()
 	if !r.area.isLarge {
 		min = theme.ScrollBarSmallSize() * 2
 	}
@@ -157,10 +156,10 @@ func (r *scrollBarAreaRenderer) Refresh() {
 	canvas.Refresh(r.bar)
 }
 
-func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength int) (length, width, lengthOffset, widthOffset int) {
+func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength float32) (length, width, lengthOffset, widthOffset float32) {
 	if scrollLength < contentLength {
-		portion := float64(scrollLength) / float64(contentLength)
-		length = int(float64(scrollLength) * portion)
+		portion := scrollLength / contentLength
+		length = float32(int(scrollLength)) * portion
 		if length < theme.ScrollBarSize() {
 			length = theme.ScrollBarSize()
 		}
@@ -168,7 +167,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 		length = scrollLength
 	}
 	if contentOffset != 0 {
-		lengthOffset = int(float64(scrollLength-length) * (float64(contentOffset) / float64(contentLength-scrollLength)))
+		lengthOffset = (scrollLength - length) * (contentOffset / (contentLength - scrollLength))
 	}
 	if r.area.isLarge {
 		width = theme.ScrollBarSize()
@@ -207,7 +206,7 @@ func (a *scrollBarArea) MouseOut() {
 	a.scroll.Refresh()
 }
 
-func (a *scrollBarArea) moveBar(offset int, barSize fyne.Size) {
+func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
 	switch a.orientation {
 	case scrollBarOrientationHorizontal:
 		a.scroll.Offset.X = a.computeScrollOffset(barSize.Width, offset, a.scroll.Size().Width, a.scroll.Content.Size().Width)
@@ -220,15 +219,15 @@ func (a *scrollBarArea) moveBar(offset int, barSize fyne.Size) {
 	a.scroll.refreshWithoutOffsetUpdate()
 }
 
-func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength int) int {
+func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength float32) float32 {
 	maxOffset := scrollLength - length
 	if offset < 0 {
 		offset = 0
 	} else if offset > maxOffset {
 		offset = maxOffset
 	}
-	ratio := float32(offset) / float32(maxOffset)
-	scrollOffset := int(ratio * float32(contentLength-scrollLength))
+	ratio := offset / maxOffset
+	scrollOffset := ratio * (contentLength - scrollLength)
 	return scrollOffset
 }
 
@@ -294,7 +293,7 @@ func (r *scrollContainerRenderer) Refresh() {
 	r.Layout(r.scroll.Size())
 }
 
-func (r *scrollContainerRenderer) handleAreaVisibility(contentSize int, scrollSize int, area *scrollBarArea) {
+func (r *scrollContainerRenderer) handleAreaVisibility(contentSize, scrollSize float32, area *scrollBarArea) {
 	if contentSize <= scrollSize {
 		area.Hide()
 	} else if r.scroll.Visible() {
@@ -302,7 +301,7 @@ func (r *scrollContainerRenderer) handleAreaVisibility(contentSize int, scrollSi
 	}
 }
 
-func (r *scrollContainerRenderer) handleShadowVisibility(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
+func (r *scrollContainerRenderer) handleShadowVisibility(offset, contentSize, scrollSize float32, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
 	if !r.scroll.Visible() {
 		return
 	}
@@ -399,7 +398,7 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 		return
 	}
 
-	if s.updateOffset(e.DraggedX, e.DraggedY) {
+	if s.updateOffset(e.Dragged.DX, e.Dragged.DY) {
 		s.refreshWithoutOffsetUpdate()
 	}
 }
@@ -443,7 +442,7 @@ func (s *ScrollContainer) Resize(size fyne.Size) {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
-	dx, dy := ev.DeltaX, ev.DeltaY
+	dx, dy := ev.Scrolled.DX, ev.Scrolled.DY
 	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
 		dx, dy = dy, dx
 	}
@@ -452,7 +451,7 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	}
 }
 
-func (s *ScrollContainer) updateOffset(deltaX, deltaY int) bool {
+func (s *ScrollContainer) updateOffset(deltaX, deltaY float32) bool {
 	if s.Content.Size().Width <= s.Size().Width && s.Content.Size().Height <= s.Size().Height {
 		if s.Offset.X != 0 || s.Offset.Y != 0 {
 			s.Offset.X = 0
@@ -469,7 +468,7 @@ func (s *ScrollContainer) updateOffset(deltaX, deltaY int) bool {
 	return true
 }
 
-func computeOffset(start, delta, outerWidth, innerWidth int) int {
+func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 	offset := start + delta
 	if offset+outerWidth >= innerWidth {
 		offset = innerWidth - outerWidth

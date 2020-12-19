@@ -171,7 +171,7 @@ func (r *Radio) indexByPosition(pos fyne.Position) int {
 	return index
 }
 
-func (r *Radio) itemHeight() int {
+func (r *Radio) itemHeight() float32 {
 	if r.Horizontal {
 		return r.MinSize().Height
 	}
@@ -180,10 +180,10 @@ func (r *Radio) itemHeight() int {
 	if r.Options != nil && len(r.Options) > 0 {
 		count = len(r.Options)
 	}
-	return r.MinSize().Height / count
+	return r.MinSize().Height / float32(count)
 }
 
-func (r *Radio) itemWidth() int {
+func (r *Radio) itemWidth() float32 {
 	if !r.Horizontal {
 		return r.MinSize().Width
 	}
@@ -192,7 +192,7 @@ func (r *Radio) itemWidth() int {
 	if r.Options != nil && len(r.Options) > 0 {
 		count = len(r.Options)
 	}
-	return r.MinSize().Width / count
+	return r.MinSize().Width / float32(count)
 }
 
 func (r *Radio) removeDuplicateOptions() {
@@ -219,7 +219,7 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 	labelSize := fyne.NewSize(itemWidth, itemHeight)
 	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
 
-	x, y := 0, 0
+	x, y := float32(0), float32(0)
 	for _, item := range r.items {
 		item.focusIndicator.Resize(focusIndicatorSize)
 		item.focusIndicator.Move(fyne.NewPos(x, y+(itemHeight-focusIndicatorSize.Height)/2))
@@ -243,8 +243,8 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 // This is based on the contained text, the radio icon and a standard amount of padding
 // between each item.
 func (r *radioRenderer) MinSize() fyne.Size {
-	width := 0
-	height := 0
+	width := float32(0)
+	height := float32(0)
 	for _, item := range r.items {
 		itemMin := item.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 		itemMin = itemMin.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))

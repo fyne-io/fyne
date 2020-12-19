@@ -92,7 +92,7 @@ func TestShowModalPopUp(t *testing.T) {
 	defer test.NewApp()
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
-	w.Resize(fyne.NewSize(200, 200))
+	w.Resize(fyne.NewSize(200, 199))
 	require.Nil(t, w.Canvas().Overlays().Top())
 
 	label := NewLabel("Hi")
@@ -106,12 +106,12 @@ func TestShowModalPopUp(t *testing.T) {
 	}
 
 	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x200">
+		<canvas padded size="200x199">
 			<content>
-				<rectangle pos="4,4" size="192x192"/>
+				<rectangle pos="4,4" size="192x191"/>
 			</content>
 			<overlay>
-				<widget backgroundColor="shadow" size="200x200" type="*widget.PopUp">
+				<widget backgroundColor="shadow" size="200x199" type="*widget.PopUp">
 					<widget pos="84,81" size="32x37" type="*widget.Shadow">
 						<radialGradient centerOffset="0.5,0.5" pos="-24,-24" size="24x24" startColor="shadow"/>
 						<linearGradient endColor="shadow" pos="0,-24" size="32x24"/>
@@ -202,8 +202,8 @@ func TestPopUp_Move(t *testing.T) {
 	assert.Equal(t, pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())), pop.Content.Position())
 
 	popPos := pop.Position()
-	assert.Equal(t, 0, popPos.X) // these are 0 as the popUp must fill our overlay
-	assert.Equal(t, 0, popPos.Y)
+	assert.Equal(t, float32(0), popPos.X) // these are 0 as the popUp must fill our overlay
+	assert.Equal(t, float32(0), popPos.Y)
 }
 
 func TestPopUp_Move_Constrained(t *testing.T) {
@@ -261,8 +261,8 @@ func TestPopUp_Resize(t *testing.T) {
 	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 
 	popSize := pop.Size()
-	assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
-	assert.Equal(t, 80, popSize.Height)
+	assert.Equal(t, float32(80), popSize.Width) // these are 80 as the popUp must fill our overlay
+	assert.Equal(t, float32(80), popSize.Height)
 }
 
 func TestPopUp_Tapped(t *testing.T) {
@@ -395,8 +395,8 @@ func TestModalPopUp_Resize(t *testing.T) {
 	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 
 	popSize := pop.Size()
-	assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
-	assert.Equal(t, 80, popSize.Height)
+	assert.Equal(t, float32(80), popSize.Width) // these are 80 as the popUp must fill our overlay
+	assert.Equal(t, float32(80), popSize.Height)
 }
 
 func TestModalPopUp_Resize_Constrained(t *testing.T) {
@@ -408,6 +408,6 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	pop.Resize(fyne.NewSize(90, 100))
 	assert.Equal(t, 80-theme.Padding()*2, pop.Content.Size().Width)
 	assert.Equal(t, 80-theme.Padding()*2, pop.Content.Size().Height)
-	assert.Equal(t, 80, pop.Size().Width)
-	assert.Equal(t, 80, pop.Size().Height)
+	assert.Equal(t, float32(80), pop.Size().Width)
+	assert.Equal(t, float32(80), pop.Size().Height)
 }

@@ -33,9 +33,9 @@ func TestDialog_Resize(t *testing.T) {
 	//Test resize - normal size scenario
 	size := fyne.NewSize(300, 180) //normal size to fit (600,400)
 	theDialog.Resize(size)
-	expectedWidth := 300
+	expectedWidth := float32(300)
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight := 180
+	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 	//Test resize - normal size scenario again
 	size = fyne.NewSize(310, 280) //normal size to fit (600,400)

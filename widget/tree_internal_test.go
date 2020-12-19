@@ -16,12 +16,12 @@ import (
 )
 
 var (
-	treeSize        = 200
+	treeSize        = float32(200)
 	templateMinSize = NewLabel("Template Object").MinSize()
 	doublePadding   = 2 * theme.Padding()
 )
 
-func indentation() int {
+func indentation() float32 {
 	return theme.IconInlineSize() + theme.Padding()
 }
 
@@ -203,17 +203,17 @@ func TestTree_Resize(t *testing.T) {
 	b := getBranch(t, tree, "B")
 	c := getLeaf(t, tree, "C")
 
-	assert.Equal(t, 0, a.Position().X)
-	assert.Equal(t, 0, a.Position().Y)
+	assert.Equal(t, float32(0), a.Position().X)
+	assert.Equal(t, float32(0), a.Position().Y)
 	assert.Equal(t, treeSize, a.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
 
-	assert.Equal(t, 0, b.Position().X)
+	assert.Equal(t, float32(0), b.Position().X)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness, b.Position().Y)
 	assert.Equal(t, treeSize, b.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
 
-	assert.Equal(t, 0, c.Position().X)
+	assert.Equal(t, float32(0), c.Position().X)
 	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness), c.Position().Y)
 	assert.Equal(t, treeSize, c.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
@@ -414,7 +414,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	tree.Refresh()                                             // Force layout
 	tree.Select("A")
 	// Tree should scroll to the top to show A
-	assert.Equal(t, 0, tree.scroller.Offset.Y)
+	assert.Equal(t, float32(0), tree.scroller.Offset.Y)
 
 	// Below
 	tree.scroller.Offset.Y = 0 // Showing "A" & "B"
