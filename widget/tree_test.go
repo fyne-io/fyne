@@ -384,8 +384,10 @@ func TestTree_Refresh(t *testing.T) {
 	tree.UpdateNode = func(uid widget.TreeNodeID, branch bool, node fyne.CanvasObject) {
 		if uid == "foobar" {
 			node.(*widget.Label).SetText(value)
+			assert.False(t, branch)
 		} else {
 			node.(*widget.Label).SetText(uid)
+			assert.True(t, branch)
 		}
 	}
 	tree.OpenBranch("foo")
