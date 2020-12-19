@@ -406,7 +406,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 
 	ev := new(fyne.DragEvent)
 	ev.Position = objPos
-	ev.Dragged = fyne.Vector{X: deltaX, Y: deltaY}
+	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
 
 	dragCallback(c.dragging, ev)
 }

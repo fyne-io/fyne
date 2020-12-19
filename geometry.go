@@ -1,29 +1,33 @@
 package fyne
 
-// Vec2 marks geometry types that can operate as a coordinate vector.
-type Vec2 interface {
+var _ Vector2 = (*Delta)(nil)
+var _ Vector2 = (*Position)(nil)
+var _ Vector2 = (*Size)(nil)
+
+// Vector2 marks geometry types that can operate as a coordinate vector.
+type Vector2 interface {
 	Components() (float32, float32)
 	IsZero() bool
 }
 
-// Vector is a generic X, Y coordinate or size representation.
-type Vector struct {
-	X, Y float32
+// Delta is a generic X, Y coordinate, size or movement representation.
+type Delta struct {
+	DX, DY float32
 }
 
-// NewVector returns a newly allocated Vector representing a generic X, Y coordinate.
-func NewVector(x float32, y float32) Vector {
-	return Vector{x, y}
+// NewDelta returns a newly allocated Delta representing a movement in the X and Y axis.
+func NewDelta(dx float32, dy float32) Delta {
+	return Delta{DX: dx, DY: dy}
 }
 
-// Components returns the X and Y elements of this Vector.
-func (v Vector) Components() (float32, float32) {
-	return v.X, v.Y
+// Components returns the X and Y elements of this Delta.
+func (v Delta) Components() (float32, float32) {
+	return v.DX, v.DY
 }
 
 // IsZero returns whether the Position is at the zero-point.
-func (v Vector) IsZero() bool {
-	return v.X == 0.0 && v.Y == 0.0
+func (v Delta) IsZero() bool {
+	return v.DX == 0.0 && v.DY == 0.0
 }
 
 // Position describes a generic X, Y coordinate relative to a parent Canvas
@@ -40,7 +44,7 @@ func NewPos(x float32, y float32) Position {
 
 // Add returns a new Position that is the result of offsetting the current
 // position by p2 X and Y.
-func (p Position) Add(v Vec2) Position {
+func (p Position) Add(v Vector2) Position {
 	x, y := v.Components()
 	return Position{p.X + x, p.Y + y}
 }
@@ -57,7 +61,7 @@ func (p Position) IsZero() bool {
 
 // Subtract returns a new Position that is the result of offsetting the current
 // position by p2 -X and -Y.
-func (p Position) Subtract(v Vec2) Position {
+func (p Position) Subtract(v Vector2) Position {
 	x, y := v.Components()
 	return Position{p.X - x, p.Y - y}
 }
@@ -75,7 +79,7 @@ func NewSize(w float32, h float32) Size {
 
 // Add returns a new Size that is the result of increasing the current size by
 // s2 Width and Height.
-func (s Size) Add(v Vec2) Size {
+func (s Size) Add(v Vector2) Size {
 	w, h := v.Components()
 	return Size{s.Width + w, s.Height + h}
 }
@@ -86,7 +90,7 @@ func (s Size) IsZero() bool {
 }
 
 // Max returns a new Size that is the maximum of the current Size and s2.
-func (s Size) Max(v Vec2) Size {
+func (s Size) Max(v Vector2) Size {
 	x, y := v.Components()
 
 	maxW := Max(s.Width, x)
@@ -96,7 +100,7 @@ func (s Size) Max(v Vec2) Size {
 }
 
 // Min returns a new Size that is the minimum of the current Size and s2.
-func (s Size) Min(v Vec2) Size {
+func (s Size) Min(v Vector2) Size {
 	x, y := v.Components()
 
 	minW := Min(s.Width, x)
@@ -112,7 +116,7 @@ func (s Size) Components() (float32, float32) {
 
 // Subtract returns a new Size that is the result of decreasing the current size
 // by s2 Width and Height.
-func (s Size) Subtract(v Vec2) Size {
+func (s Size) Subtract(v Vector2) Size {
 	w, h := v.Components()
 	return Size{s.Width - w, s.Height - h}
 }

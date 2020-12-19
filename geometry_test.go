@@ -28,7 +28,7 @@ func TestPosition_Add_Size(t *testing.T) {
 
 func TestPosition_Add_Vector(t *testing.T) {
 	pos1 := NewPos(10, 10)
-	v := NewVector(25, 25)
+	v := NewDelta(25, 25)
 
 	pos2 := pos1.Add(v)
 
@@ -85,7 +85,7 @@ func TestSize_Add_Position(t *testing.T) {
 
 func TestSize_Add_Vector(t *testing.T) {
 	size1 := NewSize(10, 10)
-	v := NewVector(25, 25)
+	v := NewDelta(25, 25)
 
 	size2 := size1.Add(v)
 
@@ -141,10 +141,10 @@ func TestSize_Subtract(t *testing.T) {
 }
 
 func TestVector_IsZero(t *testing.T) {
-	v := NewVector(0, 0)
+	v := NewDelta(0, 0)
 
 	assert.True(t, v.IsZero())
 
-	v.X = 1
+	v.DX = 1
 	assert.False(t, v.IsZero())
 }

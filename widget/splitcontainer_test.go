@@ -254,7 +254,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 
 		divider.Dragged(&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(20, 9)},
-			Dragged:    fyne.NewVector(10, -1),
+			Dragged:    fyne.NewDelta(10, -1),
 		})
 		assert.Equal(t, 0.6, split.Offset)
 
@@ -269,7 +269,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 
 		divider.Dragged(&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, 20)},
-			Dragged:    fyne.NewVector(-1, 10),
+			Dragged:    fyne.NewDelta(-1, 10),
 		})
 		assert.Equal(t, 0.6, split.Offset)
 

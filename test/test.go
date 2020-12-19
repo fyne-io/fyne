@@ -63,7 +63,7 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	}
 	e := &fyne.DragEvent{
 		PointEvent: fyne.PointEvent{Position: p},
-		Dragged:    fyne.Vector{X: deltaX, Y: deltaY},
+		Dragged:    fyne.Delta{DX: deltaX, DY: deltaY},
 	}
 	o.(fyne.Draggable).Dragged(e)
 	o.(fyne.Draggable).DragEnd()
@@ -151,7 +151,7 @@ func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 		return
 	}
 
-	e := &fyne.ScrollEvent{Delta: fyne.Vector{X: deltaX, Y: deltaY}}
+	e := &fyne.ScrollEvent{Scrolled: fyne.Delta{DX: deltaX, DY: deltaY}}
 	o.(fyne.Scrollable).Scrolled(e)
 }
 

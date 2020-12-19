@@ -155,7 +155,7 @@ func TestScrollContainer_Refresh(t *testing.T) {
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	assert.Equal(t, fyne.NewSize(1000, 1000), rect.Size())
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(-1000, -1000)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-1000, -1000)})
 	assert.Equal(t, float32(900), scroll.Offset.X)
 	assert.Equal(t, float32(900), scroll.Offset.Y)
 	assert.Equal(t, fyne.NewSize(1000, 1000), rect.Size())
@@ -177,7 +177,7 @@ func TestScrollContainer_Scrolled(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(-10, -10)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
 	assert.Equal(t, float32(10), scroll.Offset.X)
 	assert.Equal(t, float32(10), scroll.Offset.Y)
 
@@ -188,7 +188,7 @@ func TestScrollContainer_Scrolled_Limit(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(80, 80))
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(-25, -25)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-25, -25)})
 	assert.Equal(t, float32(20), scroll.Offset.X)
 }
 
@@ -199,7 +199,7 @@ func TestScrollContainer_Scrolled_Back(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	scroll.Offset.X = 10
 	scroll.Offset.Y = 10
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(10, 10)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(10, 10)})
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 }
@@ -211,7 +211,7 @@ func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	scroll.Offset.X = 10
 	scroll.Offset.Y = 10
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(20, 20)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(20, 20)})
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
@@ -222,7 +222,7 @@ func TestScrollContainer_Resize(t *testing.T) {
 	scroll := NewScrollContainer(rect)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	scroll.Resize(fyne.NewSize(80, 80))
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(-20, -20)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-20, -20)})
 	scroll.Resize(fyne.NewSize(100, 100))
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
@@ -234,7 +234,7 @@ func TestScrollContainer_ResizeOffset(t *testing.T) {
 	scroll := NewScrollContainer(rect)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	scroll.Resize(fyne.NewSize(80, 80))
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(-20, -20)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-20, -20)})
 	scroll.Resize(fyne.NewSize(90, 90))
 	assert.Equal(t, float32(10), scroll.Offset.X)
 	assert.Equal(t, float32(10), scroll.Offset.Y)
@@ -363,10 +363,10 @@ func TestScrollContainer_ShowShadowOnLeftIfContentIsScrolled(t *testing.T) {
 	assert.False(t, r.leftShadow.Visible())
 	assert.Equal(t, fyne.NewPos(0, 0), r.leftShadow.Position())
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{X: -1}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: -1}})
 	assert.True(t, r.leftShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{X: 1}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: 1}})
 	assert.False(t, r.leftShadow.Visible())
 }
 
@@ -379,10 +379,10 @@ func TestScrollContainer_ShowShadowOnRightIfContentCanScroll(t *testing.T) {
 	assert.True(t, r.rightShadow.Visible())
 	assert.Equal(t, scroll.size.Width, r.rightShadow.Position().X+r.rightShadow.Size().Width)
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{X: -400}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: -400}})
 	assert.False(t, r.rightShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{X: 100}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: 100}})
 	assert.True(t, r.rightShadow.Visible())
 }
 
@@ -395,10 +395,10 @@ func TestScrollContainer_ShowShadowOnTopIfContentIsScrolled(t *testing.T) {
 	assert.False(t, r.topShadow.Visible())
 	assert.Equal(t, fyne.NewPos(0, 0), r.topShadow.Position())
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{Y: -1}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: -1}})
 	assert.True(t, r.topShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{Y: 1}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: 1}})
 	assert.False(t, r.topShadow.Visible())
 }
 
@@ -411,10 +411,10 @@ func TestScrollContainer_ShowShadowOnBottomIfContentCanScroll(t *testing.T) {
 	assert.True(t, r.bottomShadow.Visible())
 	assert.Equal(t, scroll.size.Height, r.bottomShadow.Position().Y+r.bottomShadow.Size().Height)
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{Y: -400}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: -400}})
 	assert.False(t, r.bottomShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.Vector{Y: 100}})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: 100}})
 	assert.True(t, r.bottomShadow.Visible())
 }
 
@@ -425,7 +425,7 @@ func TestScrollContainer_ScrollHorizontallyWithVerticalMouseScroll(t *testing.T)
 	scroll.Resize(fyne.NewSize(100, 100))
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
-	scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(0, -10)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -10)})
 	assert.Equal(t, float32(10), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
@@ -436,7 +436,7 @@ func TestScrollContainer_ScrollHorizontallyWithVerticalMouseScroll(t *testing.T)
 		scroll.Resize(fyne.NewSize(100, 100))
 		assert.Equal(t, float32(0), scroll.Offset.X)
 		assert.Equal(t, float32(0), scroll.Offset.Y)
-		scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(-20, -40)})
+		scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-20, -40)})
 		assert.Equal(t, float32(20), scroll.Offset.X)
 		assert.Equal(t, float32(0), scroll.Offset.Y)
 	})
@@ -448,7 +448,7 @@ func TestScrollContainer_ScrollHorizontallyWithVerticalMouseScroll(t *testing.T)
 		scroll.Resize(fyne.NewSize(100, 100))
 		assert.Equal(t, float32(0), scroll.Offset.X)
 		assert.Equal(t, float32(0), scroll.Offset.Y)
-		scroll.Scrolled(&fyne.ScrollEvent{Delta: fyne.NewVector(0, -10)})
+		scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -10)})
 		assert.Equal(t, float32(0), scroll.Offset.X)
 		assert.Equal(t, float32(10), scroll.Offset.Y)
 	})
@@ -588,12 +588,12 @@ func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Create drag event with starting position inside scroll rectangle area
-	dragEvent := fyne.DragEvent{Dragged: fyne.Vector{X: 20}}
+	dragEvent := fyne.DragEvent{Dragged: fyne.Delta{DX: 20}}
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(100), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 20}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 20}}
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(100), scroll.Offset.Y)
@@ -608,18 +608,18 @@ func TestScrollBar_DraggedBack_ClickedInside(t *testing.T) {
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Drag forward
-	dragEvent := fyne.DragEvent{Dragged: fyne.Vector{X: 20}}
+	dragEvent := fyne.DragEvent{Dragged: fyne.Delta{DX: 20}}
 	scrollBarHoriz.Dragged(&dragEvent)
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 20}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 20}}
 	scrollBarVert.Dragged(&dragEvent)
 
 	// Drag back
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: -10}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: -10}}
 	assert.Equal(t, float32(100), scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(50), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: -10}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: -10}}
 	assert.Equal(t, float32(100), scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(50), scroll.Offset.Y)
@@ -634,44 +634,44 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Drag over limit
-	dragEvent := fyne.DragEvent{Dragged: fyne.Vector{X: 2000}}
+	dragEvent := fyne.DragEvent{Dragged: fyne.Delta{DX: 2000}}
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(800), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 2000}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 2000}}
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(800), scroll.Offset.Y)
 
 	// Drag again
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: 100}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: 100}}
 	// Offset doesn't go over limit
 	assert.Equal(t, float32(800), scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(800), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 100}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 100}}
 	// Offset doesn't go over limit
 	assert.Equal(t, float32(800), scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(800), scroll.Offset.Y)
 
 	// Drag back (still outside limit)
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: -1000}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: -1000}}
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(800), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: -1000}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: -1000}}
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(800), scroll.Offset.Y)
 
 	// Drag back (inside limit)
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: -1040}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: -1040}}
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(300), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: -1040}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: -1040}}
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(300), scroll.Offset.Y)
 }
@@ -685,33 +685,33 @@ func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Drag over back limit
-	dragEvent := fyne.DragEvent{Dragged: fyne.Vector{X: -1000}}
+	dragEvent := fyne.DragEvent{Dragged: fyne.Delta{DX: -1000}}
 	// Offset doesn't go over limit
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(0), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: -1000}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: -1000}}
 	// Offset doesn't go over limit
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
 	// Drag (still outside limit)
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: 500}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: 500}}
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(0), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 500}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 500}}
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
 	// Drag (inside limit)
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: 520}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: 520}}
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(100), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 520}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 520}}
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(100), scroll.Offset.Y)
 }
@@ -724,22 +724,22 @@ func TestScrollBar_DraggedWithNonZeroStartPosition(t *testing.T) {
 	scrollBarHoriz := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
-	dragEvent := fyne.DragEvent{Dragged: fyne.Vector{X: 50}}
+	dragEvent := fyne.DragEvent{Dragged: fyne.Delta{DX: 50}}
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(250), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 50}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 50}}
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(250), scroll.Offset.Y)
 
 	// Drag again (after releasing mouse button)
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{X: 20}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DX: 20}}
 	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, float32(350), scroll.Offset.X)
 
-	dragEvent = fyne.DragEvent{Dragged: fyne.Vector{Y: 20}}
+	dragEvent = fyne.DragEvent{Dragged: fyne.Delta{DY: 20}}
 	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, float32(350), scroll.Offset.Y)
 }

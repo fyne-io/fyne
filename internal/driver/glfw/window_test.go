@@ -169,7 +169,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewVector(-1, -1),
+			Dragged: fyne.NewDelta(-1, -1),
 		},
 		d1.popDragEvent(),
 	)
@@ -183,7 +183,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4),
 				AbsolutePosition: fyne.NewPos(16, 8)},
-			Dragged: fyne.NewVector(8, 0),
+			Dragged: fyne.NewDelta(8, 0),
 		},
 		d1.popDragEvent(),
 	)
@@ -197,7 +197,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(18, 1),
 				AbsolutePosition: fyne.NewPos(22, 5)},
-			Dragged: fyne.NewVector(6, -3),
+			Dragged: fyne.NewDelta(6, -3),
 		},
 		d1.popDragEvent(),
 	)
@@ -230,7 +230,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 3),
 				AbsolutePosition: fyne.NewPos(22, 7)},
-			Dragged: fyne.NewVector(0, 1),
+			Dragged: fyne.NewDelta(0, 1),
 		},
 		d2.popDragEvent(),
 	)
@@ -254,7 +254,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewVector(-1, -1),
+			Dragged: fyne.NewDelta(-1, -1),
 		},
 		d1.popDragEvent(),
 	)
@@ -270,7 +270,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(7, 7),
 				AbsolutePosition: fyne.NewPos(10, 10)},
-			Dragged: fyne.NewVector(2, 2),
+			Dragged: fyne.NewDelta(2, 2),
 		},
 		d1.popDragEvent(),
 	)
@@ -357,7 +357,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewVector(0, 0),
+			Dragged: fyne.NewDelta(0, 0),
 		},
 		dh.popDragEvent(),
 	)
@@ -369,7 +369,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4),
 				AbsolutePosition: fyne.NewPos(16, 8)},
-			Dragged: fyne.NewVector(8, 0),
+			Dragged: fyne.NewDelta(8, 0),
 		},
 		dh.popDragEvent(),
 	)
@@ -383,7 +383,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewVector(-8, 0),
+			Dragged: fyne.NewDelta(-8, 0),
 		},
 		dh.popDragEvent(),
 	)
