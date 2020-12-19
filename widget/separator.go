@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const separatorThickness = 1
+const separatorThickness = float32(1)
 
 var _ fyne.Widget = (*Separator)(nil)
 

@@ -334,12 +334,12 @@ func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
 			heightCenterOffset := (radio.itemHeight() - focusIndicatorSize) / 2
 
 			for i, item := range render.items {
-				x, y := 0, heightCenterOffset
+				x, y := float32(0), heightCenterOffset
 
 				if tt.isHorizontal {
-					x = i * radio.itemWidth()
+					x = float32(i) * radio.itemWidth()
 				} else {
-					y = i*radio.itemHeight() + heightCenterOffset
+					y = float32(i)*radio.itemHeight() + heightCenterOffset
 				}
 
 				assert.Equal(t, fyne.NewPos(x, y), item.focusIndicator.Position1)

@@ -24,7 +24,7 @@ var scales = []*scaleItems{
 
 func (s *Settings) appliedScale(value float32) {
 	for _, scale := range scales {
-		scale.preview.TextSize = int(float32(theme.TextSize()) * scale.scale / value)
+		scale.preview.TextSize = theme.TextSize() * scale.scale / value
 	}
 }
 
@@ -72,7 +72,7 @@ func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
 	for i, scale := range scales {
 		text := canvas.NewText("A", theme.TextColor())
 		text.Alignment = fyne.TextAlignCenter
-		text.TextSize = int(float32(theme.TextSize()) * scale.scale / value)
+		text.TextSize = theme.TextSize() * scale.scale / value
 
 		scale.preview = text
 		previews[i] = text

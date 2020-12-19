@@ -52,7 +52,7 @@ func (p *progressRenderer) updateBar() {
 	}
 
 	size := p.progress.Size()
-	p.bar.Resize(fyne.NewSize(int(float32(size.Width)*ratio), size.Height))
+	p.bar.Resize(fyne.NewSize(size.Width*ratio, size.Height))
 }
 
 // Layout the components of the check widget

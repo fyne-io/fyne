@@ -128,9 +128,9 @@ func TestFileDialogResize(t *testing.T) {
 	//Test resize - normal size scenario
 	size := fyne.NewSize(200, 180) //normal size to fit (600,400)
 	file.Resize(size)
-	expectedWidth := 200
+	expectedWidth := float32(200)
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight := 180
+	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 	//Test resize - normal size scenario again
 	size = fyne.NewSize(300, 280) //normal size to fit (600,400)

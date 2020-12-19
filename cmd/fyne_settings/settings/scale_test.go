@@ -40,5 +40,5 @@ func TestMakeScalePreviews(t *testing.T) {
 	assert.Equal(t, theme.TextSize(), previews[2].(*canvas.Text).TextSize)
 
 	s.appliedScale(1.5)
-	assert.Equal(t, int(float32(theme.TextSize())/1.5), previews[2].(*canvas.Text).TextSize)
+	assert.Equal(t, theme.TextSize()/1.5, previews[2].(*canvas.Text).TextSize)
 }

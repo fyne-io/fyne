@@ -71,7 +71,7 @@ func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		}
 
 		if child != b.top && child != b.bottom && child != b.left && child != b.right {
-			minSize = minSize.Union(child.MinSize())
+			minSize = minSize.Max(child.MinSize())
 		}
 	}
 

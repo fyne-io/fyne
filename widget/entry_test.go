@@ -346,7 +346,7 @@ func TestEntry_DragSelect(t *testing.T) {
 	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
-		de := &fyne.DragEvent{PointEvent: *ev1, DraggedX: 1, DraggedY: 0}
+		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
 		entry.Dragged(de)
 	}
 	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
@@ -2414,7 +2414,7 @@ func TestEntry_Tapped(t *testing.T) {
 	`, c)
 
 	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
+	pos := fyne.NewPos(testCharSize*1.5, testCharSize/2) // tap in the middle of the 2nd "M"
 	ev := &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
 	test.AssertRendersToMarkup(t, `
@@ -2435,7 +2435,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	pos = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
+	pos = fyne.NewPos(testCharSize*2.5, testCharSize/2) // tap in the middle of the 3rd "M"
 	ev = &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
 	test.AssertRendersToMarkup(t, `
@@ -3098,7 +3098,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
 
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
-	y := theme.Padding() + row*rowHeight + rowHeight/2
+	y := theme.Padding() + float32(row)*rowHeight + rowHeight/2
 
 	pos := fyne.NewPos(x, y)
 	return &fyne.PointEvent{Position: pos}

@@ -151,7 +151,7 @@ func (r *splitContainerRenderer) Refresh() {
 	canvas.Refresh(r.split)
 }
 
-func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin int) (int, int) {
+func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) (float32, float32) {
 	available := float64(total - dividerThickness())
 	if available <= 0 {
 		return 0, 0
@@ -175,7 +175,7 @@ func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin int) (int
 
 	ld = offset * available
 	tr = available - ld
-	return int(ld), int(tr)
+	return float32(ld), float32(tr)
 }
 
 // Declare conformity with interfaces
@@ -228,7 +228,7 @@ func (d *divider) Dragged(event *fyne.DragEvent) {
 		if trailingRatio := 1. - (float64(d.split.Trailing.Size().Width) / float64(d.split.Size().Width)); offset > trailingRatio {
 			offset = trailingRatio
 		}
-		offset += float64(event.DraggedX) / float64(d.split.Size().Width)
+		offset += float64(event.Dragged.DX) / float64(d.split.Size().Width)
 	} else {
 		if leadingRatio := float64(d.split.Leading.Size().Height) / float64(d.split.Size().Height); offset < leadingRatio {
 			offset = leadingRatio
@@ -236,7 +236,7 @@ func (d *divider) Dragged(event *fyne.DragEvent) {
 		if trailingRatio := 1. - (float64(d.split.Trailing.Size().Height) / float64(d.split.Size().Height)); offset > trailingRatio {
 			offset = trailingRatio
 		}
-		offset += float64(event.DraggedY) / float64(d.split.Size().Height)
+		offset += float64(event.Dragged.DY) / float64(d.split.Size().Height)
 	}
 	d.split.SetOffset(offset)
 }
@@ -272,7 +272,7 @@ func (r *dividerRenderer) Destroy() {
 }
 
 func (r *dividerRenderer) Layout(size fyne.Size) {
-	var x, y, w, h int
+	var x, y, w, h float32
 	if r.divider.split.Horizontal {
 		x = (dividerThickness() - handleThickness()) / 2
 		y = (size.Height - handleLength()) / 2
@@ -304,18 +304,18 @@ func (r *dividerRenderer) Refresh() {
 	r.Layout(r.divider.Size())
 }
 
-func dividerThickness() int {
+func dividerThickness() float32 {
 	return theme.Padding() * 2
 }
 
-func dividerLength() int {
+func dividerLength() float32 {
 	return theme.Padding() * 6
 }
 
-func handleThickness() int {
+func handleThickness() float32 {
 	return theme.Padding() / 2
 }
 
-func handleLength() int {
+func handleLength() float32 {
 	return theme.Padding() * 4
 }

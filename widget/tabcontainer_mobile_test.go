@@ -462,14 +462,14 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="73x29" type="*widget.tabButton">
-							<text alignment="center" bold color="hyperlink" pos="4,4" size="65x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="4,4" size="65x21">Test1</text>
 						</widget>
 						<widget pos="77,0" size="73x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="4,4" size="65x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="hyperlink" pos="0,29" size="73x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="73x4"/>
 				</widget>
 			</content>
 		</canvas>

@@ -148,9 +148,9 @@ func (c *glCanvas) Padded() bool {
 
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	texScale := c.texScale
-	multiple := float64(c.Scale() * texScale)
-	scaleInt := func(x int) int {
-		return int(math.Round(float64(x) * multiple))
+	multiple := c.Scale() * texScale
+	scaleInt := func(x float32) int {
+		return int(math.Round(float64(x * multiple)))
 	}
 
 	return scaleInt(pos.X), scaleInt(pos.Y)
@@ -394,7 +394,7 @@ func (c *glCanvas) isMenuActive() bool {
 	return c.menu != nil && c.menu.(*MenuBar).IsActive()
 }
 
-func (c *glCanvas) menuHeight() int {
+func (c *glCanvas) menuHeight() float32 {
 	switch c.menu {
 	case nil:
 		// no menu or native menu -> does not consume space on the canvas
