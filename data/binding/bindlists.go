@@ -32,8 +32,8 @@ func BindBoolList(v *[]bool) BoolList {
 
 	b := &boundBoolList{val: v}
 
-	for _, i := range *v {
-		b.appendItem(BindBool(&i))
+	for i := range *v {
+		b.appendItem(BindBool(&((*v)[i])))
 	}
 
 	return b
@@ -192,8 +192,8 @@ func BindIntList(v *[]int) IntList {
 
 	b := &boundIntList{val: v}
 
-	for _, i := range *v {
-		b.appendItem(BindInt(&i))
+	for i := range *v {
+		b.appendItem(BindInt(&((*v)[i])))
 	}
 
 	return b
@@ -272,8 +272,8 @@ func BindRuneList(v *[]rune) RuneList {
 
 	b := &boundRuneList{val: v}
 
-	for _, i := range *v {
-		b.appendItem(BindRune(&i))
+	for i := range *v {
+		b.appendItem(BindRune(&((*v)[i])))
 	}
 
 	return b
@@ -352,8 +352,8 @@ func BindStringList(v *[]string) StringList {
 
 	b := &boundStringList{val: v}
 
-	for _, i := range *v {
-		b.appendItem(BindString(&i))
+	for i := range *v {
+		b.appendItem(BindString(&((*v)[i])))
 	}
 
 	return b
