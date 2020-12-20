@@ -33,7 +33,7 @@ func (m *maxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			continue
 		}
 
-		minSize = minSize.Union(child.MinSize())
+		minSize = minSize.Max(child.MinSize())
 	}
 
 	return minSize

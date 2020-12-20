@@ -42,7 +42,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	movl := buildMenuOverlay(mm, c)
 	c.setMenuOverlay(movl)
 	w.SetContent(content)
-	w.Resize(fyne.NewSize(200, 200))
+	w.Resize(fyne.NewSize(200, 199))
 
 	ovli1 := widget.NewLabel("Overlay Item 1")
 	ovli2 := widget.NewLabel("Overlay Item 2")

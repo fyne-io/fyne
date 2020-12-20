@@ -50,7 +50,7 @@ func AssertRendersToMarkup(t *testing.T, expected string, c fyne.Canvas, msgAndA
 
 // Drag drags at an absolute position on the canvas.
 // deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
-func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
+func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Draggable); ok {
 			return true
@@ -63,8 +63,7 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 	}
 	e := &fyne.DragEvent{
 		PointEvent: fyne.PointEvent{Position: p},
-		DraggedX:   deltaX,
-		DraggedY:   deltaY,
+		Dragged:    fyne.Delta{DX: deltaX, DY: deltaY},
 	}
 	o.(fyne.Draggable).Dragged(e)
 	o.(fyne.Draggable).DragEnd()
@@ -140,7 +139,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 
 // Scroll scrolls at an absolute position on the canvas.
 // deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
-func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
+func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Scrollable); ok {
 			return true
@@ -152,7 +151,7 @@ func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 		return
 	}
 
-	e := &fyne.ScrollEvent{DeltaX: deltaX, DeltaY: deltaY}
+	e := &fyne.ScrollEvent{Scrolled: fyne.Delta{DX: deltaX, DY: deltaY}}
 	o.(fyne.Scrollable).Scrolled(e)
 }
 

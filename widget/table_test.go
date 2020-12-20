@@ -45,8 +45,8 @@ func TestTable_Cache(t *testing.T) {
 	objRef := cellRenderer.Objects()[0].(*Label)
 
 	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
-	assert.Equal(t, 0, renderer.scroll.Offset.Y) // we didn't scroll as data shorter
-	assert.Equal(t, 150, renderer.scroll.Offset.X)
+	assert.Equal(t, float32(0), renderer.scroll.Offset.Y) // we didn't scroll as data shorter
+	assert.Equal(t, float32(150), renderer.scroll.Offset.X)
 	assert.Equal(t, 6, len(cellRenderer.Objects()))
 	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
 	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
@@ -429,14 +429,14 @@ func TestTable_Select(t *testing.T) {
 							</widget>
 						</widget>
 						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="3,19" size="3x149" type="*widget.scrollBar">
+							<widget backgroundColor="scrollbar" pos="3,18" size="3x149" type="*widget.scrollBar">
 							</widget>
 						</widget>
 						<widget size="168x0" type="*widget.Shadow">
 							<linearGradient size="168x8" startColor="shadow"/>
 						</widget>
 						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="79,3" size="55x3" type="*widget.scrollBar">
+							<widget backgroundColor="scrollbar" pos="78,3" size="55x3" type="*widget.scrollBar">
 							</widget>
 						</widget>
 						<widget size="0x168" type="*widget.Shadow">
@@ -494,7 +494,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 10, len(cellRenderer.Objects()))
-	assert.Equal(t, 16, cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
+	assert.Equal(t, float32(16), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
 
 	w := test.NewWindow(table)
 	defer w.Close()

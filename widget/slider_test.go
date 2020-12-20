@@ -146,7 +146,7 @@ func TestSlider_OnChanged(t *testing.T) {
 	slider.SetValue(0.5)
 	assert.Equal(t, 1, changes)
 
-	drag := &fyne.DragEvent{DraggedX: 10, DraggedY: 2}
+	drag := &fyne.DragEvent{Dragged: fyne.NewDelta(10, 2)}
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 }

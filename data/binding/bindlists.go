@@ -112,8 +112,8 @@ func BindFloatList(v *[]float64) FloatList {
 
 	b := &boundFloatList{val: v}
 
-	for _, i := range *v {
-		b.appendItem(BindFloat(&i))
+	for i := range *v {
+		b.appendItem(BindFloat(&((*v)[i])))
 	}
 
 	return b

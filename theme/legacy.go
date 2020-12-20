@@ -69,18 +69,18 @@ func (l *legacyWrapper) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return DefaultTheme().Icon(n)
 }
 
-func (l *legacyWrapper) Size(n fyne.ThemeSizeName) int {
+func (l *legacyWrapper) Size(n fyne.ThemeSizeName) float32 {
 	switch n {
 	case SizeNameInlineIcon:
-		return l.old.IconInlineSize()
+		return float32(l.old.IconInlineSize())
 	case SizeNamePadding:
-		return l.old.Padding()
+		return float32(l.old.Padding())
 	case SizeNameScrollBar:
-		return l.old.ScrollBarSize()
+		return float32(l.old.ScrollBarSize())
 	case SizeNameScrollBarSmall:
-		return l.old.ScrollBarSmallSize()
+		return float32(l.old.ScrollBarSmallSize())
 	case SizeNameText:
-		return l.old.TextSize()
+		return float32(l.old.TextSize())
 	default:
 		return DefaultTheme().Size(n)
 	}

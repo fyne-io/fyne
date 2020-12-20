@@ -854,7 +854,7 @@ func TestMenu_Scrolling(t *testing.T) {
 								</container>
 							</widget>
 							<widget pos="22,0" size="6x90" type="*widget.scrollBarArea">
-								<widget backgroundColor="scrollbar" pos="3,50" size="3x40" type="*widget.scrollBar">
+								<widget backgroundColor="scrollbar" pos="3,49" size="3x40" type="*widget.scrollBar">
 								</widget>
 							</widget>
 							<widget size="28x0" type="*widget.Shadow">

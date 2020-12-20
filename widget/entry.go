@@ -492,7 +492,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
 
-	e.popUp = newPopUpMenu(menu, c)
+	e.popUp = NewPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
@@ -1236,9 +1236,9 @@ func (r *entryRenderer) buildSelection() {
 
 	provider := r.entry.textProvider()
 	// Convert column, row into x,y
-	getCoordinates := func(column int, row int) (int, int) {
+	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
+		return sz.Width + theme.Padding()*2, sz.Height*float32(row) + theme.Padding()*2
 	}
 
 	lineHeight := r.entry.text.charMinSize().Height
@@ -1314,7 +1314,7 @@ func (r *entryRenderer) moveCursor() {
 	size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
 	provider.propertyLock.RUnlock()
 	xPos := size.Width
-	yPos := size.Height * r.entry.CursorRow
+	yPos := size.Height * float32(r.entry.CursorRow)
 	r.entry.propertyLock.RUnlock()
 
 	r.entry.propertyLock.Lock()

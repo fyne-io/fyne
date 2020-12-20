@@ -165,7 +165,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
 	f.fileScroll = widget.NewScrollContainer(f.files)
-	verticalExtra := int(float64(fileIconSize) * 0.25)
+	verticalExtra := float32(float64(fileIconSize) * 0.25)
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 

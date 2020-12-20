@@ -169,8 +169,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			DraggedX: -1,
-			DraggedY: -1,
+			Dragged: fyne.NewDelta(-1, -1),
 		},
 		d1.popDragEvent(),
 	)
@@ -184,8 +183,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4),
 				AbsolutePosition: fyne.NewPos(16, 8)},
-			DraggedX: 8,
-			DraggedY: 0,
+			Dragged: fyne.NewDelta(8, 0),
 		},
 		d1.popDragEvent(),
 	)
@@ -199,8 +197,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(18, 1),
 				AbsolutePosition: fyne.NewPos(22, 5)},
-			DraggedX: 6,
-			DraggedY: -3,
+			Dragged: fyne.NewDelta(6, -3),
 		},
 		d1.popDragEvent(),
 	)
@@ -233,8 +230,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 3),
 				AbsolutePosition: fyne.NewPos(22, 7)},
-			DraggedX: 0,
-			DraggedY: 1,
+			Dragged: fyne.NewDelta(0, 1),
 		},
 		d2.popDragEvent(),
 	)
@@ -258,8 +254,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			DraggedX: -1,
-			DraggedY: -1,
+			Dragged: fyne.NewDelta(-1, -1),
 		},
 		d1.popDragEvent(),
 	)
@@ -275,8 +270,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(7, 7),
 				AbsolutePosition: fyne.NewPos(10, 10)},
-			DraggedX: 2,
-			DraggedY: 2,
+			Dragged: fyne.NewDelta(2, 2),
 		},
 		d1.popDragEvent(),
 	)
@@ -363,8 +357,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			DraggedX: 0,
-			DraggedY: 0,
+			Dragged: fyne.NewDelta(0, 0),
 		},
 		dh.popDragEvent(),
 	)
@@ -376,8 +369,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4),
 				AbsolutePosition: fyne.NewPos(16, 8)},
-			DraggedX: 8,
-			DraggedY: 0,
+			Dragged: fyne.NewDelta(8, 0),
 		},
 		dh.popDragEvent(),
 	)
@@ -391,8 +383,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			DraggedX: -8,
-			DraggedY: 0,
+			Dragged: fyne.NewDelta(-8, 0),
 		},
 		dh.popDragEvent(),
 	)
@@ -743,12 +734,12 @@ func TestWindow_Padded(t *testing.T) {
 	w.SetContent(content)
 
 	width, _ := w.(*window).minSizeOnScreen()
-	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
+	assert.Equal(t, int(theme.Padding()*2+content.MinSize().Width), width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
 }
 
 func TestWindow_SetPadded(t *testing.T) {
-	var menuHeight int
+	var menuHeight float32
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
@@ -759,8 +750,8 @@ func TestWindow_SetPadded(t *testing.T) {
 		name               string
 		padding            bool
 		menu               bool
-		expectedPad        int
-		expectedMenuHeight int
+		expectedPad        float32
+		expectedMenuHeight float32
 	}{
 		{"window without padding", false, false, 0, 0},
 		{"window with padding", true, false, 4, 0},

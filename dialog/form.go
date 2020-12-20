@@ -54,12 +54,6 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
 
 	d := &dialog{content: content, callback: callback, title: title, parent: parent}
-
-	// TODO: Copied from NewCustomConfirm above.
-	// This is still a problem because commenting out the `.Show()` call below will still result in the
-	// dialog being shown.
-	d.sendResponse = true
-
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}

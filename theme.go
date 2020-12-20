@@ -29,7 +29,7 @@ type Theme interface {
 	Color(ThemeColorName, ThemeVariant) color.Color
 	Font(TextStyle) Resource
 	Icon(ThemeIconName) Resource
-	Size(ThemeSizeName) int
+	Size(ThemeSizeName) float32
 }
 
 // LegacyTheme defines the requirements of any Fyne theme.

@@ -708,11 +708,11 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 	`, c)
 }
 
-func dropDownIconWidth() int {
+func dropDownIconWidth() float32 {
 	return theme.IconInlineSize() + theme.Padding()
 }
 
-func emptyTextWidth() int {
+func emptyTextWidth() float32 {
 	return widget.NewLabel("M").MinSize().Width
 }
 
@@ -721,8 +721,8 @@ func optionsMinSize(options []string) fyne.Size {
 	for _, option := range options {
 		labels = append(labels, widget.NewLabel(option))
 	}
-	minWidth := 0
-	minHeight := 0
+	minWidth := float32(0)
+	minHeight := float32(0)
 	for _, label := range labels {
 		if minWidth < label.MinSize().Width {
 			minWidth = label.MinSize().Width
@@ -730,6 +730,6 @@ func optionsMinSize(options []string) fyne.Size {
 		minHeight += label.MinSize().Height
 	}
 	// padding between all options
-	minHeight += (len(labels) - 1) * theme.Padding()
+	minHeight += float32(len(labels)-1) * theme.Padding()
 	return fyne.NewSize(minWidth, minHeight)
 }

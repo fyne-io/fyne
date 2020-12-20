@@ -72,10 +72,10 @@ func TestProgressRenderer_Layout(t *testing.T) {
 	bar.Resize(fyne.NewSize(100, 10))
 
 	render := test.WidgetRenderer(bar).(*progressRenderer)
-	assert.Equal(t, 0, render.bar.Size().Width)
+	assert.Equal(t, float32(0), render.bar.Size().Width)
 
 	bar.SetValue(.5)
-	assert.Equal(t, 50, render.bar.Size().Width)
+	assert.Equal(t, float32(50), render.bar.Size().Width)
 
 	bar.SetValue(1)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
