@@ -45,3 +45,21 @@ func TestBindUntypedMap(t *testing.T) {
 	assert.Equal(t, "new", b.Get("foo"))
 	assert.Equal(t, "Content", b.Get("Extra"))
 }
+
+func TestUntypedMap_Delete(t *testing.T) {
+	m := map[string]interface{}{
+		"foo": "bar",
+		"val": 5,
+	}
+
+	b := BindUntypedMap(&m)
+
+	assert.Equal(t, 2, len(b.Keys()))
+	assert.Equal(t, "bar", b.Get("foo"))
+	assert.Equal(t, 5, b.Get("val"))
+
+	b.Delete("foo")
+	assert.Equal(t, 1, len(b.Keys()))
+	assert.Equal(t, nil, b.Get("foo"))
+	assert.Equal(t, 5, b.Get("val"))
+}
