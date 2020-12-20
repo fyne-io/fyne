@@ -1,6 +1,8 @@
 package tutorials
 
 import (
+	"fmt"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/data/binding"
@@ -45,7 +47,7 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 		dataList.Append(float64(dataList.Length()+1) / 10)
 	})
 
-	return container.NewBorder(item, button, nil, nil, widget.NewListWithData(dataList,
+	list := widget.NewListWithData(dataList,
 		func() fyne.CanvasObject {
 			return container.NewBorder(nil, nil, nil, widget.NewButton("+", nil),
 				widget.NewLabel("item x.y"))
@@ -59,5 +61,46 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 			btn.OnTapped = func() {
 				f.Set(f.Get() + 1)
 			}
-		}))
+		})
+
+	formStruct := struct {
+		Name, Email string
+		Subscribe   bool
+	}{}
+
+	formData := binding.BindStruct(&formStruct)
+	form := newFormWithData(formData)
+	form.OnSubmit = func() {
+		fmt.Println("Struct:\n", formStruct)
+	}
+
+	listPanel := container.NewBorder(nil, button, nil, nil, list)
+	return container.NewBorder(item, nil, nil, nil, container.NewGridWithColumns(2, listPanel, form))
+}
+
+func newFormWithData(data binding.DataMap) *widget.Form {
+	keys := data.Keys()
+	items := make([]*widget.FormItem, len(keys))
+	for i, k := range keys {
+		items[i] = widget.NewFormItem(k, createBoundItem(data.GetItem(k)))
+	}
+
+	return widget.NewForm(items...)
+}
+
+func createBoundItem(v binding.DataItem) fyne.CanvasObject {
+	switch val := v.(type) {
+	case binding.Bool:
+		return widget.NewCheckWithData("", val)
+	case binding.Float:
+		s := widget.NewSliderWithData(0, 1, val)
+		s.Step = 0.01
+		return s
+	case binding.Int:
+		return widget.NewEntryWithData(binding.IntToString(val))
+	case binding.String:
+		return widget.NewEntryWithData(val)
+	default:
+		return widget.NewLabel("")
+	}
 }
