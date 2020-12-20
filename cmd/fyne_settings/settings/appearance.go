@@ -171,7 +171,7 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(path, data, 0644)
+	return ioutil.WriteFile(path, data, 0600)
 }
 
 type colorButton struct {

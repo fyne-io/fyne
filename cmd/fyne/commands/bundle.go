@@ -58,7 +58,7 @@ func (b *bundler) Run(args []string) {
 			fileModes = os.O_RDWR | os.O_APPEND
 		}
 
-		f, err := os.OpenFile(b.out, fileModes, 0666)
+		f, err := os.OpenFile(b.out, fileModes, 0600)
 		if err == nil {
 			outFile = f
 		} else {

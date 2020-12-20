@@ -31,7 +31,7 @@ func (p *packager) packageIOS() error {
     "author" : "xcode",
     "version" : 1
   }
-}`), 0644)
+}`), 0600)
 	if err != nil {
 		fyne.LogError("Content err", err)
 	}
