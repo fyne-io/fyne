@@ -19,7 +19,7 @@ func TestBoolToString(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "true", v)
 
-	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false" and "tUue" parses as "true"
+	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false"
 	assert.NotNil(t, err)
 	_, err = b.Get()
 	assert.Nil(t, err)
@@ -169,7 +169,7 @@ func TestStringToBool(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, true, v)
 
-	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false" and "tUue" parses as "true"
+	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false"
 	assert.Nil(t, err)
 	_, err = b.Get()
 	assert.NotNil(t, err)

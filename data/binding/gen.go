@@ -143,7 +143,7 @@ func (s *stringFrom{{ .Name }}) Get() (string, error) {
 
 func (s *stringFrom{{ .Name }}) Set(str string) error {
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, s.format, &val)
+	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil || n != 1 {
 		return err
 	}
@@ -203,7 +203,7 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	}
 
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, s.format, &val)
+	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil || n != 1 {
 		return {{ .Default }}, err
 	}
