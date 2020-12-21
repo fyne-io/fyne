@@ -154,12 +154,12 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 	if val == old {
 		return nil
 	}
-	err = s.from.Set(val)
-
-	if err == nil {
-		s.trigger()
+	if err = s.from.Set(val); err != nil {
+		return err
 	}
-	return err
+
+	s.trigger()
+	return nil
 }
 
 func (s *stringFrom{{ .Name }}) DataChanged() {
@@ -218,9 +218,12 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 		return err
 	}
 
-	err = s.from.Set(str)
+	if err = s.from.Set(str); err != nil {
+		return err
+	}
+
 	s.trigger()
-	return err
+	return nil
 }
 
 func (s *stringTo{{ .Name }}) DataChanged() {

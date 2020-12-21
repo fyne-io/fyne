@@ -56,12 +56,12 @@ func (s *stringFromBool) Set(str string) error {
 	if val == old {
 		return nil
 	}
-	err = s.from.Set(val)
-
-	if err == nil {
-		s.trigger()
+	if err = s.from.Set(val); err != nil {
+		return err
 	}
-	return err
+
+	s.trigger()
+	return nil
 }
 
 func (s *stringFromBool) DataChanged() {
@@ -117,12 +117,12 @@ func (s *stringFromFloat) Set(str string) error {
 	if val == old {
 		return nil
 	}
-	err = s.from.Set(val)
-
-	if err == nil {
-		s.trigger()
+	if err = s.from.Set(val); err != nil {
+		return err
 	}
-	return err
+
+	s.trigger()
+	return nil
 }
 
 func (s *stringFromFloat) DataChanged() {
@@ -178,12 +178,12 @@ func (s *stringFromInt) Set(str string) error {
 	if val == old {
 		return nil
 	}
-	err = s.from.Set(val)
-
-	if err == nil {
-		s.trigger()
+	if err = s.from.Set(val); err != nil {
+		return err
 	}
-	return err
+
+	s.trigger()
+	return nil
 }
 
 func (s *stringFromInt) DataChanged() {
@@ -240,9 +240,12 @@ func (s *stringToBool) Set(val bool) error {
 		return err
 	}
 
-	err = s.from.Set(str)
+	if err = s.from.Set(str); err != nil {
+		return err
+	}
+
 	s.trigger()
-	return err
+	return nil
 }
 
 func (s *stringToBool) DataChanged() {
@@ -299,9 +302,12 @@ func (s *stringToFloat) Set(val float64) error {
 		return err
 	}
 
-	err = s.from.Set(str)
+	if err = s.from.Set(str); err != nil {
+		return err
+	}
+
 	s.trigger()
-	return err
+	return nil
 }
 
 func (s *stringToFloat) DataChanged() {
@@ -358,9 +364,12 @@ func (s *stringToInt) Set(val int) error {
 		return err
 	}
 
-	err = s.from.Set(str)
+	if err = s.from.Set(str); err != nil {
+		return err
+	}
+
 	s.trigger()
-	return err
+	return nil
 }
 
 func (s *stringToInt) DataChanged() {
