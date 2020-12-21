@@ -128,8 +128,8 @@ func (c *TabContainer) RemoveIndex(index int) {
 // SetItems sets the container’s items and refreshes.
 func (c *TabContainer) SetItems(items []*TabItem) {
 	c.Items = items
-	if c.current >= len(c.Items) {
-		c.current = -1
+	if l := len(c.Items); c.current >= l {
+		c.current = l - 1
 	}
 	c.Refresh()
 }
