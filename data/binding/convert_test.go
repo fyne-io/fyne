@@ -21,12 +21,12 @@ func TestBoolToString(t *testing.T) {
 
 	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false" and "tUue" parses as "true"
 	assert.NotNil(t, err)
-	v2, err := b.Get()
+	_, err = b.Get()
 	assert.Nil(t, err)
 
 	err = s.Set("false")
 	assert.Nil(t, err)
-	v2, err = b.Get()
+	v2, err := b.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, false, v2)
 }
@@ -46,12 +46,12 @@ func TestBoolToStringWithFormat(t *testing.T) {
 
 	err = s.Set("true") // valid bool but not valid format
 	assert.NotNil(t, err)
-	v2, err := b.Get()
+	_, err = b.Get()
 	assert.Nil(t, err)
 
 	err = s.Set("falsely")
 	assert.Nil(t, err)
-	v2, err = b.Get()
+	v2, err := b.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, false, v2)
 }
@@ -71,12 +71,12 @@ func TestFloatToString(t *testing.T) {
 
 	err = s.Set("wrong")
 	assert.NotNil(t, err)
-	v2, err := f.Get()
+	_, err = f.Get()
 	assert.Nil(t, err)
 
 	err = s.Set("5.00")
 	assert.Nil(t, err)
-	v2, err = f.Get()
+	v2, err := f.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, v2)
 }
@@ -96,12 +96,12 @@ func TestFloatToStringWithFormat(t *testing.T) {
 
 	err = s.Set("4.3") // valid float64 but not valid format
 	assert.NotNil(t, err)
-	v2, err := f.Get()
+	_, err = f.Get()
 	assert.Nil(t, err)
 
 	err = s.Set("5.00%")
 	assert.Nil(t, err)
-	v2, err = f.Get()
+	v2, err := f.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, v2)
 }
@@ -121,12 +121,12 @@ func TestIntToString(t *testing.T) {
 
 	err = s.Set("wrong")
 	assert.NotNil(t, err)
-	v2, err := i.Get()
+	_, err = i.Get()
 	assert.Nil(t, err)
 
 	err = s.Set("5")
 	assert.Nil(t, err)
-	v2, err = i.Get()
+	v2, err := i.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5, v2)
 }
@@ -146,12 +146,12 @@ func TestIntToStringWithFormat(t *testing.T) {
 
 	err = s.Set("4") // valid int but not valid format
 	assert.NotNil(t, err)
-	v2, err := i.Get()
+	_, err = i.Get()
 	assert.Nil(t, err)
 
 	err = s.Set("num5")
 	assert.Nil(t, err)
-	v2, err = i.Get()
+	v2, err := i.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5, v2)
 }
@@ -171,7 +171,7 @@ func TestStringToBool(t *testing.T) {
 
 	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false" and "tUue" parses as "true"
 	assert.Nil(t, err)
-	v, err = b.Get()
+	_, err = b.Get()
 	assert.NotNil(t, err)
 
 	err = b.Set(false)
@@ -197,7 +197,7 @@ func TestStringToBoolWithFormat(t *testing.T) {
 
 	err = s.Set("true") // valid bool but not valid format
 	assert.Nil(t, err)
-	v, err = b.Get()
+	_, err = b.Get()
 	assert.NotNil(t, err)
 
 	err = b.Set(false)
@@ -222,7 +222,7 @@ func TestStringToFloat(t *testing.T) {
 
 	err = s.Set("wrong")
 	assert.Nil(t, err)
-	v, err = f.Get()
+	_, err = f.Get()
 	assert.NotNil(t, err)
 
 	err = f.Set(5)
@@ -248,7 +248,7 @@ func TestStringToFloatWithFormat(t *testing.T) {
 
 	err = s.Set("4.3") // valid float64 but not valid format
 	assert.Nil(t, err)
-	v, err = f.Get()
+	_, err = f.Get()
 	assert.NotNil(t, err)
 
 	err = f.Set(5)
@@ -273,7 +273,7 @@ func TestStringToInt(t *testing.T) {
 
 	err = s.Set("wrong")
 	assert.Nil(t, err)
-	v, err = i.Get()
+	_, err = i.Get()
 	assert.NotNil(t, err)
 
 	err = i.Set(5)
@@ -299,7 +299,7 @@ func TestStringToIntWithFormat(t *testing.T) {
 
 	err = s.Set("4") // valid int but not valid format
 	assert.Nil(t, err)
-	v, err = i.Get()
+	_, err = i.Get()
 	assert.NotNil(t, err)
 
 	err = i.Set(5)
