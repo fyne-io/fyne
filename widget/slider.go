@@ -71,14 +71,20 @@ func (s *Slider) Bind(data binding.Float) {
 	s.valueSource = data
 
 	s.valueListener = binding.NewDataListener(func() {
-		s.Value = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			return
+		}
+		s.Value = val
 		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
 			s.Refresh()
 		}
 	})
 	data.AddListener(s.valueListener)
 
-	s.OnChanged = data.Set
+	s.OnChanged = func(f float64) {
+		_ = data.Set(f)
+	}
 }
 
 // DragEnd function.

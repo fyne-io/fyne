@@ -118,15 +118,30 @@ func (e *Entry) Bind(data binding.String) {
 	e.Unbind()
 	e.textSource = data
 
+	var convertErr error
+	e.Validator = func(string) error {
+		return convertErr
+	}
 	e.textListener = binding.NewDataListener(func() {
-		e.Text = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			convertErr = err
+			e.SetValidationError(err)
+			return
+		}
+		e.Text = val
+		convertErr = nil
+		e.Refresh()
 		if cache.IsRendered(e) {
 			e.Refresh()
 		}
 	})
 	data.AddListener(e.textListener)
 
-	e.OnChanged = data.Set
+	e.OnChanged = func(s string) {
+		convertErr = data.Set(s)
+		e.SetValidationError(convertErr)
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -693,6 +708,7 @@ func (e *Entry) Unbind() {
 		return
 	}
 
+	e.Validator = nil
 	e.textSource.RemoveListener(e.textListener)
 	e.textListener = nil
 	e.textSource = nil

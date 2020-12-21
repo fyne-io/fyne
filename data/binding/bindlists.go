@@ -9,10 +9,10 @@ package binding
 type BoolList interface {
 	DataList
 
-	Append(bool)
-	Get(int) bool
-	Prepend(bool)
-	Set(int, bool)
+	Append(bool) error
+	Get(int) (bool, error)
+	Prepend(bool) error
+	Set(int, bool) error
 }
 
 // NewBoolList returns a bindable list of bool values.
@@ -45,42 +45,52 @@ type boundBoolList struct {
 	val *[]bool
 }
 
-func (l *boundBoolList) Append(val bool) {
+func (l *boundBoolList) Append(val bool) error {
 	if l.val != nil {
 		*l.val = append(*l.val, val)
 	}
 
 	l.appendItem(BindBool(&val))
+	return nil
 }
 
-func (l *boundBoolList) Get(i int) bool {
-	if i < 0 || i > l.Length() {
-		return false
+func (l *boundBoolList) Get(i int) (bool, error) {
+	if i < 0 || i >= l.Length() {
+		return false, outOfBounds
 	}
 	if l.val != nil {
-		return (*l.val)[i]
+		return (*l.val)[i], nil
 	}
 
-	return l.GetItem(i).(Bool).Get()
+	item, ok := l.GetItem(i)
+	if !ok {
+		return false, outOfBounds
+	}
+	return item.(Bool).Get()
 }
 
-func (l *boundBoolList) Prepend(val bool) {
+func (l *boundBoolList) Prepend(val bool) error {
 	if l.val != nil {
 		*l.val = append([]bool{val}, *l.val...)
 	}
 
 	l.prependItem(BindBool(&val))
+	return nil
 }
 
-func (l *boundBoolList) Set(i int, v bool) {
-	if i > l.Length() {
-		return
+func (l *boundBoolList) Set(i int, v bool) error {
+	if i < 0 || i >= l.Length() {
+		return outOfBounds
 	}
 	if l.val != nil {
 		(*l.val)[i] = v
 	}
 
-	l.GetItem(i).(Bool).Set(v)
+	item, ok := l.GetItem(i)
+	if !ok {
+		return outOfBounds
+	}
+	return item.(Bool).Set(v)
 }
 
 // FloatList supports binding a list of float64 values.
@@ -89,10 +99,10 @@ func (l *boundBoolList) Set(i int, v bool) {
 type FloatList interface {
 	DataList
 
-	Append(float64)
-	Get(int) float64
-	Prepend(float64)
-	Set(int, float64)
+	Append(float64) error
+	Get(int) (float64, error)
+	Prepend(float64) error
+	Set(int, float64) error
 }
 
 // NewFloatList returns a bindable list of float64 values.
@@ -125,42 +135,52 @@ type boundFloatList struct {
 	val *[]float64
 }
 
-func (l *boundFloatList) Append(val float64) {
+func (l *boundFloatList) Append(val float64) error {
 	if l.val != nil {
 		*l.val = append(*l.val, val)
 	}
 
 	l.appendItem(BindFloat(&val))
+	return nil
 }
 
-func (l *boundFloatList) Get(i int) float64 {
-	if i < 0 || i > l.Length() {
-		return 0.0
+func (l *boundFloatList) Get(i int) (float64, error) {
+	if i < 0 || i >= l.Length() {
+		return 0.0, outOfBounds
 	}
 	if l.val != nil {
-		return (*l.val)[i]
+		return (*l.val)[i], nil
 	}
 
-	return l.GetItem(i).(Float).Get()
+	item, ok := l.GetItem(i)
+	if !ok {
+		return 0.0, outOfBounds
+	}
+	return item.(Float).Get()
 }
 
-func (l *boundFloatList) Prepend(val float64) {
+func (l *boundFloatList) Prepend(val float64) error {
 	if l.val != nil {
 		*l.val = append([]float64{val}, *l.val...)
 	}
 
 	l.prependItem(BindFloat(&val))
+	return nil
 }
 
-func (l *boundFloatList) Set(i int, v float64) {
-	if i > l.Length() {
-		return
+func (l *boundFloatList) Set(i int, v float64) error {
+	if i < 0 || i >= l.Length() {
+		return outOfBounds
 	}
 	if l.val != nil {
 		(*l.val)[i] = v
 	}
 
-	l.GetItem(i).(Float).Set(v)
+	item, ok := l.GetItem(i)
+	if !ok {
+		return outOfBounds
+	}
+	return item.(Float).Set(v)
 }
 
 // IntList supports binding a list of int values.
@@ -169,10 +189,10 @@ func (l *boundFloatList) Set(i int, v float64) {
 type IntList interface {
 	DataList
 
-	Append(int)
-	Get(int) int
-	Prepend(int)
-	Set(int, int)
+	Append(int) error
+	Get(int) (int, error)
+	Prepend(int) error
+	Set(int, int) error
 }
 
 // NewIntList returns a bindable list of int values.
@@ -205,42 +225,52 @@ type boundIntList struct {
 	val *[]int
 }
 
-func (l *boundIntList) Append(val int) {
+func (l *boundIntList) Append(val int) error {
 	if l.val != nil {
 		*l.val = append(*l.val, val)
 	}
 
 	l.appendItem(BindInt(&val))
+	return nil
 }
 
-func (l *boundIntList) Get(i int) int {
-	if i < 0 || i > l.Length() {
-		return 0
+func (l *boundIntList) Get(i int) (int, error) {
+	if i < 0 || i >= l.Length() {
+		return 0, outOfBounds
 	}
 	if l.val != nil {
-		return (*l.val)[i]
+		return (*l.val)[i], nil
 	}
 
-	return l.GetItem(i).(Int).Get()
+	item, ok := l.GetItem(i)
+	if !ok {
+		return 0, outOfBounds
+	}
+	return item.(Int).Get()
 }
 
-func (l *boundIntList) Prepend(val int) {
+func (l *boundIntList) Prepend(val int) error {
 	if l.val != nil {
 		*l.val = append([]int{val}, *l.val...)
 	}
 
 	l.prependItem(BindInt(&val))
+	return nil
 }
 
-func (l *boundIntList) Set(i int, v int) {
-	if i > l.Length() {
-		return
+func (l *boundIntList) Set(i int, v int) error {
+	if i < 0 || i >= l.Length() {
+		return outOfBounds
 	}
 	if l.val != nil {
 		(*l.val)[i] = v
 	}
 
-	l.GetItem(i).(Int).Set(v)
+	item, ok := l.GetItem(i)
+	if !ok {
+		return outOfBounds
+	}
+	return item.(Int).Set(v)
 }
 
 // RuneList supports binding a list of rune values.
@@ -249,10 +279,10 @@ func (l *boundIntList) Set(i int, v int) {
 type RuneList interface {
 	DataList
 
-	Append(rune)
-	Get(int) rune
-	Prepend(rune)
-	Set(int, rune)
+	Append(rune) error
+	Get(int) (rune, error)
+	Prepend(rune) error
+	Set(int, rune) error
 }
 
 // NewRuneList returns a bindable list of rune values.
@@ -285,42 +315,52 @@ type boundRuneList struct {
 	val *[]rune
 }
 
-func (l *boundRuneList) Append(val rune) {
+func (l *boundRuneList) Append(val rune) error {
 	if l.val != nil {
 		*l.val = append(*l.val, val)
 	}
 
 	l.appendItem(BindRune(&val))
+	return nil
 }
 
-func (l *boundRuneList) Get(i int) rune {
-	if i < 0 || i > l.Length() {
-		return rune(0)
+func (l *boundRuneList) Get(i int) (rune, error) {
+	if i < 0 || i >= l.Length() {
+		return rune(0), outOfBounds
 	}
 	if l.val != nil {
-		return (*l.val)[i]
+		return (*l.val)[i], nil
 	}
 
-	return l.GetItem(i).(Rune).Get()
+	item, ok := l.GetItem(i)
+	if !ok {
+		return rune(0), outOfBounds
+	}
+	return item.(Rune).Get()
 }
 
-func (l *boundRuneList) Prepend(val rune) {
+func (l *boundRuneList) Prepend(val rune) error {
 	if l.val != nil {
 		*l.val = append([]rune{val}, *l.val...)
 	}
 
 	l.prependItem(BindRune(&val))
+	return nil
 }
 
-func (l *boundRuneList) Set(i int, v rune) {
-	if i > l.Length() {
-		return
+func (l *boundRuneList) Set(i int, v rune) error {
+	if i < 0 || i >= l.Length() {
+		return outOfBounds
 	}
 	if l.val != nil {
 		(*l.val)[i] = v
 	}
 
-	l.GetItem(i).(Rune).Set(v)
+	item, ok := l.GetItem(i)
+	if !ok {
+		return outOfBounds
+	}
+	return item.(Rune).Set(v)
 }
 
 // StringList supports binding a list of string values.
@@ -329,10 +369,10 @@ func (l *boundRuneList) Set(i int, v rune) {
 type StringList interface {
 	DataList
 
-	Append(string)
-	Get(int) string
-	Prepend(string)
-	Set(int, string)
+	Append(string) error
+	Get(int) (string, error)
+	Prepend(string) error
+	Set(int, string) error
 }
 
 // NewStringList returns a bindable list of string values.
@@ -365,40 +405,50 @@ type boundStringList struct {
 	val *[]string
 }
 
-func (l *boundStringList) Append(val string) {
+func (l *boundStringList) Append(val string) error {
 	if l.val != nil {
 		*l.val = append(*l.val, val)
 	}
 
 	l.appendItem(BindString(&val))
+	return nil
 }
 
-func (l *boundStringList) Get(i int) string {
-	if i < 0 || i > l.Length() {
-		return ""
+func (l *boundStringList) Get(i int) (string, error) {
+	if i < 0 || i >= l.Length() {
+		return "", outOfBounds
 	}
 	if l.val != nil {
-		return (*l.val)[i]
+		return (*l.val)[i], nil
 	}
 
-	return l.GetItem(i).(String).Get()
+	item, ok := l.GetItem(i)
+	if !ok {
+		return "", outOfBounds
+	}
+	return item.(String).Get()
 }
 
-func (l *boundStringList) Prepend(val string) {
+func (l *boundStringList) Prepend(val string) error {
 	if l.val != nil {
 		*l.val = append([]string{val}, *l.val...)
 	}
 
 	l.prependItem(BindString(&val))
+	return nil
 }
 
-func (l *boundStringList) Set(i int, v string) {
-	if i > l.Length() {
-		return
+func (l *boundStringList) Set(i int, v string) error {
+	if i < 0 || i >= l.Length() {
+		return outOfBounds
 	}
 	if l.val != nil {
 		(*l.val)[i] = v
 	}
 
-	l.GetItem(i).(String).Set(v)
+	item, ok := l.GetItem(i)
+	if !ok {
+		return outOfBounds
+	}
+	return item.(String).Set(v)
 }

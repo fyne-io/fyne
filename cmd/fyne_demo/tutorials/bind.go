@@ -59,7 +59,8 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 
 			btn := obj.(*fyne.Container).Objects[1].(*widget.Button)
 			btn.OnTapped = func() {
-				f.Set(f.Get() + 1)
+				val, _ := f.Get()
+				_ = f.Set(val + 1)
 			}
 		})
 
@@ -82,7 +83,11 @@ func newFormWithData(data binding.DataMap) *widget.Form {
 	keys := data.Keys()
 	items := make([]*widget.FormItem, len(keys))
 	for i, k := range keys {
-		items[i] = widget.NewFormItem(k, createBoundItem(data.GetItem(k)))
+		data, ok := data.GetItem(k)
+		if !ok {
+			continue
+		}
+		items[i] = widget.NewFormItem(k, createBoundItem(data))
 	}
 
 	return widget.NewForm(items...)

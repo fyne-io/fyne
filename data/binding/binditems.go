@@ -8,8 +8,8 @@ package binding
 // Since: 2.0.0
 type Bool interface {
 	DataItem
-	Get() bool
-	Set(bool)
+	Get() (bool, error)
+	Set(bool) error
 }
 
 // NewBool returns a bindable bool value that is managed internally.
@@ -37,16 +37,16 @@ type boundBool struct {
 	val *bool
 }
 
-func (b *boundBool) Get() bool {
+func (b *boundBool) Get() (bool, error) {
 	if b.val == nil {
-		return false
+		return false, nil
 	}
-	return *b.val
+	return *b.val, nil
 }
 
-func (b *boundBool) Set(val bool) {
+func (b *boundBool) Set(val bool) error {
 	if *b.val == val {
-		return
+		return nil
 	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
@@ -55,6 +55,7 @@ func (b *boundBool) Set(val bool) {
 	}
 
 	b.trigger()
+	return nil
 }
 
 // Float supports binding a float64 value.
@@ -62,8 +63,8 @@ func (b *boundBool) Set(val bool) {
 // Since: 2.0.0
 type Float interface {
 	DataItem
-	Get() float64
-	Set(float64)
+	Get() (float64, error)
+	Set(float64) error
 }
 
 // NewFloat returns a bindable float64 value that is managed internally.
@@ -91,16 +92,16 @@ type boundFloat struct {
 	val *float64
 }
 
-func (b *boundFloat) Get() float64 {
+func (b *boundFloat) Get() (float64, error) {
 	if b.val == nil {
-		return 0.0
+		return 0.0, nil
 	}
-	return *b.val
+	return *b.val, nil
 }
 
-func (b *boundFloat) Set(val float64) {
+func (b *boundFloat) Set(val float64) error {
 	if *b.val == val {
-		return
+		return nil
 	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
@@ -109,6 +110,7 @@ func (b *boundFloat) Set(val float64) {
 	}
 
 	b.trigger()
+	return nil
 }
 
 // Int supports binding a int value.
@@ -116,8 +118,8 @@ func (b *boundFloat) Set(val float64) {
 // Since: 2.0.0
 type Int interface {
 	DataItem
-	Get() int
-	Set(int)
+	Get() (int, error)
+	Set(int) error
 }
 
 // NewInt returns a bindable int value that is managed internally.
@@ -145,16 +147,16 @@ type boundInt struct {
 	val *int
 }
 
-func (b *boundInt) Get() int {
+func (b *boundInt) Get() (int, error) {
 	if b.val == nil {
-		return 0
+		return 0, nil
 	}
-	return *b.val
+	return *b.val, nil
 }
 
-func (b *boundInt) Set(val int) {
+func (b *boundInt) Set(val int) error {
 	if *b.val == val {
-		return
+		return nil
 	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
@@ -163,6 +165,7 @@ func (b *boundInt) Set(val int) {
 	}
 
 	b.trigger()
+	return nil
 }
 
 // Rune supports binding a rune value.
@@ -170,8 +173,8 @@ func (b *boundInt) Set(val int) {
 // Since: 2.0.0
 type Rune interface {
 	DataItem
-	Get() rune
-	Set(rune)
+	Get() (rune, error)
+	Set(rune) error
 }
 
 // NewRune returns a bindable rune value that is managed internally.
@@ -199,16 +202,16 @@ type boundRune struct {
 	val *rune
 }
 
-func (b *boundRune) Get() rune {
+func (b *boundRune) Get() (rune, error) {
 	if b.val == nil {
-		return rune(0)
+		return rune(0), nil
 	}
-	return *b.val
+	return *b.val, nil
 }
 
-func (b *boundRune) Set(val rune) {
+func (b *boundRune) Set(val rune) error {
 	if *b.val == val {
-		return
+		return nil
 	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
@@ -217,6 +220,7 @@ func (b *boundRune) Set(val rune) {
 	}
 
 	b.trigger()
+	return nil
 }
 
 // String supports binding a string value.
@@ -224,8 +228,8 @@ func (b *boundRune) Set(val rune) {
 // Since: 2.0.0
 type String interface {
 	DataItem
-	Get() string
-	Set(string)
+	Get() (string, error)
+	Set(string) error
 }
 
 // NewString returns a bindable string value that is managed internally.
@@ -253,16 +257,16 @@ type boundString struct {
 	val *string
 }
 
-func (b *boundString) Get() string {
+func (b *boundString) Get() (string, error) {
 	if b.val == nil {
-		return ""
+		return "", nil
 	}
-	return *b.val
+	return *b.val, nil
 }
 
-func (b *boundString) Set(val string) {
+func (b *boundString) Set(val string) error {
 	if *b.val == val {
-		return
+		return nil
 	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
@@ -271,4 +275,5 @@ func (b *boundString) Set(val string) {
 	}
 
 	b.trigger()
+	return nil
 }

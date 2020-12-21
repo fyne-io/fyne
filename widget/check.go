@@ -115,14 +115,20 @@ func (c *Check) Bind(data binding.Bool) {
 	c.checkSource = data
 
 	c.checkListener = binding.NewDataListener(func() {
-		c.Checked = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			return
+		}
+		c.Checked = val
 		if cache.IsRendered(c) {
 			c.Refresh()
 		}
 	})
 	data.AddListener(c.checkListener)
 
-	c.OnChanged = data.Set
+	c.OnChanged = func(b bool) {
+		_ = data.Set(b)
+	}
 }
 
 // SetChecked sets the the checked state and refreshes widget

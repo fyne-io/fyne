@@ -9,146 +9,242 @@ import (
 func TestBoolToString(t *testing.T) {
 	b := NewBool()
 	s := BoolToString(b)
-	assert.Equal(t, "false", s.Get())
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "false", v)
 
-	b.Set(true)
-	assert.Equal(t, "true", s.Get())
+	err = b.Set(true)
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "true", v)
 
-	s.Set("false")
-	assert.Equal(t, false, b.Get())
+	err = s.Set("false")
+	assert.Nil(t, err)
+	v2, err := b.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, false, v2)
 }
 
 func TestBoolToStringWithFormat(t *testing.T) {
 	b := NewBool()
 	s := BoolToStringWithFormat(b, "%tly")
-	assert.Equal(t, "falsely", s.Get())
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "falsely", v)
 
-	b.Set(true)
-	assert.Equal(t, "truely", s.Get())
+	err = b.Set(true)
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "truely", v)
 
-	s.Set("falsely")
-	assert.Equal(t, false, b.Get())
+	err = s.Set("falsely")
+	assert.Nil(t, err)
+	v2, err := b.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, false, v2)
 }
 
 func TestFloatToString(t *testing.T) {
 	f := NewFloat()
 	s := FloatToString(f)
-	assert.Equal(t, "0.000000", s.Get())
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "0.000000", v)
 
-	f.Set(0.3)
-	assert.Equal(t, "0.300000", s.Get())
+	err = f.Set(0.3)
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "0.300000", v)
 
-	s.Set("5.00")
-	assert.Equal(t, 5.0, f.Get())
+	err = s.Set("5.00")
+	assert.Nil(t, err)
+	v2, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, v2)
 }
 
 func TestFloatToStringWithFormat(t *testing.T) {
 	f := NewFloat()
 	s := FloatToStringWithFormat(f, "%f%%")
-	assert.Equal(t, "0.000000%", s.Get())
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "0.000000%", v)
 
-	f.Set(0.3)
-	assert.Equal(t, "0.300000%", s.Get())
+	err = f.Set(0.3)
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "0.300000%", v)
 
-	s.Set("5.00%")
-	assert.Equal(t, 5.0, f.Get())
+	err = s.Set("5.00%")
+	assert.Nil(t, err)
+	v2, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, v2)
 }
 
 func TestIntToString(t *testing.T) {
 	i := NewInt()
 	s := IntToString(i)
-	assert.Equal(t, "0", s.Get())
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "0", v)
 
-	i.Set(3)
-	assert.Equal(t, "3", s.Get())
+	err = i.Set(3)
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "3", v)
 
-	s.Set("5")
-	assert.Equal(t, 5, i.Get())
+	err = s.Set("5")
+	assert.Nil(t, err)
+	v2, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v2)
 }
 
 func TestIntToStringWithFormat(t *testing.T) {
 	i := NewInt()
 	s := IntToStringWithFormat(i, "num%d")
-	assert.Equal(t, "num0", s.Get())
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "num0", v)
 
-	i.Set(3)
-	assert.Equal(t, "num3", s.Get())
+	err = i.Set(3)
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "num3", v)
 
-	s.Set("num5")
-	assert.Equal(t, 5, i.Get())
+	err = s.Set("num5")
+	assert.Nil(t, err)
+	v2, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v2)
 }
 
 func TestStringToBool(t *testing.T) {
 	s := NewString()
 	b := StringToBool(s)
-	assert.Equal(t, false, b.Get())
+	v, err := b.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, false, v)
 
-	s.Set("true")
-	assert.Equal(t, true, b.Get())
+	err = s.Set("true")
+	assert.Nil(t, err)
+	v, err = b.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
 
-	b.Set(false)
-	assert.Equal(t, "false", s.Get())
+	err = b.Set(false)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "false", v2)
 }
 
 func TestStringToBoolWithFormat(t *testing.T) {
 	start := "falsely"
 	s := BindString(&start)
 	b := StringToBoolWithFormat(s, "%tly")
-	assert.Equal(t, false, b.Get())
+	v, err := b.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, false, v)
 
-	s.Set("truely")
-	assert.Equal(t, true, b.Get())
+	err = s.Set("truely")
+	assert.Nil(t, err)
+	v, err = b.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, true, v)
 
-	b.Set(false)
-	assert.Equal(t, "falsely", s.Get())
+	err = b.Set(false)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "falsely", v2)
 }
 
 func TestStringToFloat(t *testing.T) {
 	s := NewString()
 	f := StringToFloat(s)
-	assert.Equal(t, 0.0, f.Get())
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0.0, v)
 
-	s.Set("3")
-	assert.Equal(t, 3.0, f.Get())
+	err = s.Set("3")
+	assert.Nil(t, err)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 3.0, v)
 
-	f.Set(5)
-	assert.Equal(t, "5.000000", s.Get())
+	err = f.Set(5)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "5.000000", v2)
 }
 
 func TestStringToFloatWithFormat(t *testing.T) {
 	start := "0.0%"
 	s := BindString(&start)
 	f := StringToFloatWithFormat(s, "%f%%")
-	assert.Equal(t, 0.0, f.Get())
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0.0, v)
 
-	s.Set("3.000000%")
-	assert.Equal(t, 3.0, f.Get())
+	err = s.Set("3.000000%")
+	assert.Nil(t, err)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 3.0, v)
 
-	f.Set(5)
-	assert.Equal(t, "5.000000%", s.Get())
+	err = f.Set(5)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "5.000000%", v2)
 }
 
 func TestStringToInt(t *testing.T) {
 	s := NewString()
 	i := StringToInt(s)
-	assert.Equal(t, 0, i.Get())
+	v, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, v)
 
-	s.Set("3")
-	assert.Equal(t, 3, i.Get())
+	err = s.Set("3")
+	assert.Nil(t, err)
+	v, err = i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 3, v)
 
-	i.Set(5)
-	assert.Equal(t, "5", s.Get())
+	err = i.Set(5)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "5", v2)
 }
 
 func TestStringToIntWithFormat(t *testing.T) {
 	start := "num0"
 	s := BindString(&start)
 	i := StringToIntWithFormat(s, "num%d")
-	assert.Equal(t, 0, i.Get())
+	v, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, v)
 
-	s.Set("num3")
-	assert.Equal(t, 3, i.Get())
+	err = s.Set("num3")
+	assert.Nil(t, err)
+	v, err = i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 3, v)
 
-	i.Set(5)
-	assert.Equal(t, "num5", s.Get())
+	err = i.Set(5)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "num5", v2)
 }

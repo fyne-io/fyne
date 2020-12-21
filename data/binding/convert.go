@@ -36,25 +36,26 @@ func BoolToStringWithFormat(v Bool, format string) String {
 	return str
 }
 
-func (s *stringFromBool) Get() string {
-	val := s.from.Get()
+func (s *stringFromBool) Get() (string, error) {
+	val, err := s.from.Get()
 
-	return fmt.Sprintf(s.format, val)
+	return fmt.Sprintf(s.format, val), err
 }
 
-func (s *stringFromBool) Set(str string) {
+func (s *stringFromBool) Set(str string) error {
 	var val bool
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("bool parse error", err)
-		return
+		return err
 	}
-	if val == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if val == old {
+		return err
 	}
-	s.from.Set(val)
+	err = s.from.Set(val)
 
 	s.trigger()
+	return err
 }
 
 func (s *stringFromBool) DataChanged() {
@@ -88,25 +89,26 @@ func FloatToStringWithFormat(v Float, format string) String {
 	return str
 }
 
-func (s *stringFromFloat) Get() string {
-	val := s.from.Get()
+func (s *stringFromFloat) Get() (string, error) {
+	val, err := s.from.Get()
 
-	return fmt.Sprintf(s.format, val)
+	return fmt.Sprintf(s.format, val), err
 }
 
-func (s *stringFromFloat) Set(str string) {
+func (s *stringFromFloat) Set(str string) error {
 	var val float64
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("float64 parse error", err)
-		return
+		return err
 	}
-	if val == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if val == old {
+		return err
 	}
-	s.from.Set(val)
+	err = s.from.Set(val)
 
 	s.trigger()
+	return err
 }
 
 func (s *stringFromFloat) DataChanged() {
@@ -140,25 +142,26 @@ func IntToStringWithFormat(v Int, format string) String {
 	return str
 }
 
-func (s *stringFromInt) Get() string {
-	val := s.from.Get()
+func (s *stringFromInt) Get() (string, error) {
+	val, err := s.from.Get()
 
-	return fmt.Sprintf(s.format, val)
+	return fmt.Sprintf(s.format, val), err
 }
 
-func (s *stringFromInt) Set(str string) {
+func (s *stringFromInt) Set(str string) error {
 	var val int
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("int parse error", err)
-		return
+		return err
 	}
-	if val == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if val == old {
+		return err
 	}
-	s.from.Set(val)
+	err = s.from.Set(val)
 
 	s.trigger()
+	return err
 }
 
 func (s *stringFromInt) DataChanged() {
@@ -193,30 +196,32 @@ func StringToBoolWithFormat(str String, format string) Bool {
 	return v
 }
 
-func (s *stringToBool) Get() bool {
-	str := s.from.Get()
-	if str == "" {
-		return false
+func (s *stringToBool) Get() (bool, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return false, nil
 	}
 
 	var val bool
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("bool parse error", err)
-		return false
+		return false, err
 	}
 
-	return val
+	return val, nil
 }
 
-func (s *stringToBool) Set(val bool) {
+func (s *stringToBool) Set(val bool) error {
 	str := fmt.Sprintf(s.format, val)
-	if str == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if str == old {
+		return err
 	}
 
-	s.from.Set(str)
+	err = s.from.Set(str)
 	s.trigger()
+	return err
 }
 
 func (s *stringToBool) DataChanged() {
@@ -251,30 +256,32 @@ func StringToFloatWithFormat(str String, format string) Float {
 	return v
 }
 
-func (s *stringToFloat) Get() float64 {
-	str := s.from.Get()
-	if str == "" {
-		return 0.0
+func (s *stringToFloat) Get() (float64, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return 0.0, nil
 	}
 
 	var val float64
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("float64 parse error", err)
-		return 0.0
+		return 0.0, err
 	}
 
-	return val
+	return val, nil
 }
 
-func (s *stringToFloat) Set(val float64) {
+func (s *stringToFloat) Set(val float64) error {
 	str := fmt.Sprintf(s.format, val)
-	if str == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if str == old {
+		return err
 	}
 
-	s.from.Set(str)
+	err = s.from.Set(str)
 	s.trigger()
+	return err
 }
 
 func (s *stringToFloat) DataChanged() {
@@ -309,30 +316,32 @@ func StringToIntWithFormat(str String, format string) Int {
 	return v
 }
 
-func (s *stringToInt) Get() int {
-	str := s.from.Get()
-	if str == "" {
-		return 0
+func (s *stringToInt) Get() (int, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return 0, nil
 	}
 
 	var val int
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("int parse error", err)
-		return 0
+		return 0, err
 	}
 
-	return val
+	return val, nil
 }
 
-func (s *stringToInt) Set(val int) {
+func (s *stringToInt) Set(val int) error {
 	str := fmt.Sprintf(s.format, val)
-	if str == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if str == old {
+		return err
 	}
 
-	s.from.Set(str)
+	err = s.from.Set(str)
 	s.trigger()
+	return err
 }
 
 func (s *stringToInt) DataChanged() {

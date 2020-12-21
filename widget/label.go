@@ -30,7 +30,8 @@ func NewLabel(text string) *Label {
 //
 // Since: 2.0.0
 func NewLabelWithData(data binding.String) *Label {
-	label := NewLabel(data.Get())
+	val, _ := data.Get()
+	label := NewLabel(val)
 	label.Bind(data)
 
 	return label
@@ -55,7 +56,10 @@ func (l *Label) Bind(data binding.String) {
 	l.Unbind()
 	l.textSource = data
 	l.textListener = binding.NewDataListener(func() {
-		l.SetText(l.textSource.Get())
+		val, err := l.textSource.Get()
+		if err == nil {
+			l.SetText(val)
+		}
 	})
 	data.AddListener(l.textListener)
 }
