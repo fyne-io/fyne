@@ -36,8 +36,11 @@ func BoolToStringWithFormat(v Bool, format string) String {
 
 func (s *stringFromBool) Get() (string, error) {
 	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
 
-	return fmt.Sprintf(s.format, val), err
+	return fmt.Sprintf(s.format, val), nil
 }
 
 func (s *stringFromBool) Set(str string) error {
@@ -47,12 +50,17 @@ func (s *stringFromBool) Set(str string) error {
 		return err
 	}
 	old, err := s.from.Get()
-	if val == old {
+	if err != nil {
 		return err
+	}
+	if val == old {
+		return nil
 	}
 	err = s.from.Set(val)
 
-	s.trigger()
+	if err == nil {
+		s.trigger()
+	}
 	return err
 }
 
@@ -89,8 +97,11 @@ func FloatToStringWithFormat(v Float, format string) String {
 
 func (s *stringFromFloat) Get() (string, error) {
 	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
 
-	return fmt.Sprintf(s.format, val), err
+	return fmt.Sprintf(s.format, val), nil
 }
 
 func (s *stringFromFloat) Set(str string) error {
@@ -100,12 +111,17 @@ func (s *stringFromFloat) Set(str string) error {
 		return err
 	}
 	old, err := s.from.Get()
-	if val == old {
+	if err != nil {
 		return err
+	}
+	if val == old {
+		return nil
 	}
 	err = s.from.Set(val)
 
-	s.trigger()
+	if err == nil {
+		s.trigger()
+	}
 	return err
 }
 
@@ -142,8 +158,11 @@ func IntToStringWithFormat(v Int, format string) String {
 
 func (s *stringFromInt) Get() (string, error) {
 	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
 
-	return fmt.Sprintf(s.format, val), err
+	return fmt.Sprintf(s.format, val), nil
 }
 
 func (s *stringFromInt) Set(str string) error {
@@ -153,12 +172,17 @@ func (s *stringFromInt) Set(str string) error {
 		return err
 	}
 	old, err := s.from.Get()
-	if val == old {
+	if err != nil {
 		return err
+	}
+	if val == old {
+		return nil
 	}
 	err = s.from.Set(val)
 
-	s.trigger()
+	if err == nil {
+		s.trigger()
+	}
 	return err
 }
 
@@ -197,7 +221,7 @@ func StringToBoolWithFormat(str String, format string) Bool {
 func (s *stringToBool) Get() (bool, error) {
 	str, err := s.from.Get()
 	if str == "" || err != nil {
-		return false, nil
+		return false, err
 	}
 
 	var val bool
@@ -256,7 +280,7 @@ func StringToFloatWithFormat(str String, format string) Float {
 func (s *stringToFloat) Get() (float64, error) {
 	str, err := s.from.Get()
 	if str == "" || err != nil {
-		return 0.0, nil
+		return 0.0, err
 	}
 
 	var val float64
@@ -315,7 +339,7 @@ func StringToIntWithFormat(str String, format string) Int {
 func (s *stringToInt) Get() (int, error) {
 	str, err := s.from.Get()
 	if str == "" || err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	var val int
