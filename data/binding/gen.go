@@ -275,7 +275,7 @@ func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 
 func (l *bound{{ .Name }}List) Get(i int) ({{ .Type }}, error) {
 	if i < 0 || i >= l.Length() {
-		return {{ .Default }}, outOfBounds
+		return {{ .Default }}, errOutOfBounds
 	}
 	if l.val != nil {
 		return (*l.val)[i], nil
@@ -283,7 +283,7 @@ func (l *bound{{ .Name }}List) Get(i int) ({{ .Type }}, error) {
 
 	item, ok := l.GetItem(i)
 	if !ok {
-		return {{ .Default }}, outOfBounds
+		return {{ .Default }}, errOutOfBounds
 	}
 	return item.({{ .Name }}).Get()
 }
@@ -299,7 +299,7 @@ func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 
 func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) error {
 	if i < 0 || i >= l.Length() {
-		return outOfBounds
+		return errOutOfBounds
 	}
 	if l.val != nil {
 		(*l.val)[i] = v
@@ -307,7 +307,7 @@ func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) error {
 
 	item, ok := l.GetItem(i)
 	if !ok {
-		return outOfBounds
+		return errOutOfBounds
 	}
 	return item.({{ .Name }}).Set(v)
 }

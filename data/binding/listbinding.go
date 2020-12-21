@@ -2,7 +2,7 @@ package binding
 
 import "errors"
 
-var outOfBounds = errors.New("index out of bounds")
+var errOutOfBounds = errors.New("index out of bounds")
 
 // DataList is the base interface for all bindable data lists.
 //
