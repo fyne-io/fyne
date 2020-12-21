@@ -122,12 +122,12 @@ func (c *TabContainer) Remove(item *TabItem) {
 
 // RemoveIndex removes tab by index
 func (c *TabContainer) RemoveIndex(index int) {
-	if c.current == index {
-		c.setTabIndex(-1)
-	}
-	if c.current > index {
-		c.setTabIndex(c.current - 1)
-	}
+	// if c.current == index {
+	// 	c.setTabIndex(-1)
+	// }
+	// if c.current > index {
+	// 	c.setTabIndex(c.current - 1)
+	// }
 	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
 }
 
@@ -135,7 +135,7 @@ func (c *TabContainer) RemoveIndex(index int) {
 func (c *TabContainer) SetItems(items []*TabItem) {
 	c.Items = items
 	if c.current >= len(c.Items) {
-		c.setTabIndex(-1)
+		c.current = -1
 	}
 	c.Refresh()
 }
@@ -155,10 +155,6 @@ func (c *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(c.Items) || c.current == index {
 		return
 	}
-	c.setTabIndex(index)
-}
-
-func (c *TabContainer) setTabIndex(index int) {
 	c.current = index
 	c.Refresh()
 
@@ -166,6 +162,15 @@ func (c *TabContainer) setTabIndex(index int) {
 		c.OnChanged(c.Items[c.current])
 	}
 }
+
+// func (c *TabContainer) setTabIndex(index int) {
+// 	c.current = index
+// 	c.Refresh()
+
+// 	if c.OnChanged != nil {
+// 		c.OnChanged(c.Items[c.current])
+// 	}
+// }
 
 // SetTabLocation sets the location of the tab bar
 func (c *TabContainer) SetTabLocation(l TabLocation) {
