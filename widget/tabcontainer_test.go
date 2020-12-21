@@ -100,7 +100,12 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 }
 
 func TestTabContainer_RemoveIndex(t *testing.T) {
-	tabs := widget.NewTabContainer(&widget.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")})
+	tabs := widget.NewTabContainer(&widget.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")},
+		&widget.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")})
+
+	tabs.SelectTabIndex(1)
+	tabs.RemoveIndex(1)
+	assert.Equal(t, 0, tabs.CurrentTabIndex()) // check max item selection and no panic
 
 	tabs.SelectTabIndex(0)
 	tabs.RemoveIndex(0)
