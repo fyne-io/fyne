@@ -5,8 +5,6 @@ package binding
 
 import (
 	"fmt"
-
-	"fyne.io/fyne"
 )
 
 type stringFromBool struct {
@@ -205,7 +203,6 @@ func (s *stringToBool) Get() (bool, error) {
 	var val bool
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("bool parse error", err)
 		return false, err
 	}
 
@@ -265,7 +262,6 @@ func (s *stringToFloat) Get() (float64, error) {
 	var val float64
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("float64 parse error", err)
 		return 0.0, err
 	}
 
@@ -325,7 +321,6 @@ func (s *stringToInt) Get() (int, error) {
 	var val int
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("int parse error", err)
 		return 0, err
 	}
 

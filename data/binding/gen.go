@@ -197,7 +197,6 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	var val {{ .Type }}
 	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
-		fyne.LogError("{{ .Type }} parse error", err)
 		return {{ .Default }}, err
 	}
 
@@ -357,8 +356,6 @@ func main() {
 	convertFile.WriteString(`
 import (
 	"fmt"
-
-	"fyne.io/fyne"
 )
 `)
 	prefFile, err := newFile("preference")
