@@ -134,8 +134,11 @@ func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 
 func (s *stringFrom{{ .Name }}) Get() (string, error) {
 	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
 
-	return fmt.Sprintf(s.format, val), err
+	return fmt.Sprintf(s.format, val), nil
 }
 
 func (s *stringFrom{{ .Name }}) Set(str string) error {
@@ -145,12 +148,17 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 		return err
 	}
 	old, err := s.from.Get()
-	if val == old {
+	if err != nil {
 		return err
+	}
+	if val == old {
+		return nil
 	}
 	err = s.from.Set(val)
 
-	s.trigger()
+	if err == nil {
+		s.trigger()
+	}
 	return err
 }
 
@@ -191,7 +199,7 @@ func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	str, err := s.from.Get()
 	if str == "" || err != nil {
-		return {{ .Default }}, nil
+		return {{ .Default }}, err
 	}
 
 	var val {{ .Type }}
