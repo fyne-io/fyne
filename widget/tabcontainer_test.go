@@ -100,12 +100,9 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 }
 
 func TestTabContainer_RemoveIndex(t *testing.T) {
-	t.Log("==================================================================================================================")
 	tabs := widget.NewTabContainer(&widget.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")})
 
 	tabs.SelectTabIndex(0)
 	tabs.RemoveIndex(0)
 	assert.Equal(t, -1, tabs.CurrentTabIndex()) // check deselection and no panic
-
-	t.Log("==================================================================================================================")
 }
