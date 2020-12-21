@@ -1,6 +1,7 @@
 package binding
 
 import (
+	"errors"
 	"reflect"
 
 	"fyne.io/fyne"
@@ -210,15 +211,26 @@ type reflectBool struct {
 	boundReflect
 }
 
-func (r *reflectBool) Get() (bool, error) {
-	// TODO catch the panic and return as error
-	return r.val.Bool(), nil
+func (r *reflectBool) Get() (val bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid bool value in data binding")
+		}
+	}()
+
+	val = r.val.Bool()
+	return
 }
 
-func (r *reflectBool) Set(b bool) error {
-	// TODO catch the panic and return as error
+func (r *reflectBool) Set(b bool) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set bool in data binding")
+		}
+	}()
+
 	r.val.SetBool(b)
-	return nil
+	return
 }
 
 func bindReflectBool(f reflect.Value) DataItem {
@@ -231,15 +243,26 @@ type reflectFloat struct {
 	boundReflect
 }
 
-func (r *reflectFloat) Get() (float64, error) {
-	// TODO catch the panic and return as error
-	return r.val.Float(), nil
+func (r *reflectFloat) Get() (val float64, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid float64 value in data binding")
+		}
+	}()
+
+	val = r.val.Float()
+	return
 }
 
-func (r *reflectFloat) Set(f float64) error {
-	// TODO catch the panic and return as error
+func (r *reflectFloat) Set(f float64) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set float64 in data binding")
+		}
+	}()
+
 	r.val.SetFloat(f)
-	return nil
+	return
 }
 
 func bindReflectFloat(f reflect.Value) DataItem {
@@ -252,15 +275,26 @@ type reflectInt struct {
 	boundReflect
 }
 
-func (r *reflectInt) Get() (int, error) {
-	// TODO catch the panic and return as error
-	return int(r.val.Int()), nil
+func (r *reflectInt) Get() (val int, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid int value in data binding")
+		}
+	}()
+
+	val = int(r.val.Int())
+	return
 }
 
-func (r *reflectInt) Set(i int) error {
-	// TODO catch the panic and return as error
+func (r *reflectInt) Set(i int) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set int in data binding")
+		}
+	}()
+
 	r.val.SetInt(int64(i))
-	return nil
+	return
 }
 
 func bindReflectInt(f reflect.Value) DataItem {
@@ -273,15 +307,26 @@ type reflectString struct {
 	boundReflect
 }
 
-func (r *reflectString) Get() (string, error) {
-	// TODO catch the panic and return as error
-	return r.val.String(), nil
+func (r *reflectString) Get() (val string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid string value in data binding")
+		}
+	}()
+
+	val = r.val.String()
+	return
 }
 
-func (r *reflectString) Set(s string) error {
-	// TODO catch the panic and return as error
+func (r *reflectString) Set(s string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set string in data binding")
+		}
+	}()
+
 	r.val.SetString(s)
-	return nil
+	return
 }
 
 func bindReflectString(f reflect.Value) DataItem {
