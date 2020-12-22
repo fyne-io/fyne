@@ -26,8 +26,7 @@ func NewFileURI(path string) fyne.URI {
 	if runtime.GOOS == "windows" {
 		// seems that sometimes we end up with
 		// double-backslashes
-		path = strings.ReplaceAll(path, "\\\\", "/")
-		path = strings.ReplaceAll(path, "\\", "/")
+		path = filepath.ToSlash(path)
 	}
 	return &uri{raw: "file://" + path}
 }
