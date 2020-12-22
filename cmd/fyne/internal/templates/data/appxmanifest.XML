@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="{{.AppID}}"
+            Version="{{.Version}}"
+            Publisher="{{.Developer}}" />
+  <Properties>
+    <DisplayName>{{.Name}}</DisplayName>
+    <PublisherDisplayName>{{.DeveloperName}}</PublisherDisplayName>
+    <Logo>Icon.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2</OSMinVersion>
+    <OSMaxVersionTested>10.0</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <!-- TODO <Applications> -->
+</Package>

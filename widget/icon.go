@@ -32,9 +32,13 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 }
 
 func (i *iconRenderer) Refresh() {
-	i.image.propertyLock.RLock()
-	i.updateObjects()
-	i.image.propertyLock.RUnlock()
+	if i.image.Resource != i.image.cachedRes {
+		i.image.propertyLock.RLock()
+		i.updateObjects()
+		i.image.cachedRes = i.image.Resource
+		i.image.propertyLock.RUnlock()
+	}
+
 	i.Layout(i.image.Size())
 	canvas.Refresh(i.image.super())
 }
@@ -42,7 +46,6 @@ func (i *iconRenderer) Refresh() {
 func (i *iconRenderer) updateObjects() {
 	var objects []fyne.CanvasObject
 	if i.image.Resource != nil {
-		// TODO this is recreated every time - perhaps cache as long as i.image.Resource doesn't change
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
 		objects = append(objects, raster)
@@ -54,12 +57,14 @@ func (i *iconRenderer) updateObjects() {
 type Icon struct {
 	BaseWidget
 
-	Resource fyne.Resource // The resource for this icon
+	Resource  fyne.Resource // The resource for this icon
+	cachedRes fyne.Resource
 }
 
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
+	i.cachedRes = nil
 	i.Refresh()
 }
 

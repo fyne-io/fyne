@@ -30,6 +30,17 @@ func (sh *ShortcutHandler) AddShortcut(shortcut Shortcut, handler func(shortcut 
 	sh.entry[shortcut.ShortcutName()] = handler
 }
 
+// RemoveShortcut removes a registered shortcut
+func (sh *ShortcutHandler) RemoveShortcut(shortcut Shortcut) {
+	sh.mu.Lock()
+	defer sh.mu.Unlock()
+	if sh.entry == nil {
+		return
+	}
+
+	delete(sh.entry, shortcut.ShortcutName())
+}
+
 // Shortcut is the interface used to describe a shortcut action
 type Shortcut interface {
 	ShortcutName() string

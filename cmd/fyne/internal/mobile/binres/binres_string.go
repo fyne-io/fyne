@@ -19,7 +19,7 @@ var (
 
 func (i ResType) String() string {
 	switch {
-	case 0 <= i && i <= 3:
+	case i <= 3:
 		return _ResType_name_0[_ResType_index_0[i]:_ResType_index_0[i+1]]
 	case 256 <= i && i <= 260:
 		i -= 256
@@ -48,7 +48,7 @@ var (
 
 func (i DataType) String() string {
 	switch {
-	case 0 <= i && i <= 7:
+	case i <= 7:
 		return _DataType_name_0[_DataType_index_0[i]:_DataType_index_0[i+1]]
 	case 16 <= i && i <= 18:
 		i -= 16

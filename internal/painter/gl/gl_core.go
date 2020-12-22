@@ -27,7 +27,7 @@ type Texture uint32
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(0)
 
-var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
 func newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32
@@ -257,5 +257,8 @@ func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
 }
 
 func logError() {
+	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
+		return
+	}
 	logGLError(gl.GetError())
 }

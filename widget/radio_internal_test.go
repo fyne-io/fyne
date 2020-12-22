@@ -132,7 +132,7 @@ func TestRadio_Append(t *testing.T) {
 	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 
 	radio.Options = append(radio.Options, "Another")
-	Refresh(radio)
+	radio.Refresh()
 
 	assert.Equal(t, 2, len(radio.Options))
 	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
@@ -145,7 +145,7 @@ func TestRadio_Remove(t *testing.T) {
 	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 
 	radio.Options = radio.Options[:1]
-	Refresh(radio)
+	radio.Refresh()
 
 	assert.Equal(t, 1, len(radio.Options))
 	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
@@ -168,7 +168,7 @@ func TestRadio_SetSelectedWithSameOption(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Another"}, nil)
 
 	radio.Selected = "Another"
-	Refresh(radio)
+	radio.Refresh()
 
 	radio.SetSelected("Another")
 
@@ -179,7 +179,7 @@ func TestRadio_SetSelectedEmpty(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Another"}, nil)
 
 	radio.Selected = "Another"
-	Refresh(radio)
+	radio.Refresh()
 
 	radio.SetSelected("")
 
@@ -334,12 +334,12 @@ func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
 			heightCenterOffset := (radio.itemHeight() - focusIndicatorSize) / 2
 
 			for i, item := range render.items {
-				x, y := 0, heightCenterOffset
+				x, y := float32(0), heightCenterOffset
 
 				if tt.isHorizontal {
-					x = i * radio.itemWidth()
+					x = float32(i) * radio.itemWidth()
 				} else {
-					y = i*radio.itemHeight() + heightCenterOffset
+					y = float32(i)*radio.itemHeight() + heightCenterOffset
 				}
 
 				assert.Equal(t, fyne.NewPos(x, y), item.focusIndicator.Position1)

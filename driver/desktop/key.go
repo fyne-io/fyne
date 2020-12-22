@@ -23,6 +23,8 @@ const (
 	KeySuperRight fyne.KeyName = "RightSuper"
 	// KeyMenu represents the left or right menu / application key
 	KeyMenu fyne.KeyName = "Menu"
+	// KeyPrintScreen represents the key used to cause a screen capture
+	KeyPrintScreen fyne.KeyName = "PrintScreen"
 
 	// KeyCapsLock represents the caps lock key, tapping once is the down event then again is the up
 	KeyCapsLock fyne.KeyName = "CapsLock"

@@ -4,12 +4,31 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestLabel_Binding(t *testing.T) {
+	label := NewLabel("Init")
+	assert.Equal(t, "Init", label.Text)
+
+	str := binding.NewString()
+	label.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "", label.Text)
+
+	str.Set("Updated")
+	waitForBinding()
+	assert.Equal(t, "Updated", label.Text)
+
+	label.Unbind()
+	waitForBinding()
+	assert.Equal(t, "Updated", label.Text)
+}
 
 func TestLabel_Hide(t *testing.T) {
 	label := NewLabel("Test")
@@ -27,12 +46,17 @@ func TestLabel_Hide(t *testing.T) {
 
 func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")
-	min := label.MinSize()
+	minA := label.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
+	assert.Less(t, theme.Padding()*2, minA.Width)
 
 	label.SetText("Longer")
-	assert.True(t, label.MinSize().Width > min.Width)
+	minB := label.MinSize()
+	assert.Less(t, minA.Width, minB.Width)
+
+	label.Text = "."
+	minC := label.MinSize()
+	assert.Greater(t, minB.Width, minC.Width)
 }
 
 func TestLabel_Resize(t *testing.T) {
@@ -105,7 +129,7 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 	assert.True(t, min2.Width < min.Width)
 	assert.True(t, min2.Height > min.Height)
 
-	yPos := -1
+	yPos := float32(-1)
 	for _, text := range test.WidgetRenderer(textMultiLine).(*textRenderer).texts {
 		assert.True(t, text.Size().Height < min2.Height)
 		assert.True(t, text.Position().Y > yPos)
@@ -153,16 +177,43 @@ func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
 }
 
 func TestLabel_ChangeTruncate(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	c := test.NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
 	text := NewLabel("Hello")
 	c.SetContent(text)
 	c.Resize(text.MinSize())
-	test.AssertImageMatches(t, "label-default.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="45x29">
+			<content>
+				<widget size="45x29" type="*widget.Label">
+					<text pos="4,4" size="37x21">Hello</text>
+				</widget>
+			</content>
+		</canvas>
+	`, c)
 
 	truncSize := text.MinSize().Subtract(fyne.NewSize(10, 0))
 	text.Resize(truncSize)
 	text.Wrapping = fyne.TextTruncate
 	text.Refresh()
-	test.AssertImageMatches(t, "label-truncate.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="45x29">
+			<content>
+				<widget size="35x29" type="*widget.Label">
+					<text pos="4,4" size="27x21">Hel</text>
+				</widget>
+			</content>
+		</canvas>
+	`, c)
+}
+
+func TestNewLabelWithData(t *testing.T) {
+	str := binding.NewString()
+	str.Set("Init")
+
+	label := NewLabelWithData(str)
+	assert.Equal(t, "Init", label.Text)
 }

@@ -39,9 +39,9 @@ func (p *infProgressRenderer) updateBar() {
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
 
-	maxBarWidth := int(float64(progressSize.Width) * maxProgressBarInfiniteWidthRatio)
-	minBarWidth := int(float64(progressSize.Width) * minProgressBarInfiniteWidthRatio)
-	stepSize := int(float64(progressSize.Width) * progressBarInfiniteStepSizeRatio)
+	maxBarWidth := progressSize.Width * maxProgressBarInfiniteWidthRatio
+	minBarWidth := progressSize.Width * minProgressBarInfiniteWidthRatio
+	stepSize := progressSize.Width * progressBarInfiniteStepSizeRatio
 
 	// check to make sure inner bar is sized correctly
 	// if bar is on the first half of the progress bar, grow it up to maxProgressBarInfiniteWidthPercent
@@ -56,7 +56,6 @@ func (p *infProgressRenderer) updateBar() {
 		if barWidth <= minBarWidth {
 			// loop around to start when bar goes to end
 			barPos.X = 0
-			stepSize = 0
 			newBoxSize := fyne.Size{Width: minBarWidth, Height: progressSize.Height}
 			p.bar.Resize(newBoxSize)
 		} else if barPos.X+barWidth > progressSize.Width {
@@ -130,10 +129,8 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 		ticker := p.ticker.C
 		p.progress.propertyLock.RUnlock()
 
-		select {
-		case <-ticker:
-			p.doRefresh()
-		}
+		<-ticker
+		p.doRefresh()
 	}
 
 	p.progress.propertyLock.RLock()

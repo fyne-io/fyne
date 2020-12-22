@@ -12,6 +12,18 @@ type boxLayout struct {
 	horizontal bool
 }
 
+// NewHBoxLayout returns a horizontal box layout for stacking a number of child
+// canvas objects or widgets left to right.
+func NewHBoxLayout() fyne.Layout {
+	return &boxLayout{true}
+}
+
+// NewVBoxLayout returns a vertical box layout for stacking a number of child
+// canvas objects or widgets top to bottom.
+func NewVBoxLayout() fyne.Layout {
+	return &boxLayout{false}
+}
+
 func isVerticalSpacer(obj fyne.CanvasObject) bool {
 	if spacer, ok := obj.(SpacerObject); ok {
 		return spacer.ExpandVertical()
@@ -46,7 +58,7 @@ func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
 // Any spacers added will pad the view, sharing the space if there are two or more.
 func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	spacers := make([]fyne.CanvasObject, 0)
-	total := 0
+	total := float32(0)
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
@@ -63,16 +75,16 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 	}
 
-	x, y := 0, 0
-	var extra int
+	x, y := float32(0), float32(0)
+	var extra float32
 	if g.horizontal {
-		extra = size.Width - total - (theme.Padding() * (len(objects) - len(spacers) - 1))
+		extra = size.Width - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
 	} else {
-		extra = size.Height - total - (theme.Padding() * (len(objects) - len(spacers) - 1))
+		extra = size.Height - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
 	}
-	extraCell := 0
+	extraCell := float32(0)
 	if len(spacers) > 0 {
-		extraCell = int(float64(extra) / float64(len(spacers)))
+		extraCell = extra / float32(len(spacers))
 	}
 
 	for _, child := range objects {
@@ -134,16 +146,4 @@ func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		addPadding = true
 	}
 	return minSize
-}
-
-// NewHBoxLayout returns a horizontal box layout for stacking a number of child
-// canvas objects or widgets left to right.
-func NewHBoxLayout() fyne.Layout {
-	return &boxLayout{true}
-}
-
-// NewVBoxLayout returns a vertical box layout for stacking a number of child
-// canvas objects or widgets top to bottom.
-func NewVBoxLayout() fyne.Layout {
-	return &boxLayout{false}
 }

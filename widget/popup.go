@@ -46,6 +46,7 @@ func (p *PopUp) Move(pos fyne.Position) {
 // Resize changes the size of the PopUp.
 // PopUps always have the size of their canvas.
 // However, Resize changes the size of the PopUp's content.
+//
 // Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
 	p.innerSize = size
@@ -111,15 +112,6 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
-// It will then display the popup on the passed canvas.
-// Deprecated: Use ShowPopUpAtPosition() instead.
-func NewPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) *PopUp {
-	p := newPopUp(content, canvas)
-	p.ShowAtPosition(pos)
-	return p
-}
-
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
 func ShowPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) {
@@ -133,9 +125,8 @@ func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 }
 
 // NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
-// Deprecated: This will no longer show the pop-up in 2.0. Use ShowPopUp() instead.
 func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	return NewPopUpAtPosition(content, canvas, fyne.NewPos(0, 0))
+	return newPopUp(content, canvas)
 }
 
 // ShowPopUp creates a new popUp for the specified content and displays it on the passed canvas.
@@ -151,11 +142,8 @@ func newModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
-// Deprecated: This will no longer show the pop-up in 2.0. Use ShowModalPopUp instead.
 func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	p := newModalPopUp(content, canvas)
-	p.Show()
-	return p
+	return newModalPopUp(content, canvas)
 }
 
 // ShowModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
@@ -228,7 +216,9 @@ type modalPopUpRenderer struct {
 
 func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	padding := r.padding()
-	requestedSize := r.popUp.innerSize.Subtract(padding)
+	innerSize := r.popUp.innerSize.Max(r.popUp.Content.MinSize().Add(padding))
+
+	requestedSize := innerSize.Subtract(padding)
 	size := r.popUp.Content.MinSize().Max(requestedSize)
 	size = size.Min(canvasSize.Subtract(padding))
 	pos := fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
@@ -238,7 +228,7 @@ func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	innerPos := pos.Subtract(r.offset())
 	r.bg.Move(innerPos)
 	r.bg.Resize(size.Add(padding))
-	r.LayoutShadow(r.popUp.innerSize, innerPos)
+	r.LayoutShadow(innerSize, innerPos)
 }
 
 func (r *modalPopUpRenderer) MinSize() fyne.Size {

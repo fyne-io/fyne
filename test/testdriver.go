@@ -98,7 +98,7 @@ func (d *testDriver) Device() fyne.Device {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *testDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
 	opts.DPI = painter.TextDPI
@@ -106,7 +106,7 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 	face := painter.CachedFontFace(style, &opts)
 	advance := font.MeasureString(face, text)
 
-	sws := fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
+	sws := fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
 	gls := painter.RenderedTextSize(text, size, style)
 	if sws != gls {
 		log.Println("SoftwareTextSize:", sws)
@@ -117,6 +117,15 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 
 func (d *testDriver) Run() {
 	// no-op
+}
+
+func (d *testDriver) StartAnimation(a *fyne.Animation) {
+	// currently no animations in test app, we just initialise it and leave
+	a.Tick(1.0)
+}
+
+func (d *testDriver) StopAnimation(a *fyne.Animation) {
+	// currently no animations in test app, do nothing
 }
 
 func (d *testDriver) Quit() {

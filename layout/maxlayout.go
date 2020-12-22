@@ -9,6 +9,11 @@ var _ fyne.Layout = (*maxLayout)(nil)
 type maxLayout struct {
 }
 
+// NewMaxLayout creates a new MaxLayout instance
+func NewMaxLayout() fyne.Layout {
+	return &maxLayout{}
+}
+
 // Layout is called to pack all child objects into a specified size.
 // For MaxLayout this sets all children to the full size passed.
 func (m *maxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
@@ -28,13 +33,8 @@ func (m *maxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			continue
 		}
 
-		minSize = minSize.Union(child.MinSize())
+		minSize = minSize.Max(child.MinSize())
 	}
 
 	return minSize
-}
-
-// NewMaxLayout creates a new MaxLayout instance
-func NewMaxLayout() fyne.Layout {
-	return &maxLayout{}
 }

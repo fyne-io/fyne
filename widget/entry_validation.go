@@ -7,12 +7,45 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+var _ fyne.Validatable = (*Entry)(nil)
+
+// Validate validates the current text in the widget
+func (e *Entry) Validate() error {
+	if e.Validator == nil {
+		return nil
+	}
+
+	err := e.Validator(e.Text)
+	e.SetValidationError(err)
+	return err
+}
+
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
+func (e *Entry) SetOnValidationChanged(callback func(error)) {
+	if callback != nil {
+		e.onValidationChanged = callback
+	}
+}
+
 // SetValidationError manually updates the validation status until the next input change
 func (e *Entry) SetValidationError(err error) {
-	e.validationError = err
+	if e.Validator == nil {
+		return
+	}
+	if err == nil && e.validationError == nil {
+		return
+	}
 
-	if e.Validator != nil {
-		e.validationStatus.Refresh()
+	if (err == nil && e.validationError != nil) || (e.validationError == nil && err != nil) ||
+		err.Error() != e.validationError.Error() {
+		e.validationError = err
+
+		if e.onValidationChanged != nil {
+			e.onValidationChanged(err)
+		}
+
+		e.Refresh()
 	}
 }
 
@@ -21,24 +54,23 @@ var _ fyne.Widget = (*validationStatus)(nil)
 type validationStatus struct {
 	BaseWidget
 	entry *Entry
-	icon  *canvas.Image
 }
 
 func newValidationStatus(e *Entry) *validationStatus {
 	rs := &validationStatus{
-		icon:  canvas.NewImageFromResource(theme.ConfirmIcon()),
 		entry: e,
 	}
 
 	rs.ExtendBaseWidget(rs)
-	rs.icon.Hide()
 	return rs
 }
 
 func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
+	icon := &canvas.Image{}
+	icon.Hide()
 	return &validationStatusRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{icon}),
+		icon:         icon,
 		entry:        r.entry,
 	}
 }
@@ -65,14 +97,13 @@ func (r *validationStatusRenderer) Refresh() {
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.Text == "" {
 		r.icon.Hide()
-		canvas.Refresh(r.icon)
 		return
 	}
 
 	if r.entry.validationError == nil {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
-	} else if !r.entry.Focused() {
+	} else if !r.entry.focused {
 		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		r.icon.Show()
 	} else {

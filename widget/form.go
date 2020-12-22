@@ -12,11 +12,13 @@ import (
 type FormItem struct {
 	Text   string
 	Widget fyne.CanvasObject
+
+	validationError error
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
 func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
-	return &FormItem{text, widget}
+	return &FormItem{Text: text, Widget: widget}
 }
 
 // Form widget is two column grid where each row has a label and a widget (usually an input).
@@ -57,8 +59,9 @@ func (f *Form) AppendItem(item *FormItem) {
 
 	f.Items = append(f.Items, item)
 	if f.itemGrid != nil {
-		f.itemGrid.AddObject(f.createLabel(item.Text))
-		f.itemGrid.AddObject(item.Widget)
+		f.itemGrid.Add(f.createLabel(item.Text))
+		f.itemGrid.Add(item.Widget)
+		f.setUpValidation(item.Widget, len(f.Items)-1)
 	}
 
 	f.Refresh()
@@ -109,6 +112,32 @@ func (f *Form) updateButtons() {
 	}
 }
 
+func (f *Form) checkValidation(err error) {
+	if err != nil {
+		f.submitButton.Disable()
+		return
+	}
+
+	for _, item := range f.Items {
+		if item.validationError != nil {
+			f.submitButton.Disable()
+			return
+		}
+	}
+
+	f.submitButton.Enable()
+}
+
+func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
+	if w, ok := widget.(fyne.Validatable); ok {
+		f.Items[i].validationError = w.Validate()
+		w.SetOnValidationChanged(func(err error) {
+			f.Items[i].validationError = err
+			f.checkValidation(err)
+		})
+	}
+}
+
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
 		l := f.itemGrid.Objects[i*2].(*Label)
@@ -123,27 +152,29 @@ func (f *Form) updateLabels() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
-	itemGrid := fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
-	for _, item := range f.Items {
-		itemGrid.AddObject(f.createLabel(item.Text))
-		itemGrid.AddObject(item.Widget)
-	}
-	f.itemGrid = itemGrid
 
-	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
-	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
-	f.submitButton.Style = PrimaryButton
+	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
+	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
+	objects := make([]fyne.CanvasObject, len(f.Items)*2)
+	for i, item := range f.Items {
+		objects[i*2] = f.createLabel(item.Text)
+		objects[i*2+1] = item.Widget
+		f.setUpValidation(item.Widget, i)
+	}
+	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
+
 	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
-	f.updateButtons() // will set correct visibility on the submit/cancel btns
+	f.updateButtons()      // will set correct visibility on the submit/cancel btns
+	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
 	return renderer
 }
 
 // NewForm creates a new form widget with the specified rows of form items
 // and (if any of them should be shown) a form controls row at the bottom
 func NewForm(items ...*FormItem) *Form {
-	form := &Form{BaseWidget: BaseWidget{}, Items: items}
+	form := &Form{Items: items}
 	form.ExtendBaseWidget(form)
 
 	return form

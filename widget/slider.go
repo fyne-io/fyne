@@ -5,6 +5,8 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -31,6 +33,9 @@ type Slider struct {
 
 	Orientation Orientation
 	OnChanged   func(float64)
+
+	valueSource   binding.Float
+	valueListener binding.DataListener
 }
 
 // NewSlider returns a basic slider.
@@ -44,6 +49,36 @@ func NewSlider(min, max float64) *Slider {
 	}
 	slider.ExtendBaseWidget(slider)
 	return slider
+}
+
+// NewSliderWithData returns a slider connected with the specified data source.
+//
+// Since: 2.0.0
+func NewSliderWithData(min, max float64, data binding.Float) *Slider {
+	slider := NewSlider(min, max)
+	slider.Bind(data)
+
+	return slider
+}
+
+// Bind connects the specified data source to this Slider.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Slider will set the value into the data source.
+//
+// Since: 2.0.0
+func (s *Slider) Bind(data binding.Float) {
+	s.Unbind()
+	s.valueSource = data
+
+	s.valueListener = binding.NewDataListener(func() {
+		s.Value = data.Get()
+		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
+			s.Refresh()
+		}
+	})
+	data.AddListener(s.valueListener)
+
+	s.OnChanged = data.Set
 }
 
 // DragEnd function.
@@ -62,11 +97,11 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	}
 }
 
-func (s *Slider) buttonDiameter() int {
+func (s *Slider) buttonDiameter() float32 {
 	return theme.Padding() * standardScale
 }
 
-func (s *Slider) endOffset() int {
+func (s *Slider) endOffset() float32 {
 	return s.buttonDiameter()/2 + theme.Padding()
 }
 
@@ -122,6 +157,22 @@ func (s *Slider) updateValue(ratio float64) {
 	s.clampValueToRange()
 }
 
+// SetValue updates the value of the slider and clamps the value to be within the range.
+func (s *Slider) SetValue(value float64) {
+	if s.Value == value {
+		return
+	}
+
+	s.Value = value
+	s.clampValueToRange()
+
+	if s.OnChanged != nil {
+		s.OnChanged(s.Value)
+	}
+
+	s.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (s *Slider) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
@@ -144,9 +195,24 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	return slide
 }
 
+// Unbind disconnects any configured data source from this Slider.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (s *Slider) Unbind() {
+	s.OnChanged = nil
+	if s.valueSource == nil || s.valueListener == nil {
+		return
+	}
+
+	s.valueSource.RemoveListener(s.valueListener)
+	s.valueListener = nil
+	s.valueSource = nil
+}
+
 const (
-	standardScale = 4
-	minLongSide   = 50
+	standardScale = float32(4)
+	minLongSide   = float32(50)
 )
 
 type sliderRenderer struct {
@@ -194,7 +260,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	switch s.slider.Orientation {
 	case Vertical:
 		activePos = fyne.NewPos(trackPos.X, activeOffset)
-		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset-endPad)
+		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset+endPad)
 
 		thumbPos = fyne.NewPos(
 			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
@@ -227,21 +293,26 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 	return fyne.Size{Width: 0, Height: 0}
 }
 
-func (s *sliderRenderer) getOffset() int {
+func (s *sliderRenderer) getOffset() float32 {
 	endPad := s.slider.endOffset()
 	w := s.slider
 	size := s.track.Size()
 	if w.Value == w.Min || w.Min == w.Max {
-		return endPad
+		switch w.Orientation {
+		case Vertical:
+			return size.Height + endPad
+		case Horizontal:
+			return endPad
+		}
 	}
-	ratio := (w.Value - w.Min) / (w.Max - w.Min)
+	ratio := float32((w.Value - w.Min) / (w.Max - w.Min))
 
 	switch w.Orientation {
 	case Vertical:
-		y := int(float64(size.Height)-ratio*float64(size.Height)) + endPad
+		y := size.Height - ratio*size.Height + endPad
 		return y
 	case Horizontal:
-		x := int(ratio*float64(size.Width)) + endPad
+		x := ratio*size.Width + endPad
 		return x
 	}
 
