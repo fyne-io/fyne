@@ -83,9 +83,9 @@ func newFormWithData(data binding.DataMap) *widget.Form {
 	keys := data.Keys()
 	items := make([]*widget.FormItem, len(keys))
 	for i, k := range keys {
-		data, ok := data.GetItem(k)
-		if !ok {
-			items[i] = widget.NewFormItem(k, widget.NewLabel("item removed"))
+		data, err := data.GetItem(k)
+		if err != nil {
+			items[i] = widget.NewFormItem(k, widget.NewLabel(err.Error()))
 		}
 		items[i] = widget.NewFormItem(k, createBoundItem(data))
 	}

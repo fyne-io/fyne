@@ -50,8 +50,8 @@ func TestBindStruct(t *testing.T) {
 	b := BindStruct(&s)
 
 	assert.Equal(t, 3, len(b.Keys()))
-	item, ok := b.GetItem("Foo")
-	assert.True(t, ok)
+	item, err := b.GetItem("Foo")
+	assert.Nil(t, err)
 	v, err := item.(String).Get()
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -61,6 +61,9 @@ func TestBindStruct(t *testing.T) {
 	v, err = item.(String).Get()
 	assert.Nil(t, err)
 	assert.Equal(t, "Content", v)
+
+	_, err = b.GetItem("Missing")
+	assert.NotNil(t, err)
 }
 
 func TestBindUntypedMap(t *testing.T) {

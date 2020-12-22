@@ -9,7 +9,7 @@ var errOutOfBounds = errors.New("index out of bounds")
 // Since: 2.0.0
 type DataList interface {
 	DataItem
-	GetItem(int) (DataItem, bool)
+	GetItem(int) (DataItem, error)
 	Length() int
 }
 
@@ -19,12 +19,12 @@ type listBase struct {
 }
 
 // GetItem returns the DataItem at the specified index.
-func (b *listBase) GetItem(i int) (DataItem, bool) {
+func (b *listBase) GetItem(i int) (DataItem, error) {
 	if i < 0 || i >= len(b.items) {
-		return nil, false
+		return nil, errOutOfBounds
 	}
 
-	return b.items[i], true
+	return b.items[i], nil
 }
 
 // Length returns the number of items in this data list.

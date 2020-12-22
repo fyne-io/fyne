@@ -298,9 +298,9 @@ func (l *bound{{ .Name }}List) Get(i int) ({{ .Type }}, error) {
 		return (*l.val)[i], nil
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return {{ .Default }}, errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return {{ .Default }}, err
 	}
 	return item.({{ .Name }}).Get()
 }
@@ -322,9 +322,9 @@ func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) error {
 		(*l.val)[i] = v
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
 	}
 	return item.({{ .Name }}).Set(v)
 }

@@ -62,9 +62,9 @@ func (l *boundBoolList) Get(i int) (bool, error) {
 		return (*l.val)[i], nil
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return false, errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return false, err
 	}
 	return item.(Bool).Get()
 }
@@ -86,9 +86,9 @@ func (l *boundBoolList) Set(i int, v bool) error {
 		(*l.val)[i] = v
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
 	}
 	return item.(Bool).Set(v)
 }
@@ -152,9 +152,9 @@ func (l *boundFloatList) Get(i int) (float64, error) {
 		return (*l.val)[i], nil
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return 0.0, errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return 0.0, err
 	}
 	return item.(Float).Get()
 }
@@ -176,9 +176,9 @@ func (l *boundFloatList) Set(i int, v float64) error {
 		(*l.val)[i] = v
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
 	}
 	return item.(Float).Set(v)
 }
@@ -242,9 +242,9 @@ func (l *boundIntList) Get(i int) (int, error) {
 		return (*l.val)[i], nil
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return 0, errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return 0, err
 	}
 	return item.(Int).Get()
 }
@@ -266,9 +266,9 @@ func (l *boundIntList) Set(i int, v int) error {
 		(*l.val)[i] = v
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
 	}
 	return item.(Int).Set(v)
 }
@@ -332,9 +332,9 @@ func (l *boundRuneList) Get(i int) (rune, error) {
 		return (*l.val)[i], nil
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return rune(0), errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return rune(0), err
 	}
 	return item.(Rune).Get()
 }
@@ -356,9 +356,9 @@ func (l *boundRuneList) Set(i int, v rune) error {
 		(*l.val)[i] = v
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
 	}
 	return item.(Rune).Set(v)
 }
@@ -422,9 +422,9 @@ func (l *boundStringList) Get(i int) (string, error) {
 		return (*l.val)[i], nil
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return "", errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return "", err
 	}
 	return item.(String).Get()
 }
@@ -446,9 +446,9 @@ func (l *boundStringList) Set(i int, v string) error {
 		(*l.val)[i] = v
 	}
 
-	item, ok := l.GetItem(i)
-	if !ok {
-		return errOutOfBounds
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
 	}
 	return item.(String).Set(v)
 }

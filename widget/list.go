@@ -55,8 +55,8 @@ func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject,
 		data.Length,
 		createItem,
 		func(i ListItemID, o fyne.CanvasObject) {
-			item, ok := data.GetItem(i)
-			if !ok {
+			item, err := data.GetItem(i)
+			if err != nil {
 				return
 			}
 			updateItem(item, o)

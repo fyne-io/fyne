@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	errKeyNotFound = errors.New("key not found")
 	errParseFailed = errors.New("format did not match 1 value")
 )
 
@@ -16,7 +17,7 @@ var (
 // Since: 2.0.0
 type DataMap interface {
 	DataItem
-	GetItem(string) (DataItem, bool)
+	GetItem(string) (DataItem, error)
 	Keys() []string
 }
 
@@ -94,12 +95,12 @@ type mapBase struct {
 // It will return nil if the key was not found.
 //
 // Since: 2.0.0
-func (b *mapBase) GetItem(key string) (DataItem, bool) {
+func (b *mapBase) GetItem(key string) (DataItem, error) {
 	if v, ok := b.items[key]; ok {
-		return v, true
+		return v, nil
 	}
 
-	return nil, false
+	return nil, errKeyNotFound
 }
 
 // Keys returns a list of all the keys in this data map.
