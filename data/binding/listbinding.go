@@ -1,9 +1,5 @@
 package binding
 
-import "errors"
-
-var errOutOfBounds = errors.New("index out of bounds")
-
 // DataList is the base interface for all bindable data lists.
 //
 // Since: 2.0.0

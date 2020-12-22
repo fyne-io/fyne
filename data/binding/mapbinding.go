@@ -7,11 +7,6 @@ import (
 	"fyne.io/fyne"
 )
 
-var (
-	errKeyNotFound = errors.New("key not found")
-	errParseFailed = errors.New("format did not match 1 value")
-)
-
 // DataMap is the base interface for all bindable data maps.
 //
 // Since: 2.0.0
