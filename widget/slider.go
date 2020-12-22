@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 
 	"fyne.io/fyne"
@@ -84,7 +85,10 @@ func (s *Slider) Bind(data binding.Float) {
 	data.AddListener(s.valueListener)
 
 	s.OnChanged = func(f float64) {
-		_ = data.Set(f)
+		err := data.Set(f)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %f", f), err)
+		}
 	}
 }
 

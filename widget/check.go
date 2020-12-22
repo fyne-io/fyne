@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"fmt"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/data/binding"
@@ -128,7 +130,10 @@ func (c *Check) Bind(data binding.Bool) {
 	data.AddListener(c.checkListener)
 
 	c.OnChanged = func(b bool) {
-		_ = data.Set(b)
+		err := data.Set(b)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", b), err)
+		}
 	}
 }
 
