@@ -7,6 +7,10 @@ import (
 	"fyne.io/fyne"
 )
 
+var (
+	errParseFailed = errors.New("format did not match 1 value")
+)
+
 // DataMap is the base interface for all bindable data maps.
 //
 // Since: 2.0.0

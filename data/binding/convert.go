@@ -46,9 +46,13 @@ func (s *stringFromBool) Get() (string, error) {
 func (s *stringFromBool) Set(str string) error {
 	var val bool
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil || n != 1 {
+	if err != nil {
 		return err
 	}
+	if n != 1 {
+		return errParseFailed
+	}
+
 	old, err := s.from.Get()
 	if err != nil {
 		return err
@@ -107,9 +111,13 @@ func (s *stringFromFloat) Get() (string, error) {
 func (s *stringFromFloat) Set(str string) error {
 	var val float64
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil || n != 1 {
+	if err != nil {
 		return err
 	}
+	if n != 1 {
+		return errParseFailed
+	}
+
 	old, err := s.from.Get()
 	if err != nil {
 		return err
@@ -168,9 +176,13 @@ func (s *stringFromInt) Get() (string, error) {
 func (s *stringFromInt) Set(str string) error {
 	var val int
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil || n != 1 {
+	if err != nil {
 		return err
 	}
+	if n != 1 {
+		return errParseFailed
+	}
+
 	old, err := s.from.Get()
 	if err != nil {
 		return err
@@ -226,8 +238,11 @@ func (s *stringToBool) Get() (bool, error) {
 
 	var val bool
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil || n != 1 {
+	if err != nil {
 		return false, err
+	}
+	if n != 1 {
+		return false, errParseFailed
 	}
 
 	return val, nil
@@ -288,8 +303,11 @@ func (s *stringToFloat) Get() (float64, error) {
 
 	var val float64
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil || n != 1 {
+	if err != nil {
 		return 0.0, err
+	}
+	if n != 1 {
+		return 0.0, errParseFailed
 	}
 
 	return val, nil
@@ -350,8 +368,11 @@ func (s *stringToInt) Get() (int, error) {
 
 	var val int
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil || n != 1 {
+	if err != nil {
 		return 0, err
+	}
+	if n != 1 {
+		return 0, errParseFailed
 	}
 
 	return val, nil
