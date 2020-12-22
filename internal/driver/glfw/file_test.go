@@ -102,9 +102,9 @@ func Test_ListableURI(t *testing.T) {
 	}
 
 	expect := []string{
-		"file://" + filepath.Join(tempdir, "aaa"),
-		"file://" + filepath.Join(tempdir, "bbb"),
-		"file://" + filepath.Join(tempdir, "ccc"),
+		"file://" + filepath.ToSlash(filepath.Join(tempdir, "aaa")),
+		"file://" + filepath.ToSlash(filepath.Join(tempdir, "bbb")),
+		"file://" + filepath.ToSlash(filepath.Join(tempdir, "ccc")),
 	}
 
 	assert.ElementsMatch(t, listingStrings, expect)
