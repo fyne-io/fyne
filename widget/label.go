@@ -31,8 +31,7 @@ func NewLabel(text string) *Label {
 //
 // Since: 2.0.0
 func NewLabelWithData(data binding.String) *Label {
-	val, _ := data.Get()
-	label := NewLabel(val)
+	label := NewLabel("")
 	label.Bind(data)
 
 	return label
