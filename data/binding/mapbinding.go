@@ -1,6 +1,7 @@
 package binding
 
 import (
+	"errors"
 	"reflect"
 
 	"fyne.io/fyne"
@@ -11,7 +12,7 @@ import (
 // Since: 2.0.0
 type DataMap interface {
 	DataItem
-	GetItem(string) DataItem
+	GetItem(string) (DataItem, error)
 	Keys() []string
 }
 
@@ -21,8 +22,8 @@ type DataMap interface {
 type UntypedMap interface {
 	DataMap
 	Delete(string)
-	Get(string) interface{}
-	Set(string, interface{})
+	Get(string) (interface{}, error)
+	Set(string, interface{}) error
 }
 
 // NewUntypedMap creates a new, empty map binding of string to interface{}.
@@ -89,12 +90,12 @@ type mapBase struct {
 // It will return nil if the key was not found.
 //
 // Since: 2.0.0
-func (b *mapBase) GetItem(key string) DataItem {
+func (b *mapBase) GetItem(key string) (DataItem, error) {
 	if v, ok := b.items[key]; ok {
-		return v
+		return v, nil
 	}
 
-	return nil
+	return nil, errKeyNotFound
 }
 
 // Keys returns a list of all the keys in this data map.
@@ -124,27 +125,28 @@ func (b *mapBase) Delete(key string) {
 // Get returns the value stored at the specified key.
 //
 // Since: 2.0.0
-func (b *mapBase) Get(key string) interface{} {
+func (b *mapBase) Get(key string) (interface{}, error) {
 	if i, ok := b.items[key]; ok {
 		return i.(untyped).get()
 	}
 
-	return nil
+	return nil, nil
 }
 
 // Set stores the value d at the specified key.
 // If the key is not present it will create a new binding internally.
 //
 // Since: 2.0.0
-func (b *mapBase) Set(key string, d interface{}) {
+func (b *mapBase) Set(key string, d interface{}) error {
 	if i, ok := b.items[key]; ok {
 		i.(untyped).set(d)
-		return
+		return nil
 	}
 
 	item := bindUntyped(b.val, key)
 	item.set(d)
 	b.setItem(key, item)
+	return nil
 }
 
 func (b *mapBase) setItem(key string, d DataItem) {
@@ -155,8 +157,8 @@ func (b *mapBase) setItem(key string, d DataItem) {
 
 type untyped interface {
 	DataItem
-	get() interface{}
-	set(interface{})
+	get() (interface{}, error)
+	set(interface{}) error
 }
 
 func bindUntyped(m *map[string]interface{}, key string) untyped {
@@ -170,20 +172,21 @@ type boundUntyped struct {
 	val *map[string]interface{}
 }
 
-func (b *boundUntyped) get() interface{} {
+func (b *boundUntyped) get() (interface{}, error) {
 	if b.val == nil {
-		return 0
+		return 0, nil
 	}
-	return (*b.val)[b.key]
+	return (*b.val)[b.key], nil
 }
 
-func (b *boundUntyped) set(val interface{}) {
+func (b *boundUntyped) set(val interface{}) error {
 	if b.val == nil {
-		return
+		return nil
 	}
 	(*b.val)[b.key] = val
 
 	b.trigger()
+	return nil
 }
 
 type boundReflect struct {
@@ -192,26 +195,42 @@ type boundReflect struct {
 	val reflect.Value
 }
 
-func (b *boundReflect) get() interface{} {
-	return b.val.Interface()
+func (b *boundReflect) get() (interface{}, error) {
+	return b.val.Interface(), nil
 }
 
-func (b *boundReflect) set(val interface{}) {
+func (b *boundReflect) set(val interface{}) error {
+	// TODO catch the panic and return as error
 	b.val.Set(reflect.ValueOf(val))
 
 	b.trigger()
+	return nil
 }
 
 type reflectBool struct {
 	boundReflect
 }
 
-func (r *reflectBool) Get() bool {
-	return r.val.Bool()
+func (r *reflectBool) Get() (val bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid bool value in data binding")
+		}
+	}()
+
+	val = r.val.Bool()
+	return
 }
 
-func (r *reflectBool) Set(b bool) {
+func (r *reflectBool) Set(b bool) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set bool in data binding")
+		}
+	}()
+
 	r.val.SetBool(b)
+	return
 }
 
 func bindReflectBool(f reflect.Value) DataItem {
@@ -224,12 +243,26 @@ type reflectFloat struct {
 	boundReflect
 }
 
-func (r *reflectFloat) Get() float64 {
-	return r.val.Float()
+func (r *reflectFloat) Get() (val float64, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid float64 value in data binding")
+		}
+	}()
+
+	val = r.val.Float()
+	return
 }
 
-func (r *reflectFloat) Set(f float64) {
+func (r *reflectFloat) Set(f float64) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set float64 in data binding")
+		}
+	}()
+
 	r.val.SetFloat(f)
+	return
 }
 
 func bindReflectFloat(f reflect.Value) DataItem {
@@ -242,12 +275,26 @@ type reflectInt struct {
 	boundReflect
 }
 
-func (r *reflectInt) Get() int {
-	return int(r.val.Int())
+func (r *reflectInt) Get() (val int, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid int value in data binding")
+		}
+	}()
+
+	val = int(r.val.Int())
+	return
 }
 
-func (r *reflectInt) Set(i int) {
+func (r *reflectInt) Set(i int) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set int in data binding")
+		}
+	}()
+
 	r.val.SetInt(int64(i))
+	return
 }
 
 func bindReflectInt(f reflect.Value) DataItem {
@@ -260,12 +307,26 @@ type reflectString struct {
 	boundReflect
 }
 
-func (r *reflectString) Get() string {
-	return r.val.String()
+func (r *reflectString) Get() (val string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("invalid string value in data binding")
+		}
+	}()
+
+	val = r.val.String()
+	return
 }
 
-func (r *reflectString) Set(s string) {
+func (r *reflectString) Set(s string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set string in data binding")
+		}
+	}()
+
 	r.val.SetString(s)
+	return
 }
 
 func bindReflectString(f reflect.Value) DataItem {

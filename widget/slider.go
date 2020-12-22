@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 
 	"fyne.io/fyne"
@@ -71,14 +72,24 @@ func (s *Slider) Bind(data binding.Float) {
 	s.valueSource = data
 
 	s.valueListener = binding.NewDataListener(func() {
-		s.Value = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		s.Value = val
 		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
 			s.Refresh()
 		}
 	})
 	data.AddListener(s.valueListener)
 
-	s.OnChanged = data.Set
+	s.OnChanged = func(f float64) {
+		err := data.Set(f)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %f", f), err)
+		}
+	}
 }
 
 // DragEnd function.

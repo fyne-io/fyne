@@ -27,12 +27,15 @@ func TestEntry_Binding(t *testing.T) {
 	waitForBinding()
 	assert.Equal(t, "", entry.Text)
 
-	str.Set("Updated")
+	err := str.Set("Updated")
+	assert.Nil(t, err)
 	waitForBinding()
 	assert.Equal(t, "Updated", entry.Text)
 
 	entry.SetText("Typed")
-	assert.Equal(t, "Typed", str.Get())
+	v, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Typed", v)
 
 	entry.Unbind()
 	waitForBinding()
@@ -2810,14 +2813,17 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 
 func TestNewEntryWithData(t *testing.T) {
 	str := binding.NewString()
-	str.Set("Init")
+	err := str.Set("Init")
+	assert.Nil(t, err)
 
 	entry := widget.NewEntryWithData(str)
 	waitForBinding()
 	assert.Equal(t, "Init", entry.Text)
 
 	entry.SetText("Typed")
-	assert.Equal(t, "Typed", str.Get())
+	v, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Typed", v)
 }
 
 func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {

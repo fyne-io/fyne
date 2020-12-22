@@ -104,7 +104,12 @@ func (p *ProgressBar) Bind(data binding.Float) {
 	p.valueSource = data
 
 	p.valueListener = binding.NewDataListener(func() {
-		p.Value = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		p.Value = val
 		if cache.IsRendered(p) {
 			p.Refresh()
 		}

@@ -33,14 +33,15 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 	return listen
 }
 
-func (b *prefBoundBool) Get() bool {
-	return b.p.Bool(b.key)
+func (b *prefBoundBool) Get() (bool, error) {
+	return b.p.Bool(b.key), nil
 }
 
-func (b *prefBoundBool) Set(v bool) {
+func (b *prefBoundBool) Set(v bool) error {
 	b.p.SetBool(b.key, v)
 
 	b.trigger()
+	return nil
 }
 
 type prefBoundFloat struct {
@@ -66,14 +67,15 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 	return listen
 }
 
-func (b *prefBoundFloat) Get() float64 {
-	return b.p.Float(b.key)
+func (b *prefBoundFloat) Get() (float64, error) {
+	return b.p.Float(b.key), nil
 }
 
-func (b *prefBoundFloat) Set(v float64) {
+func (b *prefBoundFloat) Set(v float64) error {
 	b.p.SetFloat(b.key, v)
 
 	b.trigger()
+	return nil
 }
 
 type prefBoundInt struct {
@@ -99,14 +101,15 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 	return listen
 }
 
-func (b *prefBoundInt) Get() int {
-	return b.p.Int(b.key)
+func (b *prefBoundInt) Get() (int, error) {
+	return b.p.Int(b.key), nil
 }
 
-func (b *prefBoundInt) Set(v int) {
+func (b *prefBoundInt) Set(v int) error {
 	b.p.SetInt(b.key, v)
 
 	b.trigger()
+	return nil
 }
 
 type prefBoundString struct {
@@ -132,12 +135,13 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 	return listen
 }
 
-func (b *prefBoundString) Get() string {
-	return b.p.String(b.key)
+func (b *prefBoundString) Get() (string, error) {
+	return b.p.String(b.key), nil
 }
 
-func (b *prefBoundString) Set(v string) {
+func (b *prefBoundString) Set(v string) error {
 	b.p.SetString(b.key, v)
 
 	b.trigger()
+	return nil
 }

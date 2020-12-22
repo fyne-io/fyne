@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"fmt"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/data/binding"
@@ -115,14 +117,24 @@ func (c *Check) Bind(data binding.Bool) {
 	c.checkSource = data
 
 	c.checkListener = binding.NewDataListener(func() {
-		c.Checked = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		c.Checked = val
 		if cache.IsRendered(c) {
 			c.Refresh()
 		}
 	})
 	data.AddListener(c.checkListener)
 
-	c.OnChanged = data.Set
+	c.OnChanged = func(b bool) {
+		err := data.Set(b)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", b), err)
+		}
+	}
 }
 
 // SetChecked sets the the checked state and refreshes widget
