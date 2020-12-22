@@ -117,6 +117,7 @@ func (c *Check) Bind(data binding.Bool) {
 	c.checkListener = binding.NewDataListener(func() {
 		val, err := data.Get()
 		if err != nil {
+			fyne.LogError("Error getting current data value", err)
 			return
 		}
 		c.Checked = val

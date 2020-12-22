@@ -73,6 +73,7 @@ func (s *Slider) Bind(data binding.Float) {
 	s.valueListener = binding.NewDataListener(func() {
 		val, err := data.Get()
 		if err != nil {
+			fyne.LogError("Error getting current data value", err)
 			return
 		}
 		s.Value = val

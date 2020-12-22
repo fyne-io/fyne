@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -57,8 +58,14 @@ func (l *Label) Bind(data binding.String) {
 	l.textSource = data
 	l.textListener = binding.NewDataListener(func() {
 		val, err := l.textSource.Get()
-		if err == nil {
-			l.SetText(val)
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+
+		l.Text = val
+		if cache.IsRendered(l) {
+			l.Refresh()
 		}
 	})
 	data.AddListener(l.textListener)

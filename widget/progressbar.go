@@ -106,6 +106,7 @@ func (p *ProgressBar) Bind(data binding.Float) {
 	p.valueListener = binding.NewDataListener(func() {
 		val, err := data.Get()
 		if err != nil {
+			fyne.LogError("Error getting current data value", err)
 			return
 		}
 		p.Value = val

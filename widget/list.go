@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 
 	"fyne.io/fyne"
@@ -57,6 +58,7 @@ func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject,
 		func(i ListItemID, o fyne.CanvasObject) {
 			item, err := data.GetItem(i)
 			if err != nil {
+				fyne.LogError(fmt.Sprintf("Error getting data item %d", i), err)
 				return
 			}
 			updateItem(item, o)
