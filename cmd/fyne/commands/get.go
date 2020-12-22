@@ -17,7 +17,7 @@ var _ Command = (*Getter)(nil)
 
 // Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter struct {
-	pkg string
+	icon string
 }
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
@@ -28,8 +28,7 @@ func NewGetter() *Getter {
 
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
-	g.pkg = pkg
-	return g.get()
+	return get(pkg, g.icon)
 }
 
 // AddFlags adds available flags to the current flags parser
@@ -49,19 +48,23 @@ func (g *Getter) Run(args []string) {
 		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
 		os.Exit(1)
 	}
-	g.pkg = args[0]
 
-	err := g.get()
+	err := get(args[0], g.icon)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
 }
 
-func (g *Getter) get() error {
-	path := filepath.Join(goPath(), "src", g.pkg)
+// SetIcon allows you to set the app icon path that will be used for the next Get operation.
+func (g *Getter) SetIcon(path string) {
+	g.icon = path
+}
 
-	cmd := exec.Command("go", "get", "-u", "-d", g.pkg)
+func get(pkg, icon string) error {
+	path := filepath.Join(goPath(), "src", pkg)
+
+	cmd := exec.Command("go", "get", "-u", "-d", pkg)
 	cmd.Env = append(os.Environ(), "GO111MODULE=off")
 
 	_, err := cmd.CombinedOutput()
@@ -70,7 +73,7 @@ func (g *Getter) get() error {
 		return err
 	}
 
-	install := &installer{srcDir: path}
+	install := &installer{srcDir: path, icon: icon}
 	err = install.validate()
 	if err != nil {
 		return errors.Wrap(err, "Failed to set up installer")
