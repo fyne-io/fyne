@@ -19,14 +19,14 @@ type textWidget interface {
 }
 
 type fileDialog struct {
-	file            *FileDialog
-	fileName        textWidget
-	dismiss         *widget.Button
-	open            *widget.Button
-	breadcrumb      *widget.Box
-	files           *fyne.Container
-	fileScroll      *widget.ScrollContainer
-	showHiddenCheck *widget.Check
+	file       *FileDialog
+	fileName   textWidget
+	dismiss    *widget.Button
+	open       *widget.Button
+	breadcrumb *widget.Box
+	files      *fyne.Container
+	fileScroll *widget.ScrollContainer
+	showHidden *widget.Check
 
 	win      *widget.PopUp
 	selected *fileDialogItem
@@ -159,11 +159,11 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 	buttons := widget.NewHBox(f.dismiss, f.open)
-	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(changed bool) {
+	f.showHidden = widget.NewCheck("Show Hidden Files", func(changed bool) {
 		f.refreshDir(f.dir, changed)
 	})
-	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(f.showHiddenCheck, nil, nil, buttons),
-		buttons, widget.NewHScrollContainer(f.fileName), f.showHiddenCheck)
+	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(f.showHidden, nil, nil, buttons),
+		buttons, widget.NewHScrollContainer(f.fileName), f.showHidden)
 
 	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
@@ -301,8 +301,8 @@ func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 		f.fileName.SetText(dir.Name())
 		f.open.Enable()
 	}
-	f.refreshDir(dir, f.showHiddenCheck.Checked)
-	
+	f.refreshDir(dir, f.showHidden.Checked)
+
 	return nil
 }
 
@@ -519,7 +519,7 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	}
 	f.filter = filter
 	if f.dialog != nil {
-		f.dialog.refreshDir(f.dialog.dir, f.dialog.showHiddenCheck.Checked)
+		f.dialog.refreshDir(f.dialog.dir, f.dialog.showHidden.Checked)
 	}
 }
 
