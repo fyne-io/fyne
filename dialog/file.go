@@ -185,7 +185,12 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	favorites := f.loadFavorites()
 
 	favoritesGroup := widget.NewVScrollContainer(widget.NewGroup("Favorites", favorites...))
-	optionsButton := widget.NewButton("Options", f.optionsDialog)
+	var optionsButton *widget.Button
+	//optionsButton = widget.NewButton("Options", func() { f.optionsMenu(optionsButton.Position(), optionsButton.Size()) })
+	optionsButton = widget.NewButton("Options", func() {
+		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
+	})
+
 	left := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, optionsButton, nil, nil), favoritesGroup, optionsButton)
 
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, left, nil),
@@ -193,12 +198,23 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 }
 
-func (f *fileDialog) optionsDialog() {
+func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 	hiddenFiles := widget.NewCheck("Show Hidden Files", func(changed bool) {
 		f.showHidden = changed
 		f.refreshDir(f.dir)
 	})
-	ShowCustom("Options", "Close", hiddenFiles, f.file.parent)
+	hiddenFiles.SetChecked(f.showHidden)
+
+	title := widget.NewLabel("Options")
+	title.Alignment = fyne.TextAlignCenter
+	title.TextStyle = fyne.TextStyle{Bold: true}
+
+	content := widget.NewVBox(widget.NewCard("", "", title),
+		hiddenFiles)
+
+	p := position.Add(buttonSize)
+	pos := fyne.NewPos(p.X, p.Y-content.MinSize().Height-theme.Padding()*2)
+	widget.ShowPopUpAtPosition(content, f.win.Canvas, pos)
 }
 
 func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
