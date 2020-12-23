@@ -851,20 +851,31 @@ func TestWindow_Clipboard(t *testing.T) {
 	text := "My content from test window"
 	cb := w.Clipboard()
 
-	cliboardContent := cb.Content()
+	cliboardContent := cb.Content() // this fails but does not break the test
 	if cliboardContent != "" {
 		// Current environment has some content stored in clipboard,
 		// set temporary to an empty string to allow test and restore later.
-		cb.SetContent("")
+		cb.SetContent("") // this fails but does not break the test
 	}
 
-	assert.Empty(t, cb.Content())
+	assert.Empty(t, cb.Content()) // this fails but does not break the test
 
-	cb.SetContent(text)
-	assert.Equal(t, text, cb.Content())
+	cb.SetContent(text) // if this fails it will get caught by the retry
+
+	cbText := cb.Content() // if this fails it will get caught by the retry
+	i := 0
+	for cbText == "" && i < 3 { // retry sticking plaster fix for CB Access Denied error
+		t.Log("Clipboard Retry")
+		i++
+		time.Sleep(time.Duration(i*500) * time.Millisecond)
+		cb.SetContent(text)
+		cbText = cb.Content()
+	}
+
+	assert.Equal(t, text, cbText)
 
 	// Restore clipboardContent, if any
-	cb.SetContent(cliboardContent)
+	cb.SetContent(cliboardContent) // this fails but does not break the test
 }
 
 func TestWindow_CloseInterception(t *testing.T) {
