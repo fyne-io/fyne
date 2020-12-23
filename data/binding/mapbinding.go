@@ -43,7 +43,7 @@ func BindUntypedMap(d *map[string]interface{}) UntypedMap {
 	m := &mapBase{items: make(map[string]DataItem), val: d}
 
 	for k := range *d {
-		m.setItem(k, bindUntyped(d, k))
+		m.setItem(k, bindUntyped((*d)[k]))
 	}
 
 	return m
@@ -139,7 +139,7 @@ func (b *mapBase) Get(key string) (interface{}, error) {
 		return i.(untyped).get()
 	}
 
-	return nil, nil
+	return nil, errKeyNotFound
 }
 
 // Set stores the value d at the specified key.
@@ -152,8 +152,7 @@ func (b *mapBase) Set(key string, d interface{}) error {
 		return nil
 	}
 
-	item := bindUntyped(b.val, key)
-	item.set(d)
+	item := bindUntyped(d)
 	b.setItem(key, item)
 	return nil
 }
@@ -170,29 +169,22 @@ type untyped interface {
 	set(interface{}) error
 }
 
-func bindUntyped(m *map[string]interface{}, key string) untyped {
-	return &boundUntyped{val: m, key: key}
+func bindUntyped(m interface{}) untyped {
+	return &boundUntyped{val: m}
 }
 
 type boundUntyped struct {
 	base
 
-	key string
-	val *map[string]interface{}
+	val interface{}
 }
 
 func (b *boundUntyped) get() (interface{}, error) {
-	if b.val == nil {
-		return 0, nil
-	}
-	return (*b.val)[b.key], nil
+	return b.val, nil
 }
 
 func (b *boundUntyped) set(val interface{}) error {
-	if b.val == nil {
-		return nil
-	}
-	(*b.val)[b.key] = val
+	b.val = val
 
 	b.trigger()
 	return nil
