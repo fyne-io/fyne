@@ -2,7 +2,16 @@
 
 package binding
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
+
+var (
+	errKeyNotFound = errors.New("key not found")
+	errOutOfBounds = errors.New("index out of bounds")
+	errParseFailed = errors.New("format did not match 1 value")
+)
 
 // DataItem is the base interface for all bindable data items.
 //

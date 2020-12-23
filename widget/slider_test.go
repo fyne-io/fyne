@@ -13,14 +13,17 @@ import (
 
 func TestNewSliderWithData(t *testing.T) {
 	val := binding.NewFloat()
-	val.Set(4)
+	err := val.Set(4)
+	assert.Nil(t, err)
 
 	s := NewSliderWithData(0, 10, val)
 	waitForBinding()
 	assert.Equal(t, 4.0, s.Value)
 
 	s.SetValue(2.0)
-	assert.Equal(t, 2.0, val.Get())
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 2.0, f)
 }
 
 func TestSlider_Binding(t *testing.T) {
@@ -33,12 +36,15 @@ func TestSlider_Binding(t *testing.T) {
 	waitForBinding()
 	assert.Equal(t, 0.0, s.Value)
 
-	val.Set(3)
+	err := val.Set(3)
+	assert.Nil(t, err)
 	waitForBinding()
 	assert.Equal(t, 3.0, s.Value)
 
 	s.SetValue(5)
-	assert.Equal(t, 5.0, val.Get())
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, f)
 
 	s.Unbind()
 	waitForBinding()

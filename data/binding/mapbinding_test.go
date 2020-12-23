@@ -1,10 +1,40 @@
 package binding
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestBindReflectInt(t *testing.T) {
+	i := 5
+	b := bindReflectInt(reflect.ValueOf(&i).Elem())
+	v, err := b.(Int).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v)
+
+	err = b.(Int).Set(4)
+	assert.Nil(t, err)
+	assert.Equal(t, 4, i)
+
+	s := "hi"
+	b = bindReflectInt(reflect.ValueOf(&s).Elem())
+	_, err = b.(Int).Get()
+	assert.NotNil(t, err) // don't crash
+}
+
+func TestBindReflectString(t *testing.T) {
+	s := "Hi"
+	b := bindReflectString(reflect.ValueOf(&s).Elem())
+	v, err := b.(String).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Hi", v)
+
+	err = b.(String).Set("New")
+	assert.Nil(t, err)
+	assert.Equal(t, "New", s)
+}
 
 func TestBindStruct(t *testing.T) {
 	s := struct {
@@ -20,10 +50,20 @@ func TestBindStruct(t *testing.T) {
 	b := BindStruct(&s)
 
 	assert.Equal(t, 3, len(b.Keys()))
-	assert.Equal(t, "bar", b.GetItem("Foo").(String).Get())
+	item, err := b.GetItem("Foo")
+	assert.Nil(t, err)
+	v, err := item.(String).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
 
-	b.GetItem("Foo").(String).Set("Content")
-	assert.Equal(t, "Content", b.GetItem("Foo").(String).Get())
+	err = item.(String).Set("Content")
+	assert.Nil(t, err)
+	v, err = item.(String).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Content", v)
+
+	_, err = b.GetItem("Missing")
+	assert.NotNil(t, err)
 }
 
 func TestBindUntypedMap(t *testing.T) {
@@ -36,14 +76,24 @@ func TestBindUntypedMap(t *testing.T) {
 	b := BindUntypedMap(&m)
 
 	assert.Equal(t, 3, len(b.Keys()))
-	assert.Equal(t, "bar", b.Get("foo"))
+	v, err := b.Get("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
 
-	b.Set("Extra", "Content")
-	assert.Equal(t, "Content", b.Get("Extra"))
+	err = b.Set("Extra", "Content")
+	assert.Nil(t, err)
+	v, err = b.Get("Extra")
+	assert.Nil(t, err)
+	assert.Equal(t, "Content", v)
 
-	b.Set("foo", "new")
-	assert.Equal(t, "new", b.Get("foo"))
-	assert.Equal(t, "Content", b.Get("Extra"))
+	err = b.Set("foo", "new")
+	assert.Nil(t, err)
+	v, err = b.Get("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "new", v)
+	v, err = b.Get("Extra")
+	assert.Nil(t, err)
+	assert.Equal(t, "Content", v)
 }
 
 func TestUntypedMap_Delete(t *testing.T) {
@@ -55,11 +105,19 @@ func TestUntypedMap_Delete(t *testing.T) {
 	b := BindUntypedMap(&m)
 
 	assert.Equal(t, 2, len(b.Keys()))
-	assert.Equal(t, "bar", b.Get("foo"))
-	assert.Equal(t, 5, b.Get("val"))
+	v, err := b.Get("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+	v, err = b.Get("val")
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v)
 
 	b.Delete("foo")
 	assert.Equal(t, 1, len(b.Keys()))
-	assert.Equal(t, nil, b.Get("foo"))
-	assert.Equal(t, 5, b.Get("val"))
+	v, err = b.Get("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, nil, v)
+	v, err = b.Get("val")
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v)
 }

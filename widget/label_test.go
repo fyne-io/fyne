@@ -215,5 +215,6 @@ func TestNewLabelWithData(t *testing.T) {
 	str.Set("Init")
 
 	label := NewLabelWithData(str)
+	waitForBinding()
 	assert.Equal(t, "Init", label.Text)
 }

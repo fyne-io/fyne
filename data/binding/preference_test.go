@@ -15,10 +15,15 @@ func TestBindPreferenceBool(t *testing.T) {
 
 	p.SetBool(key, true)
 	bind := BindPreferenceBool(key, p)
-	assert.True(t, bind.Get())
+	v, err := bind.Get()
+	assert.Nil(t, err)
+	assert.True(t, v)
 
-	bind.Set(false)
-	assert.False(t, bind.Get())
+	err = bind.Set(false)
+	assert.Nil(t, err)
+	v, err = bind.Get()
+	assert.Nil(t, err)
+	assert.False(t, v)
 	assert.False(t, p.Bool(key))
 }
 
@@ -29,10 +34,15 @@ func TestBindPreferenceFloat(t *testing.T) {
 
 	p.SetFloat(key, 1.3)
 	bind := BindPreferenceFloat(key, p)
-	assert.Equal(t, 1.3, bind.Get())
+	v, err := bind.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 1.3, v)
 
-	bind.Set(2.5)
-	assert.Equal(t, 2.5, bind.Get())
+	err = bind.Set(2.5)
+	assert.Nil(t, err)
+	v, err = bind.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 2.5, v)
 	assert.Equal(t, 2.5, p.Float(key))
 }
 
@@ -43,10 +53,15 @@ func TestBindPreferenceInt(t *testing.T) {
 
 	p.SetInt(key, 4)
 	bind := BindPreferenceInt(key, p)
-	assert.Equal(t, 4, bind.Get())
+	v, err := bind.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 4, v)
 
-	bind.Set(7)
-	assert.Equal(t, 7, bind.Get())
+	err = bind.Set(7)
+	assert.Nil(t, err)
+	v, err = bind.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 7, v)
 	assert.Equal(t, 7, p.Int(key))
 }
 
@@ -57,10 +72,15 @@ func TestBindPreferenceString(t *testing.T) {
 
 	p.SetString(key, "aString")
 	bind := BindPreferenceString(key, p)
-	assert.Equal(t, "aString", bind.Get())
+	v, err := bind.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "aString", v)
 
-	bind.Set("overwritten")
-	assert.Equal(t, "overwritten", bind.Get())
+	err = bind.Set("overwritten")
+	assert.Nil(t, err)
+	v, err = bind.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "overwritten", v)
 	assert.Equal(t, "overwritten", p.String(key))
 }
 
@@ -72,10 +92,19 @@ func TestPreferenceBindingCopies(t *testing.T) {
 	p.SetString(key, "aString")
 	bind1 := BindPreferenceString(key, p)
 	bind2 := BindPreferenceString(key, p)
-	assert.Equal(t, bind2.Get(), bind1.Get())
+	v1, err := bind1.Get()
+	assert.Nil(t, err)
+	v2, err := bind2.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, v2, v1)
 
-	bind1.Set("overwritten")
-	assert.Equal(t, bind2.Get(), bind1.Get())
+	err = bind1.Set("overwritten")
+	assert.Nil(t, err)
+	v1, err = bind1.Get()
+	assert.Nil(t, err)
+	v2, err = bind2.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, v2, v1)
 }
 
 func TestPreferenceBindingTriggers(t *testing.T) {
