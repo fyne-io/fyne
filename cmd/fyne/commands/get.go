@@ -73,7 +73,7 @@ func get(pkg, icon string) error {
 		return err
 	}
 
-	install := &installer{srcDir: path, icon: icon}
+	install := &installer{srcDir: path, icon: icon, release: true}
 	err = install.validate()
 	if err != nil {
 		return errors.Wrap(err, "Failed to set up installer")
