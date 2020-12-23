@@ -115,7 +115,7 @@ func TestUntypedMap_Delete(t *testing.T) {
 	b.Delete("foo")
 	assert.Equal(t, 1, len(b.Keys()))
 	v, err = b.Get("foo")
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	assert.Equal(t, nil, v)
 	v, err = b.Get("val")
 	assert.Nil(t, err)
