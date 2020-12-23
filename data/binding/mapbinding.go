@@ -49,12 +49,21 @@ func BindUntypedMap(d *map[string]interface{}) UntypedMap {
 	return m
 }
 
+// Struct is the base interface for a bound struct type.
+//
+// Since: 2.0.0
+type Struct interface {
+	DataMap
+	Get(string) (interface{}, error)
+	Set(string, interface{}) error
+}
+
 // BindStruct creates a new map binding of string to interface{} using the struct passed as data.
 // The key for each item is a string representation of each exported field with the value set as an interface{}.
 // Only exported fields are included.
 //
 // Since: 2.0.0
-func BindStruct(i interface{}) DataMap {
+func BindStruct(i interface{}) Struct {
 	if i == nil {
 		return NewUntypedMap()
 	}
