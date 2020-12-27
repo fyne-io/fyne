@@ -244,6 +244,7 @@ func TestHiddenFiles(t *testing.T) {
 	}
 
 	// git does not preserve windows hidden flag so we have to set it.
+	// just an empty function for non windows builds
 	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
 		t.Error("Failed to hide .hidden", err)
 	}
