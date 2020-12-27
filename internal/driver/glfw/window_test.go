@@ -851,14 +851,14 @@ func TestWindow_Clipboard(t *testing.T) {
 	text := "My content from test window"
 	cb := w.Clipboard()
 
-	cliboardContent := cb.Content() // this fails but does not break the test
+	cliboardContent := cb.Content() // this sometimes fails but does not break the test, just means the CB is not restored at the end.
 	if cliboardContent != "" {
 		// Current environment has some content stored in clipboard,
 		// set temporary to an empty string to allow test and restore later.
-		cb.SetContent("") // this fails but does not break the test
+		cb.SetContent("")
 	}
 
-	assert.Empty(t, cb.Content()) // this fails but does not break the test
+	assert.Empty(t, cb.Content())
 
 	cb.SetContent(text) // if this fails it will get caught by the retry
 
@@ -875,7 +875,7 @@ func TestWindow_Clipboard(t *testing.T) {
 	assert.Equal(t, text, cbText)
 
 	// Restore clipboardContent, if any
-	cb.SetContent(cliboardContent) // this fails but does not break the test
+	cb.SetContent(cliboardContent) // this can fail but does not break the test, just means the CB is not restored
 }
 
 func TestWindow_CloseInterception(t *testing.T) {
