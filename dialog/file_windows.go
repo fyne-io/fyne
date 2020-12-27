@@ -80,6 +80,18 @@ func isHidden(file fyne.URI) bool {
 	return attr&syscall.FILE_ATTRIBUTE_HIDDEN != 0
 }
 
+func hideFile(filename string) error {
+	// git does not preserve windows hidden flag so we have to set it.
+	filenameW, err := syscall.UTF16PtrFromString(filename)
+	if err != nil {
+		return err
+	}
+	err = syscall.SetFileAttributes(filenameW, syscall.FILE_ATTRIBUTE_HIDDEN)
+	if err != nil {
+		return err
+	}
+}
+
 func fileOpenOSOverride(*FileDialog) bool {
 	return false
 }

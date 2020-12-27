@@ -4,9 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
-	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -246,15 +244,8 @@ func TestHiddenFiles(t *testing.T) {
 	}
 
 	// git does not preserve windows hidden flag so we have to set it.
-	if runtime.GOOS == "windows" {
-		filenameW, err := syscall.UTF16PtrFromString(filepath.Join(testDataPath, ".hidden"))
-		if err != nil {
-			t.Error("Failed UTF16PtrFromString", err)
-		}
-		err = syscall.SetFileAttributes(filenameW, syscall.FILE_ATTRIBUTE_HIDDEN)
-		if err != nil {
-			t.Error("Failed to hide .hidden", err)
-		}
+	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
+		t.Error("Failed to hide .hidden", err)
 	}
 
 	win := test.NewWindow(widget.NewLabel("Content"))
