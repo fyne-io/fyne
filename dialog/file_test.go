@@ -4,7 +4,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -181,14 +183,16 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
+
+	optionsButton := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Options", optionsButton.Text)
+
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
 
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
-	hidden := ui.Objects[2].(*fyne.Container).Objects[2].(*widget.Check)
-	assert.Equal(t, hidden.Text, "Show Hidden Files")
 
 	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
 	assert.Greater(t, len(breadcrumb.Children), 0)
@@ -231,6 +235,76 @@ func TestShowFileOpen(t *testing.T) {
 
 	err = chosen.Close()
 	assert.Nil(t, err)
+}
+
+func TestHiddenFiles(t *testing.T) {
+	testDataPath, _ := filepath.Abs("testdata")
+	testData := storage.NewFileURI(testDataPath)
+	dir, err := storage.ListerForURI(testData)
+	if err != nil {
+		t.Error("Failed to open testdata dir", err)
+	}
+
+	// git does not preserve windows hidden flag so we have to set it.
+	if runtime.GOOS == "windows" {
+		filenameW, err := syscall.UTF16PtrFromString(filepath.Join(testDataPath, ".hidden"))
+		if err != nil {
+			t.Error("Failed UTF16PtrFromString", err)
+		}
+		err = syscall.SetFileAttributes(filenameW, syscall.FILE_ATTRIBUTE_HIDDEN)
+		if err != nil {
+			t.Error("Failed to hide .hidden", err)
+		}
+	}
+
+	win := test.NewWindow(widget.NewLabel("Content"))
+	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+	d.SetLocation(dir)
+	d.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+
+	optionsButton := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Options", optionsButton.Text)
+
+	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	assert.Greater(t, len(files.Objects), 0)
+
+	var target *fileDialogItem
+	for _, icon := range files.Objects {
+		if icon.(*fileDialogItem).name == ".hidden" {
+			target = icon.(*fileDialogItem)
+		}
+	}
+	assert.Nil(t, target, "Failed, .hidden found in testdata")
+
+	d.dialog.showHidden = true
+	d.dialog.refreshDir(d.dialog.dir)
+
+	for _, icon := range files.Objects {
+		if icon.(*fileDialogItem).name == ".hidden" {
+			target = icon.(*fileDialogItem)
+		}
+	}
+	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
+
+	// test.Tap(target)
+	// assert.Equal(t, target.location.Name(), nameLabel.Text)
+	// assert.False(t, open.Disabled())
+
+	// test.Tap(open)
+	// assert.Nil(t, win.Canvas().Overlays().Top())
+	// assert.Nil(t, openErr)
+
+	// assert.Equal(t, target.location.String(), chosen.URI().String())
+
+	// err = chosen.Close()
+	// assert.Nil(t, err)
 }
 
 func TestShowFileSave(t *testing.T) {
