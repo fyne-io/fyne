@@ -133,4 +133,11 @@ func TestPreferenceBindingTriggers(t *testing.T) {
 	case <-time.After(time.Millisecond * 100):
 		t.Errorf("Timed out waiting for data binding change to trigger")
 	}
+
+	p.SetString(key, "overwritten") // changing preference should trigger as well
+	select {
+	case <-ch: // bind1 triggered by preferences changing the same key directly
+	case <-time.After(time.Millisecond * 300):
+		t.Errorf("Timed out waiting for data binding change to trigger")
+	}
 }

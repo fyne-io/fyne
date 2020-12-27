@@ -7,9 +7,6 @@ import "fyne.io/fyne"
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 
-// Because there is no preference listener yet we connect any listeners asking for the same key.
-var prefBinds = make(map[string]DataItem)
-
 type prefBoundBool struct {
 	base
 	key string
@@ -29,6 +26,7 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 	}
 
 	listen := &prefBoundBool{key: key, p: p}
+	ensurePreferencesAttached(p)
 	prefBinds[key] = listen
 	return listen
 }
@@ -63,6 +61,7 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 	}
 
 	listen := &prefBoundFloat{key: key, p: p}
+	ensurePreferencesAttached(p)
 	prefBinds[key] = listen
 	return listen
 }
@@ -97,6 +96,7 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 	}
 
 	listen := &prefBoundInt{key: key, p: p}
+	ensurePreferencesAttached(p)
 	prefBinds[key] = listen
 	return listen
 }
@@ -131,6 +131,7 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 	}
 
 	listen := &prefBoundString{key: key, p: p}
+	ensurePreferencesAttached(p)
 	prefBinds[key] = listen
 	return listen
 }

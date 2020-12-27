@@ -8,13 +8,20 @@ import (
 
 // InMemoryPreferences provides an implementation of the fyne.Preferences API that is stored in memory.
 type InMemoryPreferences struct {
-	values   map[string]interface{}
-	lock     sync.RWMutex
-	OnChange func()
+	values          map[string]interface{}
+	lock            sync.RWMutex
+	changeListeners []func()
 }
 
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*InMemoryPreferences)(nil)
+
+func (p *InMemoryPreferences) AddChangeListener(listener func()) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	p.changeListeners = append(p.changeListeners, listener)
+}
 
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
@@ -49,11 +56,12 @@ func (p *InMemoryPreferences) Values() map[string]interface{} {
 }
 
 func (p *InMemoryPreferences) fireChange() {
-	if p.OnChange == nil {
-		return
-	}
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
-	p.OnChange()
+	for _, l := range p.changeListeners {
+		go l()
+	}
 }
 
 // Bool looks up a boolean value for the key

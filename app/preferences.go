@@ -74,11 +74,11 @@ func newPreferences(app *fyneApp) *preferences {
 	p.app = app
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
-	p.OnChange = func() {
+	p.AddChangeListener(func() {
 		err := p.save()
 		if err != nil {
 			fyne.LogError("Failed on saving preferences", err)
 		}
-	}
+	})
 	return p
 }

@@ -88,6 +88,7 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
+	ensurePreferencesAttached(p)
 	prefBinds[key] = listen
 	return listen
 }
@@ -385,9 +386,6 @@ import (
 import "fyne.io/fyne"
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
-
-// Because there is no preference listener yet we connect any listeners asking for the same key.
-var prefBinds = make(map[string]DataItem)
 `)
 
 	listFile, err := newFile("bindlists")
