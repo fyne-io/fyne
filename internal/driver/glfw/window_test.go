@@ -875,7 +875,7 @@ func TestWindow_Clipboard(t *testing.T) {
 	assert.Equal(t, text, cbText)
 
 	// Restore clipboardContent, if any
-	cb.SetContent(cliboardContent) // this can fail but does not break the test, just means the CB is not restored
+	cb.SetContent(cliboardContent) // this can fail but does not break the test, just means the CB is not restored.
 }
 
 func TestWindow_CloseInterception(t *testing.T) {
