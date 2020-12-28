@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -189,11 +190,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
-	left := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, optionsButton, nil, nil), favoritesGroup, optionsButton)
+	left := container.NewBorder(nil, optionsButton, nil, nil, favoritesGroup)
 
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, left, nil),
-		left, header, footer, body)
-
+	return container.NewBorder(header, footer, left, nil, body)
 }
 
 func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
@@ -202,13 +201,7 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 		f.refreshDir(f.dir)
 	})
 	hiddenFiles.SetChecked(f.showHidden)
-
-	title := widget.NewLabel("Options")
-	title.Alignment = fyne.TextAlignCenter
-	title.TextStyle = fyne.TextStyle{Bold: true}
-
-	content := widget.NewVBox(widget.NewCard("", "", title),
-		hiddenFiles)
+	content := container.NewVBox(hiddenFiles)
 
 	p := position.Add(buttonSize)
 	pos := fyne.NewPos(p.X, p.Y-content.MinSize().Height-theme.Padding()*2)

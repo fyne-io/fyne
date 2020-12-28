@@ -181,18 +181,18 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-
-	optionsButton := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	//left
+	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Options", optionsButton.Text)
-
+	//header
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
-
+	//footer
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
-
-	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
+	//body
+	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
 	assert.Greater(t, len(breadcrumb.Children), 0)
 
 	assert.Nil(t, err)
@@ -207,7 +207,7 @@ func TestShowFileOpen(t *testing.T) {
 		}
 	}
 
-	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -261,10 +261,10 @@ func TestHiddenFiles(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 
-	optionsButton := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Options", optionsButton.Text)
 
-	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	var target *fileDialogItem
@@ -320,7 +320,7 @@ func TestShowFileSave(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	save := buttons.Children[1].(*widget.Button)
 
-	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
