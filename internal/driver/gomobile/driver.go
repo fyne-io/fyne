@@ -5,15 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
-	pgl "fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
-
 	"github.com/fyne-io/mobile/app"
 	"github.com/fyne-io/mobile/event/key"
 	"github.com/fyne-io/mobile/event/lifecycle"
@@ -21,6 +12,14 @@ import (
 	"github.com/fyne-io/mobile/event/size"
 	"github.com/fyne-io/mobile/event/touch"
 	"github.com/fyne-io/mobile/gl"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter"
+	pgl "fyne.io/fyne/internal/painter/gl"
+	"fyne.io/fyne/theme"
 )
 
 const tapSecondaryDelay = 300 * time.Millisecond
@@ -186,6 +185,7 @@ func (d *mobileDriver) onStop() {
 }
 
 func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
+	clips := &internal.ClipStack{}
 	canvas := window.Canvas().(*mobileCanvas)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -194,19 +194,20 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			canvas.painter.StartClipping(
-				fyne.NewPos(pos.X, canvas.Size().Height-pos.Y-obj.Size().Height),
-				obj.Size(),
-			)
+		if _, ok := obj.(fyne.Scrollable); ok {
+			inner := clips.Push(pos, obj.Size())
+			canvas.painter.StartClipping(inner.Rect())
 		}
 		canvas.painter.Paint(obj, pos, size)
 		return false
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
-		if _, ok := obj.(*widget.ScrollContainer); ok {
+		if _, ok := obj.(fyne.Scrollable); ok {
 			canvas.painter.StopClipping()
+			clips.Pop()
+			if top := clips.Top(); top != nil {
+				canvas.painter.StartClipping(top.Rect())
+			}
 		}
 	}
 
