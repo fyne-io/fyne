@@ -53,7 +53,7 @@ func (p *glPainter) Clear() {
 
 func (p *glPainter) StartClipping(pos fyne.Position, size fyne.Size) {
 	x := p.textureScaleInt(pos.X)
-	y := p.textureScaleInt(pos.Y)
+	y := p.textureScaleInt(p.canvas.Size().Height - pos.Y - size.Height)
 	w := p.textureScaleInt(size.Width)
 	h := p.textureScaleInt(size.Height)
 	p.glScissorOpen(int32(x), int32(y), int32(w), int32(h))

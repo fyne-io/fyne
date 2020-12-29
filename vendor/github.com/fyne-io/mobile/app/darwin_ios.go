@@ -83,8 +83,8 @@ var DisplayMetrics struct {
 
 //export setDisplayMetrics
 func setDisplayMetrics(width, height int, scale int) {
-	DisplayMetrics.WidthPx = width * scale
-	DisplayMetrics.HeightPx = height * scale
+	DisplayMetrics.WidthPx = width
+	DisplayMetrics.HeightPx = height
 }
 
 //export setScreen
@@ -126,16 +126,15 @@ func updateConfig(width, height, orientation int32) {
 		o = size.OrientationPortrait
 	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
 		o = size.OrientationLandscape
+		width, height = height, width
 	}
-	widthPx := screenScale * int(width)
-	heightPx := screenScale * int(height)
 	insets := C.getDevicePadding()
 
 	theApp.eventsIn <- size.Event{
-		WidthPx:       widthPx,
-		HeightPx:      heightPx,
-		WidthPt:       geom.Pt(float32(widthPx) / pixelsPerPt),
-		HeightPt:      geom.Pt(float32(heightPx) / pixelsPerPt),
+		WidthPx:       int(width),
+		HeightPx:      int(height),
+		WidthPt:       geom.Pt(float32(width) / pixelsPerPt),
+		HeightPt:      geom.Pt(float32(height) / pixelsPerPt),
 		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
 		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
 		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),

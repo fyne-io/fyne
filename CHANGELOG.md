@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix possible race conditions for canvas capture
 * Improvements to `fyne get` command downloader
 * Fix tree, so it refreshes visible nodes on Refresh()
+* Incorrect clipping behaviour with nested scroll containers (#1682)
 
 
 ## 1.4.2 - 9 December 2020

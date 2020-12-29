@@ -405,6 +405,7 @@ func (c *glCanvas) overlayChanged() {
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
+	clips := &internal.ClipStack{}
 	if c.Content() == nil {
 		return
 	}
@@ -413,18 +414,21 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 	paint := func(node *renderCacheNode, pos fyne.Position) {
 		obj := node.obj
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			c.painter.StartClipping(
-				fyne.NewPos(pos.X, c.Size().Height-pos.Y-obj.Size().Height),
-				obj.Size(),
-			)
+		if _, ok := obj.(fyne.Scrollable); ok {
+			inner := clips.Push(pos, obj.Size())
+			c.painter.StartClipping(inner.Rect())
 		}
 		c.painter.Paint(obj, pos, size)
 	}
 	afterPaint := func(node *renderCacheNode) {
-		if _, ok := node.obj.(*widget.ScrollContainer); ok {
-			c.painter.StopClipping()
+		if _, ok := node.obj.(fyne.Scrollable); ok {
+			clips.Pop()
+			if top := clips.Top(); top != nil {
+				c.painter.StartClipping(top.Rect())
+			} else {
+				c.painter.StopClipping()
+
+			}
 		}
 	}
 
