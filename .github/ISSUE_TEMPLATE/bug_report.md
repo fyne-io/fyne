@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!-- Please search for open issues that relate to the same problem before opening a new one. -->
+
 ### Describe the bug:
 <!-- A clear and concise description about the bug. -->
 
