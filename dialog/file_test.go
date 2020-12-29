@@ -284,19 +284,6 @@ func TestHiddenFiles(t *testing.T) {
 		}
 	}
 	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
-
-	// test.Tap(target)
-	// assert.Equal(t, target.location.Name(), nameLabel.Text)
-	// assert.False(t, open.Disabled())
-
-	// test.Tap(open)
-	// assert.Nil(t, win.Canvas().Overlays().Top())
-	// assert.Nil(t, openErr)
-
-	// assert.Equal(t, target.location.String(), chosen.URI().String())
-
-	// err = chosen.Close()
-	// assert.Nil(t, err)
 }
 
 func TestShowFileSave(t *testing.T) {
