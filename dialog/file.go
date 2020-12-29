@@ -29,7 +29,10 @@ type fileDialog struct {
 
 	win      *widget.PopUp
 	selected *fileDialogItem
-	dir      fyne.ListableURI
+
+	dir              fyne.ListableURI
+	startingLocation fyne.ListableURI // To be able to change back when dismitting the dialog
+
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
 }
@@ -132,6 +135,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 			callback(f.dir, nil)
 		}
+
+		if f.dir != f.startingLocation {
+			f.setLocation(f.startingLocation)
+		}
 	})
 	f.open.Style = widget.PrimaryButton
 	f.open.Disable()
@@ -155,6 +162,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			} else {
 				f.file.callback.(func(fyne.URIReadCloser, error))(nil, nil)
 			}
+		}
+
+		if f.dir != f.startingLocation {
+			f.setLocation(f.startingLocation)
 		}
 	})
 	buttons := widget.NewHBox(f.dismiss, f.open)
@@ -397,8 +408,8 @@ func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
 
-	file.startingLocation = file.effectiveStartingDir() // To make sure that we always start at the starting location
-	d.setLocation(file.startingLocation)
+	d.startingLocation = file.effectiveStartingDir()
+	d.setLocation(d.startingLocation)
 
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
@@ -423,10 +434,6 @@ func (f *FileDialog) Show() {
 	}
 
 	if f.dialog != nil {
-		if f.dialog.dir != f.startingLocation { // Make sure to start at the starting location
-			f.dialog.setLocation(f.startingLocation)
-		}
-
 		f.dialog.win.Show()
 		return
 	}
