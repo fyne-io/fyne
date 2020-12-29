@@ -15,8 +15,8 @@ var (
 	errParseFailed = errors.New("format did not match 1 value")
 
 	// As an optimisation we connect any listeners asking for the same key, so that there is only 1 per preference item.
-	prefBinds    = make(map[string]DataItem)
-	prefAttached fyne.Preferences
+	prefBinds = make(map[fyne.Preferences]map[string]preferenceItem)
+	prefLock  sync.RWMutex
 )
 
 // DataItem is the base interface for all bindable data items.
@@ -96,16 +96,28 @@ func (b *base) trigger() {
 	}
 }
 
+type preferenceItem interface {
+	checkForChange()
+}
+
 func ensurePreferencesAttached(p fyne.Preferences) {
-	if prefAttached == p {
+	prefLock.Lock()
+	defer prefLock.Unlock()
+	if prefBinds[p] != nil {
 		return
 	}
 
-	p.AddChangeListener(preferencesChanged)
+	prefBinds[p] = make(map[string]preferenceItem)
+	p.AddChangeListener(func() {
+		preferencesChanged(p)
+	})
 }
 
-func preferencesChanged() {
-	for _, item := range prefBinds {
-		item.(interface{ trigger() }).trigger()
+func preferencesChanged(p fyne.Preferences) {
+	prefLock.RLock()
+	defer prefLock.RUnlock()
+
+	for _, item := range prefBinds[p] {
+		item.checkForChange()
 	}
 }

@@ -116,7 +116,7 @@ func TestPreferenceBindingTriggers(t *testing.T) {
 	bind1 := BindPreferenceString(key, p)
 	bind2 := BindPreferenceString(key, p)
 
-	ch := make(chan interface{})
+	ch := make(chan interface{}, 2)
 	bind1.AddListener(NewDataListener(func() {
 		ch <- struct{}{}
 	}))
@@ -127,14 +127,15 @@ func TestPreferenceBindingTriggers(t *testing.T) {
 		t.Errorf("Timed out waiting for data binding to send initial value")
 	}
 
-	bind2.Set("overwritten") // write on a different listener, preferences should trigger all
+	err := bind2.Set("overwritten") // write on a different listener, preferences should trigger all
+	assert.Nil(t, err)
 	select {
 	case <-ch: // bind1 triggered by bind2 changing the same key
 	case <-time.After(time.Millisecond * 100):
 		t.Errorf("Timed out waiting for data binding change to trigger")
 	}
 
-	p.SetString(key, "overwritten") // changing preference should trigger as well
+	p.SetString(key, "overwritten2") // changing preference should trigger as well
 	select {
 	case <-ch: // bind1 triggered by preferences changing the same key directly
 	case <-time.After(time.Millisecond * 300):
