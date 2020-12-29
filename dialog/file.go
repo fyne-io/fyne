@@ -397,7 +397,8 @@ func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
 
-	d.setLocation(file.effectiveStartingDir())
+	file.startingLocation = file.effectiveStartingDir() // To make sure that we always start at the starting location
+	d.setLocation(file.startingLocation)
 
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
@@ -420,7 +421,12 @@ func (f *FileDialog) Show() {
 			return
 		}
 	}
+
 	if f.dialog != nil {
+		if f.dialog.dir != f.startingLocation { // Make sure to start at the starting location
+			f.dialog.setLocation(f.startingLocation)
+		}
+
 		f.dialog.win.Show()
 		return
 	}
