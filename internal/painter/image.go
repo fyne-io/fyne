@@ -30,17 +30,20 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 	case img.File != "" || img.Resource != nil:
 		var file io.Reader
 		var name string
+		isSVG := false
 		if img.Resource != nil {
 			name = img.Resource.Name()
 			file = bytes.NewReader(img.Resource.Content())
+			isSVG = isResourceSVG(img.Resource)
 		} else {
 			name = img.File
 			handle, _ := os.Open(img.File)
 			defer handle.Close()
 			file = handle
+			isSVG = isFileSVG(img.File)
 		}
 
-		if strings.ToLower(filepath.Ext(name)) == ".svg" {
+		if isSVG {
 			tex := svgCacheGet(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
@@ -162,4 +165,29 @@ func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) bool {
 	}
 
 	return true
+}
+
+func isFileSVG(path string) bool {
+	return strings.ToLower(filepath.Ext(path)) == ".svg"
+}
+
+func isResourceSVG(res fyne.Resource) bool {
+	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
+		return true
+	}
+
+	if len(res.Content()) < 5 {
+		return false
+	}
+
+	if strings.ToUpper(string(res.Content()[:5])) == "<!DOC" {
+		return true
+	}
+	if strings.ToLower(string(res.Content()[:5])) == "<?xml" {
+		return true
+	}
+	if strings.ToLower(string(res.Content()[:5])) == "<svg " {
+		return true
+	}
+	return false
 }
