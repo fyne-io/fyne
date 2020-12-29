@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix possible race conditions for canvas capture
 * Improvements to `fyne get` command downloader
 * Fix tree, so it refreshes visible nodes on Refresh()
+* TabContainer Panic when removing selected tab (#1668)
 * Incorrect clipping behaviour with nested scroll containers (#1682)
 
 
