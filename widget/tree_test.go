@@ -5,18 +5,20 @@ import (
 	"time"
 
 	"fyne.io/fyne"
-	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 )
 
+var treeData = map[string][]string{
+	"":    {"foo"},
+	"foo": {"foobar"},
+}
+
 func TestTree_OpenClose(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
-		data := make(map[string][]string)
-		internalwidget.AddTreePath(data, "foo", "foobar")
-		tree := widget.NewTreeWithStrings(data)
+		tree := widget.NewTreeWithStrings(treeData)
 
 		closed := make(chan string, 1)
 		opened := make(chan string, 1)
@@ -70,9 +72,7 @@ func TestTree_OpenClose(t *testing.T) {
 		}
 	})
 	t.Run("Missing", func(t *testing.T) {
-		data := make(map[string][]string)
-		internalwidget.AddTreePath(data, "foo", "foobar")
-		tree := widget.NewTreeWithStrings(data)
+		tree := widget.NewTreeWithStrings(treeData)
 
 		assert.False(t, tree.IsBranchOpen("foo"))
 
@@ -91,10 +91,12 @@ func TestTree_OpenClose(t *testing.T) {
 }
 
 func TestTree_OpenCloseAll(t *testing.T) {
-	data := make(map[string][]string)
-	internalwidget.AddTreePath(data, "foo0", "foobar0")
-	internalwidget.AddTreePath(data, "foo1", "foobar1")
-	internalwidget.AddTreePath(data, "foo2", "foobar2")
+	data := map[string][]string{
+		"":     {"foo0", "foo1", "foo2"},
+		"foo0": {"foobar0"},
+		"foo1": {"foobar1"},
+		"foo2": {"foobar2"},
+	}
 	tree := widget.NewTreeWithStrings(data)
 
 	tree.OpenAllBranches()
@@ -112,16 +114,14 @@ func TestTree_Layout(t *testing.T) {
 	test.NewApp()
 
 	for name, tt := range map[string]struct {
-		items    [][]string
+		items    map[string][]string
 		selected widget.TreeNodeID
 		opened   []widget.TreeNodeID
 		want     string
 	}{
 		"single_leaf": {
-			items: [][]string{
-				{
-					"11111",
-				},
+			items: map[string][]string{
+				"": {"11111"},
 			},
 			want: `
 				<canvas padded size="200x300">
@@ -143,10 +143,8 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"single_leaf_selected": {
-			items: [][]string{
-				{
-					"11111",
-				},
+			items: map[string][]string{
+				"": {"11111"},
 			},
 			selected: "11111",
 			want: `
@@ -169,10 +167,9 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"single_branch": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
+			items: map[string][]string{
+				"":  {"A"},
+				"A": {"11111"},
 			},
 			want: `
 				<canvas padded size="200x300">
@@ -197,10 +194,9 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"single_branch_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
+			items: map[string][]string{
+				"":  {"A"},
+				"A": {"11111"},
 			},
 			selected: "A",
 			want: `
@@ -226,10 +222,9 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"single_branch_opened": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
+			items: map[string][]string{
+				"":  {"A"},
+				"A": {"11111"},
 			},
 			opened: []string{"A"},
 			want: `
@@ -264,10 +259,9 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"single_branch_opened_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
+			items: map[string][]string{
+				"":  {"A"},
+				"A": {"11111"},
 			},
 			opened:   []string{"A"},
 			selected: "A",
@@ -303,10 +297,9 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"single_branch_opened_leaf_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
+			items: map[string][]string{
+				"":  {"A"},
+				"A": {"11111"},
 			},
 			opened:   []string{"A"},
 			selected: "11111",
@@ -342,16 +335,10 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"44444444444444444444",
-				},
+			items: map[string][]string{
+				"":  {"A", "B", "44444444444444444444"},
+				"A": {"11111"},
+				"B": {"2222222222"},
 			},
 			want: `
 				<canvas padded size="200x300">
@@ -397,16 +384,10 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"44444444444444444444",
-				},
+			items: map[string][]string{
+				"":  {"A", "B", "44444444444444444444"},
+				"A": {"11111"},
+				"B": {"2222222222"},
 			},
 			selected: "44444444444444444444",
 			want: `
@@ -453,19 +434,8 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_leaf": {
-			items: [][]string{
-				{
-					"11111",
-				},
-				{
-					"2222222222",
-				},
-				{
-					"333333333333333",
-				},
-				{
-					"44444444444444444444",
-				},
+			items: map[string][]string{
+				"": {"11111", "2222222222", "333333333333333", "44444444444444444444"},
 			},
 			want: `
 				<canvas padded size="200x300">
@@ -514,19 +484,8 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_leaf_selected": {
-			items: [][]string{
-				{
-					"11111",
-				},
-				{
-					"2222222222",
-				},
-				{
-					"333333333333333",
-				},
-				{
-					"44444444444444444444",
-				},
+			items: map[string][]string{
+				"": {"11111", "2222222222", "333333333333333", "44444444444444444444"},
 			},
 			selected: "2222222222",
 			want: `
@@ -576,16 +535,11 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_branch": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"B", "C", "333333333333333",
-				},
+			items: map[string][]string{
+				"":  {"A", "B"},
+				"A": {"11111"},
+				"B": {"2222222222", "C"},
+				"C": {"333333333333333"},
 			},
 			want: `
 				<canvas padded size="200x300">
@@ -622,16 +576,11 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_branch_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"B", "C", "333333333333333",
-				},
+			items: map[string][]string{
+				"":  {"A", "B"},
+				"A": {"11111"},
+				"B": {"2222222222", "C"},
+				"C": {"333333333333333"},
 			},
 			selected: "B",
 			want: `
@@ -669,16 +618,11 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_branch_opened": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"B", "C", "333333333333333",
-				},
+			items: map[string][]string{
+				"":  {"A", "B"},
+				"A": {"11111"},
+				"B": {"2222222222", "C"},
+				"C": {"333333333333333"},
 			},
 			opened: []string{"A", "B", "C"},
 			want: `
@@ -762,16 +706,11 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_branch_opened_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"B", "C", "333333333333333",
-				},
+			items: map[string][]string{
+				"":  {"A", "B"},
+				"A": {"11111"},
+				"B": {"2222222222", "C"},
+				"C": {"333333333333333"},
 			},
 			opened:   []string{"A", "B", "C"},
 			selected: "B",
@@ -856,16 +795,11 @@ func TestTree_Layout(t *testing.T) {
 			`,
 		},
 		"multiple_branch_opened_leaf_selected": {
-			items: [][]string{
-				{
-					"A", "11111",
-				},
-				{
-					"B", "2222222222",
-				},
-				{
-					"B", "C", "333333333333333",
-				},
+			items: map[string][]string{
+				"":  {"A", "B"},
+				"A": {"11111"},
+				"B": {"2222222222", "C"},
+				"C": {"333333333333333"},
 			},
 			opened:   []string{"A", "B", "C"},
 			selected: "2222222222",
@@ -951,11 +885,7 @@ func TestTree_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			data := make(map[string][]string)
-			for _, d := range tt.items {
-				internalwidget.AddTreePath(data, d...)
-			}
-			tree := widget.NewTreeWithStrings(data)
+			tree := widget.NewTreeWithStrings(tt.items)
 			for _, o := range tt.opened {
 				tree.OpenBranch(o)
 			}
@@ -976,9 +906,7 @@ func TestTree_ChangeTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	data := make(map[string][]string)
-	internalwidget.AddTreePath(data, "foo", "foobar")
-	tree := widget.NewTreeWithStrings(data)
+	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
 
 	window := test.NewWindow(tree)
@@ -1000,9 +928,7 @@ func TestTree_Move(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	data := make(map[string][]string)
-	internalwidget.AddTreePath(data, "foo", "foobar")
-	tree := widget.NewTreeWithStrings(data)
+	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
 
 	window := test.NewWindow(tree)
