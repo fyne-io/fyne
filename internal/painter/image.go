@@ -180,14 +180,9 @@ func isResourceSVG(res fyne.Resource) bool {
 		return false
 	}
 
-	if strings.ToUpper(string(res.Content()[:5])) == "<!DOC" {
-		return true
-	}
-	if strings.ToLower(string(res.Content()[:5])) == "<?xml" {
-		return true
-	}
-	if strings.ToLower(string(res.Content()[:5])) == "<svg " {
-		return true
+	switch strings.ToUpper(string(res.Content()[:5])) {
+		case "<!DOC", "<?xml", "<svg ":
+			return true
 	}
 	return false
 }
