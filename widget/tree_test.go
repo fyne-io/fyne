@@ -304,9 +304,7 @@ func TestTree_Refresh(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	value := "Foo Leaf"
-	data := make(map[string][]string)
-	internalwidget.AddTreePath(data, "foo", "foobar")
-	tree := widget.NewTreeWithStrings(data)
+	tree := widget.NewTreeWithStrings(treeData)
 	tree.UpdateNode = func(uid widget.TreeNodeID, branch bool, node fyne.CanvasObject) {
 		if uid == "foobar" {
 			node.(*widget.Label).SetText(value)
