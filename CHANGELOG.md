@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 1.4.3 - Ongoing
+## 1.4.3 - 4 January 2021
 
 ### Fixed
 
@@ -16,6 +16,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix tree, so it refreshes visible nodes on Refresh()
 * TabContainer Panic when removing selected tab (#1668)
 * Incorrect clipping behaviour with nested scroll containers (#1682)
+* MacOS Notifications are not shown on subsequent app runs (#1699)
 
 
 ## 1.4.2 - 9 December 2020
