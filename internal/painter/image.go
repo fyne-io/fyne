@@ -28,9 +28,11 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 
 	switch {
 	case img.File != "" || img.Resource != nil:
-		var file io.Reader
-		var name string
-		isSVG := false
+		var (
+			file  io.Reader
+			name  string
+			isSVG bool
+		)
 		if img.Resource != nil {
 			name = img.Resource.Name()
 			file = bytes.NewReader(img.Resource.Content())
@@ -180,9 +182,9 @@ func isResourceSVG(res fyne.Resource) bool {
 		return false
 	}
 
-	switch strings.ToUpper(string(res.Content()[:5])) {
-		case "<!DOC", "<?xml", "<svg ":
-			return true
+	switch strings.ToLower(string(res.Content()[:5])) {
+	case "<!doc", "<?xml", "<svg ":
+		return true
 	}
 	return false
 }
