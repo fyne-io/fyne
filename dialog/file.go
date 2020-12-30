@@ -186,7 +186,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	favoritesGroup := widget.NewVScrollContainer(widget.NewGroup("Favorites", favorites...))
 	var optionsButton *widget.Button
-	optionsButton = widget.NewButton("Options", func() {
+	optionsButton = widget.NewButtonWithIcon("Options", theme.SettingsIcon(), func() {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
