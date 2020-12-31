@@ -46,11 +46,12 @@ func initCursors() {
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	viewport   *glfw.Window
-	viewLock   sync.RWMutex
-	createLock sync.Once
-	decorate   bool
-	fixedSize  bool
+	viewport    *glfw.Window
+	viewLock    sync.RWMutex
+	createLock  sync.Once
+	decorate    bool
+	transparent bool
+	fixedSize   bool
 
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
@@ -1189,10 +1190,10 @@ func (w *window) waitForEvents() {
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
-	return d.createWindow(title, true)
+	return d.createWindow(title, true, false)
 }
 
-func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
+func (d *gLDriver) createWindow(title string, decorate bool, transparent bool) fyne.Window {
 	var ret *window
 	if title == "" {
 		title = defaultTitle
@@ -1200,7 +1201,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	runOnMain(func() {
 		d.initGLFW()
 
-		ret = &window{title: title, decorate: decorate}
+		ret = &window{title: title, decorate: decorate, transparent: transparent}
 		// This channel will be closed when the window is closed.
 		ret.eventQueue = make(chan func(), 1024)
 		go ret.runEventQueue()
@@ -1223,6 +1224,11 @@ func (w *window) create() {
 			glfw.WindowHint(glfw.Decorated, 1)
 		} else {
 			glfw.WindowHint(glfw.Decorated, 0)
+		}
+		if w.transparent {
+			glfw.WindowHint(glfw.TransparentFramebuffer, 1)
+		} else {
+			glfw.WindowHint(glfw.TransparentFramebuffer, 0)
 		}
 		if w.fixedSize {
 			glfw.WindowHint(glfw.Resizable, 0)
@@ -1320,9 +1326,18 @@ func (w *window) view() *glfw.Window {
 }
 
 func (d *gLDriver) CreateSplashWindow() fyne.Window {
-	win := d.createWindow("", false)
+	win := d.createWindow("", false, false)
 	win.SetPadded(false)
 	win.CenterOnScreen()
+	return win
+}
+
+func (d *gLDriver) CreateAttributedWindow(title string, decorate bool, transparent bool, centered bool) fyne.Window {
+	win := d.createWindow(title, decorate, transparent)
+	if centered {
+		win.SetPadded(false)
+		win.CenterOnScreen()
+	}
 	return win
 }
 

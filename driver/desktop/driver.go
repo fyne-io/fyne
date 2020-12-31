@@ -7,4 +7,7 @@ import "fyne.io/fyne"
 type Driver interface {
 	// Create a new borderless window that is centered on screen
 	CreateSplashWindow() fyne.Window
+
+	// Create a new window that can be transparent and borderless
+	CreateAttributedWindow(title string, decorate bool, transparent bool, centered bool) fyne.Window
 }

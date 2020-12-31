@@ -71,6 +71,16 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
+func TestGLDriver_CreateAttributedWindow(t *testing.T) {
+	d := NewGLDriver().(desktop.Driver)
+	w := d.CreateAttributedWindow("I'm transparent", false, true, true).(*window)
+	w.create()
+
+	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
+	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.TransparentFramebuffer))
+	assert.True(t, w.centered)
+}
+
 func TestWindow_Cursor(t *testing.T) {
 	w := createWindow("Test").(*window)
 	e := widget.NewEntry()
