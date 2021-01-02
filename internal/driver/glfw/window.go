@@ -978,7 +978,8 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	}
 
 	keyEvent := &fyne.KeyEvent{Name: keyName}
-	if action == glfw.Release {
+	switch action {
+	case glfw.Release:
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				w.queueEvent(func() { focused.KeyUp(keyEvent) })
@@ -987,9 +988,10 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return // ignore key up in core events
-	}
-
-	if action == glfw.Press {
+	case glfw.Press:
+		if keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight {
+			w.menuActivationPending = keyName
+		}
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				w.queueEvent(func() { focused.KeyDown(keyEvent) })
@@ -997,8 +999,9 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		} else if w.canvas.onKeyDown != nil {
 			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
+	default:
+		// key repeat will fall through to TypedKey and TypedShortcut
 	}
-	// key repeat will fall through to TypedKey and TypedShortcut
 
 	keyDesktopModifier := desktopModifier(mods)
 	switch keyName {
