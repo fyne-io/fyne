@@ -71,6 +71,112 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
+func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
+	menuBar := buildMenuOverlay(m, c).(*MenuBar)
+	c.setMenuOverlay(menuBar)
+	w.SetContent(canvas.NewRectangle(color.Black))
+
+	require.False(t, menuBar.IsActive())
+	t.Run("toggle via left Alt", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		assert.True(t, menuBar.IsActive())
+
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.True(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	require.False(t, menuBar.IsActive())
+	t.Run("toggle via right Alt", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, 0)
+		assert.True(t, menuBar.IsActive())
+
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.True(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	require.False(t, menuBar.IsActive())
+	t.Run("press non-special key after pressing Alt and release it before releasing Alt", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyA, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyA, 0, glfw.Release, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	for name, tt := range map[string]struct {
+		key glfw.Key
+		mod glfw.ModifierKey
+	}{
+		"left shift":    {key: glfw.KeyLeftShift, mod: glfw.ModShift},
+		"right shift":   {key: glfw.KeyRightShift, mod: glfw.ModShift},
+		"left control":  {key: glfw.KeyLeftControl, mod: glfw.ModControl},
+		"right control": {key: glfw.KeyRightControl, mod: glfw.ModControl},
+		"left super":    {key: glfw.KeyLeftSuper, mod: glfw.ModSuper},
+		"right super":   {key: glfw.KeyRightSuper, mod: glfw.ModSuper},
+	} {
+		require.False(t, menuBar.IsActive())
+		t.Run("press and release "+name+" after pressing Alt and before releasing it", func(t *testing.T) {
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+
+		require.False(t, menuBar.IsActive())
+		t.Run("press "+name+" before pressing Alt and release it before releasing Alt", func(t *testing.T) {
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+
+		require.False(t, menuBar.IsActive())
+		t.Run("press "+name+" after pressing Alt and release it after releasing Alt", func(t *testing.T) {
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+
+		require.False(t, menuBar.IsActive())
+		t.Run("press "+name+" before pressing Alt and release it after releasing Alt", func(t *testing.T) {
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+	}
+
+	t.Run("when canvas has no menu", func(t *testing.T) {
+		w = createWindow("Test").(*window)
+		w.SetContent(canvas.NewRectangle(color.Black))
+
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		// does not crash :)
+	})
+}
+
 func TestWindow_Cursor(t *testing.T) {
 	w := createWindow("Test").(*window)
 	e := widget.NewEntry()

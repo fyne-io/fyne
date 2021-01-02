@@ -265,6 +265,12 @@ func (c *glCanvas) Size() fyne.Size {
 	return c.size
 }
 
+func (c *glCanvas) ToggleMenu() {
+	if c.menu != nil {
+		c.menu.(*MenuBar).Toggle()
+	}
+}
+
 func (c *glCanvas) Unfocus() {
 	c.focusManager().Focus(nil)
 }

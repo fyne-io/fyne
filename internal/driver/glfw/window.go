@@ -80,6 +80,8 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
+	menuActivationPending fyne.KeyName
+
 	xpos, ypos    int
 	width, height int
 	shouldExpand  bool
@@ -978,18 +980,23 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	}
 
 	keyEvent := &fyne.KeyEvent{Name: keyName}
+	keyDesktopModifier := desktopModifier(mods)
+	pendingMenuActivation := w.menuActivationPending
+	w.menuActivationPending = desktop.KeyNone
 	switch action {
 	case glfw.Release:
-		if w.canvas.Focused() != nil {
+		if action == glfw.Release && keyName == pendingMenuActivation {
+			w.canvas.ToggleMenu()
+		} else if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				w.queueEvent(func() { focused.KeyUp(keyEvent) })
 			}
 		} else if w.canvas.onKeyUp != nil {
 			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
-		return // ignore key up in core events
+		return // ignore key up in other core events
 	case glfw.Press:
-		if keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight {
+		if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
 			w.menuActivationPending = keyName
 		}
 		if w.canvas.Focused() != nil {
@@ -1003,7 +1010,6 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	keyDesktopModifier := desktopModifier(mods)
 	switch keyName {
 	case fyne.KeyTab:
 		switch keyDesktopModifier {
