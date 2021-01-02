@@ -212,7 +212,7 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 			}
 		}
 	}
-	return nil
+	return
 }
 
 // Set stores the value d at the specified key.

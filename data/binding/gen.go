@@ -373,7 +373,7 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {

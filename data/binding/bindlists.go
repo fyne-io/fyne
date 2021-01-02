@@ -61,7 +61,7 @@ func (l *boundBoolList) Get() ([]bool, error) {
 		return []bool{}, nil
 	}
 
-	return (*l.val), nil
+	return *l.val, nil
 }
 
 func (l *boundBoolList) GetValue(i int) (bool, error) {
@@ -88,7 +88,7 @@ func (l *boundBoolList) Prepend(val bool) error {
 	return nil
 }
 
-func (l *boundBoolList) Set(v []bool) error {
+func (l *boundBoolList) Set(v []bool) (retErr error) {
 	if l.val == nil { // was not initialized with a blank value, recover
 		l.val = &v
 		l.trigger()
@@ -99,7 +99,7 @@ func (l *boundBoolList) Set(v []bool) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen - 1; i >= newLen; i-- {
+		for i := oldLen-1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -118,10 +118,13 @@ func (l *boundBoolList) Set(v []bool) error {
 		old, err := l.items[i].(Bool).Get()
 		val := (*(l.val))[i]
 		if err != nil || (*(l.val))[i] != old {
-			item.(*boundBool).Set(val)
+			err = item.(*boundBool).Set(val)
+			if err != nil {
+				retErr = err
+			}
 		}
 	}
-	return nil
+	return
 }
 
 func (l *boundBoolList) SetValue(i int, v bool) error {
@@ -197,7 +200,7 @@ func (l *boundFloatList) Get() ([]float64, error) {
 		return []float64{}, nil
 	}
 
-	return (*l.val), nil
+	return *l.val, nil
 }
 
 func (l *boundFloatList) GetValue(i int) (float64, error) {
@@ -224,7 +227,7 @@ func (l *boundFloatList) Prepend(val float64) error {
 	return nil
 }
 
-func (l *boundFloatList) Set(v []float64) error {
+func (l *boundFloatList) Set(v []float64) (retErr error) {
 	if l.val == nil { // was not initialized with a blank value, recover
 		l.val = &v
 		l.trigger()
@@ -235,7 +238,7 @@ func (l *boundFloatList) Set(v []float64) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen - 1; i >= newLen; i-- {
+		for i := oldLen-1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -254,10 +257,13 @@ func (l *boundFloatList) Set(v []float64) error {
 		old, err := l.items[i].(Float).Get()
 		val := (*(l.val))[i]
 		if err != nil || (*(l.val))[i] != old {
-			item.(*boundFloat).Set(val)
+			err = item.(*boundFloat).Set(val)
+			if err != nil {
+				retErr = err
+			}
 		}
 	}
-	return nil
+	return
 }
 
 func (l *boundFloatList) SetValue(i int, v float64) error {
@@ -333,7 +339,7 @@ func (l *boundIntList) Get() ([]int, error) {
 		return []int{}, nil
 	}
 
-	return (*l.val), nil
+	return *l.val, nil
 }
 
 func (l *boundIntList) GetValue(i int) (int, error) {
@@ -360,7 +366,7 @@ func (l *boundIntList) Prepend(val int) error {
 	return nil
 }
 
-func (l *boundIntList) Set(v []int) error {
+func (l *boundIntList) Set(v []int) (retErr error) {
 	if l.val == nil { // was not initialized with a blank value, recover
 		l.val = &v
 		l.trigger()
@@ -371,7 +377,7 @@ func (l *boundIntList) Set(v []int) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen - 1; i >= newLen; i-- {
+		for i := oldLen-1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -390,10 +396,13 @@ func (l *boundIntList) Set(v []int) error {
 		old, err := l.items[i].(Int).Get()
 		val := (*(l.val))[i]
 		if err != nil || (*(l.val))[i] != old {
-			item.(*boundInt).Set(val)
+			err = item.(*boundInt).Set(val)
+			if err != nil {
+				retErr = err
+			}
 		}
 	}
-	return nil
+	return
 }
 
 func (l *boundIntList) SetValue(i int, v int) error {
@@ -469,7 +478,7 @@ func (l *boundRuneList) Get() ([]rune, error) {
 		return []rune{}, nil
 	}
 
-	return (*l.val), nil
+	return *l.val, nil
 }
 
 func (l *boundRuneList) GetValue(i int) (rune, error) {
@@ -496,7 +505,7 @@ func (l *boundRuneList) Prepend(val rune) error {
 	return nil
 }
 
-func (l *boundRuneList) Set(v []rune) error {
+func (l *boundRuneList) Set(v []rune) (retErr error) {
 	if l.val == nil { // was not initialized with a blank value, recover
 		l.val = &v
 		l.trigger()
@@ -507,7 +516,7 @@ func (l *boundRuneList) Set(v []rune) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen - 1; i >= newLen; i-- {
+		for i := oldLen-1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -526,10 +535,13 @@ func (l *boundRuneList) Set(v []rune) error {
 		old, err := l.items[i].(Rune).Get()
 		val := (*(l.val))[i]
 		if err != nil || (*(l.val))[i] != old {
-			item.(*boundRune).Set(val)
+			err = item.(*boundRune).Set(val)
+			if err != nil {
+				retErr = err
+			}
 		}
 	}
-	return nil
+	return
 }
 
 func (l *boundRuneList) SetValue(i int, v rune) error {
@@ -605,7 +617,7 @@ func (l *boundStringList) Get() ([]string, error) {
 		return []string{}, nil
 	}
 
-	return (*l.val), nil
+	return *l.val, nil
 }
 
 func (l *boundStringList) GetValue(i int) (string, error) {
@@ -632,7 +644,7 @@ func (l *boundStringList) Prepend(val string) error {
 	return nil
 }
 
-func (l *boundStringList) Set(v []string) error {
+func (l *boundStringList) Set(v []string) (retErr error) {
 	if l.val == nil { // was not initialized with a blank value, recover
 		l.val = &v
 		l.trigger()
@@ -643,7 +655,7 @@ func (l *boundStringList) Set(v []string) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen - 1; i >= newLen; i-- {
+		for i := oldLen-1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -662,10 +674,13 @@ func (l *boundStringList) Set(v []string) error {
 		old, err := l.items[i].(String).Get()
 		val := (*(l.val))[i]
 		if err != nil || (*(l.val))[i] != old {
-			item.(*boundString).Set(val)
+			err = item.(*boundString).Set(val)
+			if err != nil {
+				retErr = err
+			}
 		}
 	}
-	return nil
+	return
 }
 
 func (l *boundStringList) SetValue(i int, v string) error {
