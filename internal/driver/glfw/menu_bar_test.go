@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMenuBar(t *testing.T) {
@@ -315,5 +316,734 @@ func TestMenuBar(t *testing.T) {
 				}
 			})
 		}
+	})
+
+	t.Run("keyboard control", func(t *testing.T) {
+		w := test.NewWindow(nil)
+		defer w.Close()
+		w.SetPadded(false)
+		w.Resize(fyne.NewSize(300, 300))
+		c := w.Canvas()
+
+		menuBar := glfw.NewMenuBar(menu, c)
+		themeCounter := 0
+		button := widget.NewButton("Button", func() {
+			switch themeCounter % 2 {
+			case 0:
+				test.ApplyTheme(t, test.NewTheme())
+			case 1:
+				test.ApplyTheme(t, test.Theme())
+			}
+			themeCounter++
+		})
+		container := fyne.NewContainerWithoutLayout(button, menuBar)
+		w.SetContent(container)
+		w.Resize(fyne.NewSize(300, 300))
+		button.Resize(button.MinSize())
+		button.Move(fyne.NewPos(100, 50))
+		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+
+		markupMenuBarPrefix := `
+			<canvas size="300x300">
+				<content>
+					<container size="300x300">
+						<widget pos="100,50" size="77x37" type="*widget.Button">
+							<widget pos="2,2" size="73x33" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-2" size="73x2"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="73,-2" size="2x2" startColor="shadow"/>
+								<linearGradient angle="270" pos="73,0" size="2x33" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="73,33" size="2x2" startColor="shadow"/>
+								<linearGradient pos="0,33" size="73x2" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
+							</widget>
+							<rectangle fillColor="button" pos="2,2" size="73x33"/>
+							<text bold pos="12,8" size="53x21">Button</text>
+						</widget>
+						<widget backgroundColor="button" size="300x29" type="*glfw.MenuBar">
+							<widget size="300x29" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-4" size="300x4"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="300,-4" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" pos="300,0" size="4x29" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="300,29" size="4x4" startColor="shadow"/>
+								<linearGradient pos="0,29" size="300x4" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-4,29" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x29"/>
+							</widget>`
+		markupMenuBarActivated := `
+							<widget size="300x300" type="*glfw.menuBarBackground">
+							</widget>`
+		markupMenuBarDeactivated := `
+							<widget size="0x0" type="*glfw.menuBarBackground">
+							</widget>`
+		markupMenuBarEditActive := `
+							<container pos="4,0" size="292x29">
+								<widget backgroundColor="focus" size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>`
+		markupFileMenuPrefix := `
+							<widget pos="4,29" size="85x103" type="*widget.Menu">
+								<widget size="85x103" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="85x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="85,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="85,0" size="4x103" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="85,103" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,103" size="85x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+								</widget>
+								<widget size="85x103" type="*widget.ScrollContainer">
+									<widget size="85x103" type="*widget.menuBox">
+										<container pos="0,4" size="85x111">`
+		markupFileMenuItems := `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>`
+		markupFileMenuSuffix := `
+										</container>
+									</widget>
+								</widget>
+							</widget>`
+		markupFileMenu := markupFileMenuPrefix + markupFileMenuItems + markupFileMenuSuffix
+		markupSubmenu1Prefix := `
+								<widget pos="85,66" size="76x103" type="*widget.Menu">
+									<widget size="76x103" type="*widget.Shadow">
+										<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+										<linearGradient endColor="shadow" pos="0,-4" size="76x4"/>
+										<radialGradient centerOffset="-0.5,0.5" pos="76,-4" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" pos="76,0" size="4x103" startColor="shadow"/>
+										<radialGradient centerOffset="-0.5,-0.5" pos="76,103" size="4x4" startColor="shadow"/>
+										<linearGradient pos="0,103" size="76x4" startColor="shadow"/>
+										<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+									</widget>
+									<widget size="76x103" type="*widget.ScrollContainer">
+										<widget size="76x103" type="*widget.menuBox">
+											<container pos="0,4" size="76x111">`
+		markupSubmenu1Suffix := `
+											</container>
+										</widget>
+									</widget>
+								</widget>`
+		markupSubmenu2Prefix := `
+									<widget pos="76,66" size="54x70" type="*widget.Menu">
+										<widget size="54x70" type="*widget.Shadow">
+											<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+											<linearGradient endColor="shadow" pos="0,-4" size="54x4"/>
+											<radialGradient centerOffset="-0.5,0.5" pos="54,-4" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" pos="54,0" size="4x70" startColor="shadow"/>
+											<radialGradient centerOffset="-0.5,-0.5" pos="54,70" size="4x4" startColor="shadow"/>
+											<linearGradient pos="0,70" size="54x4" startColor="shadow"/>
+											<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+										</widget>
+										<widget size="54x70" type="*widget.ScrollContainer">
+											<widget size="54x70" type="*widget.menuBox">
+												<container pos="0,4" size="54x78">`
+		markupSubmenu2Suffix := `
+												</container>
+											</widget>
+										</widget>
+									</widget>`
+		markupEditMenu := `
+							<widget pos="49,29" size="55x70" type="*widget.Menu">
+								<widget size="55x70" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="55x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="55,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="55,0" size="4x70" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="55,70" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,70" size="55x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+								</widget>
+								<widget size="55x70" type="*widget.ScrollContainer">
+									<widget size="55x70" type="*widget.menuBox">
+										<container pos="0,4" size="55x78">
+											<widget size="55x29" type="*widget.menuItem">
+												<text pos="8,4" size="36x21">Copy</text>
+											</widget>
+											<widget pos="0,33" size="55x29" type="*widget.menuItem">
+												<text pos="8,4" size="39x21">Paste</text>
+											</widget>
+										</container>
+									</widget>
+								</widget>
+							</widget>`
+		markupHelpMenu := `
+							<widget pos="97,29" size="54x37" type="*widget.Menu">
+								<widget size="54x37" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="54x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="54,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="54,0" size="4x37" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="54,37" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,37" size="54x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
+								</widget>
+								<widget size="54x37" type="*widget.ScrollContainer">
+									<widget size="54x37" type="*widget.menuBox">
+										<container pos="0,4" size="54x45">
+											<widget size="54x29" type="*widget.menuItem">
+												<text pos="8,4" size="38x21">Help!</text>
+											</widget>
+										</container>
+									</widget>
+								</widget>
+							</widget>`
+		markupMenuBarSuffix := `
+						</widget>
+					</container>
+				</content>
+			</canvas>
+		`
+		fileMenuPos := fyne.NewPos(20, 10)
+		type step struct {
+			keys       []fyne.KeyName
+			wantMarkup string
+			wantAction string
+		}
+		for name, tt := range map[string]struct {
+			steps []step
+		}{
+			"traverse menu bar items right #1": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyRight},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget backgroundColor="focus" pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupEditMenu +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu bar items right #2": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyRight, fyne.KeyRight},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget backgroundColor="focus" pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupHelpMenu +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu bar items right #3": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyRight, fyne.KeyRight, fyne.KeyRight},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated + `
+							<container pos="4,0" size="292x29">
+								<widget backgroundColor="focus" size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupFileMenu +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu bar items left #1": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyLeft},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget backgroundColor="focus" pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupHelpMenu +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu bar items left #2": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyLeft, fyne.KeyLeft},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget backgroundColor="focus" pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupEditMenu +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu bar items left #3": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated + `
+							<container pos="4,0" size="292x29">
+								<widget backgroundColor="focus" size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupFileMenu +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu down #1": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget backgroundColor="focus" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>` +
+							markupFileMenuSuffix +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu down #2": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>` +
+							markupFileMenuSuffix +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu down #3": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>` +
+							markupFileMenuSuffix +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu up #1": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyUp},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>` +
+							markupFileMenuSuffix +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"traverse menu up #2": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyUp, fyne.KeyUp},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget backgroundColor="focus" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>` +
+							markupFileMenuSuffix +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"open submenu #1": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
+									</widget>
+								</widget>` +
+							markupSubmenu1Prefix + `
+												<widget backgroundColor="focus" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="37x21">File 1</text>
+												</widget>
+												<widget pos="0,33" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="37x21">File 2</text>
+												</widget>
+												<widget pos="0,66" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="40x21">Older</text>
+													<image pos="56,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>` +
+							markupSubmenu1Suffix + `
+							</widget>` +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"open submenu #2": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
+									</widget>
+								</widget>` +
+							markupSubmenu1Prefix + `
+												<widget size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="37x21">File 1</text>
+												</widget>
+												<widget pos="0,33" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="37x21">File 2</text>
+												</widget>
+												<widget backgroundColor="focus" pos="0,66" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="40x21">Older</text>
+													<image pos="56,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>
+											</container>
+										</widget>
+									</widget>` +
+							markupSubmenu2Prefix + `
+													<widget backgroundColor="focus" size="54x29" type="*widget.menuItem">
+														<text pos="8,4" size="38x21">Old 1</text>
+													</widget>
+													<widget pos="0,33" size="54x29" type="*widget.menuItem">
+														<text pos="8,4" size="38x21">Old 2</text>
+													</widget>` + markupSubmenu2Suffix + `
+								</widget>
+							</widget>` +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"close submenu #1": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyLeft},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
+									</widget>
+								</widget>` +
+							markupSubmenu1Prefix + `
+												<widget size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="37x21">File 1</text>
+												</widget>
+												<widget pos="0,33" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="37x21">File 2</text>
+												</widget>
+												<widget backgroundColor="focus" pos="0,66" size="76x29" type="*widget.menuItem">
+													<text pos="8,4" size="40x21">Older</text>
+													<image pos="56,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>` +
+							markupSubmenu1Suffix + `
+							</widget>` +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"close submenu #2": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyLeft, fyne.KeyLeft},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarActivated +
+							markupMenuBarEditActive +
+							markupFileMenuPrefix + `
+											<widget size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="33x21">New</text>
+											</widget>
+											<widget pos="0,33" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="40x21">Open</text>
+											</widget>
+											<widget backgroundColor="focus" pos="0,66" size="85x29" type="*widget.menuItem">
+												<text pos="8,4" size="49x21">Recent</text>
+												<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>` +
+							markupFileMenuSuffix +
+							markupMenuBarSuffix,
+					},
+				},
+			},
+			"trigger with Enter": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyEnter},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarDeactivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupMenuBarSuffix,
+						wantAction: "new",
+					},
+				},
+			},
+			"trigger with Return": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyReturn},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarDeactivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupMenuBarSuffix,
+						wantAction: "open",
+					},
+				},
+			},
+			"trigger with Space": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyRight, fyne.KeyDown, fyne.KeySpace},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarDeactivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupMenuBarSuffix,
+						wantAction: "copy",
+					},
+				},
+			},
+			"trigger submenu item": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight, fyne.KeyReturn},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarDeactivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupMenuBarSuffix,
+						wantAction: "old 1",
+					},
+				},
+			},
+			"trigger without active item": {
+				[]step{
+					{
+						keys: []fyne.KeyName{fyne.KeyEnter},
+						wantMarkup: markupMenuBarPrefix + markupMenuBarDeactivated + `
+							<container pos="4,0" size="292x29">
+								<widget size="41x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="25x21">File</text>
+								</widget>
+								<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="28x21">Edit</text>
+								</widget>
+								<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
+									<text pos="8,4" size="34x21">Help</text>
+								</widget>
+							</container>` +
+							markupMenuBarSuffix,
+						wantAction: "",
+					},
+				},
+			},
+		} {
+			t.Run(name, func(t *testing.T) {
+				test.MoveMouse(c, fyne.NewPos(0, 0))
+				test.TapCanvas(c, fyne.NewPos(0, 0))
+				test.TapCanvas(c, fileMenuPos) // activate menu
+				require.Equal(t, menuBar.Items[0], c.Focused())
+				if test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture()) {
+					for i, s := range tt.steps {
+						t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
+							lastAction = ""
+							for _, key := range s.keys {
+								c.Focused().TypedKey(&fyne.KeyEvent{
+									Name: key,
+								})
+							}
+							test.AssertRendersToMarkup(t, s.wantMarkup, c)
+							assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
+						})
+					}
+				}
+			})
+		}
+
+		t.Run("moving mouse over unfocused item moves focus", func(t *testing.T) {
+			test.MoveMouse(c, fyne.NewPos(0, 0))
+			test.TapCanvas(c, fyne.NewPos(0, 0))
+			test.MoveMouse(c, fileMenuPos)
+			test.TapCanvas(c, fileMenuPos) // activate menu
+			require.Equal(t, menuBar.Items[0], c.Focused())
+			c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+			c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+			require.Equal(t, menuBar.Items[2], c.Focused())
+
+			test.MoveMouse(c, fileMenuPos.Add(fyne.NewPos(1, 0)))
+			assert.Equal(t, menuBar.Items[0], c.Focused())
+			test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture())
+		})
 	})
 }
