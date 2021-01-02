@@ -38,7 +38,7 @@ func TestFloatList_Append(t *testing.T) {
 	assert.Equal(t, 1, f.Length())
 }
 
-func TestFloatList_Get(t *testing.T) {
+func TestFloatList_GetValue(t *testing.T) {
 	f := NewFloatList()
 
 	err := f.Append(1.3)
@@ -52,4 +52,50 @@ func TestFloatList_Get(t *testing.T) {
 	v, err = f.GetValue(1)
 	assert.Nil(t, err)
 	assert.Equal(t, 0.2, v)
+
+	err = f.SetValue(1, 0.5)
+	assert.Nil(t, err)
+	v, err = f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 0.5, v)
+}
+
+func TestFloatList_Set(t *testing.T) {
+	l := []float64{1.0, 5.0, 2.3}
+	f := BindFloatList(&l)
+	i, err := f.GetItem(1)
+	assert.Nil(t, err)
+	data := i.(Float)
+
+	assert.Equal(t, 3, f.Length())
+	v, err := f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, v)
+	v, err = data.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, v)
+
+	l = []float64{1.2, 5.2, 2.2, 4.2}
+	err = f.Set(l)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 4, f.Length())
+	v, err = f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 5.2, v)
+	v, err = data.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.2, v)
+
+	l = []float64{1.3, 5.3}
+	err = f.Set(l)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 2, f.Length())
+	v, err = f.GetValue(0)
+	assert.Nil(t, err)
+	assert.Equal(t, 1.3, v)
+	v, err = data.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.3, v)
 }

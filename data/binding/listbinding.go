@@ -34,6 +34,12 @@ func (b *listBase) appendItem(i DataItem) {
 	b.trigger()
 }
 
+func (b *listBase) deleteItem(i int) {
+	b.items = append(b.items[:i], b.items[i+1:]...)
+
+	b.trigger()
+}
+
 func (b *listBase) prependItem(i DataItem) {
 	b.items = append([]DataItem{i}, b.items...)
 
