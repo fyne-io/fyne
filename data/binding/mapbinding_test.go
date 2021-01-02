@@ -121,3 +121,53 @@ func TestUntypedMap_Delete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 5, v)
 }
+
+func TestUntypedMap_Set(t *testing.T) {
+	m := map[string]interface{}{
+		"foo": "bar",
+		"val": 5,
+	}
+
+	b := BindUntypedMap(&m)
+	i, err := b.GetItem("val")
+	assert.Nil(t, err)
+	data := i.(untyped)
+
+	assert.Equal(t, 2, len(b.Keys()))
+	v, err := b.GetValue("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+	v, err = data.get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v)
+
+	m = map[string]interface{}{
+		"foo": "new",
+		"bas": "another",
+		"val": 7,
+	}
+	err = b.Set(m)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 3, len(b.Keys()))
+	v, err = b.GetValue("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "new", v)
+	v, err = data.get()
+	assert.Nil(t, err)
+	assert.Equal(t, 7, v)
+
+	m = map[string]interface{}{
+		"val": 9,
+	}
+	err = b.Set(m)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 1, len(b.Keys()))
+	v, err = b.GetValue("val")
+	assert.Nil(t, err)
+	assert.Equal(t, 9, v)
+	v, err = data.get()
+	assert.Nil(t, err)
+	assert.Equal(t, 9, v)
+}

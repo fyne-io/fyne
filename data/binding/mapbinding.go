@@ -22,7 +22,9 @@ type DataMap interface {
 type UntypedMap interface {
 	DataMap
 	Delete(string)
+	Get() (map[string]interface{}, error)
 	GetValue(string) (interface{}, error)
+	Set(map[string]interface{}) error
 	SetValue(string, interface{}) error
 }
 
@@ -131,6 +133,14 @@ func (b *mapBase) Delete(key string) {
 	b.trigger()
 }
 
+func (b *mapBase) Get() (map[string]interface{}, error) {
+	if b.val == nil {
+		return map[string]interface{}{}, nil
+	}
+
+	return *b.val, nil
+}
+
 // Get returns the value stored at the specified key.
 //
 // Since: 2.0.0
@@ -140,6 +150,54 @@ func (b *mapBase) GetValue(key string) (interface{}, error) {
 	}
 
 	return nil, errKeyNotFound
+}
+
+func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &v
+		b.trigger()
+		return nil
+	}
+
+	*b.val = v
+	// add new
+	for key := range v {
+		found := false
+		for newKey := range b.items {
+			if newKey == key {
+				found = true
+			}
+		}
+
+		if !found {
+			b.setItem(key, bindUntyped((*b.val)[key]))
+		}
+	}
+
+	// remove old
+	for key := range b.items {
+		found := false
+		for newKey := range v {
+			if newKey == key {
+				found = true
+			}
+		}
+		if !found {
+			b.Delete(key)
+		}
+	}
+
+	for k, item := range b.items {
+		old, err := b.items[k].(untyped).get()
+		val := (*(b.val))[k]
+		if err != nil || (*(b.val))[k] != old {
+			err = item.(untyped).set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return nil
 }
 
 // Set stores the value d at the specified key.
