@@ -16,7 +16,7 @@ type DataMap interface {
 	Keys() []string
 }
 
-// UntypedMap is a map data binding with all values untyped (interface{}).
+// UntypedMap is a map data binding with all values Untyped (interface{}).
 //
 // Since: 2.0.0
 type UntypedMap interface {
@@ -91,6 +91,15 @@ func BindStruct(i interface{}) Struct {
 	return m
 }
 
+// Untyped id used tpo represent binding an interface{} value.
+//
+// Since: 2.0.0
+type Untyped interface {
+	DataItem
+	get() (interface{}, error)
+	set(interface{}) error
+}
+
 type mapBase struct {
 	base
 	items map[string]DataItem
@@ -146,7 +155,7 @@ func (b *mapBase) Get() (map[string]interface{}, error) {
 // Since: 2.0.0
 func (b *mapBase) GetValue(key string) (interface{}, error) {
 	if i, ok := b.items[key]; ok {
-		return i.(untyped).get()
+		return i.(Untyped).get()
 	}
 
 	return nil, errKeyNotFound
@@ -188,10 +197,10 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 	}
 
 	for k, item := range b.items {
-		old, err := b.items[k].(untyped).get()
+		old, err := b.items[k].(Untyped).get()
 		val := (*(b.val))[k]
 		if err != nil || (*(b.val))[k] != old {
-			err = item.(untyped).set(val)
+			err = item.(Untyped).set(val)
 			if err != nil {
 				retErr = err
 			}
@@ -206,7 +215,7 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 // Since: 2.0.0
 func (b *mapBase) SetValue(key string, d interface{}) error {
 	if i, ok := b.items[key]; ok {
-		i.(untyped).set(d)
+		i.(Untyped).set(d)
 		return nil
 	}
 
@@ -221,13 +230,7 @@ func (b *mapBase) setItem(key string, d DataItem) {
 	b.trigger()
 }
 
-type untyped interface {
-	DataItem
-	get() (interface{}, error)
-	set(interface{}) error
-}
-
-func bindUntyped(m interface{}) untyped {
+func bindUntyped(m interface{}) Untyped {
 	return &boundUntyped{val: m}
 }
 

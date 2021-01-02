@@ -131,7 +131,7 @@ func TestUntypedMap_Set(t *testing.T) {
 	b := BindUntypedMap(&m)
 	i, err := b.GetItem("val")
 	assert.Nil(t, err)
-	data := i.(untyped)
+	data := i.(Untyped)
 
 	assert.Equal(t, 2, len(b.Keys()))
 	v, err := b.GetValue("foo")
