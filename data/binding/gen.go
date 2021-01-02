@@ -259,9 +259,9 @@ type {{ .Name }}List interface {
 	DataList
 
 	Append({{ .Type }}) error
-	Get(int) ({{ .Type }}, error)
+	GetValue(int) ({{ .Type }}, error)
 	Prepend({{ .Type }}) error
-	Set(int, {{ .Type }}) error
+	SetValue(int, {{ .Type }}) error
 }
 
 // New{{ .Name }}List returns a bindable list of {{ .Type }} values.
@@ -303,7 +303,7 @@ func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 	return nil
 }
 
-func (l *bound{{ .Name }}List) Get(i int) ({{ .Type }}, error) {
+func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
@@ -327,7 +327,7 @@ func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	return nil
 }
 
-func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) error {
+func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}

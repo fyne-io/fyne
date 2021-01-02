@@ -22,8 +22,8 @@ type DataMap interface {
 type UntypedMap interface {
 	DataMap
 	Delete(string)
-	Get(string) (interface{}, error)
-	Set(string, interface{}) error
+	GetValue(string) (interface{}, error)
+	SetValue(string, interface{}) error
 }
 
 // NewUntypedMap creates a new, empty map binding of string to interface{}.
@@ -54,8 +54,8 @@ func BindUntypedMap(d *map[string]interface{}) UntypedMap {
 // Since: 2.0.0
 type Struct interface {
 	DataMap
-	Get(string) (interface{}, error)
-	Set(string, interface{}) error
+	GetValue(string) (interface{}, error)
+	SetValue(string, interface{}) error
 }
 
 // BindStruct creates a new map binding of string to interface{} using the struct passed as data.
@@ -134,7 +134,7 @@ func (b *mapBase) Delete(key string) {
 // Get returns the value stored at the specified key.
 //
 // Since: 2.0.0
-func (b *mapBase) Get(key string) (interface{}, error) {
+func (b *mapBase) GetValue(key string) (interface{}, error) {
 	if i, ok := b.items[key]; ok {
 		return i.(untyped).get()
 	}
@@ -146,7 +146,7 @@ func (b *mapBase) Get(key string) (interface{}, error) {
 // If the key is not present it will create a new binding internally.
 //
 // Since: 2.0.0
-func (b *mapBase) Set(key string, d interface{}) error {
+func (b *mapBase) SetValue(key string, d interface{}) error {
 	if i, ok := b.items[key]; ok {
 		i.(untyped).set(d)
 		return nil
