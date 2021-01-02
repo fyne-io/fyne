@@ -125,7 +125,7 @@ func TestMenu_Layout(t *testing.T) {
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
 											</widget>
-											<widget backgroundColor="hover" pos="0,71" size="71x29" type="*widget.menuItem">
+											<widget backgroundColor="focus" pos="0,71" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="10x21">C</text>
 												<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 											</widget>
@@ -152,7 +152,7 @@ func TestMenu_Layout(t *testing.T) {
 												<widget pos="0,33" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="72x21">subitem B</text>
 												</widget>
-												<widget backgroundColor="hover" pos="0,66" size="153x29" type="*widget.menuItem">
+												<widget backgroundColor="focus" pos="0,66" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="117x21">subitem C (long)</text>
 													<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 												</widget>
@@ -190,14 +190,14 @@ func TestMenu_Layout(t *testing.T) {
 				</canvas>
 			`,
 		},
-		"background of active submenu parents resets if sibling is hovered": {
+		"background of active submenu parents resets if sibling is focused": {
 			windowSize: fyne.NewSize(500, 300),
 			menuPos:    fyne.NewPos(10, 10),
 			mousePositions: []fyne.Position{
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 170), // open subsubmenu
-				fyne.NewPos(300, 170), // hover subsubmenu item
-				fyne.NewPos(30, 60),   // hover sibling of submenu parent
+				fyne.NewPos(300, 170), // focus subsubmenu item
+				fyne.NewPos(30, 60),   // focus sibling of submenu parent
 			},
 			want: `
 				<canvas size="500x300">
@@ -226,7 +226,7 @@ func TestMenu_Layout(t *testing.T) {
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
 												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
-											<widget backgroundColor="hover" pos="0,38" size="71x29" type="*widget.menuItem">
+											<widget backgroundColor="focus" pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
 											</widget>
 											<widget pos="0,71" size="71x29" type="*widget.menuItem">
@@ -279,7 +279,7 @@ func TestMenu_Layout(t *testing.T) {
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
 											</widget>
-											<widget backgroundColor="hover" pos="0,71" size="71x29" type="*widget.menuItem">
+											<widget backgroundColor="focus" pos="0,71" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="10x21">C</text>
 												<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 											</widget>
@@ -306,7 +306,7 @@ func TestMenu_Layout(t *testing.T) {
 												<widget pos="0,33" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="72x21">subitem B</text>
 												</widget>
-												<widget backgroundColor="hover" pos="0,66" size="153x29" type="*widget.menuItem">
+												<widget backgroundColor="focus" pos="0,66" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="117x21">subitem C (long)</text>
 													<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 												</widget>
@@ -381,7 +381,7 @@ func TestMenu_Layout(t *testing.T) {
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
 											</widget>
-											<widget backgroundColor="hover" pos="0,71" size="71x29" type="*widget.menuItem">
+											<widget backgroundColor="focus" pos="0,71" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="10x21">C</text>
 												<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 											</widget>
@@ -408,7 +408,7 @@ func TestMenu_Layout(t *testing.T) {
 												<widget pos="0,33" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="72x21">subitem B</text>
 												</widget>
-												<widget backgroundColor="hover" pos="0,66" size="153x29" type="*widget.menuItem">
+												<widget backgroundColor="focus" pos="0,66" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="117x21">subitem C (long)</text>
 													<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 												</widget>
@@ -483,7 +483,7 @@ func TestMenu_Layout(t *testing.T) {
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
 											</widget>
-											<widget backgroundColor="hover" pos="0,71" size="71x29" type="*widget.menuItem">
+											<widget backgroundColor="focus" pos="0,71" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="10x21">C</text>
 												<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 											</widget>
@@ -510,7 +510,7 @@ func TestMenu_Layout(t *testing.T) {
 												<widget pos="0,33" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="72x21">subitem B</text>
 												</widget>
-												<widget backgroundColor="hover" pos="0,66" size="153x29" type="*widget.menuItem">
+												<widget backgroundColor="focus" pos="0,66" size="153x29" type="*widget.menuItem">
 													<text pos="8,4" size="117x21">subitem C (long)</text>
 													<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 												</widget>

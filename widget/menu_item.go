@@ -150,7 +150,7 @@ type menuItemRenderer struct {
 
 func (r *menuItemRenderer) BackgroundColor() color.Color {
 	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
-		return theme.HoverColor()
+		return theme.FocusColor()
 	}
 
 	return color.Transparent
