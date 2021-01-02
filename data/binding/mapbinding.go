@@ -169,6 +169,7 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 	}
 
 	*b.val = v
+	changed := false
 	// add new
 	for key := range v {
 		found := false
@@ -180,6 +181,7 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 
 		if !found {
 			b.setItem(key, bindUntyped((*b.val)[key]))
+			changed = true
 		}
 	}
 
@@ -193,7 +195,11 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 		}
 		if !found {
 			b.Delete(key)
+			changed = true
 		}
+	}
+	if changed {
+		b.trigger()
 	}
 
 	for k, item := range b.items {
