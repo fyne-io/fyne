@@ -2,6 +2,7 @@ package gl
 
 import (
 	"image/color"
+	"math"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -117,6 +118,7 @@ func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyn
 func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
+	size, pos = roundToPixelCoords(size, pos, p.canvas.Scale()*p.texScale)
 
 	xPos := (pos.X - pad) / frame.Width
 	x1 := -1 + xPos*2
@@ -155,6 +157,23 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 
 		return fyne.NewSize(newWidth, newHeight), fyne.NewPos(pos.X+widthPad, pos.Y+heightPad)
 	}
+
+	return size, pos
+}
+
+func roundToPixel(v float32, pixScale float32) float32 {
+	if pixScale == 1.0 {
+		return float32(math.Round(float64(v)))
+	}
+
+	return float32(math.Round(float64(v*pixScale))) / pixScale
+}
+
+func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fyne.Size, fyne.Position) {
+	size.Width = roundToPixel(size.Width, pixScale)
+	size.Height = roundToPixel(size.Height, pixScale)
+	pos.X = roundToPixel(pos.X, pixScale)
+	pos.Y = roundToPixel(pos.Y, pixScale)
 
 	return size, pos
 }

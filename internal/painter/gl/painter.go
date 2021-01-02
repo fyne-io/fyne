@@ -75,8 +75,9 @@ func (p *glPainter) Free(obj fyne.CanvasObject) {
 
 func (p *glPainter) textureScale(v float32) float32 {
 	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
-		return v
+		return float32(math.Round(float64(v)))
 	}
+
 	return float32(math.Round(float64(v * p.canvas.Scale() * p.texScale)))
 }
 
