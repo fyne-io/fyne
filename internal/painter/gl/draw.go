@@ -118,7 +118,7 @@ func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyn
 func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
-	size, pos = roundToPixelCoords(size, pos, p.canvas.Scale()*p.texScale)
+	size, pos = roundToPixelCoords(size, pos, p.pixScale)
 
 	xPos := (pos.X - pad) / frame.Width
 	x1 := -1 + xPos*2
