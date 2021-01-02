@@ -9,52 +9,6 @@ import (
 	"fyne.io/fyne/internal/painter"
 )
 
-func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
-	if fill == canvas.ImageFillContain || fill == canvas.ImageFillOriginal {
-		// change pos and size accordingly
-
-		viewAspect := size.Width / size.Height
-
-		newWidth, newHeight := size.Width, size.Height
-		widthPad, heightPad := float32(0), float32(0)
-		if viewAspect > aspect {
-			newWidth = size.Height * aspect
-			widthPad = (size.Width - newWidth) / 2
-		} else if viewAspect < aspect {
-			newHeight = size.Width / aspect
-			heightPad = (size.Height - newHeight) / 2
-		}
-
-		return fyne.NewSize(newWidth, newHeight), fyne.NewPos(pos.X+widthPad, pos.Y+heightPad)
-	}
-
-	return size, pos
-}
-
-// rectCoords calculates the openGL coordinate space of a rectangle
-func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
-	size, pos = rectInnerCoords(size, pos, fill, aspect)
-
-	xPos := (pos.X - pad) / frame.Width
-	x1 := -1 + xPos*2
-	x2Pos := (pos.X + size.Width + pad) / frame.Width
-	x2 := -1 + x2Pos*2
-
-	yPos := (pos.Y - pad) / frame.Height
-	y1 := 1 - yPos*2
-	y2Pos := (pos.Y + size.Height + pad) / frame.Height
-	y2 := 1 - y2Pos*2
-
-	return []float32{
-		// coord x, y, z texture x, y
-		x1, y2, 0, 0.0, 1.0, // top left
-		x1, y1, 0, 0.0, 0.0, // bottom left
-		x2, y2, 0, 1.0, 1.0, // top right
-		x2, y1, 0, 1.0, 0.0, // bottom right
-	}
-}
-
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
 	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
 
@@ -157,4 +111,50 @@ func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyn
 	case fyne.Widget:
 		p.drawWidget(obj, pos, frame)
 	}
+}
+
+// rectCoords calculates the openGL coordinate space of a rectangle
+func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
+	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
+	size, pos = rectInnerCoords(size, pos, fill, aspect)
+
+	xPos := (pos.X - pad) / frame.Width
+	x1 := -1 + xPos*2
+	x2Pos := (pos.X + size.Width + pad) / frame.Width
+	x2 := -1 + x2Pos*2
+
+	yPos := (pos.Y - pad) / frame.Height
+	y1 := 1 - yPos*2
+	y2Pos := (pos.Y + size.Height + pad) / frame.Height
+	y2 := 1 - y2Pos*2
+
+	return []float32{
+		// coord x, y, z texture x, y
+		x1, y2, 0, 0.0, 1.0, // top left
+		x1, y1, 0, 0.0, 0.0, // bottom left
+		x2, y2, 0, 1.0, 1.0, // top right
+		x2, y1, 0, 1.0, 0.0, // bottom right
+	}
+}
+
+func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
+	if fill == canvas.ImageFillContain || fill == canvas.ImageFillOriginal {
+		// change pos and size accordingly
+
+		viewAspect := size.Width / size.Height
+
+		newWidth, newHeight := size.Width, size.Height
+		widthPad, heightPad := float32(0), float32(0)
+		if viewAspect > aspect {
+			newWidth = size.Height * aspect
+			widthPad = (size.Width - newWidth) / 2
+		} else if viewAspect < aspect {
+			newHeight = size.Width / aspect
+			heightPad = (size.Height - newHeight) / 2
+		}
+
+		return fyne.NewSize(newWidth, newHeight), fyne.NewPos(pos.X+widthPad, pos.Y+heightPad)
+	}
+
+	return size, pos
 }
