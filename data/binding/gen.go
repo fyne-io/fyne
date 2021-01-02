@@ -310,7 +310,7 @@ func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
 		return []{{ .Type }}{}, nil
 	}
 
-	return (*l.val), nil
+	return *l.val, nil
 }
 
 func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
@@ -337,7 +337,7 @@ func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	return nil
 }
 
-func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
+func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
 	if l.val == nil { // was not initialized with a blank value, recover
 		l.val = &v
 		l.trigger()
@@ -367,7 +367,10 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 		old, err := l.items[i].({{ .Name }}).Get()
 		val := (*(l.val))[i]
 		if err != nil || (*(l.val))[i] != old {
-			item.(*bound{{ .Name }}).Set(val)
+			err = item.(*bound{{ .Name }}).Set(val)
+			if err != nil {
+				retErr = err
+			}
 		}
 	}
 	return nil

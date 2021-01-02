@@ -99,7 +99,7 @@ func (l *boundBoolList) Set(v []bool) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen-1; i >= newLen; i-- {
+		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -235,7 +235,7 @@ func (l *boundFloatList) Set(v []float64) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen-1; i >= newLen; i-- {
+		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -371,7 +371,7 @@ func (l *boundIntList) Set(v []int) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen-1; i >= newLen; i-- {
+		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -507,7 +507,7 @@ func (l *boundRuneList) Set(v []rune) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen-1; i >= newLen; i-- {
+		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
@@ -643,7 +643,7 @@ func (l *boundStringList) Set(v []string) error {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen-1; i >= newLen; i-- {
+		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
