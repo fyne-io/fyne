@@ -41,10 +41,12 @@ type glPainter struct {
 	context  driver.WithContext
 	program  Program
 	texScale float32
+	pixScale float32 // pre-calculate scale*texScale for each draw
 }
 
 func (p *glPainter) SetFrameBufferScale(scale float32) {
 	p.texScale = scale
+	p.pixScale = p.canvas.Scale() * p.texScale
 }
 
 func (p *glPainter) Clear() {
@@ -74,10 +76,11 @@ func (p *glPainter) Free(obj fyne.CanvasObject) {
 }
 
 func (p *glPainter) textureScale(v float32) float32 {
-	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
-		return v
+	if p.pixScale == 1.0 {
+		return float32(math.Round(float64(v)))
 	}
-	return float32(math.Round(float64(v * p.canvas.Scale() * p.texScale)))
+
+	return float32(math.Round(float64(v * p.pixScale)))
 }
 
 var startCacheMonitor = &sync.Once{}
@@ -86,7 +89,7 @@ var startCacheMonitor = &sync.Once{}
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &glPainter{canvas: c, context: ctx}
-	p.texScale = 1.0
+	p.SetFrameBufferScale(1.0)
 
 	glInit()
 	startCacheMonitor.Do(func() {
