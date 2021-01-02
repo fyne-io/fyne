@@ -1047,3 +1047,190 @@ func TestMenuBar(t *testing.T) {
 		})
 	})
 }
+
+func TestMenuBar_Toggle(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	m1i1 := fyne.NewMenuItem("New", nil)
+	m1i2 := fyne.NewMenuItem("Open", nil)
+	m1 := fyne.NewMenu("File", m1i1, m1i2)
+
+	m2i1 := fyne.NewMenuItem("Copy", nil)
+	m2i2 := fyne.NewMenuItem("Paste", nil)
+	m2 := fyne.NewMenu("Edit", m2i1, m2i2)
+
+	menu := fyne.NewMainMenu(m1, m2)
+
+	markupMenuBarPrefix := `
+		<canvas size="300x300">
+			<content>
+				<container size="300x300">
+					<widget backgroundColor="button" size="300x29" type="*glfw.MenuBar">
+						<widget size="300x29" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="300x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="300,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="300,0" size="4x29" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="300,29" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,29" size="300x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,29" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x29"/>
+						</widget>`
+	markupMenuBarActivated := `
+						<widget size="300x300" type="*glfw.menuBarBackground">
+						</widget>`
+	markupMenuBarDeactivated := `
+						<widget size="0x0" type="*glfw.menuBarBackground">
+						</widget>`
+	markupMenuBar := `
+						<container pos="4,0" size="292x29">
+							<widget size="41x29" type="*glfw.menuBarItem">
+								<text pos="8,4" size="25x21">File</text>
+							</widget>
+							<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+								<text pos="8,4" size="28x21">Edit</text>
+							</widget>
+						</container>`
+	markupMenuBarFileActive := `
+						<container pos="4,0" size="292x29">
+							<widget backgroundColor="focus" size="41x29" type="*glfw.menuBarItem">
+								<text pos="8,4" size="25x21">File</text>
+							</widget>
+							<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+								<text pos="8,4" size="28x21">Edit</text>
+							</widget>
+						</container>`
+	markupMenuBarEditActive := `
+						<container pos="4,0" size="292x29">
+							<widget size="41x29" type="*glfw.menuBarItem">
+								<text pos="8,4" size="25x21">File</text>
+							</widget>
+							<widget backgroundColor="focus" pos="45,0" size="44x29" type="*glfw.menuBarItem">
+								<text pos="8,4" size="28x21">Edit</text>
+							</widget>
+						</container>`
+	markupFileMenu := `
+						<widget pos="4,29" size="56x70" type="*widget.Menu">
+							<widget size="56x70" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-4" size="56x4"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="56,-4" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" pos="56,0" size="4x70" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="56,70" size="4x4" startColor="shadow"/>
+								<linearGradient pos="0,70" size="56x4" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+							</widget>
+							<widget size="56x70" type="*widget.ScrollContainer">
+								<widget size="56x70" type="*widget.menuBox">
+									<container pos="0,4" size="56x78">
+										<widget size="56x29" type="*widget.menuItem">
+											<text pos="8,4" size="33x21">New</text>
+										</widget>
+										<widget pos="0,33" size="56x29" type="*widget.menuItem">
+											<text pos="8,4" size="40x21">Open</text>
+										</widget>
+									</container>
+								</widget>
+							</widget>
+						</widget>`
+	markupEditMenu := `
+						<widget pos="49,29" size="55x70" type="*widget.Menu">
+							<widget size="55x70" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-4" size="55x4"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="55,-4" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" pos="55,0" size="4x70" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="55,70" size="4x4" startColor="shadow"/>
+								<linearGradient pos="0,70" size="55x4" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+							</widget>
+							<widget size="55x70" type="*widget.ScrollContainer">
+								<widget size="55x70" type="*widget.menuBox">
+									<container pos="0,4" size="55x78">
+										<widget size="55x29" type="*widget.menuItem">
+											<text pos="8,4" size="36x21">Copy</text>
+										</widget>
+										<widget pos="0,33" size="55x29" type="*widget.menuItem">
+											<text pos="8,4" size="39x21">Paste</text>
+										</widget>
+									</container>
+								</widget>
+							</widget>
+						</widget>`
+	markupMenuBarSuffix := `
+					</widget>
+				</container>
+			</content>
+		</canvas>
+	`
+
+	t.Run("when menu bar is inactive", func(t *testing.T) {
+		w := test.NewWindow(nil)
+		defer w.Close()
+		w.SetPadded(false)
+		w.Resize(fyne.NewSize(300, 300))
+		c := w.Canvas()
+		menuBar := glfw.NewMenuBar(menu, c)
+		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.Resize(fyne.NewSize(300, 300))
+		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+
+		require.False(t, menuBar.IsActive())
+
+		menuBar.Toggle()
+		assert.True(t, menuBar.IsActive())
+		assert.Equal(t, c.Focused(), menuBar.Items[0])
+		test.AssertRendersToMarkup(t, markupMenuBarPrefix+markupMenuBarActivated+markupMenuBarFileActive+markupFileMenu+markupMenuBarSuffix, c)
+	})
+
+	t.Run("when menu bar is active (first menu item active)", func(t *testing.T) {
+		w := test.NewWindow(nil)
+		defer w.Close()
+		w.SetPadded(false)
+		w.Resize(fyne.NewSize(300, 300))
+		c := w.Canvas()
+		menuBar := glfw.NewMenuBar(menu, c)
+		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.Resize(fyne.NewSize(300, 300))
+		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+
+		menuBar.Toggle()
+		require.True(t, menuBar.IsActive())
+
+		menuBar.Toggle()
+		assert.False(t, menuBar.IsActive())
+		assert.Nil(t, c.Focused())
+		test.AssertRendersToMarkup(t, markupMenuBarPrefix+markupMenuBarDeactivated+markupMenuBar+markupMenuBarSuffix, c)
+	})
+
+	t.Run("when menu bar is active (second menu item active)", func(t *testing.T) {
+		w := test.NewWindow(nil)
+		defer w.Close()
+		w.SetPadded(false)
+		w.Resize(fyne.NewSize(300, 300))
+		c := w.Canvas()
+		menuBar := glfw.NewMenuBar(menu, c)
+		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.Resize(fyne.NewSize(300, 300))
+		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+
+		menuBar.Toggle()
+		c.FocusNext()
+		require.True(t, menuBar.IsActive())
+		test.AssertRendersToMarkup(t, markupMenuBarPrefix+markupMenuBarActivated+markupMenuBarEditActive+markupEditMenu+markupMenuBarSuffix, c)
+
+		menuBar.Toggle()
+		assert.False(t, menuBar.IsActive())
+		assert.Nil(t, c.Focused())
+		test.AssertRendersToMarkup(t, markupMenuBarPrefix+markupMenuBarDeactivated+markupMenuBar+markupMenuBarSuffix, c)
+	})
+	// TODO:
+	// on deactivation:
+	// - deactivates menu bar
+	// - deactivates active item (two cases!)
+	// - deactivates
+	// - hides children
+}

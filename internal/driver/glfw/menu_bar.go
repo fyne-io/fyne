@@ -100,6 +100,19 @@ func (b *MenuBar) Show() {
 	widget.ShowWidget(&b.Base, b)
 }
 
+// Toggle changes the activation state of the menu bar.
+// On activation, the first item will become active.
+func (b *MenuBar) Toggle() {
+	if b.active {
+		b.canvas.Unfocus()
+		b.deactivate()
+	} else {
+		item := b.Items[0].(*menuBarItem)
+		b.activateChild(item)
+		b.canvas.Focus(item)
+	}
+}
+
 func (b *MenuBar) activateChild(item *menuBarItem) {
 	if !b.active {
 		b.active = true
