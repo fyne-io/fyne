@@ -143,11 +143,7 @@ func (i *menuBarItem) Show() {
 //
 // Implements: fyne.Tappable
 func (i *menuBarItem) Tapped(*fyne.PointEvent) {
-	if i.Parent.active {
-		i.Parent.deactivate()
-	} else {
-		i.Parent.activateChild(i)
-	}
+	i.Parent.toggle(i)
 }
 
 func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
