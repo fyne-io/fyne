@@ -348,7 +348,7 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
 	*l.val = v
 	newLen := len(v)
 	if oldLen > newLen {
-		for i := oldLen-1; i >= newLen; i-- {
+		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
 		l.trigger()
