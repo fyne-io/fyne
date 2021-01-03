@@ -130,7 +130,6 @@ func (d *mobileDriver) Run() {
 				dev.safeLeft = e.InsetLeftPx
 				dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
 				dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
-				canvas.SetScale(0) // value is ignored
 
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()
