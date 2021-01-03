@@ -243,10 +243,7 @@ func (c *glCanvas) SetPadded(padded bool) {
 	c.content.Move(c.contentPos())
 }
 
-// SetScale sets the render scale for this specific canvas
-//
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *glCanvas) SetScale(_ float32) {
+func (c *glCanvas) reloadScale() {
 	if !c.context.(*window).visible {
 		return
 	}

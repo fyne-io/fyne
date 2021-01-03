@@ -193,6 +193,9 @@ func (d *gLDriver) startDrawThread() {
 				}
 			case <-settingsChange:
 				painter.ClearFontCache()
+				for _, win := range d.windowList() {
+					go win.Canvas().(*glCanvas).reloadScale()
+				}
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)

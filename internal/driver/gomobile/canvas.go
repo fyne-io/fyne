@@ -192,11 +192,6 @@ func (c *mobileCanvas) Scale() float32 {
 	return c.scale
 }
 
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *mobileCanvas) SetScale(_ float32) {
-	c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-}
-
 func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
