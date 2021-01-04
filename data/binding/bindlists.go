@@ -10,9 +10,11 @@ type BoolList interface {
 	DataList
 
 	Append(bool) error
-	Get(int) (bool, error)
+	Get() ([]bool, error)
+	GetValue(int) (bool, error)
 	Prepend(bool) error
-	Set(int, bool) error
+	Set([]bool) error
+	SetValue(int, bool) error
 }
 
 // NewBoolList returns a bindable list of bool values.
@@ -54,7 +56,15 @@ func (l *boundBoolList) Append(val bool) error {
 	return nil
 }
 
-func (l *boundBoolList) Get(i int) (bool, error) {
+func (l *boundBoolList) Get() ([]bool, error) {
+	if l.val == nil {
+		return []bool{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *boundBoolList) GetValue(i int) (bool, error) {
 	if i < 0 || i >= l.Length() {
 		return false, errOutOfBounds
 	}
@@ -78,7 +88,46 @@ func (l *boundBoolList) Prepend(val bool) error {
 	return nil
 }
 
-func (l *boundBoolList) Set(i int, v bool) error {
+func (l *boundBoolList) Set(v []bool) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(BindBool(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].(Bool).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*boundBool).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *boundBoolList) SetValue(i int, v bool) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
@@ -100,9 +149,11 @@ type FloatList interface {
 	DataList
 
 	Append(float64) error
-	Get(int) (float64, error)
+	Get() ([]float64, error)
+	GetValue(int) (float64, error)
 	Prepend(float64) error
-	Set(int, float64) error
+	Set([]float64) error
+	SetValue(int, float64) error
 }
 
 // NewFloatList returns a bindable list of float64 values.
@@ -144,7 +195,15 @@ func (l *boundFloatList) Append(val float64) error {
 	return nil
 }
 
-func (l *boundFloatList) Get(i int) (float64, error) {
+func (l *boundFloatList) Get() ([]float64, error) {
+	if l.val == nil {
+		return []float64{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *boundFloatList) GetValue(i int) (float64, error) {
 	if i < 0 || i >= l.Length() {
 		return 0.0, errOutOfBounds
 	}
@@ -168,7 +227,46 @@ func (l *boundFloatList) Prepend(val float64) error {
 	return nil
 }
 
-func (l *boundFloatList) Set(i int, v float64) error {
+func (l *boundFloatList) Set(v []float64) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(BindFloat(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].(Float).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*boundFloat).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *boundFloatList) SetValue(i int, v float64) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
@@ -190,9 +288,11 @@ type IntList interface {
 	DataList
 
 	Append(int) error
-	Get(int) (int, error)
+	Get() ([]int, error)
+	GetValue(int) (int, error)
 	Prepend(int) error
-	Set(int, int) error
+	Set([]int) error
+	SetValue(int, int) error
 }
 
 // NewIntList returns a bindable list of int values.
@@ -234,7 +334,15 @@ func (l *boundIntList) Append(val int) error {
 	return nil
 }
 
-func (l *boundIntList) Get(i int) (int, error) {
+func (l *boundIntList) Get() ([]int, error) {
+	if l.val == nil {
+		return []int{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *boundIntList) GetValue(i int) (int, error) {
 	if i < 0 || i >= l.Length() {
 		return 0, errOutOfBounds
 	}
@@ -258,7 +366,46 @@ func (l *boundIntList) Prepend(val int) error {
 	return nil
 }
 
-func (l *boundIntList) Set(i int, v int) error {
+func (l *boundIntList) Set(v []int) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(BindInt(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].(Int).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*boundInt).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *boundIntList) SetValue(i int, v int) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
@@ -280,9 +427,11 @@ type RuneList interface {
 	DataList
 
 	Append(rune) error
-	Get(int) (rune, error)
+	Get() ([]rune, error)
+	GetValue(int) (rune, error)
 	Prepend(rune) error
-	Set(int, rune) error
+	Set([]rune) error
+	SetValue(int, rune) error
 }
 
 // NewRuneList returns a bindable list of rune values.
@@ -324,7 +473,15 @@ func (l *boundRuneList) Append(val rune) error {
 	return nil
 }
 
-func (l *boundRuneList) Get(i int) (rune, error) {
+func (l *boundRuneList) Get() ([]rune, error) {
+	if l.val == nil {
+		return []rune{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *boundRuneList) GetValue(i int) (rune, error) {
 	if i < 0 || i >= l.Length() {
 		return rune(0), errOutOfBounds
 	}
@@ -348,7 +505,46 @@ func (l *boundRuneList) Prepend(val rune) error {
 	return nil
 }
 
-func (l *boundRuneList) Set(i int, v rune) error {
+func (l *boundRuneList) Set(v []rune) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(BindRune(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].(Rune).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*boundRune).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *boundRuneList) SetValue(i int, v rune) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
@@ -370,9 +566,11 @@ type StringList interface {
 	DataList
 
 	Append(string) error
-	Get(int) (string, error)
+	Get() ([]string, error)
+	GetValue(int) (string, error)
 	Prepend(string) error
-	Set(int, string) error
+	Set([]string) error
+	SetValue(int, string) error
 }
 
 // NewStringList returns a bindable list of string values.
@@ -414,7 +612,15 @@ func (l *boundStringList) Append(val string) error {
 	return nil
 }
 
-func (l *boundStringList) Get(i int) (string, error) {
+func (l *boundStringList) Get() ([]string, error) {
+	if l.val == nil {
+		return []string{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *boundStringList) GetValue(i int) (string, error) {
 	if i < 0 || i >= l.Length() {
 		return "", errOutOfBounds
 	}
@@ -438,7 +644,46 @@ func (l *boundStringList) Prepend(val string) error {
 	return nil
 }
 
-func (l *boundStringList) Set(i int, v string) error {
+func (l *boundStringList) Set(v []string) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(BindString(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].(String).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*boundString).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *boundStringList) SetValue(i int, v string) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}

@@ -16,14 +16,16 @@ type DataMap interface {
 	Keys() []string
 }
 
-// UntypedMap is a map data binding with all values untyped (interface{}).
+// UntypedMap is a map data binding with all values Untyped (interface{}).
 //
 // Since: 2.0.0
 type UntypedMap interface {
 	DataMap
 	Delete(string)
-	Get(string) (interface{}, error)
-	Set(string, interface{}) error
+	Get() (map[string]interface{}, error)
+	GetValue(string) (interface{}, error)
+	Set(map[string]interface{}) error
+	SetValue(string, interface{}) error
 }
 
 // NewUntypedMap creates a new, empty map binding of string to interface{}.
@@ -54,8 +56,8 @@ func BindUntypedMap(d *map[string]interface{}) UntypedMap {
 // Since: 2.0.0
 type Struct interface {
 	DataMap
-	Get(string) (interface{}, error)
-	Set(string, interface{}) error
+	GetValue(string) (interface{}, error)
+	SetValue(string, interface{}) error
 }
 
 // BindStruct creates a new map binding of string to interface{} using the struct passed as data.
@@ -87,6 +89,15 @@ func BindStruct(i interface{}) Struct {
 	}
 
 	return m
+}
+
+// Untyped id used tpo represent binding an interface{} value.
+//
+// Since: 2.0.0
+type Untyped interface {
+	DataItem
+	get() (interface{}, error)
+	set(interface{}) error
 }
 
 type mapBase struct {
@@ -131,24 +142,86 @@ func (b *mapBase) Delete(key string) {
 	b.trigger()
 }
 
+func (b *mapBase) Get() (map[string]interface{}, error) {
+	if b.val == nil {
+		return map[string]interface{}{}, nil
+	}
+
+	return *b.val, nil
+}
+
 // Get returns the value stored at the specified key.
 //
 // Since: 2.0.0
-func (b *mapBase) Get(key string) (interface{}, error) {
+func (b *mapBase) GetValue(key string) (interface{}, error) {
 	if i, ok := b.items[key]; ok {
-		return i.(untyped).get()
+		return i.(Untyped).get()
 	}
 
 	return nil, errKeyNotFound
+}
+
+func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &v
+		b.trigger()
+		return nil
+	}
+
+	*b.val = v
+	changed := false
+	// add new
+	for key := range v {
+		found := false
+		for newKey := range b.items {
+			if newKey == key {
+				found = true
+			}
+		}
+
+		if !found {
+			b.setItem(key, bindUntyped((*b.val)[key]))
+			changed = true
+		}
+	}
+
+	// remove old
+	for key := range b.items {
+		found := false
+		for newKey := range v {
+			if newKey == key {
+				found = true
+			}
+		}
+		if !found {
+			b.Delete(key)
+			changed = true
+		}
+	}
+	if changed {
+		b.trigger()
+	}
+
+	for k, item := range b.items {
+		old, err := b.items[k].(Untyped).get()
+		val := (*(b.val))[k]
+		if err != nil || (*(b.val))[k] != old {
+			err = item.(Untyped).set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
 }
 
 // Set stores the value d at the specified key.
 // If the key is not present it will create a new binding internally.
 //
 // Since: 2.0.0
-func (b *mapBase) Set(key string, d interface{}) error {
+func (b *mapBase) SetValue(key string, d interface{}) error {
 	if i, ok := b.items[key]; ok {
-		i.(untyped).set(d)
+		i.(Untyped).set(d)
 		return nil
 	}
 
@@ -163,13 +236,7 @@ func (b *mapBase) setItem(key string, d DataItem) {
 	b.trigger()
 }
 
-type untyped interface {
-	DataItem
-	get() (interface{}, error)
-	set(interface{}) error
-}
-
-func bindUntyped(m interface{}) untyped {
+func bindUntyped(m interface{}) Untyped {
 	return &boundUntyped{val: m}
 }
 

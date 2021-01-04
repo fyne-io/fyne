@@ -259,9 +259,11 @@ type {{ .Name }}List interface {
 	DataList
 
 	Append({{ .Type }}) error
-	Get(int) ({{ .Type }}, error)
+	Get() ([]{{ .Type }}, error)
+	GetValue(int) ({{ .Type }}, error)
 	Prepend({{ .Type }}) error
-	Set(int, {{ .Type }}) error
+	Set([]{{ .Type }}) error
+	SetValue(int, {{ .Type }}) error
 }
 
 // New{{ .Name }}List returns a bindable list of {{ .Type }} values.
@@ -303,7 +305,15 @@ func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 	return nil
 }
 
-func (l *bound{{ .Name }}List) Get(i int) ({{ .Type }}, error) {
+func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
+	if l.val == nil {
+		return []{{ .Type }}{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
@@ -327,7 +337,46 @@ func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	return nil
 }
 
-func (l *bound{{ .Name }}List) Set(i int, v {{ .Type }}) error {
+func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(Bind{{ .Name }}(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].({{ .Name }}).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*bound{{ .Name }}).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
