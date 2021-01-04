@@ -116,10 +116,6 @@ type mapBase struct {
 	val   *map[string]interface{}
 }
 
-// GetItem returns the DataItem at the specified key.
-// It will return nil if the key was not found.
-//
-// Since: 2.0.0
 func (b *mapBase) GetItem(key string) (DataItem, error) {
 	if v, ok := b.items[key]; ok {
 		return v, nil
@@ -128,9 +124,6 @@ func (b *mapBase) GetItem(key string) (DataItem, error) {
 	return nil, errKeyNotFound
 }
 
-// Keys returns a list of all the keys in this data map.
-//
-// Since: 2.0.0
 func (b *mapBase) Keys() []string {
 	ret := make([]string, len(b.items))
 	// TODO lock
@@ -143,9 +136,6 @@ func (b *mapBase) Keys() []string {
 	return ret
 }
 
-// Delete removes the specified key and tha value associated with it.
-//
-// Since: 2.0.0
 func (b *mapBase) Delete(key string) {
 	delete(b.items, key)
 
@@ -160,9 +150,6 @@ func (b *mapBase) Get() (map[string]interface{}, error) {
 	return *b.val, nil
 }
 
-// Get returns the value stored at the specified key.
-//
-// Since: 2.0.0
 func (b *mapBase) GetValue(key string) (interface{}, error) {
 	if i, ok := b.items[key]; ok {
 		return i.(Untyped).get()
@@ -235,10 +222,6 @@ func (b *mapBase) doReload() (retErr error) {
 	return
 }
 
-// Set stores the value d at the specified key.
-// If the key is not present it will create a new binding internally.
-//
-// Since: 2.0.0
 func (b *mapBase) SetValue(key string, d interface{}) error {
 	if i, ok := b.items[key]; ok {
 		i.(Untyped).set(d)
