@@ -21,6 +21,14 @@ type {{ .Name }} interface {
 	Set({{ .Type }}) error
 }
 
+// External{{ .Name }} supports binding a {{ .Type }} value to an external value.
+//
+// Since: 2.0.0
+type External{{ .Name }} interface {
+	{{ .Name }}
+	Reload() error
+}
+
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 //
 // Since: 2.0.0
@@ -30,11 +38,12 @@ func New{{ .Name }}() {{ .Name }} {
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
+func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		return New{{ .Name }}() // never allow a nil value pointer
+		return New{{ .Name }}().(External{{ .Name }}) // never allow a nil value pointer
 	}
 
 	return &bound{{ .Name }}{val: v}
@@ -51,6 +60,11 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 		return {{ .Default }}, nil
 	}
 	return *b.val, nil
+}
+
+func (b *bound{{ .Name }}) Reload() error {
+	b.trigger() // TODO we should cache the old value and compare
+	return nil
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
@@ -266,6 +280,15 @@ type {{ .Name }}List interface {
 	SetValue(int, {{ .Type }}) error
 }
 
+// External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
+//
+// Since: 2.0.0
+type External{{ .Name }}List interface {
+	{{ .Name }}List
+
+	Reload() error
+}
+
 // New{{ .Name }}List returns a bindable list of {{ .Type }} values.
 //
 // Since: 2.0.0
@@ -274,11 +297,12 @@ func New{{ .Name }}List() {{ .Name }}List {
 }
 
 // Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
+func Bind{{ .Name }}List(v *[]{{ .Type }}) External{{ .Name }}List {
 	if v == nil {
-		return New{{ .Name }}List()
+		return New{{ .Name }}List().(External{{ .Name }}List)
 	}
 
 	b := &bound{{ .Name }}List{val: v}

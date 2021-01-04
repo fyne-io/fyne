@@ -17,6 +17,15 @@ type BoolList interface {
 	SetValue(int, bool) error
 }
 
+// ExternalBoolList supports binding a list of bool values from an external variable.
+//
+// Since: 2.0.0
+type ExternalBoolList interface {
+	BoolList
+
+	Reload() error
+}
+
 // NewBoolList returns a bindable list of bool values.
 //
 // Since: 2.0.0
@@ -25,11 +34,12 @@ func NewBoolList() BoolList {
 }
 
 // BindBoolList returns a bound list of bool values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindBoolList(v *[]bool) BoolList {
+func BindBoolList(v *[]bool) ExternalBoolList {
 	if v == nil {
-		return NewBoolList()
+		return NewBoolList().(ExternalBoolList)
 	}
 
 	b := &boundBoolList{val: v}
@@ -132,6 +142,15 @@ type FloatList interface {
 	SetValue(int, float64) error
 }
 
+// ExternalFloatList supports binding a list of float64 values from an external variable.
+//
+// Since: 2.0.0
+type ExternalFloatList interface {
+	FloatList
+
+	Reload() error
+}
+
 // NewFloatList returns a bindable list of float64 values.
 //
 // Since: 2.0.0
@@ -140,11 +159,12 @@ func NewFloatList() FloatList {
 }
 
 // BindFloatList returns a bound list of float64 values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindFloatList(v *[]float64) FloatList {
+func BindFloatList(v *[]float64) ExternalFloatList {
 	if v == nil {
-		return NewFloatList()
+		return NewFloatList().(ExternalFloatList)
 	}
 
 	b := &boundFloatList{val: v}
@@ -247,6 +267,15 @@ type IntList interface {
 	SetValue(int, int) error
 }
 
+// ExternalIntList supports binding a list of int values from an external variable.
+//
+// Since: 2.0.0
+type ExternalIntList interface {
+	IntList
+
+	Reload() error
+}
+
 // NewIntList returns a bindable list of int values.
 //
 // Since: 2.0.0
@@ -255,11 +284,12 @@ func NewIntList() IntList {
 }
 
 // BindIntList returns a bound list of int values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindIntList(v *[]int) IntList {
+func BindIntList(v *[]int) ExternalIntList {
 	if v == nil {
-		return NewIntList()
+		return NewIntList().(ExternalIntList)
 	}
 
 	b := &boundIntList{val: v}
@@ -362,6 +392,15 @@ type RuneList interface {
 	SetValue(int, rune) error
 }
 
+// ExternalRuneList supports binding a list of rune values from an external variable.
+//
+// Since: 2.0.0
+type ExternalRuneList interface {
+	RuneList
+
+	Reload() error
+}
+
 // NewRuneList returns a bindable list of rune values.
 //
 // Since: 2.0.0
@@ -370,11 +409,12 @@ func NewRuneList() RuneList {
 }
 
 // BindRuneList returns a bound list of rune values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindRuneList(v *[]rune) RuneList {
+func BindRuneList(v *[]rune) ExternalRuneList {
 	if v == nil {
-		return NewRuneList()
+		return NewRuneList().(ExternalRuneList)
 	}
 
 	b := &boundRuneList{val: v}
@@ -477,6 +517,15 @@ type StringList interface {
 	SetValue(int, string) error
 }
 
+// ExternalStringList supports binding a list of string values from an external variable.
+//
+// Since: 2.0.0
+type ExternalStringList interface {
+	StringList
+
+	Reload() error
+}
+
 // NewStringList returns a bindable list of string values.
 //
 // Since: 2.0.0
@@ -485,11 +534,12 @@ func NewStringList() StringList {
 }
 
 // BindStringList returns a bound list of string values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindStringList(v *[]string) StringList {
+func BindStringList(v *[]string) ExternalStringList {
 	if v == nil {
-		return NewStringList()
+		return NewStringList().(ExternalStringList)
 	}
 
 	b := &boundStringList{val: v}

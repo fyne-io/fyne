@@ -16,6 +16,14 @@ type DataMap interface {
 	Keys() []string
 }
 
+// ExternalUntypedMap is a map data binding with all values untyped (interface{}), connected to an external data source.
+//
+// Since: 2.0.0
+type ExternalUntypedMap interface {
+	UntypedMap
+	Reload() error
+}
+
 // UntypedMap is a map data binding with all values Untyped (interface{}).
 //
 // Since: 2.0.0
@@ -36,11 +44,12 @@ func NewUntypedMap() UntypedMap {
 }
 
 // BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
+// If your code changes the content of the map this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindUntypedMap(d *map[string]interface{}) UntypedMap {
+func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 	if d == nil {
-		return NewUntypedMap()
+		return NewUntypedMap().(ExternalUntypedMap)
 	}
 	m := &mapBase{items: make(map[string]DataItem), val: d}
 
@@ -58,6 +67,7 @@ type Struct interface {
 	DataMap
 	GetValue(string) (interface{}, error)
 	SetValue(string, interface{}) error
+	Reload() error
 }
 
 // BindStruct creates a new map binding of string to interface{} using the struct passed as data.
@@ -67,13 +77,13 @@ type Struct interface {
 // Since: 2.0.0
 func BindStruct(i interface{}) Struct {
 	if i == nil {
-		return NewUntypedMap()
+		return NewUntypedMap().(Struct)
 	}
 	t := reflect.TypeOf(i)
 	if t.Kind() != reflect.Ptr ||
 		(reflect.TypeOf(reflect.ValueOf(i).Elem()).Kind() != reflect.Struct) {
 		fyne.LogError("Invalid type passed to BindStruct, must be pointer to struct", nil)
-		return NewUntypedMap()
+		return NewUntypedMap().(Struct)
 	}
 
 	m := &mapBase{items: make(map[string]DataItem)}
