@@ -27,6 +27,7 @@ These changes likely break some apps, please read the
 
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
 * Removed deprecated types including dialog.FileIcon (now widget.FileIcon)
+* iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 
 ### Added
 

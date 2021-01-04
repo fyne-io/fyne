@@ -34,8 +34,10 @@ var _ mobile.Keyboardable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
-	shortcut    fyne.ShortcutHandler
-	Text        string
+	shortcut fyne.ShortcutHandler
+	Text     string
+	// Since: 2.0.0
+	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
@@ -1019,7 +1021,7 @@ func (e *Entry) textProvider() *textProvider {
 
 // textStyle tells the rendering textProvider our style
 func (e *Entry) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{}
+	return e.TextStyle
 }
 
 // textWrap tells the rendering textProvider our wrapping

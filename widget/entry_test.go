@@ -2378,6 +2378,58 @@ func TestEntry_SetText_Underflow(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_SetTextStyle(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	entry.Text = "Styled Text"
+	entry.TextStyle = fyne.TextStyle{Bold: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text bold pos="4,4" size="104x21">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+
+	entry.TextStyle = fyne.TextStyle{Monospace: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text monospace pos="4,4" size="104x18">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+
+	entry.TextStyle = fyne.TextStyle{Italic: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text italic pos="4,4" size="104x21">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+}
+
 func TestEntry_Tapped(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)

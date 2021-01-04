@@ -1,3 +1,5 @@
+// +build !ci !darwin
+
 package animation
 
 import (

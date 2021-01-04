@@ -71,8 +71,9 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 const prefTemplate = `
 type prefBound{{ .Name }} struct {
 	base
-	key string
-	p   fyne.Preferences
+	key   string
+	p     fyne.Preferences
+	cache {{ .Type }}
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
@@ -80,20 +81,24 @@ type prefBound{{ .Name }} struct {
 //
 // Since: 2.0.0
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
-	if listen, ok := prefBinds[key]; ok {
-		if l, ok := listen.({{ .Name }}); ok {
-			return l
+	if prefBinds[p] != nil {
+		if listen, ok := prefBinds[p][key]; ok {
+			if l, ok := listen.({{ .Name }}); ok {
+				return l
+			}
+			fyne.LogError(keyTypeMismatchError+key, nil)
 		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
-	prefBinds[key] = listen
+	ensurePreferencesAttached(p)
+	prefBinds[p][key] = listen
 	return listen
 }
 
 func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
-	return b.p.{{ .Name }}(b.key), nil
+	b.cache = b.p.{{ .Name }}(b.key)
+	return b.cache, nil
 }
 
 func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
@@ -101,6 +106,14 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *prefBound{{ .Name }}) checkForChange() {
+	if b.p.{{ .Name }}(b.key) == b.cache {
+		return
+	}
+
+	b.trigger()
 }
 `
 
@@ -385,9 +398,6 @@ import (
 import "fyne.io/fyne"
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
-
-// Because there is no preference listener yet we connect any listeners asking for the same key.
-var prefBinds = make(map[string]DataItem)
 `)
 
 	listFile, err := newFile("bindlists")

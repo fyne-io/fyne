@@ -7,13 +7,11 @@ import "fyne.io/fyne"
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 
-// Because there is no preference listener yet we connect any listeners asking for the same key.
-var prefBinds = make(map[string]DataItem)
-
 type prefBoundBool struct {
 	base
-	key string
-	p   fyne.Preferences
+	key   string
+	p     fyne.Preferences
+	cache bool
 }
 
 // BindPreferenceBool returns a bindable bool value that is managed by the application preferences.
@@ -21,20 +19,24 @@ type prefBoundBool struct {
 //
 // Since: 2.0.0
 func BindPreferenceBool(key string, p fyne.Preferences) Bool {
-	if listen, ok := prefBinds[key]; ok {
-		if l, ok := listen.(Bool); ok {
-			return l
+	if prefBinds[p] != nil {
+		if listen, ok := prefBinds[p][key]; ok {
+			if l, ok := listen.(Bool); ok {
+				return l
+			}
+			fyne.LogError(keyTypeMismatchError+key, nil)
 		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundBool{key: key, p: p}
-	prefBinds[key] = listen
+	ensurePreferencesAttached(p)
+	prefBinds[p][key] = listen
 	return listen
 }
 
 func (b *prefBoundBool) Get() (bool, error) {
-	return b.p.Bool(b.key), nil
+	b.cache = b.p.Bool(b.key)
+	return b.cache, nil
 }
 
 func (b *prefBoundBool) Set(v bool) error {
@@ -44,10 +46,19 @@ func (b *prefBoundBool) Set(v bool) error {
 	return nil
 }
 
+func (b *prefBoundBool) checkForChange() {
+	if b.p.Bool(b.key) == b.cache {
+		return
+	}
+
+	b.trigger()
+}
+
 type prefBoundFloat struct {
 	base
-	key string
-	p   fyne.Preferences
+	key   string
+	p     fyne.Preferences
+	cache float64
 }
 
 // BindPreferenceFloat returns a bindable float64 value that is managed by the application preferences.
@@ -55,20 +66,24 @@ type prefBoundFloat struct {
 //
 // Since: 2.0.0
 func BindPreferenceFloat(key string, p fyne.Preferences) Float {
-	if listen, ok := prefBinds[key]; ok {
-		if l, ok := listen.(Float); ok {
-			return l
+	if prefBinds[p] != nil {
+		if listen, ok := prefBinds[p][key]; ok {
+			if l, ok := listen.(Float); ok {
+				return l
+			}
+			fyne.LogError(keyTypeMismatchError+key, nil)
 		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundFloat{key: key, p: p}
-	prefBinds[key] = listen
+	ensurePreferencesAttached(p)
+	prefBinds[p][key] = listen
 	return listen
 }
 
 func (b *prefBoundFloat) Get() (float64, error) {
-	return b.p.Float(b.key), nil
+	b.cache = b.p.Float(b.key)
+	return b.cache, nil
 }
 
 func (b *prefBoundFloat) Set(v float64) error {
@@ -78,10 +93,19 @@ func (b *prefBoundFloat) Set(v float64) error {
 	return nil
 }
 
+func (b *prefBoundFloat) checkForChange() {
+	if b.p.Float(b.key) == b.cache {
+		return
+	}
+
+	b.trigger()
+}
+
 type prefBoundInt struct {
 	base
-	key string
-	p   fyne.Preferences
+	key   string
+	p     fyne.Preferences
+	cache int
 }
 
 // BindPreferenceInt returns a bindable int value that is managed by the application preferences.
@@ -89,20 +113,24 @@ type prefBoundInt struct {
 //
 // Since: 2.0.0
 func BindPreferenceInt(key string, p fyne.Preferences) Int {
-	if listen, ok := prefBinds[key]; ok {
-		if l, ok := listen.(Int); ok {
-			return l
+	if prefBinds[p] != nil {
+		if listen, ok := prefBinds[p][key]; ok {
+			if l, ok := listen.(Int); ok {
+				return l
+			}
+			fyne.LogError(keyTypeMismatchError+key, nil)
 		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundInt{key: key, p: p}
-	prefBinds[key] = listen
+	ensurePreferencesAttached(p)
+	prefBinds[p][key] = listen
 	return listen
 }
 
 func (b *prefBoundInt) Get() (int, error) {
-	return b.p.Int(b.key), nil
+	b.cache = b.p.Int(b.key)
+	return b.cache, nil
 }
 
 func (b *prefBoundInt) Set(v int) error {
@@ -112,10 +140,19 @@ func (b *prefBoundInt) Set(v int) error {
 	return nil
 }
 
+func (b *prefBoundInt) checkForChange() {
+	if b.p.Int(b.key) == b.cache {
+		return
+	}
+
+	b.trigger()
+}
+
 type prefBoundString struct {
 	base
-	key string
-	p   fyne.Preferences
+	key   string
+	p     fyne.Preferences
+	cache string
 }
 
 // BindPreferenceString returns a bindable string value that is managed by the application preferences.
@@ -123,20 +160,24 @@ type prefBoundString struct {
 //
 // Since: 2.0.0
 func BindPreferenceString(key string, p fyne.Preferences) String {
-	if listen, ok := prefBinds[key]; ok {
-		if l, ok := listen.(String); ok {
-			return l
+	if prefBinds[p] != nil {
+		if listen, ok := prefBinds[p][key]; ok {
+			if l, ok := listen.(String); ok {
+				return l
+			}
+			fyne.LogError(keyTypeMismatchError+key, nil)
 		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundString{key: key, p: p}
-	prefBinds[key] = listen
+	ensurePreferencesAttached(p)
+	prefBinds[p][key] = listen
 	return listen
 }
 
 func (b *prefBoundString) Get() (string, error) {
-	return b.p.String(b.key), nil
+	b.cache = b.p.String(b.key)
+	return b.cache, nil
 }
 
 func (b *prefBoundString) Set(v string) error {
@@ -144,4 +185,12 @@ func (b *prefBoundString) Set(v string) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *prefBoundString) checkForChange() {
+	if b.p.String(b.key) == b.cache {
+		return
+	}
+
+	b.trigger()
 }
