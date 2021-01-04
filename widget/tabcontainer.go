@@ -128,6 +128,9 @@ func (c *TabContainer) RemoveIndex(index int) {
 // SetItems sets the container’s items and refreshes.
 func (c *TabContainer) SetItems(items []*TabItem) {
 	c.Items = items
+	if l := len(c.Items); c.current >= l {
+		c.current = l - 1
+	}
 	c.Refresh()
 }
 
@@ -146,7 +149,6 @@ func (c *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(c.Items) || c.current == index {
 		return
 	}
-
 	c.current = index
 	c.Refresh()
 
@@ -357,6 +359,7 @@ func (r *tabContainerRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Co
 
 func (r *tabContainerRenderer) moveSelection() {
 	if r.container.current < 0 {
+		r.underline.Hide()
 		return
 	}
 	selected := r.tabBar.Objects[r.container.current]
@@ -378,6 +381,7 @@ func (r *tabContainerRenderer) moveSelection() {
 		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
 	}
 
+	r.underline.Show()
 	if r.underline.Position().IsZero() || r.underline.Position() == underlinePos {
 		r.underline.Move(underlinePos)
 		r.underline.Resize(underlineSize)

@@ -18,8 +18,8 @@ const (
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		k := key.Event{
-			Rune: r,
-			Code: getCodeFromRune(r),
+			Rune:      r,
+			Code:      getCodeFromRune(r),
 			Direction: key.DirPress,
 		}
 		theApp.eventsIn <- k
@@ -32,11 +32,11 @@ func keyboardTyped(str *C.char) {
 //export keyboardDelete
 func keyboardDelete() {
 	theApp.eventsIn <- key.Event{
-		Code: key.CodeDeleteBackspace,
+		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirPress,
 	}
 	theApp.eventsIn <- key.Event{
-		Code: key.CodeDeleteBackspace,
+		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirRelease,
 	}
 }

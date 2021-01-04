@@ -68,7 +68,7 @@ func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
-	c.sizeContent(c.Size().Max(content.MinSize()))
+	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 }
 
 // Deprecated: Use Overlays() instead.

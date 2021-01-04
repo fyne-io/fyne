@@ -1,4 +1,4 @@
-// +build !ci !windows
+// +build !mobile
 
 package glfw
 

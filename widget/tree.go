@@ -575,12 +575,13 @@ var _ fyne.Tappable = (*treeNode)(nil)
 
 type treeNode struct {
 	BaseWidget
-	tree    *Tree
-	uid     string
-	depth   int
-	hovered bool
-	icon    fyne.CanvasObject
-	content fyne.CanvasObject
+	tree     *Tree
+	uid      string
+	depth    int
+	hovered  bool
+	icon     fyne.CanvasObject
+	isBranch bool
+	content  fyne.CanvasObject
 }
 
 func (n *treeNode) Content() fyne.CanvasObject {
@@ -688,7 +689,9 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 
 func (r *treeNodeRenderer) Refresh() {
 	if c := r.treeNode.content; c != nil {
-		c.Refresh()
+		if f := r.treeNode.tree.UpdateNode; f != nil {
+			f(r.treeNode.uid, r.treeNode.isBranch, c)
+		}
 	}
 	r.partialRefresh()
 }
@@ -717,9 +720,10 @@ type branch struct {
 func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	b = &branch{
 		treeNode: &treeNode{
-			tree:    tree,
-			icon:    newBranchIcon(tree),
-			content: content,
+			tree:     tree,
+			icon:     newBranchIcon(tree),
+			isBranch: true,
+			content:  content,
 		},
 	}
 	b.ExtendBaseWidget(b)
@@ -774,8 +778,9 @@ type leaf struct {
 func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 	l = &leaf{
 		&treeNode{
-			tree:    tree,
-			content: content,
+			tree:     tree,
+			content:  content,
+			isBranch: false,
 		},
 	}
 	l.ExtendBaseWidget(l)
