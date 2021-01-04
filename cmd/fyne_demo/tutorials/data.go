@@ -78,7 +78,7 @@ var (
 			makeEntryTab,
 		},
 		"form": {"Form",
-			"Gathering input widgets for data submiission.",
+			"Gathering input widgets for data submission.",
 			makeFormTab,
 		},
 		"input": {"Input",
