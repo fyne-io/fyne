@@ -373,15 +373,15 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 			break
 		}
 
-// TODO cache values and do comparison - for now we just always trigger child elements
-//		old, err := l.items[i].({{ .Name }}).Get()
-//		val := (*(l.val))[i]
-//		if err != nil || (*(l.val))[i] != old {
-//			err = item.(*bound{{ .Name }}).Set(val)
-//			if err != nil {
-//				retErr = err
-//			}
-//		}
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := l.items[i].({{ .Name }}).Get()
+		//		val := (*(l.val))[i]
+		//		if err != nil || (*(l.val))[i] != old {
+		//			err = item.(*bound{{ .Name }}).Set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
 		item.(*bound{{ .Name }}ListItem).trigger()
 	}
 	return
@@ -408,7 +408,7 @@ type bound{{ .Name }}ListItem struct {
 	base
 
 	val   *[]{{ .Type }}
-    index int
+	index int
 }
 
 func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {

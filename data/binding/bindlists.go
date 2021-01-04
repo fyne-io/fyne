@@ -110,15 +110,15 @@ func (l *boundBoolList) doReload() (retErr error) {
 			break
 		}
 
-// TODO cache values and do comparison - for now we just always trigger child elements
-//		old, err := l.items[i].(Bool).Get()
-//		val := (*(l.val))[i]
-//		if err != nil || (*(l.val))[i] != old {
-//			err = item.(*boundBool).Set(val)
-//			if err != nil {
-//				retErr = err
-//			}
-//		}
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := l.items[i].(Bool).Get()
+		//		val := (*(l.val))[i]
+		//		if err != nil || (*(l.val))[i] != old {
+		//			err = item.(*boundBool).Set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
 		item.(*boundBoolListItem).trigger()
 	}
 	return
@@ -145,7 +145,7 @@ type boundBoolListItem struct {
 	base
 
 	val   *[]bool
-    index int
+	index int
 }
 
 func (b *boundBoolListItem) Get() (bool, error) {
@@ -266,15 +266,15 @@ func (l *boundFloatList) doReload() (retErr error) {
 			break
 		}
 
-// TODO cache values and do comparison - for now we just always trigger child elements
-//		old, err := l.items[i].(Float).Get()
-//		val := (*(l.val))[i]
-//		if err != nil || (*(l.val))[i] != old {
-//			err = item.(*boundFloat).Set(val)
-//			if err != nil {
-//				retErr = err
-//			}
-//		}
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := l.items[i].(Float).Get()
+		//		val := (*(l.val))[i]
+		//		if err != nil || (*(l.val))[i] != old {
+		//			err = item.(*boundFloat).Set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
 		item.(*boundFloatListItem).trigger()
 	}
 	return
@@ -301,7 +301,7 @@ type boundFloatListItem struct {
 	base
 
 	val   *[]float64
-    index int
+	index int
 }
 
 func (b *boundFloatListItem) Get() (float64, error) {
@@ -422,15 +422,15 @@ func (l *boundIntList) doReload() (retErr error) {
 			break
 		}
 
-// TODO cache values and do comparison - for now we just always trigger child elements
-//		old, err := l.items[i].(Int).Get()
-//		val := (*(l.val))[i]
-//		if err != nil || (*(l.val))[i] != old {
-//			err = item.(*boundInt).Set(val)
-//			if err != nil {
-//				retErr = err
-//			}
-//		}
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := l.items[i].(Int).Get()
+		//		val := (*(l.val))[i]
+		//		if err != nil || (*(l.val))[i] != old {
+		//			err = item.(*boundInt).Set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
 		item.(*boundIntListItem).trigger()
 	}
 	return
@@ -457,7 +457,7 @@ type boundIntListItem struct {
 	base
 
 	val   *[]int
-    index int
+	index int
 }
 
 func (b *boundIntListItem) Get() (int, error) {
@@ -578,15 +578,15 @@ func (l *boundRuneList) doReload() (retErr error) {
 			break
 		}
 
-// TODO cache values and do comparison - for now we just always trigger child elements
-//		old, err := l.items[i].(Rune).Get()
-//		val := (*(l.val))[i]
-//		if err != nil || (*(l.val))[i] != old {
-//			err = item.(*boundRune).Set(val)
-//			if err != nil {
-//				retErr = err
-//			}
-//		}
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := l.items[i].(Rune).Get()
+		//		val := (*(l.val))[i]
+		//		if err != nil || (*(l.val))[i] != old {
+		//			err = item.(*boundRune).Set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
 		item.(*boundRuneListItem).trigger()
 	}
 	return
@@ -613,7 +613,7 @@ type boundRuneListItem struct {
 	base
 
 	val   *[]rune
-    index int
+	index int
 }
 
 func (b *boundRuneListItem) Get() (rune, error) {
@@ -734,15 +734,15 @@ func (l *boundStringList) doReload() (retErr error) {
 			break
 		}
 
-// TODO cache values and do comparison - for now we just always trigger child elements
-//		old, err := l.items[i].(String).Get()
-//		val := (*(l.val))[i]
-//		if err != nil || (*(l.val))[i] != old {
-//			err = item.(*boundString).Set(val)
-//			if err != nil {
-//				retErr = err
-//			}
-//		}
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := l.items[i].(String).Get()
+		//		val := (*(l.val))[i]
+		//		if err != nil || (*(l.val))[i] != old {
+		//			err = item.(*boundString).Set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
 		item.(*boundStringListItem).trigger()
 	}
 	return
@@ -769,7 +769,7 @@ type boundStringListItem struct {
 	base
 
 	val   *[]string
-    index int
+	index int
 }
 
 func (b *boundStringListItem) Get() (string, error) {
