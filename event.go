@@ -16,12 +16,12 @@ type PointEvent struct {
 // The DeltaX and DeltaY represent how large the scroll was in two dimensions.
 type ScrollEvent struct {
 	PointEvent
-	DeltaX, DeltaY int
+	Scrolled Delta
 }
 
 // DragEvent defines the parameters of a pointer or other drag event.
 // The DraggedX and DraggedY fields show how far the item was dragged since the last event.
 type DragEvent struct {
 	PointEvent
-	DraggedX, DraggedY int
+	Dragged Delta
 }

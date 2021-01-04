@@ -52,7 +52,7 @@ func (p *progressRenderer) updateBar() {
 	}
 
 	size := p.progress.Size()
-	p.bar.Resize(fyne.NewSize(int(float32(size.Width)*ratio), size.Height))
+	p.bar.Resize(fyne.NewSize(size.Width*ratio, size.Height))
 }
 
 // Layout the components of the check widget
@@ -104,7 +104,12 @@ func (p *ProgressBar) Bind(data binding.Float) {
 	p.valueSource = data
 
 	p.valueListener = binding.NewDataListener(func() {
-		p.Value = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		p.Value = val
 		if cache.IsRendered(p) {
 			p.Refresh()
 		}

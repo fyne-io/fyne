@@ -5,37 +5,43 @@ package binding
 // Since: 2.0.0
 type DataList interface {
 	DataItem
-	GetItem(int) DataItem
+	GetItem(int) (DataItem, error)
 	Length() int
 }
 
 type listBase struct {
 	base
-	val []DataItem
+	items []DataItem
 }
 
 // GetItem returns the DataItem at the specified index.
-func (b *listBase) GetItem(i int) DataItem {
-	if i < 0 || i >= len(b.val) {
-		return nil
+func (b *listBase) GetItem(i int) (DataItem, error) {
+	if i < 0 || i >= len(b.items) {
+		return nil, errOutOfBounds
 	}
 
-	return b.val[i]
+	return b.items[i], nil
 }
 
 // Length returns the number of items in this data list.
 func (b *listBase) Length() int {
-	return len(b.val)
+	return len(b.items)
 }
 
 func (b *listBase) appendItem(i DataItem) {
-	b.val = append(b.val, i)
+	b.items = append(b.items, i)
+
+	b.trigger()
+}
+
+func (b *listBase) deleteItem(i int) {
+	b.items = append(b.items[:i], b.items[i+1:]...)
 
 	b.trigger()
 }
 
 func (b *listBase) prependItem(i DataItem) {
-	b.val = append([]DataItem{i}, b.val...)
+	b.items = append([]DataItem{i}, b.items...)
 
 	b.trigger()
 }

@@ -29,11 +29,13 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
+		w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
+		h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
 		clip := image.Rect(
 			internal.ScaleInt(c, clipPos.X),
 			internal.ScaleInt(c, clipPos.Y),
-			internal.ScaleInt(c, clipPos.X+clipSize.Width),
-			internal.ScaleInt(c, clipPos.Y+clipSize.Height),
+			internal.ScaleInt(c, w),
+			internal.ScaleInt(c, h),
 		)
 		switch o := obj.(type) {
 		case *canvas.Image:

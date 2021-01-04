@@ -13,14 +13,17 @@ import (
 
 func TestNewSliderWithData(t *testing.T) {
 	val := binding.NewFloat()
-	val.Set(4)
+	err := val.Set(4)
+	assert.Nil(t, err)
 
 	s := NewSliderWithData(0, 10, val)
 	waitForBinding()
 	assert.Equal(t, 4.0, s.Value)
 
 	s.SetValue(2.0)
-	assert.Equal(t, 2.0, val.Get())
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 2.0, f)
 }
 
 func TestSlider_Binding(t *testing.T) {
@@ -33,12 +36,15 @@ func TestSlider_Binding(t *testing.T) {
 	waitForBinding()
 	assert.Equal(t, 0.0, s.Value)
 
-	val.Set(3)
+	err := val.Set(3)
+	assert.Nil(t, err)
 	waitForBinding()
 	assert.Equal(t, 3.0, s.Value)
 
 	s.SetValue(5)
-	assert.Equal(t, 5.0, val.Get())
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, f)
 
 	s.Unbind()
 	waitForBinding()
@@ -146,7 +152,7 @@ func TestSlider_OnChanged(t *testing.T) {
 	slider.SetValue(0.5)
 	assert.Equal(t, 1, changes)
 
-	drag := &fyne.DragEvent{DraggedX: 10, DraggedY: 2}
+	drag := &fyne.DragEvent{Dragged: fyne.NewDelta(10, 2)}
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 }

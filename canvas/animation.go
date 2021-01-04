@@ -49,7 +49,7 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(fyne.NewPos(scaleInt(start.X, xDelta, done), scaleInt(start.Y, yDelta, done)))
+			fn(fyne.NewPos(scaleVal(start.X, xDelta, done), scaleVal(start.Y, yDelta, done)))
 		}}
 }
 
@@ -63,7 +63,7 @@ func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(fyne.NewSize(scaleInt(start.Width, widthDelta, done), scaleInt(start.Height, heightDelta, done)))
+			fn(fyne.NewSize(scaleVal(start.Width, widthDelta, done), scaleVal(start.Height, heightDelta, done)))
 		}}
 }
 
@@ -71,6 +71,6 @@ func scaleChannel(start int, diff, done float32) uint8 {
 	return uint8(start + int(diff*done))
 }
 
-func scaleInt(start int, delta, done float32) int {
-	return start + int(delta*done)
+func scaleVal(start float32, delta, done float32) float32 {
+	return start + delta*done
 }

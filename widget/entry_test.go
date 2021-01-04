@@ -27,12 +27,15 @@ func TestEntry_Binding(t *testing.T) {
 	waitForBinding()
 	assert.Equal(t, "", entry.Text)
 
-	str.Set("Updated")
+	err := str.Set("Updated")
+	assert.Nil(t, err)
 	waitForBinding()
 	assert.Equal(t, "Updated", entry.Text)
 
 	entry.SetText("Typed")
-	assert.Equal(t, "Typed", str.Get())
+	v, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Typed", v)
 
 	entry.Unbind()
 	waitForBinding()
@@ -346,7 +349,7 @@ func TestEntry_DragSelect(t *testing.T) {
 	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
-		de := &fyne.DragEvent{PointEvent: *ev1, DraggedX: 1, DraggedY: 0}
+		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
 		entry.Dragged(de)
 	}
 	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
@@ -2375,6 +2378,58 @@ func TestEntry_SetText_Underflow(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_SetTextStyle(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	entry.Text = "Styled Text"
+	entry.TextStyle = fyne.TextStyle{Bold: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text bold pos="4,4" size="104x21">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+
+	entry.TextStyle = fyne.TextStyle{Monospace: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text monospace pos="4,4" size="104x18">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+
+	entry.TextStyle = fyne.TextStyle{Italic: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text italic pos="4,4" size="104x21">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+}
+
 func TestEntry_Tapped(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
@@ -2414,7 +2469,7 @@ func TestEntry_Tapped(t *testing.T) {
 	`, c)
 
 	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
+	pos := fyne.NewPos(testCharSize*1.5, testCharSize/2) // tap in the middle of the 2nd "M"
 	ev := &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
 	test.AssertRendersToMarkup(t, `
@@ -2435,7 +2490,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	pos = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
+	pos = fyne.NewPos(testCharSize*2.5, testCharSize/2) // tap in the middle of the 3rd "M"
 	ev = &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
 	test.AssertRendersToMarkup(t, `
@@ -2810,14 +2865,17 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 
 func TestNewEntryWithData(t *testing.T) {
 	str := binding.NewString()
-	str.Set("Init")
+	err := str.Set("Init")
+	assert.Nil(t, err)
 
 	entry := widget.NewEntryWithData(str)
 	waitForBinding()
 	assert.Equal(t, "Init", entry.Text)
 
 	entry.SetText("Typed")
-	assert.Equal(t, "Typed", str.Get())
+	v, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Typed", v)
 }
 
 func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
@@ -3098,7 +3156,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
 
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
-	y := theme.Padding() + row*rowHeight + rowHeight/2
+	y := theme.Padding() + float32(row)*rowHeight + rowHeight/2
 
 	pos := fyne.NewPos(x, y)
 	return &fyne.PointEvent{Position: pos}

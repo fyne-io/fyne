@@ -40,7 +40,7 @@ func TestShowFolderOpen(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
 
-	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name

@@ -321,6 +321,9 @@ func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...stri
 	if targetOS == "darwin" {
 		tags = append(tags, "ios")
 	}
+	if buildRelease {
+		tags = append(tags, "release")
+	}
 	if len(tags) > 0 {
 		cmd.Args = append(cmd.Args, "-tags", strings.Join(tags, " "))
 	}

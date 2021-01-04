@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -16,12 +15,12 @@ import (
 )
 
 var (
-	treeSize        = 200
+	treeSize        = float32(200)
 	templateMinSize = NewLabel("Template Object").MinSize()
 	doublePadding   = 2 * theme.Padding()
 )
 
-func indentation() int {
+func indentation() float32 {
 	return theme.IconInlineSize() + theme.Padding()
 }
 
@@ -143,7 +142,7 @@ func TestTree(t *testing.T) {
 	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "foo", "foobar")
+		addTreePath(data, "foo", "foobar")
 		tree := NewTreeWithStrings(data)
 		tree.OpenBranch("foo")
 		var branches []string
@@ -170,7 +169,7 @@ func TestTree_Indentation(t *testing.T) {
 	assert.Equal(t, treeSize, tree.Size().Width)
 	assert.Equal(t, treeSize, tree.Size().Height)
 
-	widget.AddTreePath(data, "A", "B", "C")
+	addTreePath(data, "A", "B", "C")
 
 	tree.OpenAllBranches()
 
@@ -190,8 +189,8 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, treeSize, tree.Size().Width)
 	assert.Equal(t, treeSize, tree.Size().Height)
 
-	widget.AddTreePath(data, "A")
-	widget.AddTreePath(data, "B", "C")
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
 
 	tree.OpenBranch("B")
 
@@ -203,17 +202,17 @@ func TestTree_Resize(t *testing.T) {
 	b := getBranch(t, tree, "B")
 	c := getLeaf(t, tree, "C")
 
-	assert.Equal(t, 0, a.Position().X)
-	assert.Equal(t, 0, a.Position().Y)
+	assert.Equal(t, float32(0), a.Position().X)
+	assert.Equal(t, float32(0), a.Position().Y)
 	assert.Equal(t, treeSize, a.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
 
-	assert.Equal(t, 0, b.Position().X)
+	assert.Equal(t, float32(0), b.Position().X)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness, b.Position().Y)
 	assert.Equal(t, treeSize, b.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
 
-	assert.Equal(t, 0, c.Position().X)
+	assert.Equal(t, float32(0), c.Position().X)
 	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness), c.Position().Y)
 	assert.Equal(t, treeSize, c.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
@@ -333,7 +332,7 @@ func TestTree_MinSize(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			data := make(map[string][]string)
 			for _, d := range tt.items {
-				widget.AddTreePath(data, d...)
+				addTreePath(data, d...)
 			}
 			tree := NewTreeWithStrings(data)
 			for _, o := range tt.opened {
@@ -347,7 +346,7 @@ func TestTree_MinSize(t *testing.T) {
 
 func TestTree_Select(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A", "B")
+	addTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 
 	tree.Refresh() // Force layout
@@ -370,7 +369,7 @@ func TestTree_Select(t *testing.T) {
 
 func TestTree_Select_Unselects(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A", "B")
+	addTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 
 	tree.Refresh() // Force layout
@@ -393,12 +392,12 @@ func TestTree_Select_Unselects(t *testing.T) {
 
 func TestTree_ScrollToSelection(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A")
-	widget.AddTreePath(data, "B")
-	widget.AddTreePath(data, "C")
-	widget.AddTreePath(data, "D")
-	widget.AddTreePath(data, "E")
-	widget.AddTreePath(data, "F")
+	addTreePath(data, "A")
+	addTreePath(data, "B")
+	addTreePath(data, "C")
+	addTreePath(data, "D")
+	addTreePath(data, "E")
+	addTreePath(data, "F")
 	tree := NewTreeWithStrings(data)
 
 	tree.Refresh() // Force layout
@@ -414,7 +413,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	tree.Refresh()                                             // Force layout
 	tree.Select("A")
 	// Tree should scroll to the top to show A
-	assert.Equal(t, 0, tree.scroller.Offset.Y)
+	assert.Equal(t, float32(0), tree.scroller.Offset.Y)
 
 	// Below
 	tree.scroller.Offset.Y = 0 // Showing "A" & "B"
@@ -427,7 +426,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 func TestTree_Tap(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "A", "B")
+		addTreePath(data, "A", "B")
 		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
@@ -445,7 +444,7 @@ func TestTree_Tap(t *testing.T) {
 	})
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "A", "B")
+		addTreePath(data, "A", "B")
 		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
@@ -464,7 +463,7 @@ func TestTree_Tap(t *testing.T) {
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "A")
+		addTreePath(data, "A")
 		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
@@ -484,7 +483,7 @@ func TestTree_Tap(t *testing.T) {
 
 func TestTree_Unselect(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A", "B")
+	addTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 
 	tree.Refresh() // Force layout
@@ -508,8 +507,8 @@ func TestTree_Unselect(t *testing.T) {
 func TestTree_Walk(t *testing.T) {
 	t.Run("Open", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "A", "B", "C")
-		widget.AddTreePath(data, "D", "E", "F")
+		addTreePath(data, "A", "B", "C")
+		addTreePath(data, "D", "E", "F")
 		tree := NewTreeWithStrings(data)
 		tree.OpenBranch("A")
 		tree.OpenBranch("B")
@@ -539,8 +538,8 @@ func TestTree_Walk(t *testing.T) {
 	})
 	t.Run("Closed", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "A", "B", "C")
-		widget.AddTreePath(data, "D", "E", "F")
+		addTreePath(data, "A", "B", "C")
+		addTreePath(data, "D", "E", "F")
 		tree := NewTreeWithStrings(data)
 		var branches []string
 		var leaves []string
@@ -563,7 +562,7 @@ func TestTree_Walk(t *testing.T) {
 
 func TestTreeNode_Hovered(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A", "B", "C")
+	addTreePath(data, "A", "B", "C")
 	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(treeSize, treeSize))
 	tree.OpenAllBranches()
@@ -600,7 +599,7 @@ func TestTreeNode_Hovered(t *testing.T) {
 
 func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A", "B")
+	addTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(treeSize, treeSize))
 	tree.OpenAllBranches()
@@ -618,7 +617,7 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 
 func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "A", "B")
+	addTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(treeSize, treeSize))
 	tree.OpenAllBranches()
@@ -638,4 +637,23 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		b.MouseOut()
 		assert.Equal(t, theme.BackgroundColor(), br.BackgroundColor())
 	})
+}
+
+// addTreePath adds the given path to the given parent->children map
+func addTreePath(data map[string][]string, path ...string) {
+	parent := ""
+	for _, p := range path {
+		children := data[parent]
+		add := true
+		for _, c := range children {
+			if c == p {
+				add = false
+				break
+			}
+		}
+		if add {
+			data[parent] = append(children, p)
+		}
+		parent = p
+	}
 }

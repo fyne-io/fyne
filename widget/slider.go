@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 
 	"fyne.io/fyne"
@@ -71,14 +72,24 @@ func (s *Slider) Bind(data binding.Float) {
 	s.valueSource = data
 
 	s.valueListener = binding.NewDataListener(func() {
-		s.Value = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		s.Value = val
 		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
 			s.Refresh()
 		}
 	})
 	data.AddListener(s.valueListener)
 
-	s.OnChanged = data.Set
+	s.OnChanged = func(f float64) {
+		err := data.Set(f)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %f", f), err)
+		}
+	}
 }
 
 // DragEnd function.
@@ -97,11 +108,11 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	}
 }
 
-func (s *Slider) buttonDiameter() int {
+func (s *Slider) buttonDiameter() float32 {
 	return theme.Padding() * standardScale
 }
 
-func (s *Slider) endOffset() int {
+func (s *Slider) endOffset() float32 {
 	return s.buttonDiameter()/2 + theme.Padding()
 }
 
@@ -211,8 +222,8 @@ func (s *Slider) Unbind() {
 }
 
 const (
-	standardScale = 4
-	minLongSide   = 50
+	standardScale = float32(4)
+	minLongSide   = float32(50)
 )
 
 type sliderRenderer struct {
@@ -293,7 +304,7 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 	return fyne.Size{Width: 0, Height: 0}
 }
 
-func (s *sliderRenderer) getOffset() int {
+func (s *sliderRenderer) getOffset() float32 {
 	endPad := s.slider.endOffset()
 	w := s.slider
 	size := s.track.Size()
@@ -305,14 +316,14 @@ func (s *sliderRenderer) getOffset() int {
 			return endPad
 		}
 	}
-	ratio := (w.Value - w.Min) / (w.Max - w.Min)
+	ratio := float32((w.Value - w.Min) / (w.Max - w.Min))
 
 	switch w.Orientation {
 	case Vertical:
-		y := int(float64(size.Height)-ratio*float64(size.Height)) + endPad
+		y := size.Height - ratio*size.Height + endPad
 		return y
 	case Horizontal:
-		x := int(ratio*float64(size.Width)) + endPad
+		x := ratio*size.Width + endPad
 		return x
 	}
 

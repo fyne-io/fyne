@@ -2,13 +2,15 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
 
+<!-- Please search for open issues that relate to the same problem before opening a new one. -->
+
 ### Describe the bug:
-<!-- A clear and concise description of what the bug is. -->
+<!-- A clear and concise description about the bug. -->
 
 
 ### To Reproduce:
@@ -19,7 +21,7 @@ Steps to reproduce the behaviour:
 4. See error
 
 ### Screenshots:
-<!-- If applicable, add screenshots to help explain your problem. -->
+<!-- If applicable, add screenshots or gifs to help explain your problem. -->
 
 
 ### Example code:
@@ -32,7 +34,7 @@ Write your code here.
 
 
 ### Device (please complete the following information):
- - OS: [e.g. Linux, MacOS or iOS]
- - Version: [e.g. 22]
- - Go version: [e.g. 1.12.3]
- - Fyne version: [e.g. 1.2.0 or git SHA]
+ - **OS:** <!-- [e.g. Linux, MacOS or iOS] -->
+ - **Version:** <!-- [e.g. 5.10.2, 10.13 High Sierra or 14.2] -->
+ - **Go version:** <!-- [e.g. 1.12.3] -->
+ - **Fyne version:** <!-- [e.g. 1.4.2 or git SHA] -->

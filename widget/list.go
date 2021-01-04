@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 
 	"fyne.io/fyne"
@@ -34,7 +35,7 @@ type List struct {
 	scroller *ScrollContainer
 	selected []ListItemID
 	itemMin  fyne.Size
-	offsetY  int
+	offsetY  float32
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -55,7 +56,11 @@ func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject,
 		data.Length,
 		createItem,
 		func(i ListItemID, o fyne.CanvasObject) {
-			item := data.GetItem(i)
+			item, err := data.GetItem(i)
+			if err != nil {
+				fyne.LogError(fmt.Sprintf("Error getting data item %d", i), err)
+				return
+			}
 			updateItem(item, o)
 		})
 
@@ -111,7 +116,7 @@ func (l *List) Select(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (id * l.itemMin.Height) + (id * separatorThickness)
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -149,7 +154,7 @@ type listRenderer struct {
 	visibleItemCount int
 	firstItemIndex   ListItemID
 	lastItemIndex    ListItemID
-	previousOffsetY  int
+	previousOffsetY  float32
 }
 
 func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollContainer, layout *fyne.Container) *listRenderer {
@@ -204,7 +209,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if l.visibleItemCount <= 0 {
 		return
 	}
-	min := fyne.Min(length, l.visibleItemCount)
+	min := int(fyne.Min(float32(length), float32(l.visibleItemCount)))
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
 			l.itemPool.Release(l.children[i-1])
@@ -262,7 +267,7 @@ func (l *listRenderer) getItem() fyne.CanvasObject {
 }
 
 func (l *listRenderer) offsetChanged() {
-	offsetChange := int(math.Abs(float64(l.previousOffsetY - l.list.offsetY)))
+	offsetChange := float32(math.Abs(float64(l.previousOffsetY - l.list.offsetY)))
 
 	if l.previousOffsetY < l.list.offsetY {
 		// Scrolling Down.
@@ -283,7 +288,7 @@ func (l *listRenderer) prependItem(id ListItemID) {
 	l.layout.Objects = l.layout.Layout.(*listLayout).getObjects()
 }
 
-func (l *listRenderer) scrollDown(offsetChange int) {
+func (l *listRenderer) scrollDown(offsetChange float32) {
 	itemChange := 0
 	layoutEndY := l.children[len(l.children)-1].Position().Y + l.list.itemMin.Height + separatorThickness
 	scrollerEndY := l.scroller.Offset.Y + l.scroller.Size().Height
@@ -311,7 +316,7 @@ func (l *listRenderer) scrollDown(offsetChange int) {
 	}
 }
 
-func (l *listRenderer) scrollUp(offsetChange int) {
+func (l *listRenderer) scrollUp(offsetChange float32) {
 	itemChange := 0
 	layoutStartY := l.children[0].Position().Y
 	if layoutStartY > l.scroller.Offset.Y {
@@ -464,7 +469,7 @@ type listLayout struct {
 	list       *List
 	dividers   []fyne.CanvasObject
 	children   []fyne.CanvasObject
-	layoutEndY int
+	layoutEndY float32
 }
 
 func newListLayout(list *List) fyne.Layout {
@@ -475,7 +480,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	if l.list.offsetY != 0 {
 		return
 	}
-	y := 0
+	y := float32(0)
 	for _, child := range l.children {
 		child.Move(fyne.NewPos(0, y))
 		y += l.list.itemMin.Height + separatorThickness
@@ -488,7 +493,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	if f := l.list.Length; f != nil {
 		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+separatorThickness)*f()-separatorThickness)
+			(l.list.itemMin.Height+separatorThickness)*float32(f())-separatorThickness)
 	}
 	return fyne.NewSize(0, 0)
 }

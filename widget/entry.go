@@ -34,8 +34,10 @@ var _ mobile.Keyboardable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
-	shortcut    fyne.ShortcutHandler
-	Text        string
+	shortcut fyne.ShortcutHandler
+	Text     string
+	// Since: 2.0.0
+	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
@@ -118,15 +120,30 @@ func (e *Entry) Bind(data binding.String) {
 	e.Unbind()
 	e.textSource = data
 
+	var convertErr error
+	e.Validator = func(string) error {
+		return convertErr
+	}
 	e.textListener = binding.NewDataListener(func() {
-		e.Text = data.Get()
+		val, err := data.Get()
+		if err != nil {
+			convertErr = err
+			e.SetValidationError(err)
+			return
+		}
+		e.Text = val
+		convertErr = nil
+		e.Refresh()
 		if cache.IsRendered(e) {
 			e.Refresh()
 		}
 	})
 	data.AddListener(e.textListener)
 
-	e.OnChanged = data.Set
+	e.OnChanged = func(s string) {
+		convertErr = data.Set(s)
+		e.SetValidationError(convertErr)
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -492,7 +509,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
 
-	e.popUp = newPopUpMenu(menu, c)
+	e.popUp = NewPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
@@ -693,6 +710,7 @@ func (e *Entry) Unbind() {
 		return
 	}
 
+	e.Validator = nil
 	e.textSource.RemoveListener(e.textListener)
 	e.textListener = nil
 	e.textSource = nil
@@ -1003,7 +1021,7 @@ func (e *Entry) textProvider() *textProvider {
 
 // textStyle tells the rendering textProvider our style
 func (e *Entry) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{}
+	return e.TextStyle
 }
 
 // textWrap tells the rendering textProvider our wrapping
@@ -1236,9 +1254,9 @@ func (r *entryRenderer) buildSelection() {
 
 	provider := r.entry.textProvider()
 	// Convert column, row into x,y
-	getCoordinates := func(column int, row int) (int, int) {
+	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
+		return sz.Width + theme.Padding()*2, sz.Height*float32(row) + theme.Padding()*2
 	}
 
 	lineHeight := r.entry.text.charMinSize().Height
@@ -1314,7 +1332,7 @@ func (r *entryRenderer) moveCursor() {
 	size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
 	provider.propertyLock.RUnlock()
 	xPos := size.Width
-	yPos := size.Height * r.entry.CursorRow
+	yPos := size.Height * float32(r.entry.CursorRow)
 	r.entry.propertyLock.RUnlock()
 
 	r.entry.propertyLock.Lock()

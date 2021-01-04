@@ -5,7 +5,8 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	internalWidget "fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/container"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -22,10 +23,9 @@ type menuLabel struct {
 
 func (m *menuLabel) Tapped(*fyne.PointEvent) {
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(m)
-	widget.ShowPopUpMenuAtPosition(m.menu, m.canvas, fyne.NewPos(pos.X+m.Size().Width, pos.Y))
+	menu := widget.NewPopUpMenu(m.menu, m.canvas)
+	menu.ShowAtPosition(fyne.NewPos(pos.X+m.Size().Width, pos.Y))
 
-	// TODO use NewPopUpMenu in 2.0 once the Deprecated
-	menu := m.canvas.Overlays().Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu)
 	menuDismiss := menu.OnDismiss // this dismisses the menu stack
 	menu.OnDismiss = func() {
 		menuDismiss()
@@ -35,7 +35,7 @@ func (m *menuLabel) Tapped(*fyne.PointEvent) {
 }
 
 func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
-	return widget.Renderer(m.Box)
+	return cache.Renderer(m.Box)
 }
 
 func newMenuLabel(item *fyne.Menu, parent *widget.Box, c *mobileCanvas) *menuLabel {
@@ -57,7 +57,7 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 		panel.Append(newMenuLabel(item, panel, c))
 	}
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
-	c.menu = fyne.NewContainer(panel, shadow)
+	c.menu = container.NewWithoutLayout(panel, shadow)
 
 	safePos, safeSize := c.InteractiveArea()
 	panel.Move(safePos)

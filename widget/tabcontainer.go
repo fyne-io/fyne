@@ -128,6 +128,9 @@ func (c *TabContainer) RemoveIndex(index int) {
 // SetItems sets the container’s items and refreshes.
 func (c *TabContainer) SetItems(items []*TabItem) {
 	c.Items = items
+	if l := len(c.Items); c.current >= l {
+		c.current = l - 1
+	}
 	c.Refresh()
 }
 
@@ -146,7 +149,6 @@ func (c *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(c.Items) || c.current == index {
 		return
 	}
-
 	c.current = index
 	c.Refresh()
 
@@ -266,7 +268,7 @@ func (r *tabContainerRenderer) MinSize() fyne.Size {
 
 	childMin := fyne.NewSize(0, 0)
 	for _, child := range r.container.Items {
-		childMin = childMin.Union(child.Content.MinSize())
+		childMin = childMin.Max(child.Content.MinSize())
 	}
 
 	tabLocation := r.container.tabLocation
@@ -357,6 +359,7 @@ func (r *tabContainerRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Co
 
 func (r *tabContainerRenderer) moveSelection() {
 	if r.container.current < 0 {
+		r.underline.Hide()
 		return
 	}
 	selected := r.tabBar.Objects[r.container.current]
@@ -378,6 +381,7 @@ func (r *tabContainerRenderer) moveSelection() {
 		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
 	}
 
+	r.underline.Show()
 	if r.underline.Position().IsZero() || r.underline.Position() == underlinePos {
 		r.underline.Move(underlinePos)
 		r.underline.Resize(underlineSize)
@@ -561,7 +565,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
-	labelShift := 0
+	labelShift := float32(0)
 	if r.icon != nil {
 		var iconOffset fyne.Position
 		if r.button.IconPosition == buttonIconTop {
@@ -589,7 +593,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
-	var contentWidth, contentHeight int
+	var contentWidth, contentHeight float32
 	textSize := r.label.MinSize()
 	if r.button.IconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, r.iconSize())
@@ -653,7 +657,7 @@ func (r *tabButtonRenderer) Refresh() {
 	canvas.Refresh(r.button)
 }
 
-func (r *tabButtonRenderer) iconSize() int {
+func (r *tabButtonRenderer) iconSize() float32 {
 	switch r.button.IconPosition {
 	case buttonIconTop:
 		return 2 * theme.IconInlineSize()

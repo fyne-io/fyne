@@ -35,7 +35,7 @@ type gLDriver struct {
 	animation *animation.Runner
 }
 
-func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *gLDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	return painter.RenderedTextSize(text, size, style)
 }
 

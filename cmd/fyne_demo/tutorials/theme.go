@@ -42,7 +42,7 @@ func (customTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
 
-func (customTheme) Size(s fyne.ThemeSizeName) int {
+func (customTheme) Size(s fyne.ThemeSizeName) float32 {
 	switch s {
 	case theme.SizeNamePadding:
 		return 10

@@ -28,19 +28,24 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 
 	switch {
 	case img.File != "" || img.Resource != nil:
-		var file io.Reader
-		var name string
+		var (
+			file  io.Reader
+			name  string
+			isSVG bool
+		)
 		if img.Resource != nil {
 			name = img.Resource.Name()
 			file = bytes.NewReader(img.Resource.Content())
+			isSVG = isResourceSVG(img.Resource)
 		} else {
 			name = img.File
 			handle, _ := os.Open(img.File)
 			defer handle.Close()
 			file = handle
+			isSVG = isFileSVG(img.File)
 		}
 
-		if strings.ToLower(filepath.Ext(name)) == ".svg" {
+		if isSVG {
 			tex := svgCacheGet(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
@@ -129,8 +134,8 @@ func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScal
 		return pixels
 	}
 
-	pixW := fyne.Min(scaledW, pixels.Bounds().Dx()) // don't push more pixels than we have to
-	pixH := fyne.Min(scaledH, pixels.Bounds().Dy()) // the GL calls will scale this up on GPU.
+	pixW := int(fyne.Min(float32(scaledW), float32(pixels.Bounds().Dx()))) // don't push more pixels than we have to
+	pixH := int(fyne.Min(float32(scaledH), float32(pixels.Bounds().Dy()))) // the GL calls will scale this up on GPU.
 	scaledBounds := image.Rect(0, 0, pixW, pixH)
 	tex := image.NewNRGBA(scaledBounds)
 	switch scale {
@@ -167,4 +172,24 @@ func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) bool {
 	}
 
 	return true
+}
+
+func isFileSVG(path string) bool {
+	return strings.ToLower(filepath.Ext(path)) == ".svg"
+}
+
+func isResourceSVG(res fyne.Resource) bool {
+	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
+		return true
+	}
+
+	if len(res.Content()) < 5 {
+		return false
+	}
+
+	switch strings.ToLower(string(res.Content()[:5])) {
+	case "<!doc", "<?xml", "<svg ":
+		return true
+	}
+	return false
 }
