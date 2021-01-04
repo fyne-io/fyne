@@ -270,7 +270,7 @@ type {{ .Name }}List interface {
 //
 // Since: 2.0.0
 func New{{ .Name }}List() {{ .Name }}List {
-	return &bound{{ .Name }}List{}
+	return &bound{{ .Name }}List{val: &[]{{ .Type }}{}}
 }
 
 // Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
@@ -297,19 +297,13 @@ type bound{{ .Name }}List struct {
 }
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	*l.val = append(*l.val, val)
 
 	l.appendItem(Bind{{ .Name }}(&val))
 	return nil
 }
 
 func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
-	if l.val == nil {
-		return []{{ .Type }}{}, nil
-	}
-
 	return *l.val, nil
 }
 
@@ -317,33 +311,17 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return {{ .Default }}, err
-	}
-	return item.({{ .Name }}).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
-	if l.val != nil {
-		*l.val = append([]{{ .Type }}{val}, *l.val...)
-	}
+	*l.val = append([]{{ .Type }}{val}, *l.val...)
 
 	l.prependItem(Bind{{ .Name }}(&val))
 	return nil
 }
 
 func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
-
 	oldLen := len(l.items)
 	*l.val = v
 	newLen := len(v)
@@ -380,9 +358,7 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+	(*l.val)[i] = v
 
 	item, err := l.GetItem(i)
 	if err != nil {

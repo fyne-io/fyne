@@ -21,7 +21,7 @@ type BoolList interface {
 //
 // Since: 2.0.0
 func NewBoolList() BoolList {
-	return &boundBoolList{}
+	return &boundBoolList{val: &[]bool{}}
 }
 
 // BindBoolList returns a bound list of bool values, based on the contents of the passed slice.
@@ -48,19 +48,13 @@ type boundBoolList struct {
 }
 
 func (l *boundBoolList) Append(val bool) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	*l.val = append(*l.val, val)
 
 	l.appendItem(BindBool(&val))
 	return nil
 }
 
 func (l *boundBoolList) Get() ([]bool, error) {
-	if l.val == nil {
-		return []bool{}, nil
-	}
-
 	return *l.val, nil
 }
 
@@ -68,33 +62,17 @@ func (l *boundBoolList) GetValue(i int) (bool, error) {
 	if i < 0 || i >= l.Length() {
 		return false, errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return false, err
-	}
-	return item.(Bool).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *boundBoolList) Prepend(val bool) error {
-	if l.val != nil {
-		*l.val = append([]bool{val}, *l.val...)
-	}
+	*l.val = append([]bool{val}, *l.val...)
 
 	l.prependItem(BindBool(&val))
 	return nil
 }
 
 func (l *boundBoolList) Set(v []bool) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
-
 	oldLen := len(l.items)
 	*l.val = v
 	newLen := len(v)
@@ -131,9 +109,7 @@ func (l *boundBoolList) SetValue(i int, v bool) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+	(*l.val)[i] = v
 
 	item, err := l.GetItem(i)
 	if err != nil {
@@ -160,7 +136,7 @@ type FloatList interface {
 //
 // Since: 2.0.0
 func NewFloatList() FloatList {
-	return &boundFloatList{}
+	return &boundFloatList{val: &[]float64{}}
 }
 
 // BindFloatList returns a bound list of float64 values, based on the contents of the passed slice.
@@ -187,19 +163,13 @@ type boundFloatList struct {
 }
 
 func (l *boundFloatList) Append(val float64) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	*l.val = append(*l.val, val)
 
 	l.appendItem(BindFloat(&val))
 	return nil
 }
 
 func (l *boundFloatList) Get() ([]float64, error) {
-	if l.val == nil {
-		return []float64{}, nil
-	}
-
 	return *l.val, nil
 }
 
@@ -207,33 +177,17 @@ func (l *boundFloatList) GetValue(i int) (float64, error) {
 	if i < 0 || i >= l.Length() {
 		return 0.0, errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return 0.0, err
-	}
-	return item.(Float).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *boundFloatList) Prepend(val float64) error {
-	if l.val != nil {
-		*l.val = append([]float64{val}, *l.val...)
-	}
+	*l.val = append([]float64{val}, *l.val...)
 
 	l.prependItem(BindFloat(&val))
 	return nil
 }
 
 func (l *boundFloatList) Set(v []float64) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
-
 	oldLen := len(l.items)
 	*l.val = v
 	newLen := len(v)
@@ -270,9 +224,7 @@ func (l *boundFloatList) SetValue(i int, v float64) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+	(*l.val)[i] = v
 
 	item, err := l.GetItem(i)
 	if err != nil {
@@ -299,7 +251,7 @@ type IntList interface {
 //
 // Since: 2.0.0
 func NewIntList() IntList {
-	return &boundIntList{}
+	return &boundIntList{val: &[]int{}}
 }
 
 // BindIntList returns a bound list of int values, based on the contents of the passed slice.
@@ -326,19 +278,13 @@ type boundIntList struct {
 }
 
 func (l *boundIntList) Append(val int) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	*l.val = append(*l.val, val)
 
 	l.appendItem(BindInt(&val))
 	return nil
 }
 
 func (l *boundIntList) Get() ([]int, error) {
-	if l.val == nil {
-		return []int{}, nil
-	}
-
 	return *l.val, nil
 }
 
@@ -346,33 +292,17 @@ func (l *boundIntList) GetValue(i int) (int, error) {
 	if i < 0 || i >= l.Length() {
 		return 0, errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return 0, err
-	}
-	return item.(Int).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *boundIntList) Prepend(val int) error {
-	if l.val != nil {
-		*l.val = append([]int{val}, *l.val...)
-	}
+	*l.val = append([]int{val}, *l.val...)
 
 	l.prependItem(BindInt(&val))
 	return nil
 }
 
 func (l *boundIntList) Set(v []int) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
-
 	oldLen := len(l.items)
 	*l.val = v
 	newLen := len(v)
@@ -409,9 +339,7 @@ func (l *boundIntList) SetValue(i int, v int) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+	(*l.val)[i] = v
 
 	item, err := l.GetItem(i)
 	if err != nil {
@@ -438,7 +366,7 @@ type RuneList interface {
 //
 // Since: 2.0.0
 func NewRuneList() RuneList {
-	return &boundRuneList{}
+	return &boundRuneList{val: &[]rune{}}
 }
 
 // BindRuneList returns a bound list of rune values, based on the contents of the passed slice.
@@ -465,19 +393,13 @@ type boundRuneList struct {
 }
 
 func (l *boundRuneList) Append(val rune) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	*l.val = append(*l.val, val)
 
 	l.appendItem(BindRune(&val))
 	return nil
 }
 
 func (l *boundRuneList) Get() ([]rune, error) {
-	if l.val == nil {
-		return []rune{}, nil
-	}
-
 	return *l.val, nil
 }
 
@@ -485,33 +407,17 @@ func (l *boundRuneList) GetValue(i int) (rune, error) {
 	if i < 0 || i >= l.Length() {
 		return rune(0), errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return rune(0), err
-	}
-	return item.(Rune).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *boundRuneList) Prepend(val rune) error {
-	if l.val != nil {
-		*l.val = append([]rune{val}, *l.val...)
-	}
+	*l.val = append([]rune{val}, *l.val...)
 
 	l.prependItem(BindRune(&val))
 	return nil
 }
 
 func (l *boundRuneList) Set(v []rune) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
-
 	oldLen := len(l.items)
 	*l.val = v
 	newLen := len(v)
@@ -548,9 +454,7 @@ func (l *boundRuneList) SetValue(i int, v rune) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+	(*l.val)[i] = v
 
 	item, err := l.GetItem(i)
 	if err != nil {
@@ -577,7 +481,7 @@ type StringList interface {
 //
 // Since: 2.0.0
 func NewStringList() StringList {
-	return &boundStringList{}
+	return &boundStringList{val: &[]string{}}
 }
 
 // BindStringList returns a bound list of string values, based on the contents of the passed slice.
@@ -604,19 +508,13 @@ type boundStringList struct {
 }
 
 func (l *boundStringList) Append(val string) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	*l.val = append(*l.val, val)
 
 	l.appendItem(BindString(&val))
 	return nil
 }
 
 func (l *boundStringList) Get() ([]string, error) {
-	if l.val == nil {
-		return []string{}, nil
-	}
-
 	return *l.val, nil
 }
 
@@ -624,33 +522,17 @@ func (l *boundStringList) GetValue(i int) (string, error) {
 	if i < 0 || i >= l.Length() {
 		return "", errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return "", err
-	}
-	return item.(String).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *boundStringList) Prepend(val string) error {
-	if l.val != nil {
-		*l.val = append([]string{val}, *l.val...)
-	}
+	*l.val = append([]string{val}, *l.val...)
 
 	l.prependItem(BindString(&val))
 	return nil
 }
 
 func (l *boundStringList) Set(v []string) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
-
 	oldLen := len(l.items)
 	*l.val = v
 	newLen := len(v)
@@ -687,9 +569,7 @@ func (l *boundStringList) SetValue(i int, v string) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+	(*l.val)[i] = v
 
 	item, err := l.GetItem(i)
 	if err != nil {
