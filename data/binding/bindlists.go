@@ -60,8 +60,7 @@ type boundBoolList struct {
 func (l *boundBoolList) Append(val bool) error {
 	*l.val = append(*l.val, val)
 
-	l.appendItem(BindBool(&val))
-	return nil
+	return l.doReload()
 }
 
 func (l *boundBoolList) Get() ([]bool, error) {
@@ -78,14 +77,22 @@ func (l *boundBoolList) GetValue(i int) (bool, error) {
 func (l *boundBoolList) Prepend(val bool) error {
 	*l.val = append([]bool{val}, *l.val...)
 
-	l.prependItem(BindBool(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *boundBoolList) Set(v []bool) (retErr error) {
-	oldLen := len(l.items)
+func (l *boundBoolList) Reload() error {
+	return l.doReload()
+}
+
+func (l *boundBoolList) Set(v []bool) error {
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *boundBoolList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -103,14 +110,16 @@ func (l *boundBoolList) Set(v []bool) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].(Bool).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*boundBool).Set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+// TODO cache values and do comparison - for now we just always trigger child elements
+//		old, err := l.items[i].(Bool).Get()
+//		val := (*(l.val))[i]
+//		if err != nil || (*(l.val))[i] != old {
+//			err = item.(*boundBool).Set(val)
+//			if err != nil {
+//				retErr = err
+//			}
+//		}
+		item.(*boundBoolListItem).trigger()
 	}
 	return
 }
@@ -185,8 +194,7 @@ type boundFloatList struct {
 func (l *boundFloatList) Append(val float64) error {
 	*l.val = append(*l.val, val)
 
-	l.appendItem(BindFloat(&val))
-	return nil
+	return l.doReload()
 }
 
 func (l *boundFloatList) Get() ([]float64, error) {
@@ -203,14 +211,22 @@ func (l *boundFloatList) GetValue(i int) (float64, error) {
 func (l *boundFloatList) Prepend(val float64) error {
 	*l.val = append([]float64{val}, *l.val...)
 
-	l.prependItem(BindFloat(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *boundFloatList) Set(v []float64) (retErr error) {
-	oldLen := len(l.items)
+func (l *boundFloatList) Reload() error {
+	return l.doReload()
+}
+
+func (l *boundFloatList) Set(v []float64) error {
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *boundFloatList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -228,14 +244,16 @@ func (l *boundFloatList) Set(v []float64) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].(Float).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*boundFloat).Set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+// TODO cache values and do comparison - for now we just always trigger child elements
+//		old, err := l.items[i].(Float).Get()
+//		val := (*(l.val))[i]
+//		if err != nil || (*(l.val))[i] != old {
+//			err = item.(*boundFloat).Set(val)
+//			if err != nil {
+//				retErr = err
+//			}
+//		}
+		item.(*boundFloatListItem).trigger()
 	}
 	return
 }
@@ -310,8 +328,7 @@ type boundIntList struct {
 func (l *boundIntList) Append(val int) error {
 	*l.val = append(*l.val, val)
 
-	l.appendItem(BindInt(&val))
-	return nil
+	return l.doReload()
 }
 
 func (l *boundIntList) Get() ([]int, error) {
@@ -328,14 +345,22 @@ func (l *boundIntList) GetValue(i int) (int, error) {
 func (l *boundIntList) Prepend(val int) error {
 	*l.val = append([]int{val}, *l.val...)
 
-	l.prependItem(BindInt(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *boundIntList) Set(v []int) (retErr error) {
-	oldLen := len(l.items)
+func (l *boundIntList) Reload() error {
+	return l.doReload()
+}
+
+func (l *boundIntList) Set(v []int) error {
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *boundIntList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -353,14 +378,16 @@ func (l *boundIntList) Set(v []int) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].(Int).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*boundInt).Set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+// TODO cache values and do comparison - for now we just always trigger child elements
+//		old, err := l.items[i].(Int).Get()
+//		val := (*(l.val))[i]
+//		if err != nil || (*(l.val))[i] != old {
+//			err = item.(*boundInt).Set(val)
+//			if err != nil {
+//				retErr = err
+//			}
+//		}
+		item.(*boundIntListItem).trigger()
 	}
 	return
 }
@@ -435,8 +462,7 @@ type boundRuneList struct {
 func (l *boundRuneList) Append(val rune) error {
 	*l.val = append(*l.val, val)
 
-	l.appendItem(BindRune(&val))
-	return nil
+	return l.doReload()
 }
 
 func (l *boundRuneList) Get() ([]rune, error) {
@@ -453,14 +479,22 @@ func (l *boundRuneList) GetValue(i int) (rune, error) {
 func (l *boundRuneList) Prepend(val rune) error {
 	*l.val = append([]rune{val}, *l.val...)
 
-	l.prependItem(BindRune(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *boundRuneList) Set(v []rune) (retErr error) {
-	oldLen := len(l.items)
+func (l *boundRuneList) Reload() error {
+	return l.doReload()
+}
+
+func (l *boundRuneList) Set(v []rune) error {
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *boundRuneList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -478,14 +512,16 @@ func (l *boundRuneList) Set(v []rune) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].(Rune).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*boundRune).Set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+// TODO cache values and do comparison - for now we just always trigger child elements
+//		old, err := l.items[i].(Rune).Get()
+//		val := (*(l.val))[i]
+//		if err != nil || (*(l.val))[i] != old {
+//			err = item.(*boundRune).Set(val)
+//			if err != nil {
+//				retErr = err
+//			}
+//		}
+		item.(*boundRuneListItem).trigger()
 	}
 	return
 }
@@ -560,8 +596,7 @@ type boundStringList struct {
 func (l *boundStringList) Append(val string) error {
 	*l.val = append(*l.val, val)
 
-	l.appendItem(BindString(&val))
-	return nil
+	return l.doReload()
 }
 
 func (l *boundStringList) Get() ([]string, error) {
@@ -578,14 +613,22 @@ func (l *boundStringList) GetValue(i int) (string, error) {
 func (l *boundStringList) Prepend(val string) error {
 	*l.val = append([]string{val}, *l.val...)
 
-	l.prependItem(BindString(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *boundStringList) Set(v []string) (retErr error) {
-	oldLen := len(l.items)
+func (l *boundStringList) Reload() error {
+	return l.doReload()
+}
+
+func (l *boundStringList) Set(v []string) error {
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *boundStringList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -603,14 +646,16 @@ func (l *boundStringList) Set(v []string) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].(String).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*boundString).Set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+// TODO cache values and do comparison - for now we just always trigger child elements
+//		old, err := l.items[i].(String).Get()
+//		val := (*(l.val))[i]
+//		if err != nil || (*(l.val))[i] != old {
+//			err = item.(*boundString).Set(val)
+//			if err != nil {
+//				retErr = err
+//			}
+//		}
+		item.(*boundStringListItem).trigger()
 	}
 	return
 }

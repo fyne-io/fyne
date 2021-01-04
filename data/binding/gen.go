@@ -323,8 +323,7 @@ type bound{{ .Name }}List struct {
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 	*l.val = append(*l.val, val)
 
-	l.appendItem(Bind{{ .Name }}(&val))
-	return nil
+	return l.doReload()
 }
 
 func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
@@ -341,14 +340,22 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	*l.val = append([]{{ .Type }}{val}, *l.val...)
 
-	l.prependItem(Bind{{ .Name }}(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
-	oldLen := len(l.items)
+func (l *bound{{ .Name }}List) Reload() error {
+	return l.doReload()
+}
+
+func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *bound{{ .Name }}List) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -366,14 +373,16 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].({{ .Name }}).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*bound{{ .Name }}).Set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+// TODO cache values and do comparison - for now we just always trigger child elements
+//		old, err := l.items[i].({{ .Name }}).Get()
+//		val := (*(l.val))[i]
+//		if err != nil || (*(l.val))[i] != old {
+//			err = item.(*bound{{ .Name }}).Set(val)
+//			if err != nil {
+//				retErr = err
+//			}
+//		}
+		item.(*bound{{ .Name }}ListItem).trigger()
 	}
 	return
 }

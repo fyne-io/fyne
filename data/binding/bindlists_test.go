@@ -22,6 +22,57 @@ func TestBindFloatList(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestExternalFloatList_Reload(t *testing.T) {
+	l := []float64{1.0, 5.0, 2.3}
+	f := BindFloatList(&l)
+
+	assert.Equal(t, 3, f.Length())
+	v, err := f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, v)
+
+	calledList, calledChild := false, false
+	f.AddListener(NewDataListener(func() {
+		calledList = true
+	}))
+	waitForItems()
+	assert.True(t, calledList)
+
+	child, err := f.GetItem(1)
+	assert.Nil(t, err)
+	child.AddListener(NewDataListener(func() {
+		calledChild = true
+	}))
+	waitForItems()
+	assert.True(t, calledChild)
+
+	assert.NotNil(t, f.(*boundFloatList).val)
+	assert.Equal(t, 3, len(*(f.(*boundFloatList).val)))
+
+	_, err = f.GetValue(-1)
+	assert.NotNil(t, err)
+
+	calledList, calledChild = false, false
+	l[1] = 4.8
+	f.Reload()
+	waitForItems()
+	v, err = f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 4.8, v)
+	assert.False(t, calledList)
+	assert.True(t, calledChild)
+
+	calledList, calledChild = false, false
+	l = []float64{1.0, 4.2}
+	f.Reload()
+	waitForItems()
+	v, err = f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 4.2, v)
+	assert.True(t, calledList)
+	assert.True(t, calledChild)
+}
+
 func TestNewFloatList(t *testing.T) {
 	f := NewFloatList()
 	assert.Equal(t, 0, f.Length())

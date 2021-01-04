@@ -171,7 +171,11 @@ func (b *mapBase) GetValue(key string) (interface{}, error) {
 	return nil, errKeyNotFound
 }
 
-func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
+func (b *mapBase) Reload() error {
+	return b.doReload()
+}
+
+func (b *mapBase) Set(v map[string]interface{}) error {
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &v
 		b.trigger()
@@ -179,9 +183,13 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 	}
 
 	*b.val = v
+	return b.doReload()
+}
+
+func (b *mapBase) doReload() (retErr error) {
 	changed := false
 	// add new
-	for key := range v {
+	for key := range *b.val {
 		found := false
 		for newKey := range b.items {
 			if newKey == key {
@@ -198,7 +206,7 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 	// remove old
 	for key := range b.items {
 		found := false
-		for newKey := range v {
+		for newKey := range *b.val {
 			if newKey == key {
 				found = true
 			}
@@ -212,15 +220,17 @@ func (b *mapBase) Set(v map[string]interface{}) (retErr error) {
 		b.trigger()
 	}
 
-	for k, item := range b.items {
-		old, err := b.items[k].(Untyped).get()
-		val := (*(b.val))[k]
-		if err != nil || (*(b.val))[k] != old {
-			err = item.(Untyped).set(val)
-			if err != nil {
-				retErr = err
-			}
-		}
+	for _, item := range b.items {
+		// TODO cache values and do comparison - for now we just always trigger child elements
+		//		old, err := b.items[k].(Untyped).get()
+		//		val := (*(b.val))[k]
+		//		if err != nil || (*(b.val))[k] != old {
+		//			err = item.(Untyped).set(val)
+		//			if err != nil {
+		//				retErr = err
+		//			}
+		//		}
+		item.(*boundUntyped).trigger()
 	}
 	return
 }

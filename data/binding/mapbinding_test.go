@@ -96,6 +96,59 @@ func TestBindUntypedMap(t *testing.T) {
 	assert.Equal(t, "Content", v)
 }
 
+func TestExternalUntypedMap_Reload(t *testing.T) {
+	m := map[string]interface{}{
+		"foo": "bar",
+		"val": 5,
+		"bas": 0.2,
+	}
+
+	b := BindUntypedMap(&m)
+
+	assert.Equal(t, 3, len(b.Keys()))
+	v, err := b.GetValue("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+
+	calledMap, calledChild := false, false
+	b.AddListener(NewDataListener(func() {
+		calledMap = true
+	}))
+	waitForItems()
+	assert.True(t, calledMap)
+
+	child, err := b.GetItem("foo")
+	assert.Nil(t, err)
+	child.AddListener(NewDataListener(func() {
+		calledChild = true
+	}))
+	waitForItems()
+	assert.True(t, calledChild)
+
+	calledMap, calledChild = false, false
+	m["foo"] = "boo"
+	b.Reload()
+	waitForItems()
+	v, err = b.GetValue("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "boo", v)
+	assert.False(t, calledMap)
+	assert.True(t, calledChild)
+
+	calledMap, calledChild = false, false
+	m = map[string]interface{}{
+		"foo": "bar",
+		"val": 5,
+	}
+	b.Reload()
+	waitForItems()
+	v, err = b.GetValue("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+	assert.True(t, calledMap)
+	assert.True(t, calledChild)
+}
+
 func TestUntypedMap_Delete(t *testing.T) {
 	m := map[string]interface{}{
 		"foo": "bar",
