@@ -71,6 +71,16 @@ func TestExternalFloatList_Reload(t *testing.T) {
 	assert.Equal(t, 4.2, v)
 	assert.True(t, calledList)
 	assert.True(t, calledChild)
+
+	calledList, calledChild = false, false
+	l = []float64{1.0, 4.2, 5.3}
+	f.Reload()
+	waitForItems()
+	v, err = f.GetValue(1)
+	assert.Nil(t, err)
+	assert.Equal(t, 4.2, v)
+	assert.True(t, calledList)
+	assert.False(t, calledChild)
 }
 
 func TestNewFloatList(t *testing.T) {

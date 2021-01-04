@@ -147,6 +147,20 @@ func TestExternalUntypedMap_Reload(t *testing.T) {
 	assert.Equal(t, "bar", v)
 	assert.True(t, calledMap)
 	assert.True(t, calledChild)
+
+	calledMap, calledChild = false, false
+	m = map[string]interface{}{
+		"foo": "bar",
+		"val": 5,
+		"new": "longer",
+	}
+	b.Reload()
+	waitForItems()
+	v, err = b.GetValue("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+	assert.True(t, calledMap)
+	assert.False(t, calledChild)
 }
 
 func TestUntypedMap_Delete(t *testing.T) {

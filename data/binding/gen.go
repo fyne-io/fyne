@@ -34,7 +34,7 @@ type External{{ .Name }} interface {
 // Since: 2.0.0
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
-	return &bound{{ .Name }}{val: &blank}
+	return &bound{{ .Name }}{val: &blank, old: blank}
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
@@ -53,6 +53,7 @@ type bound{{ .Name }} struct {
 	base
 
 	val *{{ .Type }}
+	old {{ .Type }} 
 }
 
 func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
@@ -63,8 +64,7 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 }
 
 func (b *bound{{ .Name }}) Reload() error {
-	b.trigger() // TODO we should cache the old value and compare
-	return nil
+	return b.setIfChanged(*b.val)
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
@@ -76,6 +76,16 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	} else {
 		*b.val = val
 	}
+
+	b.trigger()
+	return nil
+}
+
+func (b *bound{{ .Name }}) setIfChanged(val {{ .Type }}) error {
+	if val == b.old {
+		return nil
+	}
+	b.old = val
 
 	b.trigger()
 	return nil
@@ -373,16 +383,10 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 			break
 		}
 
-		// TODO cache values and do comparison - for now we just always trigger child elements
-		//		old, err := l.items[i].({{ .Name }}).Get()
-		//		val := (*(l.val))[i]
-		//		if err != nil || (*(l.val))[i] != old {
-		//			err = item.(*bound{{ .Name }}).Set(val)
-		//			if err != nil {
-		//				retErr = err
-		//			}
-		//		}
-		item.(*bound{{ .Name }}ListItem).trigger()
+		err := item.(*bound{{ .Name }}ListItem).setIfChanged((*l.val)[i])
+		if err != nil {
+			retErr = err
+		}
 	}
 	return
 }
@@ -401,7 +405,7 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 }
 
 func bind{{ .Name }}ListItem(v *[]{{ .Type }}, i int) {{ .Name }} {
-	return &bound{{ .Name }}ListItem{val: v, index: i}
+	return &bound{{ .Name }}ListItem{val: v, index: i, old: (*v)[i]}
 }
 
 type bound{{ .Name }}ListItem struct {
@@ -409,6 +413,7 @@ type bound{{ .Name }}ListItem struct {
 
 	val   *[]{{ .Type }}
 	index int
+	old   {{ .Type }}
 }
 
 func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
@@ -417,6 +422,17 @@ func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
 
 func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
 	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *bound{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+	if val == b.old {
+		return nil
+	}
+	(*b.val)[b.index] = val
+	b.old = val
 
 	b.trigger()
 	return nil

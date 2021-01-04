@@ -25,7 +25,7 @@ type ExternalBool interface {
 // Since: 2.0.0
 func NewBool() Bool {
 	blank := false
-	return &boundBool{val: &blank}
+	return &boundBool{val: &blank, old: blank}
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -44,6 +44,7 @@ type boundBool struct {
 	base
 
 	val *bool
+	old bool 
 }
 
 func (b *boundBool) Get() (bool, error) {
@@ -54,8 +55,7 @@ func (b *boundBool) Get() (bool, error) {
 }
 
 func (b *boundBool) Reload() error {
-	b.trigger() // TODO we should cache the old value and compare
-	return nil
+	return b.setIfChanged(*b.val)
 }
 
 func (b *boundBool) Set(val bool) error {
@@ -67,6 +67,16 @@ func (b *boundBool) Set(val bool) error {
 	} else {
 		*b.val = val
 	}
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundBool) setIfChanged(val bool) error {
+	if val == b.old {
+		return nil
+	}
+	b.old = val
 
 	b.trigger()
 	return nil
@@ -94,7 +104,7 @@ type ExternalFloat interface {
 // Since: 2.0.0
 func NewFloat() Float {
 	blank := 0.0
-	return &boundFloat{val: &blank}
+	return &boundFloat{val: &blank, old: blank}
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -113,6 +123,7 @@ type boundFloat struct {
 	base
 
 	val *float64
+	old float64 
 }
 
 func (b *boundFloat) Get() (float64, error) {
@@ -123,8 +134,7 @@ func (b *boundFloat) Get() (float64, error) {
 }
 
 func (b *boundFloat) Reload() error {
-	b.trigger() // TODO we should cache the old value and compare
-	return nil
+	return b.setIfChanged(*b.val)
 }
 
 func (b *boundFloat) Set(val float64) error {
@@ -136,6 +146,16 @@ func (b *boundFloat) Set(val float64) error {
 	} else {
 		*b.val = val
 	}
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundFloat) setIfChanged(val float64) error {
+	if val == b.old {
+		return nil
+	}
+	b.old = val
 
 	b.trigger()
 	return nil
@@ -163,7 +183,7 @@ type ExternalInt interface {
 // Since: 2.0.0
 func NewInt() Int {
 	blank := 0
-	return &boundInt{val: &blank}
+	return &boundInt{val: &blank, old: blank}
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -182,6 +202,7 @@ type boundInt struct {
 	base
 
 	val *int
+	old int 
 }
 
 func (b *boundInt) Get() (int, error) {
@@ -192,8 +213,7 @@ func (b *boundInt) Get() (int, error) {
 }
 
 func (b *boundInt) Reload() error {
-	b.trigger() // TODO we should cache the old value and compare
-	return nil
+	return b.setIfChanged(*b.val)
 }
 
 func (b *boundInt) Set(val int) error {
@@ -205,6 +225,16 @@ func (b *boundInt) Set(val int) error {
 	} else {
 		*b.val = val
 	}
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundInt) setIfChanged(val int) error {
+	if val == b.old {
+		return nil
+	}
+	b.old = val
 
 	b.trigger()
 	return nil
@@ -232,7 +262,7 @@ type ExternalRune interface {
 // Since: 2.0.0
 func NewRune() Rune {
 	blank := rune(0)
-	return &boundRune{val: &blank}
+	return &boundRune{val: &blank, old: blank}
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -251,6 +281,7 @@ type boundRune struct {
 	base
 
 	val *rune
+	old rune 
 }
 
 func (b *boundRune) Get() (rune, error) {
@@ -261,8 +292,7 @@ func (b *boundRune) Get() (rune, error) {
 }
 
 func (b *boundRune) Reload() error {
-	b.trigger() // TODO we should cache the old value and compare
-	return nil
+	return b.setIfChanged(*b.val)
 }
 
 func (b *boundRune) Set(val rune) error {
@@ -274,6 +304,16 @@ func (b *boundRune) Set(val rune) error {
 	} else {
 		*b.val = val
 	}
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundRune) setIfChanged(val rune) error {
+	if val == b.old {
+		return nil
+	}
+	b.old = val
 
 	b.trigger()
 	return nil
@@ -301,7 +341,7 @@ type ExternalString interface {
 // Since: 2.0.0
 func NewString() String {
 	blank := ""
-	return &boundString{val: &blank}
+	return &boundString{val: &blank, old: blank}
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -320,6 +360,7 @@ type boundString struct {
 	base
 
 	val *string
+	old string 
 }
 
 func (b *boundString) Get() (string, error) {
@@ -330,8 +371,7 @@ func (b *boundString) Get() (string, error) {
 }
 
 func (b *boundString) Reload() error {
-	b.trigger() // TODO we should cache the old value and compare
-	return nil
+	return b.setIfChanged(*b.val)
 }
 
 func (b *boundString) Set(val string) error {
@@ -343,6 +383,16 @@ func (b *boundString) Set(val string) error {
 	} else {
 		*b.val = val
 	}
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundString) setIfChanged(val string) error {
+	if val == b.old {
+		return nil
+	}
+	b.old = val
 
 	b.trigger()
 	return nil

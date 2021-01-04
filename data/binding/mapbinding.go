@@ -207,17 +207,11 @@ func (b *mapBase) doReload() (retErr error) {
 		b.trigger()
 	}
 
-	for _, item := range b.items {
-		// TODO cache values and do comparison - for now we just always trigger child elements
-		//		old, err := b.items[k].(Untyped).get()
-		//		val := (*(b.val))[k]
-		//		if err != nil || (*(b.val))[k] != old {
-		//			err = item.(Untyped).set(val)
-		//			if err != nil {
-		//				retErr = err
-		//			}
-		//		}
-		item.(*boundUntyped).trigger()
+	for k, item := range b.items {
+		err := item.(*boundUntyped).setIfChanged((*b.val)[k])
+		if err != nil {
+			retErr = err
+		}
 	}
 	return
 }
@@ -241,7 +235,7 @@ func (b *mapBase) setItem(key string, d DataItem) {
 }
 
 func bindUntypedMapValue(m *map[string]interface{}, k string) Untyped {
-	return &boundUntyped{val: m, key: k}
+	return &boundUntyped{val: m, key: k, old: (*m)[k]}
 }
 
 type boundUntyped struct {
@@ -249,6 +243,7 @@ type boundUntyped struct {
 
 	val *map[string]interface{}
 	key string
+	old interface{}
 }
 
 func (b *boundUntyped) get() (interface{}, error) {
@@ -261,6 +256,17 @@ func (b *boundUntyped) get() (interface{}, error) {
 
 func (b *boundUntyped) set(val interface{}) error {
 	(*b.val)[b.key] = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundUntyped) setIfChanged(val interface{}) error {
+	if val == b.old {
+		return nil
+	}
+	(*b.val)[b.key] = val
+	b.old = val
 
 	b.trigger()
 	return nil
