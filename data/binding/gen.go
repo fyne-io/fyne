@@ -53,7 +53,7 @@ type bound{{ .Name }} struct {
 	base
 
 	val *{{ .Type }}
-	old {{ .Type }} 
+	old {{ .Type }}
 }
 
 func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {

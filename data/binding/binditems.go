@@ -44,7 +44,7 @@ type boundBool struct {
 	base
 
 	val *bool
-	old bool 
+	old bool
 }
 
 func (b *boundBool) Get() (bool, error) {
@@ -123,7 +123,7 @@ type boundFloat struct {
 	base
 
 	val *float64
-	old float64 
+	old float64
 }
 
 func (b *boundFloat) Get() (float64, error) {
@@ -202,7 +202,7 @@ type boundInt struct {
 	base
 
 	val *int
-	old int 
+	old int
 }
 
 func (b *boundInt) Get() (int, error) {
@@ -281,7 +281,7 @@ type boundRune struct {
 	base
 
 	val *rune
-	old rune 
+	old rune
 }
 
 func (b *boundRune) Get() (rune, error) {
@@ -360,7 +360,7 @@ type boundString struct {
 	base
 
 	val *string
-	old string 
+	old string
 }
 
 func (b *boundString) Get() (string, error) {
