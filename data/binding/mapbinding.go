@@ -40,7 +40,7 @@ type UntypedMap interface {
 //
 // Since: 2.0.0
 func NewUntypedMap() UntypedMap {
-	return &mapBase{items: make(map[string]DataItem)}
+	return &mapBase{items: make(map[string]DataItem), val: &map[string]interface{}{}}
 }
 
 // BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
@@ -86,7 +86,10 @@ func BindStruct(i interface{}) Struct {
 		return NewUntypedMap().(Struct)
 	}
 
-	m := &mapBase{items: make(map[string]DataItem)}
+	s := &boundStruct{orig: i}
+	s.items = make(map[string]DataItem)
+	s.val = &map[string]interface{}{}
+
 	v := reflect.ValueOf(i).Elem()
 	t = v.Type()
 	for j := 0; j < v.NumField(); j++ {
@@ -95,10 +98,12 @@ func BindStruct(i interface{}) Struct {
 			continue
 		}
 
-		m.items[t.Field(j).Name] = bindReflect(f)
+		key := t.Field(j).Name
+		s.items[key] = bindReflect(f)
+		(*s.val)[key] = f.Interface()
 	}
 
-	return m
+	return s
 }
 
 // Untyped id used tpo represent binding an interface{} value.
@@ -173,6 +178,18 @@ func (b *mapBase) Set(v map[string]interface{}) error {
 	return b.doReload()
 }
 
+func (b *mapBase) SetValue(key string, d interface{}) error {
+	if i, ok := b.items[key]; ok {
+		i.(Untyped).set(d)
+		return nil
+	}
+
+	(*b.val)[key] = d
+	item := bindUntypedMapValue(b.val, key)
+	b.setItem(key, item)
+	return nil
+}
+
 func (b *mapBase) doReload() (retErr error) {
 	changed := false
 	// add new
@@ -216,22 +233,50 @@ func (b *mapBase) doReload() (retErr error) {
 	return
 }
 
-func (b *mapBase) SetValue(key string, d interface{}) error {
-	if i, ok := b.items[key]; ok {
-		i.(Untyped).set(d)
-		return nil
-	}
-
-	(*b.val)[key] = d
-	item := bindUntypedMapValue(b.val, key)
-	b.setItem(key, item)
-	return nil
-}
-
 func (b *mapBase) setItem(key string, d DataItem) {
 	b.items[key] = d
 
 	b.trigger()
+}
+
+type boundStruct struct {
+	mapBase
+
+	orig interface{}
+}
+
+func (b *boundStruct) Reload() (retErr error) {
+	v := reflect.ValueOf(b.orig).Elem()
+	t := v.Type()
+	for j := 0; j < v.NumField(); j++ {
+		f := v.Field(j)
+		if !f.CanSet() {
+			continue
+		}
+
+		key := t.Field(j).Name
+		old := (*b.val)[key]
+		if f.Interface() == old {
+			continue
+		}
+
+		var err error
+		switch f.Kind() {
+		case reflect.Bool:
+			err = b.items[key].(*reflectBool).Set(f.Bool())
+		case reflect.Float32, reflect.Float64:
+			err = b.items[key].(*reflectFloat).Set(f.Float())
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			err = b.items[key].(*reflectInt).Set(int(f.Int()))
+		case reflect.String:
+			err = b.items[key].(*reflectString).Set(f.String())
+		}
+		if err != nil {
+			retErr = err
+		}
+		(*b.val)[key] = f.Interface()
+	}
+	return
 }
 
 func bindUntypedMapValue(m *map[string]interface{}, k string) Untyped {
@@ -313,6 +358,7 @@ func (r *reflectBool) Set(b bool) (err error) {
 	}()
 
 	r.val.SetBool(b)
+	r.trigger()
 	return
 }
 
@@ -345,6 +391,7 @@ func (r *reflectFloat) Set(f float64) (err error) {
 	}()
 
 	r.val.SetFloat(f)
+	r.trigger()
 	return
 }
 
@@ -377,6 +424,7 @@ func (r *reflectInt) Set(i int) (err error) {
 	}()
 
 	r.val.SetInt(int64(i))
+	r.trigger()
 	return
 }
 
@@ -409,6 +457,7 @@ func (r *reflectString) Set(s string) (err error) {
 	}()
 
 	r.val.SetString(s)
+	r.trigger()
 	return
 }
 

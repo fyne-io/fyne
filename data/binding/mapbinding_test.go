@@ -65,6 +65,77 @@ func TestBindStruct(t *testing.T) {
 	_, err = b.GetItem("Missing")
 	assert.NotNil(t, err)
 }
+func TestBindStruct_Reload(t *testing.T) {
+	s := struct {
+		Foo string
+		Val int
+		Bas float64
+	}{
+		"bar",
+		5,
+		0.2,
+	}
+
+	b := BindStruct(&s)
+
+	assert.Equal(t, 3, len(b.Keys()))
+	v, err := b.GetValue("Foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+
+	item, err := b.GetItem("Foo")
+	assert.Nil(t, err)
+	v, err = item.(String).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "bar", v)
+
+	calledMap, calledItem := false, false
+	b.AddListener(NewDataListener(func() {
+		calledMap = true
+	}))
+	waitForItems()
+	assert.True(t, calledMap)
+
+	item.AddListener(NewDataListener(func() {
+		calledItem = true
+	}))
+	waitForItems()
+	assert.True(t, calledItem)
+
+	s = struct {
+		Foo string
+		Val int
+		Bas float64
+	}{
+		"bas",
+		2,
+		1.2,
+	}
+
+	calledMap, calledItem = false, false
+	b.Reload()
+	waitForItems()
+	v, err = b.GetValue("Foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bas", v)
+	assert.False(t, calledMap)
+	v, err = item.(String).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "bas", v)
+	assert.True(t, calledItem)
+
+	calledMap, calledItem = false, false
+	b.Reload()
+	waitForItems()
+	v, err = b.GetValue("Foo")
+	assert.Nil(t, err)
+	assert.Equal(t, "bas", v)
+	assert.False(t, calledMap)
+	v, err = item.(String).Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "bas", v)
+	assert.False(t, calledItem)
+}
 
 func TestBindUntypedMap(t *testing.T) {
 	m := map[string]interface{}{
