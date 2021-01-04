@@ -45,7 +45,7 @@ func BindBoolList(v *[]bool) ExternalBoolList {
 	b := &boundBoolList{val: v}
 
 	for i := range *v {
-		b.appendItem(BindBool(&((*v)[i])))
+		b.appendItem(bindBoolListItem(v, i))
 	}
 
 	return b
@@ -100,7 +100,7 @@ func (l *boundBoolList) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(BindBool(&((*l.val)[i])))
+			l.appendItem(bindBoolListItem(l.val, i))
 		}
 		l.trigger()
 	}
@@ -135,6 +135,28 @@ func (l *boundBoolList) SetValue(i int, v bool) error {
 		return err
 	}
 	return item.(Bool).Set(v)
+}
+
+func bindBoolListItem(v *[]bool, i int) Bool {
+	return &boundBoolListItem{val: v, index: i}
+}
+
+type boundBoolListItem struct {
+	base
+
+	val   *[]bool
+    index int
+}
+
+func (b *boundBoolListItem) Get() (bool, error) {
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundBoolListItem) Set(val bool) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
 }
 
 // FloatList supports binding a list of float64 values.
@@ -179,7 +201,7 @@ func BindFloatList(v *[]float64) ExternalFloatList {
 	b := &boundFloatList{val: v}
 
 	for i := range *v {
-		b.appendItem(BindFloat(&((*v)[i])))
+		b.appendItem(bindFloatListItem(v, i))
 	}
 
 	return b
@@ -234,7 +256,7 @@ func (l *boundFloatList) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(BindFloat(&((*l.val)[i])))
+			l.appendItem(bindFloatListItem(l.val, i))
 		}
 		l.trigger()
 	}
@@ -269,6 +291,28 @@ func (l *boundFloatList) SetValue(i int, v float64) error {
 		return err
 	}
 	return item.(Float).Set(v)
+}
+
+func bindFloatListItem(v *[]float64, i int) Float {
+	return &boundFloatListItem{val: v, index: i}
+}
+
+type boundFloatListItem struct {
+	base
+
+	val   *[]float64
+    index int
+}
+
+func (b *boundFloatListItem) Get() (float64, error) {
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundFloatListItem) Set(val float64) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
 }
 
 // IntList supports binding a list of int values.
@@ -313,7 +357,7 @@ func BindIntList(v *[]int) ExternalIntList {
 	b := &boundIntList{val: v}
 
 	for i := range *v {
-		b.appendItem(BindInt(&((*v)[i])))
+		b.appendItem(bindIntListItem(v, i))
 	}
 
 	return b
@@ -368,7 +412,7 @@ func (l *boundIntList) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(BindInt(&((*l.val)[i])))
+			l.appendItem(bindIntListItem(l.val, i))
 		}
 		l.trigger()
 	}
@@ -403,6 +447,28 @@ func (l *boundIntList) SetValue(i int, v int) error {
 		return err
 	}
 	return item.(Int).Set(v)
+}
+
+func bindIntListItem(v *[]int, i int) Int {
+	return &boundIntListItem{val: v, index: i}
+}
+
+type boundIntListItem struct {
+	base
+
+	val   *[]int
+    index int
+}
+
+func (b *boundIntListItem) Get() (int, error) {
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundIntListItem) Set(val int) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
 }
 
 // RuneList supports binding a list of rune values.
@@ -447,7 +513,7 @@ func BindRuneList(v *[]rune) ExternalRuneList {
 	b := &boundRuneList{val: v}
 
 	for i := range *v {
-		b.appendItem(BindRune(&((*v)[i])))
+		b.appendItem(bindRuneListItem(v, i))
 	}
 
 	return b
@@ -502,7 +568,7 @@ func (l *boundRuneList) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(BindRune(&((*l.val)[i])))
+			l.appendItem(bindRuneListItem(l.val, i))
 		}
 		l.trigger()
 	}
@@ -537,6 +603,28 @@ func (l *boundRuneList) SetValue(i int, v rune) error {
 		return err
 	}
 	return item.(Rune).Set(v)
+}
+
+func bindRuneListItem(v *[]rune, i int) Rune {
+	return &boundRuneListItem{val: v, index: i}
+}
+
+type boundRuneListItem struct {
+	base
+
+	val   *[]rune
+    index int
+}
+
+func (b *boundRuneListItem) Get() (rune, error) {
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundRuneListItem) Set(val rune) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
 }
 
 // StringList supports binding a list of string values.
@@ -581,7 +669,7 @@ func BindStringList(v *[]string) ExternalStringList {
 	b := &boundStringList{val: v}
 
 	for i := range *v {
-		b.appendItem(BindString(&((*v)[i])))
+		b.appendItem(bindStringListItem(v, i))
 	}
 
 	return b
@@ -636,7 +724,7 @@ func (l *boundStringList) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(BindString(&((*l.val)[i])))
+			l.appendItem(bindStringListItem(l.val, i))
 		}
 		l.trigger()
 	}
@@ -671,4 +759,26 @@ func (l *boundStringList) SetValue(i int, v string) error {
 		return err
 	}
 	return item.(String).Set(v)
+}
+
+func bindStringListItem(v *[]string, i int) String {
+	return &boundStringListItem{val: v, index: i}
+}
+
+type boundStringListItem struct {
+	base
+
+	val   *[]string
+    index int
+}
+
+func (b *boundStringListItem) Get() (string, error) {
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundStringListItem) Set(val string) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
 }

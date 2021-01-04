@@ -308,7 +308,7 @@ func Bind{{ .Name }}List(v *[]{{ .Type }}) External{{ .Name }}List {
 	b := &bound{{ .Name }}List{val: v}
 
 	for i := range *v {
-		b.appendItem(Bind{{ .Name }}(&((*v)[i])))
+		b.appendItem(bind{{ .Name }}ListItem(v, i))
 	}
 
 	return b
@@ -363,7 +363,7 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(Bind{{ .Name }}(&((*l.val)[i])))
+			l.appendItem(bind{{ .Name }}ListItem(l.val, i))
 		}
 		l.trigger()
 	}
@@ -398,6 +398,28 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 		return err
 	}
 	return item.({{ .Name }}).Set(v)
+}
+
+func bind{{ .Name }}ListItem(v *[]{{ .Type }}, i int) {{ .Name }} {
+	return &bound{{ .Name }}ListItem{val: v, index: i}
+}
+
+type bound{{ .Name }}ListItem struct {
+	base
+
+	val   *[]{{ .Type }}
+    index int
+}
+
+func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
+	return (*b.val)[b.index], nil
+}
+
+func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
 }
 `
 

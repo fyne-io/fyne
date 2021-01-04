@@ -54,7 +54,7 @@ func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 	m := &mapBase{items: make(map[string]DataItem), val: d}
 
 	for k := range *d {
-		m.setItem(k, bindUntyped((*d)[k]))
+		m.setItem(k, bindUntypedMapValue(d, k))
 	}
 
 	return m
@@ -198,7 +198,7 @@ func (b *mapBase) doReload() (retErr error) {
 		}
 
 		if !found {
-			b.setItem(key, bindUntyped((*b.val)[key]))
+			b.setItem(key, bindUntypedMapValue(b.val, key))
 			changed = true
 		}
 	}
@@ -245,7 +245,8 @@ func (b *mapBase) SetValue(key string, d interface{}) error {
 		return nil
 	}
 
-	item := bindUntyped(d)
+	(*b.val)[key] = d
+	item := bindUntypedMapValue(b.val, key)
 	b.setItem(key, item)
 	return nil
 }
@@ -256,22 +257,27 @@ func (b *mapBase) setItem(key string, d DataItem) {
 	b.trigger()
 }
 
-func bindUntyped(m interface{}) Untyped {
-	return &boundUntyped{val: m}
+func bindUntypedMapValue(m *map[string]interface{}, k string) Untyped {
+	return &boundUntyped{val: m, key: k}
 }
 
 type boundUntyped struct {
 	base
 
-	val interface{}
+	val *map[string]interface{}
+	key string
 }
 
 func (b *boundUntyped) get() (interface{}, error) {
-	return b.val, nil
+	if v, ok := (*b.val)[b.key]; ok {
+		return v, nil
+	}
+
+	return nil, errKeyNotFound
 }
 
 func (b *boundUntyped) set(val interface{}) error {
-	b.val = val
+	(*b.val)[b.key] = val
 
 	b.trigger()
 	return nil
