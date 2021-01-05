@@ -248,7 +248,7 @@ func (b *mapBase) doReload() (retErr error) {
 	}
 
 	for k, item := range b.items {
-		err := item.(*boundUntyped).setIfChanged((*b.val)[k])
+		err := item.(*boundMapValue).setIfChanged((*b.val)[k])
 		if err != nil {
 			retErr = err
 		}
@@ -306,10 +306,10 @@ func (b *boundStruct) Reload() (retErr error) {
 }
 
 func bindUntypedMapValue(m *map[string]interface{}, k string) Untyped {
-	return &boundUntyped{val: m, key: k, old: (*m)[k]}
+	return &boundMapValue{val: m, key: k, old: (*m)[k]}
 }
 
-type boundUntyped struct {
+type boundMapValue struct {
 	base
 
 	val *map[string]interface{}
@@ -317,7 +317,7 @@ type boundUntyped struct {
 	old interface{}
 }
 
-func (b *boundUntyped) get() (interface{}, error) {
+func (b *boundMapValue) get() (interface{}, error) {
 	if v, ok := (*b.val)[b.key]; ok {
 		return v, nil
 	}
@@ -325,14 +325,14 @@ func (b *boundUntyped) get() (interface{}, error) {
 	return nil, errKeyNotFound
 }
 
-func (b *boundUntyped) set(val interface{}) error {
+func (b *boundMapValue) set(val interface{}) error {
 	(*b.val)[b.key] = val
 
 	b.trigger()
 	return nil
 }
 
-func (b *boundUntyped) setIfChanged(val interface{}) error {
+func (b *boundMapValue) setIfChanged(val interface{}) error {
 	if val == b.old {
 		return nil
 	}
