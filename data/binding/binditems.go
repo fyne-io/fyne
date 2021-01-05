@@ -48,6 +48,9 @@ type boundBool struct {
 }
 
 func (b *boundBool) Get() (bool, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return false, nil
 	}
@@ -55,10 +58,16 @@ func (b *boundBool) Get() (bool, error) {
 }
 
 func (b *boundBool) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.setIfChanged(*b.val)
 }
 
 func (b *boundBool) Set(val bool) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if *b.val == val {
 		return nil
 	}
@@ -127,6 +136,9 @@ type boundFloat struct {
 }
 
 func (b *boundFloat) Get() (float64, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return 0.0, nil
 	}
@@ -134,10 +146,16 @@ func (b *boundFloat) Get() (float64, error) {
 }
 
 func (b *boundFloat) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.setIfChanged(*b.val)
 }
 
 func (b *boundFloat) Set(val float64) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if *b.val == val {
 		return nil
 	}
@@ -206,6 +224,9 @@ type boundInt struct {
 }
 
 func (b *boundInt) Get() (int, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return 0, nil
 	}
@@ -213,10 +234,16 @@ func (b *boundInt) Get() (int, error) {
 }
 
 func (b *boundInt) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.setIfChanged(*b.val)
 }
 
 func (b *boundInt) Set(val int) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if *b.val == val {
 		return nil
 	}
@@ -285,6 +312,9 @@ type boundRune struct {
 }
 
 func (b *boundRune) Get() (rune, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return rune(0), nil
 	}
@@ -292,10 +322,16 @@ func (b *boundRune) Get() (rune, error) {
 }
 
 func (b *boundRune) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.setIfChanged(*b.val)
 }
 
 func (b *boundRune) Set(val rune) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if *b.val == val {
 		return nil
 	}
@@ -364,6 +400,9 @@ type boundString struct {
 }
 
 func (b *boundString) Get() (string, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return "", nil
 	}
@@ -371,10 +410,16 @@ func (b *boundString) Get() (string, error) {
 }
 
 func (b *boundString) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.setIfChanged(*b.val)
 }
 
 func (b *boundString) Set(val string) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if *b.val == val {
 		return nil
 	}

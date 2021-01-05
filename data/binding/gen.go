@@ -57,6 +57,9 @@ type bound{{ .Name }} struct {
 }
 
 func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return {{ .Default }}, nil
 	}
@@ -64,10 +67,16 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 }
 
 func (b *bound{{ .Name }}) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.setIfChanged(*b.val)
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if *b.val == val {
 		return nil
 	}
@@ -128,6 +137,8 @@ func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
 func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 	b.p.Set{{ .Name }}(b.key, v)
 
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
 }
@@ -199,11 +210,13 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringFrom{{ .Name }}) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -266,11 +279,13 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringTo{{ .Name }}) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -331,12 +346,18 @@ type bound{{ .Name }}List struct {
 }
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	*l.val = append(*l.val, val)
 
 	return l.doReload()
 }
 
 func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	return *l.val, nil
 }
 
@@ -344,20 +365,30 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	return (*l.val)[i], nil
 }
 
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	*l.val = append([]{{ .Type }}{val}, *l.val...)
 
 	return l.doReload()
 }
 
 func (l *bound{{ .Name }}List) Reload() error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	return l.doReload()
 }
 
 func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	*l.val = v
 
 	return l.doReload()
@@ -395,7 +426,10 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
+
+	l.lock.Lock()
 	(*l.val)[i] = v
+	l.lock.Unlock()
 
 	item, err := l.GetItem(i)
 	if err != nil {
@@ -417,10 +451,16 @@ type bound{{ .Name }}ListItem struct {
 }
 
 func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return (*b.val)[b.index], nil
 }
 
 func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	(*b.val)[b.index] = val
 
 	b.trigger()

@@ -122,6 +122,9 @@ type mapBase struct {
 }
 
 func (b *mapBase) GetItem(key string) (DataItem, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if v, ok := b.items[key]; ok {
 		return v, nil
 	}
@@ -130,8 +133,10 @@ func (b *mapBase) GetItem(key string) (DataItem, error) {
 }
 
 func (b *mapBase) Keys() []string {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	ret := make([]string, len(b.items))
-	// TODO lock
 	i := 0
 	for k := range b.items {
 		ret[i] = k
@@ -142,12 +147,18 @@ func (b *mapBase) Keys() []string {
 }
 
 func (b *mapBase) Delete(key string) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	delete(b.items, key)
 
 	b.trigger()
 }
 
 func (b *mapBase) Get() (map[string]interface{}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return map[string]interface{}{}, nil
 	}
@@ -156,6 +167,9 @@ func (b *mapBase) Get() (map[string]interface{}, error) {
 }
 
 func (b *mapBase) GetValue(key string) (interface{}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if i, ok := b.items[key]; ok {
 		return i.(Untyped).get()
 	}
@@ -164,10 +178,16 @@ func (b *mapBase) GetValue(key string) (interface{}, error) {
 }
 
 func (b *mapBase) Reload() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	return b.doReload()
 }
 
 func (b *mapBase) Set(v map[string]interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &v
 		b.trigger()
@@ -179,6 +199,9 @@ func (b *mapBase) Set(v map[string]interface{}) error {
 }
 
 func (b *mapBase) SetValue(key string, d interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	if i, ok := b.items[key]; ok {
 		i.(Untyped).set(d)
 		return nil
@@ -216,7 +239,7 @@ func (b *mapBase) doReload() (retErr error) {
 			}
 		}
 		if !found {
-			b.Delete(key)
+			delete(b.items, key)
 			changed = true
 		}
 	}
@@ -246,6 +269,9 @@ type boundStruct struct {
 }
 
 func (b *boundStruct) Reload() (retErr error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	v := reflect.ValueOf(b.orig).Elem()
 	t := v.Type()
 	for j := 0; j < v.NumField(); j++ {
