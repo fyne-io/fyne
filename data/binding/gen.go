@@ -67,34 +67,13 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 }
 
 func (b *bound{{ .Name }}) Reload() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.setIfChanged(*b.val)
+	return b.Set(*b.val)
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
-
-	b.trigger()
-	return nil
-}
-
-func (b *bound{{ .Name }}) setIfChanged(val {{ .Type }}) error {
-	if val == b.old {
-		return nil
-	}
-	b.old = val
+	*b.val = val
 
 	b.trigger()
 	return nil

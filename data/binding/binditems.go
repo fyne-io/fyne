@@ -58,34 +58,13 @@ func (b *boundBool) Get() (bool, error) {
 }
 
 func (b *boundBool) Reload() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.setIfChanged(*b.val)
+	return b.Set(*b.val)
 }
 
 func (b *boundBool) Set(val bool) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundBool) setIfChanged(val bool) error {
-	if val == b.old {
-		return nil
-	}
-	b.old = val
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -146,34 +125,13 @@ func (b *boundFloat) Get() (float64, error) {
 }
 
 func (b *boundFloat) Reload() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.setIfChanged(*b.val)
+	return b.Set(*b.val)
 }
 
 func (b *boundFloat) Set(val float64) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundFloat) setIfChanged(val float64) error {
-	if val == b.old {
-		return nil
-	}
-	b.old = val
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -234,34 +192,13 @@ func (b *boundInt) Get() (int, error) {
 }
 
 func (b *boundInt) Reload() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.setIfChanged(*b.val)
+	return b.Set(*b.val)
 }
 
 func (b *boundInt) Set(val int) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundInt) setIfChanged(val int) error {
-	if val == b.old {
-		return nil
-	}
-	b.old = val
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -322,34 +259,13 @@ func (b *boundRune) Get() (rune, error) {
 }
 
 func (b *boundRune) Reload() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.setIfChanged(*b.val)
+	return b.Set(*b.val)
 }
 
 func (b *boundRune) Set(val rune) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundRune) setIfChanged(val rune) error {
-	if val == b.old {
-		return nil
-	}
-	b.old = val
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -410,34 +326,13 @@ func (b *boundString) Get() (string, error) {
 }
 
 func (b *boundString) Reload() error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.setIfChanged(*b.val)
+	return b.Set(*b.val)
 }
 
 func (b *boundString) Set(val string) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundString) setIfChanged(val string) error {
-	if val == b.old {
-		return nil
-	}
-	b.old = val
+	*b.val = val
 
 	b.trigger()
 	return nil
