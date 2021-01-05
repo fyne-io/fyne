@@ -34,7 +34,7 @@ type External{{ .Name }} interface {
 // Since: 2.0.0
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
-	return &bound{{ .Name }}{val: &blank, old: blank}
+	return &bound{{ .Name }}{val: &blank}
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
@@ -53,7 +53,6 @@ type bound{{ .Name }} struct {
 	base
 
 	val *{{ .Type }}
-	old {{ .Type }}
 }
 
 func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {

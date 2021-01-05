@@ -25,7 +25,7 @@ type ExternalBool interface {
 // Since: 2.0.0
 func NewBool() Bool {
 	blank := false
-	return &boundBool{val: &blank, old: blank}
+	return &boundBool{val: &blank}
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -44,7 +44,6 @@ type boundBool struct {
 	base
 
 	val *bool
-	old bool
 }
 
 func (b *boundBool) Get() (bool, error) {
@@ -92,7 +91,7 @@ type ExternalFloat interface {
 // Since: 2.0.0
 func NewFloat() Float {
 	blank := 0.0
-	return &boundFloat{val: &blank, old: blank}
+	return &boundFloat{val: &blank}
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -111,7 +110,6 @@ type boundFloat struct {
 	base
 
 	val *float64
-	old float64
 }
 
 func (b *boundFloat) Get() (float64, error) {
@@ -159,7 +157,7 @@ type ExternalInt interface {
 // Since: 2.0.0
 func NewInt() Int {
 	blank := 0
-	return &boundInt{val: &blank, old: blank}
+	return &boundInt{val: &blank}
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -178,7 +176,6 @@ type boundInt struct {
 	base
 
 	val *int
-	old int
 }
 
 func (b *boundInt) Get() (int, error) {
@@ -226,7 +223,7 @@ type ExternalRune interface {
 // Since: 2.0.0
 func NewRune() Rune {
 	blank := rune(0)
-	return &boundRune{val: &blank, old: blank}
+	return &boundRune{val: &blank}
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -245,7 +242,6 @@ type boundRune struct {
 	base
 
 	val *rune
-	old rune
 }
 
 func (b *boundRune) Get() (rune, error) {
@@ -293,7 +289,7 @@ type ExternalString interface {
 // Since: 2.0.0
 func NewString() String {
 	blank := ""
-	return &boundString{val: &blank, old: blank}
+	return &boundString{val: &blank}
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -312,7 +308,6 @@ type boundString struct {
 	base
 
 	val *string
-	old string
 }
 
 func (b *boundString) Get() (string, error) {
