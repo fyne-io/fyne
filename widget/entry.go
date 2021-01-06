@@ -40,6 +40,8 @@ type Entry struct {
 	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
+	// Since: 2.0.0
+	OnSubmitted func(string) `json:"-"`
 	Password    bool
 	// Deprecated: Use Disable() instead
 	ReadOnly  bool
@@ -524,6 +526,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	e.propertyLock.RLock()
 	provider := e.textProvider()
 	multiLine := e.MultiLine
+	selectDown := e.selectKeyDown
+	text := e.Text
 	e.propertyLock.RUnlock()
 
 	if e.selectKeyDown || e.selecting {
@@ -557,7 +561,10 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		provider.deleteFromTo(pos, pos+1)
 		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
-		if !multiLine {
+		if !multiLine || selectDown {
+			if f := e.OnSubmitted; f != nil {
+				f(text)
+			}
 			return
 		}
 		e.propertyLock.Lock()

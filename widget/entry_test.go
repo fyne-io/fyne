@@ -1616,7 +1616,7 @@ func TestEntry_Select(t *testing.T) {
 		},
 		// Erase the selection and add a newline at selection start
 		"enter": {
-			keys:     []fyne.KeyName{fyne.KeyEnter},
+			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyEnter},
 			wantText: "Testing\nTe\nng\nTesting",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1636,7 +1636,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"enter reverse": {
-			keys:         []fyne.KeyName{fyne.KeyEnter},
+			keys:         []fyne.KeyName{keyShiftLeftUp, fyne.KeyEnter},
 			setupReverse: true,
 			wantText:     "Testing\nTe\nng\nTesting",
 			wantMarkup: `
@@ -2428,6 +2428,45 @@ func TestEntry_SetTextStyle(t *testing.T) {
 		</content>
 	</canvas>
 	`, c)
+}
+
+func TestEntry_Submit(t *testing.T) {
+	var submission string
+	entry := &widget.Entry{
+		OnSubmitted: func(s string) {
+			submission = s
+		},
+	}
+	t.Run("SingleLine_Enter", func(t *testing.T) {
+		entry.MultiLine = false
+		entry.SetText("a")
+		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+		assert.Equal(t, "a", submission)
+	})
+	t.Run("SingleLine_Return", func(t *testing.T) {
+		entry.MultiLine = false
+		entry.SetText("b")
+		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+		assert.Equal(t, "b", submission)
+	})
+	t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+		entry.MultiLine = true
+		entry.SetText("c")
+		typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+		assert.Equal(t, "c", submission)
+		entry.SetText("d")
+		typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+		assert.Equal(t, "d", submission)
+	})
+	t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+		entry.MultiLine = true
+		entry.SetText("e")
+		typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+		assert.Equal(t, "e", submission)
+		entry.SetText("f")
+		typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+		assert.Equal(t, "f", submission)
+	})
 }
 
 func TestEntry_Tapped(t *testing.T) {
