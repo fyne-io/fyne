@@ -51,10 +51,10 @@ func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 	if d == nil {
 		return NewUntypedMap().(ExternalUntypedMap)
 	}
-	m := &mapBase{items: make(map[string]DataItem), val: d}
+	m := &mapBase{items: make(map[string]DataItem), val: d, updateExternal: true}
 
 	for k := range *d {
-		m.setItem(k, bindUntypedMapValue(d, k))
+		m.setItem(k, bindUntypedMapValue(d, k, m.updateExternal))
 	}
 
 	return m
@@ -89,6 +89,7 @@ func BindStruct(i interface{}) Struct {
 	s := &boundStruct{orig: i}
 	s.items = make(map[string]DataItem)
 	s.val = &map[string]interface{}{}
+	s.updateExternal = true
 
 	v := reflect.ValueOf(i).Elem()
 	t = v.Type()
@@ -117,8 +118,10 @@ type Untyped interface {
 
 type mapBase struct {
 	base
-	items map[string]DataItem
-	val   *map[string]interface{}
+
+	updateExternal bool
+	items          map[string]DataItem
+	val            *map[string]interface{}
 }
 
 func (b *mapBase) GetItem(key string) (DataItem, error) {
@@ -208,7 +211,7 @@ func (b *mapBase) SetValue(key string, d interface{}) error {
 	}
 
 	(*b.val)[key] = d
-	item := bindUntypedMapValue(b.val, key)
+	item := bindUntypedMapValue(b.val, key, b.updateExternal)
 	b.setItem(key, item)
 	return nil
 }
@@ -225,7 +228,7 @@ func (b *mapBase) doReload() (retErr error) {
 		}
 
 		if !found {
-			b.setItem(key, bindUntypedMapValue(b.val, key))
+			b.setItem(key, bindUntypedMapValue(b.val, key, b.updateExternal))
 			changed = true
 		}
 	}
@@ -248,7 +251,14 @@ func (b *mapBase) doReload() (retErr error) {
 	}
 
 	for k, item := range b.items {
-		err := item.(*boundMapValue).setIfChanged((*b.val)[k])
+		var err error
+
+		if b.updateExternal {
+			err = item.(*boundExternalMapValue).setIfChanged((*b.val)[k])
+		} else {
+			err = item.(*boundMapValue).set((*b.val)[k])
+		}
+
 		if err != nil {
 			retErr = err
 		}
@@ -305,8 +315,15 @@ func (b *boundStruct) Reload() (retErr error) {
 	return
 }
 
-func bindUntypedMapValue(m *map[string]interface{}, k string) Untyped {
-	return &boundMapValue{val: m, key: k, old: (*m)[k]}
+func bindUntypedMapValue(m *map[string]interface{}, k string, external bool) Untyped {
+	if external {
+		ret := &boundExternalMapValue{old: (*m)[k]}
+		ret.val = m
+		ret.key = k
+		return ret
+	}
+
+	return &boundMapValue{val: m, key: k}
 }
 
 type boundMapValue struct {
@@ -314,7 +331,6 @@ type boundMapValue struct {
 
 	val *map[string]interface{}
 	key string
-	old interface{}
 }
 
 func (b *boundMapValue) get() (interface{}, error) {
@@ -332,15 +348,19 @@ func (b *boundMapValue) set(val interface{}) error {
 	return nil
 }
 
-func (b *boundMapValue) setIfChanged(val interface{}) error {
+type boundExternalMapValue struct {
+	boundMapValue
+
+	old interface{}
+}
+
+func (b *boundExternalMapValue) setIfChanged(val interface{}) error {
 	if val == b.old {
 		return nil
 	}
-	(*b.val)[b.key] = val
 	b.old = val
 
-	b.trigger()
-	return nil
+	return b.set(val)
 }
 
 type boundReflect struct {
@@ -353,8 +373,12 @@ func (b *boundReflect) get() (interface{}, error) {
 	return b.val.Interface(), nil
 }
 
-func (b *boundReflect) set(val interface{}) error {
-	// TODO catch the panic and return as error
+func (b *boundReflect) set(val interface{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("unable to set bool in data binding")
+		}
+	}()
 	b.val.Set(reflect.ValueOf(val))
 
 	b.trigger()

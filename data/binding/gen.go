@@ -308,10 +308,10 @@ func Bind{{ .Name }}List(v *[]{{ .Type }}) External{{ .Name }}List {
 		return New{{ .Name }}List().(External{{ .Name }}List)
 	}
 
-	b := &bound{{ .Name }}List{val: v}
+	b := &bound{{ .Name }}List{val: v, updateExternal: true}
 
 	for i := range *v {
-		b.appendItem(bind{{ .Name }}ListItem(v, i))
+		b.appendItem(bind{{ .Name }}ListItem(v, i, b.updateExternal))
 	}
 
 	return b
@@ -320,7 +320,8 @@ func Bind{{ .Name }}List(v *[]{{ .Type }}) External{{ .Name }}List {
 type bound{{ .Name }}List struct {
 	listBase
 
-	val *[]{{ .Type }}
+	updateExternal bool
+	val            *[]{{ .Type }}
 }
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
@@ -382,7 +383,7 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(bind{{ .Name }}ListItem(l.val, i))
+			l.appendItem(bind{{ .Name }}ListItem(l.val, i, l.updateExternal))
 		}
 		l.trigger()
 	}
@@ -392,7 +393,12 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 			break
 		}
 
-		err := item.(*bound{{ .Name }}ListItem).setIfChanged((*l.val)[i])
+		var err error
+		if l.updateExternal {
+			err = item.(*boundExternal{{ .Name }}ListItem).setIfChanged((*l.val)[i])
+		} else {
+			err = item.(*bound{{ .Name }}ListItem).doSet((*l.val)[i])
+		}
 		if err != nil {
 			retErr = err
 		}
@@ -416,8 +422,15 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	return item.({{ .Name }}).Set(v)
 }
 
-func bind{{ .Name }}ListItem(v *[]{{ .Type }}, i int) {{ .Name }} {
-	return &bound{{ .Name }}ListItem{val: v, index: i, old: (*v)[i]}
+func bind{{ .Name }}ListItem(v *[]{{ .Type }}, i int, external bool) {{ .Name }} {
+	if external {
+		ret := &boundExternal{{ .Name }}ListItem{old: (*v)[i]}
+		ret.val = v
+		ret.index = i
+		return ret
+	}
+
+	return &bound{{ .Name }}ListItem{val: v, index: i}
 }
 
 type bound{{ .Name }}ListItem struct {
@@ -425,7 +438,6 @@ type bound{{ .Name }}ListItem struct {
 
 	val   *[]{{ .Type }}
 	index int
-	old   {{ .Type }}
 }
 
 func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
@@ -439,13 +451,23 @@ func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
+	return b.doSet(val)
+}
+
+func (b *bound{{ .Name }}ListItem) doSet(val {{ .Type }}) error {
 	(*b.val)[b.index] = val
 
 	b.trigger()
 	return nil
 }
 
-func (b *bound{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+type boundExternal{{ .Name }}ListItem struct {
+	bound{{ .Name }}ListItem
+
+	old {{ .Type }}
+}
+
+func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 	if val == b.old {
 		return nil
 	}
