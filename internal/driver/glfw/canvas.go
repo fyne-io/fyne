@@ -131,11 +131,6 @@ func (c *glCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *glCanvas) Overlay() fyne.CanvasObject {
-	return c.Overlays().Top()
-}
-
 func (c *glCanvas) Overlays() fyne.OverlayStack {
 	c.RLock()
 	defer c.RUnlock()
@@ -225,14 +220,6 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 
 func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
-}
-
-// Deprecated: Use Overlays() instead.
-func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	c.RLock()
-	o := c.overlays
-	c.RUnlock()
-	o.setOverlay(overlay)
 }
 
 func (c *glCanvas) SetPadded(padded bool) {

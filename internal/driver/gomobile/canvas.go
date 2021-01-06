@@ -71,21 +71,8 @@ func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *mobileCanvas) Overlay() fyne.CanvasObject {
-	return c.overlays.Top()
-}
-
 func (c *mobileCanvas) Overlays() fyne.OverlayStack {
 	return c.overlays
-}
-
-// Deprecated: Use Overlays() instead.
-func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	if len(c.overlays.List()) > 0 {
-		c.overlays.Remove(c.overlays.List()[0])
-	}
-	c.overlays.Add(overlay)
 }
 
 func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
