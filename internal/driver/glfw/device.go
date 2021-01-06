@@ -33,5 +33,5 @@ func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
 		return xScale
 	}
 
-	return fyne.SettingsScaleAuto
+	return scaleAuto
 }
