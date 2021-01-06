@@ -851,7 +851,7 @@ func TestWindow_Clipboard(t *testing.T) {
 	text := "My content from test window"
 	cb := w.Clipboard()
 
-	cliboardContent := cb.Content() // this sometimes fails but does not break the test, just means the CB is not restored at the end.
+	cliboardContent := cb.Content()
 	if cliboardContent != "" {
 		// Current environment has some content stored in clipboard,
 		// set temporary to an empty string to allow test and restore later.
@@ -860,19 +860,8 @@ func TestWindow_Clipboard(t *testing.T) {
 
 	assert.Empty(t, cb.Content())
 
-	cb.SetContent(text) // if this fails it will get caught by the retry
-
-	cbText := cb.Content() // if this fails it will get caught by the retry
-	i := 0
-	for cbText == "" && i < 3 { // retry sticking plaster fix for CB Access Denied error
-		t.Log("Clipboard Retry")
-		i++
-		time.Sleep(time.Duration(i*500) * time.Millisecond)
-		cb.SetContent(text)
-		cbText = cb.Content()
-	}
-
-	assert.Equal(t, text, cbText)
+	cb.SetContent(text)
+	assert.Equal(t, text, cb.Content())
 
 	// Restore clipboardContent, if any
 	cb.SetContent(cliboardContent) // this can fail but does not break the test, just means the CB is not restored.
