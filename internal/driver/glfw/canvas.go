@@ -574,19 +574,6 @@ func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.renderCaches = o.renderCaches[:overlayCount]
 }
 
-// concurrency safe implementation of deprecated c.SetOverlay
-func (o *overlayStack) setOverlay(overlay fyne.CanvasObject) {
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
-
-	if len(o.List()) > 0 {
-		o.remove(o.List()[0])
-	}
-	if overlay != nil {
-		o.add(overlay)
-	}
-}
-
 type renderCacheNode struct {
 	// structural data
 	firstChild  *renderCacheNode
