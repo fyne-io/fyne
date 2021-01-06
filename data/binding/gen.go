@@ -395,9 +395,13 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternal{{ .Name }}ListItem).lock.Lock()
 			err = item.(*boundExternal{{ .Name }}ListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternal{{ .Name }}ListItem).lock.Unlock()
 		} else {
+			item.(*bound{{ .Name }}ListItem).lock.Lock()
 			err = item.(*bound{{ .Name }}ListItem).doSet((*l.val)[i])
+			item.(*bound{{ .Name }}ListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
