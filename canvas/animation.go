@@ -9,8 +9,12 @@ import (
 
 const (
 	// DurationStandard is the time a standard interface animation will run.
+	//
+	// Since 2.0.0
 	DurationStandard = time.Millisecond * 300
 	// DurationShort is the time a subtle or small transition should use.
+	//
+	// Since 2.0.0
 	DurationShort = time.Millisecond * 150
 )
 
@@ -18,6 +22,8 @@ const (
 // the specified Duration. The colour transition will move linearly through the RGB colour space.
 // The content of fn should apply the color values to an object and refresh it.
 // You should call Start() on the returned animation to start it.
+//
+// Since 2.0.0
 func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
 	r1, g1, b1, a1 := start.RGBA()
 	r2, g2, b2, a2 := stop.RGBA()
@@ -42,6 +48,8 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 // NewPositionAnimation sets up a new animation that will transition from the start to stop Position over
 // the specified Duration. The content of fn should apply the position value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
+//
+// Since 2.0.0
 func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
 	xDelta := float32(stop.X - start.X)
 	yDelta := float32(stop.Y - start.Y)
@@ -56,6 +64,8 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 // NewSizeAnimation sets up a new animation that will transition from the start to stop Size over
 // the specified Duration. The content of fn should apply the size value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
+//
+// Since 2.0.0
 func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
 	widthDelta := float32(stop.Width - start.Width)
 	heightDelta := float32(stop.Height - start.Height)
