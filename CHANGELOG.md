@@ -29,6 +29,7 @@ These changes likely break some apps, please read the
 * Removed deprecated types including:
   - dialog.FileIcon (now widget.FileIcon)
   - canvas.SetScale()
+  - device.SystemScale()
 * iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 
 ### Added
