@@ -69,7 +69,7 @@ func (r *Runner) tickAnimation(a *anim) bool {
 	if time.Now().After(a.end) {
 		if a.reverse {
 			a.a.Tick(0.0)
-			if !a.a.Repeat {
+			if a.repeatsLeft == 0 {
 				return false
 			}
 			a.reverse = false
@@ -79,8 +79,13 @@ func (r *Runner) tickAnimation(a *anim) bool {
 				a.reverse = true
 			}
 		}
-		if !a.a.Repeat && !a.reverse {
-			return false
+		if !a.reverse {
+			if a.repeatsLeft == 0 {
+				return false
+			}
+			if a.repeatsLeft > 0 {
+				a.repeatsLeft--
+			}
 		}
 
 		a.start = time.Now()

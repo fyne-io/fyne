@@ -8,6 +8,9 @@ import "time"
 // A linear animation would return the same output value as is passed in.
 type AnimationCurve func(float32) float32
 
+// AnimationRepeatForever is an AnimationCount value that indicates it should not stop looping.
+const AnimationRepeatForever = -1
+
 var (
 	// AnimationEaseInOut is the default easing, it starts slowly, accelerates to the middle and slows to the end.
 	AnimationEaseInOut = animationEaseInOut
@@ -25,7 +28,7 @@ type Animation struct {
 	AutoReverse bool
 	Curve       AnimationCurve
 	Duration    time.Duration
-	Repeat      bool
+	RepeatCount int
 	Tick        func(float32)
 }
 

@@ -1442,7 +1442,7 @@ func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
 		cursor.FillColor = c
 		cursor.Refresh()
 	})
-	anim.Repeat = true
+	anim.RepeatCount = fyne.AnimationRepeatForever
 	anim.AutoReverse = true
 
 	return anim
