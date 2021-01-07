@@ -19,6 +19,7 @@ var _ Command = (*installer)(nil)
 type installer struct {
 	installDir, srcDir, icon, os, appID string
 	packager                            *packager
+	release                             bool
 }
 
 // NewInstaller returns an install command that can install locally built Fyne apps.
@@ -31,6 +32,7 @@ func (i *installer) AddFlags() {
 	flag.StringVar(&i.installDir, "installDir", "", "A specific location to install to, rather than the OS default")
 	flag.StringVar(&i.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&i.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.BoolVar(&i.release, "release", false, "Should this package be installed in release mode? (disable debug etc)")
 }
 
 func (i *installer) PrintHelp(indent string) {
@@ -139,5 +141,6 @@ func (i *installer) validate() error {
 	}
 	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
 	i.packager.icon = i.icon
+	i.packager.release = i.release
 	return i.packager.validate()
 }

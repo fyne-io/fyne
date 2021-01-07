@@ -220,7 +220,7 @@ func (c *cardRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
 	if c.header != nil {
-		c.header.TextSize = int(float32(theme.TextSize()) * 1.7)
+		c.header.TextSize = theme.TextSize() * 1.7
 		c.header.Color = theme.TextColor()
 	}
 	if c.subHeader != nil {

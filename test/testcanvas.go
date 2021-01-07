@@ -25,6 +25,7 @@ type WindowlessCanvas interface {
 	Padded() bool
 	Resize(fyne.Size)
 	SetPadded(bool)
+	SetScale(float32)
 }
 
 type testCanvas struct {

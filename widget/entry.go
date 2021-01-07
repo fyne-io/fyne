@@ -34,15 +34,15 @@ var _ mobile.Keyboardable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
-	shortcut    fyne.ShortcutHandler
-	Text        string
+	shortcut fyne.ShortcutHandler
+	Text     string
+	// Since: 2.0.0
+	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
-	// Deprecated: Use Disable() instead
-	ReadOnly  bool
-	MultiLine bool
-	Wrapping  fyne.TextWrap
+	MultiLine   bool
+	Wrapping    fyne.TextWrap
 
 	// Set a validator that this entry will check against
 	// Since: 1.4
@@ -72,7 +72,9 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	ActionItem fyne.CanvasObject
+	ActionItem   fyne.CanvasObject
+	textSource   binding.String
+	textListener binding.DataListener
 }
 
 // NewEntry creates a new single line entry widget.
@@ -83,18 +85,11 @@ func NewEntry() *Entry {
 }
 
 // NewEntryWithData returns an Entry widget connected to the specified data source.
+//
+// Since: 2.0.0
 func NewEntryWithData(data binding.String) *Entry {
 	entry := NewEntry()
-
-	data.AddListener(binding.NewDataListener(func() {
-		entry.Text = data.Get()
-		if cache.IsRendered(entry) {
-			entry.Refresh()
-		}
-	}))
-	entry.OnChanged = func(s string) {
-		data.Set(s)
-	}
+	entry.Bind(data)
 
 	return entry
 }
@@ -112,6 +107,41 @@ func NewPasswordEntry() *Entry {
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
+}
+
+// Bind connects the specified data source to this Entry.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Entry will set the value into the data source.
+//
+// Since: 2.0.0
+func (e *Entry) Bind(data binding.String) {
+	e.Unbind()
+	e.textSource = data
+
+	var convertErr error
+	e.Validator = func(string) error {
+		return convertErr
+	}
+	e.textListener = binding.NewDataListener(func() {
+		val, err := data.Get()
+		if err != nil {
+			convertErr = err
+			e.SetValidationError(err)
+			return
+		}
+		e.Text = val
+		convertErr = nil
+		e.Refresh()
+		if cache.IsRendered(e) {
+			e.Refresh()
+		}
+	})
+	data.AddListener(e.textListener)
+
+	e.OnChanged = func(s string) {
+		convertErr = data.Set(s)
+		e.SetValidationError(convertErr)
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -156,9 +186,7 @@ func (e *Entry) Cursor() desktop.Cursor {
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 //
 // Implements: fyne.Disableable
-func (e *Entry) Disable() { // TODO remove this override after ReadOnly is removed
-	e.ReadOnly = true
-
+func (e *Entry) Disable() {
 	e.DisableableWidget.Disable()
 }
 
@@ -166,7 +194,7 @@ func (e *Entry) Disable() { // TODO remove this override after ReadOnly is remov
 //
 // Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
-	return e.DisableableWidget.disabled || e.ReadOnly
+	return e.DisableableWidget.disabled
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
@@ -217,9 +245,7 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 // Enable this widget, updating any style or features appropriately.
 //
 // Implements: fyne.Disableable
-func (e *Entry) Enable() { // TODO remove this override after ReadOnly is removed
-	e.ReadOnly = false
-
+func (e *Entry) Enable() {
 	e.DisableableWidget.Enable()
 }
 
@@ -395,17 +421,6 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.placeholderProvider().setText(text) // refreshes
 }
 
-// SetReadOnly sets whether or not the Entry should not be editable
-//
-// Deprecated: Use Disable() instead.
-func (e *Entry) SetReadOnly(ro bool) {
-	if ro {
-		e.Disable()
-	} else {
-		e.Enable()
-	}
-}
-
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
 	e.textProvider().setText(text)
@@ -477,7 +492,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
 
-	e.popUp = newPopUpMenu(menu, c)
+	e.popUp = NewPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
@@ -666,6 +681,22 @@ func (e *Entry) TypedRune(r rune) {
 // Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
+}
+
+// Unbind disconnects any configured data source from this Entry.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (e *Entry) Unbind() {
+	e.OnChanged = nil
+	if e.textSource == nil || e.textListener == nil {
+		return
+	}
+
+	e.Validator = nil
+	e.textSource.RemoveListener(e.textListener)
+	e.textListener = nil
+	e.textSource = nil
 }
 
 // concealed tells the rendering textProvider if we are a concealed field
@@ -973,7 +1004,7 @@ func (e *Entry) textProvider() *textProvider {
 
 // textStyle tells the rendering textProvider our style
 func (e *Entry) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{}
+	return e.TextStyle
 }
 
 // textWrap tells the rendering textProvider our wrapping
@@ -1206,9 +1237,9 @@ func (r *entryRenderer) buildSelection() {
 
 	provider := r.entry.textProvider()
 	// Convert column, row into x,y
-	getCoordinates := func(column int, row int) (int, int) {
+	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
+		return sz.Width + theme.Padding()*2, sz.Height*float32(row) + theme.Padding()*2
 	}
 
 	lineHeight := r.entry.text.charMinSize().Height
@@ -1284,7 +1315,7 @@ func (r *entryRenderer) moveCursor() {
 	size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
 	provider.propertyLock.RUnlock()
 	xPos := size.Width
-	yPos := size.Height * r.entry.CursorRow
+	yPos := size.Height * float32(r.entry.CursorRow)
 	r.entry.propertyLock.RUnlock()
 
 	r.entry.propertyLock.Lock()
@@ -1394,7 +1425,7 @@ func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
 		cursor.FillColor = c
 		cursor.Refresh()
 	})
-	anim.Repeat = true
+	anim.RepeatCount = fyne.AnimationRepeatForever
 	anim.AutoReverse = true
 
 	return anim

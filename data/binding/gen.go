@@ -12,20 +12,26 @@ import (
 )
 
 const itemBindTemplate = `
-// {{ .Name }} supports binding a {{ .Type }} value in a Fyne application
+// {{ .Name }} supports binding a {{ .Type }} value.
+//
+// Since: 2.0.0
 type {{ .Name }} interface {
 	DataItem
-	Get() {{ .Type }}
-	Set({{ .Type }})
+	Get() ({{ .Type }}, error)
+	Set({{ .Type }}) error
 }
 
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
+//
+// Since: 2.0.0
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
+//
+// Since: 2.0.0
 func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
 	if v == nil {
 		return New{{ .Name }}() // never allow a nil value pointer
@@ -40,16 +46,16 @@ type bound{{ .Name }} struct {
 	val *{{ .Type }}
 }
 
-func (b *bound{{ .Name }}) Get() {{ .Type }} {
+func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 	if b.val == nil {
-		return {{ .Default }}
+		return {{ .Default }}, nil
 	}
-	return *b.val
+	return *b.val, nil
 }
 
-func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
+func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	if *b.val == val {
-		return
+		return nil
 	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
@@ -58,37 +64,54 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
 	}
 
 	b.trigger()
+	return nil
 }
 `
 
 const prefTemplate = `
 type prefBound{{ .Name }} struct {
 	base
-	key string
-	p   fyne.Preferences
+	key   string
+	p     fyne.Preferences
+	cache {{ .Type }}
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+//
+// Since: 2.0.0
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
-	if listen, ok := prefBinds[key]; ok {
-		if l, ok := listen.({{ .Name }}); ok {
-			return l
+	if prefBinds[p] != nil {
+		if listen, ok := prefBinds[p][key]; ok {
+			if l, ok := listen.({{ .Name }}); ok {
+				return l
+			}
+			fyne.LogError(keyTypeMismatchError+key, nil)
 		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
-	prefBinds[key] = listen
+	ensurePreferencesAttached(p)
+	prefBinds[p][key] = listen
 	return listen
 }
 
-func (b *prefBound{{ .Name }}) Get() {{ .Type }} {
-	return b.p.{{ .Name }}(b.key)
+func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
+	b.cache = b.p.{{ .Name }}(b.key)
+	return b.cache, nil
 }
 
-func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) {
+func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 	b.p.Set{{ .Name }}(b.key, v)
+
+	b.trigger()
+	return nil
+}
+
+func (b *prefBound{{ .Name }}) checkForChange() {
+	if b.p.{{ .Name }}(b.key) == b.cache {
+		return
+	}
 
 	b.trigger()
 }
@@ -105,6 +128,8 @@ type stringFrom{{ .Name }} struct {
 // {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
 // Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
 // {{ .Name }} if the parse was successful.
+//
+// Since: 2.0.0
 func {{ .Name }}ToString(v {{ .Name }}) String {
 	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
 }
@@ -112,31 +137,46 @@ func {{ .Name }}ToString(v {{ .Name }}) String {
 // {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
 // presented using the specified format. Changes to the {{ .Name }} will be pushed to the String and setting
 // the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
+//
+// Since: 2.0.0
 func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
 }
 
-func (s *stringFrom{{ .Name }}) Get() string {
-	val := s.from.Get()
+func (s *stringFrom{{ .Name }}) Get() (string, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
 
-	return fmt.Sprintf(s.format, val)
+	return fmt.Sprintf(s.format, val), nil
 }
 
-func (s *stringFrom{{ .Name }}) Set(str string) {
+func (s *stringFrom{{ .Name }}) Set(str string) error {
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, s.format, &val)
-	if err != nil || n != 1 {
-		fyne.LogError("{{ .Type }} parse error", err)
-		return
+	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+	if err != nil {
+		return err
 	}
-	if val == s.from.Get() {
-		return
+	if n != 1 {
+		return errParseFailed
 	}
-	s.from.Set(val)
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if val == old {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
 
 	s.trigger()
+	return nil
 }
 
 func (s *stringFrom{{ .Name }}) DataChanged() {
@@ -155,6 +195,8 @@ type stringTo{{ .Name }} struct {
 // StringTo{{ .Name }} creates a binding that connects a String data item to a {{ .Name }}.
 // Changes to the String will be parsed and pushed to the {{ .Name }} if the parse was successful, and setting
 // the {{ .Name }} update the String binding.
+//
+// Since: 2.0.0
 func StringTo{{ .Name }}(str String) {{ .Name }} {
 	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
 }
@@ -163,40 +205,190 @@ func StringTo{{ .Name }}(str String) {{ .Name }} {
 // presented using the specified format. Changes to the {{ .Name }} will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the {{ .Name }} will push a formatted value
 // into the String.
+//
+// Since: 2.0.0
 func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
 	return v
 }
 
-func (s *stringTo{{ .Name }}) Get() {{ .Type }} {
-	str := s.from.Get()
-	if str == "" {
-		return {{ .Default }}
+func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return {{ .Default }}, err
 	}
 
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, s.format, &val)
-	if err != nil || n != 1 {
-		fyne.LogError("{{ .Type }} parse error", err)
-		return {{ .Default }}
+	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+	if err != nil {
+		return {{ .Default }}, err
+	}
+	if n != 1 {
+		return {{ .Default }}, errParseFailed
 	}
 
-	return val
+	return val, nil
 }
 
-func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) {
+func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 	str := fmt.Sprintf(s.format, val)
-	if str == s.from.Get() {
-		return
+	old, err := s.from.Get()
+	if str == old {
+		return err
 	}
 
-	s.from.Set(str)
+	if err = s.from.Set(str); err != nil {
+		return err
+	}
+
 	s.trigger()
+	return nil
 }
 
 func (s *stringTo{{ .Name }}) DataChanged() {
 	s.trigger()
+}
+`
+
+const listBindTemplate = `
+// {{ .Name }}List supports binding a list of {{ .Type }} values.
+//
+// Since: 2.0.0
+type {{ .Name }}List interface {
+	DataList
+
+	Append({{ .Type }}) error
+	Get() ([]{{ .Type }}, error)
+	GetValue(int) ({{ .Type }}, error)
+	Prepend({{ .Type }}) error
+	Set([]{{ .Type }}) error
+	SetValue(int, {{ .Type }}) error
+}
+
+// New{{ .Name }}List returns a bindable list of {{ .Type }} values.
+//
+// Since: 2.0.0
+func New{{ .Name }}List() {{ .Name }}List {
+	return &bound{{ .Name }}List{}
+}
+
+// Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
+//
+// Since: 2.0.0
+func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
+	if v == nil {
+		return New{{ .Name }}List()
+	}
+
+	b := &bound{{ .Name }}List{val: v}
+
+	for i := range *v {
+		b.appendItem(Bind{{ .Name }}(&((*v)[i])))
+	}
+
+	return b
+}
+
+type bound{{ .Name }}List struct {
+	listBase
+
+	val *[]{{ .Type }}
+}
+
+func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
+	if l.val != nil {
+		*l.val = append(*l.val, val)
+	}
+
+	l.appendItem(Bind{{ .Name }}(&val))
+	return nil
+}
+
+func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
+	if l.val == nil {
+		return []{{ .Type }}{}, nil
+	}
+
+	return *l.val, nil
+}
+
+func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
+	if i < 0 || i >= l.Length() {
+		return {{ .Default }}, errOutOfBounds
+	}
+	if l.val != nil {
+		return (*l.val)[i], nil
+	}
+
+	item, err := l.GetItem(i)
+	if err != nil {
+		return {{ .Default }}, err
+	}
+	return item.({{ .Name }}).Get()
+}
+
+func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
+	if l.val != nil {
+		*l.val = append([]{{ .Type }}{val}, *l.val...)
+	}
+
+	l.prependItem(Bind{{ .Name }}(&val))
+	return nil
+}
+
+func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
+	if l.val == nil { // was not initialized with a blank value, recover
+		l.val = &v
+		l.trigger()
+		return nil
+	}
+
+	oldLen := len(l.items)
+	*l.val = v
+	newLen := len(v)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(Bind{{ .Name }}(&((*l.val)[i])))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		old, err := l.items[i].({{ .Name }}).Get()
+		val := (*(l.val))[i]
+		if err != nil || (*(l.val))[i] != old {
+			err = item.(*bound{{ .Name }}).Set(val)
+			if err != nil {
+				retErr = err
+			}
+		}
+	}
+	return
+}
+
+func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
+	if i < 0 || i >= l.Length() {
+		return errOutOfBounds
+	}
+	if l.val != nil {
+		(*l.val)[i] = v
+	}
+
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
+	}
+	return item.({{ .Name }}).Set(v)
 }
 `
 
@@ -244,8 +436,6 @@ func main() {
 	convertFile.WriteString(`
 import (
 	"fmt"
-
-	"fyne.io/fyne"
 )
 `)
 	prefFile, err := newFile("preference")
@@ -257,15 +447,19 @@ import (
 import "fyne.io/fyne"
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
-
-// Because there is no preference listener yet we connect any listeners asking for the same key.
-var prefBinds = make(map[string]DataItem)
 `)
+
+	listFile, err := newFile("bindlists")
+	if err != nil {
+		return
+	}
+	defer listFile.Close()
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
+	list := template.Must(template.New("list").Parse(listBindTemplate))
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
@@ -281,6 +475,7 @@ var prefBinds = make(map[string]DataItem)
 		if b.Format != "" {
 			writeFile(convertFile, toString, b)
 		}
+		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {

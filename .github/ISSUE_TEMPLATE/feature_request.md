@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!-- Please search for open issues that relate to the same feature before opening a new one. -->
+
 ### Is your feature request related to a problem? Please describe:
 <!-- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
 

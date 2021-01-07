@@ -259,7 +259,7 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return t.regular
 }
 
-func (t *builtinTheme) Size(s fyne.ThemeSizeName) int {
+func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	switch s {
 	case SizeNameInlineIcon:
 		return 20
@@ -358,7 +358,7 @@ func ShadowColor() color.Color {
 }
 
 // TextSize returns the standard text size
-func TextSize() int {
+func TextSize() float32 {
 	return current().Size(SizeNameText)
 }
 
@@ -389,22 +389,22 @@ func TextMonospaceFont() fyne.Resource {
 
 // Padding is the standard gap between elements and the border around interface
 // elements
-func Padding() int {
+func Padding() float32 {
 	return current().Size(SizeNamePadding)
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
-func IconInlineSize() int {
+func IconInlineSize() float32 {
 	return current().Size(SizeNameInlineIcon)
 }
 
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer
-func ScrollBarSize() int {
+func ScrollBarSize() float32 {
 	return current().Size(SizeNameScrollBar)
 }
 
 // ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
-func ScrollBarSmallSize() int {
+func ScrollBarSmallSize() float32 {
 	return current().Size(SizeNameScrollBarSmall)
 }
 

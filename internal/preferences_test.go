@@ -2,6 +2,7 @@ package internal
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -121,11 +122,12 @@ func TestPrefs_String_Zero(t *testing.T) {
 func TestInMemoryPreferences_OnChange(t *testing.T) {
 	p := NewInMemoryPreferences()
 	called := false
-	p.OnChange = func() {
+	p.AddChangeListener(func() {
 		called = true
-	}
+	})
 
 	p.SetString("dummy", "another")
+	time.Sleep(time.Millisecond * 100)
 
 	assert.True(t, called)
 }

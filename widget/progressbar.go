@@ -52,7 +52,7 @@ func (p *progressRenderer) updateBar() {
 	}
 
 	size := p.progress.Size()
-	p.bar.Resize(fyne.NewSize(int(float32(size.Width)*ratio), size.Height))
+	p.bar.Resize(fyne.NewSize(size.Width*ratio, size.Height))
 }
 
 // Layout the components of the check widget
@@ -90,6 +90,31 @@ type ProgressBar struct {
 	//
 	// Since: 1.4
 	TextFormatter func() string
+
+	valueSource   binding.Float
+	valueListener binding.DataListener
+}
+
+// Bind connects the specified data source to this ProgressBar.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+//
+// Since: 2.0.0
+func (p *ProgressBar) Bind(data binding.Float) {
+	p.Unbind()
+	p.valueSource = data
+
+	p.valueListener = binding.NewDataListener(func() {
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		p.Value = val
+		if cache.IsRendered(p) {
+			p.Refresh()
+		}
+	})
+	data.AddListener(p.valueListener)
 }
 
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
@@ -118,6 +143,20 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
 }
 
+// Unbind disconnects any configured data source from this ProgressBar.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (p *ProgressBar) Unbind() {
+	if p.valueSource == nil || p.valueListener == nil {
+		return
+	}
+
+	p.valueSource.RemoveListener(p.valueListener)
+	p.valueListener = nil
+	p.valueSource = nil
+}
+
 // NewProgressBar creates a new progress bar widget.
 // The default Min is 0 and Max is 1, Values set should be between those numbers.
 // The display will convert this to a percentage.
@@ -129,15 +168,11 @@ func NewProgressBar() *ProgressBar {
 }
 
 // NewProgressBarWithData returns a progress bar connected with the specified data source.
+//
+// Since: 2.0.0
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
-
-	data.AddListener(binding.NewDataListener(func() {
-		p.Value = data.Get()
-		if cache.IsRendered(p) {
-			p.Refresh()
-		}
-	}))
+	p.Bind(data)
 
 	return p
 }

@@ -5,6 +5,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fyne-io/mobile/app"
+	"github.com/fyne-io/mobile/event/key"
+	"github.com/fyne-io/mobile/event/lifecycle"
+	"github.com/fyne-io/mobile/event/paint"
+	"github.com/fyne-io/mobile/event/size"
+	"github.com/fyne-io/mobile/event/touch"
+	"github.com/fyne-io/mobile/gl"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
@@ -13,15 +21,6 @@ import (
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
-
-	"github.com/fyne-io/mobile/app"
-	"github.com/fyne-io/mobile/event/key"
-	"github.com/fyne-io/mobile/event/lifecycle"
-	"github.com/fyne-io/mobile/event/paint"
-	"github.com/fyne-io/mobile/event/size"
-	"github.com/fyne-io/mobile/event/touch"
-	"github.com/fyne-io/mobile/gl"
 )
 
 const tapSecondaryDelay = 300 * time.Millisecond
@@ -64,7 +63,7 @@ func (d *mobileDriver) currentWindow() fyne.Window {
 	return d.windows[len(d.windows)-1]
 }
 
-func (d *mobileDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	return painter.RenderedTextSize(text, size, style)
 }
 
@@ -131,7 +130,6 @@ func (d *mobileDriver) Run() {
 				dev.safeLeft = e.InsetLeftPx
 				dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
 				dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
-				canvas.SetScale(0) // value is ignored
 
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()
@@ -145,7 +143,7 @@ func (d *mobileDriver) Run() {
 				}
 
 				if d.freeDirtyTextures(canvas) {
-					newSize := fyne.NewSize(int(float32(currentSize.WidthPx)/canvas.scale), int(float32(currentSize.HeightPx)/canvas.scale))
+					newSize := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
 
 					if canvas.minSizeChanged() {
 						canvas.ensureMinSize()
@@ -188,6 +186,7 @@ func (d *mobileDriver) onStop() {
 }
 
 func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
+	clips := &internal.ClipStack{}
 	canvas := window.Canvas().(*mobileCanvas)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -196,19 +195,20 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			canvas.painter.StartClipping(
-				fyne.NewPos(pos.X, canvas.Size().Height-pos.Y-obj.Size().Height),
-				obj.Size(),
-			)
+		if _, ok := obj.(fyne.Scrollable); ok {
+			inner := clips.Push(pos, obj.Size())
+			canvas.painter.StartClipping(inner.Rect())
 		}
 		canvas.painter.Paint(obj, pos, size)
 		return false
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
-		if _, ok := obj.(*widget.ScrollContainer); ok {
+		if _, ok := obj.(fyne.Scrollable); ok {
 			canvas.painter.StopClipping()
+			clips.Pop()
+			if top := clips.Top(); top != nil {
+				canvas.painter.StartClipping(top.Rect())
+			}
 		}
 	}
 

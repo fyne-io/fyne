@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -26,6 +27,7 @@ type fileDialog struct {
 	breadcrumb *widget.Box
 	files      *fyne.Container
 	fileScroll *widget.ScrollContainer
+	showHidden bool
 
 	win      *widget.PopUp
 	selected *fileDialogItem
@@ -158,6 +160,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 	buttons := widget.NewHBox(f.dismiss, f.open)
+
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, widget.NewHScrollContainer(f.fileName))
 
@@ -165,7 +168,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
 	f.fileScroll = widget.NewScrollContainer(f.files)
-	verticalExtra := int(float64(fileIconSize) * 0.25)
+	verticalExtra := float32(float64(fileIconSize) * 0.25)
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 
@@ -181,10 +184,28 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	favorites := f.loadFavorites()
 
-	favoritesGroup := widget.NewGroup("Favorites", favorites...)
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favoritesGroup, nil),
-		favoritesGroup, header, footer, body)
+	favoritesGroup := widget.NewVScrollContainer(widget.NewGroup("Favorites", favorites...))
+	var optionsButton *widget.Button
+	optionsButton = widget.NewButtonWithIcon("Options", theme.SettingsIcon(), func() {
+		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
+	})
 
+	left := container.NewBorder(nil, optionsButton, nil, nil, favoritesGroup)
+
+	return container.NewBorder(header, footer, left, nil, body)
+}
+
+func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
+	hiddenFiles := widget.NewCheck("Show Hidden Files", func(changed bool) {
+		f.showHidden = changed
+		f.refreshDir(f.dir)
+	})
+	hiddenFiles.SetChecked(f.showHidden)
+	content := container.NewVBox(hiddenFiles)
+
+	p := position.Add(buttonSize)
+	pos := fyne.NewPos(p.X, p.Y-content.MinSize().Height-theme.Padding()*2)
+	widget.ShowPopUpAtPosition(content, f.win.Canvas, pos)
 }
 
 func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
@@ -232,7 +253,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 	}
 
 	for _, file := range files {
-		if isHidden(file) {
+		if !f.showHidden && isHidden(file) {
 			continue
 		}
 

@@ -22,8 +22,6 @@ extern void themeChanged();
 
 @end
 
-static int notifyNum = 0;
-
 void sendNSUserNotification(const char *, const char *);
 
 bool isBundled() {
@@ -40,10 +38,12 @@ void sendNotification(const char *title, const char *body) {
     if (center.delegate == nil) {
         center.delegate = [[FyneUserNotificationCenterDelegate new] autorelease];
     }
+
+    NSString *uuid = [[NSUUID UUID] UUIDString];
     NSUserNotification *notification = [[NSUserNotification new] autorelease];
     notification.title = [NSString stringWithUTF8String:title];
     notification.informativeText = [NSString stringWithUTF8String:body];
-    notification.identifier = [NSString stringWithFormat:@"%@-fyne-notify-%d", [[NSBundle mainBundle] bundleIdentifier], ++notifyNum];
+    notification.identifier = [NSString stringWithFormat:@"%@-fyne-notify-%@", [[NSBundle mainBundle] bundleIdentifier], uuid];
     [center scheduleNotification:notification];
 }
 

@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"image/color"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -14,6 +16,31 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestEntry_Binding(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Init")
+	assert.Equal(t, "Init", entry.Text)
+
+	str := binding.NewString()
+	entry.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "", entry.Text)
+
+	err := str.Set("Updated")
+	assert.Nil(t, err)
+	waitForBinding()
+	assert.Equal(t, "Updated", entry.Text)
+
+	entry.SetText("Typed")
+	v, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Typed", v)
+
+	entry.Unbind()
+	waitForBinding()
+	assert.Equal(t, "Typed", entry.Text)
+}
 
 func TestEntry_Cursor(t *testing.T) {
 	entry := widget.NewEntry()
@@ -322,7 +349,7 @@ func TestEntry_DragSelect(t *testing.T) {
 	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
-		de := &fyne.DragEvent{PointEvent: *ev1, DraggedX: 1, DraggedY: 0}
+		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
 		entry.Dragged(de)
 	}
 	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
@@ -2211,25 +2238,25 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	`, c)
 }
 
-func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
+func TestEntry_Disable_KeyDown(t *testing.T) {
 	entry := widget.NewEntry()
 
 	test.Type(entry, "H")
-	entry.SetReadOnly(true)
+	entry.Disable()
 	test.Type(entry, "i")
 	assert.Equal(t, "H", entry.Text)
 
-	entry.SetReadOnly(false)
+	entry.Enable()
 	test.Type(entry, "i")
 	assert.Equal(t, "Hi", entry.Text)
 }
 
-func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
+func TestEntry_Disable_OnFocus(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
-	entry.SetReadOnly(true)
+	entry.Disable()
 	entry.FocusGained()
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
@@ -2247,7 +2274,7 @@ func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
 		</canvas>
 	`, c)
 
-	entry.SetReadOnly(false)
+	entry.Enable()
 	entry.FocusGained()
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
@@ -2351,6 +2378,58 @@ func TestEntry_SetText_Underflow(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_SetTextStyle(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	entry.Text = "Styled Text"
+	entry.TextStyle = fyne.TextStyle{Bold: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text bold pos="4,4" size="104x21">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+
+	entry.TextStyle = fyne.TextStyle{Monospace: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text monospace pos="4,4" size="104x18">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+
+	entry.TextStyle = fyne.TextStyle{Italic: true}
+	entry.Refresh()
+	test.AssertRendersToMarkup(t, `
+	<canvas padded size="150x200">
+		<content>
+			<widget pos="10,10" size="120x37" type="*widget.Entry">
+				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
+				<widget pos="4,4" size="112x29" type="*widget.textProvider">
+					<text italic pos="4,4" size="104x21">Styled Text</text>
+				</widget>
+			</widget>
+		</content>
+	</canvas>
+	`, c)
+}
+
 func TestEntry_Tapped(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
@@ -2390,7 +2469,7 @@ func TestEntry_Tapped(t *testing.T) {
 	`, c)
 
 	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
+	pos := fyne.NewPos(testCharSize*1.5, testCharSize/2) // tap in the middle of the 2nd "M"
 	ev := &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
 	test.AssertRendersToMarkup(t, `
@@ -2411,7 +2490,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	pos = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
+	pos = fyne.NewPos(testCharSize*2.5, testCharSize/2) // tap in the middle of the 3rd "M"
 	ev = &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
 	test.AssertRendersToMarkup(t, `
@@ -2784,6 +2863,21 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
 
+func TestNewEntryWithData(t *testing.T) {
+	str := binding.NewString()
+	err := str.Set("Init")
+	assert.Nil(t, err)
+
+	entry := widget.NewEntryWithData(str)
+	waitForBinding()
+	assert.Equal(t, "Init", entry.Text)
+
+	entry.SetText("Typed")
+	v, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "Typed", v)
+}
+
 func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	e := widget.NewEntry()
 	b := widget.NewButton("", func() {})
@@ -3062,7 +3156,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
 
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
-	y := theme.Padding() + row*rowHeight + rowHeight/2
+	y := theme.Padding() + float32(row)*rowHeight + rowHeight/2
 
 	pos := fyne.NewPos(x, y)
 	return &fyne.PointEvent{Position: pos}
@@ -3210,4 +3304,8 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 func teardownImageTest(w fyne.Window) {
 	w.Close()
 	test.NewApp()
+}
+
+func waitForBinding() {
+	time.Sleep(time.Millisecond * 100) // data resolves on background thread
 }

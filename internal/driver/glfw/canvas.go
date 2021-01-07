@@ -52,7 +52,7 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 
 func (c *glCanvas) Capture() image.Image {
 	var img image.Image
-	runOnMain(func() {
+	runOnDraw(c.context.(*window), func() {
 		img = c.painter.Capture(c)
 	})
 	return img
@@ -148,9 +148,9 @@ func (c *glCanvas) Padded() bool {
 
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	texScale := c.texScale
-	multiple := float64(c.Scale() * texScale)
-	scaleInt := func(x int) int {
-		return int(math.Round(float64(x) * multiple))
+	multiple := c.Scale() * texScale
+	scaleInt := func(x float32) int {
+		return int(math.Round(float64(x * multiple)))
 	}
 
 	return scaleInt(pos.X), scaleInt(pos.Y)
@@ -243,10 +243,7 @@ func (c *glCanvas) SetPadded(padded bool) {
 	c.content.Move(c.contentPos())
 }
 
-// SetScale sets the render scale for this specific canvas
-//
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *glCanvas) SetScale(_ float32) {
+func (c *glCanvas) reloadScale() {
 	if !c.context.(*window).visible {
 		return
 	}
@@ -394,7 +391,7 @@ func (c *glCanvas) isMenuActive() bool {
 	return c.menu != nil && c.menu.(*MenuBar).IsActive()
 }
 
-func (c *glCanvas) menuHeight() int {
+func (c *glCanvas) menuHeight() float32 {
 	switch c.menu {
 	case nil:
 		// no menu or native menu -> does not consume space on the canvas
@@ -421,6 +418,7 @@ func (c *glCanvas) overlayChanged() {
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
+	clips := &internal.ClipStack{}
 	if c.Content() == nil {
 		return
 	}
@@ -429,18 +427,21 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 	paint := func(node *renderCacheNode, pos fyne.Position) {
 		obj := node.obj
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			c.painter.StartClipping(
-				fyne.NewPos(pos.X, c.Size().Height-pos.Y-obj.Size().Height),
-				obj.Size(),
-			)
+		if _, ok := obj.(fyne.Scrollable); ok {
+			inner := clips.Push(pos, obj.Size())
+			c.painter.StartClipping(inner.Rect())
 		}
 		c.painter.Paint(obj, pos, size)
 	}
 	afterPaint := func(node *renderCacheNode) {
-		if _, ok := node.obj.(*widget.ScrollContainer); ok {
-			c.painter.StopClipping()
+		if _, ok := node.obj.(fyne.Scrollable); ok {
+			clips.Pop()
+			if top := clips.Top(); top != nil {
+				c.painter.StartClipping(top.Rect())
+			} else {
+				c.painter.StopClipping()
+
+			}
 		}
 	}
 

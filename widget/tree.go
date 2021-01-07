@@ -193,7 +193,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 	t.selected = []TreeNodeID{uid}
 	if t.scroller != nil {
 		var found bool
-		var y int
+		var y float32
 		var size fyne.Size
 		t.walkAll(func(id TreeNodeID, branch bool, depth int) {
 			m := t.leafMinSize
@@ -391,7 +391,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
-	y := 0
+	y := float32(0)
 	numDividers := 0
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
@@ -512,7 +512,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		if isBranch {
 			m = r.treeContent.tree.branchMinSize
 		}
-		m.Width += depth * (theme.IconInlineSize() + theme.Padding())
+		m.Width += float32(depth) * (theme.IconInlineSize() + theme.Padding())
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
 	})
@@ -575,12 +575,13 @@ var _ fyne.Tappable = (*treeNode)(nil)
 
 type treeNode struct {
 	BaseWidget
-	tree    *Tree
-	uid     string
-	depth   int
-	hovered bool
-	icon    fyne.CanvasObject
-	content fyne.CanvasObject
+	tree     *Tree
+	uid      string
+	depth    int
+	hovered  bool
+	icon     fyne.CanvasObject
+	isBranch bool
+	content  fyne.CanvasObject
 }
 
 func (n *treeNode) Content() fyne.CanvasObject {
@@ -595,8 +596,8 @@ func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func (n *treeNode) Indent() int {
-	return n.depth * (theme.IconInlineSize() + theme.Padding())
+func (n *treeNode) Indent() float32 {
+	return float32(n.depth) * (theme.IconInlineSize() + theme.Padding())
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -643,8 +644,8 @@ type treeNodeRenderer struct {
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
-	x := 0
-	y := 0
+	x := float32(0)
+	y := float32(0)
 	r.indicator.Move(fyne.NewPos(x, y))
 	s := fyne.NewSize(theme.Padding(), size.Height)
 	r.indicator.SetMinSize(s)
@@ -688,7 +689,9 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 
 func (r *treeNodeRenderer) Refresh() {
 	if c := r.treeNode.content; c != nil {
-		c.Refresh()
+		if f := r.treeNode.tree.UpdateNode; f != nil {
+			f(r.treeNode.uid, r.treeNode.isBranch, c)
+		}
 	}
 	r.partialRefresh()
 }
@@ -717,9 +720,10 @@ type branch struct {
 func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	b = &branch{
 		treeNode: &treeNode{
-			tree:    tree,
-			icon:    newBranchIcon(tree),
-			content: content,
+			tree:     tree,
+			icon:     newBranchIcon(tree),
+			isBranch: true,
+			content:  content,
 		},
 	}
 	b.ExtendBaseWidget(b)
@@ -774,8 +778,9 @@ type leaf struct {
 func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 	l = &leaf{
 		&treeNode{
-			tree:    tree,
-			content: content,
+			tree:     tree,
+			content:  content,
+			isBranch: false,
 		},
 	}
 	l.ExtendBaseWidget(l)

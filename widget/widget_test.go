@@ -58,3 +58,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 
 	window.Close()
 }
+
+func waitForBinding() {
+	time.Sleep(time.Millisecond * 100) // data resolves on background thread
+}

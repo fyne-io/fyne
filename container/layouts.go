@@ -1,4 +1,3 @@
-// Package container provides container widgets that are used to lay out and organise applications
 package container // import "fyne.io/fyne/container"
 
 import (

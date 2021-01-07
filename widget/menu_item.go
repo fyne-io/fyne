@@ -143,7 +143,7 @@ type menuItemRenderer struct {
 	widget.BaseRenderer
 	i                *menuItem
 	icon             *canvas.Image
-	lastThemePadding int
+	lastThemePadding float32
 	minSize          fyne.Size
 	text             *canvas.Text
 }

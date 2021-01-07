@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	scrollSpeed      = 10
+	scrollSpeed      = float32(10)
 	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
 )
 
@@ -520,7 +520,7 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 	}
 
 	w.canvas.detectedScale = w.detectScale()
-	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
+	go w.canvas.reloadScale()
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
@@ -637,8 +637,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
 			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
-			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
-			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
+			ev.Dragged = fyne.NewDelta(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
 
@@ -804,8 +803,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 			xoff, yoff = yoff, xoff
 		}
 		ev := &fyne.ScrollEvent{}
-		ev.DeltaX = int(xoff * scrollSpeed)
-		ev.DeltaY = int(yoff * scrollSpeed)
+		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
 		wid.Scrolled(ev)
 	}
 }
@@ -1234,11 +1232,11 @@ func (w *window) create() {
 		initWindowHints()
 
 		pixWidth, pixHeight := w.screenSize(w.canvas.size)
-		pixWidth = fyne.Max(pixWidth, w.width)
+		pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
 		if pixWidth == 0 {
 			pixWidth = 10
 		}
-		pixHeight = fyne.Max(pixHeight, w.height)
+		pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
 		if pixHeight == 0 {
 			pixHeight = 10
 		}

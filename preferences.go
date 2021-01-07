@@ -32,4 +32,7 @@ type Preferences interface {
 
 	// RemoveValue removes a value for the given key (not currently supported on iOS)
 	RemoveValue(key string)
+
+	// AddChangeListener allows code to be notified when some preferences change. This will fire on any update.
+	AddChangeListener(func())
 }
