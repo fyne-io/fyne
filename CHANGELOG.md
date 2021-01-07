@@ -25,11 +25,13 @@ These changes likely break some apps, please read the
 * The second parameter of `theme.NewThemedResource` was removed, it was previously ignored
 * The desktop.Cursor definition was renamed desktop.StandardCursor to make way for custom cursors
 
+* iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
+* Entry widget now contains scrolling so should no longer be wrapped in a scroll container
+
 * Removed deprecated types including:
   - dialog.FileIcon (now widget.FileIcon)
   - canvas.SetScale()
-* iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 
 ### Added
 
