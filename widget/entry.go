@@ -1214,6 +1214,15 @@ func (e *entryContent) Tapped(ev *fyne.PointEvent) {
 	e.entry.updateMousePointer(ev, false)
 }
 
+// TappedSecondary is called when right or alternative tap is invoked in the entry content.
+//
+// Opens the PopUpMenu in the main entry.
+//
+// Implements: fyne.SecondaryTappable
+func (e *entryContent) TappedSecondary(pe *fyne.PointEvent) {
+	e.entry.TappedSecondary(pe)
+}
+
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
 
 type entryContentRenderer struct {
