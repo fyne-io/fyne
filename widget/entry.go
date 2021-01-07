@@ -438,7 +438,7 @@ func (e *Entry) SetText(text string) {
 //
 // Implements: fyne.Tappable
 func (e *entryContent) Tapped(ev *fyne.PointEvent) {
-	// we need to stop overriding the focus TODO make inner focusable
+	// we need to propagate the focus, top level widget handles focus APIs
 	fyne.CurrentApp().Driver().CanvasForObject(e.entry).Focus(e.entry)
 
 	if fyne.CurrentDevice().IsMobile() && e.entry.selecting {

@@ -483,32 +483,18 @@ func TestSelectEntry_MinSize(t *testing.T) {
 			want:    fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), minTextHeight+2*theme.Padding()),
 		},
 		"value": {
-			value: "foo",
-			want:  widget.NewLabel("foo").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
+			value: "foo", // in a scroller
+			want:  fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
 		},
 		"large value + small options": {
-			value:   "large",
+			value:   "large", // in a scroller
 			options: smallOptions,
-			want:    widget.NewLabel("large").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
+			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
 		},
 		"small value + large options": {
-			value:   "small",
+			value:   "small", // in a scroller
 			options: largeOptions,
 			want:    fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), minTextHeight+2*theme.Padding()),
-		},
-		"placeholder": {
-			placeholder: "example",
-			want:        widget.NewLabel("example").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
-		},
-		"large placeholder + small options": {
-			placeholder: "large",
-			options:     smallOptions,
-			want:        widget.NewLabel("large").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
-		},
-		"small placeholder + large options": {
-			placeholder: "small",
-			options:     largeOptions,
-			want:        fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), minTextHeight+2*theme.Padding()),
 		},
 	}
 	for name, tt := range tests {
