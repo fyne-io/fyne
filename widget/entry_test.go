@@ -42,11 +42,6 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "Typed", entry.Text)
 }
 
-func TestEntry_Cursor(t *testing.T) {
-	entry := widget.NewEntry()
-	assert.Equal(t, desktop.TextCursor, entry.Cursor())
-}
-
 func TestEntry_CursorColumn(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("")
@@ -285,77 +280,6 @@ func TestEntry_Disableable(t *testing.T) {
 			</content>
 		</canvas>
 	`, c)
-}
-
-func TestEntry_DoubleTapped(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
-
-	// select the word 'quick'
-	ev := getClickPosition("The qui", 0)
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-	assert.Equal(t, "quick", entry.SelectedText())
-
-	// select the whitespace after 'quick'
-	ev = getClickPosition("The quick", 0)
-	// add half a ' ' character
-	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-	assert.Equal(t, " ", entry.SelectedText())
-
-	// select all whitespace after 'jumped'
-	ev = getClickPosition("jumped  ", 1)
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-	assert.Equal(t, "    ", entry.SelectedText())
-}
-
-func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("A\nB\n")
-	window := test.NewWindow(entry)
-	defer window.Close()
-	window.SetPadded(false)
-	window.Resize(entry.MinSize())
-	entry.Resize(entry.MinSize())
-	c := window.Canvas()
-
-	test.Tap(entry)
-	assert.Equal(t, entry, c.Focused())
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-
-	assert.Equal(t, "", entry.SelectedText())
-}
-
-func TestEntry_DragSelect(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
-
-	// get position after the letter 'e' on the second row
-	ev1 := getClickPosition("ove", 1)
-	// get position after the letter 'z' on the second row
-	ev2 := getClickPosition("over the laz", 1)
-	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
-	ev2.Position.X += 2
-
-	// mouse down and drag from 'r' to 'z'
-	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
-	entry.MouseDown(me)
-	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
-		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
-		entry.Dragged(de)
-	}
-	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
-	entry.MouseUp(me)
-
-	assert.Equal(t, "r the laz", entry.SelectedText())
 }
 
 func TestEntry_EmptySelection(t *testing.T) {
@@ -618,28 +542,6 @@ func TestEntry_MinSize(t *testing.T) {
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
-}
-
-func TestEntry_MouseDownOnSelect(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("Ahnj\nBuki\n")
-	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-
-	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonSecondary}
-	entry.MouseDown(me)
-	entry.MouseUp(me)
-
-	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
-
-	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
-	entry.MouseDown(me)
-	entry.MouseUp(me)
-
-	assert.Equal(t, entry.SelectedText(), "")
 }
 
 func TestEntry_MultilineSelect(t *testing.T) {
@@ -2451,7 +2353,7 @@ func TestEntry_Tapped(t *testing.T) {
 		</canvas>
 	`, c)
 
-	test.Tap(entry)
+	entry.FocusGained()
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
@@ -2470,8 +2372,7 @@ func TestEntry_Tapped(t *testing.T) {
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize*1.5, testCharSize/2) // tap in the middle of the 2nd "M"
-	ev := &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
+	test.TapCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
@@ -2491,8 +2392,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 
 	pos = fyne.NewPos(testCharSize*2.5, testCharSize/2) // tap in the middle of the 3rd "M"
-	ev = &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
+	test.TapCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
@@ -2512,8 +2412,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 2, entry.CursorColumn)
 
 	pos = fyne.NewPos(testCharSize*4, testCharSize/2) // tap after text
-	ev = &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
+	test.TapCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
@@ -2533,8 +2432,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 3, entry.CursorColumn)
 
 	pos = fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev = &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
+	test.TapCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
@@ -3150,16 +3048,6 @@ func checkNewlineIgnored(t *testing.T, entry *widget.Entry) {
 	// don't go beyond top
 	entry.TypedKey(up)
 	assert.Equal(t, 0, entry.CursorRow)
-}
-
-func getClickPosition(str string, row int) *fyne.PointEvent {
-	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
-
-	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
-	y := theme.Padding() + float32(row)*rowHeight + rowHeight/2
-
-	pos := fyne.NewPos(x, y)
-	return &fyne.PointEvent{Position: pos}
 }
 
 func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
