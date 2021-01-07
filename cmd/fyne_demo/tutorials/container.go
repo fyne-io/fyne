@@ -22,6 +22,21 @@ func containerScreen(_ fyne.Window) fyne.CanvasObject {
 	return container.NewCenter(content)
 }
 
+// tabsScreen loads a tab panel for tabs
+func tabsScreen(_ fyne.Window) fyne.CanvasObject {
+	return container.NewCenter(container.NewBorder(
+		container.NewHBox(
+			container.NewMax(makeCell(), widget.NewLabel("Tab 1")),
+			widget.NewLabel("Tab 2"),
+			widget.NewLabel("Tab 3"),
+		),
+		nil,
+		nil,
+		nil,
+		container.NewMax(makeCell(), widget.NewLabelWithStyle("Content", fyne.TextAlignCenter, fyne.TextStyle{})),
+	))
+}
+
 func makeAppTabsTab(_ fyne.Window) fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
@@ -74,6 +89,14 @@ func makeCenterLayout(_ fyne.Window) fyne.CanvasObject {
 	middle := widget.NewButton("CenterLayout", func() {})
 
 	return container.NewCenter(middle)
+}
+
+func makeDocTabsTab(_ fyne.Window) fyne.CanvasObject {
+	return container.NewDocTabs(
+		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
+		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
+		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
+	)
 }
 
 func makeGridLayout(_ fyne.Window) fyne.CanvasObject {
