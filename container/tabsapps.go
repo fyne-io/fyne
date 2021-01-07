@@ -3,9 +3,12 @@ package container
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
+
+const MAX_APP_TABS = 7
 
 // Declare conformity with Widget interface.
 var _ fyne.Widget = (*AppTabs)(nil)
@@ -39,12 +42,15 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
+			bar: &tabBar{
+				buttons: &fyne.Container{},
+			},
 			divider:   canvas.NewRectangle(theme.ShadowColor()),
 			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
 		appTabs: t,
 	}
-	// TODO r.updateTabs()
+	r.updateTabs()
 	return r
 }
 
@@ -80,10 +86,75 @@ type appTabsRenderer struct {
 }
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
+	barMin := r.bar.MinSize()
+
+	var (
+		barPos, dividerPos, contentPos    fyne.Position
+		barSize, dividerSize, contentSize fyne.Size
+	)
+
+	switch r.appTabs.tabLocation {
+	case TabLocationTop:
+		barHeight := barMin.Height
+		barPos = fyne.NewPos(0, 0)
+		barSize = fyne.NewSize(size.Width, barHeight)
+		dividerPos = fyne.NewPos(0, barHeight)
+		dividerSize = fyne.NewSize(size.Width, theme.Padding())
+		contentPos = fyne.NewPos(0, barHeight+theme.Padding())
+		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-theme.Padding())
+	case TabLocationLeading:
+		barWidth := barMin.Width
+		barPos = fyne.NewPos(0, 0)
+		barSize = fyne.NewSize(barWidth, size.Height)
+		dividerPos = fyne.NewPos(barWidth, 0)
+		dividerSize = fyne.NewSize(theme.Padding(), size.Height)
+		contentPos = fyne.NewPos(barWidth+theme.Padding(), 0)
+		contentSize = fyne.NewSize(size.Width-barWidth-theme.Padding(), size.Height)
+	case TabLocationBottom:
+		barHeight := barMin.Height
+		barPos = fyne.NewPos(0, size.Height-barHeight)
+		barSize = fyne.NewSize(size.Width, barHeight)
+		dividerPos = fyne.NewPos(0, size.Height-barHeight-theme.Padding())
+		dividerSize = fyne.NewSize(size.Width, theme.Padding())
+		contentPos = fyne.NewPos(0, 0)
+		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-theme.Padding())
+	case TabLocationTrailing:
+		barWidth := barMin.Width
+		barPos = fyne.NewPos(size.Width-barWidth, 0)
+		barSize = fyne.NewSize(barWidth, size.Height)
+		dividerPos = fyne.NewPos(size.Width-barWidth-theme.Padding(), 0)
+		dividerSize = fyne.NewSize(theme.Padding(), size.Height)
+		contentPos = fyne.NewPos(0, 0)
+		contentSize = fyne.NewSize(size.Width-barWidth-theme.Padding(), size.Height)
+	}
+
+	r.bar.Move(barPos)
+	r.bar.Resize(barSize)
+	r.divider.Move(dividerPos)
+	r.divider.Resize(dividerSize)
+	if r.appTabs.current >= 0 && r.appTabs.current < len(r.appTabs.Items) {
+		content := r.appTabs.Items[r.appTabs.current].Content
+		content.Move(contentPos)
+		content.Resize(contentSize)
+	}
 }
 
 func (r *appTabsRenderer) MinSize() (min fyne.Size) {
-	return
+	barMin := r.bar.MinSize()
+
+	contentMin := fyne.NewSize(0, 0)
+	for _, content := range r.appTabs.Items {
+		contentMin = contentMin.Max(content.Content.MinSize())
+	}
+
+	switch r.appTabs.tabLocation {
+	case TabLocationLeading, TabLocationTrailing:
+		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(),
+			fyne.Max(barMin.Height, contentMin.Height))
+	default:
+		return fyne.NewSize(fyne.Max(barMin.Width, contentMin.Width),
+			barMin.Height+contentMin.Height+theme.Padding())
+	}
 }
 
 func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
@@ -95,4 +166,83 @@ func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *appTabsRenderer) Refresh() {
+	r.updateTabs()
+	r.divider.FillColor = theme.ShadowColor()
+	r.divider.Refresh()
+	r.indicator.FillColor = theme.PrimaryColor()
+	r.Layout(r.appTabs.Size())
+	canvas.Refresh(r.appTabs)
+}
+
+func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
+	overflow = widget.NewButtonWithIcon("", theme.SettingsIcon() /* TODO OverflowIcon() */, func() {
+		// TODO show popup
+		switch r.appTabs.tabLocation {
+		case TabLocationLeading:
+		case TabLocationTrailing:
+		case TabLocationTop:
+		case TabLocationBottom:
+		}
+	})
+	return
+}
+
+func (r *appTabsRenderer) updateTabs() {
+	tabCount := len(r.appTabs.Items)
+
+	// Set overflow action
+	if tabCount < MAX_APP_TABS {
+		r.bar.action = nil
+		r.bar.layout = layout.NewMaxLayout()
+	} else if r.bar.action == nil {
+		tabCount = MAX_APP_TABS
+		r.bar.action = r.buildOverflow()
+		// Set layout of tab bar containing tab buttons and overflow action
+		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+			r.bar.layout = layout.NewBorderLayout(nil, r.bar.action, nil, nil)
+		} else {
+			r.bar.layout = layout.NewBorderLayout(nil, nil, nil, r.bar.action)
+		}
+	}
+
+	// Set tab buttons
+	var iconPos buttonIconPosition
+	if fyne.CurrentDevice().IsMobile() {
+		cells := tabCount
+		if cells == 0 {
+			cells = 1
+		}
+		if cells >= MAX_APP_TABS {
+			cells = MAX_APP_TABS
+		}
+		r.bar.buttons.Layout = layout.NewGridLayout(cells)
+		iconPos = buttonIconTop
+	} else if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+		r.bar.buttons.Layout = layout.NewVBoxLayout()
+		iconPos = buttonIconTop
+	} else {
+		r.bar.buttons.Layout = layout.NewHBoxLayout()
+		iconPos = buttonIconInline
+	}
+	r.bar.buttons.Objects = nil
+	for i := 0; i < tabCount; i++ {
+		item := r.appTabs.Items[i]
+		button, ok := r.buttons[item]
+		if !ok {
+			button = &tabButton{
+				OnTap: func() { r.appTabs.Select(item) },
+			}
+		}
+		button.Text = item.Text
+		button.Icon = item.Icon
+		button.IconPosition = iconPos
+		if i == r.appTabs.current {
+			button.Importance = widget.HighImportance
+		} else {
+			button.Importance = widget.MediumImportance
+		}
+		r.bar.buttons.Objects = append(r.bar.buttons.Objects, button)
+	}
+	r.bar.buttons.Refresh()
+	r.moveIndicator(r.appTabs.tabLocation, r.appTabs.current)
 }
