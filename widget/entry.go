@@ -159,6 +159,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	content := &entryContent{entry: e}
 	scroll := NewScrollContainer(content)
 	objects := []fyne.CanvasObject{line, scroll}
+	content.scroll = scroll
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -1019,7 +1020,8 @@ func (r *entryRenderer) MinSize() fyne.Size {
 
 	if r.entry.MultiLine {
 		// ensure multiline height is at least charMinSize * multilineRows
-		minSize.Height = fyne.Max(minSize.Height, r.entry.text.charMinSize().Height*multiLineRows)
+		rowHeight := r.entry.text.charMinSize().Height * multiLineRows
+		minSize.Height = fyne.Max(minSize.Height, rowHeight+(multiLineRows-1)*theme.Padding())
 	}
 
 	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
@@ -1095,7 +1097,8 @@ var _ fyne.Widget = (*entryContent)(nil)
 type entryContent struct {
 	BaseWidget
 
-	entry *Entry
+	entry  *Entry
+	scroll *ScrollContainer
 }
 
 func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
@@ -1396,6 +1399,34 @@ func (r *entryContentRenderer) buildSelection() {
 	}
 }
 
+func (r *entryContentRenderer) ensureCursorVisible() {
+	cx1 := r.cursor.Position().X
+	cy1 := r.cursor.Position().Y
+	cx2 := cx1 + r.cursor.Size().Width
+	cy2 := cy1 + r.cursor.Size().Height
+	offset := r.content.scroll.Offset
+	size := r.content.scroll.size
+
+	if offset.X <= cx1 && cx2 < offset.X+size.Width &&
+		offset.Y <= cy1 && cy2 < offset.Y+size.Height {
+		return
+	}
+
+	move := fyne.NewDelta(0, 0)
+	if cx1 < offset.X {
+		move.DX -= offset.X - cx1
+	} else if cx2 >= offset.X+size.Width {
+		move.DX += cx2 - (offset.X + size.Width)
+	}
+	if cy1 < offset.Y {
+		move.DY -= offset.Y - cy1
+	} else if cy2 >= offset.X+size.Height {
+		move.DY += cy2 - (offset.Y + size.Height)
+	}
+	r.content.scroll.Offset = r.content.scroll.Offset.Add(move)
+	r.content.scroll.Refresh()
+}
+
 func (r *entryContentRenderer) moveCursor() {
 	// build r.selection[] if the user has made a selection
 	r.buildSelection()
@@ -1415,6 +1446,7 @@ func (r *entryContentRenderer) moveCursor() {
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()
+	r.ensureCursorVisible()
 
 	if callback != nil {
 		callback()
