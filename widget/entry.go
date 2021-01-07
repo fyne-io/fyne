@@ -187,51 +187,6 @@ func (e *Entry) Disabled() bool {
 	return e.DisableableWidget.disabled
 }
 
-// DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
-//
-// Implements: fyne.DoubleTappable
-func (e *entryContent) DoubleTapped(_ *fyne.PointEvent) {
-	row := e.entry.textProvider().row(e.entry.CursorRow)
-
-	start, end := getTextWhitespaceRegion(row, e.entry.CursorColumn)
-	if start == -1 || end == -1 {
-		return
-	}
-
-	e.setFieldsAndRefresh(func() {
-		if !e.entry.selectKeyDown {
-			e.entry.selectRow = e.entry.CursorRow
-			e.entry.selectColumn = start
-		}
-		// Always aim to maximise the selected region
-		if e.entry.selectRow > e.entry.CursorRow || (e.entry.selectRow == e.entry.CursorRow && e.entry.selectColumn > e.entry.CursorColumn) {
-			e.entry.CursorColumn = start
-		} else {
-			e.entry.CursorColumn = end
-		}
-		e.entry.selecting = true
-	})
-}
-
-// DragEnd is called at end of a drag event. It does nothing.
-//
-// Implements: fyne.Draggable
-func (e *entryContent) DragEnd() {
-}
-
-// Dragged is called when the pointer moves while a button is held down.
-// It updates the selection accordingly.
-//
-// Implements: fyne.Draggable
-func (e *entryContent) Dragged(d *fyne.DragEvent) {
-	if !e.entry.selecting {
-		e.entry.selectRow, e.entry.selectColumn = e.entry.getRowCol(&d.PointEvent)
-
-		e.entry.selecting = true
-	}
-	e.entry.updateMousePointer(&d.PointEvent, false)
-}
-
 // Enable this widget, updating any style or features appropriately.
 //
 // Implements: fyne.Disableable
@@ -354,38 +309,6 @@ func (e *Entry) MinSize() fyne.Size {
 	return min
 }
 
-// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
-// update the existing selection (if shift is held), or start a selection dragging operation.
-//
-// Implements: desktop.Mouseable
-func (e *entryContent) MouseDown(m *desktop.MouseEvent) {
-	e.propertyLock.Lock()
-	if e.entry.selectKeyDown {
-		e.entry.selecting = true
-	}
-	if e.entry.selecting && !e.entry.selectKeyDown && m.Button == desktop.MouseButtonPrimary {
-		e.entry.selecting = false
-	}
-	e.propertyLock.Unlock()
-
-	e.entry.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
-}
-
-// MouseUp called on mouse release
-// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
-// if so, and if a text select key isn't held, then disable selecting
-//
-// Implements: desktop.Mouseable
-func (e *entryContent) MouseUp(_ *desktop.MouseEvent) {
-	start, _ := e.entry.selection()
-
-	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
-	if start == -1 && e.entry.selecting && !e.entry.selectKeyDown {
-		e.entry.selecting = false
-	}
-}
-
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
@@ -432,19 +355,6 @@ func (e *Entry) SetText(text string) {
 	if e.CursorColumn >= rowLength {
 		e.CursorColumn = rowLength
 	}
-}
-
-// Tapped is called when this entry has been tapped so we should update the cursor position.
-//
-// Implements: fyne.Tappable
-func (e *entryContent) Tapped(ev *fyne.PointEvent) {
-	// we need to propagate the focus, top level widget handles focus APIs
-	fyne.CurrentApp().Driver().CanvasForObject(e.entry).Focus(e.entry)
-
-	if fyne.CurrentDevice().IsMobile() && e.entry.selecting {
-		e.entry.selecting = false
-	}
-	e.entry.updateMousePointer(ev, false)
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -1209,6 +1119,96 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 
 func (e *entryContent) Cursor() desktop.Cursor {
 	return desktop.TextCursor
+}
+
+// DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
+//
+// Implements: fyne.DoubleTappable
+func (e *entryContent) DoubleTapped(_ *fyne.PointEvent) {
+	row := e.entry.textProvider().row(e.entry.CursorRow)
+
+	start, end := getTextWhitespaceRegion(row, e.entry.CursorColumn)
+	if start == -1 || end == -1 {
+		return
+	}
+
+	e.setFieldsAndRefresh(func() {
+		if !e.entry.selectKeyDown {
+			e.entry.selectRow = e.entry.CursorRow
+			e.entry.selectColumn = start
+		}
+		// Always aim to maximise the selected region
+		if e.entry.selectRow > e.entry.CursorRow || (e.entry.selectRow == e.entry.CursorRow && e.entry.selectColumn > e.entry.CursorColumn) {
+			e.entry.CursorColumn = start
+		} else {
+			e.entry.CursorColumn = end
+		}
+		e.entry.selecting = true
+	})
+}
+
+// DragEnd is called at end of a drag event. It does nothing.
+//
+// Implements: fyne.Draggable
+func (e *entryContent) DragEnd() {
+}
+
+// Dragged is called when the pointer moves while a button is held down.
+// It updates the selection accordingly.
+//
+// Implements: fyne.Draggable
+func (e *entryContent) Dragged(d *fyne.DragEvent) {
+	if !e.entry.selecting {
+		e.entry.selectRow, e.entry.selectColumn = e.entry.getRowCol(&d.PointEvent)
+
+		e.entry.selecting = true
+	}
+	e.entry.updateMousePointer(&d.PointEvent, false)
+}
+
+// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
+// update the existing selection (if shift is held), or start a selection dragging operation.
+//
+// Implements: desktop.Mouseable
+func (e *entryContent) MouseDown(m *desktop.MouseEvent) {
+	e.propertyLock.Lock()
+	if e.entry.selectKeyDown {
+		e.entry.selecting = true
+	}
+	if e.entry.selecting && !e.entry.selectKeyDown && m.Button == desktop.MouseButtonPrimary {
+		e.entry.selecting = false
+	}
+	e.propertyLock.Unlock()
+
+	e.entry.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
+}
+
+// MouseUp called on mouse release
+// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
+// if so, and if a text select key isn't held, then disable selecting
+//
+// Implements: desktop.Mouseable
+func (e *entryContent) MouseUp(_ *desktop.MouseEvent) {
+	start, _ := e.entry.selection()
+
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	if start == -1 && e.entry.selecting && !e.entry.selectKeyDown {
+		e.entry.selecting = false
+	}
+}
+
+// Tapped is called when this entry has been tapped so we should update the cursor position.
+//
+// Implements: fyne.Tappable
+func (e *entryContent) Tapped(ev *fyne.PointEvent) {
+	// we need to propagate the focus, top level widget handles focus APIs
+	fyne.CurrentApp().Driver().CanvasForObject(e.entry).Focus(e.entry)
+
+	if fyne.CurrentDevice().IsMobile() && e.entry.selecting {
+		e.entry.selecting = false
+	}
+	e.entry.updateMousePointer(ev, false)
 }
 
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
