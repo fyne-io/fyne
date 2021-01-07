@@ -31,7 +31,6 @@ These changes likely break some apps, please read the
 
 * Removed deprecated types including:
   - dialog.FileIcon (now widget.FileIcon)
-  - canvas.SetScale()
 
 ### Added
 

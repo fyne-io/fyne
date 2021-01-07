@@ -30,9 +30,6 @@ type Device interface {
 	IsMobile() bool
 	HasKeyboard() bool
 	SystemScaleForWindow(Window) float32
-
-	// Deprecated: Use SystemScaleForWindow instead - system scale can vary depending on window placement
-	SystemScale() float32
 }
 
 // CurrentDevice returns the device information for the current hardware (via the driver)
