@@ -35,23 +35,23 @@ func NewDocTabs(items ...*TabItem) *DocTabs {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (c *DocTabs) CreateRenderer() fyne.WidgetRenderer {
-	c.ExtendBaseWidget(c)
+func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			divider:   canvas.NewRectangle(theme.ShadowColor()),
 			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
-		docTabs: c,
+		docTabs: t,
 	}
 	// TODO r.updateTabs()
 	return r
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (c *DocTabs) MinSize() fyne.Size {
-	c.ExtendBaseWidget(c)
-	return c.BaseWidget.MinSize()
+func (t *DocTabs) MinSize() fyne.Size {
+	t.ExtendBaseWidget(t)
+	return t.BaseWidget.MinSize()
 }
 
 // Declare conformity with WidgetRenderer interface.

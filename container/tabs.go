@@ -57,92 +57,92 @@ type baseTabs struct {
 }
 
 // Append adds a new TabItem to the end of the tab panel
-func (c *baseTabs) Append(item *TabItem) {
-	c.SetItems(append(c.Items, item))
+func (t *baseTabs) Append(item *TabItem) {
+	t.SetItems(append(t.Items, item))
 }
 
 // Remove tab by value
-func (c *baseTabs) Remove(item *TabItem) {
-	for index, existingItem := range c.Items {
+func (t *baseTabs) Remove(item *TabItem) {
+	for index, existingItem := range t.Items {
 		if existingItem == item {
-			c.RemoveIndex(index)
+			t.RemoveIndex(index)
 			break
 		}
 	}
 }
 
 // RemoveIndex removes tab by index
-func (c *baseTabs) RemoveIndex(index int) {
-	if index < 0 || index >= len(c.Items) {
+func (t *baseTabs) RemoveIndex(index int) {
+	if index < 0 || index >= len(t.Items) {
 		return
 	}
-	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
+	t.SetItems(append(t.Items[:index], t.Items[index+1:]...))
 }
 
 // Select sets the specified TabItem to be selected and its content visible.
-func (c *baseTabs) Select(item *TabItem) {
-	for i, child := range c.Items {
+func (t *baseTabs) Select(item *TabItem) {
+	for i, child := range t.Items {
 		if child == item {
-			c.SelectIndex(i)
+			t.SelectIndex(i)
 			return
 		}
 	}
 }
 
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
-func (c *baseTabs) SelectIndex(index int) {
-	if index < 0 || index >= len(c.Items) || c.current == index {
+func (t *baseTabs) SelectIndex(index int) {
+	if index < 0 || index >= len(t.Items) || t.current == index {
 		return
 	}
 
-	c.current = index
-	c.Refresh()
+	t.current = index
+	t.Refresh()
 
-	if f := c.OnSelectionChanged; f != nil {
-		f(c.Items[c.current])
+	if f := t.OnSelectionChanged; f != nil {
+		f(t.Items[t.current])
 	}
 }
 
 // Selection returns the currently selected TabItem.
-func (c *baseTabs) Selection() *TabItem {
-	if c.current < 0 || c.current >= len(c.Items) {
+func (t *baseTabs) Selection() *TabItem {
+	if t.current < 0 || t.current >= len(t.Items) {
 		return nil
 	}
-	return c.Items[c.current]
+	return t.Items[t.current]
 }
 
 // SelectionIndex returns the index of the currently selected TabItem.
-func (c *baseTabs) SelectionIndex() int {
-	return c.current
+func (t *baseTabs) SelectionIndex() int {
+	return t.current
 }
 
 // SetItems sets the container’s items and refreshes.
-func (c *baseTabs) SetItems(items []*TabItem) {
+func (t *baseTabs) SetItems(items []*TabItem) {
 	if mismatchedTabItems(items) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
-	c.Items = items
+	t.Items = items
 	if len(items) == 0 {
 		// No items available to be current
-		c.current = -1
-	} else if c.current < 0 {
+		t.current = -1
+	} else if t.current < 0 {
 		// Current is first tab item
-		c.current = 0
+		t.current = 0
 	}
-	c.Refresh()
+	t.Refresh()
 }
 
 // SetTabLocation sets the location of the tab bar
-func (c *baseTabs) SetTabLocation(l TabLocation) {
-	c.tabLocation = l
-	c.Refresh()
+func (t *baseTabs) SetTabLocation(l TabLocation) {
+	t.tabLocation = l
+	t.Refresh()
 }
 
 // Show this widget, if it was previously hidden
-func (c *baseTabs) Show() {
-	c.BaseWidget.Show()
-	c.SelectIndex(c.current)
-	c.Refresh()
+func (t *baseTabs) Show() {
+	t.BaseWidget.Show()
+	t.SelectIndex(t.current)
+	t.Refresh()
 }
 
 type baseTabsRenderer struct {

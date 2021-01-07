@@ -35,27 +35,27 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (c *AppTabs) CreateRenderer() fyne.WidgetRenderer {
-	c.ExtendBaseWidget(c)
+func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			divider:   canvas.NewRectangle(theme.ShadowColor()),
 			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
-		appTabs: c,
+		appTabs: t,
 	}
 	// TODO r.updateTabs()
 	return r
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (c *AppTabs) MinSize() fyne.Size {
-	c.ExtendBaseWidget(c)
-	return c.BaseWidget.MinSize()
+func (t *AppTabs) MinSize() fyne.Size {
+	t.ExtendBaseWidget(t)
+	return t.BaseWidget.MinSize()
 }
 
 // SetTabLocation sets the location of the tab bar
-func (c *AppTabs) SetTabLocation(l TabLocation) {
+func (t *AppTabs) SetTabLocation(l TabLocation) {
 	// Mobile has limited screen space, so don't put app tab bar on long edges
 	if d := fyne.CurrentDevice(); d.IsMobile() {
 		if o := d.Orientation(); fyne.IsVertical(o) {
@@ -68,7 +68,7 @@ func (c *AppTabs) SetTabLocation(l TabLocation) {
 			}
 		}
 	}
-	c.baseTabs.SetTabLocation(l)
+	t.baseTabs.SetTabLocation(l)
 }
 
 // Declare conformity with WidgetRenderer interface.
