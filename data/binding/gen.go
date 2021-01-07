@@ -21,6 +21,14 @@ type {{ .Name }} interface {
 	Set({{ .Type }}) error
 }
 
+// External{{ .Name }} supports binding a {{ .Type }} value to an external value.
+//
+// Since: 2.0.0
+type External{{ .Name }} interface {
+	{{ .Name }}
+	Reload() error
+}
+
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 //
 // Since: 2.0.0
@@ -30,11 +38,12 @@ func New{{ .Name }}() {{ .Name }} {
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
+func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		return New{{ .Name }}() // never allow a nil value pointer
+		return New{{ .Name }}().(External{{ .Name }}) // never allow a nil value pointer
 	}
 
 	return &bound{{ .Name }}{val: v}
@@ -47,21 +56,23 @@ type bound{{ .Name }} struct {
 }
 
 func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return {{ .Default }}, nil
 	}
 	return *b.val, nil
 }
 
+func (b *bound{{ .Name }}) Reload() error {
+	return b.Set(*b.val)
+}
+
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -104,6 +115,8 @@ func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
 func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 	b.p.Set{{ .Name }}(b.key, v)
 
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
 }
@@ -175,11 +188,13 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringFrom{{ .Name }}) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -242,11 +257,13 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringTo{{ .Name }}) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -266,25 +283,35 @@ type {{ .Name }}List interface {
 	SetValue(int, {{ .Type }}) error
 }
 
+// External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
+//
+// Since: 2.0.0
+type External{{ .Name }}List interface {
+	{{ .Name }}List
+
+	Reload() error
+}
+
 // New{{ .Name }}List returns a bindable list of {{ .Type }} values.
 //
 // Since: 2.0.0
 func New{{ .Name }}List() {{ .Name }}List {
-	return &bound{{ .Name }}List{}
+	return &bound{{ .Name }}List{val: &[]{{ .Type }}{}}
 }
 
 // Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
+func Bind{{ .Name }}List(v *[]{{ .Type }}) External{{ .Name }}List {
 	if v == nil {
-		return New{{ .Name }}List()
+		return New{{ .Name }}List().(External{{ .Name }}List)
 	}
 
-	b := &bound{{ .Name }}List{val: v}
+	b := &bound{{ .Name }}List{val: v, updateExternal: true}
 
 	for i := range *v {
-		b.appendItem(Bind{{ .Name }}(&((*v)[i])))
+		b.appendItem(bind{{ .Name }}ListItem(v, i, b.updateExternal))
 	}
 
 	return b
@@ -293,22 +320,22 @@ func Bind{{ .Name }}List(v *[]{{ .Type }}) {{ .Name }}List {
 type bound{{ .Name }}List struct {
 	listBase
 
-	val *[]{{ .Type }}
+	updateExternal bool
+	val            *[]{{ .Type }}
 }
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
-	if l.val != nil {
-		*l.val = append(*l.val, val)
-	}
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
-	l.appendItem(Bind{{ .Name }}(&val))
-	return nil
+	*l.val = append(*l.val, val)
+
+	return l.doReload()
 }
 
 func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
-	if l.val == nil {
-		return []{{ .Type }}{}, nil
-	}
+	l.lock.RLock()
+	defer l.lock.RUnlock()
 
 	return *l.val, nil
 }
@@ -317,36 +344,38 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
-	if l.val != nil {
-		return (*l.val)[i], nil
-	}
+	l.lock.RLock()
+	defer l.lock.RUnlock()
 
-	item, err := l.GetItem(i)
-	if err != nil {
-		return {{ .Default }}, err
-	}
-	return item.({{ .Name }}).Get()
+	return (*l.val)[i], nil
 }
 
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
-	if l.val != nil {
-		*l.val = append([]{{ .Type }}{val}, *l.val...)
-	}
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = append([]{{ .Type }}{val}, *l.val...)
 
-	l.prependItem(Bind{{ .Name }}(&val))
-	return nil
+	return l.doReload()
 }
 
-func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
-	if l.val == nil { // was not initialized with a blank value, recover
-		l.val = &v
-		l.trigger()
-		return nil
-	}
+func (l *bound{{ .Name }}List) Reload() error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
-	oldLen := len(l.items)
+	return l.doReload()
+}
+
+func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	*l.val = v
-	newLen := len(v)
+
+	return l.doReload()
+}
+
+func (l *bound{{ .Name }}List) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
@@ -354,7 +383,7 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(Bind{{ .Name }}(&((*l.val)[i])))
+			l.appendItem(bind{{ .Name }}ListItem(l.val, i, l.updateExternal))
 		}
 		l.trigger()
 	}
@@ -364,13 +393,18 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) (retErr error) {
 			break
 		}
 
-		old, err := l.items[i].({{ .Name }}).Get()
-		val := (*(l.val))[i]
-		if err != nil || (*(l.val))[i] != old {
-			err = item.(*bound{{ .Name }}).Set(val)
-			if err != nil {
-				retErr = err
-			}
+		var err error
+		if l.updateExternal {
+			item.(*boundExternal{{ .Name }}ListItem).lock.Lock()
+			err = item.(*boundExternal{{ .Name }}ListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternal{{ .Name }}ListItem).lock.Unlock()
+		} else {
+			item.(*bound{{ .Name }}ListItem).lock.Lock()
+			err = item.(*bound{{ .Name }}ListItem).doSet((*l.val)[i])
+			item.(*bound{{ .Name }}ListItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
 		}
 	}
 	return
@@ -380,15 +414,72 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	if i < 0 || i >= l.Length() {
 		return errOutOfBounds
 	}
-	if l.val != nil {
-		(*l.val)[i] = v
-	}
+
+	l.lock.Lock()
+	(*l.val)[i] = v
+	l.lock.Unlock()
 
 	item, err := l.GetItem(i)
 	if err != nil {
 		return err
 	}
 	return item.({{ .Name }}).Set(v)
+}
+
+func bind{{ .Name }}ListItem(v *[]{{ .Type }}, i int, external bool) {{ .Name }} {
+	if external {
+		ret := &boundExternal{{ .Name }}ListItem{old: (*v)[i]}
+		ret.val = v
+		ret.index = i
+		return ret
+	}
+
+	return &bound{{ .Name }}ListItem{val: v, index: i}
+}
+
+type bound{{ .Name }}ListItem struct {
+	base
+
+	val   *[]{{ .Type }}
+	index int
+}
+
+func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	return (*b.val)[b.index], nil
+}
+
+func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	return b.doSet(val)
+}
+
+func (b *bound{{ .Name }}ListItem) doSet(val {{ .Type }}) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
+}
+
+type boundExternal{{ .Name }}ListItem struct {
+	bound{{ .Name }}ListItem
+
+	old {{ .Type }}
+}
+
+func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+	if val == b.old {
+		return nil
+	}
+	(*b.val)[b.index] = val
+	b.old = val
+
+	b.trigger()
+	return nil
 }
 `
 

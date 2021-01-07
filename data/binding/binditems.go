@@ -12,6 +12,14 @@ type Bool interface {
 	Set(bool) error
 }
 
+// ExternalBool supports binding a bool value to an external value.
+//
+// Since: 2.0.0
+type ExternalBool interface {
+	Bool
+	Reload() error
+}
+
 // NewBool returns a bindable bool value that is managed internally.
 //
 // Since: 2.0.0
@@ -21,11 +29,12 @@ func NewBool() Bool {
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindBool(v *bool) Bool {
+func BindBool(v *bool) ExternalBool {
 	if v == nil {
-		return NewBool() // never allow a nil value pointer
+		return NewBool().(ExternalBool) // never allow a nil value pointer
 	}
 
 	return &boundBool{val: v}
@@ -38,21 +47,23 @@ type boundBool struct {
 }
 
 func (b *boundBool) Get() (bool, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return false, nil
 	}
 	return *b.val, nil
 }
 
+func (b *boundBool) Reload() error {
+	return b.Set(*b.val)
+}
+
 func (b *boundBool) Set(val bool) error {
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -67,6 +78,14 @@ type Float interface {
 	Set(float64) error
 }
 
+// ExternalFloat supports binding a float64 value to an external value.
+//
+// Since: 2.0.0
+type ExternalFloat interface {
+	Float
+	Reload() error
+}
+
 // NewFloat returns a bindable float64 value that is managed internally.
 //
 // Since: 2.0.0
@@ -76,11 +95,12 @@ func NewFloat() Float {
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindFloat(v *float64) Float {
+func BindFloat(v *float64) ExternalFloat {
 	if v == nil {
-		return NewFloat() // never allow a nil value pointer
+		return NewFloat().(ExternalFloat) // never allow a nil value pointer
 	}
 
 	return &boundFloat{val: v}
@@ -93,21 +113,23 @@ type boundFloat struct {
 }
 
 func (b *boundFloat) Get() (float64, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return 0.0, nil
 	}
 	return *b.val, nil
 }
 
+func (b *boundFloat) Reload() error {
+	return b.Set(*b.val)
+}
+
 func (b *boundFloat) Set(val float64) error {
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -122,6 +144,14 @@ type Int interface {
 	Set(int) error
 }
 
+// ExternalInt supports binding a int value to an external value.
+//
+// Since: 2.0.0
+type ExternalInt interface {
+	Int
+	Reload() error
+}
+
 // NewInt returns a bindable int value that is managed internally.
 //
 // Since: 2.0.0
@@ -131,11 +161,12 @@ func NewInt() Int {
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindInt(v *int) Int {
+func BindInt(v *int) ExternalInt {
 	if v == nil {
-		return NewInt() // never allow a nil value pointer
+		return NewInt().(ExternalInt) // never allow a nil value pointer
 	}
 
 	return &boundInt{val: v}
@@ -148,21 +179,23 @@ type boundInt struct {
 }
 
 func (b *boundInt) Get() (int, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return 0, nil
 	}
 	return *b.val, nil
 }
 
+func (b *boundInt) Reload() error {
+	return b.Set(*b.val)
+}
+
 func (b *boundInt) Set(val int) error {
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -177,6 +210,14 @@ type Rune interface {
 	Set(rune) error
 }
 
+// ExternalRune supports binding a rune value to an external value.
+//
+// Since: 2.0.0
+type ExternalRune interface {
+	Rune
+	Reload() error
+}
+
 // NewRune returns a bindable rune value that is managed internally.
 //
 // Since: 2.0.0
@@ -186,11 +227,12 @@ func NewRune() Rune {
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindRune(v *rune) Rune {
+func BindRune(v *rune) ExternalRune {
 	if v == nil {
-		return NewRune() // never allow a nil value pointer
+		return NewRune().(ExternalRune) // never allow a nil value pointer
 	}
 
 	return &boundRune{val: v}
@@ -203,21 +245,23 @@ type boundRune struct {
 }
 
 func (b *boundRune) Get() (rune, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return rune(0), nil
 	}
 	return *b.val, nil
 }
 
+func (b *boundRune) Reload() error {
+	return b.Set(*b.val)
+}
+
 func (b *boundRune) Set(val rune) error {
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
 
 	b.trigger()
 	return nil
@@ -232,6 +276,14 @@ type String interface {
 	Set(string) error
 }
 
+// ExternalString supports binding a string value to an external value.
+//
+// Since: 2.0.0
+type ExternalString interface {
+	String
+	Reload() error
+}
+
 // NewString returns a bindable string value that is managed internally.
 //
 // Since: 2.0.0
@@ -241,11 +293,12 @@ func NewString() String {
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0.0
-func BindString(v *string) String {
+func BindString(v *string) ExternalString {
 	if v == nil {
-		return NewString() // never allow a nil value pointer
+		return NewString().(ExternalString) // never allow a nil value pointer
 	}
 
 	return &boundString{val: v}
@@ -258,21 +311,23 @@ type boundString struct {
 }
 
 func (b *boundString) Get() (string, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	if b.val == nil {
 		return "", nil
 	}
 	return *b.val, nil
 }
 
+func (b *boundString) Reload() error {
+	return b.Set(*b.val)
+}
+
 func (b *boundString) Set(val string) error {
-	if *b.val == val {
-		return nil
-	}
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		*b.val = val
-	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
 
 	b.trigger()
 	return nil

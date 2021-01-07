@@ -42,6 +42,8 @@ func (b *prefBoundBool) Get() (bool, error) {
 func (b *prefBoundBool) Set(v bool) error {
 	b.p.SetBool(b.key, v)
 
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
 }
@@ -89,6 +91,8 @@ func (b *prefBoundFloat) Get() (float64, error) {
 func (b *prefBoundFloat) Set(v float64) error {
 	b.p.SetFloat(b.key, v)
 
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
 }
@@ -136,6 +140,8 @@ func (b *prefBoundInt) Get() (int, error) {
 func (b *prefBoundInt) Set(v int) error {
 	b.p.SetInt(b.key, v)
 
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
 }
@@ -183,6 +189,8 @@ func (b *prefBoundString) Get() (string, error) {
 func (b *prefBoundString) Set(v string) error {
 	b.p.SetString(b.key, v)
 
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
 }

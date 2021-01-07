@@ -39,9 +39,3 @@ func (b *listBase) deleteItem(i int) {
 
 	b.trigger()
 }
-
-func (b *listBase) prependItem(i DataItem) {
-	b.items = append([]DataItem{i}, b.items...)
-
-	b.trigger()
-}
