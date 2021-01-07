@@ -29,8 +29,8 @@ func NewDocTabs(items ...*TabItem) *DocTabs {
 			current:    -1,
 		},
 	}
-	tabs.SetItems(items)
 	tabs.ExtendBaseWidget(tabs)
+	tabs.SetItems(items)
 	return tabs
 }
 
