@@ -37,10 +37,6 @@ func (*device) HasKeyboard() bool {
 	return false
 }
 
-func (d *device) SystemScale() float32 {
-	return d.SystemScaleForWindow(nil)
-}
-
 func (*device) ShowVirtualKeyboard() {
 	showVirtualKeyboard(mobile.DefaultKeyboard)
 }
