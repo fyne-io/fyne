@@ -58,8 +58,7 @@ func (c *AppTabs) MinSize() fyne.Size {
 func (c *AppTabs) SetTabLocation(l TabLocation) {
 	// Mobile has limited screen space, so don't put app tab bar on long edges
 	if d := fyne.CurrentDevice(); d.IsMobile() {
-		o := d.Orientation()
-		if fyne.IsVertical(o) {
+		if o := d.Orientation(); fyne.IsVertical(o) {
 			if l == TabLocationLeading || l == TabLocationTrailing {
 				l = TabLocationBottom
 			}
