@@ -41,10 +41,8 @@ type Entry struct {
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
-	// Deprecated: Use Disable() instead
-	ReadOnly  bool
-	MultiLine bool
-	Wrapping  fyne.TextWrap
+	MultiLine   bool
+	Wrapping    fyne.TextWrap
 
 	// Set a validator that this entry will check against
 	// Since: 1.4
@@ -188,9 +186,7 @@ func (e *Entry) Cursor() desktop.Cursor {
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 //
 // Implements: fyne.Disableable
-func (e *Entry) Disable() { // TODO remove this override after ReadOnly is removed
-	e.ReadOnly = true
-
+func (e *Entry) Disable() {
 	e.DisableableWidget.Disable()
 }
 
@@ -198,7 +194,7 @@ func (e *Entry) Disable() { // TODO remove this override after ReadOnly is remov
 //
 // Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
-	return e.DisableableWidget.disabled || e.ReadOnly
+	return e.DisableableWidget.disabled
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
@@ -249,9 +245,7 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 // Enable this widget, updating any style or features appropriately.
 //
 // Implements: fyne.Disableable
-func (e *Entry) Enable() { // TODO remove this override after ReadOnly is removed
-	e.ReadOnly = false
-
+func (e *Entry) Enable() {
 	e.DisableableWidget.Enable()
 }
 
@@ -425,17 +419,6 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.propertyLock.Unlock()
 
 	e.placeholderProvider().setText(text) // refreshes
-}
-
-// SetReadOnly sets whether or not the Entry should not be editable
-//
-// Deprecated: Use Disable() instead.
-func (e *Entry) SetReadOnly(ro bool) {
-	if ro {
-		e.Disable()
-	} else {
-		e.Enable()
-	}
 }
 
 // SetText manually sets the text of the Entry to the given text value.

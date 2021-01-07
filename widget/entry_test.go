@@ -2238,25 +2238,25 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	`, c)
 }
 
-func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
+func TestEntry_Disable_KeyDown(t *testing.T) {
 	entry := widget.NewEntry()
 
 	test.Type(entry, "H")
-	entry.SetReadOnly(true)
+	entry.Disable()
 	test.Type(entry, "i")
 	assert.Equal(t, "H", entry.Text)
 
-	entry.SetReadOnly(false)
+	entry.Enable()
 	test.Type(entry, "i")
 	assert.Equal(t, "Hi", entry.Text)
 }
 
-func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
+func TestEntry_Disable_OnFocus(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
-	entry.SetReadOnly(true)
+	entry.Disable()
 	entry.FocusGained()
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
@@ -2274,7 +2274,7 @@ func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
 		</canvas>
 	`, c)
 
-	entry.SetReadOnly(false)
+	entry.Enable()
 	entry.FocusGained()
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
