@@ -1113,8 +1113,10 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	}
 	objects := []fyne.CanvasObject{placeholder, provider, cursor}
 
-	return &entryContentRenderer{cursor, []fyne.CanvasObject{}, nil, objects,
+	r := &entryContentRenderer{cursor, []fyne.CanvasObject{}, nil, objects,
 		provider, placeholder, e}
+	r.Layout(e.size)
+	return r
 }
 
 func (e *entryContent) Cursor() desktop.Cursor {
@@ -1202,8 +1204,9 @@ func (e *entryContent) MouseUp(_ *desktop.MouseEvent) {
 //
 // Implements: fyne.Tappable
 func (e *entryContent) Tapped(ev *fyne.PointEvent) {
+	impl := e.entry.super()
 	// we need to propagate the focus, top level widget handles focus APIs
-	fyne.CurrentApp().Driver().CanvasForObject(e.entry).Focus(e.entry)
+	fyne.CurrentApp().Driver().CanvasForObject(impl).Focus(impl.(interface{}).(fyne.Focusable))
 
 	if fyne.CurrentDevice().IsMobile() && e.entry.selecting {
 		e.entry.selecting = false

@@ -236,10 +236,10 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 }
 
 func getClickPosition(str string, row int) *fyne.PointEvent {
-	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
+	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width
 
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
-	y := theme.Padding() + float32(row)*rowHeight + rowHeight/2
+	y := float32(row)*rowHeight + rowHeight/2
 
 	pos := fyne.NewPos(x, y)
 	return &fyne.PointEvent{Position: pos}

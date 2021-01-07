@@ -29,11 +29,15 @@ func TestSelectEntry_Disableable(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -48,11 +52,15 @@ func TestSelectEntry_Disableable(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -98,11 +106,15 @@ func TestSelectEntry_Disableable(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="disabled" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="disabled" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="disabled" pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="disabled button" pos="2,2" size="16x16"/>
@@ -156,11 +168,15 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -179,11 +195,15 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -231,8 +251,12 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">B</text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21">B</text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -250,8 +274,12 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">B</text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21">B</text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -299,8 +327,12 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">C</text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21">C</text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -331,11 +363,15 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -354,11 +390,15 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -407,11 +447,15 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="110x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="110x4"/>
-					<widget pos="4,4" size="122x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="114x21"></text>
-					</widget>
-					<widget pos="4,4" size="122x29" type="*widget.textProvider">
-						<text pos="4,4" size="114x21"></text>
+					<widget pos="4,4" size="82x29" type="*widget.ScrollContainer">
+						<widget size="82x29" type="*widget.entryContent">
+							<widget size="82x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="74x21"></text>
+							</widget>
+							<widget size="82x29" type="*widget.textProvider">
+								<text pos="4,4" size="74x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="82,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -526,11 +570,15 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -580,11 +628,15 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
@@ -647,11 +699,15 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
+					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+						<widget size="102x29" type="*widget.entryContent">
+							<widget size="102x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="94x21"></text>
+							</widget>
+							<widget size="102x29" type="*widget.textProvider">
+								<text pos="4,4" size="94x21"></text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
 						<rectangle fillColor="button" pos="2,2" size="16x16"/>
