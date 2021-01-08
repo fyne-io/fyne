@@ -45,6 +45,7 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 			bar: &tabBar{
 				buttons: &fyne.Container{},
 			},
+			buttons:   make(map[*TabItem]*tabButton),
 			divider:   canvas.NewRectangle(theme.ShadowColor()),
 			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
@@ -232,6 +233,7 @@ func (r *appTabsRenderer) updateTabs() {
 			button = &tabButton{
 				OnTap: func() { r.appTabs.Select(item) },
 			}
+			r.buttons[item] = button
 		}
 		button.Text = item.Text
 		button.Icon = item.Icon
