@@ -32,6 +32,7 @@ These changes likely break some apps, please read the
   - dialog.FileIcon 			(now widget.FileIcon)
   - widget.Radio 				(now widget.RadioGroup)
   - widget.AccordionContainer	(now widget.Accordion)
+  - layout.NewFixedGridLayout()	(now widget.NewGridWrapLayout())
 
 ### Added
 
