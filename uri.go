@@ -30,7 +30,7 @@ type URI interface {
 
 	// Extension should return the file extension of the resource
 	// referenced by the URI. For example, the Extension() of
-	// 'file://foo/bar.baz' is 'baz'. May return an empty string if no the
+	// 'file://foo/bar.baz' is 'baz'. May return an empty string if the
 	// referenced resource has none.
 	Extension() string
 
@@ -40,15 +40,15 @@ type URI interface {
 
 	// MimeType should return the content type of the resource referenced
 	// by the URI. The returned string should be in the format described
-	// by section 5 of RFC2045 ("Content-Type Header Field").
+	// by Section 5 of RFC2045 ("Content-Type Header Field").
 	MimeType() string
 
 	// Scheme should return the URI scheme of the URI. For example,
 	// the Scheme() of 'file://foo/bar.baz` is 'file'.
 	Scheme() string
 
-	// Parent should return a URI referencing the parent resource of the
-	// resource referenced by the URI. For example, the Parent() of
+	// Parent should return a ListableURI referencing the parent resource
+	// of the resource referenced by the URI. For example, the Parent() of
 	// 'file://foo/bar.baz' is 'file://foo'.
 	//
 	// NOTE: it is not required that the implementation return a parent URI
@@ -76,7 +76,7 @@ type URI interface {
 	// a resource which does not exist, though future operations on this
 	// resource may fail.
 	//
-	// Since: 2.0
+	// Since: 2.0.0
 	Parent() (URI, error)
 
 	// Child should return a URI referencing a resource nested
@@ -102,7 +102,7 @@ type URI interface {
 	// a resource which does not exist, though future operations on this
 	// resource may fail.
 	//
-	// Since: 2.0
+	// Since: 2.0.0
 	Child(URI, string) (URI, error)
 
 	// Exists should determine if the resource referenced by the URI
@@ -120,7 +120,7 @@ type URI interface {
 	// error value signals that the existence or non-existence of the
 	// resource cannot be determined and is undefined.
 	//
-	// Since: 2.0
+	// Since: 2.0.0
 	Exists(URI) (bool, error)
 
 	// Destroy should destroy, delete, or otherwise remove the resource
@@ -135,7 +135,7 @@ type URI interface {
 	// * If the referenced resource does not exist, attempting to destroy
 	//   it should throw an error.
 	//
-	// Since: 2.0
+	// Since: 2.0.0
 	Destroy(URI) error
 }
 

@@ -22,6 +22,8 @@ package storage
 // accessing ssh:// URIs might perform copy operations on the remote end,
 // rather than reading all the content to the local side and then writing
 // it back over the wire.
+//
+// Since: 2.0.0
 type Repository interface {
 
 	// ParseURIImpl returns a method that given a text string creates a
@@ -42,6 +44,8 @@ type Repository interface {
 	//
 	// If no implementation is provided, a generic URI based on RFC3986 is
 	// parsed without any special validation logic.
+	//
+	// Since 2.0.0
 	ParseURIImpl() func(string) (URI, error)
 
 	// ExtensionImpl returns a method that given a URI matching the
@@ -51,6 +55,8 @@ type Repository interface {
 	// If no implementation is provided, then a generic one will be used,
 	// which will string split on instances of the '.' character, and the
 	// final such component will be returned.
+	//
+	// Since 2.0.0
 	ExtensionImpl() func(URI) string
 
 	// NameImpl returns a method that given a URI matching the scheme
@@ -62,6 +68,8 @@ type Repository interface {
 	// generic implementation will string-split the path component of the
 	// URI on instances of the '/' character, and return the final such
 	// component.
+	//
+	// Since 2.0.0
 	NameImpl() func(URI) string
 
 	// MimeTypeImpl returns a method that given a URI matching the
@@ -72,6 +80,8 @@ type Repository interface {
 	// simply returns `application/octet-stream`, which is appropriate for
 	// use when the MIME type is otherwise unknown per IETF RFC2046, pp.
 	// 12.
+	//
+	// Since 2.0.0
 	MimeTypeImpl() func(URI) (string, error)
 
 	// ParentImpl returns a method that given a URI 'X' matching the
@@ -110,6 +120,8 @@ type Repository interface {
 	// this repository's URI parsing implementation to parse the result
 	// into a new URI, which is used as the parent.
 	//
+	//
+	// Since 2.0.0
 	ParentImpl() (func(URI) (URI, error), bool)
 
 	// ReaderFromImpl returns a method which given a URI matching the
@@ -134,6 +146,8 @@ type Repository interface {
 	// then any attempt to get a reader for a URI with the scheme this
 	// repository is meant to handle will fail with an 'not supported'
 	// error.
+	//
+	// Since 2.0.0
 	ReaderFromImpl() func(URI) (URIReadCloser, error)
 
 	// WriterFromImpl returns a method which given a URI matching the
@@ -158,6 +172,8 @@ type Repository interface {
 	// then any attempt to get a writer for a URI with the scheme this
 	// repository is meant to handle will fail with an 'not supported'
 	// error.
+	//
+	// Since 2.0.0
 	WriterToImpl() func(URI) (URIWriteCloser, error)
 
 	// CopyImpl returns a method that given two URIs, 'src', and 'dest'
@@ -186,6 +202,8 @@ type Repository interface {
 	//
 	// NOTE: a generic implementation which can work for URIs of different
 	// schemes is provided via storage.Duplicate().
+	//
+	// Since 2.0.0
 	CopyImpl() (func(URI, URI) error, bool)
 
 	// RenameImpl returns a method that given two URIs, 'src' and 'dest'
@@ -217,6 +235,8 @@ type Repository interface {
 	//
 	// NOTE: a generic implementation which can work for URIs of different
 	// schemes is provided via storage.Move().
+	//
+	// Since 2.0.0
 	RenameImpl() (func(URI, URI) error, bool)
 
 	// DeleteImpl returns a method that given a URI of the scheme this
@@ -239,6 +259,8 @@ type Repository interface {
 	// then any attempt to perform a delete operation on a URI with the
 	// scheme that this repository is registered to handle will
 	// fail with a 'not supported' error.
+	//
+	// Since 2.0.0
 	DeleteImpl() func(URI) error
 
 	// ListableImpl returns a method that given a URI of the scheme this
@@ -266,6 +288,8 @@ type Repository interface {
 	// then any attempt to check if the URI is listable will fail with a
 	// 'not supported' error. This implies that no URI of the scheme that
 	// this repository is registered to handle could ever be listable.
+	//
+	// Since 2.0.0
 	ListableImpl() func(URI) (bool, error)
 
 	// ListImpl returns a method that given a URI of the scheme that this
@@ -293,6 +317,8 @@ type Repository interface {
 	// If this method is not implemented (e.g. a nil function is returned),
 	// then any attempt to list a URI of the scheme this repository is
 	// registered to handle will fail with a 'not supported' error.
+	//
+	// Since 2.0.0
 	ListImpl() func(URI) ([]URI, error)
 
 	// ChildImpl returns a method that given a URI of the scheme
@@ -324,5 +350,7 @@ type Repository interface {
 	// given, then attempts to create children for any URI of the scheme
 	// this repository is registered to handle will fail with a 'not
 	// supported' error.
+	//
+	// Since 2.0.0
 	ChildImpl() (func(URI, string) (URI, error), bool)
 }
