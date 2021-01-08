@@ -33,6 +33,11 @@ func NewFileURI(path string) fyne.URI {
 
 // NewURI creates a new URI from the given string representation.
 // This could be a URI from an external source or one saved from URI.String()
+//
+// NOTE: since 2.0.0, NewURI() is backed by the repository system - this
+// function may call into either a generic implementation, or into a
+// scheme-specific implementation depending on which storage repositories have
+// been registered.
 func NewURI(u string) fyne.URI {
 	if len(u) > 5 && u[:5] == "file:" {
 		path := u[5:]
@@ -118,8 +123,33 @@ func parentGeneric(location string) (string, error) {
 	return parent, nil
 }
 
-// Parent gets the parent of a URI by splitting it along '/' separators and
-// removing the last item.
+// Parent returns a URI referencing the parent resource of the resource
+// referenced by the URI. For example, the Parent() of 'file://foo/bar.baz' is
+// 'file://foo'. The URI which is returned will be listable.
+//
+// NOTE: it is not required that the implementation return a parent URI with
+// the same Scheme(), though this will normally be the case.
+//
+// This can fail in several ways:
+//
+// * If the URI refers to a filesystem root, then the Parent() implementation
+//   must return (nil, URIRootError).
+//
+// * If the URI refers to a resource which does not exist in a hierarchical
+//   context (e.g. the URI references something which does not have a
+//   semantically meaningful "parent"), the Parent() implementation may return
+//   an error.
+//
+// * If determining the parent of the referenced resource requires
+//   interfacing with some external system, failures may propagate
+//   through the Parent() implementation. For example if determining
+//   the parent of a file:// URI requires reading information from
+//   the filesystem, it could fail with a permission error.
+//
+// NOTE: since 2.0.0, Parent() is backed by the repository system - this
+// function may call into either a generic implementation, or into a
+// scheme-specific implementation depending on which storage repositories have
+// been registered.
 //
 // Since: 1.4
 func Parent(u fyne.URI) (fyne.URI, error) {
@@ -162,7 +192,26 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	return NewURI(u.Scheme() + "://" + parent), nil
 }
 
-// Child appends a new path element to a URI, separated by a '/' character.
+// Child returns a URI referencing a resource nested hierarchically below the
+// given URI, identified by a string. For example, the child with the string
+// component 'quux' of 'file://foo/bar' is 'file://foo/bar/quux'.
+//
+// This can fail in several ways:
+//
+// * If the URI refers to a resource which does not exist in a hierarchical
+//   context (e.g. the URI references something which does not have a
+//   semantically meaningful "child"), the Child() implementation may return an
+//   error.
+//
+// * If generating a reference to a child of the referenced resource requires
+//   interfacing with some external system, failures may propagate through the
+//   Child() implementation. It is expected that this case would occur very
+//   rarely if ever.
+//
+// NOTE: since 2.0.0, Child() is backed by the repository system - this
+// function may call into either a generic implementation, or into a
+// scheme-specific implementation depending on which storage repositories have
+// been registered.
 //
 // Since: 1.4
 func Child(u fyne.URI, component string) (fyne.URI, error) {
@@ -181,9 +230,24 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 	return NewURI(s + component), nil
 }
 
-// Exists will return true if the resource the URI refers to exists, and false
-// otherwise. If an error occurs while checking, false is returned as the first
-// return.
+// Exists determines if the resource referenced by the URI exists.
+//
+// This can fail in several ways:
+//
+// * If checking the existence of a resource requires interfacing with some
+//   external system, then failures may propagate through Exists(). For
+//   example, checking the existence of a resource requires reading a directory
+//   may result in a permissions error.
+//
+// It is understood that a non-nil error value signals that the existence or
+// non-existence of the resource cannot be determined and is undefined.
+//
+// NOTE: since 2.0.0, Exists is backed by the repository system - this function
+// either calls into a scheme-specific implementation from a registered
+// repository, or fails with a URIOperationNotSupported error.
+//
+// may call into either a generic implementation, or into a scheme-specific
+// implementation depending on which storage repositories have been registered.
 //
 // Since: 1.4
 func Exists(u fyne.URI) (bool, error) {
@@ -202,3 +266,184 @@ func Exists(u fyne.URI) (bool, error) {
 
 	return true, nil
 }
+
+// Delete destroys, deletes, or otherwise removes the resource referenced
+// by the URI.
+//
+// This can fail in several ways:
+//
+// * If removing the resource requires interfacing with some external system,
+//   failures may propagate through Destroy(). For example, deleting a file may
+//   fail with a permissions error.
+//
+// * If the referenced resource does not exist, attempting to destroy it should
+//   throw an error.
+//
+// Delete is backed by the repository system - this function either calls
+// into a scheme-specific implementation from a registered repository, or
+// fails with a URIOperationNotSupported error.
+//
+// Since: 2.0.0
+func Delete(u fyne.URI) error {
+	return fmt.Errorf("TODO: implement this function")
+}
+
+// ReaderFrom returns URIReadCloser set up to read from the resource that the
+// URI references.
+//
+// This method can fail in several ways:
+//
+// * Different permissions or credentials are required to read the
+//   referenced resource.
+//
+// * This URI scheme could represent some resources that can be read,
+//   but this particular URI references a resources that is not
+//   something that can be read.
+//
+// * Attempting to set up the reader depended on a lower level
+//   operation such as a network or filesystem access that has failed
+//   in some way.
+//
+// ReaderFrom is backed by the repository system - this function either calls
+// into a scheme-specific implementation from a registered repository, or
+// fails with a URIOperationNotSupported error.
+//
+// Since 2.0.0
+func ReaderFrom(u fyne.URI) (fyne.URIReadCloser, error) {
+	return nil, fmt.Errorf("TODO: implement this function")
+}
+
+// WriterFrom returns URIWriteCloser set up to write to the resource that the
+// URI references.
+//
+// This method can fail in several ways:
+//
+// * Different permissions or credentials are required to write to the
+//   referenced resource.
+//
+// * This URI scheme could represent some resources that can be
+//   written, but this particular URI references a resources that is
+//   not something that can be written.
+//
+// * Attempting to set up the writer depended on a lower level
+//   operation such as a network or filesystem access that has failed
+//   in some way.
+//
+// WriterTo is backed by the repository system - this function either calls
+// into a scheme-specific implementation from a registered repository, or fails
+// with a URIOperationNotSupported error.
+//
+// Since 2.0.0
+func WriterTo(u fyne.URI) (fyne.URIWriteCloser, error) {
+	return fmt.Errorf("TODO: implement this function")
+}
+
+// Copy given two URIs, 'src', and 'dest' both of the same scheme , will copy
+// one to the other.
+//
+// This method may fail in several ways:
+//
+// * Different permissions or credentials are required to perform the
+//   copy operation.
+//
+// * This URI scheme could represent some resources that can be copied,
+//   but either the source, destination, or both are not resources
+//   that support copying.
+//
+// * Performing the copy operation depended on a lower level operation
+//   such as network or filesystem access that has failed in some way.
+//
+// NOTE: if the URIs do not share the same scheme, then this method will
+// instead use a reader and a writer. This may have performance implications if
+// either or both URIs is remote. If you wish to avoid this, explicitly compare
+// the URI schemes before calling Copy().
+//
+// Copy is backed by the repository system - this function may call into either
+// a generic implementation, or into a scheme-specific implementation depending
+// on which storage repositories have been registered.
+//
+// Since 2.0.0
+func Copy(source fyne.URI, destination fyne.URI) error {
+	return fmt.Errorf("TODO: implement this function")
+}
+
+// RenameImpl returns a method that given two URIs, 'src' and 'dest' both of
+// the same scheme this will rename src to dest. This means the resource
+// referenced by src will be copied into the resource referenced by dest, and
+// the resource referenced by src will no longer exist after the operation is
+// complete.
+//
+// This method may fail in several ways:
+//
+// * Different permissions or credentials are required to perform the
+//   rename operation.
+//
+// * This URI scheme could represent some resources that can be renamed,
+//   but either the source, destination, or both are not resources
+//   that support renaming.
+//
+// * Performing the rename operation depended on a lower level operation
+//   such as network or filesystem access that has failed in some way.
+//
+// Copy is backed by the repository system - this function may call into either
+// a generic implementation, or into a scheme-specific implementation depending
+// on which storage repositories have been registered.
+//
+// If both source and destination are not of the same URI scheme, then this
+// method will instead use a reader, write, and a call to Delete(), which may
+// have performance implications if either or both URIs are remote. If you wish
+// to avoid this, explicitly compare the scheme of both URIs before calling
+// Rename().
+//
+// Since 2.0.0
+func Rename(source fyne.URI, destination fyne.URI) error {
+	return fmt.Errorf("TODO: implement this function")
+}
+
+// Listable  will determine if the URI is listable or not.
+//
+// The returned method may fail in several ways:
+//
+// * Different permissions or credentials are required to check if the
+//   URI supports listing.
+//
+// * This URI scheme could represent some resources that can be listed,
+//   but this specific URI is not one of them (e.g. a file on a
+//   filesystem, as opposed to a directory).
+//
+// * Checking for listability depended on a lower level operation
+//   such as network or filesystem access that has failed in some way.
+//
+// Listable is backed by the repository system - this function either calls
+// into a scheme-specific implementation from a registered repository, or fails
+// with a URIOperationNotSupported error.
+//
+// Since 2.0.0
+func Listable(u fyne.URI) (bool, error) {
+	return false, fmt.Errorf("TODO: implement this function")
+}
+
+// List returns a list of URIs that
+// reference resources which are nested below the resource referenced
+// by the argument. For example, listing a directory on a filesystem
+// should return a list of files and directories it contains.
+//
+// The returned method may fail in several ways:
+//
+// * Different permissions or credentials are required to obtain a
+//   listing for the given URI.
+//
+// * This URI scheme could represent some resources that can be listed,
+//   but this specific URI is not one of them (e.g. a file on a
+//   filesystem, as opposed to a directory). This can be tested in advance
+//   using the Listable() function.
+//
+// * Obtaining the listing depended on a lower level operation such as
+//   network or filesystem access that has failed in some way.
+//
+// List is backed by the repository system - this function either calls into a
+// scheme-specific implementation from a registered repository, or fails with a
+// URIOperationNotSupported error.
+//
+// Since 2.0.0
+func List(u fyne.URI) ([]URI, error)
