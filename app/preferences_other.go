@@ -13,3 +13,13 @@ func (p *preferences) storagePath() string {
 func (a *fyneApp) storageRoot() string {
 	return filepath.Join(rootConfigDir(), a.UniqueID())
 }
+
+func (p *preferences) watch() {
+	watchFile(p.storagePath(), func() {
+		if p.ignoreChange {
+			return
+		}
+
+		p.load("") // path ignored
+	})
+}

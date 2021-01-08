@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
@@ -11,6 +12,7 @@ import (
 
 type preferences struct {
 	*internal.InMemoryPreferences
+	ignoreChange bool
 
 	app *fyneApp
 }
@@ -23,6 +25,11 @@ func (p *preferences) save() error {
 }
 
 func (p *preferences) saveToFile(path string) error {
+	p.ignoreChange = true
+	defer func() {
+		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
+		p.ignoreChange = false
+	}()
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -55,6 +62,7 @@ func (p *preferences) load(_ string) {
 
 func (p *preferences) loadFromFile(path string) error {
 	file, err := os.Open(path) // #nosec
+	defer file.Close()
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := os.MkdirAll(filepath.Dir(path), 0700)
@@ -84,5 +92,6 @@ func newPreferences(app *fyneApp) *preferences {
 			fyne.LogError("Failed on saving preferences", err)
 		}
 	})
+	p.watch()
 	return p
 }

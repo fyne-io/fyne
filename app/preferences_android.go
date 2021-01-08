@@ -14,3 +14,7 @@ func (p *preferences) storagePath() string {
 func (a *fyneApp) storageRoot() string {
 	return filepath.Join(rootConfigDir(), a.uniqueID)
 }
+
+func (p *preferences) watch() {
+	// no-op on mobile
+}
