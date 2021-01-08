@@ -118,12 +118,35 @@ func parentGeneric(location string) (string, error) {
 	return parent, nil
 }
 
-// Parent gets the parent of a URI by splitting it along '/' separators and
-// removing the last item.
+// Parent returns a URI referencing the parent resource of the resource
+// referenced by the URI. For example, the Parent() of 'file://foo/bar.baz' is
+// 'file://foo'. The URI which is returned will be listable.
+//
+// NOTE: it is not required that the implementation return a parent URI with
+// the same Scheme(), though this will normally be the case.
+//
+// This can fail in several ways:
+//
+// * If the URI refers to a filesystem root, then the Parent() implementation
+//   must return (nil, URIRootError).
+//
+// * If the URI refers to a resource which does not exist in a hierarchical
+//   context (e.g. the URI references something which does not have a
+//   semantically meaningful "parent"), the Parent() implementation may return
+//   an error.
+//
+// * If determining the parent of the referenced resource requires
+//   interfacing with some external system, failures may propagate
+//   through the Parent() implementation. For example if determining
+//   the parent of a file:// URI requires reading information from
+//   the filesystem, it could fail with a permission error.
+//
+// NOTE: since 2.0.0, Parent() is backed by the repository system - this
+// function may call into either a generic implementation, or into a
+// scheme-specific implementation depending on which storage repositories have
+// been registered.
 //
 // Since: 1.4
-//
-// Deprecated: Parent() is a member of the URI interface now.
 func Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
@@ -164,11 +187,28 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	return NewURI(u.Scheme() + "://" + parent), nil
 }
 
-// Child appends a new path element to a URI, separated by a '/' character.
+// Child returns a URI referencing a resource nested hierarchically below the
+// given URI, identified by a string. For example, the child with the string
+// component 'quux' of 'file://foo/bar' is 'file://foo/bar/quux'.
+//
+// This can fail in several ways:
+//
+// * If the URI refers to a resource which does not exist in a hierarchical
+//   context (e.g. the URI references something which does not have a
+//   semantically meaningful "child"), the Child() implementation may return an
+//   error.
+//
+// * If generating a reference to a child of the referenced resource requires
+//   interfacing with some external system, failures may propagate through the
+//   Child() implementation. It is expected that this case would occur very
+//   rarely if ever.
+//
+// NOTE: since 2.0.0, Child() is backed by the repository system - this
+// function may call into either a generic implementation, or into a
+// scheme-specific implementation depending on which storage repositories have
+// been registered.
 //
 // Since: 1.4
-//
-// Deprecated: Child is now a member of the URI interface.
 func Child(u fyne.URI, component string) (fyne.URI, error) {
 	// While as implemented this does not need to return an error, it is
 	// reasonable to expect that future implementations of this, especially
@@ -185,13 +225,19 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 	return NewURI(s + component), nil
 }
 
-// Exists will return true if the resource the URI refers to exists, and false
-// otherwise. If an error occurs while checking, false is returned as the first
-// return.
+// Exists determines if the resource referenced by the URI exists.
+//
+// This can fail in several ways:
+//
+// * If checking the existence of a resource requires interfacing with some
+//   external system, then failures may propagate through Exists(). For
+//   example, checking the existence of a resource requires reading a directory
+//   may result in a permissions error.
+//
+// It is understood that a non-nil error value signals that the existence or
+// non-existence of the resource cannot be determined and is undefined.
 //
 // Since: 1.4
-//
-// Deprecated: Exists is now a member of the URI interface
 func Exists(u fyne.URI) (bool, error) {
 	if u.Scheme() != "file" {
 		return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())
@@ -207,4 +253,21 @@ func Exists(u fyne.URI) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// Destroy destroys, deletes, or otherwise removes the resource referenced
+// by the URI.
+//
+// This can fail in several ways:
+//
+// * If removing the resource requires interfacing with some external system,
+//   failures may propagate through Destroy(). For example, deleting a file may
+//   fail with a permissions error.
+//
+// * If the referenced resource does not exist, attempting to destroy it should
+//   throw an error.
+//
+// Since: 2.0.0
+func Destroy(u fyne.URI) error {
+	return fmt.Errorf("TODO: implement this function")
 }
