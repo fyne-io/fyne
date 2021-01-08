@@ -20,6 +20,7 @@ var _ fyne.Widget = (*AppTabs)(nil)
 // Since: 2.0.0
 type AppTabs struct {
 	baseTabs
+	popUp *widget.PopUpMenu
 }
 
 // NewAppTabs creates a new tab container that allows the user to choose between different areas of an app.
@@ -53,6 +54,17 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r.updateTabs()
 	return r
+}
+
+// Hide hides the select.
+//
+// Implements: fyne.Widget
+func (t *AppTabs) Hide() {
+	if t.popUp != nil {
+		t.popUp.Hide()
+		t.popUp = nil
+	}
+	t.BaseWidget.Hide()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -176,14 +188,40 @@ func (r *appTabsRenderer) Refresh() {
 }
 
 func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
-	overflow = widget.NewButtonWithIcon("", theme.SettingsIcon() /* TODO OverflowIcon() */, func() {
-		// TODO show popup
+	overflow = widget.NewButtonWithIcon("", theme.MenuExpandIcon() /* TODO OverflowIcon() */, func() {
+		// Show pop up containing all tabs which did not fit in the tab bar
+
+		var items []*fyne.MenuItem
+		for i := len(r.bar.buttons.Objects); i < len(r.appTabs.Items); i++ {
+			item := r.appTabs.Items[i]
+			// FIXME MenuItem doesn't support icons
+			items = append(items, fyne.NewMenuItem(item.Text, func() {
+				r.appTabs.Select(item)
+				r.appTabs.popUp = nil
+			}))
+		}
+		d := fyne.CurrentApp().Driver()
+		c := d.CanvasForObject(overflow)
+		r.appTabs.popUp = widget.NewPopUpMenu(fyne.NewMenu("", items...), c)
+		buttonPos := d.AbsolutePositionForObject(overflow)
+		buttonMin := overflow.MinSize()
+		popUpMin := r.appTabs.popUp.MinSize()
+		var popUpPos fyne.Position
 		switch r.appTabs.tabLocation {
 		case TabLocationLeading:
+			popUpPos.X = buttonPos.X + buttonMin.Width
+			popUpPos.Y = buttonPos.Y + buttonMin.Height - popUpMin.Height
 		case TabLocationTrailing:
+			popUpPos.X = buttonPos.X - popUpMin.Width
+			popUpPos.Y = buttonPos.Y + buttonMin.Height - popUpMin.Height
 		case TabLocationTop:
+			popUpPos.X = buttonPos.X + buttonMin.Width - popUpMin.Width
+			popUpPos.Y = buttonPos.Y + buttonMin.Height
 		case TabLocationBottom:
+			popUpPos.X = buttonPos.X + buttonMin.Width - popUpMin.Width
+			popUpPos.Y = buttonPos.Y - popUpMin.Height
 		}
+		r.appTabs.popUp.ShowAtPosition(popUpPos)
 	})
 	return
 }
