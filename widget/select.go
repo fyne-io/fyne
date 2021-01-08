@@ -75,15 +75,6 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// Focused returns whether this Select is focused or not.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: internal detail, don’t use
-func (s *Select) Focused() bool {
-	return s.focused
-}
-
 // FocusGained is called after this Select has gained focus.
 //
 // Implements: fyne.Focusable

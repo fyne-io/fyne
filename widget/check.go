@@ -261,16 +261,6 @@ func (c *Check) FocusLost() {
 	c.Refresh()
 }
 
-// Focused returns whether or not this Check has focus.
-//
-// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
-func (c *Check) Focused() bool {
-	if c.Disabled() {
-		return false
-	}
-	return c.focused
-}
-
 // TypedRune receives text input events when the Check is focused.
 func (c *Check) TypedRune(r rune) {
 	if c.Disabled() {

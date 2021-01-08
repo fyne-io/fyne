@@ -22,20 +22,8 @@ type Canvas interface {
 	// The pixel size of a CanvasObject can be found by multiplying by this value.
 	Scale() float32
 
-	// Overlay returns the current overlay.
-	//
-	// Deprecated: Overlays are stacked now.
-	// This method returns the top of the overlay stack.
-	// Use Overlays() instead.
-	Overlay() CanvasObject
 	// Overlays returns the overlay stack.
 	Overlays() OverlayStack
-	// SetOverlay sets the overlay for the canvas.
-	//
-	// Deprecated: Overlays are stacked now.
-	// This method replaces the whole stack by the given overlay.
-	// Use Overlays() instead.
-	SetOverlay(CanvasObject)
 
 	OnTypedRune() func(rune)
 	SetOnTypedRune(func(rune))

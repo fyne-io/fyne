@@ -283,18 +283,6 @@ func (e *Entry) FocusLost() {
 	})
 }
 
-// Focused returns whether or not this Entry has focus.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
-func (e *Entry) Focused() bool {
-	e.propertyLock.RLock()
-	defer e.propertyLock.RUnlock()
-
-	return e.focused
-}
-
 // Hide hides the entry.
 //
 // Implements: fyne.Widget
@@ -1021,7 +1009,7 @@ func (e *Entry) textWrap() fyne.TextWrap {
 }
 
 func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
-	if !e.Focused() && !e.Disabled() {
+	if !e.focused && !e.Disabled() {
 		e.FocusGained()
 	}
 
