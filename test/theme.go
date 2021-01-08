@@ -43,11 +43,12 @@ func Theme() fyne.Theme {
 				fyne.TextStyle{Monospace: true}:          theme.DefaultTextMonospaceFont(),
 			},
 			sizes: map[fyne.ThemeSizeName]float32{
-				theme.SizeNameInlineIcon:     float32(20),
-				theme.SizeNamePadding:        float32(4),
-				theme.SizeNameScrollBar:      float32(16),
-				theme.SizeNameScrollBarSmall: float32(3),
-				theme.SizeNameText:           float32(14),
+				theme.SizeNameInlineIcon:         float32(20),
+				theme.SizeNamePadding:            float32(4),
+				theme.SizeNameScrollBar:          float32(16),
+				theme.SizeNameScrollBarSmall:     float32(3),
+				theme.SizeNameSeparatorThickness: float32(1),
+				theme.SizeNameText:               float32(14),
 			},
 		}
 	}

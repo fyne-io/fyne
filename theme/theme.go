@@ -123,6 +123,11 @@ const (
 	// Since 2.0.0
 	SizeNameScrollBarSmall fyne.ThemeSizeName = "scrollBarSmall"
 
+	// SizeNameSeparatorThickness is the name of theme lookup for the thickness of a separator.
+	//
+	// Since 2.0.0
+	SizeNameSeparatorThickness fyne.ThemeSizeName = "separator"
+
 	// SizeNameText is the name of theme lookup for text size.
 	//
 	// Since 2.0.0
@@ -269,6 +274,8 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 
 func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	switch s {
+	case SizeNameSeparatorThickness:
+		return 1
 	case SizeNameInlineIcon:
 		return 20
 	case SizeNamePadding:
@@ -411,6 +418,13 @@ func Padding() float32 {
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() float32 {
 	return current().Size(SizeNameInlineIcon)
+}
+
+// SeparatorThicknessSize is the standard thickness of the separator widget.
+//
+// Since 2.0.0
+func SeparatorThicknessSize() float32 {
+	return current().Size(SizeNameSeparatorThickness)
 }
 
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer
