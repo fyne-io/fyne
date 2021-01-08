@@ -536,6 +536,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.CursorColumn = 0
 		e.CursorRow++
 		e.propertyLock.Unlock()
+	case fyne.KeyTab:
+		e.TypedRune('\t')
 	case fyne.KeyUp:
 		if !multiLine {
 			return

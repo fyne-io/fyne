@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
+	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -999,13 +1000,23 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	} // key repeat will fall through to TypedKey and TypedShortcut
 
 	if keyName == fyne.KeyTab {
+		obj := w.canvas.Focused()
+		capture := false
+		// TODO at some point allow widgets to mark as capturing
+		if ent, ok := obj.(*widget.Entry); ok {
+			if ent.MultiLine {
+				capture = true
+			}
+		}
 		// at this point we know action != glfw.Release
-		if keyDesktopModifier == 0 {
-			w.canvas.FocusNext()
-			return
-		} else if keyDesktopModifier == desktop.ShiftModifier {
-			w.canvas.FocusPrevious()
-			return
+		if !capture {
+			if keyDesktopModifier == 0 {
+				w.canvas.FocusNext()
+				return
+			} else if keyDesktopModifier == desktop.ShiftModifier {
+				w.canvas.FocusPrevious()
+				return
+			}
 		}
 	}
 
