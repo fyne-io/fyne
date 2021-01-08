@@ -29,10 +29,10 @@ These changes likely break some apps, please read the
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
 
 * Removed deprecated types including:
-  - dialog.FileIcon 			(now widget.FileIcon)
-  - widget.Radio 				(now widget.RadioGroup)
-  - widget.AccordionContainer	(now widget.Accordion)
-  - layout.NewFixedGridLayout()	(now widget.NewGridWrapLayout())
+  - dialog.FileIcon (now widget.FileIcon)
+  - widget.Radio (now widget.RadioGroup)
+  - widget.AccordionContainer (now widget.Accordion)
+  - layout.NewFixedGridLayout() (now widget.NewGridWrapLayout())
 
 ### Added
 
