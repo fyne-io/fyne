@@ -30,6 +30,7 @@ These changes likely break some apps, please read the
 
 * Removed deprecated types including:
   - dialog.FileIcon (now widget.FileIcon)
+  - widget.Radio 	(now widget.RadioGroup)
 
 ### Added
 
