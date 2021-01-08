@@ -62,7 +62,6 @@ func (p *preferences) load() {
 
 func (p *preferences) loadFromFile(path string) error {
 	file, err := os.Open(path) // #nosec
-	defer file.Close()
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := os.MkdirAll(filepath.Dir(path), 0700)
@@ -73,6 +72,7 @@ func (p *preferences) loadFromFile(path string) error {
 		}
 		return err
 	}
+	defer file.Close()
 	decode := json.NewDecoder(file)
 
 	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
