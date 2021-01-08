@@ -57,7 +57,7 @@ func (t *legacyTheme) DisabledButtonColor() color.Color {
 }
 
 func (t *legacyTheme) DisabledTextColor() color.Color {
-	return DisabledTextColor()
+	return DisabledColor()
 }
 
 func (t *legacyTheme) FocusColor() color.Color {
@@ -85,7 +85,7 @@ func (t *legacyTheme) ShadowColor() color.Color {
 }
 
 func (t *legacyTheme) TextColor() color.Color {
-	return TextColor()
+	return ForegroundColor()
 }
 
 func (t *legacyTheme) TextSize() int {

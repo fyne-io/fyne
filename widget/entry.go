@@ -967,9 +967,9 @@ func (e *Entry) textAlign() fyne.TextAlign {
 // textColor tells the rendering textProvider our color
 func (e *Entry) textColor() color.Color {
 	if e.Disabled() {
-		return theme.DisabledTextColor()
+		return theme.DisabledColor()
 	}
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 // Obtains textual position from a given row and col
@@ -1162,7 +1162,7 @@ func (r *entryRenderer) Refresh() {
 		}
 		r.cursor.Hide()
 		if r.entry.Disabled() {
-			r.line.FillColor = theme.DisabledTextColor()
+			r.line.FillColor = theme.DisabledColor()
 		} else {
 			r.line.FillColor = theme.ShadowColor()
 		}
@@ -1342,7 +1342,7 @@ func (p *placeholderPresenter) textAlign() fyne.TextAlign {
 // textColor tells the rendering textProvider our color
 func (p *placeholderPresenter) textColor() color.Color {
 	if p.e.Disabled() {
-		return theme.DisabledTextColor()
+		return theme.DisabledColor()
 	}
 	return theme.PlaceHolderColor()
 }

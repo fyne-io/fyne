@@ -27,7 +27,7 @@ func NewSeparator() *Separator {
 //
 // Implements: fyne.Widget
 func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
-	bar := canvas.NewRectangle(theme.DisabledTextColor())
+	bar := canvas.NewRectangle(theme.DisabledColor())
 	objects := []fyne.CanvasObject{bar}
 	return &separatorRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),

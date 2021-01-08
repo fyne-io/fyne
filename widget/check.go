@@ -48,10 +48,10 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.label.Color = theme.TextColor()
+	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.Disabled() {
-		c.label.Color = theme.DisabledTextColor()
+		c.label.Color = theme.DisabledColor()
 	}
 }
 
@@ -204,7 +204,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	defer c.propertyLock.RUnlock()
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
-	text := canvas.NewText(c.Text, theme.TextColor())
+	text := canvas.NewText(c.Text, theme.ForegroundColor())
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())

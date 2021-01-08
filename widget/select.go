@@ -260,9 +260,9 @@ func (s *Select) textAlign() fyne.TextAlign {
 
 func (s *Select) textColor() color.Color {
 	if s.Disabled() {
-		return theme.DisabledTextColor()
+		return theme.DisabledColor()
 	}
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 func (s *Select) textStyle() fyne.TextStyle {

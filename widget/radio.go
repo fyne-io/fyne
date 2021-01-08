@@ -63,7 +63,7 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	for _, option := range r.Options {
 		icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
 
-		text := canvas.NewText(option, theme.TextColor())
+		text := canvas.NewText(option, theme.ForegroundColor())
 		text.Alignment = fyne.TextAlignLeading
 
 		focusIndicator := canvas.NewCircle(theme.BackgroundColor())
@@ -273,10 +273,10 @@ func (r *radioRenderer) Refresh() {
 // applyTheme updates this Radio to match the current system theme
 func (r *radioRenderer) applyTheme() {
 	for _, item := range r.items {
-		item.label.Color = theme.TextColor()
+		item.label.Color = theme.ForegroundColor()
 		item.label.TextSize = theme.TextSize()
 		if r.radio.Disabled() {
-			item.label.Color = theme.DisabledTextColor()
+			item.label.Color = theme.DisabledColor()
 		}
 	}
 }
@@ -287,7 +287,7 @@ func (r *radioRenderer) updateItems() {
 			option := r.radio.Options[i]
 			icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
 
-			text := canvas.NewText(option, theme.TextColor())
+			text := canvas.NewText(option, theme.ForegroundColor())
 			text.Alignment = fyne.TextAlignLeading
 
 			focusIndicator := canvas.NewCircle(theme.BackgroundColor())

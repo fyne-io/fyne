@@ -314,24 +314,10 @@ func DisabledButtonColor() color.Color {
 	return current().Color(ColorNameDisabledButton, currentVariant())
 }
 
-// TextColor returns the theme's standard text color
-//
-// Deprecated: Use theme.Foreground colour instead
-func TextColor() color.Color {
-	return current().Color(ColorNameForeground, currentVariant())
-}
-
 // DisabledColor returns the foreground color for a disabled UI element
 //
 // Since: 2.0.0
 func DisabledColor() color.Color {
-	return current().Color(ColorNameDisabled, currentVariant())
-}
-
-// DisabledTextColor returns the color for a disabledIcon UI element
-//
-// Deprecated: Use DisabledColor() instead
-func DisabledTextColor() color.Color {
 	return current().Color(ColorNameDisabled, currentVariant())
 }
 
