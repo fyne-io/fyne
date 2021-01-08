@@ -52,7 +52,9 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 		},
 		appTabs: t,
 	}
-	r.updateTabs()
+	// Initially setup the tab bar to only show one tab, all others will be in overflow.
+	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
+	r.updateTabs(1)
 	return r
 }
 
@@ -99,7 +101,24 @@ type appTabsRenderer struct {
 }
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
-	barMin := r.bar.MinSize()
+	var barMin fyne.Size
+
+	// Try render as many tabs as will fit, others will appear in the overflow
+	for i := MAX_APP_TABS; i > 0; i-- {
+		r.updateTabs(i)
+		barMin = r.bar.MinSize()
+		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+			if barMin.Height <= size.Height {
+				// Tab bar is short enough to fit
+				break
+			}
+		} else {
+			if barMin.Width <= size.Width {
+				// Tab bar is thin enough to fit
+				break
+			}
+		}
+	}
 
 	var (
 		barPos, dividerPos, contentPos    fyne.Position
@@ -179,11 +198,13 @@ func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *appTabsRenderer) Refresh() {
-	r.updateTabs()
 	r.divider.FillColor = theme.ShadowColor()
 	r.divider.Refresh()
+
 	r.indicator.FillColor = theme.PrimaryColor()
+
 	r.Layout(r.appTabs.Size())
+
 	canvas.Refresh(r.appTabs)
 }
 
@@ -226,16 +247,18 @@ func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
 	return
 }
 
-func (r *appTabsRenderer) updateTabs() {
+func (r *appTabsRenderer) updateTabs(max int) {
 	tabCount := len(r.appTabs.Items)
 
 	// Set overflow action
-	if tabCount < MAX_APP_TABS {
+	if tabCount < max {
 		r.bar.action = nil
 		r.bar.layout = layout.NewMaxLayout()
-	} else if r.bar.action == nil {
-		tabCount = MAX_APP_TABS
-		r.bar.action = r.buildOverflow()
+	} else {
+		tabCount = max
+		if r.bar.action == nil {
+			r.bar.action = r.buildOverflow()
+		}
 		// Set layout of tab bar containing tab buttons and overflow action
 		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
 			r.bar.layout = layout.NewBorderLayout(nil, r.bar.action, nil, nil)
@@ -251,8 +274,8 @@ func (r *appTabsRenderer) updateTabs() {
 		if cells == 0 {
 			cells = 1
 		}
-		if cells >= MAX_APP_TABS {
-			cells = MAX_APP_TABS
+		if cells >= max {
+			cells = max
 		}
 		r.bar.buttons.Layout = layout.NewGridLayout(cells)
 		iconPos = buttonIconTop
