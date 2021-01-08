@@ -26,6 +26,7 @@ func Theme() fyne.Theme {
 				theme.ColorNameButton:         color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 				theme.ColorNameDisabled:       color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 				theme.ColorNameDisabledButton: color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
+				theme.ColorNameError:          color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
 				theme.ColorNameFocus:          color.NRGBA{R: 0x81, G: 0xc7, B: 0x84, A: 0xff},
 				theme.ColorNameForeground:     color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 				theme.ColorNameHover:          color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},

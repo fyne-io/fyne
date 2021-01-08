@@ -63,6 +63,11 @@ const (
 	// Since 2.0.0
 	ColorNameDisabled fyne.ThemeColorName = "disabled"
 
+	// ColorNameError is the name of theme lookup for foreground error color.
+	//
+	// Since 2.0.0
+	ColorNameError fyne.ThemeColorName = "error"
+
 	// ColorNameFocus is the name of theme lookup for focus color.
 	//
 	// Since 2.0.0
@@ -140,6 +145,7 @@ const (
 var (
 	defaultTheme = setupDefaultTheme()
 
+	errorColor    = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 	primaryColors = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
@@ -158,6 +164,7 @@ var (
 		"button":         color.Transparent,
 		"disabled":       color.NRGBA{0xff, 0xff, 0xff, 0x42},
 		"disabledButton": color.NRGBA{0x26, 0x26, 0x26, 0xff},
+		"error":          errorColor,
 		"foreground":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		"hover":          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		"placeholder":    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
@@ -170,6 +177,7 @@ var (
 		"button":         color.Transparent,
 		"disabled":       color.NRGBA{0x0, 0x0, 0x0, 0x42},
 		"disabledButton": color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
+		"error":          errorColor,
 		"foreground":     color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		"hover":          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		"placeholder":    color.NRGBA{0x88, 0x88, 0x88, 0xff},
@@ -318,6 +326,13 @@ func DisabledColor() color.Color {
 // Deprecated: Use DisabledColor() instead
 func DisabledTextColor() color.Color {
 	return current().Color(ColorNameDisabled, currentVariant())
+}
+
+// ErrorColor returns the theme's error text color
+//
+// Since 2.0.0
+func ErrorColor() color.Color {
+	return current().Color(ColorNameError, currentVariant())
 }
 
 // PlaceHolderColor returns the theme's standard text color

@@ -21,6 +21,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameButton:         color.Black,
 			theme.ColorNameDisabled:       color.Black,
 			theme.ColorNameDisabledButton: color.White,
+			theme.ColorNameError:          blue,
 			theme.ColorNameFocus:          green,
 			theme.ColorNameForeground:     color.White,
 			theme.ColorNameHover:          green,

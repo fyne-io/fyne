@@ -391,6 +391,7 @@ func knownColor(c color.Color) string {
 		rgbaColor(theme.ButtonColor()):         "button",
 		rgbaColor(theme.DisabledButtonColor()): "disabled button",
 		rgbaColor(theme.DisabledColor()):       "disabled",
+		rgbaColor(theme.ErrorColor()):          "error",
 		rgbaColor(theme.FocusColor()):          "focus",
 		rgbaColor(theme.ForegroundColor()):     "foreground",
 		rgbaColor(theme.HoverColor()):          "hover",

@@ -41,12 +41,11 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	test.Type(entry, "2020-02")
 	assert.Error(t, r(entry.Text))
 	entry.FocusLost()
-	// TODO: error color should be named “error” in the future
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="rgba(244,67,54,255)" pos="0,33" size="120x4"/>
+					<rectangle fillColor="error" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
 						<text pos="4,4" size="104x21">2020-02</text>
 					</widget>
