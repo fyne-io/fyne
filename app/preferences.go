@@ -40,8 +40,10 @@ func (p *preferences) saveToFile(path string) error {
 	}
 	encode := json.NewEncoder(file)
 
-	values := p.InMemoryPreferences.Values()
-	return encode.Encode(&values)
+	p.InMemoryPreferences.ReadValues(func(values map[string]interface{}) {
+		err = encode.Encode(&values)
+	})
+	return err
 }
 
 func (p *preferences) load(_ string) {
@@ -65,8 +67,10 @@ func (p *preferences) loadFromFile(path string) error {
 	}
 	decode := json.NewDecoder(file)
 
-	values := p.InMemoryPreferences.Values()
-	return decode.Decode(&values)
+	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
+		err = decode.Decode(&values)
+	})
+	return err
 }
 
 func newPreferences(app *fyneApp) *preferences {
