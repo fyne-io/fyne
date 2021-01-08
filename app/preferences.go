@@ -53,7 +53,7 @@ func (p *preferences) saveToFile(path string) error {
 	return err
 }
 
-func (p *preferences) load(_ string) {
+func (p *preferences) load() {
 	err := p.loadFromFile(p.storagePath())
 	if err != nil {
 		fyne.LogError("Preferences load error:", err)

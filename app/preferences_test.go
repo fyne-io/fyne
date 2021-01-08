@@ -11,7 +11,7 @@ import (
 
 func loadPreferences(id string) *preferences {
 	p := newPreferences(&fyneApp{uniqueID: id})
-	p.load(id)
+	p.load()
 
 	return p
 }

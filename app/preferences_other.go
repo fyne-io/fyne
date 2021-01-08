@@ -20,6 +20,6 @@ func (p *preferences) watch() {
 			return
 		}
 
-		p.load("") // path ignored
+		p.load()
 	})
 }
