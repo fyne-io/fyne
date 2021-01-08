@@ -23,8 +23,14 @@ type URIWriteCloser interface {
 	URI() URI
 }
 
-// URI represents the identifier of a resource on a target system.
-// This resource may be a file or another data source such as an app or file sharing system.
+// URI represents the identifier of a resource on a target system.  This
+// resource may be a file or another data source such as an app or file sharing
+// system.
+//
+// In general, it is expected that URI implementations follow IETF RFC3896.
+// Implementations are highly recommended to utilize net/url to implement URI
+// parsing methods, especially Scheme(), AUthority(), Path(), Query(), and
+// Fragment().
 type URI interface {
 	fmt.Stringer
 
@@ -43,9 +49,36 @@ type URI interface {
 	// by Section 5 of RFC2045 ("Content-Type Header Field").
 	MimeType() string
 
-	// Scheme should return the URI scheme of the URI. For example,
-	// the Scheme() of 'file://foo/bar.baz` is 'file'.
+	// Scheme should return the URI scheme of the URI as defined by IETF
+	// RFC3986. For example, the Scheme() of 'file://foo/bar.baz` is
+	// 'file'.
 	Scheme() string
+
+	// Authority should return the URI authority, as defined by IETF
+	// RFC3986.
+	//
+	// NOTE: the RFC3986 can be obtained by combining the User and Host
+	// Fields of net/url's URL structure. Consult IETF RFC3986, section
+	// 3.2, pp. 17.
+	//
+	// Since: 2.0.0
+	Authority() string
+
+	// Path should return the URI path, as defined by IETF RFC3986.
+	//
+	// Since: 2.0.0
+	Path() string
+
+	// Query should return the URI query, as defined by IETF RFC3986.
+	//
+	// Since: 2.0.0
+	Query() string
+
+	// Fragment should return the URI fragment, as defined by IETF
+	// RFC3986.
+	//
+	// Since: 2.0.0
+	Fragment() string
 }
 
 // ListableURI represents a URI that can have child items, most commonly a
