@@ -160,51 +160,6 @@ func (r *baseTabsRenderer) BackgroundColor() color.Color {
 func (r *baseTabsRenderer) Destroy() {
 }
 
-func (r *baseTabsRenderer) moveIndicator(location TabLocation, current int) {
-	if current < 0 || current >= len(r.bar.buttons.Objects) {
-		r.indicator.Hide()
-		return
-	}
-	selected := r.bar.buttons.Objects[current]
-
-	var indicatorPos fyne.Position
-	var indicatorSize fyne.Size
-	switch location {
-	case TabLocationTop:
-		indicatorPos = fyne.NewPos(selected.Position().X, r.bar.MinSize().Height)
-		indicatorSize = fyne.NewSize(selected.Size().Width, theme.Padding())
-	case TabLocationLeading:
-		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selected.Position().Y)
-		indicatorSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
-	case TabLocationBottom:
-		indicatorPos = fyne.NewPos(selected.Position().X, r.bar.Position().Y-theme.Padding())
-		indicatorSize = fyne.NewSize(selected.Size().Width, theme.Padding())
-	case TabLocationTrailing:
-		indicatorPos = fyne.NewPos(r.bar.Position().X-theme.Padding(), selected.Position().Y)
-		indicatorSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
-	}
-
-	r.indicator.Show()
-	if r.indicator.Position().IsZero() || r.indicator.Position() == indicatorPos {
-		r.indicator.Move(indicatorPos)
-		r.indicator.Resize(indicatorSize)
-	} else if r.animation == nil {
-		r.animation = canvas.NewPositionAnimation(r.indicator.Position(), indicatorPos, canvas.DurationShort, func(p fyne.Position) {
-			r.indicator.Move(p)
-			canvas.Refresh(r.indicator)
-			if p == indicatorPos {
-				r.animation = nil
-			}
-		})
-		r.animation.Start()
-
-		canvas.NewSizeAnimation(r.indicator.Size(), indicatorSize, canvas.DurationShort, func(s fyne.Size) {
-			r.indicator.Resize(s)
-			canvas.Refresh(r.indicator)
-		}).Start()
-	}
-}
-
 var _ fyne.Widget = (*tabBar)(nil)
 
 type tabBar struct {

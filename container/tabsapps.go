@@ -55,6 +55,7 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
 	r.updateTabs(1)
+	r.moveIndicator(t.tabLocation, t.current)
 	return r
 }
 
@@ -169,6 +170,7 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 		content.Move(contentPos)
 		content.Resize(contentSize)
 	}
+	r.moveIndicator(r.appTabs.tabLocation, r.appTabs.current)
 }
 
 func (r *appTabsRenderer) MinSize() (min fyne.Size) {
@@ -225,7 +227,7 @@ func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
 		c := d.CanvasForObject(overflow)
 		r.appTabs.popUp = widget.NewPopUpMenu(fyne.NewMenu("", items...), c)
 		buttonPos := d.AbsolutePositionForObject(overflow)
-		buttonMin := overflow.MinSize()
+		buttonMin := overflow.Size()
 		popUpMin := r.appTabs.popUp.MinSize()
 		var popUpPos fyne.Position
 		switch r.appTabs.tabLocation {
@@ -245,6 +247,60 @@ func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
 		r.appTabs.popUp.ShowAtPosition(popUpPos)
 	})
 	return
+}
+
+func (r *appTabsRenderer) moveIndicator(location TabLocation, current int) {
+	var selectedPos fyne.Position
+	var selectedSize fyne.Size
+
+	if current >= len(r.bar.buttons.Objects) {
+		if a := r.bar.action; a != nil {
+			selectedPos = a.Position()
+			selectedSize = a.Size()
+		}
+	} else if current >= 0 {
+		selected := r.bar.buttons.Objects[current]
+		selectedPos = selected.Position()
+		selectedSize = selected.Size()
+	}
+
+	var indicatorPos fyne.Position
+	var indicatorSize fyne.Size
+
+	switch location {
+	case TabLocationTop:
+		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.MinSize().Height)
+		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
+	case TabLocationLeading:
+		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y)
+		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
+	case TabLocationBottom:
+		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.Position().Y-theme.Padding())
+		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
+	case TabLocationTrailing:
+		indicatorPos = fyne.NewPos(r.bar.Position().X-theme.Padding(), selectedPos.Y)
+		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
+	}
+
+	r.indicator.Show()
+	if r.indicator.Position().IsZero() || r.indicator.Position() == indicatorPos {
+		r.indicator.Move(indicatorPos)
+		r.indicator.Resize(indicatorSize)
+	} else if r.animation == nil {
+		r.animation = canvas.NewPositionAnimation(r.indicator.Position(), indicatorPos, canvas.DurationShort, func(p fyne.Position) {
+			r.indicator.Move(p)
+			canvas.Refresh(r.indicator)
+			if p == indicatorPos {
+				r.animation = nil
+			}
+		})
+		r.animation.Start()
+
+		canvas.NewSizeAnimation(r.indicator.Size(), indicatorSize, canvas.DurationShort, func(s fyne.Size) {
+			r.indicator.Resize(s)
+			canvas.Refresh(r.indicator)
+		}).Start()
+	}
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {
@@ -306,6 +362,6 @@ func (r *appTabsRenderer) updateTabs(max int) {
 		}
 		r.bar.buttons.Objects = append(r.bar.buttons.Objects, button)
 	}
+
 	r.bar.buttons.Refresh()
-	r.moveIndicator(r.appTabs.tabLocation, r.appTabs.current)
 }
