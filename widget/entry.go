@@ -1103,7 +1103,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	if focused {
-		r.line.FillColor = theme.FocusColor()
+		r.line.FillColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
 			r.line.FillColor = theme.DisabledColor()
@@ -1160,7 +1160,7 @@ type entryContent struct {
 func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	cursor := canvas.NewRectangle(theme.FocusColor())
+	cursor := canvas.NewRectangle(theme.PrimaryColor())
 	cursor.Hide()
 
 	e.entry.propertyLock.Lock()
@@ -1346,7 +1346,7 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	r.cursor.FillColor = theme.FocusColor()
+	r.cursor.FillColor = theme.PrimaryColor()
 	if focused {
 		r.cursor.Show()
 		if r.cursorAnim == nil {
@@ -1364,7 +1364,7 @@ func (r *entryContentRenderer) Refresh() {
 
 	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused && !r.content.entry.disabled
-		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
+		selection.(*canvas.Rectangle).FillColor = theme.PrimaryColor() // TODO should this be changed to a new TextSelectionColor??
 	}
 
 	canvas.Refresh(r.content)
@@ -1431,7 +1431,7 @@ func (r *entryContentRenderer) buildSelection() {
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
-			box := canvas.NewRectangle(theme.FocusColor())
+			box := canvas.NewRectangle(theme.PrimaryColor()) // TODO should this be changed to a new TextSelectionColor??
 			r.selection = append(r.selection, box)
 		}
 
@@ -1596,8 +1596,8 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 }
 
 func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
-	cursorOpaque := theme.FocusColor()
-	r, g, b, _ := theme.FocusColor().RGBA()
+	cursorOpaque := theme.PrimaryColor()
+	r, g, b, _ := theme.PrimaryColor().RGBA()
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
 	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
 		cursor.FillColor = c

@@ -346,7 +346,7 @@ func TestEntry_Focus(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -355,7 +355,7 @@ func TestEntry_Focus(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -389,7 +389,7 @@ func TestEntry_Focus(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -398,7 +398,7 @@ func TestEntry_Focus(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -413,12 +413,12 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 	c := window.Canvas()
 
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
-	fmt.Println(theme.FocusColor())
+	fmt.Println(theme.FocusColor()) // TODO is this print needed?
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -427,7 +427,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -474,7 +474,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -483,7 +483,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -496,7 +496,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -505,7 +505,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -552,7 +552,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -561,7 +561,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -615,17 +615,17 @@ func TestEntry_MultilineSelect(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="20,25" size="37x21"/>
-							<rectangle fillColor="focus" pos="3,46" size="35x21"/>
+							<rectangle fillColor="primary" pos="20,25" size="37x21"/>
+							<rectangle fillColor="primary" pos="3,46" size="35x21"/>
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,46" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,46" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -639,16 +639,16 @@ func TestEntry_MultilineSelect(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="20,25" size="18x21"/>
+							<rectangle fillColor="primary" pos="20,25" size="18x21"/>
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -662,17 +662,17 @@ func TestEntry_MultilineSelect(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="37,4" size="20x21"/>
-							<rectangle fillColor="focus" pos="3,25" size="18x21"/>
+							<rectangle fillColor="primary" pos="37,4" size="20x21"/>
+							<rectangle fillColor="primary" pos="3,25" size="18x21"/>
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -948,14 +948,14 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">H</text>
 								<text pos="4,25" size="104x21">oi</text>
 							</widget>
-							<rectangle fillColor="focus" pos="13,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="13,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -1055,13 +1055,13 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 						<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 							<widget size="112x29" type="*widget.entryContent">
 								<widget size="112x29" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1078,14 +1078,14 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 						<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 							<widget size="112x29" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="12,4" size="45x21"/>
+								<rectangle fillColor="primary" pos="12,4" size="45x21"/>
 								<widget size="112x29" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="56,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="56,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1102,14 +1102,14 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 						<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 							<widget size="112x29" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="3,4" size="10x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="10x21"/>
 								<widget size="112x29" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1126,13 +1126,13 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 						<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 							<widget size="112x29" type="*widget.entryContent">
 								<widget size="112x29" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="56,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="56,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1152,7 +1152,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
 								<widget size="112x92" type="*widget.textProvider">
@@ -1160,7 +1160,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 									<text pos="4,25" size="104x21">Testing</text>
 									<text pos="4,46" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1177,18 +1177,18 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="12,4" size="45x21"/>
-								<rectangle fillColor="focus" pos="3,25" size="54x21"/>
-								<rectangle fillColor="focus" pos="3,46" size="54x21"/>
+								<rectangle fillColor="primary" pos="12,4" size="45x21"/>
+								<rectangle fillColor="primary" pos="3,25" size="54x21"/>
+								<rectangle fillColor="primary" pos="3,46" size="54x21"/>
 								<widget size="112x92" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 									<text pos="4,25" size="104x21">Testing</text>
 									<text pos="4,46" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="56,46" size="2x21"/>
+								<rectangle fillColor="primary" pos="56,46" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1205,16 +1205,16 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="3,4" size="10x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="10x21"/>
 								<widget size="112x92" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 									<text pos="4,25" size="104x21">Testing</text>
 									<text pos="4,46" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1231,7 +1231,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
 								<widget size="112x92" type="*widget.textProvider">
@@ -1239,7 +1239,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 									<text pos="4,25" size="104x21">Testing</text>
 									<text pos="4,46" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="56,46" size="2x21"/>
+								<rectangle fillColor="primary" pos="56,46" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1346,7 +1346,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1354,7 +1354,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1369,7 +1369,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1377,7 +1377,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21"></text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1393,7 +1393,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1401,7 +1401,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Testisting</text>
       							<text pos="4,46" size="104x21"></text>
       						</widget>
-      						<rectangle fillColor="focus" pos="37,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="37,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1417,17 +1417,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,25" size="20x21"/>
-      						<rectangle fillColor="focus" pos="3,46" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="20x21"/>
+      						<rectangle fillColor="primary" pos="3,46" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,46" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,46" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1444,17 +1444,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,25" size="20x21"/>
-      						<rectangle fillColor="focus" pos="3,46" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="20x21"/>
+      						<rectangle fillColor="primary" pos="3,46" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,46" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,46" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1470,17 +1470,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,4" size="37x21"/>
-      						<rectangle fillColor="focus" pos="3,25" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="37x21"/>
+      						<rectangle fillColor="primary" pos="3,25" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,4" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1497,17 +1497,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,4" size="37x21"/>
-      						<rectangle fillColor="focus" pos="3,25" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="37x21"/>
+      						<rectangle fillColor="primary" pos="3,25" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,4" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1523,7 +1523,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1531,7 +1531,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1546,7 +1546,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1554,7 +1554,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21"></text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1570,7 +1570,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1578,7 +1578,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Testisting</text>
       							<text pos="4,46" size="104x21"></text>
       						</widget>
-      						<rectangle fillColor="focus" pos="37,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="37,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1594,17 +1594,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,25" size="20x21"/>
-      						<rectangle fillColor="focus" pos="3,46" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="20x21"/>
+      						<rectangle fillColor="primary" pos="3,46" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,46" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,46" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1621,17 +1621,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,25" size="20x21"/>
-      						<rectangle fillColor="focus" pos="3,46" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="20x21"/>
+      						<rectangle fillColor="primary" pos="3,46" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,46" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,46" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1647,17 +1647,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,4" size="37x21"/>
-      						<rectangle fillColor="focus" pos="3,25" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="37x21"/>
+      						<rectangle fillColor="primary" pos="3,25" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,4" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1674,17 +1674,17 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
-      						<rectangle fillColor="focus" pos="20,4" size="37x21"/>
-      						<rectangle fillColor="focus" pos="3,25" size="18x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="37x21"/>
+      						<rectangle fillColor="primary" pos="3,25" size="18x21"/>
       						<widget size="112x92" type="*widget.textProvider">
       							<text pos="4,4" size="104x21">Testing</text>
       							<text pos="4,25" size="104x21">Teng</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,4" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,4" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1700,7 +1700,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1709,7 +1709,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,46" size="104x21">ng</text>
       							<text pos="4,67" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="3,46" size="2x21"/>
+      						<rectangle fillColor="primary" pos="3,46" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1725,7 +1725,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1734,7 +1734,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,46" size="104x21">ng</text>
       							<text pos="4,67" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="3,46" size="2x21"/>
+      						<rectangle fillColor="primary" pos="3,46" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1749,7 +1749,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1757,7 +1757,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Tehellong</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="55,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="55,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1773,7 +1773,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1781,7 +1781,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Tehellong</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="55,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="55,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1796,7 +1796,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1804,7 +1804,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teting</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1819,7 +1819,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1827,7 +1827,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teting</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1843,7 +1843,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1851,7 +1851,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Tsting</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="12,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="12,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1867,7 +1867,7 @@ func TestEntry_Select(t *testing.T) {
       	<canvas padded size="150x200">
       		<content>
       			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+      				<rectangle fillColor="primary" pos="0,96" size="120x4"/>
       				<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
       					<widget size="112x92" type="*widget.entryContent">
       						<widget size="112x92" type="*widget.textProvider">
@@ -1875,7 +1875,7 @@ func TestEntry_Select(t *testing.T) {
       							<text pos="4,25" size="104x21">Teing</text>
       							<text pos="4,46" size="104x21">Testing</text>
       						</widget>
-      						<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+      						<rectangle fillColor="primary" pos="20,25" size="2x21"/>
       					</widget>
       				</widget>
       			</widget>
@@ -1912,7 +1912,7 @@ func TestEntry_SelectAll(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
 								<widget size="112x92" type="*widget.textProvider">
@@ -1920,7 +1920,7 @@ func TestEntry_SelectAll(t *testing.T) {
 									<text pos="4,25" size="104x21">Second Row</text>
 									<text pos="4,46" size="104x21">Third Row</text>
 								</widget>
-								<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1936,18 +1936,18 @@ func TestEntry_SelectAll(t *testing.T) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="3,4" size="67x21"/>
-								<rectangle fillColor="focus" pos="3,25" size="88x21"/>
-								<rectangle fillColor="focus" pos="3,46" size="73x21"/>
+								<rectangle fillColor="primary" pos="3,4" size="67x21"/>
+								<rectangle fillColor="primary" pos="3,25" size="88x21"/>
+								<rectangle fillColor="primary" pos="3,46" size="73x21"/>
 								<widget size="112x92" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">First Row</text>
 									<text pos="4,25" size="104x21">Second Row</text>
 									<text pos="4,46" size="104x21">Third Row</text>
 								</widget>
-								<rectangle fillColor="focus" pos="75,46" size="2x21"/>
+								<rectangle fillColor="primary" pos="75,46" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -1974,7 +1974,7 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -1982,7 +1982,7 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="56,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="56,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2003,16 +2003,16 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="20,25" size="37x21"/>
+							<rectangle fillColor="primary" pos="20,25" size="37x21"/>
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="56,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="56,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2027,16 +2027,16 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="3,25" size="18x21"/>
+							<rectangle fillColor="primary" pos="3,25" size="18x21"/>
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2057,7 +2057,7 @@ func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2065,7 +2065,7 @@ func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2091,7 +2091,7 @@ func TestEntry_SelectSnapDown(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2099,7 +2099,7 @@ func TestEntry_SelectSnapDown(t *testing.T) {
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,46" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,46" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2124,7 +2124,7 @@ func TestEntry_SelectSnapLeft(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2132,7 +2132,7 @@ func TestEntry_SelectSnapLeft(t *testing.T) {
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="20,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2157,7 +2157,7 @@ func TestEntry_SelectSnapRight(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2165,7 +2165,7 @@ func TestEntry_SelectSnapRight(t *testing.T) {
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2191,7 +2191,7 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2199,7 +2199,7 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2220,13 +2220,13 @@ func TestEntry_SelectedText(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2242,14 +2242,14 @@ func TestEntry_SelectedText(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="12,4" size="17x21"/>
+							<rectangle fillColor="primary" pos="12,4" size="17x21"/>
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="28,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="28,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2266,14 +2266,14 @@ func TestEntry_SelectedText(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="12,4" size="22x21"/>
+							<rectangle fillColor="primary" pos="12,4" size="22x21"/>
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="33,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="33,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2288,13 +2288,13 @@ func TestEntry_SelectedText(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="33,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="33,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2309,14 +2309,14 @@ func TestEntry_SelectedText(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="20,4" size="14x21"/>
+							<rectangle fillColor="primary" pos="20,4" size="14x21"/>
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="20,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="20,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2356,16 +2356,16 @@ func TestEntry_SelectionHides(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
-							<rectangle fillColor="focus" pos="20,25" size="18x21"/>
+							<rectangle fillColor="primary" pos="20,25" size="18x21"/>
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing</text>
 								<text pos="4,25" size="104x21">Testing</text>
 								<text pos="4,46" size="104x21">Testing</text>
 							</widget>
-							<rectangle fillColor="focus" pos="37,25" size="2x21"/>
+							<rectangle fillColor="primary" pos="37,25" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2470,7 +2470,7 @@ func TestEntry_Disable_OnFocus(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -2479,7 +2479,7 @@ func TestEntry_Disable_OnFocus(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2670,7 +2670,7 @@ func TestEntry_Tapped(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2678,7 +2678,7 @@ func TestEntry_Tapped(t *testing.T) {
 								<text pos="4,25" size="104x21">WWW</text>
 								<text pos="4,46" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2693,7 +2693,7 @@ func TestEntry_Tapped(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2701,7 +2701,7 @@ func TestEntry_Tapped(t *testing.T) {
 								<text pos="4,25" size="104x21">WWW</text>
 								<text pos="4,46" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="17,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="17,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2717,7 +2717,7 @@ func TestEntry_Tapped(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2725,7 +2725,7 @@ func TestEntry_Tapped(t *testing.T) {
 								<text pos="4,25" size="104x21">WWW</text>
 								<text pos="4,46" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="31,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="31,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2741,7 +2741,7 @@ func TestEntry_Tapped(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2749,7 +2749,7 @@ func TestEntry_Tapped(t *testing.T) {
 								<text pos="4,25" size="104x21">WWW</text>
 								<text pos="4,46" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="45,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="45,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2765,7 +2765,7 @@ func TestEntry_Tapped(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
@@ -2773,7 +2773,7 @@ func TestEntry_Tapped(t *testing.T) {
 								<text pos="4,25" size="104x21">WWW</text>
 								<text pos="4,46" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,46" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,46" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2795,7 +2795,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -2804,7 +2804,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2930,7 +2930,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
@@ -2939,7 +2939,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21"></text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2982,13 +2982,13 @@ func TestEntry_TextWrap(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.ScrollContainer">
 						<widget size="112x29" type="*widget.entryContent">
 							<widget size="112x29" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">Testing Wrapping</text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -2999,13 +2999,13 @@ func TestEntry_TextWrap(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+					<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 					<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 						<widget size="112x92" type="*widget.entryContent">
 							<widget size="112x92" type="*widget.textProvider">
 								<text pos="4,4" size="104x21">A long text on short words w/o NLs or LFs.</text>
 							</widget>
-							<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 						</widget>
 					</widget>
 				</widget>
@@ -3052,7 +3052,7 @@ func TestEntry_TextWrap(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="10,10" size="120x100" type="*widget.Entry">
-							<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+							<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 							<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 								<widget size="112x92" type="*widget.entryContent">
 									<widget size="112x92" type="*widget.textProvider">
@@ -3060,7 +3060,7 @@ func TestEntry_TextWrap(t *testing.T) {
 										<text pos="4,25" size="104x21">short words w</text>
 										<text pos="4,46" size="104x21">/o NLs or LFs.</text>
 									</widget>
-									<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+									<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 								</widget>
 							</widget>
 						</widget>
@@ -3075,7 +3075,7 @@ func TestEntry_TextWrap(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="10,10" size="120x100" type="*widget.Entry">
-							<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+							<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 							<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 								<widget size="112x92" type="*widget.entryContent">
 									<widget size="112x92" type="*widget.textProvider">
@@ -3084,7 +3084,7 @@ func TestEntry_TextWrap(t *testing.T) {
 										<text pos="4,46" size="104x21">w/o NLs or</text>
 										<text pos="4,67" size="104x21">LFs.</text>
 									</widget>
-									<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+									<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 								</widget>
 							</widget>
 						</widget>
@@ -3168,13 +3168,13 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 		<canvas padded size="150x100">
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="130x4"/>
 					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">•••••••</text>
 							</widget>
-							<rectangle fillColor="focus" pos="43,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="43,4" size="2x21"/>
 						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
@@ -3221,13 +3221,13 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 		<canvas padded size="150x100">
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="130x4"/>
 					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">•••••••</text>
 							</widget>
-							<rectangle fillColor="focus" pos="43,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="43,4" size="2x21"/>
 						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
@@ -3269,13 +3269,13 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		<canvas padded size="150x100">
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="130x4"/>
 					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">•••••••</text>
 							</widget>
-							<rectangle fillColor="focus" pos="43,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="43,4" size="2x21"/>
 						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
@@ -3289,13 +3289,13 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		<canvas padded size="150x100">
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
+					<rectangle fillColor="primary" pos="0,33" size="130x4"/>
 					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">Hié™שרה</text>
 							</widget>
-							<rectangle fillColor="focus" pos="66,4" size="2x21"/>
+							<rectangle fillColor="primary" pos="66,4" size="2x21"/>
 						</widget>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
@@ -3552,16 +3552,16 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="20,25" size="18x21"/>
+								<rectangle fillColor="primary" pos="20,25" size="18x21"/>
 								<widget size="112x92" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 									<text pos="4,25" size="104x21">Testing</text>
 									<text pos="4,46" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="20,25" size="2x21"/>
+								<rectangle fillColor="primary" pos="20,25" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>
@@ -3577,16 +3577,16 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 			<canvas padded size="150x200">
 				<content>
 					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+						<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 						<widget pos="4,4" size="112x92" type="*widget.ScrollContainer">
 							<widget size="112x92" type="*widget.entryContent">
-								<rectangle fillColor="focus" pos="20,25" size="18x21"/>
+								<rectangle fillColor="primary" pos="20,25" size="18x21"/>
 								<widget size="112x92" type="*widget.textProvider">
 									<text pos="4,4" size="104x21">Testing</text>
 									<text pos="4,25" size="104x21">Testing</text>
 									<text pos="4,46" size="104x21">Testing</text>
 								</widget>
-								<rectangle fillColor="focus" pos="37,25" size="2x21"/>
+								<rectangle fillColor="primary" pos="37,25" size="2x21"/>
 							</widget>
 						</widget>
 					</widget>

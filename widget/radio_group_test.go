@@ -51,7 +51,7 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 					<container pos="4,4" size="142x192">
 						<widget pos="19,52" size="103x87" type="*widget.RadioGroup">
 							<widget size="103x29" type="*widget.radioItem">
-								<circle fillColor="focus" size="28x28"/>
+								<circle fillColor="primary" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize"/>
 								<text pos="32,0" size="103x29">Option A</text>
 							</widget>
@@ -82,7 +82,7 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 								<text pos="32,0" size="103x29">Option A</text>
 							</widget>
 							<widget pos="0,29" size="103x29" type="*widget.radioItem">
-								<circle fillColor="focus" size="28x28"/>
+								<circle fillColor="primary" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize"/>
 								<text pos="32,0" size="103x29">Option B</text>
 							</widget>
@@ -156,7 +156,7 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 					<container pos="4,4" size="142x192">
 						<widget pos="19,52" size="103x87" type="*widget.RadioGroup">
 							<widget size="103x29" type="*widget.radioItem">
-								<circle fillColor="focus" size="28x28"/>
+								<circle fillColor="primary" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize"/>
 								<text pos="32,0" size="103x29">Option A</text>
 							</widget>
@@ -187,7 +187,7 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 								<text pos="32,0" size="103x29">Option A</text>
 							</widget>
 							<widget pos="0,29" size="103x29" type="*widget.radioItem">
-								<circle fillColor="focus" size="28x28"/>
+								<circle fillColor="primary" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize"/>
 								<text pos="32,0" size="103x29">Option B</text>
 							</widget>
@@ -270,7 +270,7 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 					<container pos="4,4" size="142x192">
 						<widget pos="19,52" size="103x87" type="*widget.RadioGroup">
 							<widget size="103x29" type="*widget.radioItem">
-								<circle fillColor="focus" size="28x28"/>
+								<circle fillColor="primary" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize"/>
 								<text pos="32,0" size="103x29">Option A</text>
 							</widget>
