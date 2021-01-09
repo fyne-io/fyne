@@ -57,6 +57,7 @@ type Entry struct {
 	focused     bool
 	text        *textProvider
 	placeholder *textProvider
+	content     *entryContent
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -156,10 +157,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	line := canvas.NewRectangle(theme.ShadowColor())
 
-	content := &entryContent{entry: e}
-	scroll := NewScrollContainer(content)
+	e.content = &entryContent{entry: e}
+	scroll := NewScrollContainer(e.content)
 	objects := []fyne.CanvasObject{line, scroll}
-	content.scroll = scroll
+	e.content.scroll = scroll
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -174,6 +175,15 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	return &entryRenderer{line, scroll, objects, e}
 }
 
+// Cursor returns the cursor type of this widget
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: desktop.Cursorable
+func (e *Entry) Cursor() desktop.Cursor {
+	return e.content.Cursor()
+}
+
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 //
 // Implements: fyne.Disableable
@@ -186,6 +196,34 @@ func (e *Entry) Disable() {
 // Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
 	return e.DisableableWidget.disabled
+}
+
+// DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: fyne.DoubleTappable
+func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
+	e.content.DoubleTapped(p)
+}
+
+// DragEnd is called at end of a drag event. It does nothing.
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: fyne.Draggable
+func (e *Entry) DragEnd() {
+	e.content.DragEnd()
+}
+
+// Dragged is called when the pointer moves while a button is held down.
+// It updates the selection accordingly.
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: fyne.Draggable
+func (e *Entry) Dragged(d *fyne.DragEvent) {
+	e.content.Dragged(d)
 }
 
 // Enable this widget, updating any style or features appropriately.
@@ -298,6 +336,27 @@ func (e *Entry) MinSize() fyne.Size {
 	return min
 }
 
+// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
+// update the existing selection (if shift is held), or start a selection dragging operation.
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: desktop.Mouseable
+func (e *Entry) MouseDown(m *desktop.MouseEvent) {
+	e.content.MouseDown(m)
+}
+
+// MouseUp called on mouse release
+// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
+// if so, and if a text select key isn't held, then disable selecting
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: desktop.Mouseable
+func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+	e.content.MouseUp(m)
+}
+
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
@@ -344,6 +403,15 @@ func (e *Entry) SetText(text string) {
 	if e.CursorColumn >= rowLength {
 		e.CursorColumn = rowLength
 	}
+}
+
+// Tapped is called when this entry has been tapped so we should update the cursor position.
+//
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
+// Implements: fyne.Tappable
+func (e *Entry) Tapped(ev *fyne.PointEvent) {
+	e.content.Tapped(ev)
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
