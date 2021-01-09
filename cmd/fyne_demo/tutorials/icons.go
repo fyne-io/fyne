@@ -123,6 +123,9 @@ func loadIcons() []iconInfo {
 		{"DocumentPrintIcon", theme.DocumentPrintIcon()},
 		{"DocumentSaveIcon", theme.DocumentSaveIcon()},
 
+		{"DotsHorizontalIcon", theme.DotsHorizontalIcon()},
+		{"DotsVerticalIcon", theme.DotsVerticalIcon()},
+
 		{"FileIcon", theme.FileIcon()},
 		{"FileApplicationIcon", theme.FileApplicationIcon()},
 		{"FileAudioIcon", theme.FileAudioIcon()},

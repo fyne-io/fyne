@@ -126,6 +126,9 @@ func main() {
 	bundleIcon("document-print", f)
 	bundleIcon("document-save", f)
 
+	bundleIcon("dots-horizontal", f)
+	bundleIcon("dots-vertical", f)
+
 	bundleIcon("info", f)
 	bundleIcon("question", f)
 	bundleIcon("warning", f)

@@ -160,6 +160,16 @@ const (
 	// Since 2.0.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
 
+	// IconNameDotsHorizontal is the name of theme lookup for three horizontal dots.
+	//
+	// Since 2.0.0
+	IconNameDotsHorizontal fyne.ThemeIconName = "dotsHorizontal"
+
+	// IconNameDotsVertical is the name of theme lookup for three vertical dots.
+	//
+	// Since 2.0.0
+	IconNameDotsVertical fyne.ThemeIconName = "dotsVertical"
+
 	// IconNameMailAttachment is the name of theme lookup for mail attachment icon.
 	//
 	// Since 2.0.0
@@ -438,6 +448,9 @@ var (
 		IconNameDocumentCreate: NewThemedResource(documentcreateIconRes),
 		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
 		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
+
+		IconNameDotsHorizontal: NewThemedResource(dotshorizontalIconRes),
+		IconNameDotsVertical:   NewThemedResource(dotsverticalIconRes),
 
 		IconNameInfo:     NewThemedResource(infoIconRes),
 		IconNameQuestion: NewThemedResource(questionIconRes),
@@ -795,6 +808,16 @@ func DocumentPrintIcon() fyne.Resource {
 // DocumentSaveIcon returns a resource containing the standard document save icon for the current theme
 func DocumentSaveIcon() fyne.Resource {
 	return current().Icon(IconNameDocumentSave)
+}
+
+// DotsHorizontalIcon returns a resource containing the standard horizontal three dots icon for the current theme
+func DotsHorizontalIcon() fyne.Resource {
+	return current().Icon(IconNameDotsHorizontal)
+}
+
+// DotsVerticalIcon returns a resource containing the standard vertical three dots icon for the current theme
+func DotsVerticalIcon() fyne.Resource {
+	return current().Icon(IconNameDotsVertical)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme

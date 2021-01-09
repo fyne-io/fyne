@@ -200,18 +200,26 @@ func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *appTabsRenderer) Refresh() {
+	r.Layout(r.appTabs.Size())
+
 	r.divider.FillColor = theme.ShadowColor()
 	r.divider.Refresh()
 
 	r.indicator.FillColor = theme.PrimaryColor()
 
-	r.Layout(r.appTabs.Size())
+	if r.bar.action != nil {
+		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+			r.bar.action.SetIcon(theme.DotsVerticalIcon())
+		} else {
+			r.bar.action.SetIcon(theme.DotsHorizontalIcon())
+		}
+	}
 
 	canvas.Refresh(r.appTabs)
 }
 
 func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
-	overflow = widget.NewButtonWithIcon("", theme.MenuExpandIcon() /* TODO OverflowIcon() */, func() {
+	overflow = widget.NewButton("", func() {
 		// Show pop up containing all tabs which did not fit in the tab bar
 
 		var items []*fyne.MenuItem
