@@ -31,6 +31,10 @@ func isHidden(file fyne.URI) bool {
 	return len(name) == 0 || name[0] == '.'
 }
 
+func hideFile(filename string) error {
+	return nil
+}
+
 func fileOpenOSOverride(*FileDialog) bool {
 	return false
 }

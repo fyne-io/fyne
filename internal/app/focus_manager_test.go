@@ -169,10 +169,6 @@ func (f *focusable) FocusLost() {
 	f.focused = false
 }
 
-func (f *focusable) Focused() bool {
-	return f.focused
-}
-
 func (f *focusable) TypedRune(_ rune) {
 }
 

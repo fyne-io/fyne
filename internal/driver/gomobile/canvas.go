@@ -135,11 +135,6 @@ func (c *mobileCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *mobileCanvas) Overlay() fyne.CanvasObject {
-	return c.overlays.Top()
-}
-
 func (c *mobileCanvas) Overlays() fyne.OverlayStack {
 	return c.overlays
 }
@@ -168,7 +163,7 @@ func (c *mobileCanvas) Scale() float32 {
 func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
-	c.sizeContent(c.Size().Max(content.MinSize()))
+	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 }
 
 func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
@@ -177,19 +172,6 @@ func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 
 func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
-}
-
-// Deprecated: Use Overlays() instead.
-func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	if len(c.overlays.List()) > 0 {
-		c.overlays.Remove(c.overlays.List()[0])
-	}
-	c.overlays.Add(overlay)
-}
-
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *mobileCanvas) SetScale(_ float32) {
-	c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 }
 
 func (c *mobileCanvas) Size() fyne.Size {

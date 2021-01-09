@@ -34,7 +34,6 @@ func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 func ApplySettings(set fyne.Settings, app fyne.App) {
 	for _, window := range app.Driver().AllWindows() {
 		ApplyThemeTo(window.Content(), window.Canvas())
-		window.Canvas().SetScale(set.Scale())
 
 		for _, overlay := range window.Canvas().Overlays().List() {
 			ApplyThemeTo(overlay, window.Canvas())

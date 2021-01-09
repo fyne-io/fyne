@@ -25,7 +25,7 @@ func makeAnimationCanvas() fyne.CanvasObject {
 			rect.FillColor = c
 			canvas.Refresh(rect)
 		})
-	a.Repeat = true
+	a.RepeatCount = fyne.AnimationRepeatForever
 	a.AutoReverse = true
 	a.Start()
 
@@ -37,7 +37,7 @@ func makeAnimationCanvas() fyne.CanvasObject {
 		width := 10 + (p.X / 7)
 		i.Resize(fyne.NewSize(width, width))
 	})
-	a2.Repeat = true
+	a2.RepeatCount = fyne.AnimationRepeatForever
 	a2.AutoReverse = true
 	a2.Curve = fyne.AnimationLinear
 	a2.Start()
@@ -94,5 +94,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 			box.Refresh()
 		})
 	anim.Curve = curve
+	anim.AutoReverse = true
+	anim.RepeatCount = 1
 	return
 }

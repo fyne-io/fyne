@@ -522,7 +522,7 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 	}
 
 	w.canvas.detectedScale = w.detectScale()
-	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
+	go w.canvas.reloadScale()
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {

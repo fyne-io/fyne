@@ -813,16 +813,13 @@ var scaleTests = []struct {
 	name                             string
 }{
 	{1.0, 1.0, 1.0, 1.0, "Windows with user setting 1.0"},
-	{fyne.SettingsScaleAuto, 1.0, 1.0, 1.0, "Windows with user legacy setting auto"},
 	{1.5, 1.0, 1.0, 1.5, "Windows with user setting 1.5"},
 
-	{1.0, fyne.SettingsScaleAuto, 1.0, 1.0, "Linux lowDPI with user setting 1.0"},
-	{fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 1.0, 1.0, "Linux lowDPI with user legacy setting auto"},
-	{1.5, fyne.SettingsScaleAuto, 1.0, 1.5, "Linux lowDPI with user setting 1.5"},
+	{1.0, scaleAuto, 1.0, 1.0, "Linux lowDPI with user setting 1.0"},
+	{1.5, scaleAuto, 1.0, 1.5, "Linux lowDPI with user setting 1.5"},
 
-	{1.0, fyne.SettingsScaleAuto, 2.0, 2.0, "Linux highDPI with user setting 1.0"},
-	{fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 2.0, 2.0, "Linux highDPI with user legacy setting auto"},
-	{1.5, fyne.SettingsScaleAuto, 2.0, 3.0, "Linux highDPI with user setting 1.5"},
+	{1.0, scaleAuto, 2.0, 2.0, "Linux highDPI with user setting 1.0"},
+	{1.5, scaleAuto, 2.0, 3.0, "Linux highDPI with user setting 1.5"},
 }
 
 func TestWindow_calculateScale(t *testing.T) {
@@ -1179,10 +1176,6 @@ type focusable struct {
 	focusedTimes   int
 	unfocusedTimes int
 	disabled       bool
-}
-
-func (f *focusable) Focused() bool {
-	panic("deprecated")
 }
 
 func (f *focusable) TypedRune(rune) {

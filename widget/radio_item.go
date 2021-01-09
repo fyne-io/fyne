@@ -50,15 +50,6 @@ func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// Focused returns whether this item is focused or not.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: Use fyne.Canvas.Focused() instead.
-func (i *radioItem) Focused() bool {
-	return i.focused
-}
-
 // FocusGained is called when this item gained the focus.
 //
 // Implements: fyne.Focusable

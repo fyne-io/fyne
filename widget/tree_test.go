@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -999,4 +1000,34 @@ func TestTree_Move(t *testing.T) {
 			</content>
 		</canvas>
 `, window.Canvas())
+}
+
+func TestTree_Refresh(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	value := "Foo Leaf"
+	tree := widget.NewTreeWithStrings(treeData)
+	tree.UpdateNode = func(uid widget.TreeNodeID, branch bool, node fyne.CanvasObject) {
+		if uid == "foobar" {
+			node.(*widget.Label).SetText(value)
+			assert.False(t, branch)
+		} else {
+			node.(*widget.Label).SetText(uid)
+			assert.True(t, branch)
+		}
+	}
+	tree.OpenBranch("foo")
+
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
+
+	test.AssertImageMatches(t, "tree/refresh_initial.png", window.Canvas().Capture())
+
+	value = "Replaced"
+	tree.Refresh()
+
+	test.AssertImageMatches(t, "tree/refresh_replaced.png", window.Canvas().Capture())
 }

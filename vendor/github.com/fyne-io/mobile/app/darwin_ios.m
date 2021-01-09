@@ -34,7 +34,7 @@ struct utsname sysInfo;
     if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
 		scale = (int)[UIScreen mainScreen].scale; // either 1.0, 2.0, or 3.0.
 	}
-    CGSize size = [UIScreen mainScreen].bounds.size;
+    CGSize size = [UIScreen mainScreen].nativeBounds.size;
     setDisplayMetrics((int)size.width, (int)size.height, scale);
 
 	lifecycleAlive();
@@ -135,7 +135,7 @@ struct utsname sysInfo;
 	}
 	setScreen(scale);
 
-	CGSize size = [UIScreen mainScreen].bounds.size;
+	CGSize size = [UIScreen mainScreen].nativeBounds.size;
 	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
 	updateConfig((int)size.width, (int)size.height, orientation);
 
@@ -144,11 +144,12 @@ struct utsname sysInfo;
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+- (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
 	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		// TODO(crawshaw): come up with a plan to handle animations.
 	} completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+		CGSize size = [UIScreen mainScreen].nativeBounds.size;
 		updateConfig((int)size.width, (int)size.height, orientation);
 	}];
 }
@@ -327,7 +328,6 @@ void showFileOpenPicker(char* mimes, char *exts) {
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
         initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
     documentPicker.delegate = appDelegate;
-    documentPicker.modalPresentationStyle = UIModalPresentationPopover;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
