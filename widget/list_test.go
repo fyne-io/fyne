@@ -39,7 +39,7 @@ func TestList_MinSize(t *testing.T) {
 	}{
 		"small": {
 			fyne.NewSize(1, 1),
-			fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize),
+			fyne.NewSize(float32(32), float32(32)),
 		},
 		"large": {
 			fyne.NewSize(100, 100),

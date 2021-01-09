@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
@@ -36,11 +37,11 @@ func TestShowFolderOpen(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open Folder", title.Text)
 
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name

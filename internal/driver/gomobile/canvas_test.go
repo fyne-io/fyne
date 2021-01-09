@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/layout"
 	_ "fyne.io/fyne/test"
@@ -154,7 +155,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 func TestCanvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
-	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
+	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(scroll)
 	c.resize(fyne.NewSize(40, 24))

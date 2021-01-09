@@ -2,7 +2,7 @@ package container
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/internal/widget"
 )
 
 // Scroll defines a container that is smaller than the Content.
@@ -46,7 +46,3 @@ func NewHScroll(content fyne.CanvasObject) *Scroll {
 func NewVScroll(content fyne.CanvasObject) *Scroll {
 	return widget.NewVScrollContainer(content)
 }
-
-// TODO move the implementation into internal/scroll.go in 2.0 when we delete the old API.
-// we cannot do that right now due to the fact that this package depends on widgets and they depend on us.
-// Once moving the bulk of scroller will go to an internal package, then this and the widget package can both depend.

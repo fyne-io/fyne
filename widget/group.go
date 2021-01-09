@@ -66,7 +66,7 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 // Deprecated: Consider using the Card instead.
 func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
-	group := &Group{BaseWidget{}, title, box, NewVScrollContainer(box)}
+	group := &Group{BaseWidget{}, title, box, widget.NewVScrollContainer(box)}
 
 	Renderer(group).Layout(group.MinSize())
 	return group

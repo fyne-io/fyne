@@ -38,7 +38,7 @@ type Table struct {
 	columnWidths              map[int]float32
 	moveCallback              func()
 	offset                    fyne.Position
-	scroll                    *ScrollContainer
+	scroll                    *widget.ScrollContainer
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -65,18 +65,18 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
-	t.scroll = NewScrollContainer(t.cells)
+	t.scroll = widget.NewScrollContainer(t.cells)
 
 	obj := []fyne.CanvasObject{colMarker, rowMarker, colHover, rowHover, t.scroll}
 	r := &tableRenderer{t: t, scroll: t.scroll, rowMarker: rowMarker, colMarker: colMarker,
 		rowHover: rowHover, colHover: colHover, cellSize: cellSize}
 	r.SetObjects(obj)
 	t.moveCallback = r.moveIndicators
-	t.scroll.onOffsetChanged = func() {
+	widget.AddScrollOffsetChangedListener(t.scroll, func() {
 		t.offset = t.scroll.Offset
 		t.cells.Refresh()
 		r.moveIndicators()
-	}
+	})
 
 	r.Layout(t.Size())
 	return r
@@ -155,15 +155,15 @@ func (t *Table) scrollTo(id TableCellID) {
 
 	if cellX < scrollPos.X {
 		scrollPos.X = cellX
-	} else if cellX+cellWidth > scrollPos.X+t.scroll.size.Width {
-		scrollPos.X = cellX + cellWidth - t.scroll.size.Width
+	} else if cellX+cellWidth > scrollPos.X+t.scroll.Size().Width {
+		scrollPos.X = cellX + cellWidth - t.scroll.Size().Width
 	}
 
 	cellY := float32(id.Row) * (cellPadded.Height + theme.SeparatorThicknessSize())
 	if cellY < scrollPos.Y {
 		scrollPos.Y = cellY
-	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.size.Height {
-		scrollPos.Y = cellY + cellPadded.Height - t.scroll.size.Height
+	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.Size().Height {
+		scrollPos.Y = cellY + cellPadded.Height - t.scroll.Size().Height
 	}
 	t.scroll.Offset = scrollPos
 	t.offset = scrollPos
@@ -190,7 +190,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	isVisible := false
 	visible = make(map[int]float32)
 
-	if t.scroll.size.Width <= 0 {
+	if t.scroll.Size().Width <= 0 {
 		return
 	}
 
@@ -207,7 +207,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			offX = colOffset
 			isVisible = true
 		}
-		if colOffset < t.offset.X+t.scroll.size.Width {
+		if colOffset < t.offset.X+t.scroll.Size().Width {
 			maxCol = i + 1
 		} else {
 			break
@@ -228,7 +228,7 @@ type tableRenderer struct {
 	widget.BaseRenderer
 	t *Table
 
-	scroll               *ScrollContainer
+	scroll               *widget.ScrollContainer
 	rowMarker, colMarker *canvas.Rectangle
 	rowHover, colHover   *canvas.Rectangle
 	dividers             []fyne.CanvasObject

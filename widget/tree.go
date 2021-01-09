@@ -35,7 +35,7 @@ type Tree struct {
 	leafMinSize   fyne.Size
 	offset        fyne.Position
 	open          map[TreeNodeID]bool
-	scroller      *ScrollContainer
+	scroller      *widget.ScrollContainer
 	selected      []TreeNodeID
 }
 
@@ -101,7 +101,7 @@ func (t *Tree) CloseBranch(uid TreeNodeID) {
 func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	c := newTreeContent(t)
-	s := NewScrollContainer(c)
+	s := widget.NewScrollContainer(c)
 	t.scroller = s
 	r := &treeRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{s}),
@@ -109,13 +109,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 		content:      c,
 		scroller:     s,
 	}
-	s.onOffsetChanged = func() {
-		if t.offset == s.Offset {
-			return
-		}
-		t.offset = s.Offset
-		c.Refresh()
-	}
+	widget.AddScrollOffsetChangedListener(s, t.offsetUpdated)
 	r.updateMinSizes()
 	r.content.viewport = r.MinSize()
 	return r
@@ -222,7 +216,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 		} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
 			t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
 		}
-		t.scroller.onOffsetChanged()
+		t.offsetUpdated()
 		// TODO Setting a node as selected should open all parents if they aren't already
 	}
 	t.Refresh()
@@ -261,6 +255,14 @@ func (t *Tree) ensureOpenMap() {
 	}
 }
 
+func (t *Tree) offsetUpdated() {
+	if t.offset == t.scroller.Offset {
+		return
+	}
+	t.offset = t.scroller.Offset
+	t.scroller.Content.Refresh()
+}
+
 func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
 	if isBranch := t.IsBranch; isBranch != nil {
 		if isBranch(uid) {
@@ -289,7 +291,7 @@ type treeRenderer struct {
 	widget.BaseRenderer
 	tree     *Tree
 	content  *treeContent
-	scroller *ScrollContainer
+	scroller *widget.ScrollContainer
 }
 
 func (r *treeRenderer) MinSize() (min fyne.Size) {
