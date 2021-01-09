@@ -155,11 +155,12 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.textProvider()
 	e.placeholderProvider()
 
+	box := canvas.NewRectangle(theme.EntryBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
 	scroll := NewScrollContainer(e.content)
-	objects := []fyne.CanvasObject{line, scroll}
+	objects := []fyne.CanvasObject{box, line, scroll}
 	e.content.scroll = scroll
 
 	if e.Password && e.ActionItem == nil {
@@ -172,7 +173,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{line, scroll, objects, e}
+	return &entryRenderer{box, line, scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -1023,8 +1024,8 @@ func (e *Entry) updateText(text string) {
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
-	line   *canvas.Rectangle
-	scroll *ScrollContainer
+	box, line *canvas.Rectangle
+	scroll    *ScrollContainer
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1038,8 +1039,11 @@ func (r *entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	r.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
-	r.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
+	r.line.Resize(fyne.NewSize(size.Width, theme.EntryUnderlineSize()))
+	r.line.Move(fyne.NewPos(0, size.Height-theme.EntryUnderlineSize()))
+	// Substracting "r.box.StrokeWidth/2" in order to be ready to support OutlineBorder later in future.
+	r.box.Resize(fyne.NewSize(size.Width-r.box.StrokeWidth/2, size.Height-r.box.StrokeWidth/2))
+	r.box.Move(fyne.NewPos(0, 0))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
@@ -1102,6 +1106,7 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
+	r.box.FillColor = theme.EntryBackgroundColor()
 	if focused {
 		r.line.FillColor = theme.FocusColor()
 	} else {

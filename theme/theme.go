@@ -103,6 +103,11 @@ const (
 	// Since 2.0.0
 	ColorNameShadow fyne.ThemeColorName = "shadow"
 
+	// ColorNameEntryBackground is the name of theme lookup for entry background color.
+	// TODO or ColorNameEntryFill?
+	// Since 2.0.0
+	ColorNameEntryBackground fyne.ThemeColorName = "entryBackground"
+
 	// SizeNameInlineIcon is the name of theme lookup for inline icons size.
 	//
 	// Since 2.0.0
@@ -132,6 +137,11 @@ const (
 	//
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
+
+	// SizeNameEntryUnderline is the name of theme lookup for widget.Entry underline size.
+	//
+	// Since 2.0.0
+	SizeNameEntryUnderline fyne.ThemeSizeName = "entryUnderline"
 
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
@@ -175,6 +185,8 @@ var (
 		ColorNamePlaceHolder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		// TODO define the color (why the map doesn't use the constants created??)
+		ColorNameEntryBackground: color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 	}
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
@@ -187,7 +199,10 @@ var (
 		ColorNameHover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
+		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
+		// TODO define the color (why the map doesn't use the constants created??)
+		ColorNameEntryBackground: color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+	}
 )
 
 type builtinTheme struct {
@@ -286,6 +301,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
+	case SizeNameEntryUnderline:
+		return 2
 	default:
 		return 0
 	}
@@ -379,9 +396,23 @@ func ShadowColor() color.Color {
 	return current().Color(ColorNameShadow, currentVariant())
 }
 
+// EntryBackgroundColor returns the background color for an entry.
+//
+// Since 2.0.0
+func EntryBackgroundColor() color.Color {
+	return current().Color(ColorNameEntryBackground, currentVariant())
+}
+
 // TextSize returns the standard text size
 func TextSize() float32 {
 	return current().Size(SizeNameText)
+}
+
+// EntryUnderlineSize returns the underline size for an entry.
+//
+// Since 2.0.0
+func EntryUnderlineSize() float32 {
+	return current().Size(SizeNameEntryUnderline)
 }
 
 // TextFont returns the font resource for the regular font style
