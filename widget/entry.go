@@ -23,11 +23,11 @@ const (
 
 // Declare conformity with interfaces
 var _ fyne.Disableable = (*Entry)(nil)
-var _ fyne.Draggable = (*Entry)(nil)
+var _ fyne.Draggable = (*entryContent)(nil)
 var _ fyne.Focusable = (*Entry)(nil)
-var _ fyne.Tappable = (*Entry)(nil)
+var _ fyne.Tappable = (*entryContent)(nil)
 var _ fyne.Widget = (*Entry)(nil)
-var _ desktop.Mouseable = (*Entry)(nil)
+var _ desktop.Mouseable = (*entryContent)(nil)
 var _ desktop.Keyable = (*Entry)(nil)
 var _ mobile.Keyboardable = (*Entry)(nil)
 
@@ -57,6 +57,7 @@ type Entry struct {
 	focused     bool
 	text        *textProvider
 	placeholder *textProvider
+	content     *entryContent
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -150,18 +151,16 @@ func (e *Entry) Bind(data binding.String) {
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	line := canvas.NewRectangle(theme.ShadowColor())
-	cursor := canvas.NewRectangle(theme.FocusColor())
-	cursor.Hide()
+	// initialise
+	e.textProvider()
+	e.placeholderProvider()
 
-	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
-	provider := e.textProvider()
-	placeholder := e.placeholderProvider()
-	if provider.len() != 0 {
-		placeholder.Hide()
-	}
-	objects := []fyne.CanvasObject{line, placeholder, provider, cursor}
+	line := canvas.NewRectangle(theme.ShadowColor())
+
+	e.content = &entryContent{entry: e}
+	scroll := NewScrollContainer(e.content)
+	objects := []fyne.CanvasObject{line, scroll}
+	e.content.scroll = scroll
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -173,14 +172,16 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, nil, objects, e}
+	return &entryRenderer{line, scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: desktop.Cursorable
 func (e *Entry) Cursor() desktop.Cursor {
-	return desktop.TextCursor
+	return e.content.Cursor()
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
@@ -199,47 +200,30 @@ func (e *Entry) Disabled() bool {
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: fyne.DoubleTappable
-func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
-	row := e.textProvider().row(e.CursorRow)
-
-	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
-	if start == -1 || end == -1 {
-		return
-	}
-
-	e.setFieldsAndRefresh(func() {
-		if !e.selectKeyDown {
-			e.selectRow = e.CursorRow
-			e.selectColumn = start
-		}
-		// Always aim to maximise the selected region
-		if e.selectRow > e.CursorRow || (e.selectRow == e.CursorRow && e.selectColumn > e.CursorColumn) {
-			e.CursorColumn = start
-		} else {
-			e.CursorColumn = end
-		}
-		e.selecting = true
-	})
+func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
+	e.content.DoubleTapped(p)
 }
 
 // DragEnd is called at end of a drag event. It does nothing.
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
+	e.content.DragEnd()
 }
 
 // Dragged is called when the pointer moves while a button is held down.
 // It updates the selection accordingly.
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
-	if !e.selecting {
-		e.selectRow, e.selectColumn = e.getRowCol(&d.PointEvent)
-
-		e.selecting = true
-	}
-	e.updateMousePointer(&d.PointEvent, false)
+	e.content.Dragged(d)
 }
 
 // Enable this widget, updating any style or features appropriately.
@@ -355,33 +339,22 @@ func (e *Entry) MinSize() fyne.Size {
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: desktop.Mouseable
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
-	e.propertyLock.Lock()
-	if e.selectKeyDown {
-		e.selecting = true
-	}
-	if e.selecting && !e.selectKeyDown && m.Button == desktop.MouseButtonPrimary {
-		e.selecting = false
-	}
-	e.propertyLock.Unlock()
-
-	e.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
+	e.content.MouseDown(m)
 }
 
 // MouseUp called on mouse release
 // If a mouse drag event has completed then check to see if it has resulted in an empty selection,
 // if so, and if a text select key isn't held, then disable selecting
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: desktop.Mouseable
-func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
-	start, _ := e.selection()
-
-	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
-	if start == -1 && e.selecting && !e.selectKeyDown {
-		e.selecting = false
-	}
+func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+	e.content.MouseUp(m)
 }
 
 // SelectedText returns the text currently selected in this Entry.
@@ -434,12 +407,11 @@ func (e *Entry) SetText(text string) {
 
 // Tapped is called when this entry has been tapped so we should update the cursor position.
 //
+// Deprecated: This wraps inner behavior for compatibility and may be removed in a future release
+//
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if fyne.CurrentDevice().IsMobile() && e.selecting {
-		e.selecting = false
-	}
-	e.updateMousePointer(ev, false)
+	e.content.Tapped(ev)
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -706,7 +678,7 @@ func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	for i := 0; i < len(text); i++ {
 		str := string(text[0 : i+1])
 		wid := fyne.MeasureText(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
-		if wid > pos.X {
+		if wid > pos.X+theme.Padding() {
 			return i
 		}
 	}
@@ -1051,9 +1023,8 @@ func (e *Entry) updateText(text string) {
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
-	line, cursor *canvas.Rectangle
-	selection    []fyne.CanvasObject
-	cursorAnim   *fyne.Animation
+	line   *canvas.Rectangle
+	scroll *ScrollContainer
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1091,27 +1062,22 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		}
 	}
 
-	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
+	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2+actionIconSize.Width, theme.Padding()*2))
 	entryPos := fyne.NewPos(theme.Padding(), theme.Padding())
-	r.entry.text.Resize(entrySize)
-	r.entry.text.Move(entryPos)
-	r.entry.placeholder.Resize(entrySize)
-	r.entry.placeholder.Move(entryPos)
+	r.scroll.Resize(entrySize)
+	r.scroll.Move(entryPos)
 }
 
 // MinSize calculates the minimum size of an entry widget.
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (r *entryRenderer) MinSize() fyne.Size {
-	minSize := r.entry.placeholderProvider().MinSize()
-
-	if r.entry.textProvider().len() > 0 {
-		minSize = r.entry.text.MinSize()
-	}
+	minSize := r.entry.placeholderProvider().charMinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if r.entry.MultiLine {
 		// ensure multiline height is at least charMinSize * multilineRows
-		minSize.Height = fyne.Max(minSize.Height, r.entry.text.charMinSize().Height*multiLineRows)
+		rowHeight := r.entry.text.charMinSize().Height * multiLineRows
+		minSize.Height = fyne.Max(minSize.Height, rowHeight+(multiLineRows-1)*theme.Padding())
 	}
 
 	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
@@ -1120,20 +1086,15 @@ func (r *entryRenderer) MinSize() fyne.Size {
 func (r *entryRenderer) Objects() []fyne.CanvasObject {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
-	// Objects are generated dynamically force selection rectangles to appear underneath the text
-	if r.entry.selecting {
-		return append(r.selection, r.objects...)
-	}
+
 	return r.objects
 }
 
 func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	provider := r.entry.textProvider()
-	placeholder := r.entry.placeholderProvider()
 	content := r.entry.Text
 	focused := r.entry.focused
-	selections := r.selection
 	r.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
@@ -1141,37 +1102,14 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
-	if provider.len() == 0 {
-		placeholder.Show()
-	} else if placeholder.Visible() {
-		placeholder.Hide()
-	}
-
-	r.cursor.FillColor = theme.FocusColor()
 	if focused {
-		r.cursor.Show()
 		r.line.FillColor = theme.FocusColor()
-		if r.cursorAnim == nil {
-			r.cursorAnim = makeCursorAnimation(r.cursor)
-			r.cursorAnim.Start()
-		}
 	} else {
-		if r.cursorAnim != nil {
-			r.cursorAnim.Stop()
-			r.cursorAnim = nil
-		}
-		r.cursor.Hide()
 		if r.entry.Disabled() {
 			r.line.FillColor = theme.DisabledColor()
 		} else {
 			r.line.FillColor = theme.ShadowColor()
 		}
-	}
-	r.moveCursor()
-
-	for _, selection := range selections {
-		selection.(*canvas.Rectangle).Hidden = !r.entry.focused && !r.entry.disabled
-		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
 	r.entry.text.propertyLock.Lock()
@@ -1197,7 +1135,239 @@ func (r *entryRenderer) Refresh() {
 		r.entry.validationStatus.Hide()
 	}
 
+	r.scroll.Content.Refresh()
 	canvas.Refresh(r.entry.super())
+}
+
+func (r *entryRenderer) ensureValidationSetup() {
+	if r.entry.validationStatus == nil {
+		r.entry.validationStatus = newValidationStatus(r.entry)
+		r.objects = append(r.objects, r.entry.validationStatus)
+		r.Layout(r.entry.size)
+		r.Refresh()
+	}
+}
+
+var _ fyne.Widget = (*entryContent)(nil)
+
+type entryContent struct {
+	BaseWidget
+
+	entry  *Entry
+	scroll *ScrollContainer
+}
+
+func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
+	e.ExtendBaseWidget(e)
+
+	cursor := canvas.NewRectangle(theme.FocusColor())
+	cursor.Hide()
+
+	e.entry.propertyLock.Lock()
+	defer e.entry.propertyLock.Unlock()
+	provider := e.entry.textProvider()
+	placeholder := e.entry.placeholderProvider()
+	if provider.len() != 0 {
+		placeholder.Hide()
+	}
+	objects := []fyne.CanvasObject{placeholder, provider, cursor}
+
+	r := &entryContentRenderer{cursor, []fyne.CanvasObject{}, nil, objects,
+		provider, placeholder, e}
+	r.Layout(e.size)
+	return r
+}
+
+func (e *entryContent) Cursor() desktop.Cursor {
+	return desktop.TextCursor
+}
+
+// DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
+//
+// Implements: fyne.DoubleTappable
+func (e *entryContent) DoubleTapped(_ *fyne.PointEvent) {
+	row := e.entry.textProvider().row(e.entry.CursorRow)
+
+	start, end := getTextWhitespaceRegion(row, e.entry.CursorColumn)
+	if start == -1 || end == -1 {
+		return
+	}
+
+	e.setFieldsAndRefresh(func() {
+		if !e.entry.selectKeyDown {
+			e.entry.selectRow = e.entry.CursorRow
+			e.entry.selectColumn = start
+		}
+		// Always aim to maximise the selected region
+		if e.entry.selectRow > e.entry.CursorRow || (e.entry.selectRow == e.entry.CursorRow && e.entry.selectColumn > e.entry.CursorColumn) {
+			e.entry.CursorColumn = start
+		} else {
+			e.entry.CursorColumn = end
+		}
+		e.entry.selecting = true
+	})
+}
+
+// DragEnd is called at end of a drag event. It does nothing.
+//
+// Implements: fyne.Draggable
+func (e *entryContent) DragEnd() {
+}
+
+// Dragged is called when the pointer moves while a button is held down.
+// It updates the selection accordingly.
+//
+// Implements: fyne.Draggable
+func (e *entryContent) Dragged(d *fyne.DragEvent) {
+	if !e.entry.selecting {
+		e.entry.selectRow, e.entry.selectColumn = e.entry.getRowCol(&d.PointEvent)
+
+		e.entry.selecting = true
+	}
+	e.entry.updateMousePointer(&d.PointEvent, false)
+}
+
+// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
+// update the existing selection (if shift is held), or start a selection dragging operation.
+//
+// Implements: desktop.Mouseable
+func (e *entryContent) MouseDown(m *desktop.MouseEvent) {
+	e.propertyLock.Lock()
+	if e.entry.selectKeyDown {
+		e.entry.selecting = true
+	}
+	if e.entry.selecting && !e.entry.selectKeyDown && m.Button == desktop.MouseButtonPrimary {
+		e.entry.selecting = false
+	}
+	e.propertyLock.Unlock()
+
+	e.entry.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
+}
+
+// MouseUp called on mouse release
+// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
+// if so, and if a text select key isn't held, then disable selecting
+//
+// Implements: desktop.Mouseable
+func (e *entryContent) MouseUp(_ *desktop.MouseEvent) {
+	start, _ := e.entry.selection()
+
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	if start == -1 && e.entry.selecting && !e.entry.selectKeyDown {
+		e.entry.selecting = false
+	}
+}
+
+// Tapped is called when this entry has been tapped so we should update the cursor position.
+//
+// Implements: fyne.Tappable
+func (e *entryContent) Tapped(ev *fyne.PointEvent) {
+	impl := e.entry.super()
+	// we need to propagate the focus, top level widget handles focus APIs
+	fyne.CurrentApp().Driver().CanvasForObject(impl).Focus(impl.(interface{}).(fyne.Focusable))
+
+	if fyne.CurrentDevice().IsMobile() && e.entry.selecting {
+		e.entry.selecting = false
+	}
+	e.entry.updateMousePointer(ev, false)
+}
+
+// TappedSecondary is called when right or alternative tap is invoked in the entry content.
+//
+// Opens the PopUpMenu in the main entry.
+//
+// Implements: fyne.SecondaryTappable
+func (e *entryContent) TappedSecondary(pe *fyne.PointEvent) {
+	e.entry.TappedSecondary(pe)
+}
+
+var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
+
+type entryContentRenderer struct {
+	cursor     *canvas.Rectangle
+	selection  []fyne.CanvasObject
+	cursorAnim *fyne.Animation
+	objects    []fyne.CanvasObject
+
+	provider, placeholder *textProvider
+	content               *entryContent
+}
+
+func (r *entryContentRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+func (r *entryContentRenderer) Destroy() {
+	r.cursorAnim.Stop()
+}
+
+func (r *entryContentRenderer) Layout(size fyne.Size) {
+	r.provider.Resize(size)
+	r.placeholder.Resize(size)
+}
+
+func (r *entryContentRenderer) MinSize() fyne.Size {
+	minSize := r.content.entry.placeholderProvider().MinSize()
+
+	if r.content.entry.textProvider().len() > 0 {
+		minSize = r.content.entry.text.MinSize()
+	}
+
+	return minSize
+}
+
+func (r *entryContentRenderer) Objects() []fyne.CanvasObject {
+	r.content.entry.propertyLock.RLock()
+	defer r.content.entry.propertyLock.RUnlock()
+	// Objects are generated dynamically force selection rectangles to appear underneath the text
+	if r.content.entry.selecting {
+		return append(r.selection, r.objects...)
+	}
+	return r.objects
+}
+
+func (r *entryContentRenderer) Refresh() {
+	r.content.entry.propertyLock.RLock()
+	provider := r.content.entry.textProvider()
+	placeholder := r.content.entry.placeholderProvider()
+	content := r.content.entry.Text
+	focused := r.content.entry.focused
+	selections := r.selection
+	r.content.entry.propertyLock.RUnlock()
+
+	if content != string(provider.buffer) {
+		return
+	}
+
+	if provider.len() == 0 {
+		placeholder.Show()
+	} else if placeholder.Visible() {
+		placeholder.Hide()
+	}
+
+	r.cursor.FillColor = theme.FocusColor()
+	if focused {
+		r.cursor.Show()
+		if r.cursorAnim == nil {
+			r.cursorAnim = makeCursorAnimation(r.cursor)
+			r.cursorAnim.Start()
+		}
+	} else {
+		if r.cursorAnim != nil {
+			r.cursorAnim.Stop()
+			r.cursorAnim = nil
+		}
+		r.cursor.Hide()
+	}
+	r.moveCursor()
+
+	for _, selection := range selections {
+		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused && !r.content.entry.disabled
+		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
+	}
+
+	canvas.Refresh(r.content)
 }
 
 // This process builds a slice of rectangles:
@@ -1207,15 +1377,15 @@ func (r *entryRenderer) Refresh() {
 // If the upwards case instead produces an order-reversed slice then only the newest rectangle would
 // require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
 // all rectangles to comply with the occurrence order as stated above.
-func (r *entryRenderer) buildSelection() {
-	r.entry.propertyLock.RLock()
-	cursorRow, cursorCol := r.entry.CursorRow, r.entry.CursorColumn
+func (r *entryContentRenderer) buildSelection() {
+	r.content.entry.propertyLock.RLock()
+	cursorRow, cursorCol := r.content.entry.CursorRow, r.content.entry.CursorColumn
 	selectRow, selectCol := -1, -1
-	if r.entry.selecting {
-		selectRow = r.entry.selectRow
-		selectCol = r.entry.selectColumn
+	if r.content.entry.selecting {
+		selectRow = r.content.entry.selectRow
+		selectCol = r.content.entry.selectColumn
 	}
-	r.entry.propertyLock.RUnlock()
+	r.content.entry.propertyLock.RUnlock()
 
 	if selectRow == -1 {
 		r.selection = r.selection[:0]
@@ -1223,14 +1393,14 @@ func (r *entryRenderer) buildSelection() {
 		return
 	}
 
-	provider := r.entry.textProvider()
+	provider := r.content.entry.textProvider()
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width + theme.Padding()*2, sz.Height*float32(row) + theme.Padding()*2
+		return sz.Width + theme.Padding(), sz.Height*float32(row) + theme.Padding()
 	}
 
-	lineHeight := r.entry.text.charMinSize().Height
+	lineHeight := r.content.entry.text.charMinSize().Height
 
 	minmax := func(a, b int) (int, int) {
 		if a < b {
@@ -1256,8 +1426,8 @@ func (r *entryRenderer) buildSelection() {
 		r.selection = r.selection[:rowCount]
 	}
 
-	r.entry.propertyLock.Lock()
-	defer r.entry.propertyLock.Unlock()
+	r.content.entry.propertyLock.Lock()
+	defer r.content.entry.propertyLock.Unlock()
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
@@ -1285,34 +1455,54 @@ func (r *entryRenderer) buildSelection() {
 	}
 }
 
-func (r *entryRenderer) ensureValidationSetup() {
-	if r.entry.validationStatus == nil {
-		r.entry.validationStatus = newValidationStatus(r.entry)
-		r.objects = append(r.objects, r.entry.validationStatus)
-		r.Layout(r.entry.size)
-		r.Refresh()
+func (r *entryContentRenderer) ensureCursorVisible() {
+	cx1 := r.cursor.Position().X
+	cy1 := r.cursor.Position().Y
+	cx2 := cx1 + r.cursor.Size().Width
+	cy2 := cy1 + r.cursor.Size().Height
+	offset := r.content.scroll.Offset
+	size := r.content.scroll.size
+
+	if offset.X <= cx1 && cx2 < offset.X+size.Width &&
+		offset.Y <= cy1 && cy2 < offset.Y+size.Height {
+		return
 	}
+
+	move := fyne.NewDelta(0, 0)
+	if cx1 < offset.X {
+		move.DX -= offset.X - cx1
+	} else if cx2 >= offset.X+size.Width {
+		move.DX += cx2 - (offset.X + size.Width)
+	}
+	if cy1 < offset.Y {
+		move.DY -= offset.Y - cy1
+	} else if cy2 >= offset.X+size.Height {
+		move.DY += cy2 - (offset.Y + size.Height)
+	}
+	r.content.scroll.Offset = r.content.scroll.Offset.Add(move)
+	r.content.scroll.Refresh()
 }
 
-func (r *entryRenderer) moveCursor() {
+func (r *entryContentRenderer) moveCursor() {
 	// build r.selection[] if the user has made a selection
 	r.buildSelection()
-	r.entry.propertyLock.RLock()
-	provider := r.entry.textProvider()
+	r.content.entry.propertyLock.RLock()
+	provider := r.content.entry.textProvider()
 	provider.propertyLock.RLock()
-	size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
+	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow)
 	provider.propertyLock.RUnlock()
 	xPos := size.Width
-	yPos := size.Height * float32(r.entry.CursorRow)
-	r.entry.propertyLock.RUnlock()
+	yPos := size.Height * float32(r.content.entry.CursorRow)
+	r.content.entry.propertyLock.RUnlock()
 
-	r.entry.propertyLock.Lock()
-	lineHeight := r.entry.text.charMinSize().Height
+	r.content.entry.propertyLock.Lock()
+	lineHeight := r.content.entry.text.charMinSize().Height
 	r.cursor.Resize(fyne.NewSize(2, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
+	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding(), yPos+theme.Padding()))
 
-	callback := r.entry.OnCursorChanged
-	r.entry.propertyLock.Unlock()
+	callback := r.content.entry.OnCursorChanged
+	r.content.entry.propertyLock.Unlock()
+	r.ensureCursorVisible()
 
 	if callback != nil {
 		callback()
