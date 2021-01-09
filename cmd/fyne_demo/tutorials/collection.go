@@ -52,7 +52,7 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	}
 	list.Select(125)
 
-	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+	return container.NewHSplit(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {
