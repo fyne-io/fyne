@@ -213,7 +213,7 @@ func TestTable_Selection(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="168x168" type="*widget.Scroll">
 						<widget size="509x189" type="*widget.tableCells">
 							<widget pos="4,4" size="93x29" type="*widget.Label">
 								<text pos="4,4" size="85x21">Cell 0, 0</text>
@@ -316,7 +316,7 @@ func TestTable_Select(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="168x168" type="*widget.Scroll">
 						<widget size="509x189" type="*widget.tableCells">
 							<widget pos="4,4" size="93x29" type="*widget.Label">
 								<text pos="4,4" size="85x21">Cell 0, 0</text>
@@ -395,7 +395,7 @@ func TestTable_Select(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="168x168" type="*widget.Scroll">
 						<widget pos="-239,-21" size="509x189" type="*widget.tableCells">
 							<widget pos="208,4" size="93x29" type="*widget.Label">
 								<text pos="4,4" size="85x21">Cell 0, 2</text>

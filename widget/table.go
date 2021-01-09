@@ -38,7 +38,7 @@ type Table struct {
 	columnWidths              map[int]float32
 	moveCallback              func()
 	offset                    fyne.Position
-	scroll                    *widget.ScrollContainer
+	scroll                    *widget.Scroll
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -65,7 +65,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
-	t.scroll = widget.NewScrollContainer(t.cells)
+	t.scroll = widget.NewScroll(t.cells)
 
 	obj := []fyne.CanvasObject{colMarker, rowMarker, colHover, rowHover, t.scroll}
 	r := &tableRenderer{t: t, scroll: t.scroll, rowMarker: rowMarker, colMarker: colMarker,
@@ -228,7 +228,7 @@ type tableRenderer struct {
 	widget.BaseRenderer
 	t *Table
 
-	scroll               *widget.ScrollContainer
+	scroll               *widget.Scroll
 	rowMarker, colMarker *canvas.Rectangle
 	rowHover, colHover   *canvas.Rectangle
 	dividers             []fyne.CanvasObject

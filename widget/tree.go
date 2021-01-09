@@ -35,7 +35,7 @@ type Tree struct {
 	leafMinSize   fyne.Size
 	offset        fyne.Position
 	open          map[TreeNodeID]bool
-	scroller      *widget.ScrollContainer
+	scroller      *widget.Scroll
 	selected      []TreeNodeID
 }
 
@@ -101,7 +101,7 @@ func (t *Tree) CloseBranch(uid TreeNodeID) {
 func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	c := newTreeContent(t)
-	s := widget.NewScrollContainer(c)
+	s := widget.NewScroll(c)
 	t.scroller = s
 	r := &treeRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{s}),
@@ -291,7 +291,7 @@ type treeRenderer struct {
 	widget.BaseRenderer
 	tree     *Tree
 	content  *treeContent
-	scroller *widget.ScrollContainer
+	scroller *widget.Scroll
 }
 
 func (r *treeRenderer) MinSize() (min fyne.Size) {

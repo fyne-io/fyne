@@ -35,7 +35,7 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -72,7 +72,7 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -109,7 +109,7 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -146,7 +146,7 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -189,7 +189,7 @@ func TestPopUpMenu_Resize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -226,7 +226,7 @@ func TestPopUpMenu_Resize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,80" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x80"/>
 						</widget>
-						<widget size="89x80" type="*widget.ScrollContainer">
+						<widget size="89x80" type="*widget.Scroll">
 							<widget size="89x80" type="*widget.menuBox">
 								<container pos="0,4" size="89x88">
 									<widget size="89x29" type="*widget.menuItem">
@@ -264,7 +264,7 @@ func TestPopUpMenu_Resize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,200" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x200"/>
 						</widget>
-						<widget size="210x200" type="*widget.ScrollContainer">
+						<widget size="210x200" type="*widget.Scroll">
 							<widget size="210x200" type="*widget.menuBox">
 								<container pos="0,4" size="210x208">
 									<widget size="210x29" type="*widget.menuItem">
@@ -316,7 +316,7 @@ func TestPopUpMenu_Show(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -368,7 +368,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -408,7 +408,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -448,7 +448,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
+						<widget size="79x70" type="*widget.Scroll">
 							<widget size="79x70" type="*widget.menuBox">
 								<container pos="0,4" size="79x78">
 									<widget size="79x29" type="*widget.menuItem">
@@ -490,7 +490,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,200" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x200"/>
 						</widget>
-						<widget size="210x200" type="*widget.ScrollContainer">
+						<widget size="210x200" type="*widget.Scroll">
 							<widget size="210x200" type="*widget.menuBox">
 								<container pos="0,4" size="210x208">
 									<widget size="210x29" type="*widget.menuItem">

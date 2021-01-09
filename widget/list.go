@@ -32,7 +32,7 @@ type List struct {
 	OnSelected   func(id ListItemID)
 	OnUnselected func(id ListItemID)
 
-	scroller      *widget.ScrollContainer
+	scroller      *widget.Scroll
 	selected      []ListItemID
 	itemMin       fyne.Size
 	offsetY       float32
@@ -80,7 +80,7 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
 	layout.Resize(layout.MinSize())
-	l.scroller = widget.NewVScrollContainer(layout)
+	l.scroller = widget.NewVScroll(layout)
 	objects := []fyne.CanvasObject{l.scroller}
 	lr := newListRenderer(objects, l, l.scroller, layout)
 	l.offsetUpdated = lr.offsetUpdated
@@ -149,7 +149,7 @@ type listRenderer struct {
 	widget.BaseRenderer
 
 	list             *List
-	scroller         *widget.ScrollContainer
+	scroller         *widget.Scroll
 	layout           *fyne.Container
 	itemPool         *syncPool
 	children         []fyne.CanvasObject
@@ -160,7 +160,7 @@ type listRenderer struct {
 	previousOffsetY  float32
 }
 
-func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *widget.ScrollContainer, layout *fyne.Container) *listRenderer {
+func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *widget.Scroll, layout *fyne.Container) *listRenderer {
 	lr := &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
 	widget.AddScrollOffsetChangedListener(lr.scroller, lr.offsetUpdated)
 	return lr

@@ -159,7 +159,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
-	scroll := widget.NewScrollContainer(e.content)
+	scroll := widget.NewScroll(e.content)
 	objects := []fyne.CanvasObject{line, scroll}
 	e.content.scroll = scroll
 
@@ -1025,7 +1025,7 @@ var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
 	line   *canvas.Rectangle
-	scroll *widget.ScrollContainer
+	scroll *widget.Scroll
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1155,7 +1155,7 @@ type entryContent struct {
 	BaseWidget
 
 	entry  *Entry
-	scroll *widget.ScrollContainer
+	scroll *widget.Scroll
 }
 
 func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {

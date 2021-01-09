@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// ScrollDirection represents the directions in which a ScrollContainer can scroll its child content.
+// ScrollDirection represents the directions in which a Scroll can scroll its child content.
 type ScrollDirection int
 
 // Constants for valid values of ScrollDirection.
@@ -220,7 +220,7 @@ type scrollBarArea struct {
 	Base
 
 	isLarge     bool
-	scroll      *ScrollContainer
+	scroll      *Scroll
 	orientation scrollBarOrientation
 }
 
@@ -309,14 +309,14 @@ func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, conten
 	return scrollOffset
 }
 
-func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation) *scrollBarArea {
+func newScrollBarArea(scroll *Scroll, orientation scrollBarOrientation) *scrollBarArea {
 	a := &scrollBarArea{scroll: scroll, orientation: orientation}
 	return a
 }
 
 type scrollContainerRenderer struct {
 	BaseRenderer
-	scroll                  *ScrollContainer
+	scroll                  *Scroll
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
 	leftShadow, rightShadow *Shadow
@@ -418,9 +418,9 @@ func (r *scrollContainerRenderer) updatePosition() {
 	}
 }
 
-// ScrollContainer defines a container that is smaller than the Content.
+// Scroll defines a container that is smaller than the Content.
 // The Offset is used to determine the position of the child widgets within the container.
-type ScrollContainer struct {
+type Scroll struct {
 	Base
 	minSize         fyne.Size
 	Direction       ScrollDirection
@@ -430,7 +430,7 @@ type ScrollContainer struct {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
+func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 	scr := &scrollContainerRenderer{
 		BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{s.Content}),
 		scroll:       s,
@@ -451,23 +451,23 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 //ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
-func (s *ScrollContainer) ScrollToBottom() {
+func (s *Scroll) ScrollToBottom() {
 	s.Offset.Y = s.Content.Size().Height - s.Size().Height
 	s.Refresh()
 }
 
 //ScrollToTop will scroll content to container top
-func (s *ScrollContainer) ScrollToTop() {
+func (s *Scroll) ScrollToTop() {
 	s.Offset.Y = 0
 	s.Refresh()
 }
 
 // DragEnd will stop scrolling on mobile has stopped
-func (s *ScrollContainer) DragEnd() {
+func (s *Scroll) DragEnd() {
 }
 
 // Dragged will scroll on any drag - bar or otherwise - for mobile
-func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
+func (s *Scroll) Dragged(e *fyne.DragEvent) {
 	if !fyne.CurrentDevice().IsMobile() {
 		return
 	}
@@ -480,12 +480,12 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 // Hide hides the shadow.
 //
 // Implements: fyne.Widget
-func (s *ScrollContainer) Hide() {
+func (s *Scroll) Hide() {
 	HideWidget(&s.Base, s)
 }
 
 // MinSize returns the smallest size this widget can shrink to
-func (s *ScrollContainer) MinSize() fyne.Size {
+func (s *Scroll) MinSize() fyne.Size {
 	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
 	switch s.Direction {
 	case ScrollHorizontalOnly:
@@ -499,29 +499,29 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 // Move sets the position of the widget relative to its parent.
 //
 // Implements: fyne.Widget
-func (s *ScrollContainer) Move(pos fyne.Position) {
+func (s *Scroll) Move(pos fyne.Position) {
 	MoveWidget(&s.Base, s, pos)
 }
 
 // SetMinSize specifies a minimum size for this scroll container.
 // If the specified size is larger than the content size then scrolling will not be enabled
 // This can be helpful to appear larger than default if the layout is collapsing this widget.
-func (s *ScrollContainer) SetMinSize(size fyne.Size) {
+func (s *Scroll) SetMinSize(size fyne.Size) {
 	s.minSize = size
 }
 
 // Refresh causes this widget to be redrawn in it's current state
-func (s *ScrollContainer) Refresh() {
+func (s *Scroll) Refresh() {
 	s.updateOffset(0, 0)
 	s.refreshWithoutOffsetUpdate()
 }
 
-func (s *ScrollContainer) refreshWithoutOffsetUpdate() {
+func (s *Scroll) refreshWithoutOffsetUpdate() {
 	RefreshWidget(s)
 }
 
 // Resize sets a new size for the scroll container.
-func (s *ScrollContainer) Resize(size fyne.Size) {
+func (s *Scroll) Resize(size fyne.Size) {
 	if size != s.size {
 		s.size = size
 		s.Refresh()
@@ -529,7 +529,7 @@ func (s *ScrollContainer) Resize(size fyne.Size) {
 }
 
 // Scrolled is called when an input device triggers a scroll event
-func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
+func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 	dx, dy := ev.Scrolled.DX, ev.Scrolled.DY
 	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
 		dx, dy = dy, dx
@@ -542,11 +542,11 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 // Show makes the shadow visible.
 //
 // Implements: fyne.Widget
-func (s *ScrollContainer) Show() {
+func (s *Scroll) Show() {
 	ShowWidget(&s.Base, s)
 }
 
-func (s *ScrollContainer) updateOffset(deltaX, deltaY float32) bool {
+func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	if s.Content.Size().Width <= s.Size().Width && s.Content.Size().Height <= s.Size().Height {
 		if s.Offset.X != 0 || s.Offset.Y != 0 {
 			s.Offset.X = 0
@@ -576,30 +576,30 @@ func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 
 // AddScrollOffsetChangedListener allows Fyne internal code to get an inside notification when a scroller moves.
 // TODO find a way to make this generally available
-func AddScrollOffsetChangedListener(s *ScrollContainer, f func()) {
+func AddScrollOffsetChangedListener(s *Scroll, f func()) {
 	s.onOffsetChanged = f
 }
 
-// NewScrollContainer creates a scrollable parent wrapping the specified content.
+// NewScroll creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed object.
-func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewScroll(content fyne.CanvasObject) *Scroll {
 	return newScrollContainerWithDirection(ScrollBoth, content)
 }
 
-// NewHScrollContainer create a scrollable parent wrapping the specified content.
+// NewHScroll create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Width to be smaller than that of the passed object.
-func NewHScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewHScroll(content fyne.CanvasObject) *Scroll {
 	return newScrollContainerWithDirection(ScrollHorizontalOnly, content)
 }
 
-// NewVScrollContainer create a scrollable parent wrapping the specified content.
+// NewVScroll create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
-func NewVScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewVScroll(content fyne.CanvasObject) *Scroll {
 	return newScrollContainerWithDirection(ScrollVerticalOnly, content)
 }
 
-func newScrollContainerWithDirection(direction ScrollDirection, content fyne.CanvasObject) *ScrollContainer {
-	s := &ScrollContainer{
+func newScrollContainerWithDirection(direction ScrollDirection, content fyne.CanvasObject) *Scroll {
+	s := &Scroll{
 		Direction: direction,
 		Content:   content,
 	}

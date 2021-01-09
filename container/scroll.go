@@ -9,7 +9,7 @@ import (
 // The Offset is used to determine the position of the child widgets within the container.
 //
 // Since: 1.4
-type Scroll = widget.ScrollContainer
+type Scroll = widget.Scroll
 
 // ScrollDirection represents the directions in which a Scroll container can scroll its child content.
 //
@@ -28,7 +28,7 @@ const (
 //
 // Since: 1.4
 func NewScroll(content fyne.CanvasObject) *Scroll {
-	return widget.NewScrollContainer(content)
+	return widget.NewScroll(content)
 }
 
 // NewHScroll create a scrollable parent wrapping the specified content.
@@ -36,7 +36,7 @@ func NewScroll(content fyne.CanvasObject) *Scroll {
 //
 // Since: 1.4
 func NewHScroll(content fyne.CanvasObject) *Scroll {
-	return widget.NewHScrollContainer(content)
+	return widget.NewHScroll(content)
 }
 
 // NewVScroll a scrollable parent wrapping the specified content.
@@ -44,5 +44,5 @@ func NewHScroll(content fyne.CanvasObject) *Scroll {
 //
 // Since: 1.4
 func NewVScroll(content fyne.CanvasObject) *Scroll {
-	return widget.NewVScrollContainer(content)
+	return widget.NewVScroll(content)
 }
