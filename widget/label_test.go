@@ -155,9 +155,9 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	text.Hide()
 
 	render := test.WidgetRenderer(text).(*textRenderer)
-	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+	assert.Equal(t, theme.ForegroundColor(), render.texts[0].Color)
 	text.Show()
-	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+	assert.Equal(t, theme.ForegroundColor(), render.texts[0].Color)
 }
 
 func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
