@@ -24,6 +24,24 @@ func (p *InMemoryPreferences) AddChangeListener(listener func()) {
 	p.changeListeners = append(p.changeListeners, listener)
 }
 
+// ReadValues provides read access to the underlying value map - for internal use only...
+// You should not retain a reference to the map nor write to the values in the callback function
+func (p *InMemoryPreferences) ReadValues(fn func(map[string]interface{})) {
+	p.lock.RLock()
+	fn(p.values)
+	p.lock.RUnlock()
+}
+
+// WriteValues provides write access to the underlying value map - for internal use only...
+// You should not retain a reference to the map passed to the callback function
+func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
+	p.lock.Lock()
+	fn(p.values)
+	p.lock.Unlock()
+
+	p.fireChange()
+}
+
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
 
@@ -46,14 +64,6 @@ func (p *InMemoryPreferences) remove(key string) {
 	defer p.lock.Unlock()
 
 	delete(p.values, key)
-}
-
-// Values provides access to the underlying value map - for internal use only...
-func (p *InMemoryPreferences) Values() map[string]interface{} {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-
-	return p.values
 }
 
 func (p *InMemoryPreferences) fireChange() {

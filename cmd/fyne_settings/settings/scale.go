@@ -70,7 +70,7 @@ func (s *Settings) makeScaleGroup(scale float32) *widget.Group {
 func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
 	var previews = make([]fyne.CanvasObject, len(scales))
 	for i, scale := range scales {
-		text := canvas.NewText("A", theme.TextColor())
+		text := canvas.NewText("A", theme.ForegroundColor())
 		text.Alignment = fyne.TextAlignCenter
 		text.TextSize = theme.TextSize() * scale.scale / value
 
@@ -83,7 +83,7 @@ func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
 
 func (s *Settings) refreshScalePreviews() {
 	for _, scale := range scales {
-		scale.preview.Color = theme.TextColor()
+		scale.preview.Color = theme.ForegroundColor()
 	}
 }
 

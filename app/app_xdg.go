@@ -17,7 +17,7 @@ import (
 )
 
 func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantNameDark
+	return theme.VariantDark
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {

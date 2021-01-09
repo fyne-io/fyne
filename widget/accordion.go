@@ -11,23 +11,6 @@ const accordionDividerHeight = 1
 
 var _ fyne.Widget = (*Accordion)(nil)
 
-// AccordionContainer displays a list of AccordionItems.
-// Each item is represented by a button that reveals a detailed view when tapped.
-//
-// Deprecated: This has been renamed to Accordion
-type AccordionContainer = Accordion
-
-// NewAccordionContainer creates a new accordion widget.
-//
-// Deprecated: Use NewAccordion instead
-func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
-	a := &Accordion{
-		Items: items,
-	}
-	a.ExtendBaseWidget(a)
-	return a
-}
-
 // Accordion displays a list of AccordionItems.
 // Each item is represented by a button that reveals a detailed view when tapped.
 type Accordion struct {

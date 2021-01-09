@@ -48,10 +48,10 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.label.Color = theme.TextColor()
+	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.Disabled() {
-		c.label.Color = theme.DisabledTextColor()
+		c.label.Color = theme.DisabledColor()
 	}
 }
 
@@ -204,7 +204,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	defer c.propertyLock.RUnlock()
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
-	text := canvas.NewText(c.Text, theme.TextColor())
+	text := canvas.NewText(c.Text, theme.ForegroundColor())
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
@@ -259,16 +259,6 @@ func (c *Check) FocusLost() {
 	c.focused = false
 
 	c.Refresh()
-}
-
-// Focused returns whether or not this Check has focus.
-//
-// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
-func (c *Check) Focused() bool {
-	if c.Disabled() {
-		return false
-	}
-	return c.focused
 }
 
 // TypedRune receives text input events when the Check is focused.

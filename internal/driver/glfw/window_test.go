@@ -1072,10 +1072,6 @@ type focusable struct {
 	disabled       bool
 }
 
-func (f *focusable) Focused() bool {
-	panic("deprecated")
-}
-
 func (f *focusable) TypedRune(rune) {
 }
 

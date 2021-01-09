@@ -35,9 +35,9 @@ func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 
-	header := canvas.NewText(c.Title, theme.TextColor())
+	header := canvas.NewText(c.Title, theme.ForegroundColor())
 	header.TextStyle.Bold = true
-	subHeader := canvas.NewText(c.Subtitle, theme.TextColor())
+	subHeader := canvas.NewText(c.Subtitle, theme.ForegroundColor())
 
 	objects := []fyne.CanvasObject{header, subHeader}
 	if c.Image != nil {
@@ -221,10 +221,10 @@ func (c *cardRenderer) Refresh() {
 func (c *cardRenderer) applyTheme() {
 	if c.header != nil {
 		c.header.TextSize = theme.TextSize() * 1.7
-		c.header.Color = theme.TextColor()
+		c.header.Color = theme.ForegroundColor()
 	}
 	if c.subHeader != nil {
 		c.subHeader.TextSize = theme.TextSize()
-		c.subHeader.Color = theme.TextColor()
+		c.subHeader.Color = theme.ForegroundColor()
 	}
 }
