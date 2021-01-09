@@ -20,16 +20,20 @@ type preferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
 
+func (p *preferences) resetIgnore() {
+	go func() {
+		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
+		p.ignoreChange = false
+	}()
+}
+
 func (p *preferences) save() error {
 	return p.saveToFile(p.storagePath())
 }
 
 func (p *preferences) saveToFile(path string) error {
 	p.ignoreChange = true
-	defer func() {
-		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
-		p.ignoreChange = false
-	}()
+	defer p.resetIgnore()
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -87,6 +91,10 @@ func newPreferences(app *fyneApp) *preferences {
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
 	p.AddChangeListener(func() {
+		if p.ignoreChange { // callback after loading, no need to save
+			return
+		}
+
 		err := p.save()
 		if err != nil {
 			fyne.LogError("Failed on saving preferences", err)
