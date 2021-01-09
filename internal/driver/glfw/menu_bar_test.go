@@ -1227,10 +1227,4 @@ func TestMenuBar_Toggle(t *testing.T) {
 		assert.Nil(t, c.Focused())
 		test.AssertRendersToMarkup(t, markupMenuBarPrefix+markupMenuBarDeactivated+markupMenuBar+markupMenuBarSuffix, c)
 	})
-	// TODO:
-	// on deactivation:
-	// - deactivates menu bar
-	// - deactivates active item (two cases!)
-	// - deactivates
-	// - hides children
 }
