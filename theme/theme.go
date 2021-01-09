@@ -133,15 +133,15 @@ const (
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
-	// VariantNameDark is the version of a theme that satisfies a user preference for a light look.
+	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since 2.0.0
-	VariantNameDark fyne.ThemeVariant = 0
+	VariantDark fyne.ThemeVariant = 0
 
-	// VariantNameLight is the version of a theme that satisfies a user preference for a dark look.
+	// VariantLight is the version of a theme that satisfies a user preference for a dark look.
 	//
 	// Since 2.0.0
-	VariantNameLight fyne.ThemeVariant = 1
+	VariantLight fyne.ThemeVariant = 1
 
 	// potential for adding theme types such as high visibility or monochrome...
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
@@ -205,7 +205,7 @@ func DefaultTheme() fyne.Theme {
 
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
-	theme := &builtinTheme{variant: VariantNameLight}
+	theme := &builtinTheme{variant: VariantLight}
 
 	theme.initFonts()
 	return theme
@@ -213,7 +213,7 @@ func LightTheme() fyne.Theme {
 
 // DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{variant: VariantNameDark}
+	theme := &builtinTheme{variant: VariantDark}
 
 	theme.initFonts()
 	return theme
@@ -241,7 +241,7 @@ func (t *builtinTheme) initFonts() {
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	colors := darkPalette
-	if v == VariantNameLight {
+	if v == VariantLight {
 		colors = lightPalette
 	}
 
