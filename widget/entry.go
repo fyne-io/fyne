@@ -1186,8 +1186,11 @@ func (e *entryContent) Cursor() desktop.Cursor {
 //
 // Implements: fyne.DoubleTappable
 func (e *entryContent) DoubleTapped(_ *fyne.PointEvent) {
-	row := e.entry.textProvider().row(e.entry.CursorRow)
+	impl := e.entry.super()
+	// we need to propagate the focus, top level widget handles focus APIs
+	fyne.CurrentApp().Driver().CanvasForObject(impl).Focus(impl.(interface{}).(fyne.Focusable))
 
+	row := e.entry.textProvider().row(e.entry.CursorRow)
 	start, end := getTextWhitespaceRegion(row, e.entry.CursorColumn)
 	if start == -1 || end == -1 {
 		return
