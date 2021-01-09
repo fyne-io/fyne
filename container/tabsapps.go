@@ -254,6 +254,7 @@ func (r *appTabsRenderer) buildOverflow() (overflow *widget.Button) {
 		}
 		r.appTabs.popUp.ShowAtPosition(popUpPos)
 	})
+	overflow.Importance = widget.LowImportance
 	return
 }
 
