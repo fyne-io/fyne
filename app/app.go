@@ -104,8 +104,8 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newPreferences(newApp)
-	if pref, ok := newApp.prefs.(interface{ load(string) }); ok && id != "" {
-		pref.load(id)
+	if pref, ok := newApp.prefs.(interface{ load() }); ok && id != "" {
+		pref.load()
 	}
 	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}

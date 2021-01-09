@@ -17,3 +17,7 @@ func (p *preferences) storagePath() string {
 func (a *fyneApp) storageRoot() string {
 	return rootConfigDir() // we are in a sandbox, so no app ID added to this path
 }
+
+func (p *preferences) watch() {
+	// no-op on mobile
+}
