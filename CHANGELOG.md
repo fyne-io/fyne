@@ -27,6 +27,7 @@ These changes likely break some apps, please read the
 
 * iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
+* Entry widget now contains scrolling so should no longer be wrapped in a scroll container
 
 * Removed deprecated types including:
   - dialog.FileIcon (now widget.FileIcon)

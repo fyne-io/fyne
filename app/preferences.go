@@ -90,6 +90,11 @@ func newPreferences(app *fyneApp) *preferences {
 	p.app = app
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
+	// don't load or watch if not setup
+	if app.uniqueID == "" {
+		return p
+	}
+
 	p.AddChangeListener(func() {
 		if p.ignoreChange { // callback after loading, no need to save
 			return

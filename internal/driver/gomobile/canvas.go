@@ -324,7 +324,7 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, mobile.Touchable, fyne.Focusable:
+		case mobile.Touchable, fyne.Focusable:
 			return true
 		}
 
