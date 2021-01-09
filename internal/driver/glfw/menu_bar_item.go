@@ -150,11 +150,11 @@ func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeyLeft:
 		if !i.Child().DeactivateLastSubmenu() {
-			i.Parent.canvas.FocusPrevious()
+			i.Parent.canvas.(*glCanvas).FocusPrevious()
 		}
 	case fyne.KeyRight:
 		if !i.Child().ActivateLastSubmenu() {
-			i.Parent.canvas.FocusNext()
+			i.Parent.canvas.(*glCanvas).FocusNext()
 		}
 	case fyne.KeyDown:
 		i.Child().ActivateNext()

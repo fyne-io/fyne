@@ -1218,7 +1218,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
 		menuBar.Toggle()
-		c.FocusNext()
+		c.(test.WindowlessCanvas).FocusNext()
 		require.True(t, menuBar.IsActive())
 		test.AssertRendersToMarkup(t, markupMenuBarPrefix+markupMenuBarActivated+markupMenuBarEditActive+markupEditMenu+markupMenuBarSuffix, c)
 
