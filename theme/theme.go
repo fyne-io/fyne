@@ -133,6 +133,11 @@ const (
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
+	// SizeNameEntryUnderline is the name of theme lookup for widget.Entry underline size.
+	//
+	// Since 2.0.0
+	SizeNameEntryUnderline fyne.ThemeSizeName = "entryUnderline"
+
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since 2.0.0
@@ -289,6 +294,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
+	case SizeNameEntryUnderline:
+		return 2
 	default:
 		return 0
 	}
@@ -380,6 +387,13 @@ func ScrollBarColor() color.Color {
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
 	return current().Color(ColorNameShadow, currentVariant())
+}
+
+// EntryUnderlineSize returns the underline size for an entry.
+//
+// Since 2.0.0
+func EntryUnderlineSize() float32 {
+	return current().Size(SizeNameEntryUnderline)
 }
 
 // TextSize returns the standard text size
