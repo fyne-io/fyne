@@ -610,7 +610,7 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	c := window.Canvas()
 
 	// Extend the selection down one row
-	typeKeys(e, fyne.KeyDown)
+	typeKeys(e, keyShiftLeftDown, fyne.KeyDown)
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
@@ -1363,7 +1363,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"delete multi-line": {
-			keys:     []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
+			keys:     []fyne.KeyName{keyShiftLeftDown, fyne.KeyDown, fyne.KeyDelete},
 			wantText: "Testing\nTeng",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1386,7 +1386,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"delete reverse multi-line": {
-			keys:         []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
+			keys:         []fyne.KeyName{keyShiftLeftDown, fyne.KeyDown, fyne.KeyDelete},
 			setupReverse: true,
 			wantText:     "Testing\nTestisting",
 			wantMarkup: `
@@ -1409,8 +1409,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"delete select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyDown},
+		"delete select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyDown},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
 			wantMarkup: `
@@ -1435,8 +1435,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"delete reverse select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyDown},
+		"delete reverse select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyDown},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
@@ -1462,8 +1462,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"delete select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyUp},
+		"delete select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyUp},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
 			wantMarkup: `
@@ -1488,8 +1488,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"delete reverse select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyUp},
+		"delete reverse select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyUp},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
@@ -1540,7 +1540,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"backspace multi-line": {
-			keys:     []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
+			keys:     []fyne.KeyName{keyShiftLeftDown, fyne.KeyDown, fyne.KeyBackspace},
 			wantText: "Testing\nTeng",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1563,7 +1563,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"backspace reverse multi-line": {
-			keys:         []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
+			keys:         []fyne.KeyName{keyShiftLeftDown, fyne.KeyDown, fyne.KeyBackspace},
 			setupReverse: true,
 			wantText:     "Testing\nTestisting",
 			wantMarkup: `
@@ -1586,8 +1586,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"backspace select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyDown},
+		"backspace select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyDown},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
 			wantMarkup: `
@@ -1612,8 +1612,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"backspace reverse select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyDown},
+		"backspace reverse select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyDown},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
@@ -1639,8 +1639,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"backspace select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyUp},
+		"backspace select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyUp},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
 			wantMarkup: `
@@ -1665,8 +1665,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"backspace reverse select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyUp},
+		"backspace reverse select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyUp},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
@@ -1790,7 +1790,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"deselect and delete": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete},
+			keys:     []fyne.KeyName{fyne.KeyLeft, fyne.KeyDelete},
 			wantText: "Testing\nTeting\nTesting",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1812,8 +1812,8 @@ func TestEntry_Select(t *testing.T) {
       	</canvas>
 			`,
 		},
-		"deselect and delete holding shift": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete},
+		"deselect and delete holding Shift": {
+			keys:     []fyne.KeyName{fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete},
 			wantText: "Testing\nTeting\nTesting",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1836,8 +1836,8 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		// ensure that backspace doesn't leave a selection start at the old cursor position
-		"deselect and backspace holding shift": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace},
+		"deselect and backspace holding Shift": {
+			keys:     []fyne.KeyName{fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace},
 			wantText: "Testing\nTsting\nTesting",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1861,7 +1861,7 @@ func TestEntry_Select(t *testing.T) {
 		},
 		// clear selection, select a character and while holding shift issue two backspaces
 		"deselect, select and double backspace": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace},
+			keys:     []fyne.KeyName{fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace},
 			wantText: "Testing\nTeing\nTesting",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1996,6 +1996,9 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 	e, window := setupSelection(t, false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
+
+	// Hold shift to continue selection
+	typeKeys(e, keyShiftLeftDown)
 
 	// T e[s t i]n g -> end -> // T e[s t i n g]
 	typeKeys(e, fyne.KeyEnd)
@@ -3547,7 +3550,7 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 	if reverse {
 		e.CursorRow = 1
 		e.CursorColumn = 5
-		typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
+		typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft, keyShiftLeftUp)
 		test.AssertRendersToMarkup(t, `
 			<canvas padded size="150x200">
 				<content>
@@ -3572,7 +3575,7 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 	} else {
 		e.CursorRow = 1
 		e.CursorColumn = 2
-		typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+		typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
 		test.AssertRendersToMarkup(t, `
 			<canvas padded size="150x200">
 				<content>
