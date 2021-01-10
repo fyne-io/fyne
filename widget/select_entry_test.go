@@ -29,7 +29,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -52,7 +52,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -81,7 +81,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">
@@ -106,7 +106,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="disabled" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="disabled" pos="4,4" size="94x21"></text>
@@ -168,7 +168,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -195,7 +195,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -224,7 +224,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">
@@ -251,7 +251,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">B</text>
@@ -274,7 +274,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">B</text>
@@ -300,7 +300,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">
@@ -327,7 +327,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text pos="4,4" size="94x21">C</text>
@@ -363,7 +363,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -390,7 +390,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -419,7 +419,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">
@@ -447,7 +447,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="110x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="110x4"/>
-					<widget pos="4,4" size="82x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="82x29" type="*widget.Scroll">
 						<widget size="82x29" type="*widget.entryContent">
 							<widget size="82x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="74x21"></text>
@@ -476,7 +476,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="102x103" type="*widget.ScrollContainer">
+						<widget size="102x103" type="*widget.Scroll">
 							<widget size="102x103" type="*widget.menuBox">
 								<container pos="0,4" size="102x111">
 									<widget size="102x29" type="*widget.menuItem">
@@ -570,7 +570,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -599,7 +599,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">
@@ -628,7 +628,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -657,7 +657,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">
@@ -699,7 +699,7 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
 					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="102x29" type="*widget.ScrollContainer">
+					<widget pos="4,4" size="102x29" type="*widget.Scroll">
 						<widget size="102x29" type="*widget.entryContent">
 							<widget size="102x29" type="*widget.textProvider">
 								<text color="placeholder" pos="4,4" size="94x21"></text>
@@ -728,7 +728,7 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
 						</widget>
-						<widget size="122x103" type="*widget.ScrollContainer">
+						<widget size="122x103" type="*widget.Scroll">
 							<widget size="122x103" type="*widget.menuBox">
 								<container pos="0,4" size="122x111">
 									<widget size="122x29" type="*widget.menuItem">

@@ -224,8 +224,8 @@ func TestTree_MinSize(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
-		assert.Equal(t, scrollContainerMinSize, min.Width)
-		assert.Equal(t, scrollContainerMinSize, min.Height)
+		assert.Equal(t, float32(32), min.Width)
+		assert.Equal(t, float32(32), min.Height)
 	})
 	t.Run("Callback", func(t *testing.T) {
 		for name, tt := range map[string]struct {
@@ -236,7 +236,7 @@ func TestTree_MinSize(t *testing.T) {
 			"small": {
 				fyne.NewSize(1, 1),
 				fyne.NewSize(1, 1),
-				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), scrollContainerMinSize), scrollContainerMinSize),
+				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), float32(32)), float32(32)),
 			},
 			"large-leaf": {
 				fyne.NewSize(100, 100),

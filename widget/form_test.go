@@ -104,7 +104,7 @@ func TestForm_Renderer(t *testing.T) {
 						</widget>
 						<widget pos="51,0" size="155x37" type="*widget.Entry">
 							<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-							<widget pos="4,4" size="147x29" type="*widget.ScrollContainer">
+							<widget pos="4,4" size="147x29" type="*widget.Scroll">
 								<widget size="147x29" type="*widget.entryContent">
 									<widget size="147x29" type="*widget.textProvider">
 										<text color="placeholder" pos="4,4" size="139x21"></text>
@@ -120,7 +120,7 @@ func TestForm_Renderer(t *testing.T) {
 						</widget>
 						<widget pos="51,41" size="155x37" type="*widget.Entry">
 							<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-							<widget pos="4,4" size="147x29" type="*widget.ScrollContainer">
+							<widget pos="4,4" size="147x29" type="*widget.Scroll">
 								<widget size="147x29" type="*widget.entryContent">
 									<widget size="147x29" type="*widget.textProvider">
 										<text color="placeholder" pos="4,4" size="139x21"></text>
