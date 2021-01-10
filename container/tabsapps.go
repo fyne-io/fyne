@@ -8,7 +8,9 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-const MAX_APP_TABS = 7
+// MaxAppTabs is the maximum number of visible tabs in an AppTab.
+// Any addition tabs are moved to the overflow menu.
+const MaxAppTabs = 7
 
 // Declare conformity with Widget interface.
 var _ fyne.Widget = (*AppTabs)(nil)
@@ -89,7 +91,7 @@ type appTabsRenderer struct {
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
 	// Try render as many tabs as will fit, others will appear in the overflow
-	for i := MAX_APP_TABS; i > 0; i-- {
+	for i := MaxAppTabs; i > 0; i-- {
 		r.updateTabs(i)
 		barMin := r.bar.MinSize()
 		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
