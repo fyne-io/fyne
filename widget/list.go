@@ -460,7 +460,7 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 
 func (li *listItemRenderer) Refresh() {
 	if li.item.selected {
-		li.item.statusIndicator.FillColor = theme.FocusColor()
+		li.item.statusIndicator.FillColor = theme.PrimaryColor()
 	} else if li.item.hovered {
 		li.item.statusIndicator.FillColor = theme.HoverColor()
 	} else {

@@ -140,11 +140,11 @@ func TestList_Selection(t *testing.T) {
 
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
@@ -157,18 +157,18 @@ func TestList_Select(t *testing.T) {
 	list.Select(50)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).lastItemIndex, 50)
 	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 
 	list.Select(5)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 
 	list.Select(6)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 }
 
 func TestList_Unselect(t *testing.T) {
@@ -176,7 +176,7 @@ func TestList_Unselect(t *testing.T) {
 
 	list.Select(10)
 	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 
 	list.Unselect(10)
 	children = test.WidgetRenderer(list).(*listRenderer).children
