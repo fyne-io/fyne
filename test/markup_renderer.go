@@ -358,7 +358,7 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 }
 
 func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
-	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.TextColor())
+	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.ForegroundColor())
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
 	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
@@ -391,6 +391,7 @@ func knownColor(c color.Color) string {
 		rgbaColor(theme.ButtonColor()):         "button",
 		rgbaColor(theme.DisabledButtonColor()): "disabled button",
 		rgbaColor(theme.DisabledColor()):       "disabled",
+		rgbaColor(theme.ErrorColor()):          "error",
 		rgbaColor(theme.FocusColor()):          "focus",
 		rgbaColor(theme.ForegroundColor()):     "foreground",
 		rgbaColor(theme.HoverColor()):          "hover",

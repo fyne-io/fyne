@@ -64,11 +64,13 @@ func (s *stringFromBool) Set(str string) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringFromBool) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -129,11 +131,13 @@ func (s *stringFromFloat) Set(str string) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringFromFloat) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -194,11 +198,13 @@ func (s *stringFromInt) Set(str string) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringFromInt) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -259,11 +265,13 @@ func (s *stringToBool) Set(val bool) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringToBool) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -324,11 +332,13 @@ func (s *stringToFloat) Set(val float64) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringToFloat) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -389,10 +399,12 @@ func (s *stringToInt) Set(val int) error {
 		return err
 	}
 
-	s.trigger()
+	s.DataChanged()
 	return nil
 }
 
 func (s *stringToInt) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	s.trigger()
 }

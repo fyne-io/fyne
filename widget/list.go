@@ -116,7 +116,7 @@ func (l *List) Select(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -205,7 +205,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
-	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height+separatorThickness)))
+	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height+theme.SeparatorThicknessSize())))
 	if l.visibleItemCount <= 0 {
 		return
 	}
@@ -290,6 +290,7 @@ func (l *listRenderer) prependItem(id ListItemID) {
 
 func (l *listRenderer) scrollDown(offsetChange float32) {
 	itemChange := 0
+	separatorThickness := theme.SeparatorThicknessSize()
 	layoutEndY := l.children[len(l.children)-1].Position().Y + l.list.itemMin.Height + separatorThickness
 	scrollerEndY := l.scroller.Offset.Y + l.scroller.Size().Height
 	if layoutEndY < scrollerEndY {
@@ -319,6 +320,7 @@ func (l *listRenderer) scrollDown(offsetChange float32) {
 func (l *listRenderer) scrollUp(offsetChange float32) {
 	itemChange := 0
 	layoutStartY := l.children[0].Position().Y
+	separatorThickness := theme.SeparatorThicknessSize()
 	if layoutStartY > l.scroller.Offset.Y {
 		itemChange = int(math.Ceil(float64(layoutStartY-l.scroller.Offset.Y) / float64(l.list.itemMin.Height+separatorThickness)))
 	} else if offsetChange < l.list.itemMin.Height+separatorThickness {
@@ -483,7 +485,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	y := float32(0)
 	for _, child := range l.children {
 		child.Move(fyne.NewPos(0, y))
-		y += l.list.itemMin.Height + separatorThickness
+		y += l.list.itemMin.Height + theme.SeparatorThicknessSize()
 		child.Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 	}
 	l.layoutEndY = y
@@ -492,6 +494,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	if f := l.list.Length; f != nil {
+		separatorThickness := theme.SeparatorThicknessSize()
 		return fyne.NewSize(l.list.itemMin.Width,
 			(l.list.itemMin.Height+separatorThickness)*float32(f())-separatorThickness)
 	}
@@ -506,7 +509,7 @@ func (l *listLayout) getObjects() []fyne.CanvasObject {
 
 func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
 	if len(objects) > 1 {
-		objects[len(objects)-1].Move(fyne.NewPos(0, objects[len(objects)-2].Position().Y+l.list.itemMin.Height+separatorThickness))
+		objects[len(objects)-1].Move(fyne.NewPos(0, objects[len(objects)-2].Position().Y+l.list.itemMin.Height+theme.SeparatorThicknessSize()))
 	} else {
 		objects[len(objects)-1].Move(fyne.NewPos(0, 0))
 	}
@@ -514,7 +517,7 @@ func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
 }
 
 func (l *listLayout) prependedItem(objects []fyne.CanvasObject) {
-	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height-separatorThickness))
+	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height-theme.SeparatorThicknessSize()))
 	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 }
 
@@ -530,6 +533,8 @@ func (l *listLayout) updateDividers() {
 	} else {
 		l.dividers = nil
 	}
+
+	separatorThickness := theme.SeparatorThicknessSize()
 	for i, child := range l.children {
 		if i == 0 {
 			continue

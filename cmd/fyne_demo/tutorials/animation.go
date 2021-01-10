@@ -84,7 +84,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 	text.Alignment = fyne.TextAlignCenter
 	text.Resize(fyne.NewSize(380, 30))
 	text.Move(fyne.NewPos(0, yOff))
-	box = canvas.NewRectangle(theme.TextColor())
+	box = canvas.NewRectangle(theme.ForegroundColor())
 	box.Resize(fyne.NewSize(30, 30))
 	box.Move(fyne.NewPos(0, yOff))
 

@@ -57,7 +57,7 @@ type ToolbarSeparator struct {
 
 // ToolbarObject gets the visible line object for this ToolbarSeparator
 func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
-	return canvas.NewRectangle(theme.TextColor())
+	return canvas.NewRectangle(theme.ForegroundColor())
 }
 
 // NewToolbarSeparator returns a new separator item for a Toolbar to assist with ToolbarItem grouping
@@ -130,7 +130,7 @@ func (r *toolbarRenderer) Refresh() {
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
 			rect := r.Objects()[i].(*canvas.Rectangle)
-			rect.FillColor = theme.TextColor()
+			rect.FillColor = theme.ForegroundColor()
 		}
 	}
 
