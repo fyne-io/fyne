@@ -1,7 +1,6 @@
 package widget_test
 
 import (
-	"fmt"
 	"image/color"
 	"testing"
 	"time"
@@ -223,7 +222,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 	c := window.Canvas()
 
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
-	fmt.Println(theme.FocusColor())
+
 	test.AssertRendersToMarkup(t, "entry/focus_with_popup_initial.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(20, 20))
