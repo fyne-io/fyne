@@ -427,15 +427,6 @@ func (b *tabButton) Tapped(e *fyne.PointEvent) {
 	b.OnTap()
 }
 
-func (b *tabButton) setText(text string) {
-	if text == b.Text {
-		return
-	}
-
-	b.Text = text
-	b.Refresh()
-}
-
 type tabButtonRenderer struct {
 	button  *tabButton
 	icon    *canvas.Image
