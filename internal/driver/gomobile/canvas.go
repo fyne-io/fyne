@@ -25,13 +25,14 @@ var _ fyne.Canvas = (*mobileCanvas)(nil)
 
 type mobileCanvas struct {
 	content          fyne.CanvasObject
+	contentFocusMgr  *app.FocusManager
 	windowHead, menu fyne.CanvasObject
+	menuFocusMgr     *app.FocusManager
 	overlays         *internal.OverlayStack
 	painter          gl.Painter
 	scale            float32
 	size             fyne.Size
 
-	focused fyne.Focusable
 	touched map[int]mobile.Touchable
 	padded  bool
 
@@ -60,7 +61,7 @@ func NewCanvas() fyne.Canvas {
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
 	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
-	ret.overlays = &internal.OverlayStack{Canvas: ret}
+	ret.overlays = &internal.OverlayStack{Canvas: ret, OnChange: ret.overlayChanged}
 
 	ret.setupThemeListener()
 
@@ -80,39 +81,35 @@ func (c *mobileCanvas) Content() fyne.CanvasObject {
 }
 
 func (c *mobileCanvas) Focus(obj fyne.Focusable) {
-	if c.focused == obj || obj == nil {
+	focusMgr := c.focusManager()
+	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+		c.handleKeyboard(obj)
 		return
 	}
 
-	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-		c.Unfocus()
-		return
+	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
+	for _, mgr := range focusMgrs {
+		if focusMgr != mgr {
+			if mgr.Focus(obj) {
+				c.handleKeyboard(obj)
+				return
+			}
+		}
 	}
 
-	if c.focused != nil {
-		c.focused.FocusLost()
-	}
-
-	c.focused = obj
-	obj.FocusGained()
-
-	if keyb, ok := obj.(mobile.Keyboardable); ok {
-		showVirtualKeyboard(keyb.Keyboard())
-	} else {
-		hideVirtualKeyboard()
-	}
+	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
 }
 
 func (c *mobileCanvas) FocusNext() {
-	// not yet implemented, see #1625
+	c.focusManager().FocusNext()
 }
 
 func (c *mobileCanvas) FocusPrevious() {
-	// not yet implemented, see #1625
+	c.focusManager().FocusPrevious()
 }
 
 func (c *mobileCanvas) Focused() fyne.Focusable {
-	return c.focused
+	return c.focusManager().Focused()
 }
 
 func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
@@ -162,7 +159,7 @@ func (c *mobileCanvas) Scale() float32 {
 
 func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
-
+	c.contentFocusMgr = app.NewFocusManager(c.content)
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 }
 
@@ -179,11 +176,9 @@ func (c *mobileCanvas) Size() fyne.Size {
 }
 
 func (c *mobileCanvas) Unfocus() {
-	if c.focused != nil {
-		c.focused.FocusLost()
+	if c.focusManager().Focus(nil) {
 		hideVirtualKeyboard()
 	}
-	c.focused = nil
 }
 
 func (c *mobileCanvas) ensureMinSize() {
@@ -230,6 +225,24 @@ func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func
 	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.windowHead, c.content)
 }
 
+func (c *mobileCanvas) focusManager() *app.FocusManager {
+	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
+		return focusMgr
+	}
+	if c.menu != nil {
+		return c.menuFocusMgr
+	}
+	return c.contentFocusMgr
+}
+
+func (c *mobileCanvas) handleKeyboard(obj fyne.Focusable) {
+	if keyb, ok := obj.(mobile.Keyboardable); ok {
+		showVirtualKeyboard(keyb.Keyboard())
+	} else {
+		hideVirtualKeyboard()
+	}
+}
+
 func (c *mobileCanvas) minSizeChanged() bool {
 	if c.Content() == nil {
 		return false
@@ -263,12 +276,25 @@ func (c *mobileCanvas) objectTrees() []fyne.CanvasObject {
 	return trees
 }
 
+func (c *mobileCanvas) overlayChanged() {
+	c.handleKeyboard(c.Focused())
+}
+
 func (c *mobileCanvas) resize(size fyne.Size) {
 	if size == c.size {
 		return
 	}
 
 	c.sizeContent(size)
+}
+
+func (c *mobileCanvas) setMenu(menu fyne.CanvasObject) {
+	c.menu = menu
+	if menu != nil {
+		c.menuFocusMgr = app.NewFocusManager(c.menu)
+	} else {
+		c.menuFocusMgr = nil
+	}
 }
 
 func (c *mobileCanvas) setupThemeListener() {
