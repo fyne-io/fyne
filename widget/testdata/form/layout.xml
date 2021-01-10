@@ -49,6 +49,7 @@
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 					</widget>
 					<rectangle fillColor="button" pos="2,2" size="95x33"/>
+					<rectangle size="0x0"/>
 					<text bold pos="36,8" size="51x21">Cancel</text>
 					<image fillMode="contain" pos="12,8" rsc="cancelIcon" size="20x21"/>
 				</widget>
@@ -64,6 +65,7 @@
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 					</widget>
 					<rectangle fillColor="primary" pos="2,2" size="99x33"/>
+					<rectangle size="0x0"/>
 					<text bold color="background" pos="36,8" size="55x21">Submit</text>
 					<image fillMode="contain" pos="12,8" rsc="confirmIcon" size="20x21" themed="inverted"/>
 				</widget>

@@ -5,7 +5,10 @@
 			<widget pos="4,4" size="102x29" type="*widget.Scroll">
 				<widget size="102x29" type="*widget.entryContent">
 					<widget size="102x29" type="*widget.textProvider">
-						<text pos="4,4" size="94x21">B</text>
+						<text color="placeholder" pos="4,4" size="94x21"></text>
+					</widget>
+					<widget size="102x29" type="*widget.textProvider">
+						<text pos="4,4" size="94x21"></text>
 					</widget>
 				</widget>
 			</widget>

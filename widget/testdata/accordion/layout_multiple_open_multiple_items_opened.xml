@@ -4,11 +4,13 @@
 			<widget pos="23,25" size="95x141" type="*widget.Accordion">
 				<widget pos="0,4" size="95x29" type="*widget.Button">
 					<rectangle fillColor="button" pos="2,2" size="91x25"/>
+					<rectangle size="0x0"/>
 					<text bold pos="28,4" size="11x21">A</text>
 					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 				</widget>
 				<widget pos="0,75" size="95x29" type="*widget.Button">
 					<rectangle fillColor="button" pos="2,2" size="91x25"/>
+					<rectangle size="0x0"/>
 					<text bold pos="28,4" size="11x21">B</text>
 					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 				</widget>

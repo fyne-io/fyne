@@ -13,6 +13,7 @@
 					<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 				</widget>
 				<rectangle fillColor="focus" pos="4,4" size="128x29"/>
+				<rectangle size="0x0"/>
 				<widget pos="8,4" size="100x29" type="*widget.textProvider">
 					<text bold pos="4,4" size="92x21">Option C</text>
 				</widget>
