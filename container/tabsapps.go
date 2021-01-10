@@ -19,14 +19,14 @@ var _ fyne.Widget = (*AppTabs)(nil)
 // The tabs contain text and/or an icon and allow the user to switch between the content specified in each TabItem.
 // Each item is represented by a button at the edge of the container.
 //
-// Since: 2.0.0
+// Since: 1.4
 type AppTabs struct {
 	baseTabs
 }
 
 // NewAppTabs creates a new tab container that allows the user to choose between different areas of an app.
 //
-// Since: 2.0.0
+// Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
 	tabs := &AppTabs{
 		baseTabs: baseTabs{
