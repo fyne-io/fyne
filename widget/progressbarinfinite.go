@@ -113,7 +113,7 @@ func (p *infProgressRenderer) start() {
 	}
 }
 
-// Stop the infinite progress bar background thread from to updating it
+// Stop the background thread from updating the infinite progress bar
 func (p *infProgressRenderer) stop() {
 	p.progress.propertyLock.Lock()
 	defer p.progress.propertyLock.Unlock()
