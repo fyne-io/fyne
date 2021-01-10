@@ -1,0 +1,8 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget pos="61,86" size="20x20" type="*widget.Icon">
+			</widget>
+		</container>
+	</content>
+</canvas>
