@@ -1,7 +1,7 @@
 <canvas padded size="150x200">
 	<content>
 		<widget pos="10,10" size="120x100" type="*widget.Entry">
-			<rectangle fillColor="focus" pos="0,96" size="120x4"/>
+			<rectangle fillColor="primary" pos="0,96" size="120x4"/>
 			<widget pos="4,4" size="112x92" type="*widget.Scroll">
 				<widget size="112x92" type="*widget.entryContent">
 					<widget size="112x92" type="*widget.textProvider">
@@ -10,7 +10,7 @@
 						<text pos="4,46" size="104x21">w/o NLs or</text>
 						<text pos="4,67" size="104x21">LFs.</text>
 					</widget>
-					<rectangle fillColor="focus" pos="3,4" size="2x21"/>
+					<rectangle fillColor="primary" pos="3,4" size="2x21"/>
 				</widget>
 			</widget>
 		</widget>
