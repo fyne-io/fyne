@@ -1294,10 +1294,6 @@ type entryContentRenderer struct {
 	content               *entryContent
 }
 
-func (r *entryContentRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 func (r *entryContentRenderer) Destroy() {
 	r.cursorAnim.Stop()
 }
