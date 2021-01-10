@@ -36,15 +36,17 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 // Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), b.Items...)
-	bg := &menuBarBackground{action: b.deactivate}
-	objects := []fyne.CanvasObject{bg, cont}
+	background := canvas.NewRectangle(theme.ButtonColor())
+	underlay := &menuBarUnderlay{action: b.deactivate}
+	objects := []fyne.CanvasObject{underlay, background, cont}
 	for _, item := range b.Items {
 		objects = append(objects, item.(*menuBarItem).Child())
 	}
 	return &menuBarRenderer{
 		widget.NewShadowingRenderer(objects, widget.MenuLevel),
 		b,
-		bg,
+		background,
+		underlay,
 		cont,
 	}
 }
@@ -137,13 +139,10 @@ func (b *MenuBar) deactivate() {
 
 type menuBarRenderer struct {
 	*widget.ShadowingRenderer
-	b    *MenuBar
-	bg   *menuBarBackground
-	cont *fyne.Container
-}
-
-func (r *menuBarRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	b          *MenuBar
+	background *canvas.Rectangle
+	underlay   *menuBarUnderlay
+	cont       *fyne.Container
 }
 
 func (r *menuBarRenderer) Layout(size fyne.Size) {
@@ -155,9 +154,9 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 	}
 
 	if r.b.active {
-		r.bg.Resize(r.b.canvas.Size())
+		r.underlay.Resize(r.b.canvas.Size())
 	} else {
-		r.bg.Resize(fyne.NewSize(0, 0))
+		r.underlay.Resize(fyne.NewSize(0, 0))
 	}
 	r.cont.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height))
 	r.cont.Move(fyne.NewPos(theme.Padding(), 0))
@@ -167,6 +166,7 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 		}
 		item.Child().Move(fyne.NewPos(item.Position().X+theme.Padding(), item.Size().Height))
 	}
+	r.background.Resize(size)
 }
 
 func (r *menuBarRenderer) MinSize() fyne.Size {
@@ -175,73 +175,74 @@ func (r *menuBarRenderer) MinSize() fyne.Size {
 
 func (r *menuBarRenderer) Refresh() {
 	r.Layout(r.b.Size())
+	r.background.FillColor = theme.ButtonColor()
 	canvas.Refresh(r.b)
 }
 
-// Transparent overlay shown as soon as menu is active.
+// Transparent underlay shown as soon as menu is active.
 // It catches mouse events outside the menu's objects.
-type menuBarBackground struct {
+type menuBarUnderlay struct {
 	widget.Base
 	action func()
 }
 
-var _ fyne.Widget = (*menuBarBackground)(nil)
-var _ fyne.Tappable = (*menuBarBackground)(nil)     // deactivate menu on click outside
-var _ desktop.Hoverable = (*menuBarBackground)(nil) // block hover events on main content
+var _ fyne.Widget = (*menuBarUnderlay)(nil)
+var _ fyne.Tappable = (*menuBarUnderlay)(nil)     // deactivate menu on click outside
+var _ desktop.Hoverable = (*menuBarUnderlay)(nil) // block hover events on main content
 
-func (bg *menuBarBackground) CreateRenderer() fyne.WidgetRenderer {
-	return &menuBackgroundRenderer{}
+func (u *menuBarUnderlay) CreateRenderer() fyne.WidgetRenderer {
+	return &menuUnderlayRenderer{}
 }
 
-func (bg *menuBarBackground) Hide() {
-	widget.HideWidget(&bg.Base, bg)
+func (u *menuBarUnderlay) Hide() {
+	widget.HideWidget(&u.Base, u)
 }
 
-func (bg *menuBarBackground) MinSize() fyne.Size {
-	return widget.MinSizeOf(bg)
+func (u *menuBarUnderlay) MinSize() fyne.Size {
+	return widget.MinSizeOf(u)
 }
 
-func (bg *menuBarBackground) MouseIn(*desktop.MouseEvent) {
+func (u *menuBarUnderlay) MouseIn(*desktop.MouseEvent) {
 }
 
-func (bg *menuBarBackground) MouseOut() {
+func (u *menuBarUnderlay) MouseOut() {
 }
 
-func (bg *menuBarBackground) MouseMoved(*desktop.MouseEvent) {
+func (u *menuBarUnderlay) MouseMoved(*desktop.MouseEvent) {
 }
 
-func (bg *menuBarBackground) Move(pos fyne.Position) {
-	widget.MoveWidget(&bg.Base, bg, pos)
+func (u *menuBarUnderlay) Move(pos fyne.Position) {
+	widget.MoveWidget(&u.Base, u, pos)
 }
 
-func (bg *menuBarBackground) Refresh() {
-	widget.RefreshWidget(bg)
+func (u *menuBarUnderlay) Refresh() {
+	widget.RefreshWidget(u)
 }
 
-func (bg *menuBarBackground) Resize(size fyne.Size) {
-	widget.ResizeWidget(&bg.Base, bg, size)
+func (u *menuBarUnderlay) Resize(size fyne.Size) {
+	widget.ResizeWidget(&u.Base, u, size)
 }
 
-func (bg *menuBarBackground) Show() {
-	widget.ShowWidget(&bg.Base, bg)
+func (u *menuBarUnderlay) Show() {
+	widget.ShowWidget(&u.Base, u)
 }
 
-func (bg *menuBarBackground) Tapped(*fyne.PointEvent) {
-	bg.action()
+func (u *menuBarUnderlay) Tapped(*fyne.PointEvent) {
+	u.action()
 }
 
-type menuBackgroundRenderer struct {
+type menuUnderlayRenderer struct {
 	widget.BaseRenderer
 }
 
-var _ fyne.WidgetRenderer = (*menuBackgroundRenderer)(nil)
+var _ fyne.WidgetRenderer = (*menuUnderlayRenderer)(nil)
 
-func (r *menuBackgroundRenderer) Layout(fyne.Size) {
+func (r *menuUnderlayRenderer) Layout(fyne.Size) {
 }
 
-func (r *menuBackgroundRenderer) MinSize() fyne.Size {
+func (r *menuUnderlayRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
-func (r *menuBackgroundRenderer) Refresh() {
+func (r *menuUnderlayRenderer) Refresh() {
 }
