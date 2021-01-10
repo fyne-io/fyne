@@ -1,9 +1,10 @@
 <canvas padded size="150x100">
 	<content>
 		<widget pos="10,10" size="130x37" type="*widget.Entry">
-			<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+			<rectangle fillColor="focus" size="130x37"/>
+			<rectangle fillColor="shadow" pos="0,37" size="130x0"/>
 			<widget pos="4,4" size="102x29" type="*widget.Scroll">
-				<widget size="102x29" type="*widget.entryContent">
+				<widget backgroundColor="focus" size="102x29" type="*widget.entryContent">
 					<widget size="102x29" type="*widget.textProvider">
 						<text color="placeholder" pos="4,4" size="94x21"></text>
 					</widget>
