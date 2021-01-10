@@ -17,6 +17,10 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+const (
+	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
+)
+
 type mobileCanvas struct {
 	content          fyne.CanvasObject
 	windowHead, menu fyne.CanvasObject
@@ -45,12 +49,60 @@ type mobileCanvas struct {
 	touchLastTapped fyne.CanvasObject
 }
 
-const (
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
-)
+// NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
+func NewCanvas() fyne.Canvas {
+	ret := &mobileCanvas{padded: true}
+	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
+	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
+	ret.touched = make(map[int]mobile.Touchable)
+	ret.lastTapDownPos = make(map[int]fyne.Position)
+	ret.lastTapDown = make(map[int]time.Time)
+	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
+	ret.overlays = &internal.OverlayStack{Canvas: ret}
+
+	ret.setupThemeListener()
+
+	return ret
+}
+
+func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
+	c.shortcut.AddShortcut(shortcut, handler)
+}
+
+func (c *mobileCanvas) Capture() image.Image {
+	return c.painter.Capture(c)
+}
 
 func (c *mobileCanvas) Content() fyne.CanvasObject {
 	return c.content
+}
+
+func (c *mobileCanvas) Focus(obj fyne.Focusable) {
+	if c.focused == obj || obj == nil {
+		return
+	}
+
+	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
+		c.Unfocus()
+		return
+	}
+
+	if c.focused != nil {
+		c.focused.FocusLost()
+	}
+
+	c.focused = obj
+	obj.FocusGained()
+
+	if keyb, ok := obj.(mobile.Keyboardable); ok {
+		showVirtualKeyboard(keyb.Keyboard())
+	} else {
+		hideVirtualKeyboard()
+	}
+}
+
+func (c *mobileCanvas) Focused() fyne.Focusable {
+	return c.focused
 }
 
 func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
@@ -65,14 +117,20 @@ func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 		fyne.NewSize(float32(dev.safeWidth)/scale, float32(dev.safeHeight)/scale)
 }
 
-func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
-	c.content = content
+func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+	return c.onTypedKey
+}
 
-	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
+func (c *mobileCanvas) OnTypedRune() func(rune) {
+	return c.onTypedRune
 }
 
 func (c *mobileCanvas) Overlays() fyne.OverlayStack {
 	return c.overlays
+}
+
+func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
 
 func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
@@ -82,6 +140,141 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	default:
 		// queue is full, ignore
 	}
+}
+
+func (c *mobileCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.RemoveShortcut(shortcut)
+}
+
+func (c *mobileCanvas) Scale() float32 {
+	return c.scale
+}
+
+func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
+	c.content = content
+
+	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
+}
+
+func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.onTypedKey = typed
+}
+
+func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
+	c.onTypedRune = typed
+}
+
+func (c *mobileCanvas) Size() fyne.Size {
+	return c.size
+}
+
+func (c *mobileCanvas) Unfocus() {
+	if c.focused != nil {
+		c.focused.FocusLost()
+		hideVirtualKeyboard()
+	}
+	c.focused = nil
+}
+
+func (c *mobileCanvas) ensureMinSize() {
+	if c.Content() == nil {
+		return
+	}
+	var lastParent fyne.CanvasObject
+
+	ensureMinSize := func(obj, parent fyne.CanvasObject) {
+		if !obj.Visible() {
+			return
+		}
+		minSize := obj.MinSize()
+
+		objToLayout := obj
+		if parent != nil {
+			objToLayout = parent
+		} else {
+			size := obj.Size()
+			expectedSize := minSize.Max(size)
+			if expectedSize != size && size != c.size {
+				objToLayout = nil
+				obj.Resize(expectedSize)
+			}
+		}
+
+		if objToLayout != lastParent {
+			updateLayout(lastParent)
+			lastParent = objToLayout
+		}
+	}
+	c.walkTree(nil, ensureMinSize)
+
+	if lastParent != nil {
+		updateLayout(lastParent)
+	}
+}
+
+func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+	if c.menu != nil {
+		return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.menu)
+	}
+
+	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.windowHead, c.content)
+}
+
+func (c *mobileCanvas) minSizeChanged() bool {
+	if c.Content() == nil {
+		return false
+	}
+	minSizeChange := false
+
+	ensureMinSize := func(obj, parent fyne.CanvasObject) {
+		if !obj.Visible() {
+			return
+		}
+		minSize := obj.MinSize()
+
+		if minSize != c.minSizeCache[obj] {
+			minSizeChange = true
+
+			c.minSizeCache[obj] = minSize
+		}
+	}
+	c.walkTree(nil, ensureMinSize)
+
+	return minSizeChange
+}
+
+func (c *mobileCanvas) objectTrees() []fyne.CanvasObject {
+	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
+	trees = append(trees, c.content)
+	if c.menu != nil {
+		trees = append(trees, c.menu)
+	}
+	trees = append(trees, c.Overlays().List()...)
+	return trees
+}
+
+func (c *mobileCanvas) resize(size fyne.Size) {
+	if size == c.size {
+		return
+	}
+
+	c.sizeContent(size)
+}
+
+func (c *mobileCanvas) setupThemeListener() {
+	listener := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(listener)
+	go func() {
+		for {
+			<-listener
+			if c.menu != nil {
+				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+			}
+			if c.windowHead != nil {
+				app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
+			}
+		}
+	}()
 }
 
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
@@ -125,196 +318,6 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 		c.content.Resize(areaSize)
 		c.content.Move(topLeft)
 	}
-}
-
-func (c *mobileCanvas) resize(size fyne.Size) {
-	if size == c.size {
-		return
-	}
-
-	c.sizeContent(size)
-}
-
-func (c *mobileCanvas) Focus(obj fyne.Focusable) {
-	if c.focused == obj || obj == nil {
-		return
-	}
-
-	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-		c.Unfocus()
-		return
-	}
-
-	if c.focused != nil {
-		c.focused.FocusLost()
-	}
-
-	c.focused = obj
-	obj.FocusGained()
-
-	if keyb, ok := obj.(mobile.Keyboardable); ok {
-		showVirtualKeyboard(keyb.Keyboard())
-	} else {
-		hideVirtualKeyboard()
-	}
-}
-
-func (c *mobileCanvas) Unfocus() {
-	if c.focused != nil {
-		c.focused.FocusLost()
-		hideVirtualKeyboard()
-	}
-	c.focused = nil
-}
-
-func (c *mobileCanvas) Focused() fyne.Focusable {
-	return c.focused
-}
-
-func (c *mobileCanvas) Size() fyne.Size {
-	return c.size
-}
-
-func (c *mobileCanvas) Scale() float32 {
-	return c.scale
-}
-
-func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
-}
-
-func (c *mobileCanvas) OnTypedRune() func(rune) {
-	return c.onTypedRune
-}
-
-func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
-	c.onTypedRune = typed
-}
-
-func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
-	return c.onTypedKey
-}
-
-func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
-	c.onTypedKey = typed
-}
-
-func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
-	c.shortcut.AddShortcut(shortcut, handler)
-}
-
-func (c *mobileCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
-	c.shortcut.RemoveShortcut(shortcut)
-}
-
-func (c *mobileCanvas) Capture() image.Image {
-	return c.painter.Capture(c)
-}
-
-func (c *mobileCanvas) minSizeChanged() bool {
-	if c.Content() == nil {
-		return false
-	}
-	minSizeChange := false
-
-	ensureMinSize := func(obj, parent fyne.CanvasObject) {
-		if !obj.Visible() {
-			return
-		}
-		minSize := obj.MinSize()
-
-		if minSize != c.minSizeCache[obj] {
-			minSizeChange = true
-
-			c.minSizeCache[obj] = minSize
-		}
-	}
-	c.walkTree(nil, ensureMinSize)
-
-	return minSizeChange
-}
-
-func (c *mobileCanvas) ensureMinSize() {
-	if c.Content() == nil {
-		return
-	}
-	var lastParent fyne.CanvasObject
-
-	ensureMinSize := func(obj, parent fyne.CanvasObject) {
-		if !obj.Visible() {
-			return
-		}
-		minSize := obj.MinSize()
-
-		objToLayout := obj
-		if parent != nil {
-			objToLayout = parent
-		} else {
-			size := obj.Size()
-			expectedSize := minSize.Max(size)
-			if expectedSize != size && size != c.size {
-				objToLayout = nil
-				obj.Resize(expectedSize)
-			}
-		}
-
-		if objToLayout != lastParent {
-			updateLayout(lastParent)
-			lastParent = objToLayout
-		}
-	}
-	c.walkTree(nil, ensureMinSize)
-
-	if lastParent != nil {
-		updateLayout(lastParent)
-	}
-}
-
-func updateLayout(objToLayout fyne.CanvasObject) {
-	switch cont := objToLayout.(type) {
-	case *fyne.Container:
-		if cont.Layout != nil {
-			cont.Layout.Layout(cont.Objects, cont.Size())
-		}
-	case fyne.Widget:
-		cache.Renderer(cont).Layout(cont.Size())
-	}
-}
-
-func (c *mobileCanvas) objectTrees() []fyne.CanvasObject {
-	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
-	trees = append(trees, c.content)
-	if c.menu != nil {
-		trees = append(trees, c.menu)
-	}
-	trees = append(trees, c.Overlays().List()...)
-	return trees
-}
-
-func (c *mobileCanvas) walkTree(
-	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
-) {
-	driver.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
-	if c.windowHead != nil {
-		driver.WalkVisibleObjectTree(c.windowHead, beforeChildren, afterChildren)
-	}
-	if c.menu != nil {
-		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
-	}
-	for _, overlay := range c.overlays.List() {
-		if overlay != nil {
-			driver.WalkVisibleObjectTree(overlay, beforeChildren, afterChildren)
-		}
-	}
-}
-
-func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
-	if c.menu != nil {
-		return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.menu)
-	}
-
-	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.windowHead, c.content)
 }
 
 func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
@@ -484,34 +487,31 @@ func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEven
 	c.touchLastTapped = nil
 }
 
-func (c *mobileCanvas) setupThemeListener() {
-	listener := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			<-listener
-			if c.menu != nil {
-				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-			}
-			if c.windowHead != nil {
-				app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
-			}
+func (c *mobileCanvas) walkTree(
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+) {
+	driver.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
+	if c.windowHead != nil {
+		driver.WalkVisibleObjectTree(c.windowHead, beforeChildren, afterChildren)
+	}
+	if c.menu != nil {
+		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
+	}
+	for _, overlay := range c.overlays.List() {
+		if overlay != nil {
+			driver.WalkVisibleObjectTree(overlay, beforeChildren, afterChildren)
 		}
-	}()
+	}
 }
 
-// NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
-func NewCanvas() fyne.Canvas {
-	ret := &mobileCanvas{padded: true}
-	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
-	ret.touched = make(map[int]mobile.Touchable)
-	ret.lastTapDownPos = make(map[int]fyne.Position)
-	ret.lastTapDown = make(map[int]time.Time)
-	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
-	ret.overlays = &internal.OverlayStack{Canvas: ret}
-
-	ret.setupThemeListener()
-
-	return ret
+func updateLayout(objToLayout fyne.CanvasObject) {
+	switch cont := objToLayout.(type) {
+	case *fyne.Container:
+		if cont.Layout != nil {
+			cont.Layout.Layout(cont.Objects, cont.Size())
+		}
+	case fyne.Widget:
+		cache.Renderer(cont).Layout(cont.Size())
+	}
 }
