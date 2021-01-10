@@ -34,6 +34,8 @@ These changes likely break some apps, please read the
   - widget.Radio (now widget.RadioGroup)
   - widget.AccordionContainer (now widget.Accordion)
   - layout.NewFixedGridLayout() (now layout.NewGridWrapLayout())
+  - widget.ScrollContainer (now container.Scroll)
+  - widget.SplitContainer (now containerr.Spilt)
 
 ### Added
 
