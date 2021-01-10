@@ -31,11 +31,11 @@ func TestAccordion_Append(t *testing.T) {
 	assert.Equal(t, 1, len(ac.Items))
 }
 
-func TestAccordionContainer_ChangeTheme(t *testing.T) {
+func TestAccordion_ChangeTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	ac := widget.NewAccordionContainer()
+	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
 	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
 
@@ -53,7 +53,7 @@ func TestAccordionContainer_ChangeTheme(t *testing.T) {
 	})
 }
 
-func TestAccordionContainer_Close(t *testing.T) {
+func TestAccordion_Close(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
 		ac := widget.NewAccordion()
 		ac.Append(&widget.AccordionItem{

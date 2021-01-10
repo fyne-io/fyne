@@ -128,7 +128,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -152,7 +152,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -176,7 +176,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -204,7 +204,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -232,7 +232,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -270,7 +270,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -308,7 +308,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -345,7 +345,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -395,7 +395,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -442,7 +442,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -493,7 +493,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -546,7 +546,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -588,7 +588,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="192x292" type="*widget.treeContent">
 									<widget size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -630,7 +630,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="206x292" type="*widget.treeContent">
 									<widget size="206x37" type="*widget.branch">
 										<widget pos="28,4" size="174x29" type="*widget.Label">
@@ -719,7 +719,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="206x292" type="*widget.treeContent">
 									<widget size="206x37" type="*widget.branch">
 										<widget pos="28,4" size="174x29" type="*widget.Label">
@@ -808,7 +808,7 @@ func TestTree_Layout(t *testing.T) {
 				<canvas padded size="200x300">
 					<content>
 						<widget pos="4,4" size="192x292" type="*widget.Tree">
-							<widget size="192x292" type="*widget.ScrollContainer">
+							<widget size="192x292" type="*widget.Scroll">
 								<widget size="206x292" type="*widget.treeContent">
 									<widget size="206x37" type="*widget.branch">
 										<widget pos="28,4" size="174x29" type="*widget.Label">
@@ -942,7 +942,7 @@ func TestTree_Move(t *testing.T) {
   	<canvas padded size="220x220">
   		<content>
   			<widget pos="4,4" size="212x212" type="*widget.Tree">
-  				<widget size="212x212" type="*widget.ScrollContainer">
+  				<widget size="212x212" type="*widget.Scroll">
   					<widget size="212x212" type="*widget.treeContent">
   						<widget size="212x37" type="*widget.branch">
   							<widget pos="28,4" size="180x29" type="*widget.Label">
@@ -974,7 +974,7 @@ func TestTree_Move(t *testing.T) {
 		<canvas padded size="220x220">
 			<content>
 				<widget pos="20,20" size="212x212" type="*widget.Tree">
-					<widget size="212x212" type="*widget.ScrollContainer">
+					<widget size="212x212" type="*widget.Scroll">
 						<widget size="212x212" type="*widget.treeContent">
 							<widget size="212x37" type="*widget.branch">
 								<widget pos="28,4" size="180x29" type="*widget.Label">

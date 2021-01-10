@@ -237,7 +237,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 		measureText = strings.ReplaceAll(measureText, "\t", textTabIndent)
 	}
 
-	label := canvas.NewText(measureText, theme.TextColor())
+	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
 	return label.MinSize()
 }
@@ -297,7 +297,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the label to match the current theme.
 func (r *textRenderer) applyTheme() {
-	c := theme.TextColor()
+	c := theme.ForegroundColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
 	}
@@ -333,7 +333,7 @@ func (r *textRenderer) Refresh() {
 		add := false
 		if index >= len(r.texts) {
 			add = true
-			textCanvas = canvas.NewText(line, theme.TextColor())
+			textCanvas = canvas.NewText(line, theme.ForegroundColor())
 		} else {
 			textCanvas = r.texts[index]
 			textCanvas.Text = line

@@ -27,11 +27,15 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
 					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
+					<widget pos="4,4" size="112x29" type="*widget.Scroll">
+						<widget size="112x29" type="*widget.entryContent">
+							<widget size="112x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="104x21"></text>
+							</widget>
+							<widget size="112x29" type="*widget.textProvider">
+								<text pos="4,4" size="104x21"></text>
+							</widget>
+						</widget>
 					</widget>
 				</widget>
 			</content>
@@ -41,14 +45,17 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	test.Type(entry, "2020-02")
 	assert.Error(t, r(entry.Text))
 	entry.FocusLost()
-	// TODO: error color should be named “error” in the future
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="rgba(244,67,54,255)" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">2020-02</text>
+					<rectangle fillColor="error" pos="0,33" size="120x4"/>
+					<widget pos="4,4" size="112x29" type="*widget.Scroll">
+						<widget size="112x29" type="*widget.entryContent">
+							<widget size="112x29" type="*widget.textProvider">
+								<text pos="4,4" size="104x21">2020-02</text>
+							</widget>
+						</widget>
 					</widget>
 					<widget pos="92,8" size="20x20" type="*widget.validationStatus">
 						<image rsc="errorIcon" size="iconInlineSize" themed="error"/>
@@ -65,10 +72,14 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
 					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">2020-02-12</text>
+					<widget pos="4,4" size="112x29" type="*widget.Scroll">
+						<widget size="112x29" type="*widget.entryContent">
+							<widget size="112x29" type="*widget.textProvider">
+								<text pos="4,4" size="104x21">2020-02-12</text>
+							</widget>
+							<rectangle fillColor="focus" pos="83,4" size="2x21"/>
+						</widget>
 					</widget>
-					<rectangle fillColor="focus" pos="87,8" size="2x21"/>
 					<widget pos="92,8" size="20x20" type="*widget.validationStatus">
 						<image rsc="confirmIcon" size="iconInlineSize"/>
 					</widget>

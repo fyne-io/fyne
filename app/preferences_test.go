@@ -11,17 +11,19 @@ import (
 
 func loadPreferences(id string) *preferences {
 	p := newPreferences(&fyneApp{uniqueID: id})
-	p.load(id)
+	p.load()
 
 	return p
 }
 
 func TestPreferences_Save(t *testing.T) {
 	p := loadPreferences("dummy")
-	p.Values()["keyString"] = "value"
-	p.Values()["keyInt"] = 4
-	p.Values()["keyFloat"] = 3.5
-	p.Values()["keyBool"] = true
+	p.WriteValues(func(val map[string]interface{}) {
+		val["keyString"] = "value"
+		val["keyInt"] = 4
+		val["keyFloat"] = 3.5
+		val["keyBool"] = true
+	})
 
 	path := filepath.Join(os.TempDir(), "fynePrefs.json")
 	defer os.Remove(path)

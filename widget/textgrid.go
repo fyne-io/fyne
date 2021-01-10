@@ -278,7 +278,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
 	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 
 	return render
 }
@@ -324,7 +324,7 @@ type textGridRenderer struct {
 }
 
 func (t *textGridRenderer) appendTextCell(str rune) {
-	text := canvas.NewText(string(str), theme.TextColor())
+	text := canvas.NewText(string(str), theme.ForegroundColor())
 	text.TextStyle.Monospace = true
 
 	bg := canvas.NewRectangle(color.Transparent)
@@ -337,7 +337,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	}
 
 	text := t.objects[pos*2+1].(*canvas.Text)
-	fg := theme.TextColor()
+	fg := theme.ForegroundColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
@@ -494,7 +494,7 @@ func (t *textGridRenderer) Refresh() {
 	// theme could change text size
 	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()
 }

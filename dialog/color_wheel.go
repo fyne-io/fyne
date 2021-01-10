@@ -198,9 +198,9 @@ func (r *colorWheelRenderer) Refresh() {
 	} else {
 		r.Layout(s)
 	}
-	r.x.StrokeColor = theme.TextColor()
+	r.x.StrokeColor = theme.ForegroundColor()
 	r.x.Refresh()
-	r.y.StrokeColor = theme.TextColor()
+	r.y.StrokeColor = theme.ForegroundColor()
 	r.y.Refresh()
 	r.raster.Refresh()
 	canvas.Refresh(r.area)

@@ -39,7 +39,7 @@ func TestList_MinSize(t *testing.T) {
 	}{
 		"small": {
 			fyne.NewSize(1, 1),
-			fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize),
+			fyne.NewSize(float32(32), float32(32)),
 		},
 		"large": {
 			fyne.NewSize(100, 100),
@@ -88,7 +88,7 @@ func TestList_Resize(t *testing.T) {
 		<canvas padded size="200x600">
 			<content>
 				<widget pos="4,4" size="192x592" type="*widget.List">
-					<widget size="192x592" type="*widget.ScrollContainer">
+					<widget size="192x592" type="*widget.Scroll">
 						<container size="192x37999">
 							<widget size="192x37" type="*widget.listItem">
 								<rectangle fillColor="background" size="4x37"/>
@@ -378,7 +378,7 @@ func TestList_OffsetChange(t *testing.T) {
 		<canvas padded size="200x400">
 			<content>
 				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
+					<widget size="192x392" type="*widget.Scroll">
 						<container pos="0,-300" size="192x37999">
 							<widget pos="0,266" size="192x37" type="*widget.listItem">
 								<rectangle fillColor="background" size="4x37"/>
@@ -645,7 +645,7 @@ func TestList_DataChange(t *testing.T) {
 		<canvas padded size="200x400">
 			<content>
 				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
+					<widget size="192x392" type="*widget.Scroll">
 						<container size="192x987">
 							<widget size="192x37" type="*widget.listItem">
 								<rectangle fillColor="background" size="4x37"/>
@@ -877,7 +877,7 @@ func TestList_SmallList(t *testing.T) {
 		<canvas padded size="200x400">
 			<content>
 				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
+					<widget size="192x392" type="*widget.Scroll">
 						<container size="192x392">
 							<widget size="192x37" type="*widget.listItem">
 								<rectangle fillColor="background" size="4x37"/>
@@ -939,7 +939,7 @@ func TestList_ClearList(t *testing.T) {
 		<canvas padded size="200x400">
 			<content>
 				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
+					<widget size="192x392" type="*widget.Scroll">
 						<container size="192x392">
 						</container>
 					</widget>
@@ -984,7 +984,7 @@ func TestList_RemoveItem(t *testing.T) {
 		<canvas padded size="200x400">
 			<content>
 				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
+					<widget size="192x392" type="*widget.Scroll">
 						<container size="192x392">
 							<widget size="192x37" type="*widget.listItem">
 								<rectangle fillColor="background" size="4x37"/>
@@ -1069,7 +1069,7 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 		<canvas padded size="200x400">
 			<content>
 				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
+					<widget size="192x392" type="*widget.Scroll">
 						<container size="192x37999">
 							<widget size="192x37" type="*widget.listItem">
 								<rectangle fillColor="background" size="4x37"/>

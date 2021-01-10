@@ -389,7 +389,7 @@ func TestSelect_KeyboardControl(t *testing.T) {
 								<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 								<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 							</widget>
-							<widget size="128x70" type="*widget.ScrollContainer">
+							<widget size="128x70" type="*widget.Scroll">
 								<widget size="128x70" type="*widget.menuBox">
 									<container pos="0,4" size="128x78">
 										<widget size="128x29" type="*widget.menuItem">
@@ -642,7 +642,7 @@ func TestSelect_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
+						<widget size="128x70" type="*widget.Scroll">
 							<widget size="128x70" type="*widget.menuBox">
 								<container pos="0,4" size="128x78">
 									<widget size="128x29" type="*widget.menuItem">
@@ -697,7 +697,7 @@ func TestSelect_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
+						<widget size="128x70" type="*widget.Scroll">
 							<widget size="128x70" type="*widget.menuBox">
 								<container pos="0,4" size="128x78">
 									<widget size="128x29" type="*widget.menuItem">
@@ -930,7 +930,7 @@ func TestSelect_Tapped(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
+						<widget size="128x70" type="*widget.Scroll">
 							<widget size="128x70" type="*widget.menuBox">
 								<container pos="0,4" size="128x78">
 									<widget size="128x29" type="*widget.menuItem">
@@ -999,7 +999,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
+						<widget size="128x70" type="*widget.Scroll">
 							<widget size="128x70" type="*widget.menuBox">
 								<container pos="0,4" size="128x78">
 									<widget size="128x29" type="*widget.menuItem">
@@ -1128,7 +1128,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,8" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x8"/>
 								</widget>
-								<widget size="128x8" type="*widget.ScrollContainer">
+								<widget size="128x8" type="*widget.Scroll">
 									<widget size="128x8" type="*widget.menuBox">
 										<container pos="0,4" size="128x16">
 										</container>
@@ -1181,7 +1181,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,8" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x8"/>
 								</widget>
-								<widget size="95x8" type="*widget.ScrollContainer">
+								<widget size="95x8" type="*widget.Scroll">
 									<widget size="95x8" type="*widget.menuBox">
 										<container pos="0,4" size="95x16">
 										</container>
@@ -1358,7 +1358,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
 								</widget>
-								<widget size="128x37" type="*widget.ScrollContainer">
+								<widget size="128x37" type="*widget.Scroll">
 									<widget size="128x37" type="*widget.menuBox">
 										<container pos="0,4" size="128x45">
 											<widget size="128x29" type="*widget.menuItem">
@@ -1415,7 +1415,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
 								</widget>
-								<widget size="95x37" type="*widget.ScrollContainer">
+								<widget size="95x37" type="*widget.Scroll">
 									<widget size="95x37" type="*widget.menuBox">
 										<container pos="0,4" size="95x45">
 											<widget size="95x29" type="*widget.menuItem">
@@ -1472,7 +1472,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
 								</widget>
-								<widget size="128x37" type="*widget.ScrollContainer">
+								<widget size="128x37" type="*widget.Scroll">
 									<widget size="128x37" type="*widget.menuBox">
 										<container pos="0,4" size="128x45">
 											<widget size="128x29" type="*widget.menuItem">
@@ -1530,7 +1530,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
 								</widget>
-								<widget size="95x37" type="*widget.ScrollContainer">
+								<widget size="95x37" type="*widget.Scroll">
 									<widget size="95x37" type="*widget.menuBox">
 										<container pos="0,4" size="95x45">
 											<widget size="95x29" type="*widget.menuItem">
@@ -1710,7 +1710,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 								</widget>
-								<widget size="128x70" type="*widget.ScrollContainer">
+								<widget size="128x70" type="*widget.Scroll">
 									<widget size="128x70" type="*widget.menuBox">
 										<container pos="0,4" size="128x78">
 											<widget size="128x29" type="*widget.menuItem">
@@ -1770,7 +1770,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 								</widget>
-								<widget size="95x70" type="*widget.ScrollContainer">
+								<widget size="95x70" type="*widget.Scroll">
 									<widget size="95x70" type="*widget.menuBox">
 										<container pos="0,4" size="95x78">
 											<widget size="95x29" type="*widget.menuItem">
@@ -1830,7 +1830,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 								</widget>
-								<widget size="128x70" type="*widget.ScrollContainer">
+								<widget size="128x70" type="*widget.Scroll">
 									<widget size="128x70" type="*widget.menuBox">
 										<container pos="0,4" size="128x78">
 											<widget size="128x29" type="*widget.menuItem">
@@ -1891,7 +1891,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 								</widget>
-								<widget size="95x70" type="*widget.ScrollContainer">
+								<widget size="95x70" type="*widget.Scroll">
 									<widget size="95x70" type="*widget.menuBox">
 										<container pos="0,4" size="95x78">
 											<widget size="95x29" type="*widget.menuItem">

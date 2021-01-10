@@ -36,14 +36,14 @@ func TestTabContainer_Extended_Tapped(t *testing.T) {
 
 	tab2.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
-	require.Equal(t, theme.TextColor(), test.WidgetRenderer(tab1).(*tabButtonRenderer).label.Color)
+	require.Equal(t, theme.ForegroundColor(), test.WidgetRenderer(tab1).(*tabButtonRenderer).label.Color)
 	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab2).(*tabButtonRenderer).label.Color)
 	assert.False(t, tabs.Items[0].Content.Visible())
 	assert.True(t, tabs.Items[1].Content.Visible())
 
 	tab2.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
-	require.Equal(t, theme.TextColor(), test.WidgetRenderer(tab1).(*tabButtonRenderer).label.Color)
+	require.Equal(t, theme.ForegroundColor(), test.WidgetRenderer(tab1).(*tabButtonRenderer).label.Color)
 	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab2).(*tabButtonRenderer).label.Color)
 	assert.False(t, tabs.Items[0].Content.Visible())
 	assert.True(t, tabs.Items[1].Content.Visible())
@@ -51,7 +51,7 @@ func TestTabContainer_Extended_Tapped(t *testing.T) {
 	tab1.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 0, tabs.CurrentTabIndex())
 	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab1).(*tabButtonRenderer).label.Color)
-	require.Equal(t, theme.TextColor(), test.WidgetRenderer(tab2).(*tabButtonRenderer).label.Color)
+	require.Equal(t, theme.ForegroundColor(), test.WidgetRenderer(tab2).(*tabButtonRenderer).label.Color)
 	assert.True(t, tabs.Items[0].Content.Visible())
 	assert.False(t, tabs.Items[1].Content.Visible())
 }
