@@ -14,7 +14,7 @@ var _ fyne.Theme = (*configurableTheme)(nil)
 type configurableTheme struct {
 	colors map[fyne.ThemeColorName]color.Color
 	fonts  map[fyne.TextStyle]fyne.Resource
-	sizes  map[fyne.ThemeSizeName]int
+	sizes  map[fyne.ThemeSizeName]float32
 }
 
 // Theme returns a theme useful for image based tests.
@@ -26,6 +26,7 @@ func Theme() fyne.Theme {
 				theme.ColorNameButton:         color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 				theme.ColorNameDisabled:       color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 				theme.ColorNameDisabledButton: color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
+				theme.ColorNameError:          color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
 				theme.ColorNameFocus:          color.NRGBA{R: 0x81, G: 0xc7, B: 0x84, A: 0xff},
 				theme.ColorNameForeground:     color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 				theme.ColorNameHover:          color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},
@@ -41,12 +42,13 @@ func Theme() fyne.Theme {
 				fyne.TextStyle{Italic: true}:             theme.DefaultTextItalicFont(),
 				fyne.TextStyle{Monospace: true}:          theme.DefaultTextMonospaceFont(),
 			},
-			sizes: map[fyne.ThemeSizeName]int{
-				theme.SizeNameInlineIcon:     20,
-				theme.SizeNamePadding:        4,
-				theme.SizeNameScrollBar:      16,
-				theme.SizeNameScrollBarSmall: 3,
-				theme.SizeNameText:           14,
+			sizes: map[fyne.ThemeSizeName]float32{
+				theme.SizeNameInlineIcon:         float32(20),
+				theme.SizeNamePadding:            float32(4),
+				theme.SizeNameScrollBar:          float32(16),
+				theme.SizeNameScrollBarSmall:     float32(3),
+				theme.SizeNameSeparatorThickness: float32(1),
+				theme.SizeNameText:               float32(14),
 			},
 		}
 	}
@@ -65,6 +67,6 @@ func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
 
-func (t *configurableTheme) Size(s fyne.ThemeSizeName) int {
+func (t *configurableTheme) Size(s fyne.ThemeSizeName) float32 {
 	return t.sizes[s]
 }

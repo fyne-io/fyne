@@ -75,15 +75,6 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// Focused returns whether this Select is focused or not.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: internal detail, don’t use
-func (s *Select) Focused() bool {
-	return s.focused
-}
-
 // FocusGained is called after this Select has gained focus.
 //
 // Implements: fyne.Focusable
@@ -258,7 +249,7 @@ func (s *Select) showPopUp() {
 	}
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
-	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
 	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
 }
@@ -269,9 +260,9 @@ func (s *Select) textAlign() fyne.TextAlign {
 
 func (s *Select) textColor() color.Color {
 	if s.Disabled() {
-		return theme.DisabledTextColor()
+		return theme.DisabledColor()
 	}
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 func (s *Select) textStyle() fyne.TextStyle {

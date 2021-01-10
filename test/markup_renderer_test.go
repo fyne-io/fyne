@@ -237,7 +237,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"linear gradient": {
-			content: canvas.NewLinearGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor(), 13.25),
+			content: canvas.NewLinearGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor(), 13.25),
 			pos:     fyne.NewPos(6, 13),
 			size:    fyne.NewSize(50, 10),
 			want: "<canvas size=\"100x100\">\n" +
@@ -247,7 +247,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"radial gradient": {
-			content: canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor()),
+			content: canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<radialGradient endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
@@ -256,7 +256,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"radial gradient with offset": {
 			content: func() fyne.CanvasObject {
-				g := canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor())
+				g := canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor())
 				g.CenterOffsetX = 1.5
 				g.CenterOffsetY = -13.7
 				return g
@@ -327,7 +327,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"text with text color": {
-			content: canvas.NewText("bar", theme.TextColor()),
+			content: canvas.NewText("bar", theme.ForegroundColor()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<text size=\"100x100\">bar</text>\n" +
@@ -336,7 +336,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with alignment center": {
 			content: func() fyne.CanvasObject {
-				t := canvas.NewText("bar", theme.TextColor())
+				t := canvas.NewText("bar", theme.ForegroundColor())
 				t.Alignment = fyne.TextAlignCenter
 				return t
 			}(),
@@ -348,7 +348,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with alignment trailing": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("bar", theme.TextColor())
+				txt := canvas.NewText("bar", theme.ForegroundColor())
 				txt.Alignment = fyne.TextAlignTrailing
 				return txt
 			}(),
@@ -360,7 +360,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with size": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("big", theme.TextColor())
+				txt := canvas.NewText("big", theme.ForegroundColor())
 				txt.TextSize = 42
 				return txt
 			}(),
@@ -372,7 +372,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text bold": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("bold", theme.TextColor())
+				txt := canvas.NewText("bold", theme.ForegroundColor())
 				txt.TextStyle.Bold = true
 				return txt
 			}(),
@@ -384,7 +384,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text italic": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("italic", theme.TextColor())
+				txt := canvas.NewText("italic", theme.ForegroundColor())
 				txt.TextStyle.Italic = true
 				return txt
 			}(),
@@ -396,7 +396,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text monospace": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("mono", theme.TextColor())
+				txt := canvas.NewText("mono", theme.ForegroundColor())
 				txt.TextStyle.Monospace = true
 				return txt
 			}(),

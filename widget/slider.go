@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 
 	"fyne.io/fyne"
@@ -33,6 +34,9 @@ type Slider struct {
 
 	Orientation Orientation
 	OnChanged   func(float64)
+
+	valueSource   binding.Float
+	valueListener binding.DataListener
 }
 
 // NewSlider returns a basic slider.
@@ -49,20 +53,43 @@ func NewSlider(min, max float64) *Slider {
 }
 
 // NewSliderWithData returns a slider connected with the specified data source.
+//
+// Since: 2.0.0
 func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 	slider := NewSlider(min, max)
-
-	data.AddListener(binding.NewDataListener(func() {
-		slider.Value = data.Get()
-		if cache.IsRendered(slider) { // don't invalidate values set after constructor like Step
-			slider.Refresh()
-		}
-	}))
-	slider.OnChanged = func(f float64) {
-		data.Set(f)
-	}
+	slider.Bind(data)
 
 	return slider
+}
+
+// Bind connects the specified data source to this Slider.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Slider will set the value into the data source.
+//
+// Since: 2.0.0
+func (s *Slider) Bind(data binding.Float) {
+	s.Unbind()
+	s.valueSource = data
+
+	s.valueListener = binding.NewDataListener(func() {
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		s.Value = val
+		if cache.IsRendered(s) { // don't invalidate values set after constructor like Step
+			s.Refresh()
+		}
+	})
+	data.AddListener(s.valueListener)
+
+	s.OnChanged = func(f float64) {
+		err := data.Set(f)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %f", f), err)
+		}
+	}
 }
 
 // DragEnd function.
@@ -81,11 +108,11 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	}
 }
 
-func (s *Slider) buttonDiameter() int {
+func (s *Slider) buttonDiameter() float32 {
 	return theme.Padding() * standardScale
 }
 
-func (s *Slider) endOffset() int {
+func (s *Slider) endOffset() float32 {
 	return s.buttonDiameter()/2 + theme.Padding()
 }
 
@@ -167,9 +194,9 @@ func (s *Slider) MinSize() fyne.Size {
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	track := canvas.NewRectangle(theme.ShadowColor())
-	active := canvas.NewRectangle(theme.TextColor())
+	active := canvas.NewRectangle(theme.ForegroundColor())
 	thumb := &canvas.Circle{
-		FillColor:   theme.TextColor(),
+		FillColor:   theme.ForegroundColor(),
 		StrokeWidth: 0}
 
 	objects := []fyne.CanvasObject{track, active, thumb}
@@ -179,9 +206,24 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	return slide
 }
 
+// Unbind disconnects any configured data source from this Slider.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (s *Slider) Unbind() {
+	s.OnChanged = nil
+	if s.valueSource == nil || s.valueListener == nil {
+		return
+	}
+
+	s.valueSource.RemoveListener(s.valueListener)
+	s.valueListener = nil
+	s.valueSource = nil
+}
+
 const (
-	standardScale = 4
-	minLongSide   = 50
+	standardScale = float32(4)
+	minLongSide   = float32(50)
 )
 
 type sliderRenderer struct {
@@ -195,8 +237,8 @@ type sliderRenderer struct {
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
 	s.track.FillColor = theme.ShadowColor()
-	s.thumb.FillColor = theme.TextColor()
-	s.active.FillColor = theme.TextColor()
+	s.thumb.FillColor = theme.ForegroundColor()
+	s.active.FillColor = theme.ForegroundColor()
 
 	s.slider.clampValueToRange()
 	s.Layout(s.slider.Size())
@@ -262,7 +304,7 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 	return fyne.Size{Width: 0, Height: 0}
 }
 
-func (s *sliderRenderer) getOffset() int {
+func (s *sliderRenderer) getOffset() float32 {
 	endPad := s.slider.endOffset()
 	w := s.slider
 	size := s.track.Size()
@@ -274,14 +316,14 @@ func (s *sliderRenderer) getOffset() int {
 			return endPad
 		}
 	}
-	ratio := (w.Value - w.Min) / (w.Max - w.Min)
+	ratio := float32((w.Value - w.Min) / (w.Max - w.Min))
 
 	switch w.Orientation {
 	case Vertical:
-		y := int(float64(size.Height)-ratio*float64(size.Height)) + endPad
+		y := size.Height - ratio*size.Height + endPad
 		return y
 	case Horizontal:
-		x := int(ratio*float64(size.Width)) + endPad
+		x := ratio*size.Width + endPad
 		return x
 	}
 

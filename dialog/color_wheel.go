@@ -131,20 +131,20 @@ func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 
 func (a *colorWheel) locationForPosition(pos fyne.Position) (x, y int) {
 	can := fyne.CurrentApp().Driver().CanvasForObject(a)
-	x, y = pos.X, pos.Y
+	x, y = int(pos.X), int(pos.Y)
 	if can != nil {
 		x, y = can.PixelCoordinateForPosition(pos)
 	}
 	return
 }
 
-func (a *colorWheel) selection(width, height int) (int, int) {
+func (a *colorWheel) selection(width, height float32) (float32, float32) {
 	w, h := float64(width), float64(height)
 	radius := float64(a.Saturation) / 100.0 * math.Min(w, h) / 2.0
 	degrees := float64(a.Hue)
 	radians := degrees * math.Pi / 180.0
 	c := cmplx.Rect(radius, radians)
-	return int(real(c) + w/2.0), int(imag(c) + h/2.0)
+	return float32(real(c) + w/2.0), float32(imag(c) + h/2.0)
 }
 
 func (a *colorWheel) trigger(pos fyne.Position) {
@@ -198,9 +198,9 @@ func (r *colorWheelRenderer) Refresh() {
 	} else {
 		r.Layout(s)
 	}
-	r.x.StrokeColor = theme.TextColor()
+	r.x.StrokeColor = theme.ForegroundColor()
 	r.x.Refresh()
-	r.y.StrokeColor = theme.TextColor()
+	r.y.StrokeColor = theme.ForegroundColor()
 	r.y.Refresh()
 	r.raster.Refresh()
 	canvas.Refresh(r.area)

@@ -2,9 +2,26 @@
 
 package binding
 
-import "sync"
+import (
+	"errors"
+	"sync"
+
+	"fyne.io/fyne"
+)
+
+var (
+	errKeyNotFound = errors.New("key not found")
+	errOutOfBounds = errors.New("index out of bounds")
+	errParseFailed = errors.New("format did not match 1 value")
+
+	// As an optimisation we connect any listeners asking for the same key, so that there is only 1 per preference item.
+	prefBinds = make(map[fyne.Preferences]map[string]preferenceItem)
+	prefLock  sync.RWMutex
+)
 
 // DataItem is the base interface for all bindable data items.
+//
+// Since: 2.0.0
 type DataItem interface {
 	// AddListener attaches a new change listener to this DataItem.
 	// Listeners are called each time the data inside this DataItem changes.
@@ -17,11 +34,15 @@ type DataItem interface {
 
 // DataListener is any object that can register for changes in a bindable DataItem.
 // See NewDataListener to define a new listener using just an inline function.
+//
+// Since: 2.0.0
 type DataListener interface {
 	DataChanged()
 }
 
 // NewDataListener is a helper function that creates a new listener type from a simple callback function.
+//
+// Since: 2.0.0
 func NewDataListener(fn func()) DataListener {
 	return &listener{fn}
 }
@@ -67,10 +88,33 @@ func (b *base) RemoveListener(l DataListener) {
 }
 
 func (b *base) trigger() {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
 	for _, listen := range b.listeners {
 		queueItem(listen.DataChanged)
+	}
+}
+
+type preferenceItem interface {
+	checkForChange()
+}
+
+func ensurePreferencesAttached(p fyne.Preferences) {
+	prefLock.Lock()
+	defer prefLock.Unlock()
+	if prefBinds[p] != nil {
+		return
+	}
+
+	prefBinds[p] = make(map[string]preferenceItem)
+	p.AddChangeListener(func() {
+		preferencesChanged(p)
+	})
+}
+
+func preferencesChanged(p fyne.Preferences) {
+	prefLock.RLock()
+	defer prefLock.RUnlock()
+
+	for _, item := range prefBinds[p] {
+		item.checkForChange()
 	}
 }

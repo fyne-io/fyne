@@ -14,8 +14,8 @@ func TestPaintImage_SVG(t *testing.T) {
 	defer test.NewApp()
 
 	for name, tt := range map[string]struct {
-		width     int
-		height    int
+		width     float32
+		height    float32
 		fillMode  canvas.ImageFill
 		wantImage string
 	}{

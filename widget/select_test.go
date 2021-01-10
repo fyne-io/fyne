@@ -78,37 +78,10 @@ func TestSelect_Disable(t *testing.T) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
 
 	sel.Disable()
-	disabled := `
-		<canvas padded size="200x150">
-			<content>
-				<container pos="4,4" size="192x142">
-					<widget pos="28,52" size="136x37" type="*widget.Select">
-						<widget pos="4,4" size="128x29" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-							<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-						</widget>
-						<rectangle fillColor="button" pos="4,4" size="128x29"/>
-						<widget pos="8,4" size="100x29" type="*widget.textProvider">
-							<text bold color="disabled" pos="4,4" size="92x21">(Select one)</text>
-						</widget>
-						<widget pos="108,8" size="20x20" type="*widget.Icon">
-							<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>
-						</widget>
-					</widget>
-				</container>
-			</content>
-		</canvas>
-	`
-	test.AssertRendersToMarkup(t, disabled, c)
+	test.AssertRendersToMarkup(t, "select/disabled.xml", c)
 	test.Tap(sel)
 	assert.Nil(t, c.Overlays().Top(), "no pop-up for disabled Select")
-	test.AssertRendersToMarkup(t, disabled, c)
+	test.AssertRendersToMarkup(t, "select/disabled.xml", c)
 }
 
 func TestSelect_Disabled(t *testing.T) {
@@ -142,33 +115,6 @@ func TestSelect_FocusRendering(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	focusedNoneSelected := `
-			<canvas padded size="200x150">
-				<content>
-					<container pos="4,4" size="192x142">
-						<widget pos="28,52" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">(Select one)</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`
 	t.Run("gain/lose focus", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
 		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
@@ -176,99 +122,19 @@ func TestSelect_FocusRendering(t *testing.T) {
 		w.Resize(fyne.NewSize(200, 150))
 
 		c := w.Canvas()
-		unfocusedNoneSelected := `
-				<canvas padded size="200x150">
-					<content>
-						<container pos="4,4" size="192x142">
-							<widget pos="28,52" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`
-		test.AssertRendersToMarkup(t, unfocusedNoneSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_none_selected.xml", c)
 		c.Focus(sel)
-		test.AssertRendersToMarkup(t, focusedNoneSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		c.Unfocus()
-		test.AssertRendersToMarkup(t, unfocusedNoneSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_none_selected.xml", c)
 
 		sel.SetSelected("Option B")
 		assert.Equal(t, "Option B", sel.Selected)
-		unfocusedBSelected := `
-			<canvas padded size="200x150">
-				<content>
-					<container pos="4,4" size="192x142">
-						<widget pos="28,52" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="button" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">Option B</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`
-		test.AssertRendersToMarkup(t, unfocusedBSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_b_selected.xml", c)
 		c.Focus(sel)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="200x150">
-				<content>
-					<container pos="4,4" size="192x142">
-						<widget pos="28,52" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">Option B</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "select/focus_focused_b_selected.xml", c)
 		c.Unfocus()
-		test.AssertRendersToMarkup(t, unfocusedBSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_b_selected.xml", c)
 	})
 	t.Run("disable/enable focused", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
@@ -278,37 +144,11 @@ func TestSelect_FocusRendering(t *testing.T) {
 
 		c := w.Canvas().(test.WindowlessCanvas)
 		c.FocusNext()
-		test.AssertRendersToMarkup(t, focusedNoneSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		sel.Disable()
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="200x150">
-				<content>
-					<container pos="4,4" size="192x142">
-						<widget pos="28,52" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="button" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold color="disabled" pos="4,4" size="92x21">(Select one)</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "select/disabled.xml", c)
 		sel.Enable()
-		test.AssertRendersToMarkup(t, focusedNoneSelected, c)
+		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 	})
 }
 
@@ -316,33 +156,6 @@ func TestSelect_KeyboardControl(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	noneSelected := `
-		<canvas padded size="150x200">
-			<content>
-				<container pos="4,4" size="142x192">
-					<widget pos="3,77" size="136x37" type="*widget.Select">
-						<widget pos="4,4" size="128x29" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-							<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-						</widget>
-						<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-						<widget pos="8,4" size="100x29" type="*widget.textProvider">
-							<text bold pos="4,4" size="92x21">(Select one)</text>
-						</widget>
-						<widget pos="108,8" size="20x20" type="*widget.Icon">
-							<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-						</widget>
-					</widget>
-				</container>
-			</content>
-		</canvas>
-	`
 	t.Run("activate pop-up", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B"}, nil)
 		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
@@ -351,79 +164,24 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		c := w.Canvas()
 		c.Focus(sel)
 
-		noneSelectedPopup := `
-			<canvas padded size="150x200">
-				<content>
-					<container pos="4,4" size="142x192">
-						<widget pos="3,77" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">(Select one)</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-				<overlay>
-					<widget size="150x200" type="*widget.OverlayContainer">
-						<widget pos="11,114" size="128x70" type="*widget.Menu">
-							<widget size="128x70" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-								<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-							</widget>
-							<widget size="128x70" type="*widget.ScrollContainer">
-								<widget size="128x70" type="*widget.menuBox">
-									<container pos="0,4" size="128x78">
-										<widget size="128x29" type="*widget.menuItem">
-											<text pos="8,4" size="63x21">Option A</text>
-										</widget>
-										<widget pos="0,33" size="128x29" type="*widget.menuItem">
-											<text pos="8,4" size="63x21">Option B</text>
-										</widget>
-									</container>
-								</widget>
-							</widget>
-						</widget>
-					</widget>
-				</overlay>
-			</canvas>
-		`
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
-		test.AssertRendersToMarkup(t, noneSelectedPopup, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
 		test.TapCanvas(c, fyne.NewPos(0, 0))
 
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
-		test.AssertRendersToMarkup(t, noneSelectedPopup, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
 		test.TapCanvas(c, fyne.NewPos(0, 0))
 
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
-		test.AssertRendersToMarkup(t, noneSelectedPopup, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
 		test.TapCanvas(c, fyne.NewPos(0, 0))
 
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 	})
 
 	t.Run("traverse options without pop-up", func(t *testing.T) {
@@ -433,114 +191,33 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
 		c.Focus(sel)
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 
-		aSelected := `
-			<canvas padded size="150x200">
-				<content>
-					<container pos="4,4" size="142x192">
-						<widget pos="3,77" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">Option A</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`
-		bSelected := `
-			<canvas padded size="150x200">
-				<content>
-					<container pos="4,4" size="142x192">
-						<widget pos="3,77" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">Option B</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`
-		cSelected := `
-			<canvas padded size="150x200">
-				<content>
-					<container pos="4,4" size="142x192">
-						<widget pos="3,77" size="136x37" type="*widget.Select">
-							<widget pos="4,4" size="128x29" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-							</widget>
-							<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-							<widget pos="8,4" size="100x29" type="*widget.textProvider">
-								<text bold pos="4,4" size="92x21">Option C</text>
-							</widget>
-							<widget pos="108,8" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-							</widget>
-						</widget>
-					</container>
-				</content>
-			</canvas>
-		`
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option C", sel.Selected)
-		test.AssertRendersToMarkup(t, cSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_c_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option B", sel.Selected)
-		test.AssertRendersToMarkup(t, bSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_b_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option A", sel.Selected)
-		test.AssertRendersToMarkup(t, aSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_a_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option C", sel.Selected)
-		test.AssertRendersToMarkup(t, cSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_c_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option A", sel.Selected)
-		test.AssertRendersToMarkup(t, aSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_a_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option B", sel.Selected)
-		test.AssertRendersToMarkup(t, bSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_b_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option C", sel.Selected)
-		test.AssertRendersToMarkup(t, cSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_c_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option A", sel.Selected)
-		test.AssertRendersToMarkup(t, aSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_a_selected.xml", c)
 	})
 
 	t.Run("trying to traverse empty options without pop-up", func(t *testing.T) {
@@ -550,21 +227,21 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
 		c.Focus(sel)
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertRendersToMarkup(t, noneSelected, c)
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 	})
 }
 
@@ -579,141 +256,13 @@ func TestSelect_Move(t *testing.T) {
 
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<widget pos="10,10" size="136x37" type="*widget.Select">
-					<widget pos="4,4" size="128x29" type="*widget.Shadow">
-						<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-						<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-					</widget>
-					<rectangle fillColor="button" pos="4,4" size="128x29"/>
-					<widget pos="8,4" size="100x29" type="*widget.textProvider">
-						<text bold pos="4,4" size="92x21">(Select one)</text>
-					</widget>
-					<widget pos="108,8" size="20x20" type="*widget.Icon">
-						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "select/move_initial.xml", w.Canvas())
 
 	combo.Tapped(&fyne.PointEvent{})
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<widget pos="10,10" size="136x37" type="*widget.Select">
-					<widget pos="4,4" size="128x29" type="*widget.Shadow">
-						<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-						<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-					</widget>
-					<rectangle fillColor="button" pos="4,4" size="128x29"/>
-					<widget pos="8,4" size="100x29" type="*widget.textProvider">
-						<text bold pos="4,4" size="92x21">(Select one)</text>
-					</widget>
-					<widget pos="108,8" size="20x20" type="*widget.Icon">
-						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="200x150" type="*widget.OverlayContainer">
-					<widget pos="14,43" size="128x70" type="*widget.Menu">
-						<widget size="128x70" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
-							<widget size="128x70" type="*widget.menuBox">
-								<container pos="0,4" size="128x78">
-									<widget size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">1</text>
-									</widget>
-									<widget pos="0,33" size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">2</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "select/move_tapped.xml", w.Canvas())
 
 	combo.Move(fyne.NewPos(20, 20))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<widget pos="20,20" size="136x37" type="*widget.Select">
-					<widget pos="4,4" size="128x29" type="*widget.Shadow">
-						<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-						<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-					</widget>
-					<rectangle fillColor="button" pos="4,4" size="128x29"/>
-					<widget pos="8,4" size="100x29" type="*widget.textProvider">
-						<text bold pos="4,4" size="92x21">(Select one)</text>
-					</widget>
-					<widget pos="108,8" size="20x20" type="*widget.Icon">
-						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="200x150" type="*widget.OverlayContainer">
-					<widget pos="24,53" size="128x70" type="*widget.Menu">
-						<widget size="128x70" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
-							<widget size="128x70" type="*widget.menuBox">
-								<container pos="0,4" size="128x78">
-									<widget size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">1</text>
-									</widget>
-									<widget pos="0,33" size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">2</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "select/move_moved.xml", w.Canvas())
 }
 
 func TestSelect_PlaceHolder(t *testing.T) {
@@ -751,61 +300,9 @@ func TestSelect_SetSelected(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 150))
 
 	c := w.Canvas()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<container pos="4,4" size="192x142">
-					<widget pos="28,52" size="136x37" type="*widget.Select">
-						<widget pos="4,4" size="128x29" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-							<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-						</widget>
-						<rectangle fillColor="button" pos="4,4" size="128x29"/>
-						<widget pos="8,4" size="100x29" type="*widget.textProvider">
-							<text bold pos="4,4" size="92x21">(Select one)</text>
-						</widget>
-						<widget pos="108,8" size="20x20" type="*widget.Icon">
-							<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-						</widget>
-					</widget>
-				</container>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "select/set_selected_none_selected.xml", c)
 	combo.SetSelected("2")
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<container pos="4,4" size="192x142">
-					<widget pos="28,52" size="136x37" type="*widget.Select">
-						<widget pos="4,4" size="128x29" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-							<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-						</widget>
-						<rectangle fillColor="button" pos="4,4" size="128x29"/>
-						<widget pos="8,4" size="100x29" type="*widget.textProvider">
-							<text bold pos="4,4" size="92x21">2</text>
-						</widget>
-						<widget pos="108,8" size="20x20" type="*widget.Icon">
-							<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-						</widget>
-					</widget>
-				</container>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "select/set_selected_2nd_selected.xml", c)
 	assert.Equal(t, "2", combo.Selected)
 	assert.True(t, triggered)
 	assert.Equal(t, "2", triggeredValue)
@@ -894,59 +391,7 @@ func TestSelect_Tapped(t *testing.T) {
 	test.Tap(combo)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<widget pos="4,4" size="136x37" type="*widget.Select">
-					<widget pos="4,4" size="128x29" type="*widget.Shadow">
-						<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-						<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-					</widget>
-					<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-					<widget pos="8,4" size="100x29" type="*widget.textProvider">
-						<text bold pos="4,4" size="92x21">(Select one)</text>
-					</widget>
-					<widget pos="108,8" size="20x20" type="*widget.Icon">
-						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="200x150" type="*widget.OverlayContainer">
-					<widget pos="8,37" size="128x70" type="*widget.Menu">
-						<widget size="128x70" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
-							<widget size="128x70" type="*widget.menuBox">
-								<container pos="0,4" size="128x78">
-									<widget size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">1</text>
-									</widget>
-									<widget pos="0,33" size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">2</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "select/tapped.xml", w.Canvas())
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
@@ -963,59 +408,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
 	test.Tap(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x150">
-			<content>
-				<widget pos="190,140" size="136x37" type="*widget.Select">
-					<widget pos="4,4" size="128x29" type="*widget.Shadow">
-						<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-						<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-					</widget>
-					<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-					<widget pos="8,4" size="100x29" type="*widget.textProvider">
-						<text bold pos="4,4" size="92x21">(Select one)</text>
-					</widget>
-					<widget pos="108,8" size="20x20" type="*widget.Icon">
-						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="200x150" type="*widget.OverlayContainer">
-					<widget pos="72,80" size="128x70" type="*widget.Menu">
-						<widget size="128x70" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-						</widget>
-						<widget size="128x70" type="*widget.ScrollContainer">
-							<widget size="128x70" type="*widget.menuBox">
-								<container pos="0,4" size="128x78">
-									<widget size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">1</text>
-									</widget>
-									<widget pos="0,33" size="128x29" type="*widget.menuItem">
-										<text pos="8,4" size="9x21">2</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "select/tapped_constrained.xml", w.Canvas())
 }
 
 func TestSelect_Layout(t *testing.T) {
@@ -1027,887 +420,89 @@ func TestSelect_Layout(t *testing.T) {
 		options     []string
 		selected    string
 		expanded    bool
-		want        string
 	}{
-		"empty": {
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
-		},
+		"empty": {},
 		"empty_placeholder": {
 			placeholder: "(Pick 1)",
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">(Pick 1)</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"empty_expanded": {
 			expanded: true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="11,114" size="128x8" type="*widget.Menu">
-								<widget size="128x8" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="4x8" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,8" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,8" size="128x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,8" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x8"/>
-								</widget>
-								<widget size="128x8" type="*widget.ScrollContainer">
-									<widget size="128x8" type="*widget.menuBox">
-										<container pos="0,4" size="128x16">
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"empty_expanded_placeholder": {
 			placeholder: "(Pick 1)",
 			expanded:    true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">(Pick 1)</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="27,114" size="95x8" type="*widget.Menu">
-								<widget size="95x8" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="95x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="4x8" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,8" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,8" size="95x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,8" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x8"/>
-								</widget>
-								<widget size="95x8" type="*widget.ScrollContainer">
-									<widget size="95x8" type="*widget.menuBox">
-										<container pos="0,4" size="95x16">
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"single": {
 			options: []string{"Test"},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Test"},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">(Pick 1)</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_selected": {
 			options:  []string{"Test"},
 			selected: "Test",
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">Test</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_selected_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Test"},
 			selected:    "Test",
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">Test</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_expanded": {
 			options:  []string{"Test"},
 			expanded: true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="11,114" size="128x37" type="*widget.Menu">
-								<widget size="128x37" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="4x37" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,37" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,37" size="128x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
-								</widget>
-								<widget size="128x37" type="*widget.ScrollContainer">
-									<widget size="128x37" type="*widget.menuBox">
-										<container pos="0,4" size="128x45">
-											<widget size="128x29" type="*widget.menuItem">
-												<text pos="8,4" size="30x21">Test</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"single_expanded_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Test"},
 			expanded:    true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">(Pick 1)</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="27,114" size="95x37" type="*widget.Menu">
-								<widget size="95x37" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="95x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="4x37" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,37" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,37" size="95x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
-								</widget>
-								<widget size="95x37" type="*widget.ScrollContainer">
-									<widget size="95x37" type="*widget.menuBox">
-										<container pos="0,4" size="95x45">
-											<widget size="95x29" type="*widget.menuItem">
-												<text pos="8,4" size="30x21">Test</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"single_expanded_selected": {
 			options:  []string{"Test"},
 			selected: "Test",
 			expanded: true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">Test</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="11,114" size="128x37" type="*widget.Menu">
-								<widget size="128x37" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="4x37" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,37" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,37" size="128x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
-								</widget>
-								<widget size="128x37" type="*widget.ScrollContainer">
-									<widget size="128x37" type="*widget.menuBox">
-										<container pos="0,4" size="128x45">
-											<widget size="128x29" type="*widget.menuItem">
-												<text pos="8,4" size="30x21">Test</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"single_expanded_selected_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Test"},
 			selected:    "Test",
 			expanded:    true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">Test</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="27,114" size="95x37" type="*widget.Menu">
-								<widget size="95x37" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="95x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="4x37" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,37" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,37" size="95x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
-								</widget>
-								<widget size="95x37" type="*widget.ScrollContainer">
-									<widget size="95x37" type="*widget.menuBox">
-										<container pos="0,4" size="95x45">
-											<widget size="95x29" type="*widget.menuItem">
-												<text pos="8,4" size="30x21">Test</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"multiple": {
 			options: []string{"Foo", "Bar"},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Foo", "Bar"},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">(Pick 1)</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_selected": {
 			options:  []string{"Foo", "Bar"},
 			selected: "Foo",
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">Foo</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_selected_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Foo", "Bar"},
 			selected:    "Foo",
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="button" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">Foo</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_expanded": {
 			options:  []string{"Foo", "Bar"},
 			expanded: true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">(Select one)</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="11,114" size="128x70" type="*widget.Menu">
-								<widget size="128x70" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-								</widget>
-								<widget size="128x70" type="*widget.ScrollContainer">
-									<widget size="128x70" type="*widget.menuBox">
-										<container pos="0,4" size="128x78">
-											<widget size="128x29" type="*widget.menuItem">
-												<text pos="8,4" size="27x21">Foo</text>
-											</widget>
-											<widget pos="0,33" size="128x29" type="*widget.menuItem">
-												<text pos="8,4" size="25x21">Bar</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"multiple_expanded_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Foo", "Bar"},
 			expanded:    true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">(Pick 1)</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="27,114" size="95x70" type="*widget.Menu">
-								<widget size="95x70" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="95x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="4x70" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,70" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,70" size="95x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-								</widget>
-								<widget size="95x70" type="*widget.ScrollContainer">
-									<widget size="95x70" type="*widget.menuBox">
-										<container pos="0,4" size="95x78">
-											<widget size="95x29" type="*widget.menuItem">
-												<text pos="8,4" size="27x21">Foo</text>
-											</widget>
-											<widget pos="0,33" size="95x29" type="*widget.menuItem">
-												<text pos="8,4" size="25x21">Bar</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"multiple_expanded_selected": {
 			options:  []string{"Foo", "Bar"},
 			selected: "Foo",
 			expanded: true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="3,77" size="136x37" type="*widget.Select">
-								<widget pos="4,4" size="128x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="128x29"/>
-								<widget pos="8,4" size="100x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="92x21">Foo</text>
-								</widget>
-								<widget pos="108,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="11,114" size="128x70" type="*widget.Menu">
-								<widget size="128x70" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="128x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="128,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="128,0" size="4x70" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="128,70" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,70" size="128x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-								</widget>
-								<widget size="128x70" type="*widget.ScrollContainer">
-									<widget size="128x70" type="*widget.menuBox">
-										<container pos="0,4" size="128x78">
-											<widget size="128x29" type="*widget.menuItem">
-												<text pos="8,4" size="27x21">Foo</text>
-											</widget>
-											<widget pos="0,33" size="128x29" type="*widget.menuItem">
-												<text pos="8,4" size="25x21">Bar</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 		"multiple_expanded_selected_placeholder": {
 			placeholder: "(Pick 1)",
 			options:     []string{"Foo", "Bar"},
 			selected:    "Foo",
 			expanded:    true,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="19,77" size="103x37" type="*widget.Select">
-								<widget pos="4,4" size="95x29" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-2" size="95x2"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-2" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="2x29" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,29" size="2x2" startColor="shadow"/>
-									<linearGradient pos="0,29" size="95x2" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-								</widget>
-								<rectangle fillColor="focus" pos="4,4" size="95x29"/>
-								<widget pos="8,4" size="67x29" type="*widget.textProvider">
-									<text bold pos="4,4" size="59x21">Foo</text>
-								</widget>
-								<widget pos="75,8" size="20x20" type="*widget.Icon">
-									<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-					<overlay>
-						<widget size="150x200" type="*widget.OverlayContainer">
-							<widget pos="27,114" size="95x70" type="*widget.Menu">
-								<widget size="95x70" type="*widget.Shadow">
-									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-									<linearGradient endColor="shadow" pos="0,-4" size="95x4"/>
-									<radialGradient centerOffset="-0.5,0.5" pos="95,-4" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" pos="95,0" size="4x70" startColor="shadow"/>
-									<radialGradient centerOffset="-0.5,-0.5" pos="95,70" size="4x4" startColor="shadow"/>
-									<linearGradient pos="0,70" size="95x4" startColor="shadow"/>
-									<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-								</widget>
-								<widget size="95x70" type="*widget.ScrollContainer">
-									<widget size="95x70" type="*widget.menuBox">
-										<container pos="0,4" size="95x78">
-											<widget size="95x29" type="*widget.menuItem">
-												<text pos="8,4" size="27x21">Foo</text>
-											</widget>
-											<widget pos="0,33" size="95x29" type="*widget.menuItem">
-												<text pos="8,4" size="25x21">Bar</text>
-											</widget>
-										</container>
-									</widget>
-								</widget>
-							</widget>
-						</widget>
-					</overlay>
-				</canvas>
-			`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -1923,7 +518,7 @@ func TestSelect_Layout(t *testing.T) {
 			}
 			window.Resize(combo.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertRendersToMarkup(t, tt.want, window.Canvas())
+			test.AssertRendersToMarkup(t, "select/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})

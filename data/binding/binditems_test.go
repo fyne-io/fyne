@@ -9,16 +9,44 @@ import (
 func TestBindFloat(t *testing.T) {
 	val := 0.5
 	f := BindFloat(&val)
-	assert.Equal(t, float64(0.5), f.Get())
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0.5, v)
 
-	f.Set(0.3)
-	assert.Equal(t, float64(0.3), val)
+	called := false
+	fn := NewDataListener(func() {
+		called = true
+	})
+	f.AddListener(fn)
+	waitForItems()
+	assert.True(t, called)
+
+	called = false
+	err = f.Set(0.3)
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 0.3, val)
+	assert.True(t, called)
+
+	called = false
+	val = 1.2
+	f.Reload()
+	waitForItems()
+	assert.True(t, called)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 1.2, v)
 }
 
 func TestNewFloat(t *testing.T) {
 	f := NewFloat()
-	assert.Equal(t, float64(0.0), f.Get())
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0.0, v)
 
-	f.Set(0.3)
-	assert.Equal(t, float64(0.3), f.Get())
+	err = f.Set(0.3)
+	assert.Nil(t, err)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0.3, v)
 }

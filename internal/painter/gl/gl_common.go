@@ -74,8 +74,8 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
 
 	bounds := text.MinSize()
-	width := p.textureScaleInt(bounds.Width)
-	height := p.textureScaleInt(bounds.Height)
+	width := int(p.textureScale(bounds.Width))
+	height := int(p.textureScale(bounds.Height))
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	var opts truetype.Options
@@ -97,10 +97,10 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	img := obj.(*canvas.Image)
 
-	width := p.textureScaleInt(img.Size().Width)
-	height := p.textureScaleInt(img.Size().Height)
+	width := p.textureScale(img.Size().Width)
+	height := p.textureScale(img.Size().Height)
 
-	tex := painter.PaintImage(img, p.canvas, width, height)
+	tex := painter.PaintImage(img, p.canvas, int(width), int(height))
 	if tex == nil {
 		return NoTexture
 	}
@@ -111,26 +111,26 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	rast := obj.(*canvas.Raster)
 
-	width := p.textureScaleInt(rast.Size().Width)
-	height := p.textureScaleInt(rast.Size().Height)
+	width := p.textureScale(rast.Size().Width)
+	height := p.textureScale(rast.Size().Height)
 
-	return p.imgToTexture(rast.Generator(width, height), rast.ScaleMode)
+	return p.imgToTexture(rast.Generator(int(width), int(height)), rast.ScaleMode)
 }
 
 func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.LinearGradient)
 
-	width := p.textureScaleInt(gradient.Size().Width)
-	height := p.textureScaleInt(gradient.Size().Height)
+	width := p.textureScale(gradient.Size().Width)
+	height := p.textureScale(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height), canvas.ImageScaleSmooth)
+	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.RadialGradient)
 
-	width := p.textureScaleInt(gradient.Size().Width)
-	height := p.textureScaleInt(gradient.Size().Height)
+	width := p.textureScale(gradient.Size().Width)
+	height := p.textureScale(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height), canvas.ImageScaleSmooth)
+	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }

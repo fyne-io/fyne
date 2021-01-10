@@ -2,9 +2,12 @@ package test_test
 
 import (
 	"image/color"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -30,63 +33,37 @@ func TestAssertCanvasTappableAt(t *testing.T) {
 }
 
 func TestAssertRendersToMarkup(t *testing.T) {
-	for name, tt := range map[string]struct {
-		expected    string
-		explanation string
-		wantFail    bool
-	}{
-		"equal expectation": {
-			expected: "<canvas padded size=\"9x9\">\n" +
-				"\t<content>\n" +
-				"\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-			explanation: "equal expectation should match",
-			wantFail:    false,
-		},
-		"indented (heredoc) matching expectation": {
-			expected: "\n" +
-				"  \t  \t<canvas padded size=\"9x9\">\n" +
-				"  \t  \t\t<content>\n" +
-				"  \t  \t\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
-				"  \t  \t\t</content>\n" +
-				"  \t  \t</canvas>\n",
-			explanation: "expectation which only differs in indentation should match",
-			wantFail:    false,
-		},
-		"not matching expectation": {
-			expected: "<canvas padded size=\"9x9\">\n" +
-				"\t<content>\n" +
-				"\t\t<rectangle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-			explanation: "non-equal expectation should not match",
-			wantFail:    true,
-		},
-		"indented (heredoc) not matching expectation": {
-			expected: "\n" +
-				"  \t  \t<canvas padded size=\"9x9\">\n" +
-				"  \t  \t\t<content>\n" +
-				"      \t\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
-				"  \t  \t\t</content>\n" +
-				"  \t  \t</canvas>\n",
-			explanation: "expectation which differs in indentation but with different indent strings should not match",
-			wantFail:    true,
-		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			c := test.NewCanvas()
-			c.SetContent(canvas.NewCircle(color.Black))
-			ttt := &testing.T{}
-			if tt.wantFail {
-				assert.False(t, test.AssertRendersToMarkup(ttt, tt.expected, c), tt.explanation)
-				assert.True(t, ttt.Failed(), tt.explanation)
-			} else {
-				test.AssertRendersToMarkup(t, tt.expected, c)
-				assert.True(t, test.AssertRendersToMarkup(ttt, tt.expected, c), tt.explanation)
-				assert.False(t, ttt.Failed(), tt.explanation)
-			}
-		})
+	c := test.NewCanvas()
+	c.SetContent(canvas.NewCircle(color.Black))
+
+	markup := "<canvas padded size=\"9x9\">\n" +
+		"\t<content>\n" +
+		"\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"1x1\"/>\n" +
+		"\t</content>\n" +
+		"</canvas>\n"
+
+	t.Run("non-existing master", func(t *testing.T) {
+		tt := &testing.T{}
+		assert.False(t, test.AssertRendersToMarkup(tt, "non_existing_master.xml", c), "non existing master is not equal to rendered markup")
+		assert.True(t, tt.Failed(), "test failed")
+		assert.Equal(t, markup, readMarkup(t, "testdata/failed/non_existing_master.xml"), "markup was written to disk")
+	})
+
+	t.Run("matching master", func(t *testing.T) {
+		tt := &testing.T{}
+		assert.True(t, test.AssertRendersToMarkup(tt, "markup_master.xml", c), "existing master is equal to rendered markup")
+		assert.False(t, tt.Failed(), "test should not fail")
+	})
+
+	t.Run("diffing master", func(t *testing.T) {
+		tt := &testing.T{}
+		assert.False(t, test.AssertRendersToMarkup(tt, "markup_diffing_master.xml", c), "existing master is not equal to rendered markup")
+		assert.True(t, tt.Failed(), "test should fail")
+		assert.Equal(t, markup, readMarkup(t, "testdata/failed/markup_diffing_master.xml"), "markup was written to disk")
+	})
+
+	if !t.Failed() {
+		os.RemoveAll("testdata/failed")
 	}
 }
 
@@ -106,8 +83,7 @@ func TestDrag(t *testing.T) {
 	test.Drag(c, fyne.NewPos(15, 15), 17, 42)
 	assert.Equal(t, &fyne.DragEvent{
 		PointEvent: fyne.PointEvent{Position: fyne.Position{X: 5, Y: 5}},
-		DraggedX:   17,
-		DraggedY:   42,
+		Dragged:    fyne.NewDelta(17, 42),
 	}, d.event)
 	assert.True(t, d.wasDragged)
 }
@@ -120,33 +96,33 @@ func TestFocusNext(t *testing.T) {
 	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f1, c.Focused())
-	assert.True(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.True(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f2, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.True(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.True(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f3, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.True(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.True(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f1, c.Focused())
-	assert.True(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.True(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 }
 
 func TestFocusPrevious(t *testing.T) {
@@ -157,33 +133,33 @@ func TestFocusPrevious(t *testing.T) {
 	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f3, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.True(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.True(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f2, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.True(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.True(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f1, c.Focused())
-	assert.True(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.True(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f3, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.True(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.True(t, f3.focused)
 }
 
 func TestScroll(t *testing.T) {
@@ -199,7 +175,13 @@ func TestScroll(t *testing.T) {
 	assert.Nil(t, s.event, "nothing happens if no scrollable was found at position")
 
 	test.Scroll(c, fyne.NewPos(15, 15), 17, 42)
-	assert.Equal(t, &fyne.ScrollEvent{DeltaX: 17, DeltaY: 42}, s.event)
+	assert.Equal(t, &fyne.ScrollEvent{Scrolled: fyne.NewDelta(17, 42)}, s.event)
+}
+
+func readMarkup(t *testing.T, path string) string {
+	raw, err := ioutil.ReadFile(path)
+	require.NoError(t, err)
+	return string(raw)
 }
 
 var _ fyne.Draggable = (*draggable)(nil)
@@ -231,10 +213,6 @@ func (f *focusable) FocusGained() {
 
 func (f *focusable) FocusLost() {
 	f.focused = false
-}
-
-func (f *focusable) Focused() bool {
-	return f.focused
 }
 
 func (f *focusable) TypedKey(event *fyne.KeyEvent) {

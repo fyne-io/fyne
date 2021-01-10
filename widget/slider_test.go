@@ -4,11 +4,52 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewSliderWithData(t *testing.T) {
+	val := binding.NewFloat()
+	err := val.Set(4)
+	assert.Nil(t, err)
+
+	s := NewSliderWithData(0, 10, val)
+	waitForBinding()
+	assert.Equal(t, 4.0, s.Value)
+
+	s.SetValue(2.0)
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 2.0, f)
+}
+
+func TestSlider_Binding(t *testing.T) {
+	s := NewSlider(0, 10)
+	s.SetValue(2)
+	assert.Equal(t, 2.0, s.Value)
+
+	val := binding.NewFloat()
+	s.Bind(val)
+	waitForBinding()
+	assert.Equal(t, 0.0, s.Value)
+
+	err := val.Set(3)
+	assert.Nil(t, err)
+	waitForBinding()
+	assert.Equal(t, 3.0, s.Value)
+
+	s.SetValue(5)
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, f)
+
+	s.Unbind()
+	waitForBinding()
+	assert.Equal(t, 5.0, s.Value)
+}
 
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()
@@ -36,17 +77,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(220, 50))
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="220x50">
-			<content>
-				<widget pos="4,4" size="212x42" type="*widget.Slider">
-					<rectangle fillColor="shadow" pos="12,21" size="188x4"/>
-					<rectangle fillColor="foreground" pos="12,21" size="0x4"/>
-					<circle fillColor="foreground" pos="6,15" size="16x16"/>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "slider/horizontal.xml", w.Canvas())
 }
 
 func TestSlider_OutOfRange(t *testing.T) {
@@ -83,17 +114,7 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 220))
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="50x220">
-			<content>
-				<widget pos="4,4" size="42x212" type="*widget.Slider">
-					<rectangle fillColor="shadow" pos="21,12" size="4x188"/>
-					<rectangle fillColor="foreground" pos="21,200" size="4x0"/>
-					<circle fillColor="foreground" pos="15,194" size="16x16"/>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "slider/vertical.xml", w.Canvas())
 }
 
 func TestSlider_OnChanged(t *testing.T) {
@@ -111,7 +132,7 @@ func TestSlider_OnChanged(t *testing.T) {
 	slider.SetValue(0.5)
 	assert.Equal(t, 1, changes)
 
-	drag := &fyne.DragEvent{DraggedX: 10, DraggedY: 2}
+	drag := &fyne.DragEvent{Dragged: fyne.NewDelta(10, 2)}
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 }

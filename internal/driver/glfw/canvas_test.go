@@ -57,7 +57,7 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
 	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	rightColScroll := widget.NewScrollContainer(rightCol)
+	rightColScroll := container.NewScroll(rightCol)
 	content := widget.NewHBox(leftCol, rightColScroll)
 	w.SetContent(content)
 
@@ -87,13 +87,13 @@ func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(50, 50))
 	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	leftColScroll := widget.NewScrollContainer(leftCol)
+	leftColScroll := container.NewScroll(leftCol)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(50, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
 	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	rightColScroll := widget.NewScrollContainer(rightCol)
+	rightColScroll := container.NewScroll(rightCol)
 	content := widget.NewHBox(leftColScroll, rightColScroll)
 	w.SetContent(content)
 
@@ -378,7 +378,7 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewLabel("Over")
 	w.SetContent(content)
-	w.Canvas().SetOverlay(over)
+	w.Canvas().Overlays().Add(over)
 	// TODO: address #707; overlays should always be canvas size
 	over.Resize(w.Canvas().Size())
 
@@ -455,7 +455,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 
 func TestGlCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	var menuHeight int
+	var menuHeight float32
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
@@ -465,8 +465,8 @@ func TestGlCanvas_SetContent(t *testing.T) {
 		name               string
 		padding            bool
 		menu               bool
-		expectedPad        int
-		expectedMenuHeight int
+		expectedPad        float32
+		expectedMenuHeight float32
 	}{
 		{"window without padding", false, false, 0, 0},
 		{"window with padding", true, false, theme.Padding(), 0},
@@ -481,7 +481,7 @@ func TestGlCanvas_SetContent(t *testing.T) {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
 			content := canvas.NewCircle(color.Black)
-			canvasSize := 200
+			canvasSize := float32(200)
 			w.SetContent(content)
 			w.Resize(fyne.NewSize(canvasSize, canvasSize))
 

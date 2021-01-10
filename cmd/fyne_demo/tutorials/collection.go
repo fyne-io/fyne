@@ -5,8 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
-	internalWidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -30,14 +28,14 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 
 	icon := widget.NewIcon(nil)
 	label := widget.NewLabel("Select An Item From The List")
-	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
+	hbox := container.NewHBox(icon, label)
 
 	list := widget.NewList(
 		func() int {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
@@ -53,7 +51,7 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	}
 	list.Select(125)
 
-	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+	return container.NewHSplit(list, container.NewCenter(hbox))
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {
@@ -79,17 +77,30 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
-	data := make(map[string][]string)
-	internalWidget.AddTreePath(data, "A", "B", "C", "abc")
-	internalWidget.AddTreePath(data, "A", "D", "E", "F", "adef")
-	internalWidget.AddTreePath(data, "A", "D", "E", "G", "adeg")
-	internalWidget.AddTreePath(data, "A", "H", "I", "ahi")
-	internalWidget.AddTreePath(data, "A", "J", "K", "ajk")
-	internalWidget.AddTreePath(data, "A", "L", "M", "N", "almn")
-	internalWidget.AddTreePath(data, "A", "O", "ao")
-	internalWidget.AddTreePath(data, "A", "P", "Q", "R", "apqr")
-	internalWidget.AddTreePath(data, "A", "S", "T", "U", "astu")
-	internalWidget.AddTreePath(data, "A", "V", "W", "X", "Y", "Z", "avwxyz")
+	data := map[string][]string{
+		"":  {"A"},
+		"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V"},
+		"B": {"C"},
+		"C": {"abc"},
+		"D": {"E"},
+		"E": {"F", "G"},
+		"F": {"adef"},
+		"G": {"adeg"},
+		"H": {"I"},
+		"I": {"ahi"},
+		"O": {"ao"},
+		"P": {"Q"},
+		"Q": {"R"},
+		"R": {"apqr"},
+		"S": {"T"},
+		"T": {"U"},
+		"U": {"astu"},
+		"V": {"W"},
+		"W": {"X"},
+		"X": {"Y"},
+		"Y": {"Z"},
+		"Z": {"avwxyz"},
+	}
 
 	tree := widget.NewTreeWithStrings(data)
 	tree.OnSelected = func(id string) {

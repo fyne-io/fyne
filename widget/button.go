@@ -109,7 +109,7 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	text := canvas.NewText(b.Text, theme.TextColor())
+	text := canvas.NewText(b.Text, theme.ForegroundColor())
 	text.TextStyle.Bold = true
 
 	bg := canvas.NewRectangle(color.Transparent)
@@ -288,10 +288,10 @@ func (r *buttonRenderer) Refresh() {
 func (r *buttonRenderer) applyTheme() {
 	r.bg.FillColor = r.buttonColor()
 	r.label.TextSize = theme.TextSize()
-	r.label.Color = theme.TextColor()
+	r.label.Color = theme.ForegroundColor()
 	switch {
 	case r.button.disabled:
-		r.label.Color = theme.DisabledTextColor()
+		r.label.Color = theme.DisabledColor()
 	case r.button.Style == PrimaryButton || r.button.Importance == HighImportance:
 		r.label.Color = theme.BackgroundColor()
 	}

@@ -51,7 +51,7 @@ func TestText_Layout(t *testing.T) {
 		"short_leading_large": {
 			text:  "abc",
 			align: fyne.TextAlignLeading,
-			size:  fyne.NewSize(500, 100),
+			size:  fyne.NewSize(500, 101),
 		},
 		"long_leading_small": {
 			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -61,7 +61,7 @@ func TestText_Layout(t *testing.T) {
 		"long_leading_large": {
 			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 			align: fyne.TextAlignLeading,
-			size:  fyne.NewSize(500, 100),
+			size:  fyne.NewSize(500, 101),
 		},
 		"short_center_small": {
 			text:  "abc",
@@ -71,7 +71,7 @@ func TestText_Layout(t *testing.T) {
 		"short_center_large": {
 			text:  "abc",
 			align: fyne.TextAlignCenter,
-			size:  fyne.NewSize(500, 100),
+			size:  fyne.NewSize(500, 101),
 		},
 		"long_center_small": {
 			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -81,7 +81,7 @@ func TestText_Layout(t *testing.T) {
 		"long_center_large": {
 			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 			align: fyne.TextAlignCenter,
-			size:  fyne.NewSize(500, 100),
+			size:  fyne.NewSize(500, 101),
 		},
 		"short_trailing_small": {
 			text:  "abc",
@@ -91,7 +91,7 @@ func TestText_Layout(t *testing.T) {
 		"short_trailing_large": {
 			text:  "abc",
 			align: fyne.TextAlignTrailing,
-			size:  fyne.NewSize(500, 100),
+			size:  fyne.NewSize(500, 101),
 		},
 		"long_trailing_small": {
 			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -101,11 +101,11 @@ func TestText_Layout(t *testing.T) {
 		"long_trailing_large": {
 			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 			align: fyne.TextAlignTrailing,
-			size:  fyne.NewSize(500, 100),
+			size:  fyne.NewSize(500, 101),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			text := canvas.NewText(tt.text, theme.TextColor())
+			text := canvas.NewText(tt.text, theme.ForegroundColor())
 			text.Alignment = tt.align
 
 			window := test.NewWindow(text)

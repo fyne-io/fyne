@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
@@ -128,9 +129,9 @@ func TestFileDialogResize(t *testing.T) {
 	//Test resize - normal size scenario
 	size := fyne.NewSize(200, 180) //normal size to fit (600,400)
 	file.Resize(size)
-	expectedWidth := 200
+	expectedWidth := float32(200)
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight := 180
+	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 	//Test resize - normal size scenario again
 	size = fyne.NewSize(300, 280) //normal size to fit (600,400)
@@ -181,14 +182,18 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
+	//left
+	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Options", optionsButton.Text)
+	//header
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
-
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
+	//footer
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
-
-	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
+	//body
+	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*widget.Box)
 	assert.Greater(t, len(breadcrumb.Children), 0)
 
 	assert.Nil(t, err)
@@ -203,7 +208,7 @@ func TestShowFileOpen(t *testing.T) {
 		}
 	}
 
-	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -231,6 +236,57 @@ func TestShowFileOpen(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestHiddenFiles(t *testing.T) {
+	testDataPath, _ := filepath.Abs("testdata")
+	testData := storage.NewFileURI(testDataPath)
+	dir, err := storage.ListerForURI(testData)
+	if err != nil {
+		t.Error("Failed to open testdata dir", err)
+	}
+
+	// git does not preserve windows hidden flag so we have to set it.
+	// just an empty function for non windows builds
+	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
+		t.Error("Failed to hide .hidden", err)
+	}
+
+	win := test.NewWindow(widget.NewLabel("Content"))
+	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+	d.SetLocation(dir)
+	d.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+
+	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Options", optionsButton.Text)
+
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	assert.Greater(t, len(files.Objects), 0)
+
+	var target *fileDialogItem
+	for _, icon := range files.Objects {
+		if icon.(*fileDialogItem).name == ".hidden" {
+			target = icon.(*fileDialogItem)
+		}
+	}
+	assert.Nil(t, target, "Failed, .hidden found in testdata")
+
+	d.dialog.showHidden = true
+	d.dialog.refreshDir(d.dialog.dir)
+
+	for _, icon := range files.Objects {
+		if icon.(*fileDialogItem).name == ".hidden" {
+			target = icon.(*fileDialogItem)
+		}
+	}
+	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
+}
+
 func TestShowFileSave(t *testing.T) {
 	var chosen fyne.URIWriteCloser
 	var saveErr error
@@ -248,11 +304,11 @@ func TestShowFileSave(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
-	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Entry)
+	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Entry)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	save := buttons.Children[1].(*widget.Button)
 
-	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name

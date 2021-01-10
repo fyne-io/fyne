@@ -21,6 +21,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameButton:         color.Black,
 			theme.ColorNameDisabled:       color.Black,
 			theme.ColorNameDisabledButton: color.White,
+			theme.ColorNameError:          blue,
 			theme.ColorNameFocus:          green,
 			theme.ColorNameForeground:     color.White,
 			theme.ColorNameHover:          green,
@@ -36,12 +37,13 @@ func NewTheme() fyne.Theme {
 			fyne.TextStyle{Italic: true}:             theme.DefaultTextBoldItalicFont(),
 			fyne.TextStyle{Monospace: true}:          theme.DefaultTextFont(),
 		},
-		sizes: map[fyne.ThemeSizeName]int{
-			theme.SizeNameInlineIcon:     24,
-			theme.SizeNamePadding:        10,
-			theme.SizeNameScrollBar:      10,
-			theme.SizeNameScrollBarSmall: 2,
-			theme.SizeNameText:           18,
+		sizes: map[fyne.ThemeSizeName]float32{
+			theme.SizeNameInlineIcon:         float32(24),
+			theme.SizeNamePadding:            float32(10),
+			theme.SizeNameScrollBar:          float32(10),
+			theme.SizeNameScrollBarSmall:     float32(2),
+			theme.SizeNameSeparatorThickness: float32(1),
+			theme.SizeNameText:               float32(18),
 		},
 	}
 }

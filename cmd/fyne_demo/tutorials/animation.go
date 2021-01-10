@@ -25,7 +25,7 @@ func makeAnimationCanvas() fyne.CanvasObject {
 			rect.FillColor = c
 			canvas.Refresh(rect)
 		})
-	a.Repeat = true
+	a.RepeatCount = fyne.AnimationRepeatForever
 	a.AutoReverse = true
 	a.Start()
 
@@ -34,10 +34,10 @@ func makeAnimationCanvas() fyne.CanvasObject {
 	a2 = canvas.NewPositionAnimation(fyne.NewPos(0, 0), fyne.NewPos(350, 80), time.Second*3, func(p fyne.Position) {
 		i.Move(p)
 
-		width := int(10 + (float64(p.X) / 7))
+		width := 10 + (p.X / 7)
 		i.Resize(fyne.NewSize(width, width))
 	})
-	a2.Repeat = true
+	a2.RepeatCount = fyne.AnimationRepeatForever
 	a2.AutoReverse = true
 	a2.Curve = fyne.AnimationLinear
 	a2.Start()
@@ -78,13 +78,13 @@ func makeAnimationCurves() fyne.CanvasObject {
 	return fyne.NewContainerWithoutLayout(label1, label2, label3, label4, box1, box2, box3, box4, start)
 }
 
-func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff int) (
+func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float32) (
 	text *widget.Label, box fyne.CanvasObject, anim *fyne.Animation) {
 	text = widget.NewLabel(label)
 	text.Alignment = fyne.TextAlignCenter
 	text.Resize(fyne.NewSize(380, 30))
 	text.Move(fyne.NewPos(0, yOff))
-	box = canvas.NewRectangle(theme.TextColor())
+	box = canvas.NewRectangle(theme.ForegroundColor())
 	box.Resize(fyne.NewSize(30, 30))
 	box.Move(fyne.NewPos(0, yOff))
 
@@ -94,5 +94,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff int) (
 			box.Refresh()
 		})
 	anim.Curve = curve
+	anim.AutoReverse = true
+	anim.RepeatCount = 1
 	return
 }

@@ -258,7 +258,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
 	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 
 	return render
 }
@@ -304,7 +304,7 @@ type textGridRenderer struct {
 }
 
 func (t *textGridRenderer) appendTextCell(str rune) {
-	text := canvas.NewText(string(str), theme.TextColor())
+	text := canvas.NewText(string(str), theme.ForegroundColor())
 	text.TextStyle.Monospace = true
 
 	bg := canvas.NewRectangle(color.Transparent)
@@ -317,7 +317,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	}
 
 	text := t.objects[pos*2+1].(*canvas.Text)
-	fg := theme.TextColor()
+	fg := theme.ForegroundColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
@@ -457,19 +457,19 @@ func (t *textGridRenderer) Layout(size fyne.Size) {
 }
 
 func (t *textGridRenderer) MinSize() fyne.Size {
-	longestRow := 0
+	longestRow := float32(0)
 	for _, row := range t.text.Rows {
-		longestRow = int(math.Max(float64(longestRow), float64(len(row.Cells))))
+		longestRow = float32(math.Max(float64(longestRow), float64(len(row.Cells))))
 	}
 	return fyne.NewSize(t.cellSize.Width*longestRow,
-		t.cellSize.Height*len(t.text.Rows))
+		t.cellSize.Height*float32(len(t.text.Rows)))
 }
 
 func (t *textGridRenderer) Refresh() {
 	// theme could change text size
 	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()
 }

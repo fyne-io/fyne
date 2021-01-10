@@ -46,58 +46,15 @@ func TestTabContainer_ChangeItemContent(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	text1Visible := `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	text3Visible := `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text3</text>
-					</widget>
-					<container size="150x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-
-	test.AssertRendersToMarkup(t, text1Visible, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_content_initial.xml", c)
 
 	item1.Content = widget.NewLabel("Text3")
 	tabs.Refresh()
-	test.AssertRendersToMarkup(t, text3Visible, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_content_change_visible.xml", c)
 
 	item2.Content = widget.NewLabel("Text4")
 	tabs.Refresh()
-	test.AssertRendersToMarkup(t, text3Visible, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_content_change_hidden.xml", c)
 }
 
 func TestTabContainer_ChangeItemIcon(t *testing.T) {
@@ -113,75 +70,15 @@ func TestTabContainer_ChangeItemIcon(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	test.AssertRendersToMarkup(t, `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="28x29" type="*widget.tabButton">
-							<image pos="4,4" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
-						</widget>
-						<widget pos="32,0" size="28x29" type="*widget.tabButton">
-							<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="28x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_icon_initial.xml", c)
 
 	item1.Icon = theme.InfoIcon()
 	tabs.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="28x29" type="*widget.tabButton">
-							<image pos="4,4" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
-						</widget>
-						<widget pos="32,0" size="28x29" type="*widget.tabButton">
-							<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="28x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_icon_change_selected.xml", c)
 
 	item2.Icon = theme.ContentAddIcon()
 	tabs.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="28x29" type="*widget.tabButton">
-							<image pos="4,4" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
-						</widget>
-						<widget pos="32,0" size="28x29" type="*widget.tabButton">
-							<image pos="4,4" rsc="contentAddIcon" size="iconInlineSize"/>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="28x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_icon_change_unselected.xml", c)
 }
 
 func TestTabContainer_ChangeItemText(t *testing.T) {
@@ -197,75 +94,15 @@ func TestTabContainer_ChangeItemText(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	test.AssertRendersToMarkup(t, `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_label_initial.xml", c)
 
 	item1.Text = "New 1"
 	tabs.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="63x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="47x21">New 1</text>
-						</widget>
-						<widget pos="67,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="63x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_label_change_selected.xml", c)
 
 	item2.Text = "New 2"
 	tabs.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="63x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="47x21">New 1</text>
-						</widget>
-						<widget pos="67,0" size="63x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="47x21">New 2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="63x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/change_label_change_unselected.xml", c)
 }
 
 func TestTabContainer_DynamicTabs(t *testing.T) {
@@ -280,95 +117,24 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	w.Resize(fyne.NewSize(300, 150))
 	c := w.Canvas()
 
-	test.AssertRendersToMarkup(t, `
-		<canvas size="300x150">
-			<content>
-				<widget size="300x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="300x117" type="*widget.Label">
-						<text pos="4,4" size="292x21">Text 1</text>
-					</widget>
-					<container size="300x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/dynamic_initial.xml", c)
 
 	appendedItem := widget.NewTabItem("Test2", widget.NewLabel("Text 2"))
 	tabs.Append(appendedItem)
 	assert.Equal(t, 2, len(tabs.Items))
 	assert.Equal(t, "Test2", tabs.Items[1].Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas size="300x150">
-			<content>
-				<widget size="300x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="300x117" type="*widget.Label">
-						<text pos="4,4" size="292x21">Text 1</text>
-					</widget>
-					<container size="300x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/dynamic_appended.xml", c)
 
 	tabs.RemoveIndex(1)
 	assert.Equal(t, len(tabs.Items), 1)
 	assert.Equal(t, "Test1", tabs.Items[0].Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas size="300x150">
-			<content>
-				<widget size="300x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="300x117" type="*widget.Label">
-						<text pos="4,4" size="292x21">Text 1</text>
-					</widget>
-					<container size="300x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/dynamic_initial.xml", c)
 
 	tabs.Append(appendedItem)
 	tabs.Remove(tabs.Items[0])
 	assert.Equal(t, len(tabs.Items), 1)
 	assert.Equal(t, "Test2", tabs.Items[0].Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas size="300x150">
-			<content>
-				<widget size="300x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="300x117" type="*widget.Label">
-						<text pos="4,4" size="292x21">Text 2</text>
-					</widget>
-					<container size="300x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/dynamic_appended_and_removed.xml", c)
 
 	tabs.Append(widget.NewTabItem("Test3", canvas.NewCircle(theme.BackgroundColor())))
 	tabs.Append(widget.NewTabItem("Test4", canvas.NewCircle(theme.BackgroundColor())))
@@ -377,33 +143,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	assert.Equal(t, "Test3", tabs.Items[1].Text)
 	assert.Equal(t, "Test4", tabs.Items[2].Text)
 	assert.Equal(t, "Test5", tabs.Items[3].Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas size="300x150">
-			<content>
-				<widget size="300x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="300x117" type="*widget.Label">
-						<text pos="4,4" size="292x21">Text 2</text>
-					</widget>
-					<container size="300x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test4</text>
-						</widget>
-						<widget pos="183,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test5</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/dynamic_appended_another_three.xml", c)
 
 	tabs.SetItems([]*widget.TabItem{
 		widget.NewTabItem("Test6", widget.NewLabel("Text 6")),
@@ -414,30 +154,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	assert.Equal(t, "Test6", tabs.Items[0].Text)
 	assert.Equal(t, "Test7", tabs.Items[1].Text)
 	assert.Equal(t, "Test8", tabs.Items[2].Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas size="300x150">
-			<content>
-				<widget size="300x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="300x117" type="*widget.Label">
-						<text pos="4,4" size="292x21">Text 6</text>
-					</widget>
-					<container size="300x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test6</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test7</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test8</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/dynamic_replaced_completely.xml", c)
 }
 
 func TestTabContainer_HoverButtons(t *testing.T) {
@@ -453,79 +170,16 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	noneHovered := `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	firstHovered := `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget backgroundColor="hover" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	secondHovered := `
-		<canvas size="150x150">
-			<content>
-				<widget size="150x150" type="*widget.TabContainer">
-					<widget pos="0,33" size="150x117" type="*widget.Label">
-						<text pos="4,4" size="142x21">Text1</text>
-					</widget>
-					<container size="150x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget backgroundColor="hover" pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	test.AssertRendersToMarkup(t, noneHovered, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/hover_none.xml", c)
 
 	test.MoveMouse(c, fyne.NewPos(10, 10))
-	test.AssertRendersToMarkup(t, firstHovered, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/hover_first.xml", c)
 
 	test.MoveMouse(c, fyne.NewPos(75, 10))
-	test.AssertRendersToMarkup(t, secondHovered, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/hover_second.xml", c)
 
 	test.MoveMouse(c, fyne.NewPos(10, 10))
-	test.AssertRendersToMarkup(t, firstHovered, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/hover_first.xml", c)
 }
 
 func TestTabContainer_Layout(t *testing.T) {
@@ -547,257 +201,73 @@ func TestTabContainer_Layout(t *testing.T) {
 			name:     "top: tab with icon and text",
 			item:     widget.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationTop,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" pos="0,33" size="150x117"/>
-							<container size="150x29">
-								<widget size="82x29" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="32,4" size="42x21">Text1</text>
-									<image pos="8,4" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-							<rectangle fillColor="primary" pos="0,29" size="82x4"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_top_icon_and_text.xml",
 		},
 		{
 			name:     "top: tab with text only",
 			item:     widget.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationTop,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" pos="0,33" size="150x117"/>
-							<container size="150x29">
-								<widget size="58x29" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="8,4" size="42x21">Text2</text>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-							<rectangle fillColor="primary" pos="0,29" size="58x4"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_top_text.xml",
 		},
 		{
 			name:     "top: tab with icon only",
 			item:     widget.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationTop,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" pos="0,33" size="150x117"/>
-							<container size="150x29">
-								<widget size="28x29" type="*widget.tabButton">
-									<image pos="4,4" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-							<rectangle fillColor="primary" pos="0,29" size="28x4"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_top_icon.xml",
 		},
 		{
 			name:     "bottom: tab with icon and text",
 			item:     widget.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationBottom,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" size="150x117"/>
-							<container pos="0,121" size="150x29">
-								<widget size="82x29" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="32,4" size="42x21">Text1</text>
-									<image pos="8,4" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="0,117" size="150x4"/>
-							<rectangle fillColor="primary" pos="0,117" size="82x4"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_bottom_icon_and_text.xml",
 		},
 		{
 			name:     "bottom: tab with text only",
 			item:     widget.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationBottom,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" size="150x117"/>
-							<container pos="0,121" size="150x29">
-								<widget size="58x29" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="8,4" size="42x21">Text2</text>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="0,117" size="150x4"/>
-							<rectangle fillColor="primary" pos="0,117" size="58x4"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_bottom_text.xml",
 		},
 		{
 			name:     "bottom: tab with icon only",
 			item:     widget.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationBottom,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" size="150x117"/>
-							<container pos="0,121" size="150x29">
-								<widget size="28x29" type="*widget.tabButton">
-									<image pos="4,4" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="0,117" size="150x4"/>
-							<rectangle fillColor="primary" pos="0,117" size="28x4"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_bottom_icon.xml",
 		},
 		{
 			name:     "leading: tab with icon and text",
 			item:     widget.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationLeading,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" pos="54,0" size="96x150"/>
-							<container size="50x150">
-								<widget size="50x73" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="4,48" size="42x21">Text1</text>
-									<image pos="5,4" rsc="cancelIcon" size="40x40" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="50,0" size="4x150"/>
-							<rectangle fillColor="primary" pos="50,0" size="4x73"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_leading_icon_and_text.xml",
 		},
 		{
 			name:     "leading: tab with text only",
 			item:     widget.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationLeading,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" pos="54,0" size="96x150"/>
-							<container size="50x150">
-								<widget size="50x29" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="4,4" size="42x21">Text2</text>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="50,0" size="4x150"/>
-							<rectangle fillColor="primary" pos="50,0" size="4x29"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_leading_text.xml",
 		},
 		{
 			name:     "leading: tab with icon only",
 			item:     widget.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationLeading,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" pos="52,0" size="98x150"/>
-							<container size="48x150">
-								<widget size="48x48" type="*widget.tabButton">
-									<image pos="4,4" rsc="infoIcon" size="40x40" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="48,0" size="4x150"/>
-							<rectangle fillColor="primary" pos="48,0" size="4x48"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_leading_icon.xml",
 		},
 		{
 			name:     "trailing: tab with icon and text",
 			item:     widget.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationTrailing,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" size="96x150"/>
-							<container pos="100,0" size="50x150">
-								<widget size="50x73" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="4,48" size="42x21">Text1</text>
-									<image pos="5,4" rsc="cancelIcon" size="40x40" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="96,0" size="4x150"/>
-							<rectangle fillColor="primary" pos="96,0" size="4x73"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_trailing_icon_and_text.xml",
 		},
 		{
 			name:     "trailing: tab with text only",
 			item:     widget.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationTrailing,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" size="96x150"/>
-							<container pos="100,0" size="50x150">
-								<widget size="50x29" type="*widget.tabButton">
-									<text alignment="center" bold color="primary" pos="4,4" size="42x21">Text2</text>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="96,0" size="4x150"/>
-							<rectangle fillColor="primary" pos="96,0" size="4x29"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_trailing_text.xml",
 		},
 		{
 			name:     "trailing: tab with icon only",
 			item:     widget.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: widget.TabLocationTrailing,
-			want: `
-				<canvas size="150x150">
-					<content>
-						<widget size="150x150" type="*widget.TabContainer">
-							<circle fillColor="background" size="98x150"/>
-							<container pos="102,0" size="48x150">
-								<widget size="48x48" type="*widget.tabButton">
-									<image pos="4,4" rsc="infoIcon" size="40x40" themed="primary"/>
-								</widget>
-							</container>
-							<rectangle fillColor="shadow" pos="98,0" size="4x150"/>
-							<rectangle fillColor="primary" pos="98,0" size="4x48"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:     "tabcontainer/desktop/layout_trailing_icon.xml",
 		},
 	}
 	for _, tt := range tests {
@@ -825,120 +295,24 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	w.SetPadded(false)
 	c := w.Canvas()
 
-	tabsTop := `
-		<canvas size="179x62">
-			<content>
-				<widget size="179x62" type="*widget.TabContainer">
-					<widget pos="0,33" size="179x29" type="*widget.Label">
-						<text pos="4,4" size="171x21">Text 1</text>
-					</widget>
-					<container size="179x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="179x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	tabsLeading := `
-		<canvas size="105x95">
-			<content>
-				<widget size="105x95" type="*widget.TabContainer">
-					<widget pos="53,0" size="52x95" type="*widget.Label">
-						<text pos="4,4" size="44x21">Text 1</text>
-					</widget>
-					<container size="49x95">
-						<widget size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="4,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="0,33" size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="4,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="0,66" size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="4,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="49,0" size="4x95"/>
-					<rectangle fillColor="primary" pos="49,0" size="4x29"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	tabsBottom := `
-		<canvas size="179x62">
-			<content>
-				<widget size="179x62" type="*widget.TabContainer">
-					<widget size="179x29" type="*widget.Label">
-						<text pos="4,4" size="171x21">Text 1</text>
-					</widget>
-					<container pos="0,33" size="179x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="179x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	tabsTrailing := `
-		<canvas size="105x95">
-			<content>
-				<widget size="105x95" type="*widget.TabContainer">
-					<widget size="52x95" type="*widget.Label">
-						<text pos="4,4" size="44x21">Text 1</text>
-					</widget>
-					<container pos="56,0" size="49x95">
-						<widget size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="4,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="0,33" size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="4,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="0,66" size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="4,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="52,0" size="4x95"/>
-					<rectangle fillColor="primary" pos="52,0" size="4x29"/>
-				</widget>
-			</content>
-		</canvas>
-	`
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, tabsTop, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tab_location_top.xml", c)
 
 	tabs.SetTabLocation(widget.TabLocationLeading)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, tabsLeading, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tab_location_leading.xml", c)
 
 	tabs.SetTabLocation(widget.TabLocationBottom)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, tabsBottom, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tab_location_bottom.xml", c)
 
 	tabs.SetTabLocation(widget.TabLocationTrailing)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, tabsTrailing, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tab_location_trailing.xml", c)
 
 	tabs.SetTabLocation(widget.TabLocationTop)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, tabsTop, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tab_location_top.xml", c)
 }
 
 func TestTabContainer_Tapped(t *testing.T) {
@@ -955,90 +329,18 @@ func TestTabContainer_Tapped(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 100))
 	c := w.Canvas()
 
-	firstSelected := `
-		<canvas size="200x100">
-			<content>
-				<widget size="200x100" type="*widget.TabContainer">
-					<widget pos="0,33" size="200x67" type="*widget.Label">
-						<text pos="4,4" size="192x21">Text 1</text>
-					</widget>
-					<container size="200x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	secondSelected := `
-		<canvas size="200x100">
-			<content>
-				<widget size="200x100" type="*widget.TabContainer">
-					<widget pos="0,33" size="200x67" type="*widget.Label">
-						<text pos="4,4" size="192x21">Text 2</text>
-					</widget>
-					<container size="200x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-					<rectangle fillColor="primary" pos="61,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	thirdSelected := `
-		<canvas size="200x100">
-			<content>
-				<widget size="200x100" type="*widget.TabContainer">
-					<widget pos="0,33" size="200x67" type="*widget.Label">
-						<text pos="4,4" size="192x21">Text 3</text>
-					</widget>
-					<container size="200x29">
-						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test1</text>
-						</widget>
-						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
-						</widget>
-						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test3</text>
-						</widget>
-					</container>
-					<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-					<rectangle fillColor="primary" pos="122,29" size="57x4"/>
-				</widget>
-			</content>
-		</canvas>
-	`
 	require.Equal(t, 0, tabs.CurrentTabIndex())
-	test.AssertRendersToMarkup(t, firstSelected, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(75, 10))
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
-	test.AssertRendersToMarkup(t, secondSelected, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tapped_second_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(150, 10))
 	assert.Equal(t, 2, tabs.CurrentTabIndex())
-	test.AssertRendersToMarkup(t, thirdSelected, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tapped_third_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(10, 10))
 	require.Equal(t, 0, tabs.CurrentTabIndex())
-	test.AssertRendersToMarkup(t, firstSelected, c)
+	test.AssertRendersToMarkup(t, "tabcontainer/desktop/tapped_first_selected.xml", c)
 }

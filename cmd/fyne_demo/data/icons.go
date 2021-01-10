@@ -12,7 +12,7 @@ type ThemedResource struct {
 }
 
 func isLight() bool {
-	r, g, b, _ := theme.TextColor().RGBA()
+	r, g, b, _ := theme.ForegroundColor().RGBA()
 	return r < 0xaaaa && g < 0xaaaa && b < 0xaaaa
 }
 

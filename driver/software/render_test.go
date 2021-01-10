@@ -29,7 +29,7 @@ func TestRender_Focus(t *testing.T) {
 	obj := widget.NewEntry()
 	test.AssertImageMatches(t, "entry.png", Render(obj, theme.DarkTheme()))
 
-	test.Tap(obj)
+	obj.FocusGained()
 	test.AssertImageMatches(t, "entry_focus.png", Render(obj, theme.DarkTheme()))
 }
 

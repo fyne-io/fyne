@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/layout"
 	_ "fyne.io/fyne/test"
@@ -154,11 +155,11 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 func TestCanvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
-	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
+	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(scroll)
 	c.resize(fyne.NewSize(40, 24))
-	assert.Equal(t, 0, scroll.Offset.Y)
+	assert.Equal(t, float32(0), scroll.Offset.Y)
 
 	c.tapDown(fyne.NewPos(32, 3), 0)
 	c.tapMove(fyne.NewPos(32, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
@@ -251,6 +252,7 @@ func TestCanvas_Focusable(t *testing.T) {
 	content := newFocusableEntry()
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(content)
+	content.Resize(fyne.NewSize(25, 25))
 
 	c.tapDown(fyne.NewPos(10, 10), 0)
 	assert.Equal(t, 1, content.focusedTimes)

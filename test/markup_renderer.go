@@ -109,19 +109,19 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setIntAttrWithDefault(attrs map[string]*string, name string, i int, d int) {
-	if i == d {
+func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+	if int(i) == int(d) {
 		return
 	}
-	value := fmt.Sprintf("%d", i)
+	value := fmt.Sprintf("%d", int(i))
 	attrs[name] = &value
 }
 
 func (r *markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
-	if pos.X == 0 && pos.Y == 0 {
+	if int(pos.X) == 0 && int(pos.Y) == 0 {
 		return
 	}
-	value := fmt.Sprintf("%d,%d", pos.X, pos.Y)
+	value := fmt.Sprintf("%d,%d", int(pos.X), int(pos.Y))
 	attrs[name] = &value
 }
 
@@ -173,7 +173,7 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 }
 
 func (r *markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
-	value := fmt.Sprintf("%dx%d", size.Width, size.Height)
+	value := fmt.Sprintf("%dx%d", int(size.Width), int(size.Height))
 	attrs[name] = &value
 }
 
@@ -357,9 +357,9 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 }
 
 func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
-	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.TextColor())
+	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.ForegroundColor())
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
-	r.setIntAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
+	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
 	r.setBoolAttr(attrs, "italic", t.TextStyle.Italic)
 	r.setBoolAttr(attrs, "monospace", t.TextStyle.Monospace)
@@ -386,6 +386,7 @@ func knownColor(c color.Color) string {
 		rgbaColor(theme.ButtonColor()):         "button",
 		rgbaColor(theme.DisabledButtonColor()): "disabled button",
 		rgbaColor(theme.DisabledColor()):       "disabled",
+		rgbaColor(theme.ErrorColor()):          "error",
 		rgbaColor(theme.FocusColor()):          "focus",
 		rgbaColor(theme.ForegroundColor()):     "foreground",
 		rgbaColor(theme.HoverColor()):          "hover",

@@ -42,7 +42,7 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
-	text := canvas.NewText(i.Item.Label, theme.TextColor())
+	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
 	objects := []fyne.CanvasObject{text}
 	var icon *canvas.Image
 	if i.Item.ChildMenu != nil {
@@ -143,7 +143,7 @@ type menuItemRenderer struct {
 	widget.BaseRenderer
 	i                *menuItem
 	icon             *canvas.Image
-	lastThemePadding int
+	lastThemePadding float32
 	minSize          fyne.Size
 	text             *canvas.Text
 }
@@ -160,7 +160,7 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	padding := r.itemPadding()
 
 	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.TextColor()
+	r.text.Color = theme.ForegroundColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 

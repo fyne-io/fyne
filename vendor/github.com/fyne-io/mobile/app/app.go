@@ -59,7 +59,7 @@ type App interface {
 
 type FileFilter struct {
 	Extensions []string
-	MimeTypes []string
+	MimeTypes  []string
 }
 
 // PublishResult is the result of an App.Publish call.

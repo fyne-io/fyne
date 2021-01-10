@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"fmt"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/data/binding"
@@ -46,10 +48,10 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.label.Color = theme.TextColor()
+	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.Disabled() {
-		c.label.Color = theme.DisabledTextColor()
+		c.label.Color = theme.DisabledColor()
 	}
 }
 
@@ -100,6 +102,39 @@ type Check struct {
 
 	focused bool
 	hovered bool
+
+	checkSource   binding.Bool
+	checkListener binding.DataListener
+}
+
+// Bind connects the specified data source to this Check.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Check will set the value into the data source.
+//
+// Since: 2.0.0
+func (c *Check) Bind(data binding.Bool) {
+	c.Unbind()
+	c.checkSource = data
+
+	c.checkListener = binding.NewDataListener(func() {
+		val, err := data.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+		c.Checked = val
+		if cache.IsRendered(c) {
+			c.Refresh()
+		}
+	})
+	data.AddListener(c.checkListener)
+
+	c.OnChanged = func(b bool) {
+		err := data.Set(b)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", b), err)
+		}
+	}
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -169,7 +204,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	defer c.propertyLock.RUnlock()
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
-	text := canvas.NewText(c.Text, theme.TextColor())
+	text := canvas.NewText(c.Text, theme.ForegroundColor())
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
@@ -190,12 +225,9 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
-		DisableableWidget{},
-		label,
-		false,
-		changed,
-		false,
-		false,
+		DisableableWidget: DisableableWidget{},
+		Text:              label,
+		OnChanged:         changed,
 	}
 
 	c.ExtendBaseWidget(c)
@@ -203,17 +235,11 @@ func NewCheck(label string, changed func(bool)) *Check {
 }
 
 // NewCheckWithData returns a check widget connected with the specified data source.
+//
+// Since: 2.0.0
 func NewCheckWithData(label string, data binding.Bool) *Check {
-	check := NewCheck(label, func(b bool) {
-		data.Set(b)
-	})
-
-	data.AddListener(binding.NewDataListener(func() {
-		check.Checked = data.Get()
-		if cache.IsRendered(check) {
-			check.Refresh()
-		}
-	}))
+	check := NewCheck(label, nil)
+	check.Bind(data)
 
 	return check
 }
@@ -235,16 +261,6 @@ func (c *Check) FocusLost() {
 	c.Refresh()
 }
 
-// Focused returns whether or not this Check has focus.
-//
-// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
-func (c *Check) Focused() bool {
-	if c.Disabled() {
-		return false
-	}
-	return c.focused
-}
-
 // TypedRune receives text input events when the Check is focused.
 func (c *Check) TypedRune(r rune) {
 	if c.Disabled() {
@@ -257,3 +273,18 @@ func (c *Check) TypedRune(r rune) {
 
 // TypedKey receives key input events when the Check is focused.
 func (c *Check) TypedKey(key *fyne.KeyEvent) {}
+
+// Unbind disconnects any configured data source from this Check.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (c *Check) Unbind() {
+	c.OnChanged = nil
+	if c.checkSource == nil || c.checkListener == nil {
+		return
+	}
+
+	c.checkSource.RemoveListener(c.checkListener)
+	c.checkListener = nil
+	c.checkSource = nil
+}

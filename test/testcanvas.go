@@ -25,6 +25,7 @@ type WindowlessCanvas interface {
 	Padded() bool
 	Resize(fyne.Size)
 	SetPadded(bool)
+	SetScale(float32)
 }
 
 type testCanvas struct {
@@ -128,11 +129,6 @@ func (c *testCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-// Deprecated
-func (c *testCanvas) Overlay() fyne.CanvasObject {
-	panic("deprecated method should not be used")
-}
-
 func (c *testCanvas) Overlays() fyne.OverlayStack {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
@@ -215,11 +211,6 @@ func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
 	defer c.propertyLock.Unlock()
 
 	c.onTypedRune = handler
-}
-
-// Deprecated
-func (c *testCanvas) SetOverlay(_ fyne.CanvasObject) {
-	panic("deprecated method should not be used")
 }
 
 func (c *testCanvas) SetPadded(padded bool) {

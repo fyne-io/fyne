@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -16,6 +17,9 @@ type Label struct {
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the label text
 	provider  *textProvider
+
+	textSource   binding.String
+	textListener binding.DataListener
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -24,13 +28,11 @@ func NewLabel(text string) *Label {
 }
 
 // NewLabelWithData returns an Label widget connected to the specified data source.
+//
+// Since: 2.0.0
 func NewLabelWithData(data binding.String) *Label {
-	label := NewLabel(data.Get())
-
-	data.AddListener(binding.NewDataListener(func() {
-		label.Text = data.Get()
-		label.Refresh()
-	}))
+	label := NewLabel("")
+	label.Bind(data)
 
 	return label
 }
@@ -44,6 +46,28 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 	}
 
 	return l
+}
+
+// Bind connects the specified data source to this Label.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+//
+// Since: 2.0.0
+func (l *Label) Bind(data binding.String) {
+	l.Unbind()
+	l.textSource = data
+	l.textListener = binding.NewDataListener(func() {
+		val, err := l.textSource.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+
+		l.Text = val
+		if cache.IsRendered(l) {
+			l.Refresh()
+		}
+	})
+	data.AddListener(l.textListener)
 }
 
 // Refresh checks if the text content should be updated then refreshes the graphical context
@@ -80,6 +104,20 @@ func (l *Label) SetText(text string) {
 	l.provider.setText(text) // calls refresh
 }
 
+// Unbind disconnects any configured data source from this Label.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0.0
+func (l *Label) Unbind() {
+	if l.textSource == nil || l.textListener == nil {
+		return
+	}
+
+	l.textSource.RemoveListener(l.textListener)
+	l.textListener = nil
+	l.textSource = nil
+}
+
 // textAlign tells the rendering textProvider our alignment
 func (l *Label) textAlign() fyne.TextAlign {
 	return l.Alignment
@@ -97,7 +135,7 @@ func (l *Label) textStyle() fyne.TextStyle {
 
 // textColor tells the rendering textProvider our color
 func (l *Label) textColor() color.Color {
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 // concealed tells the rendering textProvider if we are a concealed field

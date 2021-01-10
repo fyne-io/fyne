@@ -41,10 +41,12 @@ type glPainter struct {
 	context  driver.WithContext
 	program  Program
 	texScale float32
+	pixScale float32 // pre-calculate scale*texScale for each draw
 }
 
 func (p *glPainter) SetFrameBufferScale(scale float32) {
 	p.texScale = scale
+	p.pixScale = p.canvas.Scale() * p.texScale
 }
 
 func (p *glPainter) Clear() {
@@ -52,10 +54,10 @@ func (p *glPainter) Clear() {
 }
 
 func (p *glPainter) StartClipping(pos fyne.Position, size fyne.Size) {
-	x := p.textureScaleInt(pos.X)
-	y := p.textureScaleInt(pos.Y)
-	w := p.textureScaleInt(size.Width)
-	h := p.textureScaleInt(size.Height)
+	x := p.textureScale(pos.X)
+	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
+	w := p.textureScale(size.Width)
+	h := p.textureScale(size.Height)
 	p.glScissorOpen(int32(x), int32(y), int32(w), int32(h))
 }
 
@@ -73,18 +75,12 @@ func (p *glPainter) Free(obj fyne.CanvasObject) {
 	p.freeTexture(obj)
 }
 
-func (p *glPainter) textureScaleInt(v int) int {
-	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
-		return v
+func (p *glPainter) textureScale(v float32) float32 {
+	if p.pixScale == 1.0 {
+		return float32(math.Round(float64(v)))
 	}
-	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
-}
 
-func (p *glPainter) textureScale(v float32) int {
-	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
-		return int(v)
-	}
-	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
+	return float32(math.Round(float64(v * p.pixScale)))
 }
 
 var startCacheMonitor = &sync.Once{}
@@ -93,7 +89,7 @@ var startCacheMonitor = &sync.Once{}
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &glPainter{canvas: c, context: ctx}
-	p.texScale = 1.0
+	p.SetFrameBufferScale(1.0)
 
 	glInit()
 	startCacheMonitor.Do(func() {

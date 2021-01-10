@@ -103,7 +103,7 @@ func (t *textProvider) updateRowBounds() {
 	textSize := theme.TextSize()
 	maxWidth := t.size.Width - 2*theme.Padding()
 
-	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
+	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) float32 {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	})
 }
@@ -233,7 +233,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 		measureText = strings.Repeat(passwordChar, col)
 	}
 
-	label := canvas.NewText(measureText, theme.TextColor())
+	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
 	return label.MinSize()
 }
@@ -253,13 +253,13 @@ func (r *textRenderer) MinSize() fyne.Size {
 	r.provider.propertyLock.RUnlock()
 
 	charMinSize := r.provider.charMinSize()
-	height := 0
-	width := 0
+	height := float32(0)
+	width := float32(0)
 	i := 0
 
 	r.provider.propertyLock.RLock()
 	texts := r.texts
-	count := fyne.Min(len(texts), r.provider.rows())
+	count := int(fyne.Min(float32(len(texts)), float32(r.provider.rows())))
 	r.provider.propertyLock.RUnlock()
 
 	for ; i < count; i++ {
@@ -293,7 +293,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the label to match the current theme.
 func (r *textRenderer) applyTheme() {
-	c := theme.TextColor()
+	c := theme.ForegroundColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
 	}
@@ -329,7 +329,7 @@ func (r *textRenderer) Refresh() {
 		add := false
 		if index >= len(r.texts) {
 			add = true
-			textCanvas = canvas.NewText(line, theme.TextColor())
+			textCanvas = canvas.NewText(line, theme.ForegroundColor())
 		} else {
 			textCanvas = r.texts[index]
 			textCanvas.Text = line
@@ -415,7 +415,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 
 // lineBounds accepts a slice of runes, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
-func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
+func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth float32, measurer func([]rune) float32) [][2]int {
 
 	lines := splitLines(text)
 	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
