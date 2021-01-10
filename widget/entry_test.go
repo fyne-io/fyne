@@ -1694,7 +1694,7 @@ func TestEntry_Select(t *testing.T) {
 		},
 		// Erase the selection and add a newline at selection start
 		"enter": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyEnter},
+			keys:     []fyne.KeyName{fyne.KeyEnter},
 			wantText: "Testing\nTe\nng\nTesting",
 			wantMarkup: `
       	<canvas padded size="150x200">
@@ -1718,7 +1718,7 @@ func TestEntry_Select(t *testing.T) {
 			`,
 		},
 		"enter reverse": {
-			keys:         []fyne.KeyName{keyShiftLeftUp, fyne.KeyEnter},
+			keys:         []fyne.KeyName{fyne.KeyEnter},
 			setupReverse: true,
 			wantText:     "Testing\nTe\nng\nTesting",
 			wantMarkup: `
