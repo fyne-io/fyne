@@ -1,4 +1,4 @@
-// +build !ios,!android,!mobile,!nacl
+// +build mobile,nacl
 
 package app
 
@@ -15,11 +15,5 @@ func (a *fyneApp) storageRoot() string {
 }
 
 func (p *preferences) watch() {
-	watchFile(p.storagePath(), func() {
-		if p.ignoreChange {
-			return
-		}
-
-		p.load()
-	})
+	// no-op as we are in mobile simulation mode
 }
