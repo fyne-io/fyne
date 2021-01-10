@@ -38,13 +38,15 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 //
 // Implements: fyne.Widget
 func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
+	background := canvas.NewRectangle(color.Transparent)
 	text := canvas.NewText(i.Menu.Label, theme.ForegroundColor())
-	objects := []fyne.CanvasObject{text}
+	objects := []fyne.CanvasObject{background, text}
 
 	return &menuBarItemRenderer{
 		widget.NewBaseRenderer(objects),
 		i,
 		text,
+		background,
 	}
 }
 
@@ -133,25 +135,20 @@ func (i *menuBarItem) Tapped(*fyne.PointEvent) {
 
 type menuBarItemRenderer struct {
 	widget.BaseRenderer
-	i    *menuBarItem
-	text *canvas.Text
+	i          *menuBarItem
+	text       *canvas.Text
+	background *canvas.Rectangle
 }
 
-func (r *menuBarItemRenderer) BackgroundColor() color.Color {
-	if r.i.hovered || (r.i.child != nil && r.i.child.Visible()) {
-		return theme.HoverColor()
-	}
-
-	return color.Transparent
-}
-
-func (r *menuBarItemRenderer) Layout(_ fyne.Size) {
+func (r *menuBarItemRenderer) Layout(size fyne.Size) {
 	padding := r.padding()
 
 	r.text.TextSize = theme.TextSize()
 	r.text.Color = theme.ForegroundColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+
+	r.background.Resize(size)
 }
 
 func (r *menuBarItemRenderer) MinSize() fyne.Size {
@@ -159,6 +156,11 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuBarItemRenderer) Refresh() {
+	if r.i.hovered || (r.i.child != nil && r.i.child.Visible()) {
+		r.background.FillColor = theme.HoverColor()
+	} else {
+		r.background.FillColor = color.Transparent
+	}
 	canvas.Refresh(r.i)
 }
 
