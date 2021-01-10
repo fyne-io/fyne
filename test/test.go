@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -63,14 +64,15 @@ func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, m
 		return false
 	}
 
-	master, err := ioutil.ReadFile(masterPath)
+	raw, err := ioutil.ReadFile(masterPath)
 	require.NoError(t, err)
+	master := strings.ReplaceAll(string(raw), "\r", "")
 
 	var msg string
 	if len(msgAndArgs) > 0 {
 		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
 	}
-	if !assert.Equal(t, string(master), got, "%sMarkup did not match master. Actual markup written to file://%s.", msg, failedPath) {
+	if !assert.Equal(t, master, got, "%sMarkup did not match master. Actual markup written to file://%s.", msg, failedPath) {
 		require.NoError(t, writeMarkup(failedPath, got))
 		return false
 	}
