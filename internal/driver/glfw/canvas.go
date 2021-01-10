@@ -131,11 +131,6 @@ func (c *glCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *glCanvas) Overlay() fyne.CanvasObject {
-	return c.Overlays().Top()
-}
-
 func (c *glCanvas) Overlays() fyne.OverlayStack {
 	c.RLock()
 	defer c.RUnlock()
@@ -227,14 +222,6 @@ func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	c.RLock()
-	o := c.overlays
-	c.RUnlock()
-	o.setOverlay(overlay)
-}
-
 func (c *glCanvas) SetPadded(padded bool) {
 	c.Lock()
 	defer c.Unlock()
@@ -243,10 +230,7 @@ func (c *glCanvas) SetPadded(padded bool) {
 	c.content.Move(c.contentPos())
 }
 
-// SetScale sets the render scale for this specific canvas
-//
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *glCanvas) SetScale(_ float32) {
+func (c *glCanvas) reloadScale() {
 	if !c.context.(*window).visible {
 		return
 	}
@@ -588,19 +572,6 @@ func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
-}
-
-// concurrency safe implementation of deprecated c.SetOverlay
-func (o *overlayStack) setOverlay(overlay fyne.CanvasObject) {
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
-
-	if len(o.List()) > 0 {
-		o.remove(o.List()[0])
-	}
-	if overlay != nil {
-		o.add(overlay)
-	}
 }
 
 type renderCacheNode struct {

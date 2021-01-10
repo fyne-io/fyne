@@ -119,33 +119,33 @@ func TestFocusNext(t *testing.T) {
 	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f1, c.Focused())
-	assert.True(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.True(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f2, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.True(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.True(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f3, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.True(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.True(t, f3.focused)
 
 	test.FocusNext(c)
 	assert.Equal(t, f1, c.Focused())
-	assert.True(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.True(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 }
 
 func TestFocusPrevious(t *testing.T) {
@@ -156,33 +156,33 @@ func TestFocusPrevious(t *testing.T) {
 	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f3, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.True(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.True(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f2, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.True(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.True(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f1, c.Focused())
-	assert.True(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.False(t, f3.Focused())
+	assert.True(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.False(t, f3.focused)
 
 	test.FocusPrevious(c)
 	assert.Equal(t, f3, c.Focused())
-	assert.False(t, f1.Focused())
-	assert.False(t, f2.Focused())
-	assert.True(t, f3.Focused())
+	assert.False(t, f1.focused)
+	assert.False(t, f2.focused)
+	assert.True(t, f3.focused)
 }
 
 func TestScroll(t *testing.T) {
@@ -230,10 +230,6 @@ func (f *focusable) FocusGained() {
 
 func (f *focusable) FocusLost() {
 	f.focused = false
-}
-
-func (f *focusable) Focused() bool {
-	return f.focused
 }
 
 func (f *focusable) TypedKey(event *fyne.KeyEvent) {

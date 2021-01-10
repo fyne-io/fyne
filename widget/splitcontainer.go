@@ -201,7 +201,7 @@ func newDivider(split *SplitContainer) *divider {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (d *divider) CreateRenderer() fyne.WidgetRenderer {
 	d.ExtendBaseWidget(d)
-	r := canvas.NewRectangle(theme.TextColor())
+	r := canvas.NewRectangle(theme.ForegroundColor())
 	return &dividerRenderer{
 		divider:   d,
 		rectangle: r,
@@ -300,7 +300,7 @@ func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *dividerRenderer) Refresh() {
-	r.rectangle.FillColor = theme.TextColor()
+	r.rectangle.FillColor = theme.ForegroundColor()
 	r.Layout(r.divider.Size())
 }
 

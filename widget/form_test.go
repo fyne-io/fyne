@@ -104,11 +104,15 @@ func TestForm_Renderer(t *testing.T) {
 						</widget>
 						<widget pos="51,0" size="155x37" type="*widget.Entry">
 							<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-							<widget pos="4,4" size="147x29" type="*widget.textProvider">
-								<text color="placeholder" pos="4,4" size="139x21"></text>
-							</widget>
-							<widget pos="4,4" size="147x29" type="*widget.textProvider">
-								<text pos="4,4" size="139x21"></text>
+							<widget pos="4,4" size="147x29" type="*widget.ScrollContainer">
+								<widget size="147x29" type="*widget.entryContent">
+									<widget size="147x29" type="*widget.textProvider">
+										<text color="placeholder" pos="4,4" size="139x21"></text>
+									</widget>
+									<widget size="147x29" type="*widget.textProvider">
+										<text pos="4,4" size="139x21"></text>
+									</widget>
+								</widget>
 							</widget>
 						</widget>
 						<widget pos="0,41" size="47x37" type="*widget.Label">
@@ -116,11 +120,15 @@ func TestForm_Renderer(t *testing.T) {
 						</widget>
 						<widget pos="51,41" size="155x37" type="*widget.Entry">
 							<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-							<widget pos="4,4" size="147x29" type="*widget.textProvider">
-								<text color="placeholder" pos="4,4" size="139x21"></text>
-							</widget>
-							<widget pos="4,4" size="147x29" type="*widget.textProvider">
-								<text pos="4,4" size="139x21"></text>
+							<widget pos="4,4" size="147x29" type="*widget.ScrollContainer">
+								<widget size="147x29" type="*widget.entryContent">
+									<widget size="147x29" type="*widget.textProvider">
+										<text color="placeholder" pos="4,4" size="139x21"></text>
+									</widget>
+									<widget size="147x29" type="*widget.textProvider">
+										<text pos="4,4" size="139x21"></text>
+									</widget>
+								</widget>
 							</widget>
 						</widget>
 					</container>

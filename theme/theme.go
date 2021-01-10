@@ -63,6 +63,11 @@ const (
 	// Since 2.0.0
 	ColorNameDisabled fyne.ThemeColorName = "disabled"
 
+	// ColorNameError is the name of theme lookup for foreground error color.
+	//
+	// Since 2.0.0
+	ColorNameError fyne.ThemeColorName = "error"
+
 	// ColorNameFocus is the name of theme lookup for focus color.
 	//
 	// Since 2.0.0
@@ -118,20 +123,25 @@ const (
 	// Since 2.0.0
 	SizeNameScrollBarSmall fyne.ThemeSizeName = "scrollBarSmall"
 
+	// SizeNameSeparatorThickness is the name of theme lookup for the thickness of a separator.
+	//
+	// Since 2.0.0
+	SizeNameSeparatorThickness fyne.ThemeSizeName = "separator"
+
 	// SizeNameText is the name of theme lookup for text size.
 	//
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
-	// VariantNameDark is the version of a theme that satisfies a user preference for a light look.
+	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since 2.0.0
-	VariantNameDark fyne.ThemeVariant = 0
+	VariantDark fyne.ThemeVariant = 0
 
-	// VariantNameLight is the version of a theme that satisfies a user preference for a dark look.
+	// VariantLight is the version of a theme that satisfies a user preference for a dark look.
 	//
 	// Since 2.0.0
-	VariantNameLight fyne.ThemeVariant = 1
+	VariantLight fyne.ThemeVariant = 1
 
 	// potential for adding theme types such as high visibility or monochrome...
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
@@ -140,6 +150,7 @@ const (
 var (
 	defaultTheme = setupDefaultTheme()
 
+	errorColor    = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 	primaryColors = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
@@ -154,27 +165,29 @@ var (
 	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
 
 	darkPalette = map[fyne.ThemeColorName]color.Color{
-		"background":     color.NRGBA{0x30, 0x30, 0x30, 0xff},
-		"button":         color.Transparent,
-		"disabled":       color.NRGBA{0xff, 0xff, 0xff, 0x42},
-		"disabledButton": color.NRGBA{0x26, 0x26, 0x26, 0xff},
-		"foreground":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		"hover":          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
-		"placeholder":    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		ColorNameBackground:     color.NRGBA{0x30, 0x30, 0x30, 0xff},
+		ColorNameButton:         color.Transparent,
+		ColorNameDisabled:       color.NRGBA{0xff, 0xff, 0xff, 0x42},
+		ColorNameDisabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
+		ColorNameError:          errorColor,
+		ColorNameForeground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameHover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
+		ColorNamePlaceHolder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
-		"background":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		"button":         color.Transparent,
-		"disabled":       color.NRGBA{0x0, 0x0, 0x0, 0x42},
-		"disabledButton": color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
-		"foreground":     color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		"hover":          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
-		"placeholder":    color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
+		ColorNameBackground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameButton:         color.Transparent,
+		ColorNameDisabled:       color.NRGBA{0x0, 0x0, 0x0, 0x42},
+		ColorNameDisabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
+		ColorNameError:          errorColor,
+		ColorNameForeground:     color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		ColorNameHover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+		ColorNamePlaceHolder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
 )
 
 type builtinTheme struct {
@@ -192,7 +205,7 @@ func DefaultTheme() fyne.Theme {
 
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
-	theme := &builtinTheme{variant: VariantNameLight}
+	theme := &builtinTheme{variant: VariantLight}
 
 	theme.initFonts()
 	return theme
@@ -200,7 +213,7 @@ func LightTheme() fyne.Theme {
 
 // DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{variant: VariantNameDark}
+	theme := &builtinTheme{variant: VariantDark}
 
 	theme.initFonts()
 	return theme
@@ -228,7 +241,7 @@ func (t *builtinTheme) initFonts() {
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	colors := darkPalette
-	if v == VariantNameLight {
+	if v == VariantLight {
 		colors = lightPalette
 	}
 
@@ -261,6 +274,8 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 
 func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	switch s {
+	case SizeNameSeparatorThickness:
+		return 1
 	case SizeNameInlineIcon:
 		return 20
 	case SizeNamePadding:
@@ -299,9 +314,9 @@ func DisabledButtonColor() color.Color {
 	return current().Color(ColorNameDisabledButton, currentVariant())
 }
 
-// TextColor returns the theme's standard text color
+// TextColor returns the theme's standard text color - this is actually the foreground color since 1.4.
 //
-// Deprecated: Use theme.Foreground colour instead
+// Deprecated: Use theme.ForegroundColor() colour instead
 func TextColor() color.Color {
 	return current().Color(ColorNameForeground, currentVariant())
 }
@@ -313,11 +328,18 @@ func DisabledColor() color.Color {
 	return current().Color(ColorNameDisabled, currentVariant())
 }
 
-// DisabledTextColor returns the color for a disabledIcon UI element
+// DisabledTextColor returns the theme's disabled text color - this is actually the disabled color since 1.4.
 //
-// Deprecated: Use DisabledColor() instead
+// Deprecated: Use theme.DisabledColor() colour instead
 func DisabledTextColor() color.Color {
 	return current().Color(ColorNameDisabled, currentVariant())
+}
+
+// ErrorColor returns the theme's error text color
+//
+// Since 2.0.0
+func ErrorColor() color.Color {
+	return current().Color(ColorNameError, currentVariant())
 }
 
 // PlaceHolderColor returns the theme's standard text color
@@ -396,6 +418,13 @@ func Padding() float32 {
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() float32 {
 	return current().Size(SizeNameInlineIcon)
+}
+
+// SeparatorThicknessSize is the standard thickness of the separator widget.
+//
+// Since 2.0.0
+func SeparatorThicknessSize() float32 {
+	return current().Size(SizeNameSeparatorThickness)
 }
 
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer

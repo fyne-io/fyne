@@ -71,21 +71,8 @@ func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *mobileCanvas) Overlay() fyne.CanvasObject {
-	return c.overlays.Top()
-}
-
 func (c *mobileCanvas) Overlays() fyne.OverlayStack {
 	return c.overlays
-}
-
-// Deprecated: Use Overlays() instead.
-func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	if len(c.overlays.List()) > 0 {
-		c.overlays.Remove(c.overlays.List()[0])
-	}
-	c.overlays.Add(overlay)
 }
 
 func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
@@ -190,11 +177,6 @@ func (c *mobileCanvas) Size() fyne.Size {
 
 func (c *mobileCanvas) Scale() float32 {
 	return c.scale
-}
-
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *mobileCanvas) SetScale(_ float32) {
-	c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 }
 
 func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
@@ -342,7 +324,7 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, mobile.Touchable, fyne.Focusable:
+		case mobile.Touchable, fyne.Focusable:
 			return true
 		}
 

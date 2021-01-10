@@ -64,7 +64,7 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
-	p.label.Color = theme.TextColor()
+	p.label.Color = theme.ForegroundColor()
 	p.label.TextSize = theme.TextSize()
 }
 
@@ -138,7 +138,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	bar := canvas.NewRectangle(theme.PrimaryColor())
-	label := canvas.NewText("0%", theme.TextColor())
+	label := canvas.NewText("0%", theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignCenter
 	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
 }

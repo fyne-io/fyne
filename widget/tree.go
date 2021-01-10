@@ -211,7 +211,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 				}
 				// If this is not the first item, add a divider
 				if y > 0 {
-					y += separatorThickness
+					y += theme.SeparatorThicknessSize()
 				}
 
 				y += m.Height
@@ -387,6 +387,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	r.objects = nil
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
+	separatorThickness := theme.SeparatorThicknessSize()
 
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
@@ -505,7 +506,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a divider
 		if min.Height > 0 {
-			min.Height += separatorThickness
+			min.Height += theme.SeparatorThicknessSize()
 		}
 
 		m := r.treeContent.tree.leafMinSize

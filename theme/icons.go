@@ -527,8 +527,7 @@ func (res *ThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	clr := TextColor()
-	return colorizeResource(res.source, clr)
+	return colorizeResource(res.source, ForegroundColor())
 }
 
 // Error returns a different resource for indicating an error.
@@ -583,8 +582,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	clr := &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
-	return colorizeResource(res.source, clr)
+	return colorizeResource(res.source, ErrorColor())
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -632,8 +630,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	clr := DisabledTextColor()
-	return colorizeResource(res.source, clr)
+	return colorizeResource(res.source, DisabledColor())
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledIconColor setting.

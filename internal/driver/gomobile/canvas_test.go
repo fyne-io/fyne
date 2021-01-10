@@ -251,7 +251,7 @@ func TestCanvas_Focusable(t *testing.T) {
 	content := newFocusableEntry()
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(content)
-	c.resize(fyne.NewSize(25, 25))
+	content.Resize(fyne.NewSize(25, 25))
 
 	c.tapDown(fyne.NewPos(10, 10), 0)
 	assert.Equal(t, 1, content.focusedTimes)

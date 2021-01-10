@@ -135,7 +135,7 @@ func (l *Label) textStyle() fyne.TextStyle {
 
 // textColor tells the rendering textProvider our color
 func (l *Label) textColor() color.Color {
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 // concealed tells the rendering textProvider if we are a concealed field

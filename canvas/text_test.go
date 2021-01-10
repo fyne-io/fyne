@@ -105,7 +105,7 @@ func TestText_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			text := canvas.NewText(tt.text, theme.TextColor())
+			text := canvas.NewText(tt.text, theme.ForegroundColor())
 			text.Alignment = tt.align
 
 			window := test.NewWindow(text)

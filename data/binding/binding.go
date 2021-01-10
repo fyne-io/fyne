@@ -88,9 +88,6 @@ func (b *base) RemoveListener(l DataListener) {
 }
 
 func (b *base) trigger() {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
 	for _, listen := range b.listeners {
 		queueItem(listen.DataChanged)
 	}
