@@ -42,8 +42,9 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
+	background := canvas.NewRectangle(color.Transparent)
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
-	objects := []fyne.CanvasObject{text}
+	objects := []fyne.CanvasObject{background, text}
 	var icon *canvas.Image
 	if i.Item.ChildMenu != nil {
 		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
@@ -54,6 +55,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		i:            i,
 		icon:         icon,
 		text:         text,
+		background:   background,
 	}
 }
 
@@ -146,14 +148,7 @@ type menuItemRenderer struct {
 	lastThemePadding float32
 	minSize          fyne.Size
 	text             *canvas.Text
-}
-
-func (r *menuItemRenderer) BackgroundColor() color.Color {
-	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
-		return theme.HoverColor()
-	}
-
-	return color.Transparent
+	background       *canvas.Rectangle
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
@@ -168,6 +163,8 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 		r.icon.Move(fyne.NewPos(size.Width-theme.IconInlineSize(), (size.Height-theme.IconInlineSize())/2))
 	}
+
+	r.background.Resize(size)
 }
 
 func (r *menuItemRenderer) MinSize() fyne.Size {
@@ -184,6 +181,11 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuItemRenderer) Refresh() {
+	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
+		r.background.FillColor = theme.HoverColor()
+	} else {
+		r.background.FillColor = color.Transparent
+	}
 	canvas.Refresh(r.i)
 }
 

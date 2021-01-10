@@ -44,12 +44,12 @@ func TestMenu_ItemHovered(t *testing.T) {
 	m.Resize(size)
 
 	mi := m.Items[0].(*menuItem)
-	r1 := cache.Renderer(mi)
-	assert.Equal(t, color.Transparent, r1.BackgroundColor())
+	r1 := cache.Renderer(mi).(*menuItemRenderer)
+	assert.Equal(t, color.Transparent, r1.background.FillColor)
 	mi.MouseIn(nil)
-	assert.Equal(t, theme.HoverColor(), r1.BackgroundColor())
+	assert.Equal(t, theme.HoverColor(), r1.background.FillColor)
 	mi.MouseOut()
-	assert.Equal(t, color.Transparent, r1.BackgroundColor())
+	assert.Equal(t, color.Transparent, r1.background.FillColor)
 
 	sub1Widget := m.Items[3].(*menuItem)
 	assert.Equal(t, sub1, sub1Widget.Item)
