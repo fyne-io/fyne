@@ -65,10 +65,10 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv := newTextProvider(s.Selected, s)
 	txtProv.ExtendBaseWidget(txtProv)
 
-	bg := canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{bg, txtProv, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
-	bg.FillColor = r.buttonColor()
+	background := canvas.NewRectangle(theme.ButtonColor())
+	objects := []fyne.CanvasObject{background, txtProv, icon}
+	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, background, s}
+	background.FillColor = r.buttonColor()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
 	r.updateLabel()
@@ -286,10 +286,10 @@ func (s *Select) updateSelected(text string) {
 type selectRenderer struct {
 	*widget.ShadowingRenderer
 
-	icon  *Icon
-	label *textProvider
-	bg    *canvas.Rectangle
-	combo *Select
+	icon       *Icon
+	label      *textProvider
+	background *canvas.Rectangle
+	combo      *Select
 }
 
 // Layout the components of the button widget
@@ -298,8 +298,8 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	s.LayoutShadow(size.Subtract(fyne.NewSize(doublePad, doublePad)), fyne.NewPos(theme.Padding(), theme.Padding()))
 	inner := size.Subtract(fyne.NewSize(doublePad*2, doublePad))
 
-	s.bg.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	s.bg.Resize(size.Subtract(fyne.NewSize(doublePad, doublePad)))
+	s.background.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	s.background.Resize(size.Subtract(fyne.NewSize(doublePad, doublePad)))
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
 	labelSize := inner.Subtract(offset)
@@ -332,7 +332,7 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RLock()
 	s.updateLabel()
 	s.updateIcon()
-	s.bg.FillColor = s.buttonColor()
+	s.background.FillColor = s.buttonColor()
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())

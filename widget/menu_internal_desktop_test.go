@@ -3,7 +3,6 @@
 package widget
 
 import (
-	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -45,11 +44,12 @@ func TestMenu_ItemHovered(t *testing.T) {
 
 	mi := m.Items[0].(*menuItem)
 	r1 := cache.Renderer(mi).(*menuItemRenderer)
-	assert.Equal(t, color.Transparent, r1.background.FillColor)
+	assert.False(t, r1.background.Visible())
 	mi.MouseIn(nil)
 	assert.Equal(t, theme.HoverColor(), r1.background.FillColor)
+	assert.True(t, r1.background.Visible())
 	mi.MouseOut()
-	assert.Equal(t, color.Transparent, r1.background.FillColor)
+	assert.False(t, r1.background.Visible())
 
 	sub1Widget := m.Items[3].(*menuItem)
 	assert.Equal(t, sub1, sub1Widget.Item)

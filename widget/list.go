@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fmt"
-	"image/color"
 	"math"
 
 	"fyne.io/fyne"
@@ -392,7 +391,8 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
-	li.statusIndicator = canvas.NewRectangle(color.Transparent)
+	li.statusIndicator = canvas.NewRectangle(theme.HoverColor())
+	li.statusIndicator.Hide()
 
 	objects := []fyne.CanvasObject{li.statusIndicator, li.child}
 
@@ -462,11 +462,14 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 func (li *listItemRenderer) Refresh() {
 	if li.item.selected {
 		li.item.statusIndicator.FillColor = theme.FocusColor()
+		li.item.statusIndicator.Show()
 	} else if li.item.hovered {
 		li.item.statusIndicator.FillColor = theme.HoverColor()
+		li.item.statusIndicator.Show()
 	} else {
-		li.item.statusIndicator.FillColor = color.Transparent
+		li.item.statusIndicator.Hide()
 	}
+	li.item.statusIndicator.Refresh()
 	canvas.Refresh(li.item.super())
 }
 

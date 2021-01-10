@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -42,7 +40,8 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(color.Transparent)
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
 	objects := []fyne.CanvasObject{background, text}
 	var icon *canvas.Image
@@ -183,8 +182,9 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 func (r *menuItemRenderer) Refresh() {
 	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
 		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
 	} else {
-		r.background.FillColor = color.Transparent
+		r.background.Hide()
 	}
 	canvas.Refresh(r.i)
 }

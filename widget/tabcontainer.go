@@ -481,7 +481,8 @@ type tabButton struct {
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	bg := canvas.NewRectangle(theme.HoverColor())
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
@@ -491,17 +492,17 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	label.TextStyle.Bold = true
 	label.Alignment = fyne.TextAlignCenter
 
-	objects := []fyne.CanvasObject{bg, label}
+	objects := []fyne.CanvasObject{background, label}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
 	r := &tabButtonRenderer{
-		button:  b,
-		bg:      bg,
-		icon:    icon,
-		label:   label,
-		objects: objects,
+		button:     b,
+		background: background,
+		icon:       icon,
+		label:      label,
+		objects:    objects,
 	}
 	r.Refresh()
 	return r
@@ -514,7 +515,7 @@ func (b *tabButton) MinSize() fyne.Size {
 
 func (b *tabButton) MouseIn(e *desktop.MouseEvent) {
 	b.hovered = true
-	canvas.Refresh(b)
+	b.Refresh()
 }
 
 func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
@@ -522,7 +523,7 @@ func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
 
 func (b *tabButton) MouseOut() {
 	b.hovered = false
-	canvas.Refresh(b)
+	b.Refresh()
 }
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
@@ -539,18 +540,18 @@ func (b *tabButton) setText(text string) {
 }
 
 type tabButtonRenderer struct {
-	button  *tabButton
-	bg      *canvas.Rectangle
-	icon    *canvas.Image
-	label   *canvas.Text
-	objects []fyne.CanvasObject
+	button     *tabButton
+	background *canvas.Rectangle
+	icon       *canvas.Image
+	label      *canvas.Text
+	objects    []fyne.CanvasObject
 }
 
 func (r *tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
-	r.bg.Resize(size)
+	r.background.Resize(size)
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
@@ -616,10 +617,10 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	if r.button.hovered {
-		r.bg.FillColor = theme.HoverColor()
-		r.bg.Show()
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
 	} else {
-		r.bg.Hide()
+		r.background.Hide()
 	}
 
 	r.label.Text = r.button.Text

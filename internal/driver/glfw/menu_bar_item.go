@@ -1,8 +1,6 @@
 package glfw
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -38,7 +36,8 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 //
 // Implements: fyne.Widget
 func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(color.Transparent)
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	text := canvas.NewText(i.Menu.Label, theme.ForegroundColor())
 	objects := []fyne.CanvasObject{background, text}
 
@@ -158,8 +157,9 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 func (r *menuBarItemRenderer) Refresh() {
 	if r.i.hovered || (r.i.child != nil && r.i.child.Visible()) {
 		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
 	} else {
-		r.background.FillColor = color.Transparent
+		r.background.Hide()
 	}
 	canvas.Refresh(r.i)
 }
