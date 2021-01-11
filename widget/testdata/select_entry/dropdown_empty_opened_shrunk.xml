@@ -2,7 +2,7 @@
 	<content>
 		<widget pos="10,10" size="110x37" type="*widget.SelectEntry">
 			<rectangle fillColor="focus" size="110x37"/>
-			<rectangle fillColor="shadow" pos="0,37" size="110x0"/>
+			<rectangle fillColor="shadow" pos="0,35" size="110x2"/>
 			<widget pos="4,4" size="82x29" type="*widget.Scroll">
 				<widget backgroundColor="focus" size="82x29" type="*widget.entryContent">
 					<widget size="82x29" type="*widget.textProvider">

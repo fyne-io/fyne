@@ -22,7 +22,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameDisabled:       color.Black,
 			theme.ColorNameDisabledButton: color.White,
 			theme.ColorNameError:          blue,
-			theme.ColorNameFocus:          green,
+			theme.ColorNameFocus:          color.RGBA{red.R, red.G, red.B, 30},
 			theme.ColorNameForeground:     color.White,
 			theme.ColorNameHover:          green,
 			theme.ColorNamePlaceHolder:    blue,
@@ -31,11 +31,11 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameShadow:         blue,
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
-			fyne.TextStyle{}:                         theme.DefaultTextBoldFont(),
-			fyne.TextStyle{Bold: true}:               theme.DefaultTextItalicFont(),
-			fyne.TextStyle{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
-			fyne.TextStyle{Italic: true}:             theme.DefaultTextBoldItalicFont(),
-			fyne.TextStyle{Monospace: true}:          theme.DefaultTextFont(),
+			{}:                         theme.DefaultTextBoldFont(),
+			{Bold: true}:               theme.DefaultTextItalicFont(),
+			{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
+			{Italic: true}:             theme.DefaultTextBoldItalicFont(),
+			{Monospace: true}:          theme.DefaultTextFont(),
 		},
 		sizes: map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
@@ -44,6 +44,7 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameScrollBarSmall:     float32(2),
 			theme.SizeNameSeparatorThickness: float32(1),
 			theme.SizeNameText:               float32(18),
+			theme.SizeNameEntryUnderline:     float32(5),
 		},
 	}
 }
