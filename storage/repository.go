@@ -41,28 +41,6 @@ import (
 // Since: 2.0.0
 type Repository interface {
 
-	// ParseURI returns a method that given a text string creates a
-	// new URI instance. This may cause an error, for example if the string
-	// is an invalid URI or contains information that is invalid in the
-	// context of the repository's scheme.
-	//
-	// This method will be called only after the URI scheme has been
-	// verified to match the one the repository was registered to handle,
-	// however the URI is not validated further than this. It is required
-	// by convention (but not enforced by technical means) that this
-	// function should throw an error if the string is not a valid IETF RFC
-	// 3986 complaint URI. Fail to validate this at your own risk.
-	//
-	// NOTE: it is highly recommended to use net/url (
-	// https://golang.org/pkg/net/url/ ) for parsing URI strings unless you
-	// have a good reason not to. It is mature and implements RFC 3986.
-	//
-	// If no implementation is provided, a generic URI based on RFC3986 is
-	// parsed without any special validation logic.
-	//
-	// Since 2.0.0
-	ParseURI() func(string) (fyne.URI, error)
-
 	// Init will be called while the repository is being registered.  This
 	// is the appropriate place to register any optional handlers relevant
 	// to a particular URI scheme.
@@ -76,29 +54,68 @@ type Repository interface {
 	// Since 2.0.0
 	Exists(u fyne.URI) (bool, error)
 
-	// Delete will be used to implement calls to storage.Delete() for the
-	// registered scheme of this repository.
-	//
-	// Since 2.0.0
-	Delete(u fyne.URI) error
-
 	// ReaderFrom will be used to implement calls to storage.ReaderFrom()
 	// for the registered scheme of this repository.
 	//
 	// Since 2.0.0
 	ReaderFrom(u fyne.URI) (fyne.URIReadCloser, error)
 
-	// WriterTo will be used to implement calls to storage.WriterTo() for
-	// the registered scheme of this repository.
+	// CanRead will be used to implement calls to storage.CanRead() for the
+	// registered scheme of this repository.
 	//
 	// Since 2.0.0
-	WriterTo(u fyne.URI) (fyne.URIWriteCloser, error)
+	CanRead(u fyne.URI) (bool, error)
+}
 
-	// Listable will be used to implement calls to storage.Listable() for
+// WriteableRepository is an extension of the Repository interface which also
+// supports obtaining a writer for URIs of the scheme it is registered to.
+//
+// If this interface is not implemented for a repository, then attempts to use
+// storage.Writer, storage.Delete, and storage.CanWrite will fail with
+// URIOperationNotSupportedError when called on URIs of the scheme this is
+// registered to.
+//
+// Since: 2.0.0
+type WriteableRepository interface {
+	Repository
+
+	// Writer will be used to implement calls to storage.WriterTo() for
 	// the registered scheme of this repository.
 	//
 	// Since 2.0.0
-	Listable(u fyne.URI) (bool, error)
+	Writer(u fyne.URI) (fyne.URIWriteCloser, error)
+
+	// CanWrite will be used to implement calls to storage.CanWrite() for the
+	// registered scheme of this repository.
+	//
+	// Since 2.0.0
+	CanWrite(u fyne.URI) (bool, error)
+
+	// Delete will be used to implement calls to storage.Delete() for the
+	// registered scheme of this repository.
+	//
+	// Since 2.0.0
+	Delete(u fyne.URI) error
+}
+
+// ListableRepository is an extension of the Repository interface which also
+// supports obtaining directory listings (generally analogous to a directory
+// listing) for URIs of the scheme it is registered to.
+//
+// If this interface is not implemented for a repository, then attempts to use
+// storage.CanList and storage.List will fail with
+// URIOperationNotSupportedError when called for URIs of the scheme it is
+// registered to.
+//
+// Since: 2.0.0
+type ListableRepository interface {
+	Repository
+
+	// CanList will be used to implement calls to storage.Listable() for
+	// the registered scheme of this repository.
+	//
+	// Since 2.0.0
+	CanList(u fyne.URI) (bool, error)
 
 	// List will be used to implement calls to storage.List() for the
 	// registered scheme of this repository.
@@ -107,46 +124,33 @@ type Repository interface {
 	List(u fyne.URI) ([]URI, error)
 }
 
-// RegisterCopy registers an implementation of a Copy() function for a specific
-// URI scheme. This function should only be called in Repository.Init(). If
-// the scheme does not have a registered repository, then this function will
-// fail with an error. If a Copy implementation is already registered for this
-// scheme, it will be replaced with this one silently.
-//
-// If no Copy implementation is registered for a particular scheme, then copies
-// will be implemented as if the URIs were of different types, that is the
-// source URI will be read using ReaderFrom(), and the destination written
-// using WriterTo(). This function is an opportunity to implement a more
-// optimal approach, such as leveraging remote operations for a network-backed
-// repository.
-//
-// Since 2.0.0
-func RegisterCopy(scheme string, copyImplementation func(fyne.URI, fyne.URI) error) error {
-	// TODO
+// gets fallbacks
+type HierarchicalRepository interface {
+	Repository
+
+	Parent(fyne.URI) (fyne.URI, error)
+
+	Child(Fyne.URI) (fyne.URI, error)
 }
 
-// RegisterRename registers an implementation of a Rename() function for a
-// specific URI scheme. This function should only be called in
-// Repository.Init(). If the scheme does not have a registered repository, then
-// this function will fail with an error. If a Rename implementation is already
-// registered for this scheme, it will be replaced with this one silently.
-//
-// If no Rename implementation is registered for a particular scheme, then
-// renames will be implemented as if the URIs were of different types, that is
-// the source URI will be read using ReaderFrom(), and the destination written
-// using WriterTo(), then the source will be deleted using Delete(). This
-// function is an opportunity to implement a more optimal approach, such as
-// leveraging remote operations for a network-backed repository.
-//
-// Since 2.0.0
-func RegisterRename(scheme string, renameImplementation func(fyne.URI, fyne.URI) error) error {
+// gets fallbacks
+type CopyableRepository interface {
+	Repository
+
+	Copy(fyne.URI, fyne.URI) error
 }
 
-// RegisterRepository registers a storage repository so that operations on URIs
-// of the registered scheme will use methods implemented by the relevant
-// repository implementation. This method will call repository.Init(), and may
-// error if it does.
+// gets fallbacks
+type MovableRepository interface {
+	Repository
+
+	Move(fyne.URI, fyne.URI) error
+}
+
+// Register registers a storage repository so that operations on URIs of the
+// registered scheme will use methods implemented by the relevant repository
+// implementation.
 //
 // Since 2.0.0
-func RegisterRepository(scheme string, repository Repository) error {
+func Register(scheme string, repository Repository) {
 }
