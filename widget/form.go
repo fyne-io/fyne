@@ -158,11 +158,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 }
 
 func (f *Form) updateHelperText(item *FormItem) {
-	empty := false
-	if e, ok := item.Widget.(*Entry); ok {
-		empty = e.Text == ""
-	}
-	if item.validationError == nil || empty {
+	if item.validationError == nil {
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = theme.PlaceHolderColor()
 	} else {
