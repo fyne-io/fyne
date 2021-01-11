@@ -509,6 +509,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.CursorColumn = 0
 		e.CursorRow++
 		e.propertyLock.Unlock()
+	case fyne.KeyTab:
+		e.TypedRune('\t')
 	case fyne.KeyUp:
 		if !multiLine {
 			return
@@ -1136,7 +1138,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.validationStatus.Hide()
 	}
 
-	r.scroll.Content.Refresh()
+	cache.Renderer(r.scroll.Content.(*entryContent)).Refresh()
 	canvas.Refresh(r.entry.super())
 }
 
