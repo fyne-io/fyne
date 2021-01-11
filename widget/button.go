@@ -57,8 +57,6 @@ const (
 	// PrimaryButton that should be more prominent to the user.
 	// Deprecated: use Importance = HighImportance instead.
 	PrimaryButton
-
-	buttonTapDuration = 250
 )
 
 // Button widget has a text label and triggers an event func when clicked
