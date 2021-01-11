@@ -175,6 +175,7 @@ var (
 		ColorNameDisabled:       color.NRGBA{0xff, 0xff, 0xff, 0x42},
 		ColorNameDisabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
 		ColorNameError:          errorColor,
+		ColorNameFocus:          color.NRGBA{0xff, 0xff, 0xff, 0x19}, // TODO adjust
 		ColorNameForeground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		ColorNameHover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
@@ -188,11 +189,13 @@ var (
 		ColorNameDisabled:       color.NRGBA{0x0, 0x0, 0x0, 0x42},
 		ColorNameDisabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
 		ColorNameError:          errorColor,
+		ColorNameFocus:          color.NRGBA{0x0, 0x0, 0x0, 0x19}, // TODO adjust
 		ColorNameForeground:     color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		ColorNameHover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
+		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
+	}
 )
 
 type builtinTheme struct {
@@ -250,7 +253,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 		colors = lightPalette
 	}
 
-	if n == ColorNamePrimary || n == ColorNameFocus { // TODO new focus color
+	if n == ColorNamePrimary {
 		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	}
 

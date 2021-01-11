@@ -1,0 +1,92 @@
+<canvas size="200x300">
+	<content>
+		<rectangle size="200x300"/>
+	</content>
+	<overlay>
+		<widget size="200x300" type="*widget.OverlayContainer">
+			<widget pos="10,10" size="71x108" type="*widget.Menu">
+				<widget size="71x108" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+				</widget>
+				<widget size="71x108" type="*widget.Scroll">
+					<widget size="71x108" type="*widget.menuBox">
+						<container pos="0,4" size="71x116">
+							<widget size="71x29" type="*widget.menuItem">
+								<text pos="8,4" size="10x21">A</text>
+							</widget>
+							<widget pos="0,33" size="71x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="71x1"/>
+							</widget>
+							<widget pos="0,38" size="71x29" type="*widget.menuItem">
+								<text pos="8,4" size="55x21">B (long)</text>
+							</widget>
+							<widget pos="0,71" size="71x29" type="*widget.menuItem">
+								<text pos="8,4" size="10x21">C</text>
+								<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							</widget>
+						</container>
+					</widget>
+				</widget>
+				<widget pos="37,71" size="153x103" type="*widget.Menu">
+					<widget size="153x103" type="*widget.Shadow">
+						<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+						<linearGradient endColor="shadow" pos="0,-4" size="153x4"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="153,-4" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" pos="153,0" size="4x103" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="153,103" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,103" size="153x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+					</widget>
+					<widget size="153x103" type="*widget.Scroll">
+						<widget size="153x103" type="*widget.menuBox">
+							<container pos="0,4" size="153x111">
+								<widget size="153x29" type="*widget.menuItem">
+									<text pos="8,4" size="72x21">subitem A</text>
+								</widget>
+								<widget pos="0,33" size="153x29" type="*widget.menuItem">
+									<text pos="8,4" size="72x21">subitem B</text>
+								</widget>
+								<widget pos="0,66" size="153x29" type="*widget.menuItem">
+									<text pos="8,4" size="117x21">subitem C (long)</text>
+									<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+								</widget>
+							</container>
+						</widget>
+					</widget>
+					<widget pos="-6,66" size="159x70" type="*widget.Menu">
+						<widget size="159x70" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="159x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="159,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="159,0" size="4x70" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="159,70" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,70" size="159x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+						</widget>
+						<widget size="159x70" type="*widget.Scroll">
+							<widget size="159x70" type="*widget.menuBox">
+								<container pos="0,4" size="159x78">
+									<widget size="159x29" type="*widget.menuItem">
+										<text pos="8,4" size="143x21">subsubitem A (long)</text>
+									</widget>
+									<widget pos="0,33" size="159x29" type="*widget.menuItem">
+										<text pos="8,4" size="98x21">subsubitem B</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>

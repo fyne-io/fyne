@@ -195,7 +195,7 @@ func (r *radioItemRenderer) update() {
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = theme.BackgroundColor()
 	} else if r.item.focused {
-		r.focusIndicator.FillColor = theme.FocusColor()
+		r.focusIndicator.FillColor = theme.PrimaryColor()
 	} else if r.item.hovered {
 		r.focusIndicator.FillColor = theme.HoverColor()
 	} else {

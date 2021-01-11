@@ -1,0 +1,20 @@
+<canvas padded size="179x235">
+	<content>
+		<widget pos="4,4" size="171x227" type="*widget.Card">
+			<widget pos="2,2" size="167x223" type="*widget.Shadow">
+				<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="0,-1" size="167x1"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="167,-1" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" pos="167,0" size="1x223" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="167,223" size="1x1" startColor="shadow"/>
+				<linearGradient pos="0,223" size="167x1" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-1,223" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x223"/>
+			</widget>
+			<text bold pos="10,138" size="151x36" textSize="23">Longer title</text>
+			<text pos="10,178" size="151x21">subtitle with length</text>
+			<image pos="2,2" rsc="fyneLogo" size="167x128"/>
+			<rectangle fillColor="rgba(102,102,102,255)" pos="6,211" size="159x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+		</widget>
+	</content>
+</canvas>
