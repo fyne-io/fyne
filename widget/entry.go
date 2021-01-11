@@ -820,6 +820,9 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b[0]
+			if e.Wrapping != fyne.TextWrapOff && b[0] == pos && col == 0 && pos != 0 {
+				row++
+			}
 		} else {
 			break
 		}
