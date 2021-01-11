@@ -103,11 +103,11 @@ func TestForm_ChangeText(t *testing.T) {
 
 	renderer := test.WidgetRenderer(form)
 	c := renderer.Objects()[0].(*fyne.Container)
-	assert.Equal(t, "Test", c.Objects[0].(*Label).Text)
+	assert.Equal(t, "Test", c.Objects[0].(*tallerLabel).Text)
 
 	item.Text = "Changed"
 	form.Refresh()
-	assert.Equal(t, "Changed", c.Objects[0].(*Label).Text)
+	assert.Equal(t, "Changed", c.Objects[0].(*tallerLabel).Text)
 }
 
 func TestForm_ChangeTheme(t *testing.T) {

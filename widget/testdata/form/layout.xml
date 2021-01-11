@@ -1,53 +1,43 @@
-<canvas padded size="214x171">
+<canvas padded size="214x127">
 	<content>
-		<widget pos="4,4" size="206x163" type="*widget.Form">
-			<container size="206x122">
-				<widget size="47x59" type="*widget.Label">
+		<widget pos="4,4" size="206x119" type="*widget.Form">
+			<container size="206x78">
+				<widget size="47x37" type="*widget.tallerLabel">
 					<text alignment="trailing" bold pos="4,4" size="39x21">test1</text>
 				</widget>
-				<container pos="51,0" size="155x59">
-					<widget size="155x37" type="*widget.Entry">
-						<rectangle fillColor="focus" size="155x37"/>
-						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
-						<widget pos="4,4" size="147x29" type="*widget.Scroll">
-							<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
-								<widget size="147x29" type="*widget.textProvider">
-									<text color="placeholder" pos="4,4" size="139x21"></text>
-								</widget>
-								<widget size="147x29" type="*widget.textProvider">
-									<text pos="4,4" size="139x21"></text>
-								</widget>
+				<widget pos="51,0" size="155x37" type="*widget.Entry">
+					<rectangle fillColor="focus" size="155x37"/>
+					<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
+					<widget pos="4,4" size="147x29" type="*widget.Scroll">
+						<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
+							<widget size="147x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="139x21"></text>
+							</widget>
+							<widget size="147x29" type="*widget.textProvider">
+								<text pos="4,4" size="139x21"></text>
 							</widget>
 						</widget>
 					</widget>
-					<container pos="0,41" size="155x18">
-						<text color="placeholder" pos="8,0" size="0x0" textSize="0"></text>
-					</container>
-				</container>
-				<widget pos="0,63" size="47x59" type="*widget.Label">
+				</widget>
+				<widget pos="0,41" size="47x37" type="*widget.tallerLabel">
 					<text alignment="trailing" bold pos="4,4" size="39x21">test2</text>
 				</widget>
-				<container pos="51,63" size="155x59">
-					<widget size="155x37" type="*widget.Entry">
-						<rectangle fillColor="focus" size="155x37"/>
-						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
-						<widget pos="4,4" size="147x29" type="*widget.Scroll">
-							<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
-								<widget size="147x29" type="*widget.textProvider">
-									<text color="placeholder" pos="4,4" size="139x21"></text>
-								</widget>
-								<widget size="147x29" type="*widget.textProvider">
-									<text pos="4,4" size="139x21"></text>
-								</widget>
+				<widget pos="51,41" size="155x37" type="*widget.Entry">
+					<rectangle fillColor="focus" size="155x37"/>
+					<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
+					<widget pos="4,4" size="147x29" type="*widget.Scroll">
+						<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
+							<widget size="147x29" type="*widget.textProvider">
+								<text color="placeholder" pos="4,4" size="139x21"></text>
+							</widget>
+							<widget size="147x29" type="*widget.textProvider">
+								<text pos="4,4" size="139x21"></text>
 							</widget>
 						</widget>
 					</widget>
-					<container pos="0,41" size="155x18">
-						<text color="placeholder" pos="8,0" size="0x0" textSize="0"></text>
-					</container>
-				</container>
+				</widget>
 			</container>
-			<widget pos="0,126" size="206x37" type="*widget.Box">
+			<widget pos="0,82" size="206x37" type="*widget.Box">
 				<spacer size="0x0"/>
 				<widget size="99x37" type="*widget.Button">
 					<widget pos="2,2" size="95x33" type="*widget.Shadow">

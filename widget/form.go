@@ -47,10 +47,6 @@ type Form struct {
 	submitButton *Button
 }
 
-func (f *Form) createLabel(text string) *Label {
-	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
-}
-
 // Append adds a new row to the form, using the text as a label next to the specified Widget
 func (f *Form) Append(text string, widget fyne.CanvasObject) {
 	item := &FormItem{Text: text, Widget: widget}
@@ -84,6 +80,14 @@ func (f *Form) Refresh() {
 	f.updateLabels()
 	f.BaseWidget.Refresh()
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
+}
+
+func (f *Form) createLabel(text string) *tallerLabel {
+	l := &tallerLabel{}
+	l.Alignment = fyne.TextAlignTrailing
+	l.Text = text
+	l.TextStyle = fyne.TextStyle{Bold: true}
+	return l
 }
 
 func (f *Form) updateButtons() {
@@ -134,8 +138,13 @@ func (f *Form) checkValidation(err error) {
 
 func (f *Form) setUpHints(item *FormItem) fyne.CanvasObject {
 	_, ok := item.Widget.(fyne.Validatable)
-	if item.HintText == "" && !ok {
-		return item.Widget
+	if item.HintText == "" {
+		if !ok {
+			return item.Widget
+		}
+		if e, ok := item.Widget.(*Entry); ok && e.Validator == nil { // we don't have validation
+			return item.Widget
+		}
 	}
 
 	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
@@ -158,6 +167,9 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 }
 
 func (f *Form) updateHelperText(item *FormItem) {
+	if item.helperOutput == nil {
+		return // testing probably, either way not rendered yet
+	}
 	if item.validationError == nil {
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = theme.PlaceHolderColor()
@@ -170,7 +182,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
-		l := f.itemGrid.Objects[i*2].(*Label)
+		l := f.itemGrid.Objects[i*2].(*tallerLabel)
 		if l.Text == item.Text {
 			continue
 		}
@@ -210,4 +222,31 @@ func NewForm(items ...*FormItem) *Form {
 	form.ExtendBaseWidget(form)
 
 	return form
+}
+
+type tallerLabel struct {
+	Label
+}
+
+func (t *tallerLabel) CreateRenderer() fyne.WidgetRenderer {
+	return &tallerLabelRenderer{t.Label.CreateRenderer().(*textRenderer)}
+}
+
+type tallerLabelRenderer struct {
+	*textRenderer
+}
+
+func (t *tallerLabelRenderer) Layout(size fyne.Size) {
+	t.textRenderer.Layout(size.Subtract(fyne.NewSize(0, theme.Padding()*2)))
+
+	for _, text := range t.textRenderer.Objects() {
+		pos := text.Position()
+		pos.Y += theme.Padding()
+		text.Move(pos)
+	}
+}
+
+func (t *tallerLabelRenderer) MinSize() fyne.Size {
+	min := t.textRenderer.MinSize()
+	return min.Add(fyne.NewSize(0, theme.Padding()*2))
 }
