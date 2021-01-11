@@ -13,7 +13,11 @@ type FormItem struct {
 	Text   string
 	Widget fyne.CanvasObject
 
+	// Since: 2.0.0
+	HintText string
+
 	validationError error
+	helperOutput    *canvas.Text
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
@@ -128,14 +132,44 @@ func (f *Form) checkValidation(err error) {
 	f.submitButton.Enable()
 }
 
+func (f *Form) setUpHints(item *FormItem) fyne.CanvasObject {
+	_, ok := item.Widget.(fyne.Validatable)
+	if item.HintText == "" && !ok {
+		return item.Widget
+	}
+
+	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
+	text.TextSize = theme.CaptionTextSize()
+	text.Move(fyne.NewPos(theme.Padding()*2, 0))
+	item.helperOutput = text
+	f.updateHelperText(item)
+	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
+}
+
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].validationError = w.Validate()
 		w.SetOnValidationChanged(func(err error) {
 			f.Items[i].validationError = err
 			f.checkValidation(err)
+			f.updateHelperText(f.Items[i])
 		})
 	}
+}
+
+func (f *Form) updateHelperText(item *FormItem) {
+	empty := false
+	if e, ok := item.Widget.(*Entry); ok {
+		empty = e.Text == ""
+	}
+	if item.validationError == nil || empty {
+		item.helperOutput.Text = item.HintText
+		item.helperOutput.Color = theme.PlaceHolderColor()
+	} else {
+		item.helperOutput.Text = item.validationError.Error()
+		item.helperOutput.Color = theme.ErrorColor()
+	}
+	item.helperOutput.Refresh()
 }
 
 func (f *Form) updateLabels() {
@@ -146,6 +180,7 @@ func (f *Form) updateLabels() {
 		}
 
 		l.SetText(item.Text)
+		f.updateHelperText(item)
 	}
 }
 
@@ -160,8 +195,9 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	objects := make([]fyne.CanvasObject, len(f.Items)*2)
 	for i, item := range f.Items {
 		objects[i*2] = f.createLabel(item.Text)
-		objects[i*2+1] = item.Widget
+
 		f.setUpValidation(item.Widget, i)
+		objects[i*2+1] = f.setUpHints(item)
 	}
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 

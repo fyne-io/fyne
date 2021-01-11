@@ -273,8 +273,8 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 
 	form := &widget.Form{
 		Items: []*widget.FormItem{
-			{Text: "Name", Widget: name},
-			{Text: "Email", Widget: email},
+			{Text: "Name", Widget: name, HintText: "Your full name"},
+			{Text: "Email", Widget: email, HintText: "A valid email address"},
 		},
 		OnCancel: func() {
 			fmt.Println("Cancelled")

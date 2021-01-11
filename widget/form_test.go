@@ -95,44 +95,54 @@ func TestForm_Renderer(t *testing.T) {
 	defer w.Close()
 
 	test.AssertRendersToMarkup(t, `
-		<canvas padded size="214x127">
+		<canvas padded size="214x171">
 			<content>
-				<widget pos="4,4" size="206x119" type="*widget.Form">
-					<container size="206x78">
-						<widget size="47x37" type="*widget.Label">
+				<widget pos="4,4" size="206x163" type="*widget.Form">
+					<container size="206x122">
+						<widget size="47x59" type="*widget.Label">
 							<text alignment="trailing" bold pos="4,4" size="39x21">test1</text>
 						</widget>
-						<widget pos="51,0" size="155x37" type="*widget.Entry">
-							<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-							<widget pos="4,4" size="147x29" type="*widget.Scroll">
-								<widget size="147x29" type="*widget.entryContent">
-									<widget size="147x29" type="*widget.textProvider">
-										<text color="placeholder" pos="4,4" size="139x21"></text>
-									</widget>
-									<widget size="147x29" type="*widget.textProvider">
-										<text pos="4,4" size="139x21"></text>
+						<container pos="51,0" size="155x59">
+							<widget size="155x37" type="*widget.Entry">
+								<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
+								<widget pos="4,4" size="147x29" type="*widget.Scroll">
+									<widget size="147x29" type="*widget.entryContent">
+										<widget size="147x29" type="*widget.textProvider">
+											<text color="placeholder" pos="4,4" size="139x21"></text>
+										</widget>
+										<widget size="147x29" type="*widget.textProvider">
+											<text pos="4,4" size="139x21"></text>
+										</widget>
 									</widget>
 								</widget>
 							</widget>
-						</widget>
-						<widget pos="0,41" size="47x37" type="*widget.Label">
+							<container pos="0,41" size="155x18">
+								<text color="placeholder" pos="8,0" size="0x0" textSize="0"></text>
+							</container>
+						</container>
+						<widget pos="0,63" size="47x59" type="*widget.Label">
 							<text alignment="trailing" bold pos="4,4" size="39x21">test2</text>
 						</widget>
-						<widget pos="51,41" size="155x37" type="*widget.Entry">
-							<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-							<widget pos="4,4" size="147x29" type="*widget.Scroll">
-								<widget size="147x29" type="*widget.entryContent">
-									<widget size="147x29" type="*widget.textProvider">
-										<text color="placeholder" pos="4,4" size="139x21"></text>
-									</widget>
-									<widget size="147x29" type="*widget.textProvider">
-										<text pos="4,4" size="139x21"></text>
+						<container pos="51,63" size="155x59">
+							<widget size="155x37" type="*widget.Entry">
+								<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
+								<widget pos="4,4" size="147x29" type="*widget.Scroll">
+									<widget size="147x29" type="*widget.entryContent">
+										<widget size="147x29" type="*widget.textProvider">
+											<text color="placeholder" pos="4,4" size="139x21"></text>
+										</widget>
+										<widget size="147x29" type="*widget.textProvider">
+											<text pos="4,4" size="139x21"></text>
+										</widget>
 									</widget>
 								</widget>
 							</widget>
-						</widget>
+							<container pos="0,41" size="155x18">
+								<text color="placeholder" pos="8,0" size="0x0" textSize="0"></text>
+							</container>
+						</container>
 					</container>
-					<widget pos="0,82" size="206x37" type="*widget.Box">
+					<widget pos="0,126" size="206x37" type="*widget.Box">
 						<spacer size="0x0"/>
 						<widget size="99x37" type="*widget.Button">
 							<widget pos="2,2" size="95x33" type="*widget.Shadow">
@@ -195,7 +205,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)
-	w.Resize(fyne.NewSize(340, 240))
+	w.Resize(fyne.NewSize(340, 280))
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/theme_initial.png", w.Canvas().Capture())
@@ -204,6 +214,28 @@ func TestForm_ChangeTheme(t *testing.T) {
 		form.Refresh()
 		test.AssertImageMatches(t, "form/theme_changed.png", w.Canvas().Capture())
 	})
+}
+
+func TestForm_Hints(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry1 := &Entry{}
+	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
+	items := []*FormItem{
+		{Text: "First", Widget: entry1, HintText: "An entry hint"},
+		{Text: "Second", Widget: entry2},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/hint_invalid.png", w.Canvas().Capture())
+
+	test.Type(entry2, "not-")
+	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
 }
 
 func TestForm_Validation(t *testing.T) {
