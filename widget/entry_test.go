@@ -1194,6 +1194,86 @@ func TestEntry_SetTextStyle(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/set_text_style_italic.xml", c)
 }
 
+func TestEntry_Submit(t *testing.T) {
+	t.Run("Callback", func(t *testing.T) {
+		var submission string
+		entry := &widget.Entry{
+			OnSubmitted: func(s string) {
+				submission = s
+			},
+		}
+		t.Run("SingleLine_Enter", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("a")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			assert.Equal(t, "a", entry.Text)
+			assert.Equal(t, "a", submission)
+		})
+		t.Run("SingleLine_Return", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("b")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			assert.Equal(t, "b", entry.Text)
+			assert.Equal(t, "b", submission)
+		})
+		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("c")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "c", entry.Text)
+			assert.Equal(t, "c", submission)
+			entry.SetText("d")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "d", entry.Text)
+			assert.Equal(t, "d", submission)
+		})
+		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("e")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "e", entry.Text)
+			assert.Equal(t, "e", submission)
+			entry.SetText("f")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "f", entry.Text)
+			assert.Equal(t, "f", submission)
+		})
+	})
+	t.Run("NoCallback", func(t *testing.T) {
+		entry := &widget.Entry{}
+		t.Run("SingleLine_Enter", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("a")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			assert.Equal(t, "a", entry.Text)
+		})
+		t.Run("SingleLine_Return", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("b")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			assert.Equal(t, "b", entry.Text)
+		})
+		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("c")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "\nc", entry.Text)
+			entry.SetText("d")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "\nd", entry.Text)
+		})
+		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("e")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "\ne", entry.Text)
+			entry.SetText("f")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "\nf", entry.Text)
+		})
+	})
+}
+
 func TestEntry_Tapped(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
