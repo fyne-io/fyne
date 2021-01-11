@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -160,7 +161,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
-	scroll := NewScrollContainer(e.content)
+	scroll := widget.NewScroll(e.content)
 	objects := []fyne.CanvasObject{line, scroll}
 	e.content.scroll = scroll
 
@@ -515,6 +516,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.CursorColumn = 0
 		e.CursorRow++
 		e.propertyLock.Unlock()
+	case fyne.KeyTab:
+		e.TypedRune('\t')
 	case fyne.KeyUp:
 		if !multiLine {
 			return
@@ -1031,7 +1034,7 @@ var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
 	line   *canvas.Rectangle
-	scroll *ScrollContainer
+	scroll *widget.Scroll
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1110,7 +1113,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	if focused {
-		r.line.FillColor = theme.FocusColor()
+		r.line.FillColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
 			r.line.FillColor = theme.DisabledColor()
@@ -1142,7 +1145,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.validationStatus.Hide()
 	}
 
-	r.scroll.Content.Refresh()
+	cache.Renderer(r.scroll.Content.(*entryContent)).Refresh()
 	canvas.Refresh(r.entry.super())
 }
 
@@ -1161,13 +1164,13 @@ type entryContent struct {
 	BaseWidget
 
 	entry  *Entry
-	scroll *ScrollContainer
+	scroll *widget.Scroll
 }
 
 func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	cursor := canvas.NewRectangle(theme.FocusColor())
+	cursor := canvas.NewRectangle(theme.PrimaryColor())
 	cursor.Hide()
 
 	e.entry.propertyLock.Lock()
@@ -1356,7 +1359,7 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	r.cursor.FillColor = theme.FocusColor()
+	r.cursor.FillColor = theme.PrimaryColor()
 	if focused {
 		r.cursor.Show()
 		if r.cursorAnim == nil {
@@ -1374,7 +1377,7 @@ func (r *entryContentRenderer) Refresh() {
 
 	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused && !r.content.entry.disabled
-		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
+		selection.(*canvas.Rectangle).FillColor = theme.PrimaryColor()
 	}
 
 	canvas.Refresh(r.content)
@@ -1441,7 +1444,7 @@ func (r *entryContentRenderer) buildSelection() {
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
-			box := canvas.NewRectangle(theme.FocusColor())
+			box := canvas.NewRectangle(theme.PrimaryColor())
 			r.selection = append(r.selection, box)
 		}
 
@@ -1471,7 +1474,7 @@ func (r *entryContentRenderer) ensureCursorVisible() {
 	cx2 := cx1 + r.cursor.Size().Width
 	cy2 := cy1 + r.cursor.Size().Height
 	offset := r.content.scroll.Offset
-	size := r.content.scroll.size
+	size := r.content.scroll.Size()
 
 	if offset.X <= cx1 && cx2 < offset.X+size.Width &&
 		offset.Y <= cy1 && cy2 < offset.Y+size.Height {
@@ -1606,8 +1609,8 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 }
 
 func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
-	cursorOpaque := theme.FocusColor()
-	r, g, b, _ := theme.FocusColor().RGBA()
+	cursorOpaque := theme.PrimaryColor()
+	r, g, b, _ := theme.PrimaryColor().RGBA()
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
 	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
 		cursor.FillColor = c

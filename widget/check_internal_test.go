@@ -142,7 +142,7 @@ func TestCheck_Focused(t *testing.T) {
 
 	test.Tap(check)
 	assert.True(t, check.focused)
-	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, theme.PrimaryColor(), render.focusIndicator.FillColor)
 
 	check.Disable()
 	assert.True(t, check.disabled)
@@ -172,7 +172,7 @@ func TestCheck_Hovered(t *testing.T) {
 
 	test.Tap(check)
 	assert.True(t, check.hovered)
-	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, theme.PrimaryColor(), render.focusIndicator.FillColor)
 
 	check.Disable()
 	assert.True(t, check.disabled)
@@ -181,11 +181,11 @@ func TestCheck_Hovered(t *testing.T) {
 
 	check.Enable()
 	assert.True(t, check.hovered)
-	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, theme.PrimaryColor(), render.focusIndicator.FillColor)
 
 	check.MouseOut()
 	assert.False(t, check.hovered)
-	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, theme.PrimaryColor(), render.focusIndicator.FillColor)
 
 	check.FocusLost()
 	assert.False(t, check.hovered)

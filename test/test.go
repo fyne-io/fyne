@@ -1,7 +1,11 @@
 package test
 
 import (
+	"fmt"
 	"image"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -34,9 +38,11 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	return test.AssertImageMatches(t, masterFilename, img, msgAndArgs...)
 }
 
-// AssertRendersToMarkup asserts that the given canvas renders the expected markup.
-// The expected markup is stripped by leading common whitespace retaining the relative indentation
-// and thus matching the indentation of the output of the used markup renderer.
+// AssertRendersToMarkup asserts that the given canvas renders the same markup as the one stored in the master file.
+// The master filename is relative to the `testdata` directory which is relative to the test.
+// The test `t` fails if the rendered markup is not equal to the loaded master markup.
+// In this case the rendered markup is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
+// This path is also reported, thus the file can be used as new master.
 //
 // Be aware, that the indentation has to use tab characters ('\t') instead of spaces.
 // Every element starts on a new line indented one more than its parent.
@@ -44,8 +50,33 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // The only exception to this are text elements which do not contain line breaks unless the text includes them.
 //
 // Since: 2.0.0
-func AssertRendersToMarkup(t *testing.T, expected string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
-	return assert.Equal(t, removeCommonIndent(expected), snapshot(c), msgAndArgs...)
+func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	got := snapshot(c)
+	masterPath := filepath.Join(wd, "testdata", masterFilename)
+	failedPath := filepath.Join(wd, "testdata/failed", masterFilename)
+	_, err = os.Stat(masterPath)
+	if os.IsNotExist(err) {
+		require.NoError(t, writeMarkup(failedPath, got))
+		t.Errorf("Master not found at %s. Markup written to %s might be used as master.", masterPath, failedPath)
+		return false
+	}
+
+	raw, err := ioutil.ReadFile(masterPath)
+	require.NoError(t, err)
+	master := strings.ReplaceAll(string(raw), "\r", "")
+
+	var msg string
+	if len(msgAndArgs) > 0 {
+		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
+	}
+	if !assert.Equal(t, master, got, "%sMarkup did not match master. Actual markup written to file://%s.", msg, failedPath) {
+		require.NoError(t, writeMarkup(failedPath, got))
+		return false
+	}
+	return true
 }
 
 // Drag drags at an absolute position on the canvas.
@@ -283,66 +314,9 @@ func typeChars(chars []rune, keyDown func(rune)) {
 	}
 }
 
-func removeCommonIndent(raw string) string {
-	skipFirstLine := false
-	if len(raw) > 0 && raw[0] == '\n' {
-		raw = raw[1:]
-	} else {
-		skipFirstLine = true
+func writeMarkup(path string, markup string) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
 	}
-	lines := strings.Split(raw, "\n")
-	minIndentSize := getMinIndent(lines, skipFirstLine)
-	lines = removeIndent(lines, minIndentSize, skipFirstLine)
-	return strings.Join(lines, "\n")
-}
-
-func isSpace(r rune) bool {
-	switch r {
-	case ' ', '\t':
-		return true
-	default:
-		return false
-	}
-}
-
-func getMinIndent(lines []string, skipFirstLine bool) int {
-	const maxInt = int(^uint(0) >> 1)
-	minIndentSize := maxInt
-
-	for i, line := range lines {
-		if i == 0 && skipFirstLine {
-			continue
-		}
-
-		indentSize := 0
-		for _, r := range line {
-			if isSpace(r) {
-				indentSize++
-			} else {
-				break
-			}
-		}
-
-		if len(line) == indentSize {
-			if i == len(lines)-1 && indentSize < minIndentSize {
-				lines[i] = ""
-			}
-		} else if indentSize < minIndentSize {
-			minIndentSize = indentSize
-		}
-	}
-	return minIndentSize
-}
-
-func removeIndent(lines []string, n int, skipFirstLine bool) []string {
-	for i, line := range lines {
-		if i == 0 && skipFirstLine {
-			continue
-		}
-
-		if len(lines[i]) >= n {
-			lines[i] = line[n:]
-		}
-	}
-	return lines
+	return ioutil.WriteFile(path, []byte(markup), 0644)
 }

@@ -23,12 +23,16 @@ var _ fyne.OverlayStack = (*OverlayStack)(nil)
 //
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
-	s.propertyLock.Lock()
-	defer s.propertyLock.Unlock()
-
 	if overlay == nil {
 		return
 	}
+
+	if s.OnChange != nil {
+		defer s.OnChange()
+	}
+
+	s.propertyLock.Lock()
+	defer s.propertyLock.Unlock()
 	s.overlays = append(s.overlays, overlay)
 
 	// TODO this should probably apply to all once #707 is addressed
@@ -40,9 +44,6 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	}
 
 	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))
-	if s.OnChange != nil {
-		s.OnChange()
-	}
 }
 
 // List returns all overlays on the stack from bottom to top.
@@ -67,6 +68,10 @@ func (s *OverlayStack) ListFocusManagers() []*app.FocusManager {
 //
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
+	if s.OnChange != nil {
+		defer s.OnChange()
+	}
+
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
 
@@ -76,9 +81,6 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 			s.focusManagers = s.focusManagers[:i]
 			break
 		}
-	}
-	if s.OnChange != nil {
-		s.OnChange()
 	}
 }
 

@@ -77,17 +77,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(220, 50))
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="220x50">
-			<content>
-				<widget pos="4,4" size="212x42" type="*widget.Slider">
-					<rectangle fillColor="shadow" pos="12,21" size="188x4"/>
-					<rectangle fillColor="foreground" pos="12,21" size="0x4"/>
-					<circle fillColor="foreground" pos="6,15" size="16x16"/>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "slider/horizontal.xml", w.Canvas())
 }
 
 func TestSlider_OutOfRange(t *testing.T) {
@@ -124,17 +114,7 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 220))
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="50x220">
-			<content>
-				<widget pos="4,4" size="42x212" type="*widget.Slider">
-					<rectangle fillColor="shadow" pos="21,12" size="4x188"/>
-					<rectangle fillColor="foreground" pos="21,200" size="4x0"/>
-					<circle fillColor="foreground" pos="15,194" size="16x16"/>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "slider/vertical.xml", w.Canvas())
 }
 
 func TestSlider_OnChanged(t *testing.T) {

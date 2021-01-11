@@ -34,52 +34,7 @@ func TestTable_Hovered(t *testing.T) {
 
 	assert.Nil(t, table.hoveredCell)
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="180x180">
-			<content>
-				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget size="203x168" type="*widget.tableCells">
-							<widget pos="4,4" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 0, 0</text>
-							</widget>
-							<widget pos="106,4" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 0, 1</text>
-							</widget>
-							<widget pos="4,42" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 1, 0</text>
-							</widget>
-							<widget pos="106,42" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 1, 1</text>
-							</widget>
-						</widget>
-						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="0,3" size="139x3" type="*widget.scrollBar">
-							</widget>
-						</widget>
-						<widget pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
-						</widget>
-					</widget>
-					<widget pos="105,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="1x168"/>
-					</widget>
-					<widget pos="4,41" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="168x1"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "table/desktop/hovered_out.xml", w.Canvas())
 
 	table.Length = func() (int, int) { return 3, 5 }
 	table.Refresh()
@@ -91,58 +46,5 @@ func TestTable_Hovered(t *testing.T) {
 	assert.Equal(t, 0, table.hoveredCell.Col)
 	assert.Equal(t, 1, table.hoveredCell.Row)
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="180x180">
-			<content>
-				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget size="509x168" type="*widget.tableCells">
-							<widget pos="4,4" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 0, 0</text>
-							</widget>
-							<widget pos="106,4" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 0, 1</text>
-							</widget>
-							<widget pos="4,42" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 1, 0</text>
-							</widget>
-							<widget pos="106,42" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 1, 1</text>
-							</widget>
-							<widget pos="4,80" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 2, 0</text>
-							</widget>
-							<widget pos="106,80" size="93x29" type="*widget.Label">
-								<text pos="4,4" size="85x21">Cell 2, 1</text>
-							</widget>
-						</widget>
-						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="0,3" size="55x3" type="*widget.scrollBar">
-							</widget>
-						</widget>
-						<widget pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
-						</widget>
-					</widget>
-					<rectangle fillColor="hover" pos="4,0" size="101x4"/>
-					<rectangle fillColor="hover" pos="0,42" size="4x37"/>
-					<widget pos="105,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="1x168"/>
-					</widget>
-					<widget pos="4,41" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="168x1"/>
-					</widget>
-					<widget pos="4,79" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="168x1"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "table/desktop/hovered.xml", w.Canvas())
 }

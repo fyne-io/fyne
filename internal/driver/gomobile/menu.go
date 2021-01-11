@@ -30,7 +30,7 @@ func (m *menuLabel) Tapped(*fyne.PointEvent) {
 	menu.OnDismiss = func() {
 		menuDismiss()
 		m.bar.Hide() // dismiss the overlay menu bar
-		m.canvas.menu = nil
+		m.canvas.setMenu(nil)
 	}
 }
 
@@ -50,14 +50,14 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	var panel *widget.Box
 	top := widget.NewHBox(widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 		panel.Hide()
-		c.menu = nil
+		c.setMenu(nil)
 	}))
 	panel = widget.NewVBox(top)
 	for _, item := range menu.Items {
 		panel.Append(newMenuLabel(item, panel, c))
 	}
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
-	c.menu = container.NewWithoutLayout(panel, shadow)
+	c.setMenu(container.NewWithoutLayout(panel, shadow))
 
 	safePos, safeSize := c.InteractiveArea()
 	panel.Move(safePos)

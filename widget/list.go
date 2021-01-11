@@ -32,10 +32,11 @@ type List struct {
 	OnSelected   func(id ListItemID)
 	OnUnselected func(id ListItemID)
 
-	scroller *ScrollContainer
-	selected []ListItemID
-	itemMin  fyne.Size
-	offsetY  float32
+	scroller      *widget.Scroll
+	selected      []ListItemID
+	itemMin       fyne.Size
+	offsetY       float32
+	offsetUpdated func()
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -79,9 +80,11 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
 	layout.Resize(layout.MinSize())
-	l.scroller = NewVScrollContainer(layout)
+	l.scroller = widget.NewVScroll(layout)
 	objects := []fyne.CanvasObject{l.scroller}
-	return newListRenderer(objects, l, l.scroller, layout)
+	lr := newListRenderer(objects, l, l.scroller, layout)
+	l.offsetUpdated = lr.offsetUpdated
+	return lr
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -122,7 +125,7 @@ func (l *List) Select(id ListItemID) {
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
 		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
 	}
-	l.scroller.onOffsetChanged()
+	l.offsetUpdated()
 	l.Refresh()
 }
 
@@ -146,7 +149,7 @@ type listRenderer struct {
 	widget.BaseRenderer
 
 	list             *List
-	scroller         *ScrollContainer
+	scroller         *widget.Scroll
 	layout           *fyne.Container
 	itemPool         *syncPool
 	children         []fyne.CanvasObject
@@ -157,15 +160,9 @@ type listRenderer struct {
 	previousOffsetY  float32
 }
 
-func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollContainer, layout *fyne.Container) *listRenderer {
+func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *widget.Scroll, layout *fyne.Container) *listRenderer {
 	lr := &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
-	lr.scroller.onOffsetChanged = func() {
-		if lr.list.offsetY == lr.scroller.Offset.Y {
-			return
-		}
-		lr.list.offsetY = lr.scroller.Offset.Y
-		lr.offsetChanged()
-	}
+	widget.AddScrollOffsetChangedListener(lr.scroller, lr.offsetUpdated)
 	return lr
 }
 
@@ -205,7 +202,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
-	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height+theme.SeparatorThicknessSize())))
+	l.visibleItemCount = int(math.Ceil(float64(l.scroller.Size().Height) / float64(l.list.itemMin.Height+theme.SeparatorThicknessSize())))
 	if l.visibleItemCount <= 0 {
 		return
 	}
@@ -358,6 +355,14 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, id ListItemID) {
 	}
 }
 
+func (l *listRenderer) offsetUpdated() {
+	if l.list.offsetY == l.scroller.Offset.Y {
+		return
+	}
+	l.list.offsetY = l.scroller.Offset.Y
+	l.offsetChanged()
+}
+
 // Declare conformity with interfaces.
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
@@ -455,7 +460,7 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 
 func (li *listItemRenderer) Refresh() {
 	if li.item.selected {
-		li.item.statusIndicator.FillColor = theme.FocusColor()
+		li.item.statusIndicator.FillColor = theme.PrimaryColor()
 	} else if li.item.hovered {
 		li.item.statusIndicator.FillColor = theme.HoverColor()
 	} else {
