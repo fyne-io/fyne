@@ -1040,11 +1040,9 @@ func (r *entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	// Used to be ready to support OutlineBorder later in future.
-	remBoxBorder := r.box.StrokeWidth / 2
-	r.line.Resize(fyne.NewSize(size.Width-remBoxBorder, theme.InputBorderSize()-remBoxBorder))
+	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
 	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
-	r.box.Resize(fyne.NewSize(size.Width-remBoxBorder, size.Height-remBoxBorder))
+	r.box.Resize(size)
 	r.box.Move(fyne.NewPos(0, 0))
 
 	actionIconSize := fyne.NewSize(0, 0)
