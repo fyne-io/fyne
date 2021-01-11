@@ -13,6 +13,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/layout"
@@ -583,8 +584,8 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	})
 	rect2 := canvas.NewRectangle(color.Black)
 	rect2.SetMinSize(fyne.NewSize(100, 100))
-	child := fyne.NewContainerWithLayout(layout.NewGridLayout(1), button, rect2)
-	scroll := widget.NewScrollContainer(child)
+	child := container.NewGridWithColumns(1, button, rect2)
+	scroll := container.NewScroll(child)
 	scroll.Offset = fyne.NewPos(0, 50)
 
 	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, scroll)

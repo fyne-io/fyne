@@ -40,7 +40,7 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 //
 // Implements: fyne.Widget
 func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
-	text := canvas.NewText(i.Menu.Label, theme.TextColor())
+	text := canvas.NewText(i.Menu.Label, theme.ForegroundColor())
 	objects := []fyne.CanvasObject{text}
 
 	return &menuBarItemRenderer{
@@ -189,7 +189,7 @@ func (r *menuBarItemRenderer) Layout(_ fyne.Size) {
 	padding := r.padding()
 
 	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.TextColor()
+	r.text.Color = theme.ForegroundColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 }

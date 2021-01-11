@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/internal/painter/software"
 	internalTest "fyne.io/fyne/internal/test"
 	internalWidget "fyne.io/fyne/internal/widget"
@@ -51,7 +52,7 @@ func TestPainter_paintGradient_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	g := canvas.NewRadialGradient(color.NRGBA{R: 200, A: 255}, color.NRGBA{B: 200, A: 255})
 	g.SetMinSize(fyne.NewSize(100, 100))
-	scroll := widget.NewScrollContainer(g)
+	scroll := container.NewScroll(g)
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-30, -30)})
@@ -83,7 +84,7 @@ func TestPainter_paintImage_clipped(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage(5, 5))
 	img.ScaleMode = canvas.ImageScalePixels
 	img.SetMinSize(fyne.NewSize(100, 100))
-	scroll := widget.NewScrollContainer(img)
+	scroll := container.NewScroll(img)
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-15, -15)})
@@ -289,7 +290,7 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	blue3.SetMinSize(fyne.NewSize(20, 20))
 	blues := widget.NewHBox(blue1, blue2, blue3)
 	box := widget.NewVBox(reds, greens, blues)
-	scroll := widget.NewScrollContainer(box)
+	scroll := container.NewScroll(box)
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
@@ -320,7 +321,7 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 
 func TestPainter_paintText_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	scroll := widget.NewScrollContainer(widget.NewLabel("some text\nis here\nand here"))
+	scroll := container.NewScroll(widget.NewLabel("some text\nis here\nand here"))
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
@@ -337,7 +338,7 @@ func TestPainter_paintText_clipped(t *testing.T) {
 func TestPainter_paintWidgetBackground_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	w := &testWidget{min: fyne.NewSize(100, 100)}
-	scroll := widget.NewScrollContainer(w)
+	scroll := container.NewScroll(w)
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})

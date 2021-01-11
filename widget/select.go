@@ -260,9 +260,9 @@ func (s *Select) textAlign() fyne.TextAlign {
 
 func (s *Select) textColor() color.Color {
 	if s.Disabled() {
-		return theme.DisabledTextColor()
+		return theme.DisabledColor()
 	}
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 func (s *Select) textStyle() fyne.TextStyle {
@@ -352,7 +352,7 @@ func (s *selectRenderer) buttonColor() color.Color {
 		return theme.ButtonColor()
 	}
 	if s.combo.focused {
-		return theme.FocusColor()
+		return theme.PrimaryColor()
 	}
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()

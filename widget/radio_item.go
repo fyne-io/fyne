@@ -37,7 +37,7 @@ type radioItem struct {
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
 	icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
-	label := canvas.NewText(i.Label, theme.TextColor())
+	label := canvas.NewText(i.Label, theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignLeading
 	r := &radioItemRenderer{
 		BaseRenderer:   widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, label}),
@@ -177,10 +177,10 @@ func (r *radioItemRenderer) Refresh() {
 
 func (r *radioItemRenderer) update() {
 	r.label.Text = r.item.Label
-	r.label.Color = theme.TextColor()
+	r.label.Color = theme.ForegroundColor()
 	r.label.TextSize = theme.TextSize()
 	if r.item.Disabled() {
-		r.label.Color = theme.DisabledTextColor()
+		r.label.Color = theme.DisabledColor()
 	}
 
 	res := theme.RadioButtonIcon()
@@ -195,7 +195,7 @@ func (r *radioItemRenderer) update() {
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = theme.BackgroundColor()
 	} else if r.item.focused {
-		r.focusIndicator.FillColor = theme.FocusColor()
+		r.focusIndicator.FillColor = theme.PrimaryColor()
 	} else if r.item.hovered {
 		r.focusIndicator.FillColor = theme.HoverColor()
 	} else {

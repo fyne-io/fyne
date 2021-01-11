@@ -3,6 +3,7 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -47,8 +48,8 @@ func TestGroup_Scroll(t *testing.T) {
 		NewLabel("A label"), NewLabel("Another item"))
 	group.Resize(group.MinSize())
 
-	scroll := group.content.(*ScrollContainer)
-	assert.Equal(t, scroll.Direction, ScrollVerticalOnly)
+	scroll := group.content.(*widget.Scroll)
+	assert.Equal(t, scroll.Direction, widget.ScrollVerticalOnly)
 	assert.Equal(t, group.MinSize().Width, scroll.Content.Size().Width)
 	totalHeight := test.WidgetRenderer(group).(*groupRenderer).label.MinSize().Height + scroll.Content.Size().Height
 	assert.Less(t, group.MinSize().Height, totalHeight)

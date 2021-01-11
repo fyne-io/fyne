@@ -1,4 +1,4 @@
-// +build !ios,!android
+// +build !ios,!android,!mobile,!nacl
 
 package app
 
@@ -12,4 +12,14 @@ func (p *preferences) storagePath() string {
 // storageRoot returns the location of the app storage
 func (a *fyneApp) storageRoot() string {
 	return filepath.Join(rootConfigDir(), a.UniqueID())
+}
+
+func (p *preferences) watch() {
+	watchFile(p.storagePath(), func() {
+		if p.ignoreChange {
+			return
+		}
+
+		p.load()
+	})
 }

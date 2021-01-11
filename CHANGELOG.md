@@ -13,7 +13,7 @@ These changes likely break some apps, please read the
 * Coordinate system to float32
   * Size and Position units were changed from int to float32
   * `Text.TextSize` moved to float32 and `fyne.MeasureText` now takes a float32 size parameter
-  * Removed `Size.Union`
+  * Removed `Size.Union` (use `Size.Max` instead)
   * Added fyne.Delta for difference based X, Y representation
   * DraggedEvent.DraggedX and DraggedX (int, int) to DraggedEvent.Dragged (Delta)
   * ScrollEvent.DeltaX and DeltaY (int, int) moved to ScrollEvent.Scrolled (Delta)
@@ -27,9 +27,15 @@ These changes likely break some apps, please read the
 
 * iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
+* Entry widget now contains scrolling so should no longer be wrapped in a scroll container
 
 * Removed deprecated types including:
-  - dialog.FileIcon (now widget.FileIcon)
+  - `dialog.FileIcon` (now `widget.FileIcon`)
+  - `widget.Radio` (now `widget.RadioGroup`)
+  - `widget.AccordionContainer` (now `widget.Accordion`)
+  - `layout.NewFixedGridLayout()` (now `layout.NewGridWrapLayout()`)
+  - `widget.ScrollContainer` (now `container.Scroll`)
+  - `widget.SplitContainer` (now `containerr.Spilt`)
 
 ### Added
 

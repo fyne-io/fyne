@@ -22,60 +22,16 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 
 	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
 	entry.Validator = r
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/validate_initial.xml", c)
 
 	test.Type(entry, "2020-02")
 	assert.Error(t, r(entry.Text))
 	entry.FocusLost()
-	// TODO: error color should be named “error” in the future
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="rgba(244,67,54,255)" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">2020-02</text>
-					</widget>
-					<widget pos="92,8" size="20x20" type="*widget.validationStatus">
-						<image rsc="errorIcon" size="iconInlineSize" themed="error"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/validate_invalid.xml", c)
 
 	test.Type(entry, "-12")
 	assert.NoError(t, r(entry.Text))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">2020-02-12</text>
-					</widget>
-					<rectangle fillColor="focus" pos="87,8" size="2x21"/>
-					<widget pos="92,8" size="20x20" type="*widget.validationStatus">
-						<image rsc="confirmIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/validate_valid.xml", c)
 }
 
 func TestEntry_Validate(t *testing.T) {

@@ -19,9 +19,9 @@ func TestFromLegacy(t *testing.T) {
 
 func TestLegacyWrapper_Color(t *testing.T) {
 	newTheme := FromLegacy(oldTheme)
-	assert.Equal(t, oldTheme.BackgroundColor(), newTheme.Color(ColorNameBackground, VariantNameLight))
-	assert.Equal(t, oldTheme.ShadowColor(), newTheme.Color(ColorNameShadow, VariantNameLight))
-	assert.Equal(t, oldTheme.TextColor(), newTheme.Color(ColorNameForeground, VariantNameLight))
+	assert.Equal(t, oldTheme.BackgroundColor(), newTheme.Color(ColorNameBackground, VariantLight))
+	assert.Equal(t, oldTheme.ShadowColor(), newTheme.Color(ColorNameShadow, VariantLight))
+	assert.Equal(t, oldTheme.TextColor(), newTheme.Color(ColorNameForeground, VariantLight))
 }
 
 func TestLegacyWrapper_Font(t *testing.T) {
@@ -57,7 +57,7 @@ func (t *legacyTheme) DisabledButtonColor() color.Color {
 }
 
 func (t *legacyTheme) DisabledTextColor() color.Color {
-	return DisabledTextColor()
+	return DisabledColor()
 }
 
 func (t *legacyTheme) FocusColor() color.Color {
@@ -85,7 +85,7 @@ func (t *legacyTheme) ShadowColor() color.Color {
 }
 
 func (t *legacyTheme) TextColor() color.Color {
-	return TextColor()
+	return ForegroundColor()
 }
 
 func (t *legacyTheme) TextSize() int {

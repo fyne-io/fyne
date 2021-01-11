@@ -103,7 +103,7 @@ func (m *Menu) ActivatePrevious() {
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	box := newMenuBox(m.Items)
-	scroll := NewVScrollContainer(box)
+	scroll := widget.NewVScroll(box)
 	scroll.SetMinSize(box.MinSize())
 	objects := []fyne.CanvasObject{scroll}
 	for _, i := range m.Items {
@@ -229,7 +229,7 @@ type menuRenderer struct {
 	*widget.ShadowingRenderer
 	box    *menuBox
 	m      *Menu
-	scroll *ScrollContainer
+	scroll *widget.Scroll
 }
 
 func (r *menuRenderer) Layout(s fyne.Size) {
