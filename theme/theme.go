@@ -319,7 +319,7 @@ func ButtonColor() color.Color {
 	return current().Color(ColorNameButton, currentVariant())
 }
 
-// CaptionTextSize returns the standard text size
+// CaptionTextSize returns the size for caption text.
 func CaptionTextSize() float32 {
 	return current().Size(SizeNameCaptionText)
 }
