@@ -138,6 +138,11 @@ const (
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
+	// SizeNameInputBorder is the name of theme lookup for input border size.
+	//
+	// Since 2.0.0
+	SizeNameInputBorder fyne.ThemeSizeName = "inputBorder"
+
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since 2.0.0
@@ -296,6 +301,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 14
 	case SizeNameCaptionText:
 		return 11
+	case SizeNameInputBorder:
+		return 2
 	default:
 		return 0
 	}
@@ -392,6 +399,13 @@ func ScrollBarColor() color.Color {
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
 	return current().Color(ColorNameShadow, currentVariant())
+}
+
+// InputBorderSize returns the input border size (or underline size for an entry).
+//
+// Since 2.0.0
+func InputBorderSize() float32 {
+	return current().Size(SizeNameInputBorder)
 }
 
 // TextSize returns the standard text size

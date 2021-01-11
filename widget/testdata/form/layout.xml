@@ -7,9 +7,10 @@
 				</widget>
 				<container pos="51,0" size="155x59">
 					<widget size="155x37" type="*widget.Entry">
-						<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
+						<rectangle fillColor="focus" size="155x37"/>
+						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
 						<widget pos="4,4" size="147x29" type="*widget.Scroll">
-							<widget size="147x29" type="*widget.entryContent">
+							<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
 								<widget size="147x29" type="*widget.textProvider">
 									<text color="placeholder" pos="4,4" size="139x21"></text>
 								</widget>
@@ -28,9 +29,10 @@
 				</widget>
 				<container pos="51,63" size="155x59">
 					<widget size="155x37" type="*widget.Entry">
-						<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
+						<rectangle fillColor="focus" size="155x37"/>
+						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
 						<widget pos="4,4" size="147x29" type="*widget.Scroll">
-							<widget size="147x29" type="*widget.entryContent">
+							<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
 								<widget size="147x29" type="*widget.textProvider">
 									<text color="placeholder" pos="4,4" size="139x21"></text>
 								</widget>
