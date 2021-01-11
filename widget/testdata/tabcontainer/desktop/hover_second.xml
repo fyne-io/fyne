@@ -8,7 +8,8 @@
 				<widget size="57x29" type="*widget.tabButton">
 					<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 				</widget>
-				<widget backgroundColor="hover" pos="61,0" size="57x29" type="*widget.tabButton">
+				<widget pos="61,0" size="57x29" type="*widget.tabButton">
+					<rectangle fillColor="hover" size="57x29"/>
 					<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 				</widget>
 			</container>

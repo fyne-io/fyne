@@ -4,7 +4,6 @@
 			<widget size="192x392" type="*widget.Scroll">
 				<container size="192x37999">
 					<widget size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -15,7 +14,6 @@
 						</container>
 					</widget>
 					<widget pos="0,38" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -26,7 +24,6 @@
 						</container>
 					</widget>
 					<widget pos="0,76" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -37,7 +34,6 @@
 						</container>
 					</widget>
 					<widget pos="0,114" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -48,7 +44,6 @@
 						</container>
 					</widget>
 					<widget pos="0,152" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -59,7 +54,6 @@
 						</container>
 					</widget>
 					<widget pos="0,190" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -70,7 +64,6 @@
 						</container>
 					</widget>
 					<widget pos="0,228" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -81,7 +74,6 @@
 						</container>
 					</widget>
 					<widget pos="0,266" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -92,7 +84,6 @@
 						</container>
 					</widget>
 					<widget pos="0,304" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -103,7 +94,6 @@
 						</container>
 					</widget>
 					<widget pos="0,342" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -114,7 +104,6 @@
 						</container>
 					</widget>
 					<widget pos="0,380" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -125,7 +114,6 @@
 						</container>
 					</widget>
 					<widget pos="0,418" size="192x37" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x37"/>
 						<container pos="8,4" size="180x29">
 							<widget size="20x29" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x29"/>
@@ -173,7 +161,8 @@
 					</widget>
 				</container>
 				<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
-					<widget backgroundColor="scrollbar" pos="3,0" size="3x16" type="*widget.scrollBar">
+					<widget pos="3,0" size="3x16" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="3x16"/>
 					</widget>
 				</widget>
 				<widget pos="0,392" size="192x0" type="*widget.Shadow">

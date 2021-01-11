@@ -5,7 +5,8 @@
 				<text pos="4,4" size="142x21">Text1</text>
 			</widget>
 			<container size="150x29">
-				<widget backgroundColor="hover" size="57x29" type="*widget.tabButton">
+				<widget size="57x29" type="*widget.tabButton">
+					<rectangle fillColor="hover" size="57x29"/>
 					<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 				</widget>
 				<widget pos="61,0" size="57x29" type="*widget.tabButton">
