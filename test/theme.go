@@ -49,7 +49,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameScrollBarSmall:     float32(3),
 				theme.SizeNameSeparatorThickness: float32(1),
 				theme.SizeNameText:               float32(14),
-				theme.SizeNameEntryUnderline:     float32(2),
+				theme.SizeNameInputBorder:        float32(2),
 			},
 		}
 	}

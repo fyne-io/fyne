@@ -133,10 +133,10 @@ const (
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
-	// SizeNameEntryUnderline is the name of theme lookup for widget.Entry underline size.
+	// SizeNameInputBorder is the name of theme lookup for input border size.
 	//
 	// Since 2.0.0
-	SizeNameEntryUnderline fyne.ThemeSizeName = "entryUnderline"
+	SizeNameInputBorder fyne.ThemeSizeName = "inputBorder"
 
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
@@ -294,7 +294,7 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
-	case SizeNameEntryUnderline:
+	case SizeNameInputBorder:
 		return 2
 	default:
 		return 0
@@ -389,11 +389,11 @@ func ShadowColor() color.Color {
 	return current().Color(ColorNameShadow, currentVariant())
 }
 
-// EntryUnderlineSize returns the underline size for an entry.
+// InputBorderSize returns the input border size (or underline size for an entry).
 //
 // Since 2.0.0
-func EntryUnderlineSize() float32 {
-	return current().Size(SizeNameEntryUnderline)
+func InputBorderSize() float32 {
+	return current().Size(SizeNameInputBorder)
 }
 
 // TextSize returns the standard text size
