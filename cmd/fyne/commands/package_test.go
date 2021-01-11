@@ -42,16 +42,16 @@ func Test_validateAppID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "com.myApp", id)
 
-	id, err = validateAppID("", "ios", "myApp", false)
+	_, err = validateAppID("", "ios", "myApp", false)
 	assert.NotNil(t, err)
 
-	id, err = validateAppID("myApp", "ios", "myApp", false)
+	_, err = validateAppID("myApp", "ios", "myApp", false)
 	assert.NotNil(t, err)
 
 	id, err = validateAppID("com.myApp", "android", "myApp", true)
 	assert.Nil(t, err)
 	assert.Equal(t, "com.myApp", id)
 
-	id, err = validateAppID("myApp", "android", "myApp", true)
+	_, err = validateAppID("myApp", "android", "myApp", true)
 	assert.NotNil(t, err)
 }
