@@ -348,7 +348,7 @@ func (s *selectRenderer) buttonColor() color.Color {
 		return theme.ButtonColor()
 	}
 	if s.combo.focused {
-		return theme.FocusColor()
+		return theme.PrimaryColor()
 	}
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()

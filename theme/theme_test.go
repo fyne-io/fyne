@@ -89,7 +89,7 @@ func Test_HoverColor(t *testing.T) {
 func Test_FocusColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := FocusColor()
-	assert.Equal(t, PrimaryColor(), c, "wrong focus color")
+	assert.Equal(t, DarkTheme().Color(ColorNameFocus, VariantDark), c, "wrong focus color")
 }
 
 func Test_ScrollBarColor(t *testing.T) {

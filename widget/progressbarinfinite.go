@@ -110,7 +110,7 @@ func (p *infProgressRenderer) start() {
 	}
 }
 
-// Stop the infinite progress goroutine and sets value to the Max
+// Stop the background thread from updating the infinite progress bar
 func (p *infProgressRenderer) stop() {
 	p.progress.propertyLock.Lock()
 	defer p.progress.propertyLock.Unlock()
@@ -159,12 +159,12 @@ func (p *ProgressBarInfinite) Hide() {
 	p.BaseWidget.Hide()
 }
 
-// Start the infinite progress bar background thread to update it continuously
+// Start the infinite progress bar animation
 func (p *ProgressBarInfinite) Start() {
 	cache.Renderer(p).(*infProgressRenderer).start()
 }
 
-// Stop the infinite progress goroutine and sets value to the Max
+// Stop the infinite progress bar animation
 func (p *ProgressBarInfinite) Stop() {
 	cache.Renderer(p).(*infProgressRenderer).stop()
 }
