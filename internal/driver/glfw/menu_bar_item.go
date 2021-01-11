@@ -161,6 +161,7 @@ func (r *menuBarItemRenderer) Refresh() {
 	} else {
 		r.background.Hide()
 	}
+	r.background.Refresh()
 	canvas.Refresh(r.i)
 }
 

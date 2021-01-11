@@ -19,10 +19,10 @@ const (
 
 type infProgressRenderer struct {
 	widget.BaseRenderer
-	bg, bar  *canvas.Rectangle
-	ticker   *time.Ticker
-	running  bool
-	progress *ProgressBarInfinite
+	background, bar *canvas.Rectangle
+	ticker          *time.Ticker
+	running         bool
+	progress        *ProgressBarInfinite
 }
 
 // MinSize calculates the minimum size of a progress bar.
@@ -70,7 +70,7 @@ func (p *infProgressRenderer) updateBar() {
 
 // Layout the components of the infinite progress bar
 func (p *infProgressRenderer) Layout(size fyne.Size) {
-	p.bg.Resize(size)
+	p.background.Resize(size)
 	p.updateBar()
 }
 
@@ -84,10 +84,12 @@ func (p *infProgressRenderer) Refresh() {
 }
 
 func (p *infProgressRenderer) doRefresh() {
-	p.bg.FillColor = theme.ShadowColor()
+	p.background.FillColor = theme.ShadowColor()
 	p.bar.FillColor = theme.PrimaryColor()
 
 	p.updateBar()
+	p.background.Refresh()
+	p.bar.Refresh()
 	canvas.Refresh(p.progress.super())
 }
 
@@ -187,11 +189,11 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	bg := canvas.NewRectangle(theme.ShadowColor())
+	background := canvas.NewRectangle(theme.ShadowColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bg, bar}),
-		bg:           bg,
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, bar}),
+		background:   background,
 		bar:          bar,
 		progress:     p,
 	}

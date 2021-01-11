@@ -340,6 +340,7 @@ func (s *selectRenderer) Refresh() {
 		s.combo.Move(s.combo.position)
 		s.combo.Resize(s.combo.size)
 	}
+	s.background.Refresh()
 	canvas.Refresh(s.combo.super())
 }
 

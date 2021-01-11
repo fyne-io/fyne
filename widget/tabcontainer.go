@@ -622,6 +622,7 @@ func (r *tabButtonRenderer) Refresh() {
 	} else {
 		r.background.Hide()
 	}
+	r.background.Refresh()
 
 	r.label.Text = r.button.Text
 	if r.button.Importance == HighImportance {

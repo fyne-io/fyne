@@ -203,6 +203,7 @@ func (r *popUpRenderer) Refresh() {
 	if r.background.Size() != r.popUp.innerSize || r.background.Position() != r.popUp.innerPos {
 		r.Layout(r.popUp.Size())
 	}
+	r.background.Refresh()
 }
 
 type modalPopUpRenderer struct {
@@ -240,4 +241,5 @@ func (r *modalPopUpRenderer) Refresh() {
 	if r.background.Size() != r.popUp.innerSize {
 		r.Layout(r.popUp.Size())
 	}
+	r.background.Refresh()
 }

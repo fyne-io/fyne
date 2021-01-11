@@ -196,13 +196,13 @@ func newDivider(split *Split) *divider {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (d *divider) CreateRenderer() fyne.WidgetRenderer {
 	d.ExtendBaseWidget(d)
-	bg := canvas.NewRectangle(theme.ShadowColor())
-	fg := canvas.NewRectangle(theme.ForegroundColor())
+	background := canvas.NewRectangle(theme.ShadowColor())
+	foreground := canvas.NewRectangle(theme.ForegroundColor())
 	return &dividerRenderer{
-		divider: d,
-		bg:      bg,
-		fg:      fg,
-		objects: []fyne.CanvasObject{bg, fg},
+		divider:    d,
+		background: background,
+		foreground: foreground,
+		objects:    []fyne.CanvasObject{background, foreground},
 	}
 }
 
@@ -253,16 +253,17 @@ func (d *divider) MouseOut() {
 var _ fyne.WidgetRenderer = (*dividerRenderer)(nil)
 
 type dividerRenderer struct {
-	divider *divider
-	bg, fg  *canvas.Rectangle
-	objects []fyne.CanvasObject
+	divider    *divider
+	background *canvas.Rectangle
+	foreground *canvas.Rectangle
+	objects    []fyne.CanvasObject
 }
 
 func (r *dividerRenderer) Destroy() {
 }
 
 func (r *dividerRenderer) Layout(size fyne.Size) {
-	r.bg.Resize(size)
+	r.background.Resize(size)
 	var x, y, w, h float32
 	if r.divider.split.Horizontal {
 		x = (dividerThickness() - handleThickness()) / 2
@@ -275,8 +276,8 @@ func (r *dividerRenderer) Layout(size fyne.Size) {
 		w = handleLength()
 		h = handleThickness()
 	}
-	r.fg.Move(fyne.NewPos(x, y))
-	r.fg.Resize(fyne.NewSize(w, h))
+	r.foreground.Move(fyne.NewPos(x, y))
+	r.foreground.Resize(fyne.NewSize(w, h))
 }
 
 func (r *dividerRenderer) MinSize() fyne.Size {
@@ -292,11 +293,13 @@ func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 
 func (r *dividerRenderer) Refresh() {
 	if r.divider.hovered {
-		r.bg.FillColor = theme.HoverColor()
+		r.background.FillColor = theme.HoverColor()
 	} else {
-		r.bg.FillColor = theme.ShadowColor()
+		r.background.FillColor = theme.ShadowColor()
 	}
-	r.fg.FillColor = theme.ForegroundColor()
+	r.background.Refresh()
+	r.foreground.FillColor = theme.ForegroundColor()
+	r.foreground.Refresh()
 	r.Layout(r.divider.Size())
 }
 

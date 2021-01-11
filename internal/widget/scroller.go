@@ -29,13 +29,13 @@ const (
 
 type scrollBarRenderer struct {
 	BaseRenderer
-	scrollBar *scrollBar
-	bg        *canvas.Rectangle
-	minSize   fyne.Size
+	scrollBar  *scrollBar
+	background *canvas.Rectangle
+	minSize    fyne.Size
 }
 
 func (r *scrollBarRenderer) Layout(size fyne.Size) {
-	r.bg.Resize(size)
+	r.background.Resize(size)
 }
 
 func (r *scrollBarRenderer) MinSize() fyne.Size {
@@ -43,7 +43,8 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarRenderer) Refresh() {
-	r.bg.FillColor = theme.ScrollBarColor()
+	r.background.FillColor = theme.ScrollBarColor()
+	r.background.Refresh()
 }
 
 var _ desktop.Hoverable = (*scrollBar)(nil)
@@ -59,12 +60,12 @@ type scrollBar struct {
 }
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	bg := canvas.NewRectangle(theme.ScrollBarColor())
+	background := canvas.NewRectangle(theme.ScrollBarColor())
 	r := &scrollBarRenderer{
-		scrollBar: b,
-		bg:        bg,
+		scrollBar:  b,
+		background: background,
 	}
-	r.SetObjects([]fyne.CanvasObject{bg})
+	r.SetObjects([]fyne.CanvasObject{background})
 	return r
 }
 

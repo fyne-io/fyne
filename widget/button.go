@@ -276,9 +276,9 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 
 func (r *buttonRenderer) Refresh() {
 	r.label.Text = r.button.Text
-	r.background.Refresh()
 	r.updateIconAndText()
 	r.applyTheme()
+	r.background.Refresh()
 	r.Layout(r.button.Size())
 	canvas.Refresh(r.button.super())
 }

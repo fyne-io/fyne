@@ -72,8 +72,8 @@ type Toolbar struct {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	bg := canvas.NewRectangle(theme.ButtonColor())
-	r := &toolbarRenderer{toolbar: t, bg: bg, layout: layout.NewHBoxLayout()}
+	background := canvas.NewRectangle(theme.ButtonColor())
+	r := &toolbarRenderer{toolbar: t, background: background, layout: layout.NewHBoxLayout()}
 	r.resetObjects()
 	return r
 }
@@ -107,10 +107,10 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 
 type toolbarRenderer struct {
 	widget.BaseRenderer
-	bg      *canvas.Rectangle
-	layout  fyne.Layout
-	items   []fyne.CanvasObject
-	toolbar *Toolbar
+	background *canvas.Rectangle
+	layout     fyne.Layout
+	items      []fyne.CanvasObject
+	toolbar    *Toolbar
 }
 
 func (r *toolbarRenderer) MinSize() fyne.Size {
@@ -118,12 +118,13 @@ func (r *toolbarRenderer) MinSize() fyne.Size {
 }
 
 func (r *toolbarRenderer) Layout(size fyne.Size) {
-	r.bg.Resize(size)
+	r.background.Resize(size)
 	r.layout.Layout(r.items, size)
 }
 
 func (r *toolbarRenderer) Refresh() {
-	r.bg.FillColor = theme.ButtonColor()
+	r.background.FillColor = theme.ButtonColor()
+	r.background.Refresh()
 	r.resetObjects()
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
@@ -142,5 +143,5 @@ func (r *toolbarRenderer) resetObjects() {
 			r.items = append(r.items, item.ToolbarObject())
 		}
 	}
-	r.SetObjects(append([]fyne.CanvasObject{r.bg}, r.items...))
+	r.SetObjects(append([]fyne.CanvasObject{r.background}, r.items...))
 }

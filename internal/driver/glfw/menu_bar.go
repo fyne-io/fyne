@@ -176,6 +176,7 @@ func (r *menuBarRenderer) MinSize() fyne.Size {
 func (r *menuBarRenderer) Refresh() {
 	r.Layout(r.b.Size())
 	r.background.FillColor = theme.ButtonColor()
+	r.background.Refresh()
 	canvas.Refresh(r.b)
 }
 
