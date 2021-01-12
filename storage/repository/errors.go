@@ -10,6 +10,8 @@ type operationNotSupportedError string
 // that is not supported for the scheme relevant to the URI, normally because
 // the underlying repository has either not implemented the relevant function,
 // or has explicitly returned this error.
+//
+// Since 2.0.0
 const OperationNotSupportedError operationNotSupportedError = operationNotSupportedError("Operation not supported for this URI.")
 
 func (e operationNotSupportedError) Error() string {
@@ -25,6 +27,8 @@ type uriRootError string
 // attempts to take the parent of the root. This way, downstream code that
 // wants to programmatically walk up a URIs parent's will know when to stop
 // iterating.
+//
+// Since 2.0.0
 const URIRootError uriRootError = uriRootError("Cannot take the parent of the root element in a URI")
 
 func (e uriRootError) Error() string {
