@@ -388,10 +388,10 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 
 func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation {
 	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
-		mid := w.Size().Width / 2
+		mid := (w.Size().Width - theme.Padding()) / 2
 		size := mid * done
-		bg.Resize(fyne.NewSize(size*2, w.Size().Height))
-		bg.Move(fyne.NewPos(mid-size, 0))
+		bg.Resize(fyne.NewSize(size*2, w.Size().Height-theme.Padding()))
+		bg.Move(fyne.NewPos(mid-size, theme.Padding()/2))
 
 		r, g, bb, a := theme.PressedColor().RGBA()
 		aa := uint8(a)
