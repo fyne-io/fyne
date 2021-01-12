@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -58,8 +57,6 @@ const (
 	// PrimaryButton that should be more prominent to the user.
 	// Deprecated: use Importance = HighImportance instead.
 	PrimaryButton
-
-	buttonTapDuration = 250
 )
 
 // Button widget has a text label and triggers an event func when clicked
@@ -80,7 +77,9 @@ type Button struct {
 	// Deprecated: use Importance = LowImportance instead of HideShadow = true.
 	HideShadow bool
 
-	hovered, tapped bool
+	hovered bool
+	tapAnim *fyne.Animation
+	tapBG   *canvas.Rectangle
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -113,8 +112,10 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.TextStyle.Bold = true
 
 	bg := canvas.NewRectangle(color.Transparent)
+	b.tapBG = canvas.NewRectangle(color.Transparent)
 	objects := []fyne.CanvasObject{
 		bg,
+		b.tapBG,
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
@@ -181,17 +182,27 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 		return
 	}
 
-	b.tapped = true
-	defer func() { // TODO move to a real animation
-		time.Sleep(time.Millisecond * buttonTapDuration)
-		b.tapped = false
-		b.Refresh()
-	}()
+	b.tapAnimation()
 	b.Refresh()
 
 	if b.OnTapped != nil {
 		b.OnTapped()
 	}
+}
+
+func (b *Button) tapAnimation() {
+	if b.tapBG == nil { // not rendered yet? (tests)
+		return
+	}
+
+	if b.tapAnim == nil {
+		b.tapAnim = newButtonTapAnimation(b.tapBG, b)
+		b.tapAnim.Curve = fyne.AnimationEaseOut
+	} else {
+		b.tapAnim.Stop()
+	}
+
+	b.tapAnim.Start()
 }
 
 type buttonRenderer struct {
@@ -321,7 +332,7 @@ func (r *buttonRenderer) buttonColor() color.Color {
 		return theme.DisabledButtonColor()
 	case r.button.Style == PrimaryButton, r.button.Importance == HighImportance:
 		return theme.PrimaryColor()
-	case r.button.hovered, r.button.tapped: // TODO tapped will be different to hovered when we have animation
+	case r.button.hovered:
 		return theme.HoverColor()
 	default:
 		return theme.ButtonColor()
@@ -343,7 +354,7 @@ func (r *buttonRenderer) updateIconAndText() {
 		if r.icon == nil {
 			r.icon = canvas.NewImageFromResource(r.button.Icon)
 			r.icon.FillMode = canvas.ImageFillContain
-			r.SetObjects([]fyne.CanvasObject{r.bg, r.label, r.icon})
+			r.SetObjects([]fyne.CanvasObject{r.bg, r.button.tapBG, r.label, r.icon})
 		}
 		if r.button.Disabled() {
 			r.icon.Resource = theme.NewDisabledResource(r.button.Icon)
@@ -373,4 +384,19 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
 	}
 	return
+}
+
+func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation {
+	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
+		mid := (w.Size().Width - theme.Padding()) / 2
+		size := mid * done
+		bg.Resize(fyne.NewSize(size*2, w.Size().Height-theme.Padding()))
+		bg.Move(fyne.NewPos(mid-size, theme.Padding()/2))
+
+		r, g, bb, a := theme.PressedColor().RGBA()
+		aa := uint8(a)
+		fade := aa - uint8(float32(aa)*done)
+		bg.FillColor = &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(bb), A: fade}
+		canvas.Refresh(bg)
+	})
 }
