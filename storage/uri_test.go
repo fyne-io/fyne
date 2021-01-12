@@ -11,6 +11,66 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestURIAuthority(t *testing.T) {
+
+	// from IETF RFC 3986
+	s := "foo://example.com:8042/over/there?name=ferret#nose"
+	u, err := storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "example.com:8042", u.Authority())
+
+	// from IETF RFC 3986
+	s = "urn:example:animal:ferret:nose"
+	u, err = storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "", u.Authority())
+}
+
+func TestURIPath(t *testing.T) {
+	// from IETF RFC 3986
+	s := "foo://example.com:8042/over/there?name=ferret#nose"
+	u, err := storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "/over/there", u.Path())
+
+	// NOTE: this is currently broken, because net/url is not fully RFC3986
+	// compliant - it returns an empty string rather than the proper path.
+	//
+	// from IETF RFC 3986
+	// s = "urn:example:animal:ferret:nose"
+	// u, err = storage.ParseURI(s)
+	// assert.Nil(t, err)
+	// assert.Equal(t, "example:animal:ferret:nose", u.Path())
+}
+
+func TestURIQuery(t *testing.T) {
+	// from IETF RFC 3986
+	s := "foo://example.com:8042/over/there?name=ferret#nose"
+	u, err := storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "name=ferret", u.Query())
+
+	// from IETF RFC 3986
+	s = "urn:example:animal:ferret:nose"
+	u, err = storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "", u.Query())
+}
+
+func TestURIFragment(t *testing.T) {
+	// from IETF RFC 3986
+	s := "foo://example.com:8042/over/there?name=ferret#nose"
+	u, err := storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "nose", u.Fragment())
+
+	// from IETF RFC 3986
+	s = "urn:example:animal:ferret:nose"
+	u, err = storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "", u.Fragment())
+}
+
 func TestNewURI(t *testing.T) {
 	uriStr := "file:///nothere.txt"
 	u := storage.NewURI(uriStr)
