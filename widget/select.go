@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -67,7 +66,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(color.Transparent)
 	objects := []fyne.CanvasObject{bg, txtProv, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
+	r := &selectRenderer{icon, txtProv, bg, objects, s}
 	bg.FillColor = r.buttonColor()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
@@ -235,7 +234,7 @@ func (s *Select) optionTapped(text string) {
 
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height-theme.Padding()))
+	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height+1))
 }
 
 func (s *Select) showPopUp() {
@@ -266,7 +265,7 @@ func (s *Select) textColor() color.Color {
 }
 
 func (s *Select) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{Bold: true}
+	return fyne.TextStyle{Bold: false}
 }
 
 func (s *Select) textWrap() fyne.TextWrap {
@@ -284,40 +283,40 @@ func (s *Select) updateSelected(text string) {
 }
 
 type selectRenderer struct {
-	*widget.ShadowingRenderer
-
 	icon  *Icon
 	label *textProvider
 	bg    *canvas.Rectangle
-	combo *Select
+
+	objects []fyne.CanvasObject
+	combo   *Select
 }
 
 func (s *selectRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
+func (s *selectRenderer) Objects() []fyne.CanvasObject {
+	return s.objects
+}
+
+func (s *selectRenderer) Destroy() {}
+
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
-	doublePad := theme.Padding() * 2
-	s.LayoutShadow(size.Subtract(fyne.NewSize(doublePad, doublePad)), fyne.NewPos(theme.Padding(), theme.Padding()))
-	inner := size.Subtract(fyne.NewSize(doublePad*2, doublePad))
+	s.bg.Move(fyne.NewPos(0, 0))
+	s.bg.Resize(size)
 
-	s.bg.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	s.bg.Resize(size.Subtract(fyne.NewSize(doublePad, doublePad)))
-
-	offset := fyne.NewSize(theme.IconInlineSize(), 0)
-	labelSize := inner.Subtract(offset)
+	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding()*2, (size.Height-theme.IconInlineSize())/2)
+	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), size.Height)
 
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
 	s.label.Resize(labelSize)
-	s.label.Move(fyne.NewPos(doublePad, theme.Padding()))
+	s.label.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
 	s.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	s.icon.Move(fyne.NewPos(
-		size.Width-theme.IconInlineSize()-doublePad,
-		(size.Height-theme.IconInlineSize())/2))
+	s.icon.Move(iconPos)
 }
 
 // MinSize calculates the minimum size of a select button.
@@ -326,10 +325,10 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.combo.textStyle())
-
-	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
-	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+	// pad - label - pad - icon - pad*2
+	min := s.label.MinSize()
+	min = min.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, 0))
 }
 
 func (s *selectRenderer) Refresh() {
@@ -349,7 +348,7 @@ func (s *selectRenderer) Refresh() {
 
 func (s *selectRenderer) buttonColor() color.Color {
 	if s.combo.Disabled() {
-		return theme.ButtonColor()
+		return theme.FocusColor()
 	}
 	if s.combo.focused {
 		return theme.PrimaryColor()
@@ -357,7 +356,7 @@ func (s *selectRenderer) buttonColor() color.Color {
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	}
-	return theme.ButtonColor()
+	return theme.FocusColor()
 }
 
 func (s *selectRenderer) updateIcon() {
