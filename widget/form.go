@@ -82,6 +82,25 @@ func (f *Form) Refresh() {
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
+func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
+	_, ok := item.Widget.(fyne.Validatable)
+	if item.HintText == "" {
+		if !ok {
+			return item.Widget
+		}
+		if e, ok := item.Widget.(*Entry); ok && e.Validator == nil { // we don't have validation
+			return item.Widget
+		}
+	}
+
+	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
+	text.TextSize = theme.CaptionTextSize()
+	text.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()*-0.5))
+	item.helperOutput = text
+	f.updateHelperText(item)
+	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
+}
+
 func (f *Form) createLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
@@ -130,25 +149,6 @@ func (f *Form) checkValidation(err error) {
 	}
 
 	f.submitButton.Enable()
-}
-
-func (f *Form) setUpHints(item *FormItem) fyne.CanvasObject {
-	_, ok := item.Widget.(fyne.Validatable)
-	if item.HintText == "" {
-		if !ok {
-			return item.Widget
-		}
-		if e, ok := item.Widget.(*Entry); ok && e.Validator == nil { // we don't have validation
-			return item.Widget
-		}
-	}
-
-	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
-	text.TextSize = theme.CaptionTextSize()
-	text.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()*-0.5))
-	item.helperOutput = text
-	f.updateHelperText(item)
-	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
@@ -201,7 +201,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 		objects[i*2] = f.createLabel(item.Text)
 
 		f.setUpValidation(item.Widget, i)
-		objects[i*2+1] = f.setUpHints(item)
+		objects[i*2+1] = f.createInput(item)
 	}
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
