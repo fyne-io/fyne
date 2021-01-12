@@ -1013,13 +1013,10 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 	switch keyName {
 	case fyne.KeyTab:
-		obj := w.canvas.Focused()
 		capture := false
 		// TODO at some point allow widgets to mark as capturing
-		if ent, ok := obj.(*widget.Entry); ok {
-			if ent.MultiLine {
-				capture = true
-			}
+		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
+			capture = true
 		}
 		if !capture {
 			switch keyDesktopModifier {
