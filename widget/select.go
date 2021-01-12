@@ -65,14 +65,9 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv.ExtendBaseWidget(txtProv)
 
 	bg := canvas.NewRectangle(color.Transparent)
-<<<<<<< HEAD
-	objects := []fyne.CanvasObject{bg, txtProv, icon}
-	r := &selectRenderer{icon, txtProv, bg, objects, s}
-=======
 	s.tapBG = canvas.NewRectangle(color.Transparent)
 	objects := []fyne.CanvasObject{bg, s.tapBG, txtProv, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
->>>>>>> upstream/develop
+	r := &selectRenderer{icon, txtProv, bg, objects, s}
 	bg.FillColor = r.buttonColor()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
