@@ -82,12 +82,8 @@ func (f *Form) Refresh() {
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
-func (f *Form) createLabel(text string) *tallerLabel {
-	l := &tallerLabel{}
-	l.Alignment = fyne.TextAlignTrailing
-	l.Text = text
-	l.TextStyle = fyne.TextStyle{Bold: true}
-	return l
+func (f *Form) createLabel(text string) *Label {
+	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
 func (f *Form) updateButtons() {
@@ -149,7 +145,7 @@ func (f *Form) setUpHints(item *FormItem) fyne.CanvasObject {
 
 	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
 	text.TextSize = theme.CaptionTextSize()
-	text.Move(fyne.NewPos(theme.Padding()*2, 0))
+	text.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()*-0.5))
 	item.helperOutput = text
 	f.updateHelperText(item)
 	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
@@ -182,7 +178,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
-		l := f.itemGrid.Objects[i*2].(*tallerLabel)
+		l := f.itemGrid.Objects[i*2].(*Label)
 		if l.Text == item.Text {
 			continue
 		}
@@ -222,31 +218,4 @@ func NewForm(items ...*FormItem) *Form {
 	form.ExtendBaseWidget(form)
 
 	return form
-}
-
-type tallerLabel struct {
-	Label
-}
-
-func (t *tallerLabel) CreateRenderer() fyne.WidgetRenderer {
-	return &tallerLabelRenderer{t.Label.CreateRenderer().(*textRenderer)}
-}
-
-type tallerLabelRenderer struct {
-	*textRenderer
-}
-
-func (t *tallerLabelRenderer) Layout(size fyne.Size) {
-	t.textRenderer.Layout(size.Subtract(fyne.NewSize(0, theme.Padding()*2)))
-
-	for _, text := range t.textRenderer.Objects() {
-		pos := text.Position()
-		pos.Y += theme.Padding()
-		text.Move(pos)
-	}
-}
-
-func (t *tallerLabelRenderer) MinSize() fyne.Size {
-	min := t.textRenderer.MinSize()
-	return min.Add(fyne.NewSize(0, theme.Padding()*2))
 }

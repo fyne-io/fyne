@@ -104,7 +104,7 @@ func TestList_OffsetChange(t *testing.T) {
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex)
 
 	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
-	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -300)})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -280)})
 
 	indexChange := int(math.Floor(float64(300) / float64(template.MinSize().Height)))
 

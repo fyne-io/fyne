@@ -152,6 +152,7 @@ func (l *Label) object() fyne.Widget {
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.provider = newTextProvider(l.Text, l)
+	l.provider.extraVerticalPad = theme.Padding()
 	l.provider.size = l.size
 	return l.provider.CreateRenderer()
 }
