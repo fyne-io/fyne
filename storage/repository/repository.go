@@ -66,6 +66,24 @@ type Repository interface {
 	Destroy(string)
 }
 
+// CanonicalRepository is an extension of the repository interface which
+// allows the behavior of storage.ParseURI to be overridden. This is only
+// needed if you wish to generate custom URI types, rather than using Fyne's
+// URI implementation and net/url based parsing.
+//
+// NOTE: even for URIs with non-RFC3986-compliant encoding, the URI MUST begin
+// with 'scheme:', or storage.ParseURI() will not be able to determine which
+// storage repository to delegate to for parsing.
+//
+// Since 2.0.0
+type CanonicalRepository interface {
+	Repository
+
+	// ParseURI will be used to implement calls to storage.ParseURI()
+	// for the registered scheme of this repository.
+	ParseURI(string) (fyne.URI, error)
+}
+
 // WriteableRepository is an extension of the Repository interface which also
 // supports obtaining a writer for URIs of the scheme it is registered to.
 //
@@ -79,8 +97,8 @@ type WriteableRepository interface {
 	// Since 2.0.0
 	Writer(u fyne.URI) (fyne.URIWriteCloser, error)
 
-	// CanWrite will be used to implement calls to storage.CanWrite() for the
-	// registered scheme of this repository.
+	// CanWrite will be used to implement calls to storage.CanWrite() for
+	// the registered scheme of this repository.
 	//
 	// Since 2.0.0
 	CanWrite(u fyne.URI) (bool, error)
