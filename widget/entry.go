@@ -41,6 +41,8 @@ type Entry struct {
 	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
+	// Since: 2.0.0
+	OnSubmitted func(string) `json:"-"`
 	Password    bool
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
@@ -468,7 +470,10 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	e.propertyLock.RLock()
 	provider := e.textProvider()
+	onSubmitted := e.OnSubmitted
 	multiLine := e.MultiLine
+	selectDown := e.selectKeyDown
+	text := e.Text
 	e.propertyLock.RUnlock()
 
 	if e.selectKeyDown || e.selecting {
@@ -503,6 +508,15 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if !multiLine {
+			// Single line doesn't support newline.
+			// Call submitted callback, if any.
+			if onSubmitted != nil {
+				onSubmitted(text)
+			}
+			return
+		} else if selectDown && onSubmitted != nil {
+			// Multiline supports newline, unless shift is held and OnSubmitted is set.
+			onSubmitted(text)
 			return
 		}
 		e.propertyLock.Lock()
