@@ -250,7 +250,7 @@ func (s *Select) showPopUp() {
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
 	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
+	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height+theme.Padding()/2))
 }
 
 func (s *Select) textAlign() fyne.TextAlign {
