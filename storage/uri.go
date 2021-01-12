@@ -123,6 +123,14 @@ func parentGeneric(location string) (string, error) {
 	return parent, nil
 }
 
+// ParseURI creates a new URI instance by parsing a URI string, which must
+// conform to IETF RFC3986.
+//
+// Since 2.0.0
+func ParseURI(string) (fyne.URI, error) {
+	return nil, fmt.Errorf("TODO")
+}
+
 // Parent returns a URI referencing the parent resource of the resource
 // referenced by the URI. For example, the Parent() of 'file://foo/bar.baz' is
 // 'file://foo'. The URI which is returned will be listable.
