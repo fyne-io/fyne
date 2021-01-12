@@ -58,8 +58,12 @@ type Repository interface {
 	// Destroy is called when the repository is un-registered from a given
 	// URI scheme.
 	//
+	// The string parameter will be the URI scheme that the repository was
+	// registered for. This may be useful for repositories that need to
+	// handle more than one URI scheme internally.
+	//
 	// Since 2.0.0
-	Destroy()
+	Destroy(string)
 }
 
 // WriteableRepository is an extension of the Repository interface which also
@@ -187,12 +191,12 @@ type MovableRepository interface {
 func Register(scheme string, repository Repository) {
 }
 
-// RegisteredRepository returns the Repository instance which is registered to
-// handle URIs of the given scheme.
+// ForURI returns the Repository instance which is registered to handle URIs of
+// the given scheme.
 //
 // NOTE: this function is intended to be used specifically by the storage
 // package. It generally should not be used outside of the fyne package -
 // instead you should use the methods in the storage package.
-func RegisteredRepository(u fyne.URI) (Repository, error) {
+func ForURI(u fyne.URI) (Repository, error) {
 	return nil, fmt.Errorf("TODO")
 }
