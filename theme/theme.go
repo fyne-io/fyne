@@ -88,6 +88,11 @@ const (
 	// Since 2.0.0
 	ColorNamePlaceHolder fyne.ThemeColorName = "placeholder"
 
+	// ColorNamePressed is the name of theme lookup for the tap overlay color.
+	//
+	// Since 2.0.0
+	ColorNamePressed fyne.ThemeColorName = "pressed"
+
 	// ColorNamePrimary is the name of theme lookup for primary color.
 	//
 	// Since 2.0.0
@@ -133,6 +138,11 @@ const (
 	// Since 2.0.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
+	// SizeNameInputBorder is the name of theme lookup for input border size.
+	//
+	// Since 2.0.0
+	SizeNameInputBorder fyne.ThemeSizeName = "inputBorder"
+
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since 2.0.0
@@ -170,10 +180,11 @@ var (
 		ColorNameDisabled:       color.NRGBA{0xff, 0xff, 0xff, 0x42},
 		ColorNameDisabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
 		ColorNameError:          errorColor,
-		ColorNameFocus:          color.NRGBA{0xff, 0xff, 0xff, 0x19}, // TODO adjust
+		ColorNameFocus:          color.NRGBA{0xff, 0xff, 0xff, 0x19},
 		ColorNameForeground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		ColorNameHover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		ColorNamePressed:        color.NRGBA{0xff, 0xff, 0xff, 0x66},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
@@ -184,10 +195,11 @@ var (
 		ColorNameDisabled:       color.NRGBA{0x0, 0x0, 0x0, 0x42},
 		ColorNameDisabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
 		ColorNameError:          errorColor,
-		ColorNameFocus:          color.NRGBA{0x0, 0x0, 0x0, 0x19}, // TODO adjust
+		ColorNameFocus:          color.NRGBA{0x0, 0x0, 0x0, 0x19},
 		ColorNameForeground:     color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		ColorNameHover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		ColorNamePressed:        color.NRGBA{0x0, 0x0, 0x0, 0x19},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
 	}
@@ -289,6 +301,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
+	case SizeNameInputBorder:
+		return 2
 	default:
 		return 0
 	}
@@ -350,6 +364,13 @@ func PlaceHolderColor() color.Color {
 	return current().Color(ColorNamePlaceHolder, currentVariant())
 }
 
+// PressedColor returns the color used to overlap tapped features
+//
+// Since: 2.0.0
+func PressedColor() color.Color {
+	return current().Color(ColorNamePressed, currentVariant())
+}
+
 // PrimaryColor returns the color used to highlight primary features
 func PrimaryColor() color.Color {
 	return current().Color(ColorNamePrimary, currentVariant())
@@ -380,6 +401,13 @@ func ScrollBarColor() color.Color {
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
 	return current().Color(ColorNameShadow, currentVariant())
+}
+
+// InputBorderSize returns the input border size (or underline size for an entry).
+//
+// Since 2.0.0
+func InputBorderSize() float32 {
+	return current().Size(SizeNameInputBorder)
 }
 
 // TextSize returns the standard text size

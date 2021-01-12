@@ -41,6 +41,8 @@ type Entry struct {
 	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
+	// Since: 2.0.0
+	OnSubmitted func(string) `json:"-"`
 	Password    bool
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
@@ -156,11 +158,12 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.textProvider()
 	e.placeholderProvider()
 
+	box := canvas.NewRectangle(theme.FocusColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
 	scroll := widget.NewScroll(e.content)
-	objects := []fyne.CanvasObject{line, scroll}
+	objects := []fyne.CanvasObject{box, line, scroll}
 	e.content.scroll = scroll
 
 	if e.Password && e.ActionItem == nil {
@@ -173,7 +176,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{line, scroll, objects, e}
+	return &entryRenderer{box, line, scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -467,7 +470,10 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	e.propertyLock.RLock()
 	provider := e.textProvider()
+	onSubmitted := e.OnSubmitted
 	multiLine := e.MultiLine
+	selectDown := e.selectKeyDown
+	text := e.Text
 	e.propertyLock.RUnlock()
 
 	if e.selectKeyDown || e.selecting {
@@ -502,6 +508,15 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if !multiLine {
+			// Single line doesn't support newline.
+			// Call submitted callback, if any.
+			if onSubmitted != nil {
+				onSubmitted(text)
+			}
+			return
+		} else if selectDown && onSubmitted != nil {
+			// Multiline supports newline, unless shift is held and OnSubmitted is set.
+			onSubmitted(text)
 			return
 		}
 		e.propertyLock.Lock()
@@ -509,6 +524,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.CursorColumn = 0
 		e.CursorRow++
 		e.propertyLock.Unlock()
+	case fyne.KeyTab:
+		e.TypedRune('\t')
 	case fyne.KeyUp:
 		if !multiLine {
 			return
@@ -820,6 +837,9 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b[0]
+			if e.Wrapping != fyne.TextWrapOff && b[0] == pos && col == 0 && pos != 0 {
+				row++
+			}
 		} else {
 			break
 		}
@@ -1024,8 +1044,8 @@ func (e *Entry) updateText(text string) {
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
-	line   *canvas.Rectangle
-	scroll *widget.Scroll
+	box, line *canvas.Rectangle
+	scroll    *widget.Scroll
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1039,8 +1059,10 @@ func (r *entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	r.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
-	r.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
+	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
+	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
+	r.box.Resize(size)
+	r.box.Move(fyne.NewPos(0, 0))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
@@ -1103,6 +1125,7 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
+	r.box.FillColor = theme.FocusColor()
 	if focused {
 		r.line.FillColor = theme.PrimaryColor()
 	} else {
@@ -1136,7 +1159,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.validationStatus.Hide()
 	}
 
-	r.scroll.Content.Refresh()
+	cache.Renderer(r.scroll.Content.(*entryContent)).Refresh()
 	canvas.Refresh(r.entry.super())
 }
 
@@ -1299,7 +1322,8 @@ type entryContentRenderer struct {
 }
 
 func (r *entryContentRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	// Workaround until BackgroundColor is finally removed.
+	return theme.FocusColor()
 }
 
 func (r *entryContentRenderer) Destroy() {

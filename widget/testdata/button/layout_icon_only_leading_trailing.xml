@@ -12,6 +12,7 @@
 				<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x188"/>
 			</widget>
 			<rectangle fillColor="button" pos="2,2" size="138x188"/>
+			<rectangle size="0x0"/>
 			<image fillMode="contain" pos="8,86" rsc="cancelIcon" size="iconInlineSize"/>
 		</widget>
 	</content>

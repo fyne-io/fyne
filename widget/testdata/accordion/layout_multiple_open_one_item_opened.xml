@@ -4,6 +4,7 @@
 			<widget pos="45,61" size="52x70" type="*widget.Accordion">
 				<widget pos="0,4" size="52x29" type="*widget.Button">
 					<rectangle fillColor="button" pos="2,2" size="48x25"/>
+					<rectangle size="0x0"/>
 					<text bold pos="28,4" size="11x21">A</text>
 					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 				</widget>

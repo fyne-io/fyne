@@ -109,6 +109,22 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_CursorColumn_Wrap2(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.Resize(fyne.NewSize(64, 64))
+	entry.SetText("1234")
+	entry.CursorColumn = 3
+	test.Type(entry, "a")
+	test.Type(entry, "b")
+	test.Type(entry, "c")
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(70, 70))
+	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
+}
+
 func TestEntry_CursorPasswordRevealer(t *testing.T) {
 	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
@@ -1192,6 +1208,86 @@ func TestEntry_SetTextStyle(t *testing.T) {
 	entry.TextStyle = fyne.TextStyle{Italic: true}
 	entry.Refresh()
 	test.AssertRendersToMarkup(t, "entry/set_text_style_italic.xml", c)
+}
+
+func TestEntry_Submit(t *testing.T) {
+	t.Run("Callback", func(t *testing.T) {
+		var submission string
+		entry := &widget.Entry{
+			OnSubmitted: func(s string) {
+				submission = s
+			},
+		}
+		t.Run("SingleLine_Enter", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("a")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			assert.Equal(t, "a", entry.Text)
+			assert.Equal(t, "a", submission)
+		})
+		t.Run("SingleLine_Return", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("b")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			assert.Equal(t, "b", entry.Text)
+			assert.Equal(t, "b", submission)
+		})
+		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("c")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "c", entry.Text)
+			assert.Equal(t, "c", submission)
+			entry.SetText("d")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "d", entry.Text)
+			assert.Equal(t, "d", submission)
+		})
+		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("e")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "e", entry.Text)
+			assert.Equal(t, "e", submission)
+			entry.SetText("f")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "f", entry.Text)
+			assert.Equal(t, "f", submission)
+		})
+	})
+	t.Run("NoCallback", func(t *testing.T) {
+		entry := &widget.Entry{}
+		t.Run("SingleLine_Enter", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("a")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			assert.Equal(t, "a", entry.Text)
+		})
+		t.Run("SingleLine_Return", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("b")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			assert.Equal(t, "b", entry.Text)
+		})
+		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("c")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "\nc", entry.Text)
+			entry.SetText("d")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "\nd", entry.Text)
+		})
+		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("e")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "\ne", entry.Text)
+			entry.SetText("f")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "\nf", entry.Text)
+		})
+	})
 }
 
 func TestEntry_Tapped(t *testing.T) {

@@ -1,9 +1,10 @@
 <canvas padded size="150x200">
 	<content>
 		<widget pos="10,10" size="110x37" type="*widget.SelectEntry">
-			<rectangle fillColor="shadow" pos="0,33" size="110x4"/>
+			<rectangle fillColor="focus" size="110x37"/>
+			<rectangle fillColor="shadow" pos="0,35" size="110x2"/>
 			<widget pos="4,4" size="82x29" type="*widget.Scroll">
-				<widget size="82x29" type="*widget.entryContent">
+				<widget backgroundColor="focus" size="82x29" type="*widget.entryContent">
 					<widget size="82x29" type="*widget.textProvider">
 						<text color="placeholder" pos="4,4" size="74x21"></text>
 					</widget>
@@ -14,6 +15,7 @@
 			</widget>
 			<widget pos="82,8" size="20x20" type="*widget.Button">
 				<rectangle fillColor="button" pos="2,2" size="16x16"/>
+				<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="16x16"/>
 				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 			</widget>
 		</widget>

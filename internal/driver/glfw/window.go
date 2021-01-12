@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
+	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -1012,13 +1013,23 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 	switch keyName {
 	case fyne.KeyTab:
-		switch keyDesktopModifier {
-		case 0:
-			w.canvas.FocusNext()
-			return
-		case desktop.ShiftModifier:
-			w.canvas.FocusPrevious()
-			return
+		obj := w.canvas.Focused()
+		capture := false
+		// TODO at some point allow widgets to mark as capturing
+		if ent, ok := obj.(*widget.Entry); ok {
+			if ent.MultiLine {
+				capture = true
+			}
+		}
+		if !capture {
+			switch keyDesktopModifier {
+			case 0:
+				w.canvas.FocusNext()
+				return
+			case desktop.ShiftModifier:
+				w.canvas.FocusPrevious()
+				return
+			}
 		}
 	}
 
