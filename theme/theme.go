@@ -88,6 +88,11 @@ const (
 	// Since 2.0.0
 	ColorNamePlaceHolder fyne.ThemeColorName = "placeholder"
 
+	// ColorNamePressed is the name of theme lookup for the tap overlay color.
+	//
+	// Since 2.0.0
+	ColorNamePressed fyne.ThemeColorName = "pressed"
+
 	// ColorNamePrimary is the name of theme lookup for primary color.
 	//
 	// Since 2.0.0
@@ -179,6 +184,7 @@ var (
 		ColorNameForeground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		ColorNameHover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		ColorNamePressed:        color.NRGBA{0xff, 0xff, 0xff, 0x66},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
@@ -193,6 +199,7 @@ var (
 		ColorNameForeground:     color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		ColorNameHover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		ColorNamePlaceHolder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		ColorNamePressed:        color.NRGBA{0x0, 0x0, 0x0, 0x19},
 		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
 	}
@@ -355,6 +362,13 @@ func ErrorColor() color.Color {
 // PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
 	return current().Color(ColorNamePlaceHolder, currentVariant())
+}
+
+// PressedColor returns the color used to overlap tapped features
+//
+// Since: 2.0.0
+func PressedColor() color.Color {
+	return current().Color(ColorNamePressed, currentVariant())
 }
 
 // PrimaryColor returns the color used to highlight primary features
