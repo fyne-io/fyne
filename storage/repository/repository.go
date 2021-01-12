@@ -157,7 +157,7 @@ type CopyableRepository interface {
 	Copy(fyne.URI, fyne.URI) error
 }
 
-// CopyableRepository is an extension of the Repository interface which also
+// MovableRepository is an extension of the Repository interface which also
 // supports moving referenced resources from one URI to another.
 type MovableRepository interface {
 	Repository
@@ -187,12 +187,12 @@ type MovableRepository interface {
 func Register(scheme string, repository Repository) {
 }
 
-// RepositoryForURI returns the Repository instance which is registered to
+// RegisteredRepository returns the Repository instance which is registered to
 // handle URIs of the given scheme.
 //
 // NOTE: this function is intended to be used specifically by the storage
 // package. It generally should not be used outside of the fyne package -
 // instead you should use the methods in the storage package.
-func RepositoryForURI(u fyne.URI) (Repository, error) {
+func RegisteredRepository(u fyne.URI) (Repository, error) {
 	return nil, fmt.Errorf("TODO")
 }

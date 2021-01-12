@@ -156,17 +156,21 @@ func NewURI(s string) fyne.URI {
 //
 // Since 2.0.0
 func ParseURI(s string) (fyne.URI, error) {
-	_, err := url.Parse(s)
-	if err != nil {
-		return nil, err
-	}
 
 	if len(s) > 5 && s[:5] == "file:" {
 		path := s[5:]
 		if len(path) > 2 && path[:2] == "//" {
 			path = path[2:]
 		}
-		return NewFileURI(path), nil
+
+		// this looks weird, but it makes sure that we still pass
+		// url.Parse()
+		s = NewFileURI(path).String()
+	}
+
+	_, err := url.Parse(s)
+	if err != nil {
+		return nil, err
 	}
 
 	return &uri{raw: s}, nil
@@ -361,11 +365,11 @@ func Delete(u fyne.URI) error {
 //   operation such as a network or filesystem access that has failed
 //   in some way.
 //
-// ReaderFrom is backed by the repository system - this function calls
+// Reader is backed by the repository system - this function calls
 // into a scheme-specific implementation from a registered repository.
 //
 // Since 2.0.0
-func ReaderFrom(u fyne.URI) (fyne.URIReadCloser, error) {
+func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return nil, fmt.Errorf("TODO: implement this function")
 }
 
