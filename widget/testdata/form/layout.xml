@@ -3,10 +3,10 @@
 		<widget pos="4,4" size="206x119" type="*widget.Form">
 			<container size="206x78">
 				<widget size="47x37" type="*widget.Label">
-					<text alignment="trailing" bold pos="4,4" size="39x21">test1</text>
+					<text alignment="trailing" bold pos="4,8" size="39x21">test1</text>
 				</widget>
 				<widget pos="51,0" size="155x37" type="*widget.Entry">
-					<rectangle fillColor="focus" size="155x37"/>
+					<rectangle fillColor="focus" pos="0,4" size="155x33"/>
 					<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
 					<widget pos="4,4" size="147x29" type="*widget.Scroll">
 						<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
@@ -20,10 +20,10 @@
 					</widget>
 				</widget>
 				<widget pos="0,41" size="47x37" type="*widget.Label">
-					<text alignment="trailing" bold pos="4,4" size="39x21">test2</text>
+					<text alignment="trailing" bold pos="4,8" size="39x21">test2</text>
 				</widget>
 				<widget pos="51,41" size="155x37" type="*widget.Entry">
-					<rectangle fillColor="focus" size="155x37"/>
+					<rectangle fillColor="focus" pos="0,4" size="155x33"/>
 					<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
 					<widget pos="4,4" size="147x29" type="*widget.Scroll">
 						<widget backgroundColor="focus" size="147x29" type="*widget.entryContent">
