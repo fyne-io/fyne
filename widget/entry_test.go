@@ -109,6 +109,22 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_CursorColumn_Wrap2(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.Resize(fyne.NewSize(64, 64))
+	entry.SetText("1234")
+	entry.CursorColumn = 3
+	test.Type(entry, "a")
+	test.Type(entry, "b")
+	test.Type(entry, "c")
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(70, 70))
+	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
+}
+
 func TestEntry_CursorPasswordRevealer(t *testing.T) {
 	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
