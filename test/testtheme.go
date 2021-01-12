@@ -26,6 +26,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameForeground:     color.White,
 			theme.ColorNameHover:          green,
 			theme.ColorNamePlaceHolder:    blue,
+			theme.ColorNamePressed:        blue,
 			theme.ColorNamePrimary:        green,
 			theme.ColorNameScrollBar:      blue,
 			theme.ColorNameShadow:         blue,
