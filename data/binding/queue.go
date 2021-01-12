@@ -1,6 +1,6 @@
 package binding
 
-var itemQueue = make(chan itemData, 10000024)
+var itemQueue = make(chan itemData, 1024)
 
 type itemData struct {
 	fn   func()
