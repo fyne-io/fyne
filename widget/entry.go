@@ -794,6 +794,9 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 	e.updateText(provider.String())
 	e.Refresh()
+	impl := e.super()
+	// we need to propagate the focus, top level widget handles focus APIs
+	fyne.CurrentApp().Driver().CanvasForObject(impl).Focus(impl.(interface{}).(fyne.Focusable))
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
