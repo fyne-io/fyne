@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"mime"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -12,6 +13,9 @@ import (
 
 	"fyne.io/fyne"
 )
+
+// Declare conformance with fyne.URI interface
+var _ fyne.URI = &uri{}
 
 type uri struct {
 	raw string
@@ -29,25 +33,6 @@ func NewFileURI(path string) fyne.URI {
 		path = filepath.ToSlash(path)
 	}
 	return &uri{raw: "file://" + path}
-}
-
-// NewURI creates a new URI from the given string representation.
-// This could be a URI from an external source or one saved from URI.String()
-//
-// NOTE: since 2.0.0, NewURI() is backed by the repository system - this
-// function may call into either a generic implementation, or into a
-// scheme-specific implementation depending on which storage repositories have
-// been registered.
-func NewURI(u string) fyne.URI {
-	if len(u) > 5 && u[:5] == "file:" {
-		path := u[5:]
-		if len(path) > 2 && path[:2] == "//" {
-			path = path[2:]
-		}
-		return NewFileURI(path)
-	}
-
-	return &uri{raw: u}
 }
 
 func (u *uri) Extension() string {
@@ -88,6 +73,40 @@ func (u *uri) String() string {
 	return u.raw
 }
 
+func (u *uri) Authority() string {
+	// NOTE: we verified in ParseURI() that this would not error.
+	r, _ := url.Parse(u.raw)
+
+	a := ""
+	if len(r.User.String()) > 0 {
+		a = r.User.String() + "@"
+	}
+	a = a + r.Host
+
+	return a
+}
+
+func (u *uri) Path() string {
+	// NOTE: we verified in ParseURI() that this would not error.
+	r, _ := url.Parse(u.raw)
+
+	return r.Path
+}
+
+func (u *uri) Query() string {
+	// NOTE: we verified in ParseURI() that this would not error.
+	r, _ := url.Parse(u.raw)
+
+	return r.RawQuery
+}
+
+func (u *uri) Fragment() string {
+	// NOTE: we verified in ParseURI() that this would not error.
+	r, _ := url.Parse(u.raw)
+
+	return r.Fragment
+}
+
 // parentGeneric is a generic function that returns the last element of a
 // path after splitting it on "/". It should be suitable for most URIs.
 func parentGeneric(location string) (string, error) {
@@ -123,12 +142,34 @@ func parentGeneric(location string) (string, error) {
 	return parent, nil
 }
 
+// NewURI creates a new URI from the given string representation. This could be
+// a URI from an external source or one saved from URI.String()
+//
+// Deprecated - use ParseURI instead
+func NewURI(s string) fyne.URI {
+	u, _ := ParseURI(s)
+	return u
+}
+
 // ParseURI creates a new URI instance by parsing a URI string, which must
 // conform to IETF RFC3986.
 //
 // Since 2.0.0
-func ParseURI(string) (fyne.URI, error) {
-	return nil, fmt.Errorf("TODO")
+func ParseURI(s string) (fyne.URI, error) {
+	_, err := url.Parse(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(s) > 5 && s[:5] == "file:" {
+		path := s[5:]
+		if len(path) > 2 && path[:2] == "//" {
+			path = path[2:]
+		}
+		return NewFileURI(path), nil
+	}
+
+	return &uri{raw: s}, nil
 }
 
 // Parent returns a URI referencing the parent resource of the resource
@@ -200,7 +241,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 		}
 	}
 
-	return NewURI(u.Scheme() + "://" + parent), nil
+	return ParseURI(u.Scheme() + "://" + parent)
 }
 
 // Child returns a URI referencing a resource nested hierarchically below the
@@ -241,7 +282,7 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 		s += "/"
 	}
 
-	return NewURI(s + component), nil
+	return ParseURI(s + component)
 }
 
 // Exists determines if the resource referenced by the URI exists.
@@ -339,6 +380,7 @@ func ReaderFrom(u fyne.URI) (fyne.URIReadCloser, error) {
 //
 // Since 2.0.0
 func CanRead(u fyne.URI) (bool, error) {
+	return false, fmt.Errorf("TODO")
 }
 
 // Writer returns URIWriteCloser set up to write to the resource that the
@@ -366,7 +408,7 @@ func CanRead(u fyne.URI) (bool, error) {
 //
 // Since 2.0.0
 func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return fmt.Errorf("TODO: implement this function")
+	return nil, fmt.Errorf("TODO: implement this function")
 }
 
 // CanWrite determines if a given URI could be written to using the Writer()
@@ -380,6 +422,7 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Since 2.0.0
 func CanWrite(u fyne.URI) (bool, error) {
+	return false, fmt.Errorf("TODO")
 }
 
 // Copy given two URIs, 'src', and 'dest' both of the same scheme , will copy
@@ -490,4 +533,6 @@ func CanList(u fyne.URI) (bool, error) {
 // URIOperationNotSupported error.
 //
 // Since 2.0.0
-func List(u fyne.URI) ([]URI, error)
+func List(u fyne.URI) ([]fyne.URI, error) {
+	return nil, fmt.Errorf("TODO")
+}

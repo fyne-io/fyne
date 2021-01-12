@@ -105,7 +105,7 @@ type ListableRepository interface {
 	// registered scheme of this repository.
 	//
 	// Since 2.0.0
-	List(u fyne.URI) ([]URI, error)
+	List(u fyne.URI) ([]fyne.URI, error)
 }
 
 // HierarchicalRepository is an extension of the Repository interface which
@@ -131,7 +131,7 @@ type HierarchicalRepository interface {
 	// is based on RFC3986.
 	//
 	// Since 2.0.0
-	Child(Fyne.URI) (fyne.URI, error)
+	Child(fyne.URI) (fyne.URI, error)
 }
 
 // CopyableRepository is an extension of the Repository interface which also
