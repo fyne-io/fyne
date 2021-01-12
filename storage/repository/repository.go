@@ -43,11 +43,11 @@ type Repository interface {
 	// Since 2.0.0
 	Exists(u fyne.URI) (bool, error)
 
-	// ReaderFrom will be used to implement calls to storage.ReaderFrom()
+	// Reader will be used to implement calls to storage.Reader()
 	// for the registered scheme of this repository.
 	//
 	// Since 2.0.0
-	ReaderFrom(u fyne.URI) (fyne.URIReadCloser, error)
+	Reader(u fyne.URI) (fyne.URIReadCloser, error)
 
 	// CanRead will be used to implement calls to storage.CanRead() for the
 	// registered scheme of this repository.
