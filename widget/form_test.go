@@ -148,9 +148,12 @@ func TestForm_Hints(t *testing.T) {
 	w := test.NewWindow(form)
 	defer w.Close()
 
+	test.AssertImageMatches(t, "form/hint_initial.png", w.Canvas().Capture())
+
+	test.Type(entry2, "n")
 	test.AssertImageMatches(t, "form/hint_invalid.png", w.Canvas().Capture())
 
-	test.Type(entry2, "not-")
+	test.Type(entry2, "ot-")
 	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
 }
 

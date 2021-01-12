@@ -17,6 +17,7 @@ type FormItem struct {
 	HintText string
 
 	validationError error
+	invalid         bool
 	helperOutput    *canvas.Text
 }
 
@@ -142,7 +143,7 @@ func (f *Form) checkValidation(err error) {
 	}
 
 	for _, item := range f.Items {
-		if item.validationError != nil {
+		if item.invalid {
 			f.submitButton.Disable()
 			return
 		}
@@ -153,9 +154,13 @@ func (f *Form) checkValidation(err error) {
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
-		f.Items[i].validationError = w.Validate()
+		f.Items[i].invalid = w.Validate() != nil
+		if e, ok := w.(*Entry); ok && e.Validator != nil {
+			e.SetValidationError(nil) // clear initial state, will appear when we type
+		}
 		w.SetOnValidationChanged(func(err error) {
 			f.Items[i].validationError = err
+			f.Items[i].invalid = err != nil
 			f.checkValidation(err)
 			f.updateHelperText(f.Items[i])
 		})
