@@ -235,6 +235,41 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 	assert.Equal(t, entry.Text, testContent)
 }
 
+func TestEntry_Tab(t *testing.T) {
+	e := NewEntry()
+	e.SetText("a\n\tb\nc")
+	e.TextStyle.Monospace = true
+
+	r := cache.Renderer(e.textProvider()).(*textRenderer)
+	assert.Equal(t, 3, len(r.texts))
+	assert.Equal(t, "a", r.texts[0].Text)
+	assert.Equal(t, textTabIndent+"b", r.texts[1].Text)
+
+	w := test.NewWindow(e)
+	w.Resize(fyne.NewSize(86, 86))
+	w.Canvas().Focus(e)
+	test.AssertImageMatches(t, "entry/tab-content.png", w.Canvas().Capture())
+}
+
+func TestEntry_TabSelection(t *testing.T) {
+	e := NewEntry()
+	e.SetText("a\n\tb\nc")
+	e.TextStyle.Monospace = true
+
+	e.CursorRow = 1
+	e.KeyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	e.KeyUp(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+
+	assert.Equal(t, "\tb", e.SelectedText())
+
+	w := test.NewWindow(e)
+	w.Resize(fyne.NewSize(86, 86))
+	w.Canvas().Focus(e)
+	test.AssertImageMatches(t, "entry/tab-select.png", w.Canvas().Capture())
+}
+
 func getClickPosition(str string, row int) *fyne.PointEvent {
 	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width
 
