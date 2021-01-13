@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"fmt"
+	"io/ioutil"
 	"net/url"
 	"path/filepath"
 	"runtime"
@@ -60,6 +60,9 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		newURI += "#" + f
 	}
 
+	// NOTE: we specifically want to use ParseURI, rather than &uri{},
+	// since the repository for the URI we just created might be a
+	// CanonicalRepository that implements it's own ParseURI.
 	return ParseURI(newURI)
 }
 
@@ -91,6 +94,9 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 		newURI += "#" + u.Fragment()
 	}
 
+	// NOTE: we specifically want to use ParseURI, rather than &uri{},
+	// since the repository for the URI we just created might be a
+	// CanonicalRepository that implements it's own ParseURI.
 	return ParseURI(newURI)
 }
 
@@ -107,7 +113,44 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 //
 // Since: 2.0.0
 func GenericCopy(source fyne.URI, destination fyne.URI) error {
-	return fmt.Errorf("TODO")
+	// Look up repositories for the source and destination.
+	srcrepo, err := ForURI(source)
+	if err != nil {
+		return err
+	}
+
+	dstrepo, err := ForURI(destination)
+	if err != nil {
+		return err
+	}
+
+	// The destination must be writeable.
+	destwrepo, ok := dstrepo.(WriteableRepository)
+	if !ok {
+		return OperationNotSupportedError
+	}
+
+	// Create a reader and a writer.
+	srcReader, err := srcrepo.Reader(source)
+	if err != nil {
+		return err
+	}
+
+	dstWriter, err := destwrepo.Writer(destination)
+	if err != nil {
+		return err
+	}
+
+	// Read all the contents into memory...
+	contents, err := ioutil.ReadAll(srcReader)
+	if err != nil {
+		return err
+	}
+
+	// ...and write it back out.
+	_, err = dstWriter.Write(contents)
+
+	return err
 }
 
 // GenericMove can be used a common-case implementation of
@@ -123,7 +166,56 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 //
 // Since: 2.0.0
 func GenericMove(source fyne.URI, destination fyne.URI) error {
-	return fmt.Errorf("TODO")
+	// This looks a lot like GenericCopy(), but I duplicated the code
+	// to avoid having to look up the repositories more than once.
+
+	// Look up repositories for the source and destination.
+	srcrepo, err := ForURI(source)
+	if err != nil {
+		return err
+	}
+
+	dstrepo, err := ForURI(destination)
+	if err != nil {
+		return err
+	}
+
+	// The source and destination must both be writable, since the source
+	// is being deleted, which requires WriteableRepository.
+	destwrepo, ok := dstrepo.(WriteableRepository)
+	if !ok {
+		return OperationNotSupportedError
+	}
+
+	srcwrepo, ok := srcrepo.(WriteableRepository)
+	if !ok {
+		return OperationNotSupportedError
+	}
+
+	// Create the reader and writer to perform the copy operation.
+	srcReader, err := srcrepo.Reader(source)
+	if err != nil {
+		return err
+	}
+
+	dstWriter, err := destwrepo.Writer(destination)
+	if err != nil {
+		return err
+	}
+
+	// Read everything into memory and then write it back out.
+	contents, err := ioutil.ReadAll(srcReader)
+	if err != nil {
+		return err
+	}
+
+	_, err = dstWriter.Write(contents)
+	if err != nil {
+		return err
+	}
+
+	// Finally, delete the source only if the move finished without error.
+	return srcwrepo.Delete(source)
 }
 
 // ParseURI implements the back-end logic for storage.ParseURI, which you
