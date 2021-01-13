@@ -1,6 +1,7 @@
 package dialog
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -91,16 +92,16 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			exists, _ := storage.Exists(location)
 
 			// check if a directory is selected
-			_, err := storage.ListerForURI(location)
+			listable, err := storage.CanList(location)
 
 			if !exists {
 				f.win.Hide()
 				if f.file.onClosedCallback != nil {
 					f.file.onClosedCallback(true)
 				}
-				callback(storage.SaveFileToURI(location))
+				callback(storage.Writer(location))
 				return
-			} else if err == nil {
+			} else if err == nil && listable {
 				// a directory has been selected
 				ShowInformation("Cannot overwrite",
 					"Files cannot replace a directory,\ncheck the file name and try again", f.file.parent)
@@ -114,7 +115,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 					}
 					f.win.Hide()
 
-					callback(storage.SaveFileToURI(location))
+					callback(storage.Writer(location))
 					if f.file.onClosedCallback != nil {
 						f.file.onClosedCallback(true)
 					}
@@ -125,7 +126,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)
 			}
-			callback(storage.OpenFileFromURI(f.selected.location))
+			callback(storage.Reader(f.selected.location))
 		} else if f.file.isDirectory() {
 			callback := f.file.callback.(func(fyne.ListableURI, error))
 			f.win.Hide()
@@ -257,11 +258,11 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 			continue
 		}
 
-		listable, err := storage.ListerForURI(file)
+		listable, err := storage.CanList(file)
 		if f.file.isDirectory() && err != nil {
 			continue
-		} else if err == nil { // URI points to a directory
-			icons = append(icons, f.newFileItem(listable, true)) // Pass the listable URI to avoid doing the same check in FileIcon
+		} else if err == nil && listable { // URI points to a directory
+			icons = append(icons, f.newFileItem(file, true)) // Pass the listable URI to avoid doing the same check in FileIcon
 		} else if f.file.filter == nil || f.file.filter.Matches(file) {
 			icons = append(icons, f.newFileItem(file, false))
 		}
@@ -273,13 +274,17 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 	f.fileScroll.Refresh()
 }
 
-func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
+func (f *fileDialog) setLocation(dir fyne.URI) error {
 	if dir == nil {
 		return fmt.Errorf("failed to open nil directory")
 	}
+	list, err := storage.ListerForURI(dir)
+	if err != nil {
+		return err
+	}
 
 	f.setSelected(nil)
-	f.dir = dir
+	f.dir = list
 
 	f.breadcrumb.Children = nil
 
@@ -300,9 +305,13 @@ func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 			buildDir = d + string(os.PathSeparator)
 		}
 
-		newDir, err := storage.ListerForURI(storage.NewFileURI(buildDir))
+		newDir := storage.NewFileURI(buildDir)
+		isDir, err := storage.CanList(newDir)
 		if err != nil {
 			return err
+		}
+		if !isDir {
+			return errors.New("location was not a listable URI")
 		}
 		f.breadcrumb.Append(
 			widget.NewButton(d, func() {
@@ -318,7 +327,7 @@ func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 		f.fileName.SetText(dir.Name())
 		f.open.Enable()
 	}
-	f.refreshDir(dir)
+	f.refreshDir(list)
 
 	return nil
 }
@@ -329,11 +338,11 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 		f.selected.Refresh()
 	}
 	if file != nil && file.isDirectory() {
-		lister, err := storage.ListerForURI(file.location)
-		if err != nil {
+		listable, err := storage.CanList(file.location)
+		if err != nil || !listable {
 			fyne.LogError("Failed to create lister for URI"+file.location.String(), err)
 		}
-		f.setLocation(lister)
+		f.setLocation(file.location)
 		return
 	}
 	f.selected = file

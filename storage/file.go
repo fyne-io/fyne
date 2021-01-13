@@ -7,12 +7,16 @@ import (
 
 // OpenFileFromURI loads a file read stream from a resource identifier.
 // This is mostly provided so that file references can be saved using their URI and loaded again later.
+//
+// Deprecated: this has been replaced by storage.Reader(URI)
 func OpenFileFromURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return fyne.CurrentApp().Driver().FileReaderForURI(uri)
 }
 
 // SaveFileToURI loads a file write stream to a resource identifier.
 // This is mostly provided so that file references can be saved using their URI and written to again later.
+//
+// Deprecated: this has been replaced by storage.Writer(URI)
 func SaveFileToURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return fyne.CurrentApp().Driver().FileWriterForURI(uri)
 }
@@ -21,6 +25,8 @@ func SaveFileToURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 // standard URI into a listable URI.
 //
 // Since: 1.4
+//
+// Deprecated: this has been replaced by storage.List(URI)
 func ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if lister, ok := uri.(fyne.ListableURI); ok {
 		return lister, nil
