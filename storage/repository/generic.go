@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"io/ioutil"
+	"io"
 	"net/url"
 	"path/filepath"
 	"runtime"
@@ -141,20 +141,13 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 		return err
 	}
 
-	// Read all the contents into memory...
-	contents, err := ioutil.ReadAll(srcReader)
-	if err != nil {
-		return err
-	}
-
-	// ...and write it back out.
-	_, err = dstWriter.Write(contents)
-
+	// Perform the copy.
+	_, err = io.Copy(dstWriter, srcReader)
 	return err
 }
 
 // GenericMove can be used a common-case implementation of
-// MoveableRepository.Move(). It will perform the move by obtaining a reader
+// MovableRepository.Move(). It will perform the move by obtaining a reader
 // for the source URI, a writer for the destination URI, then writing the
 // contents of the source to the destination. Following this, the source
 // will be deleted using WriteableRepository.Delete.
@@ -203,13 +196,8 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 		return err
 	}
 
-	// Read everything into memory and then write it back out.
-	contents, err := ioutil.ReadAll(srcReader)
-	if err != nil {
-		return err
-	}
-
-	_, err = dstWriter.Write(contents)
+	// Perform the copy.
+	_, err = io.Copy(dstWriter, srcReader)
 	if err != nil {
 		return err
 	}

@@ -12,13 +12,15 @@ import (
 )
 
 // declare conformance with repository types
-var _ repository.Repository = &FileRepository{}
-var _ repository.WriteableRepository = &FileRepository{}
-var _ repository.HierarchicalRepository = &FileRepository{}
-var _ repository.ListableRepository = &FileRepository{}
+var _ repository.Repository = (*FileRepository)(nil)
+var _ repository.WriteableRepository = (*FileRepository)(nil)
+var _ repository.HierarchicalRepository = (*FileRepository)(nil)
+var _ repository.ListableRepository = (*FileRepository)(nil)
+var _ repository.MovableRepository = (*FileRepository)(nil)
+var _ repository.CopyableRepository = (*FileRepository)(nil)
 
-var _ fyne.URIReadCloser = &file{}
-var _ fyne.URIWriteCloser = &file{}
+var _ fyne.URIReadCloser = (*file)(nil)
+var _ fyne.URIWriteCloser = (*file)(nil)
 
 type file struct {
 	*os.File
@@ -35,7 +37,7 @@ func (f *file) URI() fyne.URI {
 //
 // This repository is suitable to handle file:// schemes.
 //
-// Since 2.0.0
+// Since: 2.0.0
 type FileRepository struct {
 }
 
@@ -43,14 +45,14 @@ type FileRepository struct {
 // given the scheme it is registered for. The caller needs to call
 // repository.Register() on the result of this function.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func NewFileRepository(scheme string) *FileRepository {
 	return &FileRepository{}
 }
 
 // Exists implements repository.Repository.Exists
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 	p := u.Path()
 
@@ -84,14 +86,14 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 
 // Reader implements repository.Repository.Reader
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(u, false)
 }
 
 // CanRead implements repository.Repository.CanRead
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
 	if err == nil {
@@ -121,14 +123,14 @@ func (r *FileRepository) Destroy(scheme string) {
 
 // Writer implements repository.WriteableRepository.Writer
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true)
 }
 
 // CanWrite implements repository.WriteableRepository.CanWrite
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
 	if err == nil {
@@ -149,14 +151,14 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 
 // Delete implements repository.WriteableRepository.Delete
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) Delete(u fyne.URI) error {
 	return os.Remove(u.Path())
 }
 
 // Parent implements repository.HierarchicalRepository.Parent
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
@@ -198,7 +200,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 
 // Child implements repository.HierarchicalRepository.Child
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	// TODO: make sure that this works on Windows - might cause trouble
 	// if the path sep isn't normalized out on ingest.
@@ -207,7 +209,7 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 
 // List implements repository.HierarchicalRepository.List()
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	if u.Scheme() != "file" {
 		return nil, fmt.Errorf("unsupported URL protocol")
@@ -234,7 +236,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 
 // CanList implements repository.HierarchicalRepository.CanList()
 //
-// Since 2.0.0
+// Since: 2.0.0
 func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	info, err := os.Stat(u.Path())
 
@@ -269,4 +271,26 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 
 	// it is a directory, and checking the permissions did not error out
 	return true, nil
+}
+
+// Copy implements repository.CopyableRepository.Copy()
+//
+// Since: 2.0.0
+func (r *FileRepository) Copy(source, destination fyne.URI) error {
+	// NOTE: as far as I can tell, golang does not have an optimized Copy
+	// function - everything I can find on the 'net suggests doing more
+	// or less the equivalent of GenericCopy(), hence why that is used.
+
+	return repository.GenericCopy(source, destination)
+}
+
+// Move implements repository.MovableRepository.Move()
+//
+// Since: 2.0.0
+func (r *FileRepository) Move(source, destination fyne.URI) error {
+	// NOTE: as far as I can tell, golang does not have an optimized Move
+	// function - everything I can find on the 'net suggests doing more
+	// or less the equivalent of GenericMove(), hence why that is used.
+
+	return repository.GenericMove(source, destination)
 }

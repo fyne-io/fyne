@@ -19,6 +19,8 @@ var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
 var _ repository.Repository = (*InMemoryRepository)(nil)
 var _ repository.WriteableRepository = (*InMemoryRepository)(nil)
 var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
+var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
+var _ repository.MovableRepository = (*InMemoryRepository)(nil)
 
 // nodeReaderWriter allows reading or writing to elements in a InMemoryRepository
 type nodeReaderWriter struct {
@@ -237,4 +239,19 @@ func (m *InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
 // Since 2.0.0
 func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return repository.GenericChild(u, component)
+}
+
+// Copy implements repository.CopyableRepository.Copy()
+//
+// Since: 2.0.0
+func (m *InMemoryRepository) Copy(source, destination fyne.URI) error {
+
+	return repository.GenericCopy(source, destination)
+}
+
+// Move implements repository.MovableRepository.Move()
+//
+// Since: 2.0.0
+func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
+	return repository.GenericMove(source, destination)
 }
