@@ -2,9 +2,6 @@ package repository
 
 import (
 	"io"
-	"net/url"
-	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -204,64 +201,4 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 
 	// Finally, delete the source only if the move finished without error.
 	return srcwrepo.Delete(source)
-}
-
-// ParseURI implements the back-end logic for storage.ParseURI, which you
-// should use instead. This is only here because other functions in repository
-// need to call it, and it prevents a circular import.
-//
-// Since: 2.0.0
-func ParseURI(s string) (fyne.URI, error) {
-
-	if len(s) > 5 && s[:5] == "file:" {
-		path := s[5:]
-		if len(path) > 2 && path[:2] == "//" {
-			path = path[2:]
-		}
-
-		// this looks weird, but it makes sure that we still pass
-		// url.Parse()
-		s = NewFileURI(path).String()
-	}
-
-	l, err := url.Parse(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return &uri{
-		scheme:    l.Scheme,
-		authority: l.User.String() + l.Host,
-		// workaround for net/url, see type uri struct comments
-		haveAuthority: true,
-		path:          l.Path,
-		query:         l.RawQuery,
-		fragment:      l.Fragment,
-	}, nil
-}
-
-// NewFileURI implements the back-end logic to storage.NewFileURI, which you
-// should use instead. This is only here because other functions in repository
-// need to call it, and it prevents a circular import.
-//
-// Since: 2.0.0
-func NewFileURI(path string) fyne.URI {
-	// URIs are supposed to use forward slashes. On Windows, it
-	// should be OK to use the platform native filepath with UNIX
-	// or NT style paths, with / or \, but when we reconstruct
-	// the URI, we want to have / only.
-	if runtime.GOOS == "windows" {
-		// seems that sometimes we end up with
-		// double-backslashes
-		path = filepath.ToSlash(path)
-	}
-
-	return &uri{
-		scheme:        "file",
-		haveAuthority: true,
-		authority:     "",
-		path:          path,
-		query:         "",
-		fragment:      "",
-	}
 }
