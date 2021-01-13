@@ -184,7 +184,7 @@ func (m *MemoryRepository) Destroy(scheme string) {
 	// do nothing
 }
 
-// Writeer implements repository.Repository.Writer
+// Writer implements repository.Repository.Writer
 //
 // Since 2.0.0
 func (m *MemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
