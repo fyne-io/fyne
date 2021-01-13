@@ -96,7 +96,9 @@ func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // Since 2.0.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
-	defer f.Close()
+	if err == nil {
+		defer f.Close()
+	}
 
 	if os.IsPermission(err) {
 		return false, nil
@@ -130,7 +132,9 @@ func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 // Since 2.0.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
-	defer f.Close()
+	if err == nil {
+		defer f.Close()
+	}
 
 	if os.IsPermission(err) {
 		return false, nil
