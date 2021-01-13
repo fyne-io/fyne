@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
@@ -238,7 +239,8 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 //
 // Since: 2.0.0
 func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
-	info, err := os.Stat(u.Path())
+	p := u.Path()
+	info, err := os.Stat(p)
 
 	if os.IsNotExist(err) {
 		return false, nil
@@ -248,13 +250,13 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		return false, err
 	}
 
-	if !info.IsDir() {
+	// TODO: on a hunch - this might be why things are breaking on Windows
+	if (!info.IsDir()) && runtime.GOOS == "windows" {
 		return false, nil
 	}
 
 	// We know it is a directory, but we don't know if we can read it, so
 	// we'll just try to do so and see if we get a permissions error.
-	p := u.Path()
 	f, err := os.Open(p)
 	if err == nil {
 		_, err = f.Readdir(1)
