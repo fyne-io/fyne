@@ -189,7 +189,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		return storage.ParseURI(u.Scheme() + "://" + parent)
 	}
 
-	uri, err := repository.GenericParent(u, storage.ParseURI)
+	uri, err := repository.GenericParent(u)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	// TODO: make sure that this works on Windows - might cause trouble
 	// if the path sep isn't normalized out on ingest.
-	return repository.GenericChild(u, component, storage.ParseURI)
+	return repository.GenericChild(u, component)
 }
 
 // List implements repository.HierarchicalRepository.List()

@@ -2,6 +2,9 @@ package repository
 
 import (
 	"fmt"
+	"net/url"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -18,19 +21,15 @@ import (
 // If the URI path is empty or '/', then a duplicate of the URI is returned,
 // along with URIRootError.
 //
-// The parseURI parameter should be a function that you wish GenericParent to
-// use to generate any new URIs it creates. Usually, storage.ParseURI is
-// suitable here.
-//
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
 // Since: 2.0.0
-func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.URI, error) {
+func GenericParent(u fyne.URI) (fyne.URI, error) {
 	p := u.Path()
 
 	if p == "" || p == "/" {
-		parent, err := parseURI(u.String())
+		parent, err := ParseURI(u.String())
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +60,7 @@ func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.UR
 		newURI += "#" + f
 	}
 
-	return parseURI(newURI)
+	return ParseURI(newURI)
 }
 
 // GenericChild can be used as a common-case implementation of
@@ -70,15 +69,11 @@ func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.UR
 // "/" + component to the path, then concatenating the result and parsing it as
 // a new URI.
 //
-// The parseURI parameter should be a function that you wish GenericParent to
-// use to generate any new URIs it creates. Usually, storage.ParseURI is
-// suitable here.
-//
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
 // Since: 2.0.0
-func GenericChild(u fyne.URI, component string, parseURI func(string) (fyne.URI, error)) (fyne.URI, error) {
+func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 
 	// split into components and add the new one
 	components := strings.Split(u.Path(), "/")
@@ -96,7 +91,7 @@ func GenericChild(u fyne.URI, component string, parseURI func(string) (fyne.URI,
 		newURI += "#" + u.Fragment()
 	}
 
-	return parseURI(newURI)
+	return ParseURI(newURI)
 }
 
 // GenericCopy can be used a common-case implementation of
@@ -129,4 +124,64 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 // Since: 2.0.0
 func GenericMove(source fyne.URI, destination fyne.URI) error {
 	return fmt.Errorf("TODO")
+}
+
+// ParseURI implements the back-end logic for storage.ParseURI, which you
+// should use instead. This is only here because other functions in repository
+// need to call it, and it prevents a circular import.
+//
+// Since: 2.0.0
+func ParseURI(s string) (fyne.URI, error) {
+
+	if len(s) > 5 && s[:5] == "file:" {
+		path := s[5:]
+		if len(path) > 2 && path[:2] == "//" {
+			path = path[2:]
+		}
+
+		// this looks weird, but it makes sure that we still pass
+		// url.Parse()
+		s = NewFileURI(path).String()
+	}
+
+	l, err := url.Parse(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return &uri{
+		scheme:    l.Scheme,
+		authority: l.User.String() + l.Host,
+		// workaround for net/url, see type uri struct comments
+		haveAuthority: true,
+		path:          l.Path,
+		query:         l.RawQuery,
+		fragment:      l.Fragment,
+	}, nil
+}
+
+// NewFileURI implements the back-end logic to storage.NewFileURI, which you
+// should use instead. This is only here because other functions in repository
+// need to call it, and it prevents a circular import.
+//
+// Since: 2.0.0
+func NewFileURI(path string) fyne.URI {
+	// URIs are supposed to use forward slashes. On Windows, it
+	// should be OK to use the platform native filepath with UNIX
+	// or NT style paths, with / or \, but when we reconstruct
+	// the URI, we want to have / only.
+	if runtime.GOOS == "windows" {
+		// seems that sometimes we end up with
+		// double-backslashes
+		path = filepath.ToSlash(path)
+	}
+
+	return &uri{
+		scheme:        "file",
+		haveAuthority: true,
+		authority:     "",
+		path:          path,
+		query:         "",
+		fragment:      "",
+	}
 }

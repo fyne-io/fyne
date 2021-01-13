@@ -1,117 +1,15 @@
 package storage
 
 import (
-	"bufio"
 	"fmt"
-	"mime"
-	"net/url"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"unicode/utf8"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage/repository"
 )
 
-// Declare conformance with fyne.URI interface.
-var _ fyne.URI = &uri{}
-
-type uri struct {
-	scheme    string
-	authority string
-	// haveAuthority lets us distinguish between a present-but-empty
-	// authority, and having no authority. This is needed because net/url
-	// incorrectly handles scheme:/absolute/path URIs.
-	haveAuthority bool
-	path          string
-	query         string
-	fragment      string
-}
-
 // NewFileURI creates a new URI from the given file path.
 func NewFileURI(path string) fyne.URI {
-	// URIs are supposed to use forward slashes. On Windows, it
-	// should be OK to use the platform native filepath with UNIX
-	// or NT style paths, with / or \, but when we reconstruct
-	// the URI, we want to have / only.
-	if runtime.GOOS == "windows" {
-		// seems that sometimes we end up with
-		// double-backslashes
-		path = filepath.ToSlash(path)
-	}
-
-	return &uri{
-		scheme:        "file",
-		haveAuthority: true,
-		authority:     "",
-		path:          path,
-		query:         "",
-		fragment:      "",
-	}
-}
-
-func (u *uri) Extension() string {
-	return filepath.Ext(u.path)
-}
-
-func (u *uri) Name() string {
-	return filepath.Base(u.path)
-}
-
-func (u *uri) MimeType() string {
-	mimeTypeFull := mime.TypeByExtension(u.Extension())
-	if mimeTypeFull == "" {
-		mimeTypeFull = "text/plain"
-		readCloser, err := Reader(u)
-		if err == nil {
-			defer readCloser.Close()
-			scanner := bufio.NewScanner(readCloser)
-			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
-				mimeTypeFull = "application/octet-stream"
-			}
-		}
-	}
-
-	return strings.Split(mimeTypeFull, ";")[0]
-}
-
-func (u *uri) Scheme() string {
-	return u.scheme
-}
-
-func (u *uri) String() string {
-	// NOTE: this string reconstruction is mandated by IETF RFC3986,
-	// section 5.3, pp. 35.
-
-	s := u.scheme + ":"
-	if u.haveAuthority {
-		s += "//" + u.authority
-	}
-	s += u.path
-	if len(u.query) > 0 {
-		s += "?" + u.query
-	}
-	if len(u.fragment) > 0 {
-		s += "#" + u.fragment
-	}
-	return s
-}
-
-func (u *uri) Authority() string {
-	return u.authority
-}
-
-func (u *uri) Path() string {
-	return u.path
-}
-
-func (u *uri) Query() string {
-	return u.query
-}
-
-func (u *uri) Fragment() string {
-	return u.fragment
+	return repository.NewFileURI(path)
 }
 
 // NewURI creates a new URI from the given string representation. This could be
@@ -128,32 +26,7 @@ func NewURI(s string) fyne.URI {
 //
 // Since: 2.0.0
 func ParseURI(s string) (fyne.URI, error) {
-
-	if len(s) > 5 && s[:5] == "file:" {
-		path := s[5:]
-		if len(path) > 2 && path[:2] == "//" {
-			path = path[2:]
-		}
-
-		// this looks weird, but it makes sure that we still pass
-		// url.Parse()
-		s = NewFileURI(path).String()
-	}
-
-	l, err := url.Parse(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return &uri{
-		scheme:    l.Scheme,
-		authority: l.User.String() + l.Host,
-		// workaround for net/url, see type uri struct comments
-		haveAuthority: true,
-		path:          l.Path,
-		query:         l.RawQuery,
-		fragment:      l.Fragment,
-	}, nil
+	return repository.ParseURI(s)
 }
 
 // Parent returns a URI referencing the parent resource of the resource

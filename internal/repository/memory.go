@@ -229,12 +229,12 @@ func (m *InMemoryRepository) Delete(u fyne.URI) error {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
-	return repository.GenericParent(u, storage.ParseURI)
+	return repository.GenericParent(u)
 }
 
 // Child implements repository.HierarchicalRepository.Child
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
-	return repository.GenericChild(u, component, storage.ParseURI)
+	return repository.GenericChild(u, component)
 }
