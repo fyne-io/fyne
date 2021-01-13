@@ -1308,7 +1308,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	pos = fyne.NewPos(entryOffset+theme.Padding()+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
+	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
 	test.TapCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, "entry/tapped_tapped_3rd_m.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
