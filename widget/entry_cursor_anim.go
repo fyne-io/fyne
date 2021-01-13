@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"sync"
 	"time"
@@ -35,8 +34,7 @@ func (c *safeCounter) Reset() {
 }
 
 type entryCursorAnimation struct {
-	mu *sync.RWMutex
-	// timeout *time.Ticker
+	mu      *sync.RWMutex
 	counter *safeCounter
 	paused  bool
 	stopped bool
@@ -63,7 +61,7 @@ func (a *entryCursorAnimation) createAnim() {
 	a.anim = anim
 }
 
-// Start must only be called once.
+// Start starts cursor animation.
 func (a *entryCursorAnimation) Start() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -71,14 +69,10 @@ func (a *entryCursorAnimation) Start() {
 	if a.anim != nil || !a.stopped {
 		return
 	}
-	fmt.Printf("anim: %p\n", a)
 	a.createAnim()
 	a.stopped = false
-	// a.timeout = time.NewTicker(10 * time.Millisecond)
 	go func() {
-		fmt.Println("start goroutine")
 		defer func() {
-			fmt.Println("===> stop goroutine")
 			a.mu.Lock()
 			a.stopped = true
 			a.mu.Unlock()
@@ -114,6 +108,7 @@ func (a *entryCursorAnimation) Start() {
 	a.anim.Start()
 }
 
+// TemporaryPause pauses temporarily the cursor by 500 ms.
 func (a *entryCursorAnimation) TemporaryPause() {
 	a.counter.Reset()
 	a.mu.Lock()
@@ -130,13 +125,10 @@ func (a *entryCursorAnimation) TemporaryPause() {
 	a.cursor.Refresh()
 }
 
-// Stop must only be called once when cursor is destroyed.
+// Stop stops cursor animation.
 func (a *entryCursorAnimation) Stop() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	// if a.timeout != nil {
-	// 	a.timeout.Stop()
-	// }
 	if a.anim != nil {
 		a.anim.Stop()
 		a.anim = nil

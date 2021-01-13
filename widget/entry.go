@@ -4,7 +4,6 @@ import (
 	"image/color"
 	"math"
 	"strings"
-	"time"
 	"unicode"
 
 	"fyne.io/fyne"
@@ -1533,18 +1532,4 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 		end += col // otherwise include the text slice position
 	}
 	return start, end
-}
-
-func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
-	cursorOpaque := theme.PrimaryColor()
-	r, g, b, _ := theme.PrimaryColor().RGBA()
-	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
-	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
-		cursor.FillColor = c
-		cursor.Refresh()
-	})
-	anim.RepeatCount = fyne.AnimationRepeatForever
-	anim.AutoReverse = true
-
-	return anim
 }
