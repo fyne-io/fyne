@@ -10,7 +10,7 @@ import (
 //
 // Deprecated: this has been replaced by storage.Reader(URI)
 func OpenFileFromURI(uri fyne.URI) (fyne.URIReadCloser, error) {
-	return fyne.CurrentApp().Driver().FileReaderForURI(uri)
+	return Reader(uri)
 }
 
 // SaveFileToURI loads a file write stream to a resource identifier.
@@ -18,7 +18,7 @@ func OpenFileFromURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 //
 // Deprecated: this has been replaced by storage.Writer(URI)
 func SaveFileToURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
-	return fyne.CurrentApp().Driver().FileWriterForURI(uri)
+	return Writer(uri)
 }
 
 // ListerForURI will attempt to use the application's driver to convert a
