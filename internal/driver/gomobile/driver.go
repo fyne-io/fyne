@@ -23,7 +23,10 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const tapSecondaryDelay = 300 * time.Millisecond
+const (
+	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
+	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+)
 
 type mobileDriver struct {
 	app   app.App
@@ -246,7 +249,7 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID tou
 		go wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		go wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(wid fyne.Draggable) {
 		go wid.DragEnd()
 	})
 }
