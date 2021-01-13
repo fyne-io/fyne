@@ -17,10 +17,6 @@ import (
 // Declare conformance with fyne.URI interface.
 var _ fyne.URI = &uri{}
 
-// For backwards-compatibility with the now-deprecated ListableURI type, we
-// also declare conformance with that.
-var _ fyne.ListableURI = &uri{}
-
 type uri struct {
 	raw string
 }
@@ -109,10 +105,6 @@ func (u *uri) Fragment() string {
 	r, _ := url.Parse(u.raw)
 
 	return r.Fragment
-}
-
-func (u *uri) List() ([]fyne.URI, error) {
-	return List(u)
 }
 
 // NewURI creates a new URI from the given string representation. This could be
@@ -505,7 +497,17 @@ func Move(source fyne.URI, destination fyne.URI) error {
 //
 // Since 2.0.0
 func CanList(u fyne.URI) (bool, error) {
-	return false, fmt.Errorf("TODO: implement this function")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return false, err
+	}
+
+	lrepo, ok := repo.(repository.ListableRepository)
+	if !ok {
+		return false, repository.OperationNotSupportedError
+	}
+
+	return lrepo.CanList(u)
 }
 
 // List returns a list of URIs that reference resources which are nested below
@@ -535,5 +537,15 @@ func CanList(u fyne.URI) (bool, error) {
 //
 // Since 2.0.0
 func List(u fyne.URI) ([]fyne.URI, error) {
-	return nil, fmt.Errorf("TODO")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return nil, err
+	}
+
+	lrepo, ok := repo.(repository.ListableRepository)
+	if !ok {
+		return nil, repository.OperationNotSupportedError
+	}
+
+	return lrepo.List(u)
 }
