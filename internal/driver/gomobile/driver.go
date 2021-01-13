@@ -414,5 +414,7 @@ func (d *mobileDriver) Device() fyne.Device {
 func NewGoMobileDriver() fyne.Driver {
 	d := new(mobileDriver)
 	d.animation = &animation.Runner{}
+
+	registerRepository(d)
 	return d
 }
