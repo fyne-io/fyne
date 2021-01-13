@@ -183,14 +183,13 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		}
 
 		return storage.ParseURI(u.Scheme() + "://" + parent)
-	} else {
-		var err error
-		parent, err := repository.GenericParent(u, storage.ParseURI)
-		if err != nil {
-			return nil, err
-		}
-		return parent, nil
 	}
+
+	uri, err := repository.GenericParent(u, storage.ParseURI)
+	if err != nil {
+		return nil, err
+	}
+	return uri, nil
 }
 
 // Child implements repository.HierarchicalRepository.Child
