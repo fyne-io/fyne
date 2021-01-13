@@ -590,6 +590,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
 		}
+		if _, ok := object.(fyne.Draggable); ok {
+			return true
+		}
 
 		_, hover := object.(desktop.Hoverable)
 		return hover
@@ -630,6 +633,14 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		}
 	} else if w.mouseOver != nil && !w.objIsDragged(w.mouseOver) {
 		w.mouseOut()
+	}
+
+	if wid, ok := obj.(fyne.Draggable); ok {
+		if w.mouseButton != 0 && !w.mouseDragStarted {
+			w.mouseDragPos = w.mousePos
+			w.mouseDragged = wid
+			w.mouseDraggedOffset = w.mousePos.Subtract(pos)
+		}
 	}
 
 	if w.mouseDragged != nil {
@@ -679,6 +690,10 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
 			return true
+		case fyne.Draggable:
+			if w.mouseDragStarted {
+				return true
+			}
 		}
 
 		return false
@@ -688,11 +703,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	ev.AbsolutePosition = w.mousePos
 
 	coMouse := co
-	// Switch the mouse target to the dragging object if one is set
-	if w.mouseDragged != nil && !w.objIsDragged(co) {
-		co, _ = w.mouseDragged.(fyne.CanvasObject)
-		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
-	}
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -719,13 +729,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton &= ^button
 	}
 
-	if wid, ok := co.(fyne.Draggable); ok {
-		if action == glfw.Press {
-			w.mouseDragPos = w.mousePos
-			w.mouseDragged = wid
-			w.mouseDraggedOffset = w.mousePos.Subtract(co.Position()).Subtract(ev.Position)
-		}
-	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		if w.mouseDragStarted {
 			w.queueEvent(w.mouseDragged.DragEnd)
