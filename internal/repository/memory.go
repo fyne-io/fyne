@@ -10,10 +10,15 @@ import (
 )
 
 // declare conformance to interfaces
-var _ io.ReadCloser = &nodeReaderWriter{}
-var _ io.WriteCloser = &nodeReaderWriter{}
-var _ fyne.URIReadCloser = &nodeReaderWriter{}
-var _ fyne.URIWriteCloser = &nodeReaderWriter{}
+var _ io.ReadCloser = (*nodeReaderWriter)(nil)
+var _ io.WriteCloser = (*nodeReaderWriter)(nil)
+var _ fyne.URIReadCloser = (*nodeReaderWriter)(nil)
+var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
+
+// declare conformance with repository types
+var _ repository.Repository = (*InMemoryRepository)(nil)
+var _ repository.WriteableRepository = (*InMemoryRepository)(nil)
+var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
 
 // nodeReaderWriter allows reading or writing to elements in a InMemoryRepository
 type nodeReaderWriter struct {
@@ -22,6 +27,29 @@ type nodeReaderWriter struct {
 	writing     bool
 	readCursor  int
 	writeCursor int
+}
+
+// InMemoryRepository implements an in-memory version of the
+// repository.Repository type. It is useful for writing test cases, and may
+// also be of use as a template for people wanting to implement their own
+// "virtual repository". In future, we may consider moving this into the public
+// API.
+//
+// Because of it's design, this repository has several quirks:
+//
+// * The Parent() of a path that exists does not necessarily exist
+//
+// * Listing takes O(number of extant paths in the repository), rather than
+//   O(number of children of path being listed).
+//
+// This repository is not designed to be particularly fast or robust, but
+// rather to be simple and easy to read. If you need performance, look
+// elsewhere.
+//
+// Since 2.0.0
+type InMemoryRepository struct {
+	data   map[string][]byte
+	scheme string
 }
 
 // Read implements io.Reader.Read
@@ -100,34 +128,6 @@ func (n *nodeReaderWriter) URI() fyne.URI {
 	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
 
 	return u
-}
-
-// declare conformance with repository types
-var _ repository.Repository = &InMemoryRepository{}
-var _ repository.WriteableRepository = &InMemoryRepository{}
-var _ repository.HierarchicalRepository = &InMemoryRepository{}
-
-// InMemoryRepository implements an in-memory version of the
-// repository.Repository type. It is useful for writing test cases, and may
-// also be of use as a template for people wanting to implement their own
-// "virtual repository". In future, we may consider moving this into the public
-// API.
-//
-// Because of it's design, this repository has several quirks:
-//
-// * The Parent() of a path that exists does not necessarily exist
-//
-// * Listing takes O(number of extant paths in the repository), rather than
-//   O(number of children of path being listed).
-//
-// This repository is not designed to be particularly fast or robust, but
-// rather to be simple and easy to read. If you need performance, look
-// elsewhere.
-//
-// Since 2.0.0
-type InMemoryRepository struct {
-	data   map[string][]byte
-	scheme string
 }
 
 // NewInMemoryRepository creates a new InMemoryRepository instance. It must be
