@@ -1224,6 +1224,25 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// DragEnd is called at end of a drag event. It does nothing.
+//
+// Implements: fyne.Draggable
+func (e *entryContent) DragEnd() {
+	impl := e.entry.super()
+	// we need to propagate the focus, top level widget handles focus APIs
+	fyne.CurrentApp().Driver().CanvasForObject(impl).Focus(impl.(interface{}).(fyne.Focusable))
+
+	e.entry.DragEnd()
+}
+
+// Dragged is called when the pointer moves while a button is held down.
+// It updates the selection accordingly.
+//
+// Implements: fyne.Draggable
+func (e *entryContent) Dragged(d *fyne.DragEvent) {
+	e.entry.Dragged(d)
+}
+
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
 
 type entryContentRenderer struct {
