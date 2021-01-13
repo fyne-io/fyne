@@ -129,9 +129,13 @@ func (l *boundBoolList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalBoolListItem).lock.Lock()
 			err = item.(*boundExternalBoolListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalBoolListItem).lock.Unlock()
 		} else {
+			item.(*boundBoolListItem).lock.Lock()
 			err = item.(*boundBoolListItem).doSet((*l.val)[i])
+			item.(*boundBoolListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -338,9 +342,13 @@ func (l *boundFloatList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalFloatListItem).lock.Lock()
 			err = item.(*boundExternalFloatListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalFloatListItem).lock.Unlock()
 		} else {
+			item.(*boundFloatListItem).lock.Lock()
 			err = item.(*boundFloatListItem).doSet((*l.val)[i])
+			item.(*boundFloatListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -547,9 +555,13 @@ func (l *boundIntList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalIntListItem).lock.Lock()
 			err = item.(*boundExternalIntListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalIntListItem).lock.Unlock()
 		} else {
+			item.(*boundIntListItem).lock.Lock()
 			err = item.(*boundIntListItem).doSet((*l.val)[i])
+			item.(*boundIntListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -756,9 +768,13 @@ func (l *boundRuneList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalRuneListItem).lock.Lock()
 			err = item.(*boundExternalRuneListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalRuneListItem).lock.Unlock()
 		} else {
+			item.(*boundRuneListItem).lock.Lock()
 			err = item.(*boundRuneListItem).doSet((*l.val)[i])
+			item.(*boundRuneListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -965,9 +981,13 @@ func (l *boundStringList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalStringListItem).lock.Lock()
 			err = item.(*boundExternalStringListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalStringListItem).lock.Unlock()
 		} else {
+			item.(*boundStringListItem).lock.Lock()
 			err = item.(*boundStringListItem).doSet((*l.val)[i])
+			item.(*boundStringListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
