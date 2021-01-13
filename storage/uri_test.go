@@ -33,6 +33,17 @@ func TestURIPath(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "/over/there", u.Path())
 
+	s = "foo:///over/there"
+	u, err = storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "/over/there", u.Path())
+
+	// NOTE: if net/url supported RFC3986, this would pass
+	// s = "foo://over/there"
+	// u, err = storage.ParseURI(s)
+	// assert.Nil(t, err)
+	// assert.Equal(t, "over/there", u.Path())
+
 	// NOTE: this is currently broken, because net/url is not fully RFC3986
 	// compliant - it returns an empty string rather than the proper path.
 	//

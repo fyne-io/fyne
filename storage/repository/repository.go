@@ -6,6 +6,10 @@ import (
 	"fyne.io/fyne"
 )
 
+// repositoryTable stores the mapping of schemes to Repository implementations.
+// It should only ever be used by ForURI() and Register().
+var repositoryTable map[string]Repository = map[string]Repository{}
+
 // Repository represents a storage repository, which is a set of methods which
 // implement specific functions on a URI. Repositories are registered to handle
 // specific URI schemes, and the higher-level functions that operate on URIs
@@ -207,6 +211,13 @@ type MovableRepository interface {
 //
 // Since 2.0.0
 func Register(scheme string, repository Repository) {
+	prev, ok := repositoryTable[scheme]
+
+	if ok {
+		prev.Destroy(scheme)
+	}
+
+	repositoryTable[scheme] = repository
 }
 
 // ForURI returns the Repository instance which is registered to handle URIs of
@@ -215,6 +226,15 @@ func Register(scheme string, repository Repository) {
 // NOTE: this function is intended to be used specifically by the storage
 // package. It generally should not be used outside of the fyne package -
 // instead you should use the methods in the storage package.
+//
+// Since 2.0.0
 func ForURI(u fyne.URI) (Repository, error) {
-	return nil, fmt.Errorf("TODO")
+	scheme := u.Scheme()
+	repo, ok := repositoryTable[scheme]
+
+	if !ok {
+		return nil, fmt.Errorf("No repository registered for scheme '%s'", scheme)
+	}
+
+	return repo, nil
 }

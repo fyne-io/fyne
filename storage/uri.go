@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"mime"
 	"net/url"
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"unicode/utf8"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/storage/repository"
 )
 
 // Declare conformance with fyne.URI interface
@@ -309,20 +309,28 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 //
 // Since: 1.4
 func Exists(u fyne.URI) (bool, error) {
-	if u.Scheme() != "file" {
-		return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())
-	}
-
-	_, err := os.Stat(u.String()[len(u.Scheme())+3:])
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-
+	repo, err := repository.ForURI(u)
 	if err != nil {
 		return false, err
 	}
 
-	return true, nil
+	return repo.Exists(u)
+
+	// TODO: this needs to move to the file:// repository
+	// if u.Scheme() != "file" {
+	//         return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())
+	// }
+	//
+	// _, err := os.Stat(u.String()[len(u.Scheme())+3:])
+	// if os.IsNotExist(err) {
+	//         return false, nil
+	// }
+	//
+	// if err != nil {
+	//         return false, err
+	// }
+	//
+	// return true, nil
 }
 
 // Delete destroys, deletes, or otherwise removes the resource referenced
@@ -346,7 +354,18 @@ func Exists(u fyne.URI) (bool, error) {
 //
 // Since: 2.0.0
 func Delete(u fyne.URI) error {
-	return fmt.Errorf("TODO: implement this function")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return err
+	}
+
+	wrepo, ok := repo.(repository.WriteableRepository)
+	if !ok {
+		return repository.OperationNotSupportedError
+	}
+
+	return wrepo.Delete(u)
+
 }
 
 // Reader returns URIReadCloser set up to read from the resource that the
@@ -370,7 +389,12 @@ func Delete(u fyne.URI) error {
 //
 // Since 2.0.0
 func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	return nil, fmt.Errorf("TODO: implement this function")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return repo.Reader(u)
 }
 
 // CanRead determines if a given URI could be written to using the Reader()
@@ -384,7 +408,12 @@ func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 //
 // Since 2.0.0
 func CanRead(u fyne.URI) (bool, error) {
-	return false, fmt.Errorf("TODO")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return false, err
+	}
+
+	return repo.CanRead(u)
 }
 
 // Writer returns URIWriteCloser set up to write to the resource that the
@@ -412,7 +441,17 @@ func CanRead(u fyne.URI) (bool, error) {
 //
 // Since 2.0.0
 func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return nil, fmt.Errorf("TODO: implement this function")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return nil, err
+	}
+
+	wrepo, ok := repo.(repository.WriteableRepository)
+	if !ok {
+		return nil, repository.OperationNotSupportedError
+	}
+
+	return wrepo.Writer(u)
 }
 
 // CanWrite determines if a given URI could be written to using the Writer()
@@ -426,7 +465,17 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Since 2.0.0
 func CanWrite(u fyne.URI) (bool, error) {
-	return false, fmt.Errorf("TODO")
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return false, err
+	}
+
+	wrepo, ok := repo.(repository.WriteableRepository)
+	if !ok {
+		return false, repository.OperationNotSupportedError
+	}
+
+	return wrepo.CanWrite(u)
 }
 
 // Copy given two URIs, 'src', and 'dest' both of the same scheme , will copy

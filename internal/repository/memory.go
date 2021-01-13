@@ -1,0 +1,219 @@
+package repository
+
+import (
+	"fyne.io/fyne"
+	"fyne.io/fyne/storage"
+	"fyne.io/fyne/storage/repository"
+
+	"fmt"
+	"io"
+)
+
+// declare conformance to interfaces
+var _ io.ReadCloser = &nodeReaderWriter{}
+var _ io.WriteCloser = &nodeReaderWriter{}
+var _ fyne.URIReadCloser = &nodeReaderWriter{}
+var _ fyne.URIWriteCloser = &nodeReaderWriter{}
+
+// nodeReaderWriter allows reading or writing to elements in a MemoryRepository
+type nodeReaderWriter struct {
+	path        string
+	repo        *MemoryRepository
+	writing     bool
+	readCursor  int
+	writeCursor int
+}
+
+// Read implements io.Reader.Read
+func (n *nodeReaderWriter) Read(p []byte) (int, error) {
+
+	// first make sure the requested path actually exists
+	data, ok := n.repo.data[n.path]
+	if !ok {
+		return 0, fmt.Errorf("Path '%s' not present in MemoryRepository", n.path)
+	}
+
+	// copy it into p - we maintain counts since len(data) may be smaller
+	// than len(p)
+	count := 0
+	j := 0 // index into p
+	for ; (j < len(p)) && (n.readCursor < len(data)); n.readCursor++ {
+		p[j] = data[n.readCursor]
+		count++
+		j++
+	}
+
+	// generate EOF if needed
+	var err error = nil
+	if n.readCursor >= len(data) {
+		err = io.EOF
+	}
+
+	return count, err
+}
+
+// Close implements io.Closer.Close
+func (n *nodeReaderWriter) Close() error {
+	n.readCursor = 0
+	n.writeCursor = 0
+	n.writing = false
+	return nil
+}
+
+// Write implements io.Writer.Write
+//
+// This implementation automatically creates the path n.path if it does not
+// exist. If it does exist, it is overwritten.
+func (n *nodeReaderWriter) Write(p []byte) (int, error) {
+
+	// guarantee that the path exists
+	_, ok := n.repo.data[n.path]
+	if !ok {
+		n.repo.data[n.path] = []byte{}
+	}
+
+	// overwrite the file if we haven't already started writing to it
+	if !n.writing {
+		n.repo.data[n.path] = make([]byte, 0)
+		n.writing = true
+	}
+
+	// copy the data into the node buffer
+	count := 0
+	start := n.writeCursor
+	for ; n.writeCursor < start+len(p); n.writeCursor++ {
+		// extend the file if needed
+		if len(n.repo.data) < n.writeCursor+len(p) {
+			n.repo.data[n.path] = append(n.repo.data[n.path], 0)
+		}
+		n.repo.data[n.path][n.writeCursor] = p[n.writeCursor-start]
+		count++
+	}
+
+	return count, nil
+}
+
+// Name implements fyne.URI*Closer.Name
+func (n *nodeReaderWriter) Name() string {
+	return n.URI().Name()
+}
+
+// Name implements fyne.URI*Closer.URI
+func (n *nodeReaderWriter) URI() fyne.URI {
+
+	// discarding the error because this should never fail
+	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
+
+	return u
+}
+
+// declare conformance with repository types
+var _ repository.Repository = &MemoryRepository{}
+var _ repository.WriteableRepository = &MemoryRepository{}
+
+// MemoryRepository implements an in-memory version of the
+// repository.Repository type. It is useful for writing test cases, and may
+// also be of use as a template for people wanting to implement their own
+// "virtual repository". In future, we may consider moving this into the public
+// API.
+//
+// Since 2.0.0
+type MemoryRepository struct {
+	data   map[string][]byte
+	scheme string
+}
+
+// NewMemoryRepository creates a new MemoryRepository instance. It must be
+// given the scheme it is registered for. The caller needs to call
+// repository.Register() on the result of this function.
+//
+// Since 2.0.0
+func NewMemoryRepository(scheme string) *MemoryRepository {
+	return &MemoryRepository{
+		data:   make(map[string][]byte),
+		scheme: scheme,
+	}
+}
+
+// Exists implements repository.Repository.Exists
+//
+// Since 2.0.0
+func (m *MemoryRepository) Exists(u fyne.URI) (bool, error) {
+	if u.Path() == "" {
+		return false, fmt.Errorf("Invalid path '%s'", u.Path())
+	}
+
+	_, ok := m.data[u.Path()]
+	return ok, nil
+}
+
+// Reader implements repository.Repository.Reader
+//
+// Since 2.0.0
+func (m *MemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+	if u.Path() == "" {
+		return nil, fmt.Errorf("Invalid path '%s'", u.Path())
+	}
+
+	_, ok := m.data[u.Path()]
+	if !ok {
+		return nil, fmt.Errorf("No such path '%s' in MemoryRepository", u.Path())
+	}
+
+	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
+}
+
+// CanRead implements repository.Repository.CanRead
+//
+// Since 2.0.0
+func (m *MemoryRepository) CanRead(u fyne.URI) (bool, error) {
+	if u.Path() == "" {
+		return false, fmt.Errorf("Invalid path '%s'", u.Path())
+	}
+
+	_, ok := m.data[u.Path()]
+	if !ok {
+		return false, fmt.Errorf("No such path '%s' in MemoryRepository", u.Path())
+	}
+
+	return true, nil
+}
+
+// Destroy implements repository.Repository.Destroy
+func (m *MemoryRepository) Destroy(scheme string) {
+	// do nothing
+}
+
+// Writeer implements repository.Repository.Writer
+//
+// Since 2.0.0
+func (m *MemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
+	if u.Path() == "" {
+		return nil, fmt.Errorf("Invalid path '%s'", u.Path())
+	}
+
+	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
+}
+
+// CanWrite implements repository.Repository.CanWrite
+//
+// Since 2.0.0
+func (m *MemoryRepository) CanWrite(u fyne.URI) (bool, error) {
+	if u.Path() == "" {
+		return false, fmt.Errorf("Invalid path '%s'", u.Path())
+	}
+
+	return true, nil
+}
+
+// Delete implements repository.Repository.Delete
+//
+// Since 2.0.0
+func (m *MemoryRepository) Delete(u fyne.URI) error {
+	_, ok := m.data[u.Path()]
+	if ok {
+		delete(m.data, u.Path())
+	}
+
+	return nil
+}
