@@ -255,29 +255,22 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	// We know it is a directory, but we don't know if we can read it, so
 	// we'll just try to do so and see if we get a permissions error.
 	p := u.Path()
-	_, err = ioutil.ReadDir(p)
+	f, err := os.Open(p)
 	if err == nil {
-		return true, nil
-	} else if os.IsPermission(err) {
+		_, err = f.Readdir(1)
+		f.Close()
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	if os.IsPermission(err) {
 		return false, nil
 	}
-	return false, err
-	// f, err := os.Open(p)
-	// if err == nil {
-	//         _, err = f.Readdir(1)
-	//         f.Close()
-	// }
-	//
-	// if err != nil {
-	//         return false, err
-	// }
-	//
-	// if os.IsPermission(err) {
-	//         return false, nil
-	// }
-	//
+
 	// it is a directory, and checking the permissions did not error out
-	// return true, nil
+	return true, nil
 }
 
 // Copy implements repository.CopyableRepository.Copy()
