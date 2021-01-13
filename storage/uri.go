@@ -1,8 +1,6 @@
 package storage
 
 import (
-	"fmt"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage/repository"
 )
@@ -143,22 +141,6 @@ func Exists(u fyne.URI) (bool, error) {
 	}
 
 	return repo.Exists(u)
-
-	// TODO: this needs to move to the file:// repository
-	// if u.Scheme() != "file" {
-	//         return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())
-	// }
-	//
-	// _, err := os.Stat(u.String()[len(u.Scheme())+3:])
-	// if os.IsNotExist(err) {
-	//         return false, nil
-	// }
-	//
-	// if err != nil {
-	//         return false, err
-	// }
-	//
-	// return true, nil
 }
 
 // Delete destroys, deletes, or otherwise removes the resource referenced
@@ -330,7 +312,17 @@ func CanWrite(u fyne.URI) (bool, error) {
 //
 // Since: 2.0.0
 func Copy(source fyne.URI, destination fyne.URI) error {
-	return fmt.Errorf("TODO: implement this function")
+	repo, err := repository.ForURI(source)
+	if err != nil {
+		return err
+	}
+
+	crepo, ok := repo.(repository.CopyableRepository)
+	if !ok {
+		return repository.OperationNotSupportedError
+	}
+
+	return crepo.Copy(source, destination)
 }
 
 // Move returns a method that given two URIs, 'src' and 'dest' both of the same
@@ -351,7 +343,7 @@ func Copy(source fyne.URI, destination fyne.URI) error {
 //   such as network or filesystem access that has failed in some way.
 //
 // * If the scheme of the given URI does not have a registered
-//   MoveableRepository instance, then this method will fail with a
+//   MovableRepository instance, then this method will fail with a
 //   repository.OperationNotSupportedError.
 //
 // Move is backed by the repository system - this function calls into a
@@ -359,7 +351,17 @@ func Copy(source fyne.URI, destination fyne.URI) error {
 //
 // Since: 2.0.0
 func Move(source fyne.URI, destination fyne.URI) error {
-	return fmt.Errorf("TODO: implement this function")
+	repo, err := repository.ForURI(source)
+	if err != nil {
+		return err
+	}
+
+	mrepo, ok := repo.(repository.MovableRepository)
+	if !ok {
+		return repository.OperationNotSupportedError
+	}
+
+	return mrepo.Move(source, destination)
 }
 
 // CanList will determine if the URI is listable or not.

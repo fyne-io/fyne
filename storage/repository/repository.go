@@ -163,6 +163,8 @@ type HierarchicalRepository interface {
 
 // CopyableRepository is an extension of the Repository interface which also
 // supports copying referenced resources from one URI to another.
+//
+// Since: 2.0.0
 type CopyableRepository interface {
 	Repository
 
@@ -185,6 +187,11 @@ type CopyableRepository interface {
 
 // MovableRepository is an extension of the Repository interface which also
 // supports moving referenced resources from one URI to another.
+//
+// Note: both Moveable and Movable are correct spellings, but Movable is newer
+// and more accepted. Source: https://grammarist.com/spelling/movable-moveable/
+//
+// Since: 2.0.0
 type MovableRepository interface {
 	Repository
 
