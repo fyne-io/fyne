@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
@@ -250,8 +249,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		return false, err
 	}
 
-	// TODO: on a hunch - this might be why things are breaking on Windows
-	if (!info.IsDir()) && runtime.GOOS == "windows" {
+	if !info.IsDir() {
 		return false, nil
 	}
 
