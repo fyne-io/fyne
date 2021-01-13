@@ -2,7 +2,7 @@
 	<content>
 		<widget size="200x100" type="*widget.TabContainer">
 			<widget pos="0,33" size="200x67" type="*widget.Label">
-				<text pos="4,4" size="192x21">Text 3</text>
+				<text pos="4,8" size="192x21">Text 3</text>
 			</widget>
 			<container size="200x29">
 				<widget size="64x29" type="*widget.tabButton">
