@@ -25,7 +25,7 @@ import (
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.URI, error) {
 	p := u.Path()
 
@@ -77,7 +77,7 @@ func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.UR
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func GenericChild(u fyne.URI, component string, parseURI func(string) (fyne.URI, error)) (fyne.URI, error) {
 
 	// split into components and add the new one
@@ -110,7 +110,7 @@ func GenericChild(u fyne.URI, component string, parseURI func(string) (fyne.URI,
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func GenericCopy(source fyne.URI, destination fyne.URI) error {
 	return fmt.Errorf("TODO")
 }
@@ -126,7 +126,7 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func GenericMove(source fyne.URI, destination fyne.URI) error {
 	return fmt.Errorf("TODO")
 }

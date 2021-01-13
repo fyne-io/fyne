@@ -44,19 +44,19 @@ type Repository interface {
 	// Exists will be used to implement calls to storage.Exists() for the
 	// registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Exists(u fyne.URI) (bool, error)
 
 	// Reader will be used to implement calls to storage.Reader()
 	// for the registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Reader(u fyne.URI) (fyne.URIReadCloser, error)
 
 	// CanRead will be used to implement calls to storage.CanRead() for the
 	// registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	CanRead(u fyne.URI) (bool, error)
 
 	// Destroy is called when the repository is un-registered from a given
@@ -66,7 +66,7 @@ type Repository interface {
 	// registered for. This may be useful for repositories that need to
 	// handle more than one URI scheme internally.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Destroy(string)
 }
 
@@ -79,7 +79,7 @@ type Repository interface {
 // with 'scheme:', or storage.ParseURI() will not be able to determine which
 // storage repository to delegate to for parsing.
 //
-// Since 2.0.0
+// Since: 2.0.0
 type CanonicalRepository interface {
 	Repository
 
@@ -91,26 +91,26 @@ type CanonicalRepository interface {
 // WriteableRepository is an extension of the Repository interface which also
 // supports obtaining a writer for URIs of the scheme it is registered to.
 //
-// Since 2.0.0
+// Since: 2.0.0
 type WriteableRepository interface {
 	Repository
 
 	// Writer will be used to implement calls to storage.WriterTo() for
 	// the registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Writer(u fyne.URI) (fyne.URIWriteCloser, error)
 
 	// CanWrite will be used to implement calls to storage.CanWrite() for
 	// the registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	CanWrite(u fyne.URI) (bool, error)
 
 	// Delete will be used to implement calls to storage.Delete() for the
 	// registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Delete(u fyne.URI) error
 }
 
@@ -118,27 +118,27 @@ type WriteableRepository interface {
 // supports obtaining directory listings (generally analogous to a directory
 // listing) for URIs of the scheme it is registered to.
 //
-// Since 2.0.0
+// Since: 2.0.0
 type ListableRepository interface {
 	Repository
 
 	// CanList will be used to implement calls to storage.Listable() for
 	// the registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	CanList(u fyne.URI) (bool, error)
 
 	// List will be used to implement calls to storage.List() for the
 	// registered scheme of this repository.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	List(u fyne.URI) ([]fyne.URI, error)
 }
 
 // HierarchicalRepository is an extension of the Repository interface which
 // also supports determining the parent and child items of a URI.
 //
-// Since 2.0.0
+// Since: 2.0.0
 type HierarchicalRepository interface {
 	Repository
 
@@ -148,7 +148,7 @@ type HierarchicalRepository interface {
 	// A generic implementation is provided in GenericParent(), which
 	// is based on the RFC3986 definition of a URI parent.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Parent(fyne.URI) (fyne.URI, error)
 
 	// Child will be used to implement calls to storage.Child() for
@@ -157,7 +157,7 @@ type HierarchicalRepository interface {
 	// A generic implementation is provided in GenericParent(), which
 	// is based on RFC3986.
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Child(fyne.URI, string) (fyne.URI, error)
 }
 
@@ -179,7 +179,7 @@ type CopyableRepository interface {
 	// repository is registered to handle. In such cases, implementations
 	// are suggested to fail-over to GenericCopy().
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Copy(fyne.URI, fyne.URI) error
 }
 
@@ -201,7 +201,7 @@ type MovableRepository interface {
 	// repository is registered to handle. In such cases, implementations
 	// are suggested to fail-over to GenericMove().
 	//
-	// Since 2.0.0
+	// Since: 2.0.0
 	Move(fyne.URI, fyne.URI) error
 }
 
@@ -209,7 +209,7 @@ type MovableRepository interface {
 // registered scheme will use methods implemented by the relevant repository
 // implementation.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func Register(scheme string, repository Repository) {
 	prev, ok := repositoryTable[scheme]
 
@@ -227,7 +227,7 @@ func Register(scheme string, repository Repository) {
 // package. It generally should not be used outside of the fyne package -
 // instead you should use the methods in the storage package.
 //
-// Since 2.0.0
+// Since: 2.0.0
 func ForURI(u fyne.URI) (Repository, error) {
 	scheme := u.Scheme()
 	repo, ok := repositoryTable[scheme]
