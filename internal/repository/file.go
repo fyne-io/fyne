@@ -252,12 +252,19 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 
 	// We know it is a directory, but we don't know if we can read it, so
 	// we'll just try to do so and see if we get a permissions error.
-	_, err = ioutil.ReadDir(u.Path())
-	if os.IsPermission(err) {
-		return false, nil
+	p := u.Path()
+	f, err := os.Open(p)
+	if err == nil {
+		_, err = f.Readdir(1)
+		f.Close()
 	}
+
 	if err != nil {
 		return false, err
+	}
+
+	if os.IsPermission(err) {
+		return false, nil
 	}
 
 	// it is a directory, and checking the permissions did not error out
