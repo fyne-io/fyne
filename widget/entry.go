@@ -1028,10 +1028,6 @@ func (e *Entry) textWrap() fyne.TextWrap {
 }
 
 func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
-	if !e.focused && !e.Disabled() {
-		e.focused = true
-	}
-
 	row, col := e.getRowCol(ev)
 	e.setFieldsAndRefresh(func() {
 		if !rightClick || rightClick && !e.selecting {
