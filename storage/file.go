@@ -2,6 +2,8 @@
 package storage
 
 import (
+	"errors"
+
 	"fyne.io/fyne"
 )
 
@@ -28,8 +30,21 @@ func SaveFileToURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Deprecated: this has been replaced by storage.List(URI)
 func ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
-	if lister, ok := uri.(fyne.ListableURI); ok {
-		return lister, nil
+	listable, err := CanList(uri)
+	if err != nil {
+		return nil, err
 	}
-	return fyne.CurrentApp().Driver().ListerForURI(uri)
+	if !listable {
+		return nil, errors.New("uri is not listable")
+	}
+
+	return &legacyListable{uri}, nil
+}
+
+type legacyListable struct {
+	fyne.URI
+}
+
+func (l *legacyListable) List() ([]fyne.URI, error) {
+	return List(l.URI)
 }
