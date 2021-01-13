@@ -1,14 +1,14 @@
 package repository
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/storage/repository"
-
-	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 )
 
 // declare conformance with repository types
@@ -17,9 +17,16 @@ var _ repository.WriteableRepository = &FileRepository{}
 var _ repository.HierarchicalRepository = &FileRepository{}
 var _ repository.ListableRepository = &FileRepository{}
 
+var _ fyne.URIReadCloser = &file{}
+var _ fyne.URIWriteCloser = &file{}
+
 type file struct {
 	*os.File
-	path string
+	uri fyne.URI
+}
+
+func (f *file) URI() fyne.URI {
+	return f.uri
 }
 
 // FileRepository implements a simple wrapper around golang's filesystem
@@ -74,7 +81,7 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 	} else {
 		f, err = os.Open(path)
 	}
-	return &file{File: f, path: path}, err
+	return &file{File: f, uri: uri}, err
 }
 
 // Reader implements repository.Repository.Reader
@@ -88,7 +95,7 @@ func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 //
 // Since 2.0.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.RDONLY, 0666)
+	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
 	defer f.Close()
 
 	if os.IsPermission(err) {
@@ -115,14 +122,14 @@ func (r *FileRepository) Destroy(scheme string) {
 //
 // Since 2.0.0
 func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return openFile(uri, true)
+	return openFile(u, true)
 }
 
 // CanWrite implements repository.WriteableRepository.CanWrite
 //
 // Since 2.0.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.WRONLY, 0666)
+	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
 	defer f.Close()
 
 	if os.IsPermission(err) {
@@ -175,15 +182,15 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 			return nil, repository.URIRootError
 		}
 
+		return storage.ParseURI(u.Scheme() + "://" + parent)
 	} else {
 		var err error
-		parent, err = parentGeneric(s)
+		parent, err := repository.GenericParent(u, storage.ParseURI)
 		if err != nil {
 			return nil, err
 		}
+		return parent, nil
 	}
-
-	return ParseURI(u.Scheme() + "://" + parent)
 }
 
 // Child implements repository.HierarchicalRepository.Child
@@ -242,7 +249,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 
 	// We know it is a directory, but we don't know if we can read it, so
 	// we'll just try to do so and see if we get a permissions error.
-	_, err := ioutil.ReadDir(path)
+	_, err = ioutil.ReadDir(u.Path())
 	if os.IsPermission(err) {
 		return false, nil
 	}
