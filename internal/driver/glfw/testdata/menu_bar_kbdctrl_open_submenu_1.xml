@@ -13,6 +13,7 @@
 					<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 				</widget>
 				<rectangle fillColor="button" pos="2,2" size="73x33"/>
+				<rectangle size="0x0"/>
 				<text bold pos="12,8" size="53x21">Button</text>
 			</widget>
 			<widget backgroundColor="button" size="300x29" type="*glfw.MenuBar">
