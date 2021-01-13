@@ -65,10 +65,6 @@ func (d *gLDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(uri, false)
 }
 
-func (f *file) Name() string {
-	return f.URI().Name()
-}
-
 func (f *file) URI() fyne.URI {
 	return storage.NewURI("file://" + f.path)
 }

@@ -16,10 +16,6 @@ type fileOpen struct {
 	done func()
 }
 
-func (f *fileOpen) Name() string {
-	return f.uri.Name()
-}
-
 func (f *fileOpen) URI() fyne.URI {
 	return f.uri
 }

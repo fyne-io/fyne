@@ -93,11 +93,6 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 	return count, nil
 }
 
-// Name implements fyne.URI*Closer.Name
-func (n *nodeReaderWriter) Name() string {
-	return n.URI().Name()
-}
-
 // Name implements fyne.URI*Closer.URI
 func (n *nodeReaderWriter) URI() fyne.URI {
 

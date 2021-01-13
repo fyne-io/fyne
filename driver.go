@@ -14,13 +14,19 @@ type Driver interface {
 
 	// FileReaderForURI opens a file reader for the given resource indicator.
 	// This may refer to a filesystem (typical on desktop) or data from another application.
+	//
+	// Deprecated: this has been replaced by storage.Reader(URI)
 	FileReaderForURI(URI) (URIReadCloser, error)
 
 	// FileWriterForURI opens a file writer for the given resource indicator.
 	// This should refer to a filesystem resource as external data will not be writable.
+	//
+	// Deprecated: this has been replaced by storage.Writer(URI)
 	FileWriterForURI(URI) (URIWriteCloser, error)
 
 	// ListerForURI converts a URI to a listable URI, if it is possible to do so.
+	//
+	// Deprecated: this has been replaced by storage.List(URI)
 	ListerForURI(URI) (ListableURI, error)
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
