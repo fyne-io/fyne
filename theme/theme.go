@@ -83,6 +83,11 @@ const (
 	// Since 2.0.0
 	ColorNameHover fyne.ThemeColorName = "hover"
 
+	// ColorNameInputBackground is the name of theme lookup for background color of an input field.
+	//
+	// Since 2.0.0
+	ColorNameInputBackground fyne.ThemeColorName = "inputBackground"
+
 	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
 	//
 	// Since 2.0.0
@@ -165,7 +170,17 @@ const (
 var (
 	defaultTheme = setupDefaultTheme()
 
-	errorColor    = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
+	errorColor  = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
+	focusColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x7f},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f},
+	}
 	primaryColors = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
@@ -180,33 +195,33 @@ var (
 	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
 
 	darkPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:     color.NRGBA{0x30, 0x30, 0x30, 0xff},
-		ColorNameButton:         color.Transparent,
-		ColorNameDisabled:       color.NRGBA{0xff, 0xff, 0xff, 0x42},
-		ColorNameDisabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
-		ColorNameError:          errorColor,
-		ColorNameFocus:          color.NRGBA{0xff, 0xff, 0xff, 0x19},
-		ColorNameForeground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		ColorNameHover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
-		ColorNamePlaceHolder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		ColorNamePressed:        color.NRGBA{0xff, 0xff, 0xff, 0x66},
-		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		ColorNameBackground:      color.NRGBA{0x30, 0x30, 0x30, 0xff},
+		ColorNameButton:          color.Transparent,
+		ColorNameDisabled:        color.NRGBA{0xff, 0xff, 0xff, 0x42},
+		ColorNameDisabledButton:  color.NRGBA{0x26, 0x26, 0x26, 0xff},
+		ColorNameError:           errorColor,
+		ColorNameForeground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameHover:           color.NRGBA{0xff, 0xff, 0xff, 0x0f},
+		ColorNameInputBackground: color.NRGBA{0xff, 0xff, 0xff, 0x19},
+		ColorNamePlaceHolder:     color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		ColorNamePressed:         color.NRGBA{0xff, 0xff, 0xff, 0x66},
+		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		ColorNameButton:         color.Transparent,
-		ColorNameDisabled:       color.NRGBA{0x0, 0x0, 0x0, 0x42},
-		ColorNameDisabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
-		ColorNameError:          errorColor,
-		ColorNameFocus:          color.NRGBA{0x0, 0x0, 0x0, 0x19},
-		ColorNameForeground:     color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		ColorNameHover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
-		ColorNamePlaceHolder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		ColorNamePressed:        color.NRGBA{0x0, 0x0, 0x0, 0x19},
-		ColorNameScrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
+		ColorNameBackground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameButton:          color.Transparent,
+		ColorNameDisabled:        color.NRGBA{0x0, 0x0, 0x0, 0x42},
+		ColorNameDisabledButton:  color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
+		ColorNameError:           errorColor,
+		ColorNameForeground:      color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		ColorNameHover:           color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+		ColorNameInputBackground: color.NRGBA{0x0, 0x0, 0x0, 0x19},
+		ColorNamePlaceHolder:     color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		ColorNamePressed:         color.NRGBA{0x0, 0x0, 0x0, 0x19},
+		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x33},
 	}
 )
 
@@ -267,6 +282,8 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 
 	if n == ColorNamePrimary {
 		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	} else if n == ColorNameFocus {
+		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	}
 
 	if c, ok := colors[n]; ok {
@@ -405,6 +422,11 @@ func ForegroundColor() color.Color {
 	return current().Color(ColorNameForeground, currentVariant())
 }
 
+// InputBackgroundColor returns the color used to draw underneath input elements.
+func InputBackgroundColor() color.Color {
+	return current().Color(ColorNameInputBackground, currentVariant())
+}
+
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
 	return current().Color(ColorNameScrollBar, currentVariant())
@@ -531,6 +553,14 @@ func currentVariant() fyne.ThemeVariant {
 	}
 
 	return fyne.CurrentApp().Settings().ThemeVariant()
+}
+
+func focusColorNamed(name string) color.Color {
+	col, ok := focusColors[name]
+	if !ok {
+		return focusColors[ColorBlue]
+	}
+	return col
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {

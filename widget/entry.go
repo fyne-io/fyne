@@ -158,7 +158,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.textProvider()
 	e.placeholderProvider()
 
-	box := canvas.NewRectangle(theme.FocusColor())
+	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
@@ -1125,7 +1125,7 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
-	r.box.FillColor = theme.FocusColor()
+	r.box.FillColor = theme.InputBackgroundColor()
 	if focused {
 		r.line.FillColor = theme.PrimaryColor()
 	} else {
@@ -1323,7 +1323,7 @@ type entryContentRenderer struct {
 
 func (r *entryContentRenderer) BackgroundColor() color.Color {
 	// Workaround until BackgroundColor is finally removed.
-	return theme.FocusColor()
+	return theme.InputBackgroundColor()
 }
 
 func (r *entryContentRenderer) Destroy() {
