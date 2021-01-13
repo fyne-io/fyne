@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMemoryRepositoryRegistration(t *testing.T) {
-	m := NewMemoryRepository("mem")
+func TestInMemoryRepositoryRegistration(t *testing.T) {
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 
 	// this should never fail, and we assume it doesn't in other tests here
@@ -25,7 +25,7 @@ func TestMemoryRepositoryRegistration(t *testing.T) {
 	assert.Equal(t, m, repo)
 
 	// test that re-registration also works
-	m2 := NewMemoryRepository("mem")
+	m2 := NewInMemoryRepository("mem")
 	repository.Register("mem", m2)
 	assert.False(t, m == m2) // this is explicitly intended to be pointer comparison
 	repo, err = repository.ForURI(foo)
@@ -33,9 +33,9 @@ func TestMemoryRepositoryRegistration(t *testing.T) {
 	assert.Equal(t, m2, repo)
 }
 
-func TestMemoryRepositoryExists(t *testing.T) {
+func TestInMemoryRepositoryExists(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.data["/foo"] = []byte{}
 	m.data["/bar"] = []byte{1, 2, 3}
@@ -58,9 +58,9 @@ func TestMemoryRepositoryExists(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestMemoryRepositoryReader(t *testing.T) {
+func TestInMemoryRepositoryReader(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.data["/foo"] = []byte{}
 	m.data["/bar"] = []byte{1, 2, 3}
@@ -87,9 +87,9 @@ func TestMemoryRepositoryReader(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestMemoryRepositoryCanRead(t *testing.T) {
+func TestInMemoryRepositoryCanRead(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.data["/foo"] = []byte{}
 	m.data["/bar"] = []byte{1, 2, 3}
@@ -112,9 +112,9 @@ func TestMemoryRepositoryCanRead(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestMemoryRepositoryWriter(t *testing.T) {
+func TestInMemoryRepositoryWriter(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.data["/foo"] = []byte{}
 	m.data["/bar"] = []byte{1, 2, 3}
@@ -196,9 +196,9 @@ func TestMemoryRepositoryWriter(t *testing.T) {
 
 }
 
-func TestMemoryRepositoryCanWrite(t *testing.T) {
+func TestInMemoryRepositoryCanWrite(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.data["/foo"] = []byte{}
 	m.data["/bar"] = []byte{1, 2, 3}
@@ -221,9 +221,9 @@ func TestMemoryRepositoryCanWrite(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestMemoryRepositoryParent(t *testing.T) {
+func TestInMemoryRepositoryParent(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.data["/foo/bar/baz"] = []byte{}
 
@@ -239,9 +239,9 @@ func TestMemoryRepositoryParent(t *testing.T) {
 	assert.Equal(t, fooExpectedParent.String(), fooParent.String())
 }
 
-func TestMemoryRepositoryChild(t *testing.T) {
+func TestInMemoryRepositoryChild(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
-	m := NewMemoryRepository("mem")
+	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 
 	// and some URIs - we know that they will not fail parsing

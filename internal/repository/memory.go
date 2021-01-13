@@ -15,10 +15,10 @@ var _ io.WriteCloser = &nodeReaderWriter{}
 var _ fyne.URIReadCloser = &nodeReaderWriter{}
 var _ fyne.URIWriteCloser = &nodeReaderWriter{}
 
-// nodeReaderWriter allows reading or writing to elements in a MemoryRepository
+// nodeReaderWriter allows reading or writing to elements in a InMemoryRepository
 type nodeReaderWriter struct {
 	path        string
-	repo        *MemoryRepository
+	repo        *InMemoryRepository
 	writing     bool
 	readCursor  int
 	writeCursor int
@@ -30,7 +30,7 @@ func (n *nodeReaderWriter) Read(p []byte) (int, error) {
 	// first make sure the requested path actually exists
 	data, ok := n.repo.data[n.path]
 	if !ok {
-		return 0, fmt.Errorf("path '%s' not present in MemoryRepository", n.path)
+		return 0, fmt.Errorf("path '%s' not present in InMemoryRepository", n.path)
 	}
 
 	// copy it into p - we maintain counts since len(data) may be smaller
@@ -103,11 +103,11 @@ func (n *nodeReaderWriter) URI() fyne.URI {
 }
 
 // declare conformance with repository types
-var _ repository.Repository = &MemoryRepository{}
-var _ repository.WriteableRepository = &MemoryRepository{}
-var _ repository.HierarchicalRepository = &MemoryRepository{}
+var _ repository.Repository = &InMemoryRepository{}
+var _ repository.WriteableRepository = &InMemoryRepository{}
+var _ repository.HierarchicalRepository = &InMemoryRepository{}
 
-// MemoryRepository implements an in-memory version of the
+// InMemoryRepository implements an in-memory version of the
 // repository.Repository type. It is useful for writing test cases, and may
 // also be of use as a template for people wanting to implement their own
 // "virtual repository". In future, we may consider moving this into the public
@@ -125,18 +125,18 @@ var _ repository.HierarchicalRepository = &MemoryRepository{}
 // elsewhere.
 //
 // Since 2.0.0
-type MemoryRepository struct {
+type InMemoryRepository struct {
 	data   map[string][]byte
 	scheme string
 }
 
-// NewMemoryRepository creates a new MemoryRepository instance. It must be
+// NewInMemoryRepository creates a new InMemoryRepository instance. It must be
 // given the scheme it is registered for. The caller needs to call
 // repository.Register() on the result of this function.
 //
 // Since 2.0.0
-func NewMemoryRepository(scheme string) *MemoryRepository {
-	return &MemoryRepository{
+func NewInMemoryRepository(scheme string) *InMemoryRepository {
+	return &InMemoryRepository{
 		data:   make(map[string][]byte),
 		scheme: scheme,
 	}
@@ -145,7 +145,7 @@ func NewMemoryRepository(scheme string) *MemoryRepository {
 // Exists implements repository.Repository.Exists
 //
 // Since 2.0.0
-func (m *MemoryRepository) Exists(u fyne.URI) (bool, error) {
+func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
 	if u.Path() == "" {
 		return false, fmt.Errorf("invalid path '%s'", u.Path())
 	}
@@ -157,14 +157,14 @@ func (m *MemoryRepository) Exists(u fyne.URI) (bool, error) {
 // Reader implements repository.Repository.Reader
 //
 // Since 2.0.0
-func (m *MemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	if u.Path() == "" {
 		return nil, fmt.Errorf("invalid path '%s'", u.Path())
 	}
 
 	_, ok := m.data[u.Path()]
 	if !ok {
-		return nil, fmt.Errorf("no such path '%s' in MemoryRepository", u.Path())
+		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
 	}
 
 	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
@@ -173,28 +173,28 @@ func (m *MemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // CanRead implements repository.Repository.CanRead
 //
 // Since 2.0.0
-func (m *MemoryRepository) CanRead(u fyne.URI) (bool, error) {
+func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
 	if u.Path() == "" {
 		return false, fmt.Errorf("invalid path '%s'", u.Path())
 	}
 
 	_, ok := m.data[u.Path()]
 	if !ok {
-		return false, fmt.Errorf("no such path '%s' in MemoryRepository", u.Path())
+		return false, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
 	}
 
 	return true, nil
 }
 
 // Destroy implements repository.Repository.Destroy
-func (m *MemoryRepository) Destroy(scheme string) {
+func (m *InMemoryRepository) Destroy(scheme string) {
 	// do nothing
 }
 
 // Writer implements repository.WriteableRepository.Writer
 //
 // Since 2.0.0
-func (m *MemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
+func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	if u.Path() == "" {
 		return nil, fmt.Errorf("invalid path '%s'", u.Path())
 	}
@@ -205,7 +205,7 @@ func (m *MemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 // CanWrite implements repository.WriteableRepository.CanWrite
 //
 // Since 2.0.0
-func (m *MemoryRepository) CanWrite(u fyne.URI) (bool, error) {
+func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
 	if u.Path() == "" {
 		return false, fmt.Errorf("invalid path '%s'", u.Path())
 	}
@@ -216,7 +216,7 @@ func (m *MemoryRepository) CanWrite(u fyne.URI) (bool, error) {
 // Delete implements repository.WriteableRepository.Delete
 //
 // Since 2.0.0
-func (m *MemoryRepository) Delete(u fyne.URI) error {
+func (m *InMemoryRepository) Delete(u fyne.URI) error {
 	_, ok := m.data[u.Path()]
 	if ok {
 		delete(m.data, u.Path())
@@ -228,13 +228,13 @@ func (m *MemoryRepository) Delete(u fyne.URI) error {
 // Parent implements repository.HierarchicalRepository.Parent
 //
 // Since 2.0.0
-func (m *MemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
+func (m *InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	return repository.GenericParent(u, storage.ParseURI)
 }
 
 // Child implements repository.HierarchicalRepository.Child
 //
 // Since 2.0.0
-func (m *MemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
+func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return repository.GenericChild(u, component, storage.ParseURI)
 }
