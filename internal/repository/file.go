@@ -59,9 +59,7 @@ func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 
 	if err == nil {
 		ok = true
-	}
-
-	if os.IsNotExist(err) {
+	} else if os.IsNotExist(err) {
 		err = nil
 	}
 
@@ -98,18 +96,19 @@ func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
 	if err == nil {
 		defer f.Close()
-	}
+	} else {
 
-	if os.IsPermission(err) {
-		return false, nil
-	}
+		if os.IsPermission(err) {
+			return false, nil
+		}
 
-	if os.IsNotExist(err) {
-		return false, nil
-	}
+		if os.IsNotExist(err) {
+			return false, nil
+		}
 
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return true, nil
@@ -134,14 +133,15 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
 	if err == nil {
 		defer f.Close()
-	}
+	} else {
 
-	if os.IsPermission(err) {
-		return false, nil
-	}
+		if os.IsPermission(err) {
+			return false, nil
+		}
 
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return true, nil

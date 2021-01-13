@@ -27,8 +27,9 @@ import (
 //
 // Since 2.0.0
 func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.URI, error) {
+	p := u.Path()
 
-	if u.Path() == "" || u.Path() == "/" {
+	if p == "" || p == "/" {
 		parent, err := parseURI(u.String())
 		if err != nil {
 			return nil, err
@@ -50,11 +51,14 @@ func GenericParent(u fyne.URI, parseURI func(string) (fyne.URI, error)) (fyne.UR
 	}
 
 	// stick the query and fragment back on the end
-	if len(u.Query()) > 0 {
-		newURI += "?" + u.Query()
+	q := u.Query()
+	if len(q) > 0 {
+		newURI += "?" + q
 	}
-	if len(u.Fragment()) > 0 {
-		newURI += "#" + u.Fragment()
+
+	f := u.Fragment()
+	if len(f) > 0 {
+		newURI += "#" + f
 	}
 
 	return parseURI(newURI)
