@@ -18,7 +18,15 @@ import (
 var _ fyne.URI = &uri{}
 
 type uri struct {
-	raw string
+	scheme    string
+	authority string
+	// haveAuthority lets us distinguish between a present-but-empty
+	// authority, and having no authority. This is needed because net/url
+	// incorrectly handles scheme:/absolute/path URIs.
+	haveAuthority bool
+	path          string
+	query         string
+	fragment      string
 }
 
 // NewFileURI creates a new URI from the given file path.
@@ -32,22 +40,30 @@ func NewFileURI(path string) fyne.URI {
 		// double-backslashes
 		path = filepath.ToSlash(path)
 	}
-	return &uri{raw: "file://" + path}
+
+	return &uri{
+		scheme:        "file",
+		haveAuthority: true,
+		authority:     "",
+		path:          path,
+		query:         "",
+		fragment:      "",
+	}
 }
 
 func (u *uri) Extension() string {
-	return filepath.Ext(u.raw)
+	return filepath.Ext(u.path)
 }
 
 func (u *uri) Name() string {
-	return filepath.Base(u.raw)
+	return filepath.Base(u.path)
 }
 
 func (u *uri) MimeType() string {
 	mimeTypeFull := mime.TypeByExtension(u.Extension())
 	if mimeTypeFull == "" {
 		mimeTypeFull = "text/plain"
-		readCloser, err := fyne.CurrentApp().Driver().FileReaderForURI(u)
+		readCloser, err := Reader(u)
 		if err == nil {
 			defer readCloser.Close()
 			scanner := bufio.NewScanner(readCloser)
@@ -61,50 +77,41 @@ func (u *uri) MimeType() string {
 }
 
 func (u *uri) Scheme() string {
-	pos := strings.Index(u.raw, ":")
-	if pos == -1 {
-		return ""
-	}
-
-	return strings.ToLower(u.raw[:pos])
+	return u.scheme
 }
 
 func (u *uri) String() string {
-	return u.raw
+	// NOTE: this string reconstruction is mandated by IETF RFC3986,
+	// section 5.3, pp. 35.
+
+	s := u.scheme + ":"
+	if u.haveAuthority {
+		s += "//" + u.authority
+	}
+	s += u.path
+	if len(u.query) > 0 {
+		s += "?" + u.query
+	}
+	if len(u.fragment) > 0 {
+		s += "#" + u.fragment
+	}
+	return s
 }
 
 func (u *uri) Authority() string {
-	// NOTE: we verified in ParseURI() that this would not error.
-	r, _ := url.Parse(u.raw)
-
-	a := ""
-	if len(r.User.String()) > 0 {
-		a = r.User.String() + "@"
-	}
-	a = a + r.Host
-
-	return a
+	return u.authority
 }
 
 func (u *uri) Path() string {
-	// NOTE: we verified in ParseURI() that this would not error.
-	r, _ := url.Parse(u.raw)
-
-	return r.Path
+	return u.path
 }
 
 func (u *uri) Query() string {
-	// NOTE: we verified in ParseURI() that this would not error.
-	r, _ := url.Parse(u.raw)
-
-	return r.RawQuery
+	return u.query
 }
 
 func (u *uri) Fragment() string {
-	// NOTE: we verified in ParseURI() that this would not error.
-	r, _ := url.Parse(u.raw)
-
-	return r.Fragment
+	return u.fragment
 }
 
 // NewURI creates a new URI from the given string representation. This could be
@@ -133,12 +140,20 @@ func ParseURI(s string) (fyne.URI, error) {
 		s = NewFileURI(path).String()
 	}
 
-	_, err := url.Parse(s)
+	l, err := url.Parse(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return &uri{raw: s}, nil
+	return &uri{
+		scheme:    l.Scheme,
+		authority: l.User.String() + l.Host,
+		// workaround for net/url, see type uri struct comments
+		haveAuthority: true,
+		path:          l.Path,
+		query:         l.RawQuery,
+		fragment:      l.Fragment,
+	}, nil
 }
 
 // Parent returns a URI referencing the parent resource of the resource
