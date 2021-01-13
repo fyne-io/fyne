@@ -14,8 +14,12 @@ import (
 	"fyne.io/fyne/storage/repository"
 )
 
-// Declare conformance with fyne.URI interface
+// Declare conformance with fyne.URI interface.
 var _ fyne.URI = &uri{}
+
+// For backwards-compatibility with the now-deprecated ListableURI type, we
+// also declare conformance with that.
+var _ fyne.ListableURI = &uri{}
 
 type uri struct {
 	raw string
@@ -107,39 +111,8 @@ func (u *uri) Fragment() string {
 	return r.Fragment
 }
 
-// parentGeneric is a generic function that returns the last element of a
-// path after splitting it on "/". It should be suitable for most URIs.
-func parentGeneric(location string) (string, error) {
-
-	// trim leading forward slashes
-	trimmed := 0
-	for location[0] == '/' {
-		location = location[1:]
-		trimmed++
-
-		// if all we have left is an empty string, than this URI
-		// pointed to a UNIX-style root
-		if len(location) == 0 {
-			return "", URIRootError
-		}
-	}
-
-	components := strings.Split(location, "/")
-
-	if len(components) == 1 {
-		return "", URIRootError
-	}
-
-	parent := ""
-	if trimmed > 2 && len(components) > 1 {
-		// Because we trimmed all the leading '/' characters, for UNIX
-		// style paths we want to insert one back in. Presumably we
-		// trimmed two instances of / for the scheme.
-		parent = parent + "/"
-	}
-	parent = parent + strings.Join(components[0:len(components)-1], "/") + "/"
-
-	return parent, nil
+func (u *uri) List() ([]fyne.URI, error) {
+	return List(u)
 }
 
 // NewURI creates a new URI from the given string representation. This could be
@@ -221,45 +194,6 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	return hrepo.Parent(u)
-
-	// TODO: move this to the file:// repository
-	// s := u.String()
-	//
-	// // trim trailing slash
-	// if s[len(s)-1] == '/' {
-	//         s = s[0 : len(s)-1]
-	// }
-	//
-	// // trim the scheme
-	// s = s[len(u.Scheme())+3:]
-	//
-	// // Completely empty URI with just a scheme
-	// if len(s) == 0 {
-	//         return nil, URIRootError
-	// }
-	//
-	// parent := ""
-	// if u.Scheme() == "file" {
-	//         // use the system native path resolution
-	//         parent = filepath.Dir(s)
-	//         if parent[len(parent)-1] != filepath.Separator {
-	//                 parent += "/"
-	//         }
-	//
-	//         // only root is it's own parent
-	//         if filepath.Clean(parent) == filepath.Clean(s) {
-	//                 return nil, URIRootError
-	//         }
-	//
-	// } else {
-	//         var err error
-	//         parent, err = parentGeneric(s)
-	//         if err != nil {
-	//                 return nil, err
-	//         }
-	// }
-	//
-	// return ParseURI(u.Scheme() + "://" + parent)
 }
 
 // Child returns a URI referencing a resource nested hierarchically below the

@@ -118,6 +118,17 @@ var _ repository.HierarchicalRepository = &MemoryRepository{}
 // "virtual repository". In future, we may consider moving this into the public
 // API.
 //
+// Because of it's design, this repository has several quirks:
+//
+// * The Parent() of a path that exists does not necessarily exist
+//
+// * Listing takes O(number of extant paths in the repository), rather than
+//   O(number of children of path being listed).
+//
+// This repository is not designed to be particularly fast or robust, but
+// rather to be simple and easy to read. If you need performance, look
+// elsewhere.
+//
 // Since 2.0.0
 type MemoryRepository struct {
 	data   map[string][]byte
@@ -174,7 +185,7 @@ func (m *MemoryRepository) CanRead(u fyne.URI) (bool, error) {
 
 	_, ok := m.data[u.Path()]
 	if !ok {
-		return false, fmt.Errorf("No such path '%s' in MemoryRepository", u.Path())
+		return false, fmt.Errorf("no such path '%s' in MemoryRepository", u.Path())
 	}
 
 	return true, nil
