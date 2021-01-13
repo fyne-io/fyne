@@ -158,7 +158,7 @@ type HierarchicalRepository interface {
 	// is based on RFC3986.
 	//
 	// Since 2.0.0
-	Child(fyne.URI) (fyne.URI, error)
+	Child(fyne.URI, string) (fyne.URI, error)
 }
 
 // CopyableRepository is an extension of the Repository interface which also
@@ -233,7 +233,7 @@ func ForURI(u fyne.URI) (Repository, error) {
 	repo, ok := repositoryTable[scheme]
 
 	if !ok {
-		return nil, fmt.Errorf("No repository registered for scheme '%s'", scheme)
+		return nil, fmt.Errorf("no repository registered for scheme '%s'", scheme)
 	}
 
 	return repo, nil

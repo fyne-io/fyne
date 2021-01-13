@@ -222,3 +222,35 @@ func TestMemoryRepositoryCanWrite(t *testing.T) {
 	assert.True(t, bazCanWrite)
 	assert.Nil(t, err)
 }
+
+func TestMemoryRepositoryParent(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewMemoryRepository("mem")
+	repository.Register("mem", m)
+	m.data["/foo/bar/baz"] = []byte{}
+
+	// and some URIs - we know that they will not fail parsing
+	foo, _ := storage.ParseURI("mem:///foo/bar/baz")
+	fooExpectedParent, _ := storage.ParseURI("mem:///foo/bar")
+	fooExists, err := storage.Exists(foo)
+	assert.True(t, fooExists)
+	assert.Nil(t, err)
+
+	fooParent, err := storage.Parent(foo)
+	assert.Nil(t, err)
+	assert.Equal(t, fooExpectedParent.String(), fooParent.String())
+}
+
+func TestMemoryRepositoryChild(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewMemoryRepository("mem")
+	repository.Register("mem", m)
+
+	// and some URIs - we know that they will not fail parsing
+	foo, _ := storage.ParseURI("mem:///foo/bar/baz")
+	fooExpectedChild, _ := storage.ParseURI("mem:///foo/bar/baz/quux")
+
+	fooChild, err := storage.Child(foo, "quux")
+	assert.Nil(t, err)
+	assert.Equal(t, fooExpectedChild.String(), fooChild.String())
+}

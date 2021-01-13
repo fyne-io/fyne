@@ -209,43 +209,57 @@ func ParseURI(s string) (fyne.URI, error) {
 //
 // Since: 1.4
 func Parent(u fyne.URI) (fyne.URI, error) {
-	s := u.String()
 
-	// trim trailing slash
-	if s[len(s)-1] == '/' {
-		s = s[0 : len(s)-1]
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return nil, err
 	}
 
-	// trim the scheme
-	s = s[len(u.Scheme())+3:]
-
-	// Completely empty URI with just a scheme
-	if len(s) == 0 {
-		return nil, URIRootError
+	hrepo, ok := repo.(repository.HierarchicalRepository)
+	if !ok {
+		return nil, repository.OperationNotSupportedError
 	}
 
-	parent := ""
-	if u.Scheme() == "file" {
-		// use the system native path resolution
-		parent = filepath.Dir(s)
-		if parent[len(parent)-1] != filepath.Separator {
-			parent += "/"
-		}
+	return hrepo.Parent(u)
 
-		// only root is it's own parent
-		if filepath.Clean(parent) == filepath.Clean(s) {
-			return nil, URIRootError
-		}
-
-	} else {
-		var err error
-		parent, err = parentGeneric(s)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return ParseURI(u.Scheme() + "://" + parent)
+	// TODO: move this to the file:// repository
+	// s := u.String()
+	//
+	// // trim trailing slash
+	// if s[len(s)-1] == '/' {
+	//         s = s[0 : len(s)-1]
+	// }
+	//
+	// // trim the scheme
+	// s = s[len(u.Scheme())+3:]
+	//
+	// // Completely empty URI with just a scheme
+	// if len(s) == 0 {
+	//         return nil, URIRootError
+	// }
+	//
+	// parent := ""
+	// if u.Scheme() == "file" {
+	//         // use the system native path resolution
+	//         parent = filepath.Dir(s)
+	//         if parent[len(parent)-1] != filepath.Separator {
+	//                 parent += "/"
+	//         }
+	//
+	//         // only root is it's own parent
+	//         if filepath.Clean(parent) == filepath.Clean(s) {
+	//                 return nil, URIRootError
+	//         }
+	//
+	// } else {
+	//         var err error
+	//         parent, err = parentGeneric(s)
+	//         if err != nil {
+	//                 return nil, err
+	//         }
+	// }
+	//
+	// return ParseURI(u.Scheme() + "://" + parent)
 }
 
 // Child returns a URI referencing a resource nested hierarchically below the
