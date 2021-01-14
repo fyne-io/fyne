@@ -27,7 +27,7 @@ type fileDialog struct {
 	open       *widget.Button
 	breadcrumb *widget.Box
 	files      *fyne.Container
-	fileScroll *widget.ScrollContainer
+	fileScroll *container.Scroll
 	showHidden bool
 
 	win      *widget.PopUp
@@ -163,18 +163,18 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	buttons := widget.NewHBox(f.dismiss, f.open)
 
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
-		buttons, widget.NewHScrollContainer(f.fileName))
+		buttons, container.NewHScroll(f.fileName))
 
 	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
-	f.fileScroll = widget.NewScrollContainer(f.files)
+	f.fileScroll = container.NewScroll(f.files)
 	verticalExtra := float32(float64(fileIconSize) * 0.25)
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 
 	f.breadcrumb = widget.NewHBox()
-	scrollBread := widget.NewHScrollContainer(f.breadcrumb)
+	scrollBread := container.NewHScroll(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
 	title := label + " File"
@@ -185,7 +185,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	favorites := f.loadFavorites()
 
-	favoritesGroup := widget.NewVScrollContainer(widget.NewGroup("Favorites", favorites...))
+	favoritesGroup := container.NewVScroll(widget.NewGroup("Favorites", favorites...))
 	var optionsButton *widget.Button
 	optionsButton = widget.NewButtonWithIcon("Options", theme.SettingsIcon(), func() {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())

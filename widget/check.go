@@ -24,7 +24,7 @@ type checkRenderer struct {
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
 	min := c.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+	min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), theme.Padding()*2))
 
 	return min
 }
@@ -34,7 +34,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
 	c.focusIndicator.Resize(focusIndicatorSize)
-	c.focusIndicator.Move(fyne.NewPos(0, (size.Height-focusIndicatorSize.Height)/2))
+	c.focusIndicator.Move(fyne.NewPos(theme.Padding()*0.5, (size.Height-focusIndicatorSize.Height)/2))
 
 	offset := fyne.NewSize(focusIndicatorSize.Width, 0)
 
@@ -43,15 +43,15 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 	c.label.Move(fyne.NewPos(offset.Width+theme.Padding(), 0))
 
 	c.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	c.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-theme.IconInlineSize())/2))
+	c.icon.Move(fyne.NewPos(theme.Padding()*1.5, (size.Height-theme.IconInlineSize())/2))
 }
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.label.Color = theme.TextColor()
+	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.Disabled() {
-		c.label.Color = theme.DisabledTextColor()
+		c.label.Color = theme.DisabledColor()
 	}
 }
 
@@ -84,7 +84,7 @@ func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	} else if c.check.focused {
-		c.focusIndicator.FillColor = theme.FocusColor()
+		c.focusIndicator.FillColor = theme.PrimaryColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
@@ -204,7 +204,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	defer c.propertyLock.RUnlock()
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
-	text := canvas.NewText(c.Text, theme.TextColor())
+	text := canvas.NewText(c.Text, theme.ForegroundColor())
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())

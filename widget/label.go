@@ -135,7 +135,7 @@ func (l *Label) textStyle() fyne.TextStyle {
 
 // textColor tells the rendering textProvider our color
 func (l *Label) textColor() color.Color {
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 // concealed tells the rendering textProvider if we are a concealed field
@@ -152,6 +152,7 @@ func (l *Label) object() fyne.Widget {
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.provider = newTextProvider(l.Text, l)
+	l.provider.extraVerticalPad = theme.Padding()
 	l.provider.size = l.size
 	return l.provider.CreateRenderer()
 }

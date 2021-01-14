@@ -186,7 +186,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 					preview,
 				),
 			),
-			fyne.NewContainerWithLayout(layout.NewCenterLayout(), hex),
+			hex,
 			alphaChannel,
 		),
 	))

@@ -130,6 +130,8 @@ func (d *mobileDriver) Run() {
 				dev.safeLeft = e.InsetLeftPx
 				dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
 				dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
+				canvas.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
+				canvas.painter.SetFrameBufferScale(1.0)
 
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()

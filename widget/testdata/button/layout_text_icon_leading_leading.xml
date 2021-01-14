@@ -1,0 +1,20 @@
+<canvas padded size="150x200">
+	<content>
+		<widget pos="4,4" size="142x192" type="*widget.Button">
+			<widget pos="2,2" size="138x188" type="*widget.Shadow">
+				<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="0,-2" size="138x2"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="138,-2" size="2x2" startColor="shadow"/>
+				<linearGradient angle="270" pos="138,0" size="2x188" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="138,188" size="2x2" startColor="shadow"/>
+				<linearGradient pos="0,188" size="138x2" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-2,188" size="2x2" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x188"/>
+			</widget>
+			<rectangle fillColor="button" pos="2,2" size="138x188"/>
+			<rectangle size="0x0"/>
+			<text bold pos="36,85" size="32x21">Test</text>
+			<image fillMode="contain" pos="12,85" rsc="cancelIcon" size="20x21"/>
+		</widget>
+	</content>
+</canvas>

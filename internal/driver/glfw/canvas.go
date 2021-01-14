@@ -65,6 +65,14 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 	return retval
 }
 
+func (c *glCanvas) DismissMenu() bool {
+	if c.menu != nil && c.menu.(*MenuBar).IsActive() {
+		c.menu.(*MenuBar).Toggle()
+		return true
+	}
+	return false
+}
+
 func (c *glCanvas) Focus(obj fyne.Focusable) {
 	focusMgr := c.focusManager()
 	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
@@ -247,6 +255,12 @@ func (c *glCanvas) Size() fyne.Size {
 	c.RLock()
 	defer c.RUnlock()
 	return c.size
+}
+
+func (c *glCanvas) ToggleMenu() {
+	if c.menu != nil {
+		c.menu.(*MenuBar).Toggle()
+	}
 }
 
 func (c *glCanvas) Unfocus() {

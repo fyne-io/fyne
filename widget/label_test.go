@@ -155,9 +155,9 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	text.Hide()
 
 	render := test.WidgetRenderer(text).(*textRenderer)
-	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+	assert.Equal(t, theme.ForegroundColor(), render.texts[0].Color)
 	text.Show()
-	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+	assert.Equal(t, theme.ForegroundColor(), render.texts[0].Color)
 }
 
 func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
@@ -185,29 +185,13 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 	text := NewLabel("Hello")
 	c.SetContent(text)
 	c.Resize(text.MinSize())
-	test.AssertRendersToMarkup(t, `
-		<canvas size="45x29">
-			<content>
-				<widget size="45x29" type="*widget.Label">
-					<text pos="4,4" size="37x21">Hello</text>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "label/default.xml", c)
 
 	truncSize := text.MinSize().Subtract(fyne.NewSize(10, 0))
 	text.Resize(truncSize)
 	text.Wrapping = fyne.TextTruncate
 	text.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas size="45x29">
-			<content>
-				<widget size="35x29" type="*widget.Label">
-					<text pos="4,4" size="27x21">Hel</text>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "label/truncate.xml", c)
 }
 
 func TestNewLabelWithData(t *testing.T) {

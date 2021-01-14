@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/layout"
 	_ "fyne.io/fyne/test"
@@ -154,7 +155,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 func TestCanvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
-	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
+	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(scroll)
 	c.resize(fyne.NewSize(40, 24))
@@ -216,42 +217,21 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	c.SetContent(fyne.NewContainerWithLayout(layout.NewMaxLayout(), but))
 	c.resize(fyne.NewSize(36, 24))
 
-	c.tapDown(fyne.NewPos(15, 15), 0)
-	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-	})
+	simulateTap(c)
 	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, tapped, 1)
+	assert.Equal(t, 1, tapped)
 
-	c.tapDown(fyne.NewPos(15, 15), 0)
-	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-	})
-	c.tapDown(fyne.NewPos(15, 15), 0)
-	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-	})
+	simulateTap(c)
+	simulateTap(c)
 	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, tapped, 1)
+	assert.Equal(t, 2, tapped)
 }
 
 func TestCanvas_Focusable(t *testing.T) {
 	content := newFocusableEntry()
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(content)
-	c.resize(fyne.NewSize(25, 25))
+	content.Resize(fyne.NewSize(25, 25))
 
 	c.tapDown(fyne.NewPos(10, 10), 0)
 	assert.Equal(t, 1, content.focusedTimes)
@@ -346,4 +326,16 @@ func newDoubleTappableButton() *doubleTappableButton {
 	but.ExtendBaseWidget(but)
 
 	return but
+}
+
+func simulateTap(c *mobileCanvas) {
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	time.Sleep(50 * time.Millisecond)
+	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+		wid.DoubleTapped(ev)
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
 }

@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
+	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -79,6 +80,9 @@ type window struct {
 	mouseCancelFunc    context.CancelFunc
 	onClosed           func()
 	onCloseIntercepted func()
+
+	menuTogglePending       fyne.KeyName
+	menuDeactivationPending fyne.KeyName
 
 	xpos, ypos    int
 	width, height int
@@ -676,7 +680,7 @@ func (w *window) mouseOut() {
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
+		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
 			return true
 		}
 
@@ -976,18 +980,26 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	if keyName == "" {
 		return
 	}
+
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
-
-	if action == glfw.Press {
-		if w.canvas.Focused() != nil {
-			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.queueEvent(func() { focused.KeyDown(keyEvent) })
+	pendingMenuToggle := w.menuTogglePending
+	pendingMenuDeactivation := w.menuDeactivationPending
+	w.menuTogglePending = desktop.KeyNone
+	w.menuDeactivationPending = desktop.KeyNone
+	switch action {
+	case glfw.Release:
+		if action == glfw.Release {
+			switch keyName {
+			case pendingMenuToggle:
+				w.canvas.ToggleMenu()
+			case pendingMenuDeactivation:
+				if w.canvas.DismissMenu() {
+					return
+				}
 			}
-		} else if w.canvas.onKeyDown != nil {
-			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
-	} else if action == glfw.Release { // ignore key up in core events
+
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				w.queueEvent(func() { focused.KeyUp(keyEvent) })
@@ -995,17 +1007,43 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		} else if w.canvas.onKeyUp != nil {
 			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
-		return
-	} // key repeat will fall through to TypedKey and TypedShortcut
+		return // ignore key up in other core events
+	case glfw.Press:
+		switch keyName {
+		case desktop.KeyAltLeft, desktop.KeyAltRight:
+			if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
+				w.menuTogglePending = keyName
+			}
+		case fyne.KeyEscape:
+			w.menuDeactivationPending = keyName
+		}
+		if w.canvas.Focused() != nil {
+			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+				w.queueEvent(func() { focused.KeyDown(keyEvent) })
+			}
+		} else if w.canvas.onKeyDown != nil {
+			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
+		}
+	default:
+		// key repeat will fall through to TypedKey and TypedShortcut
+	}
 
-	if keyName == fyne.KeyTab {
-		// at this point we know action != glfw.Release
-		if keyDesktopModifier == 0 {
-			w.canvas.FocusNext()
-			return
-		} else if keyDesktopModifier == desktop.ShiftModifier {
-			w.canvas.FocusPrevious()
-			return
+	switch keyName {
+	case fyne.KeyTab:
+		capture := false
+		// TODO at some point allow widgets to mark as capturing
+		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
+			capture = true
+		}
+		if !capture {
+			switch keyDesktopModifier {
+			case 0:
+				w.canvas.FocusNext()
+				return
+			case desktop.ShiftModifier:
+				w.canvas.FocusPrevious()
+				return
+			}
 		}
 	}
 

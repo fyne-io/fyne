@@ -31,11 +31,11 @@ func TestAccordion_Append(t *testing.T) {
 	assert.Equal(t, 1, len(ac.Items))
 }
 
-func TestAccordionContainer_ChangeTheme(t *testing.T) {
+func TestAccordion_ChangeTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	ac := widget.NewAccordionContainer()
+	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
 	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
 
@@ -53,7 +53,7 @@ func TestAccordionContainer_ChangeTheme(t *testing.T) {
 	})
 }
 
-func TestAccordionContainer_Close(t *testing.T) {
+func TestAccordion_Close(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
 		ac := widget.NewAccordion()
 		ac.Append(&widget.AccordionItem{
@@ -106,7 +106,6 @@ func TestAccordion_Layout(t *testing.T) {
 		multiOpen bool
 		items     []*widget.AccordionItem
 		opened    []int
-		want      string
 	}{
 		"single_open_one_item": {
 			items: []*widget.AccordionItem{
@@ -115,21 +114,6 @@ func TestAccordion_Layout(t *testing.T) {
 					Detail: widget.NewLabel("11111"),
 				},
 			},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="45,77" size="52x37" type="*widget.Accordion">
-								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="48x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
@@ -139,24 +123,6 @@ func TestAccordion_Layout(t *testing.T) {
 				},
 			},
 			opened: []int{0},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="45,61" size="52x70" type="*widget.Accordion">
-								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="48x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,37" size="52x29" type="*widget.Label">
-									<text pos="4,4" size="44x21">11111</text>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
@@ -169,29 +135,6 @@ func TestAccordion_Layout(t *testing.T) {
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="23,58" size="95x75" type="*widget.Accordion">
-								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,42" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">B</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,37" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled" size="95x1"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
@@ -205,32 +148,6 @@ func TestAccordion_Layout(t *testing.T) {
 				},
 			},
 			opened: []int{0, 1},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="23,42" size="95x108" type="*widget.Accordion">
-								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,42" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">B</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,75" size="95x29" type="*widget.Label">
-									<text pos="4,4" size="87x21">2222222222</text>
-								</widget>
-								<widget pos="0,37" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled" size="95x1"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_open_one_item": {
 			multiOpen: true,
@@ -240,21 +157,6 @@ func TestAccordion_Layout(t *testing.T) {
 					Detail: widget.NewLabel("11111"),
 				},
 			},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="45,77" size="52x37" type="*widget.Accordion">
-								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="48x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
@@ -265,24 +167,6 @@ func TestAccordion_Layout(t *testing.T) {
 				},
 			},
 			opened: []int{0},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="45,61" size="52x70" type="*widget.Accordion">
-								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="48x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,37" size="52x29" type="*widget.Label">
-									<text pos="4,4" size="44x21">11111</text>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_open_multiple_items": {
 			multiOpen: true,
@@ -296,29 +180,6 @@ func TestAccordion_Layout(t *testing.T) {
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="23,58" size="95x75" type="*widget.Accordion">
-								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,42" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">B</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,37" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled" size="95x1"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
@@ -333,35 +194,6 @@ func TestAccordion_Layout(t *testing.T) {
 				},
 			},
 			opened: []int{0, 1},
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="23,25" size="95x141" type="*widget.Accordion">
-								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">A</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,75" size="95x29" type="*widget.Button">
-									<rectangle fillColor="button" pos="2,2" size="91x25"/>
-									<text bold pos="28,4" size="11x21">B</text>
-									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
-								</widget>
-								<widget pos="0,37" size="95x29" type="*widget.Label">
-									<text pos="4,4" size="87x21">11111</text>
-								</widget>
-								<widget pos="0,108" size="95x29" type="*widget.Label">
-									<text pos="4,4" size="87x21">2222222222</text>
-								</widget>
-								<widget pos="0,70" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled" size="95x1"/>
-								</widget>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -378,7 +210,7 @@ func TestAccordion_Layout(t *testing.T) {
 			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), accordion))
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertRendersToMarkup(t, tt.want, window.Canvas())
+			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})
@@ -394,10 +226,10 @@ func TestAccordion_MinSize(t *testing.T) {
 	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.Padding()*2
 	minSize1 := fyne.MeasureText("111111", theme.TextSize(), fyne.TextStyle{})
 	minSize1.Width += theme.Padding() * 2
-	minSize1.Height += theme.Padding() * 2
+	minSize1.Height += theme.Padding() * 4
 	minSize2 := fyne.MeasureText("2222222222", theme.TextSize(), fyne.TextStyle{})
 	minSize2.Width += theme.Padding() * 2
-	minSize2.Height += theme.Padding() * 2
+	minSize2.Height += theme.Padding() * 4
 
 	minWidthA1 := fyne.Max(minSizeA.Width, minSize1.Width)
 	minWidthB2 := fyne.Max(minSizeB.Width, minSize2.Width)

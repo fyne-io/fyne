@@ -14,6 +14,8 @@ import (
 
 const (
 	passwordChar = "•"
+	// TODO move to complete tab handling, for now we just indent this far statically
+	textTabIndent = "    "
 )
 
 // textPresenter provides the widget specific information to a generic text provider
@@ -35,6 +37,9 @@ type textProvider struct {
 
 	buffer    []rune
 	rowBounds [][2]int
+
+	// this applies to all except entry, who pads outside the scroll
+	extraVerticalPad float32
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
@@ -231,9 +236,11 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 	measureText := string(line[0:col])
 	if t.presenter.concealed() {
 		measureText = strings.Repeat(passwordChar, col)
+	} else {
+		measureText = strings.ReplaceAll(measureText, "\t", textTabIndent)
 	}
 
-	label := canvas.NewText(measureText, theme.TextColor())
+	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
 	return label.MinSize()
 }
@@ -273,14 +280,15 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height += min.Height
 	}
 
-	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	return fyne.NewSize(width, height).
+		Add(fyne.NewSize(theme.Padding()*2, (theme.Padding()+r.provider.extraVerticalPad)*2))
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.provider.propertyLock.RLock()
 	defer r.provider.propertyLock.RUnlock()
 
-	yPos := theme.Padding()
+	yPos := theme.Padding() + r.provider.extraVerticalPad
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < len(r.texts); i++ {
@@ -293,7 +301,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the label to match the current theme.
 func (r *textRenderer) applyTheme() {
-	c := theme.TextColor()
+	c := theme.ForegroundColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
 	}
@@ -322,14 +330,14 @@ func (r *textRenderer) Refresh() {
 		if concealed {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
-			line = string(row)
+			line = strings.ReplaceAll(string(row), "\t", textTabIndent)
 		}
 
 		var textCanvas *canvas.Text
 		add := false
 		if index >= len(r.texts) {
 			add = true
-			textCanvas = canvas.NewText(line, theme.TextColor())
+			textCanvas = canvas.NewText(line, theme.ForegroundColor())
 		} else {
 			textCanvas = r.texts[index]
 			textCanvas.Text = line

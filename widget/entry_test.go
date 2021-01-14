@@ -1,7 +1,6 @@
 package widget_test
 
 import (
-	"fmt"
 	"image/color"
 	"testing"
 	"time"
@@ -40,11 +39,6 @@ func TestEntry_Binding(t *testing.T) {
 	entry.Unbind()
 	waitForBinding()
 	assert.Equal(t, "Typed", entry.Text)
-}
-
-func TestEntry_Cursor(t *testing.T) {
-	entry := widget.NewEntry()
-	assert.Equal(t, desktop.TextCursor, entry.Cursor())
 }
 
 func TestEntry_CursorColumn(t *testing.T) {
@@ -115,6 +109,22 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_CursorColumn_Wrap2(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.Resize(fyne.NewSize(64, 64))
+	entry.SetText("1234")
+	entry.CursorColumn = 3
+	test.Type(entry, "a")
+	test.Type(entry, "b")
+	test.Type(entry, "c")
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(70, 70))
+	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
+}
+
 func TestEntry_CursorPasswordRevealer(t *testing.T) {
 	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
@@ -150,212 +160,39 @@ func TestEntry_Disableable(t *testing.T) {
 	c := window.Canvas()
 
 	assert.False(t, entry.Disabled())
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_empty.xml", c)
 
 	entry.Disable()
 	assert.True(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_disabled_empty.xml", c)
 
 	entry.Enable()
 	assert.False(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_empty.xml", c)
 
 	entry.SetPlaceHolder("Type!")
 	assert.False(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21">Type!</text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_placeholder.xml", c)
 
 	entry.Disable()
 	assert.True(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21">Type!</text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_disabled_placeholder.xml", c)
 
 	entry.Enable()
 	assert.False(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21">Type!</text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_placeholder.xml", c)
 
 	entry.SetText("Hello")
 	assert.False(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Hello</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_custom_value.xml", c)
 
 	entry.Disable()
 	assert.True(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21">Hello</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/disableable_disabled_custom_value.xml", c)
 
 	entry.Enable()
 	assert.False(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Hello</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
-}
-
-func TestEntry_DoubleTapped(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
-
-	// select the word 'quick'
-	ev := getClickPosition("The qui", 0)
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-	assert.Equal(t, "quick", entry.SelectedText())
-
-	// select the whitespace after 'quick'
-	ev = getClickPosition("The quick", 0)
-	// add half a ' ' character
-	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-	assert.Equal(t, " ", entry.SelectedText())
-
-	// select all whitespace after 'jumped'
-	ev = getClickPosition("jumped  ", 1)
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-	assert.Equal(t, "    ", entry.SelectedText())
-}
-
-func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("A\nB\n")
-	window := test.NewWindow(entry)
-	defer window.Close()
-	window.SetPadded(false)
-	window.Resize(entry.MinSize())
-	entry.Resize(entry.MinSize())
-	c := window.Canvas()
-
-	test.Tap(entry)
-	assert.Equal(t, entry, c.Focused())
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
-	entry.DoubleTapped(ev)
-
-	assert.Equal(t, "", entry.SelectedText())
-}
-
-func TestEntry_DragSelect(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
-
-	// get position after the letter 'e' on the second row
-	ev1 := getClickPosition("ove", 1)
-	// get position after the letter 'z' on the second row
-	ev2 := getClickPosition("over the laz", 1)
-	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
-	ev2.Position.X += 2
-
-	// mouse down and drag from 'r' to 'z'
-	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
-	entry.MouseDown(me)
-	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
-		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
-		entry.Dragged(de)
-	}
-	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
-	entry.MouseUp(me)
-
-	assert.Equal(t, "r the laz", entry.SelectedText())
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_custom_value.xml", c)
 }
 
 func TestEntry_EmptySelection(t *testing.T) {
@@ -386,57 +223,13 @@ func TestEntry_Focus(t *testing.T) {
 	c := window.Canvas()
 
 	entry.FocusGained()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focus_gained.xml", c)
 
 	entry.FocusLost()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focus_lost.xml", c)
 
 	window.Canvas().Focus(entry)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focus_gained.xml", c)
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
@@ -445,145 +238,17 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 	c := window.Canvas()
 
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
-	fmt.Println(theme.FocusColor())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="150x200" type="*widget.OverlayContainer">
-					<widget pos="11,11" size="79x136" type="*widget.Menu">
-						<widget size="79x136" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="79x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="79,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="79,0" size="4x136" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="79,136" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,136" size="79x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,136" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x136"/>
-						</widget>
-						<widget size="79x136" type="*widget.ScrollContainer">
-							<widget size="79x136" type="*widget.menuBox">
-								<container pos="0,4" size="79x144">
-									<widget size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="25x21">Cut</text>
-									</widget>
-									<widget pos="0,33" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="36x21">Copy</text>
-									</widget>
-									<widget pos="0,66" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="39x21">Paste</text>
-									</widget>
-									<widget pos="0,99" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="63x21">Select all</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, c)
+
+	test.AssertRendersToMarkup(t, "entry/focus_with_popup_initial.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(20, 20))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focus_with_popup_entry_selected.xml", c)
 
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="150x200" type="*widget.OverlayContainer">
-					<widget pos="11,11" size="79x136" type="*widget.Menu">
-						<widget size="79x136" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="79x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="79,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="79,0" size="4x136" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="79,136" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,136" size="79x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,136" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x136"/>
-						</widget>
-						<widget size="79x136" type="*widget.ScrollContainer">
-							<widget size="79x136" type="*widget.menuBox">
-								<container pos="0,4" size="79x144">
-									<widget size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="25x21">Cut</text>
-									</widget>
-									<widget pos="0,33" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="36x21">Copy</text>
-									</widget>
-									<widget pos="0,66" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="39x21">Paste</text>
-									</widget>
-									<widget pos="0,99" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="63x21">Select all</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focus_with_popup_initial.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(5, 5))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focus_with_popup_dismissed.xml", c)
 }
 
 func TestEntry_HidePopUpOnEntry(t *testing.T) {
@@ -609,7 +274,7 @@ func TestEntry_MinSize(t *testing.T) {
 	entry.SetText("")
 	assert.Equal(t, min, entry.MinSize())
 	entry.SetPlaceHolder("Hi")
-	assert.True(t, entry.MinSize().Width > min.Width)
+	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
 	assert.True(t, min.Width > theme.Padding()*2)
@@ -620,28 +285,6 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
-func TestEntry_MouseDownOnSelect(t *testing.T) {
-	entry := widget.NewEntry()
-	entry.SetText("Ahnj\nBuki\n")
-	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-
-	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonSecondary}
-	entry.MouseDown(me)
-	entry.MouseUp(me)
-
-	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
-
-	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
-	entry.MouseDown(me)
-	entry.MouseUp(me)
-
-	assert.Equal(t, entry.SelectedText(), "")
-}
-
 func TestEntry_MultilineSelect(t *testing.T) {
 	e, window := setupSelection(t, false)
 	defer teardownImageTest(window)
@@ -649,62 +292,15 @@ func TestEntry_MultilineSelect(t *testing.T) {
 
 	// Extend the selection down one row
 	typeKeys(e, fyne.KeyDown)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="24,29" size="37x21"/>
-					<rectangle fillColor="focus" pos="7,50" size="35x21"/>
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,50" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_add_one_row_down.xml", c)
 	assert.Equal(t, "sting\nTesti", e.SelectedText())
 
 	typeKeys(e, fyne.KeyUp)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="24,29" size="18x21"/>
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_remove_one_row_up.xml", c)
 	assert.Equal(t, "sti", e.SelectedText())
 
 	typeKeys(e, fyne.KeyUp)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="41,8" size="20x21"/>
-					<rectangle fillColor="focus" pos="7,29" size="18x21"/>
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_remove_add_one_row_up.xml", c)
 	assert.Equal(t, "ng\nTe", e.SelectedText())
 }
 
@@ -939,18 +535,7 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 	entry.SetText("Hi")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Hi</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/on_key_down_newline_initial.xml", c)
 
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.TypedKey(right)
@@ -966,20 +551,7 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 
 	test.Type(entry, "o")
 	assert.Equal(t, "H\noi", entry.Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">H</text>
-						<text pos="4,25" size="104x21">oi</text>
-					</widget>
-					<rectangle fillColor="focus" pos="17,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/on_key_down_newline_typed.xml", c)
 }
 
 func TestEntry_OnPaste(t *testing.T) {
@@ -1069,78 +641,28 @@ func TestEntry_PageUpDown(t *testing.T) {
 
 		c.Focus(e)
 		e.SetText("Testing")
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-						<widget pos="4,4" size="112x29" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_initial.xml", c)
 
 		// move right, press & hold shift and pagedown
 		typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyPageDown)
 		assert.Equal(t, "esting", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="16,8" size="45x21"/>
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-						<widget pos="4,4" size="112x29" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="60,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_single_line_shift_pagedown.xml", c)
 
 		// while shift is held press pageup
 		typeKeys(e, fyne.KeyPageUp)
 		assert.Equal(t, "T", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 0, e.CursorColumn)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="7,8" size="10x21"/>
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-						<widget pos="4,4" size="112x29" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_single_line_shift_pageup.xml", c)
 
 		// release shift and press pagedown
 		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
 		assert.Equal(t, "", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-						<widget pos="4,4" size="112x29" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="60,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_single_line_pagedown.xml", c)
 	})
 
 	t.Run("page down single line", func(*testing.T) {
@@ -1150,88 +672,28 @@ func TestEntry_PageUpDown(t *testing.T) {
 
 		c.Focus(e)
 		e.SetText("Testing\nTesting\nTesting")
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-							<text pos="4,25" size="104x21">Testing</text>
-							<text pos="4,46" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_multi_line_initial.xml", c)
 
 		// move right, press & hold shift and pagedown
 		typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyPageDown)
 		assert.Equal(t, "esting\nTesting\nTesting", e.SelectedText())
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="16,8" size="45x21"/>
-						<rectangle fillColor="focus" pos="7,29" size="54x21"/>
-						<rectangle fillColor="focus" pos="7,50" size="54x21"/>
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-							<text pos="4,25" size="104x21">Testing</text>
-							<text pos="4,46" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="60,50" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_multi_line_shift_pagedown.xml", c)
 
 		// while shift is held press pageup
 		typeKeys(e, fyne.KeyPageUp)
 		assert.Equal(t, "T", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 0, e.CursorColumn)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="7,8" size="10x21"/>
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-							<text pos="4,25" size="104x21">Testing</text>
-							<text pos="4,46" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_multi_line_shift_pageup.xml", c)
 
 		// release shift and press pagedown
 		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
 		assert.Equal(t, "", e.SelectedText())
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-							<text pos="4,25" size="104x21">Testing</text>
-							<text pos="4,46" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="60,50" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/select_multi_line_pagedown.xml", c)
 	})
 }
 
@@ -1276,36 +738,11 @@ func TestEntry_Placeholder(t *testing.T) {
 	c := window.Canvas()
 
 	assert.Equal(t, "Text", entry.Text)
-	test.AssertRendersToMarkup(t, `
-			<canvas padded size="63x45">
-				<content>
-					<widget pos="4,4" size="55x37" type="*widget.Entry">
-						<rectangle fillColor="shadow" pos="0,33" size="55x4"/>
-						<widget pos="4,4" size="47x29" type="*widget.textProvider">
-							<text pos="4,4" size="39x21">Text</text>
-						</widget>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+	test.AssertRendersToMarkup(t, "entry/placeholder_with_text.xml", c)
 
 	entry.SetText("")
 	assert.Equal(t, "", entry.Text)
-	test.AssertRendersToMarkup(t, `
-			<canvas padded size="63x45">
-				<content>
-					<widget pos="4,4" size="55x37" type="*widget.Entry">
-						<rectangle fillColor="shadow" pos="0,33" size="55x4"/>
-						<widget pos="4,4" size="47x29" type="*widget.textProvider">
-							<text color="placeholder" pos="4,4" size="39x21">Placehold</text>
-						</widget>
-						<widget pos="4,4" size="47x29" type="*widget.textProvider">
-							<text pos="4,4" size="39x21"></text>
-						</widget>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+	test.AssertRendersToMarkup(t, "entry/placeholder_without_text.xml", c)
 }
 
 func TestEntry_Select(t *testing.T) {
@@ -1318,460 +755,134 @@ func TestEntry_Select(t *testing.T) {
 		wantText      string
 	}{
 		"delete single-line": {
-			keys:     []fyne.KeyName{fyne.KeyDelete},
-			wantText: "Testing\nTeng\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{fyne.KeyDelete},
+			wantText:   "Testing\nTeng\nTesting",
+			wantMarkup: "entry/selection_delete_single_line.xml",
 		},
 		"delete multi-line": {
-			keys:     []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
-			wantText: "Testing\nTeng",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21"></text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
+			wantText:   "Testing\nTeng",
+			wantMarkup: "entry/selection_delete_multi_line.xml",
 		},
 		"delete reverse multi-line": {
-			keys:         []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
+			keys:         []fyne.KeyName{keyShiftLeftDown, fyne.KeyDown, fyne.KeyDelete},
 			setupReverse: true,
 			wantText:     "Testing\nTestisting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Testisting</text>
-      					<text pos="4,46" size="104x21"></text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="41,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:   "entry/selection_delete_reverse_multi_line.xml",
 		},
-		"delete select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyDown},
+		"delete select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyDown},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,29" size="20x21"/>
-      				<rectangle fillColor="focus" pos="7,50" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,50" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_down.xml",
 		},
-		"delete reverse select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyDown},
+		"delete reverse select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyDown},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,29" size="20x21"/>
-      				<rectangle fillColor="focus" pos="7,50" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,50" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_down.xml",
 		},
-		"delete select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyUp},
+		"delete select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyUp},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,8" size="37x21"/>
-      				<rectangle fillColor="focus" pos="7,29" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,8" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_up.xml",
 		},
-		"delete reverse select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyUp},
+		"delete reverse select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyDelete, fyne.KeyUp},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,8" size="37x21"/>
-      				<rectangle fillColor="focus" pos="7,29" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,8" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_up.xml",
 		},
 		// The backspace delete behaviour is the same as via delete.
 		"backspace single-line": {
-			keys:     []fyne.KeyName{fyne.KeyBackspace},
-			wantText: "Testing\nTeng\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{fyne.KeyBackspace},
+			wantText:   "Testing\nTeng\nTesting",
+			wantMarkup: "entry/selection_delete_single_line.xml",
 		},
 		"backspace multi-line": {
-			keys:     []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
-			wantText: "Testing\nTeng",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21"></text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
+			wantText:   "Testing\nTeng",
+			wantMarkup: "entry/selection_delete_multi_line.xml",
 		},
 		"backspace reverse multi-line": {
-			keys:         []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
+			keys:         []fyne.KeyName{keyShiftLeftDown, fyne.KeyDown, fyne.KeyBackspace},
 			setupReverse: true,
 			wantText:     "Testing\nTestisting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Testisting</text>
-      					<text pos="4,46" size="104x21"></text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="41,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:   "entry/selection_delete_reverse_multi_line.xml",
 		},
-		"backspace select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyDown},
+		"backspace select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyDown},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,29" size="20x21"/>
-      				<rectangle fillColor="focus" pos="7,50" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,50" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_down.xml",
 		},
-		"backspace reverse select down with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyDown},
+		"backspace reverse select down with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyDown},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "ng\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,29" size="20x21"/>
-      				<rectangle fillColor="focus" pos="7,50" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,50" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_down.xml",
 		},
-		"backspace select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyUp},
+		"backspace select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyUp},
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,8" size="37x21"/>
-      				<rectangle fillColor="focus" pos="7,29" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,8" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_up.xml",
 		},
-		"backspace reverse select up with Shift still hold": {
-			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyUp},
+		"backspace reverse select up with Shift held": {
+			keys:          []fyne.KeyName{keyShiftLeftDown, fyne.KeyBackspace, fyne.KeyUp},
 			setupReverse:  true,
 			wantText:      "Testing\nTeng\nTesting",
 			wantSelection: "sting\nTe",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="24,8" size="37x21"/>
-      				<rectangle fillColor="focus" pos="7,29" size="18x21"/>
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teng</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,8" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:    "entry/selection_delete_and_add_up.xml",
 		},
 		// Erase the selection and add a newline at selection start
 		"enter": {
-			keys:     []fyne.KeyName{fyne.KeyEnter},
-			wantText: "Testing\nTe\nng\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Te</text>
-      					<text pos="4,46" size="104x21">ng</text>
-      					<text pos="4,67" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="7,50" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{fyne.KeyEnter},
+			wantText:   "Testing\nTe\nng\nTesting",
+			wantMarkup: "entry/selection_enter.xml",
 		},
 		"enter reverse": {
 			keys:         []fyne.KeyName{fyne.KeyEnter},
 			setupReverse: true,
 			wantText:     "Testing\nTe\nng\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Te</text>
-      					<text pos="4,46" size="104x21">ng</text>
-      					<text pos="4,67" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="7,50" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:   "entry/selection_enter.xml",
 		},
 		"replace": {
-			text:     "hello",
-			wantText: "Testing\nTehellong\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Tehellong</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="59,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			text:       "hello",
+			wantText:   "Testing\nTehellong\nTesting",
+			wantMarkup: "entry/selection_replace.xml",
 		},
 		"replace reverse": {
 			text:         "hello",
 			setupReverse: true,
 			wantText:     "Testing\nTehellong\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Tehellong</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="59,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			wantMarkup:   "entry/selection_replace.xml",
 		},
 		"deselect and delete": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete},
-			wantText: "Testing\nTeting\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teting</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete},
+			wantText:   "Testing\nTeting\nTesting",
+			wantMarkup: "entry/selection_deselect_delete.xml",
 		},
 		"deselect and delete holding shift": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete},
-			wantText: "Testing\nTeting\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teting</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete},
+			wantText:   "Testing\nTeting\nTesting",
+			wantMarkup: "entry/selection_deselect_delete.xml",
 		},
 		// ensure that backspace doesn't leave a selection start at the old cursor position
 		"deselect and backspace holding shift": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace},
-			wantText: "Testing\nTsting\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Tsting</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="16,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace},
+			wantText:   "Testing\nTsting\nTesting",
+			wantMarkup: "entry/selection_deselect_backspace.xml",
 		},
 		// clear selection, select a character and while holding shift issue two backspaces
 		"deselect, select and double backspace": {
-			keys:     []fyne.KeyName{keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace},
-			wantText: "Testing\nTeing\nTesting",
-			wantMarkup: `
-      	<canvas padded size="150x200">
-      		<content>
-      			<widget pos="10,10" size="120x100" type="*widget.Entry">
-      				<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-      				<widget pos="4,4" size="112x92" type="*widget.textProvider">
-      					<text pos="4,4" size="104x21">Testing</text>
-      					<text pos="4,25" size="104x21">Teing</text>
-      					<text pos="4,46" size="104x21">Testing</text>
-      				</widget>
-      				<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-      			</widget>
-      		</content>
-      	</canvas>
-			`,
+			keys:       []fyne.KeyName{keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace},
+			wantText:   "Testing\nTeing\nTesting",
+			wantMarkup: "entry/selection_deselect_select_backspace.xml",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -1798,44 +909,13 @@ func TestEntry_SelectAll(t *testing.T) {
 
 	c.Focus(e)
 	e.SetText("First Row\nSecond Row\nThird Row")
-	test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">First Row</text>
-							<text pos="4,25" size="104x21">Second Row</text>
-							<text pos="4,46" size="104x21">Third Row</text>
-						</widget>
-						<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+	test.AssertRendersToMarkup(t, "entry/select_all_initial.xml", c)
 
 	shortcut := &fyne.ShortcutSelectAll{}
 	e.TypedShortcut(shortcut)
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 9, e.CursorColumn)
-	test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="7,8" size="67x21"/>
-						<rectangle fillColor="focus" pos="7,29" size="88x21"/>
-						<rectangle fillColor="focus" pos="7,50" size="73x21"/>
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">First Row</text>
-							<text pos="4,25" size="104x21">Second Row</text>
-							<text pos="4,46" size="104x21">Third Row</text>
-						</widget>
-						<rectangle fillColor="focus" pos="79,50" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+	test.AssertRendersToMarkup(t, "entry/select_all_selected.xml", c)
 }
 
 func TestEntry_SelectAll_EmptyEntry(t *testing.T) {
@@ -1852,21 +932,7 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 
 	// end after releasing shift
 	typeKeys(e, keyShiftLeftUp, fyne.KeyEnd)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="60,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_end.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 }
 
@@ -1875,44 +941,17 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
+	// Hold shift to continue selection
+	typeKeys(e, keyShiftLeftDown)
+
 	// T e[s t i]n g -> end -> // T e[s t i n g]
 	typeKeys(e, fyne.KeyEnd)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="24,29" size="37x21"/>
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="60,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_add_to_end.xml", c)
 	assert.Equal(t, "sting", e.SelectedText())
 
 	// T e[s t i n g] -> home -> [T e]s t i n g
 	typeKeys(e, fyne.KeyHome)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="7,29" size="18x21"/>
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_add_to_home.xml", c)
 	assert.Equal(t, "Te", e.SelectedText())
 }
 
@@ -1923,21 +962,7 @@ func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 
 	// home after releasing shift
 	typeKeys(e, keyShiftLeftUp, fyne.KeyHome)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_home.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 }
 
@@ -1953,21 +978,7 @@ func TestEntry_SelectSnapDown(t *testing.T) {
 	typeKeys(e, keyShiftLeftUp, fyne.KeyDown)
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,50" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_snap_down.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 }
 
@@ -1982,21 +993,7 @@ func TestEntry_SelectSnapLeft(t *testing.T) {
 	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 2, e.CursorColumn)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_snap_left.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 }
 
@@ -2011,21 +1008,7 @@ func TestEntry_SelectSnapRight(t *testing.T) {
 	typeKeys(e, keyShiftLeftUp, fyne.KeyRight)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_snap_right.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 }
 
@@ -2041,21 +1024,7 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 	typeKeys(e, keyShiftLeftUp, fyne.KeyUp)
 	assert.Equal(t, 0, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_snap_up.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 }
 
@@ -2066,93 +1035,30 @@ func TestEntry_SelectedText(t *testing.T) {
 
 	c.Focus(e)
 	e.SetText("Testing")
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/select_initial.xml", c)
 	assert.Equal(t, "", e.SelectedText())
 
 	// move right, press & hold shift and move right
 	typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight)
 	assert.Equal(t, "es", e.SelectedText())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="16,8" size="17x21"/>
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="32,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/select_selected.xml", c)
 
 	// release shift
 	typeKeys(e, keyShiftLeftUp)
 	// press shift and move
 	typeKeys(e, keyShiftLeftDown, fyne.KeyRight)
 	assert.Equal(t, "est", e.SelectedText())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="16,8" size="22x21"/>
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="37,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/select_add_selection.xml", c)
 
 	// release shift and move right
 	typeKeys(e, keyShiftLeftUp, fyne.KeyRight)
 	assert.Equal(t, "", e.SelectedText())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="37,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/select_move_wo_shift.xml", c)
 
 	// press shift and move left
 	typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft)
 	assert.Equal(t, "st", e.SelectedText())
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="24,8" size="14x21"/>
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="24,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/select_select_left.xml", c)
 }
 
 func TestEntry_SelectionHides(t *testing.T) {
@@ -2161,39 +1067,11 @@ func TestEntry_SelectionHides(t *testing.T) {
 	c := window.Canvas()
 
 	c.Unfocus()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_focus_lost.xml", c)
 	assert.Equal(t, "sti", e.SelectedText())
 
 	c.Focus(e)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="24,29" size="18x21"/>
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing</text>
-						<text pos="4,25" size="104x21">Testing</text>
-						<text pos="4,46" size="104x21">Testing</text>
-					</widget>
-					<rectangle fillColor="focus" pos="41,29" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/selection_focus_gained.xml", c)
 	assert.Equal(t, "sti", e.SelectedText())
 }
 
@@ -2206,36 +1084,11 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 
 	entry.SetPlaceHolder("Test")
 	assert.Equal(t, 0, len(entry.Text))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21">Test</text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Hi</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
 func TestEntry_Disable_KeyDown(t *testing.T) {
@@ -2258,40 +1111,11 @@ func TestEntry_Disable_OnFocus(t *testing.T) {
 
 	entry.Disable()
 	entry.FocusGained()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focused_disabled.xml", c)
 
 	entry.Enable()
 	entry.FocusGained()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/focused_enabled.xml", c)
 }
 
 func TestEntry_SetText_EmptyString(t *testing.T) {
@@ -2324,18 +1148,7 @@ func TestEntry_SetText_Manual(t *testing.T) {
 
 	entry.Text = "Test"
 	entry.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Test</text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/set_text_changed.xml", c)
 }
 
 func TestEntry_SetText_Overflow(t *testing.T) {
@@ -2386,48 +1199,95 @@ func TestEntry_SetTextStyle(t *testing.T) {
 	entry.Text = "Styled Text"
 	entry.TextStyle = fyne.TextStyle{Bold: true}
 	entry.Refresh()
-	test.AssertRendersToMarkup(t, `
-	<canvas padded size="150x200">
-		<content>
-			<widget pos="10,10" size="120x37" type="*widget.Entry">
-				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-				<widget pos="4,4" size="112x29" type="*widget.textProvider">
-					<text bold pos="4,4" size="104x21">Styled Text</text>
-				</widget>
-			</widget>
-		</content>
-	</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/set_text_style_bold.xml", c)
 
 	entry.TextStyle = fyne.TextStyle{Monospace: true}
 	entry.Refresh()
-	test.AssertRendersToMarkup(t, `
-	<canvas padded size="150x200">
-		<content>
-			<widget pos="10,10" size="120x37" type="*widget.Entry">
-				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-				<widget pos="4,4" size="112x29" type="*widget.textProvider">
-					<text monospace pos="4,4" size="104x18">Styled Text</text>
-				</widget>
-			</widget>
-		</content>
-	</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/set_text_style_monospace.xml", c)
 
 	entry.TextStyle = fyne.TextStyle{Italic: true}
 	entry.Refresh()
-	test.AssertRendersToMarkup(t, `
-	<canvas padded size="150x200">
-		<content>
-			<widget pos="10,10" size="120x37" type="*widget.Entry">
-				<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-				<widget pos="4,4" size="112x29" type="*widget.textProvider">
-					<text italic pos="4,4" size="104x21">Styled Text</text>
-				</widget>
-			</widget>
-		</content>
-	</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/set_text_style_italic.xml", c)
+}
+
+func TestEntry_Submit(t *testing.T) {
+	t.Run("Callback", func(t *testing.T) {
+		var submission string
+		entry := &widget.Entry{
+			OnSubmitted: func(s string) {
+				submission = s
+			},
+		}
+		t.Run("SingleLine_Enter", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("a")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			assert.Equal(t, "a", entry.Text)
+			assert.Equal(t, "a", submission)
+		})
+		t.Run("SingleLine_Return", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("b")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			assert.Equal(t, "b", entry.Text)
+			assert.Equal(t, "b", submission)
+		})
+		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("c")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "c", entry.Text)
+			assert.Equal(t, "c", submission)
+			entry.SetText("d")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "d", entry.Text)
+			assert.Equal(t, "d", submission)
+		})
+		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("e")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "e", entry.Text)
+			assert.Equal(t, "e", submission)
+			entry.SetText("f")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "f", entry.Text)
+			assert.Equal(t, "f", submission)
+		})
+	})
+	t.Run("NoCallback", func(t *testing.T) {
+		entry := &widget.Entry{}
+		t.Run("SingleLine_Enter", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("a")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			assert.Equal(t, "a", entry.Text)
+		})
+		t.Run("SingleLine_Return", func(t *testing.T) {
+			entry.MultiLine = false
+			entry.SetText("b")
+			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			assert.Equal(t, "b", entry.Text)
+		})
+		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("c")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "\nc", entry.Text)
+			entry.SetText("d")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "\nd", entry.Text)
+		})
+		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			entry.MultiLine = true
+			entry.SetText("e")
+			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
+			assert.Equal(t, "\ne", entry.Text)
+			entry.SetText("f")
+			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
+			assert.Equal(t, "\nf", entry.Text)
+		})
+	})
 }
 
 func TestEntry_Tapped(t *testing.T) {
@@ -2436,120 +1296,33 @@ func TestEntry_Tapped(t *testing.T) {
 	c := window.Canvas()
 
 	entry.SetText("MMM\nWWW\n")
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">MMM</text>
-						<text pos="4,25" size="104x21">WWW</text>
-						<text pos="4,46" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/tapped_initial.xml", c)
 
-	test.Tap(entry)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">MMM</text>
-						<text pos="4,25" size="104x21">WWW</text>
-						<text pos="4,46" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	entry.FocusGained()
+	test.AssertRendersToMarkup(t, "entry/tapped_focused.xml", c)
 
 	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize*1.5, testCharSize/2) // tap in the middle of the 2nd "M"
-	ev := &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">MMM</text>
-						<text pos="4,25" size="104x21">WWW</text>
-						<text pos="4,46" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="21,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	pos := fyne.NewPos(entryOffset+theme.Padding()+testCharSize*1.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 2nd "M"
+	test.TapCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_2nd_m.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	pos = fyne.NewPos(testCharSize*2.5, testCharSize/2) // tap in the middle of the 3rd "M"
-	ev = &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">MMM</text>
-						<text pos="4,25" size="104x21">WWW</text>
-						<text pos="4,46" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="35,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
+	test.TapCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_3rd_m.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
 
-	pos = fyne.NewPos(testCharSize*4, testCharSize/2) // tap after text
-	ev = &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">MMM</text>
-						<text pos="4,25" size="104x21">WWW</text>
-						<text pos="4,46" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="49,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*4, entryOffset+theme.Padding()+testCharSize/2) // tap after text
+	test.TapCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_col.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 3, entry.CursorColumn)
 
-	pos = fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev = &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">MMM</text>
-						<text pos="4,25" size="104x21">WWW</text>
-						<text pos="4,46" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,50" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	pos = fyne.NewPos(entryOffset+testCharSize, entryOffset+testCharSize*4) // tap below rows
+	test.TapCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_row.xml", c)
 	assert.Equal(t, 2, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
 }
@@ -2561,274 +1334,71 @@ func TestEntry_TappedSecondary(t *testing.T) {
 
 	tapPos := fyne.NewPos(20, 10)
 	test.TapSecondaryAt(entry, tapPos)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="150x200" type="*widget.OverlayContainer">
-					<widget pos="30,20" size="79x136" type="*widget.Menu">
-						<widget size="79x136" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="79x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="79,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="79,0" size="4x136" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="79,136" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,136" size="79x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,136" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x136"/>
-						</widget>
-						<widget size="79x136" type="*widget.ScrollContainer">
-							<widget size="79x136" type="*widget.menuBox">
-								<container pos="0,4" size="79x144">
-									<widget size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="25x21">Cut</text>
-									</widget>
-									<widget pos="0,33" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="36x21">Copy</text>
-									</widget>
-									<widget pos="0,66" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="39x21">Paste</text>
-									</widget>
-									<widget pos="0,99" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="63x21">Select all</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/tapped_secondary_full_menu.xml", c)
 	assert.Equal(t, 1, len(c.Overlays().List()))
 	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Disable()
 	test.TapSecondaryAt(entry, tapPos)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="150x200" type="*widget.OverlayContainer">
-					<widget pos="30,20" size="79x70" type="*widget.Menu">
-						<widget size="79x70" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="79x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="79,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="79,0" size="4x70" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="79,70" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,70" size="79x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
-							<widget size="79x70" type="*widget.menuBox">
-								<container pos="0,4" size="79x78">
-									<widget size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="36x21">Copy</text>
-									</widget>
-									<widget pos="0,33" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="63x21">Select all</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/tapped_secondary_read_menu.xml", c)
 	assert.Equal(t, 1, len(c.Overlays().List()))
 	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Password = true
 	entry.Refresh()
 	test.TapSecondaryAt(entry, tapPos)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled" pos="4,4" size="104x21"></text>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/tapped_secondary_no_password_menu.xml", c)
 	assert.Nil(t, c.Overlays().Top(), "No popup for disabled password")
 
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="104x21"></text>
-					</widget>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21"></text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-			<overlay>
-				<widget size="150x200" type="*widget.OverlayContainer">
-					<widget pos="30,20" size="79x70" type="*widget.Menu">
-						<widget size="79x70" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="79x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="79,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="79,0" size="4x70" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="79,70" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,70" size="79x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
-						</widget>
-						<widget size="79x70" type="*widget.ScrollContainer">
-							<widget size="79x70" type="*widget.menuBox">
-								<container pos="0,4" size="79x78">
-									<widget size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="39x21">Paste</text>
-									</widget>
-									<widget pos="0,33" size="79x29" type="*widget.menuItem">
-										<text pos="8,4" size="63x21">Select all</text>
-									</widget>
-								</container>
-							</widget>
-						</widget>
-					</widget>
-				</widget>
-			</overlay>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "entry/tapped_secondary_password_menu.xml", c)
 	assert.Equal(t, 1, len(c.Overlays().List()))
 }
 
 func TestEntry_TextWrap(t *testing.T) {
-	singleLineWrapOffMarkup := `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="120x4"/>
-					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">Testing Wrapping</text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`
-	multiLineWrapOffMarkup := `
-		<canvas padded size="150x200">
-			<content>
-				<widget pos="10,10" size="120x100" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-					<widget pos="4,4" size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">A long text on short words w/o NLs or LFs.</text>
-					</widget>
-					<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-				</widget>
-			</content>
-		</canvas>
-	`
 	for name, tt := range map[string]struct {
 		multiLine bool
 		want      string
 		wrap      fyne.TextWrap
 	}{
 		"single line WrapOff": {
-			want: singleLineWrapOffMarkup,
+			want: "entry/wrap_single_line_off.xml",
 		},
 		// Disallowed - fallback to TextWrapOff
 		"single line Truncate": {
 			wrap: fyne.TextTruncate,
-			want: singleLineWrapOffMarkup,
+			want: "entry/wrap_single_line_off.xml",
 		},
 		// Disallowed - fallback to TextWrapOff
 		"single line WrapBreak": {
 			wrap: fyne.TextWrapBreak,
-			want: singleLineWrapOffMarkup,
+			want: "entry/wrap_single_line_off.xml",
 		},
 		// Disallowed - fallback to TextWrapOff
 		"single line WrapWord": {
 			wrap: fyne.TextWrapWord,
-			want: singleLineWrapOffMarkup,
+			want: "entry/wrap_single_line_off.xml",
 		},
 		"multi line WrapOff": {
 			multiLine: true,
-			want:      multiLineWrapOffMarkup,
+			want:      "entry/wrap_multi_line_off.xml",
 		},
 		// Disallowed - fallback to TextWrapOff
 		"multi line Truncate": {
 			multiLine: true,
 			wrap:      fyne.TextTruncate,
-			want:      multiLineWrapOffMarkup,
+			want:      "entry/wrap_multi_line_off.xml",
 		},
 		"multi line WrapBreak": {
 			multiLine: true,
 			wrap:      fyne.TextWrapBreak,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<widget pos="10,10" size="120x100" type="*widget.Entry">
-							<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-							<widget pos="4,4" size="112x92" type="*widget.textProvider">
-								<text pos="4,4" size="104x21">A long text on </text>
-								<text pos="4,25" size="104x21">short words w</text>
-								<text pos="4,46" size="104x21">/o NLs or LFs.</text>
-							</widget>
-							<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:      "entry/wrap_multi_line_wrap_break.xml",
 		},
 		"multi line WrapWord": {
 			multiLine: true,
 			wrap:      fyne.TextWrapWord,
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<widget pos="10,10" size="120x100" type="*widget.Entry">
-							<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-							<widget pos="4,4" size="112x92" type="*widget.textProvider">
-								<text pos="4,4" size="104x21">A long text on</text>
-								<text pos="4,25" size="104x21">short words</text>
-								<text pos="4,46" size="104x21">w/o NLs or</text>
-								<text pos="4,67" size="104x21">LFs.</text>
-							</widget>
-							<rectangle fillColor="focus" pos="7,8" size="2x21"/>
-						</widget>
-					</content>
-				</canvas>
-			`,
+			want:      "entry/wrap_multi_line_wrap_word.xml",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -2902,22 +1472,7 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 
 	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">•••••••</text>
-					</widget>
-					<rectangle fillColor="focus" pos="47,8" size="2x21"/>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityOffIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "password_entry/obfuscation_typed.xml", c)
 }
 
 func TestPasswordEntry_Placeholder(t *testing.T) {
@@ -2926,99 +1481,17 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	c := window.Canvas()
 
 	entry.SetPlaceHolder("Password")
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21">Password</text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityOffIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "password_entry/placeholder_initial.xml", c)
 
 	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">•••••••</text>
-					</widget>
-					<rectangle fillColor="focus" pos="47,8" size="2x21"/>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityOffIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "password_entry/placeholder_typed.xml", c)
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	initial := `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityOffIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`
-	concealed := `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">•••••••</text>
-					</widget>
-					<rectangle fillColor="focus" pos="47,8" size="2x21"/>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityOffIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`
-	revealed := `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="focus" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21">Hié™שרה</text>
-					</widget>
-					<rectangle fillColor="focus" pos="70,8" size="2x21"/>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := widget.NewPasswordEntry()
 		window := test.NewWindow(entry)
@@ -3028,38 +1501,38 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry.Move(fyne.NewPos(10, 10))
 		c := window.Canvas()
 
-		test.AssertRendersToMarkup(t, initial, c)
+		test.AssertRendersToMarkup(t, "password_entry/initial.xml", c)
 
 		c.Focus(entry)
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, concealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 
 		// update the Password field
 		entry.Password = false
 		entry.Refresh()
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, revealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// update the Password field
 		entry.Password = true
 		entry.Refresh()
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, concealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
 		tapPos := fyne.NewPos(140-theme.Padding()*2-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
 		test.TapCanvas(c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, revealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
 		test.TapCanvas(c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, concealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 	})
 
@@ -3077,18 +1550,18 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry.Move(fyne.NewPos(10, 10))
 		c := window.Canvas()
 
-		test.AssertRendersToMarkup(t, initial, c)
+		test.AssertRendersToMarkup(t, "password_entry/initial.xml", c)
 
 		c.Focus(entry)
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, concealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 
 		// update the Password field
 		entry.Password = false
 		entry.Refresh()
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		test.AssertRendersToMarkup(t, revealed, c)
+		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 	})
 }
@@ -3101,6 +1574,8 @@ func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
 }
 
 const (
+	entryOffset = 10
+
 	keyShiftLeftDown  fyne.KeyName = "LeftShiftDown"
 	keyShiftLeftUp    fyne.KeyName = "LeftShiftUp"
 	keyShiftRightDown fyne.KeyName = "RightShiftDown"
@@ -3152,16 +1627,6 @@ func checkNewlineIgnored(t *testing.T, entry *widget.Entry) {
 	assert.Equal(t, 0, entry.CursorRow)
 }
 
-func getClickPosition(str string, row int) *fyne.PointEvent {
-	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
-
-	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
-	y := theme.Padding() + float32(row)*rowHeight + rowHeight/2
-
-	pos := fyne.NewPos(x, y)
-	return &fyne.PointEvent{Position: pos}
-}
-
 func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	test.NewApp()
 
@@ -3177,37 +1642,9 @@ func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	entry.Move(fyne.NewPos(10, 10))
 
 	if multiLine {
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="shadow" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text color="placeholder" pos="4,4" size="104x21"></text>
-						</widget>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21"></text>
-						</widget>
-					</widget>
-				</content>
-			</canvas>
-		`, w.Canvas())
+		test.AssertRendersToMarkup(t, "entry/initial_multiline.xml", w.Canvas())
 	} else {
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x37" type="*widget.Entry">
-						<rectangle fillColor="shadow" pos="0,33" size="120x4"/>
-						<widget pos="4,4" size="112x29" type="*widget.textProvider">
-							<text color="placeholder" pos="4,4" size="104x21"></text>
-						</widget>
-						<widget pos="4,4" size="112x29" type="*widget.textProvider">
-							<text pos="4,4" size="104x21"></text>
-						</widget>
-					</widget>
-				</content>
-			</canvas>
-		`, w.Canvas())
+		test.AssertRendersToMarkup(t, "entry/initial.xml", w.Canvas())
 	}
 
 	return entry, w
@@ -3221,26 +1658,9 @@ func setupPasswordTest(t *testing.T) (*widget.Entry, fyne.Window) {
 	w.Resize(fyne.NewSize(150, 100))
 
 	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
-	entry.Move(fyne.NewPos(10, 10))
+	entry.Move(fyne.NewPos(entryOffset, entryOffset))
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="150x100">
-			<content>
-				<widget pos="10,10" size="130x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="4,4" size="142x29" type="*widget.textProvider">
-						<text pos="4,4" size="134x21"></text>
-					</widget>
-					<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-						<image rsc="visibilityOffIcon" size="iconInlineSize"/>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "password_entry/initial.xml", w.Canvas())
 
 	return entry, w
 }
@@ -3258,43 +1678,13 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 		e.CursorRow = 1
 		e.CursorColumn = 5
 		typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="24,29" size="18x21"/>
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-							<text pos="4,25" size="104x21">Testing</text>
-							<text pos="4,46" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="24,29" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/selection_initial_reverse.xml", c)
 		assert.Equal(t, "sti", e.SelectedText())
 	} else {
 		e.CursorRow = 1
 		e.CursorColumn = 2
 		typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
-		test.AssertRendersToMarkup(t, `
-			<canvas padded size="150x200">
-				<content>
-					<widget pos="10,10" size="120x100" type="*widget.Entry">
-						<rectangle fillColor="focus" pos="24,29" size="18x21"/>
-						<rectangle fillColor="focus" pos="0,96" size="120x4"/>
-						<widget pos="4,4" size="112x92" type="*widget.textProvider">
-							<text pos="4,4" size="104x21">Testing</text>
-							<text pos="4,25" size="104x21">Testing</text>
-							<text pos="4,46" size="104x21">Testing</text>
-						</widget>
-						<rectangle fillColor="focus" pos="41,29" size="2x21"/>
-					</widget>
-				</content>
-			</canvas>
-		`, c)
+		test.AssertRendersToMarkup(t, "entry/selection_initial.xml", c)
 		assert.Equal(t, "sti", e.SelectedText())
 	}
 
