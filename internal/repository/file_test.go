@@ -192,6 +192,12 @@ func TestFileRepositoryWriter(t *testing.T) {
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
 	assert.Nil(t, err)
 
+	// close the readers, since Windows won't let us delete things with
+	// open handles to them
+	fooReader.Close()
+	barReader.Close()
+	bazReader.Close()
+
 	// now let's test deletion
 	err = storage.Delete(foo)
 	assert.Nil(t, err)
@@ -425,5 +431,4 @@ func TestFileRepositoryListing(t *testing.T) {
 		stringListing = append(stringListing, u.String())
 	}
 	assert.ElementsMatch(t, []string{"file://" + dir + "/foo/bar", "file://" + dir + "/foo/baz"}, stringListing)
-
 }
