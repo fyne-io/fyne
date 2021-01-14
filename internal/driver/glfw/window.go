@@ -81,7 +81,8 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
-	menuActivationPending fyne.KeyName
+	menuTogglePending       fyne.KeyName
+	menuDeactivationPending fyne.KeyName
 
 	xpos, ypos    int
 	width, height int
@@ -982,13 +983,24 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
-	pendingMenuActivation := w.menuActivationPending
-	w.menuActivationPending = desktop.KeyNone
+	pendingMenuToggle := w.menuTogglePending
+	pendingMenuDeactivation := w.menuDeactivationPending
+	w.menuTogglePending = desktop.KeyNone
+	w.menuDeactivationPending = desktop.KeyNone
 	switch action {
 	case glfw.Release:
-		if action == glfw.Release && keyName == pendingMenuActivation {
-			w.canvas.ToggleMenu()
-		} else if w.canvas.Focused() != nil {
+		if action == glfw.Release {
+			switch keyName {
+			case pendingMenuToggle:
+				w.canvas.ToggleMenu()
+			case pendingMenuDeactivation:
+				if w.canvas.DismissMenu() {
+					return
+				}
+			}
+		}
+
+		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				w.queueEvent(func() { focused.KeyUp(keyEvent) })
 			}
@@ -997,8 +1009,13 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		}
 		return // ignore key up in other core events
 	case glfw.Press:
-		if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
-			w.menuActivationPending = keyName
+		switch keyName {
+		case desktop.KeyAltLeft, desktop.KeyAltRight:
+			if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
+				w.menuTogglePending = keyName
+			}
+		case fyne.KeyEscape:
+			w.menuDeactivationPending = keyName
 		}
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {

@@ -168,6 +168,22 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 		})
 	}
 
+	require.False(t, menuBar.IsActive())
+	t.Run("toggle via Escape", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Press, 0)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive(), "Escape does not activate the menu")
+
+		c.ToggleMenu()
+		require.True(t, menuBar.IsActive())
+
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Press, 0)
+		assert.True(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
 	t.Run("when canvas has no menu", func(t *testing.T) {
 		w = createWindow("Test").(*window)
 		w.SetContent(canvas.NewRectangle(color.Black))
