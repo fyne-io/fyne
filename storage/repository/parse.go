@@ -68,27 +68,26 @@ func ParseURI(s string) (fyne.URI, error) {
 	}
 
 	repo, err := ForURI(&uri{scheme: scheme})
-	crepo, ok := repo.(CanonicalRepository)
-	if !ok || err != nil {
-		// Either the repository registered for this scheme does not
-		// implement a parser, or there is no registered repository.
-		// Either way, we'll do our best-effort default.
-		l, err := url.Parse(s)
-		if err != nil {
-			return nil, err
+	if err == nil {
+		// If the repository registered for this scheme implements a parser
+		if c, ok := repo.(CanonicalRepository); ok {
+			return c.ParseURI(s)
 		}
-
-		return &uri{
-			scheme:    l.Scheme,
-			authority: l.User.String() + l.Host,
-			// workaround for net/url, see type uri struct comments
-			haveAuthority: true,
-			path:          l.Path,
-			query:         l.RawQuery,
-			fragment:      l.Fragment,
-		}, nil
 	}
 
-	return crepo.ParseURI(s)
+	// There was no repository registered, or it did not provide a parser
+	l, err := url.Parse(s)
+	if err != nil {
+		return nil, err
+	}
 
+	return &uri{
+		scheme:    l.Scheme,
+		authority: l.User.String() + l.Host,
+		// workaround for net/url, see type uri struct comments
+		haveAuthority: true,
+		path:          l.Path,
+		query:         l.RawQuery,
+		fragment:      l.Fragment,
+	}, nil
 }
