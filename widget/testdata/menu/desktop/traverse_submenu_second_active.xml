@@ -17,7 +17,6 @@
 						<rectangle fillColor="background" size="61x121"/>
 						<container pos="0,4" size="61x121">
 							<widget size="61x29" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="61x29"/>
 								<text pos="8,4" size="27x21">Foo</text>
 							</widget>
 							<widget pos="0,33" size="61x1" type="*widget.Separator">
@@ -32,7 +31,6 @@
 								<rectangle fillColor="disabled" size="61x1"/>
 							</widget>
 							<widget pos="0,76" size="61x29" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="61x29"/>
 								<text pos="8,4" size="26x21">Baz</text>
 							</widget>
 						</container>
@@ -54,10 +52,10 @@
 							<rectangle fillColor="background" size="53x78"/>
 							<container pos="0,4" size="53x78">
 								<widget size="53x29" type="*widget.menuItem">
-									<rectangle fillColor="focus" size="53x29"/>
 									<text pos="8,4" size="37x21">SubA</text>
 								</widget>
 								<widget pos="0,33" size="53x29" type="*widget.menuItem">
+									<rectangle fillColor="focus" size="53x29"/>
 									<text pos="8,4" size="37x21">SubB</text>
 								</widget>
 							</container>
