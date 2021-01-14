@@ -5,11 +5,13 @@ package glfw_test
 
 import (
 	//"strconv"
+
 	"testing"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver/glfw"
 	"fyne.io/fyne/test"
+
 	//"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
