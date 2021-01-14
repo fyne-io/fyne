@@ -19,8 +19,9 @@ func TestEntry_Cursor(t *testing.T) {
 
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
+	entry.Wrapping = fyne.TextWrapOff
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
-	entry.Resize(fyne.NewSize(100, entry.MinSize().Height)) // TODO use No-Wrap when supported
+	entry.Resize(entry.MinSize())
 
 	// select the word 'quick'
 	ev := getClickPosition("The qui", 0)
@@ -68,8 +69,9 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 
 func TestEntry_DragSelect(t *testing.T) {
 	entry := NewEntry()
+	entry.Wrapping = fyne.TextWrapOff
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
-	entry.Resize(fyne.NewSize(100, 70)) // TODO use No-Wrap when supported
+	entry.Resize(entry.MinSize())
 
 	// get position after the letter 'e' on the second row
 	ev1 := getClickPosition("ove", 1)
