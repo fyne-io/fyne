@@ -118,7 +118,7 @@ func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	test.Type(entry, "a")
 	test.Type(entry, "b")
 	test.Type(entry, "c")
-	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorColumn)
 	assert.Equal(t, 1, entry.CursorRow)
 	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(70, 70))
