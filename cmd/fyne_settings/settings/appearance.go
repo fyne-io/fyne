@@ -72,7 +72,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	scale.Append(widget.NewGroup("Theme", themes))
 
 	bottom := widget.NewHBox(layout.NewSpacer(),
-		&widget.Button{Text: "Apply", Style: widget.PrimaryButton, OnTapped: func() {
+		&widget.Button{Text: "Apply", Importance: widget.HighImportance, OnTapped: func() {
 			err := s.save()
 			if err != nil {
 				fyne.LogError("Failed on saving", err)

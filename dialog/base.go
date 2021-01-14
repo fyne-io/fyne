@@ -67,7 +67,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
+	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		},

@@ -135,7 +135,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			callback(f.dir, nil)
 		}
 	})
-	f.open.Style = widget.PrimaryButton
+	f.open.Importance = widget.HighImportance
 	f.open.Disable()
 	if f.file.save {
 		f.fileName.SetText(f.initialFileName)

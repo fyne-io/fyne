@@ -17,8 +17,8 @@ func TestChooseScale(t *testing.T) {
 
 	test.Tap(buttons[0].(*widget.Button))
 	assert.Equal(t, float32(0.5), s.fyneSettings.Scale)
-	assert.Equal(t, widget.PrimaryButton, buttons[0].(*widget.Button).Style)
-	assert.Equal(t, widget.DefaultButton, buttons[2].(*widget.Button).Style)
+	assert.Equal(t, widget.HighImportance, buttons[0].(*widget.Button).Importance)
+	assert.Equal(t, widget.MediumImportance, buttons[2].(*widget.Button).Importance)
 }
 
 func TestMakeScaleButtons(t *testing.T) {
@@ -27,8 +27,8 @@ func TestMakeScaleButtons(t *testing.T) {
 	buttons := s.makeScaleButtons()
 
 	assert.Equal(t, 5, len(buttons))
-	assert.Equal(t, widget.DefaultButton, buttons[0].(*widget.Button).Style)
-	assert.Equal(t, widget.PrimaryButton, buttons[2].(*widget.Button).Style)
+	assert.Equal(t, widget.MediumImportance, buttons[0].(*widget.Button).Importance)
+	assert.Equal(t, widget.HighImportance, buttons[2].(*widget.Button).Importance)
 }
 
 func TestMakeScalePreviews(t *testing.T) {
