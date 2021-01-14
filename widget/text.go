@@ -38,8 +38,8 @@ type textProvider struct {
 	buffer    []rune
 	rowBounds [][2]int
 
-	// this applies to all except entry, who pads outside the scroll
-	extraVerticalPad float32
+	// this varies due to how the widget works (entry with scroller vs others with padding)
+	extraPad fyne.Size
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
@@ -242,7 +242,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 
 	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
-	return label.MinSize()
+	return label.MinSize().Add(fyne.NewSize(t.extraPad.Width, 0))
 }
 
 // Renderer
@@ -281,20 +281,21 @@ func (r *textRenderer) MinSize() fyne.Size {
 	}
 
 	return fyne.NewSize(width, height).
-		Add(fyne.NewSize(theme.Padding()*2, (theme.Padding()+r.provider.extraVerticalPad)*2))
+		Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2).Add(r.provider.extraPad).Add(r.provider.extraPad))
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.provider.propertyLock.RLock()
 	defer r.provider.propertyLock.RUnlock()
 
-	yPos := theme.Padding() + r.provider.extraVerticalPad
+	xPos := theme.Padding() + r.provider.extraPad.Width
+	yPos := theme.Padding() + r.provider.extraPad.Height
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < len(r.texts); i++ {
 		text := r.texts[i]
 		text.Resize(lineSize)
-		text.Move(fyne.NewPos(theme.Padding(), yPos))
+		text.Move(fyne.NewPos(xPos, yPos))
 		yPos += lineHeight
 	}
 }

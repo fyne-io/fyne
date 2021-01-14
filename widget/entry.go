@@ -830,6 +830,7 @@ func (e *Entry) placeholderProvider() *textProvider {
 
 	text := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 	text.ExtendBaseWidget(text)
+	text.extraPad = fyne.NewSize(theme.Padding(), theme.InputBorderSize())
 	e.placeholder = text
 	return e.placeholder
 }
@@ -1005,6 +1006,7 @@ func (e *Entry) textProvider() *textProvider {
 
 	text := newTextProvider(e.Text, e)
 	text.ExtendBaseWidget(text)
+	text.extraPad = fyne.NewSize(theme.Padding(), theme.InputBorderSize())
 	e.text = text
 	return e.text
 }
@@ -1087,8 +1089,11 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
+	xInset := float32(0)
 	if r.entry.ActionItem != nil {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		xInset = theme.IconInlineSize() + 2*theme.Padding()
+
 		r.entry.ActionItem.Resize(actionIconSize)
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 	}
@@ -1102,13 +1107,15 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 		if r.entry.ActionItem == nil {
 			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+			xInset = theme.IconInlineSize() + 2*theme.Padding()
 		} else {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-3*theme.Padding(), theme.Padding()*2))
+			xInset += theme.IconInlineSize() + theme.Padding()
 		}
 	}
 
-	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2+actionIconSize.Width, theme.Padding()*2))
-	entryPos := fyne.NewPos(theme.Padding(), theme.Padding())
+	entrySize := size.Subtract(fyne.NewSize(xInset, theme.InputBorderSize()*2))
+	entryPos := fyne.NewPos(0, theme.InputBorderSize())
 	r.scroll.Resize(entrySize)
 	r.scroll.Move(entryPos)
 }
@@ -1413,7 +1420,7 @@ func (r *entryContentRenderer) buildSelection() {
 
 		// resize and reposition each rectangle
 		r.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
-		r.selection[i].Move(fyne.NewPos(x1-1, y1))
+		r.selection[i].Move(fyne.NewPos(x1-1, y1+theme.InputBorderSize()))
 	}
 }
 
@@ -1460,7 +1467,7 @@ func (r *entryContentRenderer) moveCursor() {
 	r.content.entry.propertyLock.Lock()
 	lineHeight := r.content.entry.text.charMinSize().Height
 	r.cursor.Resize(fyne.NewSize(2, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding(), yPos+theme.Padding()))
+	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding(), yPos+theme.Padding()+theme.InputBorderSize()))
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()

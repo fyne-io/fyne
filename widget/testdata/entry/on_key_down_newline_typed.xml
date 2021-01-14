@@ -3,13 +3,13 @@
 		<widget pos="10,10" size="120x100" type="*widget.Entry">
 			<rectangle fillColor="focus" pos="0,2" size="120x96"/>
 			<rectangle fillColor="primary" pos="0,98" size="120x2"/>
-			<widget pos="4,4" size="112x92" type="*widget.Scroll">
-				<widget backgroundColor="focus" size="112x92" type="*widget.entryContent">
-					<widget size="112x92" type="*widget.textProvider">
-						<text pos="4,4" size="104x21">H</text>
-						<text pos="4,25" size="104x21">oi</text>
+			<widget pos="0,2" size="120x96" type="*widget.Scroll">
+				<widget backgroundColor="focus" size="120x96" type="*widget.entryContent">
+					<widget size="120x96" type="*widget.textProvider">
+						<text pos="8,6" size="112x21">H</text>
+						<text pos="8,27" size="112x21">oi</text>
 					</widget>
-					<rectangle fillColor="primary" pos="13,25" size="2x21"/>
+					<rectangle fillColor="primary" pos="17,27" size="2x21"/>
 				</widget>
 			</widget>
 		</widget>
