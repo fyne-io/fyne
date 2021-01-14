@@ -65,6 +65,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
+		saveName.SetPlaceHolder("enter a filename to save")
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
