@@ -82,9 +82,6 @@ type URI interface {
 // ListableURI represents a URI that can have child items, most commonly a
 // directory on disk in the native filesystem.
 //
-// Deprecated: use the Listable() and List() methods that operate on URI in
-// the storage package instead.
-//
 // Since: 1.4
 type ListableURI interface {
 	URI

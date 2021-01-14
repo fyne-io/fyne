@@ -27,8 +27,6 @@ func SaveFileToURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 // standard URI into a listable URI.
 //
 // Since: 1.4
-//
-// Deprecated: this has been replaced by storage.List(URI)
 func ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	listable, err := CanList(uri)
 	if err != nil {
