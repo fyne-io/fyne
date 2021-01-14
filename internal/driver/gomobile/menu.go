@@ -6,18 +6,16 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 type menuLabel struct {
-	*widget.Box
-	label *widget.Label
+	widget.BaseWidget
 
 	menu   *fyne.Menu
-	bar    *widget.Box
+	bar    *fyne.Container
 	canvas *mobileCanvas
 }
 
@@ -35,26 +33,25 @@ func (m *menuLabel) Tapped(*fyne.PointEvent) {
 }
 
 func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
-	return cache.Renderer(m.Box)
+	label := widget.NewLabel(m.menu.Label)
+	box := container.NewHBox(layout.NewSpacer(), label, layout.NewSpacer(), widget.NewIcon(theme.MenuExpandIcon()))
+
+	return &menuLabelRenderer{menu: m, content: box}
 }
 
-func newMenuLabel(item *fyne.Menu, parent *widget.Box, c *mobileCanvas) *menuLabel {
-	label := widget.NewLabel(item.Label)
-	box := widget.NewHBox(layout.NewSpacer(), label, layout.NewSpacer(), widget.NewIcon(theme.MenuExpandIcon()))
-
-	m := &menuLabel{box, label, item, parent, c}
-	return m
+func newMenuLabel(item *fyne.Menu, parent *fyne.Container, c *mobileCanvas) *menuLabel {
+	return &menuLabel{menu: item, bar: parent, canvas: c}
 }
 
 func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
-	var panel *widget.Box
-	top := widget.NewHBox(widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+	var panel *fyne.Container
+	top := container.NewHBox(widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 		panel.Hide()
 		c.setMenu(nil)
 	}))
-	panel = widget.NewVBox(top)
+	panel = container.NewVBox(top)
 	for _, item := range menu.Items {
-		panel.Append(newMenuLabel(item, panel, c))
+		panel.Add(newMenuLabel(item, panel, c))
 	}
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 	c.setMenu(container.NewWithoutLayout(panel, shadow))
@@ -87,4 +84,32 @@ func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {
 	}
 
 	return nil
+}
+
+type menuLabelRenderer struct {
+	menu    *menuLabel
+	content *fyne.Container
+}
+
+func (m *menuLabelRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (m *menuLabelRenderer) Destroy() {
+}
+
+func (m *menuLabelRenderer) Layout(size fyne.Size) {
+	m.content.Resize(size)
+}
+
+func (m *menuLabelRenderer) MinSize() fyne.Size {
+	return m.content.MinSize()
+}
+
+func (m *menuLabelRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{m.content}
+}
+
+func (m *menuLabelRenderer) Refresh() {
+	m.content.Refresh()
 }

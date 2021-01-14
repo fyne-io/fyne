@@ -102,7 +102,7 @@ func TestForm_ChangeText(t *testing.T) {
 	form := NewForm(item)
 
 	renderer := test.WidgetRenderer(form)
-	c := renderer.Objects()[0].(*fyne.Container)
+	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Equal(t, "Test", c.Objects[0].(*Label).Text)
 
 	item.Text = "Changed"

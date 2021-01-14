@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 )
 
@@ -61,8 +60,8 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
-	return widget.NewHBox(
-		widget.NewVBox(screen,
+	return container.NewHBox(
+		container.NewVBox(screen,
 			widget.NewButton("Custom Theme", func() {
 				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
 			}),
@@ -70,11 +69,8 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 				win.SetFullScreen(!win.FullScreen())
 			}),
 		),
-		fyne.NewContainerWithLayout(layout.NewBorderLayout(label, nil, nil, nil),
-			label,
-			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-				genericCard, deskCard,
-			),
+		container.NewBorder(label, nil, nil, nil,
+			container.NewGridWithColumns(2, genericCard, deskCard),
 		),
 	)
 }

@@ -73,7 +73,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	box.Add(widget.NewCard("Main Color", "", swatch))
 	box.Add(widget.NewCard("Theme", "", themes))
 
-	bottom := widget.NewHBox(layout.NewSpacer(),
+	bottom := container.NewHBox(layout.NewSpacer(),
 		&widget.Button{Text: "Apply", Importance: widget.HighImportance, OnTapped: func() {
 			err := s.save()
 			if err != nil {
@@ -252,14 +252,14 @@ func showOverlay(c fyne.Canvas) {
 		widget.NewFormItem("Password", password))
 	form.OnCancel = func() {}
 	form.OnSubmit = func() {}
-	content := widget.NewVBox(
+	content := container.NewVBox(
 		widget.NewLabelWithStyle("Login demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form)
-	wrap := fyne.NewContainerWithoutLayout(content)
+	wrap := container.NewWithoutLayout(content)
 	wrap.Resize(content.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	content.Resize(content.MinSize())
 	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
-	over := fyne.NewContainerWithLayout(layout.NewMaxLayout(),
+	over := container.NewMax(
 		canvas.NewRectangle(theme.ShadowColor()), fyne.NewContainerWithLayout(layout.NewCenterLayout(),
 			wrap))
 
