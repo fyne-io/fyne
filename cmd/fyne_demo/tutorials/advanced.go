@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
@@ -14,8 +15,9 @@ func scaleString(c fyne.Canvas) string {
 	return fmt.Sprintf("%0.2f", c.Scale())
 }
 
-func prependTo(g *widget.Group, s string) {
-	g.Prepend(widget.NewLabel(s))
+func prependTo(g *fyne.Container, s string) {
+	g.Objects = append([]fyne.CanvasObject{widget.NewLabel(s)}, g.Objects...)
+	g.Refresh()
 }
 
 func setScaleText(obj *widget.Label, win fyne.Window) {
@@ -38,8 +40,11 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 	go setScaleText(scale, win)
 
 	label := widget.NewLabel("Just type...")
-	generic := widget.NewGroupWithScroller("Generic")
-	desk := widget.NewGroupWithScroller("Desktop")
+	generic := container.NewVBox()
+	desk := container.NewVBox()
+
+	genericCard := widget.NewCard("", "Generic", container.NewVScroll(generic))
+	deskCard := widget.NewCard("", "Desktop", container.NewVScroll(desk))
 
 	win.Canvas().SetOnTypedRune(func(r rune) {
 		prependTo(generic, "Rune: "+string(r))
@@ -68,7 +73,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		fyne.NewContainerWithLayout(layout.NewBorderLayout(label, nil, nil, nil),
 			label,
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-				generic, desk,
+				genericCard, deskCard,
 			),
 		),
 	)

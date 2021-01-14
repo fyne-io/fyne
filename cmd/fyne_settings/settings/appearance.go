@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -61,6 +62,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	themes.SetSelected(def)
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
+	box := container.NewVBox(scale)
 
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
@@ -68,8 +70,8 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	}
 	swatch := fyne.NewContainerWithLayout(layout.NewGridLayout(len(s.colors)), s.colors...)
 
-	scale.Append(widget.NewGroup("Main Color", swatch))
-	scale.Append(widget.NewGroup("Theme", themes))
+	box.Add(widget.NewCard("Main Color", "", swatch))
+	box.Add(widget.NewCard("Theme", "", themes))
 
 	bottom := widget.NewHBox(layout.NewSpacer(),
 		&widget.Button{Text: "Apply", Importance: widget.HighImportance, OnTapped: func() {
@@ -81,8 +83,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 			s.appliedScale(s.fyneSettings.Scale)
 		}})
 
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(scale, bottom, nil, nil),
-		scale, bottom, s.preview)
+	return container.NewBorder(scale, bottom, nil, nil, s.preview)
 }
 
 func (s *Settings) chooseTheme(name string) {

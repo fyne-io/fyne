@@ -35,7 +35,9 @@ These changes likely break some apps, please read the
   - `widget.AccordionContainer` (now `widget.Accordion`)
   - `layout.NewFixedGridLayout()` (now `layout.NewGridWrapLayout()`)
   - `widget.ScrollContainer` (now `container.Scroll`)
-  - `widget.SplitContainer` (now `containerr.Spilt`)
+  - `widget.SplitContainer` (now `container.Spilt`)
+  - `widget.Group` (replaced by `container.Card`)
+  - `widget.Box` (now `container.NewH/VBox`)
 
 ### Added
 
