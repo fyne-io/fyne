@@ -61,6 +61,7 @@ type Entry struct {
 	text        *textProvider
 	placeholder *textProvider
 	content     *entryContent
+	scroll      *widget.Scroll
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -162,9 +163,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
-	scroll := widget.NewScroll(e.content)
-	objects := []fyne.CanvasObject{box, line, scroll}
-	e.content.scroll = scroll
+	e.scroll = widget.NewScroll(e.content)
+	objects := []fyne.CanvasObject{box, line, e.scroll}
+	e.content.scroll = e.scroll
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -176,7 +177,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{box, line, scroll, objects, e}
+	return &entryRenderer{box, line, e.scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -771,7 +772,7 @@ func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 	defer e.propertyLock.RUnlock()
 
 	rowHeight := e.textProvider().charMinSize().Height
-	row := int(math.Floor(float64(ev.Position.Y-theme.Padding()) / float64(rowHeight)))
+	row := int(math.Floor(float64(ev.Position.Y+e.scroll.Offset.Y-theme.Padding()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
 		row = 0
@@ -779,7 +780,7 @@ func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 		row = e.textProvider().rows() - 1
 		col = 0
 	} else {
-		col = e.cursorColAt(e.textProvider().row(row), ev.Position)
+		col = e.cursorColAt(e.textProvider().row(row), ev.Position.Add(e.scroll.Offset))
 	}
 
 	return row, col
