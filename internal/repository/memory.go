@@ -286,7 +286,7 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	// appropriate prefix, then eliminate those with too many path
 	// components.
 	listing := []fyne.URI{}
-	for p, _ := range m.Data {
+	for p := range m.Data {
 		// We are going to compare ncomp with the number of elements in
 		// prefixSplit, which is guaranteed to have a trailing slash,
 		// so we want to also make pSplit be counted in ncomp like it
