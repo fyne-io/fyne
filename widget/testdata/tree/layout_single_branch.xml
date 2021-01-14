@@ -10,7 +10,6 @@
 						<widget pos="4,4" size="20x37" type="*widget.branchIcon">
 							<image fillMode="contain" rsc="navigateNextIcon" size="20x37"/>
 						</widget>
-						<rectangle fillColor="background" size="4x45"/>
 					</widget>
 				</widget>
 			</widget>
