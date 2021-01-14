@@ -142,11 +142,13 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 	if err != nil {
 		return err
 	}
+	defer srcReader.Close()
 
 	dstWriter, err := destwrepo.Writer(destination)
 	if err != nil {
 		return err
 	}
+	defer dstWriter.Close()
 
 	// Perform the copy.
 	_, err = io.Copy(dstWriter, srcReader)
@@ -197,11 +199,13 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 	if err != nil {
 		return err
 	}
+	defer srcReader.Close()
 
 	dstWriter, err := destwrepo.Writer(destination)
 	if err != nil {
 		return err
 	}
+	defer dstWriter.Close()
 
 	// Perform the copy.
 	_, err = io.Copy(dstWriter, srcReader)
