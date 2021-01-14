@@ -582,6 +582,7 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
+	previousPos := w.mousePos
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := desktop.Cursor(desktop.DefaultCursor)
@@ -637,7 +638,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if wid, ok := obj.(fyne.Draggable); ok {
 		if w.mouseButton != 0 && !w.mouseDragStarted {
-			w.mouseDragPos = w.mousePos
+			w.mouseDragPos = previousPos
 			w.mouseDragged = wid
 			w.mouseDraggedOffset = w.mousePos.Subtract(pos)
 		}
@@ -645,10 +646,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
-			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
-			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
 			ev.Dragged = fyne.NewDelta(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
