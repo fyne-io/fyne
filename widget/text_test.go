@@ -6,12 +6,13 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func textRenderTexts(p fyne.Widget) []*canvas.Text {
-	return Renderer(p).(*textRenderer).texts
+	return cache.Renderer(p).(*textRenderer).texts
 }
 
 type testTextParent struct {
@@ -239,7 +240,7 @@ func TestText_DeleteFromTo(t *testing.T) {
 
 func TestText_Color(t *testing.T) {
 	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	Refresh(text.presenter.object())
+	text.presenter.object().Refresh()
 
 	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
 }

@@ -497,7 +497,7 @@ func (f *FileDialog) SetDismissText(label string) {
 		return
 	}
 	f.dialog.dismiss.SetText(label)
-	widget.Refresh(f.dialog.win)
+	f.dialog.win.Refresh()
 }
 
 // SetLocation tells this FileDirectory which location to display.
