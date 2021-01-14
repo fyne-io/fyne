@@ -585,6 +585,7 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
+	previousPos := w.mousePos
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := desktop.Cursor(desktop.DefaultCursor)
@@ -592,6 +593,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
+		}
+		if _, ok := object.(fyne.Draggable); ok {
+			return true
 		}
 
 		_, hover := object.(desktop.Hoverable)
@@ -635,12 +639,19 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		w.mouseOut()
 	}
 
+	if wid, ok := obj.(fyne.Draggable); ok {
+		if w.mouseButton != 0 && !w.mouseDragStarted {
+			w.mouseDragPos = previousPos
+			w.mouseDragged = wid
+			w.mouseDraggedOffset = w.mousePos.Subtract(pos)
+		}
+	}
+
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
-			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
-			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
 			ev.Dragged = fyne.NewDelta(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
@@ -682,6 +693,10 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
 			return true
+		case fyne.Draggable:
+			if w.mouseDragStarted {
+				return true
+			}
 		}
 
 		return false
@@ -691,11 +706,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	ev.AbsolutePosition = w.mousePos
 
 	coMouse := co
-	// Switch the mouse target to the dragging object if one is set
-	if w.mouseDragged != nil && !w.objIsDragged(co) {
-		co, _ = w.mouseDragged.(fyne.CanvasObject)
-		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
-	}
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -722,13 +732,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton &= ^button
 	}
 
-	if wid, ok := co.(fyne.Draggable); ok {
-		if action == glfw.Press {
-			w.mouseDragPos = w.mousePos
-			w.mouseDragged = wid
-			w.mouseDraggedOffset = w.mousePos.Subtract(co.Position()).Subtract(ev.Position)
-		}
-	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		if w.mouseDragStarted {
 			w.queueEvent(w.mouseDragged.DragEnd)
