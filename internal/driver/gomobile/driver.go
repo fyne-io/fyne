@@ -21,6 +21,7 @@ import (
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 const tapSecondaryDelay = 300 * time.Millisecond
@@ -83,7 +84,16 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 	}
 
 	mc := c.(*mobileCanvas)
-	return driver.AbsolutePositionForObject(co, mc.objectTrees())
+	pos := driver.AbsolutePositionForObject(co, mc.objectTrees())
+	inset, _ := c.InteractiveArea()
+
+	if mc.windowHead != nil {
+		if len(mc.windowHead.(*widget.Box).Children) > 1 {
+			topHeight := mc.windowHead.MinSize().Height
+			pos = pos.Subtract(fyne.NewSize(0, topHeight))
+		}
+	}
+	return pos.Subtract(inset)
 }
 
 func (d *mobileDriver) Quit() {
