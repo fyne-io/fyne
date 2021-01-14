@@ -19,8 +19,16 @@ func NewURI(s string) fyne.URI {
 	return u
 }
 
-// ParseURI creates a new URI instance by parsing a URI string, which must
-// conform to IETF RFC3986.
+// ParseURI creates a new URI instance by parsing a URI string.
+//
+// Parse URI will parse up to the first ':' present in the URI string to
+// extract the scheme, and then delegate further parsing to the registered
+// repository for the given scheme. If no repository is registered for that
+// scheme, the URI is parsed on a best-effort basis using net/url.
+//
+// As a special exception, URIs beginning with 'file:' are always parsed using
+// NewFileURI(), which will correctly handle back-slashes appearing in the URI
+// path component on Windows.
 //
 // Since: 2.0.0
 func ParseURI(s string) (fyne.URI, error) {
