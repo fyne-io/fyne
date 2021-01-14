@@ -199,7 +199,6 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 	if err != nil {
 		return err
 	}
-	defer srcReader.Close()
 
 	dstWriter, err := destwrepo.Writer(destination)
 	if err != nil {
@@ -214,5 +213,6 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 	}
 
 	// Finally, delete the source only if the move finished without error.
+	srcReader.Close()
 	return srcwrepo.Delete(source)
 }
