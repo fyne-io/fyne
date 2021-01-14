@@ -365,3 +365,61 @@ func TestCanRead(t *testing.T) {
 	assert.False(t, bazCanRead)
 	assert.NotNil(t, err)
 }
+
+func TestCopy(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/foo"] = []byte{1, 2, 3}
+
+	foo, _ := storage.ParseURI("uritest:///foo")
+	bar, _ := storage.ParseURI("uritest:///bar")
+
+	err := storage.Copy(foo, bar)
+	assert.Nil(t, err)
+
+	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
+}
+
+func TestInMemoryRepositoryMove(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/foo"] = []byte{1, 2, 3}
+
+	foo, _ := storage.ParseURI("uritest:///foo")
+	bar, _ := storage.ParseURI("uritest:///bar")
+
+	err := storage.Move(foo, bar)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte{1, 2, 3}, m.Data["/bar"])
+
+	exists, err := m.Exists(foo)
+	assert.Nil(t, err)
+	assert.False(t, exists)
+}
+
+func TestInMemoryRepositoryListing(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/foo"] = []byte{1, 2, 3}
+	m.Data["/foo/bar"] = []byte{1, 2, 3}
+	m.Data["/foo/baz/"] = []byte{1, 2, 3}
+	m.Data["/foo/baz/quux"] = []byte{1, 2, 3}
+
+	foo, _ := storage.ParseURI("uritest:///foo")
+
+	canList, err := storage.CanList(foo)
+	assert.Nil(t, err)
+	assert.True(t, canList)
+
+	listing, err := storage.List(foo)
+	assert.Nil(t, err)
+	stringListing := []string{}
+	for _, u := range listing {
+		stringListing = append(stringListing, u.String())
+	}
+	assert.ElementsMatch(t, []string{"uritest:///foo/bar", "uritest:///foo/baz/"}, stringListing)
+}
