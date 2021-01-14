@@ -24,7 +24,11 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-const tapSecondaryDelay = 300 * time.Millisecond
+const (
+	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
+	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	tapYOffset        = -12.0                  // to compensate for how we hold our fingers on the device
+)
 
 type mobileDriver struct {
 	app   app.App
@@ -230,7 +234,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY)
+	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	canvas.tapDown(pos, int(tapID))
 }
@@ -238,7 +242,7 @@ func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32, tapID t
 func (d *mobileDriver) tapMoveCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY)
+	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		go wid.Dragged(ev)
@@ -248,7 +252,7 @@ func (d *mobileDriver) tapMoveCanvas(canvas *mobileCanvas, x, y float32, tapID t
 func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY)
+	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		go wid.Tapped(ev)
@@ -256,7 +260,7 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID tou
 		go wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		go wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(wid fyne.Draggable) {
 		go wid.DragEnd()
 	})
 }
