@@ -187,7 +187,9 @@ func (i *menuItem) isSubmenuOpen() bool {
 
 func (i *menuItem) trigger() {
 	i.Parent.Dismiss()
-	i.Item.Action()
+	if i.Item.Action != nil {
+		i.Item.Action()
+	}
 }
 
 func (i *menuItem) triggerLast() {

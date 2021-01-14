@@ -260,7 +260,8 @@ func TestMenu_TriggerTraversedMenu(t *testing.T) {
 		itemWithChild := fyne.NewMenuItem("Bar", func() { triggered = "2nd" })
 		itemWithChild.ChildMenu = fyne.NewMenu("",
 			fyne.NewMenuItem("SubA", func() { triggered = "1st sub" }),
-			fyne.NewMenuItem("SubB", func() { triggered = "2nd sub" }),
+			fyne.NewMenuItem("SubB", nil),
+			fyne.NewMenuItem("SubC", func() { triggered = "3rd sub" }),
 		)
 		m := widget.NewMenu(fyne.NewMenu("",
 			fyne.NewMenuItem("Foo", func() { triggered = "1st" }),
@@ -296,8 +297,9 @@ func TestMenu_TriggerTraversedMenu(t *testing.T) {
 		m.ActivateNext()
 		require.True(t, m.ActivateLastSubmenu())
 		m.ActivateNext()
+		m.ActivateNext()
 		m.TriggerLast()
-		assert.Equal(t, "2nd sub", triggered)
+		assert.Equal(t, "3rd sub", triggered)
 		assert.True(t, dismissed)
 	})
 	t.Run("item in menu", func(t *testing.T) {
@@ -315,6 +317,16 @@ func TestMenu_TriggerTraversedMenu(t *testing.T) {
 		m.ActivateNext()
 		m.TriggerLast()
 		assert.Equal(t, "2nd", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("item without action", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		require.True(t, m.ActivateLastSubmenu())
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "", triggered)
 		assert.True(t, dismissed)
 	})
 }
