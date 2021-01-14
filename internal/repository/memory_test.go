@@ -266,7 +266,6 @@ func TestInMemoryRepositoryCopy(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
-
 }
 
 func TestInMemoryRepositoryMove(t *testing.T) {
@@ -286,7 +285,6 @@ func TestInMemoryRepositoryMove(t *testing.T) {
 	exists, err := m.Exists(foo)
 	assert.Nil(t, err)
 	assert.False(t, exists)
-
 }
 
 func TestInMemoryRepositoryListing(t *testing.T) {

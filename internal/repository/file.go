@@ -142,6 +142,13 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 			return false, nil
 		}
 
+		if os.IsNotExist(err) {
+			// We may need to do extra logic to check if the
+			// directory is writeable, but presumably the
+			// IsPermission check covers this.
+			return true, nil
+		}
+
 		if err != nil {
 			return false, err
 		}
@@ -192,11 +199,9 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		return storage.ParseURI(u.Scheme() + "://" + parent)
 	}
 
-	uri, err := repository.GenericParent(u)
-	if err != nil {
-		return nil, err
-	}
-	return uri, nil
+	// Per the spec for storage.Parent(), we should only need to handle
+	// it for schemes we are registered to.
+	return nil, fmt.Errorf("FileRepository cannot handle unknown scheme '%s'", u.Scheme())
 }
 
 // Child implements repository.HierarchicalRepository.Child
