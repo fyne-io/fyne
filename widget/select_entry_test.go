@@ -32,7 +32,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(0, 0))
-	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled.xml", c)
+	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_tapped.xml", c)
 
 	e.Disable()
 	assert.True(t, e.Disabled())
@@ -43,7 +43,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 
 	e.Enable()
 	assert.False(t, e.Disabled())
-	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled.xml", c)
+	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_tapped.xml", c)
 
 	test.TapCanvas(c, switchPos)
 	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened.xml", c)
@@ -114,7 +114,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 	largeOptions := []string{"Large Option A", "Larger Option B", "Very Large Option C"}
 	largeOptionsMinWidth := optionsMinSize(largeOptions).Width
 
-	minTextHeight := widget.NewLabel("W").MinSize().Height
+	labelHeight := widget.NewLabel("W").MinSize().Height
 
 	tests := map[string]struct {
 		placeholder string
@@ -123,29 +123,29 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		want        fyne.Size
 	}{
 		"empty": {
-			want: fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want: fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), labelHeight),
 		},
 		"empty + small options": {
 			options: smallOptions,
-			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), labelHeight),
 		},
 		"empty + large options": {
 			options: largeOptions,
-			want:    fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want:    fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), labelHeight),
 		},
 		"value": {
 			value: "foo", // in a scroller
-			want:  fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want:  fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), labelHeight),
 		},
 		"large value + small options": {
 			value:   "large", // in a scroller
 			options: smallOptions,
-			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), labelHeight),
 		},
 		"small value + large options": {
 			value:   "small", // in a scroller
 			options: largeOptions,
-			want:    fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want:    fyne.NewSize(largeOptionsMinWidth+2*theme.Padding(), labelHeight),
 		},
 	}
 	for name, tt := range tests {

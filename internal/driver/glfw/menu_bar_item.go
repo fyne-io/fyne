@@ -9,8 +9,9 @@ import (
 	publicWidget "fyne.io/fyne/widget"
 )
 
-var _ fyne.Widget = (*menuBarItem)(nil)
 var _ desktop.Hoverable = (*menuBarItem)(nil)
+var _ fyne.Focusable = (*menuBarItem)(nil)
+var _ fyne.Widget = (*menuBarItem)(nil)
 
 // menuBarItem is a widget for displaying an item for a fyne.Menu in a MenuBar.
 type menuBarItem struct {
@@ -18,6 +19,7 @@ type menuBarItem struct {
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
+	active  bool
 	child   *publicWidget.Menu
 	hovered bool
 }
@@ -49,6 +51,23 @@ func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+func (i *menuBarItem) FocusGained() {
+	i.active = true
+	if i.Parent.active {
+		i.Parent.activateChild(i)
+	}
+	i.Refresh()
+}
+
+func (i *menuBarItem) FocusLost() {
+	i.active = false
+	i.Refresh()
+}
+
+func (i *menuBarItem) Focused() bool {
+	return i.active
+}
+
 // Hide hides the menu bar item.
 //
 // Implements: fyne.Widget
@@ -68,20 +87,20 @@ func (i *menuBarItem) MinSize() fyne.Size {
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
+	i.hovered = true
 	if i.Parent.active {
-		i.hovered = true
-		i.Parent.activateChild(i)
-		i.Refresh()
-	} else {
-		i.hovered = true
-		i.Refresh()
+		i.Parent.canvas.Focus(i)
 	}
+	i.Refresh()
 }
 
 // MouseMoved does nothing.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
+	if i.Parent.active {
+		i.Parent.canvas.Focus(i)
+	}
 }
 
 // MouseOut changes the item to not be hovered but has no effect on the visibility of the menu.
@@ -125,11 +144,29 @@ func (i *menuBarItem) Show() {
 //
 // Implements: fyne.Tappable
 func (i *menuBarItem) Tapped(*fyne.PointEvent) {
-	if i.Parent.active {
-		i.Parent.deactivate()
-	} else {
-		i.Parent.activateChild(i)
+	i.Parent.toggle(i)
+}
+
+func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeyLeft:
+		if !i.Child().DeactivateLastSubmenu() {
+			i.Parent.canvas.FocusPrevious()
+		}
+	case fyne.KeyRight:
+		if !i.Child().ActivateLastSubmenu() {
+			i.Parent.canvas.FocusNext()
+		}
+	case fyne.KeyDown:
+		i.Child().ActivateNext()
+	case fyne.KeyUp:
+		i.Child().ActivatePrevious()
+	case fyne.KeyEnter, fyne.KeyReturn, fyne.KeySpace:
+		i.Child().TriggerLast()
 	}
+}
+
+func (i *menuBarItem) TypedRune(_ rune) {
 }
 
 type menuBarItemRenderer struct {
@@ -155,7 +192,10 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuBarItemRenderer) Refresh() {
-	if r.i.hovered || (r.i.child != nil && r.i.child.Visible()) {
+	if r.i.active && r.i.Parent.active {
+		r.background.FillColor = theme.FocusColor()
+		r.background.Show()
+	} else if r.i.hovered {
 		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {

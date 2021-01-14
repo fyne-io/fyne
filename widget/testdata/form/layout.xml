@@ -3,33 +3,35 @@
 		<widget pos="4,4" size="206x119" type="*widget.Form">
 			<container size="206x78">
 				<widget size="47x37" type="*widget.Label">
-					<text alignment="trailing" bold pos="4,4" size="39x21">test1</text>
+					<text alignment="trailing" bold pos="4,8" size="39x21">test1</text>
 				</widget>
 				<widget pos="51,0" size="155x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-					<widget pos="4,4" size="147x29" type="*widget.Scroll">
-						<widget size="147x29" type="*widget.entryContent">
-							<widget size="147x29" type="*widget.textProvider">
-								<text color="placeholder" pos="4,4" size="139x21"></text>
+					<rectangle fillColor="focus" pos="0,2" size="155x33"/>
+					<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
+					<widget pos="0,2" size="155x33" type="*widget.Scroll">
+						<widget backgroundColor="focus" size="155x33" type="*widget.entryContent">
+							<widget size="155x33" type="*widget.textProvider">
+								<text color="placeholder" pos="8,6" size="147x21"></text>
 							</widget>
-							<widget size="147x29" type="*widget.textProvider">
-								<text pos="4,4" size="139x21"></text>
+							<widget size="155x33" type="*widget.textProvider">
+								<text pos="8,6" size="147x21"></text>
 							</widget>
 						</widget>
 					</widget>
 				</widget>
 				<widget pos="0,41" size="47x37" type="*widget.Label">
-					<text alignment="trailing" bold pos="4,4" size="39x21">test2</text>
+					<text alignment="trailing" bold pos="4,8" size="39x21">test2</text>
 				</widget>
 				<widget pos="51,41" size="155x37" type="*widget.Entry">
-					<rectangle fillColor="shadow" pos="0,33" size="155x4"/>
-					<widget pos="4,4" size="147x29" type="*widget.Scroll">
-						<widget size="147x29" type="*widget.entryContent">
-							<widget size="147x29" type="*widget.textProvider">
-								<text color="placeholder" pos="4,4" size="139x21"></text>
+					<rectangle fillColor="focus" pos="0,2" size="155x33"/>
+					<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
+					<widget pos="0,2" size="155x33" type="*widget.Scroll">
+						<widget backgroundColor="focus" size="155x33" type="*widget.entryContent">
+							<widget size="155x33" type="*widget.textProvider">
+								<text color="placeholder" pos="8,6" size="147x21"></text>
 							</widget>
-							<widget size="147x29" type="*widget.textProvider">
-								<text pos="4,4" size="139x21"></text>
+							<widget size="155x33" type="*widget.textProvider">
+								<text pos="8,6" size="147x21"></text>
 							</widget>
 						</widget>
 					</widget>
@@ -49,6 +51,7 @@
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 					</widget>
 					<rectangle fillColor="button" pos="2,2" size="95x33"/>
+					<rectangle size="0x0"/>
 					<text bold pos="36,8" size="51x21">Cancel</text>
 					<image fillMode="contain" pos="12,8" rsc="cancelIcon" size="20x21"/>
 				</widget>
@@ -64,6 +67,7 @@
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 					</widget>
 					<rectangle fillColor="primary" pos="2,2" size="99x33"/>
+					<rectangle size="0x0"/>
 					<text bold color="background" pos="36,8" size="55x21">Submit</text>
 					<image fillMode="contain" pos="12,8" rsc="confirmIcon" size="20x21" themed="inverted"/>
 				</widget>

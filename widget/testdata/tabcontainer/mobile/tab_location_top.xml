@@ -1,8 +1,8 @@
-<canvas size="155x62">
+<canvas size="155x70">
 	<content>
-		<widget size="155x62" type="*widget.TabContainer">
-			<widget pos="0,33" size="155x29" type="*widget.Label">
-				<text pos="4,4" size="147x21">Text 1</text>
+		<widget size="155x70" type="*widget.TabContainer">
+			<widget pos="0,33" size="155x37" type="*widget.Label">
+				<text pos="4,8" size="147x21">Text 1</text>
 			</widget>
 			<container size="155x29">
 				<widget size="49x29" type="*widget.tabButton">

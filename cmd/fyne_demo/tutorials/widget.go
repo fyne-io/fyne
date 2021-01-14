@@ -118,7 +118,7 @@ func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeTextGrid() *widget.TextGrid {
-	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
+	grid := widget.NewTextGridFromString("TextGrid\n\tContent\nZebra")
 	grid.SetStyleRange(0, 4, 0, 7,
 		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 192, A: 128}})
 	grid.SetRowStyle(1, &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}})
@@ -273,8 +273,8 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 
 	form := &widget.Form{
 		Items: []*widget.FormItem{
-			{Text: "Name", Widget: name},
-			{Text: "Email", Widget: email},
+			{Text: "Name", Widget: name, HintText: "Your full name"},
+			{Text: "Email", Widget: email, HintText: "A valid email address"},
 		},
 		OnCancel: func() {
 			fmt.Println("Cancelled")

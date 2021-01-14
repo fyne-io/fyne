@@ -5,6 +5,7 @@ jobs:
   platform_tests:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         go-version: [1.12.x, 1.15.x]
         os: [ubuntu-latest, windows-latest, macos-latest]

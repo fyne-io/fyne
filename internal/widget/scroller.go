@@ -291,8 +291,8 @@ func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
 	default:
 		a.scroll.Offset.Y = a.computeScrollOffset(barSize.Height, offset, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	}
-	if f := a.scroll.onOffsetChanged; f != nil {
-		f()
+	if f := a.scroll.OnScrolled; f != nil {
+		f(a.scroll.Offset)
 	}
 	a.scroll.refreshWithoutOffsetUpdate()
 }
@@ -422,11 +422,15 @@ func (r *scrollContainerRenderer) updatePosition() {
 // The Offset is used to determine the position of the child widgets within the container.
 type Scroll struct {
 	Base
-	minSize         fyne.Size
-	Direction       ScrollDirection
-	Content         fyne.CanvasObject
-	Offset          fyne.Position
-	onOffsetChanged func()
+	minSize   fyne.Size
+	Direction ScrollDirection
+	Content   fyne.CanvasObject
+	Offset    fyne.Position
+	// OnScrolled can be set to be notified when the Scroll has changed position.
+	// You should not update the Scroll.Offset from this method.
+	//
+	// Since: 2.0.0
+	OnScrolled func(fyne.Position)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -557,8 +561,8 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	}
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.MinSize().Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.MinSize().Height)
-	if f := s.onOffsetChanged; f != nil {
-		f()
+	if f := s.OnScrolled; f != nil {
+		f(s.Offset)
 	}
 	return true
 }
@@ -572,12 +576,6 @@ func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 		offset = 0
 	}
 	return offset
-}
-
-// AddScrollOffsetChangedListener allows Fyne internal code to get an inside notification when a scroller moves.
-// TODO find a way to make this generally available
-func AddScrollOffsetChangedListener(s *Scroll, f func()) {
-	s.onOffsetChanged = f
 }
 
 // NewScroll creates a scrollable parent wrapping the specified content.

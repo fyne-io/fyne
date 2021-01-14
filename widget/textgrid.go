@@ -88,9 +88,19 @@ func (t *TextGrid) SetText(text string) {
 	lines := strings.Split(text, "\n")
 	rows := make([]TextGridRow, len(lines))
 	for i, line := range lines {
-		cells := make([]TextGridCell, len(line))
+		spaced := strings.ReplaceAll(line, "\t", textTabIndent)
+
+		cells := make([]TextGridCell, len(spaced))
+		extras := 0
 		for j, r := range line {
-			cells[j] = TextGridCell{Rune: r}
+			cells[j+extras] = TextGridCell{Rune: r}
+
+			if r == '\t' {
+				for k := j + extras + 1; k < j+extras+len(textTabIndent); k++ {
+					cells[k] = TextGridCell{Rune: ' '}
+				}
+				extras += len(textTabIndent) - 1
+			}
 		}
 
 		rows[i] = TextGridRow{Cells: cells}
@@ -114,10 +124,20 @@ func (t *TextGrid) Text() string {
 
 	runes := make([]rune, count)
 	c := 0
+	skipped := 0
 	for i, row := range t.Rows {
+		skip := 0
 		for _, r := range row.Cells {
+			if skip > 0 {
+				skip--
+				continue
+			}
 			runes[c] = r.Rune
 			c++
+			if r.Rune == '\t' {
+				skip = len(textTabIndent) - 1
+				skipped += skip
+			}
 		}
 
 		if i < len(t.Rows)-1 {
@@ -126,7 +146,7 @@ func (t *TextGrid) Text() string {
 		}
 	}
 
-	return string(runes)
+	return string(runes[:len(runes)-skipped])
 }
 
 // Row returns a copy of the content in a specified row as a TextGridRow.
@@ -380,13 +400,18 @@ func (t *textGridRenderer) refreshGrid() {
 			if i >= t.cols { // would be an overflow - bad
 				continue
 			}
-			if t.text.ShowWhitespace && r.Rune == ' ' {
+			if t.text.ShowWhitespace && (r.Rune == ' ' || r.Rune == '\t') {
+				sym := textAreaSpaceSymbol
+				if r.Rune == '\t' {
+					sym = textAreaTabSymbol
+				}
+
 				if r.Style != nil && r.Style.BackgroundColor() != nil {
 					whitespaceBG := &CustomTextGridStyle{FGColor: TextGridStyleWhitespace.TextColor(),
 						BGColor: r.Style.BackgroundColor()}
-					t.setCellRune(textAreaSpaceSymbol, x, whitespaceBG, rowStyle) // whitespace char
+					t.setCellRune(sym, x, whitespaceBG, rowStyle) // whitespace char
 				} else {
-					t.setCellRune(textAreaSpaceSymbol, x, TextGridStyleWhitespace, rowStyle) // whitespace char
+					t.setCellRune(sym, x, TextGridStyleWhitespace, rowStyle) // whitespace char
 				}
 			} else {
 				t.setCellRune(r.Rune, x, r.Style, rowStyle) // regular char

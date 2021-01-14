@@ -109,7 +109,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 		content:      c,
 		scroller:     s,
 	}
-	widget.AddScrollOffsetChangedListener(s, t.offsetUpdated)
+	s.OnScrolled = t.offsetUpdated
 	r.updateMinSizes()
 	r.content.viewport = r.MinSize()
 	return r
@@ -216,7 +216,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 		} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
 			t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
 		}
-		t.offsetUpdated()
+		t.offsetUpdated(t.scroller.Offset)
 		// TODO Setting a node as selected should open all parents if they aren't already
 	}
 	t.Refresh()
@@ -255,11 +255,11 @@ func (t *Tree) ensureOpenMap() {
 	}
 }
 
-func (t *Tree) offsetUpdated() {
-	if t.offset == t.scroller.Offset {
+func (t *Tree) offsetUpdated(pos fyne.Position) {
+	if t.offset == pos {
 		return
 	}
-	t.offset = t.scroller.Offset
+	t.offset = pos
 	t.scroller.Content.Refresh()
 }
 

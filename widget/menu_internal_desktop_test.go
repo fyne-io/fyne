@@ -46,7 +46,7 @@ func TestMenu_ItemHovered(t *testing.T) {
 	r1 := cache.Renderer(mi).(*menuItemRenderer)
 	assert.False(t, r1.background.Visible())
 	mi.MouseIn(nil)
-	assert.Equal(t, theme.HoverColor(), r1.background.FillColor)
+	assert.Equal(t, theme.FocusColor(), r1.background.FillColor)
 	assert.True(t, r1.background.Visible())
 	mi.MouseOut()
 	assert.False(t, r1.background.Visible())

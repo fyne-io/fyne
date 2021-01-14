@@ -162,7 +162,7 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
-	win.Resize(fyne.NewSize(60, 40))
+	win.Resize(fyne.NewSize(60, 48))
 	pop := NewPopUp(label, win.Canvas())
 	pop.Show()
 	defer test.Canvas().Overlays().Remove(pop)
@@ -342,7 +342,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 	pop.Show()
 	defer test.Canvas().Overlays().Remove(pop)
 
-	size := fyne.NewSize(50, 40)
+	size := fyne.NewSize(50, 48)
 	pop.Resize(size)
 	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 

@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -25,7 +24,8 @@ type Select struct {
 	focused bool
 	hovered bool
 	popUp   *PopUpMenu
-	tapped  bool
+	tapAnim *fyne.Animation
+	tapBG   *canvas.Rectangle
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -65,8 +65,9 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv := newTextProvider(s.Selected, s)
 	txtProv.ExtendBaseWidget(txtProv)
 
-	background := canvas.NewRectangle(theme.ButtonColor())
-	objects := []fyne.CanvasObject{background, txtProv, icon}
+	background := &canvas.Rectangle{}
+	s.tapBG = canvas.NewRectangle(color.Transparent)
+	objects := []fyne.CanvasObject{background, s.tapBG, txtProv, icon}
 	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, background, s}
 	background.FillColor = r.buttonColor()
 	r.updateIcon()
@@ -180,12 +181,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		return
 	}
 
-	s.tapped = true
-	defer func() { // TODO move to a real animation
-		time.Sleep(time.Millisecond * buttonTapDuration)
-		s.tapped = false
-		s.Refresh()
-	}()
+	s.tapAnimation()
 	s.Refresh()
 
 	s.showPopUp()
@@ -252,6 +248,21 @@ func (s *Select) showPopUp() {
 	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
 	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
+}
+
+func (s *Select) tapAnimation() {
+	if s.tapBG == nil { // not rendered yet? (tests)
+		return
+	}
+
+	if s.tapAnim == nil {
+		s.tapAnim = newButtonTapAnimation(s.tapBG, s)
+		s.tapAnim.Curve = fyne.AnimationEaseOut
+	} else {
+		s.tapAnim.Stop()
+	}
+
+	s.tapAnim.Start()
 }
 
 func (s *Select) textAlign() fyne.TextAlign {
@@ -351,7 +362,7 @@ func (s *selectRenderer) buttonColor() color.Color {
 	if s.combo.focused {
 		return theme.PrimaryColor()
 	}
-	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
+	if s.combo.hovered {
 		return theme.HoverColor()
 	}
 	return theme.ButtonColor()
