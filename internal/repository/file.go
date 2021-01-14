@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 
 	"fyne.io/fyne"
@@ -202,9 +203,18 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0.0
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
-	// TODO: make sure that this works on Windows - might cause trouble
-	// if the path sep isn't normalized out on ingest.
-	return repository.GenericChild(u, component)
+	newURI := u.Scheme() + "://" + u.Authority()
+	newURI += path.Join(u.Path(), component)
+
+	// stick the query and fragment back on the end
+	if len(u.Query()) > 0 {
+		newURI += "?" + u.Query()
+	}
+	if len(u.Fragment()) > 0 {
+		newURI += "#" + u.Fragment()
+	}
+
+	return storage.ParseURI(newURI)
 }
 
 // List implements repository.HierarchicalRepository.List()
