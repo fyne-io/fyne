@@ -40,7 +40,9 @@ func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func newMenuLabel(item *fyne.Menu, parent *fyne.Container, c *mobileCanvas) *menuLabel {
-	return &menuLabel{menu: item, bar: parent, canvas: c}
+	l := &menuLabel{menu: item, bar: parent, canvas: c}
+	l.ExtendBaseWidget(l)
+	return l
 }
 
 func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
@@ -53,14 +55,19 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	for _, item := range menu.Items {
 		panel.Add(newMenuLabel(item, panel, c))
 	}
+
+	bg := canvas.NewRectangle(theme.BackgroundColor())
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
-	c.setMenu(container.NewWithoutLayout(panel, shadow))
 
 	safePos, safeSize := c.InteractiveArea()
+	bg.Move(safePos)
+	bg.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), safeSize.Height))
 	panel.Move(safePos)
 	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), safeSize.Height))
 	shadow.Resize(fyne.NewSize(theme.Padding()/2, safeSize.Height))
 	shadow.Move(fyne.NewPos(panel.Size().Width+safePos.X, safePos.Y))
+
+	c.setMenu(container.NewWithoutLayout(bg, panel, shadow))
 }
 
 func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {

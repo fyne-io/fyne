@@ -38,7 +38,7 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 	c.resize(fyne.NewSize(100, 100))
 
 	assert.NotNil(t, c.menu)
-	menuObj := c.menu.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*menuLabel)
+	menuObj := c.menu.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*menuLabel)
 	point := &fyne.PointEvent{Position: fyne.NewPos(10, 10)}
 	menuObj.Tapped(point)
 
@@ -55,7 +55,7 @@ func TestMobileCanvas_Menu(t *testing.T) {
 		fyne.NewMenu(labels[1]))
 
 	c.showMenu(menu)
-	menuObjects := c.menu.(*fyne.Container).Objects[0].(*fyne.Container)
+	menuObjects := c.menu.(*fyne.Container).Objects[1].(*fyne.Container)
 	assert.Equal(t, 3, len(menuObjects.Objects))
 	header, ok := menuObjects.Objects[0].(*fyne.Container)
 	assert.True(t, ok)
