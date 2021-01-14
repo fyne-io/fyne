@@ -8,10 +8,10 @@ import (
 	"os"
 	"testing"
 
+	"fyne.io/fyne/internal/painter"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/image/font"
 
 	"fyne.io/fyne/internal/test"
 	"fyne.io/fyne/theme"
@@ -28,12 +28,13 @@ func TestAssertImageMatches(t *testing.T) {
 	opts := truetype.Options{Size: 20, DPI: 96}
 	f, _ := truetype.Parse(theme.TextFont().Content())
 	face := truetype.NewFace(f, &opts)
-	d := font.Drawer{
-		Dst:  txtImg,
-		Src:  image.NewUniform(color.Black),
-		Face: face,
-		Dot:  freetype.Pt(0, 50-face.Metrics().Descent.Ceil()),
-	}
+
+	d := painter.Drawer{}
+	d.Dst = txtImg
+	d.Src = image.NewUniform(color.Black)
+	d.Face = face
+	d.Dot = freetype.Pt(0, 50-face.Metrics().Descent.Ceil())
+
 	d.DrawString("Hello!")
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
