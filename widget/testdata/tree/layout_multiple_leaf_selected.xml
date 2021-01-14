@@ -7,7 +7,6 @@
 						<widget pos="28,4" size="160x37" type="*widget.Label">
 							<text pos="4,8" size="152x21">11111</text>
 						</widget>
-						<rectangle fillColor="background" size="4x45"/>
 					</widget>
 					<widget pos="4,45" size="184x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="184x1"/>
@@ -25,7 +24,6 @@
 						<widget pos="28,4" size="160x37" type="*widget.Label">
 							<text pos="4,8" size="152x21">333333333333333</text>
 						</widget>
-						<rectangle fillColor="background" size="4x45"/>
 					</widget>
 					<widget pos="4,137" size="184x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="184x1"/>
@@ -34,7 +32,6 @@
 						<widget pos="28,4" size="160x37" type="*widget.Label">
 							<text pos="4,8" size="152x21">44444444444444444444</text>
 						</widget>
-						<rectangle fillColor="background" size="4x45"/>
 					</widget>
 				</widget>
 			</widget>
