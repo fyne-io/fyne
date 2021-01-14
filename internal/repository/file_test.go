@@ -430,5 +430,5 @@ func TestFileRepositoryListing(t *testing.T) {
 	for _, u := range listing {
 		stringListing = append(stringListing, u.String())
 	}
-	assert.ElementsMatch(t, []string{"file://" + dir + "/foo/bar", "file://" + dir + "/foo/baz"}, stringListing)
+	assert.ElementsMatch(t, []string{"file://" + path.Join(dir, "foo", "bar"), "file://" + path.Join(dir, "foo", "baz")}, stringListing)
 }
