@@ -7,6 +7,7 @@ import (
 
 	"fmt"
 	"io"
+	"strings"
 )
 
 // declare conformance to interfaces
@@ -21,6 +22,7 @@ var _ repository.WriteableRepository = (*InMemoryRepository)(nil)
 var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
 var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
 var _ repository.MovableRepository = (*InMemoryRepository)(nil)
+var _ repository.ListableRepository = (*InMemoryRepository)(nil)
 
 // nodeReaderWriter allows reading or writing to elements in a InMemoryRepository
 type nodeReaderWriter struct {
@@ -50,7 +52,10 @@ type nodeReaderWriter struct {
 //
 // Since 2.0.0
 type InMemoryRepository struct {
-	data   map[string][]byte
+	// Data is exposed to allow tests to directly insert their own data
+	// without having to go through the API
+	Data map[string][]byte
+
 	scheme string
 }
 
@@ -58,7 +63,7 @@ type InMemoryRepository struct {
 func (n *nodeReaderWriter) Read(p []byte) (int, error) {
 
 	// first make sure the requested path actually exists
-	data, ok := n.repo.data[n.path]
+	data, ok := n.repo.Data[n.path]
 	if !ok {
 		return 0, fmt.Errorf("path '%s' not present in InMemoryRepository", n.path)
 	}
@@ -97,14 +102,14 @@ func (n *nodeReaderWriter) Close() error {
 func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 
 	// guarantee that the path exists
-	_, ok := n.repo.data[n.path]
+	_, ok := n.repo.Data[n.path]
 	if !ok {
-		n.repo.data[n.path] = []byte{}
+		n.repo.Data[n.path] = []byte{}
 	}
 
 	// overwrite the file if we haven't already started writing to it
 	if !n.writing {
-		n.repo.data[n.path] = make([]byte, 0)
+		n.repo.Data[n.path] = make([]byte, 0)
 		n.writing = true
 	}
 
@@ -113,10 +118,10 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 	start := n.writeCursor
 	for ; n.writeCursor < start+len(p); n.writeCursor++ {
 		// extend the file if needed
-		if len(n.repo.data) < n.writeCursor+len(p) {
-			n.repo.data[n.path] = append(n.repo.data[n.path], 0)
+		if len(n.repo.Data) < n.writeCursor+len(p) {
+			n.repo.Data[n.path] = append(n.repo.Data[n.path], 0)
 		}
-		n.repo.data[n.path][n.writeCursor] = p[n.writeCursor-start]
+		n.repo.Data[n.path][n.writeCursor] = p[n.writeCursor-start]
 		count++
 	}
 
@@ -139,7 +144,7 @@ func (n *nodeReaderWriter) URI() fyne.URI {
 // Since 2.0.0
 func NewInMemoryRepository(scheme string) *InMemoryRepository {
 	return &InMemoryRepository{
-		data:   make(map[string][]byte),
+		Data:   make(map[string][]byte),
 		scheme: scheme,
 	}
 }
@@ -152,7 +157,7 @@ func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
 		return false, fmt.Errorf("invalid path '%s'", u.Path())
 	}
 
-	_, ok := m.data[u.Path()]
+	_, ok := m.Data[u.Path()]
 	return ok, nil
 }
 
@@ -164,7 +169,7 @@ func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 		return nil, fmt.Errorf("invalid path '%s'", u.Path())
 	}
 
-	_, ok := m.data[u.Path()]
+	_, ok := m.Data[u.Path()]
 	if !ok {
 		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
 	}
@@ -180,7 +185,7 @@ func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
 		return false, fmt.Errorf("invalid path '%s'", u.Path())
 	}
 
-	_, ok := m.data[u.Path()]
+	_, ok := m.Data[u.Path()]
 	if !ok {
 		return false, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
 	}
@@ -219,9 +224,9 @@ func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Delete(u fyne.URI) error {
-	_, ok := m.data[u.Path()]
+	_, ok := m.Data[u.Path()]
 	if ok {
-		delete(m.data, u.Path())
+		delete(m.Data, u.Path())
 	}
 
 	return nil
@@ -245,7 +250,6 @@ func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, erro
 //
 // Since: 2.0.0
 func (m *InMemoryRepository) Copy(source, destination fyne.URI) error {
-
 	return repository.GenericCopy(source, destination)
 }
 
@@ -254,4 +258,54 @@ func (m *InMemoryRepository) Copy(source, destination fyne.URI) error {
 // Since: 2.0.0
 func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
 	return repository.GenericMove(source, destination)
+}
+
+// CanList implements repository.MovableRepository.CanList()
+//
+// Since: 2.0.0
+func (m *InMemoryRepository) CanList(u fyne.URI) (bool, error) {
+	return m.Exists(u)
+}
+
+// List implements repository.MovableRepository.List()
+//
+// Since: 2.0.0
+func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
+	// Get the prefix, and make sure it ends with a path separator so that
+	// HasPrefix() will only find things that are children of it - this
+	// solves the edge case where you have say '/foo/bar' and
+	// '/foo/barbaz'.
+	prefix := u.Path()
+	if prefix[len(prefix)-1] != '/' {
+		prefix = prefix + "/"
+	}
+
+	prefixSplit := strings.Split(prefix, "/")
+
+	// Now we can simply loop over all the paths and find the ones with an
+	// appropriate prefix, then eliminate those with too many path
+	// components.
+	listing := []fyne.URI{}
+	for p, _ := range m.Data {
+		// We are going to compare ncomp with the number of elements in
+		// prefixSplit, which is guaranteed to have a trailing slash,
+		// so we want to also make pSplit be counted in ncomp like it
+		// does not have one.
+		pSplit := strings.Split(p, "/")
+		ncomp := len(pSplit)
+		if p[len(p)-1] == '/' {
+			ncomp--
+		}
+
+		if strings.HasPrefix(p, prefix) && ncomp == len(prefixSplit) {
+			uri, err := storage.ParseURI(m.scheme + "://" + p)
+			if err != nil {
+				return nil, err
+			}
+
+			listing = append(listing, uri)
+		}
+	}
+
+	return listing, nil
 }

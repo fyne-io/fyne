@@ -37,8 +37,8 @@ func TestInMemoryRepositoryExists(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
-	m.data["/foo"] = []byte{}
-	m.data["/bar"] = []byte{1, 2, 3}
+	m.Data["/foo"] = []byte{}
+	m.Data["/bar"] = []byte{1, 2, 3}
 
 	// and some URIs - we know that they will not fail parsing
 	foo, _ := storage.ParseURI("mem:///foo")
@@ -62,8 +62,8 @@ func TestInMemoryRepositoryReader(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
-	m.data["/foo"] = []byte{}
-	m.data["/bar"] = []byte{1, 2, 3}
+	m.Data["/foo"] = []byte{}
+	m.Data["/bar"] = []byte{1, 2, 3}
 
 	// and some URIs - we know that they will not fail parsing
 	foo, _ := storage.ParseURI("mem:///foo")
@@ -91,8 +91,8 @@ func TestInMemoryRepositoryCanRead(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
-	m.data["/foo"] = []byte{}
-	m.data["/bar"] = []byte{1, 2, 3}
+	m.Data["/foo"] = []byte{}
+	m.Data["/bar"] = []byte{1, 2, 3}
 
 	// and some URIs - we know that they will not fail parsing
 	foo, _ := storage.ParseURI("mem:///foo")
@@ -116,8 +116,8 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
-	m.data["/foo"] = []byte{}
-	m.data["/bar"] = []byte{1, 2, 3}
+	m.Data["/foo"] = []byte{}
+	m.Data["/bar"] = []byte{1, 2, 3}
 
 	// and some URIs - we know that they will not fail parsing
 	foo, _ := storage.ParseURI("mem:///foo")
@@ -200,8 +200,8 @@ func TestInMemoryRepositoryCanWrite(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
-	m.data["/foo"] = []byte{}
-	m.data["/bar"] = []byte{1, 2, 3}
+	m.Data["/foo"] = []byte{}
+	m.Data["/bar"] = []byte{1, 2, 3}
 
 	// and some URIs - we know that they will not fail parsing
 	foo, _ := storage.ParseURI("mem:///foo")
@@ -225,7 +225,7 @@ func TestInMemoryRepositoryParent(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
-	m.data["/foo/bar/baz"] = []byte{}
+	m.Data["/foo/bar/baz"] = []byte{}
 
 	// and some URIs - we know that they will not fail parsing
 	foo, _ := storage.ParseURI("mem:///foo/bar/baz")
@@ -251,4 +251,65 @@ func TestInMemoryRepositoryChild(t *testing.T) {
 	fooChild, err := storage.Child(foo, "quux")
 	assert.Nil(t, err)
 	assert.Equal(t, fooExpectedChild.String(), fooChild.String())
+}
+
+func TestInMemoryRepositoryCopy(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewInMemoryRepository("mem")
+	repository.Register("mem", m)
+	m.Data["/foo"] = []byte{1, 2, 3}
+
+	foo, _ := storage.ParseURI("mem:///foo")
+	bar, _ := storage.ParseURI("mem:///bar")
+
+	err := storage.Copy(foo, bar)
+	assert.Nil(t, err)
+
+	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
+
+}
+
+func TestInMemoryRepositoryMove(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewInMemoryRepository("mem")
+	repository.Register("mem", m)
+	m.Data["/foo"] = []byte{1, 2, 3}
+
+	foo, _ := storage.ParseURI("mem:///foo")
+	bar, _ := storage.ParseURI("mem:///bar")
+
+	err := storage.Move(foo, bar)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte{1, 2, 3}, m.Data["/bar"])
+
+	exists, err := m.Exists(foo)
+	assert.Nil(t, err)
+	assert.False(t, exists)
+
+}
+
+func TestInMemoryRepositoryListing(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewInMemoryRepository("mem")
+	repository.Register("mem", m)
+	m.Data["/foo"] = []byte{1, 2, 3}
+	m.Data["/foo/bar"] = []byte{1, 2, 3}
+	m.Data["/foo/baz/"] = []byte{1, 2, 3}
+	m.Data["/foo/baz/quux"] = []byte{1, 2, 3}
+
+	foo, _ := storage.ParseURI("mem:///foo")
+
+	canList, err := storage.CanList(foo)
+	assert.Nil(t, err)
+	assert.True(t, canList)
+
+	listing, err := storage.List(foo)
+	assert.Nil(t, err)
+	stringListing := []string{}
+	for _, u := range listing {
+		stringListing = append(stringListing, u.String())
+	}
+	assert.ElementsMatch(t, []string{"mem:///foo/bar", "mem:///foo/baz/"}, stringListing)
+
 }

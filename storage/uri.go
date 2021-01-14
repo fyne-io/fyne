@@ -100,19 +100,17 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 1.4
 func Child(u fyne.URI, component string) (fyne.URI, error) {
-	// While as implemented this does not need to return an error, it is
-	// reasonable to expect that future implementations of this, especially
-	// once it gets moved into the URI interface will need to do so. This
-	// also brings it in line with Parent().
-
-	s := u.String()
-
-	// guarantee that there will be a path separator
-	if s[len(s)-1:] != "/" {
-		s += "/"
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return nil, err
 	}
 
-	return ParseURI(s + component)
+	hrepo, ok := repo.(repository.HierarchicalRepository)
+	if !ok {
+		return nil, repository.OperationNotSupportedError
+	}
+
+	return hrepo.Child(u, component)
 }
 
 // Exists determines if the resource referenced by the URI exists.
