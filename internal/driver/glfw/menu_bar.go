@@ -112,7 +112,10 @@ func (b *MenuBar) activateChild(item *menuBarItem) {
 	}
 
 	if b.activeItem != nil {
-		b.activeItem.Child().Hide()
+		if c := b.activeItem.Child(); c != nil {
+			c.Hide()
+		}
+		b.activeItem.Refresh()
 	}
 	b.activeItem = item
 	if item == nil {
@@ -130,8 +133,11 @@ func (b *MenuBar) deactivate() {
 
 	b.active = false
 	if b.activeItem != nil {
-		defer b.activeItem.Child().Dismiss()
-		b.activeItem.Child().Hide()
+		if c := b.activeItem.Child(); c != nil {
+			defer c.Dismiss()
+			c.Hide()
+		}
+		b.activeItem.Refresh()
 		b.activeItem = nil
 	}
 	b.Refresh()

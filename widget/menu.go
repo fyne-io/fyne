@@ -60,6 +60,7 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 func (m *Menu) DeactivateChild() {
 	if m.activeItem != nil {
 		m.activeItem.Child().Hide()
+		m.activeItem.Refresh()
 		m.activeItem = nil
 	}
 }
