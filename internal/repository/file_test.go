@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -430,5 +431,5 @@ func TestFileRepositoryListing(t *testing.T) {
 	for _, u := range listing {
 		stringListing = append(stringListing, u.String())
 	}
-	assert.ElementsMatch(t, []string{"file://" + path.Join(dir, "foo", "bar"), "file://" + path.Join(dir, "foo", "baz")}, stringListing)
+	assert.ElementsMatch(t, []string{"file://" + filepath.ToSlash(path.Join(dir, "foo", "bar")), "file://" + filepath.ToSlash(path.Join(dir, "foo", "baz"))}, stringListing)
 }
