@@ -35,7 +35,7 @@ func TestTable_Cache(t *testing.T) {
 		})
 	c.SetContent(table)
 	c.SetPadded(false)
-	c.Resize(fyne.NewSize(120, 120))
+	c.Resize(fyne.NewSize(120, 148))
 
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
@@ -203,7 +203,7 @@ func TestTable_Selection(t *testing.T) {
 		selectedCol = id.Col
 		selectedRow = id.Row
 	}
-	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 50))
+	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 58))
 	assert.Equal(t, 0, table.selectedCell.Col)
 	assert.Equal(t, 1, table.selectedCell.Row)
 	assert.Equal(t, 0, selectedCol)
@@ -274,7 +274,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 10, len(cellRenderer.Objects()))
+	assert.Equal(t, 8, len(cellRenderer.Objects()))
 	assert.Equal(t, float32(16), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
 
 	w := test.NewWindow(table)
@@ -295,5 +295,5 @@ func TestTable_ShowVisible(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 10, len(cellRenderer.Objects()))
+	assert.Equal(t, 8, len(cellRenderer.Objects()))
 }

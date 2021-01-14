@@ -121,15 +121,40 @@ func TestForm_ChangeTheme(t *testing.T) {
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)
-	w.Resize(fyne.NewSize(340, 240))
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
 		form.Refresh()
+		w.Resize(form.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		test.AssertImageMatches(t, "form/theme_changed.png", w.Canvas().Capture())
 	})
+}
+
+func TestForm_Hints(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry1 := &Entry{}
+	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
+	items := []*FormItem{
+		{Text: "First", Widget: entry1, HintText: "An entry hint"},
+		{Text: "Second", Widget: entry2},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/hint_initial.png", w.Canvas().Capture())
+
+	test.Type(entry2, "n")
+	test.AssertImageMatches(t, "form/hint_invalid.png", w.Canvas().Capture())
+
+	test.Type(entry2, "ot-")
+	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
 }
 
 func TestForm_Validation(t *testing.T) {

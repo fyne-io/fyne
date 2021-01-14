@@ -108,6 +108,11 @@ const (
 	// Since 2.0.0
 	ColorNameShadow fyne.ThemeColorName = "shadow"
 
+	// SizeNameCaptionText is the name of theme lookup for helper text size, normally smaller than regular text size.
+	//
+	// Since 2.0.0
+	SizeNameCaptionText fyne.ThemeSizeName = "helperText"
+
 	// SizeNameInlineIcon is the name of theme lookup for inline icons size.
 	//
 	// Since 2.0.0
@@ -301,6 +306,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
+	case SizeNameCaptionText:
+		return 11
 	case SizeNameInputBorder:
 		return 2
 	default:
@@ -324,6 +331,11 @@ func BackgroundColor() color.Color {
 // ButtonColor returns the theme's standard button color.
 func ButtonColor() color.Color {
 	return current().Color(ColorNameButton, currentVariant())
+}
+
+// CaptionTextSize returns the size for caption text.
+func CaptionTextSize() float32 {
+	return current().Size(SizeNameCaptionText)
 }
 
 // DisabledButtonColor returns the theme's disabled button color.

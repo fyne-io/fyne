@@ -72,11 +72,11 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 		rowHover: rowHover, colHover: colHover, cellSize: cellSize}
 	r.SetObjects(obj)
 	t.moveCallback = r.moveIndicators
-	widget.AddScrollOffsetChangedListener(t.scroll, func() {
-		t.offset = t.scroll.Offset
+	t.scroll.OnScrolled = func(pos fyne.Position) {
+		t.offset = pos
 		t.cells.Refresh()
 		r.moveIndicators()
-	})
+	}
 
 	r.Layout(t.Size())
 	return r

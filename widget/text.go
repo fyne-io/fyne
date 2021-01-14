@@ -37,6 +37,9 @@ type textProvider struct {
 
 	buffer    []rune
 	rowBounds [][2]int
+
+	// this applies to all except entry, who pads outside the scroll
+	extraVerticalPad float32
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
@@ -277,14 +280,15 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height += min.Height
 	}
 
-	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	return fyne.NewSize(width, height).
+		Add(fyne.NewSize(theme.Padding()*2, (theme.Padding()+r.provider.extraVerticalPad)*2))
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.provider.propertyLock.RLock()
 	defer r.provider.propertyLock.RUnlock()
 
-	yPos := theme.Padding()
+	yPos := theme.Padding() + r.provider.extraVerticalPad
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < len(r.texts); i++ {

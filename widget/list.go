@@ -36,7 +36,7 @@ type List struct {
 	selected      []ListItemID
 	itemMin       fyne.Size
 	offsetY       float32
-	offsetUpdated func()
+	offsetUpdated func(fyne.Position)
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -125,7 +125,7 @@ func (l *List) Select(id ListItemID) {
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
 		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
 	}
-	l.offsetUpdated()
+	l.offsetUpdated(l.scroller.Offset)
 	l.Refresh()
 }
 
@@ -162,7 +162,7 @@ type listRenderer struct {
 
 func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *widget.Scroll, layout *fyne.Container) *listRenderer {
 	lr := &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
-	widget.AddScrollOffsetChangedListener(lr.scroller, lr.offsetUpdated)
+	lr.scroller.OnScrolled = lr.offsetUpdated
 	return lr
 }
 
@@ -355,11 +355,11 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, id ListItemID) {
 	}
 }
 
-func (l *listRenderer) offsetUpdated() {
-	if l.list.offsetY == l.scroller.Offset.Y {
+func (l *listRenderer) offsetUpdated(pos fyne.Position) {
+	if l.list.offsetY == pos.Y {
 		return
 	}
-	l.list.offsetY = l.scroller.Offset.Y
+	l.list.offsetY = pos.Y
 	l.offsetChanged()
 }
 
