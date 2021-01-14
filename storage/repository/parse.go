@@ -69,7 +69,7 @@ func ParseURI(s string) (fyne.URI, error) {
 	repo, err := ForURI(&uri{scheme: scheme})
 	if err == nil {
 		// If the repository registered for this scheme implements a parser
-		if c, ok := repo.(CanonicalRepository); ok {
+		if c, ok := repo.(CustomURIRepository); ok {
 			return c.ParseURI(s)
 		}
 	}

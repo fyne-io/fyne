@@ -69,7 +69,7 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
-	// CanonicalRepository that implements it's own ParseURI.
+	// CustomURIRepository that implements it's own ParseURI.
 	return ParseURI(newURI)
 }
 
@@ -103,7 +103,7 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
-	// CanonicalRepository that implements it's own ParseURI.
+	// CustomURIRepository that implements it's own ParseURI.
 	return ParseURI(newURI)
 }
 

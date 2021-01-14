@@ -70,7 +70,7 @@ type Repository interface {
 	Destroy(string)
 }
 
-// CanonicalRepository is an extension of the repository interface which
+// CustomURIRepository is an extension of the repository interface which
 // allows the behavior of storage.ParseURI to be overridden. This is only
 // needed if you wish to generate custom URI types, rather than using Fyne's
 // URI implementation and net/url based parsing.
@@ -80,7 +80,7 @@ type Repository interface {
 // storage repository to delegate to for parsing.
 //
 // Since: 2.0.0
-type CanonicalRepository interface {
+type CustomURIRepository interface {
 	Repository
 
 	// ParseURI will be used to implement calls to storage.ParseURI()
