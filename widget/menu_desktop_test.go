@@ -207,9 +207,6 @@ func TestMenu_TraverseMenu(t *testing.T) {
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c)
 
 	m.ActivateNext()
-	test.AssertRendersToMarkup(t, "menu/desktop/traverse_third_active.xml", c)
-
-	m.ActivateNext()
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_third_active.xml", c, "does not wrap around if last item is already active")
 
 	// … and up again
@@ -217,36 +214,22 @@ func TestMenu_TraverseMenu(t *testing.T) {
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c)
 
 	m.ActivatePrevious()
-	test.AssertRendersToMarkup(t, "menu/desktop/traverse_first_active.xml", c)
-
-	m.ActivatePrevious()
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_first_active.xml", c, "does not wrap around if on top")
 
 	// activate a submenu (show and activate first item)
 	m.ActivateNext()
-	assert.True(t, m.ActivateLastSubmenu())
-	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_first_active.xml", c)
 
 	assert.False(t, m.ActivateLastSubmenu())
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_first_active.xml", c, "does nothing if there is no submenu at the last active item")
 
 	// traversing through items of opened submenu
 	m.ActivateNext()
-	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_second_active.xml", c)
-
-	m.ActivateNext()
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_second_active.xml", c, "does not wrap around if last item is already active")
-
-	m.ActivatePrevious()
-	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_first_active.xml", c)
 
 	m.ActivatePrevious()
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_first_active.xml", c, "does not wrap around if on top")
 
 	// closing an open submenu
-	assert.True(t, m.DeactivateLastSubmenu())
-	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c)
-
 	assert.False(t, m.DeactivateLastSubmenu())
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c, "does nothing if there is no submenu opened")
 }
