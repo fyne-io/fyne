@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
@@ -857,7 +858,7 @@ type modifiableBox struct {
 
 func (b *modifiableBox) Append(object fyne.CanvasObject) {
 	b.Children = append(b.Children, object)
-	widget.Renderer(b).Refresh()
+	cache.Renderer(b).Refresh()
 }
 
 func (b *modifiableBox) deleteAt(index int) {
@@ -866,16 +867,16 @@ func (b *modifiableBox) deleteAt(index int) {
 	} else {
 		b.Children = b.Children[:index]
 	}
-	widget.Renderer(b).Refresh()
+	cache.Renderer(b).Refresh()
 }
 
 func (b *modifiableBox) insert(object fyne.CanvasObject, index int) {
 	tail := append([]fyne.CanvasObject{object}, b.Children[index:]...)
 	b.Children = append(b.Children[:index], tail...)
-	widget.Renderer(b).Refresh()
+	cache.Renderer(b).Refresh()
 }
 
 func (b *modifiableBox) Prepend(object fyne.CanvasObject) {
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
-	widget.Renderer(b).Refresh()
+	cache.Renderer(b).Refresh()
 }

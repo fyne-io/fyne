@@ -13,9 +13,16 @@ type ScrollDirection int
 
 // Constants for valid values of ScrollDirection.
 const (
+	// ScrollBoth supports horizontal and vertical scrolling.
 	ScrollBoth ScrollDirection = iota
+	// ScrollHorizontalOnly specifies the scrolling should only happen left to right.
 	ScrollHorizontalOnly
+	// ScrollVerticalOnly specifies the scrolling should only happen top to bottom.
 	ScrollVerticalOnly
+	// ScrollNone turns off scrolling for this container.
+	//
+	// Since: 2.0.0
+	ScrollNone
 )
 
 type scrollBarOrientation int
@@ -325,7 +332,7 @@ type scrollContainerRenderer struct {
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
-	if r.scroll.Direction != ScrollHorizontalOnly {
+	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
 		r.topShadow.Resize(fyne.NewSize(size.Width, 0))
@@ -333,7 +340,7 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
 	}
 
-	if r.scroll.Direction != ScrollVerticalOnly {
+	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.horizArea.Resize(fyne.NewSize(size.Width, r.horizArea.MinSize().Height))
 		r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
 		r.leftShadow.Resize(fyne.NewSize(0, size.Height))
@@ -400,15 +407,23 @@ func (r *scrollContainerRenderer) updatePosition() {
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
 
-	if r.scroll.Direction != ScrollHorizontalOnly {
+	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Height, scrollSize.Height, r.vertArea)
 		r.handleShadowVisibility(r.scroll.Offset.Y, contentSize.Height, scrollSize.Height, r.topShadow, r.bottomShadow)
 		cache.Renderer(r.vertArea).Layout(r.scroll.size)
+	} else {
+		r.vertArea.Hide()
+		r.topShadow.Hide()
+		r.bottomShadow.Hide()
 	}
-	if r.scroll.Direction != ScrollVerticalOnly {
+	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Width, scrollSize.Width, r.horizArea)
 		r.handleShadowVisibility(r.scroll.Offset.X, contentSize.Width, scrollSize.Width, r.leftShadow, r.rightShadow)
 		cache.Renderer(r.horizArea).Layout(r.scroll.size)
+	} else {
+		r.horizArea.Hide()
+		r.leftShadow.Hide()
+		r.rightShadow.Hide()
 	}
 
 	if r.scroll.Direction != ScrollHorizontalOnly {
@@ -439,18 +454,16 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 		BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{s.Content}),
 		scroll:       s,
 	}
-	if s.Direction != ScrollHorizontalOnly {
-		scr.vertArea = newScrollBarArea(s, scrollBarOrientationVertical)
-		scr.topShadow = NewShadow(ShadowBottom, SubmergedContentLevel)
-		scr.bottomShadow = NewShadow(ShadowTop, SubmergedContentLevel)
-		scr.SetObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow))
-	}
-	if s.Direction != ScrollVerticalOnly {
-		scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
-		scr.leftShadow = NewShadow(ShadowRight, SubmergedContentLevel)
-		scr.rightShadow = NewShadow(ShadowLeft, SubmergedContentLevel)
-		scr.SetObjects(append(scr.Objects(), scr.horizArea, scr.leftShadow, scr.rightShadow))
-	}
+	scr.vertArea = newScrollBarArea(s, scrollBarOrientationVertical)
+	scr.topShadow = NewShadow(ShadowBottom, SubmergedContentLevel)
+	scr.bottomShadow = NewShadow(ShadowTop, SubmergedContentLevel)
+	scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
+	scr.leftShadow = NewShadow(ShadowRight, SubmergedContentLevel)
+	scr.rightShadow = NewShadow(ShadowLeft, SubmergedContentLevel)
+	scr.SetObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow, scr.horizArea,
+		scr.leftShadow, scr.rightShadow))
+	scr.updatePosition()
+
 	return scr
 }
 
@@ -496,6 +509,8 @@ func (s *Scroll) MinSize() fyne.Size {
 		min.Height = fyne.Max(min.Height, s.Content.MinSize().Height)
 	case ScrollVerticalOnly:
 		min.Width = fyne.Max(min.Width, s.Content.MinSize().Width)
+	case ScrollNone:
+		return s.Content.MinSize()
 	}
 	return min
 }

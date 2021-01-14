@@ -84,7 +84,7 @@ type Entry struct {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	e := &Entry{}
+	e := &Entry{Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -101,7 +101,7 @@ func NewEntryWithData(data binding.String) *Entry {
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
-	e := &Entry{MultiLine: true}
+	e := &Entry{MultiLine: true, Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -858,6 +858,7 @@ func (e *Entry) registerShortcut() {
 // expects a read or write lock to be held by the caller
 func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
+	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
 	for i := 0; i < provider.rows(); i++ {
 		b := provider.rowBoundary(i)
 		if b[0] <= pos {
@@ -865,7 +866,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b[0]
-			if e.Wrapping != fyne.TextWrapOff && b[0] == pos && col == 0 && pos != 0 {
+			if canWrap && b[0] == pos && col == 0 && pos != 0 {
 				row++
 			}
 		} else {
@@ -1019,13 +1020,13 @@ func (e *Entry) textStyle() fyne.TextStyle {
 
 // textWrap tells the rendering textProvider our wrapping
 func (e *Entry) textWrap() fyne.TextWrap {
-	if e.Wrapping == fyne.TextTruncate {
-		fyne.LogError("Entry does not allow Truncation", nil)
-		e.Wrapping = fyne.TextWrapOff
+	if e.Wrapping == fyne.TextTruncate { // this is now the default - but we scroll around this large content
+		return fyne.TextWrapOff
 	}
-	if !e.MultiLine && e.Wrapping != fyne.TextWrapOff {
+
+	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
 		fyne.LogError("Entry cannot wrap single line", nil)
-		e.Wrapping = fyne.TextWrapOff
+		e.Wrapping = fyne.TextTruncate
 	}
 	return e.Wrapping
 }
@@ -1121,6 +1122,10 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (r *entryRenderer) MinSize() fyne.Size {
+	if r.scroll.Direction == widget.ScrollNone {
+		return r.scroll.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
+	}
+
 	minSize := r.entry.placeholderProvider().charMinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if r.entry.MultiLine {
@@ -1224,6 +1229,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 
 	r := &entryContentRenderer{cursor, []fyne.CanvasObject{}, nil, objects,
 		provider, placeholder, e}
+	r.updateScrollDirections()
 	r.Layout(e.size)
 	return r
 }
@@ -1295,6 +1301,7 @@ func (r *entryContentRenderer) Refresh() {
 	content := r.content.entry.Text
 	focused := r.content.entry.focused
 	selections := r.selection
+	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
@@ -1467,6 +1474,17 @@ func (r *entryContentRenderer) moveCursor() {
 
 	if callback != nil {
 		callback()
+	}
+}
+
+func (r *entryContentRenderer) updateScrollDirections() {
+	switch r.content.entry.Wrapping {
+	case fyne.TextWrapOff:
+		r.content.scroll.Direction = widget.ScrollNone
+	case fyne.TextTruncate: // this is now the default - but we scroll
+		r.content.scroll.Direction = widget.ScrollBoth
+	default: // fyne.TextWrapBreak, fyne.TextWrapWord
+		r.content.scroll.Direction = widget.ScrollVerticalOnly
 	}
 }
 
