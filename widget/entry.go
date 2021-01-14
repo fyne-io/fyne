@@ -1083,8 +1083,8 @@ func (r *entryRenderer) Destroy() {
 func (r *entryRenderer) Layout(size fyne.Size) {
 	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
 	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
-	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.Padding())))
-	r.box.Move(fyne.NewPos(0, theme.Padding()))
+	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.InputBorderSize()*2)))
+	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
