@@ -62,9 +62,8 @@ func ParseURI(s string) (fyne.URI, error) {
 			path = path[2:]
 		}
 
-		// this looks weird, but it makes sure that we still pass
-		// url.Parse()
-		s = NewFileURI(path).String()
+		// Windows files can break authority checks, so just return the parsed file URI
+		return NewFileURI(path), nil
 	}
 
 	repo, err := ForURI(&uri{scheme: scheme})
