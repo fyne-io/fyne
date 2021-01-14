@@ -7,6 +7,18 @@ import (
 	"fyne.io/fyne"
 )
 
+// splitNonEmpty works exactly like strings.Split(), but only returns non-empty
+// components.
+func splitNonEmpty(str, sep string) []string {
+	components := []string{}
+	for _, v := range strings.Split(str, sep) {
+		if len(v) > 0 {
+			components = append(components, v)
+		}
+	}
+	return components
+}
+
 // GenericParent can be used as a common-case implementation of
 // HierarchicalRepository.Parent(). It will create a parent URI based on
 // IETF RFC3986.
@@ -33,16 +45,14 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		return parent, URIRootError
 	}
 
-	components := strings.Split(u.Path(), "/")
+	components := splitNonEmpty(u.Path(), "/")
 
 	newURI := u.Scheme() + "://" + u.Authority()
 
 	// there will be at least one component, since we know we don't have
 	// '/' or ''.
-	if len(components) == 1 {
-		// the immediate parent is the root
-		newURI += "/"
-	} else {
+	newURI += "/"
+	if len(components) > 1 {
 		newURI += strings.Join(components[:len(components)-1], "/")
 	}
 
@@ -76,12 +86,12 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 
 	// split into components and add the new one
-	components := strings.Split(u.Path(), "/")
+	components := splitNonEmpty(u.Path(), "/")
 	components = append(components, component)
 
 	// generate the scheme, authority, and path
 	newURI := u.Scheme() + "://" + u.Authority()
-	newURI += "/" + strings.Join(components[:len(components)-1], "/")
+	newURI += "/" + strings.Join(components, "/")
 
 	// stick the query and fragment back on the end
 	if len(u.Query()) > 0 {
