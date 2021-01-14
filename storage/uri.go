@@ -128,8 +128,9 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 // NOTE: since 2.0.0, Exists is backed by the repository system - this function
 // calls into a scheme-specific implementation from a registered repository.
 //
-// may call into either a generic implementation, or into a scheme-specific
-// implementation depending on which storage repositories have been registered.
+// Exists may call into either a generic implementation, or into a
+// scheme-specific implementation depending on which storage repositories have
+// been registered.
 //
 // Since: 1.4
 func Exists(u fyne.URI) (bool, error) {
@@ -206,10 +207,13 @@ func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 }
 
 // CanRead determines if a given URI could be written to using the Reader()
-// method. It is preferred to check if a URI is writable using this method
+// method. It is preferred to check if a URI is readable using this method
 // before calling Reader(), because the underlying operations required to
-// attempt to write and then report an error may be slower than the operations
-// needed to test if a URI is writable.
+// attempt to read and then report an error may be slower than the operations
+// needed to test if a URI is readable. Keep in mind however that even if
+// CanRead returns true, you must still do appropriate error handling for
+// Reader(), as the underlying filesystem may have changed since you called
+// CanRead.
 //
 // CanRead is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
@@ -266,7 +270,11 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 // method. It is preferred to check if a URI is writable using this method
 // before calling Writer(), because the underlying operations required to
 // attempt to write and then report an error may be slower than the operations
-// needed to test if a URI is writable.
+// needed to test if a URI is writable.  Keep in mind however that even if
+// CanWrite returns true, you must still do appropriate error handling for
+// Writer(), as the underlying filesystem may have changed since you called
+// CanWrite.
+
 //
 // CanWrite is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
