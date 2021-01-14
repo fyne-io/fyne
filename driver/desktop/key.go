@@ -5,6 +5,8 @@ import (
 )
 
 const (
+	// KeyNone represents no key
+	KeyNone fyne.KeyName = ""
 	// KeyShiftLeft represents the left shift key
 	KeyShiftLeft fyne.KeyName = "LeftShift"
 	// KeyShiftRight represents the right shift key

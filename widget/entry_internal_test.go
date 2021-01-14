@@ -14,40 +14,39 @@ import (
 
 func TestEntry_Cursor(t *testing.T) {
 	entry := NewEntry()
-	content := cache.Renderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
-	assert.Equal(t, desktop.TextCursor, content.Cursor())
+	assert.Equal(t, desktop.TextCursor, entry.Cursor())
 }
 
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
+	entry.Wrapping = fyne.TextWrapOff
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
-	content := cache.Renderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
+	entry.Resize(entry.MinSize())
 
 	// select the word 'quick'
 	ev := getClickPosition("The qui", 0)
-	content.Tapped(ev)
-	content.DoubleTapped(ev)
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
 	assert.Equal(t, "quick", entry.SelectedText())
 
 	// select the whitespace after 'quick'
 	ev = getClickPosition("The quick", 0)
 	// add half a ' ' character
 	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
-	content.Tapped(ev)
-	content.DoubleTapped(ev)
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
 
 	// select all whitespace after 'jumped'
 	ev = getClickPosition("jumped  ", 1)
-	content.Tapped(ev)
-	content.DoubleTapped(ev)
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
 	assert.Equal(t, "    ", entry.SelectedText())
 }
 
 func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
-	content := cache.Renderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
 
 	window := test.NewWindow(entry)
 	defer window.Close()
@@ -56,22 +55,23 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry.Resize(entry.MinSize())
 	c := window.Canvas()
 
-	test.Tap(content)
+	test.Tap(entry)
 	assert.Equal(t, entry, c.Focused())
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
 	ev := &fyne.PointEvent{Position: pos}
-	content.Tapped(ev)
-	content.DoubleTapped(ev)
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
 
 	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_DragSelect(t *testing.T) {
 	entry := NewEntry()
+	entry.Wrapping = fyne.TextWrapOff
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
-	content := cache.Renderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
+	entry.Resize(entry.MinSize())
 
 	// get position after the letter 'e' on the second row
 	ev1 := getClickPosition("ove", 1)
@@ -82,13 +82,13 @@ func TestEntry_DragSelect(t *testing.T) {
 
 	// mouse down and drag from 'r' to 'z'
 	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
-	content.MouseDown(me)
+	entry.MouseDown(me)
 	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
 		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
-		content.Dragged(de)
+		entry.Dragged(de)
 	}
 	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
-	content.MouseUp(me)
+	entry.MouseUp(me)
 
 	assert.Equal(t, "r the laz", entry.SelectedText())
 }
@@ -182,17 +182,16 @@ func TestEntry_EraseSelection(t *testing.T) {
 func TestEntry_MouseClickAndDragOutsideText(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
-	content := cache.Renderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
 	ev := &fyne.PointEvent{Position: pos}
 
 	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
-	content.MouseDown(me)
+	entry.MouseDown(me)
 	de := &fyne.DragEvent{PointEvent: *ev, Dragged: fyne.NewDelta(1, 0)}
-	content.Dragged(de)
-	content.MouseUp(me)
+	entry.Dragged(de)
+	entry.MouseUp(me)
 	assert.False(t, entry.selecting)
 }
 
@@ -200,21 +199,20 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Ahnj\nBuki\n")
 	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
-	content := cache.Renderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
 	ev := &fyne.PointEvent{Position: pos}
 
 	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonSecondary}
-	content.MouseDown(me)
-	content.MouseUp(me)
+	entry.MouseDown(me)
+	entry.MouseUp(me)
 
 	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
 
 	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
-	content.MouseDown(me)
-	content.MouseUp(me)
+	entry.MouseDown(me)
+	entry.MouseUp(me)
 
 	assert.Equal(t, entry.SelectedText(), "")
 }

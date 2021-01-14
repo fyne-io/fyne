@@ -214,25 +214,3 @@ func (w *DisableableWidget) Disabled() bool {
 
 	return w.disabled
 }
-
-// Renderer looks up the render implementation for a widget
-//
-// Deprecated: Access to widget renderers is being removed, render details should be private to a WidgetRenderer.
-func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
-	return cache.Renderer(wid)
-}
-
-// DestroyRenderer frees a render implementation for a widget.
-// This is typically for internal use only.
-//
-// Deprecated: Access to widget renderers is being removed, render details should be private to a WidgetRenderer.
-func DestroyRenderer(wid fyne.Widget) {
-	cache.DestroyRenderer(wid)
-}
-
-// Refresh instructs the containing canvas to refresh the specified widget.
-//
-// Deprecated: Call Widget.Refresh() instead.
-func Refresh(wid fyne.Widget) {
-	wid.Refresh()
-}

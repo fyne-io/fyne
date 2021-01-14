@@ -163,7 +163,7 @@ func (p *ProgressBar) Unbind() {
 func NewProgressBar() *ProgressBar {
 	p := &ProgressBar{Min: 0, Max: 1}
 
-	Renderer(p).Layout(p.MinSize())
+	cache.Renderer(p).Layout(p.MinSize())
 	return p
 }
 

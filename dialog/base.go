@@ -160,7 +160,7 @@ func (d *dialog) Resize(size fyne.Size) {
 // SetDismissText allows custom text to be set in the confirmation button
 func (d *dialog) SetDismissText(label string) {
 	d.dismiss.SetText(label)
-	widget.Refresh(d.win)
+	d.win.Refresh()
 }
 
 // SetOnClosed allows to set a callback function that is called when

@@ -118,7 +118,7 @@ func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	test.Type(entry, "a")
 	test.Type(entry, "b")
 	test.Type(entry, "c")
-	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorColumn)
 	assert.Equal(t, 1, entry.CursorRow)
 	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(70, 70))
@@ -273,12 +273,39 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, min, entry.MinSize())
 	entry.SetText("")
 	assert.Equal(t, min, entry.MinSize())
-	entry.SetPlaceHolder("Hi")
+	entry.SetPlaceHolder("Hello")
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
+
+	entry.Wrapping = fyne.TextWrapOff
+	entry.Refresh()
+	assert.Greater(t, entry.MinSize().Width, min.Width)
+
+	min = entry.MinSize()
+	entry.ActionItem = canvas.NewCircle(color.Black)
+	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
+}
+
+func TestEntryMultiline_MinSize(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	min := entry.MinSize()
+	entry.SetText("Hello")
+	assert.Equal(t, entry.MinSize().Width, min.Width)
+	assert.Equal(t, entry.MinSize().Height, min.Height)
+
+	assert.True(t, min.Width > theme.Padding()*2)
+	assert.True(t, min.Height > theme.Padding()*2)
+
+	entry.Wrapping = fyne.TextWrapOff
+	entry.Refresh()
+	assert.Greater(t, entry.MinSize().Width, min.Width)
+
+	entry.Wrapping = fyne.TextWrapBreak
+	entry.Refresh()
+	assert.Equal(t, entry.MinSize().Width, min.Width)
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
@@ -1308,7 +1335,7 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	pos = fyne.NewPos(entryOffset+theme.Padding()+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
+	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
 	test.TapCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, "entry/tapped_tapped_3rd_m.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)

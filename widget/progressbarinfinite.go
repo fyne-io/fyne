@@ -205,6 +205,6 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 // To stop the looping progress and set the progress bar to 100%, call ProgressBarInfinite.Stop()
 func NewProgressBarInfinite() *ProgressBarInfinite {
 	p := &ProgressBarInfinite{}
-	Renderer(p).Layout(p.MinSize())
+	cache.Renderer(p).Layout(p.MinSize())
 	return p
 }
