@@ -1,13 +1,10 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
 )
 
 // Box widget is a simple list where the child elements are arranged in a single column
@@ -15,19 +12,9 @@ import (
 // Deprecated: Use container.NewVBox() or container.NewHBox().
 type Box struct {
 	BaseWidget
-	background color.Color
 
 	Horizontal bool
 	Children   []fyne.CanvasObject
-}
-
-// Refresh updates this box to match the current theme
-func (b *Box) Refresh() {
-	if b.background != nil {
-		b.background = theme.BackgroundColor()
-	}
-
-	b.BaseWidget.Refresh()
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
@@ -87,14 +74,6 @@ func (b *boxRenderer) MinSize() fyne.Size {
 
 func (b *boxRenderer) Layout(size fyne.Size) {
 	b.layout.Layout(b.Objects(), size)
-}
-
-func (b *boxRenderer) BackgroundColor() color.Color {
-	if b.box.background == nil {
-		return theme.BackgroundColor()
-	}
-
-	return b.box.background
 }
 
 func (b *boxRenderer) Refresh() {

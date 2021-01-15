@@ -502,10 +502,6 @@ func (t *textGridRenderer) Refresh() {
 func (t *textGridRenderer) ApplyTheme() {
 }
 
-func (t *textGridRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 func (t *textGridRenderer) Objects() []fyne.CanvasObject {
 	return t.objects
 }

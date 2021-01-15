@@ -4,7 +4,6 @@
 			<widget size="192x392" type="*widget.Scroll">
 				<container size="192x392">
 					<widget size="192x45" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x45"/>
 						<container pos="8,4" size="180x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
@@ -15,7 +14,6 @@
 						</container>
 					</widget>
 					<widget pos="0,46" size="192x45" type="*widget.listItem">
-						<rectangle fillColor="background" size="4x45"/>
 						<container pos="8,4" size="180x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>

@@ -10,7 +10,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -371,10 +370,6 @@ func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
 
 func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.setStringAttr(attrs, "type", reflect.TypeOf(w).String())
-	bgColor := cache.Renderer(w).BackgroundColor()
-	if bgColor != color.Transparent { // transparent widgets are the future
-		r.setColorAttrWithDefault(attrs, "backgroundColor", bgColor, theme.BackgroundColor())
-	}
 	r.writeTag("widget", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++

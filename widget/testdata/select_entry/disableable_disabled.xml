@@ -4,7 +4,7 @@
 			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="130x33"/>
 			<rectangle fillColor="disabled" pos="0,35" size="130x2"/>
 			<widget pos="0,2" size="102x33" type="*widget.Scroll">
-				<widget backgroundColor="rgba(102,102,102,255)" size="102x33" type="*widget.entryContent">
+				<widget size="102x33" type="*widget.entryContent">
 					<widget size="102x33" type="*widget.textProvider">
 						<text color="disabled" pos="8,6" size="94x21"></text>
 					</widget>
