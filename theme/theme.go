@@ -163,9 +163,7 @@ const (
 )
 
 var (
-	defaultTheme  = setupDefaultTheme()
-	fallbackColor = color.Transparent
-	fallbackIcon  = &fyne.StaticResource{}
+	defaultTheme = setupDefaultTheme()
 
 	errorColor    = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 	primaryColors = map[string]color.Color{
