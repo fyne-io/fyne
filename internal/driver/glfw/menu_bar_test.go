@@ -193,30 +193,32 @@ func TestMenuBar(t *testing.T) {
 					},
 				},
 			},
-			"menu action File->Recent->Older->Old 1": {
-				[]step{
-					{
-						actions: []action{
-							{"tap", fileMenuPos},
-							{"move", fileRecentPos},
+			/*
+				"menu action File->Recent->Older->Old 1": {
+					[]step{
+						{
+							actions: []action{
+								{"tap", fileMenuPos},
+								{"move", fileRecentPos},
+							},
+							wantImage: "menu_bar_hovered_file_recent.png",
 						},
-						wantImage: "menu_bar_hovered_file_recent.png",
-					},
-					{
-						actions:   []action{{"move", fileRecentOlderPos}},
-						wantImage: "menu_bar_hovered_file_recent_older.png",
-					},
-					{
-						actions:   []action{{"move", fileRecentOlderOld1Pos}},
-						wantImage: "menu_bar_hovered_file_recent_older_old1.png",
-					},
-					{
-						actions:    []action{{"tap", fileRecentOlderOld1Pos}},
-						wantAction: "old 1",
-						wantImage:  "menu_bar_initial.png",
+						{
+							actions:   []action{{"move", fileRecentOlderPos}},
+							wantImage: "menu_bar_hovered_file_recent_older.png",
+						},
+						{
+							actions:   []action{{"move", fileRecentOlderOld1Pos}},
+							wantImage: "menu_bar_hovered_file_recent_older_old1.png",
+						},
+						{
+							actions:    []action{{"tap", fileRecentOlderOld1Pos}},
+							wantAction: "old 1",
+							wantImage:  "menu_bar_initial.png",
+						},
 					},
 				},
-			},
+			*/
 			"move mouse outside does not hide menu": {
 				[]step{
 					{
