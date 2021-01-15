@@ -1062,7 +1062,7 @@ func UploadIcon() fyne.Resource {
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
 	icon := current().Icon(n)
 	if icon == nil {
-		return &fyne.StaticResource{}
+		return fallbackIcon
 	}
 	return icon
 }

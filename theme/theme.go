@@ -163,7 +163,9 @@ const (
 )
 
 var (
-	defaultTheme = setupDefaultTheme()
+	defaultTheme  = setupDefaultTheme()
+	fallbackColor = color.Transparent
+	fallbackIcon  = &fyne.StaticResource{}
 
 	errorColor    = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 	primaryColors = map[string]color.Color{
@@ -548,7 +550,7 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	col := current().Color(n, v)
 	if col == nil {
-		return &color.NRGBA{}
+		return fallbackColor
 	}
 	return col
 }
