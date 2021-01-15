@@ -230,7 +230,7 @@ func (s *Select) optionTapped(text string) {
 
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height+1))
+	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height))
 }
 
 func (s *Select) showPopUp() {
@@ -332,9 +332,10 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	// pad - label - pad - icon - pad*2
+	// x1			x4 (reserved)      x1    x1     x2
+	// pad  -     label      -  pad - icon - pad*2
 	min := s.label.MinSize()
-	min = min.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*2))
 	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, 0))
 }
 
