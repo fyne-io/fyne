@@ -550,6 +550,7 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	col := current().Color(n, v)
 	if col == nil {
+		fyne.LogError("Loaded theme returned nil color", nil)
 		return fallbackColor
 	}
 	return col
@@ -560,6 +561,7 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	if col != nil {
 		return col
 	}
+	fyne.LogError("Loaded theme returned nil font", nil)
 
 	if s.Monospace {
 		return DefaultTextMonospaceFont()

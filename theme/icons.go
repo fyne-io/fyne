@@ -1062,6 +1062,7 @@ func UploadIcon() fyne.Resource {
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
 	icon := current().Icon(n)
 	if icon == nil {
+		fyne.LogError("Loaded theme returned nil icon", nil)
 		return fallbackIcon
 	}
 	return icon
