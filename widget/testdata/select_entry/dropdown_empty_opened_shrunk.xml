@@ -1,15 +1,15 @@
 <canvas padded size="150x200">
 	<content>
 		<widget pos="10,10" size="110x37" type="*widget.SelectEntry">
-			<rectangle fillColor="focus" pos="0,4" size="110x33"/>
+			<rectangle fillColor="focus" pos="0,2" size="110x33"/>
 			<rectangle fillColor="shadow" pos="0,35" size="110x2"/>
-			<widget pos="4,4" size="82x29" type="*widget.Scroll">
-				<widget backgroundColor="focus" size="82x29" type="*widget.entryContent">
-					<widget size="82x29" type="*widget.textProvider">
-						<text color="placeholder" pos="4,4" size="74x21"></text>
+			<widget pos="0,2" size="82x33" type="*widget.Scroll">
+				<widget size="82x33" type="*widget.entryContent">
+					<widget size="82x33" type="*widget.textProvider">
+						<text color="placeholder" pos="8,6" size="74x21"></text>
 					</widget>
-					<widget size="82x29" type="*widget.textProvider">
-						<text pos="4,4" size="74x21"></text>
+					<widget size="82x33" type="*widget.textProvider">
+						<text pos="8,6" size="74x21"></text>
 					</widget>
 				</widget>
 			</widget>
@@ -35,6 +35,7 @@
 				</widget>
 				<widget size="102x103" type="*widget.Scroll">
 					<widget size="102x103" type="*widget.menuBox">
+						<rectangle fillColor="background" size="102x111"/>
 						<container pos="0,4" size="102x111">
 							<widget size="102x29" type="*widget.menuItem">
 								<text pos="8,4" size="10x21">A</text>

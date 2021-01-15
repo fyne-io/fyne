@@ -81,6 +81,9 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
+	menuTogglePending       fyne.KeyName
+	menuDeactivationPending fyne.KeyName
+
 	xpos, ypos    int
 	width, height int
 	shouldExpand  bool
@@ -582,6 +585,7 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
+	previousPos := w.mousePos
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := desktop.Cursor(desktop.DefaultCursor)
@@ -589,6 +593,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
+		}
+		if _, ok := object.(fyne.Draggable); ok {
+			return true
 		}
 
 		_, hover := object.(desktop.Hoverable)
@@ -632,12 +639,19 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		w.mouseOut()
 	}
 
+	if wid, ok := obj.(fyne.Draggable); ok {
+		if w.mouseButton != 0 && !w.mouseDragStarted {
+			w.mouseDragPos = previousPos
+			w.mouseDragged = wid
+			w.mouseDraggedOffset = w.mousePos.Subtract(pos)
+		}
+	}
+
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
-			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
-			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
 			ev.Dragged = fyne.NewDelta(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
@@ -679,6 +693,10 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
 			return true
+		case fyne.Draggable:
+			if w.mouseDragStarted {
+				return true
+			}
 		}
 
 		return false
@@ -688,11 +706,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	ev.AbsolutePosition = w.mousePos
 
 	coMouse := co
-	// Switch the mouse target to the dragging object if one is set
-	if w.mouseDragged != nil && !w.objIsDragged(co) {
-		co, _ = w.mouseDragged.(fyne.CanvasObject)
-		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
-	}
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -719,13 +732,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton &= ^button
 	}
 
-	if wid, ok := co.(fyne.Draggable); ok {
-		if action == glfw.Press {
-			w.mouseDragPos = w.mousePos
-			w.mouseDragged = wid
-			w.mouseDraggedOffset = w.mousePos.Subtract(co.Position()).Subtract(ev.Position)
-		}
-	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		if w.mouseDragStarted {
 			w.queueEvent(w.mouseDragged.DragEnd)
@@ -977,18 +983,26 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	if keyName == "" {
 		return
 	}
+
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
-
-	if action == glfw.Press {
-		if w.canvas.Focused() != nil {
-			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.queueEvent(func() { focused.KeyDown(keyEvent) })
+	pendingMenuToggle := w.menuTogglePending
+	pendingMenuDeactivation := w.menuDeactivationPending
+	w.menuTogglePending = desktop.KeyNone
+	w.menuDeactivationPending = desktop.KeyNone
+	switch action {
+	case glfw.Release:
+		if action == glfw.Release {
+			switch keyName {
+			case pendingMenuToggle:
+				w.canvas.ToggleMenu()
+			case pendingMenuDeactivation:
+				if w.canvas.DismissMenu() {
+					return
+				}
 			}
-		} else if w.canvas.onKeyDown != nil {
-			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
-	} else if action == glfw.Release { // ignore key up in core events
+
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				w.queueEvent(func() { focused.KeyUp(keyEvent) })
@@ -996,24 +1010,40 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		} else if w.canvas.onKeyUp != nil {
 			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
-		return
-	} // key repeat will fall through to TypedKey and TypedShortcut
+		return // ignore key up in other core events
+	case glfw.Press:
+		switch keyName {
+		case desktop.KeyAltLeft, desktop.KeyAltRight:
+			if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
+				w.menuTogglePending = keyName
+			}
+		case fyne.KeyEscape:
+			w.menuDeactivationPending = keyName
+		}
+		if w.canvas.Focused() != nil {
+			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+				w.queueEvent(func() { focused.KeyDown(keyEvent) })
+			}
+		} else if w.canvas.onKeyDown != nil {
+			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
+		}
+	default:
+		// key repeat will fall through to TypedKey and TypedShortcut
+	}
 
-	if keyName == fyne.KeyTab {
-		obj := w.canvas.Focused()
+	switch keyName {
+	case fyne.KeyTab:
 		capture := false
 		// TODO at some point allow widgets to mark as capturing
-		if ent, ok := obj.(*widget.Entry); ok {
-			if ent.MultiLine {
-				capture = true
-			}
+		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
+			capture = true
 		}
-		// at this point we know action != glfw.Release
 		if !capture {
-			if keyDesktopModifier == 0 {
+			switch keyDesktopModifier {
+			case 0:
 				w.canvas.FocusNext()
 				return
-			} else if keyDesktopModifier == desktop.ShiftModifier {
+			case desktop.ShiftModifier:
 				w.canvas.FocusPrevious()
 				return
 			}

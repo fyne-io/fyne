@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
@@ -74,7 +72,8 @@ type Toolbar struct {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	r := &toolbarRenderer{toolbar: t, layout: layout.NewHBoxLayout()}
+	background := canvas.NewRectangle(theme.ButtonColor())
+	r := &toolbarRenderer{toolbar: t, background: background, layout: layout.NewHBoxLayout()}
 	r.resetObjects()
 	return r
 }
@@ -108,24 +107,24 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 
 type toolbarRenderer struct {
 	widget.BaseRenderer
-	layout  fyne.Layout
-	objs    []fyne.CanvasObject
-	toolbar *Toolbar
+	background *canvas.Rectangle
+	layout     fyne.Layout
+	items      []fyne.CanvasObject
+	toolbar    *Toolbar
 }
 
 func (r *toolbarRenderer) MinSize() fyne.Size {
-	return r.layout.MinSize(r.Objects())
+	return r.layout.MinSize(r.items)
 }
 
 func (r *toolbarRenderer) Layout(size fyne.Size) {
-	r.layout.Layout(r.Objects(), size)
-}
-
-func (r *toolbarRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	r.background.Resize(size)
+	r.layout.Layout(r.items, size)
 }
 
 func (r *toolbarRenderer) Refresh() {
+	r.background.FillColor = theme.ButtonColor()
+	r.background.Refresh()
 	r.resetObjects()
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
@@ -138,11 +137,11 @@ func (r *toolbarRenderer) Refresh() {
 }
 
 func (r *toolbarRenderer) resetObjects() {
-	if len(r.objs) != len(r.toolbar.Items) {
-		r.objs = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
+	if len(r.items) != len(r.toolbar.Items) {
+		r.items = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
 		for _, item := range r.toolbar.Items {
-			r.objs = append(r.objs, item.ToolbarObject())
+			r.items = append(r.items, item.ToolbarObject())
 		}
 	}
-	r.SetObjects(r.objs)
+	r.SetObjects(append([]fyne.CanvasObject{r.background}, r.items...))
 }

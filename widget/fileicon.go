@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"strings"
 
 	"fyne.io/fyne"
@@ -73,7 +72,12 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 
 	i.setURI(i.URI)
 
-	s := &fileIconRenderer{file: i}
+	// TODO should FileIcon render a background representing selection, or should it be in the collection?
+	// TODO file dialog currently uses a container with NewGridWrapLayout, but if this changes to List, or Table then the primary color background would be rendered twice.
+	background := canvas.NewRectangle(theme.PrimaryColor())
+	background.Hide()
+
+	s := &fileIconRenderer{file: i, background: background}
 	s.updateObjects()
 	i.cachedURI = i.URI
 
@@ -125,12 +129,9 @@ type fileIconRenderer struct {
 
 	file *FileIcon
 
-	ext *canvas.Text
-	img *canvas.Image
-}
-
-func (s *fileIconRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	background *canvas.Rectangle
+	ext        *canvas.Text
+	img        *canvas.Image
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
@@ -154,6 +155,7 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 	s.ext.Move(fyne.NewPos(xoff, yoff))
 
 	s.Objects()[0].Resize(size)
+	s.Objects()[1].Resize(size)
 }
 
 func (s *fileIconRenderer) Refresh() {
@@ -166,11 +168,13 @@ func (s *fileIconRenderer) Refresh() {
 	}
 
 	if s.file.Selected {
+		s.background.Show()
 		s.ext.Color = theme.PrimaryColor()
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}
 	} else {
+		s.background.Hide()
 		s.ext.Color = theme.BackgroundColor()
 		if res, ok := s.img.Resource.(*theme.InvertedThemedResource); ok {
 			s.img.Resource = res.Original()
@@ -188,10 +192,7 @@ func (s *fileIconRenderer) updateObjects() {
 	s.ext.Alignment = fyne.TextAlignCenter
 	s.ext.TextSize = theme.TextSize()
 
-	objects := make([]fyne.CanvasObject, 2) // Length is known, we can pre-allocate
-	objects[0], objects[1] = s.img, s.ext
-
-	s.SetObjects(objects)
+	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
 }
 
 func trimmedExtension(uri fyne.URI) string {

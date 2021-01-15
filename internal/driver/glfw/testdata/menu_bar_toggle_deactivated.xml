@@ -1,0 +1,29 @@
+<canvas size="300x300">
+	<content>
+		<container size="300x300">
+			<widget size="300x29" type="*glfw.MenuBar">
+				<widget size="300x29" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="300x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="300,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="300,0" size="4x29" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="300,29" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,29" size="300x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,29" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x29"/>
+				</widget>
+				<widget size="0x0" type="*glfw.menuBarUnderlay">
+				</widget>
+				<rectangle fillColor="button" size="300x29"/>
+				<container pos="4,0" size="292x29">
+					<widget size="41x29" type="*glfw.menuBarItem">
+						<text pos="8,4" size="25x21">File</text>
+					</widget>
+					<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+						<text pos="8,4" size="28x21">Edit</text>
+					</widget>
+				</container>
+			</widget>
+		</container>
+	</content>
+</canvas>

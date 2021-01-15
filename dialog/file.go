@@ -65,6 +65,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
+		saveName.SetPlaceHolder("enter filename")
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
@@ -497,7 +498,7 @@ func (f *FileDialog) SetDismissText(label string) {
 		return
 	}
 	f.dialog.dismiss.SetText(label)
-	widget.Refresh(f.dialog.win)
+	f.dialog.win.Refresh()
 }
 
 // SetLocation tells this FileDirectory which location to display.

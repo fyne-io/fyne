@@ -11,6 +11,9 @@ import (
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMenu_Layout(t *testing.T) {
@@ -56,14 +59,14 @@ func TestMenu_Layout(t *testing.T) {
 			},
 			want: "menu/desktop/layout_normal_with_submenus.xml",
 		},
-		"background of active submenu parents resets if sibling is hovered": {
+		"background of active submenu parents resets if sibling is focused": {
 			windowSize: fyne.NewSize(500, 300),
 			menuPos:    fyne.NewPos(10, 10),
 			mousePositions: []fyne.Position{
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 170), // open subsubmenu
-				fyne.NewPos(300, 170), // hover subsubmenu item
-				fyne.NewPos(30, 60),   // hover sibling of submenu parent
+				fyne.NewPos(300, 170), // focus subsubmenu item
+				fyne.NewPos(30, 60),   // focus sibling of submenu parent
 			},
 			want: "menu/desktop/layout_background_reset.xml",
 		},
@@ -167,4 +170,148 @@ func TestMenu_Scrolling(t *testing.T) {
 
 	test.Scroll(c, fyne.NewPos(20, 20), 0, 50)
 	test.AssertRendersToMarkup(t, "menu/desktop/scroll_top.xml", w.Canvas())
+}
+
+/* STOPSHIP temporarily disabled and should be re-enabled
+func TestMenu_TraverseMenu(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	w := fyne.CurrentApp().NewWindow("")
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	itemWithChild := fyne.NewMenuItem("Bar", nil)
+	itemWithChild.ChildMenu = fyne.NewMenu("",
+		fyne.NewMenuItem("SubA", nil),
+		fyne.NewMenuItem("SubB", nil),
+	)
+	m := widget.NewMenu(fyne.NewMenu("",
+		fyne.NewMenuItem("Foo", nil),
+		fyne.NewMenuItemSeparator(),
+		itemWithChild,
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Baz", nil),
+	))
+	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
+	w.Resize(m.MinSize())
+	m.Resize(m.MinSize())
+
+	// going all the way down …
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_initial.xml", c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_first_active.xml", c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_third_active.xml", c, "does not wrap around if last item is already active")
+
+	// … and up again
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c)
+
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_first_active.xml", c, "does not wrap around if on top")
+
+	// activate a submenu (show and activate first item)
+	m.ActivateNext()
+
+	assert.False(t, m.ActivateLastSubmenu())
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_first_active.xml", c, "does nothing if there is no submenu at the last active item")
+
+	// traversing through items of opened submenu
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_second_active.xml", c, "does not wrap around if last item is already active")
+
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_submenu_first_active.xml", c, "does not wrap around if on top")
+
+	// closing an open submenu
+	assert.False(t, m.DeactivateLastSubmenu())
+	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c, "does nothing if there is no submenu opened")
+}
+*/
+
+func TestMenu_TriggerTraversedMenu(t *testing.T) {
+	var triggered string
+	var dismissed bool
+	setupMenu := func() *widget.Menu {
+		triggered = ""
+		dismissed = false
+		itemWithChild := fyne.NewMenuItem("Bar", func() { triggered = "2nd" })
+		itemWithChild.ChildMenu = fyne.NewMenu("",
+			fyne.NewMenuItem("SubA", func() { triggered = "1st sub" }),
+			fyne.NewMenuItem("SubB", nil),
+			fyne.NewMenuItem("SubC", func() { triggered = "3rd sub" }),
+		)
+		m := widget.NewMenu(fyne.NewMenu("",
+			fyne.NewMenuItem("Foo", func() { triggered = "1st" }),
+			fyne.NewMenuItemSeparator(),
+			itemWithChild,
+			fyne.NewMenuItemSeparator(),
+			fyne.NewMenuItem("Baz", func() { triggered = "3rd" }),
+		))
+		m.OnDismiss = func() { dismissed = true }
+		w := fyne.CurrentApp().NewWindow("")
+		w.SetContent(internalWidget.NewOverlayContainer(m, w.Canvas(), nil))
+		return m
+	}
+
+	t.Run("without active item", func(t *testing.T) {
+		m := setupMenu()
+		m.TriggerLast()
+		assert.Equal(t, "", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("first item in submenu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		require.True(t, m.ActivateLastSubmenu())
+		m.TriggerLast()
+		assert.Equal(t, "1st sub", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("last item in submenu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		require.True(t, m.ActivateLastSubmenu())
+		m.ActivateNext()
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "3rd sub", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("item in menu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "3rd", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("item with (closed) submenu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "2nd", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("item without action", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		require.True(t, m.ActivateLastSubmenu())
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "", triggered)
+		assert.True(t, dismissed)
+	})
 }

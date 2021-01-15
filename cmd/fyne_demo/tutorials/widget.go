@@ -148,7 +148,6 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := container.NewVScroll(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
@@ -191,14 +190,11 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
-		if wrap != fyne.TextTruncate {
-			entryLoremIpsum.Wrapping = wrap
-		}
+		entryLoremIpsum.Wrapping = wrap
 
 		label.Refresh()
 		hyperlink.Refresh()
 		entryLoremIpsum.Refresh()
-		entryLoremIpsumScroller.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
@@ -214,7 +210,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 	grid := makeTextGrid()
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, grid, nil, nil),
-		fixed, entryLoremIpsumScroller, grid)
+		fixed, entryLoremIpsum, grid)
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {
