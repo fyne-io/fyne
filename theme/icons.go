@@ -666,395 +666,403 @@ func FyneLogo() fyne.Resource {
 
 // CancelIcon returns a resource containing the standard cancel icon for the current theme
 func CancelIcon() fyne.Resource {
-	return current().Icon(IconNameCancel)
+	return safeIconLookup(IconNameCancel)
 }
 
 // ConfirmIcon returns a resource containing the standard confirm icon for the current theme
 func ConfirmIcon() fyne.Resource {
-	return current().Icon(IconNameConfirm)
+	return safeIconLookup(IconNameConfirm)
 }
 
 // DeleteIcon returns a resource containing the standard delete icon for the current theme
 func DeleteIcon() fyne.Resource {
-	return current().Icon(IconNameDelete)
+	return safeIconLookup(IconNameDelete)
 }
 
 // SearchIcon returns a resource containing the standard search icon for the current theme
 func SearchIcon() fyne.Resource {
-	return current().Icon(IconNameSearch)
+	return safeIconLookup(IconNameSearch)
 }
 
 // SearchReplaceIcon returns a resource containing the standard search and replace icon for the current theme
 func SearchReplaceIcon() fyne.Resource {
-	return current().Icon(IconNameSearchReplace)
+	return safeIconLookup(IconNameSearchReplace)
 }
 
 // MenuIcon returns a resource containing the standard (mobile) menu icon for the current theme
 func MenuIcon() fyne.Resource {
-	return current().Icon(IconNameMenu)
+	return safeIconLookup(IconNameMenu)
 }
 
 // MenuExpandIcon returns a resource containing the standard (mobile) expand "submenu icon for the current theme
 func MenuExpandIcon() fyne.Resource {
-	return current().Icon(IconNameMenuExpand)
+	return safeIconLookup(IconNameMenuExpand)
 }
 
 // CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme
 func CheckButtonIcon() fyne.Resource {
-	return current().Icon(IconNameCheckButton)
+	return safeIconLookup(IconNameCheckButton)
 }
 
 // CheckButtonCheckedIcon returns a resource containing the standard checkbox checked icon for the current theme
 func CheckButtonCheckedIcon() fyne.Resource {
-	return current().Icon(IconNameCheckButtonChecked)
+	return safeIconLookup(IconNameCheckButtonChecked)
 }
 
 // RadioButtonIcon returns a resource containing the standard radio button icon for the current theme
 func RadioButtonIcon() fyne.Resource {
-	return current().Icon(IconNameRadioButton)
+	return safeIconLookup(IconNameRadioButton)
 }
 
 // RadioButtonCheckedIcon returns a resource containing the standard radio button checked icon for the current theme
 func RadioButtonCheckedIcon() fyne.Resource {
-	return current().Icon(IconNameRadioButtonChecked)
+	return safeIconLookup(IconNameRadioButtonChecked)
 }
 
 // ContentAddIcon returns a resource containing the standard content add icon for the current theme
 func ContentAddIcon() fyne.Resource {
-	return current().Icon(IconNameContentAdd)
+	return safeIconLookup(IconNameContentAdd)
 }
 
 // ContentRemoveIcon returns a resource containing the standard content remove icon for the current theme
 func ContentRemoveIcon() fyne.Resource {
-	return current().Icon(IconNameContentRemove)
+	return safeIconLookup(IconNameContentRemove)
 }
 
 // ContentClearIcon returns a resource containing the standard content clear icon for the current theme
 func ContentClearIcon() fyne.Resource {
-	return current().Icon(IconNameContentClear)
+	return safeIconLookup(IconNameContentClear)
 }
 
 // ContentCutIcon returns a resource containing the standard content cut icon for the current theme
 func ContentCutIcon() fyne.Resource {
-	return current().Icon(IconNameContentCut)
+	return safeIconLookup(IconNameContentCut)
 }
 
 // ContentCopyIcon returns a resource containing the standard content copy icon for the current theme
 func ContentCopyIcon() fyne.Resource {
-	return current().Icon(IconNameContentCopy)
+	return safeIconLookup(IconNameContentCopy)
 }
 
 // ContentPasteIcon returns a resource containing the standard content paste icon for the current theme
 func ContentPasteIcon() fyne.Resource {
-	return current().Icon(IconNameContentPaste)
+	return safeIconLookup(IconNameContentPaste)
 }
 
 // ContentRedoIcon returns a resource containing the standard content redo icon for the current theme
 func ContentRedoIcon() fyne.Resource {
-	return current().Icon(IconNameContentRedo)
+	return safeIconLookup(IconNameContentRedo)
 }
 
 // ContentUndoIcon returns a resource containing the standard content undo icon for the current theme
 func ContentUndoIcon() fyne.Resource {
-	return current().Icon(IconNameContentUndo)
+	return safeIconLookup(IconNameContentUndo)
 }
 
 // ColorAchromaticIcon returns a resource containing the standard achromatic color icon for the current theme
 func ColorAchromaticIcon() fyne.Resource {
-	return current().Icon(IconNameColorAchromatic)
+	return safeIconLookup(IconNameColorAchromatic)
 }
 
 // ColorChromaticIcon returns a resource containing the standard chromatic color icon for the current theme
 func ColorChromaticIcon() fyne.Resource {
-	return current().Icon(IconNameColorChromatic)
+	return safeIconLookup(IconNameColorChromatic)
 }
 
 // ColorPaletteIcon returns a resource containing the standard color palette icon for the current theme
 func ColorPaletteIcon() fyne.Resource {
-	return current().Icon(IconNameColorPalette)
+	return safeIconLookup(IconNameColorPalette)
 }
 
 // DocumentIcon returns a resource containing the standard document icon for the current theme
 func DocumentIcon() fyne.Resource {
-	return current().Icon(IconNameDocument)
+	return safeIconLookup(IconNameDocument)
 }
 
 // DocumentCreateIcon returns a resource containing the standard document create icon for the current theme
 func DocumentCreateIcon() fyne.Resource {
-	return current().Icon(IconNameDocumentCreate)
+	return safeIconLookup(IconNameDocumentCreate)
 }
 
 // DocumentPrintIcon returns a resource containing the standard document print icon for the current theme
 func DocumentPrintIcon() fyne.Resource {
-	return current().Icon(IconNameDocumentPrint)
+	return safeIconLookup(IconNameDocumentPrint)
 }
 
 // DocumentSaveIcon returns a resource containing the standard document save icon for the current theme
 func DocumentSaveIcon() fyne.Resource {
-	return current().Icon(IconNameDocumentSave)
+	return safeIconLookup(IconNameDocumentSave)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
 func InfoIcon() fyne.Resource {
-	return current().Icon(IconNameInfo)
+	return safeIconLookup(IconNameInfo)
 }
 
 // QuestionIcon returns a resource containing the standard dialog question icon for the current theme
 func QuestionIcon() fyne.Resource {
-	return current().Icon(IconNameQuestion)
+	return safeIconLookup(IconNameQuestion)
 }
 
 // WarningIcon returns a resource containing the standard dialog warning icon for the current theme
 func WarningIcon() fyne.Resource {
-	return current().Icon(IconNameWarning)
+	return safeIconLookup(IconNameWarning)
 }
 
 // ErrorIcon returns a resource containing the standard dialog error icon for the current theme
 func ErrorIcon() fyne.Resource {
-	return current().Icon(IconNameError)
+	return safeIconLookup(IconNameError)
 }
 
 // FileIcon returns a resource containing the appropriate file icon for the current theme
 func FileIcon() fyne.Resource {
-	return current().Icon(IconNameFile)
+	return safeIconLookup(IconNameFile)
 }
 
 // FileApplicationIcon returns a resource containing the file icon representing application files for the current theme
 func FileApplicationIcon() fyne.Resource {
-	return current().Icon(IconNameFileApplication)
+	return safeIconLookup(IconNameFileApplication)
 }
 
 // FileAudioIcon returns a resource containing the file icon representing audio files for the current theme
 func FileAudioIcon() fyne.Resource {
-	return current().Icon(IconNameFileAudio)
+	return safeIconLookup(IconNameFileAudio)
 }
 
 // FileImageIcon returns a resource containing the file icon representing image files for the current theme
 func FileImageIcon() fyne.Resource {
-	return current().Icon(IconNameFileImage)
+	return safeIconLookup(IconNameFileImage)
 }
 
 // FileTextIcon returns a resource containing the file icon representing text files for the current theme
 func FileTextIcon() fyne.Resource {
-	return current().Icon(IconNameFileText)
+	return safeIconLookup(IconNameFileText)
 }
 
 // FileVideoIcon returns a resource containing the file icon representing video files for the current theme
 func FileVideoIcon() fyne.Resource {
-	return current().Icon(IconNameFileVideo)
+	return safeIconLookup(IconNameFileVideo)
 }
 
 // FolderIcon returns a resource containing the standard folder icon for the current theme
 func FolderIcon() fyne.Resource {
-	return current().Icon(IconNameFolder)
+	return safeIconLookup(IconNameFolder)
 }
 
 // FolderNewIcon returns a resource containing the standard folder creation icon for the current theme
 func FolderNewIcon() fyne.Resource {
-	return current().Icon(IconNameFolderNew)
+	return safeIconLookup(IconNameFolderNew)
 }
 
 // FolderOpenIcon returns a resource containing the standard folder open icon for the current theme
 func FolderOpenIcon() fyne.Resource {
-	return current().Icon(IconNameFolderOpen)
+	return safeIconLookup(IconNameFolderOpen)
 }
 
 // HelpIcon returns a resource containing the standard help icon for the current theme
 func HelpIcon() fyne.Resource {
-	return current().Icon(IconNameHelp)
+	return safeIconLookup(IconNameHelp)
 }
 
 // HistoryIcon returns a resource containing the standard history icon for the current theme
 func HistoryIcon() fyne.Resource {
-	return current().Icon(IconNameHistory)
+	return safeIconLookup(IconNameHistory)
 }
 
 // HomeIcon returns a resource containing the standard home folder icon for the current theme
 func HomeIcon() fyne.Resource {
-	return current().Icon(IconNameHome)
+	return safeIconLookup(IconNameHome)
 }
 
 // SettingsIcon returns a resource containing the standard settings icon for the current theme
 func SettingsIcon() fyne.Resource {
-	return current().Icon(IconNameSettings)
+	return safeIconLookup(IconNameSettings)
 }
 
 // MailAttachmentIcon returns a resource containing the standard mail attachment icon for the current theme
 func MailAttachmentIcon() fyne.Resource {
-	return current().Icon(IconNameMailAttachment)
+	return safeIconLookup(IconNameMailAttachment)
 }
 
 // MailComposeIcon returns a resource containing the standard mail compose icon for the current theme
 func MailComposeIcon() fyne.Resource {
-	return current().Icon(IconNameMailCompose)
+	return safeIconLookup(IconNameMailCompose)
 }
 
 // MailForwardIcon returns a resource containing the standard mail forward icon for the current theme
 func MailForwardIcon() fyne.Resource {
-	return current().Icon(IconNameMailForward)
+	return safeIconLookup(IconNameMailForward)
 }
 
 // MailReplyIcon returns a resource containing the standard mail reply icon for the current theme
 func MailReplyIcon() fyne.Resource {
-	return current().Icon(IconNameMailReply)
+	return safeIconLookup(IconNameMailReply)
 }
 
 // MailReplyAllIcon returns a resource containing the standard mail reply all icon for the current theme
 func MailReplyAllIcon() fyne.Resource {
-	return current().Icon(IconNameMailReplyAll)
+	return safeIconLookup(IconNameMailReplyAll)
 }
 
 // MailSendIcon returns a resource containing the standard mail send icon for the current theme
 func MailSendIcon() fyne.Resource {
-	return current().Icon(IconNameMailSend)
+	return safeIconLookup(IconNameMailSend)
 }
 
 // MediaFastForwardIcon returns a resource containing the standard media fast-forward icon for the current theme
 func MediaFastForwardIcon() fyne.Resource {
-	return current().Icon(IconNameMediaFastForward)
+	return safeIconLookup(IconNameMediaFastForward)
 }
 
 // MediaFastRewindIcon returns a resource containing the standard media fast-rewind icon for the current theme
 func MediaFastRewindIcon() fyne.Resource {
-	return current().Icon(IconNameMediaFastRewind)
+	return safeIconLookup(IconNameMediaFastRewind)
 }
 
 // MediaPauseIcon returns a resource containing the standard media pause icon for the current theme
 func MediaPauseIcon() fyne.Resource {
-	return current().Icon(IconNameMediaPause)
+	return safeIconLookup(IconNameMediaPause)
 }
 
 // MediaPlayIcon returns a resource containing the standard media play icon for the current theme
 func MediaPlayIcon() fyne.Resource {
-	return current().Icon(IconNameMediaPlay)
+	return safeIconLookup(IconNameMediaPlay)
 }
 
 // MediaRecordIcon returns a resource containing the standard media record icon for the current theme
 func MediaRecordIcon() fyne.Resource {
-	return current().Icon(IconNameMediaRecord)
+	return safeIconLookup(IconNameMediaRecord)
 }
 
 // MediaReplayIcon returns a resource containing the standard media replay icon for the current theme
 func MediaReplayIcon() fyne.Resource {
-	return current().Icon(IconNameMediaReplay)
+	return safeIconLookup(IconNameMediaReplay)
 }
 
 // MediaSkipNextIcon returns a resource containing the standard media skip next icon for the current theme
 func MediaSkipNextIcon() fyne.Resource {
-	return current().Icon(IconNameMediaSkipNext)
+	return safeIconLookup(IconNameMediaSkipNext)
 }
 
 // MediaSkipPreviousIcon returns a resource containing the standard media skip previous icon for the current theme
 func MediaSkipPreviousIcon() fyne.Resource {
-	return current().Icon(IconNameMediaSkipPrevious)
+	return safeIconLookup(IconNameMediaSkipPrevious)
 }
 
 // MediaStopIcon returns a resource containing the standard media stop icon for the current theme
 func MediaStopIcon() fyne.Resource {
-	return current().Icon(IconNameMediaStop)
+	return safeIconLookup(IconNameMediaStop)
 }
 
 // MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
 func MoveDownIcon() fyne.Resource {
-	return current().Icon(IconNameMoveDown)
+	return safeIconLookup(IconNameMoveDown)
 }
 
 // MoveUpIcon returns a resource containing the standard up arrow icon for the current theme
 func MoveUpIcon() fyne.Resource {
-	return current().Icon(IconNameMoveUp)
+	return safeIconLookup(IconNameMoveUp)
 }
 
 // NavigateBackIcon returns a resource containing the standard backward navigation icon for the current theme
 func NavigateBackIcon() fyne.Resource {
-	return current().Icon(IconNameNavigateBack)
+	return safeIconLookup(IconNameNavigateBack)
 }
 
 // NavigateNextIcon returns a resource containing the standard forward navigation icon for the current theme
 func NavigateNextIcon() fyne.Resource {
-	return current().Icon(IconNameNavigateNext)
+	return safeIconLookup(IconNameNavigateNext)
 }
 
 // MenuDropDownIcon returns a resource containing the standard menu drop down icon for the current theme
 func MenuDropDownIcon() fyne.Resource {
-	return current().Icon(IconNameArrowDropDown)
+	return safeIconLookup(IconNameArrowDropDown)
 }
 
 // MenuDropUpIcon returns a resource containing the standard menu drop up icon for the current theme
 func MenuDropUpIcon() fyne.Resource {
-	return current().Icon(IconNameArrowDropUp)
+	return safeIconLookup(IconNameArrowDropUp)
 }
 
 // ViewFullScreenIcon returns a resource containing the standard fullscreen icon for the current theme
 func ViewFullScreenIcon() fyne.Resource {
-	return current().Icon(IconNameViewFullScreen)
+	return safeIconLookup(IconNameViewFullScreen)
 }
 
 // ViewRestoreIcon returns a resource containing the standard exit fullscreen icon for the current theme
 func ViewRestoreIcon() fyne.Resource {
-	return current().Icon(IconNameViewRestore)
+	return safeIconLookup(IconNameViewRestore)
 }
 
 // ViewRefreshIcon returns a resource containing the standard refresh icon for the current theme
 func ViewRefreshIcon() fyne.Resource {
-	return current().Icon(IconNameViewRefresh)
+	return safeIconLookup(IconNameViewRefresh)
 }
 
 // ZoomFitIcon returns a resource containing the standard zoom fit icon for the current theme
 func ZoomFitIcon() fyne.Resource {
-	return current().Icon(IconNameViewZoomFit)
+	return safeIconLookup(IconNameViewZoomFit)
 }
 
 // ZoomInIcon returns a resource containing the standard zoom in icon for the current theme
 func ZoomInIcon() fyne.Resource {
-	return current().Icon(IconNameViewZoomIn)
+	return safeIconLookup(IconNameViewZoomIn)
 }
 
 // ZoomOutIcon returns a resource containing the standard zoom out icon for the current theme
 func ZoomOutIcon() fyne.Resource {
-	return current().Icon(IconNameViewZoomOut)
+	return safeIconLookup(IconNameViewZoomOut)
 }
 
 // VisibilityIcon returns a resource containing the standard visibity icon for the current theme
 func VisibilityIcon() fyne.Resource {
-	return current().Icon(IconNameVisibility)
+	return safeIconLookup(IconNameVisibility)
 }
 
 // VisibilityOffIcon returns a resource containing the standard visibity off icon for the current theme
 func VisibilityOffIcon() fyne.Resource {
-	return current().Icon(IconNameVisibilityOff)
+	return safeIconLookup(IconNameVisibilityOff)
 }
 
 // VolumeDownIcon returns a resource containing the standard volume down icon for the current theme
 func VolumeDownIcon() fyne.Resource {
-	return current().Icon(IconNameVolumeDown)
+	return safeIconLookup(IconNameVolumeDown)
 }
 
 // VolumeMuteIcon returns a resource containing the standard volume mute icon for the current theme
 func VolumeMuteIcon() fyne.Resource {
-	return current().Icon(IconNameVolumeMute)
+	return safeIconLookup(IconNameVolumeMute)
 }
 
 // VolumeUpIcon returns a resource containing the standard volume up icon for the current theme
 func VolumeUpIcon() fyne.Resource {
-	return current().Icon(IconNameVolumeUp)
+	return safeIconLookup(IconNameVolumeUp)
 }
 
 // ComputerIcon returns a resource containing the standard computer icon for the current theme
 func ComputerIcon() fyne.Resource {
-	return current().Icon(IconNameComputer)
+	return safeIconLookup(IconNameComputer)
 }
 
 // DownloadIcon returns a resource containing the standard download icon for the current theme
 func DownloadIcon() fyne.Resource {
-	return current().Icon(IconNameDownload)
+	return safeIconLookup(IconNameDownload)
 }
 
 // StorageIcon returns a resource containing the standard storage icon for the current theme
 func StorageIcon() fyne.Resource {
-	return current().Icon(IconNameStorage)
+	return safeIconLookup(IconNameStorage)
 }
 
 // UploadIcon returns a resource containing the standard upload icon for the current theme
 func UploadIcon() fyne.Resource {
-	return current().Icon(IconNameUpload)
+	return safeIconLookup(IconNameUpload)
+}
+
+func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
+	icon := current().Icon(n)
+	if icon == nil {
+		return &fyne.StaticResource{}
+	}
+	return icon
 }
