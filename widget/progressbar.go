@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -63,7 +64,7 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
-	p.background.FillColor = theme.ShadowColor()
+	p.background.FillColor = progressBackgroundColor()
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.ForegroundColor()
 	p.label.TextSize = theme.TextSize()
@@ -174,4 +175,10 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p.Bind(data)
 
 	return p
+}
+
+func progressBackgroundColor() color.Color {
+	r, g, b, a := theme.PrimaryColor().RGBA()
+	faded := uint8(a) / 3
+	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }

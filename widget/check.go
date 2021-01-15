@@ -84,7 +84,7 @@ func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	} else if c.check.focused {
-		c.focusIndicator.FillColor = theme.PrimaryColor()
+		c.focusIndicator.FillColor = theme.FocusColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
