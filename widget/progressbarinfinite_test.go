@@ -52,17 +52,19 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 
 	render := test.WidgetRenderer(bar).(*infProgressRenderer)
 
-	// width of bar is one step size because updateBar() will have run once
-	assert.Equal(t, width*progressBarInfiniteStepSizeRatio, render.bar.Size().Width)
+	render.updateBar(0.0)
+	// start at the smallest size
+	assert.Equal(t, width*minProgressBarInfiniteWidthRatio, render.bar.Size().Width)
 
 	// make sure the inner progress bar grows in size
 	// call updateBar() enough times to grow the inner bar
 	maxWidth := width * maxProgressBarInfiniteWidthRatio
-	for i := 0; i < int(maxWidth); i++ {
-		render.updateBar()
-	}
-
-	// width of bar is 1/5 of total width of progress bar
+	render.updateBar(0.5)
 	assert.Equal(t, maxWidth, render.bar.Size().Width)
+
+	render.updateBar(1.0)
+	// ends at the smallest size again
+	assert.Equal(t, width*minProgressBarInfiniteWidthRatio, render.bar.Size().Width)
+
 	bar.Hide()
 }
