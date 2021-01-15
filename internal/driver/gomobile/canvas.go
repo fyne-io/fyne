@@ -325,7 +325,7 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
 
-		if len(c.windowHead.(*widget.Box).Children) > 1 {
+		if len(c.windowHead.(*fyne.Container).Objects) > 1 {
 			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
 			offset = fyne.NewPos(0, topHeight)
 			areaSize = areaSize.Subtract(offset)

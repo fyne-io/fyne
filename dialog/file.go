@@ -24,7 +24,7 @@ type fileDialog struct {
 	fileName   textWidget
 	dismiss    *widget.Button
 	open       *widget.Button
-	breadcrumb *widget.Box
+	breadcrumb *fyne.Container
 	files      *fyne.Container
 	fileScroll *container.Scroll
 	showHidden bool
@@ -136,7 +136,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			callback(f.dir, nil)
 		}
 	})
-	f.open.Style = widget.PrimaryButton
+	f.open.Importance = widget.HighImportance
 	f.open.Disable()
 	if f.file.save {
 		f.fileName.SetText(f.initialFileName)
@@ -160,7 +160,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 		}
 	})
-	buttons := widget.NewHBox(f.dismiss, f.open)
+	buttons := container.NewHBox(f.dismiss, f.open)
 
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, container.NewHScroll(f.fileName))
@@ -173,7 +173,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 
-	f.breadcrumb = widget.NewHBox()
+	f.breadcrumb = container.NewHBox()
 	scrollBread := container.NewHScroll(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
@@ -185,7 +185,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	favorites := f.loadFavorites()
 
-	favoritesGroup := container.NewVScroll(widget.NewGroup("Favorites", favorites...))
+	favoritesGroup := container.NewVScroll(widget.NewCard("Favorites", "",
+		container.NewVBox(favorites...)))
 	var optionsButton *widget.Button
 	optionsButton = widget.NewButtonWithIcon("Options", theme.SettingsIcon(), func() {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
@@ -282,7 +283,7 @@ func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 	f.setSelected(nil)
 	f.dir = dir
 
-	f.breadcrumb.Children = nil
+	f.breadcrumb.Objects = nil
 
 	localdir := dir.String()[len(dir.Scheme())+3:]
 
@@ -305,7 +306,7 @@ func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 		if err != nil {
 			return err
 		}
-		f.breadcrumb.Append(
+		f.breadcrumb.Add(
 			widget.NewButton(d, func() {
 				err := f.setLocation(newDir)
 				if err != nil {

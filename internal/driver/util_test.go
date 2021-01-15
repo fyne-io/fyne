@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/internal/driver"
 	internal_widget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
@@ -274,7 +275,7 @@ func TestReverseWalkVisibleObjectTree(t *testing.T) {
 	child2 := canvas.NewRectangle(color.Black)
 	child2.Hide()
 	child3 := canvas.NewRectangle(color.White)
-	base := widget.NewHBox(child1, child2, child3)
+	base := container.NewHBox(child1, child2, child3)
 
 	var walked []fyne.CanvasObject
 	driver.ReverseWalkVisibleObjectTree(
@@ -348,7 +349,7 @@ func TestWalkVisibleObjectTree(t *testing.T) {
 	child2 := canvas.NewRectangle(color.Black)
 	child2.Hide()
 	child3 := canvas.NewRectangle(color.White)
-	base := widget.NewHBox(child1, child2, child3)
+	base := container.NewHBox(child1, child2, child3)
 
 	var walked []fyne.CanvasObject
 	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
@@ -418,7 +419,7 @@ func TestWalkWholeObjectTree(t *testing.T) {
 	child2 := canvas.NewRectangle(color.Black)
 	child2.Hide()
 	child3 := canvas.NewRectangle(color.White)
-	base := widget.NewHBox(child1, child2, child3)
+	base := container.NewHBox(child1, child2, child3)
 
 	var walked []fyne.CanvasObject
 	driver.WalkCompleteObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
