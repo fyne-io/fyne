@@ -20,7 +20,7 @@ const (
 type infProgressRenderer struct {
 	widget.BaseRenderer
 	background, bar *canvas.Rectangle
-	ticker          *time.Ticker
+	animation       *fyne.Animation
 	running         bool
 	progress        *ProgressBarInfinite
 }
@@ -33,45 +33,29 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }
 
-func (p *infProgressRenderer) updateBar() {
-	progressSize := p.progress.Size()
-	barWidth := p.bar.Size().Width
-	barPos := p.bar.Position()
+func (p *infProgressRenderer) updateBar(done float32) {
+	progressWidth := p.progress.size.Width
+	spanWidth := progressWidth + (progressWidth * (maxProgressBarInfiniteWidthRatio / 2))
+	maxBarWidth := progressWidth * maxProgressBarInfiniteWidthRatio
 
-	maxBarWidth := progressSize.Width * maxProgressBarInfiniteWidthRatio
-	minBarWidth := progressSize.Width * minProgressBarInfiniteWidthRatio
-	stepSize := progressSize.Width * progressBarInfiniteStepSizeRatio
-
-	// check to make sure inner bar is sized correctly
-	// if bar is on the first half of the progress bar, grow it up to maxProgressBarInfiniteWidthPercent
-	// if on the second half of the progress bar width, shrink it down until it gets to minProgressBarInfiniteWidthPercent
-	if barWidth < maxBarWidth && barPos.X+barWidth < progressSize.Width/2 {
-		// slightly increase width
-		newBoxSize := fyne.Size{Width: barWidth + stepSize, Height: progressSize.Height}
-		p.bar.Resize(newBoxSize)
-	} else {
-		barPos.X += stepSize
-
-		if barWidth <= minBarWidth {
-			// loop around to start when bar goes to end
-			barPos.X = 0
-			newBoxSize := fyne.Size{Width: minBarWidth, Height: progressSize.Height}
-			p.bar.Resize(newBoxSize)
-		} else if barPos.X+barWidth > progressSize.Width {
-			// crop to the end of the bar
-			barWidth = progressSize.Width - barPos.X
-			newBoxSize := fyne.Size{Width: barWidth, Height: progressSize.Height}
-			p.bar.Resize(newBoxSize)
-		}
+	barCenterX := spanWidth*done - (spanWidth-progressWidth)/2
+	barPos := fyne.NewPos(barCenterX-maxBarWidth/2, 0)
+	barSize := fyne.NewSize(maxBarWidth, p.progress.size.Height)
+	if barPos.X < 0 {
+		barSize.Width += barPos.X
+		barPos.X = 0
+	}
+	if barPos.X+barSize.Width > progressWidth {
+		barSize.Width = progressWidth - barPos.X
 	}
 
+	p.bar.Resize(barSize)
 	p.bar.Move(barPos)
 }
 
 // Layout the components of the infinite progress bar
 func (p *infProgressRenderer) Layout(size fyne.Size) {
 	p.background.Resize(size)
-	p.updateBar()
 }
 
 // Refresh updates the size and position of the horizontal scrolling infinite progress bar
@@ -80,14 +64,8 @@ func (p *infProgressRenderer) Refresh() {
 		return // we refresh from the goroutine
 	}
 
-	p.doRefresh()
-}
-
-func (p *infProgressRenderer) doRefresh() {
 	p.background.FillColor = progressBackgroundColor()
 	p.bar.FillColor = theme.PrimaryColor()
-
-	p.updateBar()
 	p.background.Refresh()
 	p.bar.Refresh()
 	canvas.Refresh(p.progress.super())
@@ -102,14 +80,18 @@ func (p *infProgressRenderer) isRunning() bool {
 
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
-	if !p.isRunning() {
-		p.progress.propertyLock.Lock()
-		defer p.progress.propertyLock.Unlock()
-		p.ticker = time.NewTicker(infiniteRefreshRate)
-		p.running = true
-
-		go p.infiniteProgressLoop()
+	if p.isRunning() {
+		return
 	}
+
+	p.progress.propertyLock.Lock()
+	defer p.progress.propertyLock.Unlock()
+	p.animation = fyne.NewAnimation(time.Second*3, p.updateBar)
+	p.animation.Curve = fyne.AnimationLinear
+	p.animation.RepeatCount = fyne.AnimationRepeatForever
+	p.running = true
+
+	p.animation.Start()
 }
 
 // Stop the background thread from updating the infinite progress bar
@@ -118,25 +100,7 @@ func (p *infProgressRenderer) stop() {
 	defer p.progress.propertyLock.Unlock()
 
 	p.running = false
-}
-
-// infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
-// the function can be exited by calling Stop()
-func (p *infProgressRenderer) infiniteProgressLoop() {
-	for p.isRunning() {
-		p.progress.propertyLock.RLock()
-		ticker := p.ticker.C
-		p.progress.propertyLock.RUnlock()
-
-		<-ticker
-		p.doRefresh()
-	}
-
-	p.progress.propertyLock.RLock()
-	defer p.progress.propertyLock.RUnlock()
-	if p.ticker != nil {
-		p.ticker.Stop()
-	}
+	p.animation.Stop()
 }
 
 func (p *infProgressRenderer) Destroy() {
