@@ -84,7 +84,7 @@ func (p *infProgressRenderer) Refresh() {
 }
 
 func (p *infProgressRenderer) doRefresh() {
-	p.background.FillColor = theme.ShadowColor()
+	p.background.FillColor = progressBackgroundColor()
 	p.bar.FillColor = theme.PrimaryColor()
 
 	p.updateBar()
@@ -189,7 +189,7 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	background := canvas.NewRectangle(theme.ShadowColor())
+	background := canvas.NewRectangle(progressBackgroundColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, bar}),
