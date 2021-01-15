@@ -61,6 +61,7 @@ type Entry struct {
 	text        *textProvider
 	placeholder *textProvider
 	content     *entryContent
+	scroll      *widget.Scroll
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -83,7 +84,7 @@ type Entry struct {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	e := &Entry{}
+	e := &Entry{Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -100,7 +101,7 @@ func NewEntryWithData(data binding.String) *Entry {
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
-	e := &Entry{MultiLine: true}
+	e := &Entry{MultiLine: true, Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -162,9 +163,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
-	scroll := widget.NewScroll(e.content)
-	objects := []fyne.CanvasObject{box, line, scroll}
-	e.content.scroll = scroll
+	e.scroll = widget.NewScroll(e.content)
+	objects := []fyne.CanvasObject{box, line, e.scroll}
+	e.content.scroll = e.scroll
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -176,7 +177,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{box, line, scroll, objects, e}
+	return &entryRenderer{box, line, e.scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -771,7 +772,7 @@ func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 	defer e.propertyLock.RUnlock()
 
 	rowHeight := e.textProvider().charMinSize().Height
-	row := int(math.Floor(float64(ev.Position.Y-theme.Padding()) / float64(rowHeight)))
+	row := int(math.Floor(float64(ev.Position.Y+e.scroll.Offset.Y-theme.Padding()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
 		row = 0
@@ -779,7 +780,7 @@ func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 		row = e.textProvider().rows() - 1
 		col = 0
 	} else {
-		col = e.cursorColAt(e.textProvider().row(row), ev.Position)
+		col = e.cursorColAt(e.textProvider().row(row), ev.Position.Add(e.scroll.Offset))
 	}
 
 	return row, col
@@ -830,6 +831,7 @@ func (e *Entry) placeholderProvider() *textProvider {
 
 	text := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 	text.ExtendBaseWidget(text)
+	text.extraPad = fyne.NewSize(theme.Padding(), theme.InputBorderSize())
 	e.placeholder = text
 	return e.placeholder
 }
@@ -856,6 +858,7 @@ func (e *Entry) registerShortcut() {
 // expects a read or write lock to be held by the caller
 func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
+	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
 	for i := 0; i < provider.rows(); i++ {
 		b := provider.rowBoundary(i)
 		if b[0] <= pos {
@@ -863,7 +866,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b[0]
-			if e.Wrapping != fyne.TextWrapOff && b[0] == pos && col == 0 && pos != 0 {
+			if canWrap && b[0] == pos && col == 0 && pos != 0 {
 				row++
 			}
 		} else {
@@ -1005,6 +1008,7 @@ func (e *Entry) textProvider() *textProvider {
 
 	text := newTextProvider(e.Text, e)
 	text.ExtendBaseWidget(text)
+	text.extraPad = fyne.NewSize(theme.Padding(), theme.InputBorderSize())
 	e.text = text
 	return e.text
 }
@@ -1016,13 +1020,13 @@ func (e *Entry) textStyle() fyne.TextStyle {
 
 // textWrap tells the rendering textProvider our wrapping
 func (e *Entry) textWrap() fyne.TextWrap {
-	if e.Wrapping == fyne.TextTruncate {
-		fyne.LogError("Entry does not allow Truncation", nil)
-		e.Wrapping = fyne.TextWrapOff
+	if e.Wrapping == fyne.TextTruncate { // this is now the default - but we scroll around this large content
+		return fyne.TextWrapOff
 	}
-	if !e.MultiLine && e.Wrapping != fyne.TextWrapOff {
+
+	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
 		fyne.LogError("Entry cannot wrap single line", nil)
-		e.Wrapping = fyne.TextWrapOff
+		e.Wrapping = fyne.TextTruncate
 	}
 	return e.Wrapping
 }
@@ -1073,22 +1077,21 @@ type entryRenderer struct {
 	entry   *Entry
 }
 
-func (r *entryRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
 func (r *entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
 	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
 	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
-	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.Padding())))
-	r.box.Move(fyne.NewPos(0, theme.Padding()))
+	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.InputBorderSize()*2)))
+	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
+	xInset := float32(0)
 	if r.entry.ActionItem != nil {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		xInset = theme.IconInlineSize() + 2*theme.Padding()
+
 		r.entry.ActionItem.Resize(actionIconSize)
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 	}
@@ -1102,13 +1105,15 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 		if r.entry.ActionItem == nil {
 			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+			xInset = theme.IconInlineSize() + 2*theme.Padding()
 		} else {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-3*theme.Padding(), theme.Padding()*2))
+			xInset += theme.IconInlineSize() + theme.Padding()
 		}
 	}
 
-	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2+actionIconSize.Width, theme.Padding()*2))
-	entryPos := fyne.NewPos(theme.Padding(), theme.Padding())
+	entrySize := size.Subtract(fyne.NewSize(xInset, theme.InputBorderSize()*2))
+	entryPos := fyne.NewPos(0, theme.InputBorderSize())
 	r.scroll.Resize(entrySize)
 	r.scroll.Move(entryPos)
 }
@@ -1117,6 +1122,10 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (r *entryRenderer) MinSize() fyne.Size {
+	if r.scroll.Direction == widget.ScrollNone {
+		return r.scroll.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
+	}
+
 	minSize := r.entry.placeholderProvider().charMinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if r.entry.MultiLine {
@@ -1220,6 +1229,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 
 	r := &entryContentRenderer{cursor, []fyne.CanvasObject{}, nil, objects,
 		provider, placeholder, e}
+	r.updateScrollDirections()
 	r.Layout(e.size)
 	return r
 }
@@ -1253,11 +1263,6 @@ type entryContentRenderer struct {
 
 	provider, placeholder *textProvider
 	content               *entryContent
-}
-
-func (r *entryContentRenderer) BackgroundColor() color.Color {
-	// Workaround until BackgroundColor is finally removed.
-	return theme.FocusColor()
 }
 
 func (r *entryContentRenderer) Destroy() {
@@ -1296,6 +1301,7 @@ func (r *entryContentRenderer) Refresh() {
 	content := r.content.entry.Text
 	focused := r.content.entry.focused
 	selections := r.selection
+	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
@@ -1413,7 +1419,7 @@ func (r *entryContentRenderer) buildSelection() {
 
 		// resize and reposition each rectangle
 		r.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
-		r.selection[i].Move(fyne.NewPos(x1-1, y1))
+		r.selection[i].Move(fyne.NewPos(x1-1, y1+theme.InputBorderSize()))
 	}
 }
 
@@ -1460,7 +1466,7 @@ func (r *entryContentRenderer) moveCursor() {
 	r.content.entry.propertyLock.Lock()
 	lineHeight := r.content.entry.text.charMinSize().Height
 	r.cursor.Resize(fyne.NewSize(2, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding(), yPos+theme.Padding()))
+	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding(), yPos+theme.Padding()+theme.InputBorderSize()))
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()
@@ -1468,6 +1474,17 @@ func (r *entryContentRenderer) moveCursor() {
 
 	if callback != nil {
 		callback()
+	}
+}
+
+func (r *entryContentRenderer) updateScrollDirections() {
+	switch r.content.entry.Wrapping {
+	case fyne.TextWrapOff:
+		r.content.scroll.Direction = widget.ScrollNone
+	case fyne.TextTruncate: // this is now the default - but we scroll
+		r.content.scroll.Direction = widget.ScrollBoth
+	default: // fyne.TextWrapBreak, fyne.TextWrapWord
+		r.content.scroll.Direction = widget.ScrollVerticalOnly
 	}
 }
 

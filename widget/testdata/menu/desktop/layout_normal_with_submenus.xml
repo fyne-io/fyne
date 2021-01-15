@@ -17,6 +17,7 @@
 				</widget>
 				<widget size="71x108" type="*widget.Scroll">
 					<widget size="71x108" type="*widget.menuBox">
+						<rectangle fillColor="background" size="71x116"/>
 						<container pos="0,4" size="71x116">
 							<widget size="71x29" type="*widget.menuItem">
 								<text pos="8,4" size="10x21">A</text>
@@ -27,7 +28,8 @@
 							<widget pos="0,38" size="71x29" type="*widget.menuItem">
 								<text pos="8,4" size="55x21">B (long)</text>
 							</widget>
-							<widget backgroundColor="hover" pos="0,71" size="71x29" type="*widget.menuItem">
+							<widget pos="0,71" size="71x29" type="*widget.menuItem">
+								<rectangle fillColor="focus" size="71x29"/>
 								<text pos="8,4" size="10x21">C</text>
 								<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
@@ -47,6 +49,7 @@
 					</widget>
 					<widget size="153x103" type="*widget.Scroll">
 						<widget size="153x103" type="*widget.menuBox">
+							<rectangle fillColor="background" size="153x111"/>
 							<container pos="0,4" size="153x111">
 								<widget size="153x29" type="*widget.menuItem">
 									<text pos="8,4" size="72x21">subitem A</text>
@@ -54,7 +57,8 @@
 								<widget pos="0,33" size="153x29" type="*widget.menuItem">
 									<text pos="8,4" size="72x21">subitem B</text>
 								</widget>
-								<widget backgroundColor="hover" pos="0,66" size="153x29" type="*widget.menuItem">
+								<widget pos="0,66" size="153x29" type="*widget.menuItem">
+									<rectangle fillColor="focus" size="153x29"/>
 									<text pos="8,4" size="117x21">subitem C (long)</text>
 									<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
@@ -74,6 +78,7 @@
 						</widget>
 						<widget size="159x70" type="*widget.Scroll">
 							<widget size="159x70" type="*widget.menuBox">
+								<rectangle fillColor="background" size="159x78"/>
 								<container pos="0,4" size="159x78">
 									<widget size="159x29" type="*widget.menuItem">
 										<text pos="8,4" size="143x21">subsubitem A (long)</text>

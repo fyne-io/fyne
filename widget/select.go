@@ -64,11 +64,11 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv := newTextProvider(s.Selected, s)
 	txtProv.ExtendBaseWidget(txtProv)
 
-	bg := canvas.NewRectangle(color.Transparent)
+	background := &canvas.Rectangle{}
 	s.tapBG = canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{bg, s.tapBG, txtProv, icon}
-	r := &selectRenderer{icon, txtProv, bg, objects, s}
-	bg.FillColor = r.buttonColor()
+	objects := []fyne.CanvasObject{background, s.tapBG, txtProv, icon}
+	r := &selectRenderer{icon, txtProv, background, objects, s}
+	background.FillColor = r.buttonColor()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
 	r.updateLabel()
@@ -294,16 +294,12 @@ func (s *Select) updateSelected(text string) {
 }
 
 type selectRenderer struct {
-	icon  *Icon
-	label *textProvider
-	bg    *canvas.Rectangle
+	icon       *Icon
+	label      *textProvider
+	background *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	combo   *Select
-}
-
-func (s *selectRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (s *selectRenderer) Objects() []fyne.CanvasObject {
@@ -314,8 +310,8 @@ func (s *selectRenderer) Destroy() {}
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
-	s.bg.Move(fyne.NewPos(0, 0))
-	s.bg.Resize(size)
+	s.background.Move(fyne.NewPos(0, 0))
+	s.background.Resize(size)
 
 	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding()*2, (size.Height-theme.IconInlineSize())/2)
 	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), size.Height)
@@ -346,7 +342,7 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RLock()
 	s.updateLabel()
 	s.updateIcon()
-	s.bg.FillColor = s.buttonColor()
+	s.background.FillColor = s.buttonColor()
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
@@ -354,6 +350,7 @@ func (s *selectRenderer) Refresh() {
 		s.combo.Move(s.combo.position)
 		s.combo.Resize(s.combo.size)
 	}
+	s.background.Refresh()
 	canvas.Refresh(s.combo.super())
 }
 

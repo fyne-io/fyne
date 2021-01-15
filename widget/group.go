@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -20,14 +21,14 @@ type Group struct {
 func (g *Group) Prepend(object fyne.CanvasObject) {
 	g.box.Prepend(object)
 
-	Refresh(g)
+	g.Refresh()
 }
 
 // Append adds a new CanvasObject to the end of the group
 func (g *Group) Append(object fyne.CanvasObject) {
 	g.box.Append(object)
 
-	Refresh(g)
+	g.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -57,7 +58,7 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
 	group := &Group{BaseWidget{}, title, box, box}
 
-	Renderer(group).Layout(group.MinSize())
+	cache.Renderer(group).Layout(group.MinSize())
 	return group
 }
 
@@ -68,7 +69,7 @@ func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
 	group := &Group{BaseWidget{}, title, box, widget.NewVScroll(box)}
 
-	Renderer(group).Layout(group.MinSize())
+	cache.Renderer(group).Layout(group.MinSize())
 	return group
 }
 

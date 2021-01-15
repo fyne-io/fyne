@@ -7,7 +7,6 @@
 						<widget pos="28,4" size="160x37" type="*widget.Label">
 							<text pos="4,8" size="152x21">11111</text>
 						</widget>
-						<rectangle fillColor="background" size="4x45"/>
 					</widget>
 				</widget>
 			</widget>
