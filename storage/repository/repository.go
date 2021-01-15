@@ -33,6 +33,11 @@ var repositoryTable map[string]Repository = map[string]Repository{}
 // cases, the repository must internally select and implement the correct
 // behavior for each URI scheme.
 //
+// A repository will only ever need to handle URIs with schemes for which it
+// was registered, with the exception that functions with more than 1 operand
+// such as Copy() and Move(), in which cases only the first operand is
+// guaranteed to match a scheme for which the repository is registered.
+//
 // NOTE: most developers who use Fyne should *not* generally attempt to
 // call repository methods directly. You should use the methods in the storage
 // package, which will automatically detect the scheme of a URI and call into
