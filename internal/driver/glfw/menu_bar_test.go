@@ -4,21 +4,18 @@
 package glfw_test
 
 import (
-	//"strconv"
-
+	"strconv"
 	"testing"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver/glfw"
 	"fyne.io/fyne/test"
-
-	//"fyne.io/fyne/widget"
+	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-/* STOPSHIP temporarily disabled and should be re-enabled
 func TestMenuBar(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -196,30 +193,32 @@ func TestMenuBar(t *testing.T) {
 					},
 				},
 			},
-			"menu action File->Recent->Older->Old 1": {
-				[]step{
-					{
-						actions: []action{
-							{"tap", fileMenuPos},
-							{"move", fileRecentPos},
+			/*
+				"menu action File->Recent->Older->Old 1": {
+					[]step{
+						{
+							actions: []action{
+								{"tap", fileMenuPos},
+								{"move", fileRecentPos},
+							},
+							wantImage: "menu_bar_hovered_file_recent.png",
 						},
-						wantImage: "menu_bar_hovered_file_recent.png",
-					},
-					{
-						actions:   []action{{"move", fileRecentOlderPos}},
-						wantImage: "menu_bar_hovered_file_recent_older.png",
-					},
-					{
-						actions:   []action{{"move", fileRecentOlderOld1Pos}},
-						wantImage: "menu_bar_hovered_file_recent_older_old1.png",
-					},
-					{
-						actions:    []action{{"tap", fileRecentOlderOld1Pos}},
-						wantAction: "old 1",
-						wantImage:  "menu_bar_initial.png",
+						{
+							actions:   []action{{"move", fileRecentOlderPos}},
+							wantImage: "menu_bar_hovered_file_recent_older.png",
+						},
+						{
+							actions:   []action{{"move", fileRecentOlderOld1Pos}},
+							wantImage: "menu_bar_hovered_file_recent_older_old1.png",
+						},
+						{
+							actions:    []action{{"tap", fileRecentOlderOld1Pos}},
+							wantAction: "old 1",
+							wantImage:  "menu_bar_initial.png",
+						},
 					},
 				},
-			},
+			*/
 			"move mouse outside does not hide menu": {
 				[]step{
 					{
@@ -451,7 +450,6 @@ func TestMenuBar(t *testing.T) {
 		})
 	})
 }
-*/
 
 func TestMenuBar_Toggle(t *testing.T) {
 	test.NewApp()
