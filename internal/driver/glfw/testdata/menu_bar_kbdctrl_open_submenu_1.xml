@@ -16,7 +16,7 @@
 				<rectangle size="0x0"/>
 				<text bold pos="12,8" size="53x21">Button</text>
 			</widget>
-			<widget backgroundColor="button" size="300x29" type="*glfw.MenuBar">
+			<widget size="300x29" type="*glfw.MenuBar">
 				<widget size="300x29" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 					<linearGradient endColor="shadow" pos="0,-4" size="300x4"/>
@@ -27,10 +27,12 @@
 					<radialGradient centerOffset="0.5,-0.5" pos="-4,29" size="4x4" startColor="shadow"/>
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x29"/>
 				</widget>
-				<widget size="300x300" type="*glfw.menuBarBackground">
+				<widget size="300x300" type="*glfw.menuBarUnderlay">
 				</widget>
+				<rectangle fillColor="button" size="300x29"/>
 				<container pos="4,0" size="292x29">
-					<widget backgroundColor="focus" size="41x29" type="*glfw.menuBarItem">
+					<widget size="41x29" type="*glfw.menuBarItem">
+						<rectangle fillColor="focus" size="41x29"/>
 						<text pos="8,4" size="25x21">File</text>
 					</widget>
 					<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
@@ -53,6 +55,7 @@
 					</widget>
 					<widget size="85x103" type="*widget.Scroll">
 						<widget size="85x103" type="*widget.menuBox">
+							<rectangle fillColor="background" size="85x111"/>
 							<container pos="0,4" size="85x111">
 								<widget size="85x29" type="*widget.menuItem">
 									<text pos="8,4" size="33x21">New</text>
@@ -60,7 +63,8 @@
 								<widget pos="0,33" size="85x29" type="*widget.menuItem">
 									<text pos="8,4" size="40x21">Open</text>
 								</widget>
-								<widget backgroundColor="focus" pos="0,66" size="85x29" type="*widget.menuItem">
+								<widget pos="0,66" size="85x29" type="*widget.menuItem">
+									<rectangle fillColor="focus" size="85x29"/>
 									<text pos="8,4" size="49x21">Recent</text>
 									<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
@@ -80,8 +84,10 @@
 						</widget>
 						<widget size="76x103" type="*widget.Scroll">
 							<widget size="76x103" type="*widget.menuBox">
+								<rectangle fillColor="background" size="76x111"/>
 								<container pos="0,4" size="76x111">
-									<widget backgroundColor="focus" size="76x29" type="*widget.menuItem">
+									<widget size="76x29" type="*widget.menuItem">
+										<rectangle fillColor="focus" size="76x29"/>
 										<text pos="8,4" size="37x21">File 1</text>
 									</widget>
 									<widget pos="0,33" size="76x29" type="*widget.menuItem">
