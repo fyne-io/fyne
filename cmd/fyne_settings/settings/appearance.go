@@ -189,7 +189,7 @@ func newColorButton(n string, c color.Color, s *Settings) *colorButton {
 }
 
 func (c *colorButton) CreateRenderer() fyne.WidgetRenderer {
-	r := canvas.NewRectangle(color.Transparent)
+	r := canvas.NewRectangle(c.color)
 	r.StrokeWidth = 5
 
 	if c.name == c.s.fyneSettings.PrimaryColor {
@@ -229,12 +229,9 @@ func (c *colorRenderer) Refresh() {
 	} else {
 		c.rect.StrokeColor = color.Transparent
 	}
+	c.rect.FillColor = c.c.color
 
 	c.rect.Refresh()
-}
-
-func (c *colorRenderer) BackgroundColor() color.Color {
-	return c.c.color
 }
 
 func (c *colorRenderer) Objects() []fyne.CanvasObject {

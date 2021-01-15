@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
@@ -97,18 +95,20 @@ func (p *PopUp) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	bg := canvas.NewRectangle(theme.BackgroundColor())
-	objects := []fyne.CanvasObject{bg, p.Content}
+	background := canvas.NewRectangle(theme.BackgroundColor())
 	if p.modal {
+		underlay := canvas.NewRectangle(theme.ShadowColor())
+		objects := []fyne.CanvasObject{underlay, background, p.Content}
 		return &modalPopUpRenderer{
 			widget.NewShadowingRenderer(objects, widget.DialogLevel),
-			popUpBaseRenderer{popUp: p, bg: bg},
+			popUpBaseRenderer{popUp: p, background: background},
+			underlay,
 		}
 	}
-
+	objects := []fyne.CanvasObject{background, p.Content}
 	return &popUpRenderer{
 		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
-		popUpBaseRenderer{popUp: p, bg: bg},
+		popUpBaseRenderer{popUp: p, background: background},
 	}
 }
 
@@ -154,8 +154,8 @@ func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
 }
 
 type popUpBaseRenderer struct {
-	popUp *PopUp
-	bg    *canvas.Rectangle
+	popUp      *PopUp
+	background *canvas.Rectangle
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
@@ -189,8 +189,8 @@ func (r *popUpRenderer) Layout(_ fyne.Size) {
 	}
 	r.popUp.Content.Move(innerPos.Add(r.offset()))
 
-	r.bg.Resize(r.popUp.innerSize)
-	r.bg.Move(innerPos)
+	r.background.Resize(r.popUp.innerSize)
+	r.background.Move(innerPos)
 	r.LayoutShadow(r.popUp.innerSize, innerPos)
 }
 
@@ -199,22 +199,22 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *popUpRenderer) Refresh() {
-	r.bg.FillColor = theme.BackgroundColor()
-	if r.bg.Size() != r.popUp.innerSize || r.bg.Position() != r.popUp.innerPos {
+	r.background.FillColor = theme.BackgroundColor()
+	if r.background.Size() != r.popUp.innerSize || r.background.Position() != r.popUp.innerPos {
 		r.Layout(r.popUp.Size())
 	}
-}
-
-func (r *popUpRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	r.background.Refresh()
 }
 
 type modalPopUpRenderer struct {
 	*widget.ShadowingRenderer
 	popUpBaseRenderer
+	underlay *canvas.Rectangle
 }
 
 func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
+	r.underlay.Resize(canvasSize)
+
 	padding := r.padding()
 	innerSize := r.popUp.innerSize.Max(r.popUp.Content.MinSize().Add(padding))
 
@@ -226,8 +226,8 @@ func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	r.popUp.Content.Resize(size)
 
 	innerPos := pos.Subtract(r.offset())
-	r.bg.Move(innerPos)
-	r.bg.Resize(size.Add(padding))
+	r.background.Move(innerPos)
+	r.background.Resize(size.Add(padding))
 	r.LayoutShadow(innerSize, innerPos)
 }
 
@@ -236,12 +236,10 @@ func (r *modalPopUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *modalPopUpRenderer) Refresh() {
-	r.bg.FillColor = theme.BackgroundColor()
-	if r.bg.Size() != r.popUp.innerSize {
+	r.underlay.FillColor = theme.ShadowColor()
+	r.background.FillColor = theme.BackgroundColor()
+	if r.background.Size() != r.popUp.innerSize {
 		r.Layout(r.popUp.Size())
 	}
-}
-
-func (r *modalPopUpRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
+	r.background.Refresh()
 }

@@ -1077,10 +1077,6 @@ type entryRenderer struct {
 	entry   *Entry
 }
 
-func (r *entryRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
 func (r *entryRenderer) Destroy() {
 }
 
@@ -1267,11 +1263,6 @@ type entryContentRenderer struct {
 
 	provider, placeholder *textProvider
 	content               *entryContent
-}
-
-func (r *entryContentRenderer) BackgroundColor() color.Color {
-	// Workaround until BackgroundColor is finally removed.
-	return theme.FocusColor()
 }
 
 func (r *entryContentRenderer) Destroy() {

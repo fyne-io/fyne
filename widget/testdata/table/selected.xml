@@ -35,14 +35,16 @@
 					</widget>
 				</widget>
 				<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
-					<widget backgroundColor="scrollbar" pos="3,0" size="3x123" type="*widget.scrollBar">
+					<widget pos="3,0" size="3x123" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="3x123"/>
 					</widget>
 				</widget>
 				<widget pos="0,168" size="168x0" type="*widget.Shadow">
 					<linearGradient endColor="shadow" pos="0,-8" size="168x8"/>
 				</widget>
 				<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
-					<widget backgroundColor="scrollbar" pos="0,3" size="55x3" type="*widget.scrollBar">
+					<widget pos="0,3" size="55x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="55x3"/>
 					</widget>
 				</widget>
 				<widget pos="168,0" size="0x168" type="*widget.Shadow">
