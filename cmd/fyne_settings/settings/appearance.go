@@ -116,12 +116,12 @@ func (s *Settings) createPreview() image.Image {
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
 	empty := widget.NewLabel("")
-	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home")),
-		widget.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
-		widget.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
-		widget.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
-	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs := container.NewAppTabs(
+		container.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home")),
+		container.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
+		container.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
+		container.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
+	tabs.SetTabLocation(container.TabLocationLeading)
 	showOverlay(c)
 
 	c.SetContent(tabs)
