@@ -3,7 +3,7 @@
 		<container pos="4,4" size="142x192">
 			<widget pos="19,52" size="103x87" type="*widget.RadioGroup">
 				<widget size="103x29" type="*widget.radioItem">
-					<circle fillColor="primary" pos="2,4" size="28x28"/>
+					<circle fillColor="focus" pos="2,4" size="28x28"/>
 					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize"/>
 					<text pos="32,4" size="103x29">Option A</text>
 				</widget>
