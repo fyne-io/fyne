@@ -108,7 +108,7 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true}
+	e := &Entry{Password: true, Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
