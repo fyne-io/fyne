@@ -4,14 +4,14 @@ package gomobile
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
 )
 
-func canListURI(u fyne.URI) bool {
-	listable, _ := storage.CanList(u)
-	return listable
+func canListURI(fyne.URI) bool {
+	// no-op as we use the internal FileRepository
+	return false
 }
 
-func listURI(u fyne.URI) ([]fyne.URI, error) {
-	return storage.List(u)
+func listURI(fyne.URI) ([]fyne.URI, error) {
+	// no-op as we use the internal FileRepository
+	return nil, nil
 }
