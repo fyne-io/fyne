@@ -10,7 +10,7 @@
 						<rectangle fillColor="focus" pos="0,2" size="155x33"/>
 						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
 						<widget pos="0,2" size="155x33" type="*widget.Scroll">
-							<widget backgroundColor="focus" size="155x33" type="*widget.entryContent">
+							<widget size="155x33" type="*widget.entryContent">
 								<widget size="155x33" type="*widget.textProvider">
 									<text color="placeholder" pos="8,6" size="147x21"></text>
 								</widget>
@@ -27,7 +27,7 @@
 						<rectangle fillColor="focus" pos="0,2" size="155x33"/>
 						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
 						<widget pos="0,2" size="155x33" type="*widget.Scroll">
-							<widget backgroundColor="focus" size="155x33" type="*widget.entryContent">
+							<widget size="155x33" type="*widget.entryContent">
 								<widget size="155x33" type="*widget.textProvider">
 									<text color="placeholder" pos="8,6" size="147x21"></text>
 								</widget>

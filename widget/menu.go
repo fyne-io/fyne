@@ -18,6 +18,7 @@ type Menu struct {
 	OnDismiss   func()
 	activeItem  *menuItem
 	customSized bool
+	hiding      bool
 }
 
 // NewMenu creates a new Menu.
@@ -123,9 +124,10 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 // DeactivateChild deactivates the active menu item and hides its submenu if any.
 func (m *Menu) DeactivateChild() {
 	if m.activeItem != nil {
-		if m.activeItem.Child() != nil {
-			m.activeItem.Child().Hide()
+		if c := m.activeItem.Child(); c != nil {
+			c.Hide()
 		}
+		m.activeItem.Refresh()
 		m.activeItem = nil
 	}
 }
@@ -145,6 +147,7 @@ func (m *Menu) DeactivateLastSubmenu() bool {
 //
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
+	m.hiding = true
 	widget.HideWidget(&m.Base, m)
 }
 
@@ -180,6 +183,7 @@ func (m *Menu) Resize(size fyne.Size) {
 //
 // Implements: fyne.Widget
 func (m *Menu) Show() {
+	m.hiding = false
 	widget.ShowWidget(&m.Base, m)
 }
 
@@ -266,6 +270,9 @@ func (r *menuRenderer) MinSize() fyne.Size {
 
 func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
+	for _, i := range r.m.Items {
+		i.Refresh()
+	}
 	canvas.Refresh(r.m)
 }
 
@@ -317,24 +324,29 @@ func newMenuBox(items []fyne.CanvasObject) *menuBox {
 }
 
 func (b *menuBox) CreateRenderer() fyne.WidgetRenderer {
+	background := canvas.NewRectangle(theme.BackgroundColor())
 	cont := fyne.NewContainerWithLayout(layout.NewVBoxLayout(), b.items...)
 	return &menuBoxRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{cont}),
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, cont}),
 		b:            b,
+		background:   background,
 		cont:         cont,
 	}
 }
 
 type menuBoxRenderer struct {
 	widget.BaseRenderer
-	b    *menuBox
-	cont *fyne.Container
+	b          *menuBox
+	background *canvas.Rectangle
+	cont       *fyne.Container
 }
 
 var _ fyne.WidgetRenderer = (*menuBoxRenderer)(nil)
 
 func (r *menuBoxRenderer) Layout(size fyne.Size) {
-	r.cont.Resize(fyne.NewSize(size.Width, size.Height+2*theme.Padding()))
+	s := fyne.NewSize(size.Width, size.Height+2*theme.Padding())
+	r.background.Resize(s)
+	r.cont.Resize(s)
 	r.cont.Move(fyne.NewPos(0, theme.Padding()))
 }
 
@@ -343,5 +355,7 @@ func (r *menuBoxRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuBoxRenderer) Refresh() {
+	r.background.FillColor = theme.BackgroundColor()
+	r.background.Refresh()
 	canvas.Refresh(r.b)
 }
