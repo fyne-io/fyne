@@ -16,7 +16,7 @@
 				<rectangle size="0x0"/>
 				<text bold pos="12,8" size="53x21">Button</text>
 			</widget>
-			<widget size="300x29" type="*glfw.MenuBar">
+			<widget backgroundColor="button" size="300x29" type="*glfw.MenuBar">
 				<widget size="300x29" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 					<linearGradient endColor="shadow" pos="0,-4" size="300x4"/>
@@ -27,9 +27,8 @@
 					<radialGradient centerOffset="0.5,-0.5" pos="-4,29" size="4x4" startColor="shadow"/>
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x29"/>
 				</widget>
-				<widget size="300x300" type="*glfw.menuBarUnderlay">
+				<widget size="300x300" type="*glfw.menuBarBackground">
 				</widget>
-				<rectangle fillColor="button" size="300x29"/>
 				<container pos="4,0" size="292x29">
 					<widget size="41x29" type="*glfw.menuBarItem">
 						<text pos="8,4" size="25x21">File</text>
@@ -37,8 +36,7 @@
 					<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
 						<text pos="8,4" size="28x21">Edit</text>
 					</widget>
-					<widget pos="93,0" size="50x29" type="*glfw.menuBarItem">
-						<rectangle fillColor="focus" size="50x29"/>
+					<widget backgroundColor="focus" pos="93,0" size="50x29" type="*glfw.menuBarItem">
 						<text pos="8,4" size="34x21">Help</text>
 					</widget>
 				</container>
@@ -55,7 +53,6 @@
 					</widget>
 					<widget size="54x37" type="*widget.Scroll">
 						<widget size="54x37" type="*widget.menuBox">
-							<rectangle fillColor="background" size="54x45"/>
 							<container pos="0,4" size="54x45">
 								<widget size="54x29" type="*widget.menuItem">
 									<text pos="8,4" size="38x21">Help!</text>
