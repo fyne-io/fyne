@@ -40,11 +40,11 @@ func TestToolbar_Replace(t *testing.T) {
 	toolbar := NewToolbar(NewToolbarAction(icon, func() {}))
 	assert.Equal(t, 1, len(toolbar.Items))
 	render := test.WidgetRenderer(toolbar)
-	assert.Equal(t, icon, render.Objects()[1].(*Button).Icon)
+	assert.Equal(t, icon, render.Objects()[0].(*Button).Icon)
 
 	toolbar.Items[0] = NewToolbarAction(theme.HelpIcon(), func() {})
 	toolbar.Refresh()
-	assert.NotEqual(t, icon, render.Objects()[1].(*Button).Icon)
+	assert.NotEqual(t, icon, render.Objects()[0].(*Button).Icon)
 }
 
 func TestToolbar_ItemPositioning(t *testing.T) {
