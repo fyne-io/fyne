@@ -498,10 +498,10 @@ func TestGlCanvas_SetContent(t *testing.T) {
 func TestGlCanvas_walkTree(t *testing.T) {
 	leftObj1 := canvas.NewRectangle(color.Gray16{Y: 1})
 	leftObj2 := canvas.NewRectangle(color.Gray16{Y: 2})
-	leftCol := container.NewVBox(leftObj1, leftObj2)
+	leftCol := container.NewWithoutLayout(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Gray16{Y: 10})
 	rightObj2 := canvas.NewRectangle(color.Gray16{Y: 20})
-	rightCol := container.NewVBox(rightObj1, rightObj2)
+	rightCol := container.NewWithoutLayout(rightObj1, rightObj2)
 	content := container.NewWithoutLayout(leftCol, rightCol)
 	content.Move(fyne.NewPos(17, 42))
 	leftCol.Move(fyne.NewPos(300, 400))
