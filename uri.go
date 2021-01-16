@@ -50,6 +50,8 @@ type URI interface {
 	// Scheme should return the URI scheme of the URI as defined by IETF
 	// RFC3986. For example, the Scheme() of 'file://foo/bar.baz` is
 	// 'file'.
+	//
+	// Scheme should always return the scheme in all lower-case characters.
 	Scheme() string
 
 	// Authority should return the URI authority, as defined by IETF

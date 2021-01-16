@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"fyne.io/fyne"
 )
@@ -48,6 +49,7 @@ func ParseURI(s string) (fyne.URI, error) {
 		}
 		scheme += string(s[i])
 	}
+	scheme = strings.ToLower(scheme)
 
 	if scheme == "file" {
 		// Does this really deserve to be special? In principle, the

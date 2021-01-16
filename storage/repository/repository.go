@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 
 	"fyne.io/fyne"
 )
@@ -223,6 +224,8 @@ type MovableRepository interface {
 //
 // Since: 2.0.0
 func Register(scheme string, repository Repository) {
+	scheme = strings.ToLower(scheme)
+
 	prev, ok := repositoryTable[scheme]
 
 	if ok {
@@ -241,7 +244,7 @@ func Register(scheme string, repository Repository) {
 //
 // Since: 2.0.0
 func ForURI(u fyne.URI) (Repository, error) {
-	scheme := u.Scheme()
+	scheme := strings.ToLower(u.Scheme())
 	repo, ok := repositoryTable[scheme]
 
 	if !ok {
