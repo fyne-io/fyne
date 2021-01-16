@@ -45,7 +45,7 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		return parent, ErrURIRoot
 	}
 
-	components := splitNonEmpty(u.Path(), "/")
+	components := splitNonEmpty(p, "/")
 
 	newURI := u.Scheme() + "://" + u.Authority()
 
@@ -57,13 +57,11 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	// stick the query and fragment back on the end
-	q := u.Query()
-	if len(q) > 0 {
+	if q := u.Query(); len(q) > 0 {
 		newURI += "?" + q
 	}
 
-	f := u.Fragment()
-	if len(f) > 0 {
+	if f := u.Fragment(); len(f) > 0 {
 		newURI += "#" + f
 	}
 
@@ -97,8 +95,8 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 	if q := u.Query(); len(q) > 0 {
 		newURI += "?" + q
 	}
-	if len(u.Fragment()) > 0 {
-		newURI += "#" + u.Fragment()
+	if f := u.Fragment(); len(f) > 0 {
+		newURI += "#" + f
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
