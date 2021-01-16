@@ -181,24 +181,18 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	parent := ""
-	if scheme == "file" {
-		// use the system native path resolution
-		parent = filepath.Dir(s)
-		if parent[len(parent)-1] != filepath.Separator {
-			parent += "/"
-		}
-
-		// only root is it's own parent
-		if filepath.Clean(parent) == filepath.Clean(s) {
-			return nil, repository.ErrURIRoot
-		}
-
-		return storage.ParseURI(scheme + "://" + parent)
+	// use the system native path resolution
+	parent = filepath.Dir(s)
+	if parent[len(parent)-1] != filepath.Separator {
+		parent += "/"
 	}
 
-	// Per the spec for storage.Parent(), we should only need to handle
-	// it for schemes we are registered to.
-	return nil, fmt.Errorf("FileRepository cannot handle unknown scheme '%s'", scheme)
+	// only root is it's own parent
+	if filepath.Clean(parent) == filepath.Clean(s) {
+		return nil, repository.ErrURIRoot
+	}
+
+	return storage.ParseURI(scheme + "://" + parent)
 }
 
 // Child implements repository.HierarchicalRepository.Child
