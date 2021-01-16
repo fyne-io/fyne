@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/internal/painter/software"
 	internalTest "fyne.io/fyne/internal/test"
-	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -274,22 +273,22 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	red2.SetMinSize(fyne.NewSize(20, 20))
 	red3 := canvas.NewRectangle(color.NRGBA{R: 100, A: 255})
 	red3.SetMinSize(fyne.NewSize(20, 20))
-	reds := widget.NewHBox(red1, red2, red3)
+	reds := container.NewHBox(red1, red2, red3)
 	green1 := canvas.NewRectangle(color.NRGBA{G: 200, A: 255})
 	green1.SetMinSize(fyne.NewSize(20, 20))
 	green2 := canvas.NewRectangle(color.NRGBA{G: 150, A: 255})
 	green2.SetMinSize(fyne.NewSize(20, 20))
 	green3 := canvas.NewRectangle(color.NRGBA{G: 100, A: 255})
 	green3.SetMinSize(fyne.NewSize(20, 20))
-	greens := widget.NewHBox(green1, green2, green3)
+	greens := container.NewHBox(green1, green2, green3)
 	blue1 := canvas.NewRectangle(color.NRGBA{B: 200, A: 255})
 	blue1.SetMinSize(fyne.NewSize(20, 20))
 	blue2 := canvas.NewRectangle(color.NRGBA{B: 150, A: 255})
 	blue2.SetMinSize(fyne.NewSize(20, 20))
 	blue3 := canvas.NewRectangle(color.NRGBA{B: 100, A: 255})
 	blue3.SetMinSize(fyne.NewSize(20, 20))
-	blues := widget.NewHBox(blue1, blue2, blue3)
-	box := widget.NewVBox(reds, greens, blues)
+	blues := container.NewHBox(blue1, blue2, blue3)
+	box := container.NewVBox(reds, greens, blues)
 	scroll := container.NewScroll(box)
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
@@ -333,54 +332,4 @@ func TestPainter_paintText_clipped(t *testing.T) {
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_text_clipped.png", p.Paint(c))
-}
-
-func TestPainter_paintWidgetBackground_clipped(t *testing.T) {
-	test.ApplyTheme(t, test.Theme())
-	w := &testWidget{min: fyne.NewSize(100, 100)}
-	scroll := container.NewScroll(w)
-	scroll.Move(fyne.NewPos(10, 10))
-	scroll.Resize(fyne.NewSize(50, 50))
-	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
-	cont := fyne.NewContainer(scroll)
-	c := test.NewCanvas()
-	c.SetPadded(false)
-	c.SetContent(cont)
-	c.Resize(fyne.NewSize(70, 70))
-	p := software.NewPainter()
-
-	test.AssertImageMatches(t, "draw_widget_background_clipped.png", p.Paint(c))
-}
-
-type testWidget struct {
-	widget.BaseWidget
-	min fyne.Size
-}
-
-var _ fyne.Widget = (*testWidget)(nil)
-
-func (w *testWidget) CreateRenderer() fyne.WidgetRenderer {
-	return &testWidgetRenderer{}
-}
-
-func (w *testWidget) MinSize() fyne.Size {
-	return w.min
-}
-
-type testWidgetRenderer struct {
-	internalWidget.BaseRenderer
-}
-
-func (r *testWidgetRenderer) BackgroundColor() color.Color {
-	return color.NRGBA{G: 200, B: 200, A: 255}
-}
-
-func (r *testWidgetRenderer) Layout(fyne.Size) {
-}
-
-func (r *testWidgetRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(10, 10)
-}
-
-func (r *testWidgetRenderer) Refresh() {
 }

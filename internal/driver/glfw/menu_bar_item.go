@@ -1,8 +1,6 @@
 package glfw
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -40,13 +38,16 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 //
 // Implements: fyne.Widget
 func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	text := canvas.NewText(i.Menu.Label, theme.ForegroundColor())
-	objects := []fyne.CanvasObject{text}
+	objects := []fyne.CanvasObject{background, text}
 
 	return &menuBarItemRenderer{
 		widget.NewBaseRenderer(objects),
 		i,
 		text,
+		background,
 	}
 }
 
@@ -170,28 +171,20 @@ func (i *menuBarItem) TypedRune(_ rune) {
 
 type menuBarItemRenderer struct {
 	widget.BaseRenderer
-	i    *menuBarItem
-	text *canvas.Text
+	i          *menuBarItem
+	text       *canvas.Text
+	background *canvas.Rectangle
 }
 
-func (r *menuBarItemRenderer) BackgroundColor() color.Color {
-	if r.i.active && r.i.Parent.active {
-		return theme.FocusColor()
-	}
-	if r.i.hovered {
-		return theme.HoverColor()
-	}
-
-	return color.Transparent
-}
-
-func (r *menuBarItemRenderer) Layout(_ fyne.Size) {
+func (r *menuBarItemRenderer) Layout(size fyne.Size) {
 	padding := r.padding()
 
 	r.text.TextSize = theme.TextSize()
 	r.text.Color = theme.ForegroundColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+
+	r.background.Resize(size)
 }
 
 func (r *menuBarItemRenderer) MinSize() fyne.Size {
@@ -199,6 +192,16 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuBarItemRenderer) Refresh() {
+	if r.i.active && r.i.Parent.active {
+		r.background.FillColor = theme.FocusColor()
+		r.background.Show()
+	} else if r.i.hovered {
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
+	} else {
+		r.background.Hide()
+	}
+	r.background.Refresh()
 	canvas.Refresh(r.i)
 }
 

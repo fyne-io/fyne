@@ -17,6 +17,7 @@
 				</widget>
 				<widget size="71x108" type="*widget.Scroll">
 					<widget size="71x108" type="*widget.menuBox">
+						<rectangle fillColor="background" size="71x116"/>
 						<container pos="0,4" size="71x116">
 							<widget size="71x29" type="*widget.menuItem">
 								<text pos="8,4" size="10x21">A</text>
@@ -24,7 +25,8 @@
 							<widget pos="0,33" size="71x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="71x1"/>
 							</widget>
-							<widget backgroundColor="focus" pos="0,38" size="71x29" type="*widget.menuItem">
+							<widget pos="0,38" size="71x29" type="*widget.menuItem">
+								<rectangle fillColor="hover" size="71x29"/>
 								<text pos="8,4" size="55x21">B (long)</text>
 							</widget>
 							<widget pos="0,71" size="71x29" type="*widget.menuItem">

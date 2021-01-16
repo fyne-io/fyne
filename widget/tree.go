@@ -592,10 +592,12 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
+	indicator := canvas.NewRectangle(theme.HoverColor())
+	indicator.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeNode:     n,
-		indicator:    canvas.NewRectangle(theme.BackgroundColor()),
+		indicator:    indicator,
 	}
 }
 
@@ -705,10 +707,12 @@ func (r *treeNodeRenderer) partialRefresh() {
 	}
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
 		r.indicator.FillColor = theme.PrimaryColor()
+		r.indicator.Show()
 	} else if r.treeNode.hovered {
 		r.indicator.FillColor = theme.HoverColor()
+		r.indicator.Show()
 	} else {
-		r.indicator.FillColor = theme.BackgroundColor()
+		r.indicator.Hide()
 	}
 	r.indicator.Refresh()
 	canvas.Refresh(r.treeNode.super())

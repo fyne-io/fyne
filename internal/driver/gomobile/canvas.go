@@ -325,7 +325,7 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
 
-		if len(c.windowHead.(*widget.Box).Children) > 1 {
+		if len(c.windowHead.(*fyne.Container).Objects) > 1 {
 			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
 			offset = fyne.NewPos(0, topHeight)
 			areaSize = areaSize.Subtract(offset)
@@ -393,7 +393,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	deltaX := pos.X - c.lastTapDownPos[tapID].X
 	deltaY := pos.Y - c.lastTapDownPos[tapID].Y
 
-	if math.Abs(float64(deltaX)) < 3 && math.Abs(float64(deltaY)) < 3 {
+	if c.dragging == nil && (math.Abs(float64(deltaX)) < tapMoveThreshold && math.Abs(float64(deltaY)) < tapMoveThreshold) {
 		return
 	}
 	c.lastTapDownPos[tapID] = pos
@@ -437,9 +437,10 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
-	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+	dragCallback func(fyne.Draggable)) {
+
 	if c.dragging != nil {
-		c.dragging.DragEnd()
+		dragCallback(c.dragging)
 
 		c.dragging = nil
 		return

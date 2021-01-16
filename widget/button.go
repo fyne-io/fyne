@@ -50,22 +50,11 @@ const (
 	LowImportance
 )
 
-const (
-	// DefaultButton is the standard button style.
-	// Deprecated: use Importance = MediumImportance instead.
-	DefaultButton ButtonStyle = iota
-	// PrimaryButton that should be more prominent to the user.
-	// Deprecated: use Importance = HighImportance instead.
-	PrimaryButton
-)
-
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
 	Text string
-	// Deprecated, use Importance instead, where HighImportance matches PrimaryButton
-	Style ButtonStyle
-	Icon  fyne.Resource
+	Icon fyne.Resource
 	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
 	//
 	// Since: 1.4
@@ -74,8 +63,6 @@ type Button struct {
 	IconPlacement ButtonIconPlacement
 
 	OnTapped func() `json:"-"`
-	// Deprecated: use Importance = LowImportance instead of HideShadow = true.
-	HideShadow bool
 
 	hovered bool
 	tapAnim *fyne.Animation
@@ -111,25 +98,24 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(b.Text, theme.ForegroundColor())
 	text.TextStyle.Bold = true
 
-	bg := canvas.NewRectangle(color.Transparent)
+	background := canvas.NewRectangle(theme.ButtonColor())
 	b.tapBG = canvas.NewRectangle(color.Transparent)
 	objects := []fyne.CanvasObject{
-		bg,
+		background,
 		b.tapBG,
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
-	if b.HideShadow || b.Importance == LowImportance {
+	if b.Importance == LowImportance {
 		shadowLevel = widget.BaseLevel
 	}
 	r := &buttonRenderer{
 		ShadowingRenderer: widget.NewShadowingRenderer(objects, shadowLevel),
-		bg:                bg,
+		background:        background,
 		button:            b,
 		label:             text,
 		layout:            layout.NewHBoxLayout(),
 	}
-	bg.FillColor = r.buttonColor()
 	r.updateIconAndText()
 	r.applyTheme()
 	return r
@@ -208,29 +194,25 @@ func (b *Button) tapAnimation() {
 type buttonRenderer struct {
 	*widget.ShadowingRenderer
 
-	icon   *canvas.Image
-	label  *canvas.Text
-	bg     *canvas.Rectangle
-	button *Button
-	layout fyne.Layout
-}
-
-func (r *buttonRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	icon       *canvas.Image
+	label      *canvas.Text
+	background *canvas.Rectangle
+	button     *Button
+	layout     fyne.Layout
 }
 
 // Layout the components of the button widget
 func (r *buttonRenderer) Layout(size fyne.Size) {
 	var inset fyne.Position
 	bgSize := size
-	if !r.button.HideShadow || r.button.Importance != LowImportance {
+	if r.button.Importance != LowImportance {
 		inset = fyne.NewPos(theme.Padding()/2, theme.Padding()/2)
 		bgSize = size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding()))
 	}
 	r.LayoutShadow(bgSize, inset)
 
-	r.bg.Move(inset)
-	r.bg.Resize(bgSize)
+	r.background.Move(inset)
+	r.background.Resize(bgSize)
 
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Text != ""
@@ -292,33 +274,33 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 
 func (r *buttonRenderer) Refresh() {
 	r.label.Text = r.button.Text
-	r.bg.Refresh()
 	r.updateIconAndText()
 	r.applyTheme()
+	r.background.Refresh()
 	r.Layout(r.button.Size())
 	canvas.Refresh(r.button.super())
 }
 
 // applyTheme updates this button to match the current theme
 func (r *buttonRenderer) applyTheme() {
-	r.bg.FillColor = r.buttonColor()
+	r.background.FillColor = r.buttonColor()
 	r.label.TextSize = theme.TextSize()
 	r.label.Color = theme.ForegroundColor()
 	switch {
 	case r.button.disabled:
 		r.label.Color = theme.DisabledColor()
-	case r.button.Style == PrimaryButton || r.button.Importance == HighImportance:
+	case r.button.Importance == HighImportance:
 		r.label.Color = theme.BackgroundColor()
 	}
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Style == PrimaryButton || r.button.Importance == HighImportance {
+			if r.button.Importance == HighImportance {
 				r.icon.Resource = theme.NewInvertedThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
-			if r.button.Style != PrimaryButton || r.button.Importance != HighImportance {
+			if r.button.Importance != HighImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}
@@ -330,7 +312,7 @@ func (r *buttonRenderer) buttonColor() color.Color {
 	switch {
 	case r.button.Disabled():
 		return theme.DisabledButtonColor()
-	case r.button.Style == PrimaryButton, r.button.Importance == HighImportance:
+	case r.button.Importance == HighImportance:
 		return theme.PrimaryColor()
 	case r.button.hovered:
 		return theme.HoverColor()
@@ -340,7 +322,7 @@ func (r *buttonRenderer) buttonColor() color.Color {
 }
 
 func (r *buttonRenderer) padding() fyne.Size {
-	if r.button.HideShadow || r.button.Importance == LowImportance {
+	if r.button.Importance == LowImportance {
 		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	}
 	if r.button.Text == "" {
@@ -354,7 +336,7 @@ func (r *buttonRenderer) updateIconAndText() {
 		if r.icon == nil {
 			r.icon = canvas.NewImageFromResource(r.button.Icon)
 			r.icon.FillMode = canvas.ImageFillContain
-			r.SetObjects([]fyne.CanvasObject{r.bg, r.button.tapBG, r.label, r.icon})
+			r.SetObjects([]fyne.CanvasObject{r.background, r.button.tapBG, r.label, r.icon})
 		}
 		if r.button.Disabled() {
 			r.icon.Resource = theme.NewDisabledResource(r.button.Icon)

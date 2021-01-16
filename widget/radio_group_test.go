@@ -50,6 +50,19 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 		radio.Enable()
 		test.AssertRendersToMarkup(t, "radio_group/focus_a_focused_none_selected.xml", canvas)
 	})
+
+	t.Run("append disabled", func(t *testing.T) {
+		radio := &widget.RadioGroup{Options: []string{"Option A", "Option B"}}
+		window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), radio))
+		defer window.Close()
+		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
+
+		canvas := window.Canvas().(test.WindowlessCanvas)
+		radio.Disable()
+		test.AssertRendersToMarkup(t, "radio_group/disabled_none_selected.xml", canvas)
+		radio.Append("Option C")
+		test.AssertRendersToMarkup(t, "radio_group/disabled_append_none_selected.xml", canvas)
+	})
 }
 
 func TestRadioGroup_Layout(t *testing.T) {

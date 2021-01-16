@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
@@ -83,10 +81,6 @@ type validationStatusRenderer struct {
 	widget.BaseRenderer
 	entry *Entry
 	icon  *canvas.Image
-}
-
-func (r *validationStatusRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (r *validationStatusRenderer) Layout(size fyne.Size) {

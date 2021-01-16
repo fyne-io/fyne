@@ -153,7 +153,11 @@ func (s *settings) setupTheme() {
 	} else if name == "dark" {
 		s.applyTheme(theme.DarkTheme(), theme.VariantDark)
 	} else {
-		s.applyTheme(theme.DefaultTheme(), defaultVariant())
+		if defaultVariant() == theme.VariantLight {
+			s.applyTheme(theme.LightTheme(), theme.VariantLight)
+		} else {
+			s.applyTheme(theme.DarkTheme(), theme.VariantDark)
+		}
 	}
 }
 
