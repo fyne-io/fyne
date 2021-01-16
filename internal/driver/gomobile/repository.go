@@ -15,7 +15,7 @@ func (m *mobileFileRepo) Exists(u fyne.URI) (bool, error) {
 }
 
 func (m *mobileFileRepo) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	return m.driver.FileReaderForURI(u)
+	return fileReaderForURI(u)
 }
 
 func (m *mobileFileRepo) CanRead(u fyne.URI) (bool, error) {
