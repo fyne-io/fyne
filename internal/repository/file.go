@@ -208,12 +208,15 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	newURI := u.Scheme() + "://" + u.Authority()
 	newURI += path.Join(u.Path(), component)
 
+	query := u.Query()
+	fragment := u.Fragment()
+
 	// stick the query and fragment back on the end
-	if len(u.Query()) > 0 {
-		newURI += "?" + u.Query()
+	if len(query) > 0 {
+		newURI += "?" + query
 	}
-	if len(u.Fragment()) > 0 {
-		newURI += "#" + u.Fragment()
+	if len(fragment) > 0 {
+		newURI += "#" + fragment
 	}
 
 	return storage.ParseURI(newURI)
@@ -223,9 +226,6 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 //
 // Since: 2.0.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
-	if u.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
-	}
 
 	path := u.Path()
 	files, err := ioutil.ReadDir(path)
@@ -253,11 +253,10 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	p := u.Path()
 	info, err := os.Stat(p)
 
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-
 	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
 		return false, err
 	}
 
