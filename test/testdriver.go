@@ -35,7 +35,7 @@ var _ fyne.Driver = (*testDriver)(nil)
 func NewDriver() fyne.Driver {
 	drv := new(testDriver)
 	drv.windowsMutex = sync.RWMutex{}
-	repository.Register("file", intRepo.NewFileRepository("file"))
+	repository.Register("file", intRepo.NewFileRepository())
 
 	// make a single dummy window for rendering tests
 	drv.CreateWindow("")

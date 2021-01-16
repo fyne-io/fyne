@@ -15,5 +15,5 @@ func nativeFileOpen(*fileOpen) (io.ReadCloser, error) {
 }
 
 func registerRepository(d *mobileDriver) {
-	repository.Register("file", intRepo.NewFileRepository("file"))
+	repository.Register("file", intRepo.NewFileRepository())
 }

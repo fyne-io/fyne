@@ -15,7 +15,7 @@ import (
 )
 
 func TestFileRepositoryRegistration(t *testing.T) {
-	f := NewFileRepository("file")
+	f := NewFileRepository()
 	repository.Register("file", f)
 
 	// this should never fail, and we assume it doesn't in other tests here
@@ -75,7 +75,7 @@ func TestFileRepositoryReader(t *testing.T) {
 	}
 
 	// Set up our repository - it's OK if we already registered it...
-	f := NewFileRepository("file")
+	f := NewFileRepository()
 	repository.Register("file", f)
 
 	// ...and some URIs - we know that they will not fail parsing
@@ -137,7 +137,7 @@ func TestFileRepositoryWriter(t *testing.T) {
 	}
 
 	// Set up our repository - it's OK if we already registered it...
-	f := NewFileRepository("file")
+	f := NewFileRepository()
 	repository.Register("file", f)
 
 	// ...and some URIs - we know that they will not fail parsing
@@ -244,7 +244,7 @@ func TestFileRepositoryCanWrite(t *testing.T) {
 	}
 
 	// Set up our repository - it's OK if we already registered it...
-	f := NewFileRepository("file")
+	f := NewFileRepository()
 	repository.Register("file", f)
 
 	// ...and some URIs - we know that they will not fail parsing
@@ -267,7 +267,7 @@ func TestFileRepositoryCanWrite(t *testing.T) {
 
 func TestFileRepositoryParent(t *testing.T) {
 	// Set up our repository - it's OK if we already registered it.
-	f := NewFileRepository("file")
+	f := NewFileRepository()
 	repository.Register("file", f)
 
 	// note the trailing slashes are significant, as they tend to belie a
@@ -320,7 +320,7 @@ func TestFileRepositoryParent(t *testing.T) {
 
 func TestFileRepositoryChild(t *testing.T) {
 	// Set up our repository - it's OK if we already registered it.
-	f := NewFileRepository("file")
+	f := NewFileRepository()
 	repository.Register("file", f)
 
 	p, _ := storage.Child(storage.NewURI("file:///foo/bar"), "baz")

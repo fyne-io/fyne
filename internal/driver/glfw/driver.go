@@ -130,7 +130,7 @@ func NewGLDriver() fyne.Driver {
 	d.drawDone = make(chan interface{})
 	d.animation = &animation.Runner{}
 
-	repository.Register("file", intRepo.NewFileRepository("file"))
+	repository.Register("file", intRepo.NewFileRepository())
 
 	return d
 }

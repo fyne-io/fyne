@@ -47,7 +47,7 @@ type FileRepository struct {
 // repository.Register() on the result of this function.
 //
 // Since: 2.0.0
-func NewFileRepository(scheme string) *FileRepository {
+func NewFileRepository() *FileRepository {
 	return &FileRepository{}
 }
 
