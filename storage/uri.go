@@ -60,7 +60,7 @@ func ParseURI(s string) (fyne.URI, error) {
 //
 // * If the scheme of the given URI does not have a registered
 //   HierarchicalRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // NOTE: since 2.0.0, Parent() is backed by the repository system - this
 // function is a helper which calls into an appropriate repository instance for
@@ -76,7 +76,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 
 	hrepo, ok := repo.(repository.HierarchicalRepository)
 	if !ok {
-		return nil, repository.OperationNotSupportedError
+		return nil, repository.ErrOperationNotSupported
 	}
 
 	return hrepo.Parent(u)
@@ -100,7 +100,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 //
 // * If the scheme of the given URI does not have a registered
 //   HierarchicalRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // NOTE: since 2.0.0, Child() is backed by the repository system - this
 // function is a helper which calls into an appropriate repository instance for
@@ -115,7 +115,7 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 
 	hrepo, ok := repo.(repository.HierarchicalRepository)
 	if !ok {
-		return nil, repository.OperationNotSupportedError
+		return nil, repository.ErrOperationNotSupported
 	}
 
 	return hrepo.Child(u, component)
@@ -164,7 +164,7 @@ func Exists(u fyne.URI) (bool, error) {
 //
 // * If the scheme of the given URI does not have a registered
 //   WriteableRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // Delete is backed by the repository system - this function calls
 // into a scheme-specific implementation from a registered repository.
@@ -178,7 +178,7 @@ func Delete(u fyne.URI) error {
 
 	wrepo, ok := repo.(repository.WriteableRepository)
 	if !ok {
-		return repository.OperationNotSupportedError
+		return repository.ErrOperationNotSupported
 	}
 
 	return wrepo.Delete(u)
@@ -254,7 +254,7 @@ func CanRead(u fyne.URI) (bool, error) {
 //
 // * If the scheme of the given URI does not have a registered
 //   WriteableRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // Writer is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
@@ -268,7 +268,7 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 
 	wrepo, ok := repo.(repository.WriteableRepository)
 	if !ok {
-		return nil, repository.OperationNotSupportedError
+		return nil, repository.ErrOperationNotSupported
 	}
 
 	return wrepo.Writer(u)
@@ -296,7 +296,7 @@ func CanWrite(u fyne.URI) (bool, error) {
 
 	wrepo, ok := repo.(repository.WriteableRepository)
 	if !ok {
-		return false, repository.OperationNotSupportedError
+		return false, repository.ErrOperationNotSupported
 	}
 
 	return wrepo.CanWrite(u)
@@ -319,7 +319,7 @@ func CanWrite(u fyne.URI) (bool, error) {
 //
 // * If the scheme of the given URI does not have a registered
 //   CopyableRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // Copy is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
@@ -333,7 +333,7 @@ func Copy(source fyne.URI, destination fyne.URI) error {
 
 	crepo, ok := repo.(repository.CopyableRepository)
 	if !ok {
-		return repository.OperationNotSupportedError
+		return repository.ErrOperationNotSupported
 	}
 
 	return crepo.Copy(source, destination)
@@ -358,7 +358,7 @@ func Copy(source fyne.URI, destination fyne.URI) error {
 //
 // * If the scheme of the given URI does not have a registered
 //   MovableRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // Move is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
@@ -372,7 +372,7 @@ func Move(source fyne.URI, destination fyne.URI) error {
 
 	mrepo, ok := repo.(repository.MovableRepository)
 	if !ok {
-		return repository.OperationNotSupportedError
+		return repository.ErrOperationNotSupported
 	}
 
 	return mrepo.Move(source, destination)
@@ -394,7 +394,7 @@ func Move(source fyne.URI, destination fyne.URI) error {
 //
 // * If the scheme of the given URI does not have a registered
 //   ListableRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // CanList is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
@@ -408,7 +408,7 @@ func CanList(u fyne.URI) (bool, error) {
 
 	lrepo, ok := repo.(repository.ListableRepository)
 	if !ok {
-		return false, repository.OperationNotSupportedError
+		return false, repository.ErrOperationNotSupported
 	}
 
 	return lrepo.CanList(u)
@@ -433,7 +433,7 @@ func CanList(u fyne.URI) (bool, error) {
 //
 // * If the scheme of the given URI does not have a registered
 //   ListableRepository instance, then this method will fail with a
-//   repository.OperationNotSupportedError.
+//   repository.ErrOperationNotSupported.
 //
 // List is backed by the repository system - this function either calls into a
 // scheme-specific implementation from a registered repository, or fails with a
@@ -448,7 +448,7 @@ func List(u fyne.URI) ([]fyne.URI, error) {
 
 	lrepo, ok := repo.(repository.ListableRepository)
 	if !ok {
-		return nil, repository.OperationNotSupportedError
+		return nil, repository.ErrOperationNotSupported
 	}
 
 	return lrepo.List(u)

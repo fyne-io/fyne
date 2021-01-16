@@ -299,7 +299,7 @@ func TestFileRepositoryParent(t *testing.T) {
 	}
 
 	_, err = storage.Parent(storage.NewURI("file:///"))
-	assert.Equal(t, storage.URIRootError, err)
+	assert.Equal(t, repository.ErrURIRoot, err)
 
 	if runtime.GOOS == "windows" {
 		// This is only an error under Windows, on *NIX this is a
@@ -309,7 +309,7 @@ func TestFileRepositoryParent(t *testing.T) {
 		// This should cause an error, since this is a Windows-style
 		// path and thus we can't get the parent of a drive letter.
 		_, err = storage.Parent(storage.NewURI("file://C:/"))
-		assert.Equal(t, storage.URIRootError, err)
+		assert.Equal(t, repository.ErrURIRoot, err)
 	}
 
 	// Windows supports UNIX-style paths. /C:/ is also a valid path.

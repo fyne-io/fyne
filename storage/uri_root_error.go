@@ -6,5 +6,5 @@ import (
 
 // URIRootError is a wrapper for repository.URIRootError
 //
-// Deprecated - use repository.URIRootError instead
-const URIRootError = repository.URIRootError
+// Deprecated - use repository.ErrURIRoot instead
+var URIRootError = repository.ErrURIRoot

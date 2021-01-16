@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
+	"fyne.io/fyne/storage/repository"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -243,7 +244,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 
 	var icons []fyne.CanvasObject
 	parent, err := storage.Parent(dir)
-	if err != nil && err != storage.URIRootError {
+	if err != nil && err != repository.ErrURIRoot {
 		fyne.LogError("Unable to get parent of "+dir.String(), err)
 		return
 	}

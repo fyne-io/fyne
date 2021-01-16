@@ -28,7 +28,7 @@ func splitNonEmpty(str, sep string) []string {
 // result is concatenated and parsed as a new URI.
 //
 // If the URI path is empty or '/', then a duplicate of the URI is returned,
-// along with URIRootError.
+// along with ErrURIRoot.
 //
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
@@ -42,7 +42,7 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		if err != nil {
 			return nil, err
 		}
-		return parent, URIRootError
+		return parent, ErrURIRoot
 	}
 
 	components := splitNonEmpty(u.Path(), "/")
@@ -134,7 +134,7 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 	// The destination must be writeable.
 	destwrepo, ok := dstrepo.(WriteableRepository)
 	if !ok {
-		return OperationNotSupportedError
+		return ErrOperationNotSupported
 	}
 
 	// Create a reader and a writer.
@@ -186,12 +186,12 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 	// is being deleted, which requires WriteableRepository.
 	destwrepo, ok := dstrepo.(WriteableRepository)
 	if !ok {
-		return OperationNotSupportedError
+		return ErrOperationNotSupported
 	}
 
 	srcwrepo, ok := srcrepo.(WriteableRepository)
 	if !ok {
-		return OperationNotSupportedError
+		return ErrOperationNotSupported
 	}
 
 	// Create the reader and writer to perform the copy operation.

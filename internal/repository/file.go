@@ -180,7 +180,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 
 	// Completely empty URI with just a scheme
 	if len(s) == 0 {
-		return nil, repository.URIRootError
+		return nil, repository.ErrURIRoot
 	}
 
 	parent := ""
@@ -193,7 +193,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 
 		// only root is it's own parent
 		if filepath.Clean(parent) == filepath.Clean(s) {
-			return nil, repository.URIRootError
+			return nil, repository.ErrURIRoot
 		}
 
 		return storage.ParseURI(u.Scheme() + "://" + parent)

@@ -13,7 +13,7 @@ func TestGenericParent(t *testing.T) {
 		err    error
 	}{
 		{"foo://example.com:8042/over/there?name=ferret#nose", "foo://example.com:8042/over?name=ferret#nose", nil},
-		{"file:///", "file:///", URIRootError},
+		{"file:///", "file:///", ErrURIRoot},
 		{"file:///foo", "file:///", nil},
 	}
 
