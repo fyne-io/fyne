@@ -206,6 +206,7 @@ func (r *radioGroupRenderer) updateItems() {
 	for i, item := range r.items {
 		item.Label = r.radio.Options[i]
 		item.Selected = item.Label == r.radio.Selected
+		item.disabled = r.radio.disabled
 		item.Refresh()
 	}
 }
