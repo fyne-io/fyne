@@ -19,9 +19,8 @@ type menuBarItem struct {
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
-	active  bool
-	child   *publicWidget.Menu
-	hovered bool
+	active bool
+	child  *publicWidget.Menu
 }
 
 func (i *menuBarItem) Child() *publicWidget.Menu {
@@ -82,19 +81,21 @@ func (i *menuBarItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
-// MouseIn changes the item to be hovered and shows the menu if the bar is active.
+// MouseIn shows the menu if the bar is active.
 // The menu that was displayed before will be hidden.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
-	i.hovered = true
 	if i.Parent.active {
 		i.Parent.canvas.Focus(i)
 	}
-	i.Refresh()
 }
 
-// MouseMoved does nothing.
+// MouseMoved shows the menu if the bar is active.
+// The menu that was displayed before will be hidden.
+// This might have an effect when mouse and keyboard control are mixed.
+// Changing the active menu with the keyboard will make the hovered menu bar item inactive.
+// On the next mouse move the hovered item is activated again.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
@@ -103,12 +104,10 @@ func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 	}
 }
 
-// MouseOut changes the item to not be hovered but has no effect on the visibility of the menu.
+// MouseOut does nothing.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseOut() {
-	i.hovered = false
-	i.Refresh()
 }
 
 // Move sets the position of the widget relative to its parent.
@@ -194,9 +193,6 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 func (r *menuBarItemRenderer) Refresh() {
 	if r.i.active && r.i.Parent.active {
 		r.background.FillColor = theme.FocusColor()
-		r.background.Show()
-	} else if r.i.hovered {
-		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {
 		r.background.Hide()
