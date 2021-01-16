@@ -109,9 +109,7 @@ func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 			return false, nil
 		}
 
-		if err != nil {
-			return false, err
-		}
+		return false, err
 	}
 
 	return true, nil
@@ -149,9 +147,7 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 			return true, nil
 		}
 
-		if err != nil {
-			return false, err
-		}
+		return false, err
 	}
 
 	return true, nil
@@ -169,6 +165,7 @@ func (r *FileRepository) Delete(u fyne.URI) error {
 // Since: 2.0.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
+	scheme := u.Scheme()
 
 	// trim trailing slash
 	if s[len(s)-1] == '/' {
@@ -176,7 +173,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	// trim the scheme
-	s = s[len(u.Scheme())+3:]
+	s = s[len(scheme)+3:]
 
 	// Completely empty URI with just a scheme
 	if len(s) == 0 {
@@ -184,7 +181,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	parent := ""
-	if u.Scheme() == "file" {
+	if scheme == "file" {
 		// use the system native path resolution
 		parent = filepath.Dir(s)
 		if parent[len(parent)-1] != filepath.Separator {
@@ -196,12 +193,12 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 			return nil, repository.ErrURIRoot
 		}
 
-		return storage.ParseURI(u.Scheme() + "://" + parent)
+		return storage.ParseURI(scheme + "://" + parent)
 	}
 
 	// Per the spec for storage.Parent(), we should only need to handle
 	// it for schemes we are registered to.
-	return nil, fmt.Errorf("FileRepository cannot handle unknown scheme '%s'", u.Scheme())
+	return nil, fmt.Errorf("FileRepository cannot handle unknown scheme '%s'", scheme)
 }
 
 // Child implements repository.HierarchicalRepository.Child
