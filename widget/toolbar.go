@@ -137,11 +137,9 @@ func (r *toolbarRenderer) Refresh() {
 }
 
 func (r *toolbarRenderer) resetObjects() {
-	if len(r.items) != len(r.toolbar.Items) {
-		r.items = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
-		for _, item := range r.toolbar.Items {
-			r.items = append(r.items, item.ToolbarObject())
-		}
+	r.items = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
+	for _, item := range r.toolbar.Items {
+		r.items = append(r.items, item.ToolbarObject())
 	}
 	r.SetObjects(append([]fyne.CanvasObject{r.background}, r.items...))
 }
