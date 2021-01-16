@@ -106,7 +106,7 @@ func (p *ColorPickerDialog) updateUI() {
 			p.advanced,
 		)
 
-		confirm := &widget.Button{Text: "Confirm", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
+		confirm := &widget.Button{Text: "Confirm", Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 			OnTapped: func() {
 				p.selectColor(p.color)
 			},

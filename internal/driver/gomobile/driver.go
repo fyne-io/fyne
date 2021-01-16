@@ -21,7 +21,6 @@ import (
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
 const (
@@ -92,7 +91,7 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 	inset, _ := c.InteractiveArea()
 
 	if mc.windowHead != nil {
-		if len(mc.windowHead.(*widget.Box).Children) > 1 {
+		if len(mc.windowHead.(*fyne.Container).Objects) > 1 {
 			topHeight := mc.windowHead.MinSize().Height
 			pos = pos.Subtract(fyne.NewSize(0, topHeight))
 		}

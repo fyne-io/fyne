@@ -128,7 +128,7 @@ func (r *toolbarRenderer) Refresh() {
 	r.resetObjects()
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := r.Objects()[i].(*canvas.Rectangle)
+			rect := r.items[i].(*canvas.Rectangle)
 			rect.FillColor = theme.ForegroundColor()
 		}
 	}

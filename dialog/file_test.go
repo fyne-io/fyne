@@ -190,11 +190,11 @@ func TestShowFileOpen(t *testing.T) {
 	assert.Equal(t, "Open File", title.Text)
 	//footer
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
-	open := buttons.Children[1].(*widget.Button)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	open := buttons.Objects[1].(*widget.Button)
 	//body
-	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*widget.Box)
-	assert.Greater(t, len(breadcrumb.Children), 0)
+	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container)
+	assert.Greater(t, len(breadcrumb.Objects), 0)
 
 	assert.Nil(t, err)
 	components := strings.Split(testData.String()[7:], "/")
@@ -202,9 +202,9 @@ func TestShowFileOpen(t *testing.T) {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
 	}
-	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
+	if assert.Equal(t, len(components), len(breadcrumb.Objects)) {
 		for i := range components {
-			assert.Equal(t, components[i], breadcrumb.Children[i].(*widget.Button).Text)
+			assert.Equal(t, components[i], breadcrumb.Objects[i].(*widget.Button).Text)
 		}
 	}
 
@@ -305,8 +305,8 @@ func TestShowFileSave(t *testing.T) {
 	assert.Equal(t, "Save File", title.Text)
 
 	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Entry)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
-	save := buttons.Children[1].(*widget.Button)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	save := buttons.Objects[1].(*widget.Button)
 
 	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)

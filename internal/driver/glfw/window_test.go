@@ -201,7 +201,7 @@ func TestWindow_Cursor(t *testing.T) {
 	h := widget.NewHyperlink("Testing", u)
 	b := widget.NewButton("Test", nil)
 
-	w.SetContent(widget.NewVBox(e, h, b))
+	w.SetContent(container.NewVBox(e, h, b))
 
 	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
 	textCursor := desktop.TextCursor
@@ -222,7 +222,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	h1.SetMinSize(fyne.NewSize(10, 10))
 	h2 := &hoverableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	h2.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(h1, h2))
+	w.SetContent(container.NewHBox(h1, h2))
 	w.Resize(fyne.NewSize(20, 10))
 
 	repaintWindow(w)
@@ -267,7 +267,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(d1, d2))
+	w.SetContent(container.NewHBox(d1, d2))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -363,7 +363,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 	w := createWindow("Test").(*window)
 	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(d1))
+	w.SetContent(container.NewHBox(d1))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -405,7 +405,7 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(d1, d2))
+	w.SetContent(container.NewHBox(d1, d2))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -535,7 +535,7 @@ func TestWindow_Tapped(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(widget.NewVBox(rect, o))
+	w.SetContent(container.NewVBox(rect, o))
 
 	w.mousePos = fyne.NewPos(50, 160)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -630,7 +630,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	tapped := 0
 	b1 := widget.NewButton("Tap", func() { tapped = 1 })
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
-	w.SetContent(widget.NewVBox(b1, b2))
+	w.SetContent(container.NewVBox(b1, b2))
 
 	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -911,7 +911,7 @@ func TestWindow_Focus(t *testing.T) {
 	e1 := widget.NewEntry()
 	e2 := widget.NewEntry()
 
-	w.SetContent(widget.NewVBox(e1, e2))
+	w.SetContent(container.NewVBox(e1, e2))
 	w.Canvas().Focus(e1)
 
 	w.charInput(w.viewport, 'a')

@@ -2,11 +2,13 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
+	"image/color"
 	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/theme"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -213,4 +215,31 @@ func (w *DisableableWidget) Disabled() bool {
 	defer w.propertyLock.RUnlock()
 
 	return w.disabled
+}
+
+type simpleRenderer struct {
+	content *fyne.Container
+}
+
+func (s *simpleRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (s *simpleRenderer) Destroy() {
+}
+
+func (s *simpleRenderer) Layout(size fyne.Size) {
+	s.content.Resize(size)
+}
+
+func (s *simpleRenderer) MinSize() fyne.Size {
+	return s.content.MinSize()
+}
+
+func (s *simpleRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{s.content}
+}
+
+func (s *simpleRenderer) Refresh() {
+	s.content.Refresh()
 }
