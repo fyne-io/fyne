@@ -94,8 +94,8 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 	newURI += "/" + strings.Join(components, "/")
 
 	// stick the query and fragment back on the end
-	if len(u.Query()) > 0 {
-		newURI += "?" + u.Query()
+	if q := u.Query(); len(q) > 0 {
+		newURI += "?" + q
 	}
 	if len(u.Fragment()) > 0 {
 		newURI += "#" + u.Fragment()
