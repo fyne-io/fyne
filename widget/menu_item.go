@@ -183,7 +183,7 @@ func (i *menuItem) isActive() bool {
 }
 
 func (i *menuItem) isSubmenuOpen() bool {
-	return i.Child() != nil && !i.Child().hiding
+	return i.Child() != nil && i.Child().Visible()
 }
 
 func (i *menuItem) trigger() {
@@ -243,11 +243,11 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 func (r *menuItemRenderer) Refresh() {
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
-	} else if r.i.hovered {
-		r.background.FillColor = theme.HoverColor()
-		r.background.Show()
 	} else if r.i.isActive() {
 		r.background.FillColor = theme.FocusColor()
+		r.background.Show()
+	} else if r.i.hovered {
+		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {
 		r.background.Hide()

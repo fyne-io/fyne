@@ -18,7 +18,6 @@ type Menu struct {
 	OnDismiss   func()
 	activeItem  *menuItem
 	customSized bool
-	hiding      bool
 }
 
 // NewMenu creates a new Menu.
@@ -147,7 +146,6 @@ func (m *Menu) DeactivateLastSubmenu() bool {
 //
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
-	m.hiding = true
 	widget.HideWidget(&m.Base, m)
 }
 
@@ -183,7 +181,6 @@ func (m *Menu) Resize(size fyne.Size) {
 //
 // Implements: fyne.Widget
 func (m *Menu) Show() {
-	m.hiding = false
 	widget.ShowWidget(&m.Base, m)
 }
 
@@ -270,9 +267,6 @@ func (r *menuRenderer) MinSize() fyne.Size {
 
 func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
-	for _, i := range r.m.Items {
-		i.Refresh()
-	}
 	canvas.Refresh(r.m)
 }
 
