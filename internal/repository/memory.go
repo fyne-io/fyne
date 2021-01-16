@@ -186,11 +186,7 @@ func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
 	}
 
 	_, ok := m.Data[u.Path()]
-	if !ok {
-		return false, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
-	}
-
-	return true, nil
+	return ok, nil
 }
 
 // Destroy implements repository.Repository.Destroy

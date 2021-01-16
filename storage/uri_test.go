@@ -363,7 +363,7 @@ func TestCanRead(t *testing.T) {
 
 	bazCanRead, err := storage.CanRead(baz)
 	assert.False(t, bazCanRead)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func TestCopy(t *testing.T) {

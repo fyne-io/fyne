@@ -223,6 +223,10 @@ func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // Reader(), as the underlying filesystem may have changed since you called
 // CanRead.
 //
+// The non-existence of a resource should not be treated as an error. In other
+// words, a Repository implementation which for some URI u returns false, nil
+// for Exists(u), CanRead(u) should also return false, nil.
+//
 // CanRead is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
@@ -238,6 +242,12 @@ func CanRead(u fyne.URI) (bool, error) {
 
 // Writer returns URIWriteCloser set up to write to the resource that the
 // URI references.
+//
+// Writing to a non-extant resource should create that resource if possible
+// (and if not possible, this should be reflected in the return of CanWrite()).
+// Writing to an extant resource should overwrite it in-place. At present, this
+// API does not provide a mechanism for appending to an already-extant
+// resource, except for reading it in and writing all the data back out.
 //
 // This method can fail in several ways:
 //
