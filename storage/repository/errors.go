@@ -12,7 +12,7 @@ var (
 	// or has explicitly returned this error.
 	//
 	// Since 2.0.0
-	ErrOperationNotSupported = errors.New("Operation not supported for this URI.")
+	ErrOperationNotSupported = errors.New("operation not supported for this URI")
 
 	// ErrURIRoot should be thrown by fyne.URI implementations when the caller
 	// attempts to take the parent of the root. This way, downstream code that
@@ -20,5 +20,5 @@ var (
 	// iterating.
 	//
 	// Since 2.0.0
-	ErrURIRoot = errors.New("Cannot take the parent of the root element in a URI")
+	ErrURIRoot = errors.New("cannot take the parent of the root element in a URI")
 )
