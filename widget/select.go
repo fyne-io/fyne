@@ -142,7 +142,7 @@ func (s *Select) Resize(size fyne.Size) {
 	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
-		s.popUp.Resize(fyne.NewSize(size.Width-theme.Padding()*2, s.popUp.MinSize().Height))
+		s.popUp.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
 	}
 }
 
@@ -231,7 +231,7 @@ func (s *Select) optionTapped(text string) {
 
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height))
+	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-theme.InputBorderSize()))
 }
 
 func (s *Select) showPopUp() {
@@ -247,7 +247,7 @@ func (s *Select) showPopUp() {
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
 	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
+	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
 
 func (s *Select) tapAnimation() {
