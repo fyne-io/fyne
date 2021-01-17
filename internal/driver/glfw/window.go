@@ -729,11 +729,9 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			if w.mouseDragged == nil {
 				w.queueEvent(func() { wid.MouseUp(mev) })
 			} else {
-				dragged := w.mouseDragged.(interface{}).(fyne.CanvasObject)
-				_, tapable := dragged.(desktop.Mouseable)
-				if dragged != nil && tapable {
+				if dragged, ok := w.mouseDragged.(desktop.Mouseable); ok {
 					mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
-					w.queueEvent(func() { dragged.(desktop.Mouseable).MouseUp(mev) })
+					w.queueEvent(func() { dragged.MouseUp(mev) })
 				} else {
 					w.queueEvent(func() { wid.MouseUp(mev) })
 				}
