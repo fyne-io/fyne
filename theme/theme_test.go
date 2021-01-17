@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestThemeChange(t *testing.T) {

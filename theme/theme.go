@@ -555,9 +555,9 @@ func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 }
 
 func safeFontLookup(s fyne.TextStyle) fyne.Resource {
-	col := current().Font(s)
-	if col != nil {
-		return col
+	font := current().Font(s)
+	if font != nil {
+		return font
 	}
 	fyne.LogError("Loaded theme returned nil font", nil)
 
