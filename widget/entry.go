@@ -162,7 +162,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
-	cursor := canvas.NewRectangle(theme.PrimaryColor())
+	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
@@ -1316,7 +1316,6 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	r.cursor.FillColor = theme.PrimaryColor()
 	if focused {
 		r.cursor.Show()
 		r.content.entry.cursorAnim.Start()
