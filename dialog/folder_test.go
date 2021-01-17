@@ -38,8 +38,8 @@ func TestShowFolderOpen(t *testing.T) {
 	assert.Equal(t, "Open Folder", title.Text)
 
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
-	open := buttons.Children[1].(*widget.Button)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	open := buttons.Objects[1].(*widget.Button)
 
 	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)

@@ -24,6 +24,7 @@ These changes likely break some apps, please read the
 
 * The second parameter of `theme.NewThemedResource` was removed, it was previously ignored
 * The desktop.Cursor definition was renamed desktop.StandardCursor to make way for custom cursors
+* Button `Style` and `HideShadow` were removed, use `Importance`
 
 * iOS apps preferences will be lost in this upgrade as we move to more advanced storage
 * Dialogs no longer show when created, unless using the ShowXxx convenience methods
@@ -35,7 +36,9 @@ These changes likely break some apps, please read the
   - `widget.AccordionContainer` (now `widget.Accordion`)
   - `layout.NewFixedGridLayout()` (now `layout.NewGridWrapLayout()`)
   - `widget.ScrollContainer` (now `container.Scroll`)
-  - `widget.SplitContainer` (now `containerr.Spilt`)
+  - `widget.SplitContainer` (now `container.Spilt`)
+  - `widget.Group` (replaced by `widget.Card`)
+  - `widget.Box` (now `container.NewH/VBox`)
 
 ### Added
 

@@ -312,7 +312,7 @@ func startProgress() {
 		end := endProgress
 		num := 0.0
 		for num < 1.0 {
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(16 * time.Millisecond)
 			select {
 			case <-end:
 				return
@@ -321,7 +321,7 @@ func startProgress() {
 
 			progress.SetValue(num)
 			fprogress.SetValue(num)
-			num += 0.01
+			num += 0.002
 		}
 
 		progress.SetValue(1)

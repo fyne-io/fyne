@@ -109,7 +109,7 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true}
+	e := &Entry{Password: true, Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
@@ -160,7 +160,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.textProvider()
 	e.placeholderProvider()
 
-	box := canvas.NewRectangle(theme.FocusColor())
+	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
 	cursor := canvas.NewRectangle(theme.PrimaryColor())
 	cursor.Hide()
@@ -1162,7 +1162,7 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
-	r.box.FillColor = theme.FocusColor()
+	r.box.FillColor = theme.InputBackgroundColor()
 	if focused {
 		r.line.FillColor = theme.PrimaryColor()
 	} else {

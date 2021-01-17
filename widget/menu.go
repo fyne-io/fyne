@@ -123,10 +123,10 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 // DeactivateChild deactivates the active menu item and hides its submenu if any.
 func (m *Menu) DeactivateChild() {
 	if m.activeItem != nil {
+		defer m.activeItem.Refresh()
 		if c := m.activeItem.Child(); c != nil {
 			c.Hide()
 		}
-		m.activeItem.Refresh()
 		m.activeItem = nil
 	}
 }
@@ -223,6 +223,7 @@ func (m *Menu) activateItem(item *menuItem) {
 
 	m.DeactivateChild()
 	m.activeItem = item
+	m.activeItem.Refresh()
 	m.Refresh()
 }
 

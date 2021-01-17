@@ -43,7 +43,7 @@ type Form struct {
 	CancelText string
 
 	itemGrid     *fyne.Container
-	buttonBox    *Box
+	buttonBox    *fyne.Container
 	cancelButton *Button
 	submitButton *Button
 }
@@ -199,7 +199,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
 	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
-	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
+	f.buttonBox = fyne.NewContainerWithLayout(layout.NewHBoxLayout(), layout.NewSpacer(), f.cancelButton, f.submitButton)
 
 	objects := make([]fyne.CanvasObject, len(f.Items)*2)
 	for i, item := range f.Items {
@@ -210,7 +210,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	}
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
-	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
+	renderer := &simpleRenderer{content: fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox)}
 	f.updateButtons()      // will set correct visibility on the submit/cancel btns
 	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
 	return renderer

@@ -12,7 +12,7 @@
 					<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 					<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 				</widget>
-				<rectangle fillColor="primary" pos="4,4" size="128x29"/>
+				<rectangle fillColor="focus" pos="4,4" size="128x29"/>
 				<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="132x33"/>
 				<widget pos="8,4" size="100x29" type="*widget.textProvider">
 					<text bold pos="4,4" size="92x21">(Select one)</text>

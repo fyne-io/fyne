@@ -90,8 +90,8 @@ func makeScrollTab(_ fyne.Window) fyne.CanvasObject {
 	hlist := makeButtonList(20)
 	vlist := makeButtonList(50)
 
-	horiz := container.NewHScroll(widget.NewHBox(hlist...))
-	vert := container.NewVScroll(widget.NewVBox(vlist...))
+	horiz := container.NewHScroll(container.NewHBox(hlist...))
+	vert := container.NewVScroll(container.NewVBox(vlist...))
 
 	return container.NewAdaptiveGrid(2,
 		container.NewBorder(horiz, nil, nil, nil, vert),

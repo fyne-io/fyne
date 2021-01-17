@@ -360,7 +360,7 @@ func (s *selectRenderer) buttonColor() color.Color {
 		return theme.ButtonColor()
 	}
 	if s.combo.focused {
-		return theme.PrimaryColor()
+		return theme.FocusColor()
 	}
 	if s.combo.hovered {
 		return theme.HoverColor()
