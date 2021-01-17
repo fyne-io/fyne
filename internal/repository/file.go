@@ -12,8 +12,8 @@ import (
 	"fyne.io/fyne/storage/repository"
 )
 
-// fileSchemePrefix is used for concatenating with paths when we must construct
-// them from strings.
+// fileSchemePrefix is used for when we need a hard-coded version of "file://"
+// for string processing
 const fileSchemePrefix string = "file://"
 
 // declare conformance with repository types
@@ -189,7 +189,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		return nil, repository.ErrURIRoot
 	}
 
-	return storage.ParseURI(fileSchemePrefix + parent)
+	return storage.NewFileURI(parent), nil
 }
 
 // Child implements repository.HierarchicalRepository.Child
@@ -224,10 +224,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	urilist := []fyne.URI{}
 
 	for _, f := range files {
-		uri, err := storage.ParseURI(fileSchemePrefix + filepath.Join(path, f.Name()))
-		if err != nil {
-			return nil, err
-		}
+		uri := storage.NewFileURI(filepath.Join(path, f.Name()))
 		urilist = append(urilist, uri)
 	}
 
