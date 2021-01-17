@@ -1,23 +1,14 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="3,77" size="136x37" type="*widget.Select">
-				<widget pos="4,4" size="128x29" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-2" size="128x2"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="128,-2" size="2x2" startColor="shadow"/>
-					<linearGradient angle="270" pos="128,0" size="2x29" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="128,29" size="2x2" startColor="shadow"/>
-					<linearGradient pos="0,29" size="128x2" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
-				</widget>
-				<rectangle fillColor="button" pos="4,4" size="128x29"/>
+			<widget pos="3,77" size="135x37" type="*widget.Select">
+				<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="135x33"/>
+				<rectangle fillColor="shadow" pos="0,35" size="135x2"/>
 				<rectangle size="0x0"/>
-				<widget pos="8,4" size="100x29" type="*widget.textProvider">
-					<text bold pos="4,4" size="92x21">Foo</text>
+				<widget pos="4,4" size="103x29" type="*widget.textProvider">
+					<text pos="4,4" size="95x21">Foo</text>
 				</widget>
-				<widget pos="108,8" size="20x20" type="*widget.Icon">
+				<widget pos="107,8" size="20x20" type="*widget.Icon">
 					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 				</widget>
 			</widget>
