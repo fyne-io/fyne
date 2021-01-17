@@ -361,13 +361,12 @@ func (s *selectRenderer) Refresh() {
 	canvas.Refresh(s.combo.super())
 }
 
-// TODO define colors
 func (s *selectRenderer) bgLineColor() (bg color.Color, line color.Color) {
 	if s.combo.Disabled() {
 		return theme.InputBackgroundColor(), theme.DisabledTextColor()
 	}
 	if s.combo.focused {
-		return theme.InputBackgroundColor(), theme.PrimaryColor()
+		return theme.FocusColor(), theme.PrimaryColor()
 	}
 	if s.combo.hovered {
 		return theme.HoverColor(), theme.ShadowColor()
