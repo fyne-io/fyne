@@ -4,6 +4,8 @@ package gomobile
 
 import (
 	"fyne.io/fyne"
+
+	"fyne.io/fyne/storage/repository"
 )
 
 // declare conformance with repository types
@@ -45,5 +47,5 @@ func (m *mobileFileRepo) List(u fyne.URI) ([]fyne.URI, error) {
 
 func (m *mobileFileRepo) CreateListable(u fyne.URI) error {
 	// TODO: implement this
-	return nil
+	return repository.ErrOperationNotSupported
 }
