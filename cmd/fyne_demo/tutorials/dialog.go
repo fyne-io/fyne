@@ -161,19 +161,6 @@ func loadImage(f fyne.URIReadCloser) *canvas.Image {
 	return canvas.NewImageFromResource(res)
 }
 
-func loadText(f fyne.URIReadCloser) string {
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		fyne.LogError("Failed to load text data", err)
-		return ""
-	}
-	if data == nil {
-		return ""
-	}
-
-	return string(data)
-}
-
 func showImage(f fyne.URIReadCloser) {
 	img := loadImage(f)
 	if img == nil {
