@@ -71,7 +71,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 		},
 		"a row": {
 			object: cr2,
-			want:   fyne.NewPos(4, 66),
+			want:   fyne.NewPos(4, 74),
 		},
 		"the window content": {
 			object: content,
@@ -89,11 +89,11 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 		"an overlay item": {
 			object: ovli2,
-			want:   fyne.NewPos(79, 85),
+			want:   fyne.NewPos(79, 81),
 		},
 		"the overlay content": {
 			object: ovlContent,
-			want:   fyne.NewPos(79, 52),
+			want:   fyne.NewPos(79, 40),
 		},
 		"the overlay": {
 			object: ovl,

@@ -621,6 +621,21 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			w.customCursor = rawCursor
 		}
 	}
+
+	if w.mouseButton != 0 && !w.mouseDragStarted {
+		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
+			_, ok := object.(fyne.Draggable)
+			return ok
+		})
+
+		if wid, ok := obj.(fyne.Draggable); ok {
+			w.mouseDragPos = previousPos
+			w.mouseDragged = wid
+			w.mouseDraggedOffset = previousPos.Subtract(pos)
+			w.mouseDragStarted = true
+		}
+	}
+
 	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
 		ev.AbsolutePosition = w.mousePos
@@ -639,19 +654,12 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		w.mouseOut()
 	}
 
-	if wid, ok := obj.(fyne.Draggable); ok {
-		if w.mouseButton != 0 && !w.mouseDragStarted {
-			w.mouseDragPos = previousPos
-			w.mouseDragged = wid
-			w.mouseDraggedOffset = w.mousePos.Subtract(pos)
-		}
-	}
-
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
+			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
-			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
 			ev.Dragged = fyne.NewDelta(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
@@ -716,7 +724,14 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		if action == glfw.Press {
 			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
-			w.queueEvent(func() { wid.MouseUp(mev) })
+			dragged := w.mouseDragged.(interface{}).(fyne.CanvasObject)
+			_, tappableDrag := dragged.(desktop.Mouseable)
+			if dragged != nil && tappableDrag {
+				mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
+				w.queueEvent(func() { dragged.(desktop.Mouseable).MouseUp(mev) })
+			} else {
+				w.queueEvent(func() { wid.MouseUp(mev) })
+			}
 		}
 	}
 

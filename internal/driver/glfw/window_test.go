@@ -45,6 +45,11 @@ func TestMain(m *testing.M) {
 		initMainMenu()
 		os.Exit(m.Run())
 	}()
+
+	master := d.CreateWindow("Master")
+	master.SetOnClosed(func() {
+		// we do not close, keeping the driver running
+	})
 	d.Run()
 }
 
@@ -461,7 +466,7 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 func TestWindow_HoverableOnDragging(t *testing.T) {
 	w := createWindow("Test").(*window)
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
-	c := fyne.NewContainer(dh) // allow manual positioning
+	c := container.NewWithoutLayout(dh)
 	dh.Resize(fyne.NewSize(10, 10))
 	w.SetContent(c)
 
@@ -604,7 +609,7 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	scroll := container.NewScroll(child)
 	scroll.Offset = fyne.NewPos(0, 50)
 
-	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, scroll)
+	base := container.New(layout.NewGridLayout(1), rect, scroll)
 	w.SetContent(base)
 	refreshWindow(w) // ensure any async resize is done
 
@@ -667,7 +672,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	but.onDoubleTap = func() {
 		tapped = 2
 	}
-	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), but))
+	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
 
 	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -817,7 +822,7 @@ func TestWindow_PixelSize(t *testing.T) {
 
 	rect := &canvas.Rectangle{}
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(fyne.NewContainer(rect))
+	w.SetContent(container.NewWithoutLayout(rect))
 	w.Canvas().Refresh(w.Content())
 
 	winW, winH := w.(*window).minSizeOnScreen()
