@@ -16,22 +16,22 @@
 	</content>
 	<overlay>
 		<widget size="150x200" type="*widget.OverlayContainer">
-			<widget pos="11,118" size="127x37" type="*widget.Menu">
-				<widget size="127x37" type="*widget.Shadow">
+			<widget pos="7,116" size="135x37" type="*widget.Menu">
+				<widget size="135x37" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="127x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="127,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="127,0" size="4x37" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="127,37" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,37" size="127x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="135x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="135,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="135,0" size="4x37" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="135,37" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,37" size="135x4" startColor="shadow"/>
 					<radialGradient centerOffset="0.5,-0.5" pos="-4,37" size="4x4" startColor="shadow"/>
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x37"/>
 				</widget>
-				<widget size="127x37" type="*widget.Scroll">
-					<widget size="127x37" type="*widget.menuBox">
-						<rectangle fillColor="background" size="127x45"/>
-						<container pos="0,4" size="127x45">
-							<widget size="127x29" type="*widget.menuItem">
+				<widget size="135x37" type="*widget.Scroll">
+					<widget size="135x37" type="*widget.menuBox">
+						<rectangle fillColor="background" size="135x45"/>
+						<container pos="0,4" size="135x45">
+							<widget size="135x29" type="*widget.menuItem">
 								<text pos="8,4" size="30x21">Test</text>
 							</widget>
 						</container>

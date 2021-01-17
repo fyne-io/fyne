@@ -14,25 +14,25 @@
 	</content>
 	<overlay>
 		<widget size="200x150" type="*widget.OverlayContainer">
-			<widget pos="73,80" size="127x70" type="*widget.Menu">
-				<widget size="127x70" type="*widget.Shadow">
+			<widget pos="65,80" size="135x70" type="*widget.Menu">
+				<widget size="135x70" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="127x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="127,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="127,0" size="4x70" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="127,70" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,70" size="127x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="135x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="135,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="135,0" size="4x70" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="135,70" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,70" size="135x4" startColor="shadow"/>
 					<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 				</widget>
-				<widget size="127x70" type="*widget.Scroll">
-					<widget size="127x70" type="*widget.menuBox">
-						<rectangle fillColor="background" size="127x78"/>
-						<container pos="0,4" size="127x78">
-							<widget size="127x29" type="*widget.menuItem">
+				<widget size="135x70" type="*widget.Scroll">
+					<widget size="135x70" type="*widget.menuBox">
+						<rectangle fillColor="background" size="135x78"/>
+						<container pos="0,4" size="135x78">
+							<widget size="135x29" type="*widget.menuItem">
 								<text pos="8,4" size="9x21">1</text>
 							</widget>
-							<widget pos="0,33" size="127x29" type="*widget.menuItem">
+							<widget pos="0,33" size="135x29" type="*widget.menuItem">
 								<text pos="8,4" size="9x21">2</text>
 							</widget>
 						</container>
