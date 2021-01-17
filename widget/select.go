@@ -319,10 +319,6 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding()*2, (size.Height-theme.IconInlineSize())/2)
 	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), s.label.MinSize().Height)
 
-	// TODO are these needed?
-	s.combo.propertyLock.RLock()
-	defer s.combo.propertyLock.RUnlock()
-
 	s.label.Resize(labelSize)
 	s.label.Move(fyne.NewPos(theme.Padding(), (size.Height-labelSize.Height)/2))
 
@@ -336,8 +332,6 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	// x1			      x4 (reserved)          x1    x1     x2
-	// pad  -     label (placeholder)  -  pad - icon - pad*2
 	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.combo.textStyle()).Width
 	min := s.label.MinSize()
 	min.Width = minPlaceholderWidth
