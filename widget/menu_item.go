@@ -16,8 +16,7 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child   *Menu
-	hovered bool
+	child *Menu
 }
 
 // newMenuItem creates a new menuItem.
@@ -71,14 +70,12 @@ func (i *menuItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
-// MouseIn changes the item to be hovered and shows the submenu if the item has one.
+// MouseIn activates the item which shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
 //
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
-	i.hovered = true
 	i.activate()
-	i.Refresh()
 }
 
 // MouseMoved does nothing.
@@ -87,15 +84,13 @@ func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 func (i *menuItem) MouseMoved(*desktop.MouseEvent) {
 }
 
-// MouseOut changes the item to not be hovered but has no effect on the visibility of the item's submenu.
+// MouseOut deactivates the item unless it has an open submenu.
 //
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseOut() {
-	i.hovered = false
 	if !i.isSubmenuOpen() {
 		i.deactivate()
 	}
-	i.Refresh()
 }
 
 // Move sets the position of the widget relative to its parent.
@@ -245,9 +240,6 @@ func (r *menuItemRenderer) Refresh() {
 		r.background.Hide()
 	} else if r.i.isActive() {
 		r.background.FillColor = theme.FocusColor()
-		r.background.Show()
-	} else if r.i.hovered {
-		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {
 		r.background.Hide()
