@@ -138,6 +138,7 @@ func TestFileRepositoryWriter(t *testing.T) {
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
+	spamHamPath := path.Join(dir, "spam", "ham")
 	err = ioutil.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
@@ -155,6 +156,18 @@ func TestFileRepositoryWriter(t *testing.T) {
 	foo := storage.NewFileURI(fooPath)
 	bar := storage.NewFileURI(barPath)
 	baz := storage.NewFileURI(bazPath)
+	spamHam := storage.NewFileURI(spamHamPath)
+
+	// Make sure that spamHam errors, since writing to a non-existant
+	// parent directory should be an error.
+	spamHamWriter, err := storage.Writer(spamHam)
+	assert.NotNil(t, err)
+	if err == nil {
+		// Keep this from bodging up the Windows tests if this is
+		// created in error, and then we try to delete it while there
+		// is an open handle.
+		spamHamWriter.Close()
+	}
 
 	// write some data and assert there are no errors
 	fooWriter, err := storage.Writer(foo)
