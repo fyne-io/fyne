@@ -19,8 +19,9 @@ type menuBarItem struct {
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
-	active bool
-	child  *publicWidget.Menu
+	active  bool
+	child   *publicWidget.Menu
+	hovered bool
 }
 
 func (i *menuBarItem) Child() *publicWidget.Menu {
@@ -81,21 +82,27 @@ func (i *menuBarItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
-// MouseIn shows the menu if the bar is active.
+// MouseIn activates the item and shows the menu if the bar is active.
 // The menu that was displayed before will be hidden.
+//
+// If the bar is not active, the item will be hovered.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
+	i.hovered = true
 	if i.Parent.active {
 		i.Parent.canvas.Focus(i)
 	}
+	i.Refresh()
 }
 
-// MouseMoved shows the menu if the bar is active.
+// MouseMoved activates the item and shows the menu if the bar is active.
 // The menu that was displayed before will be hidden.
 // This might have an effect when mouse and keyboard control are mixed.
 // Changing the active menu with the keyboard will make the hovered menu bar item inactive.
 // On the next mouse move the hovered item is activated again.
+//
+// If the bar is not active, this will do nothing.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
@@ -104,10 +111,14 @@ func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 	}
 }
 
-// MouseOut does nothing.
+// MouseOut does nothing if the bar is active.
+//
+// IF the bar is not active, it changes the item to not be hovered.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseOut() {
+	i.hovered = false
+	i.Refresh()
 }
 
 // Move sets the position of the widget relative to its parent.
@@ -193,6 +204,9 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 func (r *menuBarItemRenderer) Refresh() {
 	if r.i.active && r.i.Parent.active {
 		r.background.FillColor = theme.FocusColor()
+		r.background.Show()
+	} else if r.i.hovered && !r.i.Parent.active {
+		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {
 		r.background.Hide()
