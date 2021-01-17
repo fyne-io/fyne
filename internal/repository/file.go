@@ -36,7 +36,7 @@ func (f *file) URI() fyne.URI {
 // interface libraries. It should be registered by the driver on platforms
 // where it is appropriate to do so.
 //
-// This repository is suitable to handle file:// schemes.
+// This repository is suitable to handle the file:// scheme.
 //
 // Since: 2.0.0
 type FileRepository struct {
@@ -44,7 +44,7 @@ type FileRepository struct {
 
 // NewFileRepository creates a new FileRepository instance. It must be
 // given the scheme it is registered for. The caller needs to call
-// repository.Register() on the result of this function.
+// repository.Register() with the result of this function.
 //
 // Since: 2.0.0
 func NewFileRepository() *FileRepository {
@@ -74,7 +74,7 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 		return nil, fmt.Errorf("invalid URI for file: %s", uri)
 	}
 
-	path := uri.String()[7:]
+	path := uri.Path()
 	var f *os.File
 	var err error
 	if create {
@@ -168,12 +168,10 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	scheme := u.Scheme()
 
 	// trim trailing slash
-	if s[len(s)-1] == '/' {
-		s = s[0 : len(s)-1]
-	}
+	s = strings.TrimSuffix(s, "/")
 
 	// trim the scheme
-	s = s[len(scheme)+3:]
+	s = strings.TrimPrefix(s, "file://")
 
 	// Completely empty URI with just a scheme
 	if len(s) == 0 {
