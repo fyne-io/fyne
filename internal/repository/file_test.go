@@ -14,6 +14,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func checkExistance(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}
+
 func TestFileRepositoryRegistration(t *testing.T) {
 	f := NewFileRepository()
 	repository.Register("file", f)
@@ -432,4 +443,37 @@ func TestFileRepositoryListing(t *testing.T) {
 		stringListing = append(stringListing, u.String())
 	}
 	assert.ElementsMatch(t, []string{"file://" + filepath.ToSlash(path.Join(dir, "foo", "bar")), "file://" + filepath.ToSlash(path.Join(dir, "foo", "baz"))}, stringListing)
+}
+
+func TestFileRepositoryCreateListable(t *testing.T) {
+	// Set up a temporary directory.
+	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	f := NewFileRepository()
+	repository.Register("file", f)
+
+	fooPath := path.Join(dir, "foo")
+	fooBarPath := path.Join(dir, "foo", "bar")
+	foo := storage.NewFileURI(fooPath)
+	fooBar := storage.NewFileURI(fooBarPath)
+
+	// Creating a dir with no parent should fail
+	err = storage.CreateListable(fooBar)
+	assert.NotNil(t, err)
+
+	// Creating foo should work though
+	err = storage.CreateListable(foo)
+	assert.Nil(t, err)
+
+	// and now we should be able to create fooBar
+	err = storage.CreateListable(fooBar)
+	assert.Nil(t, err)
+
+	// make sure the OS thinks these dirs really exist
+	assert.True(t, checkExistance(fooPath))
+	assert.True(t, checkExistance(fooBarPath))
 }

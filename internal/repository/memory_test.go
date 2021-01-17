@@ -310,3 +310,23 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	}
 	assert.ElementsMatch(t, []string{"mem:///foo/bar", "mem:///foo/baz/"}, stringListing)
 }
+
+func TestInMemoryRepositoryCreateListable(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewInMemoryRepository("mem")
+	repository.Register("mem", m)
+
+	foo, _ := storage.ParseURI("mem:///foo")
+
+	err := storage.CreateListable(foo)
+	assert.Nil(t, err)
+
+	assert.Equal(t, m.Data["/foo"], []byte{})
+
+	// trying to create something we already created should fail
+	err = storage.CreateListable(foo)
+	assert.NotNil(t, err)
+
+	// NOTE: creating an InMemoryRepository path with a non-extant parent
+	// is specifically not an error, so that case is not tested.
+}

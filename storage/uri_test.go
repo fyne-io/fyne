@@ -381,7 +381,7 @@ func TestCopy(t *testing.T) {
 	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
 }
 
-func TestInMemoryRepositoryMove(t *testing.T) {
+func TestRepositoryMove(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := intRepo.NewInMemoryRepository("uritest")
 	repository.Register("uritest", m)
@@ -400,7 +400,7 @@ func TestInMemoryRepositoryMove(t *testing.T) {
 	assert.False(t, exists)
 }
 
-func TestInMemoryRepositoryListing(t *testing.T) {
+func TestRepositoryListing(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := intRepo.NewInMemoryRepository("uritest")
 	repository.Register("uritest", m)
@@ -422,4 +422,24 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 		stringListing = append(stringListing, u.String())
 	}
 	assert.ElementsMatch(t, []string{"uritest:///foo/bar", "uritest:///foo/baz/"}, stringListing)
+}
+
+func TestCreateListable(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+
+	foo, _ := storage.ParseURI("uritest:///foo")
+
+	err := storage.CreateListable(foo)
+	assert.Nil(t, err)
+
+	assert.Equal(t, m.Data["/foo"], []byte{})
+
+	// trying to create something we already created should fail
+	err = storage.CreateListable(foo)
+	assert.NotNil(t, err)
+
+	// NOTE: creating an InMemoryRepository path with a non-extant parent
+	// is specifically not an error, so that case is not tested.
 }
