@@ -27,8 +27,8 @@ func splitNonEmpty(str, sep string) []string {
 // is split along instances of '/', and the trailing element is removed. The
 // result is concatenated and parsed as a new URI.
 //
-// If the URI path is empty or '/', then a duplicate of the URI is returned,
-// along with ErrURIRoot.
+// If the URI path is empty or '/', then a nil URI is returned, along with
+// ErrURIRoot.
 //
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
@@ -38,11 +38,7 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 	p := u.Path()
 
 	if p == "" || p == "/" {
-		parent, err := ParseURI(u.String())
-		if err != nil {
-			return nil, err
-		}
-		return parent, ErrURIRoot
+		return nil, ErrURIRoot
 	}
 
 	components := splitNonEmpty(p, "/")

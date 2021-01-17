@@ -1,16 +1,20 @@
 package repository
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/storage/repository"
 )
+
+// fileSchemePrefix is used for concatenating with paths when we must construct
+// them from strings.
+const fileSchemePrefix string = "file://"
 
 // declare conformance with repository types
 var _ repository.Repository = (*FileRepository)(nil)
@@ -70,10 +74,6 @@ func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 }
 
 func openFile(uri fyne.URI, create bool) (*file, error) {
-	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("invalid URI for file: %s", uri)
-	}
-
 	path := uri.Path()
 	var f *os.File
 	var err error
@@ -98,7 +98,7 @@ func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
 	if err == nil {
-		defer f.Close()
+		f.Close()
 	} else {
 
 		if os.IsPermission(err) {
@@ -133,7 +133,7 @@ func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
 	if err == nil {
-		defer f.Close()
+		f.Close()
 	} else {
 
 		if os.IsPermission(err) {
@@ -165,7 +165,6 @@ func (r *FileRepository) Delete(u fyne.URI) error {
 // Since: 2.0.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
-	scheme := u.Scheme()
 
 	// trim trailing slash
 	s = strings.TrimSuffix(s, "/")
@@ -190,7 +189,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		return nil, repository.ErrURIRoot
 	}
 
-	return storage.ParseURI(scheme + "://" + parent)
+	return storage.ParseURI(fileSchemePrefix + parent)
 }
 
 // Child implements repository.HierarchicalRepository.Child
@@ -200,14 +199,11 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	newURI := u.Scheme() + "://" + u.Authority()
 	newURI += path.Join(u.Path(), component)
 
-	query := u.Query()
-	fragment := u.Fragment()
-
 	// stick the query and fragment back on the end
-	if len(query) > 0 {
+	if query := u.Query(); len(query) > 0 {
 		newURI += "?" + query
 	}
-	if len(fragment) > 0 {
+	if fragment := u.Fragment(); len(fragment) > 0 {
 		newURI += "#" + fragment
 	}
 
@@ -228,7 +224,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	urilist := []fyne.URI{}
 
 	for _, f := range files {
-		uri, err := storage.ParseURI("file://" + filepath.Join(path, f.Name()))
+		uri, err := storage.ParseURI(fileSchemePrefix + filepath.Join(path, f.Name()))
 		if err != nil {
 			return nil, err
 		}

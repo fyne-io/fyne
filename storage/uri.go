@@ -312,8 +312,15 @@ func CanWrite(u fyne.URI) (bool, error) {
 	return wrepo.CanWrite(u)
 }
 
-// Copy given two URIs, 'src', and 'dest' both of the same scheme , will copy
-// one to the other.
+// Copy given two URIs, 'src', and 'dest' both of the same scheme, will copy
+// one to the other. If the source and destination are of different schemes,
+// then the Copy implementation for the storage repository registered to the
+// scheme of the source will be used. Implementations are recommended to use
+// repository.GenericCopy() as a fail-over in the case that they do not
+// understand how to operate on the scheme of the destination URI. However, the
+// behavior of calling Copy() on URIs of non-matching schemes is ultimately
+// defined by the storage repository registered to the scheme of the source
+// URI.
 //
 // This method may fail in several ways:
 //
@@ -353,6 +360,16 @@ func Copy(source fyne.URI, destination fyne.URI) error {
 // scheme this will move src to dest. This means the resource referenced by
 // src will be copied into the resource referenced by dest, and the resource
 // referenced by src will no longer exist after the operation is complete.
+//
+// If the source and destination are of different schemes, then the Move
+// implementation for the storage repository registered to the scheme of the
+// source will be used. Implementations are recommended to use
+// repository.GenericMove() as a fail-over in the case that they do not
+// understand how to operate on the scheme of the destination URI. However, the
+// behavior of calling Move() on URIs of non-matching schemes is ultimately
+// defined by the storage repository registered to the scheme of the source
+// URI.
+//
 //
 // This method may fail in several ways:
 //

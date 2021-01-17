@@ -26,7 +26,12 @@ func TestGenericParent(t *testing.T) {
 		res, err := GenericParent(u)
 		assert.Equal(t, c.err, err)
 
-		assert.Equal(t, c.expect, res.String())
+		// In the case where there is a non-nil error, res is defined
+		// to be nil, so we cannot call res.String() without causing
+		// a panic.
+		if err == nil {
+			assert.Equal(t, c.expect, res.String())
+		}
 	}
 }
 

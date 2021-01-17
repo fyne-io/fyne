@@ -153,8 +153,8 @@ func NewInMemoryRepository(scheme string) *InMemoryRepository {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
-	if u.Path() == "" {
-		return false, fmt.Errorf("invalid path '%s'", u.Path())
+	if p := u.Path(); p == "" {
+		return false, fmt.Errorf("invalid path '%s'", p)
 	}
 
 	_, ok := m.Data[u.Path()]
@@ -165,27 +165,30 @@ func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	if u.Path() == "" {
-		return nil, fmt.Errorf("invalid path '%s'", u.Path())
+	path := u.Path()
+
+	if path == "" {
+		return nil, fmt.Errorf("invalid path '%s'", path)
 	}
 
-	_, ok := m.Data[u.Path()]
+	_, ok := m.Data[path]
 	if !ok {
-		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
+		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", path)
 	}
 
-	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
+	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
 // CanRead implements repository.Repository.CanRead
 //
 // Since 2.0.0
 func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
-	if u.Path() == "" {
-		return false, fmt.Errorf("invalid path '%s'", u.Path())
+	path := u.Path()
+	if path == "" {
+		return false, fmt.Errorf("invalid path '%s'", path)
 	}
 
-	_, ok := m.Data[u.Path()]
+	_, ok := m.Data[path]
 	return ok, nil
 }
 
@@ -198,11 +201,12 @@ func (m *InMemoryRepository) Destroy(scheme string) {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	if u.Path() == "" {
-		return nil, fmt.Errorf("invalid path '%s'", u.Path())
+	path := u.Path()
+	if path == "" {
+		return nil, fmt.Errorf("invalid path '%s'", path)
 	}
 
-	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
+	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
 // CanWrite implements repository.WriteableRepository.CanWrite
@@ -220,9 +224,10 @@ func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Delete(u fyne.URI) error {
-	_, ok := m.Data[u.Path()]
+	path := u.Path()
+	_, ok := m.Data[path]
 	if ok {
-		delete(m.Data, u.Path())
+		delete(m.Data, path)
 	}
 
 	return nil
@@ -277,6 +282,7 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	}
 
 	prefixSplit := strings.Split(prefix, "/")
+	prefixSplitLen := len(prefixSplit)
 
 	// Now we can simply loop over all the paths and find the ones with an
 	// appropriate prefix, then eliminate those with too many path
@@ -293,7 +299,7 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 			ncomp--
 		}
 
-		if strings.HasPrefix(p, prefix) && ncomp == len(prefixSplit) {
+		if strings.HasPrefix(p, prefix) && ncomp == prefixSplitLen {
 			uri, err := storage.ParseURI(m.scheme + "://" + p)
 			if err != nil {
 				return nil, err
