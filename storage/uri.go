@@ -407,7 +407,7 @@ func Move(source fyne.URI, destination fyne.URI) error {
 
 // CanList will determine if the URI is listable or not.
 //
-// The returned method may fail in several ways:
+// This method may fail in several ways:
 //
 // * Different permissions or credentials are required to check if the
 //   URI supports listing.
@@ -445,7 +445,7 @@ func CanList(u fyne.URI) (bool, error) {
 // the resource referenced by the argument. For example, listing a directory on
 // a filesystem should return a list of files and directories it contains.
 //
-// The returned method may fail in several ways:
+// This method may fail in several ways:
 //
 // * Different permissions or credentials are required to obtain a
 //   listing for the given URI.
@@ -479,4 +479,56 @@ func List(u fyne.URI) ([]fyne.URI, error) {
 	}
 
 	return lrepo.List(u)
+}
+
+// CreateListable creates a new listable resource referenced by the given URI.
+// CreateListable will error if the URI already references an extant resource.
+// This method is used for storage repositories where listable resources are of
+// a different underlying type than other resources - for example, in a typical
+// filesystem ('file://'), CreateListable() corresponds to directory creation,
+// and Writer() implies file creation for non-extant operands.
+//
+// For storage repositories where listable and non-listable resources are the
+// of the same underlying type, CreateListable should be equivalent to calling
+// Writer(), writing zero bytes, and then closing the `URIWriteCloser - in
+// filesystem terms, the same as calling 'touch;'.
+//
+// Storage repositories which support listing, but not creation of listable
+// objects may return repository.ErrOperationNotSupported.
+//
+// CreateListable should generally fail if the parent of it's operand does not
+// exist, however this can vary by the implementation details of the specific
+// storage repository. In filesystem terms, this function is "mkdir" not "mkdir
+// -p".
+//
+// This method may fail in several ways:
+//
+// * Different permissions or credentials are required to create the requested
+//   resource.
+//
+// * Creating the resource depended on a lower level operation such as network
+//   or filesystem access that has failed in some way.
+//
+// * If the scheme of the given URI does not have a registered
+//   ListableRepository instance, then this method will fail with a
+//   repository.ErrOperationNotSupported.
+//
+// CreateListable is backed by the repository system - this function either
+// calls into a scheme-specific implementation from a registered repository, or
+// fails with a URIOperationNotSupported error.
+//
+// Since: 2.0.0
+func CreateListable(u fyne.URI) error {
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return err
+	}
+
+	lrepo, ok := repo.(repository.ListableRepository)
+	if !ok {
+		return repository.ErrOperationNotSupported
+	}
+
+	return lrepo.CreateListable(u)
+
 }

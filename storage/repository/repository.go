@@ -139,6 +139,13 @@ type ListableRepository interface {
 	//
 	// Since: 2.0.0
 	List(u fyne.URI) ([]fyne.URI, error)
+
+	// CreateListable will be used to implement calls to
+	// storage.CreateListable() for the registered scheme of this
+	// repository.
+	//
+	// Since: 2.0.0
+	CreateListable(u fyne.URI) error
 }
 
 // HierarchicalRepository is an extension of the Repository interface which

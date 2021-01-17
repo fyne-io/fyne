@@ -262,14 +262,14 @@ func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
 	return repository.GenericMove(source, destination)
 }
 
-// CanList implements repository.MovableRepository.CanList()
+// CanList implements repository.ListableRepository.CanList()
 //
 // Since: 2.0.0
 func (m *InMemoryRepository) CanList(u fyne.URI) (bool, error) {
 	return m.Exists(u)
 }
 
-// List implements repository.MovableRepository.List()
+// List implements repository.ListableRepository.List()
 //
 // Since: 2.0.0
 func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
@@ -311,4 +311,20 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	}
 
 	return listing, nil
+}
+
+// CreateListable impelements repository.ListableRepository.CreateListable.
+//
+// Since: 2.0.0
+func (m *InMemoryRepository) CreateListable(u fyne.URI) error {
+	ex, err := m.Exists(u)
+	if err != nil {
+		return err
+	}
+	path := u.Path()
+	if ex {
+		return fmt.Errorf("cannot create '%s' as a listable path because it already exists", path)
+	}
+	m.Data[path] = []byte{}
+	return nil
 }

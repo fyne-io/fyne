@@ -210,7 +210,7 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return storage.ParseURI(newURI)
 }
 
-// List implements repository.HierarchicalRepository.List()
+// List implements repository.ListableRepository.List()
 //
 // Since: 2.0.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
@@ -234,7 +234,14 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	return urilist, nil
 }
 
-// CanList implements repository.HierarchicalRepository.CanList()
+// CreateListable implements repository.ListableRepository.CreateListable.
+func (r *FileRepository) CreateListable(u fyne.URI) error {
+	path := u.Path()
+	err := os.Mkdir(path, 0755)
+	return err
+}
+
+// CanList implements repository.ListableRepository.CanList()
 //
 // Since: 2.0.0
 func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
