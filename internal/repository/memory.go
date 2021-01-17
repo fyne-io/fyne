@@ -153,11 +153,12 @@ func NewInMemoryRepository(scheme string) *InMemoryRepository {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
-	if p := u.Path(); p == "" {
-		return false, fmt.Errorf("invalid path '%s'", p)
+	path := u.Path()
+	if path == "" {
+		return false, fmt.Errorf("invalid path '%s'", path)
 	}
 
-	_, ok := m.Data[u.Path()]
+	_, ok := m.Data[path]
 	return ok, nil
 }
 
@@ -213,8 +214,8 @@ func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Since 2.0.0
 func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
-	if u.Path() == "" {
-		return false, fmt.Errorf("invalid path '%s'", u.Path())
+	if p := u.Path(); p == "" {
+		return false, fmt.Errorf("invalid path '%s'", p)
 	}
 
 	return true, nil

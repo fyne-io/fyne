@@ -170,7 +170,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s = strings.TrimSuffix(s, "/")
 
 	// trim the scheme
-	s = strings.TrimPrefix(s, "file://")
+	s = strings.TrimPrefix(s, fileSchemePrefix)
 
 	// Completely empty URI with just a scheme
 	if len(s) == 0 {
