@@ -82,8 +82,10 @@ func (i *menuBarItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
-// MouseIn changes the item to be hovered and shows the menu if the bar is active.
+// MouseIn activates the item and shows the menu if the bar is active.
 // The menu that was displayed before will be hidden.
+//
+// If the bar is not active, the item will be hovered.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
@@ -94,7 +96,13 @@ func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
 	i.Refresh()
 }
 
-// MouseMoved does nothing.
+// MouseMoved activates the item and shows the menu if the bar is active.
+// The menu that was displayed before will be hidden.
+// This might have an effect when mouse and keyboard control are mixed.
+// Changing the active menu with the keyboard will make the hovered menu bar item inactive.
+// On the next mouse move the hovered item is activated again.
+//
+// If the bar is not active, this will do nothing.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
@@ -103,7 +111,9 @@ func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 	}
 }
 
-// MouseOut changes the item to not be hovered but has no effect on the visibility of the menu.
+// MouseOut does nothing if the bar is active.
+//
+// IF the bar is not active, it changes the item to not be hovered.
 //
 // Implements: desktop.Hoverable
 func (i *menuBarItem) MouseOut() {
@@ -195,7 +205,7 @@ func (r *menuBarItemRenderer) Refresh() {
 	if r.i.active && r.i.Parent.active {
 		r.background.FillColor = theme.FocusColor()
 		r.background.Show()
-	} else if r.i.hovered {
+	} else if r.i.hovered && !r.i.Parent.active {
 		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {
