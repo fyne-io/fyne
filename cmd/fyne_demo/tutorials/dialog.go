@@ -45,7 +45,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			cnf.SetConfirmText("Oh Yes!")
 			cnf.Show()
 		}),
-		widget.NewButton("File Open With Filter (.txt or .png)", func() {
+		widget.NewButton("File Open With Filter (.jpg or .png)", func() {
 			fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 				if err == nil && reader == nil {
 					return
@@ -55,9 +55,9 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				fileOpened(reader)
+				imageOpened(reader)
 			}, win)
-			fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".txt"}))
+			fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
 			fd.Show()
 		}),
 		widget.NewButton("File Save", func() {
@@ -131,22 +131,14 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 	))
 }
 
-func fileOpened(f fyne.URIReadCloser) {
+func imageOpened(f fyne.URIReadCloser) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
 	}
+	defer f.Close()
 
-	ext := f.URI().Extension()
-	if ext == ".png" {
-		showImage(f)
-	} else if ext == ".txt" {
-		showText(f)
-	}
-	err := f.Close()
-	if err != nil {
-		fyne.LogError("Failed to close stream", err)
-	}
+	showImage(f)
 }
 
 func fileSaved(f fyne.URIWriteCloser) {
@@ -191,16 +183,6 @@ func showImage(f fyne.URIReadCloser) {
 
 	w := fyne.CurrentApp().NewWindow(f.URI().Name())
 	w.SetContent(container.NewScroll(img))
-	w.Resize(fyne.NewSize(320, 240))
-	w.Show()
-}
-
-func showText(f fyne.URIReadCloser) {
-	text := widget.NewLabel(loadText(f))
-	text.Wrapping = fyne.TextWrapWord
-
-	w := fyne.CurrentApp().NewWindow(f.URI().Name())
-	w.SetContent(container.NewScroll(text))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
 }
