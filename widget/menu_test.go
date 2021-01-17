@@ -6,18 +6,16 @@ import (
 	"fyne.io/fyne"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
 
-	w := app.NewWindow("")
+	w := fyne.CurrentApp().NewWindow("")
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()

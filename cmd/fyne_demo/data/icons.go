@@ -2,6 +2,7 @@ package data
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 // ThemedResource is a resource wrapper that will return an appropriate resource
@@ -11,7 +12,7 @@ type ThemedResource struct {
 }
 
 func isLight() bool {
-	r, g, b, _ := fyne.CurrentApp().Settings().Theme().TextColor().RGBA()
+	r, g, b, _ := theme.ForegroundColor().RGBA()
 	return r < 0xaaaa && g < 0xaaaa && b < 0xaaaa
 }
 

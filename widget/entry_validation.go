@@ -33,13 +33,20 @@ func (e *Entry) SetValidationError(err error) {
 	if e.Validator == nil {
 		return
 	}
-
-	if err != e.validationError && e.onValidationChanged != nil {
-		e.onValidationChanged(err)
+	if err == nil && e.validationError == nil {
+		return
 	}
 
-	e.validationError = err
-	e.Refresh()
+	if (err == nil && e.validationError != nil) || (e.validationError == nil && err != nil) ||
+		err.Error() != e.validationError.Error() {
+		e.validationError = err
+
+		if e.onValidationChanged != nil {
+			e.onValidationChanged(err)
+		}
+
+		e.Refresh()
+	}
 }
 
 var _ fyne.Widget = (*validationStatus)(nil)

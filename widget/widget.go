@@ -2,11 +2,13 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
+	"image/color"
 	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/theme"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -215,24 +217,29 @@ func (w *DisableableWidget) Disabled() bool {
 	return w.disabled
 }
 
-// Renderer looks up the render implementation for a widget
-//
-// Deprecated: Access to widget renderers is being removed, render details should be private to a WidgetRenderer.
-func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
-	return cache.Renderer(wid)
+type simpleRenderer struct {
+	content *fyne.Container
 }
 
-// DestroyRenderer frees a render implementation for a widget.
-// This is typically for internal use only.
-//
-// Deprecated: Access to widget renderers is being removed, render details should be private to a WidgetRenderer.
-func DestroyRenderer(wid fyne.Widget) {
-	cache.DestroyRenderer(wid)
+func (s *simpleRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
 }
 
-// Refresh instructs the containing canvas to refresh the specified widget.
-//
-// Deprecated: Call Widget.Refresh() instead.
-func Refresh(wid fyne.Widget) {
-	wid.Refresh()
+func (s *simpleRenderer) Destroy() {
+}
+
+func (s *simpleRenderer) Layout(size fyne.Size) {
+	s.content.Resize(size)
+}
+
+func (s *simpleRenderer) MinSize() fyne.Size {
+	return s.content.MinSize()
+}
+
+func (s *simpleRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{s.content}
+}
+
+func (s *simpleRenderer) Refresh() {
+	s.content.Refresh()
 }

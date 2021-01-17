@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -30,10 +31,9 @@ type Dialog interface {
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	callback     func(bool)
-	sendResponse bool
-	title        string
-	icon         fyne.Resource
+	callback func(bool)
+	title    string
+	icon     fyne.Resource
 
 	win            *widget.PopUp
 	bg             *canvas.Rectangle
@@ -51,7 +51,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 	d.dismiss = &widget.Button{Text: dismiss,
 		OnTapped: d.Hide,
 	}
-	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
+	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
 	return d
 }
@@ -64,20 +64,16 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
-	// TODO: This is required to avoid confusion.
-	// Normally this function should only provide the dialog, but currently it is also displayed, which is wrong.
-	// For this case the ShowCustomConfirm() method was built.
-	d.sendResponse = true
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
+	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		},
 	}
-	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
+	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
 	return d
 }
@@ -103,7 +99,6 @@ func (d *dialog) Hide() {
 }
 
 func (d *dialog) Show() {
-	d.sendResponse = true
 	d.win.Show()
 }
 
@@ -111,7 +106,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	d.bg.Move(fyne.NewPos(0, 0))
 	d.bg.Resize(size)
 
-	btnMin := obj[3].MinSize().Union(obj[3].Size())
+	btnMin := obj[3].MinSize().Max(obj[3].Size())
 
 	// icon
 	iconHeight := padHeight*2 + d.label.MinSize().Height*2 - theme.Padding()
@@ -125,13 +120,13 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	// content
 	contentStart := d.label.Position().Y + d.label.MinSize().Height + padHeight
 	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos((padWidth / 2), d.label.MinSize().Height+padHeight))
+	obj[2].Move(fyne.NewPos(padWidth/2, d.label.MinSize().Height+padHeight))
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	contentMin := obj[2].MinSize()
-	btnMin := obj[3].MinSize().Union(obj[3].Size())
+	btnMin := obj[3].MinSize().Max(obj[3].Size())
 
 	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
 	height := contentMin.Height + btnMin.Height + d.label.MinSize().Height + theme.Padding() + padHeight*2
@@ -166,7 +161,7 @@ func (d *dialog) Resize(size fyne.Size) {
 // SetDismissText allows custom text to be set in the confirmation button
 func (d *dialog) SetDismissText(label string) {
 	d.dismiss.SetText(label)
-	widget.Refresh(d.win)
+	d.win.Refresh()
 }
 
 // SetOnClosed allows to set a callback function that is called when
@@ -191,10 +186,9 @@ func (d *dialog) applyTheme() {
 
 func (d *dialog) hideWithResponse(resp bool) {
 	d.win.Hide()
-	if d.sendResponse && d.callback != nil {
+	if d.callback != nil {
 		d.callback(resp)
 	}
-	d.sendResponse = false
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
@@ -239,9 +233,8 @@ func newLabel(message string) fyne.CanvasObject {
 
 func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 	list := fyne.NewContainerWithLayout(layout.NewGridLayout(len(buttons)))
-
 	for _, button := range buttons {
-		list.AddObject(button)
+		list.Add(button)
 	}
 
 	return list

@@ -4,13 +4,13 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCard_SetImage(t *testing.T) {
@@ -35,7 +35,6 @@ func TestCard_SetContent(t *testing.T) {
 
 func TestCard_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		title, subtitle string
@@ -109,9 +108,9 @@ func TestCard_Layout(t *testing.T) {
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
 			window.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 			if tt.content != nil {
-				assert.Equal(t, 10, tt.content.Size().Height)
+				assert.Equal(t, float32(10), tt.content.Size().Height)
 			}
-			test.AssertImageMatches(t, "card/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToMarkup(t, "card/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})

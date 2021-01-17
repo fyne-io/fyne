@@ -6,11 +6,11 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -44,33 +44,6 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			cnf.SetDismissText("Nah")
 			cnf.SetConfirmText("Oh Yes!")
 			cnf.Show()
-		}),
-		widget.NewButton("Progress", func() {
-			prog := dialog.NewProgress("MyProgress", "Nearly there...", win)
-
-			go func() {
-				num := 0.0
-				for num < 1.0 {
-					time.Sleep(50 * time.Millisecond)
-					prog.SetValue(num)
-					num += 0.01
-				}
-
-				prog.SetValue(1)
-				prog.Hide()
-			}()
-
-			prog.Show()
-		}),
-		widget.NewButton("ProgressInfinite", func() {
-			prog := dialog.NewProgressInfinite("MyProgress", "Closes after 5 seconds...", win)
-
-			go func() {
-				time.Sleep(time.Second * 5)
-				prog.Hide()
-			}()
-
-			prog.Show()
 		}),
 		widget.NewButton("File Open With Filter (.txt or .png)", func() {
 			fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -129,26 +102,31 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			picker.Advanced = true
 			picker.Show()
 		}),
-		widget.NewButton("Custom Dialog (Login Form)", func() {
+		widget.NewButton("Form Dialog (Login Form)", func() {
 			username := widget.NewEntry()
+			username.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "username can only contain letters, numbers, '_', and '-'")
 			password := widget.NewPasswordEntry()
-			content := widget.NewForm(widget.NewFormItem("Username", username),
-				widget.NewFormItem("Password", password))
+			password.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "password can only contain letters, numbers, '_', and '-'")
+			remember := false
+			items := []*widget.FormItem{
+				widget.NewFormItem("Username", username),
+				widget.NewFormItem("Password", password),
+				widget.NewFormItem("Remember me", widget.NewCheck("", func(checked bool) {
+					remember = checked
+				})),
+			}
 
-			dialog.ShowCustomConfirm("Login...", "Log In", "Cancel", content, func(b bool) {
+			dialog.ShowForm("Login...", "Log In", "Cancel", items, func(b bool) {
 				if !b {
 					return
 				}
+				var rememberText string
+				if remember {
+					rememberText = "and remember this login"
+				}
 
-				log.Println("Please Authenticate", username.Text, password.Text)
+				log.Println("Please Authenticate", username.Text, password.Text, rememberText)
 			}, win)
-		}),
-		widget.NewButton("Text Entry Dialog", func() {
-			dialog.ShowEntryDialog("Text Entry", "Enter some text: ",
-				func(response string) {
-					fmt.Printf("User entered text, response was: %v\n", response)
-				},
-				win)
 		}),
 	))
 }

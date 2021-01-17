@@ -4,8 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -13,22 +15,23 @@ import (
 
 var validator = validation.NewRegexp(`^\d{4}-\d{2}-\d{2}$`, "Input is not a valid date")
 
-func TestEntry_Validated(t *testing.T) {
-	entry, window := setupImageTest(false)
+func TestEntry_ValidatedEntry(t *testing.T) {
+	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
-	entry.Validator = validator
-	test.AssertImageMatches(t, "entry/validate_initial.png", c.Capture())
+	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
+	entry.Validator = r
+	test.AssertRendersToMarkup(t, "entry/validate_initial.xml", c)
 
 	test.Type(entry, "2020-02")
-	assert.Error(t, entry.Validator(entry.Text))
+	assert.Error(t, r(entry.Text))
 	entry.FocusLost()
-	test.AssertImageMatches(t, "entry/validate_invalid.png", c.Capture())
+	test.AssertRendersToMarkup(t, "entry/validate_invalid.xml", c)
 
 	test.Type(entry, "-12")
-	assert.NoError(t, entry.Validator(entry.Text))
-	test.AssertImageMatches(t, "entry/validate_valid.png", c.Capture())
+	assert.NoError(t, r(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/validate_valid.xml", c)
 }
 
 func TestEntry_Validate(t *testing.T) {
@@ -49,7 +52,8 @@ func TestEntry_Validate(t *testing.T) {
 }
 
 func TestEntry_SetValidationError(t *testing.T) {
-	entry, window := setupImageTest(false)
+	entry, window := setupImageTest(t, false)
+	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -74,7 +78,7 @@ func TestEntry_SetOnValidationChanged(t *testing.T) {
 		modified = true
 	})
 
-	entry.SetText("2020")
+	test.Type(entry, "2020")
 	assert.True(t, modified)
 
 	modified = false

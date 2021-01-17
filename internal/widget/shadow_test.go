@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -14,9 +13,8 @@ import (
 var shadowLevel = widget.ElevationLevel(5)
 
 func TestShadow_ApplyTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
@@ -25,19 +23,15 @@ func TestShadow_ApplyTheme(t *testing.T) {
 
 	s.Resize(fyne.NewSize(30, 30))
 	s.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "shadow/theme_dark.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/theme_default.png", w.Canvas().Capture())
 
-	test.ApplyTheme(t, theme.LightTheme())
-	test.AssertImageMatches(t, "shadow/theme_light.png", w.Canvas().Capture())
-
-	test.ApplyTheme(t, theme.DarkTheme())
-	test.AssertImageMatches(t, "shadow/theme_dark.png", w.Canvas().Capture())
+	test.ApplyTheme(t, test.NewTheme())
+	test.AssertImageMatches(t, "shadow/theme_ugly.png", w.Canvas().Capture())
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
@@ -50,9 +44,8 @@ func TestShadow_AroundShadow(t *testing.T) {
 }
 
 func TestShadow_Transparency(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
@@ -69,9 +62,8 @@ func TestShadow_Transparency(t *testing.T) {
 }
 
 func TestShadow_BottomShadow(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	s := widget.NewShadow(widget.ShadowBottom, shadowLevel)
 	w := test.NewWindow(s)
@@ -88,9 +80,8 @@ func TestShadow_MinSize(t *testing.T) {
 }
 
 func TestShadow_TopShadow(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	s := widget.NewShadow(widget.ShadowTop, shadowLevel)
 	w := test.NewWindow(s)

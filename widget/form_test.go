@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -81,9 +82,8 @@ func TestForm_AddRemoveButton(t *testing.T) {
 }
 
 func TestForm_Renderer(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	form := &Form{
 		Items: []*FormItem{
@@ -94,15 +94,15 @@ func TestForm_Renderer(t *testing.T) {
 	w := test.NewWindow(form)
 	defer w.Close()
 
-	test.AssertImageMatches(t, "form/initial.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "form/layout.xml", w.Canvas())
 }
 
 func TestForm_ChangeText(t *testing.T) {
-	item := &FormItem{Text: "Test", Widget: NewEntry()}
-	form := &Form{Items: []*FormItem{item}}
+	item := NewFormItem("Test", NewEntry())
+	form := NewForm(item)
 
 	renderer := test.WidgetRenderer(form)
-	c := renderer.Objects()[0].(*fyne.Container)
+	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Equal(t, "Test", c.Objects[0].(*Label).Text)
 
 	item.Text = "Changed"
@@ -111,9 +111,8 @@ func TestForm_ChangeText(t *testing.T) {
 }
 
 func TestForm_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	form := &Form{
 		Items: []*FormItem{
@@ -122,13 +121,70 @@ func TestForm_ChangeTheme(t *testing.T) {
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)
-	w.Resize(fyne.NewSize(340, 240))
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
 		form.Refresh()
+		w.Resize(form.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		test.AssertImageMatches(t, "form/theme_changed.png", w.Canvas().Capture())
 	})
+}
+
+func TestForm_Hints(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry1 := &Entry{}
+	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
+	items := []*FormItem{
+		{Text: "First", Widget: entry1, HintText: "An entry hint"},
+		{Text: "Second", Widget: entry2},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/hint_initial.png", w.Canvas().Capture())
+
+	test.Type(entry2, "n")
+	test.AssertImageMatches(t, "form/hint_invalid.png", w.Canvas().Capture())
+
+	test.Type(entry2, "ot-")
+	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
+}
+
+func TestForm_Validation(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry1 := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "15-true"}
+	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
+	entry3 := &Entry{}
+	items := []*FormItem{
+		{Text: "First", Widget: entry1},
+		{Text: "Second", Widget: entry2},
+		{Text: "Third", Widget: entry3},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/validation_initial.png", w.Canvas().Capture())
+
+	test.Type(entry2, "not-")
+	entry1.SetText("incorrect")
+	w = test.NewWindow(form)
+
+	test.AssertImageMatches(t, "form/validation_invalid.png", w.Canvas().Capture())
+
+	entry1.SetText("15-true")
+	w = test.NewWindow(form)
+
+	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
 }

@@ -94,7 +94,7 @@ func (hl *Hyperlink) textStyle() fyne.TextStyle {
 
 // textColor tells the rendering textProvider our color
 func (hl *Hyperlink) textColor() color.Color {
-	return theme.HyperlinkColor()
+	return theme.PrimaryColor()
 }
 
 // concealed tells the rendering textProvider if we are a concealed field
@@ -121,6 +121,7 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
 	hl.provider = newTextProvider(hl.Text, hl)
+	hl.provider.extraPad = fyne.NewSize(0, theme.Padding())
 	return hl.provider.CreateRenderer()
 }
 

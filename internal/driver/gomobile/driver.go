@@ -16,20 +16,26 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/animation"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
 )
 
-const tapSecondaryDelay = 300 * time.Millisecond
+const (
+	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
+	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	tapYOffset        = -12.0                  // to compensate for how we hold our fingers on the device
+)
 
 type mobileDriver struct {
 	app   app.App
 	glctx gl.Context
 
-	windows []fyne.Window
-	device  *device
+	windows   []fyne.Window
+	device    *device
+	animation *animation.Runner
 }
 
 // Declare conformity with Driver
@@ -61,7 +67,7 @@ func (d *mobileDriver) currentWindow() fyne.Window {
 	return d.windows[len(d.windows)-1]
 }
 
-func (d *mobileDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	return painter.RenderedTextSize(text, size, style)
 }
 
@@ -81,7 +87,16 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 	}
 
 	mc := c.(*mobileCanvas)
-	return driver.AbsolutePositionForObject(co, mc.objectTrees())
+	pos := driver.AbsolutePositionForObject(co, mc.objectTrees())
+	inset, _ := c.InteractiveArea()
+
+	if mc.windowHead != nil {
+		if len(mc.windowHead.(*fyne.Container).Objects) > 1 {
+			topHeight := mc.windowHead.MinSize().Height
+			pos = pos.Subtract(fyne.NewSize(0, topHeight))
+		}
+	}
+	return pos.Subtract(inset)
 }
 
 func (d *mobileDriver) Quit() {
@@ -115,6 +130,14 @@ func (d *mobileDriver) Run() {
 					d.onStop()
 					d.glctx = nil
 				}
+				switch e.Crosses(lifecycle.StageFocused) {
+				case lifecycle.CrossOff: // will enter background
+					if runtime.GOOS == "darwin" {
+						size := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
+						d.paintWindow(current, size)
+						a.Publish()
+					}
+				}
 			case size.Event:
 				if e.WidthPx <= 0 {
 					continue
@@ -128,7 +151,8 @@ func (d *mobileDriver) Run() {
 				dev.safeLeft = e.InsetLeftPx
 				dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
 				dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
-				canvas.SetScale(0) // value is ignored
+				canvas.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
+				canvas.painter.SetFrameBufferScale(1.0)
 
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()
@@ -142,7 +166,7 @@ func (d *mobileDriver) Run() {
 				}
 
 				if d.freeDirtyTextures(canvas) {
-					newSize := fyne.NewSize(int(float32(currentSize.WidthPx)/canvas.scale), int(float32(currentSize.HeightPx)/canvas.scale))
+					newSize := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
 
 					if canvas.minSizeChanged() {
 						canvas.ensureMinSize()
@@ -217,7 +241,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY)
+	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	canvas.tapDown(pos, int(tapID))
 }
@@ -225,7 +249,7 @@ func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32, tapID t
 func (d *mobileDriver) tapMoveCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY)
+	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		go wid.Dragged(ev)
@@ -235,7 +259,7 @@ func (d *mobileDriver) tapMoveCanvas(canvas *mobileCanvas, x, y float32, tapID t
 func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY)
+	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		go wid.Tapped(ev)
@@ -243,7 +267,7 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID tou
 		go wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		go wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(wid fyne.Draggable) {
 		go wid.DragEnd()
 	})
 }
@@ -411,5 +435,7 @@ func (d *mobileDriver) Device() fyne.Device {
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	return new(mobileDriver)
+	d := new(mobileDriver)
+	d.animation = &animation.Runner{}
+	return d
 }

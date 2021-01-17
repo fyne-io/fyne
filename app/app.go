@@ -99,22 +99,13 @@ func New() fyne.App {
 	return NewWithID("")
 }
 
-// NewAppWithDriver initialises a new Fyne application using the specified
-// driver and returns a handle to that App. The id should be globally unique to this app
-// Built in drivers are provided in the "driver" package.
-//
-// Deprecated: Developers should not specify a driver manually but use NewAppWithID()
-func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
-	return newAppWithDriver(d, id)
-}
-
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, driver: d, exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newPreferences(newApp)
-	if pref, ok := newApp.prefs.(interface{ load(string) }); ok && id != "" {
-		pref.load(id)
+	if pref, ok := newApp.prefs.(interface{ load() }); ok && id != "" {
+		pref.load()
 	}
 	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}

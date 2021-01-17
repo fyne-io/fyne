@@ -1,6 +1,6 @@
 // +build !ci
 
-// +build darwin,ios
+// +build ios
 
 package app
 
@@ -10,13 +10,13 @@ package app
 
 #include <stdlib.h>
 
+char *documentsPath(void);
 void openURL(char *urlStr);
 void sendNotification(char *title, char *content);
 */
 import "C"
 import (
 	"net/url"
-	"os"
 	"path/filepath"
 	"unsafe"
 
@@ -24,16 +24,14 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
+func defaultVariant() fyne.ThemeVariant {
 	// TODO read the iOS setting when 10.13 arrives in 2019
-	return theme.LightTheme()
+	return theme.VariantLight
 }
 
 func rootConfigDir() string {
-	homeDir, _ := os.UserHomeDir() // TODO this should be <Application Home>
-
-	desktopConfig := filepath.Join(filepath.Join(homeDir, "Library"), "Preferences")
-	return filepath.Join(desktopConfig, "fyne")
+	root := C.documentsPath()
+	return filepath.Join(C.GoString(root), "fyne")
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {

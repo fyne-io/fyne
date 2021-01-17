@@ -1,0 +1,11 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget pos="36,77" size="70x37" type="*widget.Check">
+				<circle fillColor="background" pos="2,4" size="28x28"/>
+				<image pos="6,8" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="42x37">Test</text>
+			</widget>
+		</container>
+	</content>
+</canvas>

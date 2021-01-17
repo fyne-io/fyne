@@ -6,16 +6,12 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRadioGroup_FocusRendering(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
-
 	t.Run("gain/lose focus", func(t *testing.T) {
 		radio := widget.NewRadioGroup([]string{"Option A", "Option B", "Option C"}, nil)
 		window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), radio))
@@ -23,22 +19,22 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
 		canvas := window.Canvas().(test.WindowlessCanvas)
-		test.AssertImageMatches(t, "radio/focus_none_focused_none_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_none_focused_none_selected.xml", canvas)
 		canvas.FocusNext()
-		test.AssertImageMatches(t, "radio/focus_a_focused_none_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_a_focused_none_selected.xml", canvas)
 		canvas.FocusNext()
-		test.AssertImageMatches(t, "radio/focus_b_focused_none_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_b_focused_none_selected.xml", canvas)
 		canvas.Unfocus()
-		test.AssertImageMatches(t, "radio/focus_none_focused_none_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_none_focused_none_selected.xml", canvas)
 
 		radio.SetSelected("Option B")
-		test.AssertImageMatches(t, "radio/focus_none_focused_b_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_none_focused_b_selected.xml", canvas)
 		canvas.FocusNext()
-		test.AssertImageMatches(t, "radio/focus_a_focused_b_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_a_focused_b_selected.xml", canvas)
 		canvas.FocusNext()
-		test.AssertImageMatches(t, "radio/focus_b_focused_b_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_b_focused_b_selected.xml", canvas)
 		canvas.Unfocus()
-		test.AssertImageMatches(t, "radio/focus_none_focused_b_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_none_focused_b_selected.xml", canvas)
 	})
 
 	t.Run("disable/enable focused", func(t *testing.T) {
@@ -50,17 +46,26 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 		canvas := window.Canvas().(test.WindowlessCanvas)
 		canvas.FocusNext()
 		radio.Disable()
-		test.AssertImageMatches(t, "radio/focus_disabled_none_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_disabled_none_selected.xml", canvas)
 		radio.Enable()
-		test.AssertImageMatches(t, "radio/focus_a_focused_none_selected.png", canvas.Capture())
+		test.AssertRendersToMarkup(t, "radio_group/focus_a_focused_none_selected.xml", canvas)
+	})
+
+	t.Run("append disabled", func(t *testing.T) {
+		radio := &widget.RadioGroup{Options: []string{"Option A", "Option B"}}
+		window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), radio))
+		defer window.Close()
+		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
+
+		canvas := window.Canvas().(test.WindowlessCanvas)
+		radio.Disable()
+		test.AssertRendersToMarkup(t, "radio_group/disabled_none_selected.xml", canvas)
+		radio.Append("Option C")
+		test.AssertRendersToMarkup(t, "radio_group/disabled_append_none_selected.xml", canvas)
 	})
 }
 
 func TestRadioGroup_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
-
 	for name, tt := range map[string]struct {
 		disabled   bool
 		horizontal bool
@@ -153,7 +158,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), radio))
 			window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertImageMatches(t, "radio/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToMarkup(t, "radio_group/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})
@@ -161,9 +166,6 @@ func TestRadioGroup_Layout(t *testing.T) {
 }
 
 func TestRadioGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-
 	radio := &widget.RadioGroup{Options: []string{"Option A", "Option B", "Option C"}}
 	window := test.NewWindow(radio)
 	defer window.Close()

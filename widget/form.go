@@ -13,7 +13,12 @@ type FormItem struct {
 	Text   string
 	Widget fyne.CanvasObject
 
+	// Since: 2.0.0
+	HintText string
+
 	validationError error
+	invalid         bool
+	helperOutput    *canvas.Text
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
@@ -38,13 +43,9 @@ type Form struct {
 	CancelText string
 
 	itemGrid     *fyne.Container
-	buttonBox    *Box
+	buttonBox    *fyne.Container
 	cancelButton *Button
 	submitButton *Button
-}
-
-func (f *Form) createLabel(text string) *Label {
-	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
@@ -59,11 +60,10 @@ func (f *Form) AppendItem(item *FormItem) {
 
 	f.Items = append(f.Items, item)
 	if f.itemGrid != nil {
-		f.itemGrid.AddObject(f.createLabel(item.Text))
-		f.itemGrid.AddObject(item.Widget)
+		f.itemGrid.Add(f.createLabel(item.Text))
+		f.itemGrid.Add(item.Widget)
+		f.setUpValidation(item.Widget, len(f.Items)-1)
 	}
-
-	f.setUpValidation(item.Widget, len(f.Items)-1)
 
 	f.Refresh()
 }
@@ -81,6 +81,29 @@ func (f *Form) Refresh() {
 	f.updateLabels()
 	f.BaseWidget.Refresh()
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
+}
+
+func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
+	_, ok := item.Widget.(fyne.Validatable)
+	if item.HintText == "" {
+		if !ok {
+			return item.Widget
+		}
+		if e, ok := item.Widget.(*Entry); ok && e.Validator == nil { // we don't have validation
+			return item.Widget
+		}
+	}
+
+	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
+	text.TextSize = theme.CaptionTextSize()
+	text.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()*-0.5))
+	item.helperOutput = text
+	f.updateHelperText(item)
+	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
+}
+
+func (f *Form) createLabel(text string) *Label {
+	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
 func (f *Form) updateButtons() {
@@ -113,9 +136,14 @@ func (f *Form) updateButtons() {
 	}
 }
 
-func (f *Form) checkValidation() {
+func (f *Form) checkValidation(err error) {
+	if err != nil {
+		f.submitButton.Disable()
+		return
+	}
+
 	for _, item := range f.Items {
-		if item.validationError != nil {
+		if item.invalid {
 			f.submitButton.Disable()
 			return
 		}
@@ -126,16 +154,31 @@ func (f *Form) checkValidation() {
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
-		f.Items[i].validationError = w.Validate()
+		f.Items[i].invalid = w.Validate() != nil
+		if e, ok := w.(*Entry); ok && e.Validator != nil {
+			e.SetValidationError(nil) // clear initial state, will appear when we type
+		}
 		w.SetOnValidationChanged(func(err error) {
 			f.Items[i].validationError = err
-			if err != nil {
-				f.submitButton.Disable()
-			} else {
-				f.checkValidation()
-			}
+			f.Items[i].invalid = err != nil
+			f.checkValidation(err)
+			f.updateHelperText(f.Items[i])
 		})
 	}
+}
+
+func (f *Form) updateHelperText(item *FormItem) {
+	if item.helperOutput == nil {
+		return // testing probably, either way not rendered yet
+	}
+	if item.validationError == nil {
+		item.helperOutput.Text = item.HintText
+		item.helperOutput.Color = theme.PlaceHolderColor()
+	} else {
+		item.helperOutput.Text = item.validationError.Error()
+		item.helperOutput.Color = theme.ErrorColor()
+	}
+	item.helperOutput.Refresh()
 }
 
 func (f *Form) updateLabels() {
@@ -146,35 +189,37 @@ func (f *Form) updateLabels() {
 		}
 
 		l.SetText(item.Text)
+		f.updateHelperText(item)
 	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
-	itemGrid := fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
+
+	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
+	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
+	f.buttonBox = fyne.NewContainerWithLayout(layout.NewHBoxLayout(), layout.NewSpacer(), f.cancelButton, f.submitButton)
+
+	objects := make([]fyne.CanvasObject, len(f.Items)*2)
 	for i, item := range f.Items {
-		itemGrid.Add(f.createLabel(item.Text))
-		itemGrid.Add(item.Widget)
+		objects[i*2] = f.createLabel(item.Text)
+
 		f.setUpValidation(item.Widget, i)
+		objects[i*2+1] = f.createInput(item)
 	}
-	f.itemGrid = itemGrid
+	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
-	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
-	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
-	f.submitButton.Importance = HighImportance
-	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
-
-	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
-	f.updateButtons()   // will set correct visibility on the submit/cancel btns
-	f.checkValidation() // make sure to check initial validation status
+	renderer := &simpleRenderer{content: fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox)}
+	f.updateButtons()      // will set correct visibility on the submit/cancel btns
+	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
 	return renderer
 }
 
 // NewForm creates a new form widget with the specified rows of form items
 // and (if any of them should be shown) a form controls row at the bottom
 func NewForm(items ...*FormItem) *Form {
-	form := &Form{BaseWidget: BaseWidget{}, Items: items}
+	form := &Form{Items: items}
 	form.ExtendBaseWidget(form)
 
 	return form

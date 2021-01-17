@@ -91,9 +91,10 @@ func (a *testApp) lastAppliedTheme() fyne.Theme {
 // NewApp returns a new dummy app used for testing.
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	settings := &testSettings{scale: 1.0}
+	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver)}
+	painter.SvgCacheReset()
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
@@ -152,6 +153,10 @@ func (s *testSettings) Theme() fyne.Theme {
 	}
 
 	return s.theme
+}
+
+func (s *testSettings) ThemeVariant() fyne.ThemeVariant {
+	return 2 // not a preference
 }
 
 func (s *testSettings) Scale() float32 {

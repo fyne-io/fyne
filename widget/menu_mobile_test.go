@@ -10,14 +10,12 @@ import (
 	"fyne.io/fyne/canvas"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.DarkTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
@@ -42,12 +40,12 @@ func TestMenu_Layout(t *testing.T) {
 		menuPos      fyne.Position
 		tapPositions []fyne.Position
 		useTestTheme bool
-		wantImage    string
+		want         string
 	}{
 		"normal": {
 			windowSize: fyne.NewSize(500, 300),
 			menuPos:    fyne.NewPos(10, 10),
-			wantImage:  "menu/layout_normal.png",
+			want:       "menu/mobile/layout_normal.xml",
 		},
 		"normal with submenus": {
 			windowSize: fyne.NewSize(500, 300),
@@ -56,7 +54,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),
 				fyne.NewPos(100, 170),
 			},
-			wantImage: "menu/mobile/layout_normal_with_submenus.png",
+			want: "menu/mobile/layout_normal_with_submenus.xml",
 		},
 		"background of active submenu parents resets if sibling is hovered": {
 			windowSize: fyne.NewSize(500, 300),
@@ -67,7 +65,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(300, 170), // hover subsubmenu item
 				fyne.NewPos(30, 60),   // hover sibling of submenu parent
 			},
-			wantImage: "menu/mobile/layout_background_reset.png",
+			want: "menu/mobile/layout_background_reset.xml",
 		},
 		"no space on right side for submenu": {
 			windowSize: fyne.NewSize(500, 300),
@@ -76,7 +74,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(430, 100), // open submenu
 				fyne.NewPos(300, 170), // open subsubmenu
 			},
-			wantImage: "menu/mobile/layout_no_space_on_right.png",
+			want: "menu/mobile/layout_no_space_on_right.xml",
 		},
 		"no space on left & right side for submenu": {
 			windowSize: fyne.NewSize(200, 300),
@@ -85,7 +83,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 170), // open subsubmenu
 			},
-			wantImage: "menu/mobile/layout_no_space_on_both_sides.png",
+			want: "menu/mobile/layout_no_space_on_both_sides.xml",
 		},
 		"window too short for submenu": {
 			windowSize: fyne.NewSize(500, 150),
@@ -94,18 +92,18 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 130), // open subsubmenu
 			},
-			wantImage: "menu/mobile/layout_window_too_short_for_submenu.png",
+			want: "menu/mobile/layout_window_too_short_for_submenu.xml",
 		},
 		"theme change": {
 			windowSize:   fyne.NewSize(500, 300),
 			menuPos:      fyne.NewPos(10, 10),
 			useTestTheme: true,
-			wantImage:    "menu/layout_theme_changed.png",
+			want:         "menu/mobile/layout_theme_changed.xml",
 		},
 		"window too short for menu": {
 			windowSize: fyne.NewSize(100, 50),
 			menuPos:    fyne.NewPos(10, 10),
-			wantImage:  "menu/layout_window_too_short.png",
+			want:       "menu/mobile/layout_window_too_short.xml",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -119,12 +117,12 @@ func TestMenu_Layout(t *testing.T) {
 			for _, pos := range tt.tapPositions {
 				test.TapCanvas(c, pos)
 			}
+			test.AssertRendersToMarkup(t, tt.want, w.Canvas())
 			if tt.useTestTheme {
+				test.AssertImageMatches(t, "menu/layout_normal.png", c.Capture())
 				test.WithTestTheme(t, func() {
-					test.AssertImageMatches(t, tt.wantImage, c.Capture())
+					test.AssertImageMatches(t, "menu/layout_theme_changed.png", c.Capture())
 				})
-			} else {
-				test.AssertImageMatches(t, tt.wantImage, c.Capture())
 			}
 		})
 	}
@@ -133,7 +131,6 @@ func TestMenu_Layout(t *testing.T) {
 func TestMenu_Dragging(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.DarkTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
@@ -157,17 +154,17 @@ func TestMenu_Dragging(t *testing.T) {
 	m.Move(fyne.NewPos(10, 10))
 	m.Resize(m.MinSize())
 	maxDragDistance := m.MinSize().Height - 90
-	test.AssertImageMatches(t, "menu/mobile/drag_top.png", c.Capture())
+	test.AssertRendersToMarkup(t, "menu/mobile/drag_top.xml", w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, -50)
-	test.AssertImageMatches(t, "menu/mobile/drag_middle.png", c.Capture())
+	test.AssertRendersToMarkup(t, "menu/mobile/drag_middle.xml", w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, -maxDragDistance)
-	test.AssertImageMatches(t, "menu/mobile/drag_bottom.png", c.Capture())
+	test.AssertRendersToMarkup(t, "menu/mobile/drag_bottom.xml", w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, maxDragDistance-50)
-	test.AssertImageMatches(t, "menu/mobile/drag_middle.png", c.Capture())
+	test.AssertRendersToMarkup(t, "menu/mobile/drag_middle.xml", w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, 50)
-	test.AssertImageMatches(t, "menu/mobile/drag_top.png", c.Capture())
+	test.AssertRendersToMarkup(t, "menu/mobile/drag_top.xml", w.Canvas())
 }

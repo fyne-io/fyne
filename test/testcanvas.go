@@ -20,11 +20,10 @@ var (
 type WindowlessCanvas interface {
 	fyne.Canvas
 
-	FocusNext()
-	FocusPrevious()
 	Padded() bool
 	Resize(fyne.Size)
 	SetPadded(bool)
+	SetScale(float32)
 }
 
 type testCanvas struct {
@@ -76,14 +75,13 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 }
 
 func (c *testCanvas) Capture() image.Image {
-	if c.painter != nil {
-		return c.painter.Paint(c)
-	}
-	theme := fyne.CurrentApp().Settings().Theme()
-
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
+
+	if c.painter != nil {
+		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+	}
 
 	return img
 }
@@ -129,11 +127,6 @@ func (c *testCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-// Deprecated
-func (c *testCanvas) Overlay() fyne.CanvasObject {
-	panic("deprecated method should not be used")
-}
-
 func (c *testCanvas) Overlays() fyne.OverlayStack {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
@@ -172,7 +165,6 @@ func (c *testCanvas) Resize(size fyne.Size) {
 	}
 
 	if padded {
-		theme := fyne.CurrentApp().Settings().Theme()
 		content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	} else {
@@ -217,11 +209,6 @@ func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
 	defer c.propertyLock.Unlock()
 
 	c.onTypedRune = handler
-}
-
-// Deprecated
-func (c *testCanvas) SetOverlay(_ fyne.CanvasObject) {
-	panic("deprecated method should not be used")
 }
 
 func (c *testCanvas) SetPadded(padded bool) {

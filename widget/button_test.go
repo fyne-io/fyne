@@ -124,7 +124,6 @@ func TestButton_Disabled(t *testing.T) {
 func TestButton_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		text      string
@@ -238,19 +237,17 @@ func TestButton_Layout(t *testing.T) {
 			}
 
 			window := test.NewWindow(button)
+			defer window.Close()
 			window.Resize(button.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertImageMatches(t, "button/layout_"+name+".png", window.Canvas().Capture())
-
-			window.Close()
+			test.AssertRendersToMarkup(t, "button/layout_"+name+".xml", window.Canvas())
 		})
 	}
 }
 
 func TestButton_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	b := widget.NewButton("Test", func() {})
 	w := test.NewWindow(b)

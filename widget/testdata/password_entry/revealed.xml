@@ -1,0 +1,19 @@
+<canvas padded size="150x100">
+	<content>
+		<widget pos="10,10" size="130x37" type="*widget.Entry">
+			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="130x33"/>
+			<rectangle fillColor="primary" pos="0,35" size="130x2"/>
+			<widget pos="0,2" size="102x33" type="*widget.Scroll">
+				<widget size="102x33" type="*widget.entryContent">
+					<widget size="102x33" type="*widget.textProvider">
+						<text pos="8,6" size="94x21">Hié™שרה</text>
+					</widget>
+					<rectangle fillColor="primary" pos="70,6" size="2x21"/>
+				</widget>
+			</widget>
+			<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
+				<image rsc="visibilityIcon" size="iconInlineSize"/>
+			</widget>
+		</widget>
+	</content>
+</canvas>

@@ -23,13 +23,13 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(100, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	leftCol := container.NewVBox(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(100, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(100, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	content := widget.NewHBox(leftCol, rightCol)
+	rightCol := container.NewVBox(rightObj1, rightObj2)
+	content := container.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
 	repaintWindow(w)
 
@@ -51,14 +51,14 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	leftCol := container.NewVBox(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(50, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	rightColScroll := widget.NewScrollContainer(rightCol)
-	content := widget.NewHBox(leftCol, rightColScroll)
+	rightCol := container.NewVBox(rightObj1, rightObj2)
+	rightColScroll := container.NewScroll(rightCol)
+	content := container.NewHBox(leftCol, rightColScroll)
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
@@ -86,15 +86,15 @@ func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	leftColScroll := widget.NewScrollContainer(leftCol)
+	leftCol := container.NewVBox(leftObj1, leftObj2)
+	leftColScroll := container.NewScroll(leftCol)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(50, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	rightColScroll := widget.NewScrollContainer(rightCol)
-	content := widget.NewHBox(leftColScroll, rightColScroll)
+	rightCol := container.NewVBox(rightObj1, rightObj2)
+	rightColScroll := container.NewScroll(rightCol)
+	content := container.NewHBox(leftColScroll, rightColScroll)
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(
@@ -138,12 +138,12 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	leftCol := container.NewVBox(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(50, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	rightCol := container.NewVBox(rightObj1, rightObj2)
 	content := fyne.NewContainer(leftCol, rightCol)
 	layout := &recordingLayout{}
 	content.Layout = layout
@@ -163,6 +163,45 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	c.Refresh(rightObj2)
 
 	assert.Nil(t, layout.popLayoutEvent())
+}
+
+func TestGlCanvas_Focus(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+	c := w.Canvas().(*glCanvas)
+
+	ce := &focusable{id: "ce1"}
+	content := container.NewVBox(ce)
+	me := &focusable{id: "o2e1"}
+	menuOverlay := container.NewVBox(me)
+	o1e := &focusable{id: "o1e1"}
+	overlay1 := container.NewVBox(o1e)
+	o2e := &focusable{id: "o2e1"}
+	overlay2 := container.NewVBox(o2e)
+	w.SetContent(content)
+	c.setMenuOverlay(menuOverlay)
+	c.Overlays().Add(overlay1)
+	c.Overlays().Add(overlay2)
+
+	c.Focus(ce)
+	assert.True(t, ce.focused, "focuses content object even if content is not in focus")
+
+	c.Focus(me)
+	assert.True(t, me.focused, "focuses menu object even if menu is not in focus")
+	assert.True(t, ce.focused, "does not affect focus on other layer")
+
+	c.Focus(o1e)
+	assert.True(t, o1e.focused, "focuses overlay object even if menu is not in focus")
+	assert.True(t, me.focused, "does not affect focus on other layer")
+
+	c.Focus(o2e)
+	assert.True(t, o2e.focused)
+	assert.True(t, o1e.focused, "does not affect focus on other layer")
+
+	foreign := &focusable{id: "o2e1"}
+	c.Focus(foreign)
+	assert.False(t, foreign.focused, "does not focus foreign object")
+	assert.True(t, o2e.focused)
 }
 
 func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
@@ -265,13 +304,13 @@ func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(100, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	leftCol := container.NewVBox(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(100, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(100, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	content := widget.NewHBox(leftCol, rightCol)
+	rightCol := container.NewVBox(rightObj1, rightObj2)
+	content := container.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
@@ -339,7 +378,7 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewLabel("Over")
 	w.SetContent(content)
-	w.Canvas().SetOverlay(over)
+	w.Canvas().Overlays().Add(over)
 	// TODO: address #707; overlays should always be canvas size
 	over.Resize(w.Canvas().Size())
 
@@ -416,7 +455,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 
 func TestGlCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	var menuHeight int
+	var menuHeight float32
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
@@ -426,8 +465,8 @@ func TestGlCanvas_SetContent(t *testing.T) {
 		name               string
 		padding            bool
 		menu               bool
-		expectedPad        int
-		expectedMenuHeight int
+		expectedPad        float32
+		expectedMenuHeight float32
 	}{
 		{"window without padding", false, false, 0, 0},
 		{"window with padding", true, false, theme.Padding(), 0},
@@ -442,7 +481,7 @@ func TestGlCanvas_SetContent(t *testing.T) {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
 			content := canvas.NewCircle(color.Black)
-			canvasSize := 200
+			canvasSize := float32(200)
 			w.SetContent(content)
 			w.Resize(fyne.NewSize(canvasSize, canvasSize))
 
@@ -459,11 +498,11 @@ func TestGlCanvas_SetContent(t *testing.T) {
 func TestGlCanvas_walkTree(t *testing.T) {
 	leftObj1 := canvas.NewRectangle(color.Gray16{Y: 1})
 	leftObj2 := canvas.NewRectangle(color.Gray16{Y: 2})
-	leftCol := &modifiableBox{Box: widget.NewVBox(leftObj1, leftObj2)}
+	leftCol := container.NewWithoutLayout(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Gray16{Y: 10})
 	rightObj2 := canvas.NewRectangle(color.Gray16{Y: 20})
-	rightCol := &modifiableBox{Box: widget.NewVBox(rightObj1, rightObj2)}
-	content := fyne.NewContainer(leftCol, rightCol)
+	rightCol := container.NewWithoutLayout(rightObj1, rightObj2)
+	content := container.NewWithoutLayout(leftCol, rightCol)
 	content.Move(fyne.NewPos(17, 42))
 	leftCol.Move(fyne.NewPos(300, 400))
 	leftObj1.Move(fyne.NewPos(1, 2))
@@ -596,11 +635,11 @@ func TestGlCanvas_walkTree(t *testing.T) {
 	//
 	// test that removal, replacement and adding at the end of a children list works
 	//
-	leftCol.deleteAt(1)
+	deleteAt(leftCol, 1)
 	leftNewObj2 := canvas.NewRectangle(color.Gray16{Y: 3})
-	leftCol.Append(leftNewObj2)
-	rightCol.deleteAt(1)
-	thirdCol := widget.NewVBox()
+	leftCol.Add(leftNewObj2)
+	deleteAt(rightCol, 1)
+	thirdCol := container.NewVBox()
 	content.AddObject(thirdCol)
 	thirdRunBeforePainterData := []nodeInfo{}
 	thirdRunAfterPainterData := []nodeInfo{}
@@ -643,9 +682,9 @@ func TestGlCanvas_walkTree(t *testing.T) {
 	// removes all following siblings and their subtrees
 	//
 	leftNewObj2a := canvas.NewRectangle(color.Gray16{Y: 4})
-	leftCol.insert(leftNewObj2a, 1)
+	insert(leftCol, leftNewObj2a, 1)
 	rightNewObj0 := canvas.NewRectangle(color.Gray16{Y: 30})
-	rightCol.Prepend(rightNewObj0)
+	Prepend(rightCol, rightNewObj0)
 	fourthRunBeforePainterData := []nodeInfo{}
 	fourthRunAfterPainterData := []nodeInfo{}
 	nodes = []*renderCacheNode{}
@@ -726,8 +765,8 @@ func TestGlCanvas_walkTree(t *testing.T) {
 	// test that removal at the beginning or in the middle of a children list
 	// removes all following siblings and their subtrees
 	//
-	leftCol.deleteAt(1)
-	rightCol.deleteAt(0)
+	deleteAt(leftCol, 1)
+	deleteAt(rightCol, 0)
 	fifthRunBeforePainterData := []nodeInfo{}
 	fifthRunAfterPainterData := []nodeInfo{}
 	nodes = []*renderCacheNode{}
@@ -812,31 +851,22 @@ func (l *recordingLayout) popLayoutEvent() (e interface{}) {
 	return
 }
 
-type modifiableBox struct {
-	*widget.Box
-}
-
-func (b *modifiableBox) Append(object fyne.CanvasObject) {
-	b.Children = append(b.Children, object)
-	widget.Renderer(b).Refresh()
-}
-
-func (b *modifiableBox) deleteAt(index int) {
-	if index < len(b.Children)-1 {
-		b.Children = append(b.Children[:index], b.Children[index+1:]...)
+func deleteAt(c *fyne.Container, index int) {
+	if index < len(c.Objects)-1 {
+		c.Objects = append(c.Objects[:index], c.Objects[index+1:]...)
 	} else {
-		b.Children = b.Children[:index]
+		c.Objects = c.Objects[:index]
 	}
-	widget.Renderer(b).Refresh()
+	c.Refresh()
 }
 
-func (b *modifiableBox) insert(object fyne.CanvasObject, index int) {
-	tail := append([]fyne.CanvasObject{object}, b.Children[index:]...)
-	b.Children = append(b.Children[:index], tail...)
-	widget.Renderer(b).Refresh()
+func insert(c *fyne.Container, object fyne.CanvasObject, index int) {
+	tail := append([]fyne.CanvasObject{object}, c.Objects[index:]...)
+	c.Objects = append(c.Objects[:index], tail...)
+	c.Refresh()
 }
 
-func (b *modifiableBox) Prepend(object fyne.CanvasObject) {
-	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
-	widget.Renderer(b).Refresh()
+func Prepend(c *fyne.Container, object fyne.CanvasObject) {
+	c.Objects = append([]fyne.CanvasObject{object}, c.Objects...)
+	c.Refresh()
 }

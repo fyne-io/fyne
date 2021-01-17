@@ -16,8 +16,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
+func defaultVariant() fyne.ThemeVariant {
+	return theme.VariantDark
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {

@@ -10,7 +10,7 @@ type Driver interface {
 
 	// RenderedTextSize returns the size required to render the given string of specified
 	// font size and style.
-	RenderedTextSize(string, int, TextStyle) Size
+	RenderedTextSize(string, float32, TextStyle) Size
 
 	// FileReaderForURI opens a file reader for the given resource indicator.
 	// This may refer to a filesystem (typical on desktop) or data from another application.
@@ -34,4 +34,9 @@ type Driver interface {
 	Run()
 	// Quit closes the driver and open windows, then exit the application.
 	Quit()
+
+	// StartAnimation registers a new animation with this driver and requests it be started.
+	StartAnimation(*Animation)
+	// StopAnimation stops an animation and unregisters from this driver.
+	StopAnimation(*Animation)
 }

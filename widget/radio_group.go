@@ -51,10 +51,11 @@ func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 	defer r.propertyLock.Unlock()
 
 	r.update()
-	var objects []fyne.CanvasObject
-	for _, item := range r.items {
-		objects = append(objects, item)
+	objects := make([]fyne.CanvasObject, len(r.items))
+	for i, item := range r.items {
+		objects[i] = item
 	}
+
 	return &radioGroupRenderer{widget.NewBaseRenderer(objects), r.items, r}
 }
 
@@ -141,18 +142,18 @@ func (r *radioGroupRenderer) Layout(_ fyne.Size) {
 	if r.items != nil && len(r.items) > 0 {
 		count = len(r.items)
 	}
-	var itemHeight, itemWidth int
+	var itemHeight, itemWidth float32
 	minSize := r.radio.MinSize()
 	if r.radio.Horizontal {
 		itemHeight = minSize.Height
-		itemWidth = minSize.Width / count
+		itemWidth = minSize.Width / float32(count)
 	} else {
-		itemHeight = minSize.Height / count
+		itemHeight = minSize.Height / float32(count)
 		itemWidth = minSize.Width
 	}
 
 	itemSize := fyne.NewSize(itemWidth, itemHeight)
-	x, y := 0, 0
+	x, y := float32(0), float32(0)
 	for _, item := range r.items {
 		item.Resize(itemSize)
 		item.Move(fyne.NewPos(x, y))
@@ -168,8 +169,8 @@ func (r *radioGroupRenderer) Layout(_ fyne.Size) {
 // This is based on the contained text, the radio icon and a standard amount of padding
 // between each item.
 func (r *radioGroupRenderer) MinSize() fyne.Size {
-	width := 0
-	height := 0
+	width := float32(0)
+	height := float32(0)
 	for _, item := range r.items {
 		itemMin := item.MinSize()
 		if r.radio.Horizontal {
@@ -205,6 +206,21 @@ func (r *radioGroupRenderer) updateItems() {
 	for i, item := range r.items {
 		item.Label = r.radio.Options[i]
 		item.Selected = item.Label == r.radio.Selected
+		item.disabled = r.radio.disabled
 		item.Refresh()
 	}
+}
+
+func removeDuplicates(options []string) []string {
+	var result []string
+	found := make(map[string]bool)
+
+	for _, option := range options {
+		if _, ok := found[option]; !ok {
+			found[option] = true
+			result = append(result, option)
+		}
+	}
+
+	return result
 }

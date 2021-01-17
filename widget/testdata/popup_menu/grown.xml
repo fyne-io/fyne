@@ -1,0 +1,34 @@
+<canvas padded size="200x200">
+	<content>
+		<rectangle fillColor="rgba(0,150,150,255)" pos="4,4" size="192x192"/>
+	</content>
+	<overlay>
+		<widget size="200x200" type="*widget.OverlayContainer">
+			<widget pos="10,10" size="89x80" type="*widget.Menu">
+				<widget size="89x80" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="89x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="89,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="89,0" size="4x80" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="89,80" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,80" size="89x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,80" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x80"/>
+				</widget>
+				<widget size="89x80" type="*widget.Scroll">
+					<widget size="89x80" type="*widget.menuBox">
+						<rectangle fillColor="background" size="89x88"/>
+						<container pos="0,4" size="89x88">
+							<widget size="89x29" type="*widget.menuItem">
+								<text pos="8,4" size="63x21">Option A</text>
+							</widget>
+							<widget pos="0,33" size="89x29" type="*widget.menuItem">
+								<text pos="8,4" size="63x21">Option B</text>
+							</widget>
+						</container>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>

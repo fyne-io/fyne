@@ -6,11 +6,32 @@ import "fyne.io/fyne"
 type MouseButton int
 
 const (
-	// LeftMouseButton is the most common mouse button - on some systems the only one
-	LeftMouseButton MouseButton = 1 << iota
+	// MouseButtonPrimary is the most common mouse button - on some systems the only one.
+	// This will normally be on the left side of a mouse.
+	//
+	// Since: 2.0.0
+	MouseButtonPrimary MouseButton = 1 << iota
+
+	// MouseButtonSecondary is the secondary button on most mouse input devices.
+	// This will normally be on the right side of a mouse.
+	//
+	// Since: 2.0.0
+	MouseButtonSecondary
+
+	// MouseButtonTertiary is the middle button on the mouse, assuming it has one.
+	//
+	// Since: 2.0.0
+	MouseButtonTertiary
+
+	// LeftMouseButton is the most common mouse button - on some systems the only one.
+	//
+	// Deprecated: use MouseButtonPrimary which will adapt to mouse configuration.
+	LeftMouseButton = MouseButtonPrimary
 
 	// RightMouseButton is the secondary button on most mouse input devices.
-	RightMouseButton
+	//
+	// Deprecated: use MouseButtonSecondary which will adapt to mouse configuration.
+	RightMouseButton = MouseButtonSecondary
 )
 
 // MouseEvent contains data relating to desktop mouse events

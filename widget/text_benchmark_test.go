@@ -35,9 +35,9 @@ func BenchmarkText_splitLines(b *testing.B) {
 
 func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 	text := []rune(loremIpsum)
-	textSize := 10
+	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) int {
+	measurer := func(text []rune) float32 {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
 	for n := 0; n < b.N; n++ {

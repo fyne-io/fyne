@@ -25,7 +25,7 @@ func containerScreen(_ fyne.Window) fyne.CanvasObject {
 func makeAppTabsTab(_ fyne.Window) fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
-		container.NewTabItem("Tab 2", widget.NewLabel("Content of tab 2")),
+		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
 		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
 	)
 }
@@ -90,8 +90,8 @@ func makeScrollTab(_ fyne.Window) fyne.CanvasObject {
 	hlist := makeButtonList(20)
 	vlist := makeButtonList(50)
 
-	horiz := container.NewHScroll(widget.NewHBox(hlist...))
-	vert := container.NewVScroll(widget.NewVBox(vlist...))
+	horiz := container.NewHScroll(container.NewHBox(hlist...))
+	vert := container.NewVScroll(container.NewVBox(vlist...))
 
 	return container.NewAdaptiveGrid(2,
 		container.NewBorder(horiz, nil, nil, nil, vert),

@@ -11,23 +11,6 @@ const accordionDividerHeight = 1
 
 var _ fyne.Widget = (*Accordion)(nil)
 
-// AccordionContainer displays a list of AccordionItems.
-// Each item is represented by a button that reveals a detailed view when tapped.
-//
-// Deprecated: This has been renamed to Accordion
-type AccordionContainer = Accordion
-
-// NewAccordionContainer creates a new accordion widget.
-//
-// Deprecated: Use NewAccordion instead
-func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
-	a := &Accordion{
-		Items: items,
-	}
-	a.ExtendBaseWidget(a)
-	return a
-}
-
 // Accordion displays a list of AccordionItems.
 // Each item is represented by a button that reveals a detailed view when tapped.
 type Accordion struct {
@@ -137,8 +120,8 @@ type accordionRenderer struct {
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
-	x := 0
-	y := 0
+	x := float32(0)
+	y := float32(0)
 	for i, ai := range r.container.Items {
 		if i != 0 {
 			div := r.dividers[i-1]
@@ -194,6 +177,7 @@ func (r *accordionRenderer) Refresh() {
 func (r *accordionRenderer) updateObjects() {
 	is := len(r.container.Items)
 	hs := len(r.headers)
+	ds := len(r.dividers)
 	i := 0
 	for ; i < is; i++ {
 		ai := r.container.Items[i]
@@ -204,6 +188,7 @@ func (r *accordionRenderer) updateObjects() {
 		} else {
 			h = &Button{}
 			r.headers = append(r.headers, h)
+			hs++
 		}
 		h.Alignment = ButtonAlignLeading
 		h.IconPlacement = ButtonIconLeadingText
@@ -232,21 +217,21 @@ func (r *accordionRenderer) updateObjects() {
 		r.headers[i].Hide()
 	}
 	// Set objects
-	var objects []fyne.CanvasObject
-	for _, h := range r.headers {
-		objects = append(objects, h)
+	objects := make([]fyne.CanvasObject, hs+is+ds)
+	for i, header := range r.headers {
+		objects[i] = header
 	}
-	for _, i := range r.container.Items {
-		objects = append(objects, i.Detail)
+	for i, item := range r.container.Items {
+		objects[hs+i] = item.Detail
 	}
 	// add dividers
-	for i = 0; i < len(r.dividers); i++ {
+	for i = 0; i < ds; i++ {
 		if i < len(r.container.Items)-1 {
 			r.dividers[i].Show()
 		} else {
 			r.dividers[i].Hide()
 		}
-		objects = append(objects, r.dividers[i])
+		objects[hs+is+i] = r.dividers[i]
 	}
 	// make new dividers
 	for ; i < is-1; i++ {

@@ -14,6 +14,8 @@ import (
 
 const (
 	passwordChar = "•"
+	// TODO move to complete tab handling, for now we just indent this far statically
+	textTabIndent = "    "
 )
 
 // textPresenter provides the widget specific information to a generic text provider
@@ -35,6 +37,9 @@ type textProvider struct {
 
 	buffer    []rune
 	rowBounds [][2]int
+
+	// this varies due to how the widget works (entry with scroller vs others with padding)
+	extraPad fyne.Size
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
@@ -103,7 +108,7 @@ func (t *textProvider) updateRowBounds() {
 	textSize := theme.TextSize()
 	maxWidth := t.size.Width - 2*theme.Padding()
 
-	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
+	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) float32 {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	})
 }
@@ -231,11 +236,13 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 	measureText := string(line[0:col])
 	if t.presenter.concealed() {
 		measureText = strings.Repeat(passwordChar, col)
+	} else {
+		measureText = strings.ReplaceAll(measureText, "\t", textTabIndent)
 	}
 
-	label := canvas.NewText(measureText, theme.TextColor())
+	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
-	return label.MinSize()
+	return label.MinSize().Add(fyne.NewSize(t.extraPad.Width, 0))
 }
 
 // Renderer
@@ -253,13 +260,13 @@ func (r *textRenderer) MinSize() fyne.Size {
 	r.provider.propertyLock.RUnlock()
 
 	charMinSize := r.provider.charMinSize()
-	height := 0
-	width := 0
+	height := float32(0)
+	width := float32(0)
 	i := 0
 
 	r.provider.propertyLock.RLock()
 	texts := r.texts
-	count := fyne.Min(len(texts), r.provider.rows())
+	count := int(fyne.Min(float32(len(texts)), float32(r.provider.rows())))
 	r.provider.propertyLock.RUnlock()
 
 	for ; i < count; i++ {
@@ -273,27 +280,29 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height += min.Height
 	}
 
-	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	return fyne.NewSize(width, height).
+		Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2).Add(r.provider.extraPad).Add(r.provider.extraPad))
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.provider.propertyLock.RLock()
 	defer r.provider.propertyLock.RUnlock()
 
-	yPos := theme.Padding()
+	xPos := theme.Padding() + r.provider.extraPad.Width
+	yPos := theme.Padding() + r.provider.extraPad.Height
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < len(r.texts); i++ {
 		text := r.texts[i]
 		text.Resize(lineSize)
-		text.Move(fyne.NewPos(theme.Padding(), yPos))
+		text.Move(fyne.NewPos(xPos, yPos))
 		yPos += lineHeight
 	}
 }
 
 // applyTheme updates the label to match the current theme.
 func (r *textRenderer) applyTheme() {
-	c := theme.TextColor()
+	c := theme.ForegroundColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
 	}
@@ -322,14 +331,14 @@ func (r *textRenderer) Refresh() {
 		if concealed {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
-			line = string(row)
+			line = strings.ReplaceAll(string(row), "\t", textTabIndent)
 		}
 
 		var textCanvas *canvas.Text
 		add := false
 		if index >= len(r.texts) {
 			add = true
-			textCanvas = canvas.NewText(line, theme.TextColor())
+			textCanvas = canvas.NewText(line, theme.ForegroundColor())
 		} else {
 			textCanvas = r.texts[index]
 			textCanvas.Text = line
@@ -357,10 +366,6 @@ func (r *textRenderer) Refresh() {
 	} else {
 		canvas.Refresh(r.provider.presenter.object())
 	}
-}
-
-func (r *textRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 // splitLines accepts a slice of runes and returns a slice containing the
@@ -419,7 +424,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 
 // lineBounds accepts a slice of runes, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
-func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
+func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth float32, measurer func([]rune) float32) [][2]int {
 
 	lines := splitLines(text)
 	if maxWidth <= 0 || wrap == fyne.TextWrapOff {

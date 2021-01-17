@@ -65,8 +65,32 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 	return retval
 }
 
+func (c *glCanvas) DismissMenu() bool {
+	if c.menu != nil && c.menu.(*MenuBar).IsActive() {
+		c.menu.(*MenuBar).Toggle()
+		return true
+	}
+	return false
+}
+
 func (c *glCanvas) Focus(obj fyne.Focusable) {
-	c.focusManager().Focus(obj)
+	focusMgr := c.focusManager()
+	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+		return
+	}
+
+	c.RLock()
+	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
+	c.RUnlock()
+
+	for _, mgr := range focusMgrs {
+		if focusMgr != mgr {
+			if mgr.Focus(obj) {
+				return
+			}
+		}
+	}
+	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
@@ -115,11 +139,6 @@ func (c *glCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *glCanvas) Overlay() fyne.CanvasObject {
-	return c.Overlays().Top()
-}
-
 func (c *glCanvas) Overlays() fyne.OverlayStack {
 	c.RLock()
 	defer c.RUnlock()
@@ -132,9 +151,9 @@ func (c *glCanvas) Padded() bool {
 
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	texScale := c.texScale
-	multiple := float64(c.Scale() * texScale)
-	scaleInt := func(x int) int {
-		return int(math.Round(float64(x) * multiple))
+	multiple := c.Scale() * texScale
+	scaleInt := func(x float32) int {
+		return int(math.Round(float64(x * multiple)))
 	}
 
 	return scaleInt(pos.X), scaleInt(pos.Y)
@@ -211,14 +230,6 @@ func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
 }
 
-// Deprecated: Use Overlays() instead.
-func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	c.RLock()
-	o := c.overlays
-	c.RUnlock()
-	o.setOverlay(overlay)
-}
-
 func (c *glCanvas) SetPadded(padded bool) {
 	c.Lock()
 	defer c.Unlock()
@@ -227,10 +238,7 @@ func (c *glCanvas) SetPadded(padded bool) {
 	c.content.Move(c.contentPos())
 }
 
-// SetScale sets the render scale for this specific canvas
-//
-// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-func (c *glCanvas) SetScale(_ float32) {
+func (c *glCanvas) reloadScale() {
 	if !c.context.(*window).visible {
 		return
 	}
@@ -247,6 +255,12 @@ func (c *glCanvas) Size() fyne.Size {
 	c.RLock()
 	defer c.RUnlock()
 	return c.size
+}
+
+func (c *glCanvas) ToggleMenu() {
+	if c.menu != nil {
+		c.menu.(*MenuBar).Toggle()
+	}
 }
 
 func (c *glCanvas) Unfocus() {
@@ -378,7 +392,7 @@ func (c *glCanvas) isMenuActive() bool {
 	return c.menu != nil && c.menu.(*MenuBar).IsActive()
 }
 
-func (c *glCanvas) menuHeight() int {
+func (c *glCanvas) menuHeight() float32 {
 	switch c.menu {
 	case nil:
 		// no menu or native menu -> does not consume space on the canvas
@@ -572,19 +586,6 @@ func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
-}
-
-// concurrency safe implementation of deprecated c.SetOverlay
-func (o *overlayStack) setOverlay(overlay fyne.CanvasObject) {
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
-
-	if len(o.List()) > 0 {
-		o.remove(o.List()[0])
-	}
-	if overlay != nil {
-		o.add(overlay)
-	}
 }
 
 type renderCacheNode struct {

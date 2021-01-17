@@ -108,12 +108,8 @@ type shadowRenderer struct {
 	s              *Shadow
 }
 
-func (r *shadowRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 func (r *shadowRenderer) Layout(size fyne.Size) {
-	depth := int(r.s.level)
+	depth := float32(r.s.level)
 	if r.tl != nil {
 		r.tl.Resize(fyne.NewSize(depth, depth))
 		r.tl.Move(fyne.NewPos(-depth, -depth))

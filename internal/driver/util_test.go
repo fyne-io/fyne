@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/internal/driver"
 	internal_widget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
@@ -268,57 +269,165 @@ func TestFindObjectAtPositionMatching(t *testing.T) {
 	}
 }
 
-func TestWalkVisibleObjectTree(t *testing.T) {
+func TestReverseWalkVisibleObjectTree(t *testing.T) {
+	child1 := canvas.NewRectangle(color.White)
+	child1.SetMinSize(fyne.NewSize(100, 100))
+	child2 := canvas.NewRectangle(color.Black)
+	child2.Hide()
+	child3 := canvas.NewRectangle(color.White)
+	base := container.NewHBox(child1, child2, child3)
+
+	var walked []fyne.CanvasObject
+	driver.ReverseWalkVisibleObjectTree(
+		base,
+		func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
+			walked = append(walked, object)
+			return false
+		},
+		nil,
+	)
+
+	assert.Equal(t, []fyne.CanvasObject{base, child3, child1}, walked)
+}
+
+func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	child := canvas.NewRectangle(color.Black)
-	child.Hide()
-	base := widget.NewHBox(rect, child)
+	base := fyne.NewContainerWithLayout(
+		layout.NewGridLayout(1),
+		rect,
+		internal_widget.NewScroll(child),
+		fyne.NewContainerWithLayout(
+			layout.NewGridLayout(2),
+			canvas.NewCircle(color.White),
+			canvas.NewCircle(color.White),
+			canvas.NewCircle(color.White),
+			&scrollable{},
+		),
+	)
 
-	walked := 0
-	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		walked++
+	var scClipPos, scrollableClipPos fyne.Position
+	var scClipSize, scrollableClipSize fyne.Size
+
+	driver.ReverseWalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
+		if _, ok := object.(*internal_widget.Scroll); ok {
+			scClipPos = clippingPos
+			scClipSize = clippingSize
+		} else if _, ok = object.(fyne.Scrollable); ok {
+			scrollableClipPos = clippingPos
+			scrollableClipSize = clippingSize
+		}
 		return false
 	}, nil)
 
-	assert.Equal(t, 2, walked)
+	// layout:
+	// +-------------------------------+
+	// | 0,0: rect 100x100             |
+	// +-------------------------------+
+	// |            padding            |
+	// +-------------------------------+
+	// | 0,104: scroller 100x100       |
+	// +-------------------------------+
+	// |            padding            |
+	// +--------------+-+--------------+
+	// | circle 48x48 |p| circle 48x48 |
+	// +--------------+-+--------------+
+	// |            padding            |
+	// +--------------+-+--------------+
+	// | circle 48x48 |p| scrollable   |
+	// +--------------+-+--------------+
+	assert.Equal(t, fyne.NewPos(0, 104), scClipPos)
+	assert.Equal(t, fyne.NewSize(100, 100), scClipSize)
+	assert.Equal(t, fyne.NewPos(52, 260), scrollableClipPos)
+	assert.Equal(t, fyne.NewSize(48, 48), scrollableClipSize)
+}
+
+func TestWalkVisibleObjectTree(t *testing.T) {
+	child1 := canvas.NewRectangle(color.White)
+	child1.SetMinSize(fyne.NewSize(100, 100))
+	child2 := canvas.NewRectangle(color.Black)
+	child2.Hide()
+	child3 := canvas.NewRectangle(color.White)
+	base := container.NewHBox(child1, child2, child3)
+
+	var walked []fyne.CanvasObject
+	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
+		walked = append(walked, object)
+		return false
+	}, nil)
+
+	assert.Equal(t, []fyne.CanvasObject{base, child1, child3}, walked)
 }
 
 func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	child := canvas.NewRectangle(color.Black)
-	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, widget.NewScrollContainer(child))
+	base := fyne.NewContainerWithLayout(
+		layout.NewGridLayout(1),
+		rect,
+		internal_widget.NewScroll(child),
+		fyne.NewContainerWithLayout(
+			layout.NewGridLayout(2),
+			canvas.NewCircle(color.White),
+			canvas.NewCircle(color.White),
+			canvas.NewCircle(color.White),
+			&scrollable{},
+		),
+	)
 
-	clipPos := fyne.NewPos(0, 0)
-	clipSize := rect.MinSize()
+	var scClipPos, scrollableClipPos fyne.Position
+	var scClipSize, scrollableClipSize fyne.Size
 
 	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		if _, ok := object.(*widget.ScrollContainer); ok {
-			clipPos = clippingPos
-			clipSize = clippingSize
+		if _, ok := object.(*internal_widget.Scroll); ok {
+			scClipPos = clippingPos
+			scClipSize = clippingSize
+		} else if _, ok = object.(fyne.Scrollable); ok {
+			scrollableClipPos = clippingPos
+			scrollableClipSize = clippingSize
 		}
 		return false
 	}, nil)
 
-	assert.Equal(t, fyne.NewPos(0, 104), clipPos)
-	assert.Equal(t, fyne.NewSize(100, 100), clipSize)
+	// layout:
+	// +-------------------------------+
+	// | 0,0: rect 100x100             |
+	// +-------------------------------+
+	// |            padding            |
+	// +-------------------------------+
+	// | 0,104: scroller 100x100       |
+	// +-------------------------------+
+	// |            padding            |
+	// +--------------+-+--------------+
+	// | circle 48x48 |p| circle 48x48 |
+	// +--------------+-+--------------+
+	// |            padding            |
+	// +--------------+-+--------------+
+	// | circle 48x48 |p| scrollable   |
+	// +--------------+-+--------------+
+	assert.Equal(t, fyne.NewPos(0, 104), scClipPos)
+	assert.Equal(t, fyne.NewSize(100, 100), scClipSize)
+	assert.Equal(t, fyne.NewPos(52, 260), scrollableClipPos)
+	assert.Equal(t, fyne.NewSize(48, 48), scrollableClipSize)
 }
 
 func TestWalkWholeObjectTree(t *testing.T) {
-	rect := canvas.NewRectangle(color.White)
-	rect.SetMinSize(fyne.NewSize(100, 100))
-	child := canvas.NewRectangle(color.Black)
-	child.Hide()
-	base := widget.NewHBox(rect, child)
+	child1 := canvas.NewRectangle(color.White)
+	child1.SetMinSize(fyne.NewSize(100, 100))
+	child2 := canvas.NewRectangle(color.Black)
+	child2.Hide()
+	child3 := canvas.NewRectangle(color.White)
+	base := container.NewHBox(child1, child2, child3)
 
-	walked := 0
+	var walked []fyne.CanvasObject
 	driver.WalkCompleteObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		walked++
+		walked = append(walked, object)
 		return false
 	}, nil)
 
-	assert.Equal(t, 3, walked)
+	assert.Equal(t, []fyne.CanvasObject{base, child1, child2, child3}, walked)
 }
 
 var _ fyne.Widget = (*objectTree)(nil)
@@ -385,4 +494,52 @@ func (o objectTreeRenderer) MinSize() fyne.Size {
 }
 
 func (o objectTreeRenderer) Refresh() {
+}
+
+type scrollable struct {
+	pos  fyne.Position
+	size fyne.Size
+}
+
+var _ fyne.CanvasObject = (*scrollable)(nil)
+var _ fyne.Scrollable = (*scrollable)(nil)
+
+func (s *scrollable) Hide() {
+	panic("implement me")
+}
+
+func (s *scrollable) MinSize() fyne.Size {
+	return fyne.NewSize(1, 1)
+}
+
+func (s *scrollable) Move(position fyne.Position) {
+	s.pos = position
+}
+
+func (s *scrollable) Position() fyne.Position {
+	return s.pos
+}
+
+func (s *scrollable) Refresh() {
+	panic("implement me")
+}
+
+func (s *scrollable) Resize(size fyne.Size) {
+	s.size = size
+}
+
+func (s *scrollable) Scrolled(event *fyne.ScrollEvent) {
+	panic("implement me")
+}
+
+func (s *scrollable) Show() {
+	panic("implement me")
+}
+
+func (s *scrollable) Size() fyne.Size {
+	return s.size
+}
+
+func (s *scrollable) Visible() bool {
+	return true
 }

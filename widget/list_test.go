@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +39,7 @@ func TestList_MinSize(t *testing.T) {
 	}{
 		"small": {
 			fyne.NewSize(1, 1),
-			fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize),
+			fyne.NewSize(float32(32), float32(32)),
 		},
 		"large": {
 			fyne.NewSize(100, 100),
@@ -60,9 +61,8 @@ func TestList_MinSize(t *testing.T) {
 }
 
 func TestList_Resize(t *testing.T) {
-	list := createList(1000)
-	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 400))
+	defer test.NewApp()
+	list, w := setupList(t)
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
@@ -70,7 +70,6 @@ func TestList_Resize(t *testing.T) {
 	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
-	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 
 	w.Resize(fyne.NewSize(200, 600))
 
@@ -85,10 +84,13 @@ func TestList_Resize(t *testing.T) {
 	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange)
 	assert.NotEqual(t, visibleCount, newVisibleCount)
 	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex+1)
-	test.AssertImageMatches(t, "list/list_resized.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "list/resized.xml", w.Canvas())
 }
 
 func TestList_OffsetChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -100,10 +102,9 @@ func TestList_OffsetChange(t *testing.T) {
 
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex)
-	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 
 	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 0, DeltaY: -300})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -280)})
 
 	indexChange := int(math.Floor(float64(300) / float64(template.MinSize().Height)))
 
@@ -117,7 +118,7 @@ func TestList_OffsetChange(t *testing.T) {
 	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange-1)
 	assert.Equal(t, visibleCount, newVisibleCount)
 	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex)
-	test.AssertImageMatches(t, "list/list_offset_changed.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "list/offset_changed.xml", w.Canvas())
 }
 
 func TestList_Hover(t *testing.T) {
@@ -125,11 +126,11 @@ func TestList_Hover(t *testing.T) {
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	for i := 0; i < 2; i++ {
-		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+		assert.False(t, children[i].(*listItem).statusIndicator.Visible())
 		children[i].(*listItem).MouseIn(&desktop.MouseEvent{})
 		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.HoverColor())
 		children[i].(*listItem).MouseOut()
-		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+		assert.False(t, children[i].(*listItem).statusIndicator.Visible())
 	}
 }
 
@@ -137,16 +138,18 @@ func TestList_Selection(t *testing.T) {
 	list := createList(1000)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.False(t, children[0].(*listItem).statusIndicator.Visible())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
+	assert.True(t, children[0].(*listItem).statusIndicator.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
+	assert.True(t, children[1].(*listItem).statusIndicator.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.False(t, children[0].(*listItem).statusIndicator.Visible())
 }
 
 func TestList_Select(t *testing.T) {
@@ -156,18 +159,21 @@ func TestList_Select(t *testing.T) {
 	list.Select(50)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).lastItemIndex, 50)
 	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
+	assert.True(t, children[len(children)-1].(*listItem).statusIndicator.Visible())
 
 	list.Select(5)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
+	assert.True(t, children[0].(*listItem).statusIndicator.Visible())
 
 	list.Select(6)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.False(t, children[0].(*listItem).statusIndicator.Visible())
+	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
+	assert.True(t, children[1].(*listItem).statusIndicator.Visible())
 }
 
 func TestList_Unselect(t *testing.T) {
@@ -175,33 +181,33 @@ func TestList_Unselect(t *testing.T) {
 
 	list.Select(10)
 	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
+	assert.True(t, children[10].(*listItem).statusIndicator.Visible())
 
 	list.Unselect(10)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.False(t, children[10].(*listItem).statusIndicator.Visible())
 	assert.Nil(t, list.selected)
 }
 
 func TestList_DataChange(t *testing.T) {
-	list := createList(1000)
-	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 400))
+	test.NewApp()
+	defer test.NewApp()
+
+	list, w := setupList(t)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
-	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 	changeData(list)
 	list.Refresh()
 	children = test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "a")
-	test.AssertImageMatches(t, "list/list_new_data.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "list/new_data.xml", w.Canvas())
 }
 
 func TestList_ThemeChange(t *testing.T) {
-	list := createList(1000)
-	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 400))
+	defer test.NewApp()
+	list, w := setupList(t)
 
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 
@@ -213,6 +219,9 @@ func TestList_ThemeChange(t *testing.T) {
 }
 
 func TestList_SmallList(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	var data []string
 	data = append(data, "Test Item 0")
 
@@ -239,13 +248,12 @@ func TestList_SmallList(t *testing.T) {
 	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
 	assert.Equal(t, visibleCount, 2)
 
-	test.AssertImageMatches(t, "list/list_small_list.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "list/small.xml", w.Canvas())
 }
 
 func TestList_ClearList(t *testing.T) {
-	list := createList(1000)
-	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 400))
+	defer test.NewApp()
+	list, w := setupList(t)
 	assert.Equal(t, 1000, list.Length())
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
@@ -263,10 +271,13 @@ func TestList_ClearList(t *testing.T) {
 
 	assert.Equal(t, visibleCount, 0)
 
-	test.AssertImageMatches(t, "list/list_cleared.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "list/cleared.xml", w.Canvas())
 }
 
 func TestList_RemoveItem(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	var data []string
 	data = append(data, "Test Item 0")
 	data = append(data, "Test Item 1")
@@ -294,7 +305,7 @@ func TestList_RemoveItem(t *testing.T) {
 
 	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
 	assert.Equal(t, visibleCount, 2)
-	test.AssertImageMatches(t, "list/list_item_removed.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "list/item_removed.xml", w.Canvas())
 }
 
 func TestList_NoFunctionsSet(t *testing.T) {
@@ -333,4 +344,13 @@ func changeData(list *List) {
 	list.UpdateItem = func(id ListItemID, item fyne.CanvasObject) {
 		item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 	}
+}
+
+func setupList(t *testing.T) (*List, fyne.Window) {
+	test.NewApp()
+	list := createList(1000)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(200, 400))
+	test.AssertRendersToMarkup(t, "list/initial.xml", w.Canvas())
+	return list, w
 }

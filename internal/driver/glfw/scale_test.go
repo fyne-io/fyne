@@ -35,16 +35,10 @@ func TestCalculateScale(t *testing.T) {
 	smaller := calculateScale(0.8, 1.0, 1.0)
 	assert.Equal(t, float32(0.8), smaller)
 
-	auto := calculateScale(fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 1.1)
-	assert.Equal(t, float32(1.1), auto)
-
-	autoUser := calculateScale(fyne.SettingsScaleAuto, 1.0, 1.1)
-	assert.Equal(t, float32(1.0), autoUser)
-
 	hiDPI := calculateScale(0.8, 2.0, 1.0)
 	assert.Equal(t, float32(1.6), hiDPI)
 
-	hiDPIAuto := calculateScale(0.8, fyne.SettingsScaleAuto, 2.0)
+	hiDPIAuto := calculateScale(0.8, scaleAuto, 2.0)
 	assert.Equal(t, float32(1.6), hiDPIAuto)
 
 	large := calculateScale(1.5, 2.0, 2.0)

@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -112,7 +113,6 @@ func TestTree_OpenCloseAll(t *testing.T) {
 
 func TestTree_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		items    map[string][]string
@@ -252,15 +252,14 @@ func TestTree_Layout(t *testing.T) {
 
 			tree.Refresh() // Force layout
 
-			test.AssertImageMatches(t, "tree/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToMarkup(t, "tree/layout_"+name+".xml", window.Canvas())
 		})
 	}
 }
 
 func TestTree_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
@@ -281,9 +280,8 @@ func TestTree_ChangeTheme(t *testing.T) {
 }
 
 func TestTree_Move(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
@@ -292,10 +290,12 @@ func TestTree_Move(t *testing.T) {
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
 
-	test.AssertImageMatches(t, "tree/move_initial.png", window.Canvas().Capture())
+	tree.Refresh() // Force layout
+
+	test.AssertRendersToMarkup(t, "tree/move_initial.xml", window.Canvas())
 
 	tree.Move(fyne.NewPos(20, 20))
-	test.AssertImageMatches(t, "tree/move_moved.png", window.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "tree/move_moved.xml", window.Canvas())
 }
 
 func TestTree_Refresh(t *testing.T) {

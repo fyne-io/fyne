@@ -1,7 +1,12 @@
 package test
 
 import (
+	"fmt"
 	"image"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,6 +16,7 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/test"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,9 +38,50 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	return test.AssertImageMatches(t, masterFilename, img, msgAndArgs...)
 }
 
+// AssertRendersToMarkup asserts that the given canvas renders the same markup as the one stored in the master file.
+// The master filename is relative to the `testdata` directory which is relative to the test.
+// The test `t` fails if the rendered markup is not equal to the loaded master markup.
+// In this case the rendered markup is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
+// This path is also reported, thus the file can be used as new master.
+//
+// Be aware, that the indentation has to use tab characters ('\t') instead of spaces.
+// Every element starts on a new line indented one more than its parent.
+// Closing elements stand on their own line, too, using the same indentation as the opening element.
+// The only exception to this are text elements which do not contain line breaks unless the text includes them.
+//
+// Since: 2.0.0
+func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	got := snapshot(c)
+	masterPath := filepath.Join(wd, "testdata", masterFilename)
+	failedPath := filepath.Join(wd, "testdata/failed", masterFilename)
+	_, err = os.Stat(masterPath)
+	if os.IsNotExist(err) {
+		require.NoError(t, writeMarkup(failedPath, got))
+		t.Errorf("Master not found at %s. Markup written to %s might be used as master.", masterPath, failedPath)
+		return false
+	}
+
+	raw, err := ioutil.ReadFile(masterPath)
+	require.NoError(t, err)
+	master := strings.ReplaceAll(string(raw), "\r", "")
+
+	var msg string
+	if len(msgAndArgs) > 0 {
+		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
+	}
+	if !assert.Equal(t, master, got, "%sMarkup did not match master. Actual markup written to file://%s.", msg, failedPath) {
+		require.NoError(t, writeMarkup(failedPath, got))
+		return false
+	}
+	return true
+}
+
 // Drag drags at an absolute position on the canvas.
 // deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
-func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
+func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Draggable); ok {
 			return true
@@ -47,8 +94,7 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 	}
 	e := &fyne.DragEvent{
 		PointEvent: fyne.PointEvent{Position: p},
-		DraggedX:   deltaX,
-		DraggedY:   deltaY,
+		Dragged:    fyne.Delta{DX: deltaX, DY: deltaY},
 	}
 	o.(fyne.Draggable).Dragged(e)
 	o.(fyne.Draggable).DragEnd()
@@ -124,7 +170,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 
 // Scroll scrolls at an absolute position on the canvas.
 // deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
-func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
+func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Scrollable); ok {
 			return true
@@ -136,7 +182,7 @@ func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 		return
 	}
 
-	e := &fyne.ScrollEvent{DeltaX: deltaX, DeltaY: deltaY}
+	e := &fyne.ScrollEvent{Scrolled: fyne.Delta{DX: deltaX, DY: deltaY}}
 	o.(fyne.Scrollable).Scrolled(e)
 }
 
@@ -266,4 +312,11 @@ func typeChars(chars []rune, keyDown func(rune)) {
 	for _, char := range chars {
 		keyDown(char)
 	}
+}
+
+func writeMarkup(path string, markup string) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path, []byte(markup), 0644)
 }

@@ -20,10 +20,13 @@ const (
 	// TextWrapOff extends the widget's width to fit the text, no wrapping is applied.
 	TextWrapOff TextWrap = iota
 	// TextTruncate trims the text to the widget's width, no wrapping is applied.
+	// If an entry is asked to truncate it will provide scrolling capabilities.
 	TextTruncate
 	// TextWrapBreak trims the line of characters to the widget's width adding the excess as new line.
+	// An Entry with text wrapping will scroll vertically if there is not enough space for all the text.
 	TextWrapBreak
 	// TextWrapWord trims the line of words to the widget's width adding the excess as new line.
+	// An Entry with text wrapping will scroll vertically if there is not enough space for all the text.
 	TextWrapWord
 )
 
@@ -36,6 +39,6 @@ type TextStyle struct {
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.
-func MeasureText(text string, size int, style TextStyle) Size {
+func MeasureText(text string, size float32, style TextStyle) Size {
 	return CurrentApp().Driver().RenderedTextSize(text, size, style)
 }

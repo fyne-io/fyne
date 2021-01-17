@@ -1,0 +1,17 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget pos="45,57" size="52x78" type="*widget.Accordion">
+				<widget pos="0,4" size="52x29" type="*widget.Button">
+					<rectangle fillColor="button" size="52x29"/>
+					<rectangle size="0x0"/>
+					<text bold pos="28,4" size="11x21">A</text>
+					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
+				</widget>
+				<widget pos="0,37" size="52x37" type="*widget.Label">
+					<text pos="4,8" size="44x21">11111</text>
+				</widget>
+			</widget>
+		</container>
+	</content>
+</canvas>

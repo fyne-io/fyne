@@ -179,6 +179,16 @@ func TestTextGridRender_Whitespace(t *testing.T) {
 c`)
 }
 
+func TestTextGridRender_WhitespaceTab(t *testing.T) {
+	grid := NewTextGridFromString("A\n\tb")
+	grid.ShowWhitespace = true
+	grid.Resize(fyne.NewSize(56, 42)) // causes refresh
+
+	assertGridContent(t, grid, `A↵
+→···b`)
+	assert.Equal(t, "A\n\tb", grid.Text())
+}
+
 func TestTextGridRender_RowColor(t *testing.T) {
 	grid := NewTextGridFromString("Ab ")
 	customStyle := &CustomTextGridStyle{FGColor: color.Black}
@@ -231,11 +241,11 @@ func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles 
 			bg, fg := rendererCell(renderer, y, x)
 
 			if r == ' ' {
-				assert.Equal(t, theme.TextColor(), fg.Color)
+				assert.Equal(t, theme.ForegroundColor(), fg.Color)
 				assert.Equal(t, color.Transparent, bg.FillColor)
 			} else {
 				if expected.TextColor() == nil {
-					assert.Equal(t, theme.TextColor(), fg.Color)
+					assert.Equal(t, theme.ForegroundColor(), fg.Color)
 				} else {
 					assert.Equal(t, expected.TextColor(), fg.Color)
 				}

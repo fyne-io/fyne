@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"strings"
 
 	"fyne.io/fyne"
@@ -73,7 +72,12 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 
 	i.setURI(i.URI)
 
-	s := &fileIconRenderer{file: i}
+	// TODO should FileIcon render a background representing selection, or should it be in the collection?
+	// TODO file dialog currently uses a container with NewGridWrapLayout, but if this changes to List, or Table then the primary color background would be rendered twice.
+	background := canvas.NewRectangle(theme.PrimaryColor())
+	background.Hide()
+
+	s := &fileIconRenderer{file: i, background: background}
 	s.updateObjects()
 	i.cachedURI = i.URI
 
@@ -125,12 +129,9 @@ type fileIconRenderer struct {
 
 	file *FileIcon
 
-	ext *canvas.Text
-	img *canvas.Image
-}
-
-func (s *fileIconRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	background *canvas.Rectangle
+	ext        *canvas.Text
+	img        *canvas.Image
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
@@ -141,19 +142,20 @@ func (s *fileIconRenderer) MinSize() fyne.Size {
 func (s *fileIconRenderer) Layout(size fyne.Size) {
 	isize := fyne.Min(size.Width, size.Height)
 
-	xoff := 0
+	xoff := float32(0)
 	yoff := (size.Height - isize) / 2
 
 	if size.Width > size.Height {
 		xoff = (size.Width - isize) / 2
 	}
-	yoff += int(float64(isize) * ratioDown)
+	yoff += isize * ratioDown
 
-	s.ext.TextSize = int(float64(isize) * ratioTextSize)
+	s.ext.TextSize = float32(int(isize * ratioTextSize))
 	s.ext.Resize(fyne.NewSize(isize, s.ext.MinSize().Height))
 	s.ext.Move(fyne.NewPos(xoff, yoff))
 
 	s.Objects()[0].Resize(size)
+	s.Objects()[1].Resize(size)
 }
 
 func (s *fileIconRenderer) Refresh() {
@@ -166,11 +168,13 @@ func (s *fileIconRenderer) Refresh() {
 	}
 
 	if s.file.Selected {
+		s.background.Show()
 		s.ext.Color = theme.PrimaryColor()
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}
 	} else {
+		s.background.Hide()
 		s.ext.Color = theme.BackgroundColor()
 		if res, ok := s.img.Resource.(*theme.InvertedThemedResource); ok {
 			s.img.Resource = res.Original()
@@ -188,10 +192,7 @@ func (s *fileIconRenderer) updateObjects() {
 	s.ext.Alignment = fyne.TextAlignCenter
 	s.ext.TextSize = theme.TextSize()
 
-	objects := make([]fyne.CanvasObject, 2) // Length is known, we can pre-allocate
-	objects[0], objects[1] = s.img, s.ext
-
-	s.SetObjects(objects)
+	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
 }
 
 func trimmedExtension(uri fyne.URI) string {

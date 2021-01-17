@@ -2,6 +2,7 @@ package gomobile
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -112,12 +113,12 @@ func (w *window) Show() {
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
-		w.canvas.windowHead = widget.NewHBox(menuButton,
+		w.canvas.windowHead = container.NewHBox(menuButton,
 			layout.NewSpacer(), title, layout.NewSpacer(), exit)
 
 		w.canvas.resize(w.canvas.size)
 	} else {
-		w.canvas.windowHead = widget.NewHBox(menuButton)
+		w.canvas.windowHead = container.NewHBox(menuButton)
 	}
 	w.visible = true
 

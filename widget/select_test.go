@@ -22,9 +22,8 @@ func TestNewSelect(t *testing.T) {
 }
 
 func TestSelect_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
@@ -69,9 +68,8 @@ func TestSelect_ClearSelected(t *testing.T) {
 }
 
 func TestSelect_Disable(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
 	w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
@@ -80,10 +78,10 @@ func TestSelect_Disable(t *testing.T) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
 
 	sel.Disable()
-	test.AssertImageMatches(t, "select/disabled.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/disabled.xml", c)
 	test.Tap(sel)
 	assert.Nil(t, c.Overlays().Top(), "no pop-up for disabled Select")
-	test.AssertImageMatches(t, "select/disabled.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/disabled.xml", c)
 }
 
 func TestSelect_Disabled(t *testing.T) {
@@ -116,7 +114,6 @@ func TestSelect_Enable(t *testing.T) {
 func TestSelect_FocusRendering(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	t.Run("gain/lose focus", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
@@ -125,19 +122,19 @@ func TestSelect_FocusRendering(t *testing.T) {
 		w.Resize(fyne.NewSize(200, 150))
 
 		c := w.Canvas()
-		test.AssertImageMatches(t, "select/focus_unfocused_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_none_selected.xml", c)
 		c.Focus(sel)
-		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		c.Unfocus()
-		test.AssertImageMatches(t, "select/focus_unfocused_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_none_selected.xml", c)
 
 		sel.SetSelected("Option B")
 		assert.Equal(t, "Option B", sel.Selected)
-		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_b_selected.xml", c)
 		c.Focus(sel)
-		test.AssertImageMatches(t, "select/focus_focused_b_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_focused_b_selected.xml", c)
 		c.Unfocus()
-		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_unfocused_b_selected.xml", c)
 	})
 	t.Run("disable/enable focused", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
@@ -147,18 +144,17 @@ func TestSelect_FocusRendering(t *testing.T) {
 
 		c := w.Canvas().(test.WindowlessCanvas)
 		c.FocusNext()
-		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		sel.Disable()
-		test.AssertImageMatches(t, "select/disabled.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/disabled.xml", c)
 		sel.Enable()
-		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 	})
 }
 
 func TestSelect_KeyboardControl(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	t.Run("activate pop-up", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B"}, nil)
@@ -168,24 +164,24 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		c := w.Canvas()
 		c.Focus(sel)
 
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
 		test.TapCanvas(c, fyne.NewPos(0, 0))
 
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
 		test.TapCanvas(c, fyne.NewPos(0, 0))
 
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
 		test.TapCanvas(c, fyne.NewPos(0, 0))
 
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 	})
 
 	t.Run("traverse options without pop-up", func(t *testing.T) {
@@ -195,33 +191,33 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
 		c.Focus(sel)
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option C", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_c_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_c_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option B", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_b_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_b_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option A", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_a_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_a_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "Option C", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_c_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_c_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option A", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_a_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_a_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option B", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_b_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_b_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option C", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_c_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_c_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "Option A", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_a_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_a_selected.xml", c)
 	})
 
 	t.Run("trying to traverse empty options without pop-up", func(t *testing.T) {
@@ -231,28 +227,27 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
 		c.Focus(sel)
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 		assert.Equal(t, "", sel.Selected)
-		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 	})
 }
 
 func TestSelect_Move(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, nil)
 	w := test.NewWindow(combo)
@@ -261,13 +256,13 @@ func TestSelect_Move(t *testing.T) {
 
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "select/move_initial.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/move_initial.xml", w.Canvas())
 
 	combo.Tapped(&fyne.PointEvent{})
-	test.AssertImageMatches(t, "select/move_tapped.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/move_tapped.xml", w.Canvas())
 
 	combo.Move(fyne.NewPos(20, 20))
-	test.AssertImageMatches(t, "select/move_moved.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/move_moved.xml", w.Canvas())
 }
 
 func TestSelect_PlaceHolder(t *testing.T) {
@@ -293,7 +288,6 @@ func TestSelect_SelectedIndex(t *testing.T) {
 func TestSelect_SetSelected(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	var triggered bool
 	var triggeredValue string
@@ -306,9 +300,9 @@ func TestSelect_SetSelected(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 150))
 
 	c := w.Canvas()
-	test.AssertImageMatches(t, "select/set_selected_none_selected.png", c.Capture())
+	test.AssertRendersToMarkup(t, "select/set_selected_none_selected.xml", c)
 	combo.SetSelected("2")
-	test.AssertImageMatches(t, "select/set_selected_2nd_selected.png", c.Capture())
+	test.AssertRendersToMarkup(t, "select/set_selected_2nd_selected.xml", c)
 	assert.Equal(t, "2", combo.Selected)
 	assert.True(t, triggered)
 	assert.Equal(t, "2", triggeredValue)
@@ -385,9 +379,8 @@ func TestSelect_SetSelectedIndex_Invalid(t *testing.T) {
 }
 
 func TestSelect_Tapped(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
@@ -398,13 +391,12 @@ func TestSelect_Tapped(t *testing.T) {
 	test.Tap(combo)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertImageMatches(t, "select/tapped.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/tapped.xml", w.Canvas())
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
@@ -416,13 +408,12 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
 	test.Tap(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertImageMatches(t, "select/tapped_constrained.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "select/tapped_constrained.xml", w.Canvas())
 }
 
 func TestSelect_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		placeholder string
@@ -527,7 +518,7 @@ func TestSelect_Layout(t *testing.T) {
 			}
 			window.Resize(combo.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertImageMatches(t, "select/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToMarkup(t, "select/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})

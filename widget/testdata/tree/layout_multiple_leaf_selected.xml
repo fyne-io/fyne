@@ -1,0 +1,40 @@
+<canvas padded size="200x300">
+	<content>
+		<widget pos="4,4" size="192x292" type="*widget.Tree">
+			<widget size="192x292" type="*widget.Scroll">
+				<widget size="192x292" type="*widget.treeContent">
+					<widget size="192x45" type="*widget.leaf">
+						<widget pos="28,4" size="160x37" type="*widget.Label">
+							<text pos="4,8" size="152x21">11111</text>
+						</widget>
+					</widget>
+					<widget pos="4,45" size="184x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="184x1"/>
+					</widget>
+					<widget pos="0,46" size="192x45" type="*widget.leaf">
+						<widget pos="28,4" size="160x37" type="*widget.Label">
+							<text pos="4,8" size="152x21">2222222222</text>
+						</widget>
+						<rectangle fillColor="primary" size="4x45"/>
+					</widget>
+					<widget pos="4,91" size="184x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="184x1"/>
+					</widget>
+					<widget pos="0,92" size="192x45" type="*widget.leaf">
+						<widget pos="28,4" size="160x37" type="*widget.Label">
+							<text pos="4,8" size="152x21">333333333333333</text>
+						</widget>
+					</widget>
+					<widget pos="4,137" size="184x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="184x1"/>
+					</widget>
+					<widget pos="0,138" size="192x45" type="*widget.leaf">
+						<widget pos="28,4" size="160x37" type="*widget.Label">
+							<text pos="4,8" size="152x21">44444444444444444444</text>
+						</widget>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+</canvas>

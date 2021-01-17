@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -189,15 +187,12 @@ func (c *TabContainer) mismatchedContent() bool {
 }
 
 type tabContainerRenderer struct {
+	animation       *fyne.Animation
 	container       *TabContainer
 	tabLoc          TabLocation
 	line, underline *canvas.Rectangle
 	objects         []fyne.CanvasObject // holds only the CanvasObject of the tabs' content
 	tabBar          *fyne.Container
-}
-
-func (r *tabContainerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (r *tabContainerRenderer) Destroy() {
@@ -267,7 +262,7 @@ func (r *tabContainerRenderer) MinSize() fyne.Size {
 
 	childMin := fyne.NewSize(0, 0)
 	for _, child := range r.container.Items {
-		childMin = childMin.Union(child.Content.MinSize())
+		childMin = childMin.Max(child.Content.MinSize())
 	}
 
 	tabLocation := r.container.tabLocation
@@ -353,11 +348,7 @@ func (r *tabContainerRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Co
 		lay = layout.NewHBoxLayout()
 	}
 
-	tabBar := fyne.NewContainerWithLayout(lay)
-	for _, button := range buttons {
-		tabBar.AddObject(button)
-	}
-	return tabBar
+	return fyne.NewContainerWithLayout(lay, buttons...)
 }
 
 func (r *tabContainerRenderer) moveSelection() {
@@ -383,9 +374,26 @@ func (r *tabContainerRenderer) moveSelection() {
 		underlinePos = fyne.NewPos(r.tabBar.Position().X-theme.Padding(), selected.Position().Y)
 		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
 	}
+
 	r.underline.Show()
-	r.underline.Resize(underlineSize)
-	r.underline.Move(underlinePos)
+	if r.underline.Position().IsZero() || r.underline.Position() == underlinePos {
+		r.underline.Move(underlinePos)
+		r.underline.Resize(underlineSize)
+	} else if r.animation == nil {
+		r.animation = canvas.NewPositionAnimation(r.underline.Position(), underlinePos, canvas.DurationShort, func(p fyne.Position) {
+			r.underline.Move(p)
+			canvas.Refresh(r.underline)
+			if p == underlinePos {
+				r.animation = nil
+			}
+		})
+		r.animation.Start()
+
+		canvas.NewSizeAnimation(r.underline.Size(), underlineSize, canvas.DurationShort, func(s fyne.Size) {
+			r.underline.Resize(s)
+			canvas.Refresh(r.underline)
+		}).Start()
+	}
 }
 
 func (r *tabContainerRenderer) tabsInSync() bool {
@@ -428,7 +436,10 @@ func (r *tabContainerRenderer) updateTabs() bool {
 	} else {
 		iconPos = buttonIconInline
 	}
-	var buttons, objects []fyne.CanvasObject
+
+	length := len(r.container.Items)
+	buttons := make([]fyne.CanvasObject, length)
+	objects := make([]fyne.CanvasObject, length)
 	for i, item := range r.container.Items {
 		button := r.buildButton(item, iconPos)
 		if i == r.container.current {
@@ -437,12 +448,13 @@ func (r *tabContainerRenderer) updateTabs() bool {
 		} else {
 			item.Content.Hide()
 		}
-		buttons = append(buttons, button)
-		objects = append(objects, item.Content)
+		buttons[i] = button
+		objects[i] = item.Content
 	}
 	r.tabBar = r.buildTabBar(buttons)
 	r.objects = objects
 	r.moveSelection()
+
 	return true
 }
 
@@ -469,32 +481,31 @@ type tabButton struct {
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
-		if b.Importance == HighImportance {
-			icon.Resource = theme.NewPrimaryThemedResource(b.Icon)
-		}
 	}
 
-	label := canvas.NewText(b.Text, theme.TextColor())
-	if b.Importance == HighImportance {
-		label.Color = theme.PrimaryColor()
-	}
+	label := canvas.NewText(b.Text, theme.ForegroundColor())
 	label.TextStyle.Bold = true
 	label.Alignment = fyne.TextAlignCenter
 
-	objects := []fyne.CanvasObject{label}
+	objects := []fyne.CanvasObject{background, label}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &tabButtonRenderer{
-		button:  b,
-		icon:    icon,
-		label:   label,
-		objects: objects,
+	r := &tabButtonRenderer{
+		button:     b,
+		background: background,
+		icon:       icon,
+		label:      label,
+		objects:    objects,
 	}
+	r.Refresh()
+	return r
 }
 
 func (b *tabButton) MinSize() fyne.Size {
@@ -504,7 +515,7 @@ func (b *tabButton) MinSize() fyne.Size {
 
 func (b *tabButton) MouseIn(e *desktop.MouseEvent) {
 	b.hovered = true
-	canvas.Refresh(b)
+	b.Refresh()
 }
 
 func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
@@ -512,7 +523,7 @@ func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
 
 func (b *tabButton) MouseOut() {
 	b.hovered = false
-	canvas.Refresh(b)
+	b.Refresh()
 }
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
@@ -529,29 +540,22 @@ func (b *tabButton) setText(text string) {
 }
 
 type tabButtonRenderer struct {
-	button  *tabButton
-	icon    *canvas.Image
-	label   *canvas.Text
-	objects []fyne.CanvasObject
-}
-
-func (r *tabButtonRenderer) BackgroundColor() color.Color {
-	switch {
-	case r.button.hovered:
-		return theme.HoverColor()
-	default:
-		return theme.BackgroundColor()
-	}
+	button     *tabButton
+	background *canvas.Rectangle
+	icon       *canvas.Image
+	label      *canvas.Text
+	objects    []fyne.CanvasObject
 }
 
 func (r *tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
+	r.background.Resize(size)
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
-	labelShift := 0
+	labelShift := float32(0)
 	if r.icon != nil {
 		var iconOffset fyne.Position
 		if r.button.IconPosition == buttonIconTop {
@@ -579,7 +583,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
-	var contentWidth, contentHeight int
+	var contentWidth, contentHeight float32
 	textSize := r.label.MinSize()
 	if r.button.IconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, r.iconSize())
@@ -612,13 +616,26 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
+	if r.button.hovered {
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
+	} else {
+		r.background.Hide()
+	}
+	r.background.Refresh()
+
 	r.label.Text = r.button.Text
 	if r.button.Importance == HighImportance {
 		r.label.Color = theme.PrimaryColor()
 	} else {
-		r.label.Color = theme.TextColor()
+		r.label.Color = theme.ForegroundColor()
 	}
 	r.label.TextSize = theme.TextSize()
+	if r.button.Text == "" {
+		r.label.Hide()
+	} else {
+		r.label.Show()
+	}
 
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
@@ -638,7 +655,7 @@ func (r *tabButtonRenderer) Refresh() {
 	canvas.Refresh(r.button)
 }
 
-func (r *tabButtonRenderer) iconSize() int {
+func (r *tabButtonRenderer) iconSize() float32 {
 	switch r.button.IconPosition {
 	case buttonIconTop:
 		return 2 * theme.IconInlineSize()

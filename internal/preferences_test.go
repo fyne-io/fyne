@@ -2,6 +2,7 @@ package internal
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +16,9 @@ func TestPrefs_SetBool(t *testing.T) {
 
 func TestPrefs_Bool(t *testing.T) {
 	p := NewInMemoryPreferences()
-	p.Values()["testBool"] = true
+	p.WriteValues(func(val map[string]interface{}) {
+		val["testBool"] = true
+	})
 
 	assert.Equal(t, true, p.Bool("testBool"))
 }
@@ -43,7 +46,9 @@ func TestPrefs_SetFloat(t *testing.T) {
 
 func TestPrefs_Float(t *testing.T) {
 	p := NewInMemoryPreferences()
-	p.Values()["testFloat"] = 1.2
+	p.WriteValues(func(val map[string]interface{}) {
+		val["testFloat"] = 1.2
+	})
 
 	assert.Equal(t, 1.2, p.Float("testFloat"))
 }
@@ -52,7 +57,9 @@ func TestPrefs_FloatWithFallback(t *testing.T) {
 	p := NewInMemoryPreferences()
 
 	assert.Equal(t, 1.0, p.FloatWithFallback("testFloat", 1.0))
-	p.Values()["testFloat"] = 1.2
+	p.WriteValues(func(val map[string]interface{}) {
+		val["testFloat"] = 1.2
+	})
 	assert.Equal(t, 1.2, p.FloatWithFallback("testFloat", 1.0))
 }
 
@@ -71,8 +78,9 @@ func TestPrefs_SetInt(t *testing.T) {
 
 func TestPrefs_Int(t *testing.T) {
 	p := NewInMemoryPreferences()
-	p.Values()["testInt"] = 5
-
+	p.WriteValues(func(val map[string]interface{}) {
+		val["testInt"] = 5
+	})
 	assert.Equal(t, 5, p.Int("testInt"))
 }
 
@@ -80,7 +88,9 @@ func TestPrefs_IntWithFallback(t *testing.T) {
 	p := NewInMemoryPreferences()
 
 	assert.Equal(t, 2, p.IntWithFallback("testInt", 2))
-	p.Values()["testInt"] = 5
+	p.WriteValues(func(val map[string]interface{}) {
+		val["testInt"] = 5
+	})
 	assert.Equal(t, 5, p.IntWithFallback("testInt", 2))
 }
 
@@ -99,7 +109,9 @@ func TestPrefs_SetString(t *testing.T) {
 
 func TestPrefs_String(t *testing.T) {
 	p := NewInMemoryPreferences()
-	p.Values()["test"] = "value"
+	p.WriteValues(func(val map[string]interface{}) {
+		val["test"] = "value"
+	})
 
 	assert.Equal(t, "value", p.String("test"))
 }
@@ -108,7 +120,9 @@ func TestPrefs_StringWithFallback(t *testing.T) {
 	p := NewInMemoryPreferences()
 
 	assert.Equal(t, "default", p.StringWithFallback("test", "default"))
-	p.Values()["test"] = "value"
+	p.WriteValues(func(val map[string]interface{}) {
+		val["test"] = "value"
+	})
 	assert.Equal(t, "value", p.StringWithFallback("test", "default"))
 }
 
@@ -121,11 +135,12 @@ func TestPrefs_String_Zero(t *testing.T) {
 func TestInMemoryPreferences_OnChange(t *testing.T) {
 	p := NewInMemoryPreferences()
 	called := false
-	p.OnChange = func() {
+	p.AddChangeListener(func() {
 		called = true
-	}
+	})
 
 	p.SetString("dummy", "another")
+	time.Sleep(time.Millisecond * 100)
 
 	assert.True(t, called)
 }

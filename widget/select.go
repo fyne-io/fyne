@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -25,7 +24,8 @@ type Select struct {
 	focused bool
 	hovered bool
 	popUp   *PopUpMenu
-	tapped  bool
+	tapAnim *fyne.Animation
+	tapBG   *canvas.Rectangle
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -65,23 +65,15 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv := newTextProvider(s.Selected, s)
 	txtProv.ExtendBaseWidget(txtProv)
 
-	bg := canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{bg, txtProv, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
-	bg.FillColor = r.buttonColor()
+	background := &canvas.Rectangle{}
+	s.tapBG = canvas.NewRectangle(color.Transparent)
+	objects := []fyne.CanvasObject{background, s.tapBG, txtProv, icon}
+	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, background, s}
+	background.FillColor = r.buttonColor()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
 	r.updateLabel()
 	return r
-}
-
-// Focused returns whether this Select is focused or not.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: internal detail, don’t use
-func (s *Select) Focused() bool {
-	return s.focused
 }
 
 // FocusGained is called after this Select has gained focus.
@@ -189,12 +181,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		return
 	}
 
-	s.tapped = true
-	defer func() { // TODO move to a real animation
-		time.Sleep(time.Millisecond * buttonTapDuration)
-		s.tapped = false
-		s.Refresh()
-	}()
+	s.tapAnimation()
 	s.Refresh()
 
 	s.showPopUp()
@@ -258,9 +245,24 @@ func (s *Select) showPopUp() {
 	}
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
-	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
 	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
+}
+
+func (s *Select) tapAnimation() {
+	if s.tapBG == nil { // not rendered yet? (tests)
+		return
+	}
+
+	if s.tapAnim == nil {
+		s.tapAnim = newButtonTapAnimation(s.tapBG, s)
+		s.tapAnim.Curve = fyne.AnimationEaseOut
+	} else {
+		s.tapAnim.Stop()
+	}
+
+	s.tapAnim.Start()
 }
 
 func (s *Select) textAlign() fyne.TextAlign {
@@ -269,9 +271,9 @@ func (s *Select) textAlign() fyne.TextAlign {
 
 func (s *Select) textColor() color.Color {
 	if s.Disabled() {
-		return theme.DisabledTextColor()
+		return theme.DisabledColor()
 	}
-	return theme.TextColor()
+	return theme.ForegroundColor()
 }
 
 func (s *Select) textStyle() fyne.TextStyle {
@@ -295,14 +297,10 @@ func (s *Select) updateSelected(text string) {
 type selectRenderer struct {
 	*widget.ShadowingRenderer
 
-	icon  *Icon
-	label *textProvider
-	bg    *canvas.Rectangle
-	combo *Select
-}
-
-func (s *selectRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	icon       *Icon
+	label      *textProvider
+	background *canvas.Rectangle
+	combo      *Select
 }
 
 // Layout the components of the button widget
@@ -311,8 +309,8 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	s.LayoutShadow(size.Subtract(fyne.NewSize(doublePad, doublePad)), fyne.NewPos(theme.Padding(), theme.Padding()))
 	inner := size.Subtract(fyne.NewSize(doublePad*2, doublePad))
 
-	s.bg.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	s.bg.Resize(size.Subtract(fyne.NewSize(doublePad, doublePad)))
+	s.background.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	s.background.Resize(size.Subtract(fyne.NewSize(doublePad, doublePad)))
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
 	labelSize := inner.Subtract(offset)
@@ -345,7 +343,7 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RLock()
 	s.updateLabel()
 	s.updateIcon()
-	s.bg.FillColor = s.buttonColor()
+	s.background.FillColor = s.buttonColor()
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
@@ -353,6 +351,7 @@ func (s *selectRenderer) Refresh() {
 		s.combo.Move(s.combo.position)
 		s.combo.Resize(s.combo.size)
 	}
+	s.background.Refresh()
 	canvas.Refresh(s.combo.super())
 }
 
@@ -363,7 +362,7 @@ func (s *selectRenderer) buttonColor() color.Color {
 	if s.combo.focused {
 		return theme.FocusColor()
 	}
-	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
+	if s.combo.hovered {
 		return theme.HoverColor()
 	}
 	return theme.ButtonColor()

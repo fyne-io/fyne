@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -53,6 +55,10 @@ type passwordRevealerRenderer struct {
 	widget.BaseRenderer
 	entry *Entry
 	icon  *canvas.Image
+}
+
+func (r *passwordRevealerRenderer) BackgroundColor() color.Color {
+	return color.Transparent
 }
 
 func (r *passwordRevealerRenderer) Layout(size fyne.Size) {

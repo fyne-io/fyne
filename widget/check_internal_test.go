@@ -18,13 +18,6 @@ func TestCheckSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
-func TestCheck_BackgroundStyle(t *testing.T) {
-	check := NewCheck("Hi", nil)
-	bg := test.WidgetRenderer(check).BackgroundColor()
-
-	assert.Equal(t, bg, theme.BackgroundColor())
-}
-
 func TestCheckChecked(t *testing.T) {
 	checked := false
 	check := NewCheck("Hi", func(on bool) {

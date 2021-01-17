@@ -16,13 +16,15 @@ type Container struct {
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects.
 //
-// Deprecated: Use NewContainerWithoutLayout to create a container that uses manual layout.
+// Deprecated: Use container.NewWithoutLayout() to create a container that uses manual layout.
 func NewContainer(objects ...CanvasObject) *Container {
 	return NewContainerWithoutLayout(objects...)
 }
 
-// NewContainerWithoutLayout returns a new Container instance holding the specified CanvasObjects
-// that are manually arranged.
+// NewContainerWithoutLayout returns a new Container instance holding the specified
+// CanvasObjects that are manually arranged.
+//
+// Deprecated: Use container.NewWithoutLayout() instead
 func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 	ret := &Container{
 		Objects: objects,
@@ -34,6 +36,8 @@ func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 
 // NewContainerWithLayout returns a new Container instance holding the specified
 // CanvasObjects which will be laid out according to the specified Layout.
+//
+// Deprecated: Use container.New() instead
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	ret := &Container{
 		Objects: objects,
@@ -69,7 +73,7 @@ func (c *Container) MinSize() Size {
 
 	minSize := NewSize(1, 1)
 	for _, child := range c.Objects {
-		minSize = minSize.Union(child.MinSize())
+		minSize = minSize.Max(child.MinSize())
 	}
 
 	return minSize

@@ -4,10 +4,52 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewSliderWithData(t *testing.T) {
+	val := binding.NewFloat()
+	err := val.Set(4)
+	assert.Nil(t, err)
+
+	s := NewSliderWithData(0, 10, val)
+	waitForBinding()
+	assert.Equal(t, 4.0, s.Value)
+
+	s.SetValue(2.0)
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 2.0, f)
+}
+
+func TestSlider_Binding(t *testing.T) {
+	s := NewSlider(0, 10)
+	s.SetValue(2)
+	assert.Equal(t, 2.0, s.Value)
+
+	val := binding.NewFloat()
+	s.Bind(val)
+	waitForBinding()
+	assert.Equal(t, 0.0, s.Value)
+
+	err := val.Set(3)
+	assert.Nil(t, err)
+	waitForBinding()
+	assert.Equal(t, 3.0, s.Value)
+
+	s.SetValue(5)
+	f, err := val.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, f)
+
+	s.Unbind()
+	waitForBinding()
+	assert.Equal(t, 5.0, s.Value)
+}
 
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()
@@ -35,7 +77,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(220, 50))
 
-	test.AssertImageMatches(t, "slider/horizontal.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "slider/horizontal.xml", w.Canvas())
 }
 
 func TestSlider_OutOfRange(t *testing.T) {
@@ -72,7 +114,7 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 220))
 
-	test.AssertImageMatches(t, "slider/vertical.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, "slider/vertical.xml", w.Canvas())
 }
 
 func TestSlider_OnChanged(t *testing.T) {
@@ -90,7 +132,7 @@ func TestSlider_OnChanged(t *testing.T) {
 	slider.SetValue(0.5)
 	assert.Equal(t, 1, changes)
 
-	drag := &fyne.DragEvent{DraggedX: 10, DraggedY: 2}
+	drag := &fyne.DragEvent{Dragged: fyne.NewDelta(10, 2)}
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 }
