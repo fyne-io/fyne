@@ -36,33 +36,40 @@ func (c *safeCounter) Reset() {
 const cursorPauseTimex10ms = 35 // pause time in multiple of 10 ms
 
 type entryCursorAnimation struct {
-	mu      *sync.RWMutex
-	counter *safeCounter
-	paused  bool
-	stopped bool
-	cursor  *canvas.Rectangle
-	anim    *fyne.Animation
-	sleepFn func(time.Duration) // added for tests, do not change it outside of tests!!
+	mu       *sync.RWMutex
+	counter  *safeCounter
+	inverted bool
+	paused   bool
+	stopped  bool
+	cursor   *canvas.Rectangle
+	anim     *fyne.Animation
+	sleepFn  func(time.Duration) // added for tests, do not change it outside of tests!!
 }
 
 func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
 	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor, counter: &safeCounter{}}
+	a.inverted = false
 	a.stopped = true
 	a.sleepFn = time.Sleep
 	return a
 }
 
-func (a *entryCursorAnimation) createAnim() {
+func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 	cursorOpaque := theme.PrimaryColor()
 	r, g, b, _ := theme.PrimaryColor().RGBA()
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
-	anim := canvas.NewColorRGBAAnimation(cursorOpaque, cursorDim, time.Second/2, func(c color.Color) {
+	a.inverted = inverted
+	start, end := color.Color(cursorDim), color.Color(cursorOpaque)
+	if inverted {
+		start, end = end, start
+	}
+	anim := canvas.NewColorRGBAAnimation(start, end, time.Second/2, func(c color.Color) {
 		a.cursor.FillColor = c
 		a.cursor.Refresh()
 	})
 	anim.RepeatCount = fyne.AnimationRepeatForever
 	anim.AutoReverse = true
-	a.anim = anim
+	return anim
 }
 
 // Start starts cursor animation.
@@ -73,7 +80,7 @@ func (a *entryCursorAnimation) Start() {
 	if a.anim != nil || !a.stopped {
 		return
 	}
-	a.createAnim()
+	a.anim = a.createAnim(false)
 	a.stopped = false
 	go func() {
 		defer func() {
@@ -120,6 +127,9 @@ func (a *entryCursorAnimation) TemporaryPause() {
 		return
 	}
 	a.anim.Stop()
+	if !a.inverted {
+		a.anim = a.createAnim(true)
+	}
 	if a.paused {
 		return
 	}
