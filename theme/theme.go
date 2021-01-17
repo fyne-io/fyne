@@ -342,12 +342,12 @@ func current() fyne.Theme {
 
 // BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
-	return current().Color(ColorNameBackground, currentVariant())
+	return safeColorLookup(ColorNameBackground, currentVariant())
 }
 
 // ButtonColor returns the theme's standard button color.
 func ButtonColor() color.Color {
-	return current().Color(ColorNameButton, currentVariant())
+	return safeColorLookup(ColorNameButton, currentVariant())
 }
 
 // CaptionTextSize returns the size for caption text.
@@ -357,69 +357,69 @@ func CaptionTextSize() float32 {
 
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
-	return current().Color(ColorNameDisabledButton, currentVariant())
+	return safeColorLookup(ColorNameDisabledButton, currentVariant())
 }
 
 // TextColor returns the theme's standard text color - this is actually the foreground color since 1.4.
 //
 // Deprecated: Use theme.ForegroundColor() colour instead
 func TextColor() color.Color {
-	return current().Color(ColorNameForeground, currentVariant())
+	return safeColorLookup(ColorNameForeground, currentVariant())
 }
 
 // DisabledColor returns the foreground color for a disabled UI element
 //
 // Since: 2.0.0
 func DisabledColor() color.Color {
-	return current().Color(ColorNameDisabled, currentVariant())
+	return safeColorLookup(ColorNameDisabled, currentVariant())
 }
 
 // DisabledTextColor returns the theme's disabled text color - this is actually the disabled color since 1.4.
 //
 // Deprecated: Use theme.DisabledColor() colour instead
 func DisabledTextColor() color.Color {
-	return current().Color(ColorNameDisabled, currentVariant())
+	return DisabledColor()
 }
 
 // ErrorColor returns the theme's error text color
 //
 // Since 2.0.0
 func ErrorColor() color.Color {
-	return current().Color(ColorNameError, currentVariant())
+	return safeColorLookup(ColorNameError, currentVariant())
 }
 
 // PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
-	return current().Color(ColorNamePlaceHolder, currentVariant())
+	return safeColorLookup(ColorNamePlaceHolder, currentVariant())
 }
 
 // PressedColor returns the color used to overlap tapped features
 //
 // Since: 2.0.0
 func PressedColor() color.Color {
-	return current().Color(ColorNamePressed, currentVariant())
+	return safeColorLookup(ColorNamePressed, currentVariant())
 }
 
 // PrimaryColor returns the color used to highlight primary features
 func PrimaryColor() color.Color {
-	return current().Color(ColorNamePrimary, currentVariant())
+	return safeColorLookup(ColorNamePrimary, currentVariant())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor
 func HoverColor() color.Color {
-	return current().Color(ColorNameHover, currentVariant())
+	return safeColorLookup(ColorNameHover, currentVariant())
 }
 
 // FocusColor returns the color used to highlight a focused widget
 func FocusColor() color.Color {
-	return current().Color(ColorNameFocus, currentVariant())
+	return safeColorLookup(ColorNameFocus, currentVariant())
 }
 
 // ForegroundColor returns the theme's standard foreground color for text and icons
 //
 // Since: 2.0.0
 func ForegroundColor() color.Color {
-	return current().Color(ColorNameForeground, currentVariant())
+	return safeColorLookup(ColorNameForeground, currentVariant())
 }
 
 // InputBackgroundColor returns the color used to draw underneath input elements.
@@ -429,12 +429,12 @@ func InputBackgroundColor() color.Color {
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
-	return current().Color(ColorNameScrollBar, currentVariant())
+	return safeColorLookup(ColorNameScrollBar, currentVariant())
 }
 
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
-	return current().Color(ColorNameShadow, currentVariant())
+	return safeColorLookup(ColorNameShadow, currentVariant())
 }
 
 // InputBorderSize returns the input border size (or underline size for an entry).
@@ -451,27 +451,27 @@ func TextSize() float32 {
 
 // TextFont returns the font resource for the regular font style
 func TextFont() fyne.Resource {
-	return current().Font(fyne.TextStyle{})
+	return safeFontLookup(fyne.TextStyle{})
 }
 
 // TextBoldFont returns the font resource for the bold font style
 func TextBoldFont() fyne.Resource {
-	return current().Font(fyne.TextStyle{Bold: true})
+	return safeFontLookup(fyne.TextStyle{Bold: true})
 }
 
 // TextItalicFont returns the font resource for the italic font style
 func TextItalicFont() fyne.Resource {
-	return current().Font(fyne.TextStyle{Italic: true})
+	return safeFontLookup(fyne.TextStyle{Italic: true})
 }
 
 // TextBoldItalicFont returns the font resource for the bold and italic font style
 func TextBoldItalicFont() fyne.Resource {
-	return current().Font(fyne.TextStyle{Bold: true, Italic: true})
+	return safeFontLookup(fyne.TextStyle{Bold: true, Italic: true})
 }
 
 // TextMonospaceFont returns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
-	return current().Font(fyne.TextStyle{Monospace: true})
+	return safeFontLookup(fyne.TextStyle{Monospace: true})
 }
 
 // Padding is the standard gap between elements and the border around interface
@@ -573,6 +573,38 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	}
 
 	return res
+}
+
+func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	col := current().Color(n, v)
+	if col == nil {
+		fyne.LogError("Loaded theme returned nil color", nil)
+		return fallbackColor
+	}
+	return col
+}
+
+func safeFontLookup(s fyne.TextStyle) fyne.Resource {
+	font := current().Font(s)
+	if font != nil {
+		return font
+	}
+	fyne.LogError("Loaded theme returned nil font", nil)
+
+	if s.Monospace {
+		return DefaultTextMonospaceFont()
+	}
+	if s.Bold {
+		if s.Italic {
+			return DefaultTextBoldItalicFont()
+		}
+		return DefaultTextBoldFont()
+	}
+	if s.Italic {
+		return DefaultTextItalicFont()
+	}
+
+	return DefaultTextFont()
 }
 
 func setupDefaultTheme() fyne.Theme {
