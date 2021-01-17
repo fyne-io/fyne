@@ -33,6 +33,27 @@ func TestInMemoryRepositoryRegistration(t *testing.T) {
 	assert.Equal(t, m2, repo)
 }
 
+func TestInMemoryRepositoryParsing(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := NewInMemoryRepository("mem")
+	repository.Register("mem", m)
+
+	// since we assume in some other places that these can be parsed
+	// without error, lets also explicitly test to make sure
+
+	foo, err := storage.ParseURI("mem:///foo")
+	assert.Nil(t, err)
+	assert.NotNil(t, foo)
+
+	bar, err := storage.ParseURI("mem:///bar")
+	assert.Nil(t, err)
+	assert.NotNil(t, bar)
+
+	baz, _ := storage.ParseURI("mem:///baz")
+	assert.Nil(t, err)
+	assert.NotNil(t, baz)
+}
+
 func TestInMemoryRepositoryExists(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")

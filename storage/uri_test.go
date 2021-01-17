@@ -47,14 +47,11 @@ func TestURIPath(t *testing.T) {
 	// assert.Nil(t, err)
 	// assert.Equal(t, "over/there", u.Path())
 
-	// NOTE: this is currently broken, because net/url is not fully RFC3986
-	// compliant - it returns an empty string rather than the proper path.
-	//
 	// from IETF RFC 3986
-	// s = "urn:example:animal:ferret:nose"
-	// u, err = storage.ParseURI(s)
-	// assert.Nil(t, err)
-	// assert.Equal(t, "example:animal:ferret:nose", u.Path())
+	s = "urn:example:animal:ferret:nose"
+	u, err = storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "example:animal:ferret:nose", u.Path())
 }
 
 func TestURIQuery(t *testing.T) {
