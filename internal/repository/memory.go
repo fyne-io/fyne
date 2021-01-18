@@ -128,7 +128,7 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 	return count, nil
 }
 
-// Name implements fyne.URI*Closer.URI
+// Name implements fyne.URIReadCloser.URI and fyne.URIWriteCloser.URI
 func (n *nodeReaderWriter) URI() fyne.URI {
 
 	// discarding the error because this should never fail
