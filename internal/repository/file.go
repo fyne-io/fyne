@@ -46,9 +46,8 @@ func (f *file) URI() fyne.URI {
 type FileRepository struct {
 }
 
-// NewFileRepository creates a new FileRepository instance. It must be
-// given the scheme it is registered for. The caller needs to call
-// repository.Register() with the result of this function.
+// NewFileRepository creates a new FileRepository instance.
+// The caller needs to call repository.Register() with the result of this function.
 //
 // Since: 2.0.0
 func NewFileRepository() *FileRepository {
