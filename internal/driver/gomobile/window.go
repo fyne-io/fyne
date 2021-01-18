@@ -100,9 +100,7 @@ func (w *window) SetCloseIntercept(callback func()) {
 
 func (w *window) Show() {
 	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
-	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
-		w.canvas.showMenu(menu)
-	})
+	menuButton := w.newMenuButton(menu)
 	if menu == nil {
 		menuButton.Hide()
 	}
