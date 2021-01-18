@@ -5,8 +5,8 @@ package gomobile
 import (
 	"io"
 
-	intRepo "fyne.io/fyne/internal/repository"
-	"fyne.io/fyne/storage/repository"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 func nativeFileOpen(*fileOpen) (io.ReadCloser, error) {

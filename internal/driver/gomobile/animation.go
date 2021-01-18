@@ -1,6 +1,6 @@
 package gomobile
 
-import "fyne.io/fyne"
+import "fyne.io/fyne/v2"
 
 func (d *mobileDriver) StartAnimation(a *fyne.Animation) {
 	d.animation.Start(a)

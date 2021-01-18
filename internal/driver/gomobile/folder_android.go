@@ -18,8 +18,8 @@ import (
 
 	"github.com/fyne-io/mobile/app"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 func canListURI(uri fyne.URI) bool {

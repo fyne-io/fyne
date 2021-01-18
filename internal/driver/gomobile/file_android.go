@@ -18,7 +18,7 @@ import (
 	"os"
 	"unsafe"
 
-	"fyne.io/fyne/storage/repository"
+	"fyne.io/fyne/v2/storage/repository"
 	"github.com/fyne-io/mobile/app"
 )
 

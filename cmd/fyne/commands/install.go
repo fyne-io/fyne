@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/cmd/fyne/internal/mobile"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 )
 
 // Declare conformity to Command interface

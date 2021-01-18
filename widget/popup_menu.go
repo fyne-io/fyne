@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/widget"
 )
 
 // PopUpMenu is a Menu which displays itself in an OverlayContainer.

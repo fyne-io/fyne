@@ -13,7 +13,7 @@ import (
 	"runtime"
 	"strings"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const fontFace = "NotoSans"
@@ -79,7 +79,7 @@ func writeFile(filename string, contents []byte) error {
 
 func main() {
 	f := &bytes.Buffer{}
-	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
+	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
 	bundleFont(fontFace, "Regular", f)
 	bundleFont(fontFace, "Bold", f)
 	bundleFont(fontFace, "Italic", f)
@@ -92,7 +92,7 @@ func main() {
 	}
 
 	f = &bytes.Buffer{}
-	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
+	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
 	icon := path.Join(iconDir(), "fyne.png")
 	bundleFile("fyne-logo", icon, f)
 

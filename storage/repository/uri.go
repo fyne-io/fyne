@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // Declare conformance with fyne.URI interface.

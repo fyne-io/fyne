@@ -1,4 +1,4 @@
-module fyne.io/fyne
+module fyne.io/fyne/v2
 
 go 1.12
 

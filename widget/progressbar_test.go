@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
 

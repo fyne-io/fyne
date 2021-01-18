@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Orientation controls the horizontal/vertical layout of a widget

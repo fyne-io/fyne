@@ -2,7 +2,7 @@
 
 package data
 
-import "fyne.io/fyne"
+import "fyne.io/fyne/v2"
 
 var fynescenedark = &fyne.StaticResource{
 	StaticName: "fyne_scene_dark.png",

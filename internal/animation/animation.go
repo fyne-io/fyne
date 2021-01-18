@@ -3,7 +3,7 @@ package animation
 import (
 	"time"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 type anim struct {

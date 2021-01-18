@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/storage"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/storage"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 )
 
 type preferences struct {

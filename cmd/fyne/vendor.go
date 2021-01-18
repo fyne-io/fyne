@@ -12,9 +12,9 @@ import (
 	"regexp"
 	"strings"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/cmd/fyne/commands"
-	"fyne.io/fyne/cmd/fyne/internal/util"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/commands"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (

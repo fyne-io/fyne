@@ -3,10 +3,10 @@ package widget
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Label widget is a label component with appropriate padding and layout.
