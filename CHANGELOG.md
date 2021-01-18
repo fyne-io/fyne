@@ -16,7 +16,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
   * `Text.TextSize` moved to float32 and `fyne.MeasureText` now takes a float32 size parameter
   * Removed `Size.Union` (use `Size.Max` instead)
   * Added fyne.Delta for difference based X, Y representation
-  * DraggedEvent.DraggedX and DraggedX (int, int) to DraggedEvent.Dragged (Delta)
+  * DraggedEvent.DraggedX and DraggedY (int, int) to DraggedEvent.Dragged (Delta)
   * ScrollEvent.DeltaX and DeltaY (int, int) moved to ScrollEvent.Scrolled (Delta)
 
 * Theme API update
