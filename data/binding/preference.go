@@ -3,7 +3,7 @@
 
 package binding
 
-import "fyne.io/fyne"
+import "fyne.io/fyne/v2"
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 

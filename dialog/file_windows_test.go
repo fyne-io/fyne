@@ -3,7 +3,7 @@ package dialog
 import (
 	"testing"
 
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
 )
 

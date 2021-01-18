@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/cmd/fyne/commands"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/commands"
 
 	"github.com/lucor/goinfo"
 	"github.com/lucor/goinfo/format"
@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	fyneModule = "fyne.io/fyne"
+	fyneModule = "fyne.io/fyne/v2"
 )
 
 // Declare conformity to Command interface

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const (

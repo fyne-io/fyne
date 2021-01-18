@@ -3,8 +3,8 @@ package app
 import (
 	"os"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 type store struct {

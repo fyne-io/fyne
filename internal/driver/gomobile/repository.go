@@ -3,9 +3,9 @@
 package gomobile
 
 import (
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 
-	"fyne.io/fyne/storage/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 // declare conformance with repository types

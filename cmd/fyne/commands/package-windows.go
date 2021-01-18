@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"fyne.io/fyne/cmd/fyne/internal/templates"
+	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/pkg/errors"

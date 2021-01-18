@@ -5,12 +5,12 @@ import (
 	"log"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/internal/painter/software"
-	intRepo "fyne.io/fyne/internal/repository"
-	"fyne.io/fyne/storage/repository"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/painter/software"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"

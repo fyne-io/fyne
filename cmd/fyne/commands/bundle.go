@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const fileHeader = "// auto-generated\n" + // to exclude this file in goreportcard (it has to be first)
@@ -143,7 +143,7 @@ func writeHeader(pkg string, out *os.File) {
 	fmt.Fprintln(out)
 	fmt.Fprintln(out, "package", pkg)
 	fmt.Fprintln(out)
-	fmt.Fprintln(out, "import \"fyne.io/fyne\"")
+	fmt.Fprintln(out, "import \"fyne.io/fyne/v2\"")
 	fmt.Fprintln(out)
 }
 

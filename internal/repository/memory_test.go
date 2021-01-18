@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"fyne.io/fyne/storage"
-	"fyne.io/fyne/storage/repository"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/stretchr/testify/assert"
 )

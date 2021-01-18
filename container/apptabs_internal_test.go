@@ -3,8 +3,8 @@ package container
 import (
 	"testing"
 
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )

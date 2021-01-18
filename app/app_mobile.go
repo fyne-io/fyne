@@ -5,8 +5,8 @@
 package app
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/driver/gomobile"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/gomobile"
 )
 
 // NewWithID returns a new app instance using the appropriate runtime driver.

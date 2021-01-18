@@ -6,7 +6,7 @@ import (
 	"errors"
 	"sync"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 var (

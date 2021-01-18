@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"fyne.io/fyne/cmd/fyne/internal/util"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 // Declare conformity to Command interface

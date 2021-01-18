@@ -1,7 +1,7 @@
 // Package app provides app implementations for working with Fyne graphical interfaces.
 // The fastest way to get started is to call app.New() which will normally load a new desktop application.
 // If the "ci" tag is passed to go (go run -tags ci myapp.go) it will run an in-memory application.
-package app // import "fyne.io/fyne/app"
+package app // import "fyne.io/fyne/v2/app"
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal"
-	helper "fyne.io/fyne/internal/app"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
+	helper "fyne.io/fyne/v2/internal/app"
 )
 
 // Declare conformity with App interface

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/test"
 
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
