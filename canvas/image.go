@@ -108,7 +108,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 
 	var read io.ReadCloser
 
-	read, err := storage.OpenFileFromURI(uri) // attempt unknown file type
+	read, err := storage.Reader(uri) // attempt unknown file type
 	if err != nil {
 		fyne.LogError("Failed to open image URI", err)
 		return nil

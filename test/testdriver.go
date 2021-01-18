@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/internal/painter/software"
+	intRepo "fyne.io/fyne/internal/repository"
+	"fyne.io/fyne/storage/repository"
 
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
@@ -33,6 +35,7 @@ var _ fyne.Driver = (*testDriver)(nil)
 func NewDriver() fyne.Driver {
 	drv := new(testDriver)
 	drv.windowsMutex = sync.RWMutex{}
+	repository.Register("file", intRepo.NewFileRepository())
 
 	// make a single dummy window for rendering tests
 	drv.CreateWindow("")

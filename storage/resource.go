@@ -10,7 +10,7 @@ import (
 // The URI will be opened using the current driver, so valid schemas will vary from platform to platform.
 // The file:// schema will always work.
 func LoadResourceFromURI(u fyne.URI) (fyne.Resource, error) {
-	read, err := OpenFileFromURI(u)
+	read, err := Reader(u)
 	if err != nil {
 		return nil, err
 	}
