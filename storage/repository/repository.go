@@ -243,7 +243,8 @@ func Register(scheme string, repository Repository) {
 }
 
 // ForURI returns the Repository instance which is registered to handle URIs of
-// the given scheme.
+// the given scheme. This is a helper method that calls ForScheme() on the
+// scheme of the given URI.
 //
 // NOTE: this function is intended to be used specifically by the storage
 // package. It generally should not be used outside of the fyne package -
@@ -251,7 +252,18 @@ func Register(scheme string, repository Repository) {
 //
 // Since: 2.0.0
 func ForURI(u fyne.URI) (Repository, error) {
-	scheme := strings.ToLower(u.Scheme())
+	return ForScheme(u.Scheme())
+}
+
+// ForScheme returns the Repository instance which is registered to handle URIs
+// of the given scheme.
+//
+// NOTE: this function is intended to be used specifically by the storage
+// package. It generally should not be used outside of the fyne package -
+// instead you should use the methods in the storage package.
+//
+// Since: 2.0.0
+func ForScheme(scheme string) (Repository, error) {
 	repo, ok := repositoryTable[scheme]
 
 	if !ok {
