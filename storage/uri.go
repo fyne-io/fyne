@@ -163,7 +163,7 @@ func Exists(u fyne.URI) (bool, error) {
 //   throw an error.
 //
 // * If the scheme of the given URI does not have a registered
-//   WriteableRepository instance, then this method will fail with a
+//   WritableRepository instance, then this method will fail with a
 //   repository.ErrOperationNotSupported.
 //
 // Delete is backed by the repository system - this function calls
@@ -176,7 +176,7 @@ func Delete(u fyne.URI) error {
 		return err
 	}
 
-	wrepo, ok := repo.(repository.WriteableRepository)
+	wrepo, ok := repo.(repository.WritableRepository)
 	if !ok {
 		return repository.ErrOperationNotSupported
 	}
@@ -263,7 +263,7 @@ func CanRead(u fyne.URI) (bool, error) {
 //   in some way.
 //
 // * If the scheme of the given URI does not have a registered
-//   WriteableRepository instance, then this method will fail with a
+//   WritableRepository instance, then this method will fail with a
 //   repository.ErrOperationNotSupported.
 //
 // Writer is backed by the repository system - this function calls into a
@@ -276,7 +276,7 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 
-	wrepo, ok := repo.(repository.WriteableRepository)
+	wrepo, ok := repo.(repository.WritableRepository)
 	if !ok {
 		return nil, repository.ErrOperationNotSupported
 	}
@@ -304,7 +304,7 @@ func CanWrite(u fyne.URI) (bool, error) {
 		return false, err
 	}
 
-	wrepo, ok := repo.(repository.WriteableRepository)
+	wrepo, ok := repo.(repository.WritableRepository)
 	if !ok {
 		return false, repository.ErrOperationNotSupported
 	}

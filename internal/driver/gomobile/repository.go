@@ -13,7 +13,7 @@ var _ repository.Repository = (*mobileFileRepo)(nil)
 var _ repository.ListableRepository = (*mobileFileRepo)(nil)
 
 // TODO add write support (not yet supported on mobile)
-// var _ repository.WriteableRepository = (*mobileFileRepo)(nil)
+// var _ repository.WritableRepository = (*mobileFileRepo)(nil)
 
 type mobileFileRepo struct {
 	driver *mobileDriver

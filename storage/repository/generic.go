@@ -107,7 +107,7 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 // contents of the source to the destination.
 //
 // For obvious reasons, the destination URI must have a registered
-// WriteableRepository.
+// WritableRepository.
 //
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
@@ -126,7 +126,7 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 	}
 
 	// The destination must be writeable.
-	destwrepo, ok := dstrepo.(WriteableRepository)
+	destwrepo, ok := dstrepo.(WritableRepository)
 	if !ok {
 		return ErrOperationNotSupported
 	}
@@ -153,7 +153,7 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 // MovableRepository.Move(). It will perform the move by obtaining a reader
 // for the source URI, a writer for the destination URI, then writing the
 // contents of the source to the destination. Following this, the source
-// will be deleted using WriteableRepository.Delete.
+// will be deleted using WritableRepository.Delete.
 //
 // For obvious reasons, the source and destination URIs must both be writable.
 //
@@ -177,13 +177,13 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 	}
 
 	// The source and destination must both be writable, since the source
-	// is being deleted, which requires WriteableRepository.
-	destwrepo, ok := dstrepo.(WriteableRepository)
+	// is being deleted, which requires WritableRepository.
+	destwrepo, ok := dstrepo.(WritableRepository)
 	if !ok {
 		return ErrOperationNotSupported
 	}
 
-	srcwrepo, ok := srcrepo.(WriteableRepository)
+	srcwrepo, ok := srcrepo.(WritableRepository)
 	if !ok {
 		return ErrOperationNotSupported
 	}

@@ -94,11 +94,11 @@ type CustomURIRepository interface {
 	ParseURI(string) (fyne.URI, error)
 }
 
-// WriteableRepository is an extension of the Repository interface which also
+// WritableRepository is an extension of the Repository interface which also
 // supports obtaining a writer for URIs of the scheme it is registered to.
 //
 // Since: 2.0.0
-type WriteableRepository interface {
+type WritableRepository interface {
 	Repository
 
 	// Writer will be used to implement calls to storage.WriterTo() for

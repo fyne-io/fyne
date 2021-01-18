@@ -18,7 +18,7 @@ var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
 
 // declare conformance with repository types
 var _ repository.Repository = (*InMemoryRepository)(nil)
-var _ repository.WriteableRepository = (*InMemoryRepository)(nil)
+var _ repository.WritableRepository = (*InMemoryRepository)(nil)
 var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
 var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
 var _ repository.MovableRepository = (*InMemoryRepository)(nil)
@@ -198,7 +198,7 @@ func (m *InMemoryRepository) Destroy(scheme string) {
 	// do nothing
 }
 
-// Writer implements repository.WriteableRepository.Writer
+// Writer implements repository.WritableRepository.Writer
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
@@ -210,7 +210,7 @@ func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
-// CanWrite implements repository.WriteableRepository.CanWrite
+// CanWrite implements repository.WritableRepository.CanWrite
 //
 // Since 2.0.0
 func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
@@ -221,7 +221,7 @@ func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
 	return true, nil
 }
 
-// Delete implements repository.WriteableRepository.Delete
+// Delete implements repository.WritableRepository.Delete
 //
 // Since 2.0.0
 func (m *InMemoryRepository) Delete(u fyne.URI) error {

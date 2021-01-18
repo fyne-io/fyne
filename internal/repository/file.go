@@ -18,7 +18,7 @@ const fileSchemePrefix string = "file://"
 
 // declare conformance with repository types
 var _ repository.Repository = (*FileRepository)(nil)
-var _ repository.WriteableRepository = (*FileRepository)(nil)
+var _ repository.WritableRepository = (*FileRepository)(nil)
 var _ repository.HierarchicalRepository = (*FileRepository)(nil)
 var _ repository.ListableRepository = (*FileRepository)(nil)
 var _ repository.MovableRepository = (*FileRepository)(nil)
@@ -119,14 +119,14 @@ func (r *FileRepository) Destroy(scheme string) {
 	// do nothing
 }
 
-// Writer implements repository.WriteableRepository.Writer
+// Writer implements repository.WritableRepository.Writer
 //
 // Since: 2.0.0
 func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true)
 }
 
-// CanWrite implements repository.WriteableRepository.CanWrite
+// CanWrite implements repository.WritableRepository.CanWrite
 //
 // Since: 2.0.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
@@ -152,7 +152,7 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	return true, nil
 }
 
-// Delete implements repository.WriteableRepository.Delete
+// Delete implements repository.WritableRepository.Delete
 //
 // Since: 2.0.0
 func (r *FileRepository) Delete(u fyne.URI) error {
