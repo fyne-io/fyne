@@ -13,7 +13,7 @@ type FormItem struct {
 	Text   string
 	Widget fyne.CanvasObject
 
-	// Since: 2.0.0
+	// Since: 2.0
 	HintText string
 
 	validationError error

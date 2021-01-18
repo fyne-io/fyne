@@ -97,7 +97,7 @@ type ProgressBar struct {
 // Bind connects the specified data source to this ProgressBar.
 // The current value will be displayed and any changes in the data will cause the widget to update.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (p *ProgressBar) Bind(data binding.Float) {
 	p.Unbind()
 	p.valueSource = data
@@ -146,7 +146,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 // Unbind disconnects any configured data source from this ProgressBar.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (p *ProgressBar) Unbind() {
 	if p.valueSource == nil || p.valueListener == nil {
 		return
@@ -169,7 +169,7 @@ func NewProgressBar() *ProgressBar {
 
 // NewProgressBarWithData returns a progress bar connected with the specified data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
 	p.Bind(data)

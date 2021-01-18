@@ -61,23 +61,23 @@ type URI interface {
 	// Fields of net/url's URL structure. Consult IETF RFC3986, section
 	// 3.2, pp. 17.
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	Authority() string
 
 	// Path should return the URI path, as defined by IETF RFC3986.
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	Path() string
 
 	// Query should return the URI query, as defined by IETF RFC3986.
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	Query() string
 
 	// Fragment should return the URI fragment, as defined by IETF
 	// RFC3986.
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	Fragment() string
 }
 

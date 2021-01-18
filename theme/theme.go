@@ -12,155 +12,155 @@ import (
 const (
 	// ColorRed is the red primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorRed = "red"
 	// ColorOrange is the orange primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorOrange = "orange"
 	// ColorYellow is the yellow primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorYellow = "yellow"
 	// ColorGreen is the green primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorGreen = "green"
 	// ColorBlue is the blue primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorBlue = "blue"
 	// ColorPurple is the purple primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorPurple = "purple"
 	// ColorBrown is the brown primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorBrown = "brown"
 	// ColorGray is the gray primary color name
 	//
-	// Since: 1.4.0
+	// Since: 1.4
 	ColorGray = "gray"
 
 	// ColorNameBackground is the name of theme lookup for background color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameBackground fyne.ThemeColorName = "background"
 
 	// ColorNameButton is the name of theme lookup for button color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameButton fyne.ThemeColorName = "button"
 
 	// ColorNameDisabledButton is the name of theme lookup for disabled button color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameDisabledButton fyne.ThemeColorName = "disabledButton"
 
 	// ColorNameDisabled is the name of theme lookup for disabled foreground color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameDisabled fyne.ThemeColorName = "disabled"
 
 	// ColorNameError is the name of theme lookup for foreground error color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameError fyne.ThemeColorName = "error"
 
 	// ColorNameFocus is the name of theme lookup for focus color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameFocus fyne.ThemeColorName = "focus"
 
 	// ColorNameForeground is the name of theme lookup for foreground color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameForeground fyne.ThemeColorName = "foreground"
 
 	// ColorNameHover is the name of theme lookup for hover color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameHover fyne.ThemeColorName = "hover"
 
 	// ColorNameInputBackground is the name of theme lookup for background color of an input field.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameInputBackground fyne.ThemeColorName = "inputBackground"
 
 	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNamePlaceHolder fyne.ThemeColorName = "placeholder"
 
 	// ColorNamePressed is the name of theme lookup for the tap overlay color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNamePressed fyne.ThemeColorName = "pressed"
 
 	// ColorNamePrimary is the name of theme lookup for primary color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNamePrimary fyne.ThemeColorName = "primary"
 
 	// ColorNameScrollBar is the name of theme lookup for scrollbar color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameScrollBar fyne.ThemeColorName = "scrollBar"
 
 	// ColorNameShadow is the name of theme lookup for shadow color.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ColorNameShadow fyne.ThemeColorName = "shadow"
 
 	// SizeNameCaptionText is the name of theme lookup for helper text size, normally smaller than regular text size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameCaptionText fyne.ThemeSizeName = "helperText"
 
 	// SizeNameInlineIcon is the name of theme lookup for inline icons size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameInlineIcon fyne.ThemeSizeName = "iconInline"
 
 	// SizeNamePadding is the name of theme lookup for padding size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNamePadding fyne.ThemeSizeName = "padding"
 
 	// SizeNameScrollBar is the name of theme lookup for the scrollbar size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameScrollBar fyne.ThemeSizeName = "scrollBar"
 
 	// SizeNameScrollBarSmall is the name of theme lookup for the shrunk scrollbar size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameScrollBarSmall fyne.ThemeSizeName = "scrollBarSmall"
 
 	// SizeNameSeparatorThickness is the name of theme lookup for the thickness of a separator.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameSeparatorThickness fyne.ThemeSizeName = "separator"
 
 	// SizeNameText is the name of theme lookup for text size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
 	// SizeNameInputBorder is the name of theme lookup for input border size.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	SizeNameInputBorder fyne.ThemeSizeName = "inputBorder"
 
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	VariantDark fyne.ThemeVariant = 0
 
 	// VariantLight is the version of a theme that satisfies a user preference for a dark look.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	VariantLight fyne.ThemeVariant = 1
 
 	// potential for adding theme types such as high visibility or monochrome...
@@ -233,7 +233,7 @@ type builtinTheme struct {
 
 // DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
 //
-// Since 2.0.0
+// Since: 2.0
 func DefaultTheme() fyne.Theme {
 	return defaultTheme
 }
@@ -369,7 +369,7 @@ func TextColor() color.Color {
 
 // DisabledColor returns the foreground color for a disabled UI element
 //
-// Since: 2.0.0
+// Since: 2.0
 func DisabledColor() color.Color {
 	return safeColorLookup(ColorNameDisabled, currentVariant())
 }
@@ -383,7 +383,7 @@ func DisabledTextColor() color.Color {
 
 // ErrorColor returns the theme's error text color
 //
-// Since 2.0.0
+// Since: 2.0
 func ErrorColor() color.Color {
 	return safeColorLookup(ColorNameError, currentVariant())
 }
@@ -395,7 +395,7 @@ func PlaceHolderColor() color.Color {
 
 // PressedColor returns the color used to overlap tapped features
 //
-// Since: 2.0.0
+// Since: 2.0
 func PressedColor() color.Color {
 	return safeColorLookup(ColorNamePressed, currentVariant())
 }
@@ -417,7 +417,7 @@ func FocusColor() color.Color {
 
 // ForegroundColor returns the theme's standard foreground color for text and icons
 //
-// Since: 2.0.0
+// Since: 2.0
 func ForegroundColor() color.Color {
 	return safeColorLookup(ColorNameForeground, currentVariant())
 }
@@ -439,7 +439,7 @@ func ShadowColor() color.Color {
 
 // InputBorderSize returns the input border size (or underline size for an entry).
 //
-// Since 2.0.0
+// Since: 2.0
 func InputBorderSize() float32 {
 	return current().Size(SizeNameInputBorder)
 }
@@ -487,7 +487,7 @@ func IconInlineSize() float32 {
 
 // SeparatorThicknessSize is the standard thickness of the separator widget.
 //
-// Since 2.0.0
+// Since: 2.0
 func SeparatorThicknessSize() float32 {
 	return current().Size(SizeNameSeparatorThickness)
 }
@@ -529,14 +529,14 @@ func DefaultTextMonospaceFont() fyne.Resource {
 
 // PrimaryColorNames returns a list of the standard primary color options.
 //
-// Since: 1.4.0
+// Since: 1.4
 func PrimaryColorNames() []string {
 	return []string{ColorRed, ColorOrange, ColorYellow, ColorGreen, ColorBlue, ColorPurple, ColorBrown, ColorGray}
 }
 
 // PrimaryColorNamed returns a theme specific color value for a named primary color.
 //
-// Since 1.4.0
+// Since: 1.4
 func PrimaryColorNamed(name string) color.Color {
 	col, ok := primaryColors[name]
 	if !ok {

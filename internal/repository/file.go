@@ -43,21 +43,21 @@ func (f *file) URI() fyne.URI {
 //
 // This repository is suitable to handle the file:// scheme.
 //
-// Since: 2.0.0
+// Since: 2.0
 type FileRepository struct {
 }
 
 // NewFileRepository creates a new FileRepository instance.
 // The caller needs to call repository.Register() with the result of this function.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewFileRepository() *FileRepository {
 	return &FileRepository{}
 }
 
 // Exists implements repository.Repository.Exists
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 	p := u.Path()
 
@@ -87,14 +87,14 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 
 // Reader implements repository.Repository.Reader
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(u, false)
 }
 
 // CanRead implements repository.Repository.CanRead
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
 	if err == nil {
@@ -122,14 +122,14 @@ func (r *FileRepository) Destroy(scheme string) {
 
 // Writer implements repository.WritableRepository.Writer
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true)
 }
 
 // CanWrite implements repository.WritableRepository.CanWrite
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
 	if err == nil {
@@ -155,14 +155,14 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 
 // Delete implements repository.WritableRepository.Delete
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Delete(u fyne.URI) error {
 	return os.Remove(u.Path())
 }
 
 // Parent implements repository.HierarchicalRepository.Parent
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
@@ -194,7 +194,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 
 // Child implements repository.HierarchicalRepository.Child
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	newURI := u.Scheme() + "://" + u.Authority()
 	newURI += path.Join(u.Path(), component)
@@ -212,7 +212,7 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 
 // List implements repository.ListableRepository.List()
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 
 	path := u.Path()
@@ -240,7 +240,7 @@ func (r *FileRepository) CreateListable(u fyne.URI) error {
 
 // CanList implements repository.ListableRepository.CanList()
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	p := u.Path()
 	info, err := os.Stat(p)
@@ -278,7 +278,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 
 // Copy implements repository.CopyableRepository.Copy()
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Copy(source, destination fyne.URI) error {
 	// NOTE: as far as I can tell, golang does not have an optimized Copy
 	// function - everything I can find on the 'net suggests doing more
@@ -289,7 +289,7 @@ func (r *FileRepository) Copy(source, destination fyne.URI) error {
 
 // Move implements repository.MovableRepository.Move()
 //
-// Since: 2.0.0
+// Since: 2.0
 func (r *FileRepository) Move(source, destination fyne.URI) error {
 	// NOTE: as far as I can tell, golang does not have an optimized Move
 	// function - everything I can find on the 'net suggests doing more

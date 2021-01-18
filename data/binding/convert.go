@@ -18,7 +18,7 @@ type stringFromBool struct {
 // Changes to the Bool will be pushed to the String and setting the string will parse and set the
 // Bool if the parse was successful.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BoolToString(v Bool) String {
 	return BoolToStringWithFormat(v, "%t")
 }
@@ -27,7 +27,7 @@ func BoolToString(v Bool) String {
 // presented using the specified format. Changes to the Bool will be pushed to the String and setting
 // the string will parse and set the Bool if the string matches the format and its parse was successful.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BoolToStringWithFormat(v Bool, format string) String {
 	str := &stringFromBool{from: v, format: format}
 	v.AddListener(str)
@@ -85,7 +85,7 @@ type stringFromFloat struct {
 // Changes to the Float will be pushed to the String and setting the string will parse and set the
 // Float if the parse was successful.
 //
-// Since: 2.0.0
+// Since: 2.0
 func FloatToString(v Float) String {
 	return FloatToStringWithFormat(v, "%f")
 }
@@ -94,7 +94,7 @@ func FloatToString(v Float) String {
 // presented using the specified format. Changes to the Float will be pushed to the String and setting
 // the string will parse and set the Float if the string matches the format and its parse was successful.
 //
-// Since: 2.0.0
+// Since: 2.0
 func FloatToStringWithFormat(v Float, format string) String {
 	str := &stringFromFloat{from: v, format: format}
 	v.AddListener(str)
@@ -152,7 +152,7 @@ type stringFromInt struct {
 // Changes to the Int will be pushed to the String and setting the string will parse and set the
 // Int if the parse was successful.
 //
-// Since: 2.0.0
+// Since: 2.0
 func IntToString(v Int) String {
 	return IntToStringWithFormat(v, "%d")
 }
@@ -161,7 +161,7 @@ func IntToString(v Int) String {
 // presented using the specified format. Changes to the Int will be pushed to the String and setting
 // the string will parse and set the Int if the string matches the format and its parse was successful.
 //
-// Since: 2.0.0
+// Since: 2.0
 func IntToStringWithFormat(v Int, format string) String {
 	str := &stringFromInt{from: v, format: format}
 	v.AddListener(str)
@@ -219,7 +219,7 @@ type stringToBool struct {
 // Changes to the String will be parsed and pushed to the Bool if the parse was successful, and setting
 // the Bool update the String binding.
 //
-// Since: 2.0.0
+// Since: 2.0
 func StringToBool(str String) Bool {
 	return StringToBoolWithFormat(str, "%t")
 }
@@ -229,7 +229,7 @@ func StringToBool(str String) Bool {
 // the parse is successful it will be pushed to the String. Setting the Bool will push a formatted value
 // into the String.
 //
-// Since: 2.0.0
+// Since: 2.0
 func StringToBoolWithFormat(str String, format string) Bool {
 	v := &stringToBool{from: str, format: format}
 	str.AddListener(v)
@@ -286,7 +286,7 @@ type stringToFloat struct {
 // Changes to the String will be parsed and pushed to the Float if the parse was successful, and setting
 // the Float update the String binding.
 //
-// Since: 2.0.0
+// Since: 2.0
 func StringToFloat(str String) Float {
 	return StringToFloatWithFormat(str, "%f")
 }
@@ -296,7 +296,7 @@ func StringToFloat(str String) Float {
 // the parse is successful it will be pushed to the String. Setting the Float will push a formatted value
 // into the String.
 //
-// Since: 2.0.0
+// Since: 2.0
 func StringToFloatWithFormat(str String, format string) Float {
 	v := &stringToFloat{from: str, format: format}
 	str.AddListener(v)
@@ -353,7 +353,7 @@ type stringToInt struct {
 // Changes to the String will be parsed and pushed to the Int if the parse was successful, and setting
 // the Int update the String binding.
 //
-// Since: 2.0.0
+// Since: 2.0
 func StringToInt(str String) Int {
 	return StringToIntWithFormat(str, "%d")
 }
@@ -363,7 +363,7 @@ func StringToInt(str String) Int {
 // the parse is successful it will be pushed to the String. Setting the Int will push a formatted value
 // into the String.
 //
-// Since: 2.0.0
+// Since: 2.0
 func StringToIntWithFormat(str String, format string) Int {
 	v := &stringToInt{from: str, format: format}
 	str.AddListener(v)

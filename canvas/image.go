@@ -38,7 +38,7 @@ const (
 	ImageScalePixels ImageScale = 1
 	// ImageScaleFastest will scale the image using hardware GPU if available
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	ImageScaleFastest ImageScale = 2
 )
 
@@ -98,7 +98,7 @@ func NewImageFromFile(file string) *Image {
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewImageFromURI(uri fyne.URI) *Image {
 	if uri.Scheme() == "file" && len(uri.String()) > 7 {
 		return &Image{
@@ -124,7 +124,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewImageFromReader(read io.Reader, name string) *Image {
 	data, err := ioutil.ReadAll(read)
 	if err != nil {

@@ -21,7 +21,7 @@ const (
 	ScrollVerticalOnly
 	// ScrollNone turns off scrolling for this container.
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	ScrollNone
 )
 
@@ -444,7 +444,7 @@ type Scroll struct {
 	// OnScrolled can be set to be notified when the Scroll has changed position.
 	// You should not update the Scroll.Offset from this method.
 	//
-	// Since: 2.0.0
+	// Since: 2.0
 	OnScrolled func(fyne.Position)
 }
 

@@ -33,7 +33,7 @@ func splitNonEmpty(str, sep string) []string {
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since: 2.0.0
+// Since: 2.0
 func GenericParent(u fyne.URI) (fyne.URI, error) {
 	p := u.Path()
 
@@ -76,7 +76,7 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since: 2.0.0
+// Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 
 	// split into components and add the new one
@@ -112,7 +112,7 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since: 2.0.0
+// Since: 2.0
 func GenericCopy(source fyne.URI, destination fyne.URI) error {
 	// Look up repositories for the source and destination.
 	srcrepo, err := ForURI(source)
@@ -160,7 +160,7 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 // NOTE: this function should not be called except by an implementation of
 // the Repository interface - using this for unknown URIs may break.
 //
-// Since: 2.0.0
+// Since: 2.0
 func GenericMove(source fyne.URI, destination fyne.URI) error {
 	// This looks a lot like GenericCopy(), but I duplicated the code
 	// to avoid having to look up the repositories more than once.

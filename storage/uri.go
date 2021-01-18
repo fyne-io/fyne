@@ -30,7 +30,7 @@ func NewURI(s string) fyne.URI {
 // NewFileURI(), which will correctly handle back-slashes appearing in the URI
 // path component on Windows.
 //
-// Since: 2.0.0
+// Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	return repository.ParseURI(s)
 }
@@ -62,7 +62,7 @@ func ParseURI(s string) (fyne.URI, error) {
 //   HierarchicalRepository instance, then this method will fail with a
 //   repository.ErrOperationNotSupported.
 //
-// NOTE: since 2.0.0, Parent() is backed by the repository system - this
+// NOTE: since v2.0.0, Parent() is backed by the repository system - this
 // function is a helper which calls into an appropriate repository instance for
 // the scheme of the URI it is given.
 //
@@ -102,7 +102,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 //   HierarchicalRepository instance, then this method will fail with a
 //   repository.ErrOperationNotSupported.
 //
-// NOTE: since 2.0.0, Child() is backed by the repository system - this
+// NOTE: since v2.0.0, Child() is backed by the repository system - this
 // function is a helper which calls into an appropriate repository instance for
 // the scheme of the URI it is given.
 //
@@ -133,7 +133,7 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 // It is understood that a non-nil error value signals that the existence or
 // non-existence of the resource cannot be determined and is undefined.
 //
-// NOTE: since 2.0.0, Exists is backed by the repository system - this function
+// NOTE: since v2.0.0, Exists is backed by the repository system - this function
 // calls into a scheme-specific implementation from a registered repository.
 //
 // Exists may call into either a generic implementation, or into a
@@ -169,7 +169,7 @@ func Exists(u fyne.URI) (bool, error) {
 // Delete is backed by the repository system - this function calls
 // into a scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func Delete(u fyne.URI) error {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -204,7 +204,7 @@ func Delete(u fyne.URI) error {
 // Reader is backed by the repository system - this function calls
 // into a scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -230,7 +230,7 @@ func Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // CanRead is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func CanRead(u fyne.URI) (bool, error) {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -269,7 +269,7 @@ func CanRead(u fyne.URI) (bool, error) {
 // Writer is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -297,7 +297,7 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 // CanWrite is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func CanWrite(u fyne.URI) (bool, error) {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -341,7 +341,7 @@ func CanWrite(u fyne.URI) (bool, error) {
 // Copy is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func Copy(source fyne.URI, destination fyne.URI) error {
 	repo, err := repository.ForURI(source)
 	if err != nil {
@@ -390,7 +390,7 @@ func Copy(source fyne.URI, destination fyne.URI) error {
 // Move is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func Move(source fyne.URI, destination fyne.URI) error {
 	repo, err := repository.ForURI(source)
 	if err != nil {
@@ -426,7 +426,7 @@ func Move(source fyne.URI, destination fyne.URI) error {
 // CanList is backed by the repository system - this function calls into a
 // scheme-specific implementation from a registered repository.
 //
-// Since: 2.0.0
+// Since: 2.0
 func CanList(u fyne.URI) (bool, error) {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -466,7 +466,7 @@ func CanList(u fyne.URI) (bool, error) {
 // scheme-specific implementation from a registered repository, or fails with a
 // URIOperationNotSupported error.
 //
-// Since: 2.0.0
+// Since: 2.0
 func List(u fyne.URI) ([]fyne.URI, error) {
 	repo, err := repository.ForURI(u)
 	if err != nil {
@@ -517,7 +517,7 @@ func List(u fyne.URI) ([]fyne.URI, error) {
 // calls into a scheme-specific implementation from a registered repository, or
 // fails with a URIOperationNotSupported error.
 //
-// Since: 2.0.0
+// Since: 2.0
 func CreateListable(u fyne.URI) error {
 	repo, err := repository.ForURI(u)
 	if err != nil {

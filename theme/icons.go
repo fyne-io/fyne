@@ -12,397 +12,397 @@ import (
 const (
 	// IconNameCancel is the name of theme lookup for cancel icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameCancel fyne.ThemeIconName = "cancel"
 
 	// IconNameConfirm is the name of theme lookup for confirm icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameConfirm fyne.ThemeIconName = "confirm"
 
 	// IconNameDelete is the name of theme lookup for delete icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameDelete fyne.ThemeIconName = "delete"
 
 	// IconNameSearch is the name of theme lookup for search icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameSearch fyne.ThemeIconName = "search"
 
 	// IconNameSearchReplace is the name of theme lookup for search and replace icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameSearchReplace fyne.ThemeIconName = "searchReplace"
 
 	// IconNameMenu is the name of theme lookup for menu icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMenu fyne.ThemeIconName = "menu"
 
 	// IconNameMenuExpand is the name of theme lookup for menu expansion icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMenuExpand fyne.ThemeIconName = "menuExpand"
 
 	// IconNameCheckButtonChecked is the name of theme lookup for checked check button icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameCheckButtonChecked fyne.ThemeIconName = "checked"
 
 	// IconNameCheckButton is the name of theme lookup for  unchecked check button icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameCheckButton fyne.ThemeIconName = "unchecked"
 
 	// IconNameRadioButton is the name of theme lookup for radio button unchecked icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameRadioButton fyne.ThemeIconName = "radioButton"
 
 	// IconNameRadioButtonChecked is the name of theme lookup for radio button checked icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameRadioButtonChecked fyne.ThemeIconName = "radioButtonChecked"
 
 	// IconNameColorAchromatic is the name of theme lookup for greyscale color icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameColorAchromatic fyne.ThemeIconName = "colorAchromatic"
 
 	// IconNameColorChromatic is the name of theme lookup for full color icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameColorChromatic fyne.ThemeIconName = "colorChromatic"
 
 	// IconNameColorPalette is the name of theme lookup for color palette icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameColorPalette fyne.ThemeIconName = "colorPalette"
 
 	// IconNameContentAdd is the name of theme lookup for content add icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentAdd fyne.ThemeIconName = "contentAdd"
 
 	// IconNameContentRemove is the name of theme lookup for content remove icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentRemove fyne.ThemeIconName = "contentRemove"
 
 	// IconNameContentCut is the name of theme lookup for content cut icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentCut fyne.ThemeIconName = "contentCut"
 
 	// IconNameContentCopy is the name of theme lookup for content copy icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentCopy fyne.ThemeIconName = "contentCopy"
 
 	// IconNameContentPaste is the name of theme lookup for content paste icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentPaste fyne.ThemeIconName = "contentPaste"
 
 	// IconNameContentClear is the name of theme lookup for content clear icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentClear fyne.ThemeIconName = "contentClear"
 
 	// IconNameContentRedo is the name of theme lookup for content redo icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentRedo fyne.ThemeIconName = "contentRedo"
 
 	// IconNameContentUndo is the name of theme lookup for content undo icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameContentUndo fyne.ThemeIconName = "contentUndo"
 
 	// IconNameInfo is the name of theme lookup for info icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameInfo fyne.ThemeIconName = "info"
 
 	// IconNameQuestion is the name of theme lookup for question icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameQuestion fyne.ThemeIconName = "question"
 
 	// IconNameWarning is the name of theme lookup for warning icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameWarning fyne.ThemeIconName = "warning"
 
 	// IconNameError is the name of theme lookup for error icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameError fyne.ThemeIconName = "error"
 
 	// IconNameDocument is the name of theme lookup for document icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameDocument fyne.ThemeIconName = "document"
 
 	// IconNameDocumentCreate is the name of theme lookup for document create icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameDocumentCreate fyne.ThemeIconName = "documentCreate"
 
 	// IconNameDocumentPrint is the name of theme lookup for document print icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameDocumentPrint fyne.ThemeIconName = "documentPrint"
 
 	// IconNameDocumentSave is the name of theme lookup for document save icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
 
 	// IconNameMailAttachment is the name of theme lookup for mail attachment icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMailAttachment fyne.ThemeIconName = "mailAttachment"
 
 	// IconNameMailCompose is the name of theme lookup for mail compose icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMailCompose fyne.ThemeIconName = "mailCompose"
 
 	// IconNameMailForward is the name of theme lookup for mail forward icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMailForward fyne.ThemeIconName = "mailForward"
 
 	// IconNameMailReply is the name of theme lookup for mail reply icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMailReply fyne.ThemeIconName = "mailReply"
 
 	// IconNameMailReplyAll is the name of theme lookup for mail reply-all icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMailReplyAll fyne.ThemeIconName = "mailReplyAll"
 
 	// IconNameMailSend is the name of theme lookup for mail send icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMailSend fyne.ThemeIconName = "mailSend"
 
 	// IconNameMediaFastForward is the name of theme lookup for media fast-forward icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaFastForward fyne.ThemeIconName = "mediaFastForward"
 
 	// IconNameMediaFastRewind is the name of theme lookup for media fast-rewind icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaFastRewind fyne.ThemeIconName = "mediaFastRewind"
 
 	// IconNameMediaPause is the name of theme lookup for media pause icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaPause fyne.ThemeIconName = "mediaPause"
 
 	// IconNameMediaPlay is the name of theme lookup for media play icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaPlay fyne.ThemeIconName = "mediaPlay"
 
 	// IconNameMediaRecord is the name of theme lookup for media record icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaRecord fyne.ThemeIconName = "mediaRecord"
 
 	// IconNameMediaReplay is the name of theme lookup for media replay icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaReplay fyne.ThemeIconName = "mediaReplay"
 
 	// IconNameMediaSkipNext is the name of theme lookup for media skip next icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaSkipNext fyne.ThemeIconName = "mediaSkipNext"
 
 	// IconNameMediaSkipPrevious is the name of theme lookup for media skip previous icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaSkipPrevious fyne.ThemeIconName = "mediaSkipPrevious"
 
 	// IconNameMediaStop is the name of theme lookup for media stop icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMediaStop fyne.ThemeIconName = "mediaStop"
 
 	// IconNameMoveDown is the name of theme lookup for move down icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMoveDown fyne.ThemeIconName = "arrowDown"
 
 	// IconNameMoveUp is the name of theme lookup for move up icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameMoveUp fyne.ThemeIconName = "arrowUp"
 
 	// IconNameNavigateBack is the name of theme lookup for navigate back icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameNavigateBack fyne.ThemeIconName = "arrowBack"
 
 	// IconNameNavigateNext is the name of theme lookup for navigate next icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameNavigateNext fyne.ThemeIconName = "arrowForward"
 
 	// IconNameArrowDropDown is the name of theme lookup for drop-down arrow icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameArrowDropDown fyne.ThemeIconName = "arrowDropDown"
 
 	// IconNameArrowDropUp is the name of theme lookup for drop-up arrow icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameArrowDropUp fyne.ThemeIconName = "arrowDropUp"
 
 	// IconNameFile is the name of theme lookup for file icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFile fyne.ThemeIconName = "file"
 
 	// IconNameFileApplication is the name of theme lookup for file application icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFileApplication fyne.ThemeIconName = "fileApplication"
 
 	// IconNameFileAudio is the name of theme lookup for file audio icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFileAudio fyne.ThemeIconName = "fileAudio"
 
 	// IconNameFileImage is the name of theme lookup for file image icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFileImage fyne.ThemeIconName = "fileImage"
 
 	// IconNameFileText is the name of theme lookup for file text icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFileText fyne.ThemeIconName = "fileText"
 
 	// IconNameFileVideo is the name of theme lookup for file video icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFileVideo fyne.ThemeIconName = "fileVideo"
 
 	// IconNameFolder is the name of theme lookup for folder icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFolder fyne.ThemeIconName = "folder"
 
 	// IconNameFolderNew is the name of theme lookup for folder new icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFolderNew fyne.ThemeIconName = "folderNew"
 
 	// IconNameFolderOpen is the name of theme lookup for folder open icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameFolderOpen fyne.ThemeIconName = "folderOpen"
 
 	// IconNameHelp is the name of theme lookup for help icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameHelp fyne.ThemeIconName = "help"
 
 	// IconNameHistory is the name of theme lookup for history icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameHistory fyne.ThemeIconName = "history"
 
 	// IconNameHome is the name of theme lookup for home icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameHome fyne.ThemeIconName = "home"
 
 	// IconNameSettings is the name of theme lookup for settings icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameSettings fyne.ThemeIconName = "settings"
 
 	// IconNameStorage is the name of theme lookup for storage icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameStorage fyne.ThemeIconName = "storage"
 
 	// IconNameUpload is the name of theme lookup for upload icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameUpload fyne.ThemeIconName = "upload"
 
 	// IconNameViewFullScreen is the name of theme lookup for view fullscreen icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameViewFullScreen fyne.ThemeIconName = "viewFullScreen"
 
 	// IconNameViewRefresh is the name of theme lookup for view refresh icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameViewRefresh fyne.ThemeIconName = "viewRefresh"
 
 	// IconNameViewZoomFit is the name of theme lookup for view zoom fit icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameViewZoomFit fyne.ThemeIconName = "viewZoomFit"
 
 	// IconNameViewZoomIn is the name of theme lookup for view zoom in icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameViewZoomIn fyne.ThemeIconName = "viewZoomIn"
 
 	// IconNameViewZoomOut is the name of theme lookup for view zoom out icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameViewZoomOut fyne.ThemeIconName = "viewZoomOut"
 
 	// IconNameViewRestore is the name of theme lookup for view restore icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameViewRestore fyne.ThemeIconName = "viewRestore"
 
 	// IconNameVisibility is the name of theme lookup for visibility icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameVisibility fyne.ThemeIconName = "visibility"
 
 	// IconNameVisibilityOff is the name of theme lookup for invisibility icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameVisibilityOff fyne.ThemeIconName = "visibilityOff"
 
 	// IconNameVolumeDown is the name of theme lookup for volume down icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameVolumeDown fyne.ThemeIconName = "volumeDown"
 
 	// IconNameVolumeMute is the name of theme lookup for volume mute icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameVolumeMute fyne.ThemeIconName = "volumeMute"
 
 	// IconNameVolumeUp is the name of theme lookup for volume up icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameVolumeUp fyne.ThemeIconName = "volumeUp"
 
 	// IconNameDownload is the name of theme lookup for download icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameDownload fyne.ThemeIconName = "download"
 
 	// IconNameComputer is the name of theme lookup for computer icon.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	IconNameComputer fyne.ThemeIconName = "computer"
 )
 

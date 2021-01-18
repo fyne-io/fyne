@@ -111,7 +111,7 @@ type Check struct {
 // The current value will be displayed and any changes in the data will cause the widget to update.
 // User interactions with this Check will set the value into the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (c *Check) Bind(data binding.Bool) {
 	c.Unbind()
 	c.checkSource = data
@@ -236,7 +236,7 @@ func NewCheck(label string, changed func(bool)) *Check {
 
 // NewCheckWithData returns a check widget connected with the specified data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewCheckWithData(label string, data binding.Bool) *Check {
 	check := NewCheck(label, nil)
 	check.Bind(data)
@@ -277,7 +277,7 @@ func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 // Unbind disconnects any configured data source from this Check.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (c *Check) Unbind() {
 	c.OnChanged = nil
 	if c.checkSource == nil || c.checkListener == nil {

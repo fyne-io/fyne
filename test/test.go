@@ -49,7 +49,7 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // Closing elements stand on their own line, too, using the same indentation as the opening element.
 // The only exception to this are text elements which do not contain line breaks unless the text includes them.
 //
-// Since: 2.0.0
+// Since: 2.0
 func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
