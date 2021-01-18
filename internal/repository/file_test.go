@@ -449,6 +449,12 @@ func TestFileRepositoryListing(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, canList)
 
+	// also check the empty dir
+	childDir := storage.NewFileURI(path.Join(fooPath, "baz", "quux"))
+	canList, err = storage.CanList(childDir)
+	assert.Nil(t, err)
+	assert.True(t, canList)
+
 	listing, err := storage.List(foo)
 	assert.Nil(t, err)
 	stringListing := []string{}

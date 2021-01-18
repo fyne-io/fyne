@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -263,7 +264,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		f.Close()
 	}
 
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return false, err
 	}
 
