@@ -85,7 +85,7 @@ func ParseURI(s string) (fyne.URI, error) {
 	// leading ":///" to "://".
 	rest := strings.TrimPrefix(s, scheme+":")
 	dummyHost := false
-	if rest[0:3] == "///" {
+	if len(rest) >= 3 && rest[0:3] == "///" {
 		rest = "//" + "TEMP.TEMP/" + strings.TrimPrefix(rest, "///")
 		dummyHost = true
 	}

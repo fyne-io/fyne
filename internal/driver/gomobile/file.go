@@ -52,6 +52,10 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
+			if uri == "" {
+				callback(nil, nil)
+				return
+			}
 			f, err := fileReaderForURI(storage.NewURI(uri))
 			if f != nil {
 				f.(*fileOpen).done = closer
@@ -67,6 +71,10 @@ func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, _ func()) {
+			if uri == "" {
+				callback(nil, nil)
+				return
+			}
 			f, err := listerForURI(storage.NewURI(uri))
 			callback(f, err)
 		}, mobileFilter(filter))
