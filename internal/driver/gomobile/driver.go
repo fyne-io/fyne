@@ -133,6 +133,10 @@ func (d *mobileDriver) Run() {
 				switch e.Crosses(lifecycle.StageFocused) {
 				case lifecycle.CrossOff: // will enter background
 					if runtime.GOOS == "darwin" {
+						if d.glctx == nil {
+							continue
+						}
+
 						size := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
 						d.paintWindow(current, size)
 						a.Publish()
