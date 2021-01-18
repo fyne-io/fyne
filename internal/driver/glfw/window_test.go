@@ -45,6 +45,11 @@ func TestMain(m *testing.M) {
 		initMainMenu()
 		os.Exit(m.Run())
 	}()
+
+	master := d.CreateWindow("Master")
+	master.SetOnClosed(func() {
+		// we do not close, keeping the driver running
+	})
 	d.Run()
 }
 

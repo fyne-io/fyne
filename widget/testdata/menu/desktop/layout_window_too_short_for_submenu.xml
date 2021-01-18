@@ -58,7 +58,7 @@
 									<text pos="8,4" size="72x21">subitem B</text>
 								</widget>
 								<widget pos="0,66" size="153x29" type="*widget.menuItem">
-									<rectangle fillColor="hover" size="153x29"/>
+									<rectangle fillColor="focus" size="153x29"/>
 									<text pos="8,4" size="117x21">subitem C (long)</text>
 									<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>

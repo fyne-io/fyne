@@ -1215,7 +1215,7 @@ type entryContent struct {
 func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	cursor := canvas.NewRectangle(theme.PrimaryColor())
+	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
 	e.entry.propertyLock.Lock()
@@ -1314,7 +1314,6 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	r.cursor.FillColor = theme.PrimaryColor()
 	if focused {
 		r.cursor.Show()
 		if r.cursorAnim == nil {
