@@ -51,6 +51,7 @@ func (p *infProgressRenderer) updateBar(done float32) {
 
 	p.bar.Resize(barSize)
 	p.bar.Move(barPos)
+	canvas.Refresh(p.bar)
 }
 
 // Layout the components of the infinite progress bar
