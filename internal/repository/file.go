@@ -141,7 +141,7 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 
 		if os.IsNotExist(err) {
 			// We may need to do extra logic to check if the
-			// directory is writeable, but presumably the
+			// directory is writable, but presumably the
 			// IsPermission check covers this.
 			return true, nil
 		}

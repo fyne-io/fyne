@@ -125,7 +125,7 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 		return err
 	}
 
-	// The destination must be writeable.
+	// The destination must be writable.
 	destwrepo, ok := dstrepo.(WritableRepository)
 	if !ok {
 		return ErrOperationNotSupported
