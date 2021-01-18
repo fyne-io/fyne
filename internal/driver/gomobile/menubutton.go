@@ -9,7 +9,7 @@ import (
 
 type menuButton struct {
 	widget.BaseWidget
-	win *window
+	win  *window
 	menu *fyne.MainMenu
 }
 
@@ -27,7 +27,7 @@ func (m *menuButton) CreateRenderer() fyne.WidgetRenderer {
 
 type menuButtonRenderer struct {
 	btn *widget.Button
-	bg *canvas.Rectangle
+	bg  *canvas.Rectangle
 }
 
 func (m *menuButtonRenderer) Destroy() {
