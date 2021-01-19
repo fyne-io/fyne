@@ -57,7 +57,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
   - Add ability for custom themes to support light/dark preference
   - Support for custom icons in theme definition
   - New `theme.FromLegacy` helper to use old theme API definitions
-* Add fyne.Vector for simple x/y coordinates
+* Add fyne.Vector for managing x/y float32 coordinates
 * Add MouseButtonTertiary for middle mouse button events on desktop
 * Add `canvas.ImageScaleFastest` for faster, less precise, scaling
 * Add new `dialog.Form` that will phase out `dialog.Entry`
@@ -71,10 +71,10 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
 * Coordinate system is now float32 - see breaking changes above
 * ScrollEvent and DragEvent moved to Delta from (int, int)
 * Change bundled resources to use more efficient string storage
-* Desktop left and right mouse buttons renaming to `MouseButtonPrimary` and `MouseButtonSecondary`
+* Left and Right mouse buttons on Desktop are being moved to `MouseButtonPrimary` and `MouseButtonSecondary`
 * Many optimisations and widget performance enhancements
 
-* Moving to new `container.New()` and `container.NewWithoutLayout()` constructors
+* Moving to new `container.New()` and `container.NewWithoutLayout()` constructors (replacing `fyne.NewContainer` and `fyne.NewContainerWithoutLayout`)
 * Moving storage APIs `OpenFileFromURI`, `SaveFileToURI` and `ListerForURI` to `Reader`, `Writer` and `List` functions
 
 ### Fixed
