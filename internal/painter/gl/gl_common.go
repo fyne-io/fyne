@@ -7,7 +7,6 @@ import (
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
-	"golang.org/x/image/font"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -84,7 +83,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	opts.DPI = float64(painter.TextDPI * p.texScale)
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := font.Drawer{}
+	d := painter.Drawer{}
 	d.Dst = img
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
