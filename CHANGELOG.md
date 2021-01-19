@@ -15,7 +15,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
   * Size and Position units were changed from int to float32
   * `Text.TextSize` moved to float32 and `fyne.MeasureText` now takes a float32 size parameter
   * Removed `Size.Union` (use `Size.Max` instead)
-  * Added fyne.Delta for difference based X, Y representation
+  * Added fyne.Delta for difference-based X, Y float32 representation
   * DraggedEvent.DraggedX and DraggedY (int, int) to DraggedEvent.Dragged (Delta)
   * ScrollEvent.DeltaX and DeltaY (int, int) moved to ScrollEvent.Scrolled (Delta)
 
@@ -39,7 +39,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
   - `widget.ScrollContainer` (now `container.Scroll`)
   - `widget.SplitContainer` (now `container.Spilt`)
   - `widget.Group` (replaced by `widget.Card`)
-  - `widget.Box` (now `container.NewH/VBox`)
+  - `widget.Box` (now `container.NewH/VBox`, with `Children` field moved to `Objects`)
 * Many deprecated fields have been removed, replacements listed in API docs 1.4
   - for specific information you can browse https://developer.fyne.io/api/v1.4/
 
