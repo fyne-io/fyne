@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/v2/internal/painter"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/stretchr/testify/require"

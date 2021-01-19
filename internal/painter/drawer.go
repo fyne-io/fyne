@@ -33,14 +33,12 @@ func tabStop(f font.Face, x fixed.Int26_6) fixed.Int26_6 {
 // DrawString draws s at the dot and advances the dot's location.
 // Tabs are translated into a dot location change.
 func (d *Drawer) DrawString(s string) {
-	log.Println("In DrawString")
 	prevC := rune(-1)
 	for _, c := range s {
 		if prevC >= 0 {
 			d.Dot.X += d.Face.Kern(prevC, c)
 		}
 		if c == '\t' {
-			log.Println("Tab")
 			d.Dot.X = tabStop(d.Face, d.Dot.X)
 		} else {
 			dr, mask, maskp, a, ok := d.Face.Glyph(d.Dot, c)
@@ -53,7 +51,6 @@ func (d *Drawer) DrawString(s string) {
 			draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
 			d.Dot.X += a
 		}
-		log.Printf("c=%s, X=%d", string(c), d.Dot.X)
 
 		prevC = c
 	}
@@ -68,7 +65,6 @@ func MeasureString(f font.Face, s string) (advance fixed.Int26_6) {
 			advance += f.Kern(prevC, c)
 		}
 		if c == '\t' {
-			log.Println("Measure Tab")
 			advance = tabStop(f, advance)
 		} else {
 			a, ok := f.GlyphAdvance(c)
