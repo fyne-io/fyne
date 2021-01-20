@@ -6,6 +6,8 @@ import (
 	"log"
 	"math"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -25,7 +27,8 @@ func tabStop(f font.Face, x fixed.Int26_6) fixed.Int26_6 {
 		log.Print("Failed to find space width for tab")
 		return x
 	}
-	tabw := spacew * 4 //TODO: put tabWidth in theme
+	tabWidth := fyne.CurrentApp().Settings().Theme().Size(theme.SizeNameTabWidth)
+	tabw := spacew * fixed.Int26_6(tabWidth)
 	tabs, _ := math.Modf(float64((x + tabw) / tabw))
 	return tabw * fixed.Int26_6(tabs)
 }

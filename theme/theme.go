@@ -143,6 +143,11 @@ const (
 	// Since: 2.0
 	SizeNameSeparatorThickness fyne.ThemeSizeName = "separator"
 
+	// SizeNameTabWidth is the name of theme lookup for the width of tabs in spaces.
+	//
+	// Since: 2.0
+	SizeNameTabWidth fyne.ThemeSizeName = "tabWidth"
+
 	// SizeNameText is the name of theme lookup for text size.
 	//
 	// Since: 2.0
@@ -327,6 +332,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 11
 	case SizeNameInputBorder:
 		return 2
+	case SizeNameTabWidth:
+		return 4
 	default:
 		return 0
 	}
