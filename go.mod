@@ -3,9 +3,11 @@ module fyne.io/fyne/v2
 go 1.12
 
 require (
+	fyne.io/fyne v1.4.3
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/fyne-io/mobile v0.1.2
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
@@ -28,7 +30,6 @@ require (
 	golang.org/x/tools v0.0.0-20200328031815-3db5fc6bac03
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
-	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 )
 
 replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201123143003-f2279069162d

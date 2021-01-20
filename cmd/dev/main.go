@@ -4,7 +4,8 @@ package main
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/driver/desktop"
+
+	//	"fyne.io/fyne/v2/driver/desktop"
 
 	//	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -36,18 +37,23 @@ func main() {
 	// 	withtab5,
 	// ))
 
-	e := widget.NewEntry()
-	e.SetText("1234a\n\tb\n1234\tc")
-	e.TextStyle.Monospace = true
+	// e := widget.NewEntry()
+	// e.SetText("1234a\n\tb\n1234\tc")
+	// e.TextStyle.Monospace = true
 
-	e.CursorRow = 1
-	e.KeyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
-	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	e.KeyUp(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+	// e.CursorRow = 1
+	// e.KeyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+	// e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	// e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	// e.KeyUp(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
 
-	w.SetContent(e)
-	w.Resize(fyne.NewSize(86, 86))
-	w.Canvas().Focus(e)
+	// w.SetContent(e)
+	// w.Resize(fyne.NewSize(86, 86))
+	// w.Canvas().Focus(e)
+
+	grid := widget.NewTextGridFromString("A\n\tb")
+	grid.ShowWhitespace = true
+	grid.Resize(fyne.NewSize(56, 42)) // causes refresh
+	w.SetContent(grid)
 	w.ShowAndRun()
 }
