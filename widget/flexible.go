@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 )
@@ -8,22 +10,24 @@ import (
 // Flexible defines an object with flexible properties.
 type Flexible struct {
 	BaseWidget
-	child fyne.Widget
+	child fyne.CanvasObject
 	flex  int
 }
 
 // NewFlexible creates a new flexible widget.
-func NewFlexible(flex int, w fyne.Widget) *Flexible {
-	f := &Flexible{flex: flex, child: w}
+func NewFlexible(flex int, w fyne.CanvasObject) *Flexible {
+	child := w
+	if w == nil {
+		child = canvas.NewRectangle(color.Transparent)
+	}
+	f := &Flexible{flex: flex, child: child}
 	f.ExtendBaseWidget(f)
 	return f
 }
 
 // NewExpanded creates a new flexible with flex factor equals to 1.
-func NewExpanded(w fyne.Widget) *Flexible {
-	f := &Flexible{flex: 1, child: w}
-	f.ExtendBaseWidget(f)
-	return f
+func NewExpanded(w fyne.CanvasObject) *Flexible {
+	return NewFlexible(1, w)
 }
 
 // DistanceToTextBaseline calculates the distance from the top of the widget until its text baseline.
