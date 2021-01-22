@@ -1,0 +1,19 @@
+<canvas size="150x150">
+	<content>
+		<widget size="150x150" type="*container.AppTabs">
+			<widget pos="0,33" size="150x117" type="*widget.Label">
+				<text pos="4,8" size="142x21">Text1</text>
+			</widget>
+			<container size="150x29">
+				<widget size="28x29" type="*container.tabButton">
+					<image pos="4,4" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
+				</widget>
+				<widget pos="32,0" size="28x29" type="*container.tabButton">
+					<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
+				</widget>
+			</container>
+			<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,29" size="28x4"/>
+		</widget>
+	</content>
+</canvas>

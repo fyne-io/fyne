@@ -1,11 +1,11 @@
 package dialog
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // formDialog is a simple dialog window for displaying FormItems inside a form.
@@ -44,7 +44,7 @@ func (d *formDialog) validateItems(err error) {
 // button will be disabled. The initial state of the confirm button will reflect the initial
 // validation state of the items added to the form dialog.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool), parent fyne.Window) Dialog {
 	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
 	for i, item := range items {
@@ -86,7 +86,7 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 // validation state of the items added to the form dialog.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 //
-// Since: 2.0.0
+// Since: 2.0
 func ShowForm(title, confirm, dismiss string, content []*widget.FormItem, callback func(bool), parent fyne.Window) {
 	NewForm(title, confirm, dismiss, content, callback, parent).Show()
 }

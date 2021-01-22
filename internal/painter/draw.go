@@ -4,7 +4,7 @@ import (
 	"image"
 	"math"
 
-	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/v2/canvas"
 
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/math/fixed"

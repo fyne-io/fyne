@@ -9,10 +9,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Simulate being rendered by calling CreateRenderer() to update icon
@@ -70,10 +70,7 @@ func TestFileIcon_NewURI_WithFolder(t *testing.T) {
 	}
 
 	dir := filepath.Join(workingDir, "testdata")
-	folder, err := storage.ListerForURI(storage.NewURI("file://" + dir))
-	assert.Empty(t, err)
-
-	item := newRenderedFileIcon(folder)
+	item := newRenderedFileIcon(storage.NewURI("file://" + dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 
@@ -163,10 +160,7 @@ func TestFileIcon_SetURI_WithFolder(t *testing.T) {
 	item := newRenderedFileIcon(nil)
 	assert.Empty(t, item.extension)
 
-	folder, err := storage.ListerForURI(storage.NewURI("file://" + dir))
-	assert.Empty(t, err)
-
-	item.SetURI(folder)
+	item.SetURI(storage.NewURI("file://" + dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 

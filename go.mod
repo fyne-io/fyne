@@ -1,4 +1,4 @@
-module fyne.io/fyne
+module fyne.io/fyne/v2
 
 go 1.12
 
@@ -28,6 +28,7 @@ require (
 	golang.org/x/tools v0.0.0-20200328031815-3db5fc6bac03
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
+	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 )
 
 replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201123143003-f2279069162d

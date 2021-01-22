@@ -3,10 +3,10 @@ package widget
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Label widget is a label component with appropriate padding and layout.
@@ -29,7 +29,7 @@ func NewLabel(text string) *Label {
 
 // NewLabelWithData returns an Label widget connected to the specified data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewLabelWithData(data binding.String) *Label {
 	label := NewLabel("")
 	label.Bind(data)
@@ -51,7 +51,7 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 // Bind connects the specified data source to this Label.
 // The current value will be displayed and any changes in the data will cause the widget to update.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (l *Label) Bind(data binding.String) {
 	l.Unbind()
 	l.textSource = data
@@ -107,7 +107,7 @@ func (l *Label) SetText(text string) {
 // Unbind disconnects any configured data source from this Label.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (l *Label) Unbind() {
 	if l.textSource == nil || l.textListener == nil {
 		return

@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -67,19 +67,20 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mousePos           fyne.Position
-	mouseDragged       fyne.Draggable
-	mouseDraggedOffset fyne.Position
-	mouseDragPos       fyne.Position
-	mouseDragStarted   bool
-	mouseButton        desktop.MouseButton
-	mouseOver          desktop.Hoverable
-	mouseLastClick     fyne.CanvasObject
-	mousePressed       fyne.CanvasObject
-	mouseClickCount    int
-	mouseCancelFunc    context.CancelFunc
-	onClosed           func()
-	onCloseIntercepted func()
+	mousePos             fyne.Position
+	mouseDragged         fyne.Draggable
+	mouseDraggedObjStart fyne.Position
+	mouseDraggedOffset   fyne.Position
+	mouseDragPos         fyne.Position
+	mouseDragStarted     bool
+	mouseButton          desktop.MouseButton
+	mouseOver            desktop.Hoverable
+	mouseLastClick       fyne.CanvasObject
+	mousePressed         fyne.CanvasObject
+	mouseClickCount      int
+	mouseCancelFunc      context.CancelFunc
+	onClosed             func()
+	onCloseIntercepted   func()
 
 	menuTogglePending       fyne.KeyName
 	menuDeactivationPending fyne.KeyName
@@ -632,6 +633,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			w.mouseDragPos = previousPos
 			w.mouseDragged = wid
 			w.mouseDraggedOffset = previousPos.Subtract(pos)
+			w.mouseDraggedObjStart = obj.Position()
 			w.mouseDragStarted = true
 		}
 	}
@@ -656,10 +658,10 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
-			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
+			draggedObjDelta := w.mouseDraggedObjStart.Subtract(w.mouseDragged.(fyne.CanvasObject).Position())
 			ev := new(fyne.DragEvent)
 			ev.AbsolutePosition = w.mousePos
-			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Add(draggedObjDelta)
 			ev.Dragged = fyne.NewDelta(w.mousePos.X-w.mouseDragPos.X, w.mousePos.Y-w.mouseDragPos.Y)
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
@@ -724,13 +726,15 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		if action == glfw.Press {
 			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
-			dragged := w.mouseDragged.(interface{}).(fyne.CanvasObject)
-			_, tappableDrag := dragged.(desktop.Mouseable)
-			if dragged != nil && tappableDrag {
-				mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
-				w.queueEvent(func() { dragged.(desktop.Mouseable).MouseUp(mev) })
-			} else {
+			if w.mouseDragged == nil {
 				w.queueEvent(func() { wid.MouseUp(mev) })
+			} else {
+				if dragged, ok := w.mouseDragged.(desktop.Mouseable); ok {
+					mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
+					w.queueEvent(func() { dragged.MouseUp(mev) })
+				} else {
+					w.queueEvent(func() { wid.MouseUp(mev) })
+				}
 			}
 		}
 	}

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Orientation controls the horizontal/vertical layout of a widget
@@ -54,7 +54,7 @@ func NewSlider(min, max float64) *Slider {
 
 // NewSliderWithData returns a slider connected with the specified data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 	slider := NewSlider(min, max)
 	slider.Bind(data)
@@ -66,7 +66,7 @@ func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 // The current value will be displayed and any changes in the data will cause the widget to update.
 // User interactions with this Slider will set the value into the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (s *Slider) Bind(data binding.Float) {
 	s.Unbind()
 	s.valueSource = data
@@ -209,7 +209,7 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 // Unbind disconnects any configured data source from this Slider.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (s *Slider) Unbind() {
 	s.OnChanged = nil
 	if s.valueSource == nil || s.valueListener == nil {

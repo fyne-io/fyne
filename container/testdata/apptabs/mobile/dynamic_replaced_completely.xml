@@ -1,0 +1,22 @@
+<canvas size="300x150">
+	<content>
+		<widget size="300x150" type="*container.AppTabs">
+			<widget pos="0,33" size="300x117" type="*widget.Label">
+				<text pos="4,8" size="292x21">Text 6</text>
+			</widget>
+			<container size="300x29">
+				<widget size="97x29" type="*container.tabButton">
+					<text alignment="center" bold color="primary" pos="4,4" size="89x21">Test6</text>
+				</widget>
+				<widget pos="101,0" size="98x29" type="*container.tabButton">
+					<text alignment="center" bold pos="4,4" size="90x21">Test7</text>
+				</widget>
+				<widget pos="203,0" size="97x29" type="*container.tabButton">
+					<text alignment="center" bold pos="4,4" size="89x21">Test8</text>
+				</widget>
+			</container>
+			<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
+			<rectangle fillColor="primary" pos="0,29" size="97x4"/>
+		</widget>
+	</content>
+</canvas>

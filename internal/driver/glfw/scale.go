@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const (

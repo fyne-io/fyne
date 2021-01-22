@@ -8,10 +8,12 @@ import (
 	"strings"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/animation"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/animation"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 const mainGoroutineID = 1
@@ -127,6 +129,8 @@ func NewGLDriver() fyne.Driver {
 	d.done = make(chan interface{})
 	d.drawDone = make(chan interface{})
 	d.animation = &animation.Runner{}
+
+	repository.Register("file", intRepo.NewFileRepository())
 
 	return d
 }

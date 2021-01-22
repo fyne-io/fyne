@@ -17,13 +17,13 @@ type Canvas interface {
 	// If no item is currently focused, the first focusable item is focused.
 	// If the last focusable item is currently focused, the first focusable item is focused.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	FocusNext()
 	// FocusPrevious focuses the previous focusable item.
 	// If no item is currently focused, the last focusable item is focused.
 	// If the first focusable item is currently focused, the last focusable item is focused.
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	FocusPrevious()
 	Unfocus()
 	Focused() Focusable

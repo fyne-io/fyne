@@ -20,8 +20,8 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 func defaultVariant() fyne.ThemeVariant {

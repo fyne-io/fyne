@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/widget"
 )
 
 // PopUpMenu is a Menu which displays itself in an OverlayContainer.
@@ -14,7 +14,7 @@ type PopUpMenu struct {
 
 // NewPopUpMenu creates a new, reusable popup menu. You can show it using ShowAtPosition.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p := &PopUpMenu{Menu: NewMenu(menu), canvas: c}
 	p.Menu.Resize(p.Menu.MinSize())

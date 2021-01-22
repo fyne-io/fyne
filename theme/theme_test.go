@@ -1,17 +1,13 @@
 package theme
 
 import (
+	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
+
 	"github.com/stretchr/testify/assert"
 )
-
-// TODO figure how to test the default theme if we are messing with it...
-//func TestThemeDefault(t *testing.T) {
-//	loaded := fyne.GlobalSettings().Theme()
-//	assert.NotEqual(t, lightBackground, loaded.BackgroundColor())
-//}
 
 func TestThemeChange(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
@@ -186,4 +182,31 @@ func Test_DefaultTextMonospaceFont(t *testing.T) {
 	expect := "DejaVuSansMono-Powerline.ttf"
 	result := DefaultTextMonospaceFont().Name()
 	assert.Equal(t, expect, result, "wrong default monospace font")
+}
+
+func TestEmptyTheme(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(&emptyTheme{})
+	assert.NotNil(t, ForegroundColor())
+	assert.NotNil(t, TextFont())
+	assert.NotNil(t, HelpIcon())
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+}
+
+type emptyTheme struct {
+}
+
+func (e *emptyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	return nil
+}
+
+func (e *emptyTheme) Font(s fyne.TextStyle) fyne.Resource {
+	return nil
+}
+
+func (e *emptyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return nil
+}
+
+func (e *emptyTheme) Size(n fyne.ThemeSizeName) float32 {
+	return 0
 }

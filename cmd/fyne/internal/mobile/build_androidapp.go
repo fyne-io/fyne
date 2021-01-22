@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"fyne.io/fyne/cmd/fyne/internal/mobile/binres"
+	"fyne.io/fyne/v2/cmd/fyne/internal/mobile/binres"
 	"golang.org/x/tools/go/packages"
 )
 

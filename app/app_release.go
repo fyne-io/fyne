@@ -2,6 +2,6 @@
 
 package app
 
-import "fyne.io/fyne"
+import "fyne.io/fyne/v2"
 
 const buildMode = fyne.BuildRelease

@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,7 +49,7 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // Closing elements stand on their own line, too, using the same indentation as the opening element.
 // The only exception to this are text elements which do not contain line breaks unless the text includes them.
 //
-// Since: 2.0.0
+// Since: 2.0
 func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
