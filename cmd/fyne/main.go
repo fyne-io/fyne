@@ -22,6 +22,8 @@ func main() {
 			commands.Install(),
 			commands.Package(),
 			commands.Release(),
+
+			// Deprecated commands
 			commands.Vendor(),
 			commands.Version(),
 		},
