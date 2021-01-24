@@ -45,13 +45,6 @@ func Bundle() *cli.Command {
 				Destination: &b.pkg,
 			},
 			&cli.StringFlag{
-				Name:        "package",
-				Aliases:     []string{"pkg"},
-				Usage:       "The package to output in headers (if not appending).",
-				Value:       "main",
-				Destination: &b.pkg,
-			},
-			&cli.StringFlag{
 				Name:        "prefix",
 				Usage:       "A prefix for variables (ignored if name is set).",
 				Value:       "resource",
