@@ -5,11 +5,11 @@ import (
 	"strings"
 	"unicode"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (

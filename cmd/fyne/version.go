@@ -5,8 +5,8 @@ import (
 	"os"
 	"runtime/debug"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/cmd/fyne/commands"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/commands"
 )
 
 // Declare conformity to command interface

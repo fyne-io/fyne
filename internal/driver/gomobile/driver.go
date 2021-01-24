@@ -13,14 +13,14 @@ import (
 	"github.com/fyne-io/mobile/event/touch"
 	"github.com/fyne-io/mobile/gl"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/animation"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
-	pgl "fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/animation"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
+	pgl "fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -133,6 +133,10 @@ func (d *mobileDriver) Run() {
 				switch e.Crosses(lifecycle.StageFocused) {
 				case lifecycle.CrossOff: // will enter background
 					if runtime.GOOS == "darwin" {
+						if d.glctx == nil {
+							continue
+						}
+
 						size := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
 						d.paintWindow(current, size)
 						a.Publish()
@@ -437,5 +441,7 @@ func (d *mobileDriver) Device() fyne.Device {
 func NewGoMobileDriver() fyne.Driver {
 	d := new(mobileDriver)
 	d.animation = &animation.Runner{}
+
+	registerRepository(d)
 	return d
 }

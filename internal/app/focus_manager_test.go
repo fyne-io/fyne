@@ -3,11 +3,11 @@ package app_test
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/internal/app"
-	internalWidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/app"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

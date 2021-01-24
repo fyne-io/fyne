@@ -3,10 +3,10 @@ package dialog
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 )
 
 func Test_colorGreyscalePicker_Layout(t *testing.T) {

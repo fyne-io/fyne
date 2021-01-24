@@ -1,8 +1,8 @@
 package playground
 
 import (
-	"fyne.io/fyne/driver/software"
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/test"
 )
 
 // NewSoftwareCanvas creates a new canvas in memory that can render without hardware support

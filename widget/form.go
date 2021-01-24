@@ -1,11 +1,11 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 )
 
 // FormItem provides the details for a row in a form
@@ -13,7 +13,7 @@ type FormItem struct {
 	Text   string
 	Widget fyne.CanvasObject
 
-	// Since: 2.0.0
+	// Since: 2.0
 	HintText string
 
 	validationError error

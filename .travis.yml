@@ -1,6 +1,6 @@
 language: go
 
-go_import_path: fyne.io/fyne
+go_import_path: fyne.io/fyne/v2
 
 addons:
   apt:

@@ -7,8 +7,8 @@ package glfw
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/container"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 
 	"github.com/stretchr/testify/assert"
 )

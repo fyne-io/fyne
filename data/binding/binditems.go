@@ -5,7 +5,7 @@ package binding
 
 // Bool supports binding a bool value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type Bool interface {
 	DataItem
 	Get() (bool, error)
@@ -14,7 +14,7 @@ type Bool interface {
 
 // ExternalBool supports binding a bool value to an external value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalBool interface {
 	Bool
 	Reload() error
@@ -22,7 +22,7 @@ type ExternalBool interface {
 
 // NewBool returns a bindable bool value that is managed internally.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewBool() Bool {
 	blank := false
 	return &boundBool{val: &blank}
@@ -31,7 +31,7 @@ func NewBool() Bool {
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
 // If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindBool(v *bool) ExternalBool {
 	if v == nil {
 		return NewBool().(ExternalBool) // never allow a nil value pointer
@@ -71,7 +71,7 @@ func (b *boundBool) Set(val bool) error {
 
 // Float supports binding a float64 value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type Float interface {
 	DataItem
 	Get() (float64, error)
@@ -80,7 +80,7 @@ type Float interface {
 
 // ExternalFloat supports binding a float64 value to an external value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalFloat interface {
 	Float
 	Reload() error
@@ -88,7 +88,7 @@ type ExternalFloat interface {
 
 // NewFloat returns a bindable float64 value that is managed internally.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewFloat() Float {
 	blank := 0.0
 	return &boundFloat{val: &blank}
@@ -97,7 +97,7 @@ func NewFloat() Float {
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
 // If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindFloat(v *float64) ExternalFloat {
 	if v == nil {
 		return NewFloat().(ExternalFloat) // never allow a nil value pointer
@@ -137,7 +137,7 @@ func (b *boundFloat) Set(val float64) error {
 
 // Int supports binding a int value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type Int interface {
 	DataItem
 	Get() (int, error)
@@ -146,7 +146,7 @@ type Int interface {
 
 // ExternalInt supports binding a int value to an external value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalInt interface {
 	Int
 	Reload() error
@@ -154,7 +154,7 @@ type ExternalInt interface {
 
 // NewInt returns a bindable int value that is managed internally.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewInt() Int {
 	blank := 0
 	return &boundInt{val: &blank}
@@ -163,7 +163,7 @@ func NewInt() Int {
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
 // If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindInt(v *int) ExternalInt {
 	if v == nil {
 		return NewInt().(ExternalInt) // never allow a nil value pointer
@@ -203,7 +203,7 @@ func (b *boundInt) Set(val int) error {
 
 // Rune supports binding a rune value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type Rune interface {
 	DataItem
 	Get() (rune, error)
@@ -212,7 +212,7 @@ type Rune interface {
 
 // ExternalRune supports binding a rune value to an external value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalRune interface {
 	Rune
 	Reload() error
@@ -220,7 +220,7 @@ type ExternalRune interface {
 
 // NewRune returns a bindable rune value that is managed internally.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewRune() Rune {
 	blank := rune(0)
 	return &boundRune{val: &blank}
@@ -229,7 +229,7 @@ func NewRune() Rune {
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
 // If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindRune(v *rune) ExternalRune {
 	if v == nil {
 		return NewRune().(ExternalRune) // never allow a nil value pointer
@@ -269,7 +269,7 @@ func (b *boundRune) Set(val rune) error {
 
 // String supports binding a string value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type String interface {
 	DataItem
 	Get() (string, error)
@@ -278,7 +278,7 @@ type String interface {
 
 // ExternalString supports binding a string value to an external value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalString interface {
 	String
 	Reload() error
@@ -286,7 +286,7 @@ type ExternalString interface {
 
 // NewString returns a bindable string value that is managed internally.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewString() String {
 	blank := ""
 	return &boundString{val: &blank}
@@ -295,7 +295,7 @@ func NewString() String {
 // BindString returns a new bindable value that controls the contents of the provided string variable.
 // If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindString(v *string) ExternalString {
 	if v == nil {
 		return NewString().(ExternalString) // never allow a nil value pointer

@@ -1,0 +1,14 @@
+<canvas size="150x150">
+	<content>
+		<widget size="150x150" type="*container.AppTabs">
+			<circle fillColor="background" size="98x150"/>
+			<container pos="102,0" size="48x150">
+				<widget size="48x48" type="*container.tabButton">
+					<image pos="4,4" rsc="infoIcon" size="40x40" themed="primary"/>
+				</widget>
+			</container>
+			<rectangle fillColor="shadow" pos="98,0" size="4x150"/>
+			<rectangle fillColor="primary" pos="98,0" size="4x48"/>
+		</widget>
+	</content>
+</canvas>

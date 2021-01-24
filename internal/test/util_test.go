@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/image/font"
 
-	"fyne.io/fyne/internal/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2/internal/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )

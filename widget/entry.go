@@ -6,14 +6,14 @@ import (
 	"strings"
 	"unicode"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/driver/mobile"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -36,11 +36,11 @@ type Entry struct {
 	DisableableWidget
 	shortcut fyne.ShortcutHandler
 	Text     string
-	// Since: 2.0.0
+	// Since: 2.0
 	TextStyle   fyne.TextStyle
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
-	// Since: 2.0.0
+	// Since: 2.0
 	OnSubmitted func(string) `json:"-"`
 	Password    bool
 	MultiLine   bool
@@ -92,7 +92,7 @@ func NewEntry() *Entry {
 
 // NewEntryWithData returns an Entry widget connected to the specified data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewEntryWithData(data binding.String) *Entry {
 	entry := NewEntry()
 	entry.Bind(data)
@@ -119,7 +119,7 @@ func NewPasswordEntry() *Entry {
 // The current value will be displayed and any changes in the data will cause the widget to update.
 // User interactions with this Entry will set the value into the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (e *Entry) Bind(data binding.String) {
 	e.Unbind()
 	e.textSource = data
@@ -697,7 +697,7 @@ func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 // Unbind disconnects any configured data source from this Entry.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (e *Entry) Unbind() {
 	e.OnChanged = nil
 	if e.textSource == nil || e.textListener == nil {

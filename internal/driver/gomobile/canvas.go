@@ -6,15 +6,15 @@ import (
 	"math"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/mobile"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/app"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 const (

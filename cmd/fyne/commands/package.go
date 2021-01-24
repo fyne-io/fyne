@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"fyne.io/fyne/cmd/fyne/internal/util"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 
 	"github.com/pkg/errors"
 )

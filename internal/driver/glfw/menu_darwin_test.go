@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 func TestDarwinMenu(t *testing.T) {
