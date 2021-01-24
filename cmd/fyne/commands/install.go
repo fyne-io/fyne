@@ -2,8 +2,6 @@ package commands
 
 import (
 	"errors"
-	"flag"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,10 +9,68 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
+	"github.com/urfave/cli/v2"
 )
 
-// Declare conformity to Command interface
-var _ Command = (*installer)(nil)
+// Install returns the cli command for installing fyne applications
+func Install() *cli.Command {
+	i := &installer{}
+
+	return &cli.Command{
+		Name:  "install",
+		Usage: "Packages an application and installs an application.",
+		Description: `The install command packages an application for the current platform and copies it
+		into the system location for applications. This can be overridden with installDir`,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "target",
+				Aliases:     []string{"os"},
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios).",
+				Destination: &i.os,
+			},
+			&cli.StringFlag{
+				Name:        "installDir",
+				Aliases:     []string{"o"},
+				Usage:       "A specific location to install to, rather than the OS default.",
+				Destination: &i.installDir,
+			},
+			&cli.StringFlag{
+				Name:        "icon",
+				Usage:       "The name of the application icon file.",
+				Value:       "Icon.png",
+				Destination: &i.icon,
+			},
+			&cli.StringFlag{
+				Name:        "appiD",
+				Aliases:     []string{"id"},
+				Usage:       "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile",
+				Destination: &i.appID,
+			},
+			&cli.BoolFlag{
+				Name:        "release",
+				Usage:       "Enable installation in release mode (disable debug etc).",
+				Destination: &i.release,
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			if ctx.Args().Len() != 0 {
+				return errors.New("Unexpected parameter after flags")
+			}
+
+			err := i.validate()
+			if err != nil {
+				return err
+			}
+
+			err = i.install()
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+}
 
 type installer struct {
 	installDir, srcDir, icon, os, appID string
@@ -23,41 +79,8 @@ type installer struct {
 }
 
 // NewInstaller returns an install command that can install locally built Fyne apps.
-func NewInstaller() Command {
+func NewInstaller() *installer {
 	return &installer{}
-}
-
-func (i *installer) AddFlags() {
-	flag.StringVar(&i.os, "os", "", "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios)")
-	flag.StringVar(&i.installDir, "installDir", "", "A specific location to install to, rather than the OS default")
-	flag.StringVar(&i.icon, "icon", "Icon.png", "The name of the application icon file")
-	flag.StringVar(&i.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.BoolVar(&i.release, "release", false, "Should this package be installed in release mode? (disable debug etc)")
-}
-
-func (i *installer) PrintHelp(indent string) {
-	fmt.Println(indent, "The install command packages an application for the current platform and copies it")
-	fmt.Println(indent, "into the system location for applications. This can be overridden with installDir")
-	fmt.Println(indent, "Command usage: fyne install [parameters]")
-}
-
-func (i *installer) Run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
-	}
-
-	err := i.validate()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
-	}
-
-	err = i.install()
-	if err != nil {
-		fyne.LogError("Unable to install application", err)
-		os.Exit(1)
-	}
 }
 
 func (i *installer) install() error {

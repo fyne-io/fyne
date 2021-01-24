@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/akavel/rsrc v0.8.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/fyne-io/mobile v0.1.2
@@ -20,6 +21,8 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/stretchr/testify v1.5.1
+	github.com/urfave/cli v1.22.5 // indirect
+	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 	golang.org/x/mod v0.2.0
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect

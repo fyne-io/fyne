@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"flag"
 	"fmt"
 	"strconv"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 
 	"github.com/pkg/errors"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -22,8 +22,76 @@ const (
 	defaultAppVersion = "1.0.0"
 )
 
-// Declare conformity to Command interface
-var _ Command = (*packager)(nil)
+// Package returns the cli command for packaging fyne applications
+func Package() *cli.Command {
+	p := &packager{}
+
+	return &cli.Command{
+		Name:        "package",
+		Usage:       "Packages an application for distribution.",
+		Description: "You may specify the -executable to package, otherwise -sourceDir will be built.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "target",
+				Aliases:     []string{"os"},
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios).",
+				Destination: &p.os,
+			},
+			&cli.StringFlag{
+				Name:        "executable",
+				Aliases:     []string{"exe"},
+				Usage:       "The path to the executable, default is the current dir main binary",
+				Destination: &p.exe,
+			},
+			&cli.StringFlag{
+				Name:        "name",
+				Usage:       "The name of the application, default is the executable file name",
+				Destination: &p.name,
+			},
+			&cli.StringFlag{
+				Name:        "tags",
+				Usage:       "A comma-separated list of build tags.",
+				Destination: &p.tags,
+			},
+			&cli.StringFlag{
+				Name:        "appVersion",
+				Usage:       "Version number in the form x, x.y or x.y.z semantic version",
+				Destination: &p.appVersion,
+			},
+			&cli.IntFlag{
+				Name:        "appBuild",
+				Usage:       "Build number, should be greater than 0 and incremented for each build",
+				Destination: &p.appBuild,
+			},
+			&cli.StringFlag{
+				Name:        "sourceDir",
+				Aliases:     []string{"src"},
+				Usage:       "The directory to package, if executable is not set.",
+				Destination: &p.srcDir,
+			},
+			&cli.StringFlag{
+				Name:        "icon",
+				Usage:       "The name of the application icon file.",
+				Value:       "Icon.png",
+				Destination: &p.icon,
+			},
+			&cli.StringFlag{
+				Name:        "appiD",
+				Aliases:     []string{"id"},
+				Usage:       "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile",
+				Destination: &p.appID,
+			},
+			&cli.BoolFlag{
+				Name:        "release",
+				Usage:       "Enable installation in release mode (disable debug etc).",
+				Destination: &p.release,
+			},
+		},
+		Action: func(_ *cli.Context) error {
+			return p.Package()
+		},
+	}
+}
 
 type packager struct {
 	name, srcDir, dir, exe, icon string
@@ -35,41 +103,22 @@ type packager struct {
 }
 
 // NewPackager returns a packager command that can wrap executables into full GUI app packages.
-func NewPackager() Command {
+func NewPackager() *packager {
 	return &packager{}
 }
 
-func (p *packager) AddFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
-	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
-	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
-	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
-	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
-	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
-	flag.StringVar(&p.tags, "tags", "", "A comma-separated list of build tags")
-}
-
-func (*packager) PrintHelp(indent string) {
-	fmt.Println(indent, "The package command prepares an application for installation and testing.")
-	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
-	fmt.Println(indent, "Command usage: fyne package [parameters]")
-}
-
-func (p *packager) Run(_ []string) {
+func (p *packager) Package() error {
 	err := p.validate()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+		return err
 	}
 
 	err = p.doPackage()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
+		return err
 	}
+
+	return nil
 }
 
 func (p *packager) buildPackage() error {
