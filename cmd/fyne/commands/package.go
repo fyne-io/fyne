@@ -78,7 +78,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "appiD",
 				Aliases:     []string{"id"},
-				Usage:       "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile",
+				Usage:       "For ios or darwin targets an appID is required, for ios this must match a valid provisioning profile",
 				Destination: &p.appID,
 			},
 			&cli.BoolFlag{

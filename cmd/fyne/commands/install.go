@@ -43,12 +43,12 @@ func Install() *cli.Command {
 			&cli.StringFlag{
 				Name:        "appiD",
 				Aliases:     []string{"id"},
-				Usage:       "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile",
+				Usage:       "For ios or darwin targets an appID is required, for ios this must match a valid provisioning profile",
 				Destination: &i.appID,
 			},
 			&cli.BoolFlag{
 				Name:        "release",
-				Usage:       "Enable installation in release mode (disable debug etc).",
+				Usage:       "Enable installation in release mode (disable debug, etc).",
 				Destination: &i.release,
 			},
 		},
