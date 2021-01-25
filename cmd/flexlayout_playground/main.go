@@ -18,13 +18,13 @@ func main() {
 
 	w.Resize(fyne.NewSize(500, 110))
 
-	// hello := widget.NewLabel("Some text")
-	e := newMyEntry("Hello world")
 	ml := newMyLabel("Hello", 30)
+	e := newMyEntry("Hello world")
+	hello := widget.NewLabel("hello2")
 
 	c := fyne.NewContainerWithLayout(layout.NewRow(
-		layout.MainAxisAlignmentSpaceAround, layout.CrossAxisAlignmentBaseline,
-	), /*hello, */ ml, widget.NewExpanded(e))
+		layout.MainAxisAlignmentSpaceAround, layout.CrossAxisAlignmentCenter,
+	), ml, widget.NewExpanded(e), hello)
 
 	// c2 := fyne.NewContainerWithLayout(layout.NewColumn(
 	// 	layout.MainAxisAlignmentCenter, layout.CrossAxisAlignmentCenter,

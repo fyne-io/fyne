@@ -84,6 +84,10 @@ type flexLayout struct {
 	CrossAxisAlignment CrossAxisAlignment
 }
 
+// ===============================================================
+// Privates
+// ===============================================================
+
 // Kind returns what kind of flex layout is this object based on Axis field.
 func (l *flexLayout) kind() string {
 	if l.Axis == AxisVertical {
@@ -92,6 +96,7 @@ func (l *flexLayout) kind() string {
 	return "RowFlexLayout"
 }
 
+// getFlex returns the flex factor if any, otherwise it returns 0.
 func (l *flexLayout) getFlex(obj fyne.CanvasObject) int {
 	type flexibleobj interface{ Flex() int }
 	flex := 0
@@ -101,6 +106,7 @@ func (l *flexLayout) getFlex(obj fyne.CanvasObject) int {
 	return flex
 }
 
+// getCrossSize returns the cross size based on the layout Axis.
 func (l *flexLayout) getCrossSize(obj fyne.CanvasObject, min bool) float32 {
 	minSize := obj.MinSize()
 	curSize := obj.Size()
@@ -122,6 +128,7 @@ func (l *flexLayout) getCrossSize(obj fyne.CanvasObject, min bool) float32 {
 	return fyne.Max(curSize.Height, minSize.Height)
 }
 
+// getMainSize returns the main size based on the layout Axis.
 func (l *flexLayout) getMainSize(obj fyne.CanvasObject, min bool) float32 {
 	minSize := obj.MinSize()
 	curSize := obj.Size()
@@ -143,6 +150,8 @@ func (l *flexLayout) getMainSize(obj fyne.CanvasObject, min bool) float32 {
 	return fyne.Max(curSize.Width, minSize.Width)
 }
 
+// getDistanceToBaseline returns the distance from the top of the object until its
+// text baseline.
 func (l *flexLayout) getDistanceToBaseline(obj fyne.CanvasObject) float32 {
 	// TODO check
 	type baseliner interface{ DistanceToTextBaseline() float32 }
@@ -152,6 +161,10 @@ func (l *flexLayout) getDistanceToBaseline(obj fyne.CanvasObject) float32 {
 	}
 	return distance
 }
+
+// ===============================================================
+// Fyne.Layout implementation
+// ===============================================================
 
 // Layout is called to pack all child objects into a specified size.
 //
@@ -306,13 +319,26 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 }
 
+// MinSize calculates the smallest size that will fit the listed
+// CanvasObjects using this Layout algorithm.
 func (l *flexLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	// this is calculated by dividing minSize with flex factor and get the greater one,
+	// so we can guarantee minSize for all widgets
+	minSpacePerFlex := float32(0)
+	totalFlex := 0
 	allocatedSize := float32(0)
 	crossSize := float32(0)
 	maxSizeAboveBaseline := float32(0)
 	maxSizeBelowBaseline := float32(0)
 	for _, obj := range objects {
-		allocatedSize += l.getMainSize(obj, true)
+		flex := l.getFlex(obj)
+		if flex > 0 {
+			totalFlex += flex
+			minOneFlexSize := l.getMainSize(obj, true) / float32(flex)
+			minSpacePerFlex = fyne.Max(minSpacePerFlex, minOneFlexSize)
+		} else {
+			allocatedSize += l.getMainSize(obj, true)
+		}
 		crossSize = fyne.Max(crossSize, l.getCrossSize(obj, true))
 		if l.CrossAxisAlignment == CrossAxisAlignmentBaseline {
 			distance := l.getDistanceToBaseline(obj)
@@ -327,8 +353,11 @@ func (l *flexLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			crossSize = fyne.Max(maxSizeAboveBaseline+maxSizeBelowBaseline, crossSize)
 		}
 	}
+
+	allocatedFlexSpace := minSpacePerFlex * float32(totalFlex)
+
 	if l.Axis == AxisHorizontal {
-		return fyne.NewSize(allocatedSize, crossSize)
+		return fyne.NewSize(allocatedSize+allocatedFlexSpace, crossSize)
 	}
-	return fyne.NewSize(crossSize, allocatedSize)
+	return fyne.NewSize(crossSize, allocatedSize+allocatedFlexSpace)
 }
