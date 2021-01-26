@@ -1,8 +1,6 @@
 package container
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -61,7 +59,7 @@ type baseTabs struct {
 	popUp *widget.PopUpMenu
 }
 
-// Append adds a new TabItem to the end of the tab panel
+// Append adds a new TabItem to the end of the tab bar.
 func (t *baseTabs) Append(item *TabItem) {
 	t.SetItems(append(t.Items, item))
 }
@@ -77,7 +75,7 @@ func (t *baseTabs) Hide() {
 	t.BaseWidget.Hide()
 }
 
-// Remove tab by value
+// Remove tab by value.
 func (t *baseTabs) Remove(item *TabItem) {
 	for index, existingItem := range t.Items {
 		if existingItem == item {
@@ -87,7 +85,7 @@ func (t *baseTabs) Remove(item *TabItem) {
 	}
 }
 
-// RemoveIndex removes tab by index
+// RemoveIndex removes tab by index.
 func (t *baseTabs) RemoveIndex(index int) {
 	if index < 0 || index >= len(t.Items) {
 		return
@@ -205,10 +203,6 @@ type baseTabsRenderer struct {
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
-}
-
-func (r *baseTabsRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (r *baseTabsRenderer) Destroy() {

@@ -154,20 +154,21 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		item := r.docTabs.Items[i]
 		button, ok := r.buttonCache[item]
 		if !ok {
-			button = NewBorder(nil, nil, nil, &widget.Button{
-				Icon:       theme.CancelIcon(),
-				Importance: widget.LowImportance,
-				OnTapped: func() {
-					if f := r.docTabs.OnCloseIntercepted; f != nil {
-						f(item)
-					} else {
-						r.docTabs.Remove(item)
-						if f := r.docTabs.OnClosed; f != nil {
+			button = NewBorder(nil, nil, nil,
+				&widget.Button{
+					Icon:       theme.CancelIcon(),
+					Importance: widget.LowImportance,
+					OnTapped: func() {
+						if f := r.docTabs.OnCloseIntercepted; f != nil {
 							f(item)
+						} else {
+							r.docTabs.Remove(item)
+							if f := r.docTabs.OnClosed; f != nil {
+								f(item)
+							}
 						}
-					}
+					},
 				},
-			},
 				&tabButton{
 					OnTapped: func() { r.docTabs.Select(item) },
 				},
