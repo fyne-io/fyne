@@ -46,12 +46,12 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
-			bar:         &fyne.Container{},
-			buttonCache: make(map[*TabItem]*tabButton),
-			divider:     canvas.NewRectangle(theme.ShadowColor()),
-			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
+			bar:       &fyne.Container{},
+			divider:   canvas.NewRectangle(theme.ShadowColor()),
+			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
-		appTabs: t,
+		appTabs:     t,
+		buttonCache: make(map[*TabItem]*tabButton),
 	}
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
@@ -132,7 +132,8 @@ var _ fyne.WidgetRenderer = (*appTabsRenderer)(nil)
 
 type appTabsRenderer struct {
 	baseTabsRenderer
-	appTabs *AppTabs
+	appTabs     *AppTabs
+	buttonCache map[*TabItem]*tabButton
 }
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
@@ -198,6 +199,48 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 	return
 }
 
+func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
+	buttons := &fyne.Container{}
+
+	var iconPos buttonIconPosition
+	if fyne.CurrentDevice().IsMobile() {
+		cells := count
+		if cells == 0 {
+			cells = 1
+		}
+		buttons.Layout = layout.NewGridLayout(cells)
+		iconPos = buttonIconTop
+	} else if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+		buttons.Layout = layout.NewVBoxLayout()
+		iconPos = buttonIconTop
+	} else {
+		buttons.Layout = layout.NewHBoxLayout()
+		iconPos = buttonIconInline
+	}
+
+	for i := 0; i < count; i++ {
+		item := r.appTabs.Items[i]
+		button, ok := r.buttonCache[item]
+		if !ok {
+			button = &tabButton{
+				OnTapped: func() { r.appTabs.Select(item) },
+			}
+			r.buttonCache[item] = button
+		}
+		button.Text = item.Text
+		button.Icon = item.Icon
+		button.IconPosition = iconPos
+		if i == r.appTabs.current {
+			button.Importance = widget.HighImportance
+		} else {
+			button.Importance = widget.MediumImportance
+		}
+		button.Refresh()
+		buttons.Objects = append(buttons.Objects, button)
+	}
+	return buttons
+}
+
 func (r *appTabsRenderer) moveIndicator() {
 	var selectedPos fyne.Position
 	var selectedSize fyne.Size
@@ -255,7 +298,7 @@ func (r *appTabsRenderer) updateTabs(max int) {
 		}
 	}
 
-	buttons := r.buildTabButtons(&r.appTabs.baseTabs, tabCount)
+	buttons := r.buildTabButtons(tabCount)
 
 	r.bar.Objects = []fyne.CanvasObject{buttons}
 	if a := r.action; a != nil {

@@ -18,6 +18,8 @@ var _ fyne.Widget = (*DocTabs)(nil)
 // Since: 2.0
 type DocTabs struct {
 	baseTabs
+	OnClosed           func(*TabItem)
+	OnCloseIntercepted func(*TabItem)
 }
 
 // NewDocTabs creates a new tab container that allows the user to choose between various pieces of content.
@@ -40,13 +42,13 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
-			bar:         &fyne.Container{},
-			buttonCache: make(map[*TabItem]*tabButton),
-			divider:     canvas.NewRectangle(theme.ShadowColor()),
-			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
+			bar:       &fyne.Container{},
+			divider:   canvas.NewRectangle(theme.ShadowColor()),
+			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
-		docTabs:  t,
-		scroller: &Scroll{},
+		docTabs:     t,
+		scroller:    &Scroll{},
+		buttonCache: make(map[*TabItem]*fyne.Container),
 	}
 	r.action = r.buildAllTabsButton()
 	r.scroller.OnScrolled = func(fyne.Position) {
@@ -68,8 +70,9 @@ var _ fyne.WidgetRenderer = (*docTabsRenderer)(nil)
 
 type docTabsRenderer struct {
 	baseTabsRenderer
-	docTabs  *DocTabs
-	scroller *Scroll
+	docTabs     *DocTabs
+	scroller    *Scroll
+	buttonCache map[*TabItem]*fyne.Container
 }
 
 func (r *docTabsRenderer) Layout(size fyne.Size) {
@@ -121,6 +124,64 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 	return
 }
 
+func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
+	buttons := &fyne.Container{}
+
+	var iconPos buttonIconPosition
+	if fyne.CurrentDevice().IsMobile() {
+		cells := count
+		if cells == 0 {
+			cells = 1
+		}
+		buttons.Layout = layout.NewGridLayout(cells)
+		iconPos = buttonIconTop
+	} else if r.docTabs.tabLocation == TabLocationLeading || r.docTabs.tabLocation == TabLocationTrailing {
+		buttons.Layout = layout.NewVBoxLayout()
+		iconPos = buttonIconTop
+	} else {
+		buttons.Layout = layout.NewHBoxLayout()
+		iconPos = buttonIconInline
+	}
+
+	for i := 0; i < count; i++ {
+		item := r.docTabs.Items[i]
+		button, ok := r.buttonCache[item]
+		if !ok {
+			button = NewBorder(nil, nil, nil, &widget.Button{
+				Icon:       theme.CancelIcon(),
+				Importance: widget.LowImportance,
+				OnTapped: func() {
+					if f := r.docTabs.OnCloseIntercepted; f != nil {
+						f(item)
+					} else {
+						r.docTabs.Remove(item)
+						if f := r.docTabs.OnClosed; f != nil {
+							f(item)
+						}
+					}
+				},
+			},
+				&tabButton{
+					OnTapped: func() { r.docTabs.Select(item) },
+				},
+			)
+			r.buttonCache[item] = button
+		}
+		btn := button.Objects[0].(*tabButton)
+		btn.Text = item.Text
+		btn.Icon = item.Icon
+		btn.IconPosition = iconPos
+		if i == r.docTabs.current {
+			btn.Importance = widget.HighImportance
+		} else {
+			btn.Importance = widget.MediumImportance
+		}
+		btn.Refresh()
+		buttons.Objects = append(buttons.Objects, button)
+	}
+	return buttons
+}
+
 func (r *docTabsRenderer) moveIndicator() {
 	var selectedPos fyne.Position
 	var selectedSize fyne.Size
@@ -159,7 +220,7 @@ func (r *docTabsRenderer) moveIndicator() {
 func (r *docTabsRenderer) updateTabs() {
 	tabCount := len(r.docTabs.Items)
 
-	r.scroller.Content = r.buildTabButtons(&r.docTabs.baseTabs, tabCount)
+	r.scroller.Content = r.buildTabButtons(tabCount)
 
 	// Set layout of tab bar containing tab buttons and overflow action
 	if r.docTabs.tabLocation == TabLocationLeading || r.docTabs.tabLocation == TabLocationTrailing {

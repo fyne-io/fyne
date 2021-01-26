@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -206,8 +205,6 @@ type baseTabsRenderer struct {
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
-
-	buttonCache map[*TabItem]*tabButton
 }
 
 func (r *baseTabsRenderer) BackgroundColor() color.Color {
@@ -241,48 +238,6 @@ func (r *baseTabsRenderer) animateIndicator(p fyne.Position, s fyne.Size) {
 			canvas.Refresh(r.indicator)
 		}).Start()
 	}
-}
-
-func (r *baseTabsRenderer) buildTabButtons(t *baseTabs, count int) *fyne.Container {
-	buttons := &fyne.Container{}
-
-	var iconPos buttonIconPosition
-	if fyne.CurrentDevice().IsMobile() {
-		cells := count
-		if cells == 0 {
-			cells = 1
-		}
-		buttons.Layout = layout.NewGridLayout(cells)
-		iconPos = buttonIconTop
-	} else if t.tabLocation == TabLocationLeading || t.tabLocation == TabLocationTrailing {
-		buttons.Layout = layout.NewVBoxLayout()
-		iconPos = buttonIconTop
-	} else {
-		buttons.Layout = layout.NewHBoxLayout()
-		iconPos = buttonIconInline
-	}
-
-	for i := 0; i < count; i++ {
-		item := t.Items[i]
-		button, ok := r.buttonCache[item]
-		if !ok {
-			button = &tabButton{
-				OnTap: func() { t.Select(item) },
-			}
-			r.buttonCache[item] = button
-		}
-		button.Text = item.Text
-		button.Icon = item.Icon
-		button.IconPosition = iconPos
-		if i == t.current {
-			button.Importance = widget.HighImportance
-		} else {
-			button.Importance = widget.MediumImportance
-		}
-		button.Refresh()
-		buttons.Objects = append(buttons.Objects, button)
-	}
-	return buttons
 }
 
 func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
@@ -394,7 +349,7 @@ type tabButton struct {
 	Icon         fyne.Resource
 	IconPosition buttonIconPosition
 	Importance   widget.ButtonImportance
-	OnTap        func()
+	OnTapped     func()
 	Text         string
 }
 
@@ -446,7 +401,7 @@ func (b *tabButton) MouseOut() {
 }
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
-	b.OnTap()
+	b.OnTapped()
 }
 
 type tabButtonRenderer struct {
