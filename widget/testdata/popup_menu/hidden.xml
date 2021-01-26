@@ -1,0 +1,5 @@
+<canvas padded size="200x200">
+	<content>
+		<rectangle fillColor="rgba(0,150,150,255)" pos="4,4" size="192x192"/>
+	</content>
+</canvas>

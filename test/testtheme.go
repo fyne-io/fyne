@@ -3,8 +3,8 @@ package test
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 var (
@@ -17,25 +17,27 @@ var (
 func NewTheme() fyne.Theme {
 	return &configurableTheme{
 		colors: map[fyne.ThemeColorName]color.Color{
-			theme.ColorNameBackground:     red,
-			theme.ColorNameButton:         color.Black,
-			theme.ColorNameDisabled:       color.Black,
-			theme.ColorNameDisabledButton: color.White,
-			theme.ColorNameError:          blue,
-			theme.ColorNameFocus:          green,
-			theme.ColorNameForeground:     color.White,
-			theme.ColorNameHover:          green,
-			theme.ColorNamePlaceHolder:    blue,
-			theme.ColorNamePrimary:        green,
-			theme.ColorNameScrollBar:      blue,
-			theme.ColorNameShadow:         blue,
+			theme.ColorNameBackground:      red,
+			theme.ColorNameButton:          color.Black,
+			theme.ColorNameDisabled:        color.Black,
+			theme.ColorNameDisabledButton:  color.White,
+			theme.ColorNameError:           blue,
+			theme.ColorNameFocus:           color.RGBA{red.R, red.G, red.B, 66},
+			theme.ColorNameForeground:      color.White,
+			theme.ColorNameHover:           green,
+			theme.ColorNameInputBackground: color.RGBA{red.R, red.G, red.B, 30},
+			theme.ColorNamePlaceHolder:     blue,
+			theme.ColorNamePressed:         blue,
+			theme.ColorNamePrimary:         green,
+			theme.ColorNameScrollBar:       blue,
+			theme.ColorNameShadow:          blue,
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
-			fyne.TextStyle{}:                         theme.DefaultTextBoldFont(),
-			fyne.TextStyle{Bold: true}:               theme.DefaultTextItalicFont(),
-			fyne.TextStyle{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
-			fyne.TextStyle{Italic: true}:             theme.DefaultTextBoldItalicFont(),
-			fyne.TextStyle{Monospace: true}:          theme.DefaultTextFont(),
+			{}:                         theme.DefaultTextBoldFont(),
+			{Bold: true}:               theme.DefaultTextItalicFont(),
+			{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
+			{Italic: true}:             theme.DefaultTextBoldItalicFont(),
+			{Monospace: true}:          theme.DefaultTextFont(),
 		},
 		sizes: map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
@@ -44,6 +46,7 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameScrollBarSmall:     float32(2),
 			theme.SizeNameSeparatorThickness: float32(1),
 			theme.SizeNameText:               float32(18),
+			theme.SizeNameInputBorder:        float32(5),
 		},
 	}
 }

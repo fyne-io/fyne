@@ -1,13 +1,12 @@
 package gomobile
 
 import (
-	"errors"
 	"io"
 
 	"github.com/fyne-io/mobile/app"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 type fileOpen struct {
@@ -16,15 +15,11 @@ type fileOpen struct {
 	done func()
 }
 
-func (f *fileOpen) Name() string {
-	return f.uri.Name()
-}
-
 func (f *fileOpen) URI() fyne.URI {
 	return f.uri
 }
 
-func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) {
+func fileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) {
 	file := &fileOpen{uri: u}
 	read, err := nativeFileOpen(file)
 	if read == nil {
@@ -32,10 +27,6 @@ func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) 
 	}
 	file.ReadCloser = read
 	return file, err
-}
-
-func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return nil, errors.New("file writing is not supported on mobile")
 }
 
 func mobileFilter(filter storage.FileFilter) *app.FileFilter {
@@ -61,7 +52,11 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
-			f, err := drv.FileReaderForURI(storage.NewURI(uri))
+			if uri == "" {
+				callback(nil, nil)
+				return
+			}
+			f, err := fileReaderForURI(storage.NewURI(uri))
 			if f != nil {
 				f.(*fileOpen).done = closer
 			}
@@ -76,7 +71,11 @@ func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, _ func()) {
-			f, err := drv.ListerForURI(storage.NewURI(uri))
+			if uri == "" {
+				callback(nil, nil)
+				return
+			}
+			f, err := listerForURI(storage.NewURI(uri))
 			callback(f, err)
 		}, mobileFilter(filter))
 	}

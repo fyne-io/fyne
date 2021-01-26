@@ -1,15 +1,15 @@
 package container
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/widget"
 )
 
 // Scroll defines a container that is smaller than the Content.
 // The Offset is used to determine the position of the child widgets within the container.
 //
 // Since: 1.4
-type Scroll = widget.ScrollContainer
+type Scroll = widget.Scroll
 
 // ScrollDirection represents the directions in which a Scroll container can scroll its child content.
 //
@@ -28,7 +28,7 @@ const (
 //
 // Since: 1.4
 func NewScroll(content fyne.CanvasObject) *Scroll {
-	return widget.NewScrollContainer(content)
+	return widget.NewScroll(content)
 }
 
 // NewHScroll create a scrollable parent wrapping the specified content.
@@ -36,7 +36,7 @@ func NewScroll(content fyne.CanvasObject) *Scroll {
 //
 // Since: 1.4
 func NewHScroll(content fyne.CanvasObject) *Scroll {
-	return widget.NewHScrollContainer(content)
+	return widget.NewHScroll(content)
 }
 
 // NewVScroll a scrollable parent wrapping the specified content.
@@ -44,9 +44,5 @@ func NewHScroll(content fyne.CanvasObject) *Scroll {
 //
 // Since: 1.4
 func NewVScroll(content fyne.CanvasObject) *Scroll {
-	return widget.NewVScrollContainer(content)
+	return widget.NewVScroll(content)
 }
-
-// TODO move the implementation into internal/scroll.go in 2.0 when we delete the old API.
-// we cannot do that right now due to the fact that this package depends on widgets and they depend on us.
-// Once moving the bulk of scroller will go to an internal package, then this and the widget package can both depend.

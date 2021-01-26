@@ -3,11 +3,10 @@ package tutorials
 import (
 	"fmt"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // collectionScreen loads a tab panel for collection widgets
@@ -29,14 +28,14 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 
 	icon := widget.NewIcon(nil)
 	label := widget.NewLabel("Select An Item From The List")
-	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
+	hbox := container.NewHBox(icon, label)
 
 	list := widget.NewList(
 		func() int {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
@@ -52,7 +51,7 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	}
 	list.Select(125)
 
-	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+	return container.NewHSplit(list, container.NewCenter(hbox))
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {

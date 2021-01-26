@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // ListItemID uniquely identifies an item within a list.
@@ -32,10 +32,11 @@ type List struct {
 	OnSelected   func(id ListItemID)
 	OnUnselected func(id ListItemID)
 
-	scroller *ScrollContainer
-	selected []ListItemID
-	itemMin  fyne.Size
-	offsetY  float32
+	scroller      *widget.Scroll
+	selected      []ListItemID
+	itemMin       fyne.Size
+	offsetY       float32
+	offsetUpdated func(fyne.Position)
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -50,7 +51,7 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 
 // NewListWithData creates a new list widget that will display the contents of the provided data.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject, updateItem func(binding.DataItem, fyne.CanvasObject)) *List {
 	l := NewList(
 		data.Length,
@@ -79,9 +80,11 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
 	layout.Resize(layout.MinSize())
-	l.scroller = NewVScrollContainer(layout)
+	l.scroller = widget.NewVScroll(layout)
 	objects := []fyne.CanvasObject{l.scroller}
-	return newListRenderer(objects, l, l.scroller, layout)
+	lr := newListRenderer(objects, l, l.scroller, layout)
+	l.offsetUpdated = lr.offsetUpdated
+	return lr
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -122,7 +125,7 @@ func (l *List) Select(id ListItemID) {
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
 		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
 	}
-	l.scroller.onOffsetChanged()
+	l.offsetUpdated(l.scroller.Offset)
 	l.Refresh()
 }
 
@@ -146,7 +149,7 @@ type listRenderer struct {
 	widget.BaseRenderer
 
 	list             *List
-	scroller         *ScrollContainer
+	scroller         *widget.Scroll
 	layout           *fyne.Container
 	itemPool         *syncPool
 	children         []fyne.CanvasObject
@@ -157,15 +160,9 @@ type listRenderer struct {
 	previousOffsetY  float32
 }
 
-func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollContainer, layout *fyne.Container) *listRenderer {
+func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *widget.Scroll, layout *fyne.Container) *listRenderer {
 	lr := &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
-	lr.scroller.onOffsetChanged = func() {
-		if lr.list.offsetY == lr.scroller.Offset.Y {
-			return
-		}
-		lr.list.offsetY = lr.scroller.Offset.Y
-		lr.offsetChanged()
-	}
+	lr.scroller.OnScrolled = lr.offsetUpdated
 	return lr
 }
 
@@ -205,7 +202,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
-	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height+theme.SeparatorThicknessSize())))
+	l.visibleItemCount = int(math.Ceil(float64(l.scroller.Size().Height) / float64(l.list.itemMin.Height+theme.SeparatorThicknessSize())))
 	if l.visibleItemCount <= 0 {
 		return
 	}
@@ -358,6 +355,14 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, id ListItemID) {
 	}
 }
 
+func (l *listRenderer) offsetUpdated(pos fyne.Position) {
+	if l.list.offsetY == pos.Y {
+		return
+	}
+	l.list.offsetY = pos.Y
+	l.offsetChanged()
+}
+
 // Declare conformity with interfaces.
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
@@ -386,7 +391,8 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
-	li.statusIndicator = canvas.NewRectangle(theme.BackgroundColor())
+	li.statusIndicator = canvas.NewRectangle(theme.HoverColor())
+	li.statusIndicator.Hide()
 
 	objects := []fyne.CanvasObject{li.statusIndicator, li.child}
 
@@ -455,12 +461,15 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 
 func (li *listItemRenderer) Refresh() {
 	if li.item.selected {
-		li.item.statusIndicator.FillColor = theme.FocusColor()
+		li.item.statusIndicator.FillColor = theme.PrimaryColor()
+		li.item.statusIndicator.Show()
 	} else if li.item.hovered {
 		li.item.statusIndicator.FillColor = theme.HoverColor()
+		li.item.statusIndicator.Show()
 	} else {
-		li.item.statusIndicator.FillColor = theme.BackgroundColor()
+		li.item.statusIndicator.Hide()
 	}
+	li.item.statusIndicator.Refresh()
 	canvas.Refresh(li.item.super())
 }
 

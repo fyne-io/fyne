@@ -1,12 +1,10 @@
 package widget
 
 import (
-	"image/color"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 type iconRenderer struct {
@@ -25,10 +23,6 @@ func (i *iconRenderer) Layout(size fyne.Size) {
 	}
 
 	i.Objects()[0].Resize(size)
-}
-
-func (i *iconRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (i *iconRenderer) Refresh() {

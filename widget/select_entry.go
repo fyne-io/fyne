@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // SelectEntry is an input field which supports selecting from a fixed set of options.
@@ -72,7 +72,7 @@ func (e *SelectEntry) MinSize() fyne.Size {
 func (e *SelectEntry) Resize(size fyne.Size) {
 	e.Entry.Resize(size)
 	if e.popUp != nil {
-		e.popUp.Resize(fyne.NewSize(size.Width-theme.Padding()*2, e.popUp.Size().Height))
+		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
 	}
 }
 
@@ -99,11 +99,11 @@ func (e *SelectEntry) setupDropDown() *Button {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
 		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-		popUpPos := entryPos.Add(fyne.NewPos(theme.Padding(), e.Size().Height))
+		popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
 
 		e.popUp = NewPopUpMenu(e.dropDown, c)
 		e.popUp.ShowAtPosition(popUpPos)
-		e.popUp.Resize(fyne.NewSize(e.Size().Width-theme.Padding()*2, e.popUp.MinSize().Height))
+		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.Importance = LowImportance
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())

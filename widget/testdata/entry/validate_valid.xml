@@ -1,0 +1,19 @@
+<canvas padded size="150x200">
+	<content>
+		<widget pos="10,10" size="120x37" type="*widget.Entry">
+			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="120x33"/>
+			<rectangle fillColor="primary" pos="0,35" size="120x2"/>
+			<widget pos="0,2" size="92x33" type="*widget.Scroll">
+				<widget size="92x33" type="*widget.entryContent">
+					<widget size="92x33" type="*widget.textProvider">
+						<text pos="8,6" size="84x21">2020-02-12</text>
+					</widget>
+					<rectangle fillColor="primary" pos="87,6" size="2x21"/>
+				</widget>
+			</widget>
+			<widget pos="92,8" size="20x20" type="*widget.validationStatus">
+				<image rsc="confirmIcon" size="iconInlineSize"/>
+			</widget>
+		</widget>
+	</content>
+</canvas>

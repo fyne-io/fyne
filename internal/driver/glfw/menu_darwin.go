@@ -5,7 +5,7 @@ package glfw
 import (
 	"unsafe"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 /*

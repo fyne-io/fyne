@@ -9,12 +9,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/storage"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // comparePaths compares if two file paths point to the same thing, and calls
@@ -188,12 +189,12 @@ func TestShowFileOpen(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
 	//footer
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
-	open := buttons.Children[1].(*widget.Button)
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	open := buttons.Objects[1].(*widget.Button)
 	//body
-	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
-	assert.Greater(t, len(breadcrumb.Children), 0)
+	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container)
+	assert.Greater(t, len(breadcrumb.Objects), 0)
 
 	assert.Nil(t, err)
 	components := strings.Split(testData.String()[7:], "/")
@@ -201,13 +202,13 @@ func TestShowFileOpen(t *testing.T) {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
 	}
-	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
+	if assert.Equal(t, len(components), len(breadcrumb.Objects)) {
 		for i := range components {
-			assert.Equal(t, components[i], breadcrumb.Children[i].(*widget.Button).Text)
+			assert.Equal(t, components[i], breadcrumb.Objects[i].(*widget.Button).Text)
 		}
 	}
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -264,7 +265,7 @@ func TestHiddenFiles(t *testing.T) {
 	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Options", optionsButton.Text)
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	var target *fileDialogItem
@@ -303,11 +304,11 @@ func TestShowFileSave(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
-	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Entry)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
-	save := buttons.Children[1].(*widget.Button)
+	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Entry)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	save := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
+	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name

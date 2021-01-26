@@ -4,13 +4,14 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/driver"
-	internal_widget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	_ "fyne.io/fyne/test"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver"
+	internal_widget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
+	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -274,7 +275,7 @@ func TestReverseWalkVisibleObjectTree(t *testing.T) {
 	child2 := canvas.NewRectangle(color.Black)
 	child2.Hide()
 	child3 := canvas.NewRectangle(color.White)
-	base := widget.NewHBox(child1, child2, child3)
+	base := container.NewHBox(child1, child2, child3)
 
 	var walked []fyne.CanvasObject
 	driver.ReverseWalkVisibleObjectTree(
@@ -296,7 +297,7 @@ func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
 	base := fyne.NewContainerWithLayout(
 		layout.NewGridLayout(1),
 		rect,
-		widget.NewScrollContainer(child),
+		internal_widget.NewScroll(child),
 		fyne.NewContainerWithLayout(
 			layout.NewGridLayout(2),
 			canvas.NewCircle(color.White),
@@ -310,7 +311,7 @@ func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
 	var scClipSize, scrollableClipSize fyne.Size
 
 	driver.ReverseWalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		if _, ok := object.(*widget.ScrollContainer); ok {
+		if _, ok := object.(*internal_widget.Scroll); ok {
 			scClipPos = clippingPos
 			scClipSize = clippingSize
 		} else if _, ok = object.(fyne.Scrollable); ok {
@@ -348,7 +349,7 @@ func TestWalkVisibleObjectTree(t *testing.T) {
 	child2 := canvas.NewRectangle(color.Black)
 	child2.Hide()
 	child3 := canvas.NewRectangle(color.White)
-	base := widget.NewHBox(child1, child2, child3)
+	base := container.NewHBox(child1, child2, child3)
 
 	var walked []fyne.CanvasObject
 	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
@@ -366,7 +367,7 @@ func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 	base := fyne.NewContainerWithLayout(
 		layout.NewGridLayout(1),
 		rect,
-		widget.NewScrollContainer(child),
+		internal_widget.NewScroll(child),
 		fyne.NewContainerWithLayout(
 			layout.NewGridLayout(2),
 			canvas.NewCircle(color.White),
@@ -380,7 +381,7 @@ func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 	var scClipSize, scrollableClipSize fyne.Size
 
 	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		if _, ok := object.(*widget.ScrollContainer); ok {
+		if _, ok := object.(*internal_widget.Scroll); ok {
 			scClipPos = clippingPos
 			scClipSize = clippingSize
 		} else if _, ok = object.(fyne.Scrollable); ok {
@@ -418,7 +419,7 @@ func TestWalkWholeObjectTree(t *testing.T) {
 	child2 := canvas.NewRectangle(color.Black)
 	child2.Hide()
 	child3 := canvas.NewRectangle(color.White)
-	base := widget.NewHBox(child1, child2, child3)
+	base := container.NewHBox(child1, child2, child3)
 
 	var walked []fyne.CanvasObject
 	driver.WalkCompleteObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {

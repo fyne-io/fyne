@@ -5,15 +5,15 @@ import (
 	"math"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/app"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // Declare conformity with Canvas interface
@@ -63,6 +63,14 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 	retval := c.content
 	c.RUnlock()
 	return retval
+}
+
+func (c *glCanvas) DismissMenu() bool {
+	if c.menu != nil && c.menu.(*MenuBar).IsActive() {
+		c.menu.(*MenuBar).Toggle()
+		return true
+	}
+	return false
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
@@ -247,6 +255,12 @@ func (c *glCanvas) Size() fyne.Size {
 	c.RLock()
 	defer c.RUnlock()
 	return c.size
+}
+
+func (c *glCanvas) ToggleMenu() {
+	if c.menu != nil {
+		c.menu.(*MenuBar).Toggle()
+	}
 }
 
 func (c *glCanvas) Unfocus() {

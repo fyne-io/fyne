@@ -3,11 +3,11 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,13 +24,6 @@ func newextendedRadioGroup(opts []string, f func(string)) *extendedRadioGroup {
 	ret.update() // Not needed for extending Radio but for the tests to be able to access items without creating a renderer first.
 
 	return ret
-}
-
-func TestRadioGroup_Extended_BackgroundStyle(t *testing.T) {
-	radio := newextendedRadioGroup([]string{"Hi"}, nil)
-	bg := cache.Renderer(radio).BackgroundColor()
-
-	assert.Equal(t, bg, theme.BackgroundColor())
 }
 
 func TestRadioGroup_Extended_Selected(t *testing.T) {

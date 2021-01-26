@@ -3,10 +3,11 @@ package app_test
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/app"
-	internalWidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/app"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -202,7 +203,7 @@ func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, visib
 	disabled = &focusable{}
 	disabled.Disable()
 	entry3 = &focusable{}
-	m = app.NewFocusManager(widget.NewVBox(entry1, hidden, entry2, disabled, entry3))
+	m = app.NewFocusManager(container.NewVBox(entry1, hidden, entry2, disabled, entry3))
 	require.Nil(t, m.Focused())
 	require.False(t, hidden.Visible())
 	require.True(t, visibleInsideHidden.Visible())

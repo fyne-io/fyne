@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"fyne.io/fyne/cmd/fyne/internal/util"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 
 	"github.com/pkg/errors"
 )
@@ -159,13 +159,9 @@ func (p *packager) validate() error {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
 
-	// only used for iOS and macOS
-	if p.appID == "" {
-		if p.os == "darwin" {
-			p.appID = "com.example." + p.name
-		} else if p.os == "ios" || util.IsAndroid(p.os) || (p.os == "windows" && p.release) {
-			return errors.New("Missing appID parameter for package")
-		}
+	p.appID, err = validateAppID(p.appID, p.os, p.name, p.release)
+	if err != nil {
+		return err
 	}
 	if p.appVersion != "" && !isValidVersion(p.appVersion) {
 		return errors.New("invalid -appVersion parameter, integer and '.' characters only up to x.y.z")
@@ -185,4 +181,22 @@ func isValidVersion(ver string) bool {
 		}
 	}
 	return true
+}
+
+func validateAppID(appID, os, name string, release bool) (string, error) {
+	// old darwin compatibility
+	if os == "darwin" {
+		if appID == "" {
+			return "com.example." + name, nil
+		}
+	} else if os == "ios" || util.IsAndroid(os) || (os == "windows" && release) {
+		// all mobile, and for windows when releasing, needs a unique id - usually reverse DNS style
+		if appID == "" {
+			return "", errors.New("Missing appID parameter for package")
+		} else if !strings.Contains(appID, ".") {
+			return "", errors.New("appID must be globally unique and contain at least 1 '.'")
+		}
+	}
+
+	return appID, nil
 }

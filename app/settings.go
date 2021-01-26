@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // SettingsSchema is used for loading and storing global settings
@@ -153,7 +153,11 @@ func (s *settings) setupTheme() {
 	} else if name == "dark" {
 		s.applyTheme(theme.DarkTheme(), theme.VariantDark)
 	} else {
-		s.applyTheme(theme.DefaultTheme(), defaultVariant())
+		if defaultVariant() == theme.VariantLight {
+			s.applyTheme(theme.LightTheme(), theme.VariantLight)
+		} else {
+			s.applyTheme(theme.DarkTheme(), theme.VariantDark)
+		}
 	}
 }
 

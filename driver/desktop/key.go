@@ -1,10 +1,12 @@
 package desktop
 
 import (
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const (
+	// KeyNone represents no key
+	KeyNone fyne.KeyName = ""
 	// KeyShiftLeft represents the left shift key
 	KeyShiftLeft fyne.KeyName = "LeftShift"
 	// KeyShiftRight represents the right shift key

@@ -5,15 +5,17 @@ import (
 	"strings"
 	"unicode"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (
 	passwordChar = "•"
+	// TODO move to complete tab handling, for now we just indent this far statically
+	textTabIndent = "    "
 )
 
 // textPresenter provides the widget specific information to a generic text provider
@@ -35,6 +37,9 @@ type textProvider struct {
 
 	buffer    []rune
 	rowBounds [][2]int
+
+	// this varies due to how the widget works (entry with scroller vs others with padding)
+	extraPad fyne.Size
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
@@ -231,11 +236,13 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 	measureText := string(line[0:col])
 	if t.presenter.concealed() {
 		measureText = strings.Repeat(passwordChar, col)
+	} else {
+		measureText = strings.ReplaceAll(measureText, "\t", textTabIndent)
 	}
 
 	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
-	return label.MinSize()
+	return label.MinSize().Add(fyne.NewSize(t.extraPad.Width, 0))
 }
 
 // Renderer
@@ -273,20 +280,22 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height += min.Height
 	}
 
-	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	return fyne.NewSize(width, height).
+		Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2).Add(r.provider.extraPad).Add(r.provider.extraPad))
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.provider.propertyLock.RLock()
 	defer r.provider.propertyLock.RUnlock()
 
-	yPos := theme.Padding()
+	xPos := theme.Padding() + r.provider.extraPad.Width
+	yPos := theme.Padding() + r.provider.extraPad.Height
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < len(r.texts); i++ {
 		text := r.texts[i]
 		text.Resize(lineSize)
-		text.Move(fyne.NewPos(theme.Padding(), yPos))
+		text.Move(fyne.NewPos(xPos, yPos))
 		yPos += lineHeight
 	}
 }
@@ -322,7 +331,7 @@ func (r *textRenderer) Refresh() {
 		if concealed {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
-			line = string(row)
+			line = strings.ReplaceAll(string(row), "\t", textTabIndent)
 		}
 
 		var textCanvas *canvas.Text
@@ -357,10 +366,6 @@ func (r *textRenderer) Refresh() {
 	} else {
 		canvas.Refresh(r.provider.presenter.object())
 	}
-}
-
-func (r *textRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 // splitLines accepts a slice of runes and returns a slice containing the

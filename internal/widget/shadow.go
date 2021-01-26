@@ -3,9 +3,9 @@ package widget
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
 )
 
 var _ fyne.Widget = (*Shadow)(nil)
@@ -106,10 +106,6 @@ type shadowRenderer struct {
 	bl, br, tl, tr *canvas.RadialGradient
 	minSize        fyne.Size
 	s              *Shadow
-}
-
-func (r *shadowRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (r *shadowRenderer) Layout(size fyne.Size) {

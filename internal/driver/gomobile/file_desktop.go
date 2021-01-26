@@ -3,15 +3,17 @@
 package gomobile
 
 import (
-	"errors"
 	"io"
-	"os"
+
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
-func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
-	if f.uri.Scheme() != "file" {
-		return nil, errors.New("mobile simulator mode only supports file:// URIs")
-	}
+func nativeFileOpen(*fileOpen) (io.ReadCloser, error) {
+	// no-op as we use the internal FileRepository
+	return nil, nil
+}
 
-	return os.Open(f.uri.String()[7:])
+func registerRepository(d *mobileDriver) {
+	repository.Register("file", intRepo.NewFileRepository())
 }

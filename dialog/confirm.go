@@ -1,9 +1,9 @@
 package dialog
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // ConfirmDialog is like the standard Dialog but with an additional confirmation button
@@ -16,7 +16,7 @@ type ConfirmDialog struct {
 // SetConfirmText allows custom text to be set in the confirmation button
 func (d *ConfirmDialog) SetConfirmText(label string) {
 	d.confirm.SetText(label)
-	widget.Refresh(d.win)
+	d.win.Refresh()
 }
 
 // NewConfirm creates a dialog over the specified window for user confirmation.
@@ -28,7 +28,7 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 	d.dismiss = &widget.Button{Text: "No", Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	confirm := &widget.Button{Text: "Yes", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
+	confirm := &widget.Button{Text: "Yes", Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		},

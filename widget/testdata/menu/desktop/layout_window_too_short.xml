@@ -1,0 +1,49 @@
+<canvas size="100x50">
+	<content>
+		<rectangle size="100x50"/>
+	</content>
+	<overlay>
+		<widget size="100x50" type="*widget.OverlayContainer">
+			<widget pos="10,10" size="71x40" type="*widget.Menu">
+				<widget size="71x40" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="71,0" size="4x40" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="71,40" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,40" size="71x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,40" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x40"/>
+				</widget>
+				<widget size="71x40" type="*widget.Scroll">
+					<widget size="71x108" type="*widget.menuBox">
+						<rectangle fillColor="background" size="71x116"/>
+						<container pos="0,4" size="71x116">
+							<widget size="71x29" type="*widget.menuItem">
+								<text pos="8,4" size="10x21">A</text>
+							</widget>
+							<widget pos="0,33" size="71x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="71x1"/>
+							</widget>
+							<widget pos="0,38" size="71x29" type="*widget.menuItem">
+								<text pos="8,4" size="55x21">B (long)</text>
+							</widget>
+							<widget pos="0,71" size="71x29" type="*widget.menuItem">
+								<text pos="8,4" size="10x21">C</text>
+								<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							</widget>
+						</container>
+					</widget>
+					<widget pos="65,0" size="6x40" type="*widget.scrollBarArea">
+						<widget pos="3,0" size="3x16" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="3x16"/>
+						</widget>
+					</widget>
+					<widget pos="0,40" size="71x0" type="*widget.Shadow">
+						<linearGradient endColor="shadow" pos="0,-8" size="71x8"/>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>

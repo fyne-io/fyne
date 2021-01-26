@@ -19,12 +19,12 @@ type Settings interface {
 	SetTheme(Theme)
 	// ThemeVariant defines which preferred version of a theme should be used (i.e. light or dark)
 	//
-	// Since 2.0.0
+	// Since: 2.0
 	ThemeVariant() ThemeVariant
 	Scale() float32
 	// PrimaryColor indicates a user preference for a named primary color
 	//
-	// Since 1.4.0
+	// Since: 1.4
 	PrimaryColor() string
 
 	AddChangeListener(chan Settings)

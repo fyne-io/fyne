@@ -9,14 +9,15 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/app"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/tools/playground"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/tools/playground"
+	"fyne.io/fyne/v2/widget"
 )
 
 const (
@@ -61,18 +62,19 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	themes.SetSelected(def)
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
+	box := container.NewVBox(scale)
 
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)
 	}
-	swatch := fyne.NewContainerWithLayout(layout.NewGridLayout(len(s.colors)), s.colors...)
+	swatch := container.NewGridWithColumns(len(s.colors), s.colors...)
+	appearance := widget.NewForm(widget.NewFormItem("Main Color", swatch),
+		widget.NewFormItem("Theme", themes))
 
-	scale.Append(widget.NewGroup("Main Color", swatch))
-	scale.Append(widget.NewGroup("Theme", themes))
-
-	bottom := widget.NewHBox(layout.NewSpacer(),
-		&widget.Button{Text: "Apply", Style: widget.PrimaryButton, OnTapped: func() {
+	box.Add(widget.NewCard("Appearance", "", appearance))
+	bottom := container.NewHBox(layout.NewSpacer(),
+		&widget.Button{Text: "Apply", Importance: widget.HighImportance, OnTapped: func() {
 			err := s.save()
 			if err != nil {
 				fyne.LogError("Failed on saving", err)
@@ -81,8 +83,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 			s.appliedScale(s.fyneSettings.Scale)
 		}})
 
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(scale, bottom, nil, nil),
-		scale, bottom, s.preview)
+	return container.NewBorder(box, bottom, nil, nil, s.preview)
 }
 
 func (s *Settings) chooseTheme(name string) {
@@ -115,12 +116,12 @@ func (s *Settings) createPreview() image.Image {
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
 	empty := widget.NewLabel("")
-	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home")),
-		widget.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
-		widget.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
-		widget.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
-	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs := container.NewAppTabs(
+		container.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home")),
+		container.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
+		container.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
+		container.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
+	tabs.SetTabLocation(container.TabLocationLeading)
 	showOverlay(c)
 
 	c.SetContent(tabs)
@@ -189,7 +190,7 @@ func newColorButton(n string, c color.Color, s *Settings) *colorButton {
 }
 
 func (c *colorButton) CreateRenderer() fyne.WidgetRenderer {
-	r := canvas.NewRectangle(color.Transparent)
+	r := canvas.NewRectangle(c.color)
 	r.StrokeWidth = 5
 
 	if c.name == c.s.fyneSettings.PrimaryColor {
@@ -229,12 +230,9 @@ func (c *colorRenderer) Refresh() {
 	} else {
 		c.rect.StrokeColor = color.Transparent
 	}
+	c.rect.FillColor = c.c.color
 
 	c.rect.Refresh()
-}
-
-func (c *colorRenderer) BackgroundColor() color.Color {
-	return c.c.color
 }
 
 func (c *colorRenderer) Objects() []fyne.CanvasObject {
@@ -251,14 +249,14 @@ func showOverlay(c fyne.Canvas) {
 		widget.NewFormItem("Password", password))
 	form.OnCancel = func() {}
 	form.OnSubmit = func() {}
-	content := widget.NewVBox(
+	content := container.NewVBox(
 		widget.NewLabelWithStyle("Login demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form)
-	wrap := fyne.NewContainerWithoutLayout(content)
+	wrap := container.NewWithoutLayout(content)
 	wrap.Resize(content.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	content.Resize(content.MinSize())
 	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
-	over := fyne.NewContainerWithLayout(layout.NewMaxLayout(),
+	over := container.NewMax(
 		canvas.NewRectangle(theme.ShadowColor()), fyne.NewContainerWithLayout(layout.NewCenterLayout(),
 			wrap))
 

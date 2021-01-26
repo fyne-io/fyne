@@ -3,25 +3,29 @@ package container
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
-// TabItem represents a single view in a TabContainer.
+// TabItem represents a single view in a tab view.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
 //
 // Since: 1.4
-type TabItem = widget.TabItem
+type TabItem struct {
+	Text    string
+	Icon    fyne.Resource
+	Content fyne.CanvasObject
+}
 
 // TabLocation is the location where the tabs of a tab container should be rendered
 //
 // Since: 1.4
-type TabLocation = widget.TabLocation
+type TabLocation int
 
 // TabLocation values
 const (
@@ -35,24 +39,22 @@ const (
 //
 // Since: 1.4
 func NewTabItem(text string, content fyne.CanvasObject) *TabItem {
-	return widget.NewTabItem(text, content)
+	return &TabItem{Text: text, Content: content}
 }
 
 // NewTabItemWithIcon creates a new item for a tabbed widget - each item specifies the content and a label with an icon for its tab.
 //
 // Since: 1.4
 func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObject) *TabItem {
-	return widget.NewTabItemWithIcon(text, icon, content)
+	return &TabItem{Text: text, Icon: icon, Content: content}
 }
-
-// TODO move the implementation into here in 2.0 when we delete the old API.
-// we cannot do that right now due to Scroll dependency order.
 
 type baseTabs struct {
 	widget.BaseWidget
 
-	Items              []*TabItem
-	OnSelectionChanged func(tab *TabItem)
+	Items        []*TabItem
+	OnSelected   func(tab *TabItem)
+	OnUnselected func(tab *TabItem)
 
 	current     int
 	tabLocation TabLocation
@@ -106,6 +108,11 @@ func (t *baseTabs) Select(item *TabItem) {
 
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *baseTabs) SelectIndex(index int) {
+	previous := t.current
+	if f := t.OnUnselected; f != nil && previous >= 0 && previous < len(t.Items) {
+		f(t.Items[previous])
+	}
+
 	if index < 0 || index >= len(t.Items) || t.current == index {
 		return
 	}
@@ -113,7 +120,7 @@ func (t *baseTabs) SelectIndex(index int) {
 	t.current = index
 	t.Refresh()
 
-	if f := t.OnSelectionChanged; f != nil {
+	if f := t.OnSelected; f != nil {
 		f(t.Items[t.current])
 	}
 }
@@ -137,14 +144,22 @@ func (t *baseTabs) SetItems(items []*TabItem) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
 	t.Items = items
-	if len(items) == 0 {
+	count := len(items)
+	switch {
+	case count == 0:
 		// No items available to be current
+		t.SelectIndex(-1) // Unsure OnUnselected gets called if applicable
 		t.current = -1
-	} else if t.current < 0 {
+		t.Refresh()
+	case t.current < 0:
 		// Current is first tab item
-		t.current = 0
+		t.SelectIndex(0)
+	case t.current >= count:
+		// Current doesn't exist, select last tab
+		t.SelectIndex(count - 1)
+	default:
+		t.Refresh()
 	}
-	t.Refresh()
 }
 
 // SetTabLocation sets the location of the tab bar
@@ -317,10 +332,14 @@ func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
 	r.bar.Resize(barSize)
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
-	if t.current >= 0 && t.current < len(t.Items) {
-		content := t.Items[t.current].Content
-		content.Move(contentPos)
-		content.Resize(contentSize)
+	for i, ti := range t.Items {
+		if i == t.current {
+			ti.Content.Move(contentPos)
+			ti.Content.Resize(contentSize)
+			ti.Content.Show()
+		} else {
+			ti.Content.Hide()
+		}
 	}
 }
 
@@ -381,6 +400,8 @@ type tabButton struct {
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
@@ -390,16 +411,17 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	label.TextStyle.Bold = true
 	label.Alignment = fyne.TextAlignCenter
 
-	objects := []fyne.CanvasObject{label}
+	objects := []fyne.CanvasObject{background, label}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
 	r := &tabButtonRenderer{
-		button:  b,
-		icon:    icon,
-		label:   label,
-		objects: objects,
+		button:     b,
+		background: background,
+		icon:       icon,
+		label:      label,
+		objects:    objects,
 	}
 	r.Refresh()
 	return r
@@ -428,25 +450,18 @@ func (b *tabButton) Tapped(e *fyne.PointEvent) {
 }
 
 type tabButtonRenderer struct {
-	button  *tabButton
-	icon    *canvas.Image
-	label   *canvas.Text
-	objects []fyne.CanvasObject
-}
-
-func (r *tabButtonRenderer) BackgroundColor() color.Color {
-	switch {
-	case r.button.hovered:
-		return theme.HoverColor()
-	default:
-		return theme.BackgroundColor()
-	}
+	button     *tabButton
+	background *canvas.Rectangle
+	icon       *canvas.Image
+	label      *canvas.Text
+	objects    []fyne.CanvasObject
 }
 
 func (r *tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
+	r.background.Resize(size)
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
@@ -511,6 +526,14 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
+	if r.button.hovered {
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
+	} else {
+		r.background.Hide()
+	}
+	r.background.Refresh()
+
 	r.label.Text = r.button.Text
 	if r.button.Importance == widget.HighImportance {
 		r.label.Color = theme.PrimaryColor()

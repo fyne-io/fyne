@@ -3,14 +3,14 @@ package storage_test
 import (
 	"testing"
 
-	"fyne.io/fyne/storage"
+	"fyne.io/fyne/v2/storage"
 
-	_ "fyne.io/fyne/test"
+	_ "fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFIleFilter(t *testing.T) {
+func TestFileFilter(t *testing.T) {
 	filter := storage.NewExtensionFileFilter([]string{".jpg", ".png"})
 
 	assert.NotNil(t, filter)

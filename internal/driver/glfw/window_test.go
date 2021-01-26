@@ -11,14 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/layout"
-	_ "fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/layout"
+	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +45,11 @@ func TestMain(m *testing.M) {
 		initMainMenu()
 		os.Exit(m.Run())
 	}()
+
+	master := d.CreateWindow("Master")
+	master.SetOnClosed(func() {
+		// we do not close, keeping the driver running
+	})
 	d.Run()
 }
 
@@ -71,6 +77,128 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
+func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
+	menuBar := buildMenuOverlay(m, c).(*MenuBar)
+	c.setMenuOverlay(menuBar)
+	w.SetContent(canvas.NewRectangle(color.Black))
+
+	require.False(t, menuBar.IsActive())
+	t.Run("toggle via left Alt", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		assert.True(t, menuBar.IsActive())
+
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.True(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	require.False(t, menuBar.IsActive())
+	t.Run("toggle via right Alt", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, 0)
+		assert.True(t, menuBar.IsActive())
+
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.True(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	require.False(t, menuBar.IsActive())
+	t.Run("press non-special key after pressing Alt and release it before releasing Alt", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyA, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyA, 0, glfw.Release, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	for name, tt := range map[string]struct {
+		key glfw.Key
+		mod glfw.ModifierKey
+	}{
+		"left shift":    {key: glfw.KeyLeftShift, mod: glfw.ModShift},
+		"right shift":   {key: glfw.KeyRightShift, mod: glfw.ModShift},
+		"left control":  {key: glfw.KeyLeftControl, mod: glfw.ModControl},
+		"right control": {key: glfw.KeyRightControl, mod: glfw.ModControl},
+		"left super":    {key: glfw.KeyLeftSuper, mod: glfw.ModSuper},
+		"right super":   {key: glfw.KeyRightSuper, mod: glfw.ModSuper},
+	} {
+		require.False(t, menuBar.IsActive())
+		t.Run("press and release "+name+" after pressing Alt and before releasing it", func(t *testing.T) {
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+
+		require.False(t, menuBar.IsActive())
+		t.Run("press "+name+" before pressing Alt and release it before releasing Alt", func(t *testing.T) {
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+
+		require.False(t, menuBar.IsActive())
+		t.Run("press "+name+" after pressing Alt and release it after releasing Alt", func(t *testing.T) {
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+
+		require.False(t, menuBar.IsActive())
+		t.Run("press "+name+" before pressing Alt and release it after releasing Alt", func(t *testing.T) {
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			assert.False(t, menuBar.IsActive())
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
+			assert.False(t, menuBar.IsActive())
+		})
+	}
+
+	require.False(t, menuBar.IsActive())
+	t.Run("toggle via Escape", func(t *testing.T) {
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Press, 0)
+		assert.False(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive(), "Escape does not activate the menu")
+
+		c.ToggleMenu()
+		require.True(t, menuBar.IsActive())
+
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Press, 0)
+		assert.True(t, menuBar.IsActive())
+		w.keyPressed(w.viewport, glfw.KeyEscape, 0, glfw.Release, 0)
+		assert.False(t, menuBar.IsActive())
+	})
+
+	t.Run("when canvas has no menu", func(t *testing.T) {
+		w = createWindow("Test").(*window)
+		w.SetContent(canvas.NewRectangle(color.Black))
+
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		// does not crash :)
+	})
+}
+
 func TestWindow_Cursor(t *testing.T) {
 	w := createWindow("Test").(*window)
 	e := widget.NewEntry()
@@ -78,7 +206,7 @@ func TestWindow_Cursor(t *testing.T) {
 	h := widget.NewHyperlink("Testing", u)
 	b := widget.NewButton("Test", nil)
 
-	w.SetContent(widget.NewVBox(e, h, b))
+	w.SetContent(container.NewVBox(e, h, b))
 
 	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
 	textCursor := desktop.TextCursor
@@ -99,7 +227,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	h1.SetMinSize(fyne.NewSize(10, 10))
 	h2 := &hoverableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	h2.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(h1, h2))
+	w.SetContent(container.NewHBox(h1, h2))
 	w.Resize(fyne.NewSize(20, 10))
 
 	repaintWindow(w)
@@ -144,7 +272,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(d1, d2))
+	w.SetContent(container.NewHBox(d1, d2))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -240,7 +368,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 	w := createWindow("Test").(*window)
 	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(d1))
+	w.SetContent(container.NewHBox(d1))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -282,7 +410,7 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(widget.NewHBox(d1, d2))
+	w.SetContent(container.NewHBox(d1, d2))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -338,7 +466,7 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 func TestWindow_HoverableOnDragging(t *testing.T) {
 	w := createWindow("Test").(*window)
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
-	c := fyne.NewContainer(dh) // allow manual positioning
+	c := container.NewWithoutLayout(dh)
 	dh.Resize(fyne.NewSize(10, 10))
 	w.SetContent(c)
 
@@ -412,7 +540,7 @@ func TestWindow_Tapped(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(widget.NewVBox(rect, o))
+	w.SetContent(container.NewVBox(rect, o))
 
 	w.mousePos = fyne.NewPos(50, 160)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -477,11 +605,11 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	})
 	rect2 := canvas.NewRectangle(color.Black)
 	rect2.SetMinSize(fyne.NewSize(100, 100))
-	child := fyne.NewContainerWithLayout(layout.NewGridLayout(1), button, rect2)
-	scroll := widget.NewScrollContainer(child)
+	child := container.NewGridWithColumns(1, button, rect2)
+	scroll := container.NewScroll(child)
 	scroll.Offset = fyne.NewPos(0, 50)
 
-	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, scroll)
+	base := container.New(layout.NewGridLayout(1), rect, scroll)
 	w.SetContent(base)
 	refreshWindow(w) // ensure any async resize is done
 
@@ -507,7 +635,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	tapped := 0
 	b1 := widget.NewButton("Tap", func() { tapped = 1 })
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
-	w.SetContent(widget.NewVBox(b1, b2))
+	w.SetContent(container.NewVBox(b1, b2))
 
 	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -544,7 +672,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	but.onDoubleTap = func() {
 		tapped = 2
 	}
-	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), but))
+	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
 
 	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -694,7 +822,7 @@ func TestWindow_PixelSize(t *testing.T) {
 
 	rect := &canvas.Rectangle{}
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(fyne.NewContainer(rect))
+	w.SetContent(container.NewWithoutLayout(rect))
 	w.Canvas().Refresh(w.Content())
 
 	winW, winH := w.(*window).minSizeOnScreen()
@@ -788,7 +916,7 @@ func TestWindow_Focus(t *testing.T) {
 	e1 := widget.NewEntry()
 	e2 := widget.NewEntry()
 
-	w.SetContent(widget.NewVBox(e1, e2))
+	w.SetContent(container.NewVBox(e1, e2))
 	w.Canvas().Focus(e1)
 
 	w.charInput(w.viewport, 'a')

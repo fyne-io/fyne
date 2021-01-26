@@ -1,0 +1,15 @@
+<canvas padded size="46x45">
+	<content>
+		<widget pos="4,4" size="38x37" type="*widget.Entry">
+			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="38x33"/>
+			<rectangle fillColor="shadow" pos="0,35" size="38x2"/>
+			<widget pos="0,2" size="38x33" type="*widget.Scroll">
+				<widget size="38x33" type="*widget.entryContent">
+					<widget size="38x33" type="*widget.textProvider">
+						<text pos="8,6" size="30x21">Text</text>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+</canvas>

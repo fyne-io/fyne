@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"net/url"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Hyperlink widget is a text component with appropriate padding and layout.
@@ -121,6 +121,7 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
 	hl.provider = newTextProvider(hl.Text, hl)
+	hl.provider.extraPad = fyne.NewSize(0, theme.Padding())
 	return hl.provider.CreateRenderer()
 }
 

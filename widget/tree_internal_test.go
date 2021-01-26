@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -224,8 +224,8 @@ func TestTree_MinSize(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
-		assert.Equal(t, scrollContainerMinSize, min.Width)
-		assert.Equal(t, scrollContainerMinSize, min.Height)
+		assert.Equal(t, float32(32), min.Width)
+		assert.Equal(t, float32(32), min.Height)
 	})
 	t.Run("Callback", func(t *testing.T) {
 		for name, tt := range map[string]struct {
@@ -236,7 +236,7 @@ func TestTree_MinSize(t *testing.T) {
 			"small": {
 				fyne.NewSize(1, 1),
 				fyne.NewSize(1, 1),
-				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), scrollContainerMinSize), scrollContainerMinSize),
+				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), float32(32)), float32(32)),
 			},
 			"large-leaf": {
 				fyne.NewSize(100, 100),
@@ -609,12 +609,14 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
 		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
-		assert.Equal(t, theme.BackgroundColor(), ar.BackgroundColor())
+		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
+		assert.False(t, ar.indicator.Visible())
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
 		br := test.WidgetRenderer(b).(*treeNodeRenderer)
-		assert.Equal(t, theme.BackgroundColor(), br.BackgroundColor())
+		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
+		assert.False(t, br.indicator.Visible())
 	})
 }
 
@@ -629,16 +631,20 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
 		a.MouseIn(&desktop.MouseEvent{})
 		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
+		assert.True(t, ar.indicator.Visible())
 		a.MouseOut()
-		assert.Equal(t, theme.BackgroundColor(), ar.BackgroundColor())
+		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
+		assert.False(t, ar.indicator.Visible())
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
 		br := test.WidgetRenderer(b).(*treeNodeRenderer)
 		b.MouseIn(&desktop.MouseEvent{})
 		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
+		assert.True(t, br.indicator.Visible())
 		b.MouseOut()
-		assert.Equal(t, theme.BackgroundColor(), br.BackgroundColor())
+		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
+		assert.False(t, br.indicator.Visible())
 	})
 }
 

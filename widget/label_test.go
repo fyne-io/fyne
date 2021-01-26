@@ -3,11 +3,11 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/internal/painter/software"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/painter/software"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -185,29 +185,13 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 	text := NewLabel("Hello")
 	c.SetContent(text)
 	c.Resize(text.MinSize())
-	test.AssertRendersToMarkup(t, `
-		<canvas size="45x29">
-			<content>
-				<widget size="45x29" type="*widget.Label">
-					<text pos="4,4" size="37x21">Hello</text>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "label/default.xml", c)
 
 	truncSize := text.MinSize().Subtract(fyne.NewSize(10, 0))
 	text.Resize(truncSize)
 	text.Wrapping = fyne.TextTruncate
 	text.Refresh()
-	test.AssertRendersToMarkup(t, `
-		<canvas size="45x29">
-			<content>
-				<widget size="35x29" type="*widget.Label">
-					<text pos="4,4" size="27x21">Hel</text>
-				</widget>
-			</content>
-		</canvas>
-	`, c)
+	test.AssertRendersToMarkup(t, "label/truncate.xml", c)
 }
 
 func TestNewLabelWithData(t *testing.T) {

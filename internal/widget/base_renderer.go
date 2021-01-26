@@ -1,11 +1,6 @@
 package widget
 
-import (
-	"image/color"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
-)
+import "fyne.io/fyne/v2"
 
 // BaseRenderer is a renderer base providing the most common implementations of a part of the
 // widget.Renderer interface.
@@ -16,13 +11,6 @@ type BaseRenderer struct {
 // NewBaseRenderer creates a new BaseRenderer.
 func NewBaseRenderer(objects []fyne.CanvasObject) BaseRenderer {
 	return BaseRenderer{objects}
-}
-
-// BackgroundColor returns the theme background color.
-//
-// Implements: fyne.WidgetRenderer
-func (r *BaseRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 // Destroy does nothing in the base implementation.

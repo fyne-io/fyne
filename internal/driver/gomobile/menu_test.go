@@ -5,11 +5,11 @@ package gomobile
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	internalWidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +38,7 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 	c.resize(fyne.NewSize(100, 100))
 
 	assert.NotNil(t, c.menu)
-	menuObj := c.menu.(*fyne.Container).Objects[0].(*widget.Box).Children[1].(*menuLabel)
+	menuObj := c.menu.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*menuLabel)
 	point := &fyne.PointEvent{Position: fyne.NewPos(10, 10)}
 	menuObj.Tapped(point)
 
@@ -55,18 +55,18 @@ func TestMobileCanvas_Menu(t *testing.T) {
 		fyne.NewMenu(labels[1]))
 
 	c.showMenu(menu)
-	menuObjects := c.menu.(*fyne.Container).Objects[0].(*widget.Box)
-	assert.Equal(t, 3, len(menuObjects.Children))
-	header, ok := menuObjects.Children[0].(*widget.Box)
+	menuObjects := c.menu.(*fyne.Container).Objects[1].(*fyne.Container)
+	assert.Equal(t, 3, len(menuObjects.Objects))
+	header, ok := menuObjects.Objects[0].(*fyne.Container)
 	assert.True(t, ok)
-	closed, ok := header.Children[0].(*widget.Button)
+	closed, ok := header.Objects[0].(*widget.Button)
 	assert.True(t, ok)
 	assert.Equal(t, theme.CancelIcon(), closed.Icon)
 
 	for i := 1; i < 3; i++ {
-		item, ok := menuObjects.Children[i].(*menuLabel)
+		item, ok := menuObjects.Objects[i].(*menuLabel)
 		assert.True(t, ok)
-		assert.Equal(t, labels[i-1], item.label.Text)
+		assert.Equal(t, labels[i-1], item.menu.Label)
 	}
 }
 

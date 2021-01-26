@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -177,6 +177,16 @@ func TestTextGridRender_Whitespace(t *testing.T) {
 
 	assertGridContent(t, grid, `A·b↵
 c`)
+}
+
+func TestTextGridRender_WhitespaceTab(t *testing.T) {
+	grid := NewTextGridFromString("A\n\tb")
+	grid.ShowWhitespace = true
+	grid.Resize(fyne.NewSize(56, 42)) // causes refresh
+
+	assertGridContent(t, grid, `A↵
+→···b`)
+	assert.Equal(t, "A\n\tb", grid.Text())
 }
 
 func TestTextGridRender_RowColor(t *testing.T) {

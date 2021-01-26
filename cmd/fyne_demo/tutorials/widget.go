@@ -6,13 +6,13 @@ import (
 	"net/url"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/data/validation"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 const (
@@ -118,7 +118,7 @@ func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeTextGrid() *widget.TextGrid {
-	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
+	grid := widget.NewTextGridFromString("TextGrid\n\tContent\nZebra")
 	grid.SetStyleRange(0, 4, 0, 7,
 		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 192, A: 128}})
 	grid.SetRowStyle(1, &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}})
@@ -148,7 +148,6 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := container.NewVScroll(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
@@ -191,14 +190,11 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
-		if wrap != fyne.TextTruncate {
-			entryLoremIpsum.Wrapping = wrap
-		}
+		entryLoremIpsum.Wrapping = wrap
 
 		label.Refresh()
 		hyperlink.Refresh()
 		entryLoremIpsum.Refresh()
-		entryLoremIpsumScroller.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
@@ -214,7 +210,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 	grid := makeTextGrid()
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, grid, nil, nil),
-		fixed, entryLoremIpsumScroller, grid)
+		fixed, entryLoremIpsum, grid)
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {
@@ -273,8 +269,8 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 
 	form := &widget.Form{
 		Items: []*widget.FormItem{
-			{Text: "Name", Widget: name},
-			{Text: "Email", Widget: email},
+			{Text: "Name", Widget: name, HintText: "Your full name"},
+			{Text: "Email", Widget: email, HintText: "A valid email address"},
 		},
 		OnCancel: func() {
 			fmt.Println("Cancelled")
@@ -316,7 +312,7 @@ func startProgress() {
 		end := endProgress
 		num := 0.0
 		for num < 1.0 {
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(16 * time.Millisecond)
 			select {
 			case <-end:
 				return
@@ -325,7 +321,7 @@ func startProgress() {
 
 			progress.SetValue(num)
 			fprogress.SetValue(num)
-			num += 0.01
+			num += 0.002
 		}
 
 		progress.SetValue(1)

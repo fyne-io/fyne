@@ -15,6 +15,8 @@ import "C"
 import (
 	"io"
 	"unsafe"
+
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 type secureReadCloser struct {
@@ -73,4 +75,9 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 
 	fileStruct := &secureReadCloser{url: url, closer: f.done}
 	return fileStruct, nil
+}
+
+func registerRepository(d *mobileDriver) {
+	repo := &mobileFileRepo{driver: d}
+	repository.Register("file", repo)
 }

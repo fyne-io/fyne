@@ -5,11 +5,10 @@ import (
 	"image"
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/painter"
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
@@ -223,12 +222,4 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.Point{}, draw.Over)
-}
-
-func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	scaledWidth := internal.ScaleInt(c, wid.Size().Width)
-	scaledHeight := internal.ScaleInt(c, wid.Size().Height)
-	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
-	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
-	draw.Draw(base, bounds, image.NewUniform(cache.Renderer(wid).BackgroundColor()), image.Point{}, draw.Over)
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/app"
-	"fyne.io/fyne/cmd/fyne_settings/settings"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
+	"fyne.io/fyne/v2/container"
 )
 
 func main() {
@@ -14,9 +14,9 @@ func main() {
 	w := a.NewWindow("Fyne Settings")
 
 	appearance := s.LoadAppearanceScreen(w)
-	tabs := widget.NewTabContainer(
-		&widget.TabItem{Text: "Appearance", Icon: s.AppearanceIcon(), Content: appearance})
-	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs := container.NewAppTabs(
+		&container.TabItem{Text: "Appearance", Icon: s.AppearanceIcon(), Content: appearance})
+	tabs.SetTabLocation(container.TabLocationLeading)
 	w.SetContent(tabs)
 
 	w.Resize(fyne.NewSize(480, 480))

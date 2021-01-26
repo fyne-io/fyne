@@ -12,8 +12,7 @@ jobs:
 
     - name: Get dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+        sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
         GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
         GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
         GO111MODULE=off go get golang.org/x/lint/golint

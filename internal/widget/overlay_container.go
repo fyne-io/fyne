@@ -1,10 +1,8 @@
 package widget
 
 import (
-	"image/color"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 )
 
 var _ fyne.Widget = (*OverlayContainer)(nil)
@@ -118,10 +116,6 @@ type overlayRenderer struct {
 }
 
 var _ fyne.WidgetRenderer = (*overlayRenderer)(nil)
-
-func (r *overlayRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
 
 func (r *overlayRenderer) Layout(fyne.Size) {
 }

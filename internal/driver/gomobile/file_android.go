@@ -18,6 +18,7 @@ import (
 	"os"
 	"unsafe"
 
+	"fyne.io/fyne/v2/storage/repository"
 	"github.com/fyne-io/mobile/app"
 )
 
@@ -89,4 +90,10 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	stream := &javaStream{}
 	stream.stream = ret
 	return stream, nil
+}
+
+func registerRepository(d *mobileDriver) {
+	repo := &mobileFileRepo{driver: d}
+	repository.Register("file", repo)
+	repository.Register("content", repo)
 }

@@ -3,9 +3,9 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -33,6 +33,18 @@ func TestToolbar_Prepend(t *testing.T) {
 	toolbar.Prepend(prepend)
 	assert.Equal(t, 2, len(toolbar.Items))
 	assert.Equal(t, prepend, toolbar.Items[0])
+}
+
+func TestToolbar_Replace(t *testing.T) {
+	icon := theme.ContentCutIcon()
+	toolbar := NewToolbar(NewToolbarAction(icon, func() {}))
+	assert.Equal(t, 1, len(toolbar.Items))
+	render := test.WidgetRenderer(toolbar)
+	assert.Equal(t, icon, render.Objects()[0].(*Button).Icon)
+
+	toolbar.Items[0] = NewToolbarAction(theme.HelpIcon(), func() {})
+	toolbar.Refresh()
+	assert.NotEqual(t, icon, render.Objects()[0].(*Button).Icon)
 }
 
 func TestToolbar_ItemPositioning(t *testing.T) {

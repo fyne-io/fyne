@@ -1,0 +1,36 @@
+<canvas padded size="200x400">
+	<content>
+		<widget pos="4,4" size="192x392" type="*widget.List">
+			<widget size="192x392" type="*widget.Scroll">
+				<container size="192x392">
+					<widget size="192x45" type="*widget.listItem">
+						<container pos="8,4" size="180x37">
+							<widget size="20x37" type="*widget.Icon">
+								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
+							</widget>
+							<widget pos="24,0" size="88x37" type="*widget.Label">
+								<text pos="4,8" size="80x21">Test Item 0</text>
+							</widget>
+						</container>
+					</widget>
+					<widget pos="0,46" size="192x45" type="*widget.listItem">
+						<container pos="8,4" size="180x37">
+							<widget size="20x37" type="*widget.Icon">
+								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
+							</widget>
+							<widget pos="24,0" size="88x37" type="*widget.Label">
+								<text pos="4,8" size="80x21">Test Item 1</text>
+							</widget>
+						</container>
+					</widget>
+					<widget size="0x0" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="0x0"/>
+					</widget>
+					<widget pos="4,45" size="184x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="184x1"/>
+					</widget>
+				</container>
+			</widget>
+		</widget>
+	</content>
+</canvas>

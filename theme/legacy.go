@@ -3,13 +3,13 @@ package theme
 import (
 	"image/color"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // FromLegacy returns a 2.0 Theme created from the given LegacyTheme data.
 // This is a transition path and will be removed in the future (probably version 3.0).
 //
-// Since: 2.0.0
+// Since: 2.0
 func FromLegacy(t fyne.LegacyTheme) fyne.Theme {
 	return &legacyWrapper{old: t}
 }

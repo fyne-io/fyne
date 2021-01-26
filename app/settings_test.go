@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 )
 
 func TestSettingsBuildType(t *testing.T) {

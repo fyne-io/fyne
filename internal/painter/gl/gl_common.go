@@ -9,11 +9,9 @@ import (
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/painter"
 )
 
 var textures = make(map[fyne.CanvasObject]Texture, 1024)
@@ -54,23 +52,15 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
-	col := theme.BackgroundColor()
-	if wid, ok := rect.(fyne.Widget); ok {
-		widCol := cache.Renderer(wid).BackgroundColor()
-		if widCol != nil {
-			col = widCol
-		}
-	} else if rect, ok := rect.(*canvas.Rectangle); ok {
-		if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
-			return p.newGlStrokedRectTexture(rect)
-		}
-		if rect.FillColor != nil {
-			col = rect.FillColor
-		}
+func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
+	rect := obj.(*canvas.Rectangle)
+	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+		return p.newGlStrokedRectTexture(rect)
 	}
-
-	return p.imgToTexture(image.NewUniform(col), canvas.ImageScaleSmooth)
+	if rect.FillColor == nil {
+		return NoTexture
+	}
+	return p.imgToTexture(image.NewUniform(rect.FillColor), canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {

@@ -1,12 +1,12 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // TreeNodeID represents the unique id of a tree node.
@@ -35,7 +35,7 @@ type Tree struct {
 	leafMinSize   fyne.Size
 	offset        fyne.Position
 	open          map[TreeNodeID]bool
-	scroller      *ScrollContainer
+	scroller      *widget.Scroll
 	selected      []TreeNodeID
 }
 
@@ -101,7 +101,7 @@ func (t *Tree) CloseBranch(uid TreeNodeID) {
 func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	c := newTreeContent(t)
-	s := NewScrollContainer(c)
+	s := widget.NewScroll(c)
 	t.scroller = s
 	r := &treeRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{s}),
@@ -109,13 +109,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 		content:      c,
 		scroller:     s,
 	}
-	s.onOffsetChanged = func() {
-		if t.offset == s.Offset {
-			return
-		}
-		t.offset = s.Offset
-		c.Refresh()
-	}
+	s.OnScrolled = t.offsetUpdated
 	r.updateMinSizes()
 	r.content.viewport = r.MinSize()
 	return r
@@ -222,7 +216,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 		} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
 			t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
 		}
-		t.scroller.onOffsetChanged()
+		t.offsetUpdated(t.scroller.Offset)
 		// TODO Setting a node as selected should open all parents if they aren't already
 	}
 	t.Refresh()
@@ -261,6 +255,14 @@ func (t *Tree) ensureOpenMap() {
 	}
 }
 
+func (t *Tree) offsetUpdated(pos fyne.Position) {
+	if t.offset == pos {
+		return
+	}
+	t.offset = pos
+	t.scroller.Content.Refresh()
+}
+
 func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
 	if isBranch := t.IsBranch; isBranch != nil {
 		if isBranch(uid) {
@@ -289,7 +291,7 @@ type treeRenderer struct {
 	widget.BaseRenderer
 	tree     *Tree
 	content  *treeContent
-	scroller *ScrollContainer
+	scroller *widget.Scroll
 }
 
 func (r *treeRenderer) MinSize() (min fyne.Size) {
@@ -590,10 +592,12 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
+	indicator := canvas.NewRectangle(theme.HoverColor())
+	indicator.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeNode:     n,
-		indicator:    canvas.NewRectangle(theme.BackgroundColor()),
+		indicator:    indicator,
 	}
 }
 
@@ -703,10 +707,12 @@ func (r *treeNodeRenderer) partialRefresh() {
 	}
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
 		r.indicator.FillColor = theme.PrimaryColor()
+		r.indicator.Show()
 	} else if r.treeNode.hovered {
 		r.indicator.FillColor = theme.HoverColor()
+		r.indicator.Show()
 	} else {
-		r.indicator.FillColor = theme.BackgroundColor()
+		r.indicator.Hide()
 	}
 	r.indicator.Refresh()
 	canvas.Refresh(r.treeNode.super())

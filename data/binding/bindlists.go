@@ -5,7 +5,7 @@ package binding
 
 // BoolList supports binding a list of bool values.
 //
-// Since: 2.0.0
+// Since: 2.0
 type BoolList interface {
 	DataList
 
@@ -19,7 +19,7 @@ type BoolList interface {
 
 // ExternalBoolList supports binding a list of bool values from an external variable.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalBoolList interface {
 	BoolList
 
@@ -28,7 +28,7 @@ type ExternalBoolList interface {
 
 // NewBoolList returns a bindable list of bool values.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewBoolList() BoolList {
 	return &boundBoolList{val: &[]bool{}}
 }
@@ -36,7 +36,7 @@ func NewBoolList() BoolList {
 // BindBoolList returns a bound list of bool values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindBoolList(v *[]bool) ExternalBoolList {
 	if v == nil {
 		return NewBoolList().(ExternalBoolList)
@@ -129,9 +129,13 @@ func (l *boundBoolList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalBoolListItem).lock.Lock()
 			err = item.(*boundExternalBoolListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalBoolListItem).lock.Unlock()
 		} else {
+			item.(*boundBoolListItem).lock.Lock()
 			err = item.(*boundBoolListItem).doSet((*l.val)[i])
+			item.(*boundBoolListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -214,7 +218,7 @@ func (b *boundExternalBoolListItem) setIfChanged(val bool) error {
 
 // FloatList supports binding a list of float64 values.
 //
-// Since: 2.0.0
+// Since: 2.0
 type FloatList interface {
 	DataList
 
@@ -228,7 +232,7 @@ type FloatList interface {
 
 // ExternalFloatList supports binding a list of float64 values from an external variable.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalFloatList interface {
 	FloatList
 
@@ -237,7 +241,7 @@ type ExternalFloatList interface {
 
 // NewFloatList returns a bindable list of float64 values.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewFloatList() FloatList {
 	return &boundFloatList{val: &[]float64{}}
 }
@@ -245,7 +249,7 @@ func NewFloatList() FloatList {
 // BindFloatList returns a bound list of float64 values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindFloatList(v *[]float64) ExternalFloatList {
 	if v == nil {
 		return NewFloatList().(ExternalFloatList)
@@ -338,9 +342,13 @@ func (l *boundFloatList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalFloatListItem).lock.Lock()
 			err = item.(*boundExternalFloatListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalFloatListItem).lock.Unlock()
 		} else {
+			item.(*boundFloatListItem).lock.Lock()
 			err = item.(*boundFloatListItem).doSet((*l.val)[i])
+			item.(*boundFloatListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -423,7 +431,7 @@ func (b *boundExternalFloatListItem) setIfChanged(val float64) error {
 
 // IntList supports binding a list of int values.
 //
-// Since: 2.0.0
+// Since: 2.0
 type IntList interface {
 	DataList
 
@@ -437,7 +445,7 @@ type IntList interface {
 
 // ExternalIntList supports binding a list of int values from an external variable.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalIntList interface {
 	IntList
 
@@ -446,7 +454,7 @@ type ExternalIntList interface {
 
 // NewIntList returns a bindable list of int values.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewIntList() IntList {
 	return &boundIntList{val: &[]int{}}
 }
@@ -454,7 +462,7 @@ func NewIntList() IntList {
 // BindIntList returns a bound list of int values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindIntList(v *[]int) ExternalIntList {
 	if v == nil {
 		return NewIntList().(ExternalIntList)
@@ -547,9 +555,13 @@ func (l *boundIntList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalIntListItem).lock.Lock()
 			err = item.(*boundExternalIntListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalIntListItem).lock.Unlock()
 		} else {
+			item.(*boundIntListItem).lock.Lock()
 			err = item.(*boundIntListItem).doSet((*l.val)[i])
+			item.(*boundIntListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -632,7 +644,7 @@ func (b *boundExternalIntListItem) setIfChanged(val int) error {
 
 // RuneList supports binding a list of rune values.
 //
-// Since: 2.0.0
+// Since: 2.0
 type RuneList interface {
 	DataList
 
@@ -646,7 +658,7 @@ type RuneList interface {
 
 // ExternalRuneList supports binding a list of rune values from an external variable.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalRuneList interface {
 	RuneList
 
@@ -655,7 +667,7 @@ type ExternalRuneList interface {
 
 // NewRuneList returns a bindable list of rune values.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewRuneList() RuneList {
 	return &boundRuneList{val: &[]rune{}}
 }
@@ -663,7 +675,7 @@ func NewRuneList() RuneList {
 // BindRuneList returns a bound list of rune values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindRuneList(v *[]rune) ExternalRuneList {
 	if v == nil {
 		return NewRuneList().(ExternalRuneList)
@@ -756,9 +768,13 @@ func (l *boundRuneList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalRuneListItem).lock.Lock()
 			err = item.(*boundExternalRuneListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalRuneListItem).lock.Unlock()
 		} else {
+			item.(*boundRuneListItem).lock.Lock()
 			err = item.(*boundRuneListItem).doSet((*l.val)[i])
+			item.(*boundRuneListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -841,7 +857,7 @@ func (b *boundExternalRuneListItem) setIfChanged(val rune) error {
 
 // StringList supports binding a list of string values.
 //
-// Since: 2.0.0
+// Since: 2.0
 type StringList interface {
 	DataList
 
@@ -855,7 +871,7 @@ type StringList interface {
 
 // ExternalStringList supports binding a list of string values from an external variable.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalStringList interface {
 	StringList
 
@@ -864,7 +880,7 @@ type ExternalStringList interface {
 
 // NewStringList returns a bindable list of string values.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewStringList() StringList {
 	return &boundStringList{val: &[]string{}}
 }
@@ -872,7 +888,7 @@ func NewStringList() StringList {
 // BindStringList returns a bound list of string values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindStringList(v *[]string) ExternalStringList {
 	if v == nil {
 		return NewStringList().(ExternalStringList)
@@ -965,9 +981,13 @@ func (l *boundStringList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
+			item.(*boundExternalStringListItem).lock.Lock()
 			err = item.(*boundExternalStringListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalStringListItem).lock.Unlock()
 		} else {
+			item.(*boundStringListItem).lock.Lock()
 			err = item.(*boundStringListItem).doSet((*l.val)[i])
+			item.(*boundStringListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err

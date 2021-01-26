@@ -4,12 +4,12 @@ import (
 	"errors"
 	"reflect"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // DataMap is the base interface for all bindable data maps.
 //
-// Since: 2.0.0
+// Since: 2.0
 type DataMap interface {
 	DataItem
 	GetItem(string) (DataItem, error)
@@ -18,7 +18,7 @@ type DataMap interface {
 
 // ExternalUntypedMap is a map data binding with all values untyped (interface{}), connected to an external data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 type ExternalUntypedMap interface {
 	UntypedMap
 	Reload() error
@@ -26,7 +26,7 @@ type ExternalUntypedMap interface {
 
 // UntypedMap is a map data binding with all values Untyped (interface{}).
 //
-// Since: 2.0.0
+// Since: 2.0
 type UntypedMap interface {
 	DataMap
 	Delete(string)
@@ -38,7 +38,7 @@ type UntypedMap interface {
 
 // NewUntypedMap creates a new, empty map binding of string to interface{}.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewUntypedMap() UntypedMap {
 	return &mapBase{items: make(map[string]DataItem), val: &map[string]interface{}{}}
 }
@@ -46,7 +46,7 @@ func NewUntypedMap() UntypedMap {
 // BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
 // If your code changes the content of the map this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 	if d == nil {
 		return NewUntypedMap().(ExternalUntypedMap)
@@ -62,7 +62,7 @@ func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 
 // Struct is the base interface for a bound struct type.
 //
-// Since: 2.0.0
+// Since: 2.0
 type Struct interface {
 	DataMap
 	GetValue(string) (interface{}, error)
@@ -74,7 +74,7 @@ type Struct interface {
 // The key for each item is a string representation of each exported field with the value set as an interface{}.
 // Only exported fields are included.
 //
-// Since: 2.0.0
+// Since: 2.0
 func BindStruct(i interface{}) Struct {
 	if i == nil {
 		return NewUntypedMap().(Struct)
@@ -109,7 +109,7 @@ func BindStruct(i interface{}) Struct {
 
 // Untyped id used tpo represent binding an interface{} value.
 //
-// Since: 2.0.0
+// Since: 2.0
 type Untyped interface {
 	DataItem
 	get() (interface{}, error)

@@ -1,11 +1,12 @@
 package gomobile
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 type window struct {
@@ -99,9 +100,7 @@ func (w *window) SetCloseIntercept(callback func()) {
 
 func (w *window) Show() {
 	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
-	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
-		w.canvas.showMenu(menu)
-	})
+	menuButton := w.newMenuButton(menu)
 	if menu == nil {
 		menuButton.Hide()
 	}
@@ -112,12 +111,12 @@ func (w *window) Show() {
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
-		w.canvas.windowHead = widget.NewHBox(menuButton,
+		w.canvas.windowHead = container.NewHBox(menuButton,
 			layout.NewSpacer(), title, layout.NewSpacer(), exit)
 
 		w.canvas.resize(w.canvas.size)
 	} else {
-		w.canvas.windowHead = widget.NewHBox(menuButton)
+		w.canvas.windowHead = container.NewHBox(menuButton)
 	}
 	w.visible = true
 

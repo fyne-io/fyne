@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/data/binding"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 const defaultText = "%d%%"
 
 type progressRenderer struct {
 	widget.BaseRenderer
-	bar      *canvas.Rectangle
-	label    *canvas.Text
-	progress *ProgressBar
+	background, bar *canvas.Rectangle
+	label           *canvas.Text
+	progress        *ProgressBar
 }
 
 // MinSize calculates the minimum size of a progress bar.
@@ -57,25 +57,24 @@ func (p *progressRenderer) updateBar() {
 
 // Layout the components of the check widget
 func (p *progressRenderer) Layout(size fyne.Size) {
+	p.background.Resize(size)
 	p.label.Resize(size)
 	p.updateBar()
 }
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
+	p.background.FillColor = progressBackgroundColor()
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.ForegroundColor()
 	p.label.TextSize = theme.TextSize()
 }
 
-func (p *progressRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
-}
-
 func (p *progressRenderer) Refresh() {
 	p.applyTheme()
 	p.updateBar()
-
+	p.background.Refresh()
+	p.bar.Refresh()
 	canvas.Refresh(p.progress.super())
 }
 
@@ -98,7 +97,7 @@ type ProgressBar struct {
 // Bind connects the specified data source to this ProgressBar.
 // The current value will be displayed and any changes in the data will cause the widget to update.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (p *ProgressBar) Bind(data binding.Float) {
 	p.Unbind()
 	p.valueSource = data
@@ -137,16 +136,17 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
+	background := canvas.NewRectangle(theme.ShadowColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	label := canvas.NewText("0%", theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
+	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{background, bar, label}), background, bar, label, p}
 }
 
 // Unbind disconnects any configured data source from this ProgressBar.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func (p *ProgressBar) Unbind() {
 	if p.valueSource == nil || p.valueListener == nil {
 		return
@@ -163,16 +163,22 @@ func (p *ProgressBar) Unbind() {
 func NewProgressBar() *ProgressBar {
 	p := &ProgressBar{Min: 0, Max: 1}
 
-	Renderer(p).Layout(p.MinSize())
+	cache.Renderer(p).Layout(p.MinSize())
 	return p
 }
 
 // NewProgressBarWithData returns a progress bar connected with the specified data source.
 //
-// Since: 2.0.0
+// Since: 2.0
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
 	p.Bind(data)
 
 	return p
+}
+
+func progressBackgroundColor() color.Color {
+	r, g, b, a := theme.PrimaryColor().RGBA()
+	faded := uint8(a) / 3
+	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }
