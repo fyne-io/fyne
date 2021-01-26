@@ -200,7 +200,7 @@ func (t *baseTabs) showPopUp(button *widget.Button, items []*fyne.MenuItem) {
 }
 
 type baseTabsRenderer struct {
-	animation *fyne.Animation
+	positionAnimation, sizeAnimation *fyne.Animation
 
 	action             *widget.Button
 	bar                *fyne.Container
@@ -218,25 +218,44 @@ func (r *baseTabsRenderer) Objects() []fyne.CanvasObject {
 	return []fyne.CanvasObject{r.bar, r.divider, r.indicator}
 }
 
-func (r *baseTabsRenderer) animateIndicator(p fyne.Position, s fyne.Size) {
+func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, animate bool) {
+	if r.positionAnimation != nil {
+		r.positionAnimation.Stop()
+		r.positionAnimation = nil
+	}
+	if r.sizeAnimation != nil {
+		r.sizeAnimation.Stop()
+		r.sizeAnimation = nil
+	}
+
 	r.indicator.Show()
-	if r.indicator.Position().IsZero() || r.indicator.Position() == p {
-		r.indicator.Move(p)
-		r.indicator.Resize(s)
-	} else if r.animation == nil {
-		r.animation = canvas.NewPositionAnimation(r.indicator.Position(), p, canvas.DurationShort, func(p fyne.Position) {
+	if r.indicator.Position().IsZero() || r.indicator.Position() == pos {
+		r.indicator.Move(pos)
+		r.indicator.Resize(siz)
+		return
+	}
+	if animate {
+		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
 			r.indicator.Move(p)
 			canvas.Refresh(r.indicator)
-			if p == p {
-				r.animation = nil
+			if pos == p {
+				r.positionAnimation = nil
 			}
 		})
-		r.animation.Start()
-
-		canvas.NewSizeAnimation(r.indicator.Size(), s, canvas.DurationShort, func(s fyne.Size) {
+		r.sizeAnimation = canvas.NewSizeAnimation(r.indicator.Size(), siz, canvas.DurationShort, func(s fyne.Size) {
 			r.indicator.Resize(s)
 			canvas.Refresh(r.indicator)
-		}).Start()
+			if siz == s {
+				r.sizeAnimation = nil
+			}
+		})
+
+		r.positionAnimation.Start()
+		r.sizeAnimation.Start()
+	} else {
+		r.indicator.Move(pos)
+		r.indicator.Resize(siz)
+		r.indicator.Refresh()
 	}
 }
 

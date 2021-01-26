@@ -56,7 +56,7 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
 	r.updateTabs(1)
-	r.moveIndicator()
+	r.updateIndicator()
 	return r
 }
 
@@ -155,7 +155,7 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 	}
 
 	r.layout(&r.appTabs.baseTabs, size)
-	r.moveIndicator()
+	r.updateIndicator()
 }
 
 func (r *appTabsRenderer) MinSize() fyne.Size {
@@ -241,7 +241,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	return buttons
 }
 
-func (r *appTabsRenderer) moveIndicator() {
+func (r *appTabsRenderer) updateIndicator() {
 	var selectedPos fyne.Position
 	var selectedSize fyne.Size
 
@@ -275,7 +275,7 @@ func (r *appTabsRenderer) moveIndicator() {
 		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
 	}
 
-	r.animateIndicator(indicatorPos, indicatorSize)
+	r.moveIndicator(indicatorPos, indicatorSize, true)
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {
