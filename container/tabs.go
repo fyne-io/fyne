@@ -362,9 +362,9 @@ func (r *baseTabsRenderer) minSize(t *baseTabs) fyne.Size {
 func (r *baseTabsRenderer) refresh(t *baseTabs) {
 	if r.action != nil {
 		if t.tabLocation == TabLocationLeading || t.tabLocation == TabLocationTrailing {
-			r.action.SetIcon(theme.DotsVerticalIcon())
+			r.action.SetIcon(theme.MoreVerticalIcon())
 		} else {
-			r.action.SetIcon(theme.DotsHorizontalIcon())
+			r.action.SetIcon(theme.MoreHorizontalIcon())
 		}
 	}
 

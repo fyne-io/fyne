@@ -123,9 +123,6 @@ func loadIcons() []iconInfo {
 		{"DocumentPrintIcon", theme.DocumentPrintIcon()},
 		{"DocumentSaveIcon", theme.DocumentSaveIcon()},
 
-		{"DotsHorizontalIcon", theme.DotsHorizontalIcon()},
-		{"DotsVerticalIcon", theme.DotsVerticalIcon()},
-
 		{"FileIcon", theme.FileIcon()},
 		{"FileApplicationIcon", theme.FileApplicationIcon()},
 		{"FileAudioIcon", theme.FileAudioIcon()},
@@ -152,6 +149,9 @@ func loadIcons() []iconInfo {
 		{"ZoomFitIcon", theme.ZoomFitIcon()},
 		{"ZoomInIcon", theme.ZoomInIcon()},
 		{"ZoomOutIcon", theme.ZoomOutIcon()},
+
+		{"MoreHorizontalIcon", theme.MoreHorizontalIcon()},
+		{"MoreVerticalIcon", theme.MoreVerticalIcon()},
 
 		{"MoveDownIcon", theme.MoveDownIcon()},
 		{"MoveUpIcon", theme.MoveUpIcon()},

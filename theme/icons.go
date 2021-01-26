@@ -160,15 +160,15 @@ const (
 	// Since: 2.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
 
-	// IconNameDotsHorizontal is the name of theme lookup for three horizontal dots.
+	// IconNameMoreHorizontal is the name of theme lookup for horizontal more.
 	//
 	// Since 2.0
-	IconNameDotsHorizontal fyne.ThemeIconName = "dotsHorizontal"
+	IconNameMoreHorizontal fyne.ThemeIconName = "moreHorizontal"
 
-	// IconNameDotsVertical is the name of theme lookup for three vertical dots.
+	// IconNameMoreVertical is the name of theme lookup for vertical more.
 	//
 	// Since 2.0
-	IconNameDotsVertical fyne.ThemeIconName = "dotsVertical"
+	IconNameMoreVertical fyne.ThemeIconName = "moreVertical"
 
 	// IconNameMailAttachment is the name of theme lookup for mail attachment icon.
 	//
@@ -449,8 +449,8 @@ var (
 		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
 		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
 
-		IconNameDotsHorizontal: NewThemedResource(dotshorizontalIconRes),
-		IconNameDotsVertical:   NewThemedResource(dotsverticalIconRes),
+		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
+		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
 
 		IconNameInfo:     NewThemedResource(infoIconRes),
 		IconNameQuestion: NewThemedResource(questionIconRes),
@@ -807,14 +807,14 @@ func DocumentSaveIcon() fyne.Resource {
 	return safeIconLookup(IconNameDocumentSave)
 }
 
-// DotsHorizontalIcon returns a resource containing the standard horizontal three dots icon for the current theme
-func DotsHorizontalIcon() fyne.Resource {
-	return current().Icon(IconNameDotsHorizontal)
+// MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
+func MoreHorizontalIcon() fyne.Resource {
+	return current().Icon(IconNameMoreHorizontal)
 }
 
-// DotsVerticalIcon returns a resource containing the standard vertical three dots icon for the current theme
-func DotsVerticalIcon() fyne.Resource {
-	return current().Icon(IconNameDotsVertical)
+// MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
+func MoreVerticalIcon() fyne.Resource {
+	return current().Icon(IconNameMoreVertical)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
