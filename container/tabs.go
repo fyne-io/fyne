@@ -389,7 +389,7 @@ func (b *tabButton) MinSize() fyne.Size {
 
 func (b *tabButton) MouseIn(e *desktop.MouseEvent) {
 	b.hovered = true
-	canvas.Refresh(b)
+	b.Refresh()
 }
 
 func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
@@ -397,7 +397,7 @@ func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
 
 func (b *tabButton) MouseOut() {
 	b.hovered = false
-	canvas.Refresh(b)
+	b.Refresh()
 }
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
