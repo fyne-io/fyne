@@ -15,6 +15,23 @@ func TestContainer_Add(t *testing.T) {
 	assert.Equal(t, 1, len(container.Objects))
 }
 
+func TestContainer_Prepend(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout()
+	assert.Equal(t, 0, len(container.Objects))
+
+	container.Prepend(box)
+	assert.Equal(t, 1, len(container.Objects))
+
+	box2 := new(dummyObject)
+
+	container.Prepend(box2)
+	assert.Equal(t, 2, len(container.Objects))
+
+	assert.Same(t, box2, container.Objects[0])
+	assert.Same(t, box, container.Objects[1])
+}
+
 func TestContainer_CustomLayout(t *testing.T) {
 	box := new(dummyObject)
 	layout := new(customLayout)
