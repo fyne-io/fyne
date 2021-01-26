@@ -499,7 +499,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		return
 	}
 	if e.cursorAnim != nil {
-		e.cursorAnim.TemporaryStop()
+		e.cursorAnim.temporaryStop()
 	}
 	e.propertyLock.RLock()
 	provider := e.textProvider()
@@ -1268,7 +1268,7 @@ type entryContentRenderer struct {
 }
 
 func (r *entryContentRenderer) Destroy() {
-	r.content.entry.cursorAnim.Stop()
+	r.content.entry.cursorAnim.stop()
 }
 
 func (r *entryContentRenderer) Layout(size fyne.Size) {
@@ -1318,9 +1318,9 @@ func (r *entryContentRenderer) Refresh() {
 
 	if focused {
 		r.cursor.Show()
-		r.content.entry.cursorAnim.Start()
+		r.content.entry.cursorAnim.start()
 	} else {
-		r.content.entry.cursorAnim.Stop()
+		r.content.entry.cursorAnim.stop()
 		r.cursor.Hide()
 	}
 	r.moveCursor()

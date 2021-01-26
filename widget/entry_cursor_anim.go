@@ -12,25 +12,25 @@ import (
 
 type safeCounter struct {
 	mu  sync.RWMutex
-	cnt int
+	val int
 }
 
 func (c *safeCounter) Inc(n int) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.cnt += n
+	c.val += n
 }
 
 func (c *safeCounter) Value() int {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	return c.cnt
+	return c.val
 }
 
 func (c *safeCounter) Reset() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.cnt = 0
+	c.val = 0
 }
 
 const cursorStopTimex10ms = 35 // stop time in multiple of 10 ms
@@ -80,10 +80,9 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 }
 
 // Start starts cursor animation.
-func (a *entryCursorAnimation) Start() {
+func (a *entryCursorAnimation) start() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	// anim should be nil and current state should be stopped
 	if a.anim != nil || a.state != cursorStateStopped {
 		return
 	}
@@ -97,12 +96,10 @@ func (a *entryCursorAnimation) Start() {
 		}()
 		for {
 			a.sleepFn(10 * time.Millisecond)
-			// >>>> lock
 			a.mu.RLock()
 			tempStop := a.state == cursorStateTemporarilyStopped
 			cancel := a.anim == nil
 			a.mu.RUnlock()
-			// <<<< unlock
 			if cancel {
 				return
 			}
@@ -110,23 +107,22 @@ func (a *entryCursorAnimation) Start() {
 				continue
 			}
 			a.counter.Inc(1)
-			if a.counter.Value() == cursorStopTimex10ms {
-				// >>>> lock
-				a.mu.Lock()
-				if a.anim != nil {
-					a.anim.Start()
-				}
-				a.state = cursorStateRunning
-				a.mu.Unlock()
-				// <<<< unlock
+			if a.counter.Value() != cursorStopTimex10ms {
+				continue
 			}
+			a.mu.Lock()
+			if a.anim != nil {
+				a.anim.Start()
+			}
+			a.state = cursorStateRunning
+			a.mu.Unlock()
 		}
 	}()
 	a.anim.Start()
 }
 
 // TemporaryStop temporarily stops the cursor by "cursorStopTimex10ms".
-func (a *entryCursorAnimation) TemporaryStop() {
+func (a *entryCursorAnimation) temporaryStop() {
 	a.counter.Reset()
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -146,7 +142,7 @@ func (a *entryCursorAnimation) TemporaryStop() {
 }
 
 // Stop stops cursor animation.
-func (a *entryCursorAnimation) Stop() {
+func (a *entryCursorAnimation) stop() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if a.anim != nil {

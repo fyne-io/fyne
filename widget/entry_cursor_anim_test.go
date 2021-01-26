@@ -25,7 +25,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	}
 
 	// start animation
-	a.Start()
+	a.start()
 	<-cycle
 	assert.False(t, a.inverted)
 	assert.Equal(t, cursorStateRunning, a.state)
@@ -45,7 +45,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	assert.Zero(t, a.counter.Value())
 
 	// now call a TemporaryStop()
-	a.TemporaryStop()
+	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateTemporarilyStopped, a.state)
 	assert.NotNil(t, a.anim)
@@ -85,7 +85,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	assert.Equal(t, cursorStopTimex10ms, a.counter.Value())
 
 	// temporary stop again
-	a.TemporaryStop()
+	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateTemporarilyStopped, a.state)
 	assert.NotNil(t, a.anim)
@@ -103,7 +103,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	}
 
 	// temporary stop again (counter should be resetted)
-	a.TemporaryStop()
+	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateTemporarilyStopped, a.state)
 	assert.NotNil(t, a.anim)
@@ -121,7 +121,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	}
 
 	// stop the animation
-	a.Stop()
+	a.stop()
 	sleeper <- 1
 	time.Sleep(1 * time.Millisecond)
 	runtime.Gosched()
@@ -132,13 +132,13 @@ func TestEntryCursorAnim(t *testing.T) {
 	assert.Equal(t, 10, a.counter.Value())
 
 	// calling a.TemporaryStop() on stopped animation, does not do anything (just reset the counter)
-	a.TemporaryStop()
+	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateStopped, a.state)
 	assert.Nil(t, a.anim)
 	assert.Zero(t, a.counter.Value())
 
-	assert.NotPanics(t, func() { a.TemporaryStop() })
-	assert.NotPanics(t, func() { a.Start() })
-	assert.NotPanics(t, func() { a.Stop() })
+	assert.NotPanics(t, func() { a.temporaryStop() })
+	assert.NotPanics(t, func() { a.start() })
+	assert.NotPanics(t, func() { a.stop() })
 }
