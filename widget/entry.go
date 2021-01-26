@@ -499,7 +499,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		return
 	}
 	if e.cursorAnim != nil {
-		e.cursorAnim.TemporaryPause()
+		e.cursorAnim.TemporaryStop()
 	}
 	e.propertyLock.RLock()
 	provider := e.textProvider()

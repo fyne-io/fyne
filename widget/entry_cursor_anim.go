@@ -33,14 +33,21 @@ func (c *safeCounter) Reset() {
 	c.cnt = 0
 }
 
-const cursorPauseTimex10ms = 35 // pause time in multiple of 10 ms
+const cursorStopTimex10ms = 35 // stop time in multiple of 10 ms
+
+type cursorState int
+
+const (
+	cursorStateRunning cursorState = iota
+	cursorStateTemporarilyStopped
+	cursorStateStopped
+)
 
 type entryCursorAnimation struct {
 	mu       *sync.RWMutex
 	counter  *safeCounter
 	inverted bool
-	paused   bool
-	stopped  bool
+	state    cursorState
 	cursor   *canvas.Rectangle
 	anim     *fyne.Animation
 	sleepFn  func(time.Duration) // added for tests, do not change it outside of tests!!
@@ -49,7 +56,7 @@ type entryCursorAnimation struct {
 func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
 	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor, counter: &safeCounter{}}
 	a.inverted = false
-	a.stopped = true
+	a.state = cursorStateStopped
 	a.sleepFn = time.Sleep
 	return a
 }
@@ -77,39 +84,39 @@ func (a *entryCursorAnimation) Start() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	// anim should be nil and current state should be stopped
-	if a.anim != nil || !a.stopped {
+	if a.anim != nil || a.state != cursorStateStopped {
 		return
 	}
 	a.anim = a.createAnim(false)
-	a.stopped = false
+	a.state = cursorStateRunning
 	go func() {
 		defer func() {
 			a.mu.Lock()
-			a.stopped = true
+			a.state = cursorStateStopped
 			a.mu.Unlock()
 		}()
 		for {
 			a.sleepFn(10 * time.Millisecond)
 			// >>>> lock
 			a.mu.RLock()
-			paused := a.paused
+			tempStop := a.state == cursorStateTemporarilyStopped
 			cancel := a.anim == nil
 			a.mu.RUnlock()
 			// <<<< unlock
 			if cancel {
 				return
 			}
-			if !paused {
+			if !tempStop {
 				continue
 			}
 			a.counter.Inc(1)
-			if a.counter.Value() == cursorPauseTimex10ms {
+			if a.counter.Value() == cursorStopTimex10ms {
 				// >>>> lock
 				a.mu.Lock()
 				if a.anim != nil {
 					a.anim.Start()
 				}
-				a.paused = false
+				a.state = cursorStateRunning
 				a.mu.Unlock()
 				// <<<< unlock
 			}
@@ -118,8 +125,8 @@ func (a *entryCursorAnimation) Start() {
 	a.anim.Start()
 }
 
-// TemporaryPause pauses temporarily the cursor by `cursorPauseTimex10ms`.
-func (a *entryCursorAnimation) TemporaryPause() {
+// TemporaryStop temporarily stops the cursor by "cursorStopTimex10ms".
+func (a *entryCursorAnimation) TemporaryStop() {
 	a.counter.Reset()
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -130,10 +137,10 @@ func (a *entryCursorAnimation) TemporaryPause() {
 	if !a.inverted {
 		a.anim = a.createAnim(true)
 	}
-	if a.paused {
+	if a.state == cursorStateTemporarilyStopped {
 		return
 	}
-	a.paused = true
+	a.state = cursorStateTemporarilyStopped
 	a.cursor.FillColor = theme.PrimaryColor()
 	a.cursor.Refresh()
 }
@@ -144,7 +151,6 @@ func (a *entryCursorAnimation) Stop() {
 	defer a.mu.Unlock()
 	if a.anim != nil {
 		a.anim.Stop()
-		a.paused = false
 		a.anim = nil
 	}
 }
