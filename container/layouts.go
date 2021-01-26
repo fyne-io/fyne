@@ -97,3 +97,15 @@ func NewPadded(objects ...fyne.CanvasObject) *fyne.Container {
 func NewVBox(objects ...fyne.CanvasObject) *fyne.Container {
 	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), objects...)
 }
+
+// NewRow creates a new FlexRow container.
+// TODO version??
+func NewRow(axisAlignment fyne.AxisAlignment, objects ...fyne.CanvasObject) *fyne.Container {
+	return New(layout.NewFlexLayout(fyne.AxisHorizontal, &axisAlignment), objects...)
+}
+
+// NewColumn creates a new FlexColumn container.
+// TODO version??
+func NewColumn(axisAlignment fyne.AxisAlignment, objects ...fyne.CanvasObject) *fyne.Container {
+	return New(layout.NewFlexLayout(fyne.AxisVertical, &axisAlignment), objects...)
+}

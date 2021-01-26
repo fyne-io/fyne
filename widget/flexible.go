@@ -45,6 +45,10 @@ func (f *Flexible) Flex() int {
 	return f.flex
 }
 
+// ===============================================================
+// Renderer
+// ===============================================================
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (f *Flexible) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{f.child}

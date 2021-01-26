@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -22,9 +22,16 @@ func main() {
 	e := newMyEntry("Hello world")
 	hello := widget.NewLabel("hello2")
 
-	c := fyne.NewContainerWithLayout(layout.NewRow(
-		layout.MainAxisAlignmentSpaceAround, layout.CrossAxisAlignmentCenter,
-	), ml, widget.NewExpanded(e), hello)
+	c := container.NewRow(
+		fyne.AxisAlignment{
+			MainAxisAlignment:  fyne.MainAxisAlignmentCenter,
+			CrossAxisAlignment: fyne.CrossAxisAlignmentCenter,
+		},
+		ml, widget.NewExpanded(e), hello,
+	)
+	// c := fyne.NewContainerWithLayout(layout.NewRow(
+	// 	layout.MainAxisAlignmentSpaceAround, layout.CrossAxisAlignmentCenter,
+	// ), ml, widget.NewExpanded(e), hello)
 
 	// c2 := fyne.NewContainerWithLayout(layout.NewColumn(
 	// 	layout.MainAxisAlignmentCenter, layout.CrossAxisAlignmentCenter,

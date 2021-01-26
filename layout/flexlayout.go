@@ -6,82 +6,22 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-type (
-	// Axis represents the two cardinal directions in two dimensions.
-	Axis int
-	// MainAxisAlignment represents how the children should be placed along the main axis in a flex layout.
-	MainAxisAlignment int
-	// CrossAxisAlignment represents how the children should be placed along the cross axis in a flex layout.
-	CrossAxisAlignment int
-)
-
-// Axis options
-const (
-	AxisHorizontal Axis = iota
-	AxisVertical
-)
-
-// MainAxisAlignment options
-const (
-	// Place the children as close to the start of the main axis as possible.
-	MainAxisAlignmentStart MainAxisAlignment = iota
-	// Place the children as close to the end of the main axis as possible.
-	MainAxisAlignmentEnd
-	// Place the children as close to the middle of the main axis as possible.
-	MainAxisAlignmentCenter
-	// Place the free space evenly between the children.
-	MainAxisAlignmentSpaceBetween
-	// Place the free space evenly between the children as well as half of that
-	// space before and after the first and last child.
-	MainAxisAlignmentSpaceAround
-	// Place the free space evenly between the children as well as before and
-	// after the first and last child.
-	MainAxisAlignmentSpaceEvenly
-)
-
-// CrossAxisAlignment options
-const (
-	// Place the children so that their centers align with the middle of the
-	// cross axis.
-	CrossAxisAlignmentCenter CrossAxisAlignment = iota
-	// Place the children with their start edge aligned with the start side of
-	// the cross axis.
-	CrossAxisAlignmentStart
-	// Place the children as close to the end of the cross axis as possible.
-	CrossAxisAlignmentEnd
-	// Place the children along the cross axis such that their baselines match.
-	CrossAxisAlignmentBaseline
-)
-
-// NewRow creates a new FlexLayout instance with AxisHorizontal.
-//
-func NewRow(
-	mainAxisAlignment MainAxisAlignment,
-	crossAxisAlignment CrossAxisAlignment,
-) fyne.Layout {
-	return &flexLayout{
-		Axis: AxisHorizontal, MainAxisAlignment: mainAxisAlignment, CrossAxisAlignment: crossAxisAlignment,
-	}
-}
-
-// NewColumn creates a new FlexLayout instance with AxisVertical.
-//
-func NewColumn(
-	mainAxisAlignment MainAxisAlignment,
-	crossAxisAlignment CrossAxisAlignment,
-) fyne.Layout {
-	return &flexLayout{
-		Axis: AxisVertical, MainAxisAlignment: mainAxisAlignment, CrossAxisAlignment: crossAxisAlignment,
-	}
-}
-
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*flexLayout)(nil)
 
 type flexLayout struct {
-	Axis               Axis
-	MainAxisAlignment  MainAxisAlignment
-	CrossAxisAlignment CrossAxisAlignment
+	Axis               fyne.Axis
+	MainAxisAlignment  fyne.MainAxisAlignment
+	CrossAxisAlignment fyne.CrossAxisAlignment
+}
+
+// NewFlexLayout creates a new FlexLayout instance.
+func NewFlexLayout(axis fyne.Axis, axisAlignment *fyne.AxisAlignment) fyne.Layout {
+	return &flexLayout{
+		Axis:               axis,
+		MainAxisAlignment:  axisAlignment.MainAxisAlignment,
+		CrossAxisAlignment: axisAlignment.CrossAxisAlignment,
+	}
 }
 
 // ===============================================================
@@ -90,7 +30,7 @@ type flexLayout struct {
 
 // Kind returns what kind of flex layout is this object based on Axis field.
 func (l *flexLayout) kind() string {
-	if l.Axis == AxisVertical {
+	if l.Axis == fyne.AxisVertical {
 		return "ColumnFlexLayout"
 	}
 	return "RowFlexLayout"
@@ -111,12 +51,12 @@ func (l *flexLayout) getCrossSize(obj fyne.CanvasObject, min bool) float32 {
 	minSize := obj.MinSize()
 	curSize := obj.Size()
 	switch l.Axis {
-	case AxisHorizontal:
+	case fyne.AxisHorizontal:
 		if min {
 			return minSize.Height
 		}
 		return fyne.Max(curSize.Height, minSize.Height)
-	case AxisVertical:
+	case fyne.AxisVertical:
 		if min {
 			return minSize.Width
 		}
@@ -133,12 +73,12 @@ func (l *flexLayout) getMainSize(obj fyne.CanvasObject, min bool) float32 {
 	minSize := obj.MinSize()
 	curSize := obj.Size()
 	switch l.Axis {
-	case AxisHorizontal:
+	case fyne.AxisHorizontal:
 		if min {
 			return minSize.Width
 		}
 		return fyne.Max(curSize.Width, minSize.Width)
-	case AxisVertical:
+	case fyne.AxisVertical:
 		if min {
 			return minSize.Height
 		}
@@ -172,7 +112,7 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	// Determine used flex factor, size inflexible items, calculate free space.
 	totalFlex := 0
 	maxMainSize := size.Width
-	if l.Axis == AxisVertical {
+	if l.Axis == fyne.AxisVertical {
 		maxMainSize = size.Height
 	}
 	crossSize := float32(0)
@@ -181,6 +121,9 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 	// --- Resizing non-flex objects
 	for _, obj := range objects {
+		if !obj.Visible() {
+			continue
+		}
 		flex := l.getFlex(obj)
 		if flex > 0 {
 			totalFlex += flex
@@ -189,9 +132,9 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 			// TODO mainAxisSize min and max??
 			if _, ok := obj.(*fyne.Container); ok {
 				switch l.Axis {
-				case AxisHorizontal:
+				case fyne.AxisHorizontal:
 					obj.Resize(fyne.NewSize(l.getMainSize(obj, false), size.Height))
-				case AxisVertical:
+				case fyne.AxisVertical:
 					obj.Resize(fyne.NewSize(size.Width, l.getMainSize(obj, false)))
 				}
 			} else {
@@ -206,12 +149,15 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	freeSpace := maxMainSize - allocatedSize
 	allocatedFlexSpace := float32(0)
 	maxBaselineDistance := float32(0)
-	if totalFlex > 0 || l.CrossAxisAlignment == CrossAxisAlignmentBaseline {
+	if totalFlex > 0 || l.CrossAxisAlignment == fyne.CrossAxisAlignmentBaseline {
 		spacePerFlex := freeSpace / float32(totalFlex)
 		maxSizeAboveBaseline := float32(0)
 		maxSizeBelowBaseline := float32(0)
 
 		for _, obj := range objects {
+			if !obj.Visible() {
+				continue
+			}
 			flex := l.getFlex(obj)
 			if flex > 0 {
 				maxChildExtent := spacePerFlex * float32(flex)
@@ -219,9 +165,9 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 					maxChildExtent = freeSpace - allocatedFlexSpace
 				}
 				switch l.Axis {
-				case AxisHorizontal:
+				case fyne.AxisHorizontal:
 					obj.Resize(fyne.NewSize(maxChildExtent, l.getCrossSize(obj, false)))
-				case AxisVertical:
+				case fyne.AxisVertical:
 					obj.Resize(fyne.NewSize(l.getCrossSize(obj, false), maxChildExtent))
 				}
 				objChildMainSize := l.getMainSize(obj, false)
@@ -233,7 +179,7 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 				allocatedFlexSpace += maxChildExtent
 				crossSize = fyne.Max(crossSize, l.getCrossSize(obj, false))
 			}
-			if l.CrossAxisAlignment == CrossAxisAlignmentBaseline {
+			if l.CrossAxisAlignment == fyne.CrossAxisAlignmentBaseline {
 				distance := l.getDistanceToBaseline(obj)
 				maxBaselineDistance = fyne.Max(maxBaselineDistance, distance)
 				maxSizeAboveBaseline = fyne.Max(
@@ -262,28 +208,28 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	leadingSpace := float32(0)
 	betweenSpace := float32(0)
 	switch l.MainAxisAlignment {
-	case MainAxisAlignmentStart:
+	case fyne.MainAxisAlignmentStart:
 		leadingSpace = 0
 		betweenSpace = 0
-	case MainAxisAlignmentEnd:
+	case fyne.MainAxisAlignmentEnd:
 		leadingSpace = remainingSpace
 		betweenSpace = 0
-	case MainAxisAlignmentCenter:
+	case fyne.MainAxisAlignmentCenter:
 		leadingSpace = remainingSpace / 2
 		betweenSpace = 0
-	case MainAxisAlignmentSpaceBetween:
+	case fyne.MainAxisAlignmentSpaceBetween:
 		leadingSpace = 0
 		betweenSpace = 0
 		if len(objects) > 1 {
 			betweenSpace = remainingSpace / float32(len(objects)-1)
 		}
-	case MainAxisAlignmentSpaceAround:
+	case fyne.MainAxisAlignmentSpaceAround:
 		betweenSpace = 0
 		if len(objects) > 0 {
 			betweenSpace = remainingSpace / float32(len(objects))
 		}
 		leadingSpace = betweenSpace / 2
-	case MainAxisAlignmentSpaceEvenly:
+	case fyne.MainAxisAlignmentSpaceEvenly:
 		betweenSpace = 0
 		if len(objects) > 0 {
 			betweenSpace = remainingSpace / float32(len(objects)+1)
@@ -294,25 +240,28 @@ func (l *flexLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	// --- Position objects
 	objMainPos := leadingSpace
 	for _, obj := range objects {
+		if !obj.Visible() {
+			continue
+		}
 		objCrossPos := float32(0)
 		switch l.CrossAxisAlignment {
-		case CrossAxisAlignmentStart:
+		case fyne.CrossAxisAlignmentStart:
 			objCrossPos = 0
-		case CrossAxisAlignmentEnd:
+		case fyne.CrossAxisAlignmentEnd:
 			objCrossPos = crossSize - l.getCrossSize(obj, false)
-		case CrossAxisAlignmentCenter:
+		case fyne.CrossAxisAlignmentCenter:
 			objCrossPos = crossSize/2 - l.getCrossSize(obj, false)/2
-		case CrossAxisAlignmentBaseline:
+		case fyne.CrossAxisAlignmentBaseline:
 			objCrossPos = 0
-			if l.Axis == AxisHorizontal {
+			if l.Axis == fyne.AxisHorizontal {
 				distance := l.getDistanceToBaseline(obj)
 				objCrossPos = maxBaselineDistance - distance
 			}
 		}
 		switch l.Axis {
-		case AxisHorizontal:
+		case fyne.AxisHorizontal:
 			obj.Move(fyne.NewPos(objMainPos, objCrossPos))
-		case AxisVertical:
+		case fyne.AxisVertical:
 			obj.Move(fyne.NewPos(objCrossPos, objMainPos))
 		}
 		objMainPos += l.getMainSize(obj, false) + betweenSpace
@@ -331,6 +280,9 @@ func (l *flexLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	maxSizeAboveBaseline := float32(0)
 	maxSizeBelowBaseline := float32(0)
 	for _, obj := range objects {
+		if !obj.Visible() {
+			continue
+		}
 		flex := l.getFlex(obj)
 		if flex > 0 {
 			totalFlex += flex
@@ -340,7 +292,7 @@ func (l *flexLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			allocatedSize += l.getMainSize(obj, true)
 		}
 		crossSize = fyne.Max(crossSize, l.getCrossSize(obj, true))
-		if l.CrossAxisAlignment == CrossAxisAlignmentBaseline {
+		if l.CrossAxisAlignment == fyne.CrossAxisAlignmentBaseline {
 			distance := l.getDistanceToBaseline(obj)
 			maxSizeAboveBaseline = fyne.Max(
 				distance,
@@ -356,7 +308,7 @@ func (l *flexLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 	allocatedFlexSpace := minSpacePerFlex * float32(totalFlex)
 
-	if l.Axis == AxisHorizontal {
+	if l.Axis == fyne.AxisHorizontal {
 		return fyne.NewSize(allocatedSize+allocatedFlexSpace, crossSize)
 	}
 	return fyne.NewSize(crossSize, allocatedSize+allocatedFlexSpace)
