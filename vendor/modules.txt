@@ -6,6 +6,8 @@ github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
+github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/mobile v0.1.2
