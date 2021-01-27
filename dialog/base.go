@@ -31,9 +31,10 @@ type Dialog interface {
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	callback func(bool)
-	title    string
-	icon     fyne.Resource
+	callback    func(bool)
+	title       string
+	icon        fyne.Resource
+	desiredSize fyne.Size
 
 	win            *widget.PopUp
 	bg             *canvas.Rectangle
@@ -99,6 +100,9 @@ func (d *dialog) Hide() {
 }
 
 func (d *dialog) Show() {
+	if !d.desiredSize.IsZero() {
+		d.win.Resize(d.desiredSize)
+	}
 	d.win.Show()
 }
 
@@ -141,6 +145,7 @@ func (d *dialog) Refresh() {
 
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
+	d.desiredSize = size
 	maxSize := d.win.Size()
 	minSize := d.win.MinSize()
 	newWidth := size.Width
