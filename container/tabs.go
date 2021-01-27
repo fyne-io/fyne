@@ -364,13 +364,13 @@ var _ desktop.Hoverable = (*tabButton)(nil)
 
 type tabButton struct {
 	widget.BaseWidget
-	hovered      bool
-	icon         fyne.Resource
-	iconPosition buttonIconPosition
-	importance   widget.ButtonImportance
-	onTapped     func()
-	onClosed     func()
-	text         string
+	hovered       bool
+	icon          fyne.Resource
+	iconPosition  buttonIconPosition
+	importance    widget.ButtonImportance
+	onTapped      func()
+	onClosed      func()
+	text          string
 	textAlignment fyne.TextAlign
 }
 
