@@ -47,7 +47,7 @@ type FileDialog struct {
 	parent           fyne.Window
 	dialog           *fileDialog
 	dismissText      string
-	desiredSize      *fyne.Size
+	desiredSize      fyne.Size
 	// this will be applied to dialog.dir when it's loaded
 	startingLocation fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
@@ -459,9 +459,8 @@ func (f *FileDialog) Show() {
 		return
 	}
 	f.dialog = showFile(f)
-	if f.desiredSize != nil {
-		f.Resize(*f.desiredSize)
-		f.desiredSize = nil
+	if !f.desiredSize.IsZero() {
+		f.Resize(f.desiredSize)
 	}
 }
 
@@ -470,10 +469,11 @@ func (f *FileDialog) Refresh() {
 	f.dialog.win.Refresh()
 }
 
-// Resize dialog, call this function after dialog show
+// Resize dialog to the requested size, if there is sufficient space.
+// If the parent window is not large enough then the size will be reduced to fit.
 func (f *FileDialog) Resize(size fyne.Size) {
+	f.desiredSize = size
 	if f.dialog == nil {
-		f.desiredSize = &size
 		return
 	}
 	maxSize := f.dialog.win.Size()
