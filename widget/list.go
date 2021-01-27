@@ -372,7 +372,7 @@ type listItem struct {
 	BaseWidget
 
 	onTapped          func()
-	statusIndicator   *canvas.Rectangle
+	background        *canvas.Rectangle
 	child             fyne.CanvasObject
 	hovered, selected bool
 }
@@ -391,10 +391,10 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
-	li.statusIndicator = canvas.NewRectangle(theme.HoverColor())
-	li.statusIndicator.Hide()
+	li.background = canvas.NewRectangle(theme.HoverColor())
+	li.background.Hide()
 
-	objects := []fyne.CanvasObject{li.statusIndicator, li.child}
+	objects := []fyne.CanvasObject{li.background, li.child}
 
 	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
@@ -450,10 +450,7 @@ func (li *listItemRenderer) MinSize() (size fyne.Size) {
 
 // Layout the components of the listItem widget.
 func (li *listItemRenderer) Layout(size fyne.Size) {
-	li.item.statusIndicator.Move(fyne.NewPos(0, 0))
-	s := fyne.NewSize(theme.Padding(), size.Height)
-	li.item.statusIndicator.SetMinSize(s)
-	li.item.statusIndicator.Resize(s)
+	li.item.background.Resize(size)
 
 	li.item.child.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
 	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding()*3, size.Height-theme.Padding()*2))
@@ -461,15 +458,15 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 
 func (li *listItemRenderer) Refresh() {
 	if li.item.selected {
-		li.item.statusIndicator.FillColor = theme.PrimaryColor()
-		li.item.statusIndicator.Show()
+		li.item.background.FillColor = theme.PrimaryColor()
+		li.item.background.Show()
 	} else if li.item.hovered {
-		li.item.statusIndicator.FillColor = theme.HoverColor()
-		li.item.statusIndicator.Show()
+		li.item.background.FillColor = theme.HoverColor()
+		li.item.background.Show()
 	} else {
-		li.item.statusIndicator.Hide()
+		li.item.background.Hide()
 	}
-	li.item.statusIndicator.Refresh()
+	li.item.background.Refresh()
 	canvas.Refresh(li.item.super())
 }
 
