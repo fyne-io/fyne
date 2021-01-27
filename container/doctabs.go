@@ -18,6 +18,7 @@ var _ fyne.Widget = (*DocTabs)(nil)
 // Since: 2.0
 type DocTabs struct {
 	baseTabs
+	CreateTab          func() *TabItem
 	OnClosed           func(*TabItem)
 	OnCloseIntercepted func(*TabItem)
 }
@@ -51,6 +52,8 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 		scroller: &Scroll{},
 	}
 	r.action = r.buildAllTabsButton()
+	r.create = r.buildCreateTabsButton()
+	r.box = fyne.NewContainer(r.create, r.action)
 	var lastX, lastY float32
 	r.scroller.OnScrolled = func(offset fyne.Position) {
 		// FIXME OnScrolled can be called when the offset hasn't changed
@@ -61,6 +64,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 		lastY = offset.Y
 		r.updateIndicator(false)
 	}
+	r.updateCreateTab()
 	r.updateTabs()
 	r.updateIndicator(false)
 	return r
@@ -79,9 +83,12 @@ type docTabsRenderer struct {
 	baseTabsRenderer
 	docTabs  *DocTabs
 	scroller *Scroll
+	box      *fyne.Container
+	create   *widget.Button
 }
 
 func (r *docTabsRenderer) Layout(size fyne.Size) {
+	r.updateCreateTab()
 	r.updateTabs()
 	r.layout(&r.docTabs.baseTabs, size)
 	r.updateIndicator(true)
@@ -128,6 +135,18 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 	})
 	all.Importance = widget.LowImportance
 	return
+}
+
+func (r *docTabsRenderer) buildCreateTabsButton() *widget.Button {
+	create := widget.NewButton("", func() {
+		if f := r.docTabs.CreateTab; f != nil {
+			if tab := f(); tab != nil {
+				r.docTabs.Append(tab)
+			}
+		}
+	})
+	create.Importance = widget.LowImportance
+	return create
 }
 
 func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
@@ -233,6 +252,15 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	r.moveIndicator(indicatorPos, indicatorSize, animate)
 }
 
+func (r *docTabsRenderer) updateCreateTab() {
+	if r.docTabs.CreateTab != nil {
+		r.create.SetIcon(theme.ContentAddIcon())
+		r.create.Show()
+	} else {
+		r.create.Hide()
+	}
+}
+
 func (r *docTabsRenderer) updateTabs() {
 	tabCount := len(r.docTabs.Items)
 
@@ -240,17 +268,15 @@ func (r *docTabsRenderer) updateTabs() {
 
 	// Set layout of tab bar containing tab buttons and overflow action
 	if r.docTabs.tabLocation == TabLocationLeading || r.docTabs.tabLocation == TabLocationTrailing {
-		r.bar.Layout = layout.NewBorderLayout(nil, r.action, nil, nil)
+		r.box.Layout = layout.NewVBoxLayout()
+		r.bar.Layout = layout.NewBorderLayout(nil, r.box, nil, nil)
 		r.scroller.Direction = ScrollVerticalOnly
 	} else {
-		r.bar.Layout = layout.NewBorderLayout(nil, nil, nil, r.action)
+		r.box.Layout = layout.NewHBoxLayout()
+		r.bar.Layout = layout.NewBorderLayout(nil, nil, nil, r.box)
 		r.scroller.Direction = ScrollHorizontalOnly
 	}
 
-	r.bar.Objects = []fyne.CanvasObject{r.scroller}
-	if a := r.action; a != nil {
-		r.bar.Objects = append(r.bar.Objects, a)
-	}
-
+	r.bar.Objects = []fyne.CanvasObject{r.scroller, r.box}
 	r.bar.Refresh()
 }

@@ -102,8 +102,10 @@ func makeDocTabsTab(_ fyne.Window) fyne.CanvasObject {
 		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
 		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
 	)
-	for i := 4; i <= 12; i++ {
-		tabs.Append(container.NewTabItem(fmt.Sprintf("Tab %d", i), widget.NewLabel(fmt.Sprintf("Content of tab %d", i))))
+	i := 3
+	tabs.CreateTab = func() *container.TabItem {
+		i++
+		return container.NewTabItem(fmt.Sprintf("Tab %d", i), widget.NewLabel(fmt.Sprintf("Content of tab %d", i)))
 	}
 	locations := makeTabLocationSelect(tabs.SetTabLocation)
 	return container.NewBorder(locations, nil, nil, nil, tabs)
