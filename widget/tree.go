@@ -592,12 +592,12 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
-	indicator := canvas.NewRectangle(theme.HoverColor())
-	indicator.Hide()
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeNode:     n,
-		indicator:    indicator,
+		background:   background,
 	}
 }
 
@@ -644,17 +644,14 @@ var _ fyne.WidgetRenderer = (*treeNodeRenderer)(nil)
 
 type treeNodeRenderer struct {
 	widget.BaseRenderer
-	treeNode  *treeNode
-	indicator *canvas.Rectangle
+	treeNode   *treeNode
+	background *canvas.Rectangle
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	x := float32(0)
 	y := float32(0)
-	r.indicator.Move(fyne.NewPos(x, y))
-	s := fyne.NewSize(theme.Padding(), size.Height)
-	r.indicator.SetMinSize(s)
-	r.indicator.Resize(s)
+	r.background.Resize(size)
 	h := size.Height - 2*theme.Padding()
 	x += theme.Padding() + r.treeNode.Indent()
 	y += theme.Padding()
@@ -682,13 +679,13 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
+	objects = append(objects, r.background)
 	if r.treeNode.content != nil {
 		objects = append(objects, r.treeNode.content)
 	}
 	if r.treeNode.icon != nil {
 		objects = append(objects, r.treeNode.icon)
 	}
-	objects = append(objects, r.indicator)
 	return
 }
 
@@ -706,15 +703,15 @@ func (r *treeNodeRenderer) partialRefresh() {
 		r.treeNode.icon.Refresh()
 	}
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
-		r.indicator.FillColor = theme.PrimaryColor()
-		r.indicator.Show()
+		r.background.FillColor = theme.PrimaryColor()
+		r.background.Show()
 	} else if r.treeNode.hovered {
-		r.indicator.FillColor = theme.HoverColor()
-		r.indicator.Show()
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
 	} else {
-		r.indicator.Hide()
+		r.background.Hide()
 	}
-	r.indicator.Refresh()
+	r.background.Refresh()
 	canvas.Refresh(r.treeNode.super())
 }
 

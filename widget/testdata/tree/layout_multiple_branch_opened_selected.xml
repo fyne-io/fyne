@@ -23,13 +23,13 @@
 						<rectangle fillColor="disabled" size="198x1"/>
 					</widget>
 					<widget pos="0,92" size="206x45" type="*widget.branch">
+						<rectangle fillColor="primary" size="206x45"/>
 						<widget pos="28,4" size="174x37" type="*widget.Label">
 							<text pos="4,8" size="166x21">B</text>
 						</widget>
 						<widget pos="4,4" size="20x37" type="*widget.branchIcon">
 							<image fillMode="contain" rsc="moveDownIcon" size="20x37"/>
 						</widget>
-						<rectangle fillColor="primary" size="4x45"/>
 					</widget>
 					<widget pos="4,137" size="198x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="198x1"/>

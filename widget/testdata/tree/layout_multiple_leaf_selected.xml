@@ -12,10 +12,10 @@
 						<rectangle fillColor="disabled" size="184x1"/>
 					</widget>
 					<widget pos="0,46" size="192x45" type="*widget.leaf">
+						<rectangle fillColor="primary" size="192x45"/>
 						<widget pos="28,4" size="160x37" type="*widget.Label">
 							<text pos="4,8" size="152x21">2222222222</text>
 						</widget>
-						<rectangle fillColor="primary" size="4x45"/>
 					</widget>
 					<widget pos="4,91" size="184x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="184x1"/>
