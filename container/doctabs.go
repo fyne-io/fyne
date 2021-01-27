@@ -142,6 +142,7 @@ func (r *docTabsRenderer) buildCreateTabsButton() *widget.Button {
 		if f := r.docTabs.CreateTab; f != nil {
 			if tab := f(); tab != nil {
 				r.docTabs.Append(tab)
+				r.docTabs.SelectIndex(len(r.docTabs.Items)-1)
 			}
 		}
 	})
