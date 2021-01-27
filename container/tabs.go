@@ -203,6 +203,8 @@ type baseTabsRenderer struct {
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
+
+	buttonCache map[*TabItem]*tabButton
 }
 
 func (r *baseTabsRenderer) Destroy() {
@@ -359,11 +361,13 @@ var _ desktop.Hoverable = (*tabButton)(nil)
 type tabButton struct {
 	widget.BaseWidget
 	hovered      bool
-	Icon         fyne.Resource
-	IconPosition buttonIconPosition
-	Importance   widget.ButtonImportance
-	OnTapped     func()
-	Text         string
+	icon         fyne.Resource
+	iconPosition buttonIconPosition
+	importance   widget.ButtonImportance
+	onTapped     func()
+	onClosed     func()
+	text         string
+	textAlignment fyne.TextAlign
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
@@ -371,15 +375,22 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
 	background.Hide()
 	var icon *canvas.Image
-	if b.Icon != nil {
-		icon = canvas.NewImageFromResource(b.Icon)
+	if b.icon != nil {
+		icon = canvas.NewImageFromResource(b.icon)
 	}
 
-	label := canvas.NewText(b.Text, theme.TextColor())
+	label := canvas.NewText(b.text, theme.TextColor())
 	label.TextStyle.Bold = true
-	label.Alignment = fyne.TextAlignCenter
 
-	objects := []fyne.CanvasObject{background, label}
+	close := widget.NewButton("", func() {
+		if f := b.onClosed; f != nil {
+			f()
+		}
+	})
+	close.Icon = theme.CancelIcon()
+	close.Importance = widget.LowImportance
+
+	objects := []fyne.CanvasObject{background, label, close}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
@@ -389,6 +400,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 		background: background,
 		icon:       icon,
 		label:      label,
+		close:      close,
 		objects:    objects,
 	}
 	r.Refresh()
@@ -414,7 +426,7 @@ func (b *tabButton) MouseOut() {
 }
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
-	b.OnTapped()
+	b.onTapped()
 }
 
 type tabButtonRenderer struct {
@@ -422,6 +434,7 @@ type tabButtonRenderer struct {
 	background *canvas.Rectangle
 	icon       *canvas.Image
 	label      *canvas.Text
+	close      *widget.Button
 	objects    []fyne.CanvasObject
 }
 
@@ -436,7 +449,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	labelShift := float32(0)
 	if r.icon != nil {
 		var iconOffset fyne.Position
-		if r.button.IconPosition == buttonIconTop {
+		if r.button.iconPosition == buttonIconTop {
 			iconOffset = fyne.NewPos((innerSize.Width-r.iconSize())/2, 0)
 		} else {
 			iconOffset = fyne.NewPos(0, (innerSize.Height-r.iconSize())/2)
@@ -448,7 +461,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	if r.label.Text != "" {
 		var labelOffset fyne.Position
 		var labelSize fyne.Size
-		if r.button.IconPosition == buttonIconTop {
+		if r.button.iconPosition == buttonIconTop {
 			labelOffset = fyne.NewPos(0, labelShift)
 			labelSize = fyne.NewSize(innerSize.Width, r.label.MinSize().Height)
 		} else {
@@ -458,12 +471,15 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		r.label.Resize(labelSize)
 		r.label.Move(innerOffset.Add(labelOffset))
 	}
+	closeSize := r.close.MinSize()
+	r.close.Move(fyne.NewPos(size.Width-closeSize.Width, (size.Height-closeSize.Height)/2))
+	r.close.Resize(closeSize)
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
 	var contentWidth, contentHeight float32
 	textSize := r.label.MinSize()
-	if r.button.IconPosition == buttonIconTop {
+	if r.button.iconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, r.iconSize())
 		if r.icon != nil {
 			contentHeight += r.iconSize()
@@ -486,6 +502,11 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 			contentWidth += textSize.Width
 		}
 	}
+	closeSize := r.close.MinSize()
+	if r.button.onClosed != nil {
+		contentWidth += closeSize.Width
+		contentHeight = fyne.Max(contentHeight, closeSize.Height)
+	}
 	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
 }
 
@@ -502,14 +523,15 @@ func (r *tabButtonRenderer) Refresh() {
 	}
 	r.background.Refresh()
 
-	r.label.Text = r.button.Text
-	if r.button.Importance == widget.HighImportance {
+	r.label.Text = r.button.text
+	r.label.Alignment = r.button.textAlignment
+	if r.button.importance == widget.HighImportance {
 		r.label.Color = theme.PrimaryColor()
 	} else {
 		r.label.Color = theme.TextColor()
 	}
 	r.label.TextSize = theme.TextSize()
-	if r.button.Text == "" {
+	if r.button.text == "" {
 		r.label.Hide()
 	} else {
 		r.label.Show()
@@ -518,23 +540,32 @@ func (r *tabButtonRenderer) Refresh() {
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Importance == widget.HighImportance {
+			if r.button.importance == widget.HighImportance {
 				r.icon.Resource = theme.NewPrimaryThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.PrimaryThemedResource:
-			if r.button.Importance != widget.HighImportance {
+			if r.button.importance != widget.HighImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}
 		}
 	}
 
+	r.close.Icon = theme.CancelIcon()
+	r.close.Importance = widget.LowImportance
+	if r.button.onClosed == nil {
+		r.close.Hide()
+	} else {
+		r.close.Show()
+	}
+	r.close.Refresh()
+
 	canvas.Refresh(r.button)
 }
 
 func (r *tabButtonRenderer) iconSize() float32 {
-	switch r.button.IconPosition {
+	switch r.button.iconPosition {
 	case buttonIconTop:
 		return 2 * theme.IconInlineSize()
 	default:
@@ -543,7 +574,7 @@ func (r *tabButtonRenderer) iconSize() float32 {
 }
 
 func (r *tabButtonRenderer) padding() fyne.Size {
-	if r.label.Text != "" && r.button.IconPosition == buttonIconInline {
+	if r.label.Text != "" && r.button.iconPosition == buttonIconInline {
 		return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 	}
 	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)

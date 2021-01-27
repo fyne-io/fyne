@@ -19,7 +19,7 @@ func Test_tabButtonRenderer_SetText(t *testing.T) {
 
 	assert.Equal(t, "Test", renderer.label.Text)
 
-	button.Text = "Temp"
+	button.text = "Temp"
 	button.Refresh()
 	assert.Equal(t, "Temp", renderer.label.Text)
 

@@ -46,12 +46,12 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
-			bar:       &fyne.Container{},
-			divider:   canvas.NewRectangle(theme.ShadowColor()),
-			indicator: canvas.NewRectangle(theme.PrimaryColor()),
+			bar:         &fyne.Container{},
+			divider:     canvas.NewRectangle(theme.ShadowColor()),
+			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
+			buttonCache: make(map[*TabItem]*tabButton),
 		},
-		appTabs:     t,
-		buttonCache: make(map[*TabItem]*tabButton),
+		appTabs: t,
 	}
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
@@ -132,8 +132,7 @@ var _ fyne.WidgetRenderer = (*appTabsRenderer)(nil)
 
 type appTabsRenderer struct {
 	baseTabsRenderer
-	appTabs     *AppTabs
-	buttonCache map[*TabItem]*tabButton
+	appTabs *AppTabs
 }
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
@@ -223,18 +222,19 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		button, ok := r.buttonCache[item]
 		if !ok {
 			button = &tabButton{
-				OnTapped: func() { r.appTabs.Select(item) },
+				onTapped: func() { r.appTabs.Select(item) },
 			}
 			r.buttonCache[item] = button
 		}
-		button.Text = item.Text
-		button.Icon = item.Icon
-		button.IconPosition = iconPos
+		button.icon = item.Icon
+		button.iconPosition = iconPos
 		if i == r.appTabs.current {
-			button.Importance = widget.HighImportance
+			button.importance = widget.HighImportance
 		} else {
-			button.Importance = widget.MediumImportance
+			button.importance = widget.MediumImportance
 		}
+		button.text = item.Text
+		button.textAlignment = fyne.TextAlignCenter
 		button.Refresh()
 		buttons.Objects = append(buttons.Objects, button)
 	}
