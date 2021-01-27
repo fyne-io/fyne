@@ -56,7 +56,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.box = fyne.NewContainer(r.create, r.action)
 	var lastX, lastY float32
 	r.scroller.OnScrolled = func(offset fyne.Position) {
-		// FIXME OnScrolled can be called when the offset hasn't changed
+		// FIXME OnScrolled can be called when the offset hasn't changed (#1868)
 		if offset.X == lastX && offset.Y == lastY {
 			return
 		}

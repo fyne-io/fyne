@@ -386,13 +386,15 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	label := canvas.NewText(b.text, theme.TextColor())
 	label.TextStyle.Bold = true
 
-	close := widget.NewButton("", func() {
-		if f := b.onClosed; f != nil {
-			f()
-		}
-	})
-	close.Icon = theme.CancelIcon()
-	close.Importance = widget.LowImportance
+	close := &tabCloseButton{
+		parent: b,
+		onTapped: func() {
+			if f := b.onClosed; f != nil {
+				f()
+			}
+		},
+	}
+	close.Hide()
 
 	objects := []fyne.CanvasObject{background, label, close}
 	if icon != nil {
@@ -416,12 +418,12 @@ func (b *tabButton) MinSize() fyne.Size {
 	return b.BaseWidget.MinSize()
 }
 
-func (b *tabButton) MouseIn(e *desktop.MouseEvent) {
+func (b *tabButton) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
 	b.Refresh()
 }
 
-func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
+func (b *tabButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *tabButton) MouseOut() {
@@ -429,7 +431,7 @@ func (b *tabButton) MouseOut() {
 	b.Refresh()
 }
 
-func (b *tabButton) Tapped(e *fyne.PointEvent) {
+func (b *tabButton) Tapped(*fyne.PointEvent) {
 	b.onTapped()
 }
 
@@ -438,7 +440,7 @@ type tabButtonRenderer struct {
 	background *canvas.Rectangle
 	icon       *canvas.Image
 	label      *canvas.Text
-	close      *widget.Button
+	close      *tabCloseButton
 	objects    []fyne.CanvasObject
 }
 
@@ -475,9 +477,8 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		r.label.Resize(labelSize)
 		r.label.Move(innerOffset.Add(labelOffset))
 	}
-	closeSize := r.close.MinSize()
-	r.close.Move(fyne.NewPos(size.Width-closeSize.Width, (size.Height-closeSize.Height)/2))
-	r.close.Resize(closeSize)
+	r.close.Move(fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding(), (size.Height-theme.IconInlineSize())/2))
+	r.close.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
@@ -506,10 +507,9 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 			contentWidth += textSize.Width
 		}
 	}
-	closeSize := r.close.MinSize()
 	if r.button.onClosed != nil {
-		contentWidth += closeSize.Width
-		contentHeight = fyne.Max(contentHeight, closeSize.Height)
+		contentWidth += theme.IconInlineSize() + theme.Padding()
+		contentHeight = fyne.Max(contentHeight, theme.IconInlineSize())
 	}
 	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
 }
@@ -556,12 +556,10 @@ func (r *tabButtonRenderer) Refresh() {
 		}
 	}
 
-	r.close.Icon = theme.CancelIcon()
-	r.close.Importance = widget.LowImportance
-	if r.button.onClosed == nil {
-		r.close.Hide()
-	} else {
+	if r.button.onClosed != nil && (r.button.hovered || r.close.hovered) {
 		r.close.Show()
+	} else {
+		r.close.Hide()
 	}
 	r.close.Refresh()
 
@@ -582,6 +580,90 @@ func (r *tabButtonRenderer) padding() fyne.Size {
 		return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 	}
 	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+}
+
+var _ fyne.Widget = (*tabCloseButton)(nil)
+var _ fyne.Tappable = (*tabCloseButton)(nil)
+var _ desktop.Hoverable = (*tabCloseButton)(nil)
+
+type tabCloseButton struct {
+	widget.BaseWidget
+	parent   *tabButton
+	hovered  bool
+	onTapped func()
+}
+
+func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
+	b.ExtendBaseWidget(b)
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
+	icon := canvas.NewImageFromResource(theme.CancelIcon())
+
+	r := &tabCloseButtonRenderer{
+		button:     b,
+		background: background,
+		icon:       icon,
+		objects:    []fyne.CanvasObject{background, icon},
+	}
+	r.Refresh()
+	return r
+}
+
+func (b *tabCloseButton) MinSize() fyne.Size {
+	b.ExtendBaseWidget(b)
+	return b.BaseWidget.MinSize()
+}
+
+func (b *tabCloseButton) MouseIn(*desktop.MouseEvent) {
+	b.hovered = true
+	b.parent.Refresh()
+}
+
+func (b *tabCloseButton) MouseMoved(*desktop.MouseEvent) {
+}
+
+func (b *tabCloseButton) MouseOut() {
+	b.hovered = false
+	b.parent.Refresh()
+}
+
+func (b *tabCloseButton) Tapped(*fyne.PointEvent) {
+	b.onTapped()
+}
+
+type tabCloseButtonRenderer struct {
+	button     *tabCloseButton
+	background *canvas.Rectangle
+	icon       *canvas.Image
+	objects    []fyne.CanvasObject
+}
+
+func (r *tabCloseButtonRenderer) Destroy() {
+}
+
+func (r *tabCloseButtonRenderer) Layout(size fyne.Size) {
+	r.background.Resize(size)
+	r.icon.Resize(size)
+}
+
+func (r *tabCloseButtonRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+}
+
+func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *tabCloseButtonRenderer) Refresh() {
+	if r.button.hovered {
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
+	} else {
+		r.background.Hide()
+	}
+	r.background.Refresh()
+	r.icon.Resource = theme.CancelIcon()
+	r.icon.Refresh()
 }
 
 func mismatchedTabItems(items []*TabItem) bool {
