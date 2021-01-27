@@ -47,19 +47,19 @@ func TestEntryCursorAnim(t *testing.T) {
 	// now call a TemporaryStop()
 	a.temporaryStop()
 	assert.True(t, a.inverted)
-	assert.Equal(t, cursorStateTemporarilyStopped, a.state)
+	assert.Equal(t, cursorStateInterrupted, a.state)
 	assert.NotNil(t, a.anim)
 	assert.Zero(t, a.counter.Value())
 	assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
 
-	// make some steps in time less than cursorStopTimex10ms
+	// make some steps in time less than cursorInterruptTimex10ms
 	// cursor.FillColor should be PrimaryColor always
-	for i := 0; i < (cursorStopTimex10ms - 1); i++ {
+	for i := 0; i < (cursorInterruptTimex10ms - 1); i++ {
 		sleeper <- 1
 		<-cycle
 		assert.True(t, a.inverted)
 		assert.Equal(t, i+1, a.counter.Value())
-		assert.Equal(t, cursorStateTemporarilyStopped, a.state)
+		assert.Equal(t, cursorStateInterrupted, a.state)
 		assert.NotNil(t, a.anim)
 		assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
 	}
@@ -81,13 +81,13 @@ func TestEntryCursorAnim(t *testing.T) {
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateRunning, a.state)
 	assert.NotNil(t, a.anim)
-	// counter value should be cursorStopTimex10ms (it shouldn't increase)
-	assert.Equal(t, cursorStopTimex10ms, a.counter.Value())
+	// counter value should be cursorInterruptTimex10ms (it shouldn't increase)
+	assert.Equal(t, cursorInterruptTimex10ms, a.counter.Value())
 
 	// temporary stop again
 	a.temporaryStop()
 	assert.True(t, a.inverted)
-	assert.Equal(t, cursorStateTemporarilyStopped, a.state)
+	assert.Equal(t, cursorStateInterrupted, a.state)
 	assert.NotNil(t, a.anim)
 	assert.Zero(t, a.counter.Value())
 	assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
@@ -97,7 +97,7 @@ func TestEntryCursorAnim(t *testing.T) {
 		<-cycle
 		assert.True(t, a.inverted)
 		assert.Equal(t, i+1, a.counter.Value())
-		assert.Equal(t, cursorStateTemporarilyStopped, a.state)
+		assert.Equal(t, cursorStateInterrupted, a.state)
 		assert.NotNil(t, a.anim)
 		assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
 	}
@@ -105,7 +105,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	// temporary stop again (counter should be resetted)
 	a.temporaryStop()
 	assert.True(t, a.inverted)
-	assert.Equal(t, cursorStateTemporarilyStopped, a.state)
+	assert.Equal(t, cursorStateInterrupted, a.state)
 	assert.NotNil(t, a.anim)
 	assert.Zero(t, a.counter.Value())
 	assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
@@ -115,7 +115,7 @@ func TestEntryCursorAnim(t *testing.T) {
 		<-cycle
 		assert.True(t, a.inverted)
 		assert.Equal(t, i+1, a.counter.Value())
-		assert.Equal(t, cursorStateTemporarilyStopped, a.state)
+		assert.Equal(t, cursorStateInterrupted, a.state)
 		assert.NotNil(t, a.anim)
 		assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
 	}

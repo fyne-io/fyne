@@ -33,13 +33,13 @@ func (c *safeCounter) Reset() {
 	c.val = 0
 }
 
-const cursorStopTimex10ms = 35 // stop time in multiple of 10 ms
+const cursorInterruptTimex10ms = 35 // interrupt time in multiple of 10 ms
 
 type cursorState int
 
 const (
 	cursorStateRunning cursorState = iota
-	cursorStateTemporarilyStopped
+	cursorStateInterrupted
 	cursorStateStopped
 )
 
@@ -97,17 +97,17 @@ func (a *entryCursorAnimation) start() {
 		for {
 			a.sleepFn(10 * time.Millisecond)
 			a.mu.RLock()
-			tempStop := a.state == cursorStateTemporarilyStopped
+			interrupted := a.state == cursorStateInterrupted
 			cancel := a.anim == nil
 			a.mu.RUnlock()
 			if cancel {
 				return
 			}
-			if !tempStop {
+			if !interrupted {
 				continue
 			}
 			a.counter.Inc(1)
-			if a.counter.Value() != cursorStopTimex10ms {
+			if a.counter.Value() != cursorInterruptTimex10ms {
 				continue
 			}
 			a.mu.Lock()
@@ -133,10 +133,10 @@ func (a *entryCursorAnimation) temporaryStop() {
 	if !a.inverted {
 		a.anim = a.createAnim(true)
 	}
-	if a.state == cursorStateTemporarilyStopped {
+	if a.state == cursorStateInterrupted {
 		return
 	}
-	a.state = cursorStateTemporarilyStopped
+	a.state = cursorStateInterrupted
 	a.cursor.FillColor = theme.PrimaryColor()
 	a.cursor.Refresh()
 }
