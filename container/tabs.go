@@ -91,6 +91,9 @@ func (t *baseTabs) RemoveIndex(index int) {
 		return
 	}
 	t.SetItems(append(t.Items[:index], t.Items[index+1:]...))
+	if index < t.current {
+		t.current--
+	}
 }
 
 // Select sets the specified TabItem to be selected and its content visible.
