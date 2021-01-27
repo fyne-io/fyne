@@ -12,131 +12,121 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type mockTicker struct {
+	started bool
+	ticks   int
+	cycle   chan int
+	tickCh  chan int
+}
+
+func (m *mockTicker) sendTick() {
+	m.tickCh <- 1
+	<-m.cycle
+	m.ticks++
+}
+func (m *mockTicker) WaitTick() {
+	m.cycle <- 1
+	<-m.tickCh
+}
+func (m *mockTicker) Stop() {
+	m.started = false
+}
+func (m *mockTicker) Reset() { m.ticks = 0 }
+func (m *mockTicker) Start(d time.Duration) {
+	m.started = true
+	m.tickCh = make(chan int)
+	m.cycle = make(chan int)
+	go func() { <-m.cycle }()
+	runtime.Gosched()
+}
+func (m *mockTicker) Started() bool { return m.started }
+
 func TestEntryCursorAnim(t *testing.T) {
 	cursor := canvas.NewRectangle(color.Black)
-	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor, counter: &safeCounter{}}
+	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor}
 	a.inverted = false
 	a.state = cursorStateStopped
-	sleeper := make(chan int)
-	cycle := make(chan int)
-	a.sleepFn = func(d time.Duration) {
-		cycle <- 1
-		<-sleeper
-	}
+	mticker := &mockTicker{}
+	a.ticker = mticker
 
 	// start animation
 	a.start()
-	<-cycle
 	assert.False(t, a.inverted)
 	assert.Equal(t, cursorStateRunning, a.state)
 	assert.NotNil(t, a.anim)
-	assert.Zero(t, a.counter.Value())
+	assert.True(t, mticker.Started())
 
 	// pass some time
 	for i := 0; i < 10; i++ {
-		sleeper <- 1
-		<-cycle
+		assert.Equal(t, i, mticker.ticks)
+		mticker.sendTick()
 	}
 
 	// entry cursor animation must have the same values as before
 	assert.False(t, a.inverted)
 	assert.Equal(t, cursorStateRunning, a.state)
 	assert.NotNil(t, a.anim)
-	assert.Zero(t, a.counter.Value())
+	assert.True(t, mticker.Started())
 
 	// now call a TemporaryStop()
 	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateInterrupted, a.state)
 	assert.NotNil(t, a.anim)
-	assert.Zero(t, a.counter.Value())
+	assert.True(t, mticker.Started())
+	assert.Zero(t, mticker.ticks)
 	assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
 
-	// make some steps in time less than cursorInterruptTimex10ms
-	// cursor.FillColor should be PrimaryColor always
-	for i := 0; i < (cursorInterruptTimex10ms - 1); i++ {
-		sleeper <- 1
-		<-cycle
-		assert.True(t, a.inverted)
-		assert.Equal(t, i+1, a.counter.Value())
-		assert.Equal(t, cursorStateInterrupted, a.state)
-		assert.NotNil(t, a.anim)
-		assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
-	}
-
-	// advance one step more (equals to cursorPauseTimex10ms) and the animation
-	// should start again
-	sleeper <- 1
-	<-cycle
+	// when ticks, the animation should start again
+	mticker.sendTick()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateRunning, a.state)
+	assert.True(t, mticker.Started())
+	assert.Equal(t, 1, mticker.ticks)
 	assert.NotNil(t, a.anim)
 
 	// make some steps
-	sleeper <- 1
-	<-cycle
-	sleeper <- 1
-	<-cycle
-	// animation should continue (not temp. stopped)
+	mticker.sendTick()
+	mticker.sendTick()
+	// animation should continue (not interrupted)
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateRunning, a.state)
+	assert.True(t, mticker.Started())
+	assert.Equal(t, 3, mticker.ticks)
 	assert.NotNil(t, a.anim)
-	// counter value should be cursorInterruptTimex10ms (it shouldn't increase)
-	assert.Equal(t, cursorInterruptTimex10ms, a.counter.Value())
 
 	// temporary stop again
 	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateInterrupted, a.state)
 	assert.NotNil(t, a.anim)
-	assert.Zero(t, a.counter.Value())
+	assert.True(t, mticker.Started())
+	assert.Zero(t, mticker.ticks)
 	assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
 
-	for i := 0; i < 10; i++ {
-		sleeper <- 1
-		<-cycle
-		assert.True(t, a.inverted)
-		assert.Equal(t, i+1, a.counter.Value())
-		assert.Equal(t, cursorStateInterrupted, a.state)
-		assert.NotNil(t, a.anim)
-		assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
-	}
-
 	// temporary stop again (counter should be resetted)
+	mticker.ticks = 100 // just to ensure it is resetted below
 	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateInterrupted, a.state)
 	assert.NotNil(t, a.anim)
-	assert.Zero(t, a.counter.Value())
+	assert.Zero(t, mticker.ticks)
 	assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
-
-	for i := 0; i < 10; i++ {
-		sleeper <- 1
-		<-cycle
-		assert.True(t, a.inverted)
-		assert.Equal(t, i+1, a.counter.Value())
-		assert.Equal(t, cursorStateInterrupted, a.state)
-		assert.NotNil(t, a.anim)
-		assert.Equal(t, theme.PrimaryColor(), a.cursor.FillColor)
-	}
 
 	// stop the animation
 	a.stop()
-	sleeper <- 1
-	time.Sleep(1 * time.Millisecond)
-	runtime.Gosched()
+	mticker.tickCh <- 1
 	time.Sleep(5 * time.Millisecond)
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateStopped, a.state)
 	assert.Nil(t, a.anim)
-	assert.Equal(t, 10, a.counter.Value())
 
-	// calling a.TemporaryStop() on stopped animation, does not do anything (just reset the counter)
+	// calling a.TemporaryStop() on stopped animation, does not do anything
 	a.temporaryStop()
 	assert.True(t, a.inverted)
 	assert.Equal(t, cursorStateStopped, a.state)
 	assert.Nil(t, a.anim)
-	assert.Zero(t, a.counter.Value())
+	assert.False(t, mticker.Started())
 
 	assert.NotPanics(t, func() { a.temporaryStop() })
 	assert.NotPanics(t, func() { a.start() })

@@ -10,30 +10,60 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-type safeCounter struct {
-	mu  sync.RWMutex
-	val int
+// ===============================================================
+// Cursor ticker
+// ===============================================================
+
+type cursorTicker interface {
+	WaitTick()
+	Stop()
+	Reset()
+	Start(d time.Duration)
+	Started() bool
 }
 
-func (c *safeCounter) Inc(n int) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.val += n
+type realTicker struct {
+	tk       *time.Ticker
+	duration time.Duration
 }
 
-func (c *safeCounter) Value() int {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.val
+func (t *realTicker) Start(d time.Duration) {
+	if t.Started() {
+		return
+	}
+	t.duration = d
+	t.tk = time.NewTicker(t.duration)
 }
 
-func (c *safeCounter) Reset() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.val = 0
+func (t *realTicker) Reset() {
+	if !t.Started() {
+		return
+	}
+	t.tk.Reset(t.duration)
 }
 
-const cursorInterruptTimex10ms = 35 // interrupt time in multiple of 10 ms
+func (t *realTicker) Stop() {
+	if !t.Started() {
+		return
+	}
+	t.tk.Stop()
+	t.tk = nil // TODO is it safe?
+}
+
+func (t *realTicker) WaitTick() {
+	if !t.Started() {
+		return
+	}
+	<-t.tk.C
+}
+
+func (t *realTicker) Started() bool { return t.tk != nil }
+
+// ===============================================================
+// Implementation
+// ===============================================================
+
+const cursorInterruptTime = 300 * time.Millisecond
 
 type cursorState int
 
@@ -45,19 +75,18 @@ const (
 
 type entryCursorAnimation struct {
 	mu       *sync.RWMutex
-	counter  *safeCounter
 	inverted bool
 	state    cursorState
+	ticker   cursorTicker
 	cursor   *canvas.Rectangle
 	anim     *fyne.Animation
-	sleepFn  func(time.Duration) // added for tests, do not change it outside of tests!!
 }
 
 func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
-	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor, counter: &safeCounter{}}
+	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor}
+	a.ticker = &realTicker{}
 	a.inverted = false
 	a.state = cursorStateStopped
-	a.sleepFn = time.Sleep
 	return a
 }
 
@@ -83,19 +112,21 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 func (a *entryCursorAnimation) start() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if a.anim != nil || a.state != cursorStateStopped {
+	if a.anim != nil || a.ticker.Started() || a.state != cursorStateStopped {
 		return
 	}
 	a.anim = a.createAnim(false)
 	a.state = cursorStateRunning
+	a.ticker.Start(cursorInterruptTime)
 	go func() {
 		defer func() {
 			a.mu.Lock()
 			a.state = cursorStateStopped
+			a.ticker.Stop()
 			a.mu.Unlock()
 		}()
 		for {
-			a.sleepFn(10 * time.Millisecond)
+			a.ticker.WaitTick()
 			a.mu.RLock()
 			interrupted := a.state == cursorStateInterrupted
 			cancel := a.anim == nil
@@ -104,10 +135,6 @@ func (a *entryCursorAnimation) start() {
 				return
 			}
 			if !interrupted {
-				continue
-			}
-			a.counter.Inc(1)
-			if a.counter.Value() != cursorInterruptTimex10ms {
 				continue
 			}
 			a.mu.Lock()
@@ -121,14 +148,14 @@ func (a *entryCursorAnimation) start() {
 	a.anim.Start()
 }
 
-// TemporaryStop temporarily stops the cursor by "cursorStopTimex10ms".
+// TemporaryStop temporarily stops the cursor by "cursorInterruptTime".
 func (a *entryCursorAnimation) temporaryStop() {
-	a.counter.Reset()
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if a.anim == nil {
+	if a.anim == nil || !a.ticker.Started() {
 		return
 	}
+	a.ticker.Reset()
 	a.anim.Stop()
 	if !a.inverted {
 		a.anim = a.createAnim(true)
