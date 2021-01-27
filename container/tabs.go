@@ -217,47 +217,6 @@ func (r *baseTabsRenderer) Objects() []fyne.CanvasObject {
 	return []fyne.CanvasObject{r.bar, r.divider, r.indicator}
 }
 
-func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, animate bool) {
-	if r.positionAnimation != nil {
-		r.positionAnimation.Stop()
-		r.positionAnimation = nil
-	}
-	if r.sizeAnimation != nil {
-		r.sizeAnimation.Stop()
-		r.sizeAnimation = nil
-	}
-
-	r.indicator.Show()
-	if r.indicator.Position().IsZero() || r.indicator.Position() == pos {
-		r.indicator.Move(pos)
-		r.indicator.Resize(siz)
-		return
-	}
-	if animate {
-		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
-			r.indicator.Move(p)
-			canvas.Refresh(r.indicator)
-			if pos == p {
-				r.positionAnimation = nil
-			}
-		})
-		r.sizeAnimation = canvas.NewSizeAnimation(r.indicator.Size(), siz, canvas.DurationShort, func(s fyne.Size) {
-			r.indicator.Resize(s)
-			canvas.Refresh(r.indicator)
-			if siz == s {
-				r.sizeAnimation = nil
-			}
-		})
-
-		r.positionAnimation.Start()
-		r.sizeAnimation.Start()
-	} else {
-		r.indicator.Move(pos)
-		r.indicator.Resize(siz)
-		r.indicator.Refresh()
-	}
-}
-
 func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
 	var (
 		barPos, dividerPos, contentPos    fyne.Position
@@ -329,6 +288,48 @@ func (r *baseTabsRenderer) minSize(t *baseTabs) fyne.Size {
 		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(), contentMin.Height)
 	default:
 		return fyne.NewSize(contentMin.Width, barMin.Height+contentMin.Height+theme.Padding())
+	}
+}
+
+func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, animate bool) {
+	if r.positionAnimation != nil {
+		r.positionAnimation.Stop()
+		r.positionAnimation = nil
+	}
+	if r.sizeAnimation != nil {
+		r.sizeAnimation.Stop()
+		r.sizeAnimation = nil
+	}
+
+	r.indicator.Show()
+	if r.indicator.Position().IsZero() || r.indicator.Position() == pos {
+		r.indicator.Move(pos)
+		r.indicator.Resize(siz)
+		r.indicator.Refresh()
+		return
+	}
+	if animate {
+		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
+			r.indicator.Move(p)
+			r.indicator.Refresh()
+			if pos == p {
+				r.positionAnimation = nil
+			}
+		})
+		r.sizeAnimation = canvas.NewSizeAnimation(r.indicator.Size(), siz, canvas.DurationShort, func(s fyne.Size) {
+			r.indicator.Resize(s)
+			r.indicator.Refresh()
+			if siz == s {
+				r.sizeAnimation = nil
+			}
+		})
+
+		r.positionAnimation.Start()
+		r.sizeAnimation.Start()
+	} else {
+		r.indicator.Move(pos)
+		r.indicator.Resize(siz)
+		r.indicator.Refresh()
 	}
 }
 
