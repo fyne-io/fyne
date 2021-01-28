@@ -46,14 +46,14 @@ jobs:
     #    fi
   
     - name: Tests Linux
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: ${{ runner.os == 'Linux'  }}
       run: |
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         export DISPLAY=:99.0
         go test ./... 
 
     - name: Setup Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+      if: ${{ runner.os == 'Windows'  }}
       shell: msys2 {0}
       run: |
         cd ..
@@ -69,14 +69,14 @@ jobs:
         ./deploy.cmd
 
     - name: Tests Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+      if: ${{  runner.os == 'Windows' }}
       shell: pwsh
       run: |
         go test ./...
         #go test -tags ci ./...
 
     - name: Tests MacOS
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: ${{ runner.os == 'macOS' }}
       run: |
         go test -tags ci ./... 
 
