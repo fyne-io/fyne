@@ -75,7 +75,7 @@ func Release() *cli.Command {
 			&cli.StringFlag{
 				Name:        "appiD",
 				Aliases:     []string{"id"},
-				Usage:       "For ios or darwin targets an appID is required, for ios this must match a valid provisioning profile",
+				Usage:       "For ios or darwin targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
 				Destination: &r.appID,
 			},
 			&cli.StringFlag{
@@ -145,11 +145,6 @@ type releaser struct {
 	keyPass      string
 	developer    string
 	password     string
-}
-
-// NewReleaser returns a command that can adapt app packages for distribution
-func NewReleaser() *releaser {
-	return &releaser{}
 }
 
 func (r *releaser) afterPackage() error {

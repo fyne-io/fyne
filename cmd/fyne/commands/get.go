@@ -6,13 +6,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
-// Get returns the command for getting a fyne application downloaded
+// Get returns the command which downloads and installs fyne applications.
 func Get() *cli.Command {
 	return &cli.Command{
 		Name:        "get",
@@ -47,8 +46,6 @@ func (g *Getter) SetIcon(path string) {
 
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
-	path := filepath.Join(goPath(), "src", pkg)
-
 	cmd := exec.Command("go", "get", "-u", "-d", pkg)
 	cmd.Env = append(os.Environ(), "GO111MODULE=off")
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
@@ -58,6 +55,7 @@ func (g *Getter) Get(pkg string) error {
 		return err
 	}
 
+	path := filepath.Join(goPath(), "src", pkg)
 	if !util.Exists(path) { // the error above may be ignorable, unless the path was not found
 		return err
 	}

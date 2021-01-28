@@ -10,9 +10,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Vendor returns the vendor cli command
+// Vendor returns the vendor cli command.
 //
-// Deprecated: Use "go mod vendor" instead
+// Deprecated: Use "go mod vendor" instead.
 func Vendor() *cli.Command {
 	return &cli.Command{
 		Name:  "vendor",
@@ -25,21 +25,19 @@ func Vendor() *cli.Command {
 	}
 }
 
-// Version returns the cli command for the program version
+// Version returns the cli command for the program version.
 //
-// Deprecated: Use "go mod vendor" instead
+// Deprecated: Use "fyne --version" or "fyne -v" instead.
 func Version() *cli.Command {
 	return &cli.Command{
 		Name:  "version",
 		Usage: "Deprecated: Use \"fyne --version\" or \"fyne -v\" instead.",
 		Action: func(_ *cli.Context) error {
-			if info, ok := debug.ReadBuildInfo(); !ok {
-				return errors.New("could not retrieve version information (ensure module support is activated and build again)")
-			} else {
+			if info, ok := debug.ReadBuildInfo(); ok {
 				fmt.Println("fyne cli version:", info.Main.Version)
 			}
 
-			return nil
+			return errors.New("could not retrieve version information (ensure module support is activated and build again)")
 		},
 	}
 }

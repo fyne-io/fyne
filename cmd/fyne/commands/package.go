@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
@@ -78,7 +77,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "appiD",
 				Aliases:     []string{"id"},
-				Usage:       "For ios or darwin targets an appID is required, for ios this must match a valid provisioning profile",
+				Usage:       "For ios or darwin targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
 				Destination: &p.appID,
 			},
 			&cli.BoolFlag{
@@ -100,11 +99,6 @@ type packager struct {
 	install, release             bool
 	certificate, profile         string // optional flags for releasing
 	tags, category               string
-}
-
-// NewPackager returns a packager command that can wrap executables into full GUI app packages.
-func NewPackager() *packager {
-	return &packager{}
 }
 
 func (p *packager) Package() error {

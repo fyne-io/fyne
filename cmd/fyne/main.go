@@ -14,7 +14,7 @@ func main() {
 	app := &cli.App{
 		Name:        "fyne",
 		Usage:       "A command line helper for various Fyne tools",
-		Description: "The fyne command provides tooling for fyne applications and their development",
+		Description: "The fyne command provides tooling for fyne applications and to assist in their development",
 		Commands: []*cli.Command{
 			commands.Bundle(),
 			commands.Env(),
