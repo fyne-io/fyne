@@ -78,7 +78,7 @@ jobs:
     - name: Tests MacOS
       if: ${{ runner.os == 'macOS' }}
       run: |
-        go test -tags ci ./... 
+        go test ./... 
 
     - name: Update coverage
       run: |
