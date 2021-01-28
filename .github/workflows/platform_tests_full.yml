@@ -1,0 +1,95 @@
+name: Platform_test_full
+
+on:
+#  [push, pull_request]
+  workflow_dispatch:
+    branches: [ master ]
+#  schedule:
+#     * is a special character in YAML so you have to quote this string
+#    - cron:  '*/10 * 23 1 *'
+
+jobs:
+  platform_tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: [1.12.x,1.15.x]
+        #using ubuntu-20.04 untill github upgrade latest https://github.com/actions/virtual-environments/issues/1816
+        os: [ubuntu-20.04, windows-latest, macos-latest]
+        #os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - uses: msys2/setup-msys2@v2
+      if: ${{ runner.os == 'Windows' }}
+      with:
+        release: false
+        install: >-
+          p7zip
+
+    - name: Get dependencies
+      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      if: ${{ runner.os == 'Linux' }}
+
+    #- name: Verify go modules
+    #  run: |
+    #    if [ "$GO111MODULE" == "on" ]
+    #    then
+    #        # For some reason `git diff-index HEAD` does not work properly if the following line is missing.
+    #        git diff
+    #        # check that go mod tidy does not change go.mod/go.sum
+    #        go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
+    #    fi
+  
+    - name: Tests Linux
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        export DISPLAY=:99.0
+        go test ./... 
+
+    - name: Setup Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: msys2 {0}
+      run: |
+        cd ..
+        mkdir mesa
+        # next two lines would download the latest, have locked it to 20.3.3 for now.
+        #mesapath=$(curl -sL https://github.com/pal1000/mesa-dist-win/releases/latest | grep -o "/pal1000..*mesa3d.*release-mingw.7z")
+        #curl -L https://github.com/${mesapath} -o mesa3d.7z
+        curl -L https://github.com/pal1000/mesa-dist-win/releases/download/20.3.3/mesa3d-20.3.3-release-mingw.7z -o mesa3d.7z
+        7z x -o./mesa mesa3d.7z
+        #only need our own deply script until https://github.com/pal1000/mesa-dist-win/issues/48
+        cp fyne/ci/mesa/deploy.cmd mesa/
+        cd mesa
+        ./deploy.cmd
+
+    - name: Tests Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: pwsh
+      run: |
+        go test ./...
+        #go test -tags ci ./...
+
+    - name: Tests MacOS
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: |
+        go test -tags ci ./... 
+
+    - name: Update coverage
+      run: |
+        GO111MODULE=off go get github.com/mattn/goveralls
+        set -e
+        go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
+        if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Update PR Coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: coverage.out
+      if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
