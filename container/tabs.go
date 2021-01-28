@@ -108,12 +108,18 @@ func (t *baseTabs) Select(item *TabItem) {
 
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *baseTabs) SelectIndex(index int) {
-	previous := t.current
-	if f := t.OnUnselected; f != nil && previous >= 0 && previous < len(t.Items) {
-		f(t.Items[previous])
+	if t.current == index {
+		// No change, so do nothing
+		return
 	}
 
-	if index < 0 || index >= len(t.Items) || t.current == index {
+	if f,p := t.OnUnselected,t.current; f != nil && p >= 0 && p < len(t.Items) {
+		// Notification of unselection
+		f(t.Items[p])
+	}
+
+	if index < 0 || index >= len(t.Items) {
+		// Out of bounds, so do nothing
 		return
 	}
 
@@ -121,6 +127,7 @@ func (t *baseTabs) SelectIndex(index int) {
 	t.Refresh()
 
 	if f := t.OnSelected; f != nil {
+		// Notification of selection
 		f(t.Items[t.current])
 	}
 }
