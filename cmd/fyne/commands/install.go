@@ -54,7 +54,7 @@ func Install() *cli.Command {
 		},
 		Action: func(ctx *cli.Context) error {
 			if ctx.Args().Len() != 0 {
-				return errors.New("Unexpected parameter after flags")
+				return errors.New("unexpected parameter after flags")
 			}
 
 			err := i.validate()
