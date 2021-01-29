@@ -320,6 +320,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 			r.indicator.Move(p)
 			r.indicator.Refresh()
 			if pos == p {
+				r.positionAnimation.Stop()
 				r.positionAnimation = nil
 			}
 		})
@@ -327,6 +328,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 			r.indicator.Resize(s)
 			r.indicator.Refresh()
 			if siz == s {
+				r.sizeAnimation.Stop()
 				r.sizeAnimation = nil
 			}
 		})
