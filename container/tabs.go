@@ -563,7 +563,7 @@ func (r *tabButtonRenderer) Refresh() {
 		}
 	}
 
-	if r.button.onClosed != nil && (r.button.hovered || r.close.hovered) {
+	if d := fyne.CurrentDevice(); d.IsMobile() || (r.button.onClosed != nil && (r.button.hovered || r.close.hovered)) {
 		r.close.Show()
 	} else {
 		r.close.Hide()
