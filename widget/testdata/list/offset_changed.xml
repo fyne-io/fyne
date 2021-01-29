@@ -106,32 +106,32 @@
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
-					<widget pos="4,275" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,275" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,321" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,321" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,367" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,367" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,413" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,413" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,459" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,459" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,505" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,505" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,551" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,551" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,597" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,597" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="4,643" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,643" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>
 				<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">

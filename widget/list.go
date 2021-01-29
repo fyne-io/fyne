@@ -273,7 +273,7 @@ func (l *listRenderer) offsetChanged() {
 		// Scrolling Up.
 		l.scrollUp(offsetChange)
 	}
-	l.layout.Layout.(*listLayout).updateDividers()
+	l.layout.Layout.(*listLayout).updateSeparators()
 }
 
 func (l *listRenderer) prependItem(id ListItemID) {
@@ -475,7 +475,7 @@ var _ fyne.Layout = (*listLayout)(nil)
 
 type listLayout struct {
 	list       *List
-	dividers   []fyne.CanvasObject
+	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 	layoutEndY float32
 }
@@ -495,7 +495,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		child.Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 	}
 	l.layoutEndY = y
-	l.updateDividers()
+	l.updateSeparators()
 }
 
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
@@ -509,7 +509,7 @@ func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 func (l *listLayout) getObjects() []fyne.CanvasObject {
 	objects := l.children
-	objects = append(objects, l.dividers...)
+	objects = append(objects, l.separators...)
 	return objects
 }
 
@@ -527,17 +527,17 @@ func (l *listLayout) prependedItem(objects []fyne.CanvasObject) {
 	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 }
 
-func (l *listLayout) updateDividers() {
+func (l *listLayout) updateSeparators() {
 	if len(l.children) > 1 {
-		if len(l.dividers) > len(l.children) {
-			l.dividers = l.dividers[:len(l.children)]
+		if len(l.separators) > len(l.children) {
+			l.separators = l.separators[:len(l.children)]
 		} else {
-			for i := len(l.dividers); i < len(l.children); i++ {
-				l.dividers = append(l.dividers, NewSeparator())
+			for i := len(l.separators); i < len(l.children); i++ {
+				l.separators = append(l.separators, NewSeparator())
 			}
 		}
 	} else {
-		l.dividers = nil
+		l.separators = nil
 	}
 
 	separatorThickness := theme.SeparatorThicknessSize()
@@ -545,8 +545,8 @@ func (l *listLayout) updateDividers() {
 		if i == 0 {
 			continue
 		}
-		l.dividers[i].Move(fyne.NewPos(theme.Padding(), child.Position().Y-separatorThickness))
-		l.dividers[i].Resize(fyne.NewSize(l.list.Size().Width-(theme.Padding()*2), separatorThickness))
-		l.dividers[i].Show()
+		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-separatorThickness))
+		l.separators[i].Resize(fyne.NewSize(l.list.Size().Width, separatorThickness))
+		l.separators[i].Show()
 	}
 }
