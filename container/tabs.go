@@ -309,7 +309,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 	}
 
 	r.indicator.Show()
-	if r.indicator.Position().IsZero() || r.indicator.Position() == pos {
+	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
 		r.indicator.Resize(siz)
 		r.indicator.Refresh()

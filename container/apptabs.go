@@ -242,6 +242,11 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 }
 
 func (r *appTabsRenderer) updateIndicator() {
+	if r.appTabs.current < 0 {
+		r.indicator.Hide()
+		return
+	}
+
 	var selectedPos fyne.Position
 	var selectedSize fyne.Size
 

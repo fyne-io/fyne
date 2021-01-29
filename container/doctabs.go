@@ -207,6 +207,11 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 }
 
 func (r *docTabsRenderer) updateIndicator(animate bool) {
+	if r.docTabs.current < 0 {
+		r.indicator.Hide()
+		return
+	}
+
 	var selectedPos fyne.Position
 	var selectedSize fyne.Size
 
