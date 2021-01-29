@@ -24,9 +24,11 @@ func (m *mockTicker) sendTick() {
 	<-m.cycle
 	m.ticks++
 }
-func (m *mockTicker) WaitTick() {
+func (m *mockTicker) WaitTick() (reset bool) {
 	m.cycle <- 1
 	<-m.tickCh
+	reset = false
+	return
 }
 func (m *mockTicker) Stop() {
 	m.started = false

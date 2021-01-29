@@ -15,7 +15,7 @@ import (
 // ===============================================================
 
 type cursorTicker interface {
-	WaitTick()
+	WaitTick() (reset bool)
 	Stop()
 	Reset()
 	Start(d time.Duration)
@@ -23,7 +23,8 @@ type cursorTicker interface {
 }
 
 type realTicker struct {
-	tk       *time.Ticker
+	tim      *time.Timer
+	rstCh    chan struct{}
 	duration time.Duration
 }
 
@@ -32,32 +33,52 @@ func (t *realTicker) Start(d time.Duration) {
 		return
 	}
 	t.duration = d
-	t.tk = time.NewTicker(t.duration)
+	t.rstCh = make(chan struct{}, 1)
+	t.tim = time.NewTimer(t.duration)
 }
 
 func (t *realTicker) Reset() {
 	if !t.Started() {
 		return
 	}
-	t.tk.Reset(t.duration)
+	select {
+	case t.rstCh <- struct{}{}:
+	default:
+	}
 }
 
+// Stop must be called in the same go routine where WaitTick is used.
 func (t *realTicker) Stop() {
 	if !t.Started() {
 		return
 	}
-	t.tk.Stop()
-	t.tk = nil // TODO is it safe?
+	if !t.tim.Stop() {
+		<-t.tim.C
+	}
+	t.tim = nil // TODO is it safe?
+	t.rstCh = nil
 }
 
-func (t *realTicker) WaitTick() {
+func (t *realTicker) WaitTick() (reset bool) {
 	if !t.Started() {
+		reset = true // TODO what to do here?
 		return
 	}
-	<-t.tk.C
+	select {
+	case <-t.tim.C:
+		reset = false
+		t.tim.Stop()
+	case <-t.rstCh:
+		reset = true
+		if !t.tim.Stop() {
+			<-t.tim.C
+		}
+	}
+	t.tim.Reset(t.duration)
+	return
 }
 
-func (t *realTicker) Started() bool { return t.tk != nil }
+func (t *realTicker) Started() bool { return t.tim != nil }
 
 // ===============================================================
 // Implementation
@@ -126,7 +147,9 @@ func (a *entryCursorAnimation) start() {
 			a.mu.Unlock()
 		}()
 		for {
-			a.ticker.WaitTick()
+			if reset := a.ticker.WaitTick(); reset {
+				continue
+			}
 			a.mu.RLock()
 			interrupted := a.state == cursorStateInterrupted
 			cancel := a.anim == nil
