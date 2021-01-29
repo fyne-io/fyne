@@ -64,6 +64,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 		lastY = offset.Y
 		r.updateIndicator(false)
 	}
+	r.updateAllTabs()
 	r.updateCreateTab()
 	r.updateTabs()
 	r.updateIndicator(false)
@@ -88,6 +89,7 @@ type docTabsRenderer struct {
 }
 
 func (r *docTabsRenderer) Layout(size fyne.Size) {
+	r.updateAllTabs()
 	r.updateCreateTab()
 	r.updateTabs()
 	r.layout(&r.docTabs.baseTabs, size)
@@ -251,6 +253,14 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	}
 
 	r.moveIndicator(indicatorPos, indicatorSize, animate)
+}
+
+func (r *docTabsRenderer) updateAllTabs() {
+	if len(r.docTabs.Items) > 0 {
+		r.action.Show()
+	} else {
+		r.action.Hide()
+	}
 }
 
 func (r *docTabsRenderer) updateCreateTab() {

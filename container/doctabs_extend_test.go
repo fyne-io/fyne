@@ -12,28 +12,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type extendedAppTabs struct {
-	AppTabs
+type extendedDocTabs struct {
+	DocTabs
 }
 
-func newExtendedAppTabs(items ...*TabItem) *extendedAppTabs {
-	ret := &extendedAppTabs{}
+func newExtendedDocTabs(items ...*TabItem) *extendedDocTabs {
+	ret := &extendedDocTabs{}
 	ret.ExtendBaseWidget(ret)
 
 	ret.Items = items
 	return ret
 }
 
-func TestAppTabs_Extended_Tapped(t *testing.T) {
-	tabs := newExtendedAppTabs(
+func TestDocTabs_Extended_Tapped(t *testing.T) {
+	tabs := newExtendedDocTabs(
 		NewTabItem("Test1", widget.NewLabel("Test1")),
 		NewTabItem("Test2", widget.NewLabel("Test2")),
 	)
-	tabs.Resize(fyne.NewSize(150, 150)) // Ensure AppTabs is big enough to show both tab buttons
-	r := test.WidgetRenderer(tabs).(*appTabsRenderer)
+	tabs.Resize(fyne.NewSize(150, 150)) // Ensure DocTabs is big enough to show both tab buttons
+	r := test.WidgetRenderer(tabs).(*docTabsRenderer)
 
-	tab1 := r.bar.Objects[0].(*fyne.Container).Objects[0].(*tabButton)
-	tab2 := r.bar.Objects[0].(*fyne.Container).Objects[1].(*tabButton)
+	buttons := r.bar.Objects[0].(*Scroll).Content.(*fyne.Container).Objects
+	tab1 := buttons[0].(*tabButton)
+	tab2 := buttons[1].(*tabButton)
 	require.Equal(t, 0, tabs.SelectionIndex())
 	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab1).(*tabButtonRenderer).label.Color)
 

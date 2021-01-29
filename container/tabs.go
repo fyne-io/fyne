@@ -113,7 +113,7 @@ func (t *baseTabs) SelectIndex(index int) {
 		return
 	}
 
-	if f,p := t.OnUnselected,t.current; f != nil && p >= 0 && p < len(t.Items) {
+	if f, p := t.OnUnselected, t.current; f != nil && p >= 0 && p < len(t.Items) {
 		// Notification of unselection
 		f(t.Items[p])
 	}

@@ -181,6 +181,12 @@ func TestAppTabs_HoverButtons(t *testing.T) {
 
 	test.MoveMouse(c, fyne.NewPos(10, 10))
 	test.AssertRendersToMarkup(t, "apptabs/desktop/hover_first.xml", c)
+
+	tabs.Append(&container.TabItem{Text: "Test3", Content: widget.NewLabel("Text3")})
+	tabs.Append(&container.TabItem{Text: "Test4", Content: widget.NewLabel("Text4")})
+
+	test.MoveMouse(c, fyne.NewPos(136, 10))
+	test.AssertRendersToMarkup(t, "apptabs/desktop/hover_overflow.xml", c)
 }
 
 func TestAppTabs_Layout(t *testing.T) {
@@ -330,18 +336,23 @@ func TestAppTabs_Tapped(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 100))
 	c := w.Canvas()
 
-	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, 0, tabs.SelectionIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(75, 10))
-	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	assert.Equal(t, 1, tabs.SelectionIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_second_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(150, 10))
-	assert.Equal(t, 2, tabs.CurrentTabIndex())
+	assert.Equal(t, 2, tabs.SelectionIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_third_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(10, 10))
-	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, 0, tabs.SelectionIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_first_selected.xml", c)
+
+	tabs.Append(&container.TabItem{Text: "Test4", Content: widget.NewLabel("Text 4")})
+
+	test.TapCanvas(c, fyne.NewPos(186, 10))
+	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_overflow_tabs.xml", c)
 }
