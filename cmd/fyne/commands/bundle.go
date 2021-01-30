@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -152,6 +153,80 @@ func (b *bundler) doBundle(filepath string, out *os.File) {
 		b.name = sanitiseName(path.Base(filepath), b.prefix)
 	}
 	writeResource(filepath, b.name, out)
+}
+
+// NewBundler returns a command that can bundle resources into a Go code.
+func NewBundler() Command {
+	return &bundler{}
+}
+
+// AddFlags adds all the command line flags for passing to the bundler.
+//
+// Deprecated: Use Bundle() to get the urfave/cli command instead.
+func (b *bundler) AddFlags() {
+	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
+	flag.StringVar(&b.out, "o", "", "Specify an output file instead of printing to standard output")
+	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
+	flag.StringVar(&b.prefix, "prefix", "resource", "A prefix for variables (ignored if name is set)")
+	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
+}
+
+// PrintHelp prints the help message for the bundle command.
+//
+// Deprecated: Use Bundle() to get the urfave/cli command instead.
+func (b *bundler) PrintHelp(indent string) {
+	fmt.Println(indent, "The bundle command embeds static content into your go application.")
+	fmt.Println(indent, "Each resource will have a generated filename unless specified")
+	fmt.Println(indent, "Command usage: fyne bundle [parameters] file|directory")
+}
+
+// Run runs the bundle command.
+//
+// Deprecated: Use Bundle() to get the urfave/cli command instead.
+func (b *bundler) Run(args []string) {
+	if len(args) != 1 {
+		fyne.LogError("Missing required file or directory parameter after flags", nil)
+		return
+	}
+
+	outFile := os.Stdout
+	if b.out != "" {
+		fileModes := os.O_RDWR | os.O_CREATE | os.O_TRUNC
+		if b.noheader {
+			fileModes = os.O_RDWR | os.O_APPEND
+		}
+
+		f, err := os.OpenFile(b.out, fileModes, 0666)
+		if err == nil {
+			outFile = f
+		} else {
+			if os.IsNotExist(err) {
+				f, err = os.Create(b.out)
+				if err == nil {
+					outFile = f
+				} else {
+					fyne.LogError("Unable to read, or create, output file : "+b.out, err)
+					return
+				}
+			} else {
+				fyne.LogError("Unable to open output file", err)
+				return
+			}
+		}
+	}
+
+	switch stat, err := os.Stat(args[0]); {
+	case os.IsNotExist(err):
+		fyne.LogError("Specified file could not be found", err)
+	case stat.IsDir():
+		b.noheader = false
+		b.dirBundle(args[0], outFile)
+	case b.name != "":
+		b.prefix = ""
+		fallthrough
+	default:
+		b.doBundle(args[0], outFile)
+	}
 }
 
 func sanitiseName(file, prefix string) string {
