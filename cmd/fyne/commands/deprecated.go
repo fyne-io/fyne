@@ -35,6 +35,7 @@ func Version() *cli.Command {
 		Action: func(_ *cli.Context) error {
 			if info, ok := debug.ReadBuildInfo(); ok {
 				fmt.Println("fyne cli version:", info.Main.Version)
+				return nil
 			}
 
 			return errors.New("could not retrieve version information (ensure module support is activated and build again)")
