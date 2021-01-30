@@ -1,6 +1,6 @@
 // +build !ci
 
-// +build linux openbsd freebsd netbsd
+// +build linux openbsd freebsd netbsd dragonfly
 // +build !android
 
 package app
