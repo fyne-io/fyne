@@ -77,6 +77,17 @@ func (t *DocTabs) MinSize() fyne.Size {
 	return t.BaseWidget.MinSize()
 }
 
+func (t *DocTabs) close(item *TabItem) {
+	if f := t.CloseIntercept; f != nil {
+		f(item)
+	} else {
+		t.Remove(item)
+		if f := t.OnClosed; f != nil {
+			f(item)
+		}
+	}
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*docTabsRenderer)(nil)
 
@@ -177,16 +188,7 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if !ok {
 			button = &tabButton{
 				onTapped: func() { r.docTabs.Select(item) },
-				onClosed: func() {
-					if f := r.docTabs.CloseIntercept; f != nil {
-						f(item)
-					} else {
-						r.docTabs.Remove(item)
-						if f := r.docTabs.OnClosed; f != nil {
-							f(item)
-						}
-					}
-				},
+				onClosed: func() { r.docTabs.close(item) },
 			}
 			r.buttonCache[item] = button
 		}
