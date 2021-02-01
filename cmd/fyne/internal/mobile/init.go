@@ -108,8 +108,7 @@ func runCmd(cmd *exec.Cmd) error {
 
 	if buildWork {
 		if goos == "windows" {
-			cmd.Env = append(cmd.Env, `TEMP=`+tmpdir)
-			cmd.Env = append(cmd.Env, `TMP=`+tmpdir)
+			cmd.Env = append(cmd.Env, `TEMP=`+tmpdir, `TMP=`+tmpdir)
 		} else {
 			cmd.Env = append(cmd.Env, `TMPDIR=`+tmpdir)
 		}

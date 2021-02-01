@@ -32,8 +32,7 @@ func (b *builder) build() error {
 		}
 	} else {
 		if goos == "darwin" {
-			env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11")
-			env = append(env, "CGO_LDFLAGS=-mmacosx-version-min=10.11")
+			env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 		}
 		if b.release {
 			args = append(args, "-ldflags", "-s -w")
