@@ -16,10 +16,10 @@
 					</container>
 				</widget>
 				<container pos="0,8" size="73x29">
-					<widget size="73x29" type="*widget.Button">
-						<rectangle fillColor="button" size="73x29"/>
+					<widget size="28x29" type="*widget.Button">
+						<rectangle fillColor="button" size="28x29"/>
 						<rectangle size="0x0"/>
-						<image fillMode="contain" pos="26,4" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="4,4" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>

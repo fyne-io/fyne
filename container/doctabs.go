@@ -53,7 +53,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r.action = r.buildAllTabsButton()
 	r.create = r.buildCreateTabsButton()
-	r.box = fyne.NewContainer(r.create, r.action)
+	r.box = NewHBox(r.create, r.action)
 	var lastX, lastY float32
 	r.scroller.OnScrolled = func(offset fyne.Position) {
 		// FIXME OnScrolled can be called when the offset hasn't changed (#1868)
@@ -286,11 +286,9 @@ func (r *docTabsRenderer) updateTabs() {
 
 	// Set layout of tab bar containing tab buttons and overflow action
 	if r.docTabs.tabLocation == TabLocationLeading || r.docTabs.tabLocation == TabLocationTrailing {
-		r.box.Layout = layout.NewVBoxLayout()
 		r.bar.Layout = layout.NewBorderLayout(nil, r.box, nil, nil)
 		r.scroller.Direction = ScrollVerticalOnly
 	} else {
-		r.box.Layout = layout.NewHBoxLayout()
 		r.bar.Layout = layout.NewBorderLayout(nil, nil, nil, r.box)
 		r.scroller.Direction = ScrollHorizontalOnly
 	}
