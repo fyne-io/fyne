@@ -203,7 +203,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 					// This is root node, skip
 					return
 				}
-				// If this is not the first item, add a divider
+				// If this is not the first item, add a separator
 				if y > 0 {
 					y += theme.SeparatorThicknessSize()
 				}
@@ -374,7 +374,7 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 type treeContentRenderer struct {
 	widget.BaseRenderer
 	treeContent *treeContent
-	dividers    []fyne.CanvasObject
+	separators  []fyne.CanvasObject
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
@@ -389,13 +389,14 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	r.objects = nil
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
-	separatorThickness := theme.SeparatorThicknessSize()
 
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
+	separatorCount := 0
+	separatorThickness := theme.SeparatorThicknessSize()
+	separatorSize := fyne.NewSize(width, separatorThickness)
 	y := float32(0)
-	numDividers := 0
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
@@ -407,22 +408,21 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			}
 		}
 
-		// If this is not the first item, add a divider
+		// If this is not the first item, add a separator
 		if y > 0 {
-			var divider fyne.CanvasObject
-			if numDividers < len(r.dividers) {
-				divider = r.dividers[numDividers]
+			var separator fyne.CanvasObject
+			if separatorCount < len(r.separators) {
+				separator = r.separators[separatorCount]
 			} else {
-				divider = NewSeparator()
-				r.dividers = append(r.dividers, divider)
+				separator = NewSeparator()
+				r.separators = append(r.separators, separator)
 			}
-			divider.Move(fyne.NewPos(theme.Padding(), y))
-			s := fyne.NewSize(width-2*theme.Padding(), separatorThickness)
-			divider.Resize(s)
-			divider.Show()
-			r.objects = append(r.objects, divider)
+			separator.Move(fyne.NewPos(0, y))
+			separator.Resize(separatorSize)
+			separator.Show()
+			r.objects = append(r.objects, separator)
 			y += separatorThickness
-			numDividers++
+			separatorCount++
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -469,9 +469,9 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		y += m.Height
 	})
 
-	// Hide any dividers that haven't been reused
-	for ; numDividers < len(r.dividers); numDividers++ {
-		r.dividers[numDividers].Hide()
+	// Hide any separators that haven't been reused
+	for ; separatorCount < len(r.separators); separatorCount++ {
+		r.separators[separatorCount].Hide()
 	}
 
 	// Release any nodes that haven't been reused
@@ -506,7 +506,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 			}
 		}
 
-		// If this is not the first item, add a divider
+		// If this is not the first item, add a separator
 		if min.Height > 0 {
 			min.Height += theme.SeparatorThicknessSize()
 		}
@@ -592,12 +592,12 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
-	indicator := canvas.NewRectangle(theme.HoverColor())
-	indicator.Hide()
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeNode:     n,
-		indicator:    indicator,
+		background:   background,
 	}
 }
 
@@ -644,17 +644,14 @@ var _ fyne.WidgetRenderer = (*treeNodeRenderer)(nil)
 
 type treeNodeRenderer struct {
 	widget.BaseRenderer
-	treeNode  *treeNode
-	indicator *canvas.Rectangle
+	treeNode   *treeNode
+	background *canvas.Rectangle
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	x := float32(0)
 	y := float32(0)
-	r.indicator.Move(fyne.NewPos(x, y))
-	s := fyne.NewSize(theme.Padding(), size.Height)
-	r.indicator.SetMinSize(s)
-	r.indicator.Resize(s)
+	r.background.Resize(size)
 	h := size.Height - 2*theme.Padding()
 	x += theme.Padding() + r.treeNode.Indent()
 	y += theme.Padding()
@@ -682,13 +679,13 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
+	objects = append(objects, r.background)
 	if r.treeNode.content != nil {
 		objects = append(objects, r.treeNode.content)
 	}
 	if r.treeNode.icon != nil {
 		objects = append(objects, r.treeNode.icon)
 	}
-	objects = append(objects, r.indicator)
 	return
 }
 
@@ -706,15 +703,15 @@ func (r *treeNodeRenderer) partialRefresh() {
 		r.treeNode.icon.Refresh()
 	}
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
-		r.indicator.FillColor = theme.PrimaryColor()
-		r.indicator.Show()
+		r.background.FillColor = theme.FocusColor()
+		r.background.Show()
 	} else if r.treeNode.hovered {
-		r.indicator.FillColor = theme.HoverColor()
-		r.indicator.Show()
+		r.background.FillColor = theme.HoverColor()
+		r.background.Show()
 	} else {
-		r.indicator.Hide()
+		r.background.Hide()
 	}
-	r.indicator.Refresh()
+	r.background.Refresh()
 	canvas.Refresh(r.treeNode.super())
 }
 
