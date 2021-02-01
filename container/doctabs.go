@@ -15,7 +15,7 @@ var _ fyne.Widget = (*DocTabs)(nil)
 // The tabs contain text and/or an icon and allow the user to switch between the content specified in each TabItem.
 // Each item is represented by a button at the edge of the container.
 //
-// Since: 2.0
+// Since: 2.1
 type DocTabs struct {
 	baseTabs
 	CreateTab      func() *TabItem
@@ -25,7 +25,7 @@ type DocTabs struct {
 
 // NewDocTabs creates a new tab container that allows the user to choose between various pieces of content.
 //
-// Since: 2.0
+// Since: 2.1
 func NewDocTabs(items ...*TabItem) *DocTabs {
 	tabs := &DocTabs{
 		baseTabs: baseTabs{
