@@ -22,21 +22,6 @@ func containerScreen(_ fyne.Window) fyne.CanvasObject {
 	return container.NewCenter(content)
 }
 
-// tabsScreen loads a tab panel for tabs
-func tabsScreen(_ fyne.Window) fyne.CanvasObject {
-	return container.NewCenter(container.NewBorder(
-		container.NewHBox(
-			container.NewMax(makeCell(), widget.NewLabel("Tab 1")),
-			widget.NewLabel("Tab 2"),
-			widget.NewLabel("Tab 3"),
-		),
-		nil,
-		nil,
-		nil,
-		container.NewMax(makeCell(), widget.NewLabelWithStyle("Content", fyne.TextAlignCenter, fyne.TextStyle{})),
-	))
-}
-
 func makeAppTabsTab(_ fyne.Window) fyne.CanvasObject {
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
@@ -98,14 +83,14 @@ func makeCenterLayout(_ fyne.Window) fyne.CanvasObject {
 
 func makeDocTabsTab(_ fyne.Window) fyne.CanvasObject {
 	tabs := container.NewDocTabs(
-		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
-		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
-		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
+		container.NewTabItem("Doc 1", widget.NewLabel("Content of document 1")),
+		container.NewTabItem("Doc 2 bigger", widget.NewLabel("Content of document 2")),
+		container.NewTabItem("Doc 3", widget.NewLabel("Content of document 3")),
 	)
 	i := 3
 	tabs.CreateTab = func() *container.TabItem {
 		i++
-		return container.NewTabItem(fmt.Sprintf("Tab %d", i), widget.NewLabel(fmt.Sprintf("Content of tab %d", i)))
+		return container.NewTabItem(fmt.Sprintf("Doc %d", i), widget.NewLabel(fmt.Sprintf("Content of document %d", i)))
 	}
 	locations := makeTabLocationSelect(tabs.SetTabLocation)
 	return container.NewBorder(locations, nil, nil, nil, tabs)
