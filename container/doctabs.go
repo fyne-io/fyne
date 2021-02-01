@@ -18,9 +18,9 @@ var _ fyne.Widget = (*DocTabs)(nil)
 // Since: 2.0
 type DocTabs struct {
 	baseTabs
-	CreateTab          func() *TabItem
-	OnClosed           func(*TabItem)
-	OnCloseIntercepted func(*TabItem)
+	CreateTab      func() *TabItem
+	OnClosed       func(*TabItem)
+	CloseIntercept func(*TabItem)
 }
 
 // NewDocTabs creates a new tab container that allows the user to choose between various pieces of content.
@@ -178,7 +178,7 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 			button = &tabButton{
 				onTapped: func() { r.docTabs.Select(item) },
 				onClosed: func() {
-					if f := r.docTabs.OnCloseIntercepted; f != nil {
+					if f := r.docTabs.CloseIntercept; f != nil {
 						f(item)
 					} else {
 						r.docTabs.Remove(item)
