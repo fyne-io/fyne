@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime/debug"
 
-	"fyne.io/fyne/v2/cmd/fyne/commands"
+	"fyne.io/fyne/v2/cmd/fyne/internal/commands"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,7 +23,7 @@ func main() {
 			commands.Package(),
 			commands.Release(),
 
-			// Deprecated commands
+			// Deprecated commands:
 			commands.Vendor(),
 			commands.Version(),
 		},

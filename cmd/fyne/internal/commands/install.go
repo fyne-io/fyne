@@ -16,7 +16,7 @@ import (
 
 // Install returns the cli command for installing fyne applications
 func Install() *cli.Command {
-	i := &installer{}
+	i := &Installer{}
 
 	return &cli.Command{
 		Name:  "install",
@@ -74,14 +74,15 @@ func Install() *cli.Command {
 	}
 }
 
-type installer struct {
+// Installer installs locally built Fyne apps.
+type Installer struct {
 	installDir, srcDir, icon, os, appID string
-	packager                            *packager
+	Packager                            *Packager
 	release                             bool
 }
 
-func (i *installer) install() error {
-	p := i.packager
+func (i *Installer) install() error {
+	p := i.Packager
 
 	if i.os != "" {
 		if i.os == "ios" {
@@ -115,12 +116,12 @@ func (i *installer) install() error {
 	return p.doPackage()
 }
 
-func (i *installer) installAndroid() error {
-	target := mobile.AppOutputName(i.os, i.packager.name)
+func (i *Installer) installAndroid() error {
+	target := mobile.AppOutputName(i.os, i.Packager.name)
 
 	_, err := os.Stat(target)
 	if os.IsNotExist(err) {
-		err := i.packager.doPackage()
+		err := i.Packager.doPackage()
 		if err != nil {
 			return nil
 		}
@@ -129,11 +130,11 @@ func (i *installer) installAndroid() error {
 	return i.runMobileInstall("adb", target, "install")
 }
 
-func (i *installer) installIOS() error {
-	target := mobile.AppOutputName(i.os, i.packager.name)
+func (i *Installer) installIOS() error {
+	target := mobile.AppOutputName(i.os, i.Packager.name)
 	_, err := os.Stat(target)
 	if os.IsNotExist(err) {
-		err := i.packager.doPackage()
+		err := i.Packager.doPackage()
 		if err != nil {
 			return nil
 		}
@@ -142,7 +143,7 @@ func (i *installer) installIOS() error {
 	return i.runMobileInstall("ios-deploy", target, "--bundle")
 }
 
-func (i *installer) runMobileInstall(tool, target string, args ...string) error {
+func (i *Installer) runMobileInstall(tool, target string, args ...string) error {
 	_, err := exec.LookPath(tool)
 	if err != nil {
 		return err
@@ -154,21 +155,21 @@ func (i *installer) runMobileInstall(tool, target string, args ...string) error 
 	return cmd.Run()
 }
 
-func (i *installer) validate() error {
+func (i *Installer) validate() error {
 	os := i.os
 	if os == "" {
 		os = targetOS()
 	}
-	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
-	i.packager.icon = i.icon
-	i.packager.release = i.release
-	return i.packager.validate()
+	i.Packager = &Packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
+	i.Packager.icon = i.icon
+	i.Packager.release = i.release
+	return i.Packager.validate()
 }
 
-// AddFlags adds the flags for interacting with the installer.
+// AddFlags adds the flags for interacting with the Installer.
 //
-// Deprecated: Use Install() to get the urfave/cli command instead.
-func (i *installer) AddFlags() {
+// Deprecated: Access to the individual cli commands are being removed.
+func (i *Installer) AddFlags() {
 	flag.StringVar(&i.os, "os", "", "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios)")
 	flag.StringVar(&i.installDir, "installDir", "", "A specific location to install to, rather than the OS default")
 	flag.StringVar(&i.icon, "icon", "Icon.png", "The name of the application icon file")
@@ -178,8 +179,8 @@ func (i *installer) AddFlags() {
 
 // PrintHelp prints the help for the install command.
 //
-// Deprecated: Use Install() to get the urfave/cli command instead.
-func (i *installer) PrintHelp(indent string) {
+// Deprecated: Access to the individual cli commands are being removed.
+func (i *Installer) PrintHelp(indent string) {
 	fmt.Println(indent, "The install command packages an application for the current platform and copies it")
 	fmt.Println(indent, "into the system location for applications. This can be overridden with installDir")
 	fmt.Println(indent, "Command usage: fyne install [parameters]")
@@ -187,8 +188,8 @@ func (i *installer) PrintHelp(indent string) {
 
 // Run runs the install command.
 //
-// Deprecated: Use Install() to get the urfave/cli command instead.
-func (i *installer) Run(args []string) {
+// Deprecated: A better version will be exposed in the future.
+func (i *Installer) Run(args []string) {
 	if len(args) != 0 {
 		fyne.LogError("Unexpected parameter after flags", nil)
 		return

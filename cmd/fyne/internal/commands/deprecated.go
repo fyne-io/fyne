@@ -42,12 +42,3 @@ func Version() *cli.Command {
 		},
 	}
 }
-
-// Command defines the required functionality to provide a subcommand to the "fyne" tool.
-//
-// Deprecated: Use the functions that return urfave/cli commands instead.
-type Command interface {
-	AddFlags()
-	PrintHelp(string)
-	Run(args []string)
-}

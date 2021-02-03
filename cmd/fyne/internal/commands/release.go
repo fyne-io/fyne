@@ -120,12 +120,12 @@ func Release() *cli.Command {
 				return err
 			}
 
-			r.packager.release = true
+			r.Packager.release = true
 			if err := r.beforePackage(); err != nil {
 				return err
 			}
 
-			err := r.packager.Package()
+			err := r.Packager.Package()
 			if err != nil {
 				return err
 			}
@@ -140,7 +140,7 @@ func Release() *cli.Command {
 }
 
 type releaser struct {
-	packager
+	Packager
 
 	keyStore     string
 	keyStorePass string
@@ -151,7 +151,7 @@ type releaser struct {
 
 func (r *releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
-		target := mobile.AppOutputName(r.os, r.packager.name)
+		target := mobile.AppOutputName(r.os, r.Packager.name)
 		apk := filepath.Join(r.dir, target)
 		if err := r.zipAlign(apk); err != nil {
 			return err
@@ -414,7 +414,7 @@ func (r *releaser) zipAlign(path string) error {
 
 // AddFlags adds the flags for interacting with the release command.
 //
-// Deprecated: Use Release() to get the urfave/cli command instead.
+// Deprecated: Access to the individual cli commands are being removed.
 func (r *releaser) AddFlags() {
 	flag.StringVar(&r.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
 	flag.StringVar(&r.name, "name", "", "The name of the application, default is the executable file name")
@@ -435,26 +435,26 @@ func (r *releaser) AddFlags() {
 
 // PrintHelp prints the help message for the release command.
 //
-// Deprecated: Use Release() to get the urfave/cli command instead.
+// Deprecated: Access to the individual cli commands are being removed.
 func (r *releaser) PrintHelp(indent string) {
 	fmt.Println(indent, "The release command prepares an application for public distribution.")
 }
 
 // Run runs the release command.
 //
-// Deprecated: Use Release() to get the urfave/cli command instead.
+// Deprecated: A better version will be exposed in the future.
 func (r *releaser) Run(params []string) {
 	if err := r.validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
 	}
-	r.packager.release = true
+	r.Packager.release = true
 
 	if err := r.beforePackage(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
 	}
-	r.packager.Run(params)
+	r.Packager.Run(params)
 	if err := r.afterPackage(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 	}

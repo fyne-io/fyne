@@ -15,7 +15,7 @@ type unixData struct {
 	Local            string
 }
 
-func (p *packager) packageUNIX() error {
+func (p *Packager) packageUNIX() error {
 	var prefixDir string
 	local := "local/"
 	tempDir := "tmp-pkg"

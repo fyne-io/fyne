@@ -20,7 +20,7 @@ type darwinData struct {
 	Category      string
 }
 
-func (p *packager) packageDarwin() error {
+func (p *Packager) packageDarwin() error {
 	appDir := util.EnsureSubDir(p.dir, p.name+".app")
 	exeName := filepath.Base(p.exe)
 

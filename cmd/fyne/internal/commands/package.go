@@ -24,7 +24,7 @@ const (
 
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
-	p := &packager{}
+	p := &Packager{}
 
 	return &cli.Command{
 		Name:        "package",
@@ -93,7 +93,8 @@ func Package() *cli.Command {
 	}
 }
 
-type packager struct {
+// Packager wraps executables into full GUI app packages.
+type Packager struct {
 	name, srcDir, dir, exe, icon string
 	os, appID, appVersion        string
 	appBuild                     int
@@ -102,7 +103,8 @@ type packager struct {
 	tags, category               string
 }
 
-func (p *packager) Package() error {
+// Package starts the packaging process
+func (p *Packager) Package() error {
 	err := p.validate()
 	if err != nil {
 		return err
@@ -116,7 +118,7 @@ func (p *packager) Package() error {
 	return nil
 }
 
-func (p *packager) buildPackage() error {
+func (p *Packager) buildPackage() error {
 	tags := strings.Split(p.tags, ",")
 	b := &builder{
 		os:      p.os,
@@ -128,11 +130,11 @@ func (p *packager) buildPackage() error {
 	return b.build()
 }
 
-func (p *packager) combinedVersion() string {
+func (p *Packager) combinedVersion() string {
 	return fmt.Sprintf("%s.%d", p.appVersion, p.appBuild)
 }
 
-func (p *packager) doPackage() error {
+func (p *Packager) doPackage() error {
 	// sensible defaults - validation deemed them optional
 	if p.appVersion == "" {
 		p.appVersion = defaultAppVersion
@@ -167,7 +169,7 @@ func (p *packager) doPackage() error {
 	}
 }
 
-func (p *packager) validate() error {
+func (p *Packager) validate() error {
 	if p.os == "" {
 		p.os = targetOS()
 	}
@@ -216,8 +218,8 @@ func (p *packager) validate() error {
 
 // AddFlags adds the flags for interacting with the package command.
 //
-// Deprecated: Use Package() to get the urfave/cli command instead.
-func (p *packager) AddFlags() {
+// Deprecated: Access to the individual cli commands are being removed.
+func (p *Packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
@@ -232,8 +234,8 @@ func (p *packager) AddFlags() {
 
 // PrintHelp prints the help for the package command.
 //
-// Deprecated: Use Package() to get the urfave/cli command instead.
-func (*packager) PrintHelp(indent string) {
+// Deprecated: Access to the individual cli commands are being removed.
+func (*Packager) PrintHelp(indent string) {
 	fmt.Println(indent, "The package command prepares an application for installation and testing.")
 	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
@@ -241,8 +243,8 @@ func (*packager) PrintHelp(indent string) {
 
 // Run runs the package command.
 //
-// Deprecated: Use Package() to get the urfave/cli command instead.
-func (p *packager) Run(_ []string) {
+// Deprecated: A better version will be exposed in the future.
+func (p *Packager) Run(_ []string) {
 	err := p.validate()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())

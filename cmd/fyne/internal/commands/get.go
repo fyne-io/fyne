@@ -56,7 +56,7 @@ func (g *Getter) Get(pkg string) error {
 		return err
 	}
 
-	install := &installer{srcDir: path, icon: g.icon, release: true}
+	install := &Installer{srcDir: path, icon: g.icon, release: true}
 	if err := install.validate(); err != nil {
 		return errors.Wrap(err, "Failed to set up installer")
 	}

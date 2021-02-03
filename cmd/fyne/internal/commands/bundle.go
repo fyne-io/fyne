@@ -20,7 +20,7 @@ const fileHeader = "// auto-generated\n" + // to exclude this file in goreportca
 
 // Bundle returns the vendor cli command
 func Bundle() *cli.Command {
-	b := &bundler{}
+	b := &Bundler{}
 
 	return &cli.Command{
 		Name:        "bundle",
@@ -109,13 +109,14 @@ func Bundle() *cli.Command {
 	}
 }
 
-type bundler struct {
+// Bundler bundles resources into Go code.
+type Bundler struct {
 	name, pkg, out string
 	prefix         string
 	noheader       bool
 }
 
-func (b *bundler) dirBundle(dirpath string, out *os.File) error {
+func (b *Bundler) dirBundle(dirpath string, out *os.File) error {
 	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
 		fyne.LogError("Error reading specified directory", err)
@@ -144,7 +145,7 @@ func (b *bundler) dirBundle(dirpath string, out *os.File) error {
 // (pkg) and the data will be assigned to variable named "name". If you are
 // appending an existing resource file then pass true to noheader as the headers
 // should only be output once per file.
-func (b *bundler) doBundle(filepath string, out *os.File) {
+func (b *Bundler) doBundle(filepath string, out *os.File) {
 	if !b.noheader {
 		writeHeader(b.pkg, out)
 	}
@@ -155,15 +156,10 @@ func (b *bundler) doBundle(filepath string, out *os.File) {
 	writeResource(filepath, b.name, out)
 }
 
-// NewBundler returns a command that can bundle resources into a Go code.
-func NewBundler() Command {
-	return &bundler{}
-}
-
-// AddFlags adds all the command line flags for passing to the bundler.
+// AddFlags adds all the command line flags for passing to the Bundler.
 //
-// Deprecated: Use Bundle() to get the urfave/cli command instead.
-func (b *bundler) AddFlags() {
+// Deprecated: Access to the individual cli commands are being removed.
+func (b *Bundler) AddFlags() {
 	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
 	flag.StringVar(&b.out, "o", "", "Specify an output file instead of printing to standard output")
 	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
@@ -173,8 +169,8 @@ func (b *bundler) AddFlags() {
 
 // PrintHelp prints the help message for the bundle command.
 //
-// Deprecated: Use Bundle() to get the urfave/cli command instead.
-func (b *bundler) PrintHelp(indent string) {
+// Deprecated: Access to the individual cli commands are being removed.
+func (b *Bundler) PrintHelp(indent string) {
 	fmt.Println(indent, "The bundle command embeds static content into your go application.")
 	fmt.Println(indent, "Each resource will have a generated filename unless specified")
 	fmt.Println(indent, "Command usage: fyne bundle [parameters] file|directory")
@@ -182,8 +178,8 @@ func (b *bundler) PrintHelp(indent string) {
 
 // Run runs the bundle command.
 //
-// Deprecated: Use Bundle() to get the urfave/cli command instead.
-func (b *bundler) Run(args []string) {
+// Deprecated: A better version will be exposed in the future.
+func (b *Bundler) Run(args []string) {
 	if len(args) != 1 {
 		fyne.LogError("Missing required file or directory parameter after flags", nil)
 		return
