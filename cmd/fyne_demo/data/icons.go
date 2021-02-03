@@ -1,5 +1,7 @@
 package data
 
+//go:generate fyne bundle -package data -o bundled.go assets
+
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -38,4 +40,4 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 }
 
 // FyneScene contains the full fyne logo with background design
-var FyneScene = NewThemedResource(fynescenedark, fynescenelight)
+var FyneScene = NewThemedResource(resourceFynescenedarkPng, resourceFynescenelightPng)
