@@ -103,6 +103,48 @@ type Packager struct {
 	tags, category               string
 }
 
+// AddFlags adds the flags for interacting with the package command.
+//
+// Deprecated: Access to the individual cli commands are being removed.
+func (p *Packager) AddFlags() {
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
+	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
+	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
+	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
+	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
+	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
+	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
+	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
+	flag.StringVar(&p.tags, "tags", "", "A comma-separated list of build tags")
+}
+
+// PrintHelp prints the help for the package command.
+//
+// Deprecated: Access to the individual cli commands are being removed.
+func (*Packager) PrintHelp(indent string) {
+	fmt.Println(indent, "The package command prepares an application for installation and testing.")
+	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
+	fmt.Println(indent, "Command usage: fyne package [parameters]")
+}
+
+// Run runs the package command.
+//
+// Deprecated: A better version will be exposed in the future.
+func (p *Packager) Run(_ []string) {
+	err := p.validate()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	err = p.doPackage()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
+}
+
 // Package starts the packaging process
 func (p *Packager) Package() error {
 	err := p.validate()
@@ -214,48 +256,6 @@ func (p *Packager) validate() error {
 	}
 
 	return nil
-}
-
-// AddFlags adds the flags for interacting with the package command.
-//
-// Deprecated: Access to the individual cli commands are being removed.
-func (p *Packager) AddFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
-	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
-	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
-	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
-	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
-	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
-	flag.StringVar(&p.tags, "tags", "", "A comma-separated list of build tags")
-}
-
-// PrintHelp prints the help for the package command.
-//
-// Deprecated: Access to the individual cli commands are being removed.
-func (*Packager) PrintHelp(indent string) {
-	fmt.Println(indent, "The package command prepares an application for installation and testing.")
-	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
-	fmt.Println(indent, "Command usage: fyne package [parameters]")
-}
-
-// Run runs the package command.
-//
-// Deprecated: A better version will be exposed in the future.
-func (p *Packager) Run(_ []string) {
-	err := p.validate()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
-
-	err = p.doPackage()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
-	}
 }
 
 func isValidVersion(ver string) bool {

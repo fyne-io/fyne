@@ -27,7 +27,7 @@ var macAppStoreCategories = []string{
 
 // Release returns the cli command for bundling release builds of fyne applications
 func Release() *cli.Command {
-	r := &releaser{}
+	r := &Releaser{}
 
 	return &cli.Command{
 		Name:  "release",
@@ -115,31 +115,12 @@ func Release() *cli.Command {
 				Destination: &r.icon,
 			},
 		},
-		Action: func(_ *cli.Context) error {
-			if err := r.validate(); err != nil {
-				return err
-			}
-
-			r.Packager.release = true
-			if err := r.beforePackage(); err != nil {
-				return err
-			}
-
-			err := r.Packager.Package()
-			if err != nil {
-				return err
-			}
-
-			if err := r.afterPackage(); err != nil {
-				return err
-			}
-
-			return nil
-		},
+		Action: r.releaseAction,
 	}
 }
 
-type releaser struct {
+// Releaser adapts app packages form distribution.
+type Releaser struct {
 	Packager
 
 	keyStore     string
@@ -149,7 +130,77 @@ type releaser struct {
 	password     string
 }
 
-func (r *releaser) afterPackage() error {
+// AddFlags adds the flags for interacting with the release command.
+//
+// Deprecated: Access to the individual cli commands are being removed.
+func (r *Releaser) AddFlags() {
+	flag.StringVar(&r.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
+	flag.StringVar(&r.name, "name", "", "The name of the application, default is the executable file name")
+	flag.StringVar(&r.icon, "icon", "Icon.png", "The name of the application icon file")
+	flag.StringVar(&r.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
+	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
+	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
+	flag.StringVar(&r.keyStorePass, "keyStorePass", "", "Android: password for the .keystore file, default take the password from stdin")
+	flag.StringVar(&r.keyPass, "keyPass", "", "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin")
+	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
+	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
+	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
+	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
+	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
+	flag.StringVar(&r.category, "category", "", "macOS: category of the app for store listing")
+}
+
+// PrintHelp prints the help message for the release command.
+//
+// Deprecated: Access to the individual cli commands are being removed.
+func (r *Releaser) PrintHelp(indent string) {
+	fmt.Println(indent, "The release command prepares an application for public distribution.")
+}
+
+// Run runs the release command.
+//
+// Deprecated: A better version will be exposed in the future.
+func (r *Releaser) Run(params []string) {
+	if err := r.validate(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		return
+	}
+	r.Packager.release = true
+
+	if err := r.beforePackage(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		return
+	}
+	r.Packager.Run(params)
+	if err := r.afterPackage(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+	}
+}
+
+func (r *Releaser) releaseAction(_ *cli.Context) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+
+	r.Packager.release = true
+	if err := r.beforePackage(); err != nil {
+		return err
+	}
+
+	err := r.Packager.Package()
+	if err != nil {
+		return err
+	}
+
+	if err := r.afterPackage(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
 		target := mobile.AppOutputName(r.os, r.Packager.name)
 		apk := filepath.Join(r.dir, target)
@@ -180,7 +231,7 @@ func (r *releaser) afterPackage() error {
 	return nil
 }
 
-func (r *releaser) beforePackage() error {
+func (r *Releaser) beforePackage() error {
 	if util.IsAndroid(r.os) {
 		if err := util.RequireAndroidSDK(); err != nil {
 			return err
@@ -190,7 +241,7 @@ func (r *releaser) beforePackage() error {
 	return nil
 }
 
-func (r *releaser) nameFromCertInfo(info string) string {
+func (r *Releaser) nameFromCertInfo(info string) string {
 	// format should be "CN=Company, O=Company, L=City, S=State, C=Country"
 	parts := strings.Split(info, ",")
 	cn := parts[0]
@@ -202,7 +253,7 @@ func (r *releaser) nameFromCertInfo(info string) string {
 	return cn[pos+3:]
 }
 
-func (r *releaser) packageIOSRelease() error {
+func (r *Releaser) packageIOSRelease() error {
 	team, err := mobile.DetectIOSTeamID(r.certificate)
 	if err != nil {
 		return errors.New("failed to determine team ID")
@@ -237,7 +288,7 @@ func (r *releaser) packageIOSRelease() error {
 	return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
 }
 
-func (r *releaser) packageMacOSRelease() error {
+func (r *Releaser) packageMacOSRelease() error {
 	appCert := r.certificate // try to derive two certificates from one name (they will be consistent)
 	if strings.Contains(appCert, "Installer") {
 		appCert = strings.Replace(appCert, "Installer", "Application", 1)
@@ -275,7 +326,7 @@ func (r *releaser) packageMacOSRelease() error {
 	return cmd.Run()
 }
 
-func (r *releaser) packageWindowsRelease(outFile string) error {
+func (r *Releaser) packageWindowsRelease(outFile string) error {
 	payload := filepath.Join(r.dir, "Payload")
 	os.Mkdir(payload, 0750)
 	defer os.RemoveAll(payload)
@@ -314,7 +365,7 @@ func (r *releaser) packageWindowsRelease(outFile string) error {
 	return cmd.Run()
 }
 
-func (r *releaser) signAndroid(path string) error {
+func (r *Releaser) signAndroid(path string) error {
 	signer := filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
 
 	args := []string{"sign", "--ks", r.keyStore}
@@ -333,7 +384,7 @@ func (r *releaser) signAndroid(path string) error {
 	return cmd.Run()
 }
 
-func (r *releaser) signWindows(appx string) error {
+func (r *Releaser) signWindows(appx string) error {
 	binDir, err := findWindowsSDKBin()
 	if err != nil {
 		return errors.New("cannot find signtool.exe, make sure you have installed the Windows SDK")
@@ -347,7 +398,7 @@ func (r *releaser) signWindows(appx string) error {
 	return cmd.Run()
 }
 
-func (r *releaser) validate() error {
+func (r *Releaser) validate() error {
 	if r.os == "" {
 		r.os = targetOS()
 	}
@@ -396,7 +447,7 @@ func (r *releaser) validate() error {
 	return nil
 }
 
-func (r *releaser) zipAlign(path string) error {
+func (r *Releaser) zipAlign(path string) error {
 	unaligned := filepath.Join(filepath.Dir(path), "unaligned.apk")
 	err := os.Rename(path, unaligned)
 	if err != nil {
@@ -410,54 +461,6 @@ func (r *releaser) zipAlign(path string) error {
 		return err
 	}
 	return os.Remove(unaligned)
-}
-
-// AddFlags adds the flags for interacting with the release command.
-//
-// Deprecated: Access to the individual cli commands are being removed.
-func (r *releaser) AddFlags() {
-	flag.StringVar(&r.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&r.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&r.icon, "icon", "Icon.png", "The name of the application icon file")
-	flag.StringVar(&r.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
-	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
-	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
-	flag.StringVar(&r.keyStorePass, "keyStorePass", "", "Android: password for the .keystore file, default take the password from stdin")
-	flag.StringVar(&r.keyPass, "keyPass", "", "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin")
-	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
-	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
-	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
-	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
-	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
-	flag.StringVar(&r.category, "category", "", "macOS: category of the app for store listing")
-}
-
-// PrintHelp prints the help message for the release command.
-//
-// Deprecated: Access to the individual cli commands are being removed.
-func (r *releaser) PrintHelp(indent string) {
-	fmt.Println(indent, "The release command prepares an application for public distribution.")
-}
-
-// Run runs the release command.
-//
-// Deprecated: A better version will be exposed in the future.
-func (r *releaser) Run(params []string) {
-	if err := r.validate(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		return
-	}
-	r.Packager.release = true
-
-	if err := r.beforePackage(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		return
-	}
-	r.Packager.Run(params)
-	if err := r.afterPackage(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-	}
 }
 
 func findWindowsSDKBin() (string, error) {
