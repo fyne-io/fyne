@@ -131,7 +131,7 @@ func (e *Entry) Bind(data binding.String) {
 		val, err := data.Get()
 		if err != nil {
 			convertErr = err
-			e.SetValidationError(err)
+			e.SetValidationError(e.Validate())
 			return
 		}
 		e.Text = val
@@ -145,7 +145,7 @@ func (e *Entry) Bind(data binding.String) {
 
 	e.OnChanged = func(s string) {
 		convertErr = data.Set(s)
-		e.SetValidationError(convertErr)
+		e.SetValidationError(e.Validate())
 	}
 }
 
