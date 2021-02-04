@@ -204,6 +204,17 @@ func TestGlCanvas_Focus(t *testing.T) {
 	assert.True(t, o2e.focused)
 }
 
+func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+	e := widget.NewEntry()
+	c := w.Canvas().(*glCanvas)
+	c.Focus(e) // this crashed in the past
+
+	w.SetContent(e)
+	assert.Equal(t, e, c.Focused(), "Item set to focus before SetContent was not focused after")
+}
+
 func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
