@@ -14,30 +14,22 @@ import (
 // Cursor ticker
 // ===============================================================
 
-type cursorTicker interface {
-	WaitTick() (reset bool)
-	Stop()
-	Reset()
-	Start(d time.Duration)
-	Started() bool
-}
-
-type realTicker struct {
+type cursorTicker struct {
 	tim      *time.Timer
 	rstCh    chan struct{}
 	duration time.Duration
+	mockWait func() (reset bool)
 }
 
-func (t *realTicker) Start(d time.Duration) {
+func (t *cursorTicker) Start() {
 	if t.Started() {
 		return
 	}
-	t.duration = d
 	t.rstCh = make(chan struct{}, 1)
 	t.tim = time.NewTimer(t.duration)
 }
 
-func (t *realTicker) Reset() {
+func (t *cursorTicker) Reset() {
 	if !t.Started() {
 		return
 	}
@@ -48,7 +40,7 @@ func (t *realTicker) Reset() {
 }
 
 // Stop must be called in the same go routine where WaitTick is used.
-func (t *realTicker) Stop() {
+func (t *cursorTicker) Stop() {
 	if !t.Started() {
 		return
 	}
@@ -59,10 +51,13 @@ func (t *realTicker) Stop() {
 	t.rstCh = nil
 }
 
-func (t *realTicker) WaitTick() (reset bool) {
+func (t *cursorTicker) WaitTick() (reset bool) {
 	if !t.Started() {
 		reset = true // TODO what to do here?
 		return
+	}
+	if t.mockWait != nil {
+		return t.mockWait()
 	}
 	select {
 	case <-t.tim.C:
@@ -78,7 +73,7 @@ func (t *realTicker) WaitTick() (reset bool) {
 	return
 }
 
-func (t *realTicker) Started() bool { return t.tim != nil }
+func (t *cursorTicker) Started() bool { return t.tim != nil }
 
 // ===============================================================
 // Implementation
@@ -98,14 +93,14 @@ type entryCursorAnimation struct {
 	mu       *sync.RWMutex
 	inverted bool
 	state    cursorState
-	ticker   cursorTicker
+	ticker   *cursorTicker
 	cursor   *canvas.Rectangle
 	anim     *fyne.Animation
 }
 
 func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
 	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor}
-	a.ticker = &realTicker{}
+	a.ticker = &cursorTicker{duration: cursorInterruptTime}
 	a.inverted = false
 	a.state = cursorStateStopped
 	return a
@@ -138,7 +133,7 @@ func (a *entryCursorAnimation) start() {
 	}
 	a.anim = a.createAnim(false)
 	a.state = cursorStateRunning
-	a.ticker.Start(cursorInterruptTime)
+	a.ticker.Start()
 	go func() {
 		defer func() {
 			a.mu.Lock()
