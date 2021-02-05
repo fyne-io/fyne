@@ -16,6 +16,12 @@ type Command interface {
 //Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter commands.Getter
 
+// NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
+// It depends on a Go and C compiler installed at this stage and takes a single, package, parameter to identify the app.
+func NewGetter() *Getter {
+	return &Getter{}
+}
+
 // NewBundler returns a command that can bundle resources into Go code.
 //
 // Deprecated: A better version will be exposed in the future.
