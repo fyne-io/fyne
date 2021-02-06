@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-
 	"github.com/pkg/errors"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -22,10 +22,79 @@ const (
 	defaultAppVersion = "1.0.0"
 )
 
-// Declare conformity to Command interface
-var _ Command = (*packager)(nil)
+// Package returns the cli command for packaging fyne applications
+func Package() *cli.Command {
+	p := &Packager{}
 
-type packager struct {
+	return &cli.Command{
+		Name:        "package",
+		Usage:       "Packages an application for distribution.",
+		Description: "You may specify the -executable to package, otherwise -sourceDir will be built.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "target",
+				Aliases:     []string{"os"},
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios).",
+				Destination: &p.os,
+			},
+			&cli.StringFlag{
+				Name:        "executable",
+				Aliases:     []string{"exe"},
+				Usage:       "The path to the executable, default is the current dir main binary",
+				Destination: &p.exe,
+			},
+			&cli.StringFlag{
+				Name:        "name",
+				Usage:       "The name of the application, default is the executable file name",
+				Destination: &p.name,
+			},
+			&cli.StringFlag{
+				Name:        "tags",
+				Usage:       "A comma-separated list of build tags.",
+				Destination: &p.tags,
+			},
+			&cli.StringFlag{
+				Name:        "appVersion",
+				Usage:       "Version number in the form x, x.y or x.y.z semantic version",
+				Destination: &p.appVersion,
+			},
+			&cli.IntFlag{
+				Name:        "appBuild",
+				Usage:       "Build number, should be greater than 0 and incremented for each build",
+				Destination: &p.appBuild,
+			},
+			&cli.StringFlag{
+				Name:        "sourceDir",
+				Aliases:     []string{"src"},
+				Usage:       "The directory to package, if executable is not set.",
+				Destination: &p.srcDir,
+			},
+			&cli.StringFlag{
+				Name:        "icon",
+				Usage:       "The name of the application icon file.",
+				Value:       "Icon.png",
+				Destination: &p.icon,
+			},
+			&cli.StringFlag{
+				Name:        "appiD",
+				Aliases:     []string{"id"},
+				Usage:       "For ios or darwin targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
+				Destination: &p.appID,
+			},
+			&cli.BoolFlag{
+				Name:        "release",
+				Usage:       "Enable installation in release mode (disable debug etc).",
+				Destination: &p.release,
+			},
+		},
+		Action: func(_ *cli.Context) error {
+			return p.Package()
+		},
+	}
+}
+
+// Packager wraps executables into full GUI app packages.
+type Packager struct {
 	name, srcDir, dir, exe, icon string
 	os, appID, appVersion        string
 	appBuild                     int
@@ -34,12 +103,10 @@ type packager struct {
 	tags, category               string
 }
 
-// NewPackager returns a packager command that can wrap executables into full GUI app packages.
-func NewPackager() Command {
-	return &packager{}
-}
-
-func (p *packager) AddFlags() {
+// AddFlags adds the flags for interacting with the package command.
+//
+// Deprecated: Access to the individual cli commands are being removed.
+func (p *Packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
@@ -52,13 +119,19 @@ func (p *packager) AddFlags() {
 	flag.StringVar(&p.tags, "tags", "", "A comma-separated list of build tags")
 }
 
-func (*packager) PrintHelp(indent string) {
+// PrintHelp prints the help for the package command.
+//
+// Deprecated: Access to the individual cli commands are being removed.
+func (*Packager) PrintHelp(indent string) {
 	fmt.Println(indent, "The package command prepares an application for installation and testing.")
 	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
 }
 
-func (p *packager) Run(_ []string) {
+// Run runs the package command.
+//
+// Deprecated: A better version will be exposed in the future.
+func (p *Packager) Run(_ []string) {
 	err := p.validate()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -72,7 +145,22 @@ func (p *packager) Run(_ []string) {
 	}
 }
 
-func (p *packager) buildPackage() error {
+// Package starts the packaging process
+func (p *Packager) Package() error {
+	err := p.validate()
+	if err != nil {
+		return err
+	}
+
+	err = p.doPackage()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Packager) buildPackage() error {
 	tags := strings.Split(p.tags, ",")
 	b := &builder{
 		os:      p.os,
@@ -84,11 +172,11 @@ func (p *packager) buildPackage() error {
 	return b.build()
 }
 
-func (p *packager) combinedVersion() string {
+func (p *Packager) combinedVersion() string {
 	return fmt.Sprintf("%s.%d", p.appVersion, p.appBuild)
 }
 
-func (p *packager) doPackage() error {
+func (p *Packager) doPackage() error {
 	// sensible defaults - validation deemed them optional
 	if p.appVersion == "" {
 		p.appVersion = defaultAppVersion
@@ -123,7 +211,7 @@ func (p *packager) doPackage() error {
 	}
 }
 
-func (p *packager) validate() error {
+func (p *Packager) validate() error {
 	if p.os == "" {
 		p.os = targetOS()
 	}

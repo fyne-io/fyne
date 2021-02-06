@@ -7,13 +7,27 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+	"github.com/pkg/errors"
+	"github.com/urfave/cli/v2"
 )
 
-// Declare conformity to Command interface
-var _ Command = (*Getter)(nil)
+// Get returns the command which downloads and installs fyne applications.
+func Get() *cli.Command {
+	return &cli.Command{
+		Name:        "get",
+		Usage:       "Downloads and installs a Fyne application",
+		Description: "A single parameter is required to specify the Go package, as with \"go get\".",
+		Action: func(ctx *cli.Context) error {
+			if ctx.Args().Len() != 1 {
+				return errors.New("missing \"package\" argument to define the application to get")
+			}
+
+			pkg := ctx.Args().Slice()[0]
+			return (&Getter{}).Get(pkg)
+		},
+	}
+}
 
 // Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter struct {
@@ -28,32 +42,26 @@ func NewGetter() *Getter {
 
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
-	return get(pkg, g.icon)
-}
+	cmd := exec.Command("go", "get", "-u", "-d", pkg)
+	cmd.Env = append(os.Environ(), "GO111MODULE=off")
+	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 
-// AddFlags adds available flags to the current flags parser
-func (g *Getter) AddFlags() {
-}
-
-// PrintHelp prints help for this command when used in a command-line context
-func (g *Getter) PrintHelp(indent string) {
-	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
-	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
-}
-
-// Run is the command-line version of the Get(pkg) command, the first of the passed arguments will be used
-// as the package to get.
-func (g *Getter) Run(args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
-		os.Exit(1)
-	}
-
-	err := get(args[0], g.icon)
+	err := cmd.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
+		return err
 	}
+
+	path := filepath.Join(goPath(), "src", pkg)
+	if !util.Exists(path) { // the error above may be ignorable, unless the path was not found
+		return err
+	}
+
+	install := &Installer{srcDir: path, icon: g.icon, release: true}
+	if err := install.validate(); err != nil {
+		return errors.Wrap(err, "Failed to set up installer")
+	}
+
+	return install.install()
 }
 
 // SetIcon allows you to set the app icon path that will be used for the next Get operation.
@@ -61,24 +69,34 @@ func (g *Getter) SetIcon(path string) {
 	g.icon = path
 }
 
-func get(pkg, icon string) error {
-	path := filepath.Join(goPath(), "src", pkg)
+// AddFlags adds available flags to the current flags parser
+//
+// Deprecated: Get does not define any flags.
+func (g *Getter) AddFlags() {
+}
 
-	cmd := exec.Command("go", "get", "-u", "-d", pkg)
-	cmd.Env = append(os.Environ(), "GO111MODULE=off")
+// PrintHelp prints help for this command when used in a command-line context
+//
+// Deprecated: Use Get() to get the cli and help messages instead.
+func (g *Getter) PrintHelp(indent string) {
+	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
+	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
+}
 
-	_, err := cmd.CombinedOutput()
-
-	if !util.Exists(path) { // the error above may be ignorable, unless the path was not found
-		return err
+// Run is the command-line version of the Get(pkg) command, the first of the passed arguments will be used
+// as the package to get.
+//
+// Deprecated: Use Get() for the urfave/cli command or Getter.Get() to download and install an application.
+func (g *Getter) Run(args []string) {
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
+		os.Exit(1)
 	}
 
-	install := &installer{srcDir: path, icon: icon, release: true}
-	err = install.validate()
-	if err != nil {
-		return errors.Wrap(err, "Failed to set up installer")
+	if err := g.Get(args[0]); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
 	}
-	return install.install()
 }
 
 func goPath() string {

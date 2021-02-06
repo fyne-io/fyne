@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-
 	"github.com/pkg/errors"
 )
 
@@ -16,7 +15,7 @@ type unixData struct {
 	Local            string
 }
 
-func (p *packager) packageUNIX() error {
+func (p *Packager) packageUNIX() error {
 	var prefixDir string
 	local := "local/"
 	tempDir := "tmp-pkg"

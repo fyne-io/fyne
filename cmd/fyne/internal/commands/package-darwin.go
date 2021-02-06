@@ -8,7 +8,6 @@ import (
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-
 	"github.com/jackmordaunt/icns"
 	"github.com/pkg/errors"
 )
@@ -21,7 +20,7 @@ type darwinData struct {
 	Category      string
 }
 
-func (p *packager) packageDarwin() error {
+func (p *Packager) packageDarwin() error {
 	appDir := util.EnsureSubDir(p.dir, p.name+".app")
 	exeName := filepath.Base(p.exe)
 

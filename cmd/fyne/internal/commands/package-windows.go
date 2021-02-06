@@ -22,7 +22,7 @@ type windowsData struct {
 	CombinedVersion string
 }
 
-func (p *packager) packageWindows() error {
+func (p *Packager) packageWindows() error {
 	exePath := filepath.Dir(p.exe)
 
 	// convert icon

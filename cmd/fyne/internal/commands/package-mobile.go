@@ -14,11 +14,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (p *packager) packageAndroid(arch string) error {
+func (p *Packager) packageAndroid(arch string) error {
 	return mobile.RunNewBuild(arch, p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, "", "")
 }
 
-func (p *packager) packageIOS() error {
+func (p *Packager) packageIOS() error {
 	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, p.certificate, p.profile)
 	if err != nil {
 		return err

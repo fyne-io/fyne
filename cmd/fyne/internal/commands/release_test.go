@@ -7,7 +7,7 @@ import (
 )
 
 func TestReleaser_nameFromCertInfo(t *testing.T) {
-	rel := &releaser{}
+	rel := &Releaser{}
 	cert := "CN=Company, O=Company, L=City, S=State, C=Country"
 	assert.Equal(t, "Company", rel.nameFromCertInfo(cert))
 	assert.Equal(t, "Fallback", rel.nameFromCertInfo("Fallback"))
