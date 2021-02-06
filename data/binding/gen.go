@@ -519,6 +519,9 @@ func main() {
 		return
 	}
 	defer itemFile.Close()
+	itemFile.WriteString(`
+import "fyne.io/fyne/v2"
+`)
 	convertFile, err := newFile("convert")
 	if err != nil {
 		return
@@ -545,6 +548,9 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 		return
 	}
 	defer listFile.Close()
+	listFile.WriteString(`
+import "fyne.io/fyne/v2"
+`)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
@@ -557,6 +563,7 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)"},
 	}
 	for _, b := range binds {
 		writeFile(itemFile, item, b)
