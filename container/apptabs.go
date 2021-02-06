@@ -56,7 +56,7 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 		// Current is first tab item
 		tabs.current = 0
 	}
-	tabs.ExtendBaseWidget(tabs)
+	tabs.BaseWidget.ExtendBaseWidget(tabs)
 
 	if tabs.mismatchedContent() {
 		internal.LogHint("AppTabs items should all have the same type of content (text, icons or both)")
@@ -86,7 +86,7 @@ func (c *AppTabs) Append(item *TabItem) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *AppTabs) CreateRenderer() fyne.WidgetRenderer {
-	c.ExtendBaseWidget(c)
+	c.BaseWidget.ExtendBaseWidget(c)
 	r := &appTabsRenderer{line: canvas.NewRectangle(theme.ShadowColor()),
 		underline: canvas.NewRectangle(theme.PrimaryColor()), container: c}
 	r.updateTabs()
@@ -106,9 +106,16 @@ func (c *AppTabs) CurrentTabIndex() int {
 	return c.current
 }
 
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+//
+// Deprecated: Support for extending containers is being removed
+func (c *AppTabs) ExtendBaseWidget(wid fyne.Widget) {
+	c.BaseWidget.ExtendBaseWidget(wid)
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (c *AppTabs) MinSize() fyne.Size {
-	c.ExtendBaseWidget(c)
+	c.BaseWidget.ExtendBaseWidget(c)
 	return c.BaseWidget.MinSize()
 }
 
