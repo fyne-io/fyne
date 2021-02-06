@@ -11,10 +11,6 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("Hello")
 
-	w2 := a.NewWindow("Second")
-	w2.SetContent(widget.NewLabel("Second window"))
-	w2.Close()
-
 	hello := widget.NewLabel("Hello Fyne!")
 	w.SetContent(container.NewVBox(
 		hello,
