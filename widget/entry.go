@@ -420,9 +420,9 @@ func (e *Entry) SelectedText() string {
 func (e *Entry) SetAcceptTabs(acceptTabs bool) {
 	if acceptTabs {
 		e.acceptTabs = 1
-	} else {
-		e.acceptTabs = -1
+		return
 	}
+	e.acceptTabs = -1
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
