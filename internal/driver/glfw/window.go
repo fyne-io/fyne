@@ -16,7 +16,6 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -1052,12 +1051,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 	switch keyName {
 	case fyne.KeyTab:
-		capture := false
-		// TODO at some point allow widgets to mark as capturing
-		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
-			capture = true
-		}
-		if !capture {
+		if ent, ok := w.canvas.Focused().(fyne.Tabable); ok && !ent.AcceptTabs() {
 			switch keyDesktopModifier {
 			case 0:
 				w.canvas.FocusNext()
