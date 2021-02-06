@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/commands"
 	"github.com/urfave/cli/v2"
@@ -26,6 +27,12 @@ func main() {
 			// Deprecated: Use "go mod vendor" instead.
 			commands.Vendor(),
 		},
+	}
+
+	if info, ok := debug.ReadBuildInfo(); !ok {
+		app.Version = "could not retrieve version information (ensure module support is activated and build again)"
+	} else {
+		app.Version = info.Main.Version
 	}
 
 	if err := app.Run(os.Args); err != nil {
