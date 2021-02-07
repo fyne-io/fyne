@@ -26,9 +26,9 @@ func (b *builder) build() error {
 
 	if goos == "windows" {
 		if b.release {
-			args = append(args, "-ldflags", "-s -w -H=windowsgui")
+			args = append(args, "-ldflags", `"-s -w -H=windowsgui"`)
 		} else {
-			args = append(args, "-ldflags", "-H=windowsgui")
+			args = append(args, "-ldflags", `"-H=windowsgui"`)
 		}
 	} else {
 		if goos == "darwin" {
@@ -36,7 +36,7 @@ func (b *builder) build() error {
 			env = append(env, "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 		}
 		if b.release {
-			args = append(args, "-ldflags", "-s -w")
+			args = append(args, "-ldflags", `"-s -w"`)
 		}
 	}
 
