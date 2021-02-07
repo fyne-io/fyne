@@ -76,9 +76,9 @@ func Package() *cli.Command {
 				Destination: &p.icon,
 			},
 			&cli.StringFlag{
-				Name:        "appiD",
+				Name:        "appID",
 				Aliases:     []string{"id"},
-				Usage:       "For ios or darwin targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
+				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
 				Destination: &p.appID,
 			},
 			&cli.BoolFlag{
