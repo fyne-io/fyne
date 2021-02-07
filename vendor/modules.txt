@@ -4,6 +4,8 @@ github.com/Kodeworks/golang-image-ico
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
+# github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d
+github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
@@ -53,6 +55,10 @@ github.com/nfnt/resize
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/russross/blackfriday/v2 v2.0.1
+github.com/russross/blackfriday/v2
+# github.com/shurcooL/sanitized_anchor_name v1.0.0
+github.com/shurcooL/sanitized_anchor_name
 # github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
@@ -60,6 +66,8 @@ github.com/srwiley/rasterx
 # github.com/stretchr/testify v1.5.1
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/urfave/cli/v2 v2.3.0
+github.com/urfave/cli/v2
 # golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 golang.org/x/image/colornames
 golang.org/x/image/draw
