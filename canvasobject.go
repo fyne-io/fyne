@@ -100,7 +100,7 @@ type Shortcutable interface {
 // Tabable describes any object that needs to accept the Tab key presses.
 type Tabable interface {
 	// AcceptTabs() is a hook called by the key press handling logic.
-	// If it returns true then the Tab key events will be sent TypedKey and TypedRun.
+	// If it returns true then the Tab key events will be sent TypedKey and TypedRune.
 	AcceptTabs() bool
 	// SetAcceptTabs() sets the value returned by AcceptTabs().
 	SetAcceptTabs(bool)
