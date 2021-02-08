@@ -67,10 +67,12 @@ func (i *FileIcon) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
+	i.propertyLock.Lock()
+	i.setURI(i.URI)
+	i.propertyLock.Unlock()
+
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
-
-	i.setURI(i.URI)
 
 	// TODO should FileIcon render a background representing selection, or should it be in the collection?
 	// TODO file dialog currently uses a container with NewGridWrapLayout, but if this changes to List, or Table then the primary color background would be rendered twice.
@@ -164,13 +166,15 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 
 func (s *fileIconRenderer) Refresh() {
 	if s.file.URI != s.file.cachedURI {
-		s.file.propertyLock.RLock()
+		s.file.propertyLock.Lock()
 		s.file.setURI(s.file.URI)
-		s.file.cachedURI = s.file.URI
-		s.file.propertyLock.RUnlock()
+		s.file.propertyLock.Unlock()
 
+		s.file.propertyLock.RLock()
+		s.file.cachedURI = s.file.URI
 		s.img.Resource = s.file.resource
 		s.ext.Text = s.file.extension
+		s.file.propertyLock.RUnlock()
 	}
 
 	if s.file.Selected {
