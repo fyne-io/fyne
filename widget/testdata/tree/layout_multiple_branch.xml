@@ -11,8 +11,8 @@
 							<image fillMode="contain" rsc="navigateNextIcon" size="20x37"/>
 						</widget>
 					</widget>
-					<widget pos="4,45" size="184x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="184x1"/>
+					<widget pos="0,45" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 					<widget pos="0,46" size="192x45" type="*widget.branch">
 						<widget pos="28,4" size="160x37" type="*widget.Label">

@@ -45,19 +45,26 @@ func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *Sp
 		Leading:    leading,
 		Trailing:   trailing,
 	}
-	s.ExtendBaseWidget(s)
+	s.BaseWidget.ExtendBaseWidget(s)
 	return s
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Split) CreateRenderer() fyne.WidgetRenderer {
-	s.ExtendBaseWidget(s)
+	s.BaseWidget.ExtendBaseWidget(s)
 	d := newDivider(s)
 	return &splitContainerRenderer{
 		split:   s,
 		divider: d,
 		objects: []fyne.CanvasObject{s.Leading, d, s.Trailing},
 	}
+}
+
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+//
+// Deprecated: Support for extending containers is being removed
+func (s *Split) ExtendBaseWidget(wid fyne.Widget) {
+	s.BaseWidget.ExtendBaseWidget(wid)
 }
 
 // SetOffset sets the offset (0.0 to 1.0) of the Split divider.

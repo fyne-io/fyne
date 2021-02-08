@@ -26,7 +26,6 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
-	tapYOffset        = -12.0                  // to compensate for how we hold our fingers on the device
 )
 
 type mobileDriver struct {

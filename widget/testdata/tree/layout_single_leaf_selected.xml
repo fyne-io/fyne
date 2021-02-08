@@ -4,10 +4,10 @@
 			<widget size="192x292" type="*widget.Scroll">
 				<widget size="192x292" type="*widget.treeContent">
 					<widget size="192x45" type="*widget.leaf">
+						<rectangle fillColor="focus" size="192x45"/>
 						<widget pos="28,4" size="160x37" type="*widget.Label">
 							<text pos="4,8" size="152x21">11111</text>
 						</widget>
-						<rectangle fillColor="primary" size="4x45"/>
 					</widget>
 				</widget>
 			</widget>

@@ -126,11 +126,11 @@ func TestList_Hover(t *testing.T) {
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	for i := 0; i < 2; i++ {
-		assert.False(t, children[i].(*listItem).statusIndicator.Visible())
+		assert.False(t, children[i].(*listItem).background.Visible())
 		children[i].(*listItem).MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.HoverColor())
+		assert.Equal(t, children[i].(*listItem).background.FillColor, theme.HoverColor())
 		children[i].(*listItem).MouseOut()
-		assert.False(t, children[i].(*listItem).statusIndicator.Visible())
+		assert.False(t, children[i].(*listItem).background.Visible())
 	}
 }
 
@@ -138,18 +138,18 @@ func TestList_Selection(t *testing.T) {
 	list := createList(1000)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
-	assert.False(t, children[0].(*listItem).statusIndicator.Visible())
+	assert.False(t, children[0].(*listItem).background.Visible())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
-	assert.True(t, children[0].(*listItem).statusIndicator.Visible())
+	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[0].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
-	assert.True(t, children[1].(*listItem).statusIndicator.Visible())
+	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[1].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
-	assert.False(t, children[0].(*listItem).statusIndicator.Visible())
+	assert.False(t, children[0].(*listItem).background.Visible())
 }
 
 func TestList_Select(t *testing.T) {
@@ -159,21 +159,21 @@ func TestList_Select(t *testing.T) {
 	list.Select(50)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).lastItemIndex, 50)
 	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
-	assert.True(t, children[len(children)-1].(*listItem).statusIndicator.Visible())
+	assert.Equal(t, children[len(children)-1].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[len(children)-1].(*listItem).background.Visible())
 
 	list.Select(5)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
-	assert.True(t, children[0].(*listItem).statusIndicator.Visible())
+	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[0].(*listItem).background.Visible())
 
 	list.Select(6)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.False(t, children[0].(*listItem).statusIndicator.Visible())
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
-	assert.True(t, children[1].(*listItem).statusIndicator.Visible())
+	assert.False(t, children[0].(*listItem).background.Visible())
+	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[1].(*listItem).background.Visible())
 }
 
 func TestList_Unselect(t *testing.T) {
@@ -181,12 +181,12 @@ func TestList_Unselect(t *testing.T) {
 
 	list.Select(10)
 	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
-	assert.True(t, children[10].(*listItem).statusIndicator.Visible())
+	assert.Equal(t, children[10].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[10].(*listItem).background.Visible())
 
 	list.Unselect(10)
 	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.False(t, children[10].(*listItem).statusIndicator.Visible())
+	assert.False(t, children[10].(*listItem).background.Visible())
 	assert.Nil(t, list.selected)
 }
 
