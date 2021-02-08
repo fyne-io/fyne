@@ -78,7 +78,12 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
-	s.updateObjects()
+	s.img = canvas.NewImageFromResource(s.file.resource)
+	s.img.FillMode = canvas.ImageFillContain
+	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
+	s.ext.Alignment = fyne.TextAlignCenter
+
+	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
 	i.cachedURI = i.URI
 
 	return s
@@ -161,9 +166,11 @@ func (s *fileIconRenderer) Refresh() {
 	if s.file.URI != s.file.cachedURI {
 		s.file.propertyLock.RLock()
 		s.file.setURI(s.file.URI)
-		s.updateObjects()
 		s.file.cachedURI = s.file.URI
 		s.file.propertyLock.RUnlock()
+
+		s.img.Resource = s.file.resource
+		s.ext.Text = s.file.extension
 	}
 
 	if s.file.Selected {
@@ -182,16 +189,6 @@ func (s *fileIconRenderer) Refresh() {
 
 	canvas.Refresh(s.file.super())
 	canvas.Refresh(s.ext)
-}
-
-func (s *fileIconRenderer) updateObjects() {
-	s.img = canvas.NewImageFromResource(s.file.resource)
-	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
-	s.img.FillMode = canvas.ImageFillContain
-	s.ext.Alignment = fyne.TextAlignCenter
-	s.ext.TextSize = theme.TextSize()
-
-	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
 }
 
 func trimmedExtension(uri fyne.URI) string {
