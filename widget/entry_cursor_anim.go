@@ -15,65 +15,64 @@ import (
 // ===============================================================
 
 type cursorTicker struct {
-	tim      *time.Timer
-	rstCh    chan struct{}
-	duration time.Duration
-	mockWait func() (reset bool)
+	timer     *time.Timer
+	resetChan chan struct{}
+	duration  time.Duration
+	mockWait  func() (reset bool)
 }
 
-func (t *cursorTicker) Start() {
-	if t.Started() {
-		return
-	}
-	t.rstCh = make(chan struct{}, 1)
-	t.tim = time.NewTimer(t.duration)
-}
-
-func (t *cursorTicker) Reset() {
-	if !t.Started() {
+func (t *cursorTicker) reset() {
+	if !t.started() {
 		return
 	}
 	select {
-	case t.rstCh <- struct{}{}:
+	case t.resetChan <- struct{}{}:
 	default:
 	}
 }
 
-// Stop must be called in the same go routine where WaitTick is used.
-func (t *cursorTicker) Stop() {
-	if !t.Started() {
+func (t *cursorTicker) start() {
+	if t.started() {
 		return
 	}
-	if !t.tim.Stop() {
-		<-t.tim.C
-	}
-	t.tim = nil // TODO is it safe?
-	t.rstCh = nil
+	t.resetChan = make(chan struct{}, 1)
+	t.timer = time.NewTimer(t.duration)
 }
 
-func (t *cursorTicker) WaitTick() (reset bool) {
-	if !t.Started() {
-		reset = true // TODO what to do here?
+func (t *cursorTicker) started() bool { return t.timer != nil }
+
+// stop must be called in the same go routine where WaitTick is used.
+func (t *cursorTicker) stop() {
+	if !t.started() {
+		return
+	}
+	if !t.timer.Stop() {
+		<-t.timer.C
+	}
+	t.timer = nil
+	t.resetChan = nil
+}
+
+func (t *cursorTicker) waitTick() (reset bool) {
+	if !t.started() {
 		return
 	}
 	if t.mockWait != nil {
 		return t.mockWait()
 	}
 	select {
-	case <-t.tim.C:
+	case <-t.timer.C:
 		reset = false
-		t.tim.Stop()
-	case <-t.rstCh:
+		t.timer.Stop()
+	case <-t.resetChan:
 		reset = true
-		if !t.tim.Stop() {
-			<-t.tim.C
+		if !t.timer.Stop() {
+			<-t.timer.C
 		}
 	}
-	t.tim.Reset(t.duration)
+	t.timer.Reset(t.duration)
 	return
 }
-
-func (t *cursorTicker) Started() bool { return t.tim != nil }
 
 // ===============================================================
 // Implementation
@@ -128,21 +127,15 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 func (a *entryCursorAnimation) start() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if a.anim != nil || a.ticker.Started() || a.state != cursorStateStopped {
+	if a.anim != nil || a.ticker.started() || a.state != cursorStateStopped {
 		return
 	}
 	a.anim = a.createAnim(false)
 	a.state = cursorStateRunning
-	a.ticker.Start()
+	a.ticker.start()
 	go func() {
-		defer func() {
-			a.mu.Lock()
-			a.state = cursorStateStopped
-			a.ticker.Stop()
-			a.mu.Unlock()
-		}()
 		for {
-			if reset := a.ticker.WaitTick(); reset {
+			if reset := a.ticker.waitTick(); reset {
 				continue
 			}
 			a.mu.RLock()
@@ -150,7 +143,7 @@ func (a *entryCursorAnimation) start() {
 			cancel := a.anim == nil
 			a.mu.RUnlock()
 			if cancel {
-				return
+				break
 			}
 			if !interrupted {
 				continue
@@ -162,18 +155,22 @@ func (a *entryCursorAnimation) start() {
 			a.state = cursorStateRunning
 			a.mu.Unlock()
 		}
+		a.mu.Lock()
+		a.state = cursorStateStopped
+		a.ticker.stop()
+		a.mu.Unlock()
 	}()
 	a.anim.Start()
 }
 
-// TemporaryStop temporarily stops the cursor by "cursorInterruptTime".
+// temporaryStop temporarily stops the cursor by "cursorInterruptTime".
 func (a *entryCursorAnimation) temporaryStop() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if a.anim == nil || !a.ticker.Started() {
+	if a.anim == nil || !a.ticker.started() {
 		return
 	}
-	a.ticker.Reset()
+	a.ticker.reset()
 	a.anim.Stop()
 	if !a.inverted {
 		a.anim = a.createAnim(true)
@@ -186,7 +183,7 @@ func (a *entryCursorAnimation) temporaryStop() {
 	a.cursor.Refresh()
 }
 
-// Stop stops cursor animation.
+// stop stops cursor animation.
 func (a *entryCursorAnimation) stop() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
