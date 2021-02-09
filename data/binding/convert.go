@@ -286,7 +286,8 @@ type stringToBool struct {
 	base
 
 	format string
-	from   String
+
+	from String
 }
 
 // StringToBool creates a binding that connects a String data item to a Bool.
@@ -358,7 +359,8 @@ type stringToFloat struct {
 	base
 
 	format string
-	from   String
+
+	from String
 }
 
 // StringToFloat creates a binding that connects a String data item to a Float.
@@ -430,7 +432,8 @@ type stringToInt struct {
 	base
 
 	format string
-	from   String
+
+	from String
 }
 
 // StringToInt creates a binding that connects a String data item to a Int.
@@ -501,8 +504,7 @@ func (s *stringToInt) DataChanged() {
 type stringToURI struct {
 	base
 
-	format string
-	from   String
+	from String
 }
 
 // StringToURI creates a binding that connects a String data item to a URI.

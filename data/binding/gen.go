@@ -218,9 +218,10 @@ func (s *stringFrom{{ .Name }}) DataChanged() {
 const fromStringTemplate = `
 type stringTo{{ .Name }} struct {
 	base
-
+{{ if .Format }}
 	format string
-	from   String
+{{ end }}
+	from String
 }
 
 // StringTo{{ .Name }} creates a binding that connects a String data item to a {{ .Name }}.
