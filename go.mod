@@ -14,7 +14,7 @@ require (
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
-	github.com/lucor/goinfo v0.0.0-20210208195711-359b022dda72
+	github.com/lucor/goinfo v0.0.0-20210209132455-aee5dbc9b821
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
