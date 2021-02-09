@@ -47,8 +47,10 @@ func (p *PopUp) Move(pos fyne.Position) {
 //
 // Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
+	canvasSize := p.Canvas.Size()
 	p.innerSize = size
-	p.BaseWidget.Resize(p.Canvas.Size())
+	p.Content.Resize(p.innerSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	p.BaseWidget.Resize(canvasSize)
 	// The canvas size might not have changed and therefore the Resize won't trigger a layout.
 	// Until we have a widget.Relayout() or similar, the renderer's refresh will do the re-layout.
 	p.Refresh()
