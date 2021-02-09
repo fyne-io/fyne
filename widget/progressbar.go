@@ -136,7 +136,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
-	background := canvas.NewRectangle(theme.ShadowColor())
+	background := canvas.NewRectangle(progressBackgroundColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	label := canvas.NewText("0%", theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignCenter

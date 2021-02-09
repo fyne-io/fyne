@@ -89,7 +89,6 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
 * Properly align Label in FormItem (#1531)
 * Mobile dropdowns are too low (#1771)
 * Cursor does not go down to next line with wrapping (#1737)
-* MacOS Notifications are not shown on subsequent app runs after first run due to duplicate identifier (#1699)
 * Entry: while adding text beyond visible reagion there is no auto-scroll (#912)
 
 

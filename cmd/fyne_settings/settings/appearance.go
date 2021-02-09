@@ -42,7 +42,7 @@ func NewSettings() *Settings {
 
 // AppearanceIcon returns the icon for appearance settings
 func (s *Settings) AppearanceIcon() fyne.Resource {
-	return theme.NewThemedResource(appearanceIcon)
+	return theme.NewThemedResource(resourceAppearanceSvg)
 }
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration

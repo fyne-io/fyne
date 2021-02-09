@@ -41,7 +41,7 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 		},
 		Items: items,
 	}
-	tabs.ExtendBaseWidget(tabs)
+	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	tabs.SetItems(items)
 	return tabs
 }
@@ -102,10 +102,17 @@ func (t *AppTabs) Hide() {
 	t.baseTabs.Hide()
 }
 
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+//
+// Deprecated: Support for extending containers is being removed
+func (t *AppTabs) ExtendBaseWidget(wid fyne.Widget) {
+	t.BaseWidget.ExtendBaseWidget(wid)
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (t *AppTabs) MinSize() fyne.Size {
 	t.baseTabs.Items = t.Items
-	t.ExtendBaseWidget(t)
+	t.BaseWidget.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
 }
 
