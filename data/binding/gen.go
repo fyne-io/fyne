@@ -133,9 +133,10 @@ func (b *prefBound{{ .Name }}) checkForChange() {
 const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
-
+{{ if .Format }}
 	format string
-	from   {{ .Name }}
+{{ end }}
+	from {{ .Name }}
 }
 
 // {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
