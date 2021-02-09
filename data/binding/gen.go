@@ -144,9 +144,15 @@ type stringFrom{{ .Name }} struct {
 //
 // Since: 2.0
 func {{ .Name }}ToString(v {{ .Name }}) String {
+{{ if .Format }}
 	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
+{{ else }}
+	str := &stringFrom{{ .Name }}{from: v}
+	v.AddListener(str)
+	return str
+{{ end }}
 }
-
+{{ if .Format }}
 // {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
 // presented using the specified format. Changes to the {{ .Name }} will be pushed to the String and setting
 // the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
@@ -157,17 +163,26 @@ func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	v.AddListener(str)
 	return str
 }
-
+{{ end }}
 func (s *stringFrom{{ .Name }}) Get() (string, error) {
 	val, err := s.from.Get()
 	if err != nil {
 		return "", err
 	}
-
+{{ if .ToString }}
+	return {{ .ToString }}(val)
+{{ else }}
 	return fmt.Sprintf(s.format, val), nil
+{{ end }}
 }
 
 func (s *stringFrom{{ .Name }}) Set(str string) error {
+{{ if .FromString }}
+	val, err := {{ .FromString }}(str)
+	if err != nil {
+		return err
+	}
+{{ else }}
 	var val {{ .Type }}
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -176,7 +191,7 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 	if n != 1 {
 		return errParseFailed
 	}
-
+{{ end }}
 	old, err := s.from.Get()
 	if err != nil {
 		return err
@@ -213,9 +228,15 @@ type stringTo{{ .Name }} struct {
 //
 // Since: 2.0
 func StringTo{{ .Name }}(str String) {{ .Name }} {
+{{ if .Format }}
 	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
+{{ else }}
+	v := &stringTo{{ .Name }}{from: str}
+	str.AddListener(v)
+	return v
+{{ end }}
 }
-
+{{ if .Format }}
 // StringTo{{ .Name }}WithFormat creates a binding that connects a String data item to a {{ .Name }} and is
 // presented using the specified format. Changes to the {{ .Name }} will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the {{ .Name }} will push a formatted value
@@ -227,13 +248,15 @@ func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	str.AddListener(v)
 	return v
 }
-
+{{ end }}
 func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	str, err := s.from.Get()
 	if str == "" || err != nil {
 		return {{ .Default }}, err
 	}
-
+{{ if .FromString }}
+	return {{ .FromString }}(str)
+{{ else }}
 	var val {{ .Type }}
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -244,10 +267,18 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	}
 
 	return val, nil
+{{ end }}
 }
 
 func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
+{{ if .ToString }}
+	str, err := {{ .ToString }}(val)
+	if err != nil {
+		return err
+	}
+{{ else }}
 	str := fmt.Sprintf(s.format, val)
+{{ end }}
 	old, err := s.from.Get()
 	if str == old {
 		return err
@@ -484,9 +515,10 @@ func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 `
 
 type bindValues struct {
-	Name, Type, Default string
-	Format              string
-	SupportsPreferences bool
+	Name, Type, Default  string
+	Format               string
+	SupportsPreferences  bool
+	FromString, ToString string // function names...
 }
 
 func newFile(name string) (*os.File, error) {
@@ -530,6 +562,8 @@ import "fyne.io/fyne/v2"
 	convertFile.WriteString(`
 import (
 	"fmt"
+
+	"fyne.io/fyne/v2"
 )
 `)
 	prefFile, err := newFile("preference")
@@ -563,21 +597,21 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)"},
+		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", FromString: "uriFromString", ToString: "uriToString"},
 	}
 	for _, b := range binds {
 		writeFile(itemFile, item, b)
 		if b.SupportsPreferences {
 			writeFile(prefFile, preference, b)
 		}
-		if b.Format != "" {
+		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}
 		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {
-		if b.Format != "" {
+		if b.Format != "" || b.FromString != "" {
 			writeFile(convertFile, fromString, b)
 		}
 	}
