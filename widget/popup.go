@@ -203,6 +203,7 @@ func (r *popUpRenderer) Refresh() {
 	if r.background.Size() != r.popUp.innerSize || r.background.Position() != r.popUp.innerPos {
 		r.Layout(r.popUp.Size())
 	}
+	// TODO should fix this refresh too?
 	r.background.Refresh()
 }
 
@@ -241,5 +242,9 @@ func (r *modalPopUpRenderer) Refresh() {
 	if r.background.Size() != r.popUp.innerSize {
 		r.Layout(r.popUp.Size())
 	}
+	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
+	}
+	r.popUp.Content.Refresh()
 	r.background.Refresh()
 }
