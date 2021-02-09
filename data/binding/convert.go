@@ -223,7 +223,7 @@ type stringFromURI struct {
 // Changes to the URI will be pushed to the String and setting the string will parse and set the
 // URI if the parse was successful.
 //
-// Since: 2.0
+// Since: 2.1
 func URIToString(v URI) String {
 	str := &stringFromURI{from: v}
 	v.AddListener(str)
@@ -483,7 +483,7 @@ type stringToURI struct {
 // Changes to the String will be parsed and pushed to the URI if the parse was successful, and setting
 // the URI update the String binding.
 //
-// Since: 2.0
+// Since: 2.1
 func StringToURI(str String) URI {
 	v := &stringToURI{from: str}
 	str.AddListener(v)

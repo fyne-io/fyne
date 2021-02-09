@@ -1072,7 +1072,7 @@ func (b *boundExternalStringListItem) setIfChanged(val string) error {
 
 // URIList supports binding a list of fyne.URI values.
 //
-// Since: 2.0
+// Since: 2.1
 type URIList interface {
 	DataList
 
@@ -1086,7 +1086,7 @@ type URIList interface {
 
 // ExternalURIList supports binding a list of fyne.URI values from an external variable.
 //
-// Since: 2.0
+// Since: 2.1
 type ExternalURIList interface {
 	URIList
 
@@ -1095,7 +1095,7 @@ type ExternalURIList interface {
 
 // NewURIList returns a bindable list of fyne.URI values.
 //
-// Since: 2.0
+// Since: 2.1
 func NewURIList() URIList {
 	return &boundURIList{val: &[]fyne.URI{}}
 }
@@ -1103,7 +1103,7 @@ func NewURIList() URIList {
 // BindURIList returns a bound list of fyne.URI values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0
+// Since: 2.1
 func BindURIList(v *[]fyne.URI) ExternalURIList {
 	if v == nil {
 		return NewURIList().(ExternalURIList)
