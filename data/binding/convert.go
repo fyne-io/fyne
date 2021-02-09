@@ -23,9 +23,7 @@ type stringFromBool struct {
 //
 // Since: 2.0
 func BoolToString(v Bool) String {
-
 	return BoolToStringWithFormat(v, "%t")
-
 }
 
 // BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
@@ -46,11 +44,9 @@ func (s *stringFromBool) Get() (string, error) {
 	}
 
 	return fmt.Sprintf(s.format, val), nil
-
 }
 
 func (s *stringFromBool) Set(str string) error {
-
 	var val bool
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -95,9 +91,7 @@ type stringFromFloat struct {
 //
 // Since: 2.0
 func FloatToString(v Float) String {
-
 	return FloatToStringWithFormat(v, "%f")
-
 }
 
 // FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
@@ -118,11 +112,9 @@ func (s *stringFromFloat) Get() (string, error) {
 	}
 
 	return fmt.Sprintf(s.format, val), nil
-
 }
 
 func (s *stringFromFloat) Set(str string) error {
-
 	var val float64
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -167,9 +159,7 @@ type stringFromInt struct {
 //
 // Since: 2.0
 func IntToString(v Int) String {
-
 	return IntToStringWithFormat(v, "%d")
-
 }
 
 // IntToStringWithFormat creates a binding that connects a Int data item to a String and is
@@ -190,11 +180,9 @@ func (s *stringFromInt) Get() (string, error) {
 	}
 
 	return fmt.Sprintf(s.format, val), nil
-
 }
 
 func (s *stringFromInt) Set(str string) error {
-
 	var val int
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -237,11 +225,9 @@ type stringFromURI struct {
 //
 // Since: 2.0
 func URIToString(v URI) String {
-
 	str := &stringFromURI{from: v}
 	v.AddListener(str)
 	return str
-
 }
 
 func (s *stringFromURI) Get() (string, error) {
@@ -251,11 +237,9 @@ func (s *stringFromURI) Get() (string, error) {
 	}
 
 	return uriToString(val)
-
 }
 
 func (s *stringFromURI) Set(str string) error {
-
 	val, err := uriFromString(str)
 	if err != nil {
 		return err
@@ -296,9 +280,7 @@ type stringToBool struct {
 //
 // Since: 2.0
 func StringToBool(str String) Bool {
-
 	return StringToBoolWithFormat(str, "%t")
-
 }
 
 // StringToBoolWithFormat creates a binding that connects a String data item to a Bool and is
@@ -329,11 +311,9 @@ func (s *stringToBool) Get() (bool, error) {
 	}
 
 	return val, nil
-
 }
 
 func (s *stringToBool) Set(val bool) error {
-
 	str := fmt.Sprintf(s.format, val)
 
 	old, err := s.from.Get()
@@ -369,9 +349,7 @@ type stringToFloat struct {
 //
 // Since: 2.0
 func StringToFloat(str String) Float {
-
 	return StringToFloatWithFormat(str, "%f")
-
 }
 
 // StringToFloatWithFormat creates a binding that connects a String data item to a Float and is
@@ -402,11 +380,9 @@ func (s *stringToFloat) Get() (float64, error) {
 	}
 
 	return val, nil
-
 }
 
 func (s *stringToFloat) Set(val float64) error {
-
 	str := fmt.Sprintf(s.format, val)
 
 	old, err := s.from.Get()
@@ -442,9 +418,7 @@ type stringToInt struct {
 //
 // Since: 2.0
 func StringToInt(str String) Int {
-
 	return StringToIntWithFormat(str, "%d")
-
 }
 
 // StringToIntWithFormat creates a binding that connects a String data item to a Int and is
@@ -475,11 +449,9 @@ func (s *stringToInt) Get() (int, error) {
 	}
 
 	return val, nil
-
 }
 
 func (s *stringToInt) Set(val int) error {
-
 	str := fmt.Sprintf(s.format, val)
 
 	old, err := s.from.Get()
@@ -513,11 +485,9 @@ type stringToURI struct {
 //
 // Since: 2.0
 func StringToURI(str String) URI {
-
 	v := &stringToURI{from: str}
 	str.AddListener(v)
 	return v
-
 }
 
 func (s *stringToURI) Get() (fyne.URI, error) {
@@ -527,16 +497,13 @@ func (s *stringToURI) Get() (fyne.URI, error) {
 	}
 
 	return uriFromString(str)
-
 }
 
 func (s *stringToURI) Set(val fyne.URI) error {
-
 	str, err := uriToString(val)
 	if err != nil {
 		return err
 	}
-
 	old, err := s.from.Get()
 	if str == old {
 		return err

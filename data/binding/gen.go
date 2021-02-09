@@ -145,13 +145,13 @@ type stringFrom{{ .Name }} struct {
 //
 // Since: 2.0
 func {{ .Name }}ToString(v {{ .Name }}) String {
-{{ if .Format }}
+{{- if .Format }}
 	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
-{{ else }}
+{{- else }}
 	str := &stringFrom{{ .Name }}{from: v}
 	v.AddListener(str)
 	return str
-{{ end }}
+{{- end }}
 }
 {{ if .Format }}
 // {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
@@ -172,13 +172,13 @@ func (s *stringFrom{{ .Name }}) Get() (string, error) {
 	}
 {{ if .ToString }}
 	return {{ .ToString }}(val)
-{{ else }}
+{{- else }}
 	return fmt.Sprintf(s.format, val), nil
-{{ end }}
+{{- end }}
 }
 
 func (s *stringFrom{{ .Name }}) Set(str string) error {
-{{ if .FromString }}
+{{- if .FromString }}
 	val, err := {{ .FromString }}(str)
 	if err != nil {
 		return err
@@ -230,13 +230,13 @@ type stringTo{{ .Name }} struct {
 //
 // Since: 2.0
 func StringTo{{ .Name }}(str String) {{ .Name }} {
-{{ if .Format }}
+{{- if .Format }}
 	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
-{{ else }}
+{{- else }}
 	v := &stringTo{{ .Name }}{from: str}
 	str.AddListener(v)
 	return v
-{{ end }}
+{{- end }}
 }
 {{ if .Format }}
 // StringTo{{ .Name }}WithFormat creates a binding that connects a String data item to a {{ .Name }} and is
@@ -258,7 +258,7 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	}
 {{ if .FromString }}
 	return {{ .FromString }}(str)
-{{ else }}
+{{- else }}
 	var val {{ .Type }}
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -269,16 +269,16 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	}
 
 	return val, nil
-{{ end }}
+{{- end }}
 }
 
 func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
-{{ if .ToString }}
+{{- if .ToString }}
 	str, err := {{ .ToString }}(val)
 	if err != nil {
 		return err
 	}
-{{ else }}
+{{- else }}
 	str := fmt.Sprintf(s.format, val)
 {{ end }}
 	old, err := s.from.Get()
