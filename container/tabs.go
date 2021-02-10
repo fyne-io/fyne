@@ -46,151 +46,28 @@ func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObje
 	return &TabItem{Text: text, Icon: icon, Content: content}
 }
 
-type baseTabs struct {
-	widget.BaseWidget
+type baseTabs interface {
+	onUnselected() func(*TabItem)
+	onSelected() func(*TabItem)
 
-	Items        []*TabItem
-	OnSelected   func(tab *TabItem)
-	OnUnselected func(tab *TabItem)
+	items() []*TabItem
+	setItems([]*TabItem)
 
-	current     int
-	tabLocation TabLocation
+	selection() int
+	setSelection(int)
 
-	popUp *widget.PopUpMenu
+	tabLocation() TabLocation
 }
 
-// Append adds a new TabItem to the end of the tab bar.
-func (t *baseTabs) Append(item *TabItem) {
-	t.SetItems(append(t.Items, item))
-}
-
-// Hide hides the widget.
-//
-// Implements: fyne.Widget
-func (t *baseTabs) Hide() {
-	if t.popUp != nil {
-		t.popUp.Hide()
-		t.popUp = nil
-	}
-	t.BaseWidget.Hide()
-}
-
-// Remove tab by value.
-func (t *baseTabs) Remove(item *TabItem) {
-	for index, existingItem := range t.Items {
-		if existingItem == item {
-			t.RemoveIndex(index)
-			break
-		}
-	}
-}
-
-// RemoveIndex removes tab by index.
-func (t *baseTabs) RemoveIndex(index int) {
-	if index < 0 || index >= len(t.Items) {
-		return
-	}
-	t.SetItems(append(t.Items[:index], t.Items[index+1:]...))
-	if index < t.current {
-		t.current--
-	}
-}
-
-// Select sets the specified TabItem to be selected and its content visible.
-func (t *baseTabs) Select(item *TabItem) {
-	for i, child := range t.Items {
-		if child == item {
-			t.SelectIndex(i)
-			return
-		}
-	}
-}
-
-// SelectIndex sets the TabItem at the specific index to be selected and its content visible.
-func (t *baseTabs) SelectIndex(index int) {
-	if t.current == index {
-		// No change, so do nothing
-		return
-	}
-
-	if f, p := t.OnUnselected, t.current; f != nil && p >= 0 && p < len(t.Items) {
-		// Notification of unselection
-		f(t.Items[p])
-	}
-
-	if index < 0 || index >= len(t.Items) {
-		// Out of bounds, so do nothing
-		return
-	}
-
-	t.current = index
-	t.Refresh()
-
-	if f := t.OnSelected; f != nil {
-		// Notification of selection
-		f(t.Items[t.current])
-	}
-}
-
-// Selection returns the currently selected TabItem.
-func (t *baseTabs) Selection() *TabItem {
-	if t.current < 0 || t.current >= len(t.Items) {
-		return nil
-	}
-	return t.Items[t.current]
-}
-
-// SelectionIndex returns the index of the currently selected TabItem.
-func (t *baseTabs) SelectionIndex() int {
-	return t.current
-}
-
-// SetItems sets the container’s items and refreshes.
-func (t *baseTabs) SetItems(items []*TabItem) {
-	if mismatchedTabItems(items) {
-		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
-	}
-	t.Items = items
-	count := len(items)
-	switch {
-	case count == 0:
-		// No items available to be current
-		t.SelectIndex(-1) // Unsure OnUnselected gets called if applicable
-		t.current = -1
-		t.Refresh()
-	case t.current < 0:
-		// Current is first tab item
-		t.SelectIndex(0)
-	case t.current >= count:
-		// Current doesn't exist, select last tab
-		t.SelectIndex(count - 1)
-	default:
-		t.Refresh()
-	}
-}
-
-// SetTabLocation sets the location of the tab bar
-func (t *baseTabs) SetTabLocation(l TabLocation) {
-	t.tabLocation = l
-	t.Refresh()
-}
-
-// Show this widget, if it was previously hidden
-func (t *baseTabs) Show() {
-	t.BaseWidget.Show()
-	t.SelectIndex(t.current)
-	t.Refresh()
-}
-
-func (t *baseTabs) showPopUp(button *widget.Button, items []*fyne.MenuItem) {
+func buildPopUpMenu(t baseTabs, button *widget.Button, items []*fyne.MenuItem) *widget.PopUpMenu {
 	d := fyne.CurrentApp().Driver()
 	c := d.CanvasForObject(button)
-	t.popUp = widget.NewPopUpMenu(fyne.NewMenu("", items...), c)
+	popUpMenu := widget.NewPopUpMenu(fyne.NewMenu("", items...), c)
 	buttonPos := d.AbsolutePositionForObject(button)
 	buttonSize := button.Size()
-	popUpMin := t.popUp.MinSize()
+	popUpMin := popUpMenu.MinSize()
 	var popUpPos fyne.Position
-	switch t.tabLocation {
+	switch t.tabLocation() {
 	case TabLocationLeading:
 		popUpPos.X = buttonPos.X + buttonSize.Width
 		popUpPos.Y = buttonPos.Y + buttonSize.Height - popUpMin.Height
@@ -204,7 +81,95 @@ func (t *baseTabs) showPopUp(button *widget.Button, items []*fyne.MenuItem) {
 		popUpPos.X = buttonPos.X + buttonSize.Width - popUpMin.Width
 		popUpPos.Y = buttonPos.Y - popUpMin.Height
 	}
-	t.popUp.ShowAtPosition(popUpPos)
+	popUpMenu.ShowAtPosition(popUpPos)
+	return popUpMenu
+}
+
+func removeIndex(t baseTabs, index int) {
+	items := t.items()
+	if index < 0 || index >= len(items) {
+		return
+	}
+	setItems(t, append(items[:index], items[index+1:]...))
+	if s := t.selection(); index < s {
+		t.setSelection(s - 1)
+	}
+}
+
+func removeItem(t baseTabs, item *TabItem) {
+	for index, existingItem := range t.items() {
+		if existingItem == item {
+			removeIndex(t, index)
+			break
+		}
+	}
+}
+
+func selection(t baseTabs) *TabItem {
+	selection := t.selection()
+	items := t.items()
+	if selection < 0 || selection >= len(items) {
+		return nil
+	}
+	return items[selection]
+}
+
+func selectIndex(t baseTabs, index int) {
+	selection := t.selection()
+
+	if selection == index {
+		// No change, so do nothing
+		return
+	}
+
+	items := t.items()
+
+	if f := t.onUnselected(); f != nil && selection >= 0 && selection < len(items) {
+		// Notification of unselection
+		f(items[selection])
+	}
+
+	if index < 0 || index >= len(items) {
+		// Out of bounds, so do nothing
+		return
+	}
+
+	t.setSelection(index)
+
+	if f := t.onSelected(); f != nil {
+		// Notification of selection
+		f(items[index])
+	}
+}
+
+func selectItem(t baseTabs, item *TabItem) {
+	for i, child := range t.items() {
+		if child == item {
+			selectIndex(t, i)
+			return
+		}
+	}
+}
+
+func setItems(t baseTabs, items []*TabItem) {
+	if mismatchedTabItems(items) {
+		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
+	}
+	t.setItems(items)
+	selection := t.selection()
+	count := len(items)
+	switch {
+	case count == 0:
+		// No items available to be selection
+		selectIndex(t, -1) // Unsure OnUnselected gets called if applicable
+		t.setSelection(-1)
+	case selection < 0:
+		// Current is first tab item
+		selectIndex(t, 0)
+	case selection >= count:
+		// Current doesn't exist, select last tab
+		selectIndex(t, count-1)
+	}
 }
 
 type baseTabsRenderer struct {
@@ -224,7 +189,19 @@ func (r *baseTabsRenderer) Objects() []fyne.CanvasObject {
 	return []fyne.CanvasObject{r.bar, r.divider, r.indicator}
 }
 
-func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
+func (r *baseTabsRenderer) applyTheme(t baseTabs) {
+	if r.action != nil {
+		if l := t.tabLocation(); l == TabLocationLeading || l == TabLocationTrailing {
+			r.action.SetIcon(theme.MoreVerticalIcon())
+		} else {
+			r.action.SetIcon(theme.MoreHorizontalIcon())
+		}
+	}
+	r.divider.FillColor = theme.ShadowColor()
+	r.indicator.FillColor = theme.PrimaryColor()
+}
+
+func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 	var (
 		barPos, dividerPos, contentPos    fyne.Position
 		barSize, dividerSize, contentSize fyne.Size
@@ -232,7 +209,7 @@ func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
 
 	barMin := r.bar.MinSize()
 
-	switch t.tabLocation {
+	switch t.tabLocation() {
 	case TabLocationTop:
 		barHeight := barMin.Height
 		barPos = fyne.NewPos(0, 0)
@@ -271,8 +248,9 @@ func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
 	r.bar.Resize(barSize)
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
-	for i, ti := range t.Items {
-		if i == t.current {
+	selection := t.selection()
+	for i, ti := range t.items() {
+		if i == selection {
 			ti.Content.Move(contentPos)
 			ti.Content.Resize(contentSize)
 			ti.Content.Show()
@@ -282,15 +260,15 @@ func (r *baseTabsRenderer) layout(t *baseTabs, size fyne.Size) {
 	}
 }
 
-func (r *baseTabsRenderer) minSize(t *baseTabs) fyne.Size {
+func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 	barMin := r.bar.MinSize()
 
 	contentMin := fyne.NewSize(0, 0)
-	for _, content := range t.Items {
+	for _, content := range t.items() {
 		contentMin = contentMin.Max(content.Content.MinSize())
 	}
 
-	switch t.tabLocation {
+	switch t.tabLocation() {
 	case TabLocationLeading, TabLocationTrailing:
 		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(), contentMin.Height)
 	default:
@@ -342,21 +320,11 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 	}
 }
 
-func (r *baseTabsRenderer) refresh(t *baseTabs) {
-	if r.action != nil {
-		if t.tabLocation == TabLocationLeading || t.tabLocation == TabLocationTrailing {
-			r.action.SetIcon(theme.MoreVerticalIcon())
-		} else {
-			r.action.SetIcon(theme.MoreHorizontalIcon())
-		}
-	}
+func (r *baseTabsRenderer) refresh(t baseTabs) {
+	r.applyTheme(t)
 
 	r.bar.Refresh()
-
-	r.divider.FillColor = theme.ShadowColor()
 	r.divider.Refresh()
-
-	r.indicator.FillColor = theme.PrimaryColor()
 	r.indicator.Refresh()
 }
 

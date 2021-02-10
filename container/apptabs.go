@@ -21,33 +21,33 @@ var _ fyne.Widget = (*AppTabs)(nil)
 //
 // Since: 1.4
 type AppTabs struct {
-	baseTabs
-	// Deprecated: 'Items' has been moved into an embedded type.
-	// Most devs using AppTabs will not be affected when this is removed as they can still assign to Items field and call the same public APIs.
-	// The only devs affected would be ones using struct init (a := &AppTabs{Items: ...}) who'll need to change to (a := &AppTabs{}; a.Items = ...)
+	widget.BaseWidget
+
 	Items []*TabItem
+
 	// Deprecated: Use `OnSelected func(*TabItem)` instead.
-	OnChanged func(tab *TabItem)
+	OnChanged    func(*TabItem)
+	OnSelected   func(*TabItem)
+	OnUnselected func(*TabItem)
+
+	current  int
+	location TabLocation
+
+	popUpMenu *widget.PopUpMenu
 }
 
 // NewAppTabs creates a new tab container that allows the user to choose between different areas of an app.
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{
-		baseTabs: baseTabs{
-			BaseWidget: widget.BaseWidget{},
-			current:    -1,
-		},
-	}
-	tabs.SetItems(items)
+	tabs := &AppTabs{}
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
+	tabs.SetItems(items)
 	return tabs
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
-	t.baseTabs.Items = t.Items
 	t.BaseWidget.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
@@ -62,16 +62,13 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit (capped to maxAppTab).
 	r.updateTabs(1)
 	r.updateIndicator()
+	r.applyTheme(t)
 	return r
 }
 
 // Append adds a new TabItem to the end of the tab bar.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) Append(item *TabItem) {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.Append(item)
-	t.Items = t.baseTabs.Items
+	t.SetItems(append(t.Items, item))
 }
 
 // CurrentTab returns the currently selected TabItem.
@@ -91,16 +88,6 @@ func (t *AppTabs) CurrentTabIndex() int {
 	return t.current
 }
 
-// Hide hides the widget.
-//
-// Implements: fyne.Widget
-//
-// Deprecated: Moved into an embedded type.
-func (t *AppTabs) Hide() {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.Hide()
-}
-
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 //
 // Deprecated: Support for extending containers is being removed
@@ -108,45 +95,45 @@ func (t *AppTabs) ExtendBaseWidget(wid fyne.Widget) {
 	t.BaseWidget.ExtendBaseWidget(wid)
 }
 
+// Hide hides the widget.
+//
+// Implements: fyne.Widget
+func (t *AppTabs) Hide() {
+	if t.popUpMenu != nil {
+		t.popUpMenu.Hide()
+		t.popUpMenu = nil
+	}
+	t.BaseWidget.Hide()
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (t *AppTabs) MinSize() fyne.Size {
-	t.baseTabs.Items = t.Items
 	t.BaseWidget.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
 }
 
 // Remove tab by value.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) Remove(item *TabItem) {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.Remove(item)
-	t.Items = t.baseTabs.Items
+	removeItem(t, item)
+	t.Refresh()
 }
 
 // RemoveIndex removes tab by index.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) RemoveIndex(index int) {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.RemoveIndex(index)
-	t.Items = t.baseTabs.Items
+	removeIndex(t, index)
+	t.Refresh()
 }
 
 // Select sets the specified TabItem to be selected and its content visible.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) Select(item *TabItem) {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.Select(item)
+	selectItem(t, item)
+	t.Refresh()
 }
 
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) SelectIndex(index int) {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.SelectIndex(index)
+	selectIndex(t, index)
+	t.Refresh()
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.
@@ -177,32 +164,23 @@ func (t *AppTabs) SelectTabIndex(index int) {
 }
 
 // Selection returns the currently selected TabItem.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) Selection() *TabItem {
-	t.baseTabs.Items = t.Items
-	return t.baseTabs.Selection()
+	return selection(t)
 }
 
 // SelectionIndex returns the index of the currently selected TabItem.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) SelectionIndex() int {
-	t.baseTabs.Items = t.Items
-	return t.baseTabs.SelectionIndex()
+	return t.current
 }
 
 // SetItems sets the container’s items and refreshes.
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) SetItems(items []*TabItem) {
-	t.baseTabs.SetItems(items)
-	t.Items = t.baseTabs.Items
+	setItems(t, items)
+	t.Refresh()
 }
 
 // SetTabLocation sets the location of the tab bar
 func (t *AppTabs) SetTabLocation(l TabLocation) {
-	t.baseTabs.Items = t.Items
 	// Mobile has limited screen space, so don't put app tab bar on long edges
 	if d := fyne.CurrentDevice(); d.IsMobile() {
 		if o := d.Orientation(); fyne.IsVertical(o) {
@@ -215,15 +193,43 @@ func (t *AppTabs) SetTabLocation(l TabLocation) {
 			}
 		}
 	}
-	t.baseTabs.SetTabLocation(l)
+	t.location = l
+	t.Refresh()
 }
 
 // Show this widget, if it was previously hidden
-//
-// Deprecated: Moved into an embedded type.
 func (t *AppTabs) Show() {
-	t.baseTabs.Items = t.Items
-	t.baseTabs.Show()
+	t.BaseWidget.Show()
+	t.SelectIndex(t.current)
+	t.Refresh()
+}
+
+func (t *AppTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
+}
+
+func (t *AppTabs) onSelected() func(*TabItem) {
+	return t.OnSelected
+}
+
+func (t *AppTabs) items() []*TabItem {
+	return t.Items
+}
+
+func (t *AppTabs) selection() int {
+	return t.current
+}
+
+func (t *AppTabs) setItems(items []*TabItem) {
+	t.Items = items
+}
+
+func (t *AppTabs) setSelection(selection int) {
+	t.current = selection
+}
+
+func (t *AppTabs) tabLocation() TabLocation {
+	return t.location
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -239,7 +245,7 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 	for i := maxAppTabs; i > 0; i-- {
 		r.updateTabs(i)
 		barMin := r.bar.MinSize()
-		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 			if barMin.Height <= size.Height {
 				// Tab bar is short enough to fit
 				break
@@ -252,17 +258,17 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 		}
 	}
 
-	r.layout(&r.appTabs.baseTabs, size)
+	r.layout(r.appTabs, size)
 	r.updateIndicator()
 }
 
 func (r *appTabsRenderer) MinSize() fyne.Size {
-	return r.minSize(&r.appTabs.baseTabs)
+	return r.minSize(r.appTabs)
 }
 
 func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
 	objects := r.baseTabsRenderer.Objects()
-	if i, is := r.appTabs.current, r.appTabs.baseTabs.Items; i >= 0 && i < len(is) {
+	if i, is := r.appTabs.current, r.appTabs.Items; i >= 0 && i < len(is) {
 		objects = append(objects, is[i].Content)
 	}
 	return objects
@@ -271,7 +277,7 @@ func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
 func (r *appTabsRenderer) Refresh() {
 	r.Layout(r.appTabs.Size())
 
-	r.refresh(&r.appTabs.baseTabs)
+	r.refresh(r.appTabs)
 
 	canvas.Refresh(r.appTabs)
 }
@@ -281,17 +287,20 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 		// Show pop up containing all tabs which did not fit in the tab bar
 
 		var items []*fyne.MenuItem
-		for i := len(r.bar.Objects[0].(*fyne.Container).Objects); i < len(r.appTabs.baseTabs.Items); i++ {
-			item := r.appTabs.baseTabs.Items[i]
+		for i := len(r.bar.Objects[0].(*fyne.Container).Objects); i < len(r.appTabs.Items); i++ {
+			item := r.appTabs.Items[i]
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
 			items = append(items, fyne.NewMenuItem(item.Text, func() {
 				r.appTabs.Select(item)
-				r.appTabs.popUp = nil
+				if r.appTabs.popUpMenu != nil {
+					r.appTabs.popUpMenu.Hide()
+					r.appTabs.popUpMenu = nil
+				}
 			}))
 		}
 
-		r.appTabs.showPopUp(overflow, items)
+		r.appTabs.popUpMenu = buildPopUpMenu(r.appTabs, overflow, items)
 	})
 	overflow.Importance = widget.LowImportance
 	return
@@ -308,7 +317,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		}
 		buttons.Layout = layout.NewGridLayout(cells)
 		iconPos = buttonIconTop
-	} else if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+	} else if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
 		iconPos = buttonIconTop
 	} else {
@@ -317,7 +326,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	}
 
 	for i := 0; i < count; i++ {
-		item := r.appTabs.baseTabs.Items[i]
+		item := r.appTabs.Items[i]
 		button, ok := r.buttonCache[item]
 		if !ok {
 			button = &tabButton{
@@ -364,7 +373,7 @@ func (r *appTabsRenderer) updateIndicator() {
 	var indicatorPos fyne.Position
 	var indicatorSize fyne.Size
 
-	switch r.appTabs.tabLocation {
+	switch r.appTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.MinSize().Height)
 		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
@@ -383,7 +392,7 @@ func (r *appTabsRenderer) updateIndicator() {
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {
-	tabCount := len(r.appTabs.baseTabs.Items)
+	tabCount := len(r.appTabs.Items)
 
 	// Set overflow action
 	if tabCount < max {
@@ -395,7 +404,7 @@ func (r *appTabsRenderer) updateTabs(max int) {
 			r.action = r.buildOverflowTabsButton()
 		}
 		// Set layout of tab bar containing tab buttons and overflow action
-		if r.appTabs.tabLocation == TabLocationLeading || r.appTabs.tabLocation == TabLocationTrailing {
+		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 			r.bar.Layout = layout.NewBorderLayout(nil, r.action, nil, nil)
 		} else {
 			r.bar.Layout = layout.NewBorderLayout(nil, nil, nil, r.action)

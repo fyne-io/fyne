@@ -17,25 +17,35 @@ var _ fyne.Widget = (*DocTabs)(nil)
 //
 // Since: 2.1
 type DocTabs struct {
-	baseTabs
+	widget.BaseWidget
+
+	Items []*TabItem
+
 	CreateTab      func() *TabItem
-	OnClosed       func(*TabItem)
 	CloseIntercept func(*TabItem)
+	OnClosed       func(*TabItem)
+	OnSelected     func(*TabItem)
+	OnUnselected   func(*TabItem)
+
+	current  int
+	location TabLocation
+
+	popUpMenu *widget.PopUpMenu
 }
 
 // NewDocTabs creates a new tab container that allows the user to choose between various pieces of content.
 //
 // Since: 2.1
 func NewDocTabs(items ...*TabItem) *DocTabs {
-	tabs := &DocTabs{
-		baseTabs: baseTabs{
-			BaseWidget: widget.BaseWidget{},
-			current:    -1,
-		},
-	}
+	tabs := &DocTabs{}
 	tabs.ExtendBaseWidget(tabs)
 	tabs.SetItems(items)
 	return tabs
+}
+
+// Append adds a new TabItem to the end of the tab bar.
+func (t *DocTabs) Append(item *TabItem) {
+	t.SetItems(append(t.Items, item))
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -68,13 +78,78 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.updateCreateTab()
 	r.updateTabs()
 	r.updateIndicator(false)
+	r.applyTheme(t)
 	return r
+}
+
+// Hide hides the widget.
+//
+// Implements: fyne.Widget
+func (t *DocTabs) Hide() {
+	if t.popUpMenu != nil {
+		t.popUpMenu.Hide()
+		t.popUpMenu = nil
+	}
+	t.BaseWidget.Hide()
 }
 
 // MinSize returns the size that this widget should not shrink below
 func (t *DocTabs) MinSize() fyne.Size {
 	t.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
+}
+
+// Remove tab by value.
+func (t *DocTabs) Remove(item *TabItem) {
+	removeItem(t, item)
+	t.Refresh()
+}
+
+// RemoveIndex removes tab by index.
+func (t *DocTabs) RemoveIndex(index int) {
+	removeIndex(t, index)
+	t.Refresh()
+}
+
+// Select sets the specified TabItem to be selected and its content visible.
+func (t *DocTabs) Select(item *TabItem) {
+	selectItem(t, item)
+	t.Refresh()
+}
+
+// SelectIndex sets the TabItem at the specific index to be selected and its content visible.
+func (t *DocTabs) SelectIndex(index int) {
+	selectIndex(t, index)
+	t.Refresh()
+}
+
+// Selection returns the currently selected TabItem.
+func (t *DocTabs) Selection() *TabItem {
+	return selection(t)
+}
+
+// SelectionIndex returns the index of the currently selected TabItem.
+func (t *DocTabs) SelectionIndex() int {
+	return t.current
+}
+
+// SetItems sets the container’s items and refreshes.
+func (t *DocTabs) SetItems(items []*TabItem) {
+	setItems(t, items)
+	t.Refresh()
+}
+
+// SetTabLocation sets the location of the tab bar
+func (t *DocTabs) SetTabLocation(l TabLocation) {
+	t.location = l
+	t.Refresh()
+}
+
+// Show this widget, if it was previously hidden
+func (t *DocTabs) Show() {
+	t.BaseWidget.Show()
+	t.SelectIndex(t.current)
+	t.Refresh()
 }
 
 func (t *DocTabs) close(item *TabItem) {
@@ -86,6 +161,34 @@ func (t *DocTabs) close(item *TabItem) {
 			f(item)
 		}
 	}
+}
+
+func (t *DocTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
+}
+
+func (t *DocTabs) onSelected() func(*TabItem) {
+	return t.OnSelected
+}
+
+func (t *DocTabs) items() []*TabItem {
+	return t.Items
+}
+
+func (t *DocTabs) selection() int {
+	return t.current
+}
+
+func (t *DocTabs) setItems(items []*TabItem) {
+	t.Items = items
+}
+
+func (t *DocTabs) setSelection(selection int) {
+	t.current = selection
+}
+
+func (t *DocTabs) tabLocation() TabLocation {
+	return t.location
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -103,12 +206,12 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.updateAllTabs()
 	r.updateCreateTab()
 	r.updateTabs()
-	r.layout(&r.docTabs.baseTabs, size)
+	r.layout(r.docTabs, size)
 	r.updateIndicator(true)
 }
 
 func (r *docTabsRenderer) MinSize() fyne.Size {
-	return r.minSize(&r.docTabs.baseTabs)
+	return r.minSize(r.docTabs)
 }
 
 func (r *docTabsRenderer) Objects() []fyne.CanvasObject {
@@ -124,7 +227,7 @@ func (r *docTabsRenderer) Refresh() {
 
 	r.Layout(r.docTabs.Size())
 
-	r.refresh(&r.docTabs.baseTabs)
+	r.refresh(r.docTabs)
 
 	canvas.Refresh(r.docTabs)
 }
@@ -140,11 +243,14 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
 			items = append(items, fyne.NewMenuItem(item.Text, func() {
 				r.docTabs.Select(item)
-				r.docTabs.popUp = nil
+				if r.docTabs.popUpMenu != nil {
+					r.docTabs.popUpMenu.Hide()
+					r.docTabs.popUpMenu = nil
+				}
 			}))
 		}
 
-		r.docTabs.showPopUp(all, items)
+		r.docTabs.popUpMenu = buildPopUpMenu(r.docTabs, all, items)
 	})
 	all.Importance = widget.LowImportance
 	return
@@ -174,7 +280,7 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		}
 		buttons.Layout = layout.NewGridLayout(cells)
 		iconPos = buttonIconTop
-	} else if r.docTabs.tabLocation == TabLocationLeading || r.docTabs.tabLocation == TabLocationTrailing {
+	} else if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
 		iconPos = buttonIconTop
 	} else {
@@ -231,7 +337,7 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	var indicatorPos fyne.Position
 	var indicatorSize fyne.Size
 
-	switch r.docTabs.tabLocation {
+	switch r.docTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.MinSize().Height)
 		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), theme.Padding())
@@ -285,7 +391,7 @@ func (r *docTabsRenderer) updateTabs() {
 	r.scroller.Content = r.buildTabButtons(tabCount)
 
 	// Set layout of tab bar containing tab buttons and overflow action
-	if r.docTabs.tabLocation == TabLocationLeading || r.docTabs.tabLocation == TabLocationTrailing {
+	if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
 		r.bar.Layout = layout.NewBorderLayout(nil, r.box, nil, nil)
 		r.scroller.Direction = ScrollVerticalOnly
 	} else {
