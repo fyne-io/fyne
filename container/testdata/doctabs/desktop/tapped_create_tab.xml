@@ -3,7 +3,7 @@
 		<widget size="300x100" type="*container.DocTabs">
 			<container size="300x32">
 				<widget size="236x32" type="*widget.Scroll">
-					<container size="358x32">
+					<container pos="-122,0" size="358x32">
 						<widget size="81x32" type="*container.tabButton">
 							<text bold pos="8,4" size="65x24">Test1</text>
 						</widget>
@@ -32,6 +32,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,32" size="300x4"/>
+			<rectangle fillColor="primary" pos="133,32" size="103x4"/>
 			<widget pos="0,36" size="300x64" type="*widget.Label">
 				<text pos="4,8" size="292x21">Another Tab</text>
 			</widget>

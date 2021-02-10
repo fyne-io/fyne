@@ -196,10 +196,11 @@ var _ fyne.WidgetRenderer = (*docTabsRenderer)(nil)
 
 type docTabsRenderer struct {
 	baseTabsRenderer
-	docTabs  *DocTabs
-	scroller *Scroll
-	box      *fyne.Container
-	create   *widget.Button
+	docTabs       *DocTabs
+	scroller      *Scroll
+	box           *fyne.Container
+	create        *widget.Button
+	lastSelection int
 }
 
 func (r *docTabsRenderer) Layout(size fyne.Size) {
@@ -223,9 +224,14 @@ func (r *docTabsRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *docTabsRenderer) Refresh() {
-	// TODO Offset Scroller so current tab is always visible
-
 	r.Layout(r.docTabs.Size())
+
+	if c := r.docTabs.current; c != r.lastSelection {
+		if c >= 0 && c < len(r.docTabs.Items) {
+			r.scrollToSelection()
+		}
+		r.lastSelection = c
+	}
 
 	r.refresh(r.docTabs)
 
@@ -312,6 +318,29 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		buttons.Objects = append(buttons.Objects, button)
 	}
 	return buttons
+}
+
+func (r *docTabsRenderer) scrollToSelection() {
+	buttons := r.scroller.Content.(*fyne.Container)
+	button := buttons.Objects[r.docTabs.current]
+	pos := button.Position()
+	size := button.Size()
+	offset := r.scroller.Offset
+	viewport := r.scroller.Size()
+	if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
+		if pos.Y < offset.Y {
+			offset.Y = pos.Y
+		} else if pos.Y+size.Height > offset.Y+viewport.Height {
+			offset.Y = pos.Y + size.Height - viewport.Height
+		}
+	} else {
+		if pos.X < offset.X {
+			offset.X = pos.X
+		} else if pos.X+size.Width > offset.X+viewport.Width {
+			offset.X = pos.X + size.Width - viewport.Width
+		}
+	}
+	r.scroller.Offset = offset
 }
 
 func (r *docTabsRenderer) updateIndicator(animate bool) {
