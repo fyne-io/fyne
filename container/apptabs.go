@@ -39,17 +39,16 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 			BaseWidget: widget.BaseWidget{},
 			current:    -1,
 		},
-		Items: items,
 	}
-	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	tabs.SetItems(items)
+	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	return tabs
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.baseTabs.Items = t.Items
-	t.ExtendBaseWidget(t)
+	t.BaseWidget.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			bar:         &fyne.Container{},
