@@ -211,8 +211,6 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		l.firstItemIndex = 0
 		l.list.offsetY = 0
 		l.visibleItemCount = min
-		// TODO should the list scroll to top if length is lower than the children length?
-		l.scroller.ScrollToTop()
 	}
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
