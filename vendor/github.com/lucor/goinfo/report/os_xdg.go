@@ -1,3 +1,5 @@
+// +build linux openbsd freebsd netbsd dragonfly
+
 package report
 
 import (
@@ -83,9 +85,9 @@ func (i *OS) architecture() (string, error) {
 		return "", fmt.Errorf("could not detect architecture using uname command: %w", err)
 	}
 
-	info := strings.Trim(string(out), "\n")
+	arch := strings.Trim(string(out), "\n")
 
-	return info, nil
+	return arch, nil
 }
 
 func (i *OS) kernel() (string, error) {
@@ -95,7 +97,7 @@ func (i *OS) kernel() (string, error) {
 		return "", fmt.Errorf("could not detect the kernel using uname command: %w", err)
 	}
 
-	info := strings.Trim(string(out), "\n")
+	kernel := strings.Trim(string(out), "\n")
 
-	return info, nil
+	return kernel, nil
 }
