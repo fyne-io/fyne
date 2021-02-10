@@ -103,8 +103,8 @@ func (d *dialog) Show() {
 	if !d.desiredSize.IsZero() {
 		d.win.Resize(d.desiredSize)
 	}
-	d.win.Show()
 	d.Refresh()
+	d.win.Show()
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
@@ -245,29 +245,3 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 
 	return list
 }
-
-// TODO I don't think it is needed
-// // dialogTitle is really just a normal title but we use the Refresh() hook to update the background rectangle.
-// type dialogTitle struct {
-// 	widget.Label
-
-// 	d *dialog
-// }
-
-// // Refresh applies the current theme to the whole dialog before refreshing the underlying label.
-// func (t *dialogTitle) Refresh() {
-// 	t.d.Refresh()
-
-// 	t.BaseWidget.Refresh()
-// }
-
-// func newDialogTitle(title string, d *dialog) *dialogTitle {
-// 	l := &dialogTitle{}
-// 	l.Text = title
-// 	l.Alignment = fyne.TextAlignLeading
-// 	l.TextStyle.Bold = true
-
-// 	l.d = d
-// 	l.ExtendBaseWidget(l)
-// 	return l
-// }
