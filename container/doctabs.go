@@ -317,6 +317,7 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 func (r *docTabsRenderer) updateIndicator(animate bool) {
 	if r.docTabs.current < 0 {
 		r.indicator.Hide()
+		r.indicator.Refresh()
 		return
 	}
 
@@ -362,6 +363,7 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	}
 	if indicatorSize.Width < 0 || indicatorSize.Height < 0 {
 		r.indicator.Hide()
+		r.indicator.Refresh()
 		return
 	}
 
