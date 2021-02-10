@@ -185,10 +185,6 @@ type baseTabsRenderer struct {
 func (r *baseTabsRenderer) Destroy() {
 }
 
-func (r *baseTabsRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{r.bar, r.divider, r.indicator}
-}
-
 func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	if r.action != nil {
 		if l := t.tabLocation(); l == TabLocationLeading || l == TabLocationTrailing {
@@ -318,6 +314,14 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.indicator.Resize(siz)
 		r.indicator.Refresh()
 	}
+}
+
+func (r *baseTabsRenderer) objects(t baseTabs) []fyne.CanvasObject {
+	objects := []fyne.CanvasObject{r.bar, r.divider, r.indicator}
+	if i, is := t.selection(), t.items(); i >= 0 && i < len(is) {
+		objects = append(objects, is[i].Content)
+	}
+	return objects
 }
 
 func (r *baseTabsRenderer) refresh(t baseTabs) {

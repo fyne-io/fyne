@@ -216,11 +216,7 @@ func (r *docTabsRenderer) MinSize() fyne.Size {
 }
 
 func (r *docTabsRenderer) Objects() []fyne.CanvasObject {
-	objects := r.baseTabsRenderer.Objects()
-	if i, is := r.docTabs.current, r.docTabs.Items; i >= 0 && i < len(is) {
-		objects = append(objects, is[i].Content)
-	}
-	return objects
+	return r.objects(r.docTabs)
 }
 
 func (r *docTabsRenderer) Refresh() {
