@@ -671,7 +671,16 @@ func (r *tabCloseButtonRenderer) Refresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
-	r.icon.Resource = theme.CancelIcon()
+	switch res := r.icon.Resource.(type) {
+	case *theme.ThemedResource:
+		if r.button.parent.importance == widget.HighImportance {
+			r.icon.Resource = theme.NewPrimaryThemedResource(res)
+		}
+	case *theme.PrimaryThemedResource:
+		if r.button.parent.importance != widget.HighImportance {
+			r.icon.Resource = res.Original()
+		}
+	}
 	r.icon.Refresh()
 }
 
