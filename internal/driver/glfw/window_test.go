@@ -1010,6 +1010,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
 	assert.True(t, onClosed)
 
+	w.closing = false // fake a fresh window
 	onIntercepted = false
 	onClosed = false
 	w.closed(w.viewport)
@@ -1017,6 +1018,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	assert.True(t, onIntercepted) // The interceptor is called by the closed.
 	assert.False(t, onClosed)     // If the interceptor is set Close is not called.
 
+	w.closing = false // fake a fresh window
 	onClosed = false
 	w.SetCloseIntercept(nil)
 	w.closed(w.viewport)
