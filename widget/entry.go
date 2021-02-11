@@ -237,12 +237,15 @@ func (e *Entry) DragEnd() {
 //
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
+	pevt := d.PointEvent
+	// Convert the relative drag position from our Entry coordinates to be relative
+	// for Scroll.Content
+	pevt.Position = pevt.Position.Subtract(e.scroll.Offset)
 	if !e.selecting {
-		e.selectRow, e.selectColumn = e.getRowCol(&d.PointEvent)
-
+		e.selectRow, e.selectColumn = e.getRowCol(&pevt)
 		e.selecting = true
 	}
-	e.updateMousePointer(&d.PointEvent, false)
+	e.updateMousePointer(&pevt, false)
 }
 
 // Enable this widget, updating any style or features appropriately.
