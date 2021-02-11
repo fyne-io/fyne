@@ -93,6 +93,29 @@ func TestEntry_DragSelect(t *testing.T) {
 	assert.Equal(t, "r the laz", entry.SelectedText())
 }
 
+func TestEntry_DragSelectWithScroll(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("The quick brown fox jumped over and over the lazy dog.")
+	entry.Resize(entry.MinSize())
+
+	// get position after the letter 'a'.
+	ev1 := getClickPosition("The quick brown fox jumped over and over the la", 0)
+	// get position after the letter 'u'
+	ev2 := getClickPosition("The qu", 0)
+
+	// mouse down and drag from 'a' to 'i'
+	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
+	entry.MouseDown(me)
+	for ; ev1.Position.X > ev2.Position.X; ev1.Position.X-- {
+		de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
+		entry.Dragged(de)
+	}
+	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
+	entry.MouseUp(me)
+
+	assert.Equal(t, "ick brown fox jumped over and over the la", entry.SelectedText())
+}
+
 func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 	str := []rune(" fish 日本語日  \t  test 本日本 moose  \t")
 
