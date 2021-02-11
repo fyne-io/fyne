@@ -1202,6 +1202,10 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.entry.validationStatus = newValidationStatus(r.entry)
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.size)
+
+		if r.entry.Text != "" {
+			r.entry.Validate()
+		}
 		r.Refresh()
 	}
 }
