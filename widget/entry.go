@@ -238,12 +238,8 @@ func (e *Entry) DragEnd() {
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	pevt := d.PointEvent
-	// For selection text, rows and columns numbers relative to the most-left
-	// part of the widget (visible ones) are needed. Although d.PointEvent.Position
-	// already satisfies that condition, inside "getRowCol" function rows and columns
-	// are converted to be relative to the whole widget (by adding the scroll offset).
-	// So in order to nullify this effect, PointEvent.Position need to subtract
-	// the scroll offset.
+	// Convert the relative drag position from our Entry coordinates to be relative
+	// for Scroll.Content
 	pevt.Position = pevt.Position.Subtract(e.scroll.Offset)
 	if !e.selecting {
 		e.selectRow, e.selectColumn = e.getRowCol(&pevt)
