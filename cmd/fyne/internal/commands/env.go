@@ -28,6 +28,7 @@ func Env() *cli.Command {
 				&fyneReport{GoMod: &report.GoMod{WorkDir: workDir, Module: fyneModule}},
 				&report.GoVersion{},
 				&report.GoEnv{Filter: []string{"GOOS", "GOARCH", "CGO_ENABLED", "GO111MODULE"}},
+				&report.OS{},
 			}
 
 			err = goinfo.Write(os.Stdout, reporters, &format.Text{})
