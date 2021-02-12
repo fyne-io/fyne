@@ -187,11 +187,7 @@ func (r *baseTabsRenderer) Destroy() {
 
 func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	if r.action != nil {
-		if l := t.tabLocation(); l == TabLocationLeading || l == TabLocationTrailing {
-			r.action.SetIcon(theme.MoreVerticalIcon())
-		} else {
-			r.action.SetIcon(theme.MoreHorizontalIcon())
-		}
+		r.action.SetIcon(moreIcon(t))
 	}
 	r.divider.FillColor = theme.ShadowColor()
 	r.indicator.FillColor = theme.PrimaryColor()
@@ -672,4 +668,11 @@ func mismatchedTabItems(items []*TabItem) bool {
 	}
 
 	return mismatch
+}
+
+func moreIcon(t baseTabs) fyne.Resource {
+	if l := t.tabLocation(); l == TabLocationLeading || l == TabLocationTrailing {
+		return theme.MoreVerticalIcon()
+	}
+	return theme.MoreHorizontalIcon()
 }

@@ -10,6 +10,7 @@
 				<widget pos="0,8" size="49x29" type="*widget.Button">
 					<rectangle fillColor="button" size="49x29"/>
 					<rectangle size="0x0"/>
+					<image fillMode="contain" pos="14,4" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
 				</widget>
 			</container>
 			<rectangle fillColor="shadow" pos="49,0" size="4x37"/>
