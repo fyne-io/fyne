@@ -94,7 +94,7 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 		}
 	}
 
-	c.contentFocusMgr.FocusBeforeAdded(obj) // not found yet assume we are preparing the UI
+	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
