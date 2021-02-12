@@ -84,7 +84,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 
 // Hide hides the widget.
 //
-// Implements: fyne.Widget
+// Implements: fyne.CanvasObject
 func (t *DocTabs) Hide() {
 	if t.popUpMenu != nil {
 		t.popUpMenu.Hide()
