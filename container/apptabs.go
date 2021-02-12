@@ -215,7 +215,14 @@ func (t *AppTabs) onUnselected() func(*TabItem) {
 }
 
 func (t *AppTabs) onSelected() func(*TabItem) {
-	return t.OnSelected
+	return func(tab *TabItem) {
+		if f := t.OnChanged; f != nil {
+			f(tab)
+		}
+		if f := t.OnSelected; f != nil {
+			f(tab)
+		}
+	}
 }
 
 func (t *AppTabs) items() []*TabItem {
