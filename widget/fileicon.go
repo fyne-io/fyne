@@ -156,9 +156,13 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 	}
 	yoff += isize * ratioDown
 
+	oldSize := s.ext.TextSize
 	s.ext.TextSize = float32(int(isize * ratioTextSize))
 	s.ext.Resize(fyne.NewSize(isize, s.ext.MinSize().Height))
 	s.ext.Move(fyne.NewPos(xoff, yoff))
+	if oldSize != s.ext.TextSize {
+		s.ext.Refresh()
+	}
 
 	s.Objects()[0].Resize(size)
 	s.Objects()[1].Resize(size)
