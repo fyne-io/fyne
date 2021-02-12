@@ -11,27 +11,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDocTabs_Selection(t *testing.T) {
+func TestDocTabs_Selected(t *testing.T) {
 	tab1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")}
 	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
 	tabs := container.NewDocTabs(tab1, tab2)
 
 	assert.Equal(t, 2, len(tabs.Items))
-	assert.Equal(t, tab1, tabs.Selection())
+	assert.Equal(t, tab1, tabs.Selected())
 }
 
-func TestDocTabs_SelectionIndex(t *testing.T) {
+func TestDocTabs_SelectedIndex(t *testing.T) {
 	tabs := container.NewDocTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Test")})
 
 	assert.Equal(t, 1, len(tabs.Items))
-	assert.Equal(t, 0, tabs.SelectionIndex())
+	assert.Equal(t, 0, tabs.SelectedIndex())
 }
 
 func TestDocTabs_Empty(t *testing.T) {
 	tabs := container.NewDocTabs()
 	assert.Equal(t, 0, len(tabs.Items))
-	assert.Equal(t, -1, tabs.SelectionIndex())
-	assert.Nil(t, tabs.Selection())
+	assert.Equal(t, -1, tabs.SelectedIndex())
+	assert.Nil(t, tabs.Selected())
 	min := tabs.MinSize()
 	assert.Equal(t, float32(0), min.Width)
 	assert.Equal(t, 4*theme.Padding()+theme.IconInlineSize(), min.Height)
@@ -67,7 +67,7 @@ func TestDocTabs_Select(t *testing.T) {
 	tabs := container.NewDocTabs(tab1, tab2)
 
 	assert.Equal(t, 2, len(tabs.Items))
-	assert.Equal(t, tab1, tabs.Selection())
+	assert.Equal(t, tab1, tabs.Selected())
 
 	var selectedTab *container.TabItem
 	tabs.OnSelected = func(tab *container.TabItem) {
@@ -78,18 +78,18 @@ func TestDocTabs_Select(t *testing.T) {
 		unselectedTab = tab
 	}
 	tabs.Select(tab2)
-	assert.Equal(t, tab2, tabs.Selection())
+	assert.Equal(t, tab2, tabs.Selected())
 	assert.Equal(t, tab2, selectedTab)
 	assert.Equal(t, tab1, unselectedTab)
 
 	tabs.OnSelected = func(tab *container.TabItem) {
-		assert.Fail(t, "unexpected tab selection")
+		assert.Fail(t, "unexpected tab selected")
 	}
 	tabs.OnUnselected = func(tab *container.TabItem) {
-		assert.Fail(t, "unexpected tab unselection")
+		assert.Fail(t, "unexpected tab unselected")
 	}
 	tabs.Select(container.NewTabItem("Test3", widget.NewLabel("Test3")))
-	assert.Equal(t, tab2, tabs.Selection())
+	assert.Equal(t, tab2, tabs.Selected())
 }
 
 func TestDocTabs_SelectIndex(t *testing.T) {
@@ -97,7 +97,7 @@ func TestDocTabs_SelectIndex(t *testing.T) {
 		&container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")})
 
 	assert.Equal(t, 2, len(tabs.Items))
-	assert.Equal(t, 0, tabs.SelectionIndex())
+	assert.Equal(t, 0, tabs.SelectedIndex())
 
 	var selectedTab *container.TabItem
 	tabs.OnSelected = func(tab *container.TabItem) {
@@ -108,7 +108,7 @@ func TestDocTabs_SelectIndex(t *testing.T) {
 		unselectedTab = tab
 	}
 	tabs.SelectIndex(1)
-	assert.Equal(t, 1, tabs.SelectionIndex())
+	assert.Equal(t, 1, tabs.SelectedIndex())
 	assert.Equal(t, tabs.Items[1], selectedTab)
 	assert.Equal(t, tabs.Items[0], unselectedTab)
 }
@@ -119,9 +119,9 @@ func TestDocTabs_RemoveIndex(t *testing.T) {
 
 	tabs.SelectIndex(1)
 	tabs.RemoveIndex(1)
-	assert.Equal(t, 0, tabs.SelectionIndex()) // check max item selection and no panic
+	assert.Equal(t, 0, tabs.SelectedIndex()) // check max item selected and no panic
 
 	tabs.SelectIndex(0)
 	tabs.RemoveIndex(0)
-	assert.Equal(t, -1, tabs.SelectionIndex()) // check deselection and no panic
+	assert.Equal(t, -1, tabs.SelectedIndex()) // check deselected and no panic
 }

@@ -345,23 +345,23 @@ func TestDocTabs_Tapped(t *testing.T) {
 	w.Resize(fyne.NewSize(300, 100))
 	c := w.Canvas()
 
-	require.Equal(t, 0, tabs.SelectionIndex())
+	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(90, 10))
-	assert.Equal(t, 1, tabs.SelectionIndex())
+	assert.Equal(t, 1, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_second_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(180, 10))
-	assert.Equal(t, 2, tabs.SelectionIndex())
+	assert.Equal(t, 2, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_third_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(10, 10))
-	require.Equal(t, 0, tabs.SelectionIndex())
+	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(254, 10))
-	require.Equal(t, 3, tabs.SelectionIndex())
+	require.Equal(t, 3, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_create_tab.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(286, 10))

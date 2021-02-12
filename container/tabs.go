@@ -53,8 +53,8 @@ type baseTabs interface {
 	items() []*TabItem
 	setItems([]*TabItem)
 
-	selection() int
-	setSelection(int)
+	selected() int
+	setSelected(int)
 
 	tabLocation() TabLocation
 }
@@ -91,8 +91,8 @@ func removeIndex(t baseTabs, index int) {
 		return
 	}
 	setItems(t, append(items[:index], items[index+1:]...))
-	if s := t.selection(); index < s {
-		t.setSelection(s - 1)
+	if s := t.selected(); index < s {
+		t.setSelected(s - 1)
 	}
 }
 
@@ -105,28 +105,28 @@ func removeItem(t baseTabs, item *TabItem) {
 	}
 }
 
-func selection(t baseTabs) *TabItem {
-	selection := t.selection()
+func selected(t baseTabs) *TabItem {
+	selected := t.selected()
 	items := t.items()
-	if selection < 0 || selection >= len(items) {
+	if selected < 0 || selected >= len(items) {
 		return nil
 	}
-	return items[selection]
+	return items[selected]
 }
 
 func selectIndex(t baseTabs, index int) {
-	selection := t.selection()
+	selected := t.selected()
 
-	if selection == index {
+	if selected == index {
 		// No change, so do nothing
 		return
 	}
 
 	items := t.items()
 
-	if f := t.onUnselected(); f != nil && selection >= 0 && selection < len(items) {
-		// Notification of unselection
-		f(items[selection])
+	if f := t.onUnselected(); f != nil && selected >= 0 && selected < len(items) {
+		// Notification of unselected
+		f(items[selected])
 	}
 
 	if index < 0 || index >= len(items) {
@@ -134,10 +134,10 @@ func selectIndex(t baseTabs, index int) {
 		return
 	}
 
-	t.setSelection(index)
+	t.setSelected(index)
 
 	if f := t.onSelected(); f != nil {
-		// Notification of selection
+		// Notification of selected
 		f(items[index])
 	}
 }
@@ -156,17 +156,17 @@ func setItems(t baseTabs, items []*TabItem) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
 	t.setItems(items)
-	selection := t.selection()
+	selected := t.selected()
 	count := len(items)
 	switch {
 	case count == 0:
-		// No items available to be selection
+		// No items available to be selected
 		selectIndex(t, -1) // Unsure OnUnselected gets called if applicable
-		t.setSelection(-1)
-	case selection < 0:
+		t.setSelected(-1)
+	case selected < 0:
 		// Current is first tab item
 		selectIndex(t, 0)
-	case selection >= count:
+	case selected >= count:
 		// Current doesn't exist, select last tab
 		selectIndex(t, count-1)
 	}
@@ -244,9 +244,9 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 	r.bar.Resize(barSize)
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
-	selection := t.selection()
+	selected := t.selected()
 	for i, ti := range t.items() {
-		if i == selection {
+		if i == selected {
 			ti.Content.Move(contentPos)
 			ti.Content.Resize(contentSize)
 			ti.Content.Show()
@@ -318,7 +318,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 
 func (r *baseTabsRenderer) objects(t baseTabs) []fyne.CanvasObject {
 	objects := []fyne.CanvasObject{r.bar, r.divider, r.indicator}
-	if i, is := t.selection(), t.items(); i >= 0 && i < len(is) {
+	if i, is := t.selected(), t.items(); i >= 0 && i < len(is) {
 		objects = append(objects, is[i].Content)
 	}
 	return objects

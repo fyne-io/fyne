@@ -127,13 +127,13 @@ func (t *DocTabs) SelectIndex(index int) {
 	t.Refresh()
 }
 
-// Selection returns the currently selected TabItem.
-func (t *DocTabs) Selection() *TabItem {
-	return selection(t)
+// Selected returns the currently selected TabItem.
+func (t *DocTabs) Selected() *TabItem {
+	return selected(t)
 }
 
-// SelectionIndex returns the index of the currently selected TabItem.
-func (t *DocTabs) SelectionIndex() int {
+// SelectedIndex returns the index of the currently selected TabItem.
+func (t *DocTabs) SelectedIndex() int {
 	return t.current
 }
 
@@ -181,7 +181,7 @@ func (t *DocTabs) items() []*TabItem {
 	return t.Items
 }
 
-func (t *DocTabs) selection() int {
+func (t *DocTabs) selected() int {
 	return t.current
 }
 
@@ -189,8 +189,8 @@ func (t *DocTabs) setItems(items []*TabItem) {
 	t.Items = items
 }
 
-func (t *DocTabs) setSelection(selection int) {
-	t.current = selection
+func (t *DocTabs) setSelected(selected int) {
+	t.current = selected
 }
 
 func (t *DocTabs) tabLocation() TabLocation {
@@ -202,11 +202,11 @@ var _ fyne.WidgetRenderer = (*docTabsRenderer)(nil)
 
 type docTabsRenderer struct {
 	baseTabsRenderer
-	docTabs       *DocTabs
-	scroller      *Scroll
-	box           *fyne.Container
-	create        *widget.Button
-	lastSelection int
+	docTabs      *DocTabs
+	scroller     *Scroll
+	box          *fyne.Container
+	create       *widget.Button
+	lastSelected int
 }
 
 func (r *docTabsRenderer) Layout(size fyne.Size) {
@@ -228,11 +228,11 @@ func (r *docTabsRenderer) Objects() []fyne.CanvasObject {
 func (r *docTabsRenderer) Refresh() {
 	r.Layout(r.docTabs.Size())
 
-	if c := r.docTabs.current; c != r.lastSelection {
+	if c := r.docTabs.current; c != r.lastSelected {
 		if c >= 0 && c < len(r.docTabs.Items) {
-			r.scrollToSelection()
+			r.scrollToSelected()
 		}
-		r.lastSelection = c
+		r.lastSelected = c
 	}
 
 	r.refresh(r.docTabs)
@@ -322,7 +322,7 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	return buttons
 }
 
-func (r *docTabsRenderer) scrollToSelection() {
+func (r *docTabsRenderer) scrollToSelected() {
 	buttons := r.scroller.Content.(*fyne.Container)
 	button := buttons.Objects[r.docTabs.current]
 	pos := button.Position()

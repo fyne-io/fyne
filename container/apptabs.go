@@ -75,7 +75,7 @@ func (t *AppTabs) Append(item *TabItem) {
 
 // CurrentTab returns the currently selected TabItem.
 //
-// Deprecated: Use `AppTabs.Selection() *TabItem` instead.
+// Deprecated: Use `AppTabs.Selected() *TabItem` instead.
 func (t *AppTabs) CurrentTab() *TabItem {
 	if t.current < 0 || t.current >= len(t.Items) {
 		return nil
@@ -85,7 +85,7 @@ func (t *AppTabs) CurrentTab() *TabItem {
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
 //
-// Deprecated: Use `AppTabs.SelectionIndex() int` instead.
+// Deprecated: Use `AppTabs.SelectedIndex() int` instead.
 func (t *AppTabs) CurrentTabIndex() int {
 	return t.current
 }
@@ -167,13 +167,13 @@ func (t *AppTabs) SelectTabIndex(index int) {
 	}
 }
 
-// Selection returns the currently selected TabItem.
-func (t *AppTabs) Selection() *TabItem {
-	return selection(t)
+// Selected returns the currently selected TabItem.
+func (t *AppTabs) Selected() *TabItem {
+	return selected(t)
 }
 
-// SelectionIndex returns the index of the currently selected TabItem.
-func (t *AppTabs) SelectionIndex() int {
+// SelectedIndex returns the index of the currently selected TabItem.
+func (t *AppTabs) SelectedIndex() int {
 	return t.current
 }
 
@@ -222,7 +222,7 @@ func (t *AppTabs) items() []*TabItem {
 	return t.Items
 }
 
-func (t *AppTabs) selection() int {
+func (t *AppTabs) selected() int {
 	return t.current
 }
 
@@ -230,8 +230,8 @@ func (t *AppTabs) setItems(items []*TabItem) {
 	t.Items = items
 }
 
-func (t *AppTabs) setSelection(selection int) {
-	t.current = selection
+func (t *AppTabs) setSelected(selected int) {
+	t.current = selected
 }
 
 func (t *AppTabs) tabLocation() TabLocation {
