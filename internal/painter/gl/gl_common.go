@@ -83,7 +83,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	opts.DPI = float64(painter.TextDPI * p.texScale)
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := painter.Drawer{}
+	d := painter.FontDrawer{}
 	d.Dst = img
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face

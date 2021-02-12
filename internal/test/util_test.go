@@ -29,7 +29,7 @@ func TestAssertImageMatches(t *testing.T) {
 	f, _ := truetype.Parse(theme.TextFont().Content())
 	face := truetype.NewFace(f, &opts)
 
-	d := painter.Drawer{}
+	d := painter.FontDrawer{}
 	d.Dst = txtImg
 	d.Src = image.NewUniform(color.Black)
 	d.Face = face

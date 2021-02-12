@@ -144,7 +144,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	opts.DPI = painter.TextDPI
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := painter.Drawer{}
+	d := painter.FontDrawer{}
 	d.Dst = txtImg
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
