@@ -724,9 +724,10 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 
 func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	for i := 0; i < len(text); i++ {
-		str := string(text[0 : i+1])
-		wid := fyne.MeasureText(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
-		if wid > pos.X+theme.Padding() {
+		str := string(text[0 : i])
+		wid := fyne.MeasureText(str, theme.TextSize(), e.textStyle()).Width
+		charWid := fyne.MeasureText(string(text[i]), theme.TextSize(), e.textStyle()).Width
+		if pos.X < theme.Padding()*2 + wid + (charWid/2) {
 			return i
 		}
 	}
