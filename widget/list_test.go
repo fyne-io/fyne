@@ -308,6 +308,46 @@ func TestList_RemoveItem(t *testing.T) {
 	test.AssertRendersToMarkup(t, "list/item_removed.xml", w.Canvas())
 }
 
+func TestList_ScrollThenShrink(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	data := make([]string, 0, 20)
+	for i := 0; i < 20; i++ {
+		data = append(data, fmt.Sprintf("Data %d", i))
+	}
+
+	list := NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("TEMPLATE")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*Label).SetText(data[id])
+		},
+	)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(300, 300))
+
+	visibles := test.WidgetRenderer(list).(*listRenderer).children
+	visibleCount := len(visibles)
+	assert.Equal(t, visibleCount, 8)
+
+	list.scroller.ScrollToBottom()
+	visibles = test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, "Data 19", visibles[len(visibles)-1].(*listItem).child.(*Label).Text)
+
+	data = data[:1]
+	assert.NotPanics(t, func() { list.Refresh() })
+
+	visibles = test.WidgetRenderer(list).(*listRenderer).children
+	visibleCount = len(visibles)
+	assert.Equal(t, visibleCount, 1)
+	assert.Equal(t, "Data 0", visibles[0].(*listItem).child.(*Label).Text)
+}
+
 func TestList_NoFunctionsSet(t *testing.T) {
 	list := &List{}
 	w := test.NewWindow(list)
