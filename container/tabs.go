@@ -293,10 +293,6 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
-	if r.indicator.Position().Subtract(pos).IsZero() && r.indicator.Size().Subtract(siz).IsZero() {
-		return
-	}
-
 	if animate {
 		r.lastIndicatorPos = pos
 		r.lastIndicatorSize = siz
