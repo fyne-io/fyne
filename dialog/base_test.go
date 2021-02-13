@@ -30,6 +30,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	w.Resize(d.MinSize().Add(fyne.NewSize(25, 25)))
+	d.Resize(d.MinSize()) // TODO remove once #707 is resolved
 	test.AssertImageMatches(t, "dialog-custom-ugly.png", w.Canvas().Capture())
 }
 
