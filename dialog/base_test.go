@@ -23,13 +23,14 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 	label.Alignment = fyne.TextAlignCenter
 
 	d := NewCustom("Title", "OK", label, w)
-	w.Resize(d.MinSize().Add(fyne.NewSize(25, 25)))
+	shadowPad := float32(50)
+	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
 
 	d.Show()
 	test.AssertImageMatches(t, "dialog-custom-default.png", w.Canvas().Capture())
 
 	test.ApplyTheme(t, test.NewTheme())
-	w.Resize(d.MinSize().Add(fyne.NewSize(25, 25)))
+	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
 	d.Resize(d.MinSize()) // TODO remove once #707 is resolved
 	test.AssertImageMatches(t, "dialog-custom-ugly.png", w.Canvas().Capture())
 }
