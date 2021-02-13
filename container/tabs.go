@@ -175,6 +175,9 @@ func setItems(t baseTabs, items []*TabItem) {
 type baseTabsRenderer struct {
 	positionAnimation, sizeAnimation *fyne.Animation
 
+	lastIndicatorPos  fyne.Position
+	lastIndicatorSize fyne.Size
+
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
@@ -269,6 +272,18 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 }
 
 func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, animate bool) {
+	r.indicator.Show()
+	if r.indicator.Position().IsZero() {
+		r.indicator.Move(pos)
+		r.indicator.Resize(siz)
+		r.indicator.Refresh()
+		return
+	}
+
+	if r.lastIndicatorPos.Subtract(pos).IsZero() && r.lastIndicatorSize.Subtract(siz).IsZero() {
+		return
+	}
+
 	if r.positionAnimation != nil {
 		r.positionAnimation.Stop()
 		r.positionAnimation = nil
@@ -278,14 +293,13 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
-	r.indicator.Show()
-	if r.indicator.Position().IsZero() {
-		r.indicator.Move(pos)
-		r.indicator.Resize(siz)
-		r.indicator.Refresh()
+	if r.indicator.Position().Subtract(pos).IsZero() && r.indicator.Size().Subtract(siz).IsZero() {
 		return
 	}
+
 	if animate {
+		r.lastIndicatorPos = pos
+		r.lastIndicatorSize = siz
 		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
 			r.indicator.Move(p)
 			r.indicator.Refresh()
