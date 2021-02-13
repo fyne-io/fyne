@@ -274,7 +274,7 @@ func (w *window) fitContent() {
 		return
 	}
 
-	if w.viewport == nil || w.closing {
+	if w.isClosing() {
 		return
 	}
 
@@ -406,7 +406,7 @@ func (w *window) doShow() {
 }
 
 func (w *window) Hide() {
-	if w.closing {
+	if w.isClosing() {
 		return
 	}
 
@@ -424,7 +424,7 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
-	if w.closing {
+	if w.isClosing() {
 		return
 	}
 
@@ -1178,7 +1178,7 @@ func (w *window) focused(_ *glfw.Window, isFocused bool) {
 }
 
 func (w *window) RunWithContext(f func()) {
-	if w.closing {
+	if w.isClosing() {
 		return
 	}
 	w.viewport.MakeContextCurrent()
@@ -1195,7 +1195,7 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) rescaleOnMain() {
-	if w.viewport == nil || w.closing {
+	if w.isClosing() {
 		return
 	}
 	w.fitContent()
@@ -1359,7 +1359,7 @@ func (w *window) create() {
 }
 
 func (w *window) doShowAgain() {
-	if w.closing {
+	if w.isClosing() {
 		return
 	}
 
@@ -1375,6 +1375,10 @@ func (w *window) doShowAgain() {
 		w.visible = true
 		w.viewLock.Unlock()
 	})
+}
+
+func (w *window) isClosing() bool {
+	return w.closing || w.viewport == nil
 }
 
 func (w *window) view() *glfw.Window {
