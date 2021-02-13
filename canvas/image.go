@@ -74,7 +74,7 @@ func (i *Image) Resize(s fyne.Size) {
 	i.baseObject.Resize(s)
 
 	Refresh(i)
- }
+}
 
 // Refresh causes this object to be redrawn in it's current state
 func (i *Image) Refresh() {
