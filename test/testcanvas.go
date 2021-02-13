@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 var (
@@ -161,7 +162,13 @@ func (c *testCanvas) Resize(size fyne.Size) {
 	}
 
 	for _, overlay := range overlays.List() {
-		overlay.Resize(size)
+		if p, ok := overlay.(*widget.PopUp); ok {
+			// TODO: remove this when #707 is being addressed.
+			// “Notifies” the PopUp of the canvas size change.
+			p.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		} else {
+			overlay.Resize(size)
+		}
 	}
 
 	if padded {
