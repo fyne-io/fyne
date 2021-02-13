@@ -36,6 +36,8 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 		color:    theme.PrimaryColor(),
 		callback: callback,
 	}
+	p.dialog.layout = &dialogLayout{d: p.dialog}
+
 	return p
 }
 
