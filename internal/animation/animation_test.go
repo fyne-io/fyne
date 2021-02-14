@@ -3,6 +3,7 @@
 package animation
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -47,4 +48,45 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 	}
 	run.Stop(a)
 	assert.Zero(t, len(run.animations))
+}
+
+func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
+	var wg sync.WaitGroup
+	run := &Runner{}
+
+	// stopping an animation immediately after start, should be effectively removed
+	// from the internal animation list (first one is added directly to animation list)
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Tick:     func(f float32) {},
+	}
+	run.Start(a)
+	run.Stop(a)
+
+	// stopping animation inside tick function
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		var b *fyne.Animation
+		b = &fyne.Animation{
+			Duration: time.Second,
+			Tick: func(d float32) {
+				run.Stop(b)
+				wg.Done()
+			}}
+		run.Start(b)
+	}
+
+	// Similar to first part, but in this time this animation should be added and then removed
+	// from pendingAnimation slice.
+	c := &fyne.Animation{
+		Duration: time.Second,
+		Tick:     func(f float32) {},
+	}
+	run.Start(c)
+	run.Stop(c)
+
+	wg.Wait()
+	run.animationMutex.RLock()
+	assert.Zero(t, len(run.animations))
+	run.animationMutex.RUnlock()
 }
