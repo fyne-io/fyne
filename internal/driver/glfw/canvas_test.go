@@ -216,12 +216,12 @@ func TestGlCanvas_Focus_SetContent(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
 	e := widget.NewEntry()
-	w.SetContent(e)
+	w.SetContent(container.NewHBox(e))
 	c := w.Canvas().(*glCanvas)
 	c.Focus(e)
 	assert.Equal(t, e, c.Focused())
 
-	w.SetContent(e)
+	w.SetContent(container.NewVBox(e))
 	assert.Equal(t, e, c.Focused())
 }
 
