@@ -286,7 +286,11 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if cells == 0 {
 			cells = 1
 		}
-		buttons.Layout = layout.NewGridLayout(cells)
+		if r.docTabs.location == TabLocationTop || r.docTabs.location == TabLocationBottom {
+			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			buttons.Layout = layout.NewGridLayoutWithRows(cells)
+		}
 		iconPos = buttonIconTop
 	} else if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
