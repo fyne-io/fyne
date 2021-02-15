@@ -508,7 +508,20 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 	} else {
 		fyne.LogError("Missing Length callback required for Table", nil)
 	}
-	return fyne.NewSize(r.cells.cellSize.Width*float32(cols)+float32(cols-1), r.cells.cellSize.Height*float32(rows)+float32(rows-1))
+
+	width := float32(0)
+	cellWidth := r.cells.cellSize.Width
+	for col := 0; col < cols; col++ {
+		colWidth, ok := r.cells.t.columnWidths[col]
+		if ok {
+			width += colWidth
+		} else {
+			width += cellWidth
+		}
+	}
+
+	separatorSize := theme.SeparatorThicknessSize()
+	return fyne.NewSize(width+float32(cols-1)*separatorSize, r.cells.cellSize.Height*float32(rows)+float32(rows-1)*separatorSize)
 }
 
 func (r *tableCellsRenderer) Refresh() {
@@ -556,11 +569,11 @@ func (r *tableCellsRenderer) Refresh() {
 				if c == nil {
 					continue
 				}
-
-				c.Move(fyne.NewPos(theme.Padding()+cellOffset,
-					theme.Padding()+float32(row)*(r.cells.cellSize.Height+separatorThickness)))
-				c.Resize(fyne.NewSize(colWidth-theme.Padding()*2, r.cells.cellSize.Height-theme.Padding()*2))
 			}
+
+			c.Move(fyne.NewPos(theme.Padding()+cellOffset,
+				theme.Padding()+float32(row)*(r.cells.cellSize.Height+separatorThickness)))
+			c.Resize(fyne.NewSize(colWidth-theme.Padding()*2, r.cells.cellSize.Height-theme.Padding()*2))
 
 			if updateCell != nil {
 				updateCell(TableCellID{row, col}, c)
