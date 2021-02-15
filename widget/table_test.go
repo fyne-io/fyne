@@ -276,7 +276,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	cellRenderer.Refresh()
 	assert.Equal(t, 8, len(cellRenderer.Objects()))
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
-	cell1Offset := theme.SeparatorThicknessSize()+theme.Padding()*3
+	cell1Offset := theme.SeparatorThicknessSize() + theme.Padding()*3
 	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
 
 	table.SetColumnWidth(0, 16)
