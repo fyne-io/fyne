@@ -1,0 +1,26 @@
+<canvas size="150x150">
+	<content>
+		<widget size="150x150" type="*container.AppTabs">
+			<container size="150x29">
+				<container size="118x29">
+					<widget size="57x29" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
+					</widget>
+					<widget pos="61,0" size="57x29" type="*container.tabButton">
+						<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
+					</widget>
+				</container>
+				<widget pos="122,0" size="28x29" type="*widget.Button">
+					<rectangle fillColor="hover" size="28x29"/>
+					<rectangle size="0x0"/>
+					<image fillMode="contain" pos="4,4" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+				</widget>
+			</container>
+			<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,29" size="57x4"/>
+			<widget pos="0,33" size="150x117" type="*widget.Label">
+				<text pos="4,8" size="142x21">Text1</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>

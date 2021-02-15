@@ -25,6 +25,9 @@ type Dialog interface {
 	SetOnClosed(closed func())
 	Refresh()
 	Resize(size fyne.Size)
+
+	// Since: 2.1
+	MinSize() fyne.Size
 }
 
 // Declare conformity to Dialog interface
@@ -41,6 +44,7 @@ type dialog struct {
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
+	layout         *dialogLayout
 }
 
 // NewCustom creates and returns a dialog over the specified application using custom
@@ -48,6 +52,7 @@ type dialog struct {
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
+	d.layout = &dialogLayout{d: d}
 
 	d.dismiss = &widget.Button{Text: dismiss,
 		OnTapped: d.Hide,
@@ -64,6 +69,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
+	d.layout = &dialogLayout{d: d}
 	d.callback = callback
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
@@ -99,43 +105,18 @@ func (d *dialog) Hide() {
 	d.hideWithResponse(false)
 }
 
+// MinSize returns the size that this dialog should not shrink below
+//
+// Since: 2.1
+func (d *dialog) MinSize() fyne.Size {
+	return d.win.MinSize()
+}
+
 func (d *dialog) Show() {
 	if !d.desiredSize.IsZero() {
 		d.win.Resize(d.desiredSize)
 	}
 	d.win.Show()
-}
-
-func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	d.bg.Move(fyne.NewPos(0, 0))
-	d.bg.Resize(size)
-
-	btnMin := obj[3].MinSize().Max(obj[3].Size())
-
-	// icon
-	iconHeight := padHeight*2 + d.label.MinSize().Height*2 - theme.Padding()
-	obj[0].Resize(fyne.NewSize(iconHeight, iconHeight))
-	obj[0].Move(fyne.NewPos(size.Width-iconHeight+theme.Padding(), -theme.Padding()))
-
-	// buttons
-	obj[3].Resize(btnMin)
-	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
-
-	// content
-	contentStart := d.label.Position().Y + d.label.MinSize().Height + padHeight
-	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos(padWidth/2, d.label.MinSize().Height+padHeight))
-	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
-}
-
-func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
-	contentMin := obj[2].MinSize()
-	btnMin := obj[3].MinSize().Max(obj[3].Size())
-
-	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
-	height := contentMin.Height + btnMin.Height + d.label.MinSize().Height + theme.Padding() + padHeight*2
-
-	return fyne.NewSize(width, height)
 }
 
 func (d *dialog) Refresh() {
@@ -202,7 +183,7 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 
 	var content fyne.CanvasObject
 	if d.icon == nil {
-		content = fyne.NewContainerWithLayout(d,
+		content = container.New(d.layout,
 			&canvas.Image{},
 			d.bg,
 			d.content,
@@ -211,7 +192,7 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 		)
 	} else {
 		bgIcon := canvas.NewImageFromResource(d.icon)
-		content = fyne.NewContainerWithLayout(d,
+		content = container.New(d.layout,
 			bgIcon,
 			d.bg,
 			d.content,
@@ -226,6 +207,7 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newLabel(message), title: title, icon: icon, parent: parent}
+	d.layout = &dialogLayout{d: d}
 
 	d.callback = callback
 
@@ -237,7 +219,7 @@ func newLabel(message string) fyne.CanvasObject {
 }
 
 func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
-	list := fyne.NewContainerWithLayout(layout.NewGridLayout(len(buttons)))
+	list := container.New(layout.NewGridLayout(len(buttons)))
 	for _, button := range buttons {
 		list.Add(button)
 	}
@@ -268,4 +250,40 @@ func newDialogTitle(title string, d *dialog) *dialogTitle {
 	l.d = d
 	l.ExtendBaseWidget(l)
 	return l
+}
+
+type dialogLayout struct {
+	d *dialog
+}
+
+func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
+	l.d.bg.Move(fyne.NewPos(0, 0))
+	l.d.bg.Resize(size)
+
+	btnMin := obj[3].MinSize().Max(obj[3].Size())
+
+	// icon
+	iconHeight := padHeight*2 + l.d.label.MinSize().Height*2 - theme.Padding()
+	obj[0].Resize(fyne.NewSize(iconHeight, iconHeight))
+	obj[0].Move(fyne.NewPos(size.Width-iconHeight+theme.Padding(), -theme.Padding()))
+
+	// buttons
+	obj[3].Resize(btnMin)
+	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
+
+	// content
+	contentStart := l.d.label.Position().Y + l.d.label.MinSize().Height + padHeight
+	contentEnd := obj[3].Position().Y - theme.Padding()
+	obj[2].Move(fyne.NewPos(padWidth/2, l.d.label.MinSize().Height+padHeight))
+	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
+}
+
+func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
+	contentMin := obj[2].MinSize()
+	btnMin := obj[3].MinSize().Max(obj[3].Size())
+
+	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
+	height := contentMin.Height + btnMin.Height + l.d.label.MinSize().Height + theme.Padding() + padHeight*2
+
+	return fyne.NewSize(width, height)
 }

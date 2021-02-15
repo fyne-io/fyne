@@ -160,6 +160,16 @@ const (
 	// Since: 2.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
 
+	// IconNameMoreHorizontal is the name of theme lookup for horizontal more.
+	//
+	// Since 2.0
+	IconNameMoreHorizontal fyne.ThemeIconName = "moreHorizontal"
+
+	// IconNameMoreVertical is the name of theme lookup for vertical more.
+	//
+	// Since 2.0
+	IconNameMoreVertical fyne.ThemeIconName = "moreVertical"
+
 	// IconNameMailAttachment is the name of theme lookup for mail attachment icon.
 	//
 	// Since: 2.0
@@ -438,6 +448,9 @@ var (
 		IconNameDocumentCreate: NewThemedResource(documentcreateIconRes),
 		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
 		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
+
+		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
+		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
 
 		IconNameInfo:     NewThemedResource(infoIconRes),
 		IconNameQuestion: NewThemedResource(questionIconRes),
@@ -792,6 +805,16 @@ func DocumentPrintIcon() fyne.Resource {
 // DocumentSaveIcon returns a resource containing the standard document save icon for the current theme
 func DocumentSaveIcon() fyne.Resource {
 	return safeIconLookup(IconNameDocumentSave)
+}
+
+// MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
+func MoreHorizontalIcon() fyne.Resource {
+	return current().Icon(IconNameMoreHorizontal)
+}
+
+// MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
+func MoreVerticalIcon() fyne.Resource {
+	return current().Icon(IconNameMoreVertical)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme

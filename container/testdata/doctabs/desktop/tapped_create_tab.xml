@@ -1,0 +1,41 @@
+<canvas size="300x100">
+	<content>
+		<widget size="300x100" type="*container.DocTabs">
+			<container size="300x32">
+				<widget size="236x32" type="*widget.Scroll">
+					<container pos="-122,0" size="358x32">
+						<widget size="81x32" type="*container.tabButton">
+							<text bold pos="8,4" size="65x24">Test1</text>
+						</widget>
+						<widget pos="85,0" size="81x32" type="*container.tabButton">
+							<text bold pos="8,4" size="65x24">Test2</text>
+						</widget>
+						<widget pos="170,0" size="81x32" type="*container.tabButton">
+							<text bold pos="8,4" size="65x24">Test3</text>
+						</widget>
+						<widget pos="255,0" size="103x32" type="*container.tabButton">
+							<text bold color="primary" pos="8,4" size="87x24">Another</text>
+						</widget>
+					</container>
+				</widget>
+				<container pos="240,0" size="60x32">
+					<widget size="28x32" type="*widget.Button">
+						<rectangle fillColor="button" size="28x32"/>
+						<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="24x28"/>
+						<image fillMode="contain" pos="4,6" rsc="contentAddIcon" size="iconInlineSize"/>
+					</widget>
+					<widget pos="32,0" size="28x32" type="*widget.Button">
+						<rectangle fillColor="button" size="28x32"/>
+						<rectangle size="0x0"/>
+						<image fillMode="contain" pos="4,6" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+					</widget>
+				</container>
+			</container>
+			<rectangle fillColor="shadow" pos="0,32" size="300x4"/>
+			<rectangle fillColor="primary" pos="133,32" size="103x4"/>
+			<widget pos="0,36" size="300x64" type="*widget.Label">
+				<text pos="4,8" size="292x21">Another Tab</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>

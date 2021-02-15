@@ -3,6 +3,8 @@
 
 package binding
 
+import "fyne.io/fyne/v2"
+
 // Bool supports binding a bool value.
 //
 // Since: 2.0
@@ -325,6 +327,72 @@ func (b *boundString) Reload() error {
 }
 
 func (b *boundString) Set(val string) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	*b.val = val
+
+	b.trigger()
+	return nil
+}
+
+// URI supports binding a fyne.URI value.
+//
+// Since: 2.1
+type URI interface {
+	DataItem
+	Get() (fyne.URI, error)
+	Set(fyne.URI) error
+}
+
+// ExternalURI supports binding a fyne.URI value to an external value.
+//
+// Since: 2.1
+type ExternalURI interface {
+	URI
+	Reload() error
+}
+
+// NewURI returns a bindable fyne.URI value that is managed internally.
+//
+// Since: 2.1
+func NewURI() URI {
+	blank := fyne.URI(nil)
+	return &boundURI{val: &blank}
+}
+
+// BindURI returns a new bindable value that controls the contents of the provided fyne.URI variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.1
+func BindURI(v *fyne.URI) ExternalURI {
+	if v == nil {
+		return NewURI().(ExternalURI) // never allow a nil value pointer
+	}
+
+	return &boundURI{val: v}
+}
+
+type boundURI struct {
+	base
+
+	val *fyne.URI
+}
+
+func (b *boundURI) Get() (fyne.URI, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	if b.val == nil {
+		return fyne.URI(nil), nil
+	}
+	return *b.val, nil
+}
+
+func (b *boundURI) Reload() error {
+	return b.Set(*b.val)
+}
+
+func (b *boundURI) Set(val fyne.URI) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	*b.val = val

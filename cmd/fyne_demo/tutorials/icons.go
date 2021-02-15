@@ -150,6 +150,9 @@ func loadIcons() []iconInfo {
 		{"ZoomInIcon", theme.ZoomInIcon()},
 		{"ZoomOutIcon", theme.ZoomOutIcon()},
 
+		{"MoreHorizontalIcon", theme.MoreHorizontalIcon()},
+		{"MoreVerticalIcon", theme.MoreVerticalIcon()},
+
 		{"MoveDownIcon", theme.MoveDownIcon()},
 		{"MoveUpIcon", theme.MoveUpIcon()},
 
