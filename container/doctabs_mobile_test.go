@@ -339,7 +339,7 @@ func TestDocTabs_Tapped(t *testing.T) {
 	w := test.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
-	w.Resize(fyne.NewSize(200, 100))
+	w.Resize(fyne.NewSize(300, 100))
 	c := w.Canvas()
 
 	require.Equal(t, 0, tabs.SelectedIndex())
