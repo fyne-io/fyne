@@ -30,8 +30,8 @@ github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca/go.mo
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/lucor/goinfo v0.0.0-20200401173949-526b5363a13a h1:4djPngMU3ttoFCf6DOgPNQYmxyNmRRmpLg4/uz2TTEg=
-github.com/lucor/goinfo v0.0.0-20200401173949-526b5363a13a/go.mod h1:ORP3/rB5IsulLEBwQZCJyyV6niqmI7P4EWSmkug+1Ng=
+github.com/lucor/goinfo v0.0.0-20210209132455-aee5dbc9b821 h1:oROpX/5r4YyH7tjXHFpwuH6pmG5Fy2rz7382MQhEcbw=
+github.com/lucor/goinfo v0.0.0-20210209132455-aee5dbc9b821/go.mod h1:ORP3/rB5IsulLEBwQZCJyyV6niqmI7P4EWSmkug+1Ng=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=

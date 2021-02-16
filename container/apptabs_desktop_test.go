@@ -16,7 +16,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func TestTabContainer_ApplyTheme(t *testing.T) {
+func TestAppTabs_ApplyTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -34,7 +34,7 @@ func TestTabContainer_ApplyTheme(t *testing.T) {
 	test.AssertImageMatches(t, "apptabs/desktop/single_custom_theme.png", c.Capture())
 }
 
-func TestTabContainer_ChangeItemContent(t *testing.T) {
+func TestAppTabs_ChangeItemContent(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -58,7 +58,7 @@ func TestTabContainer_ChangeItemContent(t *testing.T) {
 	test.AssertRendersToMarkup(t, "apptabs/desktop/change_content_change_hidden.xml", c)
 }
 
-func TestTabContainer_ChangeItemIcon(t *testing.T) {
+func TestAppTabs_ChangeItemIcon(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -82,7 +82,7 @@ func TestTabContainer_ChangeItemIcon(t *testing.T) {
 	test.AssertRendersToMarkup(t, "apptabs/desktop/change_icon_change_unselected.xml", c)
 }
 
-func TestTabContainer_ChangeItemText(t *testing.T) {
+func TestAppTabs_ChangeItemText(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -106,7 +106,7 @@ func TestTabContainer_ChangeItemText(t *testing.T) {
 	test.AssertRendersToMarkup(t, "apptabs/desktop/change_label_change_unselected.xml", c)
 }
 
-func TestTabContainer_DynamicTabs(t *testing.T) {
+func TestAppTabs_DynamicTabs(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -158,7 +158,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	test.AssertRendersToMarkup(t, "apptabs/desktop/dynamic_replaced_completely.xml", c)
 }
 
-func TestTabContainer_HoverButtons(t *testing.T) {
+func TestAppTabs_HoverButtons(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -181,9 +181,15 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 
 	test.MoveMouse(c, fyne.NewPos(10, 10))
 	test.AssertRendersToMarkup(t, "apptabs/desktop/hover_first.xml", c)
+
+	tabs.Append(&container.TabItem{Text: "Test3", Content: widget.NewLabel("Text3")})
+	tabs.Append(&container.TabItem{Text: "Test4", Content: widget.NewLabel("Text4")})
+
+	test.MoveMouse(c, fyne.NewPos(136, 10))
+	test.AssertRendersToMarkup(t, "apptabs/desktop/hover_overflow.xml", c)
 }
 
-func TestTabContainer_Layout(t *testing.T) {
+func TestAppTabs_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -283,7 +289,7 @@ func TestTabContainer_Layout(t *testing.T) {
 	}
 }
 
-func TestTabContainer_SetTabLocation(t *testing.T) {
+func TestAppTabs_SetTabLocation(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -316,7 +322,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tab_location_top.xml", c)
 }
 
-func TestTabContainer_Tapped(t *testing.T) {
+func TestAppTabs_Tapped(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -330,18 +336,23 @@ func TestTabContainer_Tapped(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 100))
 	c := w.Canvas()
 
-	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(75, 10))
-	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	assert.Equal(t, 1, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_second_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(150, 10))
-	assert.Equal(t, 2, tabs.CurrentTabIndex())
+	assert.Equal(t, 2, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_third_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(10, 10))
-	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_first_selected.xml", c)
+
+	tabs.Append(&container.TabItem{Text: "Test4", Content: widget.NewLabel("Text 4")})
+
+	test.TapCanvas(c, fyne.NewPos(186, 10))
+	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_overflow_tabs.xml", c)
 }

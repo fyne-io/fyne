@@ -5,13 +5,16 @@ package binding
 
 import (
 	"fmt"
+
+	"fyne.io/fyne/v2"
 )
 
 type stringFromBool struct {
 	base
 
 	format string
-	from   Bool
+
+	from Bool
 }
 
 // BoolToString creates a binding that connects a Bool data item to a String.
@@ -78,7 +81,8 @@ type stringFromFloat struct {
 	base
 
 	format string
-	from   Float
+
+	from Float
 }
 
 // FloatToString creates a binding that connects a Float data item to a String.
@@ -145,7 +149,8 @@ type stringFromInt struct {
 	base
 
 	format string
-	from   Int
+
+	from Int
 }
 
 // IntToString creates a binding that connects a Int data item to a String.
@@ -208,11 +213,65 @@ func (s *stringFromInt) DataChanged() {
 	s.trigger()
 }
 
+type stringFromURI struct {
+	base
+
+	from URI
+}
+
+// URIToString creates a binding that connects a URI data item to a String.
+// Changes to the URI will be pushed to the String and setting the string will parse and set the
+// URI if the parse was successful.
+//
+// Since: 2.1
+func URIToString(v URI) String {
+	str := &stringFromURI{from: v}
+	v.AddListener(str)
+	return str
+}
+
+func (s *stringFromURI) Get() (string, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
+
+	return uriToString(val)
+}
+
+func (s *stringFromURI) Set(str string) error {
+	val, err := uriFromString(str)
+	if err != nil {
+		return err
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if val == old {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *stringFromURI) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
+}
+
 type stringToBool struct {
 	base
 
 	format string
-	from   String
+
+	from String
 }
 
 // StringToBool creates a binding that connects a String data item to a Bool.
@@ -256,6 +315,7 @@ func (s *stringToBool) Get() (bool, error) {
 
 func (s *stringToBool) Set(val bool) error {
 	str := fmt.Sprintf(s.format, val)
+
 	old, err := s.from.Get()
 	if str == old {
 		return err
@@ -279,7 +339,8 @@ type stringToFloat struct {
 	base
 
 	format string
-	from   String
+
+	from String
 }
 
 // StringToFloat creates a binding that connects a String data item to a Float.
@@ -323,6 +384,7 @@ func (s *stringToFloat) Get() (float64, error) {
 
 func (s *stringToFloat) Set(val float64) error {
 	str := fmt.Sprintf(s.format, val)
+
 	old, err := s.from.Get()
 	if str == old {
 		return err
@@ -346,7 +408,8 @@ type stringToInt struct {
 	base
 
 	format string
-	from   String
+
+	from String
 }
 
 // StringToInt creates a binding that connects a String data item to a Int.
@@ -390,6 +453,7 @@ func (s *stringToInt) Get() (int, error) {
 
 func (s *stringToInt) Set(val int) error {
 	str := fmt.Sprintf(s.format, val)
+
 	old, err := s.from.Get()
 	if str == old {
 		return err
@@ -404,6 +468,56 @@ func (s *stringToInt) Set(val int) error {
 }
 
 func (s *stringToInt) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
+}
+
+type stringToURI struct {
+	base
+
+	from String
+}
+
+// StringToURI creates a binding that connects a String data item to a URI.
+// Changes to the String will be parsed and pushed to the URI if the parse was successful, and setting
+// the URI update the String binding.
+//
+// Since: 2.1
+func StringToURI(str String) URI {
+	v := &stringToURI{from: str}
+	str.AddListener(v)
+	return v
+}
+
+func (s *stringToURI) Get() (fyne.URI, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return fyne.URI(nil), err
+	}
+
+	return uriFromString(str)
+}
+
+func (s *stringToURI) Set(val fyne.URI) error {
+	str, err := uriToString(val)
+	if err != nil {
+		return err
+	}
+	old, err := s.from.Get()
+	if str == old {
+		return err
+	}
+
+	if err = s.from.Set(str); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *stringToURI) DataChanged() {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	s.trigger()
