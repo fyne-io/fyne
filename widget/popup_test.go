@@ -144,7 +144,7 @@ func TestPopUp_Move(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
-	win.Resize(fyne.NewSize(50, 50))
+	win.Resize(fyne.NewSize(70, 70))
 	pop := newPopUp(label, win.Canvas())
 	defer test.Canvas().Overlays().Remove(pop)
 
@@ -208,7 +208,7 @@ func TestPopUp_Resize(t *testing.T) {
 	pop.Show()
 	defer test.Canvas().Overlays().Remove(pop)
 
-	size := fyne.NewSize(50, 40)
+	size := fyne.NewSize(60, 50)
 	pop.Resize(size)
 	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 
@@ -289,7 +289,7 @@ func TestPopUp_Layout(t *testing.T) {
 	pop.ShowAtPosition(pos)
 	defer test.Canvas().Overlays().Remove(pop)
 
-	size := fyne.NewSize(50, 40)
+	size := fyne.NewSize(60, 50)
 	pop.Resize(size)
 	r := cache.Renderer(pop)
 	require.GreaterOrEqual(t, len(r.Objects()), 3)
