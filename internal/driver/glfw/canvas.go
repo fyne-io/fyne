@@ -84,12 +84,16 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 	c.RUnlock()
 
 	for _, mgr := range focusMgrs {
+		if mgr == nil {
+			continue
+		}
 		if focusMgr != mgr {
 			if mgr.Focus(obj) {
 				return
 			}
 		}
 	}
+
 	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
 }
 
@@ -452,7 +456,14 @@ func (c *glCanvas) paint(size fyne.Size) {
 func (c *glCanvas) setContent(content fyne.CanvasObject) {
 	c.content = content
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	var focused fyne.Focusable
+	if c.contentFocusMgr != nil {
+		focused = c.contentFocusMgr.Focused() // keep old focus if possible
+	}
 	c.contentFocusMgr = app.NewFocusManager(c.content)
+	if focused != nil {
+		c.contentFocusMgr.Focus(focused)
+	}
 }
 
 func (c *glCanvas) setDirty(dirty bool) {
