@@ -20,10 +20,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	alphaEquals := func(color1, color2 color.Color) bool {
 		_, _, _, a1 := color1.RGBA()
 		_, _, _, a2 := color2.RGBA()
-		if a1 == a2 {
-			return true
-		}
-		return false
+		return a1 == a2
 	}
 
 	cursor := canvas.NewRectangle(color.Black)
@@ -37,7 +34,6 @@ func TestEntryCursorAnim(t *testing.T) {
 
 	a.interrupt()
 	a.anim.Tick(0.0)
-	runtime.Gosched()
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 	a.anim.Tick(0.5)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
@@ -49,6 +45,8 @@ func TestEntryCursorAnim(t *testing.T) {
 	}
 	// animation should be restarted inverting the colors
 	a.anim.Tick(0.0)
+	runtime.Gosched() // ensure go routine for restart animation is executed
+	a.anim.Tick(0.0)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 	a.anim.Tick(1.0)
 	assert.True(t, alphaEquals(cursorDim, a.cursor.FillColor))
@@ -56,12 +54,13 @@ func TestEntryCursorAnim(t *testing.T) {
 	a.timeNow = time.Now
 	a.interrupt()
 	a.anim.Tick(0.0)
-	runtime.Gosched()
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 
 	a.timeNow = func() time.Time {
 		return time.Now().Add(cursorInterruptTime)
 	}
+	a.anim.Tick(0.0)
+	runtime.Gosched() // ensure go routine for restart animation is executed
 	a.anim.Tick(0.0)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 	a.anim.Tick(1.0)
