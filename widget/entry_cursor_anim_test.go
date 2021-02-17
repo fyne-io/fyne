@@ -45,7 +45,8 @@ func TestEntryCursorAnim(t *testing.T) {
 	}
 	// animation should be restarted inverting the colors
 	a.anim.Tick(0.0)
-	runtime.Gosched() // ensure go routine for restart animation is executed
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
 	a.anim.Tick(0.0)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 	a.anim.Tick(1.0)
@@ -60,7 +61,8 @@ func TestEntryCursorAnim(t *testing.T) {
 		return time.Now().Add(cursorInterruptTime)
 	}
 	a.anim.Tick(0.0)
-	runtime.Gosched() // ensure go routine for restart animation is executed
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
 	a.anim.Tick(0.0)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 	a.anim.Tick(1.0)
