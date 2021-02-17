@@ -17,6 +17,7 @@
 				</widget>
 				<widget size="28x90" type="*widget.Scroll">
 					<widget pos="0,-112" size="28x202" type="*widget.menuBox">
+						<rectangle fillColor="background" size="28x210"/>
 						<container pos="0,4" size="28x210">
 							<widget size="28x29" type="*widget.menuItem">
 								<text pos="8,4" size="10x21">A</text>
@@ -39,7 +40,8 @@
 						</container>
 					</widget>
 					<widget pos="22,0" size="6x90" type="*widget.scrollBarArea">
-						<widget backgroundColor="scrollbar" pos="3,49" size="3x40" type="*widget.scrollBar">
+						<widget pos="3,49" size="3x40" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="3x40"/>
 						</widget>
 					</widget>
 					<widget size="28x0" type="*widget.Shadow">
