@@ -4,6 +4,8 @@
 #import <AppKit/AppKit.h>
 
 extern void menuCallback(int);
+extern BOOL menuEnabled(int);
+extern BOOL menuChecked(int);
 extern void exceptionCallback(const char*);
 
 @interface FyneMenuHandler : NSObject {
@@ -13,6 +15,16 @@ extern void exceptionCallback(const char*);
 @implementation FyneMenuHandler
 + (void) tapped:(NSMenuItem*) item {
     menuCallback([item tag]);
+}
++ (BOOL) validateMenuItem:(NSMenuItem*) item {
+    BOOL checked = menuChecked([item tag]);
+    if (checked) {
+        [item setState:NSControlStateValueOn];
+    } else {
+        [item setState:NSControlStateValueOff];
+    }
+
+    return menuEnabled([item tag]);
 }
 @end
 
