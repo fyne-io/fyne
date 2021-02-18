@@ -47,8 +47,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
 		objects = append(objects, icon)
 	}
-	var checkIcon *canvas.Image
-	checkIcon = canvas.NewImageFromResource(theme.ConfirmIcon())
+	checkIcon := canvas.NewImageFromResource(theme.ConfirmIcon())
 	objects = append(objects, checkIcon)
 	return &menuItemRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
