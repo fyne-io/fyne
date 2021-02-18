@@ -246,10 +246,21 @@ type themedBackgroundRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject { return renderer.objects }
-func (renderer *themedBackgroundRenderer) Destroy()                     {}
-func (renderer *themedBackgroundRenderer) Layout(size fyne.Size)        { renderer.rect.Resize(size) }
-func (renderer *themedBackgroundRenderer) MinSize() fyne.Size           { return renderer.rect.MinSize() }
+func (renderer *themedBackgroundRenderer) Destroy() {
+}
+
+func (renderer *themedBackgroundRenderer) Layout(size fyne.Size) {
+	renderer.rect.Resize(size)
+}
+
+func (renderer *themedBackgroundRenderer) MinSize() fyne.Size {
+	return renderer.rect.MinSize()
+}
+
+func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject {
+	return renderer.objects
+}
+
 func (renderer *themedBackgroundRenderer) Refresh() {
 	r, g, b, _ := theme.BackgroundColor().RGBA()
 	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
