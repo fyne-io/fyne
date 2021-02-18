@@ -477,6 +477,14 @@ func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
 	c.menu = b
 	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
 	c.menuFocusMgr = app.NewFocusManager(c.menu)
+
+	if c.menu != nil && !c.size.IsZero() {
+		c.content.Resize(c.contentSize(c.size))
+		c.content.Move(c.contentPos())
+
+		c.menu.Refresh()
+		c.menu.Resize(fyne.NewSize(c.size.Width, c.menu.MinSize().Height))
+	}
 }
 
 func (c *glCanvas) setupThemeListener() {
