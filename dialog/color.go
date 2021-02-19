@@ -68,8 +68,7 @@ func (p *ColorPickerDialog) Show() {
 }
 
 func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
-	contents = append(contents, newColorBasicPicker(p.selectColor))
-	contents = append(contents, newColorGreyscalePicker(p.selectColor))
+	contents = append(contents, newColorBasicPicker(p.selectColor), newColorGreyscalePicker(p.selectColor))
 	if recent := newColorRecentPicker(p.selectColor); len(recent.(*fyne.Container).Objects) > 0 {
 		// Add divider and recents if there are any
 		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)

@@ -28,7 +28,7 @@ func isHidden(file fyne.URI) bool {
 	}
 	path := file.String()[len(file.Scheme())+3:]
 	name := filepath.Base(path)
-	return len(name) == 0 || name[0] == '.'
+	return name == "" || name[0] == '.'
 }
 
 func hideFile(filename string) error {

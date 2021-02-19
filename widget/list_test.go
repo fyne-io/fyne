@@ -278,10 +278,7 @@ func TestList_RemoveItem(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	var data []string
-	data = append(data, "Test Item 0")
-	data = append(data, "Test Item 1")
-	data = append(data, "Test Item 2")
+	data := []string{"Test Item 0", "Test Item 1", "Test Item 2"}
 
 	list := NewList(
 		func() int {
