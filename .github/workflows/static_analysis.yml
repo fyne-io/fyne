@@ -13,9 +13,9 @@ jobs:
     - name: Get dependencies
       run: |
         sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
-        go install golang.org/x/tools/cmd/goimports
-        go install github.com/fzipp/gocyclo/cmd/gocyclo
-        go install golang.org/x/lint/golint
+        go install golang.org/x/tools/cmd/goimports@latest
+        go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+        go install golang.org/x/lint/golint@latest
         go install honnef.co/go/tools/cmd/staticcheck@v0.1.2
     - name: Cleanup repository
       run: rm -rf vendor/
