@@ -19,9 +19,9 @@ extern void exceptionCallback(const char*);
 + (BOOL) validateMenuItem:(NSMenuItem*) item {
     BOOL checked = menuChecked([item tag]);
     if (checked) {
-        [item setState:NSControlStateValueOn];
+        [item setState:NSOnState];
     } else {
-        [item setState:NSControlStateValueOff];
+        [item setState:NSOffState];
     }
 
     return menuEnabled([item tag]);
