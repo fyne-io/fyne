@@ -116,7 +116,6 @@ func (d *dialog) Show() {
 	if !d.desiredSize.IsZero() {
 		d.win.Resize(d.desiredSize)
 	}
-	d.Refresh()
 	d.win.Show()
 }
 
