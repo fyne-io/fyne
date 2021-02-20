@@ -61,7 +61,7 @@ linters:
 #    - prealloc
 #    - rowserrcheck
 #    - scopelint
-    - staticcheck
+#    - staticcheck
 #    - structcheck
 #    - stylecheck
 #    - typecheck
