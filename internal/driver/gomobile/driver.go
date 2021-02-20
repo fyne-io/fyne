@@ -63,7 +63,15 @@ func (d *mobileDriver) currentWindow() fyne.Window {
 		return nil
 	}
 
-	return d.windows[len(d.windows)-1]
+	var last fyne.Window
+	for i := len(d.windows) - 1; i >= 0; i-- {
+		last = d.windows[i]
+		if last.(*window).visible {
+			return last
+		}
+	}
+
+	return last
 }
 
 func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
