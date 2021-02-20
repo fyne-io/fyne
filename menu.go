@@ -17,8 +17,9 @@ type MenuItem struct {
 	ChildMenu   *Menu
 	Label       string
 	IsSeparator bool
-	IsQuit      bool
-	Action      func()
+	// Since: 2.1
+	IsQuit bool
+	Action func()
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.

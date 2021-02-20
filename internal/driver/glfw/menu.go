@@ -15,14 +15,14 @@ func buildMenuOverlay(menus *fyne.MainMenu, c fyne.Canvas) fyne.CanvasObject {
 }
 
 func addMissingQuit(menus *fyne.MainMenu) *fyne.MainMenu {
-	var firstItem *fyne.MenuItem
+	var lastItem *fyne.MenuItem
 	if len(menus.Items[0].Items) > 0 {
-		firstItem = menus.Items[0].Items[len(menus.Items[0].Items)-1]
-		if firstItem.Label == "Quit" {
-			firstItem.IsQuit = true
+		lastItem = menus.Items[0].Items[len(menus.Items[0].Items)-1]
+		if lastItem.Label == "Quit" {
+			lastItem.IsQuit = true
 		}
 	}
-	if firstItem == nil || !firstItem.IsQuit { // make sure the first menu always has a quit option
+	if lastItem == nil || !lastItem.IsQuit { // make sure the first menu always has a quit option
 		quitItem := fyne.NewMenuItem("Quit", nil)
 		menus.Items[0].Items = append(menus.Items[0].Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
