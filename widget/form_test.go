@@ -220,6 +220,8 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 
 	test.Type(entry1, "H")
 	test.Type(entry2, "L")
+	entry1.focused = false
+	entry1.Refresh()
 	w = test.NewWindow(form)
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_valid.png", w.Canvas().Capture())
