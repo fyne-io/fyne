@@ -21,8 +21,10 @@ func (b *builder) build() error {
 	}
 
 	args := []string{"build"}
-	env := os.Environ()
-	env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+	env := append(os.Environ(), "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+	if goos == "darwin" {
+		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
+	}
 
 	if goos == "windows" {
 		if b.release {
@@ -30,14 +32,8 @@ func (b *builder) build() error {
 		} else {
 			args = append(args, "-ldflags", "-H=windowsgui")
 		}
-	} else {
-		if goos == "darwin" {
-			env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11")
-			env = append(env, "CGO_LDFLAGS=-mmacosx-version-min=10.11")
-		}
-		if b.release {
-			args = append(args, "-ldflags", "-s -w")
-		}
+	} else if b.release {
+		args = append(args, "-ldflags", `"-s -w"`)
 	}
 
 	// handle build tags
