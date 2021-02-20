@@ -152,13 +152,7 @@ func walkObjectTree(
 	}
 	pos := obj.Position().Add(offset)
 
-	var children []fyne.CanvasObject
-	switch co := obj.(type) {
-	case *fyne.Container:
-		children = co.Objects
-	case fyne.Widget:
-		children = cache.Renderer(co).Objects()
-	}
+	children := childrenForObject(obj)
 
 	if _, ok := obj.(fyne.Scrollable); ok {
 		clipPos = pos
@@ -197,4 +191,14 @@ func walkObjectTree(
 		afterChildren(obj, parent)
 	}
 	return cancelled
+}
+
+func childrenForObject(obj fyne.CanvasObject) []fyne.CanvasObject {
+	switch co := obj.(type) {
+	case *fyne.Container:
+		return co.Objects
+	case fyne.Widget:
+		return cache.Renderer(co).Objects()
+	}
+	return nil
 }
