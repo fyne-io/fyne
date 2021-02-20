@@ -1,4 +1,4 @@
-// +build !gles,!arm,!arm64
+// +build !gles,!arm,!arm64 darwin
 
 package glfw
 
