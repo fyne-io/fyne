@@ -1,12 +1,18 @@
 package widget
 
 import (
+	"errors"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
+
+// errFormItemInitialState defines the error if the initial validation for a FormItem result
+// in an error
+var errFormItemInitialState = errors.New("widget.FormItem initial state error")
 
 // FormItem provides the details for a row in a form
 type FormItem struct {
@@ -155,10 +161,14 @@ func (f *Form) checkValidation(err error) {
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok && e.Validator != nil {
-			e.SetValidationError(nil) // clear initial state, will appear when we type
+		if e, ok := w.(*Entry); ok && e.Validator != nil && f.Items[i].invalid {
+			// set initial state error to guarantee next error (if triggers) is always different
+			e.SetValidationError(errFormItemInitialState)
 		}
 		w.SetOnValidationChanged(func(err error) {
+			if err == errFormItemInitialState {
+				return
+			}
 			f.Items[i].validationError = err
 			f.Items[i].invalid = err != nil
 			f.checkValidation(err)
