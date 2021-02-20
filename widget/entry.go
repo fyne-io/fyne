@@ -1297,7 +1297,8 @@ func (r *entryContentRenderer) Objects() []fyne.CanvasObject {
 	defer r.content.entry.propertyLock.RUnlock()
 	// Objects are generated dynamically force selection rectangles to appear underneath the text
 	if r.content.entry.selecting {
-		return append(r.selection, r.objects...)
+		objs := append([]fyne.CanvasObject(nil), r.selection...)
+		return append(objs, r.objects...)
 	}
 	return r.objects
 }
