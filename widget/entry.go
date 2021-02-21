@@ -63,7 +63,6 @@ type Entry struct {
 	placeholder *textProvider
 	content     *entryContent
 	scroll      *widget.Scroll
-	acceptTabs  int // tri state 0 unset +/- true/false
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -120,10 +119,7 @@ func NewPasswordEntry() *Entry {
 //
 // Implements: fyne.Tabable
 func (e *Entry) AcceptTabs() bool {
-	if e.acceptTabs == 0 {
-		return e.MultiLine
-	}
-	return e.acceptTabs > 0
+	return e.MultiLine
 }
 
 // Bind connects the specified data source to this Entry.
@@ -413,16 +409,6 @@ func (e *Entry) SelectedText() string {
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 	return string(e.textProvider().buffer[start:stop])
-}
-
-// SetAcceptTabs sets if Entry will accept tabs for text entry.
-// This is overrides the default behaviour of Multiline Entries accepting tabs
-func (e *Entry) SetAcceptTabs(acceptTabs bool) {
-	if acceptTabs {
-		e.acceptTabs = 1
-		return
-	}
-	e.acceptTabs = -1
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty

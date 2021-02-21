@@ -1329,26 +1329,6 @@ func TestTabable(t *testing.T) {
 		entry.MultiLine = false
 		assert.False(t, entry.AcceptTabs())
 	})
-	t.Run("Multiline_Tab_Disabled", func(t *testing.T) {
-		entry.MultiLine = true
-		entry.SetAcceptTabs(false)
-		assert.False(t, entry.AcceptTabs())
-	})
-	t.Run("Multiline_Tab_Enabled", func(t *testing.T) {
-		entry.MultiLine = true
-		entry.SetAcceptTabs(true)
-		assert.True(t, entry.AcceptTabs())
-	})
-	t.Run("Singleline_Tab_Disabled", func(t *testing.T) {
-		entry.MultiLine = false
-		entry.SetAcceptTabs(false)
-		assert.False(t, entry.AcceptTabs())
-	})
-	t.Run("Singleline_Tab_Enabled", func(t *testing.T) {
-		entry.MultiLine = false
-		entry.SetAcceptTabs(true)
-		assert.True(t, entry.AcceptTabs())
-	})
 }
 
 func TestEntry_Tapped(t *testing.T) {
