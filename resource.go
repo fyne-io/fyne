@@ -1,9 +1,11 @@
 package fyne
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"time"
 )
 
 // Resource represents a single binary resource, such as an image or font.
@@ -59,7 +61,14 @@ func LoadResourceFromPath(path string) (Resource, error) {
 
 // LoadResourceFromURLString creates a new StaticResource in memory using the body of the specified URL.
 func LoadResourceFromURLString(urlStr string) (Resource, error) {
-	res, err := http.Get(urlStr)
+	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	res, err := (&http.Client{}).Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
