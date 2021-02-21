@@ -41,7 +41,7 @@ func (r *Runner) Stop(a *fyne.Animation) {
 		if item.a != a {
 			newList = append(newList, item)
 		} else {
-			item.setStopFlag()
+			item.setStopped()
 			stopped = true
 		}
 	}
@@ -55,7 +55,7 @@ func (r *Runner) Stop(a *fyne.Animation) {
 		if item.a != a {
 			newList = append(newList, item)
 		} else {
-			item.setStopFlag()
+			item.setStopped()
 		}
 	}
 	r.pendingAnimations = newList
@@ -72,7 +72,7 @@ func (r *Runner) runAnimations() {
 			r.animationMutex.Unlock()
 			newList := make([]*anim, 0, len(oldList))
 			for _, a := range oldList {
-				if r.tickAnimation(a) && !a.isStopped() {
+				if !a.isStopped() && r.tickAnimation(a) {
 					newList = append(newList, a)
 				}
 			}
@@ -115,6 +115,7 @@ func (r *Runner) tickAnimation(a *anim) bool {
 
 		a.start = time.Now()
 		a.end = a.start.Add(a.a.Duration)
+		return true
 	}
 
 	delta := time.Since(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
