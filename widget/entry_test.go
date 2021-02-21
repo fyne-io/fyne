@@ -1567,8 +1567,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	// the Password field is set to true.
 	// In this case the action item will be set when the renderer is created.
 	t.Run("Entry with Password field", func(t *testing.T) {
-		entry := &widget.Entry{}
-		entry.Password = true
+		entry := &widget.Entry{Password: true, Wrapping: fyne.TextWrapWord}
 		entry.Refresh()
 		window := test.NewWindow(entry)
 		defer window.Close()
@@ -1657,7 +1656,12 @@ func checkNewlineIgnored(t *testing.T, entry *widget.Entry) {
 func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	test.NewApp()
 
-	entry := &widget.Entry{MultiLine: multiLine}
+	var entry *widget.Entry
+	if multiLine {
+		entry = &widget.Entry{MultiLine: true, Wrapping: fyne.TextWrapWord}
+	} else {
+		entry = &widget.Entry{Wrapping: fyne.TextWrapOff}
+	}
 	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 200))
 

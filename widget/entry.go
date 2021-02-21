@@ -158,13 +158,21 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	// initialise
 	e.textProvider()
 	e.placeholderProvider()
+	scrolling := e.Wrapping != fyne.TextWrapOff
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
 
 	e.content = &entryContent{entry: e}
-	e.scroll = widget.NewScroll(e.content)
-	objects := []fyne.CanvasObject{box, line, e.scroll}
+	e.scroll = &widget.Scroll{}
+	objects := []fyne.CanvasObject{box, line}
+	if scrolling {
+		e.scroll.Content = e.content
+		objects = append(objects, e.scroll)
+	} else {
+		e.scroll.Hide()
+		objects = append(objects, e.content)
+	}
 	e.content.scroll = e.scroll
 
 	if e.Password && e.ActionItem == nil {
@@ -1118,8 +1126,13 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 	entrySize := size.Subtract(fyne.NewSize(xInset, theme.InputBorderSize()*2))
 	entryPos := fyne.NewPos(0, theme.InputBorderSize())
-	r.scroll.Resize(entrySize)
-	r.scroll.Move(entryPos)
+	if r.entry.Wrapping == fyne.TextWrapOff {
+		r.entry.content.Resize(entrySize)
+		r.entry.content.Move(entryPos)
+	} else {
+		r.scroll.Resize(entrySize)
+		r.scroll.Move(entryPos)
+	}
 }
 
 // MinSize calculates the minimum size of an entry widget.
@@ -1127,7 +1140,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (r *entryRenderer) MinSize() fyne.Size {
 	if r.scroll.Direction == widget.ScrollNone {
-		return r.scroll.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
+		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
 	}
 
 	minSize := r.entry.placeholderProvider().charMinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
@@ -1194,7 +1207,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.validationStatus.Hide()
 	}
 
-	cache.Renderer(r.scroll.Content.(*entryContent)).Refresh()
+	cache.Renderer(r.entry.content).Refresh()
 	canvas.Refresh(r.entry.super())
 }
 
@@ -1456,8 +1469,10 @@ func (r *entryContentRenderer) ensureCursorVisible() {
 	} else if cy2 >= offset.X+size.Height {
 		move.DY += cy2 - (offset.Y + size.Height)
 	}
-	r.content.scroll.Offset = r.content.scroll.Offset.Add(move)
-	r.content.scroll.Refresh()
+	if r.content.scroll.Content != nil {
+		r.content.scroll.Offset = r.content.scroll.Offset.Add(move)
+		r.content.scroll.Refresh()
+	}
 }
 
 func (r *entryContentRenderer) moveCursor() {
