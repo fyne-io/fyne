@@ -21,7 +21,7 @@ type gradient interface {
 	Size() fyne.Size
 }
 
-func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	pad := painter.VectorPad(circle)
 	scaledWidth := internal.ScaleInt(c, circle.Size().Width+pad*2)
 	scaledHeight := internal.ScaleInt(c, circle.Size().Height+pad*2)
@@ -43,7 +43,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
-func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	bounds := g.Size()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -51,7 +51,7 @@ func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGB
 	drawTex(internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y), width, height, base, tex, clip)
 }
 
-func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	bounds := img.Size()
 	if bounds.IsZero() {
 		return
@@ -80,7 +80,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip)
 }
 
-func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
+func drawPixels(x, y, width, height int, mode canvas.ImageScale, base draw.Image, origImg image.Image, clip image.Rectangle) {
 	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
 		// do not scale or duplicate image since not needed, draw directly
 		drawTex(x, y, width, height, base, origImg, clip)
@@ -104,7 +104,7 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 	drawTex(x, y, width, height, base, scaledImg, clip)
 }
 
-func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	pad := painter.VectorPad(line)
 	scaledWidth := internal.ScaleInt(c, line.Size().Width+pad*2)
 	scaledHeight := internal.ScaleInt(c, line.Size().Height+pad*2)
@@ -126,14 +126,14 @@ func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.N
 	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
-func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip image.Rectangle) {
+func drawTex(x, y, width, height int, base draw.Image, tex image.Image, clip image.Rectangle) {
 	outBounds := image.Rect(x, y, x+width, y+height)
 	clippedBounds := clip.Intersect(outBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - outBounds.Min.X, Y: clippedBounds.Min.Y - outBounds.Min.Y}
 	draw.Draw(base, clippedBounds, tex, srcPt, draw.Over)
 }
 
-func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	bounds := text.MinSize()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -172,7 +172,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
 }
 
-func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	bounds := rast.Size()
 	if bounds.IsZero() {
 		return
@@ -189,7 +189,7 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	}
 }
 
-func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	pad := painter.VectorPad(rect)
 	scaledWidth := internal.ScaleInt(c, rect.Size().Width+pad*2)
 	scaledHeight := internal.ScaleInt(c, rect.Size().Height+pad*2)
@@ -211,7 +211,7 @@ func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Positio
 	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
-func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base draw.Image, clip image.Rectangle) {
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 { // use a rasterizer if there is a stroke
 		drawRectangleStroke(c, rect, pos, base, clip)
 		return

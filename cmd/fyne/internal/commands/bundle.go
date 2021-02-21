@@ -187,7 +187,7 @@ func (b *Bundler) bundleAction(ctx *cli.Context) error {
 	return nil
 }
 
-func (b *Bundler) dirBundle(dirpath string, out *os.File) error {
+func (b *Bundler) dirBundle(dirpath string, out io.Writer) error {
 	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
 		fyne.LogError("Error reading specified directory", err)
@@ -216,7 +216,7 @@ func (b *Bundler) dirBundle(dirpath string, out *os.File) error {
 // (pkg) and the data will be assigned to variable named "name". If you are
 // appending an existing resource file then pass true to noheader as the headers
 // should only be output once per file.
-func (b *Bundler) doBundle(filepath string, out *os.File) {
+func (b *Bundler) doBundle(filepath string, out io.Writer) {
 	if !b.noheader {
 		writeHeader(b.pkg, out)
 	}
@@ -236,13 +236,13 @@ func sanitiseName(file, prefix string) string {
 	return prefix + name
 }
 
-func writeHeader(pkg string, out *os.File) {
-	fmt.Fprintln(out, fileHeader)
-	fmt.Fprintln(out)
-	fmt.Fprintln(out, "package", pkg)
-	fmt.Fprintln(out)
-	fmt.Fprintln(out, "import \"fyne.io/fyne/v2\"")
-	fmt.Fprintln(out)
+func writeHeader(pkg string, w io.Writer) {
+	fmt.Fprintln(w, fileHeader)
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "package", pkg)
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "import \"fyne.io/fyne/v2\"")
+	fmt.Fprintln(w)
 }
 
 func writeResource(file, name string, f io.Writer) {
