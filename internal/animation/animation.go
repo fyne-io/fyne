@@ -20,14 +20,13 @@ type anim struct {
 }
 
 func newAnim(a *fyne.Animation) *anim {
-	// TODO should we add a nil check here? (to avoid panic)
 	animate := &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)}
 	animate.total = animate.end.Sub(animate.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
 	animate.repeatsLeft = a.RepeatCount
 	return animate
 }
 
-func (a *anim) setStopFlag() {
+func (a *anim) setStopped() {
 	a.mu.Lock()
 	a.stopped = true
 	a.mu.Unlock()
