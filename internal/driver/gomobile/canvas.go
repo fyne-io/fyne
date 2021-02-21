@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
@@ -549,5 +550,7 @@ func updateLayout(objToLayout fyne.CanvasObject) {
 		}
 	case fyne.Widget:
 		cache.Renderer(cont).Layout(cont.Size())
+	case internal.CanvasObjectWrapper:
+		updateLayout(cont.WrappedObject())
 	}
 }

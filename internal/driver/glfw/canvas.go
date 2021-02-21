@@ -655,5 +655,7 @@ func updateLayout(objToLayout fyne.CanvasObject) {
 		}
 	case fyne.Widget:
 		cache.Renderer(cont).Layout(cont.Size())
+	case internal.CanvasObjectWrapper:
+		updateLayout(cont.WrappedObject())
 	}
 }

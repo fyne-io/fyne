@@ -282,6 +282,8 @@ func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyn
 		for _, child := range c.Objects {
 			objects = layoutAndCollect(objects, child, child.Size())
 		}
+	case internal.CanvasObjectWrapper:
+		objects = layoutAndCollect(objects, c.WrappedObject(), size)
 	}
 	return objects
 }

@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -214,7 +215,7 @@ func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 	r.writeCloseTag("canvas")
 }
 
-func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 	attrs := map[string]*string{}
 	r.setPosAttr(attrs, "pos", obj.Position())
 	r.setSizeAttr(attrs, "size", obj.Size())
@@ -239,6 +240,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeContainer(o, attrs)
 	case fyne.Widget:
 		r.writeWidget(o, attrs)
+	case internal.CanvasObjectWrapper:
+		r.writeWrapper(o, attrs)
 	case *layout.Spacer:
 		r.writeSpacer(o, attrs)
 	default:
@@ -265,6 +268,10 @@ func (r *markupRenderer) writeCloseCanvasObject(o, _ fyne.CanvasObject) {
 		r.indentation--
 		r.writeIndent()
 		r.writeCloseTag("widget")
+	case internal.CanvasObjectWrapper:
+		r.indentation--
+		r.writeIndent()
+		r.writeCloseTag("wrapper")
 	}
 }
 
@@ -371,6 +378,12 @@ func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
 func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.setStringAttr(attrs, "type", reflect.TypeOf(w).String())
 	r.writeTag("widget", false, attrs)
+	r.w.WriteRune('\n')
+	r.indentation++
+}
+
+func (r *markupRenderer) writeWrapper(w internal.CanvasObjectWrapper, attrs map[string]*string) {
+	r.writeTag("wrapper", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++
 }

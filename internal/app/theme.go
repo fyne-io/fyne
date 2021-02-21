@@ -2,6 +2,7 @@ package app
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 )
 
@@ -25,6 +26,8 @@ func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 		if l := o.Layout; l != nil {
 			l.Layout(o.Objects, o.Size()) // theme can cause sizing changes
 		}
+	case internal.CanvasObjectWrapper:
+		ApplyThemeTo(o.WrappedObject(), canv)
 	}
 	content.Refresh()
 }

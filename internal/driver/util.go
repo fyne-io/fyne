@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 )
 
@@ -199,6 +200,8 @@ func childrenForObject(obj fyne.CanvasObject) []fyne.CanvasObject {
 		return co.Objects
 	case fyne.Widget:
 		return cache.Renderer(co).Objects()
+	case internal.CanvasObjectWrapper:
+		return []fyne.CanvasObject{co.WrappedObject()}
 	}
 	return nil
 }
