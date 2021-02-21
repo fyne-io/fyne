@@ -336,7 +336,8 @@ func createList(items int) *List {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+			icon := NewIcon(theme.DocumentIcon())
+			return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, icon, nil), icon, NewLabel("Template Object"))
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
