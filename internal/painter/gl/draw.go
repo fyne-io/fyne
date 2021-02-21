@@ -71,8 +71,8 @@ func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Si
 		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
 	}
 
-	if size.Height > containerSize.Height {
-		pos = fyne.NewPos(pos.X, pos.Y+(size.Height-containerSize.Height)/2)
+	if containerSize.Height > size.Height {
+		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
