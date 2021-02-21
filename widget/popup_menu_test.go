@@ -1,4 +1,4 @@
-package widget
+package widget_test
 
 import (
 	"image/color"
@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/widget"
 )
 
 func TestPopUpMenu_Move(t *testing.T) {
@@ -89,12 +90,12 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(menuSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
-func setupPopUpMenuTest() (*PopUpMenu, fyne.Window) {
+func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
 	test.NewApp()
 
 	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
-	m := NewPopUpMenu(fyne.NewMenu(
+	m := widget.NewPopUpMenu(fyne.NewMenu(
 		"",
 		fyne.NewMenuItem("Option A", nil),
 		fyne.NewMenuItem("Option B", nil),
