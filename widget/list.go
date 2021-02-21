@@ -152,7 +152,6 @@ type listRenderer struct {
 	list     *List
 	scroller *widget.Scroll
 	layout   *fyne.Container
-	size     fyne.Size
 }
 
 func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *widget.Scroll, layout *fyne.Container) *listRenderer {
