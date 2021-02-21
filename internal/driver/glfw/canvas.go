@@ -572,7 +572,7 @@ func (c *glCanvas) walkTrees(
 }
 
 type overlayStack struct {
-	internal.OverlayStack
+	app.OverlayStack
 
 	propertyLock sync.RWMutex
 	renderCaches []*renderCacheTree
@@ -633,7 +633,7 @@ func newCanvas() *glCanvas {
 	c.padded = true
 
 	c.overlays = &overlayStack{
-		OverlayStack: internal.OverlayStack{
+		OverlayStack: app.OverlayStack{
 			OnChange: c.overlayChanged,
 			Canvas:   c,
 		},

@@ -1,10 +1,9 @@
-package internal
+package app
 
 import (
 	"sync"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/widget"
 )
 
@@ -12,7 +11,7 @@ import (
 type OverlayStack struct {
 	OnChange      func()
 	Canvas        fyne.Canvas
-	focusManagers []*app.FocusManager
+	focusManagers []*FocusManager
 	overlays      []fyne.CanvasObject
 	propertyLock  sync.RWMutex
 }
@@ -43,7 +42,7 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 		overlay.Move(safePos)
 	}
 
-	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))
+	s.focusManagers = append(s.focusManagers, NewFocusManager(overlay))
 }
 
 // List returns all overlays on the stack from bottom to top.
@@ -57,7 +56,7 @@ func (s *OverlayStack) List() []fyne.CanvasObject {
 }
 
 // ListFocusManagers returns all focus managers on the stack from bottom to top.
-func (s *OverlayStack) ListFocusManagers() []*app.FocusManager {
+func (s *OverlayStack) ListFocusManagers() []*FocusManager {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 
@@ -98,14 +97,14 @@ func (s *OverlayStack) Top() fyne.CanvasObject {
 }
 
 // TopFocusManager returns the app.FocusManager assigned to the top-most overlay of the stack.
-func (s *OverlayStack) TopFocusManager() *app.FocusManager {
+func (s *OverlayStack) TopFocusManager() *FocusManager {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	return s.topFocusManager()
 }
 
-func (s *OverlayStack) topFocusManager() *app.FocusManager {
-	var fm *app.FocusManager
+func (s *OverlayStack) topFocusManager() *FocusManager {
+	var fm *FocusManager
 	if len(s.focusManagers) > 0 {
 		fm = s.focusManagers[len(s.focusManagers)-1]
 	}

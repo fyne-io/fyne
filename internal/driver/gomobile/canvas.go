@@ -8,7 +8,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
@@ -28,7 +27,7 @@ type mobileCanvas struct {
 	contentFocusMgr  *app.FocusManager
 	windowHead, menu fyne.CanvasObject
 	menuFocusMgr     *app.FocusManager
-	overlays         *internal.OverlayStack
+	overlays         *app.OverlayStack
 	painter          gl.Painter
 	scale            float32
 	size             fyne.Size
@@ -61,7 +60,7 @@ func NewCanvas() fyne.Canvas {
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
 	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
-	ret.overlays = &internal.OverlayStack{Canvas: ret, OnChange: ret.overlayChanged}
+	ret.overlays = &app.OverlayStack{Canvas: ret, OnChange: ret.overlayChanged}
 
 	ret.setupThemeListener()
 
