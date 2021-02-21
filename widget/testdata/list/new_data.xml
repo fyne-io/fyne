@@ -8,8 +8,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="88x37" type="*widget.Label">
-								<text pos="4,8" size="80x21">a</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">a</text>
 							</widget>
 						</container>
 					</widget>
@@ -18,8 +18,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="88x37" type="*widget.Label">
-								<text pos="4,8" size="80x21">b</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">b</text>
 							</widget>
 						</container>
 					</widget>
@@ -28,8 +28,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="97x37" type="*widget.Label">
-								<text pos="4,8" size="89x21">c</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">c</text>
 							</widget>
 						</container>
 					</widget>
@@ -38,8 +38,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="88x37" type="*widget.Label">
-								<text pos="4,8" size="80x21">d</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">d</text>
 							</widget>
 						</container>
 					</widget>
@@ -48,8 +48,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="97x37" type="*widget.Label">
-								<text pos="4,8" size="89x21">e</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">e</text>
 							</widget>
 						</container>
 					</widget>
@@ -58,8 +58,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="88x37" type="*widget.Label">
-								<text pos="4,8" size="80x21">f</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">f</text>
 							</widget>
 						</container>
 					</widget>
@@ -68,8 +68,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="88x37" type="*widget.Label">
-								<text pos="4,8" size="80x21">g</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">g</text>
 							</widget>
 						</container>
 					</widget>
@@ -78,8 +78,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="88x37" type="*widget.Label">
-								<text pos="4,8" size="80x21">h</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">h</text>
 							</widget>
 						</container>
 					</widget>
@@ -88,8 +88,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="97x37" type="*widget.Label">
-								<text pos="4,8" size="89x21">i</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">i</text>
 							</widget>
 						</container>
 					</widget>
@@ -98,8 +98,8 @@
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="97x37" type="*widget.Label">
-								<text pos="4,8" size="89x21">j</text>
+							<widget pos="24,0" size="156x37" type="*widget.Label">
+								<text pos="4,8" size="148x21">j</text>
 							</widget>
 						</container>
 					</widget>
