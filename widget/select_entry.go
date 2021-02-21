@@ -17,6 +17,7 @@ type SelectEntry struct {
 func NewSelectEntry(options []string) *SelectEntry {
 	e := &SelectEntry{}
 	e.ExtendBaseWidget(e)
+	e.Wrapping = fyne.TextTruncate
 	e.options = options
 	return e
 }
