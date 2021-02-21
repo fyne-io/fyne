@@ -103,6 +103,23 @@ func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
 	return m, w
 }
 
+func setupPopUpMenuWithSubmenusTest(callback func(string)) (*widget.PopUpMenu, fyne.Window) {
+	test.NewApp()
+
+	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	w.Resize(fyne.NewSize(800, 600))
+	itemA := fyne.NewMenuItem("Option A", func() { callback("Option A") })
+	itemB := fyne.NewMenuItem("Option B", func() { callback("Option B") })
+	itemBA := fyne.NewMenuItem("Sub Option A", func() { callback("Sub Option A") })
+	itemBB := fyne.NewMenuItem("Sub Option B", func() { callback("Sub Option B") })
+	itemBBA := fyne.NewMenuItem("Sub Sub Option A", func() { callback("Sub Sub Option A") })
+	itemBBB := fyne.NewMenuItem("Sub Sub Option B", func() { callback("Sub Sub Option B") })
+	itemB.ChildMenu = fyne.NewMenu("", itemBA, itemBB)
+	itemBB.ChildMenu = fyne.NewMenu("", itemBBA, itemBBB)
+	m := widget.NewPopUpMenu(fyne.NewMenu("", itemA, itemB), w.Canvas())
+	return m, w
+}
+
 func tearDownPopUpMenuTest(w fyne.Window) {
 	w.Close()
 	test.NewApp()

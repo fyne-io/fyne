@@ -2,13 +2,20 @@ package widget
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/widget"
 )
+
+var _ fyne.Widget = (*PopUpMenu)(nil)
+
+var _ internal.CanvasObjectWrapper = (*popUpMenuKeyboardControl)(nil)
+var _ fyne.Focusable = (*popUpMenuKeyboardControl)(nil)
 
 // PopUpMenu is a Menu which displays itself in an OverlayContainer.
 type PopUpMenu struct {
 	*Menu
 	canvas  fyne.Canvas
+	kbdCtrl *popUpMenuKeyboardControl
 	overlay *widget.OverlayContainer
 }
 
@@ -16,10 +23,11 @@ type PopUpMenu struct {
 //
 // Since: 2.0
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
-	p := &PopUpMenu{Menu: NewMenu(menu), canvas: c}
-	p.Menu.Resize(p.Menu.MinSize())
+	m := NewMenu(menu)
+	p := &PopUpMenu{Menu: m, canvas: c, kbdCtrl: newPopUpMenuKeyboardControl(m)}
+	p.kbdCtrl.Resize(p.MinSize())
 	p.Menu.customSized = true
-	o := widget.NewOverlayContainer(p.Menu, c, p.Dismiss)
+	o := widget.NewOverlayContainer(p.kbdCtrl, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
 	p.OnDismiss = func() {
@@ -47,7 +55,7 @@ func (p *PopUpMenu) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Widget
 func (p *PopUpMenu) Hide() {
 	p.overlay.Hide()
-	p.Menu.Hide()
+	p.kbdCtrl.Hide()
 }
 
 // Move moves the pop-up menu.
@@ -55,15 +63,15 @@ func (p *PopUpMenu) Hide() {
 //
 // Implements: fyne.Widget
 func (p *PopUpMenu) Move(pos fyne.Position) {
-	widget.MoveWidget(&p.Base, p, p.adjustedPosition(pos, p.Size()))
+	p.kbdCtrl.Move(p.adjustedPosition(pos, p.kbdCtrl.Size()))
 }
 
 // Resize changes the size of the pop-up menu.
 //
 // Implements: fyne.Widget
 func (p *PopUpMenu) Resize(size fyne.Size) {
-	widget.MoveWidget(&p.Base, p, p.adjustedPosition(p.Position(), size))
-	p.Menu.Resize(size)
+	p.kbdCtrl.Move(p.adjustedPosition(p.kbdCtrl.Position(), size))
+	p.kbdCtrl.Resize(size)
 }
 
 // Show makes the pop-up menu visible.
@@ -71,7 +79,8 @@ func (p *PopUpMenu) Resize(size fyne.Size) {
 // Implements: fyne.Widget
 func (p *PopUpMenu) Show() {
 	p.overlay.Show()
-	p.Menu.Show()
+	p.kbdCtrl.Show()
+	p.canvas.Focus(p.kbdCtrl)
 }
 
 // ShowAtPosition shows the pop-up menu at the specified position.
@@ -96,4 +105,39 @@ func (p *PopUpMenu) adjustedPosition(pos fyne.Position, size fyne.Size) fyne.Pos
 		}
 	}
 	return fyne.NewPos(x, y)
+}
+
+type popUpMenuKeyboardControl struct {
+	internal.SimpleCanvasObjectWrapper
+}
+
+func (c *popUpMenuKeyboardControl) FocusGained() {
+}
+
+func (c *popUpMenuKeyboardControl) FocusLost() {
+}
+
+func (c *popUpMenuKeyboardControl) TypedRune(_ rune) {
+}
+
+func newPopUpMenuKeyboardControl(m *Menu) *popUpMenuKeyboardControl {
+	return &popUpMenuKeyboardControl{internal.SimpleCanvasObjectWrapper{O: m}}
+}
+
+func (c *popUpMenuKeyboardControl) TypedKey(event *fyne.KeyEvent) {
+	menu := c.WrappedObject().(*Menu)
+	switch event.Name {
+	case fyne.KeyDown:
+		menu.ActivateNext()
+	case fyne.KeyEnter, fyne.KeyReturn, fyne.KeySpace:
+		menu.TriggerLast()
+	case fyne.KeyEscape:
+		menu.Dismiss()
+	case fyne.KeyLeft:
+		menu.DeactivateLastSubmenu()
+	case fyne.KeyRight:
+		menu.ActivateLastSubmenu()
+	case fyne.KeyUp:
+		menu.ActivatePrevious()
+	}
 }

@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -42,7 +43,7 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 	point := &fyne.PointEvent{Position: fyne.NewPos(10, 10)}
 	menuObj.Tapped(point)
 
-	tapMeItem := c.overlays.Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu).Items[0].(fyne.Tappable)
+	tapMeItem := c.overlays.Top().(*internalWidget.OverlayContainer).Content.(internal.CanvasObjectWrapper).WrappedObject().(*widget.Menu).Items[0].(fyne.Tappable)
 	tapMeItem.Tapped(point)
 	assert.Nil(t, c.menu)
 }
