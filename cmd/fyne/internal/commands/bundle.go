@@ -138,35 +138,23 @@ func (b *Bundler) Run(args []string) {
 	}
 }
 
-func (b *Bundler) bundleAction(ctx *cli.Context) error {
+func (b *Bundler) bundleAction(ctx *cli.Context) (err error) {
 	if ctx.Args().Len() != 1 {
 		return errors.New("missing required file or directory parameter after flags")
 	}
 
 	outFile := os.Stdout
 	if b.out != "" {
-		fileModes := os.O_RDWR | os.O_CREATE | os.O_TRUNC
-		if b.noheader {
-			fileModes = os.O_RDWR | os.O_APPEND
+		file, closeFile, err := getOutputFile(b.out, b.noheader)
+		if err != nil {
+			return err
 		}
-
-		f, err := os.OpenFile(b.out, fileModes, 0666)
-		if err == nil {
-			outFile = f
-		} else {
-			if os.IsNotExist(err) {
-				f, err = os.Create(b.out)
-				if err == nil {
-					outFile = f
-				} else {
-					fyne.LogError("Unable to read, or create, output file : "+b.out, err)
-					return err
-				}
-			} else {
-				fyne.LogError("Unable to open output file", err)
-				return err
+		defer func() {
+			if r := closeFile(); r != nil {
+				err = r
 			}
-		}
+		}()
+		outFile = file
 	}
 
 	arg := ctx.Args().First()
@@ -225,6 +213,32 @@ func (b *Bundler) doBundle(filepath string, out *os.File) {
 		b.name = sanitiseName(path.Base(filepath), b.prefix)
 	}
 	writeResource(filepath, b.name, out)
+}
+
+func getOutputFile(filePath string, noheader bool) (file *os.File, close func() error, err error) {
+	fileModes := os.O_RDWR | os.O_CREATE | os.O_TRUNC
+	if noheader {
+		fileModes = os.O_RDWR | os.O_APPEND
+	}
+
+	f, err := os.OpenFile(filePath, fileModes, 0666)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Unable to open output file", err)
+			return nil, nil, err
+		}
+
+		// try creating the file
+		f, err = os.Create(filePath)
+		if err != nil {
+			fyne.LogError("Unable to read, or create, output file : "+filePath, err)
+			return nil, nil, err
+		}
+	}
+
+	return f, func() error {
+		return f.Close()
+	}, nil
 }
 
 func sanitiseName(file, prefix string) string {

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
@@ -260,21 +261,18 @@ func (r *Releaser) packageIOSRelease() error {
 	}
 
 	payload := filepath.Join(r.dir, "Payload")
-	os.Mkdir(payload, 0750)
+	_ = os.Mkdir(payload, 0750)
 	defer os.RemoveAll(payload)
 	appName := mobile.AppOutputName(r.os, r.name)
 	payloadAppDir := filepath.Join(payload, appName)
-	os.Rename(filepath.Join(r.dir, appName), payloadAppDir)
+	if err := os.Rename(filepath.Join(r.dir, appName), payloadAppDir); err != nil {
+		return err
+	}
 
-	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
-	entitlements, _ := os.Create(entitlementPath)
-	entitlementData := struct{ TeamID, AppID string }{
+	if _, err := r.writeEntitlements(templates.EntitlementsDarwinMobile, struct{ TeamID, AppID string }{
 		TeamID: team,
 		AppID:  r.appID,
-	}
-	err = templates.EntitlementsDarwinMobile.Execute(entitlements, entitlementData)
-	entitlements.Close()
-	if err != nil {
+	}); err != nil {
 		return errors.New("failed to write entitlements plist template")
 	}
 
@@ -297,14 +295,12 @@ func (r *Releaser) packageMacOSRelease() error {
 	unsignedPath := r.name + "-unsigned.pkg"
 
 	defer os.RemoveAll(r.name + ".app") // this was the output of package and it can get in the way of future builds
-	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
-	entitlements, _ := os.Create(entitlementPath)
-	err := templates.EntitlementsDarwin.Execute(entitlements, nil)
-	entitlements.Close()
+
+	cleanup, err := r.writeEntitlements(templates.EntitlementsDarwin, nil)
 	if err != nil {
 		return errors.New("failed to write entitlements plist template")
 	}
-	defer os.Remove(entitlementPath)
+	defer cleanup()
 
 	cmd := exec.Command("codesign", "-vfs", appCert, "--entitlement", "entitlements.plist", r.name+".app")
 	err = cmd.Run()
@@ -328,7 +324,7 @@ func (r *Releaser) packageMacOSRelease() error {
 
 func (r *Releaser) packageWindowsRelease(outFile string) error {
 	payload := filepath.Join(r.dir, "Payload")
-	os.Mkdir(payload, 0750)
+	_ = os.Mkdir(payload, 0750)
 	defer os.RemoveAll(payload)
 
 	manifestPath := filepath.Join(payload, "appxmanifest.xml")
@@ -445,6 +441,26 @@ func (r *Releaser) validate() error {
 		}
 	}
 	return nil
+}
+
+func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData interface{}) (cleanup func(), err error) {
+	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
+	entitlements, err := os.Create(entitlementPath)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if r := entitlements.Close(); r != nil {
+			err = r
+		}
+	}()
+
+	if err := tmpl.Execute(entitlements, entitlementData); err != nil {
+		return nil, err
+	}
+	return func() {
+		_ = os.Remove(entitlementPath)
+	}, nil
 }
 
 func (r *Releaser) zipAlign(path string) error {
