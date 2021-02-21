@@ -35,7 +35,7 @@ func TestAssertImageMatches(t *testing.T) {
 	d.Face = face
 	d.Dot = freetype.Pt(0, 50-face.Metrics().Descent.Ceil())
 
-	d.DrawString("Hello!")
+	d.DrawString("Hello!", 4)
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}

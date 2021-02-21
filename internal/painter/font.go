@@ -31,7 +31,7 @@ func RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size
 	opts.DPI = TextDPI
 
 	face := CachedFontFace(style, &opts)
-	advance := MeasureString(face, text)
+	advance := MeasureString(face, text, style.TabWidth())
 
 	return fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
 }

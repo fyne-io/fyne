@@ -88,7 +88,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text)
+	d.DrawString(text.Text, text.TextStyle.TabWidth())
 
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }

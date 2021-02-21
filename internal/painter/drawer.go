@@ -6,8 +6,6 @@ import (
 	"log"
 	"math"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -21,13 +19,12 @@ type FontDrawer struct {
 	font.Drawer
 }
 
-func tabStop(f font.Face, x fixed.Int26_6) fixed.Int26_6 {
+func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
 	spacew, ok := f.GlyphAdvance(' ')
 	if !ok {
 		log.Print("Failed to find space width for tab")
 		return x
 	}
-	tabWidth := fyne.CurrentApp().Settings().Theme().Size(theme.SizeNameTabWidth)
 	tabw := spacew * fixed.Int26_6(tabWidth)
 	tabs, _ := math.Modf(float64((x + tabw) / tabw))
 	return tabw * fixed.Int26_6(tabs)
@@ -35,14 +32,14 @@ func tabStop(f font.Face, x fixed.Int26_6) fixed.Int26_6 {
 
 // DrawString draws s at the dot and advances the dot's location.
 // Tabs are translated into a dot location change.
-func (d *FontDrawer) DrawString(s string) {
+func (d *FontDrawer) DrawString(s string, tabWidth int) {
 	prevC := rune(-1)
 	for _, c := range s {
 		if prevC >= 0 {
 			d.Dot.X += d.Face.Kern(prevC, c)
 		}
 		if c == '\t' {
-			d.Dot.X = tabStop(d.Face, d.Dot.X)
+			d.Dot.X = tabStop(d.Face, d.Dot.X, tabWidth)
 		} else {
 			dr, mask, maskp, a, ok := d.Face.Glyph(d.Dot, c)
 			if !ok {
@@ -61,14 +58,14 @@ func (d *FontDrawer) DrawString(s string) {
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
-func MeasureString(f font.Face, s string) (advance fixed.Int26_6) {
+func MeasureString(f font.Face, s string, tabWidth int) (advance fixed.Int26_6) {
 	prevC := rune(-1)
 	for _, c := range s {
 		if prevC >= 0 {
 			advance += f.Kern(prevC, c)
 		}
 		if c == '\t' {
-			advance = tabStop(f, advance)
+			advance = tabStop(f, advance, tabWidth)
 		} else {
 			a, ok := f.GlyphAdvance(c)
 			if !ok {

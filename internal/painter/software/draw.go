@@ -149,7 +149,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text)
+	d.DrawString(text.Text, text.TextStyle.TabWidth())
 
 	size := text.Size()
 	offsetX := float32(0)

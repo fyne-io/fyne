@@ -99,11 +99,6 @@ func Test_TextSize(t *testing.T) {
 	assert.Equal(t, DarkTheme().Size(SizeNameText), TextSize(), "wrong text size")
 }
 
-func Test_TabWidth(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Size(SizeNameTabWidth), current().Size(SizeNameTabWidth), "wrong tab width")
-}
-
 func Test_TextFont(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	expect := "NotoSans-Regular.ttf"
