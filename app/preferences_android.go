@@ -11,8 +11,8 @@ func (p *preferences) storagePath() string {
 }
 
 // storageRoot returns the location of the app storage
-func (a *fyneApp) storageRoot() string {
-	return filepath.Join(rootConfigDir(), a.uniqueID)
+func (app *fyneApp) storageRoot() string {
+	return filepath.Join(rootConfigDir(), app.uniqueID)
 }
 
 func (p *preferences) watch() {

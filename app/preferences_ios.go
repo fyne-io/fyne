@@ -14,7 +14,7 @@ func (p *preferences) storagePath() string {
 }
 
 // storageRoot returns the location of the app storage
-func (a *fyneApp) storageRoot() string {
+func (app *fyneApp) storageRoot() string {
 	return rootConfigDir() // we are in a sandbox, so no app ID added to this path
 }
 

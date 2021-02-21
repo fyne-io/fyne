@@ -142,7 +142,7 @@ func (c *testCanvas) Padded() bool {
 }
 
 func (c *testCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
 func (c *testCanvas) Refresh(fyne.CanvasObject) {

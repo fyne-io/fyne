@@ -218,7 +218,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			visible[i] = width
 		}
 	}
-	return
+	return visible, offX, minCol, maxCol
 }
 
 // Declare conformity with WidgetRenderer interface.

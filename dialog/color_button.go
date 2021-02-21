@@ -104,7 +104,7 @@ func (r *colorButtonRenderer) MinSize() fyne.Size {
 func (r *colorButtonRenderer) Refresh() {
 	if r.button.hovered {
 		r.rectangle.StrokeColor = theme.HoverColor()
-		r.rectangle.StrokeWidth = float32(theme.Padding())
+		r.rectangle.StrokeWidth = theme.Padding()
 	} else {
 		r.rectangle.StrokeWidth = 0
 	}

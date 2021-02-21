@@ -164,16 +164,9 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	}
 	arsc.iconPath = iconPath
 	assetsDir := filepath.Join(dir, "assets")
-	assetsDirExists := true
-	fi, err := os.Stat(assetsDir)
+	assetsDirExists, err := dirExists(assetsDir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			assetsDirExists = false
-		} else {
-			return nil, err
-		}
-	} else {
-		assetsDirExists = fi.IsDir()
+		return nil, err
 	}
 	if assetsDirExists {
 		// if assets is a symlink, follow the symlink.
@@ -327,6 +320,17 @@ func androidPkgName(name string) string {
 		s += "_"
 	}
 	return s
+}
+
+func dirExists(path string) (bool, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return false, err
+		}
+		return false, nil
+	}
+	return fi.IsDir(), nil
 }
 
 // A random uninteresting private key.

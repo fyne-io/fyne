@@ -252,7 +252,7 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
 	gl.ReadBuffer(gl.FRONT)
 	logError()
-	gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(*pixels))
+	gl.ReadPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(*pixels))
 	logError()
 }
 

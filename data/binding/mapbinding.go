@@ -216,7 +216,7 @@ func (b *mapBase) SetValue(key string, d interface{}) error {
 	return nil
 }
 
-func (b *mapBase) doReload() (retErr error) {
+func (b *mapBase) doReload() error {
 	changed := false
 	// add new
 	for key := range *b.val {
@@ -250,20 +250,19 @@ func (b *mapBase) doReload() (retErr error) {
 		b.trigger()
 	}
 
+	var err error
 	for k, item := range b.items {
-		var err error
-
 		if b.updateExternal {
-			err = item.(*boundExternalMapValue).setIfChanged((*b.val)[k])
-		} else {
-			err = item.(*boundMapValue).set((*b.val)[k])
+			if r := item.(*boundExternalMapValue).setIfChanged((*b.val)[k]); r != nil {
+				err = r
+			}
+			continue
 		}
-
-		if err != nil {
-			retErr = err
+		if r := item.(*boundMapValue).set((*b.val)[k]); r != nil {
+			err = r
 		}
 	}
-	return
+	return err
 }
 
 func (b *mapBase) setItem(key string, d DataItem) {
@@ -278,12 +277,14 @@ type boundStruct struct {
 	orig interface{}
 }
 
-func (b *boundStruct) Reload() (retErr error) {
+func (b *boundStruct) Reload() error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	v := reflect.ValueOf(b.orig).Elem()
 	t := v.Type()
+
+	var err error
 	for j := 0; j < v.NumField(); j++ {
 		f := v.Field(j)
 		if !f.CanSet() {
@@ -296,23 +297,23 @@ func (b *boundStruct) Reload() (retErr error) {
 			continue
 		}
 
-		var err error
+		var r error
 		switch f.Kind() {
 		case reflect.Bool:
-			err = b.items[key].(*reflectBool).Set(f.Bool())
+			r = b.items[key].(*reflectBool).Set(f.Bool())
 		case reflect.Float32, reflect.Float64:
-			err = b.items[key].(*reflectFloat).Set(f.Float())
+			r = b.items[key].(*reflectFloat).Set(f.Float())
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			err = b.items[key].(*reflectInt).Set(int(f.Int()))
+			r = b.items[key].(*reflectInt).Set(int(f.Int()))
 		case reflect.String:
-			err = b.items[key].(*reflectString).Set(f.String())
+			r = b.items[key].(*reflectString).Set(f.String())
 		}
-		if err != nil {
-			retErr = err
+		if r != nil {
+			err = r
 		}
 		(*b.val)[key] = f.Interface()
 	}
-	return
+	return err
 }
 
 func bindUntypedMapValue(m *map[string]interface{}, k string, external bool) Untyped {
