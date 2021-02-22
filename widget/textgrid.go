@@ -68,6 +68,7 @@ type TextGrid struct {
 
 	ShowLineNumbers bool
 	ShowWhitespace  bool
+	tabWidth        int
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -85,25 +86,22 @@ func (t *TextGrid) Resize(size fyne.Size) {
 // SetText updates the buffer of this textgrid to contain the specified text.
 // New lines and columns will be added as required. Lines are separated by '\n'.
 // The grid will use default text style and any previous content and style will be removed.
+// Tab characters are padded with spaces to the next tab stop.
 func (t *TextGrid) SetText(text string) {
 	lines := strings.Split(text, "\n")
 	rows := make([]TextGridRow, len(lines))
 	for i, line := range lines {
-		spaced := strings.ReplaceAll(line, "\t", textTabIndent)
-
-		cells := make([]TextGridCell, len(spaced))
-		extras := 0
-		for j, r := range line {
-			cells[j+extras] = TextGridCell{Rune: r}
-
+		cells := make([]TextGridCell, 0, len(line))
+		for _, r := range line {
+			cells = append(cells, TextGridCell{Rune: r})
 			if r == '\t' {
-				for k := j + extras + 1; k < j+extras+len(textTabIndent); k++ {
-					cells[k] = TextGridCell{Rune: ' '}
+				col := len(cells)
+				next := nextTab(col-1, t.TabWidth())
+				for i := col; i < next; i++ {
+					cells = append(cells, TextGridCell{Rune: ' '})
 				}
-				extras += len(textTabIndent) - 1
 			}
 		}
-
 		rows[i] = TextGridRow{Cells: cells}
 	}
 
@@ -111,8 +109,25 @@ func (t *TextGrid) SetText(text string) {
 	t.Refresh()
 }
 
+// TabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
+func (t *TextGrid) TabWidth() int {
+	if t.tabWidth == 0 {
+		return fyne.DefaultTabWidth
+	}
+	return t.tabWidth
+}
+
+// SetTabWidth sets the tab width if the supplied value is greater than 0
+// This has to be set prior to calling SetText.
+func (t *TextGrid) SetTabWidth(tabWidth int) {
+	if tabWidth > 0 {
+		t.tabWidth = tabWidth
+	}
+}
+
 // Text returns the contents of the buffer as a single string (with no style information).
 // It reconstructs the lines by joining with a `\n` character.
+// Tab characters have padded spaces removed.
 func (t *TextGrid) Text() string {
 	count := len(t.Rows) - 1 // newlines
 	for _, row := range t.Rows {
@@ -123,31 +138,25 @@ func (t *TextGrid) Text() string {
 		return ""
 	}
 
-	runes := make([]rune, count)
-	c := 0
-	skipped := 0
+	runes := make([]rune, 0, count)
+
 	for i, row := range t.Rows {
-		skip := 0
-		for _, r := range row.Cells {
-			if skip > 0 {
-				skip--
+		next := 0
+		for c, r := range row.Cells {
+			if c < next {
 				continue
 			}
-			runes[c] = r.Rune
-			c++
+			runes = append(runes, r.Rune)
 			if r.Rune == '\t' {
-				skip = len(textTabIndent) - 1
-				skipped += skip
+				next = nextTab(c, t.TabWidth())
 			}
 		}
-
 		if i < len(t.Rows)-1 {
-			runes[c] = '\n'
-			c++
+			runes = append(runes, '\n')
 		}
 	}
 
-	return string(runes[:len(runes)-skipped])
+	return string(runes)
 }
 
 // Row returns a copy of the content in a specified row as a TextGridRow.
@@ -162,6 +171,7 @@ func (t *TextGrid) Row(row int) TextGridRow {
 
 // RowText returns a string representation of the content at the row specified.
 // If the index is out of bounds it returns an empty string.
+// Tab characters do not have padding spaces removed.
 func (t *TextGrid) RowText(row int) string {
 	rowData := t.Row(row)
 	runes := make([]rune, len(rowData.Cells))
@@ -176,6 +186,7 @@ func (t *TextGrid) RowText(row int) string {
 
 // SetRow updates the specified row of the grid's contents using the specified content and style and then refreshes.
 // If the row is beyond the end of the current buffer it will be expanded.
+// Tab characters are not padded with spaces.
 func (t *TextGrid) SetRow(row int, content TextGridRow) {
 	if row < 0 {
 		return
@@ -313,6 +324,12 @@ func NewTextGridFromString(content string) *TextGrid {
 	grid := NewTextGrid()
 	grid.SetText(content)
 	return grid
+}
+
+// nextTab finds the column of the next tab stop for the given column
+func nextTab(column int, tabWidth int) int {
+	tabStop, _ := math.Modf(float64(column+tabWidth) / float64(tabWidth))
+	return tabWidth * int(tabStop)
 }
 
 type textGridRenderer struct {
