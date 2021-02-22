@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const httpReqTimeout = 60 * time.Second
+
 // Resource represents a single binary resource, such as an image or font.
 // A resource has an identifying name and byte array content.
 // The serialised path of a resource can be obtained which may result in a
@@ -61,12 +63,17 @@ func LoadResourceFromPath(path string) (Resource, error) {
 
 // LoadResourceFromURLString creates a new StaticResource in memory using the body of the specified URL.
 func LoadResourceFromURLString(urlStr string) (Resource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), httpReqTimeout)
+	defer cancel()
+
+	return LoadResourceFromURLStringWithCtx(ctx, urlStr)
+}
+
+func LoadResourceFromURLStringWithCtx(ctx context.Context, urlStr string) (Resource, error) {
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
 
 	res, err := (&http.Client{}).Do(req.WithContext(ctx))
 	if err != nil {
