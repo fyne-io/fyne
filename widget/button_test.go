@@ -245,6 +245,38 @@ func TestButton_Layout(t *testing.T) {
 	}
 }
 
+func TestButton_Hover(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	b := widget.NewButton("Test", func() {})
+	b.Importance = widget.HighImportance
+	w := test.NewWindow(b)
+	defer w.Close()
+
+	test.AssertRendersToMarkup(t, "button/high_importance_not_hovered.xml", w.Canvas())
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+	b.Refresh()
+	test.AssertRendersToMarkup(t, "button/high_importance_hovered.xml", w.Canvas())
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(0, 0))
+	b.Refresh()
+	test.AssertRendersToMarkup(t, "button/high_importance_not_hovered.xml", w.Canvas())
+
+	b.Importance = widget.MediumImportance
+	b.Refresh()
+	test.AssertRendersToMarkup(t, "button/not_hovered.xml", w.Canvas())
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+	b.Refresh()
+	test.AssertRendersToMarkup(t, "button/hovered.xml", w.Canvas())
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(0, 0))
+	b.Refresh()
+	test.AssertRendersToMarkup(t, "button/not_hovered.xml", w.Canvas())
+}
+
 func TestButton_ChangeTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
