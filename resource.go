@@ -69,6 +69,8 @@ func LoadResourceFromURLString(urlStr string) (Resource, error) {
 	return LoadResourceFromURLStringWithCtx(ctx, urlStr)
 }
 
+// LoadResourceFromURLStringWithCtx creates a new StaticResource in memory using the body of the specified URL.
+// The provided context will be passed the the http request.
 func LoadResourceFromURLStringWithCtx(ctx context.Context, urlStr string) (Resource, error) {
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
 	if err != nil {
