@@ -79,7 +79,7 @@ func (app *fyneApp) SendNotification(n *fyne.Notification) {
 		appID = "Fyne app"
 	}
 
-	script := fmt.Sprintf(notificationTemplate, title, content, appName)
+	script := fmt.Sprintf(notificationTemplate, title, content, appID)
 	go runScript("notify", script)
 }
 
