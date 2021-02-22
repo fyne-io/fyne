@@ -4,6 +4,7 @@
 package glfw
 
 import (
+	"reflect"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -28,9 +29,45 @@ func Test_Menu_AddsQuit(t *testing.T) {
 
 func Test_Menu_LeaveQuit(t *testing.T) {
 	w := createWindow("Menu Test").(*window)
-	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem("Quit", nil)))
+	quitFunc := func() {}
+	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem("Quit", quitFunc)))
 	bar := buildMenuOverlay(mainMenu, w.canvas)
 	assert.NotNil(t, bar)
 	assert.Equal(t, 1, len(mainMenu.Items[0].Items)) // no separator added
-	assert.Nil(t, mainMenu.Items[0].Items[0].Action) // no quit handler added
+	assert.Equal(t, reflect.ValueOf(quitFunc).Pointer(), reflect.ValueOf(mainMenu.Items[0].Items[0].Action).Pointer())
+}
+func Test_Menu_LeaveQuit_AddAction(t *testing.T) {
+	w := createWindow("Menu Test").(*window)
+	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem("Quit", nil)))
+	bar := buildMenuOverlay(mainMenu, w.canvas)
+	assert.NotNil(t, bar)
+	assert.Equal(t, 1, len(mainMenu.Items[0].Items))    // no separator added
+	assert.NotNil(t, mainMenu.Items[0].Items[0].Action) // quit action was added
+}
+
+func Test_Menu_CustomQuit(t *testing.T) {
+	w := createWindow("Menu Test").(*window)
+
+	quitFunc := func() {}
+	quitItem := fyne.NewMenuItem("Beenden", quitFunc)
+	quitItem.IsQuit = true
+
+	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", quitItem))
+	bar := buildMenuOverlay(mainMenu, w.canvas)
+
+	assert.NotNil(t, bar)
+	assert.Equal(t, 1, len(mainMenu.Items[0].Items)) // no separator added
+	assert.Equal(t, reflect.ValueOf(quitFunc).Pointer(), reflect.ValueOf(mainMenu.Items[0].Items[0].Action).Pointer())
+}
+
+func Test_Menu_CustomQuit_NoAction(t *testing.T) {
+	w := createWindow("Menu Test").(*window)
+	quitItem := fyne.NewMenuItem("Beenden", nil)
+	quitItem.IsQuit = true
+	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", quitItem))
+	bar := buildMenuOverlay(mainMenu, w.canvas)
+
+	assert.NotNil(t, bar)
+	assert.Equal(t, 1, len(mainMenu.Items[0].Items))    // no separator added
+	assert.NotNil(t, mainMenu.Items[0].Items[0].Action) // quit action was added
 }
