@@ -14,6 +14,9 @@ cmd/hello/hello.apk
 cmd/hello/hello.app
 cmd/hello/hello.exe
 
+### Issues playground
+cmd/issues_playground/*
+
 ### Tests
 **/testdata/failed
 
