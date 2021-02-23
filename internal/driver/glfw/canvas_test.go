@@ -441,6 +441,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 
 	content := widget.NewLabel("Content")
 	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
+	over.Show() // to ensure popup content size is not zero
 	w.SetContent(content)
 	w.Canvas().Overlays().Add(over)
 
