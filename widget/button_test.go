@@ -121,6 +121,31 @@ func TestButton_Disabled(t *testing.T) {
 	assert.False(t, button.Disabled())
 }
 
+func TestButton_Hover(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
+	w := test.NewWindow(b)
+	defer w.Close()
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+	test.AssertImageMatches(t, "button/hovered.png", w.Canvas().Capture())
+
+	b.Importance = widget.HighImportance
+	b.Refresh()
+	test.AssertImageMatches(t, "button/high_importance_hovered.png", w.Canvas().Capture())
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(0, 0))
+	b.Refresh()
+	test.AssertImageMatches(t, "button/high_importance.png", w.Canvas().Capture())
+
+	b.Importance = widget.MediumImportance
+	b.Refresh()
+	test.AssertImageMatches(t, "button/initial.png", w.Canvas().Capture())
+}
+
 func TestButton_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()

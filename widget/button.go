@@ -312,10 +312,20 @@ func (r *buttonRenderer) buttonColor() color.Color {
 	switch {
 	case r.button.Disabled():
 		return theme.DisabledButtonColor()
+	case r.button.hovered:
+		if r.button.Importance == HighImportance {
+			srcR, srcG, srcB, srcA := theme.PrimaryColor().RGBA()
+			dstR, dstG, dstB, dstA := theme.HoverColor().RGBA()
+			alpha := float32(dstA) / 0xFFFF
+			outR := alpha*float32(dstR) + (1-alpha)*float32(srcR)
+			outG := alpha*float32(dstG) + (1-alpha)*float32(srcG)
+			outB := alpha*float32(dstB) + (1-alpha)*float32(srcB)
+			outA := alpha*float32(dstA) + (1-alpha)*float32(srcA)
+			return color.RGBA{R: uint8(uint32(outR) >> 8), G: uint8(uint32(outG) >> 8), B: uint8(uint32(outB) >> 8), A: uint8(uint32(outA) >> 8)}
+		}
+		return theme.HoverColor()
 	case r.button.Importance == HighImportance:
 		return theme.PrimaryColor()
-	case r.button.hovered:
-		return theme.HoverColor()
 	default:
 		return theme.ButtonColor()
 	}
