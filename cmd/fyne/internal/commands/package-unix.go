@@ -66,9 +66,8 @@ func (p *Packager) packageUNIX() error {
 			return errors.Wrap(err, "Failed to write Makefile string")
 		}
 
-		tarCmd := exec.Command("tar", "zcf", p.name+".tar.gz", "-C", tempDir, "usr", "Makefile")
-		err = tarCmd.Run()
-		if err != nil {
+		tarCmd := exec.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
+		if err = tarCmd.Run(); err != nil {
 			return errors.Wrap(err, "Failed to create archive with tar")
 		}
 	}

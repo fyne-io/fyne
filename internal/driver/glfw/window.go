@@ -51,6 +51,7 @@ type window struct {
 	viewLock   sync.RWMutex
 	createLock sync.Once
 	decorate   bool
+	closing    bool
 	fixedSize  bool
 
 	cursor       desktop.Cursor
@@ -273,7 +274,7 @@ func (w *window) fitContent() {
 		return
 	}
 
-	if w.viewport == nil {
+	if w.isClosing() {
 		return
 	}
 
@@ -413,7 +414,7 @@ func (w *window) doShow() {
 }
 
 func (w *window) Hide() {
-	if w.viewport == nil {
+	if w.isClosing() {
 		return
 	}
 
@@ -431,10 +432,11 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
-	if w.viewport == nil {
+	if w.isClosing() {
 		return
 	}
 
+	w.closing = true
 	w.viewport.SetShouldClose(true)
 
 	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
@@ -457,7 +459,7 @@ func (w *window) ShowAndRun() {
 
 // Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
-	if w.viewport == nil {
+	if w.view() == nil {
 		return nil
 	}
 
@@ -1184,6 +1186,9 @@ func (w *window) focused(_ *glfw.Window, isFocused bool) {
 }
 
 func (w *window) RunWithContext(f func()) {
+	if w.isClosing() {
+		return
+	}
 	w.viewport.MakeContextCurrent()
 
 	f()
@@ -1198,7 +1203,7 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) rescaleOnMain() {
-	if w.viewport == nil {
+	if w.isClosing() {
 		return
 	}
 	w.fitContent()
@@ -1362,7 +1367,7 @@ func (w *window) create() {
 }
 
 func (w *window) doShowAgain() {
-	if w.viewport == nil {
+	if w.isClosing() {
 		return
 	}
 
@@ -1380,10 +1385,17 @@ func (w *window) doShowAgain() {
 	})
 }
 
+func (w *window) isClosing() bool {
+	return w.closing || w.viewport == nil
+}
+
 func (w *window) view() *glfw.Window {
 	w.viewLock.RLock()
 	defer w.viewLock.RUnlock()
 
+	if w.closing {
+		return nil
+	}
 	return w.viewport
 }
 

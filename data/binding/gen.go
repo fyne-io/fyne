@@ -14,7 +14,7 @@ import (
 const itemBindTemplate = `
 // {{ .Name }} supports binding a {{ .Type }} value.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 type {{ .Name }} interface {
 	DataItem
 	Get() ({{ .Type }}, error)
@@ -23,7 +23,7 @@ type {{ .Name }} interface {
 
 // External{{ .Name }} supports binding a {{ .Type }} value to an external value.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 type External{{ .Name }} interface {
 	{{ .Name }}
 	Reload() error
@@ -31,7 +31,7 @@ type External{{ .Name }} interface {
 
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
@@ -40,7 +40,7 @@ func New{{ .Name }}() {{ .Name }} {
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
 // If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
 		return New{{ .Name }}().(External{{ .Name }}) // never allow a nil value pointer
@@ -90,7 +90,7 @@ type prefBound{{ .Name }} struct {
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
 // Changes to this value will be saved to application storage and when the app starts the previous values will be read.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 	if prefBinds[p] != nil {
 		if listen, ok := prefBinds[p][key]; ok {
@@ -133,41 +133,57 @@ func (b *prefBound{{ .Name }}) checkForChange() {
 const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
-
+{{ if .Format }}
 	format string
-	from   {{ .Name }}
+{{ end }}
+	from {{ .Name }}
 }
 
 // {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
 // Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
 // {{ .Name }} if the parse was successful.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func {{ .Name }}ToString(v {{ .Name }}) String {
+{{- if .Format }}
 	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
+{{- else }}
+	str := &stringFrom{{ .Name }}{from: v}
+	v.AddListener(str)
+	return str
+{{- end }}
 }
-
+{{ if .Format }}
 // {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
 // presented using the specified format. Changes to the {{ .Name }} will be pushed to the String and setting
 // the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
 }
-
+{{ end }}
 func (s *stringFrom{{ .Name }}) Get() (string, error) {
 	val, err := s.from.Get()
 	if err != nil {
 		return "", err
 	}
-
+{{ if .ToString }}
+	return {{ .ToString }}(val)
+{{- else }}
 	return fmt.Sprintf(s.format, val), nil
+{{- end }}
 }
 
 func (s *stringFrom{{ .Name }}) Set(str string) error {
+{{- if .FromString }}
+	val, err := {{ .FromString }}(str)
+	if err != nil {
+		return err
+	}
+{{ else }}
 	var val {{ .Type }}
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -176,7 +192,7 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 	if n != 1 {
 		return errParseFailed
 	}
-
+{{ end }}
 	old, err := s.from.Get()
 	if err != nil {
 		return err
@@ -202,38 +218,47 @@ func (s *stringFrom{{ .Name }}) DataChanged() {
 const fromStringTemplate = `
 type stringTo{{ .Name }} struct {
 	base
-
+{{ if .Format }}
 	format string
-	from   String
+{{ end }}
+	from String
 }
 
 // StringTo{{ .Name }} creates a binding that connects a String data item to a {{ .Name }}.
 // Changes to the String will be parsed and pushed to the {{ .Name }} if the parse was successful, and setting
 // the {{ .Name }} update the String binding.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func StringTo{{ .Name }}(str String) {{ .Name }} {
+{{- if .Format }}
 	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
+{{- else }}
+	v := &stringTo{{ .Name }}{from: str}
+	str.AddListener(v)
+	return v
+{{- end }}
 }
-
+{{ if .Format }}
 // StringTo{{ .Name }}WithFormat creates a binding that connects a String data item to a {{ .Name }} and is
 // presented using the specified format. Changes to the {{ .Name }} will be parsed and if the format matches and
 // the parse is successful it will be pushed to the String. Setting the {{ .Name }} will push a formatted value
 // into the String.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
 	return v
 }
-
+{{ end }}
 func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	str, err := s.from.Get()
 	if str == "" || err != nil {
 		return {{ .Default }}, err
 	}
-
+{{ if .FromString }}
+	return {{ .FromString }}(str)
+{{- else }}
 	var val {{ .Type }}
 	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 	if err != nil {
@@ -244,10 +269,18 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	}
 
 	return val, nil
+{{- end }}
 }
 
 func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
+{{- if .ToString }}
+	str, err := {{ .ToString }}(val)
+	if err != nil {
+		return err
+	}
+{{- else }}
 	str := fmt.Sprintf(s.format, val)
+{{ end }}
 	old, err := s.from.Get()
 	if str == old {
 		return err
@@ -271,7 +304,7 @@ func (s *stringTo{{ .Name }}) DataChanged() {
 const listBindTemplate = `
 // {{ .Name }}List supports binding a list of {{ .Type }} values.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 type {{ .Name }}List interface {
 	DataList
 
@@ -285,7 +318,7 @@ type {{ .Name }}List interface {
 
 // External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 type External{{ .Name }}List interface {
 	{{ .Name }}List
 
@@ -294,7 +327,7 @@ type External{{ .Name }}List interface {
 
 // New{{ .Name }}List returns a bindable list of {{ .Type }} values.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func New{{ .Name }}List() {{ .Name }}List {
 	return &bound{{ .Name }}List{val: &[]{{ .Type }}{}}
 }
@@ -302,7 +335,7 @@ func New{{ .Name }}List() {{ .Name }}List {
 // Bind{{ .Name }}List returns a bound list of {{ .Type }} values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
-// Since: 2.0
+// Since: {{ .Since }}
 func Bind{{ .Name }}List(v *[]{{ .Type }}) External{{ .Name }}List {
 	if v == nil {
 		return New{{ .Name }}List().(External{{ .Name }}List)
@@ -484,9 +517,10 @@ func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 `
 
 type bindValues struct {
-	Name, Type, Default string
-	Format              string
-	SupportsPreferences bool
+	Name, Type, Default  string
+	Format, Since        string
+	SupportsPreferences  bool
+	FromString, ToString string // function names...
 }
 
 func newFile(name string) (*os.File, error) {
@@ -519,6 +553,9 @@ func main() {
 		return
 	}
 	defer itemFile.Close()
+	itemFile.WriteString(`
+import "fyne.io/fyne/v2"
+`)
 	convertFile, err := newFile("convert")
 	if err != nil {
 		return
@@ -527,6 +564,8 @@ func main() {
 	convertFile.WriteString(`
 import (
 	"fmt"
+
+	"fyne.io/fyne/v2"
 )
 `)
 	prefFile, err := newFile("preference")
@@ -545,6 +584,9 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 		return
 	}
 	defer listFile.Close()
+	listFile.WriteString(`
+import "fyne.io/fyne/v2"
+`)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
@@ -557,20 +599,30 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
+			FromString: "uriFromString", ToString: "uriToString"},
 	}
 	for _, b := range binds {
+		if b.Since == "" {
+			b.Since = "2.0"
+		}
+
 		writeFile(itemFile, item, b)
 		if b.SupportsPreferences {
 			writeFile(prefFile, preference, b)
 		}
-		if b.Format != "" {
+		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}
 		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {
-		if b.Format != "" {
+		if b.Since == "" {
+			b.Since = "2.0"
+		}
+
+		if b.Format != "" || b.FromString != "" {
 			writeFile(convertFile, fromString, b)
 		}
 	}

@@ -54,6 +54,7 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
 
 	d := &dialog{content: content, callback: callback, title: title, parent: parent}
+	d.layout = &dialogLayout{d: d}
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}

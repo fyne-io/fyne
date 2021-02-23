@@ -443,6 +443,13 @@ func showFile(file *FileDialog) *fileDialog {
 	return d
 }
 
+// MinSize returns the size that this dialog should not shrink below
+//
+// Since: 2.1
+func (f *FileDialog) MinSize() fyne.Size {
+	return f.dialog.win.MinSize()
+}
+
 // Show shows the file dialog.
 func (f *FileDialog) Show() {
 	if f.save {

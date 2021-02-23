@@ -237,12 +237,15 @@ func (e *Entry) DragEnd() {
 //
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
+	pevt := d.PointEvent
+	// Convert the relative drag position from our Entry coordinates to be relative
+	// for Scroll.Content
+	pevt.Position = pevt.Position.Subtract(e.scroll.Offset)
 	if !e.selecting {
-		e.selectRow, e.selectColumn = e.getRowCol(&d.PointEvent)
-
+		e.selectRow, e.selectColumn = e.getRowCol(&pevt)
 		e.selecting = true
 	}
-	e.updateMousePointer(&d.PointEvent, false)
+	e.updateMousePointer(&pevt, false)
 }
 
 // Enable this widget, updating any style or features appropriately.
@@ -1199,6 +1202,10 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.entry.validationStatus = newValidationStatus(r.entry)
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.size)
+
+		if r.entry.Text != "" {
+			r.entry.Validate()
+		}
 		r.Refresh()
 	}
 }
@@ -1289,7 +1296,9 @@ func (r *entryContentRenderer) Objects() []fyne.CanvasObject {
 	defer r.content.entry.propertyLock.RUnlock()
 	// Objects are generated dynamically force selection rectangles to appear underneath the text
 	if r.content.entry.selecting {
-		return append(r.selection, r.objects...)
+		objs := make([]fyne.CanvasObject, 0, len(r.selection)+len(r.objects))
+		objs = append(objs, r.selection...)
+		return append(objs, r.objects...)
 	}
 	return r.objects
 }

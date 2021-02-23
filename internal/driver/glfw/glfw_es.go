@@ -1,4 +1,5 @@
 // +build gles arm arm64
+// +build !darwin
 
 package glfw
 
