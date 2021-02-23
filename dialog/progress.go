@@ -1,7 +1,11 @@
 package dialog
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -27,8 +31,9 @@ func (p *ProgressDialog) SetValue(v float64) {
 func NewProgress(title, message string, parent fyne.Window) *ProgressDialog {
 	d := newDialog(title, message, theme.InfoIcon(), nil /*cancel?*/, parent)
 	bar := widget.NewProgressBar()
-	bar.Resize(fyne.NewSize(200, bar.MinSize().Height))
+	rect := canvas.NewRectangle(color.Transparent)
+	rect.SetMinSize(fyne.NewSize(200, 0))
 
-	d.setButtons(bar)
+	d.setButtons(container.NewMax(rect, bar))
 	return &ProgressDialog{d, bar}
 }

@@ -144,7 +144,7 @@ func TestPopUp_Move(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
-	win.Resize(fyne.NewSize(50, 50))
+	win.Resize(fyne.NewSize(70, 70))
 	pop := newPopUp(label, win.Canvas())
 	defer test.Canvas().Overlays().Remove(pop)
 
@@ -208,7 +208,7 @@ func TestPopUp_Resize(t *testing.T) {
 	pop.Show()
 	defer test.Canvas().Overlays().Remove(pop)
 
-	size := fyne.NewSize(50, 40)
+	size := fyne.NewSize(60, 50)
 	pop.Resize(size)
 	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 
@@ -289,7 +289,7 @@ func TestPopUp_Layout(t *testing.T) {
 	pop.ShowAtPosition(pos)
 	defer test.Canvas().Overlays().Remove(pop)
 
-	size := fyne.NewSize(50, 40)
+	size := fyne.NewSize(60, 50)
 	pop.Resize(size)
 	r := cache.Renderer(pop)
 	require.GreaterOrEqual(t, len(r.Objects()), 3)
@@ -304,6 +304,50 @@ func TestPopUp_Layout(t *testing.T) {
 		assert.Equal(t, theme.BackgroundColor(), bg.FillColor)
 	}
 	assert.Equal(t, r.Objects()[2], content)
+}
+
+func TestPopUp_ApplyThemeOnShow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 300))
+
+	pop := NewPopUp(NewLabel("Label"), w.Canvas())
+
+	test.ApplyTheme(t, test.Theme())
+	pop.Show()
+	test.AssertImageMatches(t, "popup/normal-onshow-theme-default.png", w.Canvas().Capture())
+	pop.Hide()
+
+	test.ApplyTheme(t, test.NewTheme())
+	pop.Show()
+	test.AssertImageMatches(t, "popup/normal-onshow-theme-changed.png", w.Canvas().Capture())
+	pop.Hide()
+
+	test.ApplyTheme(t, test.Theme())
+	pop.Show()
+	test.AssertImageMatches(t, "popup/normal-onshow-theme-default.png", w.Canvas().Capture())
+	pop.Hide()
+}
+
+func TestPopUp_ResizeOnShow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	pop := NewPopUp(NewLabel("Label"), w.Canvas())
+
+	pop.Show()
+	assert.Equal(t, size, pop.Size())
+	pop.Hide()
+
+	size = fyne.NewSize(500, 500)
+	w.Resize(size)
+	pop.Show()
+	assert.Equal(t, size, pop.Size())
+	pop.Hide()
 }
 
 func TestModalPopUp_Tapped(t *testing.T) {
@@ -362,4 +406,48 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	assert.Equal(t, 80-theme.Padding()*2, pop.Content.Size().Height)
 	assert.Equal(t, float32(80), pop.Size().Width)
 	assert.Equal(t, float32(80), pop.Size().Height)
+}
+
+func TestModalPopUp_ApplyThemeOnShow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 300))
+
+	pop := NewModalPopUp(NewLabel("Label"), w.Canvas())
+
+	test.ApplyTheme(t, test.Theme())
+	pop.Show()
+	test.AssertImageMatches(t, "popup/modal-onshow-theme-default.png", w.Canvas().Capture())
+	pop.Hide()
+
+	test.ApplyTheme(t, test.NewTheme())
+	pop.Show()
+	test.AssertImageMatches(t, "popup/modal-onshow-theme-changed.png", w.Canvas().Capture())
+	pop.Hide()
+
+	test.ApplyTheme(t, test.Theme())
+	pop.Show()
+	test.AssertImageMatches(t, "popup/modal-onshow-theme-default.png", w.Canvas().Capture())
+	pop.Hide()
+}
+
+func TestModalPopUp_ResizeOnShow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	pop := NewModalPopUp(NewLabel("Label"), w.Canvas())
+
+	pop.Show()
+	assert.Equal(t, size, pop.Size())
+	pop.Hide()
+
+	size = fyne.NewSize(500, 500)
+	w.Resize(size)
+	pop.Show()
+	assert.Equal(t, size, pop.Size())
+	pop.Hide()
 }
