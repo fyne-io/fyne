@@ -182,7 +182,6 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
-			// fmt.Printf("%#v ,canvas resize: %v\n", p, p.Content.Size())
 			p.Refresh()
 		} else {
 			overlay.Resize(size)
