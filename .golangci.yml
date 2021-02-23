@@ -1,91 +1,18 @@
+# See https://golangci-lint.run/usage/configuration/#config-file for configuration options.
+
 linters-settings:
-#  govet:
-#    check-shadowing: true
   golint:
     min-confidence: 0.8
   gocyclo:
     min-complexity: 50
-  staticcheck:
-    go: 1.12
-#  maligned:
-#    suggest-new: true
-#  dupl:
-#    threshold: 150
-#  depguard:
-#    list-type: blacklist
-#    include-go-root: false
-#    packages:
-#      - github.com/sirupsen/logrus
-#      - github.com/bmizerany/assert
-#  funlen:
-#    lines: 70
-#    statements: 40
-#  lll:
-#    line-length: 150
-#  nakedret:
-#    max-func-lines: 10
 
 linters:
   disable-all: true
   enable:
-#    - asciicheck
-#    - bodyclose
-#    - deadcode
-#    - depguard
-#    - dogsled
-#    - dupl
-#    - errcheck
-#    - exhaustive
-#    - funlen
-#    - gochecknoglobals
-#    - gochecknoinits
-#    - goconst
-#    - gocritic
     - gocyclo
-#    - gofmt
     - goimports
     - golint
-#    - gomnd
-#    - goprintffuncname
-#    - gosec
-#    - gosimple
     - govet
-#    - ineffassign
-#    - interfacer
-#    - lll
-#    - maligned
-#    - misspell
-#    - nakedret
-#    - noctx
-#    - nolintlint
-#    - prealloc
-#    - rowserrcheck
-#    - scopelint
-#    - staticcheck
-#    - structcheck
-#    - stylecheck
-#    - typecheck
-#    - unconvert
-#    - unparam
-#    - unused
-#    - varcheck
-#    - whitespace
 
 issues:
-#  exclude-rules:
-#    - path: _test\.go
-#      linters:
-#        - gocyclo
-#        - errcheck
-#        - dupl
-#        - gosec
-#        - gocritic
-#        - depguard
-#    - text: "Using the variable on range scope `tt` in function literal"
-#      linters:
-#        - scopelint
-
   exclude-use-default: false
-  exclude:
-    # errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
-    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
