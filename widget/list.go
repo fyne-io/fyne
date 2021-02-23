@@ -367,9 +367,8 @@ func (l *listLayout) updateList() {
 	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
 	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
 
-	updateItem := l.list.UpdateItem
-	if updateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for Table", nil)
+	if l.list.UpdateItem == nil {
+		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
 	wasVisible := l.visible
