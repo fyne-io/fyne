@@ -483,8 +483,7 @@ func (f *FileDialog) Resize(size fyne.Size) {
 	if f.dialog == nil {
 		return
 	}
-	minSize := f.dialog.win.MinSize()
-	f.dialog.win.Resize(minSize.Max(size))
+	f.dialog.win.Resize(size)
 }
 
 // Hide hides the file dialog.
