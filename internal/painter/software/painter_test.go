@@ -228,9 +228,8 @@ func TestPainter_paintRaster(t *testing.T) {
 		y = y / 5
 		if x%2 == y%2 {
 			return color.White
-		} else {
-			return color.Black
 		}
+		return color.Black
 	})
 
 	c := test.NewCanvas()
@@ -249,9 +248,8 @@ func TestPainter_paintRaster_scaled(t *testing.T) {
 		y = y / 5
 		if x%2 == y%2 {
 			return color.White
-		} else {
-			return color.Black
 		}
+		return color.Black
 	})
 
 	c := test.NewCanvas()
