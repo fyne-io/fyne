@@ -160,7 +160,7 @@ func writeResource(file, name string, f io.Writer) {
 		return
 	}
 
-	v := fmt.Sprintf("var %s = &fyne.StaticResource{\n\tStaticName:    %q,\n\tStaticContent: []byte(%q),\n}\n", name, staticRes.StaticName, staticRes.StaticContent)
+	v := fmt.Sprintf("var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(\n\t\t%q),\n}\n", name, staticRes.StaticName, staticRes.StaticContent)
 	_, err = f.Write([]byte(v))
 	if err != nil {
 		fyne.LogError("Unable to write to bundled file", err)
