@@ -18,11 +18,11 @@ func rootConfigDir() string {
 	return "/tmp/fyne-test/"
 }
 
-func (app *fyneApp) OpenURL(_ *url.URL) error {
+func (a *fyneApp) OpenURL(_ *url.URL) error {
 	return errors.New("Unable to open url for unknown operating system")
 }
 
-func (app *fyneApp) SendNotification(_ *fyne.Notification) {
+func (a *fyneApp) SendNotification(_ *fyne.Notification) {
 	fyne.LogError("Refusing to show notification for unknown operating system", nil)
 }
 
