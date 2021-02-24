@@ -25,8 +25,6 @@ jobs:
       with:
         version: v1.37
         skip-go-installation: true
-        # skip-pkg-cache: true
-        # skip-build-cache: true
 
     - name: Staticcheck
       run: staticcheck -go 1.12 -f stylish ./...
