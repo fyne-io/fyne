@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -128,6 +129,8 @@ func (s *Settings) createPreview() image.Image {
 
 	c.SetContent(tabs)
 	c.Resize(fyne.NewSize(380, 380))
+	// wait for indicator animation
+	time.Sleep(150 * time.Millisecond)
 	img := c.Capture()
 
 	painter.SvgCacheReset() // ensure we re-create the correct cached assets
