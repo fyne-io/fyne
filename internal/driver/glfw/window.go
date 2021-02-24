@@ -403,14 +403,6 @@ func (w *window) doShow() {
 	if w.canvas.Content() != nil {
 		w.canvas.Content().Show()
 	}
-
-	// Refresh popup overlays
-	for _, overlay := range w.canvas.Overlays().List() {
-		if _, ok := overlay.(*widget.PopUp); !ok {
-			continue
-		}
-		overlay.Refresh()
-	}
 }
 
 func (w *window) Hide() {
