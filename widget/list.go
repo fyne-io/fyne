@@ -337,17 +337,17 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 	l.updateList()
 }
 
-func (l *listLayout) setupListItem(item fyne.CanvasObject, id ListItemID) {
-	li := item.(*listItem)
+func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 	previousIndicator := li.selected
 	li.selected = false
 	for _, s := range l.list.selected {
 		if id == s {
 			li.selected = true
+			break
 		}
 	}
 	if previousIndicator != li.selected {
-		item.Refresh()
+		li.Refresh()
 	}
 	if f := l.list.UpdateItem; f != nil {
 		f(id, li.child)
