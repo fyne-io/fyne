@@ -141,14 +141,14 @@ func TestList_Select(t *testing.T) {
 	list.Select(5)
 	assert.Equal(t, float32(230), list.offsetY)
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
-	assert.Equal(t, visible[5].statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, visible[5].statusIndicator.FillColor, theme.PrimaryColor())
 	assert.True(t, visible[5].statusIndicator.Visible())
 
 	list.Select(6)
 	assert.Equal(t, float32(230), list.offsetY)
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.False(t, visible[5].statusIndicator.Visible())
-	assert.Equal(t, visible[6].statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, visible[6].statusIndicator.FillColor, theme.PrimaryColor())
 	assert.True(t, visible[6].statusIndicator.Visible())
 }
 
@@ -157,7 +157,7 @@ func TestList_Unselect(t *testing.T) {
 
 	list.Select(10)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.PrimaryColor())
 	assert.True(t, children[10].(*listItem).statusIndicator.Visible())
 
 	list.Unselect(10)
