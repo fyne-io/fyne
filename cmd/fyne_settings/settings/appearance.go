@@ -130,7 +130,7 @@ func (s *Settings) createPreview() image.Image {
 	c.SetContent(tabs)
 	c.Resize(fyne.NewSize(380, 380))
 	// wait for indicator animation
-	time.Sleep(150 * time.Millisecond)
+	time.Sleep(canvas.DurationShort)
 	img := c.Capture()
 
 	painter.SvgCacheReset() // ensure we re-create the correct cached assets
