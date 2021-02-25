@@ -291,9 +291,9 @@ func (li *listItemRenderer) Refresh() {
 var _ fyne.Layout = (*listLayout)(nil)
 
 type listLayout struct {
-	list       *List
-	dividers   []fyne.CanvasObject
-	children   []fyne.CanvasObject
+	list     *List
+	dividers []fyne.CanvasObject
+	children []fyne.CanvasObject
 
 	itemPool   *syncPool
 	visible    map[ListItemID]*listItem
