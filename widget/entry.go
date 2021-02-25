@@ -158,7 +158,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	// initialise
 	e.textProvider()
 	e.placeholderProvider()
-	scrolling := e.Wrapping != fyne.TextWrapOff
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
@@ -166,7 +165,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.content = &entryContent{entry: e}
 	e.scroll = &widget.Scroll{}
 	objects := []fyne.CanvasObject{box, line}
-	if scrolling {
+	if e.Wrapping != fyne.TextWrapOff {
 		e.scroll.Content = e.content
 		objects = append(objects, e.scroll)
 	} else {
@@ -1092,6 +1091,24 @@ type entryRenderer struct {
 func (r *entryRenderer) Destroy() {
 }
 
+func (r *entryRenderer) trailingInset() float32 {
+	xInset := float32(0)
+
+	if r.entry.ActionItem != nil {
+		xInset = theme.IconInlineSize() + 2*theme.Padding()
+	}
+
+	if r.entry.Validator != nil {
+		if r.entry.ActionItem == nil {
+			xInset = theme.IconInlineSize() + 2*theme.Padding()
+		} else {
+			xInset += theme.IconInlineSize() + theme.Padding()
+		}
+	}
+
+	return xInset
+}
+
 func (r *entryRenderer) Layout(size fyne.Size) {
 	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
 	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
@@ -1099,10 +1116,8 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
-	xInset := float32(0)
 	if r.entry.ActionItem != nil {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		xInset = theme.IconInlineSize() + 2*theme.Padding()
 
 		r.entry.ActionItem.Resize(actionIconSize)
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
@@ -1117,14 +1132,12 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 		if r.entry.ActionItem == nil {
 			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
-			xInset = theme.IconInlineSize() + 2*theme.Padding()
 		} else {
 			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-3*theme.Padding(), theme.Padding()*2))
-			xInset += theme.IconInlineSize() + theme.Padding()
 		}
 	}
 
-	entrySize := size.Subtract(fyne.NewSize(xInset, theme.InputBorderSize()*2))
+	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	entryPos := fyne.NewPos(0, theme.InputBorderSize())
 	if r.entry.Wrapping == fyne.TextWrapOff {
 		r.entry.content.Resize(entrySize)
@@ -1164,12 +1177,44 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	provider := r.entry.textProvider()
-	content := r.entry.Text
+	text := r.entry.Text
+	content := r.entry.content
 	focused := r.entry.focused
+	size := r.entry.size
+	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
 
-	if content != string(provider.buffer) {
-		r.entry.SetText(content)
+	// correct our scroll wrappers if the wrap mode changed
+	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
+	if wrapping == fyne.TextWrapOff && r.scroll.Content != nil {
+		r.scroll.Hide()
+		r.scroll.Content = nil
+		content.Move(fyne.NewPos(0, theme.InputBorderSize()))
+		content.Resize(entrySize)
+
+		for i, o := range r.objects {
+			if o == r.scroll {
+				r.objects[i] = content
+				break
+			}
+		}
+	} else if wrapping != fyne.TextWrapOff && r.scroll.Content == nil {
+		r.scroll.Content = content
+		content.Move(fyne.NewPos(0, 0))
+		r.scroll.Move(fyne.NewPos(0, theme.InputBorderSize()))
+		r.scroll.Resize(entrySize)
+		r.scroll.Show()
+
+		for i, o := range r.objects {
+			if o == content {
+				r.objects[i] = r.scroll
+				break
+			}
+		}
+	}
+
+	if text != string(provider.buffer) {
+		r.entry.SetText(text)
 		return
 	}
 
