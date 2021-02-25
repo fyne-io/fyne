@@ -1392,20 +1392,19 @@ func TestEntry_TextWrap(t *testing.T) {
 		"single line WrapOff": {
 			want: "entry/wrap_single_line_off.xml",
 		},
-		// Disallowed - fallback to TextWrapOff
 		"single line Truncate": {
 			wrap: fyne.TextTruncate,
-			want: "entry/wrap_single_line_off.xml",
+			want: "entry/wrap_single_line_truncate.xml",
 		},
-		// Disallowed - fallback to TextWrapOff
+		// Disallowed - fallback to TextWrapTruncate (horizontal)
 		"single line WrapBreak": {
 			wrap: fyne.TextWrapBreak,
-			want: "entry/wrap_single_line_off.xml",
+			want: "entry/wrap_single_line_truncate.xml",
 		},
-		// Disallowed - fallback to TextWrapOff
+		// Disallowed - fallback to TextWrapTruncate (horizontal)
 		"single line WrapWord": {
 			wrap: fyne.TextWrapWord,
-			want: "entry/wrap_single_line_off.xml",
+			want: "entry/wrap_single_line_truncate.xml",
 		},
 		"multi line WrapOff": {
 			multiLine: true,
@@ -1415,7 +1414,7 @@ func TestEntry_TextWrap(t *testing.T) {
 		"multi line Truncate": {
 			multiLine: true,
 			wrap:      fyne.TextTruncate,
-			want:      "entry/wrap_multi_line_off.xml",
+			want:      "entry/wrap_multi_line_truncate.xml",
 		},
 		"multi line WrapBreak": {
 			multiLine: true,
@@ -1443,6 +1442,25 @@ func TestEntry_TextWrap(t *testing.T) {
 			test.AssertRendersToMarkup(t, tt.want, c)
 		})
 	}
+}
+
+func TestEntry_TextWrap_Changed(t *testing.T) {
+	e, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	c.Focus(e)
+	e.Wrapping = fyne.TextWrapOff
+	e.SetText("Testing Wrapping")
+	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
+
+	e.Wrapping = fyne.TextTruncate
+	e.Refresh()
+	test.AssertRendersToMarkup(t, "entry/wrap_single_line_truncate.xml", c)
+
+	e.Wrapping = fyne.TextWrapOff
+	e.Refresh()
+	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
