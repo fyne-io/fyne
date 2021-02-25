@@ -288,9 +288,8 @@ func (li *listItemRenderer) Refresh() {
 var _ fyne.Layout = (*listLayout)(nil)
 
 type listLayout struct {
-	list       *List
-	separators []fyne.CanvasObject
-	children   []fyne.CanvasObject
+	list     *List
+	children []fyne.CanvasObject
 
 	itemPool   *syncPool
 	visible    map[ListItemID]*listItem
@@ -309,9 +308,7 @@ func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	if f := l.list.Length; f != nil {
-		separatorThickness := theme.SeparatorThicknessSize()
-		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+separatorThickness)*float32(f())-separatorThickness)
+		return fyne.NewSize(l.list.itemMin.Width, l.list.itemMin.Height*float32(f()))
 	}
 	return fyne.NewSize(0, 0)
 }
@@ -356,15 +353,15 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 func (l *listLayout) updateList() {
 	l.renderLock.Lock()
 	defer l.renderLock.Unlock()
-	separatorThickness := theme.SeparatorThicknessSize()
+
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {
 		length = f()
 	}
 	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+theme.SeparatorThicknessSize()))) + 1
-	offY := l.list.offsetY - float32(int(l.list.offsetY)%int(l.list.itemMin.Height+separatorThickness))
-	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
+	offY := l.list.offsetY
+	minRow := ListItemID(offY / (l.list.itemMin.Height))
 	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
 
 	if l.list.UpdateItem == nil {
@@ -389,7 +386,7 @@ func (l *listLayout) updateList() {
 		c.Resize(size)
 		l.setupListItem(c, row)
 
-		y += l.list.itemMin.Height + separatorThickness
+		y += l.list.itemMin.Height
 		l.visible[row] = c
 		cells = append(cells, c)
 	}
@@ -400,33 +397,7 @@ func (l *listLayout) updateList() {
 		}
 	}
 	l.children = cells
-	l.updateSeparators()
 
 	objects := l.children
-	objects = append(objects, l.separators...)
 	l.list.scroller.Content.(*fyne.Container).Objects = objects
-}
-
-func (l *listLayout) updateSeparators() {
-	if len(l.children) > 1 {
-		if len(l.separators) > len(l.children) {
-			l.separators = l.separators[:len(l.children)]
-		} else {
-			for i := len(l.separators); i < len(l.children); i++ {
-				l.separators = append(l.separators, NewSeparator())
-			}
-		}
-	} else {
-		l.separators = nil
-	}
-
-	separatorThickness := theme.SeparatorThicknessSize()
-	for i, child := range l.children {
-		if i == 0 {
-			continue
-		}
-		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-separatorThickness))
-		l.separators[i].Resize(fyne.NewSize(l.list.Size().Width, separatorThickness))
-		l.separators[i].Show()
-	}
 }
