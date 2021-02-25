@@ -304,7 +304,26 @@ func TestTable_ShowVisible(t *testing.T) {
 	assert.Equal(t, 8, len(cellRenderer.Objects()))
 }
 
-type separatorThicknessZeroTheme struct{}
+func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	test.ApplyTheme(t, &separatorThicknessZeroTheme{})
+
+	table := NewTable(
+		func() (int, int) { return 500, 150 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	assert.NotPanics(t, func() {
+		table.Resize(fyne.NewSize(400, 644))
+	})
+}
+
+type separatorThicknessZeroTheme struct {
+}
 
 func (separatorThicknessZeroTheme) Color(c fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	return theme.DefaultTheme().Color(c, v)
@@ -323,22 +342,4 @@ func (separatorThicknessZeroTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 0
 	}
 	return theme.DefaultTheme().Size(s)
-}
-
-func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-
-	test.ApplyTheme(t, &separatorThicknessZeroTheme{})
-
-	table := NewTable(
-		func() (int, int) { return 500, 150 },
-		func() fyne.CanvasObject {
-			return NewLabel("placeholder")
-		},
-		func(TableCellID, fyne.CanvasObject) {})
-
-	assert.NotPanics(t, func() {
-		table.Resize(fyne.NewSize(400, 644))
-	})
 }
