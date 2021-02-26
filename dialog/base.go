@@ -40,7 +40,7 @@ type dialog struct {
 	desiredSize fyne.Size
 
 	win            *widget.PopUp
-	bg             *canvas.Rectangle
+	bg             *themedBackground
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
@@ -120,28 +120,13 @@ func (d *dialog) Show() {
 }
 
 func (d *dialog) Refresh() {
-	d.applyTheme()
 	d.win.Refresh()
 }
 
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
 	d.desiredSize = size
-	maxSize := d.win.Size()
-	minSize := d.win.MinSize()
-	newWidth := size.Width
-	if size.Width > maxSize.Width {
-		newWidth = maxSize.Width
-	} else if size.Width < minSize.Width {
-		newWidth = minSize.Width
-	}
-	newHeight := size.Height
-	if size.Height > maxSize.Height {
-		newHeight = maxSize.Height
-	} else if size.Height < minSize.Height {
-		newHeight = minSize.Height
-	}
-	d.win.Resize(fyne.NewSize(newWidth, newHeight))
+	d.win.Resize(size)
 }
 
 // SetDismissText allows custom text to be set in the confirmation button
@@ -164,12 +149,6 @@ func (d *dialog) SetOnClosed(closed func()) {
 	}
 }
 
-func (d *dialog) applyTheme() {
-	r, g, b, _ := theme.BackgroundColor().RGBA()
-	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
-	d.bg.FillColor = bg
-}
-
 func (d *dialog) hideWithResponse(resp bool) {
 	d.win.Hide()
 	if d.callback != nil {
@@ -178,8 +157,8 @@ func (d *dialog) hideWithResponse(resp bool) {
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
-	d.bg = canvas.NewRectangle(theme.BackgroundColor())
-	d.label = newDialogTitle(d.title, d)
+	d.bg = newThemedBackground()
+	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	var content fyne.CanvasObject
 	if d.icon == nil {
@@ -227,30 +206,55 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 	return list
 }
 
-// dialogTitle is really just a normal title but we use the Refresh() hook to update the background rectangle.
-type dialogTitle struct {
-	widget.Label
+// ===============================================================
+// ThemedBackground
+// ===============================================================
 
-	d *dialog
+type themedBackground struct {
+	widget.BaseWidget
 }
 
-// Refresh applies the current theme to the whole dialog before refreshing the underlying label.
-func (t *dialogTitle) Refresh() {
-	t.d.Refresh()
-
-	t.BaseWidget.Refresh()
+func newThemedBackground() *themedBackground {
+	t := &themedBackground{}
+	t.ExtendBaseWidget(t)
+	return t
 }
 
-func newDialogTitle(title string, d *dialog) *dialogTitle {
-	l := &dialogTitle{}
-	l.Text = title
-	l.Alignment = fyne.TextAlignLeading
-	l.TextStyle.Bold = true
-
-	l.d = d
-	l.ExtendBaseWidget(l)
-	return l
+func (t *themedBackground) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
+	rect := canvas.NewRectangle(theme.BackgroundColor())
+	return &themedBackgroundRenderer{rect, []fyne.CanvasObject{rect}}
 }
+
+type themedBackgroundRenderer struct {
+	rect    *canvas.Rectangle
+	objects []fyne.CanvasObject
+}
+
+func (renderer *themedBackgroundRenderer) Destroy() {
+}
+
+func (renderer *themedBackgroundRenderer) Layout(size fyne.Size) {
+	renderer.rect.Resize(size)
+}
+
+func (renderer *themedBackgroundRenderer) MinSize() fyne.Size {
+	return renderer.rect.MinSize()
+}
+
+func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject {
+	return renderer.objects
+}
+
+func (renderer *themedBackgroundRenderer) Refresh() {
+	r, g, b, _ := theme.BackgroundColor().RGBA()
+	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
+	renderer.rect.FillColor = bg
+}
+
+// ===============================================================
+// DialogLayout
+// ===============================================================
 
 type dialogLayout struct {
 	d *dialog
@@ -260,7 +264,7 @@ func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	l.d.bg.Move(fyne.NewPos(0, 0))
 	l.d.bg.Resize(size)
 
-	btnMin := obj[3].MinSize().Max(obj[3].Size())
+	btnMin := obj[3].MinSize()
 
 	// icon
 	iconHeight := padHeight*2 + l.d.label.MinSize().Height*2 - theme.Padding()
@@ -280,7 +284,7 @@ func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 
 func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	contentMin := obj[2].MinSize()
-	btnMin := obj[3].MinSize().Max(obj[3].Size())
+	btnMin := obj[3].MinSize()
 
 	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
 	height := contentMin.Height + btnMin.Height + l.d.label.MinSize().Height + theme.Padding() + padHeight*2
