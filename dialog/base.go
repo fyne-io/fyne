@@ -145,21 +145,7 @@ func (d *dialog) Refresh() {
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
 	d.desiredSize = size
-	maxSize := d.win.Size()
-	minSize := d.win.MinSize()
-	newWidth := size.Width
-	if size.Width > maxSize.Width {
-		newWidth = maxSize.Width
-	} else if size.Width < minSize.Width {
-		newWidth = minSize.Width
-	}
-	newHeight := size.Height
-	if size.Height > maxSize.Height {
-		newHeight = maxSize.Height
-	} else if size.Height < minSize.Height {
-		newHeight = minSize.Height
-	}
-	d.win.Resize(fyne.NewSize(newWidth, newHeight))
+	d.win.Resize(size)
 }
 
 // SetDismissText allows custom text to be set in the confirmation button

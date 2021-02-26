@@ -340,8 +340,7 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
-			size := p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)).Min(areaSize)
-			p.Resize(size)
+			p.Refresh()
 		} else {
 			overlay.Resize(areaSize)
 			overlay.Move(topLeft)

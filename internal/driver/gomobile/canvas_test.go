@@ -227,6 +227,26 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	assert.Equal(t, 2, tapped)
 }
 
+func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+
+	c.SetContent(widget.NewLabel("Content"))
+
+	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), c)
+	popupBgSize := fyne.NewSize(200, 200)
+	popup.Show()
+	popup.Resize(popupBgSize)
+
+	canvasSize := fyne.NewSize(600, 700)
+	c.resize(canvasSize)
+
+	// get popup content padding dynamically
+	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
+
+	assert.Equal(t, popupBgSize.Subtract(popupContentPadding), popup.Content.Size())
+	assert.Equal(t, canvasSize, popup.Size())
+}
+
 func TestCanvas_Focusable(t *testing.T) {
 	content := newFocusableEntry()
 	c := NewCanvas().(*mobileCanvas)

@@ -48,7 +48,6 @@ func (p *PopUp) Move(pos fyne.Position) {
 // Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
 	p.innerSize = size
-	p.BaseWidget.Resize(p.Canvas.Size())
 	// The canvas size might not have changed and therefore the Resize won't trigger a layout.
 	// Until we have a widget.Relayout() or similar, the renderer's refresh will do the re-layout.
 	p.Refresh()
@@ -57,9 +56,6 @@ func (p *PopUp) Resize(size fyne.Size) {
 // Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if !p.overlayShown {
-		if p.Size().IsZero() {
-			p.Resize(p.MinSize())
-		}
 		p.Canvas.Overlays().Add(p)
 		p.overlayShown = true
 	}
