@@ -8,8 +8,8 @@
 //   package main
 //
 //   import "fyne.io/fyne/v2/app"
-//   import "fyne.io/fyne/v2/widget"
 //   import "fyne.io/fyne/v2/container"
+//   import "fyne.io/fyne/v2/widget"
 //
 //   func main() {
 //   	a := app.New()
