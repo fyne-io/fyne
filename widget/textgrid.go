@@ -125,13 +125,13 @@ func (t *TextGrid) Text() string {
 
 	for i, row := range t.Rows {
 		next := 0
-		for c, r := range row.Cells {
-			if c < next {
+		for col, cell := range row.Cells {
+			if col < next {
 				continue
 			}
-			runes = append(runes, r.Rune)
-			if r.Rune == '\t' {
-				next = nextTab(c, t.tabWidth())
+			runes = append(runes, cell.Rune)
+			if cell.Rune == '\t' {
+				next = nextTab(col, t.tabWidth())
 			}
 		}
 		if i < len(t.Rows)-1 {
@@ -154,16 +154,26 @@ func (t *TextGrid) Row(row int) TextGridRow {
 
 // RowText returns a string representation of the content at the row specified.
 // If the index is out of bounds it returns an empty string.
-// Tab characters do not have padding spaces removed.
 func (t *TextGrid) RowText(row int) string {
 	rowData := t.Row(row)
-	runes := make([]rune, len(rowData.Cells))
-	c := 0
-	for _, r := range rowData.Cells {
-		runes[c] = r.Rune
-		c++
+	count := len(rowData.Cells)
+
+	if count <= 0 {
+		return ""
 	}
 
+	runes := make([]rune, 0, count)
+
+	next := 0
+	for col, cell := range rowData.Cells {
+		if col < next {
+			continue
+		}
+		runes = append(runes, cell.Rune)
+		if cell.Rune == '\t' {
+			next = nextTab(col, t.tabWidth())
+		}
+	}
 	return string(runes)
 }
 
