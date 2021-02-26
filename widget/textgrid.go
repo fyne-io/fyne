@@ -15,7 +15,6 @@ const (
 	textAreaSpaceSymbol   = '·'
 	textAreaTabSymbol     = '→'
 	textAreaNewLineSymbol = '↵'
-	textTabIndent         = "    "
 )
 
 var (
@@ -68,7 +67,7 @@ type TextGrid struct {
 
 	ShowLineNumbers bool
 	ShowWhitespace  bool
-	tabWidth        int
+	TabWidth        int // If set to 0 the fyne.DefaultTabWidth is used
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -96,7 +95,7 @@ func (t *TextGrid) SetText(text string) {
 			cells = append(cells, TextGridCell{Rune: r})
 			if r == '\t' {
 				col := len(cells)
-				next := nextTab(col-1, t.TabWidth())
+				next := nextTab(col-1, t.tabWidth())
 				for i := col; i < next; i++ {
 					cells = append(cells, TextGridCell{Rune: ' '})
 				}
@@ -109,20 +108,12 @@ func (t *TextGrid) SetText(text string) {
 	t.Refresh()
 }
 
-// TabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
-func (t *TextGrid) TabWidth() int {
-	if t.tabWidth == 0 {
+// tabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
+func (t *TextGrid) tabWidth() int {
+	if t.TabWidth == 0 {
 		return fyne.DefaultTabWidth
 	}
-	return t.tabWidth
-}
-
-// SetTabWidth sets the tab width if the supplied value is greater than 0
-// This has to be set prior to calling SetText.
-func (t *TextGrid) SetTabWidth(tabWidth int) {
-	if tabWidth > 0 {
-		t.tabWidth = tabWidth
-	}
+	return t.TabWidth
 }
 
 // Text returns the contents of the buffer as a single string (with no style information).
@@ -148,7 +139,7 @@ func (t *TextGrid) Text() string {
 			}
 			runes = append(runes, r.Rune)
 			if r.Rune == '\t' {
-				next = nextTab(c, t.TabWidth())
+				next = nextTab(c, t.tabWidth())
 			}
 		}
 		if i < len(t.Rows)-1 {
