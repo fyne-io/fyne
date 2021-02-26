@@ -1,0 +1,18 @@
+name: Mobile Tests
+on: [push, pull_request]
+
+jobs:
+  mobile_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.x
+
+    - name: Get dependencies
+      run: sudo apt-get update && sudo apt-get install gcc
+
+    - name: Tests
+      run: go test -tags ci,mobile ./...
+
