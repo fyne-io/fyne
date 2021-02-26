@@ -19,7 +19,7 @@ func makeInfiniteQueue() (chan<- *itemData, <-chan *itemData) {
 	in := make(chan *itemData)
 	out := make(chan *itemData)
 	go func() {
-		var queued []*itemData
+		queued := make([]*itemData, 0, 1024)
 		pending := func() chan *itemData {
 			if len(queued) == 0 {
 				return nil
