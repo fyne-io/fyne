@@ -108,14 +108,6 @@ func (t *TextGrid) SetText(text string) {
 	t.Refresh()
 }
 
-// tabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
-func (t *TextGrid) tabWidth() int {
-	if t.TabWidth == 0 {
-		return fyne.DefaultTabWidth
-	}
-	return t.TabWidth
-}
-
 // Text returns the contents of the buffer as a single string (with no style information).
 // It reconstructs the lines by joining with a `\n` character.
 // Tab characters have padded spaces removed.
@@ -443,6 +435,14 @@ func (t *textGridRenderer) refreshGrid() {
 	for ; x < len(t.objects)/2; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
+}
+
+// tabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
+func (t *TextGrid) tabWidth() int {
+	if t.TabWidth == 0 {
+		return fyne.DefaultTabWidth
+	}
+	return t.TabWidth
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
