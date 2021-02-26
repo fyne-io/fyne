@@ -13,24 +13,15 @@ jobs:
     - name: Get dependencies
       run: |
         sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
-        go install golang.org/x/tools/cmd/goimports@latest
-        go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-        go install golang.org/x/lint/golint@latest
         go install honnef.co/go/tools/cmd/staticcheck@v0.1.2
     - name: Cleanup repository
       run: rm -rf vendor/
 
-    - name: Vet
-      run: go vet -tags ci ./...
-
-    - name: Goimports
-      run: test -z $(goimports -e -d . | tee /dev/stderr)
-
-    - name: Gocyclo
-      run: gocyclo -over 50 .
-
-    - name: Golint
-      run: golint -set_exit_status $(go list -tags ci ./...)
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2.4.0
+      with:
+        version: v1.37
+        skip-go-installation: true
 
     - name: Staticcheck
-      run: staticcheck -go 1.12 -f stylish ./...
+      run: staticcheck -go 1.12 ./...
