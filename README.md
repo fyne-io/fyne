@@ -42,13 +42,19 @@ To run a showcase of the features of Fyne execute the following:
 And you should see something like this (after you click a few buttons):
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-dark.png" width="752" height="617" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-dark.png" width="752" height="617" alt="Fyne Demo Dark Theme" style="max-width: 100%" />
 </p>
 
 Or if you are using the light theme:
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-light.png" width="752" height="617" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-light.png" width="752" height="617" alt="Fyne Demo Light Theme" style="max-width: 100%" />
+</p>
+
+And even running on a mobile device:
+
+<p align="center" markdown="1" style="max-width: 100%">
+  <img src="img/widgets-mobile-light.png" width="348" height="617" alt="Fyne Demo Mobile Light Theme" style="max-width: 100%" />
 </p>
 
 # Getting Started
@@ -86,7 +92,7 @@ func main() {
 
 And you can run that simply as:
 
-    go run main.go
+    $ go run main.go
 
 It should look like this:
 
@@ -103,6 +109,12 @@ It should look like this:
 > Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
 
+## Run in mobile simulation
+
+There is a helpful mobile simulation mode that gives a hint of how your app would work on a mobile device:
+
+    $ go run -tags mobile main.go
+
 # Installing
 
 Using `go install` will copy the executable into your go `bin` dir.
@@ -112,7 +124,17 @@ application location you can use the fyne utility and the "install" subcommand.
     $ go get fyne.io/fyne/v2/cmd/fyne
     $ fyne install
 
-# Packaging a release
+# Packaging for mobile
+
+To run on a mobile device it is necessary to package up the application.
+To do this we can use the fyne utility "package" subcommand.
+You will need to add appropriate parameters as prompted, but the basic command is shown below.
+Once packaged you can install using the platform development tools or the fyne "install" subcommand.
+
+    $ fyne package -os android -appID my.domain.appname
+    $ fyne install -os android
+
+# Preparing a release
 
 Using the fyne utility "release" subcommand you can package up your app for release
 to app stores and market places. Make sure you have the standard build tools installed
