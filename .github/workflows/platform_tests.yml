@@ -9,6 +9,7 @@ jobs:
       matrix:
         go-version: [1.12.x, 1.15.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
+        tags: ["ci", "ci mobile"]
 
     steps:
     - uses: actions/checkout@v2
@@ -31,19 +32,19 @@ jobs:
     #    fi
 
     - name: Tests
-      run: go test -tags ci ./...
+      run: go test -tags '${{ matrix.tags }}' ./...
 
     - name: Update coverage
       run: |
         GO111MODULE=off go get github.com/mattn/goveralls
 
         set -e
-        go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
+        go test -tags '${{ matrix.tags }}' -covermode=atomic -coverprofile=coverage.out ./...
         if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
-      if: ${{ runner.os == 'Linux' }}
+      if: ${{ runner.os == 'Linux' && matrix.tags == 'ci' }}
 
     - name: Update PR Coverage
       uses: shogo82148/actions-goveralls@v1
       with:
         path-to-profile: coverage.out
-      if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
+      if: ${{ runner.os == 'Linux' && matrix.tags == 'ci' && github.event_name == 'push' }}
