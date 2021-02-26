@@ -308,7 +308,7 @@ func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	test.ApplyTheme(t, &separatorThicknessZeroTheme{})
+	test.ApplyTheme(t, &separatorThicknessZeroTheme{theme.DefaultTheme()})
 
 	table := NewTable(
 		func() (int, int) { return 500, 150 },
@@ -323,18 +323,7 @@ func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
 }
 
 type separatorThicknessZeroTheme struct {
-}
-
-func (separatorThicknessZeroTheme) Color(c fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	return theme.DefaultTheme().Color(c, v)
-}
-
-func (separatorThicknessZeroTheme) Font(style fyne.TextStyle) fyne.Resource {
-	return theme.DefaultTheme().Font(style)
-}
-
-func (separatorThicknessZeroTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
-	return theme.DefaultTheme().Icon(n)
+	fyne.Theme
 }
 
 func (separatorThicknessZeroTheme) Size(s fyne.ThemeSizeName) float32 {
