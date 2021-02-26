@@ -303,3 +303,32 @@ func TestTable_ShowVisible(t *testing.T) {
 	cellRenderer.Refresh()
 	assert.Equal(t, 8, len(cellRenderer.Objects()))
 }
+
+func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	test.ApplyTheme(t, &separatorThicknessZeroTheme{test.Theme()})
+
+	table := NewTable(
+		func() (int, int) { return 500, 150 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	assert.NotPanics(t, func() {
+		table.Resize(fyne.NewSize(400, 644))
+	})
+}
+
+type separatorThicknessZeroTheme struct {
+	fyne.Theme
+}
+
+func (t *separatorThicknessZeroTheme) Size(n fyne.ThemeSizeName) float32 {
+	if n == theme.SizeNameSeparatorThickness {
+		return 0
+	}
+	return t.Theme.Size(n)
+}

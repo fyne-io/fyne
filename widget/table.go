@@ -330,7 +330,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	divs := 0
 	i := minCol
-	for x := offX + visibleColWidths[i]; i < minCol+colDivs; x += visibleColWidths[i] + separatorThickness {
+	for x := offX + visibleColWidths[i]; i < minCol+colDivs && divs < len(t.dividers); x += visibleColWidths[i] + separatorThickness {
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(theme.Padding()+x-t.scroll.Offset.X, theme.Padding()))
@@ -341,7 +341,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	i = 0
 	count := int(t.scroll.Offset.Y) % int(t.cellSize.Height+separatorThickness)
-	for y := theme.Padding() + t.scroll.Offset.Y - float32(count) - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + separatorThickness {
+	for y := theme.Padding() + t.scroll.Offset.Y - float32(count) - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1 && divs < len(t.dividers); y += t.cellSize.Height + separatorThickness {
 		if y < theme.Padding()+t.scroll.Offset.Y {
 			continue
 		}
