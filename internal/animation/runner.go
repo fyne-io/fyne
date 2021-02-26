@@ -9,19 +9,24 @@ import (
 
 // Runner is the main driver for animations package
 type Runner struct {
-	animationMutex sync.RWMutex
-	animations     []*anim
+	animationMutex    sync.RWMutex
+	animations        []*anim
+	pendingAnimations []*anim
+
+	runnerStarted bool
 }
 
 // Start will register the passed application and initiate its ticking.
 func (r *Runner) Start(a *fyne.Animation) {
 	r.animationMutex.Lock()
 	defer r.animationMutex.Unlock()
-	wasStopped := len(r.animations) == 0
 
-	r.animations = append(r.animations, newAnim(a))
-	if wasStopped {
+	if !r.runnerStarted {
+		r.runnerStarted = true
+		r.animations = append(r.animations, newAnim(a))
 		r.runAnimations()
+	} else {
+		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
 }
 
@@ -29,14 +34,31 @@ func (r *Runner) Start(a *fyne.Animation) {
 func (r *Runner) Stop(a *fyne.Animation) {
 	r.animationMutex.Lock()
 	defer r.animationMutex.Unlock()
-	oldList := r.animations
-	var newList []*anim
-	for _, item := range oldList {
+
+	newList := make([]*anim, 0, len(r.animations))
+	stopped := false
+	for _, item := range r.animations {
 		if item.a != a {
 			newList = append(newList, item)
+		} else {
+			item.setStopped()
+			stopped = true
 		}
 	}
 	r.animations = newList
+	if stopped {
+		return
+	}
+
+	newList = make([]*anim, 0, len(r.pendingAnimations))
+	for _, item := range r.pendingAnimations {
+		if item.a != a {
+			newList = append(newList, item)
+		} else {
+			item.setStopped()
+		}
+	}
+	r.pendingAnimations = newList
 }
 
 func (r *Runner) runAnimations() {
@@ -47,19 +69,22 @@ func (r *Runner) runAnimations() {
 			<-draw.C
 			r.animationMutex.Lock()
 			oldList := r.animations
-			r.animations = nil // clear the list so we can append any new ones after processing
 			r.animationMutex.Unlock()
-			var newList []*anim
+			newList := make([]*anim, 0, len(oldList))
 			for _, a := range oldList {
-				if r.tickAnimation(a) {
+				if !a.isStopped() && r.tickAnimation(a) {
 					newList = append(newList, a)
 				}
 			}
 			r.animationMutex.Lock()
-			r.animations = append(newList, r.animations...)
+			r.animations = append(newList, r.pendingAnimations...)
+			r.pendingAnimations = nil
 			done = len(r.animations) == 0
 			r.animationMutex.Unlock()
 		}
+		r.animationMutex.Lock()
+		r.runnerStarted = false
+		r.animationMutex.Unlock()
 		draw.Stop()
 	}()
 }
@@ -90,6 +115,7 @@ func (r *Runner) tickAnimation(a *anim) bool {
 
 		a.start = time.Now()
 		a.end = a.start.Add(a.a.Duration)
+		return true
 	}
 
 	delta := time.Since(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
