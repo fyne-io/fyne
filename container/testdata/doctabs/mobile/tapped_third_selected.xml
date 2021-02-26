@@ -7,19 +7,19 @@
 						<widget size="87x32" type="*container.tabButton">
 							<text bold pos="4,4" size="79x21">Test1</text>
 							<widget pos="63,6" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0"/>
+								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 						<widget pos="91,0" size="86x32" type="*container.tabButton">
 							<text bold pos="4,4" size="78x21">Test2</text>
 							<widget pos="62,6" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0"/>
+								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 						<widget pos="181,0" size="87x32" type="*container.tabButton">
 							<text bold color="primary" pos="4,4" size="79x21">Test3</text>
 							<widget pos="63,6" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0" themed="primary"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 					</container>

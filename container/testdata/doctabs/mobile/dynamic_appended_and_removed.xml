@@ -7,7 +7,7 @@
 						<widget size="268x32" type="*container.tabButton">
 							<text bold color="primary" pos="4,4" size="260x21">Test2</text>
 							<widget pos="244,6" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0" themed="primary"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 					</container>
