@@ -5,6 +5,10 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ## 2.0.1 - Ongoing
 
+### Changed
+
+* An Entry with `Wrapping=fyne.TextWrapOff` no longer blocks scroll events from a parent
+
 ### Fixed
 
 * Dialog.Resize() has no effect if called before Dialog.Show() (#1863)
@@ -35,6 +39,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Calling Select on List before draw can crash (#1960)
 * Dialog not resizing in newly created window (#1692)
 * Dialog not returning to requested size (#1382)
+* Entry without scrollable content prevents scrolling of outside scroller (#1939)
 
 
 ## 2.0 - 22 January 2021
