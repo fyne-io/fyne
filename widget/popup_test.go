@@ -350,6 +350,33 @@ func TestPopUp_ResizeOnShow(t *testing.T) {
 	pop.Hide()
 }
 
+func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	// Simulate canvas size {0,0}
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(0, 0))
+	w := test.NewWindow(rect)
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(0, 0))
+	assert.Zero(t, w.Canvas().Size())
+
+	pop := NewPopUp(NewLabel("Label"), w.Canvas())
+	popBgSize := fyne.NewSize(200, 200)
+	pop.Resize(popBgSize)
+	pop.Show()
+
+	winSize := fyne.NewSize(300, 300)
+	w.Resize(winSize)
+
+	// get content padding dynamically
+	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())
+
+	assert.Equal(t, popBgSize.Subtract(popContentPadding), pop.Content.Size())
+	assert.Equal(t, winSize, pop.Size())
+}
+
 func TestModalPopUp_Tapped(t *testing.T) {
 	label := NewLabel("Hi")
 	pop := NewModalPopUp(label, test.Canvas())
@@ -450,4 +477,31 @@ func TestModalPopUp_ResizeOnShow(t *testing.T) {
 	pop.Show()
 	assert.Equal(t, size, pop.Size())
 	pop.Hide()
+}
+
+func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	// Simulate canvas size {0,0}
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(0, 0))
+	w := test.NewWindow(rect)
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(0, 0))
+	assert.Zero(t, w.Canvas().Size())
+
+	pop := NewModalPopUp(NewLabel("Label"), w.Canvas())
+	popBgSize := fyne.NewSize(200, 200)
+	pop.Resize(popBgSize)
+	pop.Show()
+
+	winSize := fyne.NewSize(300, 300)
+	w.Resize(winSize)
+
+	// get content padding dynamically
+	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())
+
+	assert.Equal(t, popBgSize.Subtract(popContentPadding), pop.Content.Size())
+	assert.Equal(t, winSize, pop.Size())
 }
