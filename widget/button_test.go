@@ -130,15 +130,19 @@ func TestButton_Hover(t *testing.T) {
 	w := test.NewWindow(b)
 	defer w.Close()
 
-	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
-	test.AssertImageMatches(t, "button/hovered.png", w.Canvas().Capture())
+	if !fyne.CurrentDevice().IsMobile() {
+		test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+		test.AssertImageMatches(t, "button/hovered.png", w.Canvas().Capture())
+	}
 
 	b.Importance = widget.HighImportance
 	b.Refresh()
-	test.AssertImageMatches(t, "button/high_importance_hovered.png", w.Canvas().Capture())
+	if !fyne.CurrentDevice().IsMobile() {
+		test.AssertImageMatches(t, "button/high_importance_hovered.png", w.Canvas().Capture())
 
-	test.MoveMouse(w.Canvas(), fyne.NewPos(0, 0))
-	b.Refresh()
+		test.MoveMouse(w.Canvas(), fyne.NewPos(0, 0))
+		b.Refresh()
+	}
 	test.AssertImageMatches(t, "button/high_importance.png", w.Canvas().Capture())
 
 	b.Importance = widget.MediumImportance
