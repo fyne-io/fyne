@@ -84,7 +84,9 @@ type prefBound{{ .Name }} struct {
 	base
 	key   string
 	p     fyne.Preferences
-	cache {{ .Type }}
+
+	cacheLock sync.RWMutex
+	cache     {{ .Type }}
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
@@ -92,8 +94,9 @@ type prefBound{{ .Name }} struct {
 //
 // Since: {{ .Since }}
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
-	if prefBinds[p] != nil {
-		if listen, ok := prefBinds[p][key]; ok {
+	binds := prefBinds.getBindings(p)
+	if binds != nil {
+		if listen := binds.getItem(key); listen != nil {
 			if l, ok := listen.({{ .Name }}); ok {
 				return l
 			}
@@ -102,13 +105,16 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
-	ensurePreferencesAttached(p)
-	prefBinds[p][key] = listen
+	binds = prefBinds.ensurePreferencesAttached(p)
+	binds.setItem(key, listen)
 	return listen
 }
 
 func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
-	b.cache = b.p.{{ .Name }}(b.key)
+	cache := b.p.{{ .Name }}(b.key)
+	b.cacheLock.Lock()
+	b.cache = cache
+	b.cacheLock.Unlock()
 	return b.cache, nil
 }
 
@@ -122,7 +128,10 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 }
 
 func (b *prefBound{{ .Name }}) checkForChange() {
-	if b.p.{{ .Name }}(b.key) == b.cache {
+	b.cacheLock.RLock()
+	cache := b.cache
+	b.cacheLock.RUnlock()
+	if b.p.{{ .Name }}(b.key) == cache {
 		return
 	}
 
@@ -574,7 +583,11 @@ import (
 	}
 	defer prefFile.Close()
 	prefFile.WriteString(`
-import "fyne.io/fyne/v2"
+import (
+	"sync"
+	
+	"fyne.io/fyne/v2"
+)
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 `)
