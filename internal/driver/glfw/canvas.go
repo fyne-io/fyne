@@ -154,7 +154,9 @@ func (c *glCanvas) Padded() bool {
 }
 
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	c.RLock()
 	texScale := c.texScale
+	c.RUnlock()
 	multiple := c.Scale() * texScale
 	scaleInt := func(x float32) int {
 		return int(math.Round(float64(x * multiple)))
@@ -243,7 +245,11 @@ func (c *glCanvas) SetPadded(padded bool) {
 }
 
 func (c *glCanvas) reloadScale() {
-	if !c.context.(*window).visible {
+	w := c.context.(*window)
+	w.viewLock.RLock()
+	windowVisible := w.visible
+	w.viewLock.RUnlock()
+	if !windowVisible {
 		return
 	}
 
@@ -417,9 +423,9 @@ func (c *glCanvas) objectTrees() []fyne.CanvasObject {
 }
 
 func (c *glCanvas) overlayChanged() {
-	c.Lock()
-	defer c.Unlock()
+	c.dirtyMutex.Lock()
 	c.dirty = true
+	c.dirtyMutex.Unlock()
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
@@ -468,9 +474,8 @@ func (c *glCanvas) setContent(content fyne.CanvasObject) {
 
 func (c *glCanvas) setDirty(dirty bool) {
 	c.dirtyMutex.Lock()
-	defer c.dirtyMutex.Unlock()
-
 	c.dirty = dirty
+	c.dirtyMutex.Unlock()
 }
 
 func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {

@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"sync"
 	"testing"
 	"time"
 
@@ -630,6 +631,7 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	assert.True(t, tapped, "Tapped button that was clipped")
 }
 
+// TODO solve race condition (solve first race condition in widget.Button, canvas.Text, boxLayout)
 func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w := createWindow("Test").(*window)
 	tapped := 0
@@ -662,15 +664,25 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 }
 
+// TODO solve race condition (solve first race condition in widget.Button, canvas.Text, boxLayout)
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
+	var lock sync.RWMutex
+	waitSingleTapped := make(chan struct{})
+	waitDoubleTapped := make(chan struct{})
 	tapped := 0
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
+		lock.Lock()
 		tapped = 1
+		lock.Unlock()
+		waitSingleTapped <- struct{}{}
 	}
 	but.onDoubleTap = func() {
+		lock.Lock()
 		tapped = 2
+		lock.Unlock()
+		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
 
@@ -678,22 +690,30 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
+	<-waitSingleTapped
 	w.waitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
+	lock.RLock()
 	assert.Equal(t, 1, tapped, "Single tap should have fired")
+	lock.RUnlock()
+
+	lock.Lock()
 	tapped = 0
+	lock.Unlock()
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	w.waitForEvents()
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
+	<-waitDoubleTapped
 	w.waitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
+	lock.RLock()
 	assert.Equal(t, 2, tapped, "Double tap should have fired")
+	lock.RUnlock()
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
@@ -910,6 +930,7 @@ func TestWindow_SetPadded(t *testing.T) {
 	}
 }
 
+// TODO solve race condition (solve first race conditions in widget.Entry and boxLayout)
 func TestWindow_Focus(t *testing.T) {
 	w := createWindow("Test").(*window)
 

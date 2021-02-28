@@ -366,12 +366,16 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	c := w.Canvas().(*glCanvas)
 
 	pos := fyne.NewPos(4, 4)
+	c.Lock()
 	c.scale = 2.5
+	c.Unlock()
 	x, y := c.PixelCoordinateForPosition(pos)
 	assert.Equal(t, int(10*c.texScale), x)
 	assert.Equal(t, int(10*c.texScale), y)
 
+	c.Lock()
 	c.texScale = 2.0
+	c.Unlock()
 	x, y = c.PixelCoordinateForPosition(pos)
 	assert.Equal(t, 20, x)
 	assert.Equal(t, 20, y)
@@ -489,7 +493,9 @@ func TestGlCanvas_Scale(t *testing.T) {
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
 
+	c.Lock()
 	c.scale = 2.5
+	c.Unlock()
 	assert.Equal(t, 5, int(2*c.Scale()))
 }
 
