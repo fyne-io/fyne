@@ -15,12 +15,6 @@ type preferenceBindings struct {
 	items map[string]preferenceItem
 }
 
-func (b *preferenceBindings) setItem(key string, item preferenceItem) {
-	b.lock.Lock()
-	b.items[key] = item
-	b.lock.Unlock()
-}
-
 func (b *preferenceBindings) getItem(key string) preferenceItem {
 	b.lock.RLock()
 	item := b.items[key]
@@ -36,6 +30,12 @@ func (b *preferenceBindings) list() []preferenceItem {
 	}
 	b.lock.RUnlock()
 	return items
+}
+
+func (b *preferenceBindings) setItem(key string, item preferenceItem) {
+	b.lock.Lock()
+	b.items[key] = item
+	b.lock.Unlock()
 }
 
 type preferencesMap struct {
@@ -64,6 +64,13 @@ func (m *preferencesMap) ensurePreferencesAttached(p fyne.Preferences) *preferen
 	return m.prefs[p]
 }
 
+func (m *preferencesMap) getBindings(p fyne.Preferences) *preferenceBindings {
+	m.lock.RLock()
+	binds := m.prefs[p]
+	m.lock.RUnlock()
+	return binds
+}
+
 func (m *preferencesMap) preferencesChanged(p fyne.Preferences) {
 	binds := m.getBindings(p)
 	if binds == nil {
@@ -72,11 +79,4 @@ func (m *preferencesMap) preferencesChanged(p fyne.Preferences) {
 	for _, item := range binds.list() {
 		item.checkForChange()
 	}
-}
-
-func (m *preferencesMap) getBindings(p fyne.Preferences) *preferenceBindings {
-	m.lock.RLock()
-	binds := m.prefs[p]
-	m.lock.RUnlock()
-	return binds
 }
