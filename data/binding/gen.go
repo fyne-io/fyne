@@ -82,8 +82,8 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 const prefTemplate = `
 type prefBound{{ .Name }} struct {
 	base
-	key   string
-	p     fyne.Preferences
+	key string
+	p   fyne.Preferences
 
 	cacheLock sync.RWMutex
 	cache     {{ .Type }}
@@ -585,7 +585,7 @@ import (
 	prefFile.WriteString(`
 import (
 	"sync"
-	
+
 	"fyne.io/fyne/v2"
 )
 
