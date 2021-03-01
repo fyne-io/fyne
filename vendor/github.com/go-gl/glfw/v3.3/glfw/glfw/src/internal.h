@@ -342,9 +342,9 @@ struct _GLFWcontext
     int                 robustness;
     int                 release;
 
-    PFNGLGETSTRINGIPROC GetStringi;
+    PFNGLGETSTRINGIPROC  GetStringi;
     PFNGLGETINTEGERVPROC GetIntegerv;
-    PFNGLGETSTRINGPROC  GetString;
+    PFNGLGETSTRINGPROC   GetString;
 
     _GLFWmakecontextcurrentfun  makeCurrent;
     _GLFWswapbuffersfun         swapBuffers;
@@ -396,23 +396,23 @@ struct _GLFWwindow
     _GLFWcontext        context;
 
     struct {
-        GLFWwindowposfun        pos;
-        GLFWwindowsizefun       size;
-        GLFWwindowclosefun      close;
-        GLFWwindowrefreshfun    refresh;
-        GLFWwindowfocusfun      focus;
-        GLFWwindowiconifyfun    iconify;
-        GLFWwindowmaximizefun   maximize;
-        GLFWframebuffersizefun  fbsize;
+        GLFWwindowposfun          pos;
+        GLFWwindowsizefun         size;
+        GLFWwindowclosefun        close;
+        GLFWwindowrefreshfun      refresh;
+        GLFWwindowfocusfun        focus;
+        GLFWwindowiconifyfun      iconify;
+        GLFWwindowmaximizefun     maximize;
+        GLFWframebuffersizefun    fbsize;
         GLFWwindowcontentscalefun scale;
-        GLFWmousebuttonfun      mouseButton;
-        GLFWcursorposfun        cursorPos;
-        GLFWcursorenterfun      cursorEnter;
-        GLFWscrollfun           scroll;
-        GLFWkeyfun              key;
-        GLFWcharfun             character;
-        GLFWcharmodsfun         charmods;
-        GLFWdropfun             drop;
+        GLFWmousebuttonfun        mouseButton;
+        GLFWcursorposfun          cursorPos;
+        GLFWcursorenterfun        cursorEnter;
+        GLFWscrollfun             scroll;
+        GLFWkeyfun                key;
+        GLFWcharfun               character;
+        GLFWcharmodsfun           charmods;
+        GLFWdropfun               drop;
     } callbacks;
 
     // This is defined in the window API's platform.h

@@ -356,7 +356,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
 
     for (jid = 0;  jid <= GLFW_JOYSTICK_LAST;  jid++)
     {
-        _GLFWjoystick* js = _glfw.joysticks + jid;
+        js = _glfw.joysticks + jid;
         if (js->present)
         {
             if (memcmp(&js->win32.guid, &di->guidInstance, sizeof(GUID)) == 0)
@@ -672,11 +672,11 @@ int _glfwPlatformPollJoystick(_GLFWjoystick* js, int mode)
                     };
 
                     // Screams of horror are appropriate at this point
-                    int state = LOWORD(*(DWORD*) data) / (45 * DI_DEGREES);
-                    if (state < 0 || state > 8)
-                        state = 8;
+                    int stateIndex = LOWORD(*(DWORD*) data) / (45 * DI_DEGREES);
+                    if (stateIndex < 0 || stateIndex > 8)
+                        stateIndex = 8;
 
-                    _glfwInputJoystickHat(js, pi, states[state]);
+                    _glfwInputJoystickHat(js, pi, states[stateIndex]);
                     pi++;
                     break;
                 }

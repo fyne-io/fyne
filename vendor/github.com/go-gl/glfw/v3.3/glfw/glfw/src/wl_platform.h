@@ -57,7 +57,7 @@ typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR
 #include "osmesa_context.h"
 
 #include "wayland-xdg-shell-client-protocol.h"
-#include "wayland-xdg-decoration-unstable-v1-client-protocol.h"
+#include "wayland-xdg-decoration-client-protocol.h"
 #include "wayland-viewporter-client-protocol.h"
 #include "wayland-relative-pointer-unstable-v1-client-protocol.h"
 #include "wayland-pointer-constraints-unstable-v1-client-protocol.h"
