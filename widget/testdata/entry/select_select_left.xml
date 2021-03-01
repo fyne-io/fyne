@@ -6,7 +6,7 @@
 			<widget pos="0,2" size="120x33" type="*widget.entryContent">
 				<rectangle fillColor="primary" pos="24,6" size="14x21"/>
 				<widget size="120x33" type="*widget.textProvider">
-					<text pos="8,6" size="112x21">Testing</text>
+					<text pos="8,6" size="108x21">Testing</text>
 				</widget>
 				<rectangle fillColor="primary" pos="24,6" size="2x21"/>
 			</widget>
