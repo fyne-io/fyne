@@ -4,7 +4,6 @@ import (
 	"image/color"
 	"math"
 	"strings"
-	"time"
 	"unicode"
 
 	"fyne.io/fyne/v2"
@@ -56,6 +55,8 @@ type Entry struct {
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
+
+	cursorAnim *entryCursorAnimation
 
 	focused     bool
 	text        *textProvider
@@ -161,7 +162,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	line := canvas.NewRectangle(theme.ShadowColor())
+	cursor := canvas.NewRectangle(color.Transparent)
+	cursor.Hide()
 
+	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
 	e.scroll = &widget.Scroll{}
 	objects := []fyne.CanvasObject{box, line}
@@ -504,7 +508,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.Disabled() {
 		return
 	}
-
+	if e.cursorAnim != nil {
+		e.cursorAnim.interrupt()
+	}
 	e.propertyLock.RLock()
 	provider := e.textProvider()
 	onSubmitted := e.OnSubmitted
@@ -1281,9 +1287,6 @@ type entryContent struct {
 func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	cursor := canvas.NewRectangle(color.Transparent)
-	cursor.Hide()
-
 	e.entry.propertyLock.Lock()
 	defer e.entry.propertyLock.Unlock()
 	provider := e.entry.textProvider()
@@ -1291,9 +1294,9 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	if provider.len() != 0 {
 		placeholder.Hide()
 	}
-	objects := []fyne.CanvasObject{placeholder, provider, cursor}
+	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor}
 
-	r := &entryContentRenderer{cursor, []fyne.CanvasObject{}, nil, objects,
+	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
 		provider, placeholder, e}
 	r.updateScrollDirections()
 	r.Layout(e.size)
@@ -1322,17 +1325,16 @@ func (e *entryContent) Dragged(d *fyne.DragEvent) {
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
 
 type entryContentRenderer struct {
-	cursor     *canvas.Rectangle
-	selection  []fyne.CanvasObject
-	cursorAnim *fyne.Animation
-	objects    []fyne.CanvasObject
+	cursor    *canvas.Rectangle
+	selection []fyne.CanvasObject
+	objects   []fyne.CanvasObject
 
 	provider, placeholder *textProvider
 	content               *entryContent
 }
 
 func (r *entryContentRenderer) Destroy() {
-	r.cursorAnim.Stop()
+	r.content.entry.cursorAnim.stop()
 }
 
 func (r *entryContentRenderer) Layout(size fyne.Size) {
@@ -1384,15 +1386,9 @@ func (r *entryContentRenderer) Refresh() {
 
 	if focused {
 		r.cursor.Show()
-		if r.cursorAnim == nil {
-			r.cursorAnim = makeCursorAnimation(r.cursor)
-			r.cursorAnim.Start()
-		}
+		r.content.entry.cursorAnim.start()
 	} else {
-		if r.cursorAnim != nil {
-			r.cursorAnim.Stop()
-			r.cursorAnim = nil
-		}
+		r.content.entry.cursorAnim.stop()
 		r.cursor.Hide()
 	}
 	r.moveCursor()
@@ -1641,18 +1637,4 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 		end += col // otherwise include the text slice position
 	}
 	return start, end
-}
-
-func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
-	cursorOpaque := theme.PrimaryColor()
-	r, g, b, _ := theme.PrimaryColor().RGBA()
-	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
-	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
-		cursor.FillColor = c
-		cursor.Refresh()
-	})
-	anim.RepeatCount = fyne.AnimationRepeatForever
-	anim.AutoReverse = true
-
-	return anim
 }
