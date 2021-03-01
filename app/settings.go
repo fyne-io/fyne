@@ -14,7 +14,7 @@ import (
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
-	ThemeName    string  `json:"theme"`
+	ThemeVariant string  `json:"theme"`
 	Scale        float32 `json:"scale"`
 	PrimaryColor string  `json:"primary_color"`
 }
@@ -139,26 +139,36 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
-	if s.themeSpecified {
-		return
-	}
-	name := s.schema.ThemeName
+	variantName := s.schema.ThemeVariant
 	if env := os.Getenv("FYNE_THEME"); env != "" {
-		s.themeSpecified = true
-		name = env
+		variantName = env
 	}
 
-	if name == "light" {
-		s.applyTheme(theme.LightTheme(), theme.VariantLight)
-	} else if name == "dark" {
-		s.applyTheme(theme.DarkTheme(), theme.VariantDark)
-	} else {
-		if defaultVariant() == theme.VariantLight {
-			s.applyTheme(theme.LightTheme(), theme.VariantLight)
-		} else {
-			s.applyTheme(theme.DarkTheme(), theme.VariantDark)
+	var variant fyne.ThemeVariant
+	effectiveTheme := s.theme
+	switch variantName {
+	case "light":
+		variant = theme.VariantLight
+		if !s.themeSpecified {
+			effectiveTheme = theme.LightTheme()
+		}
+	case "dark":
+		variant = theme.VariantDark
+		if !s.themeSpecified {
+			effectiveTheme = theme.DarkTheme()
+		}
+	default:
+		variant = defaultVariant()
+		if s.themeSpecified {
+			break
+		}
+		effectiveTheme = theme.DarkTheme()
+		if variant == theme.VariantLight {
+			effectiveTheme = theme.LightTheme()
 		}
 	}
+
+	s.applyTheme(effectiveTheme, variant)
 }
 
 func loadSettings() *settings {
