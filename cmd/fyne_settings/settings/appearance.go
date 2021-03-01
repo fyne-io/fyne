@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	systemThemeVariant = "system default"
+	systemThemeName = "system default"
 )
 
 // Settings gives access to user interfaces to control Fyne settings
@@ -53,15 +53,15 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	s.preview = canvas.NewImageFromImage(s.createPreview())
 	s.preview.FillMode = canvas.ImageFillContain
 
-	def := s.fyneSettings.ThemeVariant
-	themeVariants := []string{"dark", "light"}
+	def := s.fyneSettings.ThemeName
+	themeNames := []string{"dark", "light"}
 	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
-		themeVariants = append(themeVariants, systemThemeVariant)
-		if s.fyneSettings.ThemeVariant == "" {
-			def = systemThemeVariant
+		themeNames = append(themeNames, systemThemeName)
+		if s.fyneSettings.ThemeName == "" {
+			def = systemThemeName
 		}
 	}
-	themes := widget.NewSelect(themeVariants, s.chooseThemeVariant)
+	themes := widget.NewSelect(themeNames, s.chooseTheme)
 	themes.SetSelected(def)
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
@@ -89,11 +89,11 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	return container.NewBorder(box, bottom, nil, nil, s.preview)
 }
 
-func (s *Settings) chooseThemeVariant(variant string) {
-	if variant == systemThemeVariant {
-		variant = ""
+func (s *Settings) chooseTheme(name string) {
+	if name == systemThemeName {
+		name = ""
 	}
-	s.fyneSettings.ThemeVariant = variant
+	s.fyneSettings.ThemeName = name
 
 	s.preview.Image = s.createPreview()
 	canvas.Refresh(s.preview)
@@ -109,9 +109,9 @@ func (s *Settings) createPreview() image.Image {
 	oldColor := fyne.CurrentApp().Settings().PrimaryColor()
 
 	th := oldTheme
-	if s.fyneSettings.ThemeVariant == "light" {
+	if s.fyneSettings.ThemeName == "light" {
 		th = theme.LightTheme()
-	} else if s.fyneSettings.ThemeVariant == "dark" {
+	} else if s.fyneSettings.ThemeName == "dark" {
 		th = theme.DarkTheme()
 	}
 

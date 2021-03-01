@@ -14,7 +14,7 @@ import (
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
-	ThemeVariant string  `json:"theme"`
+	ThemeName    string  `json:"theme"`
 	Scale        float32 `json:"scale"`
 	PrimaryColor string  `json:"primary_color"`
 }
@@ -139,14 +139,14 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
-	variantName := s.schema.ThemeVariant
+	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
-		variantName = env
+		name = env
 	}
 
 	var variant fyne.ThemeVariant
 	effectiveTheme := s.theme
-	switch variantName {
+	switch name {
 	case "light":
 		variant = theme.VariantLight
 		if !s.themeSpecified {
