@@ -145,7 +145,7 @@ func (b *Bundler) bundleAction(ctx *cli.Context) (err error) {
 
 	outFile := os.Stdout
 	if b.out != "" {
-		file, closeFile, err := getOutputFile(b.out, b.noheader)
+		file, closeFile, err := openOutputFile(b.out, b.noheader)
 		if err != nil {
 			return err
 		}
@@ -215,7 +215,7 @@ func (b *Bundler) doBundle(filepath string, out *os.File) {
 	writeResource(filepath, b.name, out)
 }
 
-func getOutputFile(filePath string, noheader bool) (file *os.File, close func() error, err error) {
+func openOutputFile(filePath string, noheader bool) (file *os.File, close func() error, err error) {
 	fileModes := os.O_RDWR | os.O_CREATE | os.O_TRUNC
 	if noheader {
 		fileModes = os.O_RDWR | os.O_APPEND
