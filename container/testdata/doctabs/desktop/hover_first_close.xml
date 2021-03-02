@@ -7,8 +7,8 @@
 						<widget size="81x32" type="*container.tabButton">
 							<text bold color="primary" pos="8,4" size="65x24">Test1</text>
 							<widget pos="57,6" size="20x20" type="*container.tabCloseButton">
-								<rectangle fillColor="hover" size="0x0"/>
-								<image rsc="cancelIcon" size="0x0" themed="primary"/>
+								<rectangle fillColor="hover" size="20x20"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 						<widget pos="85,0" size="81x32" type="*container.tabButton">

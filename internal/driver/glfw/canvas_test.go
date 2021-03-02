@@ -479,8 +479,6 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 
 	winSize := fyne.NewSize(1000, 600)
 	w.Resize(winSize)
-	w.Show()
-	defer w.Close()
 
 	// get popup content padding dynamically
 	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())

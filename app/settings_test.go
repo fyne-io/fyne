@@ -76,16 +76,68 @@ func TestOverrideTheme_IgnoresSettingsChange(t *testing.T) {
 	}
 	set.setupTheme()
 	assert.Equal(t, theme.LightTheme(), set.Theme())
-	err = os.Setenv("FYNE_THEME", "")
-	if err != nil {
-		t.Error(err)
-	}
 
 	err = set.loadFromFile(filepath.Join("testdata", "dark-theme.json"))
 	if err != nil {
 		t.Error(err)
 	}
-
 	set.setupTheme()
 	assert.Equal(t, theme.LightTheme(), set.Theme())
+	err = os.Setenv("FYNE_THEME", "")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCustomTheme(t *testing.T) {
+	type customTheme struct {
+		fyne.Theme
+	}
+	set := &settings{}
+	ctheme := &customTheme{theme.LightTheme()}
+	set.SetTheme(ctheme)
+
+	set.setupTheme()
+	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, defaultVariant(), set.ThemeVariant())
+
+	err := set.loadFromFile(filepath.Join("testdata", "light-theme.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
+
+	err = set.loadFromFile(filepath.Join("testdata", "dark-theme.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
+
+	err = os.Setenv("FYNE_THEME", "light")
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
+
+	err = os.Setenv("FYNE_THEME", "dark")
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
+
+	err = os.Setenv("FYNE_THEME", "")
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 }
