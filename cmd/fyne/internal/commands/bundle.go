@@ -236,9 +236,7 @@ func getOutputFile(filePath string, noheader bool) (file *os.File, close func() 
 		}
 	}
 
-	return f, func() error {
-		return f.Close()
-	}, nil
+	return f, f.Close(), nil
 }
 
 func sanitiseName(file, prefix string) string {
