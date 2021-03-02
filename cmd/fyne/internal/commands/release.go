@@ -269,12 +269,14 @@ func (r *Releaser) packageIOSRelease() error {
 		return err
 	}
 
-	if _, err := r.writeEntitlements(templates.EntitlementsDarwinMobile, struct{ TeamID, AppID string }{
+	cleanup, err := r.writeEntitlements(templates.EntitlementsDarwinMobile, struct{ TeamID, AppID string }{
 		TeamID: team,
 		AppID:  r.appID,
-	}); err != nil {
+	})
+	if err != nil {
 		return errors.New("failed to write entitlements plist template")
 	}
+	defer cleanup()
 
 	cmd := exec.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
 		"entitlements.plist", "Payload/"+appName+"/")
