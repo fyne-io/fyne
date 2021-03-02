@@ -6,13 +6,13 @@
 					<container size="148x48">
 						<widget size="72x48" type="*container.tabButton">
 							<widget pos="48,14" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0" themed="primary"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 							<image pos="16,4" rsc="cancelIcon" size="40x40" themed="primary"/>
 						</widget>
 						<widget pos="76,0" size="72x48" type="*container.tabButton">
 							<widget pos="48,14" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0"/>
+								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 							<image pos="16,4" rsc="confirmIcon" size="40x40"/>
 						</widget>

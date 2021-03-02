@@ -6,7 +6,7 @@
 					<container size="118x48">
 						<widget size="118x48" type="*container.tabButton">
 							<widget pos="94,14" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0" themed="primary"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 							<image pos="39,4" rsc="infoIcon" size="40x40" themed="primary"/>
 						</widget>
