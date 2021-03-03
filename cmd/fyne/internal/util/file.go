@@ -55,7 +55,7 @@ func copyFileMode(src, tgt string, perm os.FileMode) (err error) {
 		return err
 	}
 	defer func() {
-		if r := target.Close(); r != nil {
+		if r := target.Close(); r != nil && err == nil {
 			err = r
 		}
 	}()
