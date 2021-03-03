@@ -20,25 +20,31 @@ type darwinData struct {
 	Category      string
 }
 
-func (p *Packager) packageDarwin() error {
+func (p *Packager) packageDarwin() (err error) {
 	appDir := util.EnsureSubDir(p.dir, p.name+".app")
 	exeName := filepath.Base(p.exe)
 
 	contentsDir := util.EnsureSubDir(appDir, "Contents")
 	info := filepath.Join(contentsDir, "Info.plist")
-	infoFile, _ := os.Create(info)
+	infoFile, err := os.Create(info)
+	if err != nil {
+		return errors.Wrap(err, "Failed to write plist template")
+	}
+	defer func() {
+		if r := infoFile.Close(); r != nil && err == nil {
+			err = r
+		}
+	}()
 
 	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild,
 		Category: strings.ToLower(p.category)}
-	err := templates.InfoPlistDarwin.Execute(infoFile, tplData)
-	if err != nil {
+	if err := templates.InfoPlistDarwin.Execute(infoFile, tplData); err != nil {
 		return errors.Wrap(err, "Failed to write plist template")
 	}
 
 	macOSDir := util.EnsureSubDir(contentsDir, "MacOS")
 	binName := filepath.Join(macOSDir, exeName)
-	err = util.CopyExeFile(p.exe, binName)
-	if err != nil {
+	if err := util.CopyExeFile(p.exe, binName); err != nil {
 		return errors.Wrap(err, "Failed to copy exe file")
 	}
 
@@ -58,7 +64,11 @@ func (p *Packager) packageDarwin() error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to open destination file")
 	}
-	defer dest.Close()
+	defer func() {
+		if r := dest.Close(); r != nil && err == nil {
+			err = r
+		}
+	}()
 	if err := icns.Encode(dest, srcImg); err != nil {
 		return errors.Wrap(err, "Failed to encode icns")
 	}
