@@ -31,7 +31,7 @@ func (p *Packager) packageDarwin() (err error) {
 		return errors.Wrap(err, "Failed to write plist template")
 	}
 	defer func() {
-		if r := infoFile.Close(); r != nil {
+		if r := infoFile.Close(); r != nil && err == nil {
 			err = r
 		}
 	}()
@@ -65,7 +65,7 @@ func (p *Packager) packageDarwin() (err error) {
 		return errors.Wrap(err, "Failed to open destination file")
 	}
 	defer func() {
-		if r := dest.Close(); r != nil {
+		if r := dest.Close(); r != nil && err == nil {
 			err = r
 		}
 	}()

@@ -76,7 +76,7 @@ func (p *preferences) loadFromFile(path string) (err error) {
 		return err
 	}
 	defer func() {
-		if r := file.Close(); r != nil {
+		if r := file.Close(); r != nil && err == nil {
 			err = r
 		}
 	}()

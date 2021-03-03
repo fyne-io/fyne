@@ -452,7 +452,7 @@ func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData in
 		return nil, err
 	}
 	defer func() {
-		if r := entitlements.Close(); r != nil {
+		if r := entitlements.Close(); r != nil && err == nil {
 			err = r
 		}
 	}()
