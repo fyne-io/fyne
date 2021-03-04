@@ -1,6 +1,6 @@
 package binding
 
-var itemQueue = make(chan itemData, 1024)
+var itemQueueIn, itemQueueOut = makeInfiniteQueue()
 
 type itemData struct {
 	fn   func()
@@ -8,16 +8,50 @@ type itemData struct {
 }
 
 func queueItem(f func()) {
-	itemQueue <- itemData{fn: f}
+	itemQueueIn <- &itemData{fn: f}
 }
 
 func init() {
 	go processItems()
 }
 
+func makeInfiniteQueue() (chan<- *itemData, <-chan *itemData) {
+	in := make(chan *itemData)
+	out := make(chan *itemData)
+	go func() {
+		queued := make([]*itemData, 0, 1024)
+		pending := func() chan *itemData {
+			if len(queued) == 0 {
+				return nil
+			}
+			return out
+		}
+		next := func() *itemData {
+			if len(queued) == 0 {
+				return nil
+			}
+			return queued[0]
+		}
+		for len(queued) > 0 || in != nil {
+			select {
+			case val, ok := <-in:
+				if !ok {
+					in = nil
+				} else {
+					queued = append(queued, val)
+				}
+			case pending() <- next():
+				queued = queued[1:]
+			}
+		}
+		close(out)
+	}()
+	return in, out
+}
+
 func processItems() {
 	for {
-		i := <-itemQueue
+		i := <-itemQueueOut
 		if i.fn != nil {
 			i.fn()
 		}
@@ -29,6 +63,6 @@ func processItems() {
 
 func waitForItems() {
 	done := make(chan interface{})
-	itemQueue <- itemData{done: done}
+	itemQueueIn <- &itemData{done: done}
 	<-done
 }
