@@ -39,9 +39,8 @@ func EnsureSubDir(parent, name string) string {
 	return path
 }
 
-func copyFileMode(src, tgt string, perm os.FileMode) error {
-	_, err := os.Stat(src)
-	if err != nil {
+func copyFileMode(src, tgt string, perm os.FileMode) (err error) {
+	if _, err := os.Stat(src); err != nil {
 		return err
 	}
 
@@ -55,7 +54,11 @@ func copyFileMode(src, tgt string, perm os.FileMode) error {
 	if err != nil {
 		return err
 	}
-	defer target.Close()
+	defer func() {
+		if r := target.Close(); r != nil && err == nil {
+			err = r
+		}
+	}()
 
 	_, err = io.Copy(target, source)
 	return err

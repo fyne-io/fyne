@@ -402,6 +402,9 @@ func (r *scrollContainerRenderer) handleShadowVisibility(offset, contentSize, sc
 }
 
 func (r *scrollContainerRenderer) updatePosition() {
+	if r.scroll.Content == nil {
+		return
+	}
 	scrollSize := r.scroll.Size()
 	contentSize := r.scroll.Content.Size()
 

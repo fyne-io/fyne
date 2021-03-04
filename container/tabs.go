@@ -389,6 +389,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 			}
 		},
 	}
+	close.ExtendBaseWidget(close)
 	close.Hide()
 
 	objects := []fyne.CanvasObject{background, label, close}
