@@ -23,23 +23,23 @@ func newRenderedFileIcon(uri fyne.URI) *FileIcon {
 }
 
 func TestFileIcon_NewFileIcon(t *testing.T) {
-	item := newRenderedFileIcon(storage.NewURI("file:///path/to/filename.zip"))
+	item := newRenderedFileIcon(storage.NewFileURI("/path/to/filename.zip"))
 	assert.Equal(t, ".zip", item.extension)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
-	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.mp3"))
+	item = newRenderedFileIcon(storage.NewFileURI("/path/to/filename.mp3"))
 	assert.Equal(t, ".mp3", item.extension)
 	assert.Equal(t, theme.FileAudioIcon(), item.resource)
 
-	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.png"))
+	item = newRenderedFileIcon(storage.NewFileURI("/path/to/filename.png"))
 	assert.Equal(t, ".png", item.extension)
 	assert.Equal(t, theme.FileImageIcon(), item.resource)
 
-	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.txt"))
+	item = newRenderedFileIcon(storage.NewFileURI("/path/to/filename.txt"))
 	assert.Equal(t, ".txt", item.extension)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 
-	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.mp4"))
+	item = newRenderedFileIcon(storage.NewFileURI("/path/to/filename.mp4"))
 	assert.Equal(t, ".mp4", item.extension)
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
@@ -53,11 +53,11 @@ func TestFileIcon_NewFileIcon_NoExtension(t *testing.T) {
 	binFileWithNoExt := filepath.Join(workingDir, "testdata/bin")
 	textFileWithNoExt := filepath.Join(workingDir, "testdata/text")
 
-	item := newRenderedFileIcon(storage.NewURI("file://" + binFileWithNoExt))
+	item := newRenderedFileIcon(storage.NewFileURI(binFileWithNoExt))
 	assert.Equal(t, "", item.extension)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
-	item = newRenderedFileIcon(storage.NewURI("file://" + textFileWithNoExt))
+	item = newRenderedFileIcon(storage.NewFileURI(textFileWithNoExt))
 	assert.Equal(t, "", item.extension)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 }
@@ -70,11 +70,11 @@ func TestFileIcon_NewURI_WithFolder(t *testing.T) {
 	}
 
 	dir := filepath.Join(workingDir, "testdata")
-	item := newRenderedFileIcon(storage.NewURI("file://" + dir))
+	item := newRenderedFileIcon(storage.NewFileURI(dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 
-	item.SetURI(storage.NewURI("file://" + dir))
+	item.SetURI(storage.NewFileURI(dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
@@ -97,28 +97,28 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 	test.AssertImageMatches(t, "fileicon/fileicon_nil.png", w.Canvas().Capture())
 
 	text := filepath.Join(workingDir, "testdata/text")
-	icon2 := NewFileIcon(storage.NewURI("file://" + text))
+	icon2 := NewFileIcon(storage.NewFileURI(text))
 
 	w.SetContent(icon2)
 	w.Resize(fyne.NewSize(150, 150))
 	test.AssertImageMatches(t, "fileicon/fileicon_text.png", w.Canvas().Capture())
 
 	text += ".txt"
-	icon3 := NewFileIcon(storage.NewURI("file://" + text))
+	icon3 := NewFileIcon(storage.NewFileURI(text))
 
 	w.SetContent(icon3)
 	w.Resize(fyne.NewSize(150, 150))
 	test.AssertImageMatches(t, "fileicon/fileicon_text_txt.png", w.Canvas().Capture())
 
 	bin := filepath.Join(workingDir, "testdata/bin")
-	icon4 := NewFileIcon(storage.NewURI("file://" + bin))
+	icon4 := NewFileIcon(storage.NewFileURI(bin))
 
 	w.SetContent(icon4)
 	w.Resize(fyne.NewSize(150, 150))
 	test.AssertImageMatches(t, "fileicon/fileicon_bin.png", w.Canvas().Capture())
 
 	dir := filepath.Join(workingDir, "testdata")
-	icon5 := NewFileIcon(storage.NewURI("file://" + dir))
+	icon5 := NewFileIcon(storage.NewFileURI(dir))
 
 	w.SetContent(icon5)
 	w.Resize(fyne.NewSize(150, 150))
@@ -128,23 +128,23 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 }
 
 func TestFileIcon_SetURI(t *testing.T) {
-	item := newRenderedFileIcon(storage.NewURI("file:///path/to/filename.zip"))
+	item := newRenderedFileIcon(storage.NewFileURI("/path/to/filename.zip"))
 	assert.Equal(t, ".zip", item.extension)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
-	item.SetURI(storage.NewURI("file:///path/to/filename.mp3"))
+	item.SetURI(storage.NewFileURI("/path/to/filename.mp3"))
 	assert.Equal(t, ".mp3", item.extension)
 	assert.Equal(t, theme.FileAudioIcon(), item.resource)
 
-	item.SetURI(storage.NewURI("file:///path/to/filename.png"))
+	item.SetURI(storage.NewFileURI("/path/to/filename.png"))
 	assert.Equal(t, ".png", item.extension)
 	assert.Equal(t, theme.FileImageIcon(), item.resource)
 
-	item.SetURI(storage.NewURI("file:///path/to/filename.txt"))
+	item.SetURI(storage.NewFileURI("/path/to/filename.txt"))
 	assert.Equal(t, ".txt", item.extension)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 
-	item.SetURI(storage.NewURI("file:///path/to/filename.mp4"))
+	item.SetURI(storage.NewFileURI("/path/to/filename.mp4"))
 	assert.Equal(t, ".mp4", item.extension)
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
@@ -160,11 +160,11 @@ func TestFileIcon_SetURI_WithFolder(t *testing.T) {
 	item := newRenderedFileIcon(nil)
 	assert.Empty(t, item.extension)
 
-	item.SetURI(storage.NewURI("file://" + dir))
+	item.SetURI(storage.NewFileURI(dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 
-	item.SetURI(storage.NewURI("file://" + dir))
+	item.SetURI(storage.NewFileURI(dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }

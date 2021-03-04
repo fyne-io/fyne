@@ -204,6 +204,17 @@ func TestGlCanvas_Focus(t *testing.T) {
 	assert.True(t, o2e.focused)
 }
 
+func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+	e := widget.NewEntry()
+	c := w.Canvas().(*glCanvas)
+	c.Focus(e) // this crashed in the past
+
+	w.SetContent(e)
+	assert.Equal(t, e, c.Focused(), "Item set to focus before SetContent was not focused after")
+}
+
 func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
@@ -401,14 +412,8 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	o3 := widget.NewLabel("o3")
 	w.SetContent(content)
 	w.Canvas().Overlays().Add(o1)
-	// TODO: address #707; overlays should always be canvas size
-	o1.Resize(w.Canvas().Size())
 	w.Canvas().Overlays().Add(o2)
-	// TODO: address #707; overlays should always be canvas size
-	o2.Resize(w.Canvas().Size())
 	w.Canvas().Overlays().Add(o3)
-	// TODO: address #707; overlays should always be canvas size
-	o3.Resize(w.Canvas().Size())
 
 	size := fyne.NewSize(200, 100)
 	assert.NotEqual(t, size, content.Size())
@@ -431,10 +436,11 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
 	w.SetContent(content)
-	w.Canvas().Overlays().Add(over)
+	over.Show()
 
 	size := fyne.NewSize(200, 100)
 	overContentSize := over.Content.Size()
+	assert.NotZero(t, overContentSize)
 	assert.NotEqual(t, size, content.Size())
 	assert.NotEqual(t, size, over.Size())
 	assert.NotEqual(t, size, overContentSize)
@@ -443,6 +449,30 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
+}
+
+func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+
+	content := widget.NewLabel("Content")
+	w.SetContent(content)
+
+	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), w.Canvas())
+	popupBgSize := fyne.NewSize(975, 575)
+	popup.Show()
+	popup.Resize(popupBgSize)
+
+	winSize := fyne.NewSize(1000, 600)
+	w.Resize(winSize)
+	w.Show()
+	defer w.Close()
+
+	// get popup content padding dynamically
+	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
+
+	assert.Equal(t, popupBgSize.Subtract(popupContentPadding), popup.Content.Size())
+	assert.Equal(t, winSize, popup.Size())
 }
 
 func TestGlCanvas_Scale(t *testing.T) {

@@ -3,6 +3,51 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.0.1 - 4 March 2021
+
+### Changed
+
+* An Entry with `Wrapping=fyne.TextWrapOff` no longer blocks scroll events from a parent
+
+### Fixed
+
+* Dialog.Resize() has no effect if called before Dialog.Show() (#1863)
+* SelectTab does not always correctly set the blue underline to the selected tab (#1872)
+* Entry Validation Broken when using Data binding (#1890)
+* Fix background colour not applying until theme change
+* android runtime error with fyne.dialog (#1896)
+* Fix scale calculations for Wayland phones (PinePhone)
+* Correct initial state of entry validation
+* fix entry widget mouse drag selection when scrolled
+* List widget panic when refreshing after changing content length (#1864)
+* Fix image caching that was too agressive on resize
+* Pointer and cursor misalignment in widget.Entry (#1937)
+* SIGSEGV Sometimes When Closing a Program by Clicking a Button (#1604)
+* Advanced Color Picker shows Black for custom primary color as RGBA (#1970)
+* Canvas.Focus() before window visible causes application to crash (#1893)
+* Menu over Content (#1973)
+* Error compiling fyne on Apple M1 arm64 (#1739)
+* Cells are not getting draw in correct location after column resize. (#1951)
+* Possible panic when selecting text in a widget.Entry (#1983)
+* Form validation doesn't enable submit button (#1965)
+* Creating a window shows it before calling .Show() and .Hide() does not work (#1835)
+* Dialogs are not refreshed correctly on .Show() (#1866)
+* Failed creating setting storage : no such directory (#2023)
+* Erroneous custom filter types not supported error on mobile (#2012)
+* High importance button show no hovered state (#1785)
+* List widget does not render all visible content after content data gets shorter (#1948)
+* Calling Select on List before draw can crash (#1960)
+* Dialog not resizing in newly created window (#1692)
+* Dialog not returning to requested size (#1382)
+* Entry without scrollable content prevents scrolling of outside scroller (#1939)
+* fyne_demo crash after selecting custom Theme and table (#2018)
+* Table widget crash when scrolling rapidly (#1887)
+* Cursor animation sometimes distorts the text (#1778)
+* Extended password entry panics when password revealer is clicked (#2036)
+* Data binding limited to 1024 simultaneous operations (#1838)
+* Custom theme does not refresh when variant changes (#2006)
+
+
 ## 2.0 - 22 January 2021
 
 ### Changes that are not backward compatible
