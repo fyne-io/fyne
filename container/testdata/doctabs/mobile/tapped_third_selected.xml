@@ -35,7 +35,7 @@
 			<rectangle fillColor="shadow" pos="0,32" size="300x4"/>
 			<rectangle fillColor="primary" pos="181,32" size="87x4"/>
 			<widget pos="0,36" size="300x64" type="*widget.Label">
-				<text pos="4,8" size="292x21">Text 3</text>
+				<text pos="8,8" size="284x21">Text 3</text>
 			</widget>
 		</widget>
 	</content>

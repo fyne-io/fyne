@@ -5,7 +5,7 @@
 			<rectangle fillColor="primary" pos="0,35" size="120x2"/>
 			<widget pos="0,2" size="92x33" type="*widget.entryContent">
 				<widget size="92x33" type="*widget.textProvider">
-					<text pos="8,6" size="84x21">2020-02-12</text>
+					<text pos="8,6" size="80x21">2020-02-12</text>
 				</widget>
 				<rectangle fillColor="primary" pos="87,6" size="2x21"/>
 			</widget>

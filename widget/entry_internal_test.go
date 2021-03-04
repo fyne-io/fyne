@@ -291,7 +291,7 @@ func TestEntry_TabSelection(t *testing.T) {
 }
 
 func getClickPosition(str string, row int) *fyne.PointEvent {
-	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width
+	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
 
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
 	y := float32(row)*rowHeight + rowHeight/2
