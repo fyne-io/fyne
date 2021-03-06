@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/widget"
 )
 
 // FocusManager represents a standard manager of input focus for a canvas
@@ -52,7 +53,9 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 			return true
 		}
 		if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-			return true
+			if _, isEntry := obj.(*widget.Entry); !isEntry {
+				return true
+			}
 		}
 	}
 	f.focus(obj)
