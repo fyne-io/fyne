@@ -39,7 +39,11 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 			isSVG = isResourceSVG(img.Resource)
 		} else {
 			name = img.File
-			handle, _ := os.Open(img.File)
+			handle, err := os.Open(img.File)
+			if err != nil {
+				fyne.LogError("image load error", err)
+				return nil
+			}
 			defer handle.Close()
 			file = handle
 			isSVG = isFileSVG(img.File)
