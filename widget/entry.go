@@ -303,6 +303,7 @@ func (e *Entry) FocusGained() {
 func (e *Entry) FocusLost() {
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
+		e.selectKeyDown = false
 	})
 }
 
@@ -335,6 +336,9 @@ func (e *Entry) Keyboard() mobile.KeyboardType {
 //
 // Implements: desktop.Keyable
 func (e *Entry) KeyDown(key *fyne.KeyEvent) {
+	if e.Disabled() {
+		return
+	}
 	// For keyboard cursor controlled selection we now need to store shift key state and selection "start"
 	// Note: selection start is where the highlight started (if the user moves the selection up or left then
 	// the selectRow/Column will not match SelectionStart)
@@ -351,6 +355,9 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 //
 // Implements: desktop.Keyable
 func (e *Entry) KeyUp(key *fyne.KeyEvent) {
+	if e.Disabled() {
+		return
+	}
 	// Handle shift release for keyboard selection
 	// Note: if shift is released then the user may repress it without moving to adjust their old selection
 	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
