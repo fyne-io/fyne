@@ -237,10 +237,19 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 	})
 }
 
-// DragEnd is called at end of a drag event. It does nothing.
+// DragEnd is called at end of a drag event.
 //
 // Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
+	e.propertyLock.Lock()
+	if e.CursorColumn == e.selectColumn && e.CursorRow == e.selectRow {
+		e.selecting = false
+	}
+	shouldRefresh := !e.selecting
+	e.propertyLock.Unlock()
+	if shouldRefresh {
+		e.Refresh()
+	}
 }
 
 // Dragged is called when the pointer moves while a button is held down.
@@ -254,9 +263,6 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 	pevt.Position = pevt.Position.Subtract(e.scroll.Offset)
 	if !e.selecting {
 		e.selectRow, e.selectColumn = e.getRowCol(&pevt)
-		if e.selectRow == 0 && e.selectColumn == 0 {
-			return
-		}
 		e.selecting = true
 	}
 	e.updateMousePointer(&pevt, false)
@@ -1303,7 +1309,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// DragEnd is called at end of a drag event. It does nothing.
+// DragEnd is called at end of a drag event.
 //
 // Implements: fyne.Draggable
 func (e *entryContent) DragEnd() {
