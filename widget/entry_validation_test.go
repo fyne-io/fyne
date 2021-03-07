@@ -15,6 +15,18 @@ import (
 
 var validator = validation.NewRegexp(`^\d{4}-\d{2}-\d{2}$`, "Input is not a valid date")
 
+func TestEntry_DisabledHideValidation(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	entry.Validator = validator
+	entry.SetText("invalid text")
+	entry.Disable()
+
+	test.AssertImageMatches(t, "entry/validation_disabled.png", c.Capture())
+}
+
 func TestEntry_ValidatedEntry(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
