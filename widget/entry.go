@@ -283,9 +283,6 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
-	if e.Disabled() {
-		return
-	}
 	e.setFieldsAndRefresh(func() {
 		e.focused = true
 	})
@@ -1175,7 +1172,7 @@ func (r *entryRenderer) Refresh() {
 	provider := r.entry.textProvider()
 	text := r.entry.Text
 	content := r.entry.content
-	focused := r.entry.focused
+	focusedAppearance := r.entry.focused && !r.entry.disabled
 	size := r.entry.size
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
@@ -1215,7 +1212,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	r.box.FillColor = theme.InputBackgroundColor()
-	if focused {
+	if focusedAppearance {
 		r.line.FillColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
@@ -1359,7 +1356,7 @@ func (r *entryContentRenderer) Refresh() {
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
 	content := r.content.entry.Text
-	focused := r.content.entry.focused
+	focusedAppearance := r.content.entry.focused && !r.content.entry.disabled
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
@@ -1374,7 +1371,7 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	if focused {
+	if focusedAppearance {
 		r.cursor.Show()
 		r.content.entry.cursorAnim.start()
 	} else {
@@ -1384,7 +1381,7 @@ func (r *entryContentRenderer) Refresh() {
 	r.moveCursor()
 
 	for _, selection := range selections {
-		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused && !r.content.entry.disabled
+		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
 		selection.(*canvas.Rectangle).FillColor = theme.PrimaryColor()
 	}
 
