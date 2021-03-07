@@ -254,6 +254,9 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 	pevt.Position = pevt.Position.Subtract(e.scroll.Offset)
 	if !e.selecting {
 		e.selectRow, e.selectColumn = e.getRowCol(&pevt)
+		if e.selectRow == 0 && e.selectColumn == 0 {
+			return
+		}
 		e.selecting = true
 	}
 	e.updateMousePointer(&pevt, false)
