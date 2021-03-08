@@ -3,6 +3,7 @@
 package glfw
 
 import (
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -111,6 +112,16 @@ func (d *gLDriver) windowList() []fyne.Window {
 	d.windowLock.RLock()
 	defer d.windowLock.RUnlock()
 	return d.windows
+}
+
+func (d *gLDriver) initFailed(msg string, err error) {
+	fyne.LogError(msg, err)
+
+	if running() {
+		d.Quit()
+	} else {
+		os.Exit(1)
+	}
 }
 
 func goroutineID() int {
