@@ -36,7 +36,7 @@ func mobileFilter(filter storage.FileFilter) *app.FileFilter {
 		mobile.MimeTypes = f.MimeTypes
 	} else if f, ok := filter.(*storage.ExtensionFileFilter); ok {
 		mobile.Extensions = f.Extensions
-	} else {
+	} else if filter != nil {
 		fyne.LogError("Custom filter types not supported on mobile", nil)
 	}
 

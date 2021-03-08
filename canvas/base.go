@@ -14,8 +14,8 @@ import (
 )
 
 type baseObject struct {
-	size     fyne.Size     // The current size of the Rectangle
-	position fyne.Position // The current position of the Rectangle
+	size     fyne.Size     // The current size of the canvas object
+	position fyne.Position // The current position of the object
 	Hidden   bool          // Is this object currently hidden
 
 	min fyne.Size // The minimum size this object can be
@@ -23,7 +23,7 @@ type baseObject struct {
 	propertyLock sync.RWMutex
 }
 
-// CurrentSize returns the current size of this rectangle object
+// CurrentSize returns the current size of this canvas object.
 func (r *baseObject) Size() fyne.Size {
 	r.propertyLock.RLock()
 	defer r.propertyLock.RUnlock()
@@ -31,7 +31,7 @@ func (r *baseObject) Size() fyne.Size {
 	return r.size
 }
 
-// Resize sets a new size for the rectangle object
+// Resize sets a new size for the canvas object.
 func (r *baseObject) Resize(size fyne.Size) {
 	r.propertyLock.Lock()
 	defer r.propertyLock.Unlock()
@@ -39,7 +39,7 @@ func (r *baseObject) Resize(size fyne.Size) {
 	r.size = size
 }
 
-// CurrentPosition gets the current position of this rectangle object, relative to its parent / canvas
+// CurrentPosition gets the current position of this canvas object, relative to its parent.
 func (r *baseObject) Position() fyne.Position {
 	r.propertyLock.RLock()
 	defer r.propertyLock.RUnlock()
@@ -47,7 +47,7 @@ func (r *baseObject) Position() fyne.Position {
 	return r.position
 }
 
-// Move the rectangle object to a new position, relative to its parent / canvas
+// Move the object to a new position, relative to its parent.
 func (r *baseObject) Move(pos fyne.Position) {
 	r.propertyLock.Lock()
 	defer r.propertyLock.Unlock()
@@ -55,7 +55,7 @@ func (r *baseObject) Move(pos fyne.Position) {
 	r.position = pos
 }
 
-// MinSize returns the specified minimum size, if set, or {1, 1} otherwise
+// MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (r *baseObject) MinSize() fyne.Size {
 	r.propertyLock.RLock()
 	defer r.propertyLock.RUnlock()
@@ -67,7 +67,7 @@ func (r *baseObject) MinSize() fyne.Size {
 	return r.min
 }
 
-// SetMinSize specifies the smallest size this object should be
+// SetMinSize specifies the smallest size this object should be.
 func (r *baseObject) SetMinSize(size fyne.Size) {
 	r.propertyLock.Lock()
 	defer r.propertyLock.Unlock()
@@ -75,7 +75,7 @@ func (r *baseObject) SetMinSize(size fyne.Size) {
 	r.min = size
 }
 
-// IsVisible returns true if this object is visible, false otherwise
+// IsVisible returns true if this object is visible, false otherwise.
 func (r *baseObject) Visible() bool {
 	r.propertyLock.RLock()
 	defer r.propertyLock.RUnlock()
@@ -83,7 +83,7 @@ func (r *baseObject) Visible() bool {
 	return !r.Hidden
 }
 
-// Show will set this object to be visible
+// Show will set this object to be visible.
 func (r *baseObject) Show() {
 	r.propertyLock.Lock()
 	defer r.propertyLock.Unlock()
@@ -91,7 +91,7 @@ func (r *baseObject) Show() {
 	r.Hidden = false
 }
 
-// Hide will set this object to not be visible
+// Hide will set this object to not be visible.
 func (r *baseObject) Hide() {
 	r.propertyLock.Lock()
 	defer r.propertyLock.Unlock()

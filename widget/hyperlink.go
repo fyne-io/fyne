@@ -121,7 +121,7 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
 	hl.provider = newTextProvider(hl.Text, hl)
-	hl.provider.extraPad = fyne.NewSize(0, theme.Padding())
+	hl.provider.extraPad = fyne.NewSize(theme.Padding(), theme.Padding())
 	return hl.provider.CreateRenderer()
 }
 

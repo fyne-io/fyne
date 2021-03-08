@@ -7,13 +7,13 @@
 						<widget size="73x32" type="*container.tabButton">
 							<text bold color="primary" pos="4,4" size="65x21">Test1</text>
 							<widget pos="49,6" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0" themed="primary"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 						<widget pos="77,0" size="73x32" type="*container.tabButton">
 							<text bold pos="4,4" size="65x21">Test2</text>
 							<widget pos="49,6" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="0x0"/>
+								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 					</container>
@@ -29,7 +29,7 @@
 			<rectangle fillColor="shadow" pos="0,32" size="150x4"/>
 			<rectangle fillColor="primary" pos="0,32" size="73x4"/>
 			<widget pos="0,36" size="150x114" type="*widget.Label">
-				<text pos="4,8" size="142x21">Text1</text>
+				<text pos="8,8" size="134x21">Text1</text>
 			</widget>
 		</widget>
 	</content>
