@@ -422,8 +422,8 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	if c.dragging == nil {
 		if drag, ok := co.(fyne.Draggable); ok {
 			c.dragging = drag
+			c.dragOffset = previousPos.Subtract(objPos)
 			c.dragStart = co.Position()
-			c.dragOffset = previousPos.Subtract(pos)
 		} else {
 			return
 		}
@@ -431,7 +431,6 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 
 	ev := new(fyne.DragEvent)
 	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
-	ev.AbsolutePosition = pos
 	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
 
