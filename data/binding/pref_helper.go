@@ -24,12 +24,13 @@ func (b *preferenceBindings) getItem(key string) preferenceItem {
 
 func (b *preferenceBindings) list() []preferenceItem {
 	b.lock.RLock()
-	items := make([]preferenceItem, 0, len(b.items))
-	for _, i := range b.items {
-		items = append(items, i)
-	}
+	allItems := b.items
 	b.lock.RUnlock()
-	return items
+	ret := make([]preferenceItem, 0, len(allItems))
+	for _, i := range allItems {
+		ret = append(ret, i)
+	}
+	return ret
 }
 
 func (b *preferenceBindings) setItem(key string, item preferenceItem) {
@@ -50,18 +51,25 @@ func newPreferencesMap() *preferencesMap {
 }
 
 func (m *preferencesMap) ensurePreferencesAttached(p fyne.Preferences) *preferenceBindings {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if m.prefs[p] != nil {
-		return m.prefs[p]
+	m.lock.RLock()
+	binds := m.prefs[p]
+	m.lock.RUnlock()
+
+	if binds != nil {
+		return binds
 	}
+
+	m.lock.Lock()
 	m.prefs[p] = &preferenceBindings{
 		items: make(map[string]preferenceItem),
 	}
+	binds = m.prefs[p]
+	m.lock.Unlock()
+
 	p.AddChangeListener(func() {
 		m.preferencesChanged(p)
 	})
-	return m.prefs[p]
+	return binds
 }
 
 func (m *preferencesMap) getBindings(p fyne.Preferences) *preferenceBindings {
