@@ -876,14 +876,15 @@ func (e *Entry) registerShortcut() {
 func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
 	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
-	for i := 0; i < provider.rows(); i++ {
+	totalRows := provider.rows()
+	for i := 0; i < totalRows; i++ {
 		b := provider.rowBoundary(i)
 		if b[0] <= pos {
 			if b[1] < pos {
 				row++
 			}
 			col = pos - b[0]
-			if canWrap && b[0] == pos && col == 0 && pos != 0 {
+			if canWrap && b[0] == pos && col == 0 && pos != 0 && row < (totalRows-1) {
 				row++
 			}
 		} else {
