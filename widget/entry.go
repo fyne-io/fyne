@@ -1431,7 +1431,7 @@ func (r *entryContentRenderer) buildSelection() {
 	}
 	r.content.entry.propertyLock.RUnlock()
 
-	if selectRow == -1 {
+	if selectRow == -1 || (cursorRow == selectRow && cursorCol == selectCol) {
 		r.selection = r.selection[:0]
 
 		return
