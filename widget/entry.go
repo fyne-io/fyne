@@ -821,21 +821,10 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 	provider := e.textProvider()
 	runes := []rune(text)
-	provider.insertAt(e.cursorTextPos(), runes)
+	pos := e.cursorTextPos()
+	provider.insertAt(pos, runes)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-	newlines := strings.Count(text, "\n")
-	if newlines == 0 {
-		e.CursorColumn += len(runes)
-	} else {
-		e.CursorRow += newlines
-		lastNewlineIndex := 0
-		for i, r := range runes {
-			if r == '\n' {
-				lastNewlineIndex = i
-			}
-		}
-		e.CursorColumn = len(runes) - lastNewlineIndex - 1
-	}
 	e.updateText(provider.String())
 	e.Refresh()
 }
