@@ -40,13 +40,12 @@ type mobileCanvas struct {
 	onTypedKey  func(event *fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
-	inited                bool
-	lastTapDown           map[int]time.Time
-	lastTapDownPos        map[int]fyne.Position
-	dragging              fyne.Draggable
-	dragStart, dragOffset fyne.Position
-	refreshQueue          chan fyne.CanvasObject
-	minSizeCache          map[fyne.CanvasObject]fyne.Size
+	inited         bool
+	lastTapDown    map[int]time.Time
+	lastTapDownPos map[int]fyne.Position
+	dragging       fyne.Draggable
+	refreshQueue   chan fyne.CanvasObject
+	minSizeCache   map[fyne.CanvasObject]fyne.Size
 
 	touchTapCount   int
 	touchCancelFunc context.CancelFunc
@@ -390,9 +389,8 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 
 func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
-	previousPos := c.lastTapDownPos[tapID]
-	deltaX := pos.X - previousPos.X
-	deltaY := pos.Y - previousPos.Y
+	deltaX := pos.X - c.lastTapDownPos[tapID].X
+	deltaY := pos.Y - c.lastTapDownPos[tapID].Y
 
 	if c.dragging == nil && (math.Abs(float64(deltaX)) < tapMoveThreshold && math.Abs(float64(deltaY)) < tapMoveThreshold) {
 		return
@@ -422,17 +420,13 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	if c.dragging == nil {
 		if drag, ok := co.(fyne.Draggable); ok {
 			c.dragging = drag
-			c.dragStart = co.Position()
-			c.dragOffset = previousPos.Subtract(pos)
 		} else {
 			return
 		}
 	}
 
 	ev := new(fyne.DragEvent)
-	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
-	ev.AbsolutePosition = pos
-	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
+	ev.Position = objPos
 	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
 
 	dragCallback(c.dragging, ev)
