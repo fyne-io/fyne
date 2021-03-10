@@ -43,14 +43,14 @@ func mobileFilter(filter storage.FileFilter) *app.FileFilter {
 	return mobile
 }
 
-type hasPicker interface {
+type hasOpenPicker interface {
 	ShowFileOpenPicker(func(string, func()), *app.FileFilter)
 }
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
 func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage.FileFilter) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
-	if a, ok := drv.app.(hasPicker); ok {
+	if a, ok := drv.app.(hasOpenPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
 			if uri == "" {
 				callback(nil, nil)
@@ -69,7 +69,7 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
 	filter := storage.NewMimeTypeFileFilter([]string{"application/x-directory"})
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
-	if a, ok := drv.app.(hasPicker); ok {
+	if a, ok := drv.app.(hasOpenPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, _ func()) {
 			if uri == "" {
 				callback(nil, nil)
@@ -78,5 +78,47 @@ func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
 			f, err := listerForURI(storage.NewURI(uri))
 			callback(f, err)
 		}, mobileFilter(filter))
+	}
+}
+
+type fileSave struct {
+	io.WriteCloser
+	uri  fyne.URI
+	done func()
+}
+
+func (f *fileSave) URI() fyne.URI {
+	return f.uri
+}
+
+func fileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
+	file := &fileSave{uri: u}
+	write, err := nativeFileSave(file)
+	if write == nil {
+		return nil, err
+	}
+	file.WriteCloser = write
+	return file, err
+}
+
+type hasSavePicker interface {
+	ShowFileSavePicker(func(string, func()))
+}
+
+// ShowFileSavePicker loads the native file save dialog and returns the chosen file path via the callback func.
+func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error)) {
+	drv := fyne.CurrentApp().Driver().(*mobileDriver)
+	if a, ok := drv.app.(hasSavePicker); ok {
+		a.ShowFileSavePicker(func(uri string, closer func()) {
+			if uri == "" {
+				callback(nil, nil)
+				return
+			}
+			f, err := fileWriterForURI(storage.NewURI(uri))
+			if f != nil {
+				f.(*fileSave).done = closer
+			}
+			callback(f, err)
+		})
 	}
 }
