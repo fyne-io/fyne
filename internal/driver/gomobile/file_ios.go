@@ -13,6 +13,7 @@ const void* iosReadFromURL(void* url, int* len);
 */
 import "C"
 import (
+	"errors"
 	"io"
 	"unsafe"
 
@@ -75,6 +76,10 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 
 	fileStruct := &secureReadCloser{url: url, closer: f.done}
 	return fileStruct, nil
+}
+
+func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
+	return nil, errors.New("Currently unsupported.")
 }
 
 func registerRepository(d *mobileDriver) {
