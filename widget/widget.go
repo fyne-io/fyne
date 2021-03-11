@@ -2,13 +2,11 @@
 package widget // import "fyne.io/fyne/v2/widget"
 
 import (
-	"image/color"
 	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/theme"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -29,16 +27,16 @@ func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
 	}
 
 	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
 	w.impl = wid
+	w.propertyLock.Unlock()
 }
 
 // Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
 	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.size
+	size := w.size
+	w.propertyLock.RUnlock()
+	return size
 }
 
 // Resize sets a new size for a widget.
@@ -65,18 +63,17 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 // Position gets the current position of this widget, relative to its parent.
 func (w *BaseWidget) Position() fyne.Position {
 	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.position
+	pos := w.position
+	w.propertyLock.RUnlock()
+	return pos
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
 	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
-
 	w.position = pos
+	w.propertyLock.Unlock()
 }
 
 // MinSize for the widget - it should never be resized below this value.
@@ -95,9 +92,9 @@ func (w *BaseWidget) MinSize() fyne.Size {
 // Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *BaseWidget) Visible() bool {
 	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return !w.Hidden
+	isVisible := !w.Hidden
+	w.propertyLock.RUnlock()
+	return isVisible
 }
 
 // Show this widget so it becomes visible
@@ -160,23 +157,15 @@ func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 
 	impl := w.getImpl()
 	if impl == nil {
-		w.Refresh()
-	} else {
-		impl.Refresh()
+		return
 	}
+	impl.Refresh()
 }
 
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
-	impl := w.getImpl()
-
-	if impl == nil {
-		var x interface{} = w
-		return x.(fyne.Widget)
-	}
-
-	return impl
+	return w.getImpl()
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
@@ -189,22 +178,22 @@ type DisableableWidget struct {
 
 // Enable this widget, updating any style or features appropriately.
 func (w *DisableableWidget) Enable() {
-	w.setFieldsAndRefresh(func() {
-		if !w.disabled {
-			return
-		}
+	if !w.Disabled() {
+		return
+	}
 
+	w.setFieldsAndRefresh(func() {
 		w.disabled = false
 	})
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (w *DisableableWidget) Disable() {
-	w.setFieldsAndRefresh(func() {
-		if w.disabled {
-			return
-		}
+	if w.Disabled() {
+		return
+	}
 
+	w.setFieldsAndRefresh(func() {
 		w.disabled = true
 	})
 }
@@ -212,17 +201,13 @@ func (w *DisableableWidget) Disable() {
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
 	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.disabled
+	dis := w.disabled
+	w.propertyLock.RUnlock()
+	return dis
 }
 
 type simpleRenderer struct {
 	content *fyne.Container
-}
-
-func (s *simpleRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (s *simpleRenderer) Destroy() {
