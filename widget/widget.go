@@ -2,13 +2,11 @@
 package widget // import "fyne.io/fyne/v2/widget"
 
 import (
-	"image/color"
 	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/theme"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -160,23 +158,15 @@ func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 
 	impl := w.getImpl()
 	if impl == nil {
-		w.Refresh()
-	} else {
-		impl.Refresh()
+		return
 	}
+	impl.Refresh()
 }
 
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
-	impl := w.getImpl()
-
-	if impl == nil {
-		var x interface{} = w
-		return x.(fyne.Widget)
-	}
-
-	return impl
+	return w.getImpl()
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
@@ -189,22 +179,22 @@ type DisableableWidget struct {
 
 // Enable this widget, updating any style or features appropriately.
 func (w *DisableableWidget) Enable() {
-	w.setFieldsAndRefresh(func() {
-		if !w.disabled {
-			return
-		}
+	if !w.Disabled() {
+		return
+	}
 
+	w.setFieldsAndRefresh(func() {
 		w.disabled = false
 	})
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (w *DisableableWidget) Disable() {
-	w.setFieldsAndRefresh(func() {
-		if w.disabled {
-			return
-		}
+	if w.Disabled() {
+		return
+	}
 
+	w.setFieldsAndRefresh(func() {
 		w.disabled = true
 	})
 }
@@ -219,10 +209,6 @@ func (w *DisableableWidget) Disabled() bool {
 
 type simpleRenderer struct {
 	content *fyne.Container
-}
-
-func (s *simpleRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (s *simpleRenderer) Destroy() {
