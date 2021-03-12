@@ -834,21 +834,10 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 	provider := e.textProvider()
 	runes := []rune(text)
-	provider.insertAt(e.cursorTextPos(), runes)
+	pos := e.cursorTextPos()
+	provider.insertAt(pos, runes)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-	newlines := strings.Count(text, "\n")
-	if newlines == 0 {
-		e.CursorColumn += len(runes)
-	} else {
-		e.CursorRow += newlines
-		lastNewlineIndex := 0
-		for i, r := range runes {
-			if r == '\n' {
-				lastNewlineIndex = i
-			}
-		}
-		e.CursorColumn = len(runes) - lastNewlineIndex - 1
-	}
 	e.updateText(provider.String())
 	e.Refresh()
 }
@@ -889,14 +878,15 @@ func (e *Entry) registerShortcut() {
 func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
 	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
-	for i := 0; i < provider.rows(); i++ {
+	totalRows := provider.rows()
+	for i := 0; i < totalRows; i++ {
 		b := provider.rowBoundary(i)
 		if b[0] <= pos {
 			if b[1] < pos {
 				row++
 			}
 			col = pos - b[0]
-			if canWrap && b[0] == pos && col == 0 && pos != 0 {
+			if canWrap && b[0] == pos && col == 0 && pos != 0 && row < (totalRows-1) {
 				row++
 			}
 		} else {

@@ -57,6 +57,7 @@ type window struct {
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
 	canvas       *glCanvas
+	driver       *gLDriver
 	title        string
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
@@ -446,7 +447,7 @@ func (w *window) Close() {
 
 func (w *window) ShowAndRun() {
 	w.Show()
-	fyne.CurrentApp().Driver().Run()
+	w.driver.Run()
 }
 
 // Clipboard returns the system clipboard
@@ -1274,7 +1275,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	runOnMain(func() {
 		d.initGLFW()
 
-		ret = &window{title: title, decorate: decorate}
+		ret = &window{title: title, decorate: decorate, driver: d}
 		// This channel will be closed when the window is closed.
 		ret.eventQueue = make(chan func(), 1024)
 		go ret.runEventQueue()
@@ -1317,7 +1318,7 @@ func (w *window) create() {
 
 		win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
 		if err != nil {
-			fyne.LogError("window creation error", err)
+			w.driver.initFailed("window creation error", err)
 			return
 		}
 

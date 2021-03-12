@@ -296,6 +296,35 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 	assert.Equal(t, entry.Text, testContent)
 }
 
+func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
+	entry := NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+
+	w := test.NewApp().NewWindow("")
+	w.SetContent(entry)
+	w.Resize(fyne.NewSize(100, 64))
+
+	test.Type(entry, "T")
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard.SetContent("esting entry")
+
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, entry.Text, "Testing entry")
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 5, entry.CursorColumn)
+
+	clipboard.SetContent(" paste\ncontent")
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, "Testing entry paste\ncontent", entry.Text)
+	assert.Equal(t, 2, entry.CursorRow)
+	assert.Equal(t, 7, entry.CursorColumn)
+}
+
 func TestEntry_Tab(t *testing.T) {
 	e := NewEntry()
 	e.SetText("a\n\tb\nc")

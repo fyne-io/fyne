@@ -347,6 +347,34 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	assert.Equal(t, "ng\nTe", e.SelectedText())
 }
 
+func TestEntry_MultilineWrapping_DeleteWithBackspace(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.Resize(fyne.NewSize(64, 64))
+	test.Type(entry, "line1")
+	test.Type(entry, "\nline2")
+	test.Type(entry, "\nline3")
+
+	assert.Equal(t, 5, entry.CursorColumn)
+	assert.Equal(t, 2, entry.CursorRow)
+
+	for i := 0; i < 4; i++ {
+		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+		assert.Equal(t, 4-i, entry.CursorColumn)
+		assert.Equal(t, 2, entry.CursorRow)
+	}
+
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 2, entry.CursorRow)
+
+	assert.NotPanics(t, func() {
+		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	})
+	assert.Equal(t, 5, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
+}
+
 func TestEntry_Notify(t *testing.T) {
 	entry := widget.NewEntry()
 	changed := false
