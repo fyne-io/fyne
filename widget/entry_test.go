@@ -195,6 +195,22 @@ func TestEntry_Disableable(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/disableable_enabled_custom_value.xml", c)
 }
 
+func TestEntry_Disabled_TextSelection(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	entry.SetText("Testing")
+	entry.Disable()
+	c := window.Canvas()
+
+	assert.True(t, entry.Disabled())
+	test.DoubleTap(entry)
+
+	test.AssertImageMatches(t, "entry/disabled_text_selected.png", c.Capture())
+
+	entry.FocusLost()
+	test.AssertImageMatches(t, "entry/disabled_text_unselected.png", c.Capture())
+}
+
 func TestEntry_EmptySelection(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("text")

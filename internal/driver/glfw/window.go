@@ -1124,10 +1124,19 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 	if shortcut != nil {
 		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			shouldRunShortcut := true
+			type selectableText interface {
+				fyne.Disableable
+				SelectedText() string
+			}
+			if selectableTextWid, ok := focused.(selectableText); ok && selectableTextWid.Disabled() {
+				shouldRunShortcut = shortcut.ShortcutName() == "Copy"
+			}
+			if shouldRunShortcut {
+				w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			}
 			return
 		}
-
 		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
 		return
 	}
