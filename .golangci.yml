@@ -4,7 +4,7 @@ linters-settings:
   golint:
     min-confidence: 0.8
   gocyclo:
-    min-complexity: 50
+    min-complexity: 30
 
 linters:
   disable-all: true

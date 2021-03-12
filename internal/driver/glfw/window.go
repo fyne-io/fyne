@@ -1000,6 +1000,27 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
+func (w *window) capturesTab(keyName fyne.KeyName, modifier desktop.Modifier) bool {
+	if keyName == fyne.KeyTab {
+		capture := false
+		// TODO at some point allow widgets to mark as capturing
+		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
+			capture = true
+		}
+		if !capture {
+			switch modifier {
+			case 0:
+				w.canvas.FocusNext()
+				return false
+			case desktop.ShiftModifier:
+				w.canvas.FocusPrevious()
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
 	if keyName == "" {
@@ -1053,82 +1074,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	switch keyName {
-	case fyne.KeyTab:
-		capture := false
-		// TODO at some point allow widgets to mark as capturing
-		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
-			capture = true
-		}
-		if !capture {
-			switch keyDesktopModifier {
-			case 0:
-				w.canvas.FocusNext()
-				return
-			case desktop.ShiftModifier:
-				w.canvas.FocusPrevious()
-				return
-			}
-		}
-	}
-
-	var shortcut fyne.Shortcut
-	ctrlMod := desktop.ControlModifier
-	if runtime.GOOS == "darwin" {
-		ctrlMod = desktop.SuperModifier
-	}
-	if keyDesktopModifier == ctrlMod {
-		switch keyName {
-		case fyne.KeyV:
-			// detect paste shortcut
-			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyC, fyne.KeyInsert:
-			// detect copy shortcut
-			shortcut = &fyne.ShortcutCopy{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyX:
-			// detect cut shortcut
-			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyA:
-			// detect selectAll shortcut
-			shortcut = &fyne.ShortcutSelectAll{}
-		}
-	}
-
-	if keyDesktopModifier == desktop.ShiftModifier {
-		switch keyName {
-		case fyne.KeyInsert:
-			// detect paste shortcut
-			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyDelete:
-			// detect cut shortcut
-			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
-			}
-		}
-	}
-
-	if shortcut == nil && keyDesktopModifier != 0 && keyDesktopModifier != desktop.ShiftModifier {
-		shortcut = &desktop.CustomShortcut{
-			KeyName:  keyName,
-			Modifier: keyDesktopModifier,
-		}
-	}
-
-	if shortcut != nil {
-		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
-			return
-		}
-
-		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+	if !w.capturesTab(keyName, keyDesktopModifier) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}
 
@@ -1176,6 +1122,70 @@ func (w *window) focused(_ *glfw.Window, isFocused bool) {
 	} else {
 		w.canvas.FocusLost()
 	}
+}
+
+func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifier) bool {
+	var shortcut fyne.Shortcut
+	ctrlMod := desktop.ControlModifier
+	if runtime.GOOS == "darwin" {
+		ctrlMod = desktop.SuperModifier
+	}
+	if modifier == ctrlMod {
+		switch keyName {
+		case fyne.KeyV:
+			// detect paste shortcut
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyC, fyne.KeyInsert:
+			// detect copy shortcut
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyX:
+			// detect cut shortcut
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyA:
+			// detect selectAll shortcut
+			shortcut = &fyne.ShortcutSelectAll{}
+		}
+	}
+
+	if modifier == desktop.ShiftModifier {
+		switch keyName {
+		case fyne.KeyInsert:
+			// detect paste shortcut
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyDelete:
+			// detect cut shortcut
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: w.Clipboard(),
+			}
+		}
+	}
+
+	if shortcut == nil && modifier != 0 && modifier != desktop.ShiftModifier {
+		shortcut = &desktop.CustomShortcut{
+			KeyName:  keyName,
+			Modifier: modifier,
+		}
+	}
+
+	if shortcut != nil {
+		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
+			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			return true
+		}
+
+		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+		return true
+	}
+
+	return false
 }
 
 func (w *window) RunWithContext(f func()) {
