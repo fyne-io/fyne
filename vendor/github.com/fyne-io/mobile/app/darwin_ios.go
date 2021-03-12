@@ -301,3 +301,6 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 
 	C.showFileOpenPicker(mimeStr, extStr)
 }
+
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+}
