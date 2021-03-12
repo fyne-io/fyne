@@ -33,7 +33,7 @@ func (m *mobileFileRepo) Destroy(string) {
 }
 
 func (m *mobileFileRepo) CanWrite(u fyne.URI) (bool, error) {
-	return true, nil // TODO check a file can be read
+	return true, nil // TODO check a file can be written
 }
 
 func (m *mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
