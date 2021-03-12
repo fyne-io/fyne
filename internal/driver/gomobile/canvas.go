@@ -82,7 +82,7 @@ func (c *mobileCanvas) Content() fyne.CanvasObject {
 
 func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 	focusMgr := c.focusManager()
-	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+	if focusMgr != nil && focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
 		c.handleKeyboard(obj)
 		return
 	}
@@ -101,15 +101,27 @@ func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 }
 
 func (c *mobileCanvas) FocusNext() {
-	c.focusManager().FocusNext()
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusNext()
 }
 
 func (c *mobileCanvas) FocusPrevious() {
-	c.focusManager().FocusPrevious()
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusPrevious()
 }
 
 func (c *mobileCanvas) Focused() fyne.Focusable {
-	return c.focusManager().Focused()
+	mgr := c.focusManager()
+	if mgr == nil {
+		return nil
+	}
+	return mgr.Focused()
 }
 
 func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
@@ -176,7 +188,11 @@ func (c *mobileCanvas) Size() fyne.Size {
 }
 
 func (c *mobileCanvas) Unfocus() {
-	if c.focusManager().Focus(nil) {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	if mgr.Focus(nil) {
 		hideVirtualKeyboard()
 	}
 }
