@@ -52,7 +52,12 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 			return true
 		}
 		if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-			return true
+			type selectableText interface {
+				SelectedText() string
+			}
+			if _, isSelectableText := obj.(selectableText); !isSelectableText || fyne.CurrentDevice().IsMobile() {
+				return true
+			}
 		}
 	}
 	f.focus(obj)
