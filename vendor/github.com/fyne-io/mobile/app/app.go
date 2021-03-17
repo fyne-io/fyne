@@ -55,6 +55,7 @@ type App interface {
 	ShowVirtualKeyboard(KeyboardType)
 	HideVirtualKeyboard()
 	ShowFileOpenPicker(func(string, func()), *FileFilter)
+	ShowFileSavePicker(func(string, func()), *FileFilter)
 }
 
 type FileFilter struct {
@@ -148,6 +149,9 @@ func (a *app) HideVirtualKeyboard() {
 
 func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	driverShowFileOpenPicker(callback, filter)
+}
+func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+	driverShowFileSavePicker(callback, filter)
 }
 
 type stopPumping struct{}

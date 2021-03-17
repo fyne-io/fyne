@@ -144,6 +144,25 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return (*env)->NewGlobalRef(env, stream);
 }
 
+void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject resolver = getContentResolver(jni_env, ctx);
+
+	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+	jmethodID saveOutputStream = find_method(env, resolverClass, "openOutputStream", "(Landroid/net/Uri;)Ljava/io/OutputStream;");
+
+	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, saveOutputStream, uri);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+	if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return NULL;
+	}
+
+	return (*env)->NewGlobalRef(env, stream);
+}
+
 char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
@@ -160,6 +179,19 @@ char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* t
 	char* bytes = malloc(sizeof(char)*count);
 	(*env)->GetByteArrayRegion(env, data, 0, count, bytes);
 	return bytes;
+}
+
+void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* buf, int len) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jclass streamClass = (*env)->GetObjectClass(env, stream);
+	jmethodID write = find_method(env, streamClass, "write", "([BII)V");
+
+	jbyteArray data = (*env)->NewByteArray(env, len);
+	(*env)->SetByteArrayRegion(env, data, 0, len, buf);
+
+	(*env)->CallVoidMethod(env, stream, write, data, 0, len);
+
+	free(buf);
 }
 
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
