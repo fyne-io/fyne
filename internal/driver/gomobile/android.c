@@ -275,6 +275,39 @@ bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return false;
 }
 
+char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject resolver = getContentResolver(jni_env, ctx);
+	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+	if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return "";
+	}
+
+	jclass stringClass = find_class(env, "java/lang/String");
+	jobjectArray project = (*env)->NewObjectArray(env, 1, stringClass, (*env)->NewStringUTF(env, "_display_name"));
+
+	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;");
+
+	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, uri, project, NULL, NULL, NULL);
+	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
+
+	jmethodID first = find_method(env, cursorClass, "moveToFirst", "()Z");
+	jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
+
+	if (((jboolean)(*env)->CallBooleanMethod(env, cursor, first)) == JNI_TRUE) {
+		jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
+		char *fname = getString(jni_env, ctx, name);
+		return fname;
+	}
+
+	return NULL;
+}
+
 char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
