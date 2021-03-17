@@ -58,7 +58,7 @@ func NewGetter() *Getter {
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
 	cmd := exec.Command("go", "get", "-u", "-d", pkg)
-	cmd.Env = append(os.Environ(), "GO111MODULE=off")
+	cmd.Env = append(os.Environ(), "GO111MODULE=off") // cache the downloaded code
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 
 	err := cmd.Run()
