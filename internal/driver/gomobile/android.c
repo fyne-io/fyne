@@ -187,12 +187,11 @@ void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* buf, int 
 	jmethodID write = find_method(env, streamClass, "write", "([BII)V");
 
 	jbyteArray data = (*env)->NewByteArray(env, len);
-    jboolean isCopy;
-    (*env)->SetByteArrayRegion(env, data, 0, len, buf);
+	(*env)->SetByteArrayRegion(env, data, 0, len, buf);
 
 	(*env)->CallVoidMethod(env, stream, write, data, 0, len);
 
-    free(buf);
+	free(buf);
 }
 
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
