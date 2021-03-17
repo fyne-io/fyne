@@ -131,7 +131,7 @@ var _ io.WriteCloser = (*javaStream)(nil)
 
 func (s *javaStream) Write(p []byte) (int, error) {
 	err := app.RunOnJVM(func(_, env, ctx uintptr) error {
-		C.writeStream(C.uintptr_t(env), C.uintptr_t(ctx), s.stream, (*C.char)(unsafe.Pointer(&p[0])), C.int(len(p)))
+		C.writeStream(C.uintptr_t(env), C.uintptr_t(ctx), s.stream, (*C.char)(C.CBytes(p)), C.int(len(p)))
 		return nil
 	})
 
