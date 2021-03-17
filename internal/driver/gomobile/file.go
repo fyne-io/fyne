@@ -9,6 +9,12 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
+// Override Name on android for content://
+type mobileURI struct {
+	systemURI string
+	fyne.URI
+}
+
 type fileOpen struct {
 	io.ReadCloser
 	uri  fyne.URI
@@ -56,7 +62,10 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 				callback(nil, nil)
 				return
 			}
-			f, err := fileReaderForURI(storage.NewURI(uri))
+			f, err := fileReaderForURI(&mobileURI{
+				URI:       storage.NewURI(uri),
+				systemURI: uri,
+			})
 			if f != nil {
 				f.(*fileOpen).done = closer
 			}
