@@ -188,10 +188,11 @@ void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* buf, int 
 
 	jbyteArray data = (*env)->NewByteArray(env, len);
     jboolean isCopy;
-    void *underlying = (*env)->GetPrimitiveArrayCritical(env, (jarray)data, &isCopy);
-    memcpy(underlying, buf, len);
+    (*env)->SetByteArrayRegion(env, data, 0, len, buf);
 
 	(*env)->CallVoidMethod(env, stream, write, data, 0, len);
+
+    free(buf);
 }
 
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
