@@ -9,12 +9,6 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-// Override Name on android for content://
-type mobileURI struct {
-	systemURI string
-	fyne.URI
-}
-
 type fileOpen struct {
 	io.ReadCloser
 	uri  fyne.URI
