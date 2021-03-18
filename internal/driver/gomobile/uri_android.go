@@ -14,21 +14,29 @@ import (
 	"path/filepath"
 	"unsafe"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 	"github.com/fyne-io/mobile/app"
 )
 
-func (m *mobileURI) Name() string {
-	if m.Scheme() == "content" {
-		result := contentURIGetFileName(m.systemURI)
+type androidURI struct {
+	systemURI string
+	fyne.URI
+}
+
+// Override Name on android for content://
+func (a *androidURI) Name() string {
+	if a.Scheme() == "content" {
+		result := contentURIGetFileName(a.systemURI)
 		if result != "" {
 			return result
 		}
 	}
-	return m.URI.Name()
+	return a.URI.Name()
 }
 
-func (m *mobileURI) Extension() string {
-	return filepath.Ext(m.Name())
+func (a *androidURI) Extension() string {
+	return filepath.Ext(a.Name())
 }
 
 func contentURIGetFileName(uri string) string {
@@ -48,4 +56,8 @@ func contentURIGetFileName(uri string) string {
 		return nil
 	})
 	return filename
+}
+
+func nativeURI(uri string) fyne.URI {
+	return &androidURI{URI: storage.NewURI(uri), systemURI: uri}
 }
