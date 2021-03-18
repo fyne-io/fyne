@@ -215,7 +215,6 @@ bool hasPrefix(char* string, char* prefix) {
 bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
@@ -278,7 +277,6 @@ bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
@@ -311,7 +309,6 @@ char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
