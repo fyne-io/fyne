@@ -294,9 +294,7 @@ void hideKeyboard() {
     });
 }
 
-void showFileOpenPicker(char* mimes, char *exts) {
-    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
-
+NSMutableArray *docTypesForMimeExts(char *mimes, char *exts) {
     NSMutableArray *docTypes = [NSMutableArray array];
     if (mimes != NULL && strlen(mimes) > 0) {
         NSString *mimeList = [NSString stringWithUTF8String:mimes];
@@ -325,8 +323,37 @@ void showFileOpenPicker(char* mimes, char *exts) {
         [docTypes addObject:@"public.data"];
     }
 
+    return docTypes;
+}
+
+void showFileOpenPicker(char* mimes, char *exts) {
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+
+    NSMutableArray *docTypes = docTypesForMimeExts(mimes, exts);
+
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
         initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
+    documentPicker.delegate = appDelegate;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
+    });
+}
+
+void showFileSavePicker(char* mimes, char *exts) {
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+
+    NSMutableArray *docTypes = docTypesForMimeExts(mimes, exts);
+
+    NSURL *temporaryDirectoryURL = [NSURL fileURLWithPath: NSTemporaryDirectory() isDirectory: YES];
+    NSURL *temporaryFileURL = [temporaryDirectoryURL URLByAppendingPathComponent:@"filename"];
+
+    char* bytes = "\n";
+    NSData *data = [NSData dataWithBytes:bytes length:1];
+    BOOL ok = [data writeToURL:temporaryFileURL atomically:YES];
+
+    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
+        initWithURL:temporaryFileURL inMode:UIDocumentPickerModeMoveToService];
     documentPicker.delegate = appDelegate;
 
     dispatch_async(dispatch_get_main_queue(), ^{
