@@ -13,6 +13,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -97,14 +98,14 @@ func (p *glPainter) SetOutputSize(width, height int) {
 }
 
 func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
-	texture, ok := textures[obj]
+	texture, ok := cache.GetTexture(obj)
 	if !ok {
 		return
 	}
 
 	p.glctx().DeleteTexture(gl.Texture(texture))
 	p.logError()
-	delete(textures, obj)
+	cache.DestroyTexture(obj)
 }
 
 func (p *glPainter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {

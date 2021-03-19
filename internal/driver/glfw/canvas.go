@@ -325,9 +325,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	windowNeedsMinSizeUpdate := false
 	ensureMinSize := func(node *renderCacheNode) {
 		obj := node.obj
-		canvasMutex.Lock()
-		canvases[obj] = c
-		canvasMutex.Unlock()
+		cache.SetCanvasForObject(obj, c)
 
 		if !obj.Visible() {
 			return
@@ -471,6 +469,9 @@ func (c *glCanvas) setDirty(dirty bool) {
 	defer c.dirtyMutex.Unlock()
 
 	c.dirty = dirty
+	if dirty {
+		cache.Clean()
+	}
 }
 
 func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {

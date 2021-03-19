@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	intRepo "fyne.io/fyne/v2/internal/repository"
@@ -20,9 +21,7 @@ import (
 const mainGoroutineID = 1
 
 var (
-	canvasMutex sync.RWMutex
-	canvases    = make(map[fyne.CanvasObject]fyne.Canvas)
-	isWayland   = false
+	isWayland = false
 )
 
 // Declare conformity with Driver
@@ -43,9 +42,7 @@ func (d *gLDriver) RenderedTextSize(text string, size float32, style fyne.TextSt
 }
 
 func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	canvasMutex.RLock()
-	defer canvasMutex.RUnlock()
-	return canvases[obj]
+	return cache.GetCanvasForObject(obj)
 }
 
 func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {

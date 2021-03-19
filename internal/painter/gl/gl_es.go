@@ -14,6 +14,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -87,7 +88,7 @@ func (p *glPainter) SetOutputSize(width, height int) {
 }
 
 func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
-	texture, ok := textures[obj]
+	texture, ok := cache.GetTexture(obj)
 	if !ok {
 		return
 	}
@@ -95,7 +96,7 @@ func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 	tex := uint32(texture)
 	gl.DeleteTextures(1, &tex)
 	logError()
-	delete(textures, obj)
+	cache.DestroyTexture(obj)
 }
 
 func glInit() {
