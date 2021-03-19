@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 
@@ -238,6 +239,9 @@ func freeDirtyTextures(canvas *glCanvas) {
 				return false
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
+			cache.RangeExpiredTextures(func(co fyne.CanvasObject) {
+				canvas.painter.Free(co)
+			})
 		default:
 			return
 		}

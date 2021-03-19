@@ -94,7 +94,7 @@ func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 	tex := uint32(texture)
 	gl.DeleteTextures(1, &tex)
 	logError()
-	cache.DestroyTexture(obj)
+	cache.DeleteTexture(obj)
 }
 
 func glInit() {

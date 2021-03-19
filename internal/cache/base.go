@@ -39,25 +39,7 @@ func init() {
 				}
 
 				// -- Textures clean task
-				expired = expired[:0]
-				texturesLock.RLock()
-				for obj, tinfo := range textures {
-					if tinfo.isExpired(now) {
-						expired = append(expired, obj)
-					}
-				}
-				texturesLock.RUnlock()
-				if len(expired) > 0 {
-					texturesLock.Lock()
-					for i, exp := range expired {
-						if free := textures[exp].freeFn; free != nil {
-							go free(exp)
-						}
-						delete(textures, exp)
-						expired[i] = nil
-					}
-					texturesLock.Unlock()
-				}
+				// TODO find a way to clean textures here
 
 				if excludeCanvases {
 					return

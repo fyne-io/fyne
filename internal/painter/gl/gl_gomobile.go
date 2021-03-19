@@ -105,7 +105,7 @@ func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 
 	p.glctx().DeleteTexture(gl.Texture(texture))
 	p.logError()
-	cache.DestroyTexture(obj)
+	cache.DeleteTexture(obj)
 }
 
 func (p *glPainter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {

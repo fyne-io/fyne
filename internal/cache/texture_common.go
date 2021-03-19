@@ -2,6 +2,7 @@ package cache
 
 import (
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 )
@@ -9,11 +10,27 @@ import (
 var texturesLock sync.RWMutex
 var textures = make(map[fyne.CanvasObject]*textureInfo, 1024)
 
-// DestroyTexture destroys cached texture.
-func DestroyTexture(obj fyne.CanvasObject) {
+// DeleteTexture deletes the texture from the cache map.
+func DeleteTexture(obj fyne.CanvasObject) {
 	texturesLock.Lock()
 	delete(textures, obj)
 	texturesLock.Unlock()
+}
+
+// RangeExpiredTextures range over the expired textures.
+func RangeExpiredTextures(f func(fyne.CanvasObject)) {
+	now := time.Now()
+	expired := make([]fyne.CanvasObject, 0, 10)
+	texturesLock.RLock()
+	for obj, tinfo := range textures {
+		if tinfo.isExpired(now) {
+			expired = append(expired, obj)
+		}
+	}
+	texturesLock.RUnlock()
+	for _, obj := range expired {
+		f(obj)
+	}
 }
 
 // GetTexture gets cached texture.
@@ -29,9 +46,8 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 }
 
 // SetTexture sets cached texture.
-func SetTexture(obj fyne.CanvasObject, texture TextureType, freeFn func(obj fyne.CanvasObject)) {
+func SetTexture(obj fyne.CanvasObject, texture TextureType) {
 	texInfo := &textureInfo{texture: texture}
-	texInfo.freeFn = freeFn
 	texInfo.setAlive()
 	texturesLock.Lock()
 	textures[obj] = texInfo
