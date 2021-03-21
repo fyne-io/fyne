@@ -32,7 +32,7 @@ func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObje
 
 	if !ok {
 		texture = cache.TextureType(creator(object))
-		cache.SetTexture(object, texture)
+		cache.SetTexture(object, texture, p.canvas)
 	}
 	return Texture(texture)
 }

@@ -26,19 +26,55 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 	return texInfo.texture, true
 }
 
-// RangeExpiredTextures range over the expired textures.
-func RangeExpiredTextures(f func(fyne.CanvasObject)) {
+// RangeExpiredTexturesFor range over the expired textures for the specified canvas.
+//
+// Note: If this is used to free textures, then it should be called inside a current
+// gl context to ensure textures are deleted from gl.
+func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	now := time.Now()
 	for obj, tinfo := range textures {
-		if tinfo.isExpired(now) {
+		if tinfo.isExpired(now) && tinfo.canvas == canvas {
+			f(obj)
+		}
+	}
+}
+
+// RangeTexturesFor range over the textures for the specified canvas.
+//
+// Note: If this is used to free textures, then it should be called inside a current
+// gl context to ensure textures are deleted from gl.
+func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
+	for obj, tinfo := range textures {
+		if tinfo.canvas == canvas {
 			f(obj)
 		}
 	}
 }
 
 // SetTexture sets cached texture.
-func SetTexture(obj fyne.CanvasObject, texture TextureType) {
+func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) {
 	texInfo := &textureInfo{texture: texture}
+	texInfo.canvas = canvas
 	texInfo.setAlive()
 	textures[obj] = texInfo
+}
+
+// ===============================================================
+// Privates
+// ===============================================================
+
+// textureCacheBase defines base texture cache object.
+type textureCacheBase struct {
+	expires time.Time
+	canvas  fyne.Canvas
+}
+
+// isExpired check if the cache data is expired.
+func (c *textureCacheBase) isExpired(now time.Time) bool {
+	return c.expires.Before(now)
+}
+
+// setAlive updates expiration time.
+func (c *textureCacheBase) setAlive() {
+	c.expires = time.Now().Add(cacheDuration)
 }

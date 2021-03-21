@@ -215,6 +215,7 @@ func (d *gLDriver) startDrawThread() {
 
 					d.repaintWindow(w)
 				}
+				cache.CleanTask()
 			}
 		}
 	}()
@@ -239,10 +240,10 @@ func freeDirtyTextures(canvas *glCanvas) {
 				return false
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
-			cache.RangeExpiredTextures(func(co fyne.CanvasObject) {
-				canvas.painter.Free(co)
-			})
 		default:
+			cache.RangeExpiredTexturesFor(canvas, func(obj fyne.CanvasObject) {
+				canvas.painter.Free(obj)
+			})
 			return
 		}
 	}

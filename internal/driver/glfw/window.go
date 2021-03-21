@@ -429,14 +429,26 @@ func (w *window) Close() {
 		return
 	}
 
-	w.closing = true
-	w.viewport.SetShouldClose(true)
+	// set w.closing flag inside draw thread to ensure we can free textures
+	runOnDraw(w, func() {
+		w.closing = true
+		w.viewport.SetShouldClose(true)
+		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
+			w.canvas.painter.Free(obj)
+		})
+	})
 
+	// destroy current renderers
 	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
 		switch co := node.obj.(type) {
 		case fyne.Widget:
 			cache.DestroyRenderer(co)
 		}
+	})
+
+	// remove all canvas objects from the cache
+	w.queueEvent(func() {
+		cache.ForceCleanFor(w.canvas)
 	})
 
 	// trigger callbacks

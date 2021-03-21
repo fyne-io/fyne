@@ -10,6 +10,6 @@ type TextureType = gl.Texture
 var noTexture = gl.Texture{0}
 
 type textureInfo struct {
-	expiringCache
+	textureCacheBase
 	texture TextureType
 }

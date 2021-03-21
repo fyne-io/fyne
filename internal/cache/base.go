@@ -7,95 +7,139 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-const cacheDuration = 1 * time.Minute
+const (
+	cacheDuration     = 1 * time.Minute
+	cleanTaskInterval = cacheDuration / 2
+)
 
-var cleanCh = make(chan struct{}, 1)
-var cleanTaskOnce sync.Once
+var canvasRefreshCh = make(chan struct{}, 1)
+var expiredObjects = make([]fyne.CanvasObject, 0, 50)
+var lastClean time.Time
 
-func init() {
-
-	cleanTaskOnce.Do(func() {
-
-		go func() {
-			expired := make([]fyne.CanvasObject, 0, 50)
-
-			cleanTask := func(excludeCanvases bool) {
-				now := time.Now()
-				// -- Renderers clean task
-				expired = expired[:0]
-				renderersLock.RLock()
-				for wid, rinfo := range renderers {
-					if rinfo.isExpired(now) {
-						rinfo.renderer.Destroy()
-						expired = append(expired, wid)
-					}
-				}
-				renderersLock.RUnlock()
-				if len(expired) > 0 {
-					renderersLock.Lock()
-					for i, exp := range expired {
-						delete(renderers, exp.(fyne.Widget))
-						expired[i] = nil
-					}
-					renderersLock.Unlock()
-				}
-
-				// -- Textures clean task
-				// TODO find a way to clean textures here
-
-				if excludeCanvases {
-					return
-				}
-
-				// -- Canvases clean task
-				expired = expired[:0]
-				canvasesLock.RLock()
-				for obj, cinfo := range canvases {
-					if cinfo.isExpired(now) {
-						expired = append(expired, obj)
-					}
-				}
-				canvasesLock.RUnlock()
-				if len(expired) > 0 {
-					canvasesLock.Lock()
-					for i, exp := range expired {
-						delete(canvases, exp)
-						expired[i] = nil
-					}
-					canvasesLock.Unlock()
-				}
-			}
-
-			t := time.NewTicker(cacheDuration)
-			for {
-				select {
-				case <-cleanCh:
-					cleanTask(false)
-					// do not trigger another clean task so fast
-					time.Sleep(10 * time.Second)
-					t.Reset(cacheDuration)
-				case <-t.C:
-					// canvases cache can't be invalidated using the ticker
-					// because if we do it, there wouldn't be a way to recover them later
-					cleanTask(true)
-				}
-			}
-		}()
-	})
-
+// CleanTask run cache clean task, it should be called on paint events.
+func CleanTask() {
+	now := time.Now()
+	// do not run clean task so fast
+	if now.Sub(lastClean) < 10*time.Second {
+		return
+	}
+	canvasRefresh := false
+	select {
+	case <-canvasRefreshCh:
+		canvasRefresh = true
+	default:
+		if now.Sub(lastClean) < cleanTaskInterval {
+			return
+		}
+	}
+	destroyExpiredRenderers(now)
+	// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
+	// be a way to recover them later
+	if canvasRefresh {
+		destroyExpiredCanvases(now)
+	}
+	lastClean = time.Now()
 }
 
-// Clean triggers clean cache task.
-func Clean() {
+// ForceCleanFor forces a complete remove of all the objects that belong to the specified
+// canvas. Usually used to free all objects from a closing windows.
+func ForceCleanFor(canvas fyne.Canvas) {
+	deletingObjs := make([]fyne.CanvasObject, 0, 50)
+
+	// find all objects that belong to the specified canvas
+	canvasesLock.RLock()
+	for obj, cinfo := range canvases {
+		if cinfo.canvas == canvas {
+			deletingObjs = append(deletingObjs, obj)
+		}
+	}
+	canvasesLock.RUnlock()
+	if len(deletingObjs) == 0 {
+		return
+	}
+
+	// remove them from canvas cache
+	canvasesLock.Lock()
+	for _, dobj := range deletingObjs {
+		delete(canvases, dobj)
+	}
+	canvasesLock.Unlock()
+
+	// destroy their renderers and delete them from the renderer
+	// cache if they are widgets
+	renderersLock.Lock()
+	for _, dobj := range deletingObjs {
+		wid, ok := dobj.(fyne.Widget)
+		if !ok {
+			continue
+		}
+		winfo, ok := renderers[wid]
+		if !ok {
+			continue
+		}
+		winfo.renderer.Destroy()
+		delete(renderers, wid)
+	}
+	renderersLock.Unlock()
+}
+
+// NotifyCanvasRefresh notifies to the caches that a canvas refresh was triggered.
+func NotifyCanvasRefresh() {
 	select {
-	case cleanCh <- struct{}{}:
+	case canvasRefreshCh <- struct{}{}:
 	default:
 		return
 	}
 }
 
 // ===============================================================
-// Privates
+// Private functions
+// ===============================================================
+
+// destroyExpiredCanvases deletes objects from the canvases cache.
+func destroyExpiredCanvases(now time.Time) {
+	expiredObjects = expiredObjects[:0]
+	canvasesLock.RLock()
+	for obj, cinfo := range canvases {
+		if cinfo.isExpired(now) {
+			expiredObjects = append(expiredObjects, obj)
+		}
+	}
+	canvasesLock.RUnlock()
+	if len(expiredObjects) > 0 {
+		canvasesLock.Lock()
+		for i, exp := range expiredObjects {
+			delete(canvases, exp)
+			expiredObjects[i] = nil
+		}
+		canvasesLock.Unlock()
+	}
+}
+
+// destroyExpiredRenderers deletes the renderer from the cache and calls
+// renderer.Destroy()
+func destroyExpiredRenderers(now time.Time) {
+	expiredObjects = expiredObjects[:0]
+	renderersLock.RLock()
+	for wid, rinfo := range renderers {
+		if rinfo.isExpired(now) {
+			rinfo.renderer.Destroy()
+			expiredObjects = append(expiredObjects, wid)
+		}
+	}
+	renderersLock.RUnlock()
+	if len(expiredObjects) > 0 {
+		renderersLock.Lock()
+		for i, exp := range expiredObjects {
+			delete(renderers, exp.(fyne.Widget))
+			expiredObjects[i] = nil
+		}
+		renderersLock.Unlock()
+	}
+}
+
+// ===============================================================
+// Private types
 // ===============================================================
 
 type expiringCache struct {

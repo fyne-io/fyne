@@ -470,7 +470,7 @@ func (c *glCanvas) setDirty(dirty bool) {
 
 	c.dirty = dirty
 	if dirty {
-		cache.Clean()
+		cache.NotifyCanvasRefresh()
 	}
 }
 

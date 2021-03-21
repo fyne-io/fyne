@@ -8,6 +8,6 @@ type TextureType = uint32
 var noTexture = TextureType(0)
 
 type textureInfo struct {
-	expiringCache
+	textureCacheBase
 	texture TextureType
 }
