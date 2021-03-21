@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const cacheDuration = 1 * time.Minute
+
 var cleanCh = make(chan struct{}, 1)
 var cleanTaskOnce sync.Once
 
@@ -64,14 +66,14 @@ func init() {
 				}
 			}
 
-			t := time.NewTicker(time.Minute)
+			t := time.NewTicker(cacheDuration)
 			for {
 				select {
 				case <-cleanCh:
 					cleanTask(false)
 					// do not trigger another clean task so fast
 					time.Sleep(10 * time.Second)
-					t.Reset(time.Minute)
+					t.Reset(cacheDuration)
 				case <-t.C:
 					// canvases cache can't be invalidated using the ticker
 					// because if we do it, there wouldn't be a way to recover them later
@@ -110,7 +112,7 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	t := time.Now().Add(1 * time.Minute)
+	t := time.Now().Add(cacheDuration)
 	c.expireLock.Lock()
 	c.expires = t
 	c.expireLock.Unlock()
