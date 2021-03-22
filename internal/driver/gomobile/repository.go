@@ -1,5 +1,3 @@
-// +build ios android
-
 package gomobile
 
 import (
