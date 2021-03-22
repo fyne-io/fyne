@@ -56,7 +56,7 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 				callback(nil, nil)
 				return
 			}
-			f, err := fileReaderForURI(storage.NewURI(uri))
+			f, err := fileReaderForURI(nativeURI(uri))
 			if f != nil {
 				f.(*fileOpen).done = closer
 			}
