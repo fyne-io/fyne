@@ -10,11 +10,28 @@ import (
 
 // declare conformance with repository types
 var _ repository.Repository = (*mobileFileRepo)(nil)
+var _ repository.HierarchicalRepository = (*mobileFileRepo)(nil)
 var _ repository.ListableRepository = (*mobileFileRepo)(nil)
 var _ repository.WritableRepository = (*mobileFileRepo)(nil)
 
 type mobileFileRepo struct {
 	driver *mobileDriver
+}
+
+func (m *mobileFileRepo) Child(u fyne.URI, name string) (fyne.URI, error) {
+	if u == nil || u.Scheme() != "file" {
+		return nil, repository.ErrOperationNotSupported
+	}
+
+	return repository.GenericChild(u, name)
+}
+
+func (m *mobileFileRepo) Parent(u fyne.URI) (fyne.URI, error) {
+	if u == nil || u.Scheme() != "file" {
+		return nil, repository.ErrOperationNotSupported
+	}
+
+	return repository.GenericParent(u)
 }
 
 func (m *mobileFileRepo) Exists(u fyne.URI) (bool, error) {
