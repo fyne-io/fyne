@@ -13,7 +13,6 @@ var _ repository.ListableRepository = (*mobileFileRepo)(nil)
 var _ repository.WritableRepository = (*mobileFileRepo)(nil)
 
 type mobileFileRepo struct {
-	driver *mobileDriver
 }
 
 func (m *mobileFileRepo) CanList(u fyne.URI) (bool, error) {

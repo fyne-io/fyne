@@ -139,7 +139,7 @@ func (s *javaStream) Write(p []byte) (int, error) {
 }
 
 func registerRepository(d *mobileDriver) {
-	repo := &mobileFileRepo{driver: d}
+	repo := &mobileFileRepo{}
 	repository.Register("file", repo)
 	repository.Register("content", repo)
 }
