@@ -1,6 +1,10 @@
 package gomobile
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
+
 	"fyne.io/fyne/v2"
 
 	"fyne.io/fyne/v2/storage/repository"
@@ -69,5 +73,20 @@ func (m *mobileFileRepo) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 }
 
 func (m *mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
+	if u == nil || u.Scheme() != "file" {
+		return nil, repository.ErrOperationNotSupported
+	}
+
+	path := u.Path()
+	_, serr := os.Stat(path)
+	if errors.Is(serr, os.ErrNotExist) {
+		dirpath := filepath.Dir(path)
+		os.MkdirAll(dirpath, 0755)
+		f, ce := os.Create(path)
+		if ce != nil {
+			return nil, ce
+		}
+		f.Close()
+	}
 	return fileWriterForURI(u)
 }
