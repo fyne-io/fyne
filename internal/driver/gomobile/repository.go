@@ -24,7 +24,6 @@ func (m *mobileFileRepo) CanRead(u fyne.URI) (bool, error) {
 	return true, nil // TODO check a file can be read
 }
 
-
 func (m *mobileFileRepo) CanWrite(u fyne.URI) (bool, error) {
 	return true, nil // TODO check a file can be written
 }
