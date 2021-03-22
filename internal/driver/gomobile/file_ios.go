@@ -118,6 +118,6 @@ func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 }
 
 func registerRepository(d *mobileDriver) {
-	repo := &mobileFileRepo{driver: d}
+	repo := &mobileFileRepo{}
 	repository.Register("file", repo)
 }
