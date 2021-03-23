@@ -126,9 +126,6 @@ func (r *colorChannelRenderer) updateObjects() {
 
 type colorChannelEntry struct {
 	userChangeEntry
-
-	lock      sync.RWMutex
-	userTyped bool
 }
 
 func newColorChannelEntry(c *colorChannel) *colorChannelEntry {
