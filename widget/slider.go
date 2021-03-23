@@ -100,10 +100,12 @@ func (s *Slider) DragEnd() {
 func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
 
+	lastValue := s.Value
+
 	s.updateValue(ratio)
 	s.Refresh()
 
-	if s.OnChanged != nil {
+	if s.OnChanged != nil && lastValue != s.Value {
 		s.OnChanged(s.Value)
 	}
 }
