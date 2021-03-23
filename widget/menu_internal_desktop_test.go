@@ -3,13 +3,12 @@
 package widget
 
 import (
-	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -44,12 +43,13 @@ func TestMenu_ItemHovered(t *testing.T) {
 	m.Resize(size)
 
 	mi := m.Items[0].(*menuItem)
-	r1 := cache.Renderer(mi)
-	assert.Equal(t, color.Transparent, r1.BackgroundColor())
+	r1 := cache.Renderer(mi).(*menuItemRenderer)
+	assert.False(t, r1.background.Visible())
 	mi.MouseIn(nil)
-	assert.Equal(t, theme.HoverColor(), r1.BackgroundColor())
+	assert.Equal(t, theme.FocusColor(), r1.background.FillColor)
+	assert.True(t, r1.background.Visible())
 	mi.MouseOut()
-	assert.Equal(t, color.Transparent, r1.BackgroundColor())
+	assert.False(t, r1.background.Visible())
 
 	sub1Widget := m.Items[3].(*menuItem)
 	assert.Equal(t, sub1, sub1Widget.Item)

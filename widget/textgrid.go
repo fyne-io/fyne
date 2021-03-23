@@ -6,9 +6,9 @@ import (
 	"math"
 	"strings"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -88,9 +88,19 @@ func (t *TextGrid) SetText(text string) {
 	lines := strings.Split(text, "\n")
 	rows := make([]TextGridRow, len(lines))
 	for i, line := range lines {
-		cells := make([]TextGridCell, len(line))
+		spaced := strings.ReplaceAll(line, "\t", textTabIndent)
+
+		cells := make([]TextGridCell, len(spaced))
+		extras := 0
 		for j, r := range line {
-			cells[j] = TextGridCell{Rune: r}
+			cells[j+extras] = TextGridCell{Rune: r}
+
+			if r == '\t' {
+				for k := j + extras + 1; k < j+extras+len(textTabIndent); k++ {
+					cells[k] = TextGridCell{Rune: ' '}
+				}
+				extras += len(textTabIndent) - 1
+			}
 		}
 
 		rows[i] = TextGridRow{Cells: cells}
@@ -114,10 +124,20 @@ func (t *TextGrid) Text() string {
 
 	runes := make([]rune, count)
 	c := 0
+	skipped := 0
 	for i, row := range t.Rows {
+		skip := 0
 		for _, r := range row.Cells {
+			if skip > 0 {
+				skip--
+				continue
+			}
 			runes[c] = r.Rune
 			c++
+			if r.Rune == '\t' {
+				skip = len(textTabIndent) - 1
+				skipped += skip
+			}
 		}
 
 		if i < len(t.Rows)-1 {
@@ -126,7 +146,7 @@ func (t *TextGrid) Text() string {
 		}
 	}
 
-	return string(runes)
+	return string(runes[:len(runes)-skipped])
 }
 
 // Row returns a copy of the content in a specified row as a TextGridRow.
@@ -258,7 +278,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
 	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 
 	return render
 }
@@ -304,7 +324,7 @@ type textGridRenderer struct {
 }
 
 func (t *textGridRenderer) appendTextCell(str rune) {
-	text := canvas.NewText(string(str), theme.TextColor())
+	text := canvas.NewText(string(str), theme.ForegroundColor())
 	text.TextStyle.Monospace = true
 
 	bg := canvas.NewRectangle(color.Transparent)
@@ -317,7 +337,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	}
 
 	text := t.objects[pos*2+1].(*canvas.Text)
-	fg := theme.TextColor()
+	fg := theme.ForegroundColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
@@ -380,13 +400,18 @@ func (t *textGridRenderer) refreshGrid() {
 			if i >= t.cols { // would be an overflow - bad
 				continue
 			}
-			if t.text.ShowWhitespace && r.Rune == ' ' {
+			if t.text.ShowWhitespace && (r.Rune == ' ' || r.Rune == '\t') {
+				sym := textAreaSpaceSymbol
+				if r.Rune == '\t' {
+					sym = textAreaTabSymbol
+				}
+
 				if r.Style != nil && r.Style.BackgroundColor() != nil {
 					whitespaceBG := &CustomTextGridStyle{FGColor: TextGridStyleWhitespace.TextColor(),
 						BGColor: r.Style.BackgroundColor()}
-					t.setCellRune(textAreaSpaceSymbol, x, whitespaceBG, rowStyle) // whitespace char
+					t.setCellRune(sym, x, whitespaceBG, rowStyle) // whitespace char
 				} else {
-					t.setCellRune(textAreaSpaceSymbol, x, TextGridStyleWhitespace, rowStyle) // whitespace char
+					t.setCellRune(sym, x, TextGridStyleWhitespace, rowStyle) // whitespace char
 				}
 			} else {
 				t.setCellRune(r.Rune, x, r.Style, rowStyle) // regular char
@@ -457,28 +482,24 @@ func (t *textGridRenderer) Layout(size fyne.Size) {
 }
 
 func (t *textGridRenderer) MinSize() fyne.Size {
-	longestRow := 0
+	longestRow := float32(0)
 	for _, row := range t.text.Rows {
-		longestRow = int(math.Max(float64(longestRow), float64(len(row.Cells))))
+		longestRow = float32(math.Max(float64(longestRow), float64(len(row.Cells))))
 	}
 	return fyne.NewSize(t.cellSize.Width*longestRow,
-		t.cellSize.Height*len(t.text.Rows))
+		t.cellSize.Height*float32(len(t.text.Rows)))
 }
 
 func (t *textGridRenderer) Refresh() {
 	// theme could change text size
 	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()
 }
 
 func (t *textGridRenderer) ApplyTheme() {
-}
-
-func (t *textGridRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (t *textGridRenderer) Objects() []fyne.CanvasObject {

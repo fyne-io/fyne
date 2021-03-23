@@ -16,8 +16,8 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 const notificationTemplate = `$title = "%s"
@@ -32,7 +32,7 @@ $toastXml.GetElementsByTagName("text")[1].AppendChild($toastXml.CreateTextNode($
 $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
 $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("appID").Show($toast);`
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("%s").Show($toast);`
 
 func isDark() bool {
 	k, err := registry.OpenKey(registry.CURRENT_USER, `SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize`, registry.QUERY_VALUE)
@@ -49,11 +49,11 @@ func isDark() bool {
 	return useLight == 0
 }
 
-func defaultTheme() fyne.Theme {
+func defaultVariant() fyne.ThemeVariant {
 	if isDark() {
-		return theme.DarkTheme()
+		return theme.VariantDark
 	}
-	return theme.LightTheme()
+	return theme.VariantLight
 }
 
 func rootConfigDir() string {
@@ -74,8 +74,12 @@ var scriptNum = 0
 func (app *fyneApp) SendNotification(n *fyne.Notification) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
+	appID := app.UniqueID() // TODO once we have an app name compiled in this could be improved
+	if appID == "" || strings.Index(appID, "missing-id") == 0 {
+		appID = "Fyne app"
+	}
 
-	script := fmt.Sprintf(notificationTemplate, title, content)
+	script := fmt.Sprintf(notificationTemplate, title, content, appID)
 	go runScript("notify", script)
 }
 

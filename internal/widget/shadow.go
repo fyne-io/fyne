@@ -3,9 +3,9 @@ package widget
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
 )
 
 var _ fyne.Widget = (*Shadow)(nil)
@@ -108,12 +108,8 @@ type shadowRenderer struct {
 	s              *Shadow
 }
 
-func (r *shadowRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 func (r *shadowRenderer) Layout(size fyne.Size) {
-	depth := int(r.s.level)
+	depth := float32(r.s.level)
 	if r.tl != nil {
 		r.tl.Resize(fyne.NewSize(depth, depth))
 		r.tl.Move(fyne.NewPos(-depth, -depth))

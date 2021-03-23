@@ -1,4 +1,4 @@
-// +build !gles,!arm,!arm64,!android,!ios,!mobile
+// +build !gles,!arm,!arm64,!android,!ios,!mobile darwin,!mobile,!ios
 
 package gl
 
@@ -10,9 +10,9 @@ import (
 
 	"github.com/go-gl/gl/v3.2-core/gl"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Buffer represents a GL buffer
@@ -27,7 +27,7 @@ type Texture uint32
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(0)
 
-var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
 func newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32

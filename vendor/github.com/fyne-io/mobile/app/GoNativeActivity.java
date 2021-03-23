@@ -26,6 +26,7 @@ import android.widget.FrameLayout;
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 	private static final int FILE_OPEN_CODE = 1;
+	private static final int FILE_SAVE_CODE = 2;
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
              InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD; // this is required to force samsung keyboards to not suggest
@@ -148,6 +149,21 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
+    static void showFileSave(String mimes) {
+        goNativeActivity.doShowFileSave(mimes);
+    }
+
+    void doShowFileSave(String mimes) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
+        } else {
+            intent.setType(mimes);
+        }
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(Intent.createChooser(intent, "Save File"), FILE_SAVE_CODE);
+    }
 	static int getRune(int deviceId, int keyCode, int metaState) {
 		try {
 			int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
@@ -241,7 +257,7 @@ public class GoNativeActivity extends NativeActivity {
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // unhandled request
-        if (requestCode != FILE_OPEN_CODE) {
+        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE) {
             return;
         }
 

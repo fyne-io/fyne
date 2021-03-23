@@ -3,11 +3,11 @@ package software
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 func TestRender(t *testing.T) {
@@ -29,7 +29,7 @@ func TestRender_Focus(t *testing.T) {
 	obj := widget.NewEntry()
 	test.AssertImageMatches(t, "entry.png", Render(obj, theme.DarkTheme()))
 
-	test.Tap(obj)
+	obj.FocusGained()
 	test.AssertImageMatches(t, "entry_focus.png", Render(obj, theme.DarkTheme()))
 }
 

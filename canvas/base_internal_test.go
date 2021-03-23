@@ -3,7 +3,7 @@ package canvas
 import (
 	"testing"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -21,8 +21,8 @@ func TestBase_Move(t *testing.T) {
 	base.Move(fyne.NewPos(10, 10))
 	pos := base.Position()
 
-	assert.Equal(t, 10, pos.X)
-	assert.Equal(t, 10, pos.Y)
+	assert.Equal(t, float32(10), pos.X)
+	assert.Equal(t, float32(10), pos.Y)
 }
 
 func TestBase_Resize(t *testing.T) {
@@ -30,8 +30,8 @@ func TestBase_Resize(t *testing.T) {
 	base.Resize(fyne.NewSize(10, 10))
 	size := base.Size()
 
-	assert.Equal(t, 10, size.Width)
-	assert.Equal(t, 10, size.Height)
+	assert.Equal(t, float32(10), size.Width)
+	assert.Equal(t, float32(10), size.Height)
 }
 
 func TestBase_HideShow(t *testing.T) {

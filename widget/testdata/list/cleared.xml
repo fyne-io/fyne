@@ -1,0 +1,10 @@
+<canvas padded size="200x400">
+	<content>
+		<widget pos="4,4" size="192x392" type="*widget.List">
+			<widget size="192x392" type="*widget.Scroll">
+				<container size="192x392">
+				</container>
+			</widget>
+		</widget>
+	</content>
+</canvas>

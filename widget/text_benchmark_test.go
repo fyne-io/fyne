@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quis consectetur nisi. Suspendisse id interdum felis. Sed egestas eget tellus eu pharetra. Praesent pulvinar sed massa id placerat. Etiam sem libero, semper vitae consequat ut, volutpat id mi. Mauris volutpat pellentesque convallis. Curabitur rutrum venenatis orci nec ornare. Maecenas quis pellentesque neque. Aliquam consectetur dapibus nulla, id maximus odio ultrices ac. Sed luctus at felis sed faucibus. Cras leo augue, congue in velit ut, mattis rhoncus lectus.
@@ -35,9 +35,9 @@ func BenchmarkText_splitLines(b *testing.B) {
 
 func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 	text := []rune(loremIpsum)
-	textSize := 10
+	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) int {
+	measurer := func(text []rune) float32 {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
 	for n := 0; n < b.N; n++ {

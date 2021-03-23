@@ -3,8 +3,8 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,9 +25,9 @@ func TestProgressBarRenderer_Extended_Layout(t *testing.T) {
 	r := test.WidgetRenderer(bar).(*progressRenderer)
 
 	assert.Equal(t, 0.0, bar.Value)
-	assert.Equal(t, 0, r.bar.Size().Width)
+	assert.Equal(t, float32(0), r.bar.Size().Width)
 
 	bar.SetValue(.5)
 	assert.Equal(t, .5, bar.Value)
-	assert.Equal(t, 50, r.bar.Size().Width)
+	assert.Equal(t, float32(50), r.bar.Size().Width)
 }

@@ -1,5 +1,6 @@
 // +build gles arm arm64
 // +build !android,!ios,!mobile
+// +build !darwin
 
 package gl
 
@@ -11,9 +12,9 @@ import (
 
 	gl "github.com/go-gl/gl/v3.1/gles2"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Buffer represents a GL buffer

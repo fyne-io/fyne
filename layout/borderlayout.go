@@ -1,8 +1,8 @@
 package layout
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Declare conformity with Layout interface
@@ -71,7 +71,7 @@ func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		}
 
 		if child != b.top && child != b.bottom && child != b.left && child != b.right {
-			minSize = minSize.Union(child.MinSize())
+			minSize = minSize.Max(child.MinSize())
 		}
 	}
 

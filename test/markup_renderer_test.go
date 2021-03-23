@@ -7,12 +7,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 func Test_snapshot(t *testing.T) {
@@ -100,7 +100,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"image themed resource": {
-			content: canvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}), nil)),
+			content: canvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}))),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"default\"/>\n" +
@@ -237,33 +237,33 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"linear gradient": {
-			content: canvas.NewLinearGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor(), 13.25),
+			content: canvas.NewLinearGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor(), 13.25),
 			pos:     fyne.NewPos(6, 13),
 			size:    fyne.NewSize(50, 10),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<linearGradient angle=\"13.25\" endColor=\"disabled text\" pos=\"6,13\" size=\"50x10\" startColor=\"rgba(1,2,3,4)\"/>\n" +
+				"\t\t<linearGradient angle=\"13.25\" endColor=\"disabled\" pos=\"6,13\" size=\"50x10\" startColor=\"rgba(1,2,3,4)\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
 		"radial gradient": {
-			content: canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor()),
+			content: canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<radialGradient endColor=\"disabled text\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
+				"\t\t<radialGradient endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
 		"radial gradient with offset": {
 			content: func() fyne.CanvasObject {
-				g := canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledTextColor())
+				g := canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor())
 				g.CenterOffsetX = 1.5
 				g.CenterOffsetY = -13.7
 				return g
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<radialGradient centerOffset=\"1.5,-13.7\" endColor=\"disabled text\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
+				"\t\t<radialGradient centerOffset=\"1.5,-13.7\" endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -327,7 +327,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"text with text color": {
-			content: canvas.NewText("bar", theme.TextColor()),
+			content: canvas.NewText("bar", theme.ForegroundColor()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<text size=\"100x100\">bar</text>\n" +
@@ -336,7 +336,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with alignment center": {
 			content: func() fyne.CanvasObject {
-				t := canvas.NewText("bar", theme.TextColor())
+				t := canvas.NewText("bar", theme.ForegroundColor())
 				t.Alignment = fyne.TextAlignCenter
 				return t
 			}(),
@@ -348,7 +348,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with alignment trailing": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("bar", theme.TextColor())
+				txt := canvas.NewText("bar", theme.ForegroundColor())
 				txt.Alignment = fyne.TextAlignTrailing
 				return txt
 			}(),
@@ -360,7 +360,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with size": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("big", theme.TextColor())
+				txt := canvas.NewText("big", theme.ForegroundColor())
 				txt.TextSize = 42
 				return txt
 			}(),
@@ -372,7 +372,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text bold": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("bold", theme.TextColor())
+				txt := canvas.NewText("bold", theme.ForegroundColor())
 				txt.TextStyle.Bold = true
 				return txt
 			}(),
@@ -384,7 +384,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text italic": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("italic", theme.TextColor())
+				txt := canvas.NewText("italic", theme.ForegroundColor())
 				txt.TextStyle.Italic = true
 				return txt
 			}(),
@@ -396,7 +396,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text monospace": {
 			content: func() fyne.CanvasObject {
-				txt := canvas.NewText("mono", theme.TextColor())
+				txt := canvas.NewText("mono", theme.ForegroundColor())
 				txt.TextStyle.Monospace = true
 				return txt
 			}(),
@@ -418,7 +418,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"widget": {
-			content: &markupRendererTestWidget{bgColor: theme.BackgroundColor()},
+			content: &markupRendererTestWidget{},
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<widget size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
@@ -428,7 +428,6 @@ func Test_snapshot(t *testing.T) {
 		},
 		"widget with subobjects": {
 			content: &markupRendererTestWidget{
-				bgColor: theme.BackgroundColor(),
 				objs: []fyne.CanvasObject{
 					canvas.NewCircle(color.Black),
 					canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250}),
@@ -439,15 +438,6 @@ func Test_snapshot(t *testing.T) {
 				"\t\t<widget size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
 				"\t\t\t<circle fillColor=\"rgba(0,0,0,255)\" size=\"0x0\"/>\n" +
 				"\t\t\t<line size=\"0x0\" strokeColor=\"rgba(250,250,250,250)\"/>\n" +
-				"\t\t</widget>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"widget with non-default background color": {
-			content: &markupRendererTestWidget{bgColor: theme.TextColor()},
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<widget backgroundColor=\"text\" size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
 				"\t\t</widget>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
@@ -535,11 +525,10 @@ func Test_snapshot(t *testing.T) {
 }
 
 type markupRendererTestWidget struct {
-	bgColor color.Color
-	hidden  bool
-	objs    []fyne.CanvasObject
-	pos     fyne.Position
-	size    fyne.Size
+	hidden bool
+	objs   []fyne.CanvasObject
+	pos    fyne.Position
+	size   fyne.Size
 }
 
 var _ fyne.Widget = (*markupRendererTestWidget)(nil)
@@ -571,10 +560,6 @@ func (w *markupRendererTestWidget) Resize(size fyne.Size) {
 	w.size = size
 }
 
-func (w *markupRendererTestWidget) SetBgColor(c color.Color) {
-	w.bgColor = c
-}
-
 func (w *markupRendererTestWidget) SetObjects(objects ...fyne.CanvasObject) {
 	w.objs = objects
 }
@@ -593,10 +578,6 @@ func (w *markupRendererTestWidget) Visible() bool {
 
 type markupRendererTestWidgetRenderer struct {
 	w *markupRendererTestWidget
-}
-
-func (r *markupRendererTestWidgetRenderer) BackgroundColor() color.Color {
-	return r.w.bgColor
 }
 
 func (r *markupRendererTestWidgetRenderer) Destroy() {

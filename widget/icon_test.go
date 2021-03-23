@@ -3,11 +3,11 @@ package widget_test
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 func TestIcon_Layout(t *testing.T) {
@@ -16,33 +16,10 @@ func TestIcon_Layout(t *testing.T) {
 
 	for name, tt := range map[string]struct {
 		resource fyne.Resource
-		want     string
 	}{
-		"empty": {
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="61,86" size="20x20" type="*widget.Icon">
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
-		},
+		"empty": {},
 		"resource": {
 			resource: theme.CancelIcon(),
-			want: `
-				<canvas padded size="150x200">
-					<content>
-						<container pos="4,4" size="142x192">
-							<widget pos="61,86" size="20x20" type="*widget.Icon">
-								<image fillMode="contain" rsc="cancelIcon" size="iconInlineSize"/>
-							</widget>
-						</container>
-					</content>
-				</canvas>
-			`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -53,7 +30,7 @@ func TestIcon_Layout(t *testing.T) {
 			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), icon))
 			window.Resize(icon.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertRendersToMarkup(t, tt.want, window.Canvas())
+			test.AssertRendersToMarkup(t, "icon/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})

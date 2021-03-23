@@ -1,10 +1,10 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 var _ fyne.Validatable = (*Entry)(nil)
@@ -15,7 +15,9 @@ func (e *Entry) Validate() error {
 		return nil
 	}
 
-	return e.Validator(e.Text)
+	err := e.Validator(e.Text)
+	e.SetValidationError(err)
+	return err
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
@@ -28,10 +30,22 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 
 // SetValidationError manually updates the validation status until the next input change
 func (e *Entry) SetValidationError(err error) {
-	e.validationError = err
+	if e.Validator == nil {
+		return
+	}
+	if err == nil && e.validationError == nil {
+		return
+	}
 
-	if e.Validator != nil {
-		e.validationStatus.Refresh()
+	if (err == nil && e.validationError != nil) || (e.validationError == nil && err != nil) ||
+		err.Error() != e.validationError.Error() {
+		e.validationError = err
+
+		if e.onValidationChanged != nil {
+			e.onValidationChanged(err)
+		}
+
+		e.Refresh()
 	}
 }
 
@@ -81,9 +95,8 @@ func (r *validationStatusRenderer) MinSize() fyne.Size {
 func (r *validationStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
-	if r.entry.Text == "" {
+	if r.entry.Text == "" || r.entry.disabled {
 		r.icon.Hide()
-		canvas.Refresh(r.icon)
 		return
 	}
 

@@ -3,21 +3,27 @@
 package glfw
 
 import (
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/animation"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/animation"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 const mainGoroutineID = 1
 
-var canvasMutex sync.RWMutex
-var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
+var (
+	canvasMutex sync.RWMutex
+	canvases    = make(map[fyne.CanvasObject]fyne.Canvas)
+	isWayland   = false
+)
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
@@ -32,7 +38,7 @@ type gLDriver struct {
 	animation *animation.Runner
 }
 
-func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *gLDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	return painter.RenderedTextSize(text, size, style)
 }
 
@@ -108,6 +114,16 @@ func (d *gLDriver) windowList() []fyne.Window {
 	return d.windows
 }
 
+func (d *gLDriver) initFailed(msg string, err error) {
+	fyne.LogError(msg, err)
+
+	if running() {
+		d.Quit()
+	} else {
+		os.Exit(1)
+	}
+}
+
 func goroutineID() int {
 	b := make([]byte, 64)
 	b = b[:runtime.Stack(b, false)]
@@ -124,6 +140,8 @@ func NewGLDriver() fyne.Driver {
 	d.done = make(chan interface{})
 	d.drawDone = make(chan interface{})
 	d.animation = &animation.Runner{}
+
+	repository.Register("file", intRepo.NewFileRepository())
 
 	return d
 }

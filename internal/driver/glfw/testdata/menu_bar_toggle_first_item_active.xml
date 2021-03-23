@@ -1,0 +1,55 @@
+<canvas size="300x300">
+	<content>
+		<container size="300x300">
+			<widget size="300x29" type="*glfw.MenuBar">
+				<widget size="300x29" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="300x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="300,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="300,0" size="4x29" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="300,29" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,29" size="300x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,29" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x29"/>
+				</widget>
+				<widget size="300x300" type="*glfw.menuBarUnderlay">
+				</widget>
+				<rectangle fillColor="button" size="300x29"/>
+				<container pos="4,0" size="292x29">
+					<widget size="41x29" type="*glfw.menuBarItem">
+						<rectangle fillColor="focus" size="41x29"/>
+						<text pos="8,4" size="25x21">File</text>
+					</widget>
+					<widget pos="45,0" size="44x29" type="*glfw.menuBarItem">
+						<text pos="8,4" size="28x21">Edit</text>
+					</widget>
+				</container>
+				<widget pos="4,29" size="56x70" type="*widget.Menu">
+					<widget size="56x70" type="*widget.Shadow">
+						<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+						<linearGradient endColor="shadow" pos="0,-4" size="56x4"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="56,-4" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" pos="56,0" size="4x70" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="56,70" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,70" size="56x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+					</widget>
+					<widget size="56x70" type="*widget.Scroll">
+						<widget size="56x70" type="*widget.menuBox">
+							<rectangle fillColor="background" size="56x78"/>
+							<container pos="0,4" size="56x78">
+								<widget size="56x29" type="*widget.menuItem">
+									<text pos="8,4" size="33x21">New</text>
+								</widget>
+								<widget pos="0,33" size="56x29" type="*widget.menuItem">
+									<text pos="8,4" size="40x21">Open</text>
+								</widget>
+							</container>
+						</widget>
+					</widget>
+				</widget>
+			</widget>
+		</container>
+	</content>
+</canvas>

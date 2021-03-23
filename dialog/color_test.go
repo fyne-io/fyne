@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -379,4 +379,22 @@ func Test_hueToChannel(t *testing.T) {
 			assert.InDelta(t, tt.expected, hueToChannel(tt.h, tt.v1, tt.v2), 0.000000000000001)
 		})
 	}
+}
+
+func Test_UnmultiplyAlpha(t *testing.T) {
+	c := color.RGBA{R: 100, G: 100, B: 100, A: 100}
+	r, g, b, a := unmultiplyAlpha(c)
+
+	assert.Equal(t, 255, r)
+	assert.Equal(t, 255, g)
+	assert.Equal(t, 255, b)
+	assert.Equal(t, 100, a)
+
+	c = color.RGBA{R: 100, G: 100, B: 100, A: 255}
+	r, g, b, a = unmultiplyAlpha(c)
+
+	assert.Equal(t, 100, r)
+	assert.Equal(t, 100, g)
+	assert.Equal(t, 100, b)
+	assert.Equal(t, 255, a)
 }

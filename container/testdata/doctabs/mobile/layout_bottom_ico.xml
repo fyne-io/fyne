@@ -1,0 +1,28 @@
+<canvas size="150x150">
+	<content>
+		<widget size="150x150" type="*container.DocTabs">
+			<container pos="0,102" size="150x48">
+				<widget size="118x48" type="*widget.Scroll">
+					<container size="118x48">
+						<widget size="118x48" type="*container.tabButton">
+							<widget pos="94,14" size="20x20" type="*container.tabCloseButton">
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
+							</widget>
+							<image pos="39,4" rsc="infoIcon" size="40x40" themed="primary"/>
+						</widget>
+					</container>
+				</widget>
+				<container pos="122,0" size="28x48">
+					<widget size="28x48" type="*widget.Button">
+						<rectangle fillColor="button" size="28x48"/>
+						<rectangle size="0x0"/>
+						<image fillMode="contain" pos="4,14" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+					</widget>
+				</container>
+			</container>
+			<rectangle fillColor="shadow" pos="0,98" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,98" size="118x4"/>
+			<circle fillColor="background" size="150x98"/>
+		</widget>
+	</content>
+</canvas>

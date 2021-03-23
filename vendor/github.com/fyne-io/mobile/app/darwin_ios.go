@@ -28,6 +28,7 @@ void showKeyboard(int keyboardType);
 void hideKeyboard();
 
 void showFileOpenPicker(char* mimes, char *exts);
+void showFileSavePicker(char* mimes, char *exts);
 void closeFileResource(void* urlPtr);
 */
 import "C"
@@ -76,15 +77,15 @@ func main(f func(App)) {
 var pixelsPerPt float32
 var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
 
-var DisplayMetrics struct{
-	WidthPx int
+var DisplayMetrics struct {
+	WidthPx  int
 	HeightPx int
 }
 
 //export setDisplayMetrics
 func setDisplayMetrics(width, height int, scale int) {
-	DisplayMetrics.WidthPx = width * scale
-	DisplayMetrics.HeightPx = height * scale
+	DisplayMetrics.WidthPx = width
+	DisplayMetrics.HeightPx = height
 }
 
 //export setScreen
@@ -126,16 +127,15 @@ func updateConfig(width, height, orientation int32) {
 		o = size.OrientationPortrait
 	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
 		o = size.OrientationLandscape
+		width, height = height, width
 	}
-	widthPx := screenScale * int(width)
-	heightPx := screenScale * int(height)
 	insets := C.getDevicePadding()
 
 	theApp.eventsIn <- size.Event{
-		WidthPx:       widthPx,
-		HeightPx:      heightPx,
-		WidthPt:       geom.Pt(float32(widthPx) / pixelsPerPt),
-		HeightPt:      geom.Pt(float32(heightPx) / pixelsPerPt),
+		WidthPx:       int(width),
+		HeightPx:      int(height),
+		WidthPt:       geom.Pt(float32(width) / pixelsPerPt),
+		HeightPt:      geom.Pt(float32(height) / pixelsPerPt),
 		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
 		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
 		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),
@@ -210,7 +210,7 @@ func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	for workAvailable := theApp.worker.WorkAvailable();;{
+	for workAvailable := theApp.worker.WorkAvailable(); ; {
 		select {
 		case <-workAvailable:
 			theApp.worker.DoWork()
@@ -259,6 +259,19 @@ func (a *app) loop(ctx C.GLintptr) {
 	}
 }
 
+func cStringsForFilter(filter *FileFilter) (*C.char, *C.char) {
+	mimes := strings.Join(filter.MimeTypes, "|")
+
+	// extensions must have the '.' removed for UTI lookups on iOS
+	extList := []string{}
+	for _, ext := range filter.Extensions {
+		extList = append(extList, ext[1:])
+	}
+	exts := strings.Join(extList, "|")
+
+	return C.CString(mimes), C.CString(exts)
+}
+
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	C.showKeyboard(C.int(int32(keyboard)))
@@ -286,19 +299,19 @@ func filePickerReturned(str *C.char, urlPtr unsafe.Pointer) {
 func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	fileCallback = callback
 
-	mimes := strings.Join(filter.MimeTypes, "|")
-
-	// extensions must have the '.' removed for UTI lookups on iOS
-	extList := []string{}
-	for _, ext := range filter.Extensions {
-		extList = append(extList, ext[1:])
-	}
-	exts := strings.Join(extList, "|")
-
-	mimeStr := C.CString(mimes)
+	mimeStr, extStr := cStringsForFilter(filter)
 	defer C.free(unsafe.Pointer(mimeStr))
-	extStr := C.CString(exts)
 	defer C.free(unsafe.Pointer(extStr))
 
 	C.showFileOpenPicker(mimeStr, extStr)
+}
+
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+	fileCallback = callback
+
+	mimeStr, extStr := cStringsForFilter(filter)
+	defer C.free(unsafe.Pointer(mimeStr))
+	defer C.free(unsafe.Pointer(extStr))
+
+	C.showFileSavePicker(mimeStr, extStr)
 }

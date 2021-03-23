@@ -3,67 +3,71 @@ package gomobile
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	internalWidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 type menuLabel struct {
-	*widget.Box
-	label *widget.Label
+	widget.BaseWidget
 
 	menu   *fyne.Menu
-	bar    *widget.Box
+	bar    *fyne.Container
 	canvas *mobileCanvas
 }
 
 func (m *menuLabel) Tapped(*fyne.PointEvent) {
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(m)
-	widget.ShowPopUpMenuAtPosition(m.menu, m.canvas, fyne.NewPos(pos.X+m.Size().Width, pos.Y))
+	menu := widget.NewPopUpMenu(m.menu, m.canvas)
+	menu.ShowAtPosition(fyne.NewPos(pos.X+m.Size().Width, pos.Y))
 
-	// TODO use NewPopUpMenu in 2.0 once the Deprecated
-	menu := m.canvas.Overlays().Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu)
 	menuDismiss := menu.OnDismiss // this dismisses the menu stack
 	menu.OnDismiss = func() {
 		menuDismiss()
 		m.bar.Hide() // dismiss the overlay menu bar
-		m.canvas.menu = nil
+		m.canvas.setMenu(nil)
 	}
 }
 
 func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
-	return widget.Renderer(m.Box)
+	label := widget.NewLabel(m.menu.Label)
+	box := container.NewHBox(layout.NewSpacer(), label, layout.NewSpacer(), widget.NewIcon(theme.MenuExpandIcon()))
+
+	return &menuLabelRenderer{menu: m, content: box}
 }
 
-func newMenuLabel(item *fyne.Menu, parent *widget.Box, c *mobileCanvas) *menuLabel {
-	label := widget.NewLabel(item.Label)
-	box := widget.NewHBox(layout.NewSpacer(), label, layout.NewSpacer(), widget.NewIcon(theme.MenuExpandIcon()))
-
-	m := &menuLabel{box, label, item, parent, c}
-	return m
+func newMenuLabel(item *fyne.Menu, parent *fyne.Container, c *mobileCanvas) *menuLabel {
+	l := &menuLabel{menu: item, bar: parent, canvas: c}
+	l.ExtendBaseWidget(l)
+	return l
 }
 
 func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
-	var panel *widget.Box
-	top := widget.NewHBox(widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+	var panel *fyne.Container
+	top := container.NewHBox(widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 		panel.Hide()
-		c.menu = nil
+		c.setMenu(nil)
 	}))
-	panel = widget.NewVBox(top)
+	panel = container.NewVBox(top)
 	for _, item := range menu.Items {
-		panel.Append(newMenuLabel(item, panel, c))
+		panel.Add(newMenuLabel(item, panel, c))
 	}
+
+	bg := canvas.NewRectangle(theme.BackgroundColor())
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
-	c.menu = fyne.NewContainer(panel, shadow)
 
 	safePos, safeSize := c.InteractiveArea()
+	bg.Move(safePos)
+	bg.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), safeSize.Height))
 	panel.Move(safePos)
 	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), safeSize.Height))
 	shadow.Resize(fyne.NewSize(theme.Padding()/2, safeSize.Height))
 	shadow.Move(fyne.NewPos(panel.Size().Width+safePos.X, safePos.Y))
+
+	c.setMenu(container.NewWithoutLayout(bg, panel, shadow))
 }
 
 func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {
@@ -87,4 +91,32 @@ func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {
 	}
 
 	return nil
+}
+
+type menuLabelRenderer struct {
+	menu    *menuLabel
+	content *fyne.Container
+}
+
+func (m *menuLabelRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (m *menuLabelRenderer) Destroy() {
+}
+
+func (m *menuLabelRenderer) Layout(size fyne.Size) {
+	m.content.Resize(size)
+}
+
+func (m *menuLabelRenderer) MinSize() fyne.Size {
+	return m.content.MinSize()
+}
+
+func (m *menuLabelRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{m.content}
+}
+
+func (m *menuLabelRenderer) Refresh() {
+	m.content.Refresh()
 }

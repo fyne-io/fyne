@@ -2,9 +2,12 @@ package canvas
 
 import (
 	"image"
+	"io"
+	"io/ioutil"
 	"path/filepath"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // ImageFill defines the different type of ways an image can stretch to fill its space.
@@ -33,6 +36,10 @@ const (
 	ImageScaleSmooth ImageScale = 0
 	// ImageScalePixels will scale the image using NearestNeighbor filter (or GL equivalent)
 	ImageScalePixels ImageScale = 1
+	// ImageScaleFastest will scale the image using hardware GPU if available
+	//
+	// Since: 2.0
+	ImageScaleFastest ImageScale = 2
 )
 
 // Declare conformity with CanvasObject interface
@@ -61,15 +68,12 @@ func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
 
-// Resize on an image will usually scale the content or reposition it according to FillMode..
-// If the content of the File or Resource is an SVG file, however, this will cause a Refresh.
+// Resize on an image will scale the content or reposition it according to FillMode.
+// It will normally cause a Refresh to ensure the pixels are recalculated.
 func (i *Image) Resize(s fyne.Size) {
 	i.baseObject.Resize(s)
 
-	if (i.File != "" && filepath.Ext(i.File) == ".svg") ||
-		(i.Resource != nil && filepath.Ext(i.Resource.Name()) == ".svg") {
-		Refresh(i)
-	}
+	Refresh(i)
 }
 
 // Refresh causes this object to be redrawn in it's current state
@@ -83,6 +87,54 @@ func (i *Image) Refresh() {
 func NewImageFromFile(file string) *Image {
 	return &Image{
 		File: file,
+	}
+}
+
+// NewImageFromURI creates a new image from named resource.
+// File URIs will read the file path and other schemes will download the data into a resource.
+// Images returned from this method will scale to fit the canvas object.
+// The method for scaling can be set using the Fill field.
+//
+// Since: 2.0
+func NewImageFromURI(uri fyne.URI) *Image {
+	if uri.Scheme() == "file" && len(uri.String()) > 7 {
+		return &Image{
+			File: uri.String()[7:],
+		}
+	}
+
+	var read io.ReadCloser
+
+	read, err := storage.Reader(uri) // attempt unknown file type
+	if err != nil {
+		fyne.LogError("Failed to open image URI", err)
+		return nil
+	}
+
+	defer read.Close()
+	return NewImageFromReader(read, filepath.Base(uri.String()))
+}
+
+// NewImageFromReader creates a new image from a data stream.
+// The name parameter is required to uniquely identify this image (for caching etc).
+// If the image in this io.Reader is an SVG, the name should end ".svg".
+// Images returned from this method will scale to fit the canvas object.
+// The method for scaling can be set using the Fill field.
+//
+// Since: 2.0
+func NewImageFromReader(read io.Reader, name string) *Image {
+	data, err := ioutil.ReadAll(read)
+	if err != nil {
+		fyne.LogError("Unable to read image data", err)
+		return nil
+	}
+	res := &fyne.StaticResource{
+		StaticName:    name,
+		StaticContent: data,
+	}
+
+	return &Image{
+		Resource: res,
 	}
 }
 

@@ -1,10 +1,10 @@
 package widget
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Card widget groups title, subtitle with content and a header image
@@ -35,9 +35,9 @@ func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 
-	header := canvas.NewText(c.Title, theme.TextColor())
+	header := canvas.NewText(c.Title, theme.ForegroundColor())
 	header.TextStyle.Bold = true
-	subHeader := canvas.NewText(c.Subtitle, theme.TextColor())
+	subHeader := canvas.NewText(c.Subtitle, theme.ForegroundColor())
 
 	objects := []fyne.CanvasObject{header, subHeader}
 	if c.Image != nil {
@@ -220,11 +220,11 @@ func (c *cardRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
 	if c.header != nil {
-		c.header.TextSize = int(float32(theme.TextSize()) * 1.7)
-		c.header.Color = theme.TextColor()
+		c.header.TextSize = theme.TextSize() * 1.7
+		c.header.Color = theme.ForegroundColor()
 	}
 	if c.subHeader != nil {
 		c.subHeader.TextSize = theme.TextSize()
-		c.subHeader.Color = theme.TextColor()
+		c.subHeader.Color = theme.ForegroundColor()
 	}
 }

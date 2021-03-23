@@ -4,11 +4,12 @@ import (
 	"image"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // TextDPI is a global constant that determines how text scales to interface sizes
@@ -24,7 +25,7 @@ func loadFont(data fyne.Resource) *truetype.Font {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
 	opts.DPI = TextDPI
@@ -32,7 +33,7 @@ func RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	face := CachedFontFace(style, &opts)
 	advance := font.MeasureString(face, text)
 
-	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
+	return fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
 }
 
 type compositeFace struct {

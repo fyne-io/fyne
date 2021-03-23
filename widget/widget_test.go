@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,7 @@ func (m *myWidget) Refresh() {
 
 func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 	m.ExtendBaseWidget(m)
-	return (&Box{}).CreateRenderer()
+	return &simpleRenderer{&fyne.Container{}}
 }
 
 func TestApplyThemeCalled(t *testing.T) {
@@ -44,7 +45,7 @@ func TestApplyThemeCalled(t *testing.T) {
 
 func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{refreshed: make(chan bool)}
-	parent := NewVBox(child)
+	parent := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{child}}
 
 	window := test.NewWindow(parent)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
@@ -57,4 +58,8 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	}()
 
 	window.Close()
+}
+
+func waitForBinding() {
+	time.Sleep(time.Millisecond * 100) // data resolves on background thread
 }

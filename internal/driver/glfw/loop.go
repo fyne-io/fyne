@@ -6,23 +6,23 @@ import (
 	"sync"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 type funcData struct {
 	f    func()
-	done chan bool
+	done chan struct{} // Zero allocation signalling channel
 }
 
 type drawData struct {
 	f    func()
 	win  *window
-	done chan bool
+	done chan struct{} // Zero allocation signalling channel
 }
 
 // channel for queuing functions on the main thread
@@ -31,6 +31,9 @@ var drawFuncQueue = make(chan drawData)
 var runFlag = false
 var runMutex = &sync.Mutex{}
 var initOnce = &sync.Once{}
+var donePool = &sync.Pool{New: func() interface{} {
+	return make(chan struct{})
+}}
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -50,7 +53,8 @@ func runOnMain(f func()) {
 	if !running() {
 		f()
 	} else {
-		done := make(chan bool)
+		done := donePool.Get().(chan struct{})
+		defer donePool.Put(done)
 
 		funcQueue <- funcData{f: f, done: done}
 		<-done
@@ -59,7 +63,8 @@ func runOnMain(f func()) {
 
 // force a function f to run on the draw thread
 func runOnDraw(w *window, f func()) {
-	done := make(chan bool)
+	done := donePool.Get().(chan struct{})
+	defer donePool.Put(done)
 
 	drawFuncQueue <- drawData{f: f, win: w, done: done}
 	<-done
@@ -96,7 +101,7 @@ func (d *gLDriver) runGL() {
 		case f := <-funcQueue:
 			f.f()
 			if f.done != nil {
-				f.done <- true
+				f.done <- struct{}{}
 			}
 		case <-eventTick.C:
 			d.tryPollEvents()
@@ -113,7 +118,6 @@ func (d *gLDriver) runGL() {
 					w.viewLock.Lock()
 					w.visible = false
 					v := w.viewport
-					w.viewport = nil
 					w.viewLock.Unlock()
 
 					// remove window from window list
@@ -189,19 +193,22 @@ func (d *gLDriver) startDrawThread() {
 			case f := <-drawFuncQueue:
 				f.win.RunWithContext(f.f)
 				if f.done != nil {
-					f.done <- true
+					f.done <- struct{}{}
 				}
 			case <-settingsChange:
 				painter.ClearFontCache()
+				for _, win := range d.windowList() {
+					go win.Canvas().(*glCanvas).reloadScale()
+				}
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)
 					w.viewLock.RLock()
 					canvas := w.canvas
-					view := w.viewport
+					closing := w.closing
 					visible := w.visible
 					w.viewLock.RUnlock()
-					if view == nil || !canvas.isDirty() || !visible {
+					if closing || !canvas.isDirty() || !visible {
 						continue
 					}
 

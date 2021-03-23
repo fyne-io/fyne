@@ -1,7 +1,7 @@
 package tutorials
 
 import (
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // Tutorial defines the data structure for a tutorial
@@ -48,6 +48,10 @@ var (
 			"A container to that centers child elements.",
 			makeCenterLayout,
 		},
+		"doctabs": {"DocTabs",
+			"A container to display a single document from a set of many.",
+			makeDocTabsTab,
+		},
 		"grid": {"Grid",
 			"A container that arranges all items in a grid.",
 			makeGridLayout,
@@ -82,7 +86,7 @@ var (
 			makeEntryTab,
 		},
 		"form": {"Form",
-			"Gathering input widgets for data submiission.",
+			"Gathering input widgets for data submission.",
 			makeFormTab,
 		},
 		"input": {"Input",
@@ -140,7 +144,7 @@ var (
 	TutorialIndex = map[string][]string{
 		"":            {"welcome", "canvas", "animations", "icons", "widgets", "collections", "containers", "dialogs", "windows", "binding", "advanced"},
 		"collections": {"list", "table", "tree"},
-		"containers":  {"apptabs", "border", "box", "center", "grid", "split", "scroll"},
-		"widgets":     {"accordion", "button", "card", "entry", "form", "input", "text", "toolbar", "progress"},
+		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split"},
+		"widgets":     {"accordion", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
 	}
 )

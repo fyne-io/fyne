@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"math"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // Declare conformity with CanvasObject interface
@@ -24,8 +24,8 @@ type Line struct {
 
 // Size returns the current size of bounding box for this line object
 func (l *Line) Size() fyne.Size {
-	return fyne.NewSize(int(math.Abs(float64(l.Position2.X)-float64(l.Position1.X))),
-		int(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))))
+	return fyne.NewSize(float32(math.Abs(float64(l.Position2.X)-float64(l.Position1.X))),
+		float32(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))))
 }
 
 // Resize sets a new bottom-right position for the line object and it will then be refreshed.

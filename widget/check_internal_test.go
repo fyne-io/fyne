@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,13 +16,6 @@ func TestCheckSize(t *testing.T) {
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
-}
-
-func TestCheck_BackgroundStyle(t *testing.T) {
-	check := NewCheck("Hi", nil)
-	bg := test.WidgetRenderer(check).BackgroundColor()
-
-	assert.Equal(t, bg, theme.BackgroundColor())
 }
 
 func TestCheckChecked(t *testing.T) {

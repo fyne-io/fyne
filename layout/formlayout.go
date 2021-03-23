@@ -1,8 +1,8 @@
 package layout
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 const formLayoutCols = 2
@@ -32,7 +32,7 @@ func (f *formLayout) countRows(objects []fyne.CanvasObject) int {
 // The width of the label column will be set as the max width value between all the label cells.
 // The width of the content column will be set as the max width value between all the content cells
 // or the remaining space of the bounding containerWidth, if it is larger.
-func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth int) [][2]fyne.Size {
+func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth float32) [][2]fyne.Size {
 	rows := f.countRows(objects)
 	table := make([][2]fyne.Size, rows)
 
@@ -42,8 +42,8 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 
 	lowBound := 0
 	highBound := 2
-	labelCellMaxWidth := 0
-	contentCellMaxWidth := 0
+	labelCellMaxWidth := float32(0)
+	contentCellMaxWidth := float32(0)
 	for row := 0; row < rows; {
 		currentRow := objects[lowBound:highBound]
 		lowBound = highBound
@@ -82,7 +82,7 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	table := f.tableCellsSize(objects, size.Width)
 
 	row := 0
-	y := 0
+	y := float32(0)
 	for i := 0; i < len(objects); i += formLayoutCols {
 		if !objects[i].Visible() && (i+1 < len(objects) && !objects[i+1].Visible()) {
 			continue

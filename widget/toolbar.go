@@ -1,13 +1,11 @@
 package widget
 
 import (
-	"image/color"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 )
 
 // ToolbarItem represents any interface element that can be added to a toolbar
@@ -57,7 +55,7 @@ type ToolbarSeparator struct {
 
 // ToolbarObject gets the visible line object for this ToolbarSeparator
 func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
-	return canvas.NewRectangle(theme.TextColor())
+	return canvas.NewRectangle(theme.ForegroundColor())
 }
 
 // NewToolbarSeparator returns a new separator item for a Toolbar to assist with ToolbarItem grouping
@@ -109,28 +107,24 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 type toolbarRenderer struct {
 	widget.BaseRenderer
 	layout  fyne.Layout
-	objs    []fyne.CanvasObject
+	items   []fyne.CanvasObject
 	toolbar *Toolbar
 }
 
 func (r *toolbarRenderer) MinSize() fyne.Size {
-	return r.layout.MinSize(r.Objects())
+	return r.layout.MinSize(r.items)
 }
 
 func (r *toolbarRenderer) Layout(size fyne.Size) {
-	r.layout.Layout(r.Objects(), size)
-}
-
-func (r *toolbarRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	r.layout.Layout(r.items, size)
 }
 
 func (r *toolbarRenderer) Refresh() {
 	r.resetObjects()
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := r.Objects()[i].(*canvas.Rectangle)
-			rect.FillColor = theme.TextColor()
+			rect := r.items[i].(*canvas.Rectangle)
+			rect.FillColor = theme.ForegroundColor()
 		}
 	}
 
@@ -138,11 +132,9 @@ func (r *toolbarRenderer) Refresh() {
 }
 
 func (r *toolbarRenderer) resetObjects() {
-	if len(r.objs) != len(r.toolbar.Items) {
-		r.objs = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
-		for _, item := range r.toolbar.Items {
-			r.objs = append(r.objs, item.ToolbarObject())
-		}
+	r.items = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
+	for _, item := range r.toolbar.Items {
+		r.items = append(r.items, item.ToolbarObject())
 	}
-	r.SetObjects(r.objs)
+	r.SetObjects(r.items)
 }

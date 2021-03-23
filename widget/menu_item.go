@@ -1,13 +1,11 @@
 package widget
 
 import (
-	"image/color"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 var _ fyne.Widget = (*menuItem)(nil)
@@ -18,14 +16,12 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child           *Menu
-	hovered         bool
-	onActivateChild func(*menuItem)
+	child *Menu
 }
 
 // newMenuItem creates a new menuItem.
-func newMenuItem(item *fyne.MenuItem, parent *Menu, onActivateChild func(*menuItem)) *menuItem {
-	return &menuItem{Item: item, Parent: parent, onActivateChild: onActivateChild}
+func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
+	return &menuItem{Item: item, Parent: parent}
 }
 
 func (i *menuItem) Child() *Menu {
@@ -42,8 +38,10 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
-	text := canvas.NewText(i.Item.Label, theme.TextColor())
-	objects := []fyne.CanvasObject{text}
+	background := canvas.NewRectangle(theme.HoverColor())
+	background.Hide()
+	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
+	objects := []fyne.CanvasObject{background, text}
 	var icon *canvas.Image
 	if i.Item.ChildMenu != nil {
 		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
@@ -54,6 +52,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		i:            i,
 		icon:         icon,
 		text:         text,
+		background:   background,
 	}
 }
 
@@ -71,14 +70,12 @@ func (i *menuItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
-// MouseIn changes the item to be hovered and shows the submenu if the item has one.
+// MouseIn activates the item which shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
 //
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
-	i.hovered = true
-	i.onActivateChild(i)
-	i.Refresh()
+	i.activate()
 }
 
 // MouseMoved does nothing.
@@ -87,12 +84,13 @@ func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 func (i *menuItem) MouseMoved(*desktop.MouseEvent) {
 }
 
-// MouseOut changes the item to not be hovered but has no effect on the visibility of the item's submenu.
+// MouseOut deactivates the item unless it has an open submenu.
 //
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseOut() {
-	i.hovered = false
-	i.Refresh()
+	if !i.isSubmenuOpen() {
+		i.deactivate()
+	}
 }
 
 // Move sets the position of the widget relative to its parent.
@@ -130,37 +128,89 @@ func (i *menuItem) Show() {
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
-			i.onActivateChild(i)
+			i.activate()
 		}
 		return
 	}
 
+	i.trigger()
+}
+
+func (i *menuItem) activate() {
+	if i.Child() != nil {
+		i.Child().Show()
+	}
+	i.Parent.activateItem(i)
+}
+
+func (i *menuItem) activateLastSubmenu() bool {
+	if i.Child() == nil {
+		return false
+	}
+	if i.isSubmenuOpen() {
+		return i.Child().ActivateLastSubmenu()
+	}
+	i.Child().Show()
+	i.Child().ActivateNext()
+	return true
+}
+
+func (i *menuItem) deactivate() {
+	if i.Child() != nil {
+		i.Child().Hide()
+	}
+	i.Parent.DeactivateChild()
+}
+
+func (i *menuItem) deactivateLastSubmenu() bool {
+	if !i.isSubmenuOpen() {
+		return false
+	}
+	if !i.Child().DeactivateLastSubmenu() {
+		i.Child().DeactivateChild()
+		i.Child().Hide()
+	}
+	return true
+}
+
+func (i *menuItem) isActive() bool {
+	return i.Parent.activeItem == i
+}
+
+func (i *menuItem) isSubmenuOpen() bool {
+	return i.Child() != nil && i.Child().Visible()
+}
+
+func (i *menuItem) trigger() {
 	i.Parent.Dismiss()
-	i.Item.Action()
+	if i.Item.Action != nil {
+		i.Item.Action()
+	}
+}
+
+func (i *menuItem) triggerLast() {
+	if i.isSubmenuOpen() {
+		i.Child().TriggerLast()
+		return
+	}
+	i.trigger()
 }
 
 type menuItemRenderer struct {
 	widget.BaseRenderer
 	i                *menuItem
 	icon             *canvas.Image
-	lastThemePadding int
+	lastThemePadding float32
 	minSize          fyne.Size
 	text             *canvas.Text
-}
-
-func (r *menuItemRenderer) BackgroundColor() color.Color {
-	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
-		return theme.HoverColor()
-	}
-
-	return color.Transparent
+	background       *canvas.Rectangle
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
 	padding := r.itemPadding()
 
 	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.TextColor()
+	r.text.Color = theme.ForegroundColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 
@@ -168,6 +218,8 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 		r.icon.Move(fyne.NewPos(size.Width-theme.IconInlineSize(), (size.Height-theme.IconInlineSize())/2))
 	}
+
+	r.background.Resize(size)
 }
 
 func (r *menuItemRenderer) MinSize() fyne.Size {
@@ -184,6 +236,15 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuItemRenderer) Refresh() {
+	if fyne.CurrentDevice().IsMobile() {
+		r.background.Hide()
+	} else if r.i.isActive() {
+		r.background.FillColor = theme.FocusColor()
+		r.background.Show()
+	} else {
+		r.background.Hide()
+	}
+	r.background.Refresh()
 	canvas.Refresh(r.i)
 }
 

@@ -4,14 +4,15 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func textRenderTexts(p fyne.Widget) []*canvas.Text {
-	return Renderer(p).(*textRenderer).texts
+	return cache.Renderer(p).(*textRenderer).texts
 }
 
 type testTextParent struct {
@@ -239,7 +240,7 @@ func TestText_DeleteFromTo(t *testing.T) {
 
 func TestText_Color(t *testing.T) {
 	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	Refresh(text.presenter.object())
+	text.presenter.object().Refresh()
 
 	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
 }
@@ -320,8 +321,8 @@ func TestText_splitLines(t *testing.T) {
 }
 
 func TestText_lineBounds(t *testing.T) {
-	mockMeasurer := func(text []rune) int {
-		return len(text)
+	mockMeasurer := func(text []rune) float32 {
+		return float32(len(text))
 	}
 	tests := []struct {
 		name string
@@ -697,9 +698,9 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 			},
 		},
 	}
-	textSize := 10
+	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) int {
+	measurer := func(text []rune) float32 {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
 	for _, tt := range tests {
@@ -710,10 +711,10 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 }
 
 func TestText_binarySearch(t *testing.T) {
-	maxWidth := 50
-	textSize := 10
+	maxWidth := float32(50)
+	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) int {
+	measurer := func(text []rune) float32 {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
 	for name, tt := range map[string]struct {

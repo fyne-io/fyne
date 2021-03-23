@@ -1,8 +1,8 @@
 package app
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 )
 
 // ApplyThemeTo ensures that the specified canvasobject and all widgets and themeable objects will
@@ -34,7 +34,6 @@ func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 func ApplySettings(set fyne.Settings, app fyne.App) {
 	for _, window := range app.Driver().AllWindows() {
 		ApplyThemeTo(window.Content(), window.Canvas())
-		window.Canvas().SetScale(set.Scale())
 
 		for _, overlay := range window.Canvas().Overlays().List() {
 			ApplyThemeTo(overlay, window.Canvas())

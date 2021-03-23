@@ -1,0 +1,55 @@
+<canvas size="200x100">
+	<content>
+		<widget size="200x100" type="*container.AppTabs">
+			<container size="200x29">
+				<container size="168x29">
+					<widget size="57x29" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
+					</widget>
+					<widget pos="61,0" size="57x29" type="*container.tabButton">
+						<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
+					</widget>
+				</container>
+				<widget pos="172,0" size="28x29" type="*widget.Button">
+					<rectangle fillColor="button" size="28x29"/>
+					<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="24x25"/>
+					<image fillMode="contain" pos="4,4" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+				</widget>
+			</container>
+			<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
+			<rectangle fillColor="primary" pos="0,29" size="57x4"/>
+			<widget pos="0,33" size="200x67" type="*widget.Label">
+				<text pos="8,8" size="184x21">Text 1</text>
+			</widget>
+		</widget>
+	</content>
+	<overlay>
+		<widget size="200x100" type="*widget.OverlayContainer">
+			<widget pos="145,29" size="55x70" type="*widget.Menu">
+				<widget size="55x70" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="55x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="55,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="55,0" size="4x70" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="55,70" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,70" size="55x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+				</widget>
+				<widget size="55x70" type="*widget.Scroll">
+					<widget size="55x70" type="*widget.menuBox">
+						<rectangle fillColor="background" size="55x78"/>
+						<container pos="0,4" size="55x78">
+							<widget size="55x29" type="*widget.menuItem">
+								<text pos="8,4" size="39x21">Test3</text>
+							</widget>
+							<widget pos="0,33" size="55x29" type="*widget.menuItem">
+								<text pos="8,4" size="39x21">Test4</text>
+							</widget>
+						</container>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>

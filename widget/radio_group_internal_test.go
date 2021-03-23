@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,13 +26,6 @@ func TestRadioGroup_MinSize(t *testing.T) {
 
 	assert.Equal(t, min.Width, min2.Width)
 	assert.Greater(t, min2.Height, min.Height)
-}
-
-func TestRadioGroup_BackgroundStyle(t *testing.T) {
-	radio := NewRadioGroup([]string{"Hi"}, nil)
-	bg := test.WidgetRenderer(radio).BackgroundColor()
-
-	assert.Equal(t, bg, theme.BackgroundColor())
 }
 
 func TestRadioGroup_MinSize_Horizontal(t *testing.T) {

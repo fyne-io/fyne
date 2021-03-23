@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,8 +24,8 @@ func TestLine_Resize(t *testing.T) {
 	line.Resize(fyne.NewSize(10, 0))
 	size := line.Size()
 
-	assert.Equal(t, size.Width, 10)
-	assert.Equal(t, size.Height, 0)
+	assert.Equal(t, float32(10), size.Width)
+	assert.Equal(t, float32(0), size.Height)
 }
 
 func TestLine_StrokeColor(t *testing.T) {

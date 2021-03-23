@@ -1,12 +1,10 @@
 package widget
 
 import (
-	"image/color"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // PopUp is a widget that can float above the user interface.
@@ -50,7 +48,6 @@ func (p *PopUp) Move(pos fyne.Position) {
 // Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
 	p.innerSize = size
-	p.BaseWidget.Resize(p.Canvas.Size())
 	// The canvas size might not have changed and therefore the Resize won't trigger a layout.
 	// Until we have a widget.Relayout() or similar, the renderer's refresh will do the re-layout.
 	p.Refresh()
@@ -59,12 +56,10 @@ func (p *PopUp) Resize(size fyne.Size) {
 // Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if !p.overlayShown {
-		if p.Size().IsZero() {
-			p.Resize(p.MinSize())
-		}
 		p.Canvas.Overlays().Add(p)
 		p.overlayShown = true
 	}
+	p.Refresh()
 	p.BaseWidget.Show()
 }
 
@@ -97,29 +92,21 @@ func (p *PopUp) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	bg := canvas.NewRectangle(theme.BackgroundColor())
-	objects := []fyne.CanvasObject{bg, p.Content}
+	background := canvas.NewRectangle(theme.BackgroundColor())
 	if p.modal {
+		underlay := canvas.NewRectangle(theme.ShadowColor())
+		objects := []fyne.CanvasObject{underlay, background, p.Content}
 		return &modalPopUpRenderer{
 			widget.NewShadowingRenderer(objects, widget.DialogLevel),
-			popUpBaseRenderer{popUp: p, bg: bg},
+			popUpBaseRenderer{popUp: p, background: background},
+			underlay,
 		}
 	}
-
+	objects := []fyne.CanvasObject{background, p.Content}
 	return &popUpRenderer{
 		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
-		popUpBaseRenderer{popUp: p, bg: bg},
+		popUpBaseRenderer{popUp: p, background: background},
 	}
-}
-
-// NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
-// It will then display the popup on the passed canvas.
-//
-// Deprecated: Use ShowPopUpAtPosition() instead.
-func NewPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) *PopUp {
-	p := newPopUp(content, canvas)
-	p.ShowAtPosition(pos)
-	return p
 }
 
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
@@ -135,10 +122,8 @@ func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 }
 
 // NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
-//
-// Deprecated: This will no longer show the pop-up in 2.0. Use ShowPopUp() instead.
 func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	return NewPopUpAtPosition(content, canvas, fyne.NewPos(0, 0))
+	return newPopUp(content, canvas)
 }
 
 // ShowPopUp creates a new popUp for the specified content and displays it on the passed canvas.
@@ -154,12 +139,8 @@ func newModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
-//
-// Deprecated: This will no longer show the pop-up in 2.0. Use ShowModalPopUp instead.
 func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	p := newModalPopUp(content, canvas)
-	p.Show()
-	return p
+	return newModalPopUp(content, canvas)
 }
 
 // ShowModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
@@ -170,8 +151,8 @@ func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
 }
 
 type popUpBaseRenderer struct {
-	popUp *PopUp
-	bg    *canvas.Rectangle
+	popUp      *PopUp
+	background *canvas.Rectangle
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
@@ -188,26 +169,27 @@ type popUpRenderer struct {
 }
 
 func (r *popUpRenderer) Layout(_ fyne.Size) {
-	r.popUp.Content.Resize(r.popUp.innerSize.Subtract(r.padding()))
+	innerSize := r.popUp.innerSize.Max(r.popUp.MinSize())
+	r.popUp.Content.Resize(innerSize.Subtract(r.padding()))
 
 	innerPos := r.popUp.innerPos
-	if innerPos.X+r.popUp.innerSize.Width > r.popUp.Canvas.Size().Width {
-		innerPos.X = r.popUp.Canvas.Size().Width - r.popUp.innerSize.Width
+	if innerPos.X+innerSize.Width > r.popUp.Canvas.Size().Width {
+		innerPos.X = r.popUp.Canvas.Size().Width - innerSize.Width
 		if innerPos.X < 0 {
 			innerPos.X = 0 // TODO here we may need a scroller as it's wider than our canvas
 		}
 	}
-	if innerPos.Y+r.popUp.innerSize.Height > r.popUp.Canvas.Size().Height {
-		innerPos.Y = r.popUp.Canvas.Size().Height - r.popUp.innerSize.Height
+	if innerPos.Y+innerSize.Height > r.popUp.Canvas.Size().Height {
+		innerPos.Y = r.popUp.Canvas.Size().Height - innerSize.Height
 		if innerPos.Y < 0 {
 			innerPos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
 		}
 	}
 	r.popUp.Content.Move(innerPos.Add(r.offset()))
 
-	r.bg.Resize(r.popUp.innerSize)
-	r.bg.Move(innerPos)
-	r.LayoutShadow(r.popUp.innerSize, innerPos)
+	r.background.Resize(innerSize)
+	r.background.Move(innerPos)
+	r.LayoutShadow(innerSize, innerPos)
 }
 
 func (r *popUpRenderer) MinSize() fyne.Size {
@@ -215,24 +197,33 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *popUpRenderer) Refresh() {
-	r.bg.FillColor = theme.BackgroundColor()
-	if r.bg.Size() != r.popUp.innerSize || r.bg.Position() != r.popUp.innerPos {
+	r.background.FillColor = theme.BackgroundColor()
+	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
+	shouldRelayout := !r.popUp.Content.Size().Subtract(expectedContentSize).IsZero()
+
+	if r.background.Size() != r.popUp.innerSize || r.background.Position() != r.popUp.innerPos || shouldRelayout {
 		r.Layout(r.popUp.Size())
 	}
-}
-
-func (r *popUpRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
+	}
+	r.popUp.Content.Refresh()
+	r.background.Refresh()
 }
 
 type modalPopUpRenderer struct {
 	*widget.ShadowingRenderer
 	popUpBaseRenderer
+	underlay *canvas.Rectangle
 }
 
 func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
+	r.underlay.Resize(canvasSize)
+
 	padding := r.padding()
-	requestedSize := r.popUp.innerSize.Subtract(padding)
+	innerSize := r.popUp.innerSize.Max(r.popUp.Content.MinSize().Add(padding))
+
+	requestedSize := innerSize.Subtract(padding)
 	size := r.popUp.Content.MinSize().Max(requestedSize)
 	size = size.Min(canvasSize.Subtract(padding))
 	pos := fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
@@ -240,9 +231,9 @@ func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	r.popUp.Content.Resize(size)
 
 	innerPos := pos.Subtract(r.offset())
-	r.bg.Move(innerPos)
-	r.bg.Resize(size.Add(padding))
-	r.LayoutShadow(r.popUp.innerSize, innerPos)
+	r.background.Move(innerPos)
+	r.background.Resize(size.Add(padding))
+	r.LayoutShadow(innerSize, innerPos)
 }
 
 func (r *modalPopUpRenderer) MinSize() fyne.Size {
@@ -250,12 +241,17 @@ func (r *modalPopUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *modalPopUpRenderer) Refresh() {
-	r.bg.FillColor = theme.BackgroundColor()
-	if r.bg.Size() != r.popUp.innerSize {
+	r.underlay.FillColor = theme.ShadowColor()
+	r.background.FillColor = theme.BackgroundColor()
+	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
+	shouldRelayout := !r.popUp.Content.Size().Subtract(expectedContentSize).IsZero()
+
+	if r.background.Size() != r.popUp.innerSize || shouldRelayout {
 		r.Layout(r.popUp.Size())
 	}
-}
-
-func (r *modalPopUpRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
+	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
+	}
+	r.popUp.Content.Refresh()
+	r.background.Refresh()
 }

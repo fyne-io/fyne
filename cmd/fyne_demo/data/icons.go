@@ -1,7 +1,10 @@
 package data
 
+//go:generate fyne bundle -package data -o bundled.go assets
+
 import (
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // ThemedResource is a resource wrapper that will return an appropriate resource
@@ -11,7 +14,7 @@ type ThemedResource struct {
 }
 
 func isLight() bool {
-	r, g, b, _ := fyne.CurrentApp().Settings().Theme().TextColor().RGBA()
+	r, g, b, _ := theme.ForegroundColor().RGBA()
 	return r < 0xaaaa && g < 0xaaaa && b < 0xaaaa
 }
 
@@ -37,4 +40,4 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 }
 
 // FyneScene contains the full fyne logo with background design
-var FyneScene = NewThemedResource(fynescenedark, fynescenelight)
+var FyneScene = NewThemedResource(resourceFynescenedarkPng, resourceFynescenelightPng)

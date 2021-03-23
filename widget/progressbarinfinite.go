@@ -1,14 +1,13 @@
 package widget
 
 import (
-	"image/color"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -20,10 +19,10 @@ const (
 
 type infProgressRenderer struct {
 	widget.BaseRenderer
-	bar      *canvas.Rectangle
-	ticker   *time.Ticker
-	running  bool
-	progress *ProgressBarInfinite
+	background, bar *canvas.Rectangle
+	animation       *fyne.Animation
+	running         bool
+	progress        *ProgressBarInfinite
 }
 
 // MinSize calculates the minimum size of a progress bar.
@@ -34,49 +33,30 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }
 
-func (p *infProgressRenderer) updateBar() {
-	progressSize := p.progress.Size()
-	barWidth := p.bar.Size().Width
-	barPos := p.bar.Position()
+func (p *infProgressRenderer) updateBar(done float32) {
+	progressWidth := p.progress.size.Width
+	spanWidth := progressWidth + (progressWidth * (maxProgressBarInfiniteWidthRatio / 2))
+	maxBarWidth := progressWidth * maxProgressBarInfiniteWidthRatio
 
-	maxBarWidth := int(float64(progressSize.Width) * maxProgressBarInfiniteWidthRatio)
-	minBarWidth := int(float64(progressSize.Width) * minProgressBarInfiniteWidthRatio)
-	stepSize := int(float64(progressSize.Width) * progressBarInfiniteStepSizeRatio)
-
-	// check to make sure inner bar is sized correctly
-	// if bar is on the first half of the progress bar, grow it up to maxProgressBarInfiniteWidthPercent
-	// if on the second half of the progress bar width, shrink it down until it gets to minProgressBarInfiniteWidthPercent
-	if barWidth < maxBarWidth && barPos.X+barWidth < progressSize.Width/2 {
-		// slightly increase width
-		newBoxSize := fyne.Size{Width: barWidth + stepSize, Height: progressSize.Height}
-		p.bar.Resize(newBoxSize)
-	} else {
-		barPos.X += stepSize
-
-		if barWidth <= minBarWidth {
-			// loop around to start when bar goes to end
-			barPos.X = 0
-			stepSize = 0
-			newBoxSize := fyne.Size{Width: minBarWidth, Height: progressSize.Height}
-			p.bar.Resize(newBoxSize)
-		} else if barPos.X+barWidth > progressSize.Width {
-			// crop to the end of the bar
-			barWidth = progressSize.Width - barPos.X
-			newBoxSize := fyne.Size{Width: barWidth, Height: progressSize.Height}
-			p.bar.Resize(newBoxSize)
-		}
+	barCenterX := spanWidth*done - (spanWidth-progressWidth)/2
+	barPos := fyne.NewPos(barCenterX-maxBarWidth/2, 0)
+	barSize := fyne.NewSize(maxBarWidth, p.progress.size.Height)
+	if barPos.X < 0 {
+		barSize.Width += barPos.X
+		barPos.X = 0
+	}
+	if barPos.X+barSize.Width > progressWidth {
+		barSize.Width = progressWidth - barPos.X
 	}
 
+	p.bar.Resize(barSize)
 	p.bar.Move(barPos)
+	canvas.Refresh(p.bar)
 }
 
 // Layout the components of the infinite progress bar
 func (p *infProgressRenderer) Layout(size fyne.Size) {
-	p.updateBar()
-}
-
-func (p *infProgressRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
+	p.background.Resize(size)
 }
 
 // Refresh updates the size and position of the horizontal scrolling infinite progress bar
@@ -85,13 +65,10 @@ func (p *infProgressRenderer) Refresh() {
 		return // we refresh from the goroutine
 	}
 
-	p.doRefresh()
-}
-
-func (p *infProgressRenderer) doRefresh() {
+	p.background.FillColor = progressBackgroundColor()
 	p.bar.FillColor = theme.PrimaryColor()
-
-	p.updateBar()
+	p.background.Refresh()
+	p.bar.Refresh()
 	canvas.Refresh(p.progress.super())
 }
 
@@ -104,41 +81,27 @@ func (p *infProgressRenderer) isRunning() bool {
 
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
-	if !p.isRunning() {
-		p.progress.propertyLock.Lock()
-		defer p.progress.propertyLock.Unlock()
-		p.ticker = time.NewTicker(infiniteRefreshRate)
-		p.running = true
-
-		go p.infiniteProgressLoop()
+	if p.isRunning() {
+		return
 	}
+
+	p.progress.propertyLock.Lock()
+	defer p.progress.propertyLock.Unlock()
+	p.animation = fyne.NewAnimation(time.Second*3, p.updateBar)
+	p.animation.Curve = fyne.AnimationLinear
+	p.animation.RepeatCount = fyne.AnimationRepeatForever
+	p.running = true
+
+	p.animation.Start()
 }
 
-// Stop the infinite progress goroutine and sets value to the Max
+// Stop the background thread from updating the infinite progress bar
 func (p *infProgressRenderer) stop() {
 	p.progress.propertyLock.Lock()
 	defer p.progress.propertyLock.Unlock()
 
 	p.running = false
-}
-
-// infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
-// the function can be exited by calling Stop()
-func (p *infProgressRenderer) infiniteProgressLoop() {
-	for p.isRunning() {
-		p.progress.propertyLock.RLock()
-		ticker := p.ticker.C
-		p.progress.propertyLock.RUnlock()
-
-		<-ticker
-		p.doRefresh()
-	}
-
-	p.progress.propertyLock.RLock()
-	defer p.progress.propertyLock.RUnlock()
-	if p.ticker != nil {
-		p.ticker.Stop()
-	}
+	p.animation.Stop()
 }
 
 func (p *infProgressRenderer) Destroy() {
@@ -163,12 +126,12 @@ func (p *ProgressBarInfinite) Hide() {
 	p.BaseWidget.Hide()
 }
 
-// Start the infinite progress bar background thread to update it continuously
+// Start the infinite progress bar animation
 func (p *ProgressBarInfinite) Start() {
 	cache.Renderer(p).(*infProgressRenderer).start()
 }
 
-// Stop the infinite progress goroutine and sets value to the Max
+// Stop the infinite progress bar animation
 func (p *ProgressBarInfinite) Stop() {
 	cache.Renderer(p).(*infProgressRenderer).stop()
 }
@@ -191,9 +154,11 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
+	background := canvas.NewRectangle(progressBackgroundColor())
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar}),
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, bar}),
+		background:   background,
 		bar:          bar,
 		progress:     p,
 	}
@@ -206,6 +171,6 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 // To stop the looping progress and set the progress bar to 100%, call ProgressBarInfinite.Stop()
 func NewProgressBarInfinite() *ProgressBarInfinite {
 	p := &ProgressBarInfinite{}
-	Renderer(p).Layout(p.MinSize())
+	cache.Renderer(p).Layout(p.MinSize())
 	return p
 }

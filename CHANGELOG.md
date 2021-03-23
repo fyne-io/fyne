@@ -3,26 +3,178 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.0 - Ongoing
-
-### Changes that are not backward compatible
-
-These changes likely break some apps, please read the 
-[upgrading doc](https://developer.fyne.io/api/v2.0/upgrading) for more info
-
-*
-
-### Added
-
-*
+## 2.0.1 - 4 March 2021
 
 ### Changed
 
-*
+* An Entry with `Wrapping=fyne.TextWrapOff` no longer blocks scroll events from a parent
 
 ### Fixed
 
-*
+* Dialog.Resize() has no effect if called before Dialog.Show() (#1863)
+* SelectTab does not always correctly set the blue underline to the selected tab (#1872)
+* Entry Validation Broken when using Data binding (#1890)
+* Fix background colour not applying until theme change
+* android runtime error with fyne.dialog (#1896)
+* Fix scale calculations for Wayland phones (PinePhone)
+* Correct initial state of entry validation
+* fix entry widget mouse drag selection when scrolled
+* List widget panic when refreshing after changing content length (#1864)
+* Fix image caching that was too agressive on resize
+* Pointer and cursor misalignment in widget.Entry (#1937)
+* SIGSEGV Sometimes When Closing a Program by Clicking a Button (#1604)
+* Advanced Color Picker shows Black for custom primary color as RGBA (#1970)
+* Canvas.Focus() before window visible causes application to crash (#1893)
+* Menu over Content (#1973)
+* Error compiling fyne on Apple M1 arm64 (#1739)
+* Cells are not getting draw in correct location after column resize. (#1951)
+* Possible panic when selecting text in a widget.Entry (#1983)
+* Form validation doesn't enable submit button (#1965)
+* Creating a window shows it before calling .Show() and .Hide() does not work (#1835)
+* Dialogs are not refreshed correctly on .Show() (#1866)
+* Failed creating setting storage : no such directory (#2023)
+* Erroneous custom filter types not supported error on mobile (#2012)
+* High importance button show no hovered state (#1785)
+* List widget does not render all visible content after content data gets shorter (#1948)
+* Calling Select on List before draw can crash (#1960)
+* Dialog not resizing in newly created window (#1692)
+* Dialog not returning to requested size (#1382)
+* Entry without scrollable content prevents scrolling of outside scroller (#1939)
+* fyne_demo crash after selecting custom Theme and table (#2018)
+* Table widget crash when scrolling rapidly (#1887)
+* Cursor animation sometimes distorts the text (#1778)
+* Extended password entry panics when password revealer is clicked (#2036)
+* Data binding limited to 1024 simultaneous operations (#1838)
+* Custom theme does not refresh when variant changes (#2006)
+
+
+## 2.0 - 22 January 2021
+
+### Changes that are not backward compatible
+
+These changes may break some apps, please read the 
+[upgrading doc](https://developer.fyne.io/api/v2.0/upgrading) for more info
+The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
+
+* Coordinate system to float32
+  * Size and Position units were changed from int to float32
+  * `Text.TextSize` moved to float32 and `fyne.MeasureText` now takes a float32 size parameter
+  * Removed `Size.Union` (use `Size.Max` instead)
+  * Added fyne.Delta for difference-based X, Y float32 representation
+  * DraggedEvent.DraggedX and DraggedY (int, int) to DraggedEvent.Dragged (Delta)
+  * ScrollEvent.DeltaX and DeltaY (int, int) moved to ScrollEvent.Scrolled (Delta)
+
+* Theme API update
+  * `fyne.Theme` moved to `fyne.LegacyTheme` and can be load to a new theme using `theme.FromLegacy`
+  * A new, more flexible, Theme interface has been created that we encourage developers to use
+
+* The second parameter of `theme.NewThemedResource` was removed, it was previously ignored
+* The desktop.Cursor definition was renamed desktop.StandardCursor to make way for custom cursors
+* Button `Style` and `HideShadow` were removed, use `Importance`
+
+* iOS apps preferences will be lost in this upgrade as we move to more advanced storage
+* Dialogs no longer show when created, unless using the ShowXxx convenience methods
+* Entry widget now contains scrolling so should no longer be wrapped in a scroll container
+
+* Removed deprecated types including:
+  - `dialog.FileIcon` (now `widget.FileIcon`)
+  - `widget.Radio` (now `widget.RadioGroup`)
+  - `widget.AccordionContainer` (now `widget.Accordion`)
+  - `layout.NewFixedGridLayout()` (now `layout.NewGridWrapLayout()`)
+  - `widget.ScrollContainer` (now `container.Scroll`)
+  - `widget.SplitContainer` (now `container.Spilt`)
+  - `widget.Group` (replaced by `widget.Card`)
+  - `widget.Box` (now `container.NewH/VBox`, with `Children` field moved to `Objects`)
+  - `widget.TabContainer` and `widget.AppTabs` (now `container.AppTabs`)
+* Many deprecated fields have been removed, replacements listed in API docs 1.4
+  - for specific information you can browse https://developer.fyne.io/api/v1.4/
+
+### Added
+
+* Data binding API to connect data sources to widgets and sync data
+  - Add preferences data binding and `Preferences.AddChangeListener`
+  - Add bind support to `Check`, `Entry`, `Label`, `List`, `ProgressBar` and `Slider` widgets
+* Animation API for handling smooth element transitions
+  - Add animations to buttons, tabs and entry cursor
+* Storage repository API for connecting custom file sources
+  - Add storage functions `Copy`, `Delete` and `Move` for `URI`
+  - Add `CanRead`, `CanWrite` and `CanList` to storage APIs
+* New Theme API for easier customisation of apps
+  - Add ability for custom themes to support light/dark preference
+  - Support for custom icons in theme definition
+  - New `theme.FromLegacy` helper to use old theme API definitions
+* Add fyne.Vector for managing x/y float32 coordinates
+* Add MouseButtonTertiary for middle mouse button events on desktop
+* Add `canvas.ImageScaleFastest` for faster, less precise, scaling
+* Add new `dialog.Form` that will phase out `dialog.Entry`
+* Add keyboard control for main menu
+* Add `Scroll.OnScrolled` event for seeing changes in scroll container
+* Add `TextStyle` and `OnSubmitted` to `Entry` widget
+* Add support for `HintText` and showing validation errors in `Form` widget
+* Added basic support for tab character in `Entry`, `Label` and `TextGrid`
+
+### Changed
+
+* Coordinate system is now float32 - see breaking changes above
+* ScrollEvent and DragEvent moved to Delta from (int, int)
+* Change bundled resources to use more efficient string storage
+* Left and Right mouse buttons on Desktop are being moved to `MouseButtonPrimary` and `MouseButtonSecondary`
+* Many optimisations and widget performance enhancements
+
+* Moving to new `container.New()` and `container.NewWithoutLayout()` constructors (replacing `fyne.NewContainer` and `fyne.NewContainerWithoutLayout`)
+* Moving storage APIs `OpenFileFromURI`, `SaveFileToURI` and `ListerForURI` to `Reader`, `Writer` and `List` functions
+
+### Fixed
+
+* Validating a widget in widget.Form before renderer was created could cause a panic
+* Added file and folder support for mobile simulation support (#1470)
+* Appending options to a disabled widget.RadioGroup shows them as enabled (#1697)
+* Toggling toolbar icons does not refresh (#1809)
+* Black screen when slide up application on iPhone (#1610)
+* Properly align Label in FormItem (#1531)
+* Mobile dropdowns are too low (#1771)
+* Cursor does not go down to next line with wrapping (#1737)
+* Entry: while adding text beyond visible reagion there is no auto-scroll (#912)
+
+
+## 1.4.3 - 4 January 2021
+
+### Fixed
+
+* Fix crash when showing file open dialog on iPadOS
+* Fix possible missing icon on initial show of disabled button
+* Capturing a canvas on macOS retina display would not capture full resolution
+* Fix the release build flag for mobile
+* Fix possible race conditions for canvas capture
+* Improvements to `fyne get` command downloader
+* Fix tree, so it refreshes visible nodes on Refresh()
+* TabContainer Panic when removing selected tab (#1668)
+* Incorrect clipping behaviour with nested scroll containers (#1682)
+* MacOS Notifications are not shown on subsequent app runs (#1699)
+* Fix the behavior when dragging the divider of split container (#1618)
+
+
+## 1.4.2 - 9 December 2020
+
+### Added
+
+* [fyne-cli] Add support for passing custom build tags (#1538)
+
+### Changed
+
+* Run validation on content change instead of on each Refresh in widget.Entry
+
+### Fixed
+
+* [fyne-cli] Android: allow to specify an inline password for the keystore
+* Fixed Card widget MinSize (#1581)
+* Fix missing release tag to enable BuildRelease in Settings.BuildType()
+* Dialog shadow does not resize after Refresh (#1370)
+* Android Duplicate Number Entry (#1256)
+* Support older macOS by default - back to 10.11 (#886)
+* Complete certification of macOS App Store releases (#1443)
+* Fix compilation errors for early stage Wayland testing
+* Fix entry.SetValidationError() not working correctly
 
 
 ## 1.4.1 - 20 November 2020

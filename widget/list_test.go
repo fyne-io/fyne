@@ -2,15 +2,16 @@ package widget
 
 import (
 	"fmt"
-	"math"
+	"image/color"
 	"testing"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -19,298 +20,51 @@ func TestNewList(t *testing.T) {
 	list := createList(1000)
 
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), test.WidgetRenderer(list).(*listRenderer).scroller.MinSize())
-	assert.Equal(t, 0, firstItemIndex)
-	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
+	assert.Equal(t, float32(0), list.offsetY)
+}
+
+func TestList_MinSize(t *testing.T) {
+	for name, tt := range map[string]struct {
+		cellSize        fyne.Size
+		expectedMinSize fyne.Size
+	}{
+		"small": {
+			fyne.NewSize(1, 1),
+			fyne.NewSize(float32(32), float32(32)),
+		},
+		"large": {
+			fyne.NewSize(100, 100),
+			fyne.NewSize(100+3*theme.Padding(), 100+2*theme.Padding()),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.expectedMinSize, NewList(
+				func() int { return 5 },
+				func() fyne.CanvasObject {
+					r := canvas.NewRectangle(color.Black)
+					r.SetMinSize(tt.cellSize)
+					r.Resize(tt.cellSize)
+					return r
+				},
+				func(ListItemID, fyne.CanvasObject) {}).MinSize())
+		})
+	}
 }
 
 func TestList_Resize(t *testing.T) {
 	defer test.NewApp()
 	list, w := setupList(t)
-	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
-	assert.Equal(t, 0, firstItemIndex)
-	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
+	assert.Equal(t, float32(0), list.offsetY)
 
 	w.Resize(fyne.NewSize(200, 600))
 
-	indexChange := int(math.Floor(float64(200) / float64(template.MinSize().Height)))
-
-	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	newVisibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
-
-	assert.Equal(t, firstItemIndex, newFirstItemIndex)
-	assert.NotEqual(t, lastItemIndex, newLastItemIndex)
-	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange)
-	assert.NotEqual(t, visibleCount, newVisibleCount)
-	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex+1)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x600">
-			<content>
-				<widget pos="4,4" size="192x592" type="*widget.List">
-					<widget size="192x592" type="*widget.ScrollContainer">
-						<container size="192x37999">
-							<widget size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 0</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,38" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 1</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,76" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 2</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,114" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 3</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,152" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 4</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,190" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 5</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,228" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 6</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,266" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 7</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,304" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 8</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,342" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 9</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,380" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 10</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,418" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 11</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,456" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 12</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,494" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 13</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,532" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 14</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,570" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 15</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,608" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 16</text>
-									</widget>
-								</container>
-							</widget>
-							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
-							</widget>
-							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,75" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,113" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,151" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,189" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,227" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,265" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,455" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,493" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,531" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,569" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,607" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-						</container>
-						<widget pos="186,0" size="6x592" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="3,0" size="3x16" type="*widget.scrollBar">
-							</widget>
-						</widget>
-						<widget pos="0,592" size="192x0" type="*widget.Shadow">
-							<linearGradient endColor="shadow" pos="0,-8" size="192x8"/>
-						</widget>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	assert.Equal(t, float32(0), list.offsetY)
+	test.AssertRendersToMarkup(t, "list/resized.xml", w.Canvas())
 }
 
 func TestList_OffsetChange(t *testing.T) {
@@ -320,282 +74,95 @@ func TestList_OffsetChange(t *testing.T) {
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
-	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	visibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
-
-	assert.Equal(t, 0, firstItemIndex)
-	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex)
+	assert.Equal(t, float32(0), list.offsetY)
 
 	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 0, DeltaY: -300})
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -280)})
 
-	indexChange := int(math.Floor(float64(300) / float64(template.MinSize().Height)))
-
-	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	newVisibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
-
-	assert.NotEqual(t, firstItemIndex, newFirstItemIndex)
-	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange-1)
-	assert.NotEqual(t, lastItemIndex, newLastItemIndex)
-	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange-1)
-	assert.Equal(t, visibleCount, newVisibleCount)
-	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x400">
-			<content>
-				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
-						<container pos="0,-300" size="192x37999">
-							<widget pos="0,266" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 7</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,304" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 8</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,342" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 9</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,380" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 10</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,418" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 11</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,456" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 12</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,494" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 13</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,532" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 14</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,570" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 15</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,608" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 16</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,646" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 17</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,684" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 18</text>
-									</widget>
-								</container>
-							</widget>
-							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
-							</widget>
-							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,455" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,493" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,531" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,569" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,607" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,645" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,683" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-						</container>
-						<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="3,2" size="3x16" type="*widget.scrollBar">
-							</widget>
-						</widget>
-						<widget size="192x0" type="*widget.Shadow">
-							<linearGradient size="192x8" startColor="shadow"/>
-						</widget>
-						<widget pos="0,392" size="192x0" type="*widget.Shadow">
-							<linearGradient endColor="shadow" pos="0,-8" size="192x8"/>
-						</widget>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	assert.NotEqual(t, 0, list.offsetY)
+	test.AssertRendersToMarkup(t, "list/offset_changed.xml", w.Canvas())
 }
 
 func TestList_Hover(t *testing.T) {
 	list := createList(1000)
-	children := test.WidgetRenderer(list).(*listRenderer).children
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 
 	for i := 0; i < 2; i++ {
-		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+		assert.False(t, children[i].(*listItem).background.Visible())
 		children[i].(*listItem).MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.HoverColor())
+		assert.Equal(t, children[i].(*listItem).background.FillColor, theme.HoverColor())
 		children[i].(*listItem).MouseOut()
-		assert.Equal(t, children[i].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+		assert.False(t, children[i].(*listItem).background.Visible())
 	}
 }
 
 func TestList_Selection(t *testing.T) {
 	list := createList(1000)
-	children := test.WidgetRenderer(list).(*listRenderer).children
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.False(t, children[0].(*listItem).background.Visible())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[0].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[1].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.False(t, children[0].(*listItem).background.Visible())
 }
 
 func TestList_Select(t *testing.T) {
-	list := createList(1000)
+	list := NewList(
+		func() int {
+			return 5
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+		},
+	)
+	list.Resize(fyne.NewSize(20, 20))
+	list.Select(3)
 
-	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 0)
+	list = createList(1000)
+
+	assert.Equal(t, float32(0), list.offsetY)
 	list.Select(50)
-	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).lastItemIndex, 50)
-	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, float32(1345), list.offsetY)
+	visible := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
+	assert.Equal(t, visible[50].background.FillColor, theme.FocusColor())
+	assert.True(t, visible[50].background.Visible())
 
 	list.Select(5)
-	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
-	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, float32(230), list.offsetY)
+	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
+	assert.Equal(t, visible[5].background.FillColor, theme.FocusColor())
+	assert.True(t, visible[5].background.Visible())
 
 	list.Select(6)
-	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
-	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	assert.Equal(t, float32(230), list.offsetY)
+	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
+	assert.False(t, visible[5].background.Visible())
+	assert.Equal(t, visible[6].background.FillColor, theme.FocusColor())
+	assert.True(t, visible[6].background.Visible())
 }
 
 func TestList_Unselect(t *testing.T) {
 	list := createList(1000)
 
 	list.Select(10)
-	children := test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[10].(*listItem).background.FillColor, theme.FocusColor())
+	assert.True(t, children[10].(*listItem).background.Visible())
 
 	list.Unselect(10)
-	children = test.WidgetRenderer(list).(*listRenderer).children
-	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.False(t, children[10].(*listItem).background.Visible())
 	assert.Nil(t, list.selected)
 }
 
@@ -604,200 +171,14 @@ func TestList_DataChange(t *testing.T) {
 	defer test.NewApp()
 
 	list, w := setupList(t)
-	children := test.WidgetRenderer(list).(*listRenderer).children
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 
 	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
 	changeData(list)
 	list.Refresh()
-	children = test.WidgetRenderer(list).(*listRenderer).children
+	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "a")
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x400">
-			<content>
-				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
-						<container size="192x987">
-							<widget size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">a</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,38" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">b</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,76" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">c</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,114" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">d</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,152" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">e</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,190" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">f</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,228" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">g</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,266" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">h</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,304" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">i</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,342" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">j</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,380" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">k</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,418" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">l</text>
-									</widget>
-								</container>
-							</widget>
-							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
-							</widget>
-							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,75" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,113" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,151" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,189" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,227" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,265" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-						</container>
-						<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="3,0" size="3x155" type="*widget.scrollBar">
-							</widget>
-						</widget>
-						<widget pos="0,392" size="192x0" type="*widget.Shadow">
-							<linearGradient endColor="shadow" pos="0,-8" size="192x8"/>
-						</widget>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "list/new_data.xml", w.Canvas())
 }
 
 func TestList_ThemeChange(t *testing.T) {
@@ -834,55 +215,16 @@ func TestList_SmallList(t *testing.T) {
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
 
-	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+	visibleCount := len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
 	assert.Equal(t, visibleCount, 1)
 
 	data = append(data, "Test Item 1")
 	list.Refresh()
 
-	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
+	visibleCount = len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
 	assert.Equal(t, visibleCount, 2)
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x400">
-			<content>
-				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
-						<container size="192x392">
-							<widget size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 0</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,38" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 1</text>
-									</widget>
-								</container>
-							</widget>
-							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
-							</widget>
-							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-						</container>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "list/small.xml", w.Canvas())
 }
 
 func TestList_ClearList(t *testing.T) {
@@ -890,43 +232,23 @@ func TestList_ClearList(t *testing.T) {
 	list, w := setupList(t)
 	assert.Equal(t, 1000, list.Length())
 
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
-
-	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
-
 	list.Length = func() int {
 		return 0
 	}
 	list.Refresh()
 
-	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
+	visibleCount := len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
 
 	assert.Equal(t, visibleCount, 0)
 
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x400">
-			<content>
-				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
-						<container size="192x392">
-						</container>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "list/cleared.xml", w.Canvas())
 }
 
 func TestList_RemoveItem(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	var data []string
-	data = append(data, "Test Item 0")
-	data = append(data, "Test Item 1")
-	data = append(data, "Test Item 2")
+	data := []string{"Test Item 0", "Test Item 1", "Test Item 2"}
 
 	list := NewList(
 		func() int {
@@ -942,54 +264,55 @@ func TestList_RemoveItem(t *testing.T) {
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
 
-	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+	visibleCount := len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
 	assert.Equal(t, visibleCount, 3)
 
 	data = data[:len(data)-1]
 	list.Refresh()
 
-	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
+	visibleCount = len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
 	assert.Equal(t, visibleCount, 2)
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x400">
-			<content>
-				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
-						<container size="192x392">
-							<widget size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 0</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,38" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 1</text>
-									</widget>
-								</container>
-							</widget>
-							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
-							</widget>
-							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-						</container>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "list/item_removed.xml", w.Canvas())
+}
+
+func TestList_ScrollThenShrink(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	data := make([]string, 0, 20)
+	for i := 0; i < 20; i++ {
+		data = append(data, fmt.Sprintf("Data %d", i))
+	}
+
+	list := NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("TEMPLATE")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*Label).SetText(data[id])
+		},
+	)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(300, 300))
+
+	visibles := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	visibleCount := len(visibles)
+	assert.Equal(t, visibleCount, 8)
+
+	list.scroller.ScrollToBottom()
+	visibles = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, "Data 19", visibles[len(visibles)-1].(*listItem).child.(*Label).Text)
+
+	data = data[:1]
+	assert.NotPanics(t, func() { list.Refresh() })
+
+	visibles = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	visibleCount = len(visibles)
+	assert.Equal(t, visibleCount, 1)
+	assert.Equal(t, "Data 0", visibles[0].(*listItem).child.(*Label).Text)
 }
 
 func TestList_NoFunctionsSet(t *testing.T) {
@@ -1010,7 +333,8 @@ func createList(items int) *List {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+			icon := NewIcon(theme.DocumentIcon())
+			return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, icon, nil), icon, NewLabel("Template Object"))
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
@@ -1035,192 +359,6 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
-	test.AssertRendersToMarkup(t, `
-		<canvas padded size="200x400">
-			<content>
-				<widget pos="4,4" size="192x392" type="*widget.List">
-					<widget size="192x392" type="*widget.ScrollContainer">
-						<container size="192x37999">
-							<widget size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 0</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,38" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 1</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,76" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 2</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,114" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 3</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,152" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 4</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,190" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 5</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,228" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 6</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,266" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 7</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,304" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 8</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,342" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="88x29" type="*widget.Label">
-										<text pos="4,4" size="80x21">Test Item 9</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,380" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 10</text>
-									</widget>
-								</container>
-							</widget>
-							<widget pos="0,418" size="192x37" type="*widget.listItem">
-								<rectangle fillColor="background" size="4x37"/>
-								<container pos="8,4" size="180x29">
-									<widget size="20x29" type="*widget.Icon">
-										<image fillMode="contain" rsc="documentIcon" size="20x29"/>
-									</widget>
-									<widget pos="24,0" size="97x29" type="*widget.Label">
-										<text pos="4,4" size="89x21">Test Item 11</text>
-									</widget>
-								</container>
-							</widget>
-							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
-							</widget>
-							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,75" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,113" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,151" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,189" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,227" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,265" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
-							</widget>
-						</container>
-						<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" pos="3,0" size="3x16" type="*widget.scrollBar">
-							</widget>
-						</widget>
-						<widget pos="0,392" size="192x0" type="*widget.Shadow">
-							<linearGradient endColor="shadow" pos="0,-8" size="192x8"/>
-						</widget>
-					</widget>
-				</widget>
-			</content>
-		</canvas>
-	`, w.Canvas())
+	test.AssertRendersToMarkup(t, "list/initial.xml", w.Canvas())
 	return list, w
 }

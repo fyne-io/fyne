@@ -3,8 +3,8 @@ package layout
 import (
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Declare conformity with Layout interface
@@ -57,15 +57,15 @@ func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
 
 // Get the leading (top or left) edge of a grid cell.
 // size is the ideal cell size and the offset is which col or row its on.
-func getLeading(size float64, offset int) int {
+func getLeading(size float64, offset int) float32 {
 	ret := (size + float64(theme.Padding())) * float64(offset)
 
-	return int(math.Round(ret))
+	return float32(math.Round(ret))
 }
 
 // Get the trailing (bottom or right) edge of a grid cell.
 // size is the ideal cell size and the offset is which col or row its on.
-func getTrailing(size float64, offset int) int {
+func getTrailing(size float64, offset int) float32 {
 	return getLeading(size, offset+1) - theme.Padding()
 }
 
@@ -75,8 +75,8 @@ func getTrailing(size float64, offset int) int {
 func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	rows := g.countRows(objects)
 
-	padWidth := (g.Cols - 1) * theme.Padding()
-	padHeight := (rows - 1) * theme.Padding()
+	padWidth := float32(g.Cols-1) * theme.Padding()
+	padHeight := float32(rows-1) * theme.Padding()
 	cellWidth := float64(size.Width-padWidth) / float64(g.Cols)
 	cellHeight := float64(size.Height-padHeight) / float64(rows)
 
@@ -132,14 +132,14 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			continue
 		}
 
-		minSize = minSize.Union(child.MinSize())
+		minSize = minSize.Max(child.MinSize())
 	}
 
 	if g.horizontal() {
-		minContentSize := fyne.NewSize(minSize.Width*g.Cols, minSize.Height*rows)
-		return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(g.Cols-1, 0), theme.Padding()*fyne.Max(rows-1, 0)))
+		minContentSize := fyne.NewSize(minSize.Width*float32(g.Cols), minSize.Height*float32(rows))
+		return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(float32(g.Cols-1), 0), theme.Padding()*fyne.Max(float32(rows-1), 0)))
 	}
 
-	minContentSize := fyne.NewSize(minSize.Width*rows, minSize.Height*g.Cols)
-	return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(rows-1, 0), theme.Padding()*fyne.Max(g.Cols-1, 0)))
+	minContentSize := fyne.NewSize(minSize.Width*float32(rows), minSize.Height*float32(g.Cols))
+	return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(float32(rows-1), 0), theme.Padding()*fyne.Max(float32(g.Cols-1), 0)))
 }

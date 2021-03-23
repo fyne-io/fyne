@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 type captureImage struct {
@@ -26,8 +26,8 @@ func (c *captureImage) At(x, y int) color.Color {
 }
 
 func (p *glPainter) Capture(c fyne.Canvas) image.Image {
-	width := int(float32(c.Size().Width) * c.Scale())
-	height := int(float32(c.Size().Height) * c.Scale())
+	pos := fyne.NewPos(c.Size().Width, c.Size().Height)
+	width, height := c.PixelCoordinateForPosition(pos)
 	pixels := make([]uint8, width*height*4)
 
 	p.context.RunWithContext(func() {

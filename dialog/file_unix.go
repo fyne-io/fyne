@@ -5,9 +5,9 @@ package dialog
 import (
 	"path/filepath"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/theme"
 )
 
 func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
@@ -28,7 +28,11 @@ func isHidden(file fyne.URI) bool {
 	}
 	path := file.String()[len(file.Scheme())+3:]
 	name := filepath.Base(path)
-	return len(name) == 0 || name[0] == '.'
+	return name == "" || name[0] == '.'
+}
+
+func hideFile(filename string) error {
+	return nil
 }
 
 func fileOpenOSOverride(*FileDialog) bool {

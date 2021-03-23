@@ -1,8 +1,8 @@
 package layout
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Declare conformity with Layout interface
@@ -58,7 +58,7 @@ func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
 // Any spacers added will pad the view, sharing the space if there are two or more.
 func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	spacers := make([]fyne.CanvasObject, 0)
-	total := 0
+	total := float32(0)
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
@@ -75,16 +75,16 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 	}
 
-	x, y := 0, 0
-	var extra int
+	x, y := float32(0), float32(0)
+	var extra float32
 	if g.horizontal {
-		extra = size.Width - total - (theme.Padding() * (len(objects) - len(spacers) - 1))
+		extra = size.Width - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
 	} else {
-		extra = size.Height - total - (theme.Padding() * (len(objects) - len(spacers) - 1))
+		extra = size.Height - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
 	}
-	extraCell := 0
+	extraCell := float32(0)
 	if len(spacers) > 0 {
-		extraCell = int(float64(extra) / float64(len(spacers)))
+		extraCell = extra / float32(len(spacers))
 	}
 
 	for _, child := range objects {

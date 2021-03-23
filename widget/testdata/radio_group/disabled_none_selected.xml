@@ -1,0 +1,18 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget pos="19,67" size="103x58" type="*widget.RadioGroup">
+				<widget size="103x29" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,4" size="28x28"/>
+					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<text color="disabled" pos="32,4" size="103x29">Option A</text>
+				</widget>
+				<widget pos="0,29" size="103x29" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,4" size="28x28"/>
+					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<text color="disabled" pos="32,4" size="103x29">Option B</text>
+				</widget>
+			</widget>
+		</container>
+	</content>
+</canvas>

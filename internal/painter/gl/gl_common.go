@@ -9,11 +9,9 @@ import (
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/painter"
 )
 
 var textures = make(map[fyne.CanvasObject]Texture, 1024)
@@ -54,23 +52,15 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
-	col := theme.BackgroundColor()
-	if wid, ok := rect.(fyne.Widget); ok {
-		widCol := cache.Renderer(wid).BackgroundColor()
-		if widCol != nil {
-			col = widCol
-		}
-	} else if rect, ok := rect.(*canvas.Rectangle); ok {
-		if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
-			return p.newGlStrokedRectTexture(rect)
-		}
-		if rect.FillColor != nil {
-			col = rect.FillColor
-		}
+func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
+	rect := obj.(*canvas.Rectangle)
+	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+		return p.newGlStrokedRectTexture(rect)
 	}
-
-	return p.imgToTexture(image.NewUniform(col), canvas.ImageScaleSmooth)
+	if rect.FillColor == nil {
+		return NoTexture
+	}
+	return p.imgToTexture(image.NewUniform(rect.FillColor), canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
@@ -84,8 +74,8 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
 
 	bounds := text.MinSize()
-	width := p.textureScaleInt(bounds.Width)
-	height := p.textureScaleInt(bounds.Height)
+	width := int(p.textureScale(bounds.Width))
+	height := int(p.textureScale(bounds.Height))
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	var opts truetype.Options
@@ -107,10 +97,10 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	img := obj.(*canvas.Image)
 
-	width := p.textureScaleInt(img.Size().Width)
-	height := p.textureScaleInt(img.Size().Height)
+	width := p.textureScale(img.Size().Width)
+	height := p.textureScale(img.Size().Height)
 
-	tex := painter.PaintImage(img, p.canvas, width, height)
+	tex := painter.PaintImage(img, p.canvas, int(width), int(height))
 	if tex == nil {
 		return NoTexture
 	}
@@ -121,26 +111,26 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	rast := obj.(*canvas.Raster)
 
-	width := p.textureScaleInt(rast.Size().Width)
-	height := p.textureScaleInt(rast.Size().Height)
+	width := p.textureScale(rast.Size().Width)
+	height := p.textureScale(rast.Size().Height)
 
-	return p.imgToTexture(rast.Generator(width, height), rast.ScaleMode)
+	return p.imgToTexture(rast.Generator(int(width), int(height)), rast.ScaleMode)
 }
 
 func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.LinearGradient)
 
-	width := p.textureScaleInt(gradient.Size().Width)
-	height := p.textureScaleInt(gradient.Size().Height)
+	width := p.textureScale(gradient.Size().Width)
+	height := p.textureScale(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height), canvas.ImageScaleSmooth)
+	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.RadialGradient)
 
-	width := p.textureScaleInt(gradient.Size().Width)
-	height := p.textureScaleInt(gradient.Size().Height)
+	width := p.textureScale(gradient.Size().Width)
+	height := p.textureScale(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height), canvas.ImageScaleSmooth)
+	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }

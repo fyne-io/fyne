@@ -4,10 +4,39 @@ import (
 	"fmt"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewProgressBarWithData(t *testing.T) {
+	val := binding.NewFloat()
+	val.Set(0.4)
+
+	label := NewProgressBarWithData(val)
+	waitForBinding()
+	assert.Equal(t, 0.4, label.Value)
+}
+
+func TestProgressBar_Binding(t *testing.T) {
+	bar := NewProgressBar()
+	assert.Equal(t, 0.0, bar.Value)
+
+	val := binding.NewFloat()
+	val.Set(0.1)
+	bar.Bind(val)
+	waitForBinding()
+	assert.Equal(t, 0.1, bar.Value)
+
+	val.Set(0.4)
+	waitForBinding()
+	assert.Equal(t, 0.4, bar.Value)
+
+	bar.Unbind()
+	waitForBinding()
+	assert.Equal(t, 0.4, bar.Value)
+}
 
 func TestProgressBar_SetValue(t *testing.T) {
 	bar := NewProgressBar()
@@ -43,10 +72,10 @@ func TestProgressRenderer_Layout(t *testing.T) {
 	bar.Resize(fyne.NewSize(100, 10))
 
 	render := test.WidgetRenderer(bar).(*progressRenderer)
-	assert.Equal(t, 0, render.bar.Size().Width)
+	assert.Equal(t, float32(0), render.bar.Size().Width)
 
 	bar.SetValue(.5)
-	assert.Equal(t, 50, render.bar.Size().Width)
+	assert.Equal(t, float32(50), render.bar.Size().Width)
 
 	bar.SetValue(1)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)

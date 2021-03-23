@@ -4,9 +4,9 @@ import (
 	"os"
 	"syscall"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/storage"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/theme"
 )
 
 func driveMask() uint32 {
@@ -78,6 +78,15 @@ func isHidden(file fyne.URI) bool {
 	}
 
 	return attr&syscall.FILE_ATTRIBUTE_HIDDEN != 0
+}
+
+func hideFile(filename string) (err error) {
+	// git does not preserve windows hidden flag so we have to set it.
+	filenameW, err := syscall.UTF16PtrFromString(filename)
+	if err != nil {
+		return err
+	}
+	return syscall.SetFileAttributes(filenameW, syscall.FILE_ATTRIBUTE_HIDDEN)
 }
 
 func fileOpenOSOverride(*FileDialog) bool {

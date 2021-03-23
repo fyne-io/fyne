@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,8 +26,8 @@ func TestCircle_FillColor(t *testing.T) {
 }
 
 func TestCircle_Resize(t *testing.T) {
-	targetWidth := 50
-	targetHeight := 50
+	targetWidth := float32(50)
+	targetHeight := float32(50)
 	circle := canvas.NewCircle(color.White)
 	start := circle.Size()
 	assert.True(t, start.Height == 0)

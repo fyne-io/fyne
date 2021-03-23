@@ -3,8 +3,8 @@ package layout
 import (
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Declare conformity with Layout interface
@@ -32,7 +32,7 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		g.colCount = int(math.Floor(float64(size.Width+theme.Padding()) / float64(g.CellSize.Width+theme.Padding())))
 	}
 
-	i, x, y := 0, 0, 0
+	i, x, y := 0, float32(0), float32(0)
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
@@ -60,5 +60,5 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // of columns as this layout re-flows dynamically.
 func (g *gridWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(g.CellSize.Width,
-		(g.CellSize.Height*g.rowCount)+((g.rowCount-1)*theme.Padding()))
+		(g.CellSize.Height*float32(g.rowCount))+(float32(g.rowCount-1)*theme.Padding()))
 }

@@ -3,19 +3,30 @@ package dialog
 import (
 	"testing"
 
-	"fyne.io/fyne/test"
-
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEntryDialogConfirm(t *testing.T) {
-	ch := make(chan string)
-	i := NewEntryDialog("test1", "test2", func(s string) { ch <- s }, test.NewWindow(nil))
-	i.Show()
+func TestEntryDialog_Confirm(t *testing.T) {
+	value := ""
+	ed := NewEntryDialog("Test", "message", func(v string) {
+		value = v
+	}, test.NewWindow(nil))
+	ed.Show()
+	test.Type(ed.entry, "123")
+	test.Tap(ed.confirm)
 
-	assert.False(t, i.win.Hidden)
-	test.Type(i.entry, "test3")
-	go test.Tap(i.confirmButton)
-	assert.EqualValues(t, "test3", <-ch)
-	assert.EqualValues(t, "test3", i.entry.Text)
+	assert.Equal(t, value, "123", "Control form should be confirmed with no validation")
+}
+
+func TestEntryDialog_Dismiss(t *testing.T) {
+	value := "123"
+	ed := NewEntryDialog("Test", "message", func(v string) {
+		value = v
+	}, test.NewWindow(nil))
+	ed.Show()
+	test.Type(ed.entry, "XYZ")
+	test.Tap(ed.cancel)
+
+	assert.Equal(t, value, "123", "Control form should not change value on dismiss")
 }

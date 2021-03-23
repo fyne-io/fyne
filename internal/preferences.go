@@ -3,18 +3,44 @@ package internal
 import (
 	"sync"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // InMemoryPreferences provides an implementation of the fyne.Preferences API that is stored in memory.
 type InMemoryPreferences struct {
-	values   map[string]interface{}
-	lock     sync.RWMutex
-	OnChange func()
+	values          map[string]interface{}
+	lock            sync.RWMutex
+	changeListeners []func()
 }
 
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*InMemoryPreferences)(nil)
+
+// AddChangeListener allows code to be notified when some preferences change. This will fire on any update.
+func (p *InMemoryPreferences) AddChangeListener(listener func()) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	p.changeListeners = append(p.changeListeners, listener)
+}
+
+// ReadValues provides read access to the underlying value map - for internal use only...
+// You should not retain a reference to the map nor write to the values in the callback function
+func (p *InMemoryPreferences) ReadValues(fn func(map[string]interface{})) {
+	p.lock.RLock()
+	fn(p.values)
+	p.lock.RUnlock()
+}
+
+// WriteValues provides write access to the underlying value map - for internal use only...
+// You should not retain a reference to the map passed to the callback function
+func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
+	p.lock.Lock()
+	fn(p.values)
+	p.lock.Unlock()
+
+	p.fireChange()
+}
 
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
@@ -40,20 +66,13 @@ func (p *InMemoryPreferences) remove(key string) {
 	delete(p.values, key)
 }
 
-// Values provides access to the underlying value map - for internal use only...
-func (p *InMemoryPreferences) Values() map[string]interface{} {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-
-	return p.values
-}
-
 func (p *InMemoryPreferences) fireChange() {
-	if p.OnChange == nil {
-		return
-	}
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
-	p.OnChange()
+	for _, l := range p.changeListeners {
+		go l()
+	}
 }
 
 // Bool looks up a boolean value for the key

@@ -1,11 +1,5 @@
 package fyne
 
-// SettingsScaleAuto is a specific scale value that indicates a canvas should
-// scale according to the DPI of the window that contains it.
-//
-// Deprecated: Automatic scaling is now handled in the drivers and is not a user setting.
-const SettingsScaleAuto = float32(-1.0)
-
 // BuildType defines different modes that an application can be built using.
 type BuildType int
 
@@ -23,7 +17,14 @@ const (
 type Settings interface {
 	Theme() Theme
 	SetTheme(Theme)
+	// ThemeVariant defines which preferred version of a theme should be used (i.e. light or dark)
+	//
+	// Since: 2.0
+	ThemeVariant() ThemeVariant
 	Scale() float32
+	// PrimaryColor indicates a user preference for a named primary color
+	//
+	// Since: 1.4
 	PrimaryColor() string
 
 	AddChangeListener(chan Settings)

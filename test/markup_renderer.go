@@ -8,12 +8,11 @@ import (
 	"strings"
 	"unsafe"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 )
 
 type markupRenderer struct {
@@ -110,19 +109,19 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setIntAttrWithDefault(attrs map[string]*string, name string, i int, d int) {
-	if i == d {
+func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+	if int(i) == int(d) {
 		return
 	}
-	value := fmt.Sprintf("%d", i)
+	value := fmt.Sprintf("%d", int(i))
 	attrs[name] = &value
 }
 
 func (r *markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
-	if pos.X == 0 && pos.Y == 0 {
+	if int(pos.X) == 0 && int(pos.Y) == 0 {
 		return
 	}
-	value := fmt.Sprintf("%d,%d", pos.X, pos.Y)
+	value := fmt.Sprintf("%d,%d", int(pos.X), int(pos.Y))
 	attrs[name] = &value
 }
 
@@ -174,7 +173,7 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 }
 
 func (r *markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
-	value := fmt.Sprintf("%dx%d", size.Width, size.Height)
+	value := fmt.Sprintf("%dx%d", int(size.Width), int(size.Height))
 	attrs[name] = &value
 }
 
@@ -358,9 +357,9 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 }
 
 func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
-	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.TextColor())
+	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.ForegroundColor())
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
-	r.setIntAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
+	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
 	r.setBoolAttr(attrs, "italic", t.TextStyle.Italic)
 	r.setBoolAttr(attrs, "monospace", t.TextStyle.Monospace)
@@ -371,10 +370,6 @@ func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
 
 func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.setStringAttr(attrs, "type", reflect.TypeOf(w).String())
-	bgColor := cache.Renderer(w).BackgroundColor()
-	if bgColor != color.Transparent { // transparent widgets are the future
-		r.setColorAttrWithDefault(attrs, "backgroundColor", bgColor, theme.BackgroundColor())
-	}
 	r.writeTag("widget", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++
@@ -390,17 +385,15 @@ func knownColor(c color.Color) string {
 		rgbaColor(theme.BackgroundColor()):     "background",
 		rgbaColor(theme.ButtonColor()):         "button",
 		rgbaColor(theme.DisabledButtonColor()): "disabled button",
-		rgbaColor(theme.DisabledTextColor()):   "disabled text",
+		rgbaColor(theme.DisabledColor()):       "disabled",
+		rgbaColor(theme.ErrorColor()):          "error",
 		rgbaColor(theme.FocusColor()):          "focus",
+		rgbaColor(theme.ForegroundColor()):     "foreground",
 		rgbaColor(theme.HoverColor()):          "hover",
 		rgbaColor(theme.PlaceHolderColor()):    "placeholder",
 		rgbaColor(theme.PrimaryColor()):        "primary",
 		rgbaColor(theme.ScrollBarColor()):      "scrollbar",
 		rgbaColor(theme.ShadowColor()):         "shadow",
-		rgbaColor(theme.TextColor()):           "text",
-		rgbaColor(theme.DisabledIconColor()):   "disabled icon",
-		rgbaColor(theme.HyperlinkColor()):      "hyperlink",
-		rgbaColor(theme.IconColor()):           "icon",
 	}[rgbaColor(c)]
 }
 

@@ -4,11 +4,11 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
-	_ "fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/layout"
+	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,11 +24,11 @@ func TestNewBorderContainer(t *testing.T) {
 	assert.Equal(t, 3, len(c.Objects))
 
 	c.Resize(fyne.NewSize(100, 100))
-	assert.Equal(t, 0, top.Position().X)
-	assert.Equal(t, 0, top.Position().Y)
-	assert.Equal(t, 90, right.Position().X)
+	assert.Equal(t, float32(0), top.Position().X)
+	assert.Equal(t, float32(0), top.Position().Y)
+	assert.Equal(t, float32(90), right.Position().X)
 	assert.Equal(t, 10+theme.Padding(), right.Position().Y)
-	assert.Equal(t, 0, middle.Position().X)
+	assert.Equal(t, float32(0), middle.Position().X)
 	assert.Equal(t, 10+theme.Padding(), middle.Position().Y)
 	assert.Equal(t, 90-theme.Padding(), middle.Size().Width)
 	assert.Equal(t, 90-theme.Padding(), middle.Size().Height)

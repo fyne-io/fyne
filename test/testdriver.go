@@ -5,10 +5,12 @@ import (
 	"log"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/internal/painter/software"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/painter/software"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
@@ -33,6 +35,7 @@ var _ fyne.Driver = (*testDriver)(nil)
 func NewDriver() fyne.Driver {
 	drv := new(testDriver)
 	drv.windowsMutex = sync.RWMutex{}
+	repository.Register("file", intRepo.NewFileRepository())
 
 	// make a single dummy window for rendering tests
 	drv.CreateWindow("")
@@ -98,7 +101,7 @@ func (d *testDriver) Device() fyne.Device {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *testDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
 	opts.DPI = painter.TextDPI
@@ -106,7 +109,7 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 	face := painter.CachedFontFace(style, &opts)
 	advance := font.MeasureString(face, text)
 
-	sws := fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
+	sws := fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
 	gls := painter.RenderedTextSize(text, size, style)
 	if sws != gls {
 		log.Println("SoftwareTextSize:", sws)

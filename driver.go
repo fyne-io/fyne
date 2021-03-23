@@ -10,18 +10,7 @@ type Driver interface {
 
 	// RenderedTextSize returns the size required to render the given string of specified
 	// font size and style.
-	RenderedTextSize(string, int, TextStyle) Size
-
-	// FileReaderForURI opens a file reader for the given resource indicator.
-	// This may refer to a filesystem (typical on desktop) or data from another application.
-	FileReaderForURI(URI) (URIReadCloser, error)
-
-	// FileWriterForURI opens a file writer for the given resource indicator.
-	// This should refer to a filesystem resource as external data will not be writable.
-	FileWriterForURI(URI) (URIWriteCloser, error)
-
-	// ListerForURI converts a URI to a listable URI, if it is possible to do so.
-	ListerForURI(URI) (ListableURI, error)
+	RenderedTextSize(string, float32, TextStyle) Size
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas
@@ -33,6 +22,7 @@ type Driver interface {
 	// Run starts the main event loop of the driver.
 	Run()
 	// Quit closes the driver and open windows, then exit the application.
+	// On some some operating systems this does nothing, for example iOS and Android.
 	Quit()
 
 	// StartAnimation registers a new animation with this driver and requests it be started.

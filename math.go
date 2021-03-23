@@ -1,7 +1,7 @@
 package fyne
 
 // Min returns the smaller of the passed values.
-func Min(x, y int) int {
+func Min(x, y float32) float32 {
 	if x < y {
 		return x
 	}
@@ -9,7 +9,7 @@ func Min(x, y int) int {
 }
 
 // Max returns the larger of the passed values.
-func Max(x, y int) int {
+func Max(x, y float32) float32 {
 	if x > y {
 		return x
 	}

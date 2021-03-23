@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // SettingsSchema is used for loading and storing global settings
@@ -31,6 +31,7 @@ type settings struct {
 	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
+	variant        fyne.ThemeVariant
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
@@ -66,12 +67,17 @@ func (s *settings) Theme() fyne.Theme {
 
 func (s *settings) SetTheme(theme fyne.Theme) {
 	s.themeSpecified = true
-	s.applyTheme(theme)
+	s.applyTheme(theme, s.variant)
 }
 
-func (s *settings) applyTheme(theme fyne.Theme) {
+func (s *settings) ThemeVariant() fyne.ThemeVariant {
+	return s.variant
+}
+
+func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
+	s.variant = variant
 	s.theme = theme
 	s.apply()
 }
@@ -79,6 +85,9 @@ func (s *settings) applyTheme(theme fyne.Theme) {
 func (s *settings) Scale() float32 {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
+	if s.schema.Scale < 0.0 {
+		return 1.0 // catching any really old data still using the `-1`  value for "auto" scale
+	}
 	return s.schema.Scale
 }
 
@@ -130,22 +139,36 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
-	if s.themeSpecified {
-		return
-	}
 	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
-		s.themeSpecified = true
 		name = env
 	}
 
-	if name == "light" {
-		s.applyTheme(theme.LightTheme())
-	} else if name == "dark" {
-		s.applyTheme(theme.DarkTheme())
-	} else {
-		s.applyTheme(defaultTheme())
+	var variant fyne.ThemeVariant
+	effectiveTheme := s.theme
+	switch name {
+	case "light":
+		variant = theme.VariantLight
+		if !s.themeSpecified {
+			effectiveTheme = theme.LightTheme()
+		}
+	case "dark":
+		variant = theme.VariantDark
+		if !s.themeSpecified {
+			effectiveTheme = theme.DarkTheme()
+		}
+	default:
+		variant = defaultVariant()
+		if s.themeSpecified {
+			break
+		}
+		effectiveTheme = theme.DarkTheme()
+		if variant == theme.VariantLight {
+			effectiveTheme = theme.LightTheme()
+		}
 	}
+
+	s.applyTheme(effectiveTheme, variant)
 }
 
 func loadSettings() *settings {

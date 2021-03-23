@@ -5,11 +5,10 @@ import (
 	"image"
 	"math"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/painter"
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
@@ -29,8 +28,8 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawCircle(circle, pad, func(in float32) int {
-		return int(math.Round(float64(in) * float64(c.Scale())))
+	raw := painter.DrawCircle(circle, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -82,11 +81,19 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
+	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
+		// do not scale or duplicate image since not needed, draw directly
+		drawTex(x, y, width, height, base, origImg, clip)
+		return
+	}
+
 	scaledBounds := image.Rect(0, 0, width, height)
 	scaledImg := image.NewNRGBA(scaledBounds)
 	switch mode {
 	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
+	case canvas.ImageScaleFastest:
+		draw.ApproxBiLinear.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	default:
 		if mode != canvas.ImageScaleSmooth {
 			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", mode), nil)
@@ -104,8 +111,8 @@ func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.N
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawLine(line, pad, func(in float32) int {
-		return int(math.Round(float64(in) * float64(c.Scale())))
+	raw := painter.DrawLine(line, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -133,8 +140,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	var opts truetype.Options
-	fontSize := float64(text.TextSize) * float64(c.Scale())
-	opts.Size = fontSize
+	fontSize := text.TextSize * c.Scale()
+	opts.Size = float64(fontSize)
 	opts.DPI = painter.TextDPI
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
@@ -146,8 +153,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.DrawString(text.Text)
 
 	size := text.Size()
-	offsetX := 0
-	offsetY := 0
+	offsetX := float32(0)
+	offsetY := float32(0)
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
 		offsetX = size.Width - bounds.Width
@@ -189,8 +196,8 @@ func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Positio
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawRectangle(rect, pad, func(in float32) int {
-		return int(math.Round(float64(in) * float64(c.Scale())))
+	raw := painter.DrawRectangle(rect, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -215,12 +222,4 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.Point{}, draw.Over)
-}
-
-func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	scaledWidth := internal.ScaleInt(c, wid.Size().Width)
-	scaledHeight := internal.ScaleInt(c, wid.Size().Height)
-	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
-	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
-	draw.Draw(base, bounds, image.NewUniform(cache.Renderer(wid).BackgroundColor()), image.Point{}, draw.Over)
 }

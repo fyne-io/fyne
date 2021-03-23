@@ -16,16 +16,17 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"unsafe"
 
 	mobileApp "github.com/fyne-io/mobile/app"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
-func defaultTheme() fyne.Theme {
-	return theme.LightTheme()
+func defaultVariant() fyne.ThemeVariant {
+	return theme.VariantLight
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
@@ -54,5 +55,5 @@ func rootConfigDir() string {
 		return "/data/data" // probably won't work, but we can't make a better guess
 	}
 
-	return filesDir
+	return filepath.Join(filesDir, "fyne")
 }

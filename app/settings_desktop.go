@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -25,7 +25,7 @@ func ensureDirExists(dir string) {
 		return
 	}
 
-	err := os.Mkdir(dir, 0700)
+	err := os.MkdirAll(dir, 0700)
 	if err != nil {
 		fyne.LogError("Unable to create settings storage:", err)
 	}

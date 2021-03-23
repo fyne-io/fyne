@@ -4,10 +4,10 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -129,6 +129,6 @@ func TestFormLayout_MinSize_Hidden(t *testing.T) {
 	l := layout.NewFormLayout()
 	layoutMin := l.MinSize(container.Objects)
 	expectedRowWidth := 50 + 100 + theme.Padding()
-	expectedRowHeight := 100
+	expectedRowHeight := float32(100)
 	assert.Equal(t, fyne.NewSize(expectedRowWidth, expectedRowHeight), layoutMin)
 }

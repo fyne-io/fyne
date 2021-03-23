@@ -13,6 +13,18 @@ type Canvas interface {
 	// Focus makes the provided item focused.
 	// The item has to be added to the contents of the canvas before calling this.
 	Focus(Focusable)
+	// FocusNext focuses the next focusable item.
+	// If no item is currently focused, the first focusable item is focused.
+	// If the last focusable item is currently focused, the first focusable item is focused.
+	//
+	// Since: 2.0
+	FocusNext()
+	// FocusPrevious focuses the previous focusable item.
+	// If no item is currently focused, the last focusable item is focused.
+	// If the first focusable item is currently focused, the last focusable item is focused.
+	//
+	// Since: 2.0
+	FocusPrevious()
 	Unfocus()
 	Focused() Focusable
 
@@ -21,25 +33,9 @@ type Canvas interface {
 	// Scale returns the current scale (multiplication factor) this canvas uses to render
 	// The pixel size of a CanvasObject can be found by multiplying by this value.
 	Scale() float32
-	// SetScale sets ths scale for this canvas only, overriding system and user settings.
-	//
-	// Deprecated: Settings are now calculated solely on the user configuration and system setup.
-	SetScale(float32)
 
-	// Overlay returns the current overlay.
-	//
-	// Deprecated: Overlays are stacked now.
-	// This method returns the top of the overlay stack.
-	// Use Overlays() instead.
-	Overlay() CanvasObject
 	// Overlays returns the overlay stack.
 	Overlays() OverlayStack
-	// SetOverlay sets the overlay for the canvas.
-	//
-	// Deprecated: Overlays are stacked now.
-	// This method replaces the whole stack by the given overlay.
-	// Use Overlays() instead.
-	SetOverlay(CanvasObject)
 
 	OnTypedRune() func(rune)
 	SetOnTypedRune(func(rune))

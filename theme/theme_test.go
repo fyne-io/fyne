@@ -1,17 +1,13 @@
 package theme
 
 import (
+	"image/color"
 	"testing"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
+
 	"github.com/stretchr/testify/assert"
 )
-
-// TODO figure how to test the default theme if we are messing with it...
-//func TestThemeDefault(t *testing.T) {
-//	loaded := fyne.GlobalSettings().Theme()
-//	assert.NotEqual(t, lightBackground, loaded.BackgroundColor())
-//}
 
 func TestThemeChange(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
@@ -41,84 +37,66 @@ func TestBuiltinTheme_ShadowColor(t *testing.T) {
 func TestTheme_Dark_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
-	assert.Equal(t, DarkTheme().BackgroundColor(), bg, "wrong dark theme background color")
+	assert.Equal(t, DarkTheme().Color(ColorNameBackground, VariantDark), bg, "wrong dark theme background color")
 }
 
 func TestTheme_Light_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	bg := BackgroundColor()
-	assert.Equal(t, LightTheme().BackgroundColor(), bg, "wrong light theme background color")
+	assert.Equal(t, LightTheme().Color(ColorNameBackground, VariantLight), bg, "wrong light theme background color")
 }
 
 func Test_ButtonColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := ButtonColor()
-	assert.Equal(t, DarkTheme().ButtonColor(), c, "wrong button color")
-}
-
-func Test_HyperlinkColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := HyperlinkColor()
-	assert.Equal(t, DarkTheme().HyperlinkColor(), c, "wrong hyperlink color")
+	assert.Equal(t, DarkTheme().Color(ColorNameButton, VariantDark), c, "wrong button color")
 }
 
 func Test_TextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := TextColor()
-	assert.Equal(t, DarkTheme().TextColor(), c, "wrong text color")
+	c := ForegroundColor()
+	assert.Equal(t, DarkTheme().Color(ColorNameForeground, VariantDark), c, "wrong text color")
 }
 
 func Test_DisabledTextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := DisabledTextColor()
-	assert.Equal(t, DarkTheme().DisabledTextColor(), c, "wrong disabled text color")
+	c := DisabledColor()
+	assert.Equal(t, DarkTheme().Color(ColorNameDisabled, VariantDark), c, "wrong disabled text color")
 }
 
 func Test_PlaceHolderColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := PlaceHolderColor()
-	assert.Equal(t, DarkTheme().PlaceHolderColor(), c, "wrong placeholder color")
+	assert.Equal(t, DarkTheme().Color(ColorNamePlaceHolder, VariantDark), c, "wrong placeholder color")
 }
 
 func Test_PrimaryColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := PrimaryColor()
-	assert.Equal(t, DarkTheme().PrimaryColor(), c, "wrong primary color")
+	assert.Equal(t, DarkTheme().Color(ColorNamePrimary, VariantDark), c, "wrong primary color")
 }
 
 func Test_HoverColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := HoverColor()
-	assert.Equal(t, DarkTheme().HoverColor(), c, "wrong hover color")
+	assert.Equal(t, DarkTheme().Color(ColorNameHover, VariantDark), c, "wrong hover color")
 }
 
 func Test_FocusColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := FocusColor()
-	assert.Equal(t, PrimaryColor(), c, "wrong focus color")
+	assert.Equal(t, DarkTheme().Color(ColorNameFocus, VariantDark), c, "wrong focus color")
 }
 
 func Test_ScrollBarColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := ScrollBarColor()
-	assert.Equal(t, DarkTheme().ScrollBarColor(), c, "wrong scrollbar color")
-}
-
-func Test_IconColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := IconColor()
-	assert.Equal(t, DarkTheme().IconColor(), c, "wrong icon color")
-}
-
-func Test_DisabledIconColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := DisabledIconColor()
-	assert.Equal(t, DarkTheme().DisabledIconColor(), c, "wrong disabled icon color")
+	assert.Equal(t, DarkTheme().Color(ColorNameScrollBar, VariantDark), c, "wrong scrollbar color")
 }
 
 func Test_TextSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().TextSize(), TextSize(), "wrong text size")
+	assert.Equal(t, DarkTheme().Size(SizeNameText), TextSize(), "wrong text size")
 }
 
 func Test_TextFont(t *testing.T) {
@@ -158,17 +136,17 @@ func Test_TextMonospaceFont(t *testing.T) {
 
 func Test_Padding(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Padding(), Padding(), "wrong padding")
+	assert.Equal(t, DarkTheme().Size(SizeNamePadding), Padding(), "wrong padding")
 }
 
 func Test_IconInlineSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().IconInlineSize(), IconInlineSize(), "wrong inline icon size")
+	assert.Equal(t, DarkTheme().Size(SizeNameInlineIcon), IconInlineSize(), "wrong inline icon size")
 }
 
 func Test_ScrollBarSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().ScrollBarSize(), ScrollBarSize(), "wrong inline icon size")
+	assert.Equal(t, DarkTheme().Size(SizeNameScrollBar), ScrollBarSize(), "wrong inline icon size")
 }
 
 func Test_DefaultTextFont(t *testing.T) {
@@ -204,4 +182,31 @@ func Test_DefaultTextMonospaceFont(t *testing.T) {
 	expect := "DejaVuSansMono-Powerline.ttf"
 	result := DefaultTextMonospaceFont().Name()
 	assert.Equal(t, expect, result, "wrong default monospace font")
+}
+
+func TestEmptyTheme(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(&emptyTheme{})
+	assert.NotNil(t, ForegroundColor())
+	assert.NotNil(t, TextFont())
+	assert.NotNil(t, HelpIcon())
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+}
+
+type emptyTheme struct {
+}
+
+func (e *emptyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	return nil
+}
+
+func (e *emptyTheme) Font(s fyne.TextStyle) fyne.Resource {
+	return nil
+}
+
+func (e *emptyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return nil
+}
+
+func (e *emptyTheme) Size(n fyne.ThemeSizeName) float32 {
+	return 0
 }

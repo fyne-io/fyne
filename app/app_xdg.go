@@ -12,12 +12,12 @@ import (
 
 	"github.com/godbus/dbus/v5"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
-func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
+func defaultVariant() fyne.ThemeVariant {
+	return theme.VariantDark
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {

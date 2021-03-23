@@ -3,10 +3,10 @@ package layout_test
 import (
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -63,8 +63,8 @@ func TestHBoxLayout_Wide(t *testing.T) {
 	container.Resize(fyne.NewSize(308, 100))
 	assert.Equal(t, fyne.NewSize(150+(theme.Padding()*2), 100), container.MinSize())
 
-	assert.Equal(t, 50, obj1.Size().Width)
-	assert.Equal(t, 50, obj2.Size().Width)
+	assert.Equal(t, float32(50), obj1.Size().Width)
+	assert.Equal(t, float32(50), obj2.Size().Width)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(100+theme.Padding()*2, 0)
@@ -100,8 +100,8 @@ func TestHBoxLayout_Spacer(t *testing.T) {
 	container.Resize(fyne.NewSize(300, 100))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(150+(theme.Padding()*2), 100))
 
-	assert.Equal(t, 50, obj1.Size().Width)
-	assert.Equal(t, 50, obj2.Size().Width)
+	assert.Equal(t, float32(50), obj1.Size().Width)
+	assert.Equal(t, float32(50), obj2.Size().Width)
 	cell2Pos := fyne.NewPos(200-theme.Padding(), 0)
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(250, 0)
@@ -119,8 +119,8 @@ func TestHBoxLayout_MiddleSpacer(t *testing.T) {
 	container.Resize(fyne.NewSize(300, 100))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(150+(theme.Padding()*2), 100))
 
-	assert.Equal(t, 50, obj1.Size().Width)
-	assert.Equal(t, 50, obj2.Size().Width)
+	assert.Equal(t, float32(50), obj1.Size().Width)
+	assert.Equal(t, float32(50), obj2.Size().Width)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(250, 0)
@@ -189,8 +189,8 @@ func TestVBoxLayout_Tall(t *testing.T) {
 	container.Resize(fyne.NewSize(100, 308))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
-	assert.Equal(t, 50, obj1.Size().Height)
-	assert.Equal(t, 50, obj2.Size().Height)
+	assert.Equal(t, float32(50), obj1.Size().Height)
+	assert.Equal(t, float32(50), obj2.Size().Height)
 	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(0, 100+theme.Padding()*2)
@@ -208,8 +208,8 @@ func TestVBoxLayout_Spacer(t *testing.T) {
 	container.Resize(fyne.NewSize(100, 300))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
-	assert.Equal(t, 50, obj1.Size().Height)
-	assert.Equal(t, 50, obj2.Size().Height)
+	assert.Equal(t, float32(50), obj1.Size().Height)
+	assert.Equal(t, float32(50), obj2.Size().Height)
 	cell2Pos := fyne.NewPos(0, 200-theme.Padding())
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(0, 250)
@@ -227,8 +227,8 @@ func TestVBoxLayout_MiddleSpacer(t *testing.T) {
 	container.Resize(fyne.NewSize(100, 300))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
-	assert.Equal(t, 50, obj1.Size().Height)
-	assert.Equal(t, 50, obj2.Size().Height)
+	assert.Equal(t, float32(50), obj1.Size().Height)
+	assert.Equal(t, float32(50), obj2.Size().Height)
 	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(0, 250)

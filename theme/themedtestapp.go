@@ -5,7 +5,7 @@ package theme
 import (
 	"net/url"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 type themedApp struct {
@@ -70,6 +70,10 @@ func (t *themedApp) Theme() fyne.Theme {
 
 func (t *themedApp) SetTheme(theme fyne.Theme) {
 	t.theme = theme
+}
+
+func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
+	return VariantDark
 }
 
 func (t *themedApp) Scale() float32 {

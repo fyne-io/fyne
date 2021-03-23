@@ -5,12 +5,13 @@ import (
 	"os"
 	"strconv"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 const (
 	baselineDPI = 120.0
 	scaleEnvKey = "FYNE_SCALE"
+	scaleAuto   = float32(-1.0) // some platforms allow setting auto-scale (linux/BSD)
 )
 
 func calculateDetectedScale(widthMm, widthPx int) float32 {
@@ -27,11 +28,11 @@ func calculateDetectedScale(widthMm, widthPx int) float32 {
 }
 
 func calculateScale(user, system, detected float32) float32 {
-	if user == fyne.SettingsScaleAuto {
+	if user < 0 {
 		user = 1.0
 	}
 
-	if system == fyne.SettingsScaleAuto {
+	if system == scaleAuto {
 		system = detected
 	}
 
@@ -51,8 +52,7 @@ func userScale() float32 {
 	}
 
 	if env != "auto" {
-		setting := fyne.CurrentApp().Settings().Scale()
-		if setting != fyne.SettingsScaleAuto && setting != 0.0 {
+		if setting := fyne.CurrentApp().Settings().Scale(); setting > 0 {
 			return setting
 		}
 	}

@@ -1,13 +1,12 @@
 package dialog
 
 import (
-	"image/color"
 	"path/filepath"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 const (
@@ -32,11 +31,19 @@ func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
+	background := canvas.NewRectangle(theme.PrimaryColor())
+	background.Hide()
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
 	icon := widget.NewFileIcon(i.location)
 
-	return &fileItemRenderer{item: i, icon: icon, text: text, objects: []fyne.CanvasObject{icon, text}}
+	return &fileItemRenderer{
+		item:       i,
+		background: background,
+		icon:       icon,
+		text:       text,
+		objects:    []fyne.CanvasObject{background, icon, text},
+	}
 }
 
 func fileName(path fyne.URI) (name string) {
@@ -72,18 +79,21 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
 type fileItemRenderer struct {
 	item *fileDialogItem
 
-	icon    *widget.FileIcon
-	text    *widget.Label
-	objects []fyne.CanvasObject
+	background *canvas.Rectangle
+	icon       *widget.FileIcon
+	text       *widget.Label
+	objects    []fyne.CanvasObject
 }
 
 func (s fileItemRenderer) Layout(size fyne.Size) {
+	s.background.Resize(size)
+
 	iconAlign := (size.Width - fileIconSize) / 2
 	s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 	s.icon.Move(fyne.NewPos(iconAlign, 0))
 
 	s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
-	s.text.Move(fyne.NewPos(0, fileIconSize+theme.Padding()))
+	s.text.Move(fyne.NewPos(0, size.Height-fileTextSize-theme.Padding()*2))
 }
 
 func (s fileItemRenderer) MinSize() fyne.Size {
@@ -91,15 +101,15 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 }
 
 func (s fileItemRenderer) Refresh() {
+	if s.item.isCurrent {
+		s.background.FillColor = theme.PrimaryColor()
+		s.background.Show()
+	} else {
+		s.background.Hide()
+	}
+	s.background.Refresh()
 	s.icon.SetSelected(s.item.isCurrent)
 	canvas.Refresh(s.item)
-}
-
-func (s fileItemRenderer) BackgroundColor() color.Color {
-	if s.item.isCurrent {
-		return theme.PrimaryColor()
-	}
-	return theme.BackgroundColor()
 }
 
 func (s fileItemRenderer) Objects() []fyne.CanvasObject {

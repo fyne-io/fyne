@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -99,20 +99,14 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	button.Resize(button.MinSize().Add(fyne.NewSize(100, 100)))
 	render := test.WidgetRenderer(button).(*buttonRenderer)
 
-	iconYOffset, labelYOffset := 0, 0
 	textHeight := render.label.MinSize().Height
-	if theme.IconInlineSize() > textHeight {
-		labelYOffset = (theme.IconInlineSize() - textHeight) / 2
-	} else {
-		iconYOffset = (textHeight - theme.IconInlineSize()) / 2
-	}
 	minIconHeight := fyne.Max(theme.IconInlineSize(), textHeight)
 	assert.Equal(t, 50+theme.Padding()*3, render.icon.Position().X, "icon x")
-	assert.Equal(t, 50+theme.Padding()*2+iconYOffset, render.icon.Position().Y, "icon y")
+	assert.Equal(t, 50+theme.Padding()*2, render.icon.Position().Y, "icon y")
 	assert.Equal(t, theme.IconInlineSize(), render.icon.Size().Width, "icon width")
 	assert.Equal(t, minIconHeight, render.icon.Size().Height, "icon height")
 	assert.Equal(t, 50+theme.Padding()*4+theme.IconInlineSize(), render.label.Position().X, "label x")
-	assert.Equal(t, 50+theme.Padding()*2+labelYOffset, render.label.Position().Y, "label y")
+	assert.Equal(t, 50+theme.Padding()*2, render.label.Position().Y, "label y")
 	assert.Equal(t, render.label.MinSize(), render.label.Size(), "label size")
 }
 

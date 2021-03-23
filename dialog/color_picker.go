@@ -3,13 +3,13 @@ package dialog
 import (
 	"image/color"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/container"
-	internalwidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	internalwidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // newColorBasicPicker returns a component for selecting basic colors.
@@ -129,7 +129,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	lightnessChannel := newColorChannel("L", 0, 100, p.Lightness, func(l int) {
 		p.SetHSLA(p.Hue, p.Saturation, l, p.Alpha)
 	})
-	hslBox := widget.NewVBox(
+	hslBox := container.NewVBox(
 		hueChannel,
 		saturationChannel,
 		lightnessChannel,
@@ -145,7 +145,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	blueChannel := newColorChannel("B", 0, 255, p.Blue, func(b int) {
 		p.SetRGBA(p.Red, p.Green, b, p.Alpha)
 	})
-	rgbBox := widget.NewVBox(
+	rgbBox := container.NewVBox(
 		redChannel,
 		greenChannel,
 		blueChannel,
@@ -174,7 +174,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		},
 	}
 
-	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), widget.NewVBox(
+	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), container.NewVBox(
 		container.NewGridWithColumns(3,
 			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
 			hslBox,
@@ -186,7 +186,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 					preview,
 				),
 			),
-			fyne.NewContainerWithLayout(layout.NewCenterLayout(), hex),
+			hex,
 			alphaChannel,
 		),
 	))

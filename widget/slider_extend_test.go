@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 )
 
 type extendedSlider struct {
@@ -42,7 +42,7 @@ func TestSlider_Extended_Drag(t *testing.T) {
 	thumb := objs[2]
 	thumbPos := thumb.Position()
 
-	drag := &fyne.DragEvent{DraggedX: 10, DraggedY: 2}
+	drag := &fyne.DragEvent{Dragged: fyne.NewDelta(10, 2)}
 	slider.Dragged(drag)
 	assert.Greater(t, thumbPos.X, thumb.Position().X)
 	assert.Equal(t, thumbPos.Y, thumb.Position().Y)

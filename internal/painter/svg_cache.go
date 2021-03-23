@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 )
 
 type rasterInfo struct {
@@ -32,7 +32,13 @@ func init() {
 
 // GetAspect looks up an aspect ratio of an image
 func GetAspect(img *canvas.Image) float32 {
-	aspect := aspects[img.Resource]
+	aspect := float32(0.0)
+	if img.Resource != nil {
+		aspect = aspects[img.Resource.Name()]
+	} else if img.File != "" {
+		aspect = aspects[img.File]
+	}
+
 	if aspect == 0 {
 		aspect = aspects[img]
 	}

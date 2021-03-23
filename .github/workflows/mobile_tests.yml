@@ -1,0 +1,23 @@
+name: Mobile Tests
+on: [push, pull_request]
+
+jobs:
+  mobile_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: [1.12.x, 1.16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: WillAbides/setup-go-faster@v1.5.0
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Get dependencies
+      run: sudo apt-get update && sudo apt-get install gcc libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+
+    - name: Tests
+      run: go test -tags "ci mobile" ./...
+

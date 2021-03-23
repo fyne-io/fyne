@@ -3,7 +3,7 @@ package canvas
 import (
 	"image/color"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 // Declare conformity with CanvasObject interface
@@ -18,7 +18,7 @@ type Text struct {
 
 	Color     color.Color    // The main text draw color
 	Text      string         // The string content of this Text
-	TextSize  int            // Size of the text - if the Canvas scale is 1.0 this will be equivalent to point size
+	TextSize  float32        // Size of the text - if the Canvas scale is 1.0 this will be equivalent to point size
 	TextStyle fyne.TextStyle // The style of the text content
 }
 
@@ -43,6 +43,6 @@ func NewText(text string, color color.Color) *Text {
 	return &Text{
 		Color:    color,
 		Text:     text,
-		TextSize: fyne.CurrentApp().Settings().Theme().TextSize(),
+		TextSize: fyne.CurrentApp().Settings().Theme().Size("text"), // manually name the size to avoid import loop
 	}
 }
