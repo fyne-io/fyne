@@ -176,8 +176,14 @@ func (s *Slider) SetValue(value float64) {
 		return
 	}
 
+	lastValue := s.Value
+
 	s.Value = value
 	s.clampValueToRange()
+
+	if lastValue == s.Value {
+		return
+	}
 
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
