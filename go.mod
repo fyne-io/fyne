@@ -7,7 +7,7 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/mobile v0.1.3-0.20210308120140-0925491569e9
+	github.com/fyne-io/mobile v0.1.3-0.20210318200029-09e9c4e13a8f
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3
 	github.com/godbus/dbus/v5 v5.0.3

@@ -16,6 +16,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"unsafe"
 
 	mobileApp "github.com/fyne-io/mobile/app"
@@ -54,5 +55,5 @@ func rootConfigDir() string {
 		return "/data/data" // probably won't work, but we can't make a better guess
 	}
 
-	return filesDir
+	return filepath.Join(filesDir, "fyne")
 }

@@ -1177,10 +1177,19 @@ func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifie
 
 	if shortcut != nil {
 		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
-			return true
+			shouldRunShortcut := true
+			type selectableText interface {
+				fyne.Disableable
+				SelectedText() string
+			}
+			if selectableTextWid, ok := focused.(selectableText); ok && selectableTextWid.Disabled() {
+				shouldRunShortcut = shortcut.ShortcutName() == "Copy"
+			}
+			if shouldRunShortcut {
+				w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			}
+			return shouldRunShortcut
 		}
-
 		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
 		return true
 	}
