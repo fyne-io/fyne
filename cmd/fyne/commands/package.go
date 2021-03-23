@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -105,6 +106,7 @@ func (p *packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
+		defer p.removeBuild()
 	}
 
 	switch p.os {
@@ -120,6 +122,13 @@ func (p *packager) doPackage() error {
 		return p.packageIOS()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
+	}
+}
+
+func (p *packager) removeBuild() {
+	err := os.Remove(p.exe)
+	if err != nil {
+		log.Println("Unable to remove temporary build file", p.exe)
 	}
 }
 
