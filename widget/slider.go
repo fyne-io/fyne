@@ -104,7 +104,7 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 
 	s.updateValue(ratio)
 
-	if lastValue == s.Value {
+	if s.almostEqual(lastValue, s.Value) {
 		return
 	}
 
@@ -163,10 +163,15 @@ func (s *Slider) clampValueToRange() {
 		return
 	}
 
-	i := -(math.Log10(s.Step))
-	p := math.Pow(10, i)
-
-	s.Value = float64(int(s.Value*p)) / p
+	rem := math.Mod(s.Value, s.Step)
+	if rem == 0 {
+		return
+	}
+	min := s.Value - rem
+	if rem > s.Step/2 {
+		min += s.Step
+	}
+	s.Value = min
 }
 
 func (s *Slider) updateValue(ratio float64) {
@@ -186,7 +191,7 @@ func (s *Slider) SetValue(value float64) {
 	s.Value = value
 	s.clampValueToRange()
 
-	if lastValue == s.Value {
+	if s.almostEqual(lastValue, s.Value) {
 		return
 	}
 
@@ -217,6 +222,11 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
 	slide.Refresh() // prepare for first draw
 	return slide
+}
+
+func (s *Slider) almostEqual(a, b float64) bool {
+	delta := math.Abs(a - b)
+	return delta <= s.Step/2
 }
 
 // Unbind disconnects any configured data source from this Slider.
