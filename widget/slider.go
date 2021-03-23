@@ -103,9 +103,14 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	lastValue := s.Value
 
 	s.updateValue(ratio)
+
+	if lastValue == s.Value {
+		return
+	}
+
 	s.Refresh()
 
-	if s.OnChanged != nil && lastValue != s.Value {
+	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
 }
