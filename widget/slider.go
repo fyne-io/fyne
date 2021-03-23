@@ -163,10 +163,15 @@ func (s *Slider) clampValueToRange() {
 		return
 	}
 
-	i := -(math.Log10(s.Step))
-	p := math.Pow(10, i)
-
-	s.Value = float64(int(s.Value*p)) / p
+	rem := math.Mod(s.Value, s.Step)
+	if rem == 0 {
+		return
+	}
+	min := s.Value - rem
+	if rem > s.Step/2 {
+		min += s.Step
+	}
+	s.Value = min
 }
 
 func (s *Slider) updateValue(ratio float64) {
