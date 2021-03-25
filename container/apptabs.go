@@ -320,7 +320,11 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if cells == 0 {
 			cells = 1
 		}
-		buttons.Layout = layout.NewGridLayout(cells)
+		if r.appTabs.location == TabLocationTop || r.appTabs.location == TabLocationBottom {
+			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			buttons.Layout = layout.NewGridLayoutWithRows(cells)
+		}
 		iconPos = buttonIconTop
 	} else if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
