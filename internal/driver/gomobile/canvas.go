@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
+	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
 )
 
 var _ fyne.Canvas = (*mobileCanvas)(nil)
