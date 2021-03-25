@@ -179,7 +179,16 @@ func TestDocTabs_HoverButtons(t *testing.T) {
 	test.MoveMouse(c, fyne.NewPos(75, 10))
 	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
 
+	test.MoveMouse(c, fyne.NewPos(90, 10))
+	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
+
 	test.MoveMouse(c, fyne.NewPos(10, 10))
+	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
+
+	test.MoveMouse(c, fyne.NewPos(136, 10))
+	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
+
+	test.MoveMouse(c, fyne.NewPos(104, 10))
 	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
 }
 
@@ -327,6 +336,9 @@ func TestDocTabs_Tapped(t *testing.T) {
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
 	item3 := &container.TabItem{Text: "Test3", Content: widget.NewLabel("Text 3")}
 	tabs := container.NewDocTabs(item1, item2, item3)
+	tabs.CreateTab = func() *container.TabItem {
+		return &container.TabItem{Text: "Another", Content: widget.NewLabel("Another Tab")}
+	}
 	w := test.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
@@ -347,4 +359,11 @@ func TestDocTabs_Tapped(t *testing.T) {
 	test.TapCanvas(c, fyne.NewPos(10, 10))
 	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_first_selected.xml", c)
+
+	test.TapCanvas(c, fyne.NewPos(254, 10))
+	require.Equal(t, 3, tabs.SelectedIndex())
+	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_create_tab.xml", c)
+
+	test.TapCanvas(c, fyne.NewPos(286, 10))
+	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_all_tabs.xml", c)
 }
