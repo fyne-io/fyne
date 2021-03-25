@@ -17,6 +17,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
+	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	pgl "fyne.io/fyne/v2/internal/painter/gl"
@@ -127,9 +128,16 @@ func (d *mobileDriver) Run() {
 				}
 				drawFinish = false
 				a.Send(paint.Event{})
-			case <-settingsChange:
+			case set := <-settingsChange:
 				painter.ClearFontCache()
 				painter.SvgCacheReset()
+				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+					c, ok := w.Canvas().(*mobileCanvas)
+					if !ok {
+						return
+					}
+					c.applyThemeOutOfTreeObjects()
+				})
 			case e := <-a.Events():
 				current := d.currentWindow()
 				if current == nil {

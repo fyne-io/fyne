@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 
@@ -195,12 +196,17 @@ func (d *gLDriver) startDrawThread() {
 				if f.done != nil {
 					f.done <- struct{}{}
 				}
-			case <-settingsChange:
+			case set := <-settingsChange:
 				painter.ClearFontCache()
 				painter.SvgCacheReset()
-				for _, win := range d.windowList() {
-					go win.Canvas().(*glCanvas).reloadScale()
-				}
+				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+					c, ok := w.Canvas().(*glCanvas)
+					if !ok {
+						return
+					}
+					c.applyThemeOutOfTreeObjects()
+					go c.reloadScale()
+				})
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)

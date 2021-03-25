@@ -11,7 +11,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
-	helper "fyne.io/fyne/v2/internal/app"
 )
 
 // Declare conformity with App interface
@@ -110,14 +109,6 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}
 
-	listener := make(chan fyne.Settings)
-	newApp.Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			set := <-listener
-			helper.ApplySettings(set, newApp)
-		}
-	}()
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
 	}
