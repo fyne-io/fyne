@@ -309,19 +309,17 @@ func TestDocTabs_SetTabLocation(t *testing.T) {
 	w.Resize(tabs.MinSize())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_top.xml", c)
 
-	// TODO: doc tabs support leading/trailing but rendering is currently broken (see #1962)
-	// tabs.SetTabLocation(container.TabLocationLeading)
-	// w.Resize(tabs.MinSize())
-	// test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_bottom.xml", c, "leading is the same as bottom on mobile")
+	tabs.SetTabLocation(container.TabLocationLeading)
+	w.Resize(tabs.MinSize())
+	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_leading.xml", c)
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 	w.Resize(tabs.MinSize())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_bottom.xml", c)
 
-	// TODO: doc tabs support leading/trailing but rendering is currently broken (see #1962)
-	// tabs.SetTabLocation(container.TabLocationTrailing)
-	// w.Resize(tabs.MinSize())
-	// test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_bottom.xml", c, "trailing is the same as bottom on mobile")
+	tabs.SetTabLocation(container.TabLocationTrailing)
+	w.Resize(tabs.MinSize())
+	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_trailing.xml", c)
 
 	tabs.SetTabLocation(container.TabLocationTop)
 	w.Resize(tabs.MinSize())
