@@ -17,6 +17,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	pgl "fyne.io/fyne/v2/internal/painter/gl"
@@ -113,100 +114,110 @@ func (d *mobileDriver) Quit() {
 func (d *mobileDriver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
-
 		var currentSize size.Event
-		for e := range a.Events() {
-			current := d.currentWindow()
-			if current == nil {
-				continue
-			}
-			canvas := current.Canvas().(*mobileCanvas)
+		settingsChange := make(chan fyne.Settings)
+		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+		draw := time.NewTicker(time.Second / 60)
 
-			switch e := a.Filter(e).(type) {
-			case lifecycle.Event:
-				switch e.Crosses(lifecycle.StageVisible) {
-				case lifecycle.CrossOn:
-					d.glctx, _ = e.DrawContext.(gl.Context)
-					d.onStart()
-
-					// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
-					canvas.Content().Refresh()
-
-					a.Send(paint.Event{})
-				case lifecycle.CrossOff:
-					d.onStop()
-					d.glctx = nil
+		for {
+			select {
+			case <-draw.C:
+				a.Send(paint.Event{})
+			case <-settingsChange:
+				painter.ClearFontCache()
+				cache.ResetSvg()
+				a.Send(paint.Event{})
+			case e := <-a.Events():
+				current := d.currentWindow()
+				if current == nil {
+					continue
 				}
-				switch e.Crosses(lifecycle.StageFocused) {
-				case lifecycle.CrossOff: // will enter background
-					if runtime.GOOS == "darwin" {
-						if d.glctx == nil {
-							continue
+				canvas := current.Canvas().(*mobileCanvas)
+
+				switch e := a.Filter(e).(type) {
+				case lifecycle.Event:
+					switch e.Crosses(lifecycle.StageVisible) {
+					case lifecycle.CrossOn:
+						d.glctx, _ = e.DrawContext.(gl.Context)
+						d.onStart()
+
+						// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
+						canvas.Content().Refresh()
+
+						a.Send(paint.Event{})
+					case lifecycle.CrossOff:
+						d.onStop()
+						d.glctx = nil
+					}
+					switch e.Crosses(lifecycle.StageFocused) {
+					case lifecycle.CrossOff: // will enter background
+						if runtime.GOOS == "darwin" {
+							if d.glctx == nil {
+								continue
+							}
+
+							size := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
+							d.paintWindow(current, size)
+							a.Publish()
+						}
+					}
+				case size.Event:
+					if e.WidthPx <= 0 {
+						continue
+					}
+					currentSize = e
+					currentOrientation = e.Orientation
+					currentDPI = e.PixelsPerPt * 72
+
+					dev := d.device
+					dev.safeTop = e.InsetTopPx
+					dev.safeLeft = e.InsetLeftPx
+					dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
+					dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
+					canvas.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
+					canvas.painter.SetFrameBufferScale(1.0)
+
+					// make sure that we paint on the next frame
+					canvas.Content().Refresh()
+				case paint.Event:
+					if d.glctx == nil || e.External {
+						continue
+					}
+					if !canvas.inited {
+						canvas.inited = true
+						canvas.painter.Init() // we cannot init until the context is set above
+					}
+
+					if d.freeDirtyTextures(canvas) {
+						newSize := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
+
+						if canvas.minSizeChanged() {
+							canvas.ensureMinSize()
+
+							canvas.sizeContent(newSize) // force resize of content
+						} else { // if screen changed
+							current.Resize(newSize)
 						}
 
-						size := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
-						d.paintWindow(current, size)
+						d.paintWindow(current, newSize)
 						a.Publish()
 					}
-				}
-			case size.Event:
-				if e.WidthPx <= 0 {
-					continue
-				}
-				currentSize = e
-				currentOrientation = e.Orientation
-				currentDPI = e.PixelsPerPt * 72
-
-				dev := d.device
-				dev.safeTop = e.InsetTopPx
-				dev.safeLeft = e.InsetLeftPx
-				dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
-				dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
-				canvas.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
-				canvas.painter.SetFrameBufferScale(1.0)
-
-				// make sure that we paint on the next frame
-				canvas.Content().Refresh()
-			case paint.Event:
-				if d.glctx == nil || e.External {
-					continue
-				}
-				if !canvas.inited {
-					canvas.inited = true
-					canvas.painter.Init() // we cannot init until the context is set above
-				}
-
-				if d.freeDirtyTextures(canvas) {
-					newSize := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
-
-					if canvas.minSizeChanged() {
-						canvas.ensureMinSize()
-
-						canvas.sizeContent(newSize) // force resize of content
-					} else { // if screen changed
-						current.Resize(newSize)
+					cache.CleanTask()
+				case touch.Event:
+					switch e.Type {
+					case touch.TypeBegin:
+						d.tapDownCanvas(canvas, e.X, e.Y, e.Sequence)
+					case touch.TypeMove:
+						d.tapMoveCanvas(canvas, e.X, e.Y, e.Sequence)
+					case touch.TypeEnd:
+						d.tapUpCanvas(canvas, e.X, e.Y, e.Sequence)
 					}
-
-					d.paintWindow(current, newSize)
-					a.Publish()
-				}
-
-				time.Sleep(time.Millisecond * 10)
-				a.Send(paint.Event{})
-			case touch.Event:
-				switch e.Type {
-				case touch.TypeBegin:
-					d.tapDownCanvas(canvas, e.X, e.Y, e.Sequence)
-				case touch.TypeMove:
-					d.tapMoveCanvas(canvas, e.X, e.Y, e.Sequence)
-				case touch.TypeEnd:
-					d.tapUpCanvas(canvas, e.X, e.Y, e.Sequence)
-				}
-			case key.Event:
-				if e.Direction == key.DirPress {
-					d.typeDownCanvas(canvas, e.Rune, e.Code)
-				} else if e.Direction == key.DirRelease {
-					d.typeUpCanvas(canvas, e.Rune, e.Code)
+				case key.Event:
+					if e.Direction == key.DirPress {
+						d.typeDownCanvas(canvas, e.Rune, e.Code)
+					} else if e.Direction == key.DirRelease {
+						d.typeUpCanvas(canvas, e.Rune, e.Code)
+					}
 				}
 			}
 		}

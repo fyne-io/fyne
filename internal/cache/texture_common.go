@@ -65,16 +65,6 @@ func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) 
 
 // textureCacheBase defines base texture cache object.
 type textureCacheBase struct {
-	expires time.Time
-	canvas  fyne.Canvas
-}
-
-// isExpired check if the cache data is expired.
-func (c *textureCacheBase) isExpired(now time.Time) bool {
-	return c.expires.Before(now)
-}
-
-// setAlive updates expiration time.
-func (c *textureCacheBase) setAlive() {
-	c.expires = time.Now().Add(cacheDuration)
+	expiringCacheNoLock
+	canvas fyne.Canvas
 }

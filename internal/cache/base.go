@@ -1,13 +1,14 @@
 package cache
 
 import (
+	"os"
 	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 )
 
-const (
+var (
 	cacheDuration     = 1 * time.Minute
 	cleanTaskInterval = cacheDuration / 2
 )
@@ -15,6 +16,13 @@ const (
 var canvasRefreshCh = make(chan struct{}, 1)
 var expiredObjects = make([]fyne.CanvasObject, 0, 50)
 var lastClean time.Time
+
+func init() {
+	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
+		cacheDuration = t
+		cleanTaskInterval = cacheDuration / 2
+	}
+}
 
 // CleanTask run cache clean task, it should be called on paint events.
 func CleanTask() {
@@ -33,6 +41,7 @@ func CleanTask() {
 		}
 	}
 	destroyExpiredRenderers(now)
+	destroyExpiredSvgs(now)
 	// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
 	// be a way to recover them later
 	if canvasRefresh {
@@ -138,6 +147,25 @@ func destroyExpiredRenderers(now time.Time) {
 	}
 }
 
+// destroyExpiredSvgs destroys expired svgs cache data.
+func destroyExpiredSvgs(now time.Time) {
+	expiredSvgs := make([]string, 0, 20)
+	svgLock.RLock()
+	for s, sinfo := range svgs {
+		if sinfo.isExpired(now) {
+			expiredSvgs = append(expiredSvgs, s)
+		}
+	}
+	svgLock.RUnlock()
+	if len(expiredSvgs) > 0 {
+		svgLock.Lock()
+		for _, exp := range expiredSvgs {
+			delete(svgs, exp)
+		}
+		svgLock.Unlock()
+	}
+}
+
 // ===============================================================
 // Private types
 // ===============================================================
@@ -160,4 +188,19 @@ func (c *expiringCache) setAlive() {
 	c.expireLock.Lock()
 	c.expires = t
 	c.expireLock.Unlock()
+}
+
+type expiringCacheNoLock struct {
+	expires time.Time
+}
+
+// isExpired check if the cache data is expired.
+func (c *expiringCacheNoLock) isExpired(now time.Time) bool {
+	return c.expires.Before(now)
+}
+
+// setAlive updates expiration time.
+func (c *expiringCacheNoLock) setAlive() {
+	t := time.Now().Add(cacheDuration)
+	c.expires = t
 }
