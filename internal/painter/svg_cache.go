@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 )
 
@@ -98,17 +97,4 @@ func SvgCacheReset() {
 	rasterMutex.Lock()
 	rasters = make(map[string]*rasterInfo)
 	rasterMutex.Unlock()
-}
-
-// SvgCacheMonitorTheme hooks up the SVG cache to listen for theme changes and resets the cache
-func SvgCacheMonitorTheme() {
-	listener := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			<-listener
-			SvgCacheReset()
-		}
-	}()
-
 }
