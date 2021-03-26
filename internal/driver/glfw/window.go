@@ -1001,7 +1001,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 
 func (w *window) capturesTab(keyName fyne.KeyName, modifier desktop.Modifier) bool {
 	if keyName == fyne.KeyTab {
-		if ent, ok := w.canvas.Focused().(fyne.Tabable); ok && !ent.AcceptTabs() {
+		if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && !ent.AcceptsTab() {
 			switch modifier {
 			case 0:
 				w.canvas.FocusNext()

@@ -30,7 +30,7 @@ var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
 var _ desktop.Keyable = (*Entry)(nil)
 var _ mobile.Keyboardable = (*Entry)(nil)
-var _ fyne.Tabable = (*Entry)(nil)
+var _ fyne.Tabbable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
@@ -116,12 +116,12 @@ func NewPasswordEntry() *Entry {
 	return e
 }
 
-// AcceptTabs returns if Entry accepts Tabs or not.
+// AcceptsTab returns if Entry accepts the Tab key or not.
 //
-// Implements: fyne.Tabable
+// Implements: fyne.Tabbable
 //
 // Since: 2.1
-func (e *Entry) AcceptTabs() bool {
+func (e *Entry) AcceptsTab() bool {
 	return e.MultiLine
 }
 

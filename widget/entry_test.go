@@ -1371,7 +1371,7 @@ func TestTabable(t *testing.T) {
 	})
 	t.Run("Singleline_Tab_Default", func(t *testing.T) {
 		entry.MultiLine = false
-		assert.False(t, entry.AcceptTabs())
+		assert.False(t, entry.AcceptsTab())
 	})
 }
 
