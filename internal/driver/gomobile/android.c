@@ -149,10 +149,11 @@ void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jobject resolver = getContentResolver(jni_env, ctx);
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
-	jmethodID saveOutputStream = find_method(env, resolverClass, "openOutputStream", "(Landroid/net/Uri;)Ljava/io/OutputStream;");
+	jmethodID saveOutputStream = find_method(env, resolverClass, "openOutputStream", "(Landroid/net/Uri;Ljava/lang/String;)Ljava/io/OutputStream;");
 
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
-	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, saveOutputStream, uri);
+	jstring modes = (*env)->NewStringUTF(env, "wt"); // truncate before write
+	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, saveOutputStream, uri, modes);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
 	if (loadErr != NULL) {
