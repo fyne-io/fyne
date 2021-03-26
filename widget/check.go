@@ -108,9 +108,9 @@ type Check struct {
 	checkSource   binding.Bool
 	checkListener binding.DataListener
 }
-// Bind connects the specified data source to this Check.
-// The current value will be displayed and any changes in the data will cause the widget to update.
-// User interactions with this Check will set the value into the data source.
+
+// SetId Set a unique identifier.
+// Used for OnChangedById callback identifier.
 //
 // Since: 2.0
 func (c *Check) SetId(Id string) {
@@ -248,7 +248,7 @@ func NewCheck(label string, changed func(bool)) *Check {
 	return c
 }
 
-// NewCheck creates a new check widget with the set label and change handler
+// NewCheckById creates a new check widget with the set label id and change handler
 func NewCheckById(label string,Id string, changed func(string,bool)) *Check {
 	c := &Check{
 		DisableableWidget: DisableableWidget{},
@@ -257,6 +257,7 @@ func NewCheckById(label string,Id string, changed func(string,bool)) *Check {
 		OnChanged:         nil,
 		OnChangedById: changed,
 	}
+	
 	c.ExtendBaseWidget(c)
 	return c
 }
