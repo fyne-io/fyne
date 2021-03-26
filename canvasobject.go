@@ -96,3 +96,12 @@ type Focusable interface {
 type Shortcutable interface {
 	TypedShortcut(Shortcut)
 }
+
+// Tabable describes any object that needs to accept the Tab key presses.
+//
+// Since: 2.1
+type Tabable interface {
+	// AcceptTabs() is a hook called by the key press handling logic.
+	// If it returns true then the Tab key events will be sent TypedKey and TypedRune.
+	AcceptTabs() bool
+}
