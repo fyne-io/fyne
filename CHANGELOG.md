@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.0.2 - In progress
+## 2.0.2 - 30 March 2021
 
 ### Changed
 
@@ -28,6 +28,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Slider calls OnChanged for each value between steps (#1748)
 * fyne command doesn't remove temporary binary from src (#1910)
 * Advanced Color picker on mobile keeps updating values forever after sliding (#2075)
+* After clicking a link on macOS, click everywhere in the app will be linked (#2112)
+* Text selection - Shift+Tab bug (#1787)
 
 
 ## 2.0.1 - 4 March 2021
