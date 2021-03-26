@@ -1,5 +1,6 @@
 // +build gles arm arm64
 // +build !android,!ios,!mobile
+// +build !darwin
 
 package gl
 

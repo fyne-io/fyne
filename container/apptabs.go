@@ -3,12 +3,13 @@ package container
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
+
+// Declare conformity with Widget interface.
+var _ fyne.Widget = (*AppTabs)(nil)
 
 // AppTabs container is used to split your application into various different areas identified by tabs.
 // The tabs contain text and/or an icon and allow the user to switch between the content specified in each TabItem.
@@ -18,663 +19,409 @@ import (
 type AppTabs struct {
 	widget.BaseWidget
 
-	Items       []*TabItem
-	OnChanged   func(tab *TabItem)
-	current     int
-	tabLocation TabLocation
+	Items []*TabItem
+
+	// Deprecated: Use `OnSelected func(*TabItem)` instead.
+	OnChanged    func(*TabItem)
+	OnSelected   func(*TabItem)
+	OnUnselected func(*TabItem)
+
+	current  int
+	location TabLocation
+
+	popUpMenu *widget.PopUpMenu
 }
-
-// TabItem represents a single view in a AppTabs.
-// The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
-//
-// Since: 1.4
-type TabItem struct {
-	Text    string
-	Icon    fyne.Resource
-	Content fyne.CanvasObject
-}
-
-// TabLocation is the location where the tabs of a tab container should be rendered
-//
-// Since: 1.4
-type TabLocation int
-
-// TabLocation values
-const (
-	TabLocationTop TabLocation = iota
-	TabLocationLeading
-	TabLocationBottom
-	TabLocationTrailing
-)
 
 // NewAppTabs creates a new tab container that allows the user to choose between different areas of an app.
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{BaseWidget: widget.BaseWidget{}, Items: items, current: -1}
-	if len(items) > 0 {
-		// Current is first tab item
-		tabs.current = 0
-	}
-	tabs.ExtendBaseWidget(tabs)
-
-	if tabs.mismatchedContent() {
-		internal.LogHint("AppTabs items should all have the same type of content (text, icons or both)")
-	}
-
+	tabs := &AppTabs{}
+	tabs.BaseWidget.ExtendBaseWidget(tabs)
+	tabs.SetItems(items)
 	return tabs
 }
 
-// NewTabItem creates a new item for a tabbed widget - each item specifies the content and a label for its tab.
-//
-// Since: 1.4
-func NewTabItem(text string, content fyne.CanvasObject) *TabItem {
-	return &TabItem{Text: text, Content: content}
-}
-
-// NewTabItemWithIcon creates a new item for a tabbed widget - each item specifies the content and a label with an icon for its tab.
-//
-// Since: 1.4
-func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObject) *TabItem {
-	return &TabItem{Text: text, Icon: icon, Content: content}
-}
-
-// Append adds a new TabItem to the rightmost side of the tab panel
-func (c *AppTabs) Append(item *TabItem) {
-	c.SetItems(append(c.Items, item))
-}
-
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (c *AppTabs) CreateRenderer() fyne.WidgetRenderer {
-	c.ExtendBaseWidget(c)
-	r := &appTabsRenderer{line: canvas.NewRectangle(theme.ShadowColor()),
-		underline: canvas.NewRectangle(theme.PrimaryColor()), container: c}
-	r.updateTabs()
+//
+// Implements: fyne.Widget
+func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
+	t.BaseWidget.ExtendBaseWidget(t)
+	r := &appTabsRenderer{
+		baseTabsRenderer: baseTabsRenderer{
+			bar:         &fyne.Container{},
+			divider:     canvas.NewRectangle(theme.ShadowColor()),
+			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
+			buttonCache: make(map[*TabItem]*tabButton),
+		},
+		appTabs: t,
+	}
+	// Initially setup the tab bar to only show one tab, all others will be in overflow.
+	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
+	r.updateTabs(1)
+	r.updateIndicator()
+	r.applyTheme(t)
 	return r
 }
 
+// Append adds a new TabItem to the end of the tab bar.
+func (t *AppTabs) Append(item *TabItem) {
+	t.SetItems(append(t.Items, item))
+}
+
 // CurrentTab returns the currently selected TabItem.
-func (c *AppTabs) CurrentTab() *TabItem {
-	if c.current < 0 || c.current >= len(c.Items) {
+//
+// Deprecated: Use `AppTabs.Selected() *TabItem` instead.
+func (t *AppTabs) CurrentTab() *TabItem {
+	if t.current < 0 || t.current >= len(t.Items) {
 		return nil
 	}
-	return c.Items[c.current]
+	return t.Items[t.current]
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
-func (c *AppTabs) CurrentTabIndex() int {
-	return c.current
+//
+// Deprecated: Use `AppTabs.SelectedIndex() int` instead.
+func (t *AppTabs) CurrentTabIndex() int {
+	return t.current
+}
+
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+//
+// Deprecated: Support for extending containers is being removed
+func (t *AppTabs) ExtendBaseWidget(wid fyne.Widget) {
+	t.BaseWidget.ExtendBaseWidget(wid)
+}
+
+// Hide hides the widget.
+//
+// Implements: fyne.CanvasObject
+func (t *AppTabs) Hide() {
+	if t.popUpMenu != nil {
+		t.popUpMenu.Hide()
+		t.popUpMenu = nil
+	}
+	t.BaseWidget.Hide()
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (c *AppTabs) MinSize() fyne.Size {
-	c.ExtendBaseWidget(c)
-	return c.BaseWidget.MinSize()
+//
+// Implements: fyne.CanvasObject
+func (t *AppTabs) MinSize() fyne.Size {
+	t.BaseWidget.ExtendBaseWidget(t)
+	return t.BaseWidget.MinSize()
 }
 
-// Remove tab by value
-func (c *AppTabs) Remove(item *TabItem) {
-	for index, existingItem := range c.Items {
-		if existingItem == item {
-			c.RemoveIndex(index)
-			break
-		}
-	}
+// Remove tab by value.
+func (t *AppTabs) Remove(item *TabItem) {
+	removeItem(t, item)
+	t.Refresh()
 }
 
-// RemoveIndex removes tab by index
-func (c *AppTabs) RemoveIndex(index int) {
-	c.SetItems(append(c.Items[:index], c.Items[index+1:]...))
+// RemoveIndex removes tab by index.
+func (t *AppTabs) RemoveIndex(index int) {
+	removeIndex(t, index)
+	t.Refresh()
 }
 
-// SetItems sets the container’s items and refreshes.
-func (c *AppTabs) SetItems(items []*TabItem) {
-	c.Items = items
-	if l := len(c.Items); c.current >= l {
-		c.current = l - 1
-	}
-	c.Refresh()
+// Select sets the specified TabItem to be selected and its content visible.
+func (t *AppTabs) Select(item *TabItem) {
+	selectItem(t, item)
+	t.Refresh()
+}
+
+// SelectIndex sets the TabItem at the specific index to be selected and its content visible.
+func (t *AppTabs) SelectIndex(index int) {
+	selectIndex(t, index)
+	t.Refresh()
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.
-func (c *AppTabs) SelectTab(item *TabItem) {
-	for i, child := range c.Items {
+//
+// Deprecated: Use `AppTabs.Select(*TabItem)` instead.
+func (t *AppTabs) SelectTab(item *TabItem) {
+	for i, child := range t.Items {
 		if child == item {
-			c.SelectTabIndex(i)
+			t.SelectTabIndex(i)
 			return
 		}
 	}
 }
 
 // SelectTabIndex sets the TabItem at the specific index to be selected and its content visible.
-func (c *AppTabs) SelectTabIndex(index int) {
-	if index < 0 || index >= len(c.Items) || c.current == index {
+//
+// Deprecated: Use `AppTabs.SelectIndex(int)` instead.
+func (t *AppTabs) SelectTabIndex(index int) {
+	if index < 0 || index >= len(t.Items) || t.current == index {
 		return
 	}
-	c.current = index
-	c.Refresh()
+	t.current = index
+	t.Refresh()
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Items[c.current])
+	if t.OnChanged != nil {
+		t.OnChanged(t.Items[t.current])
 	}
+}
+
+// Selected returns the currently selected TabItem.
+func (t *AppTabs) Selected() *TabItem {
+	return selected(t)
+}
+
+// SelectedIndex returns the index of the currently selected TabItem.
+func (t *AppTabs) SelectedIndex() int {
+	return t.current
+}
+
+// SetItems sets the container’s items and refreshes.
+func (t *AppTabs) SetItems(items []*TabItem) {
+	setItems(t, items)
+	t.Refresh()
 }
 
 // SetTabLocation sets the location of the tab bar
-func (c *AppTabs) SetTabLocation(l TabLocation) {
-	c.tabLocation = l
-	c.Refresh()
+func (t *AppTabs) SetTabLocation(l TabLocation) {
+	// Mobile has limited screen space, so don't put app tab bar on long edges
+	if d := fyne.CurrentDevice(); d.IsMobile() {
+		if o := d.Orientation(); fyne.IsVertical(o) {
+			if l == TabLocationLeading || l == TabLocationTrailing {
+				l = TabLocationBottom
+			}
+		} else {
+			if l == TabLocationTop || l == TabLocationBottom {
+				l = TabLocationLeading
+			}
+		}
+	}
+	t.location = l
+	t.Refresh()
 }
 
 // Show this widget, if it was previously hidden
-func (c *AppTabs) Show() {
-	c.BaseWidget.Show()
-	c.SelectTabIndex(c.current)
-	c.Refresh()
+//
+// Implements: fyne.CanvasObject
+func (t *AppTabs) Show() {
+	t.BaseWidget.Show()
+	t.SelectIndex(t.current)
+	t.Refresh()
 }
 
-func (c *AppTabs) mismatchedContent() bool {
-	var hasText, hasIcon bool
-	for _, tab := range c.Items {
-		hasText = hasText || tab.Text != ""
-		hasIcon = hasIcon || tab.Icon != nil
-	}
+func (t *AppTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
+}
 
-	mismatch := false
-	for _, tab := range c.Items {
-		if (hasText && tab.Text == "") || (hasIcon && tab.Icon == nil) {
-			mismatch = true
-			break
+func (t *AppTabs) onSelected() func(*TabItem) {
+	return func(tab *TabItem) {
+		if f := t.OnChanged; f != nil {
+			f(tab)
+		}
+		if f := t.OnSelected; f != nil {
+			f(tab)
 		}
 	}
-
-	return mismatch
 }
+
+func (t *AppTabs) items() []*TabItem {
+	return t.Items
+}
+
+func (t *AppTabs) selected() int {
+	return t.current
+}
+
+func (t *AppTabs) setItems(items []*TabItem) {
+	t.Items = items
+}
+
+func (t *AppTabs) setSelected(selected int) {
+	t.current = selected
+}
+
+func (t *AppTabs) tabLocation() TabLocation {
+	return t.location
+}
+
+// Declare conformity with WidgetRenderer interface.
+var _ fyne.WidgetRenderer = (*appTabsRenderer)(nil)
 
 type appTabsRenderer struct {
-	animation       *fyne.Animation
-	container       *AppTabs
-	tabLoc          TabLocation
-	line, underline *canvas.Rectangle
-	objects         []fyne.CanvasObject // holds only the CanvasObject of the tabs' content
-	tabBar          *fyne.Container
-}
-
-func (r *appTabsRenderer) Destroy() {
+	baseTabsRenderer
+	appTabs *AppTabs
 }
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
-	tabBarMinSize := r.tabBar.MinSize()
-	var tabBarPos fyne.Position
-	var tabBarSize fyne.Size
-	var linePos fyne.Position
-	var lineSize fyne.Size
-	var childPos fyne.Position
-	var childSize fyne.Size
-	switch r.adaptedLocation() {
-	case TabLocationTop:
-		buttonHeight := tabBarMinSize.Height
-		tabBarPos = fyne.NewPos(0, 0)
-		tabBarSize = fyne.NewSize(size.Width, buttonHeight)
-		linePos = fyne.NewPos(0, buttonHeight)
-		lineSize = fyne.NewSize(size.Width, theme.Padding())
-		barHeight := buttonHeight + theme.Padding()
-		childPos = fyne.NewPos(0, barHeight)
-		childSize = fyne.NewSize(size.Width, size.Height-barHeight)
-	case TabLocationLeading:
-		buttonWidth := tabBarMinSize.Width
-		tabBarPos = fyne.NewPos(0, 0)
-		tabBarSize = fyne.NewSize(buttonWidth, size.Height)
-		linePos = fyne.NewPos(buttonWidth, 0)
-		lineSize = fyne.NewSize(theme.Padding(), size.Height)
-		barWidth := buttonWidth + theme.Padding()
-		childPos = fyne.NewPos(barWidth, 0)
-		childSize = fyne.NewSize(size.Width-barWidth, size.Height)
-	case TabLocationBottom:
-		buttonHeight := tabBarMinSize.Height
-		tabBarPos = fyne.NewPos(0, size.Height-buttonHeight)
-		tabBarSize = fyne.NewSize(size.Width, buttonHeight)
-		barHeight := buttonHeight + theme.Padding()
-		linePos = fyne.NewPos(0, size.Height-barHeight)
-		lineSize = fyne.NewSize(size.Width, theme.Padding())
-		childPos = fyne.NewPos(0, 0)
-		childSize = fyne.NewSize(size.Width, size.Height-barHeight)
-	case TabLocationTrailing:
-		buttonWidth := tabBarMinSize.Width
-		tabBarPos = fyne.NewPos(size.Width-buttonWidth, 0)
-		tabBarSize = fyne.NewSize(buttonWidth, size.Height)
-		barWidth := buttonWidth + theme.Padding()
-		linePos = fyne.NewPos(size.Width-barWidth, 0)
-		lineSize = fyne.NewSize(theme.Padding(), size.Height)
-		childPos = fyne.NewPos(0, 0)
-		childSize = fyne.NewSize(size.Width-barWidth, size.Height)
+	// Try render as many tabs as will fit, others will appear in the overflow
+	for i := len(r.appTabs.Items); i > 0; i-- {
+		r.updateTabs(i)
+		barMin := r.bar.MinSize()
+		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
+			if barMin.Height <= size.Height {
+				// Tab bar is short enough to fit
+				break
+			}
+		} else {
+			if barMin.Width <= size.Width {
+				// Tab bar is thin enough to fit
+				break
+			}
+		}
 	}
 
-	r.tabBar.Move(tabBarPos)
-	r.tabBar.Resize(tabBarSize)
-	r.line.Move(linePos)
-	r.line.Resize(lineSize)
-	if r.container.current >= 0 && r.container.current < len(r.container.Items) {
-		child := r.container.Items[r.container.current].Content
-		child.Move(childPos)
-		child.Resize(childSize)
-	}
-	r.moveSelection()
+	r.layout(r.appTabs, size)
+	r.updateIndicator()
 }
 
 func (r *appTabsRenderer) MinSize() fyne.Size {
-	buttonsMin := r.tabBar.MinSize()
-
-	childMin := fyne.NewSize(0, 0)
-	for _, child := range r.container.Items {
-		childMin = childMin.Max(child.Content.MinSize())
-	}
-
-	tabLocation := r.container.tabLocation
-	if fyne.CurrentDevice().IsMobile() {
-		tabLocation = TabLocationBottom
-	}
-	switch tabLocation {
-	case TabLocationLeading, TabLocationTrailing:
-		return fyne.NewSize(buttonsMin.Width+childMin.Width+theme.Padding(),
-			fyne.Max(buttonsMin.Height, childMin.Height))
-	default:
-		return fyne.NewSize(fyne.Max(buttonsMin.Width, childMin.Width),
-			buttonsMin.Height+childMin.Height+theme.Padding())
-	}
+	return r.minSize(r.appTabs)
 }
 
 func (r *appTabsRenderer) Objects() []fyne.CanvasObject {
-	return append(r.objects, r.tabBar, r.line, r.underline)
+	return r.objects(r.appTabs)
 }
 
 func (r *appTabsRenderer) Refresh() {
-	r.line.FillColor = theme.ShadowColor()
-	r.line.Refresh()
-	r.underline.FillColor = theme.PrimaryColor()
+	r.Layout(r.appTabs.Size())
 
-	if r.updateTabs() {
-		r.Layout(r.container.Size())
-	} else {
-		current := r.container.current
-		if current >= 0 && current < len(r.objects) && !r.objects[current].Visible() {
-			r.Layout(r.container.Size())
-			for i, o := range r.objects {
-				if i == current {
-					o.Show()
-				} else {
-					o.Hide()
+	r.refresh(r.appTabs)
+
+	canvas.Refresh(r.appTabs)
+}
+
+func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
+	overflow = widget.NewButtonWithIcon("", moreIcon(r.appTabs), func() {
+		// Show pop up containing all tabs which did not fit in the tab bar
+
+		var items []*fyne.MenuItem
+		for i := len(r.bar.Objects[0].(*fyne.Container).Objects); i < len(r.appTabs.Items); i++ {
+			item := r.appTabs.Items[i]
+			// FIXME MenuItem doesn't support icons (#1752)
+			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
+			items = append(items, fyne.NewMenuItem(item.Text, func() {
+				r.appTabs.Select(item)
+				if r.appTabs.popUpMenu != nil {
+					r.appTabs.popUpMenu.Hide()
+					r.appTabs.popUpMenu = nil
 				}
-			}
+			}))
 		}
-		for i, button := range r.tabBar.Objects {
-			if i == current {
-				button.(*tabButton).Importance = widget.HighImportance
-			} else {
-				button.(*tabButton).Importance = widget.MediumImportance
-			}
 
-			button.Refresh()
-		}
-	}
-	r.moveSelection()
-	canvas.Refresh(r.container)
+		r.appTabs.popUpMenu = buildPopUpMenu(r.appTabs, overflow, items)
+	})
+	overflow.Importance = widget.LowImportance
+	return
 }
 
-func (r *appTabsRenderer) adaptedLocation() TabLocation {
-	tabLocation := r.container.tabLocation
-	if fyne.CurrentDevice().IsMobile() && (tabLocation == TabLocationLeading || tabLocation == TabLocationTrailing) {
-		return TabLocationBottom
-	}
+func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
+	buttons := &fyne.Container{}
 
-	return r.container.tabLocation
-}
-
-func (r *appTabsRenderer) buildButton(item *TabItem, iconPos buttonIconPosition) *tabButton {
-	return &tabButton{
-		Text:         item.Text,
-		Icon:         item.Icon,
-		IconPosition: iconPos,
-		OnTap:        func() { r.container.SelectTab(item) },
-	}
-}
-
-func (r *appTabsRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container {
-	var lay fyne.Layout
+	var iconPos buttonIconPosition
 	if fyne.CurrentDevice().IsMobile() {
-		cells := len(buttons)
+		cells := count
 		if cells == 0 {
 			cells = 1
 		}
-		lay = layout.NewGridLayout(cells)
-	} else if r.container.tabLocation == TabLocationLeading || r.container.tabLocation == TabLocationTrailing {
-		lay = layout.NewVBoxLayout()
-	} else {
-		lay = layout.NewHBoxLayout()
-	}
-
-	return fyne.NewContainerWithLayout(lay, buttons...)
-}
-
-func (r *appTabsRenderer) moveSelection() {
-	if r.container.current < 0 {
-		r.underline.Hide()
-		return
-	}
-	selected := r.tabBar.Objects[r.container.current]
-
-	var underlinePos fyne.Position
-	var underlineSize fyne.Size
-	switch r.adaptedLocation() {
-	case TabLocationTop:
-		underlinePos = fyne.NewPos(selected.Position().X, r.tabBar.MinSize().Height)
-		underlineSize = fyne.NewSize(selected.Size().Width, theme.Padding())
-	case TabLocationLeading:
-		underlinePos = fyne.NewPos(r.tabBar.MinSize().Width, selected.Position().Y)
-		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
-	case TabLocationBottom:
-		underlinePos = fyne.NewPos(selected.Position().X, r.tabBar.Position().Y-theme.Padding())
-		underlineSize = fyne.NewSize(selected.Size().Width, theme.Padding())
-	case TabLocationTrailing:
-		underlinePos = fyne.NewPos(r.tabBar.Position().X-theme.Padding(), selected.Position().Y)
-		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
-	}
-
-	r.underline.Show()
-	if r.underline.Position().IsZero() {
-		r.underline.Move(underlinePos)
-		r.underline.Resize(underlineSize)
-		return
-	}
-
-	if r.animation != nil {
-		r.animation.Stop()
-	}
-	r.animation = canvas.NewPositionAnimation(r.underline.Position(), underlinePos, canvas.DurationShort, func(p fyne.Position) {
-		r.underline.Move(p)
-		canvas.Refresh(r.underline)
-		if p == underlinePos {
-			r.animation = nil
-		}
-	})
-	r.animation.Start()
-
-	canvas.NewSizeAnimation(r.underline.Size(), underlineSize, canvas.DurationShort, func(s fyne.Size) {
-		r.underline.Resize(s)
-		canvas.Refresh(r.underline)
-	}).Start()
-}
-
-func (r *appTabsRenderer) tabsInSync() bool {
-	if r.tabBar == nil {
-		return false
-	}
-	if r.tabLoc != r.container.tabLocation {
-		return false
-	}
-	if len(r.objects) != len(r.container.Items) {
-		return false
-	}
-	if len(r.tabBar.Objects) != len(r.container.Items) {
-		return false
-	}
-	for i, item := range r.container.Items {
-		if item.Content != r.objects[i] {
-			return false
-		}
-		button := r.tabBar.Objects[i].(*tabButton)
-		if item.Text != button.Text {
-			return false
-		}
-		if item.Icon != button.Icon {
-			return false
-		}
-	}
-	return true
-}
-
-func (r *appTabsRenderer) updateTabs() bool {
-	if r.tabsInSync() {
-		return false
-	}
-
-	r.tabLoc = r.container.tabLocation
-	var iconPos buttonIconPosition
-	if fyne.CurrentDevice().IsMobile() || r.container.tabLocation == TabLocationLeading || r.container.tabLocation == TabLocationTrailing {
+		buttons.Layout = layout.NewGridLayout(cells)
+		iconPos = buttonIconTop
+	} else if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
+		buttons.Layout = layout.NewVBoxLayout()
 		iconPos = buttonIconTop
 	} else {
+		buttons.Layout = layout.NewHBoxLayout()
 		iconPos = buttonIconInline
 	}
 
-	length := len(r.container.Items)
-	buttons := make([]fyne.CanvasObject, length)
-	objects := make([]fyne.CanvasObject, length)
-	for i, item := range r.container.Items {
-		button := r.buildButton(item, iconPos)
-		if i == r.container.current {
-			button.Importance = widget.HighImportance
-			item.Content.Show()
-		} else {
-			item.Content.Hide()
+	for i := 0; i < count; i++ {
+		item := r.appTabs.Items[i]
+		button, ok := r.buttonCache[item]
+		if !ok {
+			button = &tabButton{
+				onTapped: func() { r.appTabs.Select(item) },
+			}
+			r.buttonCache[item] = button
 		}
-		buttons[i] = button
-		objects[i] = item.Content
+		button.icon = item.Icon
+		button.iconPosition = iconPos
+		if i == r.appTabs.current {
+			button.importance = widget.HighImportance
+		} else {
+			button.importance = widget.MediumImportance
+		}
+		button.text = item.Text
+		button.textAlignment = fyne.TextAlignCenter
+		button.Refresh()
+		buttons.Objects = append(buttons.Objects, button)
 	}
-	r.tabBar = r.buildTabBar(buttons)
-	r.objects = objects
-	r.moveSelection()
-
-	return true
+	return buttons
 }
 
-type buttonIconPosition int
-
-const (
-	buttonIconInline buttonIconPosition = iota
-	buttonIconTop
-)
-
-var _ fyne.Widget = (*tabButton)(nil)
-var _ fyne.Tappable = (*tabButton)(nil)
-var _ desktop.Hoverable = (*tabButton)(nil)
-
-type tabButton struct {
-	widget.BaseWidget
-	hovered      bool
-	Icon         fyne.Resource
-	IconPosition buttonIconPosition
-	Importance   widget.ButtonImportance
-	OnTap        func()
-	Text         string
-}
-
-func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
-	b.ExtendBaseWidget(b)
-	background := canvas.NewRectangle(theme.HoverColor())
-	background.Hide()
-	var icon *canvas.Image
-	if b.Icon != nil {
-		icon = canvas.NewImageFromResource(b.Icon)
-	}
-
-	label := canvas.NewText(b.Text, theme.ForegroundColor())
-	label.TextStyle.Bold = true
-	label.Alignment = fyne.TextAlignCenter
-
-	objects := []fyne.CanvasObject{background, label}
-	if icon != nil {
-		objects = append(objects, icon)
-	}
-
-	r := &tabButtonRenderer{
-		button:     b,
-		background: background,
-		icon:       icon,
-		label:      label,
-		objects:    objects,
-	}
-	r.Refresh()
-	return r
-}
-
-func (b *tabButton) MinSize() fyne.Size {
-	b.ExtendBaseWidget(b)
-	return b.BaseWidget.MinSize()
-}
-
-func (b *tabButton) MouseIn(e *desktop.MouseEvent) {
-	b.hovered = true
-	b.Refresh()
-}
-
-func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
-}
-
-func (b *tabButton) MouseOut() {
-	b.hovered = false
-	b.Refresh()
-}
-
-func (b *tabButton) Tapped(e *fyne.PointEvent) {
-	b.OnTap()
-}
-
-func (b *tabButton) setText(text string) {
-	if text == b.Text {
+func (r *appTabsRenderer) updateIndicator() {
+	if r.appTabs.current < 0 {
+		r.indicator.Hide()
 		return
 	}
 
-	b.Text = text
-	b.Refresh()
+	var selectedPos fyne.Position
+	var selectedSize fyne.Size
+
+	buttons := r.bar.Objects[0].(*fyne.Container).Objects
+	if r.appTabs.current >= len(buttons) {
+		if a := r.action; a != nil {
+			selectedPos = a.Position()
+			selectedSize = a.Size()
+		}
+	} else if r.appTabs.current >= 0 {
+		selected := buttons[r.appTabs.current]
+		selectedPos = selected.Position()
+		selectedSize = selected.Size()
+	}
+
+	var indicatorPos fyne.Position
+	var indicatorSize fyne.Size
+
+	switch r.appTabs.location {
+	case TabLocationTop:
+		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.MinSize().Height)
+		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
+	case TabLocationLeading:
+		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y)
+		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
+	case TabLocationBottom:
+		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.Position().Y-theme.Padding())
+		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
+	case TabLocationTrailing:
+		indicatorPos = fyne.NewPos(r.bar.Position().X-theme.Padding(), selectedPos.Y)
+		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
+	}
+
+	r.moveIndicator(indicatorPos, indicatorSize, true)
 }
 
-type tabButtonRenderer struct {
-	button     *tabButton
-	background *canvas.Rectangle
-	icon       *canvas.Image
-	label      *canvas.Text
-	objects    []fyne.CanvasObject
-}
+func (r *appTabsRenderer) updateTabs(max int) {
+	tabCount := len(r.appTabs.Items)
 
-func (r *tabButtonRenderer) Destroy() {
-}
-
-func (r *tabButtonRenderer) Layout(size fyne.Size) {
-	r.background.Resize(size)
-	padding := r.padding()
-	innerSize := size.Subtract(padding)
-	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
-	labelShift := float32(0)
-	if r.icon != nil {
-		var iconOffset fyne.Position
-		if r.button.IconPosition == buttonIconTop {
-			iconOffset = fyne.NewPos((innerSize.Width-r.iconSize())/2, 0)
+	// Set overflow action
+	if tabCount <= max {
+		r.action = nil
+		r.bar.Layout = layout.NewMaxLayout()
+	} else {
+		tabCount = max
+		if r.action == nil {
+			r.action = r.buildOverflowTabsButton()
+		}
+		// Set layout of tab bar containing tab buttons and overflow action
+		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
+			r.bar.Layout = layout.NewBorderLayout(nil, r.action, nil, nil)
 		} else {
-			iconOffset = fyne.NewPos(0, (innerSize.Height-r.iconSize())/2)
-		}
-		r.icon.Resize(fyne.NewSize(r.iconSize(), r.iconSize()))
-		r.icon.Move(innerOffset.Add(iconOffset))
-		labelShift = r.iconSize() + theme.Padding()
-	}
-	if r.label.Text != "" {
-		var labelOffset fyne.Position
-		var labelSize fyne.Size
-		if r.button.IconPosition == buttonIconTop {
-			labelOffset = fyne.NewPos(0, labelShift)
-			labelSize = fyne.NewSize(innerSize.Width, r.label.MinSize().Height)
-		} else {
-			labelOffset = fyne.NewPos(labelShift, 0)
-			labelSize = fyne.NewSize(innerSize.Width-labelShift, innerSize.Height)
-		}
-		r.label.Resize(labelSize)
-		r.label.Move(innerOffset.Add(labelOffset))
-	}
-}
-
-func (r *tabButtonRenderer) MinSize() fyne.Size {
-	var contentWidth, contentHeight float32
-	textSize := r.label.MinSize()
-	if r.button.IconPosition == buttonIconTop {
-		contentWidth = fyne.Max(textSize.Width, r.iconSize())
-		if r.icon != nil {
-			contentHeight += r.iconSize()
-		}
-		if r.label.Text != "" {
-			if r.icon != nil {
-				contentHeight += theme.Padding()
-			}
-			contentHeight += textSize.Height
-		}
-	} else {
-		contentHeight = fyne.Max(textSize.Height, r.iconSize())
-		if r.icon != nil {
-			contentWidth += r.iconSize()
-		}
-		if r.label.Text != "" {
-			if r.icon != nil {
-				contentWidth += theme.Padding()
-			}
-			contentWidth += textSize.Width
-		}
-	}
-	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
-}
-
-func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
-func (r *tabButtonRenderer) Refresh() {
-	if r.button.hovered {
-		r.background.FillColor = theme.HoverColor()
-		r.background.Show()
-	} else {
-		r.background.Hide()
-	}
-	r.background.Refresh()
-
-	r.label.Text = r.button.Text
-	if r.button.Importance == widget.HighImportance {
-		r.label.Color = theme.PrimaryColor()
-	} else {
-		r.label.Color = theme.ForegroundColor()
-	}
-	r.label.TextSize = theme.TextSize()
-	if r.button.Text == "" {
-		r.label.Hide()
-	} else {
-		r.label.Show()
-	}
-
-	if r.icon != nil && r.icon.Resource != nil {
-		switch res := r.icon.Resource.(type) {
-		case *theme.ThemedResource:
-			if r.button.Importance == widget.HighImportance {
-				r.icon.Resource = theme.NewPrimaryThemedResource(res)
-				r.icon.Refresh()
-			}
-		case *theme.PrimaryThemedResource:
-			if r.button.Importance != widget.HighImportance {
-				r.icon.Resource = res.Original()
-				r.icon.Refresh()
-			}
+			r.bar.Layout = layout.NewBorderLayout(nil, nil, nil, r.action)
 		}
 	}
 
-	canvas.Refresh(r.button)
-}
+	buttons := r.buildTabButtons(tabCount)
 
-func (r *tabButtonRenderer) iconSize() float32 {
-	switch r.button.IconPosition {
-	case buttonIconTop:
-		return 2 * theme.IconInlineSize()
-	default:
-		return theme.IconInlineSize()
+	r.bar.Objects = []fyne.CanvasObject{buttons}
+	if a := r.action; a != nil {
+		r.bar.Objects = append(r.bar.Objects, a)
 	}
-}
 
-func (r *tabButtonRenderer) padding() fyne.Size {
-	if r.label.Text != "" && r.button.IconPosition == buttonIconInline {
-		return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
-	}
-	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	r.bar.Refresh()
 }

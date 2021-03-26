@@ -1,0 +1,18 @@
+# See https://golangci-lint.run/usage/configuration/#config-file for configuration options.
+
+linters-settings:
+  golint:
+    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 30
+
+linters:
+  disable-all: true
+  enable:
+    - gocyclo
+    - goimports
+    - golint
+    - govet
+
+issues:
+  exclude-use-default: false

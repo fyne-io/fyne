@@ -267,7 +267,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 				obj.(*Label).Text = "placeholder"
 			}
 		})
-	table.SetColumnWidth(0, 16)
+	table.SetColumnWidth(0, 32)
 	table.Resize(fyne.NewSize(120, 120))
 	table.Select(TableCellID{1, 0})
 
@@ -275,7 +275,13 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 8, len(cellRenderer.Objects()))
+	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
+	cell1Offset := theme.SeparatorThicknessSize() + theme.Padding()*3
+	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
+
+	table.SetColumnWidth(0, 16)
 	assert.Equal(t, float32(16), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
+	assert.Equal(t, float32(16)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
 
 	w := test.NewWindow(table)
 	defer w.Close()
@@ -296,4 +302,33 @@ func TestTable_ShowVisible(t *testing.T) {
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 8, len(cellRenderer.Objects()))
+}
+
+func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	test.ApplyTheme(t, &separatorThicknessZeroTheme{test.Theme()})
+
+	table := NewTable(
+		func() (int, int) { return 500, 150 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	assert.NotPanics(t, func() {
+		table.Resize(fyne.NewSize(400, 644))
+	})
+}
+
+type separatorThicknessZeroTheme struct {
+	fyne.Theme
+}
+
+func (t *separatorThicknessZeroTheme) Size(n fyne.ThemeSizeName) float32 {
+	if n == theme.SizeNameSeparatorThickness {
+		return 0
+	}
+	return t.Theme.Size(n)
 }

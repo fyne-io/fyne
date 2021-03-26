@@ -1,22 +1,23 @@
-<canvas size="155x70">
+<canvas size="60x70">
 	<content>
-		<widget size="155x70" type="*container.AppTabs">
-			<widget pos="0,33" size="155x37" type="*widget.Label">
-				<text pos="4,8" size="147x21">Text 1</text>
-			</widget>
-			<container size="155x29">
-				<widget size="49x29" type="*container.tabButton">
-					<text alignment="center" bold color="primary" pos="4,4" size="41x21">Test1</text>
-				</widget>
-				<widget pos="53,0" size="49x29" type="*container.tabButton">
-					<text alignment="center" bold pos="4,4" size="41x21">Test2</text>
-				</widget>
-				<widget pos="106,0" size="49x29" type="*container.tabButton">
-					<text alignment="center" bold pos="4,4" size="41x21">Test3</text>
+		<widget size="60x70" type="*container.AppTabs">
+			<container size="60x29">
+				<container size="28x29">
+					<widget size="28x29" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="4,4" size="20x21">Test1</text>
+					</widget>
+				</container>
+				<widget pos="32,0" size="28x29" type="*widget.Button">
+					<rectangle fillColor="button" size="28x29"/>
+					<rectangle size="0x0"/>
+					<image fillMode="contain" pos="4,4" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 				</widget>
 			</container>
-			<rectangle fillColor="shadow" pos="0,29" size="155x4"/>
-			<rectangle fillColor="primary" pos="0,29" size="49x4"/>
+			<rectangle fillColor="shadow" pos="0,29" size="60x4"/>
+			<rectangle fillColor="primary" pos="0,29" size="28x4"/>
+			<widget pos="0,33" size="60x37" type="*widget.Label">
+				<text pos="8,8" size="44x21">Text 1</text>
+			</widget>
 		</widget>
 	</content>
 </canvas>

@@ -67,7 +67,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				fileSaved(writer)
+				fileSaved(writer, win)
 			}, win)
 		}),
 		widget.NewButton("Folder Open", func() {
@@ -141,13 +141,18 @@ func imageOpened(f fyne.URIReadCloser) {
 	showImage(f)
 }
 
-func fileSaved(f fyne.URIWriteCloser) {
+func fileSaved(f fyne.URIWriteCloser, w fyne.Window) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
 	}
 
-	log.Println("Save to...", f.URI())
+	defer f.Close()
+	_, err := f.Write([]byte("Written by Fyne demo\n"))
+	if err != nil {
+		dialog.ShowError(err, w)
+	}
+	log.Println("Saved to...", f.URI())
 }
 
 func loadImage(f fyne.URIReadCloser) *canvas.Image {

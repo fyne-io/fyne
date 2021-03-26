@@ -78,4 +78,5 @@ var manifestTmpl = template.Must(template.New("manifest").Parse(`
 
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.INTERNET" />
 </manifest>`))

@@ -195,6 +195,22 @@ func TestEntry_Disableable(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/disableable_enabled_custom_value.xml", c)
 }
 
+func TestEntry_Disabled_TextSelection(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	entry.SetText("Testing")
+	entry.Disable()
+	c := window.Canvas()
+
+	assert.True(t, entry.Disabled())
+	test.DoubleTap(entry)
+
+	test.AssertImageMatches(t, "entry/disabled_text_selected.png", c.Capture())
+
+	entry.FocusLost()
+	test.AssertImageMatches(t, "entry/disabled_text_unselected.png", c.Capture())
+}
+
 func TestEntry_EmptySelection(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("text")
@@ -329,6 +345,34 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	typeKeys(e, fyne.KeyUp)
 	test.AssertRendersToMarkup(t, "entry/selection_remove_add_one_row_up.xml", c)
 	assert.Equal(t, "ng\nTe", e.SelectedText())
+}
+
+func TestEntry_MultilineWrapping_DeleteWithBackspace(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.Resize(fyne.NewSize(64, 64))
+	test.Type(entry, "line1")
+	test.Type(entry, "\nline2")
+	test.Type(entry, "\nline3")
+
+	assert.Equal(t, 5, entry.CursorColumn)
+	assert.Equal(t, 2, entry.CursorRow)
+
+	for i := 0; i < 4; i++ {
+		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+		assert.Equal(t, 4-i, entry.CursorColumn)
+		assert.Equal(t, 2, entry.CursorRow)
+	}
+
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 2, entry.CursorRow)
+
+	assert.NotPanics(t, func() {
+		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	})
+	assert.Equal(t, 5, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
 }
 
 func TestEntry_Notify(t *testing.T) {
@@ -1406,20 +1450,19 @@ func TestEntry_TextWrap(t *testing.T) {
 		"single line WrapOff": {
 			want: "entry/wrap_single_line_off.xml",
 		},
-		// Disallowed - fallback to TextWrapOff
 		"single line Truncate": {
 			wrap: fyne.TextTruncate,
-			want: "entry/wrap_single_line_off.xml",
+			want: "entry/wrap_single_line_truncate.xml",
 		},
-		// Disallowed - fallback to TextWrapOff
+		// Disallowed - fallback to TextWrapTruncate (horizontal)
 		"single line WrapBreak": {
 			wrap: fyne.TextWrapBreak,
-			want: "entry/wrap_single_line_off.xml",
+			want: "entry/wrap_single_line_truncate.xml",
 		},
-		// Disallowed - fallback to TextWrapOff
+		// Disallowed - fallback to TextWrapTruncate (horizontal)
 		"single line WrapWord": {
 			wrap: fyne.TextWrapWord,
-			want: "entry/wrap_single_line_off.xml",
+			want: "entry/wrap_single_line_truncate.xml",
 		},
 		"multi line WrapOff": {
 			multiLine: true,
@@ -1429,7 +1472,7 @@ func TestEntry_TextWrap(t *testing.T) {
 		"multi line Truncate": {
 			multiLine: true,
 			wrap:      fyne.TextTruncate,
-			want:      "entry/wrap_multi_line_off.xml",
+			want:      "entry/wrap_multi_line_truncate.xml",
 		},
 		"multi line WrapBreak": {
 			multiLine: true,
@@ -1457,6 +1500,25 @@ func TestEntry_TextWrap(t *testing.T) {
 			test.AssertRendersToMarkup(t, tt.want, c)
 		})
 	}
+}
+
+func TestEntry_TextWrap_Changed(t *testing.T) {
+	e, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	c.Focus(e)
+	e.Wrapping = fyne.TextWrapOff
+	e.SetText("Testing Wrapping")
+	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
+
+	e.Wrapping = fyne.TextTruncate
+	e.Refresh()
+	test.AssertRendersToMarkup(t, "entry/wrap_single_line_truncate.xml", c)
+
+	e.Wrapping = fyne.TextWrapOff
+	e.Refresh()
+	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
@@ -1581,8 +1643,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	// the Password field is set to true.
 	// In this case the action item will be set when the renderer is created.
 	t.Run("Entry with Password field", func(t *testing.T) {
-		entry := &widget.Entry{}
-		entry.Password = true
+		entry := &widget.Entry{Password: true, Wrapping: fyne.TextWrapWord}
 		entry.Refresh()
 		window := test.NewWindow(entry)
 		defer window.Close()
@@ -1671,7 +1732,12 @@ func checkNewlineIgnored(t *testing.T, entry *widget.Entry) {
 func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	test.NewApp()
 
-	entry := &widget.Entry{MultiLine: multiLine}
+	var entry *widget.Entry
+	if multiLine {
+		entry = &widget.Entry{MultiLine: true, Wrapping: fyne.TextWrapWord}
+	} else {
+		entry = &widget.Entry{Wrapping: fyne.TextWrapOff}
+	}
 	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 200))
 

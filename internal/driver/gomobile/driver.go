@@ -26,7 +26,6 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
-	tapYOffset        = -12.0                  // to compensate for how we hold our fingers on the device
 )
 
 type mobileDriver struct {
@@ -64,7 +63,15 @@ func (d *mobileDriver) currentWindow() fyne.Window {
 		return nil
 	}
 
-	return d.windows[len(d.windows)-1]
+	var last fyne.Window
+	for i := len(d.windows) - 1; i >= 0; i-- {
+		last = d.windows[i]
+		if last.(*window).visible {
+			return last
+		}
+	}
+
+	return last
 }
 
 func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {

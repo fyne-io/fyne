@@ -49,9 +49,9 @@ func (i *EntryDialog) SetOnClosed(callback func()) {
 func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) *EntryDialog {
 	i := &EntryDialog{entry: widget.NewEntry()}
 	items := []*widget.FormItem{widget.NewFormItem(message, i.entry)}
-	i.formDialog = NewForm(title, "Ok", "Cancel", items, func(_ bool) {
+	i.formDialog = NewForm(title, "Ok", "Cancel", items, func(ok bool) {
 		// User has confirmed and entered an input
-		if onConfirm != nil {
+		if ok && onConfirm != nil {
 			onConfirm(i.entry.Text)
 		}
 

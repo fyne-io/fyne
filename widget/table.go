@@ -330,7 +330,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	divs := 0
 	i := minCol
-	for x := offX + visibleColWidths[i]; i < minCol+colDivs; x += visibleColWidths[i] + separatorThickness {
+	for x := offX + visibleColWidths[i]; i < minCol+colDivs && divs < len(t.dividers); x += visibleColWidths[i] + separatorThickness {
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(theme.Padding()+x-t.scroll.Offset.X, theme.Padding()))
@@ -341,7 +341,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	i = 0
 	count := int(t.scroll.Offset.Y) % int(t.cellSize.Height+separatorThickness)
-	for y := theme.Padding() + t.scroll.Offset.Y - float32(count) - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + separatorThickness {
+	for y := theme.Padding() + t.scroll.Offset.Y - float32(count) - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1 && divs < len(t.dividers); y += t.cellSize.Height + separatorThickness {
 		if y < theme.Padding()+t.scroll.Offset.Y {
 			continue
 		}
@@ -508,7 +508,20 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 	} else {
 		fyne.LogError("Missing Length callback required for Table", nil)
 	}
-	return fyne.NewSize(r.cells.cellSize.Width*float32(cols)+float32(cols-1), r.cells.cellSize.Height*float32(rows)+float32(rows-1))
+
+	width := float32(0)
+	cellWidth := r.cells.cellSize.Width
+	for col := 0; col < cols; col++ {
+		colWidth, ok := r.cells.t.columnWidths[col]
+		if ok {
+			width += colWidth
+		} else {
+			width += cellWidth
+		}
+	}
+
+	separatorSize := theme.SeparatorThicknessSize()
+	return fyne.NewSize(width+float32(cols-1)*separatorSize, r.cells.cellSize.Height*float32(rows)+float32(rows-1)*separatorSize)
 }
 
 func (r *tableCellsRenderer) Refresh() {
@@ -556,11 +569,11 @@ func (r *tableCellsRenderer) Refresh() {
 				if c == nil {
 					continue
 				}
-
-				c.Move(fyne.NewPos(theme.Padding()+cellOffset,
-					theme.Padding()+float32(row)*(r.cells.cellSize.Height+separatorThickness)))
-				c.Resize(fyne.NewSize(colWidth-theme.Padding()*2, r.cells.cellSize.Height-theme.Padding()*2))
 			}
+
+			c.Move(fyne.NewPos(theme.Padding()+cellOffset,
+				theme.Padding()+float32(row)*(r.cells.cellSize.Height+separatorThickness)))
+			c.Resize(fyne.NewSize(colWidth-theme.Padding()*2, r.cells.cellSize.Height-theme.Padding()*2))
 
 			if updateCell != nil {
 				updateCell(TableCellID{row, col}, c)

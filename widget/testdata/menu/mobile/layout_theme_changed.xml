@@ -17,6 +17,7 @@
 				</widget>
 				<widget size="71x108" type="*widget.Scroll">
 					<widget size="71x108" type="*widget.menuBox">
+						<rectangle fillColor="background" size="71x116"/>
 						<container pos="0,4" size="71x116">
 							<widget size="71x29" type="*widget.menuItem">
 								<text pos="8,4" size="10x21">A</text>

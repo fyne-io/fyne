@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 		os.Exit(m.Run())
 	}()
 
-	master := d.CreateWindow("Master")
+	master := createWindow("Master")
 	master.SetOnClosed(func() {
 		// we do not close, keeping the driver running
 	})
@@ -992,6 +992,46 @@ func TestWindow_Clipboard(t *testing.T) {
 	cb.SetContent(cliboardContent)
 }
 
+func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
+	w := createWindow("Test").(*window)
+	e := widget.NewEntry()
+	e.SetText("Testing")
+	e.Disable()
+	w.SetContent(e)
+	repaintWindow(w)
+
+	w.canvas.Focus(e)
+	e.DoubleTapped(nil)
+	assert.Equal(t, "Testing", e.SelectedText())
+
+	ctrlMod := glfw.ModControl
+	if runtime.GOOS == "darwin" {
+		ctrlMod = glfw.ModSuper
+	}
+	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
+	w.waitForEvents()
+
+	assert.Equal(t, "Testing", w.Clipboard().Content())
+
+	e.SetText("Testing2")
+	e.DoubleTapped(nil)
+	assert.Equal(t, "Testing2", e.SelectedText())
+
+	// any other shortcut should be forbidden (Cut)
+	w.keyPressed(nil, glfw.KeyX, 0, glfw.Repeat, ctrlMod)
+	w.waitForEvents()
+
+	assert.Equal(t, "Testing2", e.Text)
+	assert.Equal(t, "Testing", w.Clipboard().Content())
+
+	// any other shortcut should be forbidden (Paste)
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod)
+	w.waitForEvents()
+
+	assert.Equal(t, "Testing2", e.Text)
+	assert.Equal(t, "Testing", w.Clipboard().Content())
+}
+
 func TestWindow_CloseInterception(t *testing.T) {
 	d := NewGLDriver()
 	w := d.CreateWindow("test").(*window)
@@ -1010,6 +1050,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
 	assert.True(t, onClosed)
 
+	w.closing = false // fake a fresh window
 	onIntercepted = false
 	onClosed = false
 	w.closed(w.viewport)
@@ -1017,6 +1058,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	assert.True(t, onIntercepted) // The interceptor is called by the closed.
 	assert.False(t, onClosed)     // If the interceptor is set Close is not called.
 
+	w.closing = false // fake a fresh window
 	onClosed = false
 	w.SetCloseIntercept(nil)
 	w.closed(w.viewport)

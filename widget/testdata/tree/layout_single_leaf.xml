@@ -5,7 +5,7 @@
 				<widget size="192x292" type="*widget.treeContent">
 					<widget size="192x45" type="*widget.leaf">
 						<widget pos="28,4" size="160x37" type="*widget.Label">
-							<text pos="4,8" size="152x21">11111</text>
+							<text pos="8,8" size="144x21">11111</text>
 						</widget>
 					</widget>
 				</widget>

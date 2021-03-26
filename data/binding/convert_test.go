@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/storage"
 )
 
 func TestBoolToString(t *testing.T) {
@@ -307,4 +309,57 @@ func TestStringToIntWithFormat(t *testing.T) {
 	v2, err := s.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, "num5", v2)
+}
+
+func TestStringToURI(t *testing.T) {
+	s := NewString()
+	u := StringToURI(s)
+	v, err := u.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, nil, v)
+
+	err = s.Set("file:///tmp/test.txt")
+	assert.Nil(t, err)
+	v, err = u.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///tmp/test.txt", v.String())
+
+	// TODO fix issue in URI parser whereby "wrong" is a valid URI
+	//err = s.Set("wrong")
+	//assert.Nil(t, err)
+	//_, err = u.Get()
+	//assert.NotNil(t, err)
+
+	uri := storage.NewFileURI("/mydir/")
+	err = u.Set(uri)
+	assert.Nil(t, err)
+	v2, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///mydir/", v2)
+}
+
+func TestURIToString(t *testing.T) {
+	u := NewURI()
+	s := URIToString(u)
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "", v)
+
+	err = u.Set(storage.NewFileURI("/tmp/test.txt"))
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///tmp/test.txt", v)
+
+	// TODO fix issue in URI parser whereby "wrong" is a valid URI
+	//err = s.Set("wrong")
+	//assert.NotNil(t, err)
+	//_, err = u.Get()
+	//assert.Nil(t, err)
+
+	err = s.Set("file:///tmp/test.txt")
+	assert.Nil(t, err)
+	v2, err := u.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///tmp/test.txt", v2.String())
 }
