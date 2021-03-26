@@ -96,15 +96,25 @@ func (c *checkRenderer) updateFocusIndicator() {
 type Check struct {
 	DisableableWidget
 	Text    string
+	Id string
 	Checked bool
 
 	OnChanged func(bool) `json:"-"`
+	OnChangedById func(string,bool) `json:"-"`
 
 	focused bool
 	hovered bool
 
 	checkSource   binding.Bool
 	checkListener binding.DataListener
+}
+// Bind connects the specified data source to this Check.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Check will set the value into the data source.
+//
+// Since: 2.0
+func (c *Check) SetId(Id string) {
+	c.Id=Id;
 }
 
 // Bind connects the specified data source to this Check.
@@ -147,6 +157,9 @@ func (c *Check) SetChecked(checked bool) {
 
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
+	}
+	if c.OnChangedById!=nil {
+		c.OnChangedById(c.Id,c.Checked)
 	}
 
 	c.Refresh()
@@ -228,11 +241,27 @@ func NewCheck(label string, changed func(bool)) *Check {
 		DisableableWidget: DisableableWidget{},
 		Text:              label,
 		OnChanged:         changed,
+		OnChangedById: nil,
 	}
 
 	c.ExtendBaseWidget(c)
 	return c
 }
+
+// NewCheck creates a new check widget with the set label and change handler
+func NewCheckById(label string,Id string, changed func(string,bool)) *Check {
+	c := &Check{
+		DisableableWidget: DisableableWidget{},
+		Text:              label,
+		Id:                Id,
+		OnChanged:         nil,
+		OnChangedById: changed,
+	}
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+
 
 // NewCheckWithData returns a check widget connected with the specified data source.
 //
