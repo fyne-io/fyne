@@ -119,6 +119,8 @@ func NewPasswordEntry() *Entry {
 // AcceptTabs returns if Entry accepts Tabs or not.
 //
 // Implements: fyne.Tabable
+//
+// Since: 2.1
 func (e *Entry) AcceptTabs() bool {
 	return e.MultiLine
 }
