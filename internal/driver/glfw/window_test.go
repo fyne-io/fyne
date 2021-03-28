@@ -18,7 +18,6 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
-	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
