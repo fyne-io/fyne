@@ -654,6 +654,19 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
 			}
+		} else if w.mouseOver != nil {
+			isChild := false
+			driver.WalkCompleteObjectTree(w.mouseOver.(fyne.CanvasObject),
+				func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
+					if co == obj {
+						isChild = true
+						return true
+					}
+					return false
+				}, nil)
+			if !isChild {
+				w.mouseOut()
+			}
 		}
 	} else if w.mouseOver != nil && !w.objIsDragged(w.mouseOver) {
 		w.mouseOut()
