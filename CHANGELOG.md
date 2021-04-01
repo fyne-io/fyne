@@ -3,12 +3,11 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.0.2 - 30 March 2021
+## 2.0.2 - 1 April 2021
 
 ### Changed
 
 * Text can now be copied from a disable Entry using keyboard shortcuts
-* Updated GLFW to 3.3.3 - fixes Chinese input on Linux (#73)
 
 ### Fixed
 
