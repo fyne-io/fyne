@@ -237,10 +237,19 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 	})
 }
 
-// DragEnd is called at end of a drag event. It does nothing.
+// DragEnd is called at end of a drag event.
 //
 // Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
+	e.propertyLock.Lock()
+	if e.CursorColumn == e.selectColumn && e.CursorRow == e.selectRow {
+		e.selecting = false
+	}
+	shouldRefresh := !e.selecting
+	e.propertyLock.Unlock()
+	if shouldRefresh {
+		e.Refresh()
+	}
 }
 
 // Dragged is called when the pointer moves while a button is held down.
@@ -283,9 +292,6 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
-	if e.Disabled() {
-		return
-	}
 	e.setFieldsAndRefresh(func() {
 		e.focused = true
 	})
@@ -297,6 +303,7 @@ func (e *Entry) FocusGained() {
 func (e *Entry) FocusLost() {
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
+		e.selectKeyDown = false
 	})
 }
 
@@ -329,6 +336,9 @@ func (e *Entry) Keyboard() mobile.KeyboardType {
 //
 // Implements: desktop.Keyable
 func (e *Entry) KeyDown(key *fyne.KeyEvent) {
+	if e.Disabled() {
+		return
+	}
 	// For keyboard cursor controlled selection we now need to store shift key state and selection "start"
 	// Note: selection start is where the highlight started (if the user moves the selection up or left then
 	// the selectRow/Column will not match SelectionStart)
@@ -345,6 +355,9 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 //
 // Implements: desktop.Keyable
 func (e *Entry) KeyUp(key *fyne.KeyEvent) {
+	if e.Disabled() {
+		return
+	}
 	// Handle shift release for keyboard selection
 	// Note: if shift is released then the user may repress it without moving to adjust their old selection
 	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
@@ -821,21 +834,10 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 	provider := e.textProvider()
 	runes := []rune(text)
-	provider.insertAt(e.cursorTextPos(), runes)
+	pos := e.cursorTextPos()
+	provider.insertAt(pos, runes)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-	newlines := strings.Count(text, "\n")
-	if newlines == 0 {
-		e.CursorColumn += len(runes)
-	} else {
-		e.CursorRow += newlines
-		lastNewlineIndex := 0
-		for i, r := range runes {
-			if r == '\n' {
-				lastNewlineIndex = i
-			}
-		}
-		e.CursorColumn = len(runes) - lastNewlineIndex - 1
-	}
 	e.updateText(provider.String())
 	e.Refresh()
 }
@@ -876,14 +878,15 @@ func (e *Entry) registerShortcut() {
 func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
 	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
-	for i := 0; i < provider.rows(); i++ {
+	totalRows := provider.rows()
+	for i := 0; i < totalRows; i++ {
 		b := provider.rowBoundary(i)
 		if b[0] <= pos {
 			if b[1] < pos {
 				row++
 			}
 			col = pos - b[0]
-			if canWrap && b[0] == pos && col == 0 && pos != 0 {
+			if canWrap && b[0] == pos && col == 0 && pos != 0 && row < (totalRows-1) {
 				row++
 			}
 		} else {
@@ -1185,7 +1188,7 @@ func (r *entryRenderer) Refresh() {
 	provider := r.entry.textProvider()
 	text := r.entry.Text
 	content := r.entry.content
-	focused := r.entry.focused
+	focusedAppearance := r.entry.focused && !r.entry.disabled
 	size := r.entry.size
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
@@ -1225,7 +1228,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	r.box.FillColor = theme.InputBackgroundColor()
-	if focused {
+	if focusedAppearance {
 		r.line.FillColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
@@ -1249,7 +1252,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	if r.entry.Validator != nil {
-		if !r.entry.focused && r.entry.Text != "" && r.entry.validationError != nil {
+		if !r.entry.focused && !r.entry.Disabled() && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = theme.ErrorColor()
 		}
 		r.ensureValidationSetup()
@@ -1303,7 +1306,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// DragEnd is called at end of a drag event. It does nothing.
+// DragEnd is called at end of a drag event.
 //
 // Implements: fyne.Draggable
 func (e *entryContent) DragEnd() {
@@ -1369,7 +1372,7 @@ func (r *entryContentRenderer) Refresh() {
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
 	content := r.content.entry.Text
-	focused := r.content.entry.focused
+	focusedAppearance := r.content.entry.focused && !r.content.entry.disabled
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
@@ -1384,7 +1387,7 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	if focused {
+	if focusedAppearance {
 		r.cursor.Show()
 		r.content.entry.cursorAnim.start()
 	} else {
@@ -1394,7 +1397,7 @@ func (r *entryContentRenderer) Refresh() {
 	r.moveCursor()
 
 	for _, selection := range selections {
-		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused && !r.content.entry.disabled
+		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
 		selection.(*canvas.Rectangle).FillColor = theme.PrimaryColor()
 	}
 
@@ -1418,7 +1421,7 @@ func (r *entryContentRenderer) buildSelection() {
 	}
 	r.content.entry.propertyLock.RUnlock()
 
-	if selectRow == -1 {
+	if selectRow == -1 || (cursorRow == selectRow && cursorCol == selectCol) {
 		r.selection = r.selection[:0]
 
 		return

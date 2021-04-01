@@ -52,23 +52,16 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 			return true
 		}
 		if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-			return true
+			type selectableText interface {
+				SelectedText() string
+			}
+			if _, isSelectableText := obj.(selectableText); !isSelectableText || fyne.CurrentDevice().IsMobile() {
+				return true
+			}
 		}
 	}
 	f.focus(obj)
 	return true
-}
-
-// FocusBeforeAdded allows an object to be focused before it is added to the object tree.
-// This is typically used before a canvas is visible and should be used with care.
-func (f *FocusManager) FocusBeforeAdded(obj fyne.Focusable) {
-	f.RLock()
-	defer f.RUnlock()
-	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-		return
-	}
-
-	f.focus(obj)
 }
 
 // Focused returns the currently focused object or nil if none.

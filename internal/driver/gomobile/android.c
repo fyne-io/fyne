@@ -144,6 +144,26 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return (*env)->NewGlobalRef(env, stream);
 }
 
+void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject resolver = getContentResolver(jni_env, ctx);
+
+	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+	jmethodID saveOutputStream = find_method(env, resolverClass, "openOutputStream", "(Landroid/net/Uri;Ljava/lang/String;)Ljava/io/OutputStream;");
+
+	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	jstring modes = (*env)->NewStringUTF(env, "wt"); // truncate before write
+	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, saveOutputStream, uri, modes);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+	if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return NULL;
+	}
+
+	return (*env)->NewGlobalRef(env, stream);
+}
+
 char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
@@ -160,6 +180,19 @@ char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* t
 	char* bytes = malloc(sizeof(char)*count);
 	(*env)->GetByteArrayRegion(env, data, 0, count, bytes);
 	return bytes;
+}
+
+void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* buf, int len) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jclass streamClass = (*env)->GetObjectClass(env, stream);
+	jmethodID write = find_method(env, streamClass, "write", "([BII)V");
+
+	jbyteArray data = (*env)->NewByteArray(env, len);
+	(*env)->SetByteArrayRegion(env, data, 0, len, buf);
+
+	(*env)->CallVoidMethod(env, stream, write, data, 0, len);
+
+	free(buf);
 }
 
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
@@ -183,7 +216,6 @@ bool hasPrefix(char* string, char* prefix) {
 bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
@@ -243,10 +275,41 @@ bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return false;
 }
 
+char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject resolver = getContentResolver(jni_env, ctx);
+	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+	if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return "";
+	}
+
+	jclass stringClass = find_class(env, "java/lang/String");
+	jobjectArray project = (*env)->NewObjectArray(env, 1, stringClass, (*env)->NewStringUTF(env, "_display_name"));
+
+	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;");
+
+	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, uri, project, NULL, NULL, NULL);
+	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
+
+	jmethodID first = find_method(env, cursorClass, "moveToFirst", "()Z");
+	jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
+
+	if (((jboolean)(*env)->CallBooleanMethod(env, cursor, first)) == JNI_TRUE) {
+		jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
+		char *fname = getString(jni_env, ctx, name);
+		return fname;
+	}
+
+	return NULL;
+}
+
 char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 

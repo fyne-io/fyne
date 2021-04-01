@@ -57,6 +57,7 @@ type window struct {
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
 	canvas       *glCanvas
+	driver       *gLDriver
 	title        string
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
@@ -446,7 +447,7 @@ func (w *window) Close() {
 
 func (w *window) ShowAndRun() {
 	w.Show()
-	fyne.CurrentApp().Driver().Run()
+	w.driver.Run()
 }
 
 // Clipboard returns the system clipboard
@@ -701,6 +702,11 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	if w.mousePos.IsZero() { // window may not be focused (darwin mostly) and so position callbacks not happening
+		xpos, ypos := w.viewport.GetCursorPos()
+		w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
+	}
+
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
@@ -1123,10 +1129,19 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 	if shortcut != nil {
 		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			shouldRunShortcut := true
+			type selectableText interface {
+				fyne.Disableable
+				SelectedText() string
+			}
+			if selectableTextWid, ok := focused.(selectableText); ok && selectableTextWid.Disabled() {
+				shouldRunShortcut = shortcut.ShortcutName() == "Copy"
+			}
+			if shouldRunShortcut {
+				w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			}
 			return
 		}
-
 		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
 		return
 	}
@@ -1174,6 +1189,7 @@ func (w *window) focused(_ *glfw.Window, isFocused bool) {
 		w.canvas.FocusGained()
 	} else {
 		w.canvas.FocusLost()
+		w.mousePos = fyne.Position{}
 	}
 }
 
@@ -1265,7 +1281,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	runOnMain(func() {
 		d.initGLFW()
 
-		ret = &window{title: title, decorate: decorate}
+		ret = &window{title: title, decorate: decorate, driver: d}
 		// This channel will be closed when the window is closed.
 		ret.eventQueue = make(chan func(), 1024)
 		go ret.runEventQueue()
@@ -1308,7 +1324,7 @@ func (w *window) create() {
 
 		win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
 		if err != nil {
-			fyne.LogError("window creation error", err)
+			w.driver.initFailed("window creation error", err)
 			return
 		}
 
