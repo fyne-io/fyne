@@ -701,6 +701,11 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	if w.mousePos.IsZero() { // window may not be focused (darwin mostly) and so position callbacks not happening
+		xpos, ypos := w.viewport.GetCursorPos()
+		w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
+	}
+
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
@@ -1115,6 +1120,7 @@ func (w *window) focused(_ *glfw.Window, isFocused bool) {
 		w.canvas.FocusGained()
 	} else {
 		w.canvas.FocusLost()
+		w.mousePos = fyne.Position{}
 	}
 }
 

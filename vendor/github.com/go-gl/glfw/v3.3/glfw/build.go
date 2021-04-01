@@ -7,8 +7,10 @@ package glfw
 #cgo windows CFLAGS: -D_GLFW_WIN32 -Iglfw/deps/mingw
 
 // Linker Options:
-#cgo windows LDFLAGS: -lopengl32 -lgdi32
+#cgo windows LDFLAGS: -lgdi32
 
+#cgo !gles2,windows LDFLAGS: -lopengl32
+#cgo gles2,windows LDFLAGS: -lGLESv2
 
 // Darwin Build Tags
 // ----------------
@@ -16,8 +18,10 @@ package glfw
 #cgo darwin CFLAGS: -D_GLFW_COCOA -Wno-deprecated-declarations
 
 // Linker Options:
-#cgo darwin LDFLAGS: -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo
+#cgo darwin LDFLAGS: -framework Cocoa -framework IOKit -framework CoreVideo
 
+#cgo !gles2,darwin LDFLAGS: -framework OpenGL
+#cgo gles2,darwin LDFLAGS: -lGLESv2
 
 // Linux Build Tags
 // ----------------
