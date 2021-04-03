@@ -118,16 +118,19 @@ func (d *mobileDriver) Run() {
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 70)
-		drawFinish := false
+		onGoingPaint := false
+		sendPaintEvent := func() {
+			if onGoingPaint {
+				return
+			}
+			a.Send(paint.Event{})
+			onGoingPaint = true
+		}
 
 		for {
 			select {
 			case <-draw.C:
-				if !drawFinish {
-					continue
-				}
-				drawFinish = false
-				a.Send(paint.Event{})
+				sendPaintEvent()
 			case set := <-settingsChange:
 				painter.ClearFontCache()
 				painter.SvgCacheReset()
@@ -155,7 +158,7 @@ func (d *mobileDriver) Run() {
 						// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
 						canvas.Content().Refresh()
 
-						a.Send(paint.Event{})
+						sendPaintEvent()
 					case lifecycle.CrossOff:
 						d.onStop()
 						d.glctx = nil
@@ -191,6 +194,7 @@ func (d *mobileDriver) Run() {
 					// make sure that we paint on the next frame
 					canvas.Content().Refresh()
 				case paint.Event:
+					onGoingPaint = false
 					if d.glctx == nil || e.External {
 						continue
 					}
@@ -213,7 +217,6 @@ func (d *mobileDriver) Run() {
 						d.paintWindow(current, newSize)
 						a.Publish()
 					}
-					drawFinish = true
 				case touch.Event:
 					switch e.Type {
 					case touch.TypeBegin:
