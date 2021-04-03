@@ -66,7 +66,10 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 }
 
 func (b *bound{{ .Name }}) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {

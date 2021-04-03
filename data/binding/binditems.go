@@ -59,7 +59,10 @@ func (b *boundBool) Get() (bool, error) {
 }
 
 func (b *boundBool) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *boundBool) Set(val bool) error {
@@ -129,7 +132,10 @@ func (b *boundFloat) Get() (float64, error) {
 }
 
 func (b *boundFloat) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *boundFloat) Set(val float64) error {
@@ -199,7 +205,10 @@ func (b *boundInt) Get() (int, error) {
 }
 
 func (b *boundInt) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *boundInt) Set(val int) error {
@@ -269,7 +278,10 @@ func (b *boundRune) Get() (rune, error) {
 }
 
 func (b *boundRune) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *boundRune) Set(val rune) error {
@@ -339,7 +351,10 @@ func (b *boundString) Get() (string, error) {
 }
 
 func (b *boundString) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *boundString) Set(val string) error {
@@ -409,7 +424,10 @@ func (b *boundURI) Get() (fyne.URI, error) {
 }
 
 func (b *boundURI) Reload() error {
-	return b.Set(*b.val)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.trigger()
+	return nil
 }
 
 func (b *boundURI) Set(val fyne.URI) error {
