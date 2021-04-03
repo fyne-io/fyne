@@ -71,7 +71,11 @@ func (b *bound{{ .Name }}) Reload() error {
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
+	defer b.lock.Unlock(){{ if not .Custom }}
+	if *b.val == val {
+		return nil
+	}
+	{{ end }}
 	*b.val = val
 
 	b.trigger()
@@ -521,6 +525,7 @@ type bindValues struct {
 	Format, Since        string
 	SupportsPreferences  bool
 	FromString, ToString string // function names...
+	Custom               bool   // check whether it is a custom type or a built-in one
 }
 
 func newFile(name string) (*os.File, error) {
@@ -600,7 +605,7 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
-			FromString: "uriFromString", ToString: "uriToString"},
+			FromString: "uriFromString", ToString: "uriToString", Custom: true},
 	}
 	for _, b := range binds {
 		if b.Since == "" {

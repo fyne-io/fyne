@@ -50,3 +50,30 @@ func TestNewFloat(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 0.3, v)
 }
+
+func TestNewFloat_TriggerOnlyWhenChange(t *testing.T) {
+	f := NewFloat()
+	called := 0
+	f.AddListener(NewDataListener(func() {
+		called++
+	}))
+	waitForItems()
+	assert.Equal(t, 1, called)
+
+	for i := 0; i < 5; i++ {
+		err := f.Set(9.0)
+		assert.Nil(t, err)
+		waitForItems()
+		assert.Equal(t, 2, called)
+	}
+
+	err := f.Set(9.1)
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 3, called)
+
+	f.Set(8.0)
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 4, called)
+}

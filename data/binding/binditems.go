@@ -65,6 +65,10 @@ func (b *boundBool) Reload() error {
 func (b *boundBool) Set(val bool) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	if *b.val == val {
+		return nil
+	}
+	
 	*b.val = val
 
 	b.trigger()
@@ -131,6 +135,10 @@ func (b *boundFloat) Reload() error {
 func (b *boundFloat) Set(val float64) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	if *b.val == val {
+		return nil
+	}
+	
 	*b.val = val
 
 	b.trigger()
@@ -197,6 +205,10 @@ func (b *boundInt) Reload() error {
 func (b *boundInt) Set(val int) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	if *b.val == val {
+		return nil
+	}
+	
 	*b.val = val
 
 	b.trigger()
@@ -263,6 +275,10 @@ func (b *boundRune) Reload() error {
 func (b *boundRune) Set(val rune) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	if *b.val == val {
+		return nil
+	}
+	
 	*b.val = val
 
 	b.trigger()
@@ -329,6 +345,10 @@ func (b *boundString) Reload() error {
 func (b *boundString) Set(val string) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	if *b.val == val {
+		return nil
+	}
+	
 	*b.val = val
 
 	b.trigger()
