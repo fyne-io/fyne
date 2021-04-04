@@ -29,7 +29,7 @@
 			<rectangle fillColor="shadow" pos="0,32" size="300x4"/>
 			<rectangle fillColor="primary" pos="0,32" size="132x4"/>
 			<widget pos="0,36" size="300x114" type="*widget.Label">
-				<text pos="4,8" size="292x21">Text 1</text>
+				<text pos="8,8" size="284x21">Text 1</text>
 			</widget>
 		</widget>
 	</content>

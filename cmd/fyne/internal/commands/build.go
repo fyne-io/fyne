@@ -33,7 +33,7 @@ func (b *builder) build() error {
 			args = append(args, "-ldflags", "-H=windowsgui")
 		}
 	} else if b.release {
-		args = append(args, "-ldflags", `"-s -w"`)
+		args = append(args, "-ldflags", "-s -w")
 	}
 
 	// handle build tags

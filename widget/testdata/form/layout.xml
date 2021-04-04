@@ -3,36 +3,36 @@
 		<widget pos="4,4" size="206x119" type="*widget.Form">
 			<container size="206x119">
 				<container size="206x78">
-					<widget size="47x37" type="*widget.Label">
-						<text alignment="trailing" bold pos="4,8" size="39x21">test1</text>
+					<widget size="55x37" type="*widget.Label">
+						<text alignment="trailing" bold pos="8,8" size="39x21">test1</text>
 					</widget>
-					<widget pos="51,0" size="155x37" type="*widget.Entry">
-						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="155x33"/>
-						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
-						<widget pos="0,2" size="155x33" type="*widget.Scroll">
-							<widget size="155x33" type="*widget.entryContent">
-								<widget size="155x33" type="*widget.textProvider">
-									<text color="placeholder" pos="8,6" size="147x21"></text>
+					<widget pos="59,0" size="147x37" type="*widget.Entry">
+						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="147x33"/>
+						<rectangle fillColor="shadow" pos="0,35" size="147x2"/>
+						<widget pos="0,2" size="147x33" type="*widget.Scroll">
+							<widget size="147x33" type="*widget.entryContent">
+								<widget size="147x33" type="*widget.textProvider">
+									<text color="placeholder" pos="8,6" size="135x21"></text>
 								</widget>
-								<widget size="155x33" type="*widget.textProvider">
-									<text pos="8,6" size="147x21"></text>
+								<widget size="147x33" type="*widget.textProvider">
+									<text pos="8,6" size="135x21"></text>
 								</widget>
 							</widget>
 						</widget>
 					</widget>
-					<widget pos="0,41" size="47x37" type="*widget.Label">
-						<text alignment="trailing" bold pos="4,8" size="39x21">test2</text>
+					<widget pos="0,41" size="55x37" type="*widget.Label">
+						<text alignment="trailing" bold pos="8,8" size="39x21">test2</text>
 					</widget>
-					<widget pos="51,41" size="155x37" type="*widget.Entry">
-						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="155x33"/>
-						<rectangle fillColor="shadow" pos="0,35" size="155x2"/>
-						<widget pos="0,2" size="155x33" type="*widget.Scroll">
-							<widget size="155x33" type="*widget.entryContent">
-								<widget size="155x33" type="*widget.textProvider">
-									<text color="placeholder" pos="8,6" size="147x21"></text>
+					<widget pos="59,41" size="147x37" type="*widget.Entry">
+						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="147x33"/>
+						<rectangle fillColor="shadow" pos="0,35" size="147x2"/>
+						<widget pos="0,2" size="147x33" type="*widget.Scroll">
+							<widget size="147x33" type="*widget.entryContent">
+								<widget size="147x33" type="*widget.textProvider">
+									<text color="placeholder" pos="8,6" size="135x21"></text>
 								</widget>
-								<widget size="155x33" type="*widget.textProvider">
-									<text pos="8,6" size="147x21"></text>
+								<widget size="147x33" type="*widget.textProvider">
+									<text pos="8,6" size="135x21"></text>
 								</widget>
 							</widget>
 						</widget>

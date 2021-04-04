@@ -1,4 +1,4 @@
-// +build !ios,!android
+// +build !ios,!android,!wayland
 
 package gomobile
 

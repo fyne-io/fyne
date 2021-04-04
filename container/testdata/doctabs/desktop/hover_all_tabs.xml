@@ -19,7 +19,7 @@
 						<image fillMode="contain" pos="4,6" rsc="contentAddIcon" size="iconInlineSize"/>
 					</widget>
 					<widget pos="32,0" size="28x32" type="*widget.Button">
-						<rectangle fillColor="hover" size="28x32"/>
+						<rectangle fillColor="rgba(46,48,48,255)" size="28x32"/>
 						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="4,6" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>
@@ -28,7 +28,7 @@
 			<rectangle fillColor="shadow" pos="0,32" size="150x4"/>
 			<rectangle fillColor="primary" pos="0,32" size="81x4"/>
 			<widget pos="0,36" size="150x114" type="*widget.Label">
-				<text pos="4,8" size="142x21">Text1</text>
+				<text pos="8,8" size="134x21">Text1</text>
 			</widget>
 		</widget>
 	</content>

@@ -80,9 +80,13 @@ func main() {
 			u, _ := url.Parse("https://github.com/sponsors/fyne-io")
 			_ = a.OpenURL(u)
 		}))
+	file := fyne.NewMenu("File", newItem)
+	if !fyne.CurrentDevice().IsMobile() {
+		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
+	}
 	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
-		fyne.NewMenu("File", newItem, fyne.NewMenuItemSeparator(), settingsItem),
+		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)

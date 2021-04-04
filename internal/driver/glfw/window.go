@@ -16,7 +16,6 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -57,6 +56,7 @@ type window struct {
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
 	canvas       *glCanvas
+	driver       *gLDriver
 	title        string
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
@@ -446,7 +446,7 @@ func (w *window) Close() {
 
 func (w *window) ShowAndRun() {
 	w.Show()
-	fyne.CurrentApp().Driver().Run()
+	w.driver.Run()
 }
 
 // Clipboard returns the system clipboard
@@ -653,6 +653,19 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
 			}
+		} else if w.mouseOver != nil {
+			isChild := false
+			driver.WalkCompleteObjectTree(w.mouseOver.(fyne.CanvasObject),
+				func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
+					if co == obj {
+						isChild = true
+						return true
+					}
+					return false
+				}, nil)
+			if !isChild {
+				w.mouseOut()
+			}
 		}
 	} else if w.mouseOver != nil && !w.objIsDragged(w.mouseOver) {
 		w.mouseOut()
@@ -701,6 +714,11 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	if w.mousePos.IsZero() { // window may not be focused (darwin mostly) and so position callbacks not happening
+		xpos, ypos := w.viewport.GetCursorPos()
+		w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
+	}
+
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
@@ -999,6 +1017,22 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
+func (w *window) capturesTab(keyName fyne.KeyName, modifier desktop.Modifier) bool {
+	if keyName == fyne.KeyTab {
+		if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && !ent.AcceptsTab() {
+			switch modifier {
+			case 0:
+				w.canvas.FocusNext()
+				return false
+			case desktop.ShiftModifier:
+				w.canvas.FocusPrevious()
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
 	if keyName == "" {
@@ -1052,82 +1086,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	switch keyName {
-	case fyne.KeyTab:
-		capture := false
-		// TODO at some point allow widgets to mark as capturing
-		if ent, ok := w.canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
-			capture = true
-		}
-		if !capture {
-			switch keyDesktopModifier {
-			case 0:
-				w.canvas.FocusNext()
-				return
-			case desktop.ShiftModifier:
-				w.canvas.FocusPrevious()
-				return
-			}
-		}
-	}
-
-	var shortcut fyne.Shortcut
-	ctrlMod := desktop.ControlModifier
-	if runtime.GOOS == "darwin" {
-		ctrlMod = desktop.SuperModifier
-	}
-	if keyDesktopModifier == ctrlMod {
-		switch keyName {
-		case fyne.KeyV:
-			// detect paste shortcut
-			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyC, fyne.KeyInsert:
-			// detect copy shortcut
-			shortcut = &fyne.ShortcutCopy{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyX:
-			// detect cut shortcut
-			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyA:
-			// detect selectAll shortcut
-			shortcut = &fyne.ShortcutSelectAll{}
-		}
-	}
-
-	if keyDesktopModifier == desktop.ShiftModifier {
-		switch keyName {
-		case fyne.KeyInsert:
-			// detect paste shortcut
-			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
-			}
-		case fyne.KeyDelete:
-			// detect cut shortcut
-			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
-			}
-		}
-	}
-
-	if shortcut == nil && keyDesktopModifier != 0 && keyDesktopModifier != desktop.ShiftModifier {
-		shortcut = &desktop.CustomShortcut{
-			KeyName:  keyName,
-			Modifier: keyDesktopModifier,
-		}
-	}
-
-	if shortcut != nil {
-		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
-			return
-		}
-
-		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+	if !w.capturesTab(keyName, keyDesktopModifier) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}
 
@@ -1174,7 +1133,81 @@ func (w *window) focused(_ *glfw.Window, isFocused bool) {
 		w.canvas.FocusGained()
 	} else {
 		w.canvas.FocusLost()
+		w.mousePos = fyne.Position{}
 	}
+}
+
+func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifier) bool {
+	var shortcut fyne.Shortcut
+	ctrlMod := desktop.ControlModifier
+	if runtime.GOOS == "darwin" {
+		ctrlMod = desktop.SuperModifier
+	}
+	if modifier == ctrlMod {
+		switch keyName {
+		case fyne.KeyV:
+			// detect paste shortcut
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyC, fyne.KeyInsert:
+			// detect copy shortcut
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyX:
+			// detect cut shortcut
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyA:
+			// detect selectAll shortcut
+			shortcut = &fyne.ShortcutSelectAll{}
+		}
+	}
+
+	if modifier == desktop.ShiftModifier {
+		switch keyName {
+		case fyne.KeyInsert:
+			// detect paste shortcut
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: w.Clipboard(),
+			}
+		case fyne.KeyDelete:
+			// detect cut shortcut
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: w.Clipboard(),
+			}
+		}
+	}
+
+	if shortcut == nil && modifier != 0 && modifier != desktop.ShiftModifier {
+		shortcut = &desktop.CustomShortcut{
+			KeyName:  keyName,
+			Modifier: modifier,
+		}
+	}
+
+	if shortcut != nil {
+		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
+			shouldRunShortcut := true
+			type selectableText interface {
+				fyne.Disableable
+				SelectedText() string
+			}
+			if selectableTextWid, ok := focused.(selectableText); ok && selectableTextWid.Disabled() {
+				shouldRunShortcut = shortcut.ShortcutName() == "Copy"
+			}
+			if shouldRunShortcut {
+				w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+			}
+			return shouldRunShortcut
+		}
+		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+		return true
+	}
+
+	return false
 }
 
 func (w *window) RunWithContext(f func()) {
@@ -1265,7 +1298,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	runOnMain(func() {
 		d.initGLFW()
 
-		ret = &window{title: title, decorate: decorate}
+		ret = &window{title: title, decorate: decorate, driver: d}
 		// This channel will be closed when the window is closed.
 		ret.eventQueue = make(chan func(), 1024)
 		go ret.runEventQueue()
@@ -1308,7 +1341,7 @@ func (w *window) create() {
 
 		win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
 		if err != nil {
-			fyne.LogError("window creation error", err)
+			w.driver.initFailed("window creation error", err)
 			return
 		}
 
