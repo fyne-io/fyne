@@ -11,12 +11,12 @@ import "fyne.io/fyne/v2"
 type BoolList interface {
 	DataList
 
-	Append(bool) error
+	Append(val bool) error
 	Get() ([]bool, error)
-	GetValue(int) (bool, error)
-	Prepend(bool) error
-	Set([]bool) error
-	SetValue(int, bool) error
+	GetValue(index int) (bool, error)
+	Prepend(val bool) error
+	Set(v []bool) error
+	SetValue(index int, val bool) error
 }
 
 // ExternalBoolList supports binding a list of bool values from an external variable.
@@ -224,12 +224,12 @@ func (b *boundExternalBoolListItem) setIfChanged(val bool) error {
 type FloatList interface {
 	DataList
 
-	Append(float64) error
+	Append(val float64) error
 	Get() ([]float64, error)
-	GetValue(int) (float64, error)
-	Prepend(float64) error
-	Set([]float64) error
-	SetValue(int, float64) error
+	GetValue(index int) (float64, error)
+	Prepend(val float64) error
+	Set(v []float64) error
+	SetValue(index int, val float64) error
 }
 
 // ExternalFloatList supports binding a list of float64 values from an external variable.
@@ -437,12 +437,12 @@ func (b *boundExternalFloatListItem) setIfChanged(val float64) error {
 type IntList interface {
 	DataList
 
-	Append(int) error
+	Append(val int) error
 	Get() ([]int, error)
-	GetValue(int) (int, error)
-	Prepend(int) error
-	Set([]int) error
-	SetValue(int, int) error
+	GetValue(index int) (int, error)
+	Prepend(val int) error
+	Set(v []int) error
+	SetValue(index int, val int) error
 }
 
 // ExternalIntList supports binding a list of int values from an external variable.
@@ -650,12 +650,12 @@ func (b *boundExternalIntListItem) setIfChanged(val int) error {
 type RuneList interface {
 	DataList
 
-	Append(rune) error
+	Append(val rune) error
 	Get() ([]rune, error)
-	GetValue(int) (rune, error)
-	Prepend(rune) error
-	Set([]rune) error
-	SetValue(int, rune) error
+	GetValue(index int) (rune, error)
+	Prepend(val rune) error
+	Set(v []rune) error
+	SetValue(index int, val rune) error
 }
 
 // ExternalRuneList supports binding a list of rune values from an external variable.
@@ -863,12 +863,12 @@ func (b *boundExternalRuneListItem) setIfChanged(val rune) error {
 type StringList interface {
 	DataList
 
-	Append(string) error
+	Append(val string) error
 	Get() ([]string, error)
-	GetValue(int) (string, error)
-	Prepend(string) error
-	Set([]string) error
-	SetValue(int, string) error
+	GetValue(index int) (string, error)
+	Prepend(val string) error
+	Set(v []string) error
+	SetValue(index int, val string) error
 }
 
 // ExternalStringList supports binding a list of string values from an external variable.
@@ -1076,12 +1076,12 @@ func (b *boundExternalStringListItem) setIfChanged(val string) error {
 type URIList interface {
 	DataList
 
-	Append(fyne.URI) error
+	Append(val fyne.URI) error
 	Get() ([]fyne.URI, error)
-	GetValue(int) (fyne.URI, error)
-	Prepend(fyne.URI) error
-	Set([]fyne.URI) error
-	SetValue(int, fyne.URI) error
+	GetValue(index int) (fyne.URI, error)
+	Prepend(val fyne.URI) error
+	Set(v []fyne.URI) error
+	SetValue(index int, val fyne.URI) error
 }
 
 // ExternalURIList supports binding a list of fyne.URI values from an external variable.
