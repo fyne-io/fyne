@@ -2,10 +2,11 @@ package widget
 
 import (
 	"fmt"
-	"fyne.io/fyne/v2/internal/cache"
 	"image/color"
 	"math"
 	"strings"
+
+	"fyne.io/fyne/v2/internal/cache"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -333,7 +334,7 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 }
 
 func (t *textGridRenderer) refreshCell(row, col int) {
-	pos := row*t.cols+col
+	pos := row*t.cols + col
 	text := t.objects[pos*2+1].(*canvas.Text)
 	rect := t.objects[pos*2].(*canvas.Rectangle)
 
