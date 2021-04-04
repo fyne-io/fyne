@@ -10,7 +10,7 @@ require (
 	github.com/fyne-io/mobile v0.1.3-0.20210318200029-09e9c4e13a8f
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210311203641-62640a716d48
-	github.com/godbus/dbus/v5 v5.0.3
+	github.com/godbus/dbus/v5 v5.0.4
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
