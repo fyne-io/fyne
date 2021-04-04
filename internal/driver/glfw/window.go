@@ -782,7 +782,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	})
 	ev := new(fyne.PointEvent)
 	ev.Position = pos
-	ev.AbsolutePosition = w.mousePos
+	ev.AbsolutePosition = mousePos
 
 	coMouse := co
 	button, modifiers := convertMouseButton(btn, mods)
