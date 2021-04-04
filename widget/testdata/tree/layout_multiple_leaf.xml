@@ -5,7 +5,7 @@
 				<widget size="192x292" type="*widget.treeContent">
 					<widget size="192x45" type="*widget.leaf">
 						<widget pos="28,4" size="160x37" type="*widget.Label">
-							<text pos="4,8" size="152x21">11111</text>
+							<text pos="8,8" size="144x21">11111</text>
 						</widget>
 					</widget>
 					<widget pos="0,45" size="192x1" type="*widget.Separator">
@@ -13,7 +13,7 @@
 					</widget>
 					<widget pos="0,46" size="192x45" type="*widget.leaf">
 						<widget pos="28,4" size="160x37" type="*widget.Label">
-							<text pos="4,8" size="152x21">2222222222</text>
+							<text pos="8,8" size="144x21">2222222222</text>
 						</widget>
 					</widget>
 					<widget pos="0,91" size="192x1" type="*widget.Separator">
@@ -21,7 +21,7 @@
 					</widget>
 					<widget pos="0,92" size="192x45" type="*widget.leaf">
 						<widget pos="28,4" size="160x37" type="*widget.Label">
-							<text pos="4,8" size="152x21">333333333333333</text>
+							<text pos="8,8" size="144x21">333333333333333</text>
 						</widget>
 					</widget>
 					<widget pos="0,137" size="192x1" type="*widget.Separator">
@@ -29,7 +29,7 @@
 					</widget>
 					<widget pos="0,138" size="192x45" type="*widget.leaf">
 						<widget pos="28,4" size="160x37" type="*widget.Label">
-							<text pos="4,8" size="152x21">44444444444444444444</text>
+							<text pos="8,8" size="144x21">44444444444444444444</text>
 						</widget>
 					</widget>
 				</widget>

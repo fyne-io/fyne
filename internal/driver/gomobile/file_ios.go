@@ -10,6 +10,7 @@ package gomobile
 
 void* iosParseUrl(const char* url);
 const void* iosReadFromURL(void* url, int* len);
+const int iosWriteToURL(void* url, const void* bytes, int len);
 */
 import "C"
 import (
@@ -63,6 +64,31 @@ func (s *secureReadCloser) Close() error {
 	return nil
 }
 
+type secureWriteCloser struct {
+	url    unsafe.Pointer
+	closer func()
+
+	offset int
+}
+
+// Declare conformity to WriteCloser interface
+var _ io.WriteCloser = (*secureWriteCloser)(nil)
+
+func (s *secureWriteCloser) Write(p []byte) (int, error) {
+	count := int(C.iosWriteToURL(s.url, C.CBytes(p), C.int(len(p))))
+	s.offset += count
+
+	return count, nil
+}
+
+func (s *secureWriteCloser) Close() error {
+	if s.closer != nil {
+		s.closer()
+	}
+	s.url = nil
+	return nil
+}
+
 func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	if f.uri == nil || f.uri.String() == "" {
 		return nil, nil
@@ -77,7 +103,21 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	return fileStruct, nil
 }
 
+func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
+	if f.uri == nil || f.uri.String() == "" {
+		return nil, nil
+	}
+
+	cStr := C.CString(f.uri.String())
+	defer C.free(unsafe.Pointer(cStr))
+
+	url := C.iosParseUrl(cStr)
+
+	fileStruct := &secureWriteCloser{url: url, closer: f.done}
+	return fileStruct, nil
+}
+
 func registerRepository(d *mobileDriver) {
-	repo := &mobileFileRepo{driver: d}
+	repo := &mobileFileRepo{}
 	repository.Register("file", repo)
 }

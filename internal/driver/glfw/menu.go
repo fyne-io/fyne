@@ -24,6 +24,7 @@ func addMissingQuit(menus *fyne.MainMenu) *fyne.MainMenu {
 	}
 	if lastItem == nil || !lastItem.IsQuit { // make sure the first menu always has a quit option
 		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem.IsQuit = true
 		menus.Items[0].Items = append(menus.Items[0].Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
 	for _, item := range menus.Items[0].Items {

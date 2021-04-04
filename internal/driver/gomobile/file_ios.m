@@ -16,3 +16,14 @@ const void* iosReadFromURL(void* urlPtr, int* len)  {
     *len = data.length;
     return data.bytes;
 }
+
+const int iosWriteToURL(void* urlPtr, const void* bytes, int len) {
+    NSURL* url = (NSURL*)urlPtr;
+    NSData *data = [NSData dataWithBytes:bytes length:len];
+    BOOL ok = [data writeToURL:url atomically:YES];
+
+    if (!ok) {
+        return 0;
+    }
+    return data.length;
+}

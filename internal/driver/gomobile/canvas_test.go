@@ -4,6 +4,7 @@ package gomobile
 
 import (
 	"image/color"
+	"os"
 	"testing"
 	"time"
 
@@ -18,6 +19,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	currentApp := fyne.CurrentApp()
+	fyne.SetCurrentApp(newTestMobileApp())
+	ret := m.Run()
+	fyne.SetCurrentApp(currentApp)
+	os.Exit(ret)
+}
 
 func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
@@ -170,12 +179,43 @@ func TestCanvas_Dragged(t *testing.T) {
 
 	assert.True(t, dragged)
 	assert.Equal(t, scroll, draggedObj)
-	// TODO find a way to get the test driver to report as mobile
 	dragged = false
 	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 	})
+	assert.True(t, dragged)
+	assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
+}
+
+func TestCanvas_DraggingOutOfWidget(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	slider := widget.NewSlider(0.0, 100.0)
+	c.SetContent(container.NewGridWithRows(2, slider, widget.NewLabel("Outside")))
+	c.resize(fyne.NewSize(100, 200))
+
+	assert.Zero(t, slider.Value)
+	lastValue := slider.Value
+
+	dragged := false
+	c.tapDown(fyne.NewPos(23, 13), 0)
+	c.tapMove(fyne.NewPos(30, 13), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		assert.Equal(t, slider, wid)
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Greater(t, slider.Value, lastValue)
+	lastValue = slider.Value
+
+	dragged = false
+	c.tapMove(fyne.NewPos(40, 120), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		assert.Equal(t, slider, wid)
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Greater(t, slider.Value, lastValue)
 }
 
 func TestCanvas_Tappable(t *testing.T) {
@@ -358,4 +398,20 @@ func simulateTap(c *mobileCanvas) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable) {
 	})
+}
+
+type mobileApp struct {
+	fyne.App
+	driver fyne.Driver
+}
+
+func (a *mobileApp) Driver() fyne.Driver {
+	return a.driver
+}
+
+func newTestMobileApp() fyne.App {
+	return &mobileApp{
+		App:    fyne.CurrentApp(),
+		driver: NewGoMobileDriver(),
+	}
 }

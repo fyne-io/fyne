@@ -28,6 +28,7 @@ void showKeyboard(int keyboardType);
 void hideKeyboard();
 
 void showFileOpenPicker(char* mimes, char *exts);
+void showFileSavePicker(char* mimes, char *exts);
 void closeFileResource(void* urlPtr);
 */
 import "C"
@@ -258,6 +259,19 @@ func (a *app) loop(ctx C.GLintptr) {
 	}
 }
 
+func cStringsForFilter(filter *FileFilter) (*C.char, *C.char) {
+	mimes := strings.Join(filter.MimeTypes, "|")
+
+	// extensions must have the '.' removed for UTI lookups on iOS
+	extList := []string{}
+	for _, ext := range filter.Extensions {
+		extList = append(extList, ext[1:])
+	}
+	exts := strings.Join(extList, "|")
+
+	return C.CString(mimes), C.CString(exts)
+}
+
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	C.showKeyboard(C.int(int32(keyboard)))
@@ -285,19 +299,19 @@ func filePickerReturned(str *C.char, urlPtr unsafe.Pointer) {
 func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	fileCallback = callback
 
-	mimes := strings.Join(filter.MimeTypes, "|")
-
-	// extensions must have the '.' removed for UTI lookups on iOS
-	extList := []string{}
-	for _, ext := range filter.Extensions {
-		extList = append(extList, ext[1:])
-	}
-	exts := strings.Join(extList, "|")
-
-	mimeStr := C.CString(mimes)
+	mimeStr, extStr := cStringsForFilter(filter)
 	defer C.free(unsafe.Pointer(mimeStr))
-	extStr := C.CString(exts)
 	defer C.free(unsafe.Pointer(extStr))
 
 	C.showFileOpenPicker(mimeStr, extStr)
+}
+
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+	fileCallback = callback
+
+	mimeStr, extStr := cStringsForFilter(filter)
+	defer C.free(unsafe.Pointer(mimeStr))
+	defer C.free(unsafe.Pointer(extStr))
+
+	C.showFileSavePicker(mimeStr, extStr)
 }

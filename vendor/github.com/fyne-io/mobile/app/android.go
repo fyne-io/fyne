@@ -35,8 +35,8 @@ package app
 #include <pthread.h>
 #include <stdlib.h>
 
-EGLDisplay display;
-EGLSurface surface;
+extern EGLDisplay display;
+extern EGLSurface surface;
 
 char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
@@ -45,6 +45,7 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
+void showFileSave(JNIEnv* env, char* mimes);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -337,9 +338,7 @@ func insetsChanged(top, bottom, left, right int) {
 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
 }
 
-func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
-	fileCallback = callback
-
+func mimeStringFromFilter(filter *FileFilter) string {
 	mimes := "*/*"
 	if filter.MimeTypes != nil {
 		mimes = strings.Join(filter.MimeTypes, "|")
@@ -362,6 +361,13 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 		}
 		mimes = strings.Join(mimeTypes, "|")
 	}
+	return mimes
+}
+
+func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
+	fileCallback = callback
+
+	mimes := mimeStringFromFilter(filter)
 	mimeStr := C.CString(mimes)
 	defer C.free(unsafe.Pointer(mimeStr))
 
@@ -373,6 +379,24 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 	}
 
 	if err := mobileinit.RunOnJVM(open); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+	fileCallback = callback
+
+	mimes := mimeStringFromFilter(filter)
+	mimeStr := C.CString(mimes)
+	defer C.free(unsafe.Pointer(mimeStr))
+
+	save := func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.showFileSave(env, mimeStr)
+		return nil
+	}
+
+	if err := mobileinit.RunOnJVM(save); err != nil {
 		log.Fatalf("app: %v", err)
 	}
 }

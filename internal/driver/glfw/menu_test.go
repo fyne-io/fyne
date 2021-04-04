@@ -25,6 +25,7 @@ func Test_Menu_AddsQuit(t *testing.T) {
 	assert.NotNil(t, bar)
 	assert.Equal(t, 1, len(mainMenu.Items))
 	assert.Equal(t, 2, len(mainMenu.Items[0].Items)) // separator+quit inserted
+	assert.True(t, mainMenu.Items[0].Items[1].IsQuit)
 }
 
 func Test_Menu_LeaveQuit(t *testing.T) {

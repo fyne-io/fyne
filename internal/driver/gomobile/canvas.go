@@ -40,12 +40,13 @@ type mobileCanvas struct {
 	onTypedKey  func(event *fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
-	inited         bool
-	lastTapDown    map[int]time.Time
-	lastTapDownPos map[int]fyne.Position
-	dragging       fyne.Draggable
-	refreshQueue   chan fyne.CanvasObject
-	minSizeCache   map[fyne.CanvasObject]fyne.Size
+	inited                bool
+	lastTapDown           map[int]time.Time
+	lastTapDownPos        map[int]fyne.Position
+	dragging              fyne.Draggable
+	dragStart, dragOffset fyne.Position
+	refreshQueue          chan fyne.CanvasObject
+	minSizeCache          map[fyne.CanvasObject]fyne.Size
 
 	touchTapCount   int
 	touchCancelFunc context.CancelFunc
@@ -82,7 +83,7 @@ func (c *mobileCanvas) Content() fyne.CanvasObject {
 
 func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 	focusMgr := c.focusManager()
-	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+	if focusMgr != nil && focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
 		c.handleKeyboard(obj)
 		return
 	}
@@ -101,15 +102,27 @@ func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 }
 
 func (c *mobileCanvas) FocusNext() {
-	c.focusManager().FocusNext()
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusNext()
 }
 
 func (c *mobileCanvas) FocusPrevious() {
-	c.focusManager().FocusPrevious()
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusPrevious()
 }
 
 func (c *mobileCanvas) Focused() fyne.Focusable {
-	return c.focusManager().Focused()
+	mgr := c.focusManager()
+	if mgr == nil {
+		return nil
+	}
+	return mgr.Focused()
 }
 
 func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
@@ -176,7 +189,11 @@ func (c *mobileCanvas) Size() fyne.Size {
 }
 
 func (c *mobileCanvas) Unfocus() {
-	if c.focusManager().Focus(nil) {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	if mgr.Focus(nil) {
 		hideVirtualKeyboard()
 	}
 }
@@ -389,8 +406,9 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 
 func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
-	deltaX := pos.X - c.lastTapDownPos[tapID].X
-	deltaY := pos.Y - c.lastTapDownPos[tapID].Y
+	previousPos := c.lastTapDownPos[tapID]
+	deltaX := pos.X - previousPos.X
+	deltaY := pos.Y - previousPos.Y
 
 	if c.dragging == nil && (math.Abs(float64(deltaX)) < tapMoveThreshold && math.Abs(float64(deltaY)) < tapMoveThreshold) {
 		return
@@ -420,13 +438,16 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	if c.dragging == nil {
 		if drag, ok := co.(fyne.Draggable); ok {
 			c.dragging = drag
+			c.dragOffset = previousPos.Subtract(objPos)
+			c.dragStart = co.Position()
 		} else {
 			return
 		}
 	}
 
 	ev := new(fyne.DragEvent)
-	ev.Position = objPos
+	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
+	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
 
 	dragCallback(c.dragging, ev)

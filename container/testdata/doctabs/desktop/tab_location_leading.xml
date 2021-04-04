@@ -1,6 +1,6 @@
-<canvas size="129x37">
+<canvas size="137x37">
 	<content>
-		<widget size="129x37" type="*container.DocTabs">
+		<widget size="137x37" type="*container.DocTabs">
 			<container size="73x37">
 				<widget size="73x4" type="*widget.Scroll">
 					<container size="73x95">
@@ -25,8 +25,8 @@
 			</container>
 			<rectangle fillColor="shadow" pos="73,0" size="4x37"/>
 			<rectangle fillColor="primary" pos="73,0" size="4x4"/>
-			<widget pos="77,0" size="52x37" type="*widget.Label">
-				<text pos="4,8" size="44x21">Text 1</text>
+			<widget pos="77,0" size="60x37" type="*widget.Label">
+				<text pos="8,8" size="44x21">Text 1</text>
 			</widget>
 		</widget>
 	</content>
