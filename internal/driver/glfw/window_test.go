@@ -269,7 +269,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 
 func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w := createWindow("Test").(*window)
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	test.ApplyTheme(t, theme.DarkTheme())
 	l := widget.NewList(
 		func() int { return 2 },
 		func() fyne.CanvasObject { return widget.NewEntry() },
@@ -283,19 +283,25 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.mouseMoved(w.viewport, 9, 50)
 	w.waitForEvents()
 	repaintWindow(w)
+	w.mouseLock.RLock()
 	assert.NotNil(t, w.mouseOver)
+	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	w.mouseMoved(w.viewport, 50, 50)
 	w.waitForEvents()
 	repaintWindow(w)
+	w.mouseLock.RLock()
 	assert.NotNil(t, w.mouseOver)
+	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	w.mouseMoved(w.viewport, 50, 100)
 	w.waitForEvents()
 	repaintWindow(w)
+	w.mouseLock.RLock()
 	assert.Nil(t, w.mouseOver)
+	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 }
 
@@ -663,7 +669,6 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	assert.True(t, tapped, "Tapped button that was clipped")
 }
 
-// TODO solve race condition (solve first race condition in widget.Button, canvas.Text, boxLayout)
 func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w := createWindow("Test").(*window)
 	tapped := 0
@@ -696,7 +701,6 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 }
 
-// TODO solve race condition (solve first race condition in widget.Button, canvas.Text, boxLayout)
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
 	var lock sync.RWMutex
@@ -962,7 +966,6 @@ func TestWindow_SetPadded(t *testing.T) {
 	}
 }
 
-// TODO solve race condition (solve first race conditions in widget.Entry and boxLayout)
 func TestWindow_Focus(t *testing.T) {
 	w := createWindow("Test").(*window)
 
@@ -977,11 +980,13 @@ func TestWindow_Focus(t *testing.T) {
 	w.charInput(w.viewport, 'c')
 	w.charInput(w.viewport, 'd')
 	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
+	w.waitForEvents()
+
 	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
 	w.charInput(w.viewport, 'e')
 	w.charInput(w.viewport, 'f')
-
 	w.waitForEvents()
+
 	assert.Equal(t, "abcd", e1.Text)
 	assert.Equal(t, "ef", e2.Text)
 }
