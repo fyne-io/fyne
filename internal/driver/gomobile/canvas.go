@@ -253,7 +253,11 @@ func (c *mobileCanvas) focusManager() *app.FocusManager {
 }
 
 func (c *mobileCanvas) handleKeyboard(obj fyne.Focusable) {
-	if keyb, ok := obj.(mobile.Keyboardable); ok {
+	isDisabled := false
+	if disWid, ok := obj.(fyne.Disableable); ok {
+		isDisabled = disWid.Disabled()
+	}
+	if keyb, ok := obj.(mobile.Keyboardable); ok && !isDisabled {
 		showVirtualKeyboard(keyb.Keyboard())
 	} else {
 		hideVirtualKeyboard()
