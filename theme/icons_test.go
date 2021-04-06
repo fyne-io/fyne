@@ -463,3 +463,18 @@ func Test_VisibilityOffIcon_FileSource(t *testing.T) {
 	result := VisibilityOffIcon().Name()
 	assert.Equal(t, "visibility-off.svg", result)
 }
+
+func Test_AccountIcon_FileSource(t *testing.T) {
+	result := AccountIcon().Name()
+	assert.Equal(t, "account.svg", result)
+}
+
+func Test_ChartIcon_FileSource(t *testing.T) {
+	result := ChartIcon().Name()
+	assert.Equal(t, "chart.svg", result)
+}
+
+func Test_TwitterIcon_FileSource(t *testing.T) {
+	result := TwitterIcon().Name()
+	assert.Equal(t, "twitter.svg", result)
+}

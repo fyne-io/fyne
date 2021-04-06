@@ -414,6 +414,21 @@ const (
 	//
 	// Since: 2.0
 	IconNameComputer fyne.ThemeIconName = "computer"
+
+	// IconNameAccount is the name of theme lookup for computer icon.
+	//
+	// Since: 2.0.2
+	IconNameAccount fyne.ThemeIconName = "account"
+
+	// IconNameChart is the name of theme lookup for chart icon.
+	//
+	// Since: 2.0.2
+	IconNameChart fyne.ThemeIconName = "chart"
+
+	// IconNameTwitter is the name of theme lookup for twitter icon.
+	//
+	// Since: 2.0.2
+	IconNameTwitter fyne.ThemeIconName = "twitter"
 )
 
 var (
@@ -513,6 +528,10 @@ var (
 		IconNameComputer: NewThemedResource(computerIconRes),
 		IconNameStorage:  NewThemedResource(storageIconRes),
 		IconNameUpload:   NewThemedResource(uploadIconRes),
+
+		IconNameAccount: NewThemedResource(accountIconRes),
+		IconNameChart:   NewThemedResource(chartIconRes),
+		IconNameTwitter: NewThemedResource(twitterIconRes),
 	}
 )
 
@@ -1080,6 +1099,21 @@ func StorageIcon() fyne.Resource {
 // UploadIcon returns a resource containing the standard upload icon for the current theme
 func UploadIcon() fyne.Resource {
 	return safeIconLookup(IconNameUpload)
+}
+
+// AccountIcon returns a resource containing the standard account icon for the current theme
+func AccountIcon() fyne.Resource {
+	return safeIconLookup(IconNameAccount)
+}
+
+// ChartIcon returns a resource containing the standard chart icon for the current theme
+func ChartIcon() fyne.Resource {
+	return safeIconLookup(IconNameChart)
+}
+
+// TwitterIcon returns a resource containing the standard twitter icon for the current theme
+func TwitterIcon() fyne.Resource {
+	return safeIconLookup(IconNameTwitter)
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
