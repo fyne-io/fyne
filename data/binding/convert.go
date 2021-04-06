@@ -5,6 +5,7 @@ package binding
 
 import (
 	"fmt"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 )
@@ -23,7 +24,7 @@ type stringFromBool struct {
 //
 // Since: 2.0
 func BoolToString(v Bool) String {
-	return BoolToStringWithFormat(v, "%t")
+	return BoolToStringWithFormat(v, "")
 }
 
 // BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
@@ -43,17 +44,30 @@ func (s *stringFromBool) Get() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(s.format, val), nil
+	if s.format != "" {
+		return fmt.Sprintf(s.format, val), nil
+	}
+
+	return strconv.FormatBool(val), nil
 }
 
 func (s *stringFromBool) Set(str string) error {
 	var val bool
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return err
-	}
-	if n != 1 {
-		return errParseFailed
+
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errParseFailed
+		}
+	} else {
+		new, err := strconv.ParseBool(str)
+		if err != nil {
+			return err
+		}
+		val = new
 	}
 
 	old, err := s.from.Get()
@@ -91,7 +105,7 @@ type stringFromFloat struct {
 //
 // Since: 2.0
 func FloatToString(v Float) String {
-	return FloatToStringWithFormat(v, "%f")
+	return FloatToStringWithFormat(v, "")
 }
 
 // FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
@@ -111,17 +125,30 @@ func (s *stringFromFloat) Get() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(s.format, val), nil
+	if s.format != "" {
+		return fmt.Sprintf(s.format, val), nil
+	}
+
+	return strconv.FormatFloat(val, 'f', -1, 64), nil
 }
 
 func (s *stringFromFloat) Set(str string) error {
 	var val float64
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return err
-	}
-	if n != 1 {
-		return errParseFailed
+
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errParseFailed
+		}
+	} else {
+		new, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return err
+		}
+		val = new
 	}
 
 	old, err := s.from.Get()
@@ -159,7 +186,7 @@ type stringFromInt struct {
 //
 // Since: 2.0
 func IntToString(v Int) String {
-	return IntToStringWithFormat(v, "%d")
+	return IntToStringWithFormat(v, "")
 }
 
 // IntToStringWithFormat creates a binding that connects a Int data item to a String and is
@@ -179,17 +206,30 @@ func (s *stringFromInt) Get() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(s.format, val), nil
+	if s.format != "" {
+		return fmt.Sprintf(s.format, val), nil
+	}
+
+	return strconv.Itoa(val), nil
 }
 
 func (s *stringFromInt) Set(str string) error {
 	var val int
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return err
-	}
-	if n != 1 {
-		return errParseFailed
+
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errParseFailed
+		}
+	} else {
+		new, err := strconv.ParseInt(str, 0, 64)
+		if err != nil {
+			return err
+		}
+		val = int(new)
 	}
 
 	old, err := s.from.Get()
@@ -280,7 +320,7 @@ type stringToBool struct {
 //
 // Since: 2.0
 func StringToBool(str String) Bool {
-	return StringToBoolWithFormat(str, "%t")
+	return StringToBoolWithFormat(str, "")
 }
 
 // StringToBoolWithFormat creates a binding that connects a String data item to a Bool and is
@@ -302,19 +342,32 @@ func (s *stringToBool) Get() (bool, error) {
 	}
 
 	var val bool
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return false, err
-	}
-	if n != 1 {
-		return false, errParseFailed
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return false, err
+		}
+		if n != 1 {
+			return false, errParseFailed
+		}
+	} else {
+		new, err := strconv.ParseBool(str)
+		if err != nil {
+			return false, err
+		}
+		val = new
 	}
 
 	return val, nil
 }
 
 func (s *stringToBool) Set(val bool) error {
-	str := fmt.Sprintf(s.format, val)
+	var str string
+	if s.format != "" {
+		str = fmt.Sprintf(s.format, val)
+	} else {
+		str = strconv.FormatBool(val)
+	}
 
 	old, err := s.from.Get()
 	if str == old {
@@ -349,7 +402,7 @@ type stringToFloat struct {
 //
 // Since: 2.0
 func StringToFloat(str String) Float {
-	return StringToFloatWithFormat(str, "%f")
+	return StringToFloatWithFormat(str, "")
 }
 
 // StringToFloatWithFormat creates a binding that connects a String data item to a Float and is
@@ -371,19 +424,32 @@ func (s *stringToFloat) Get() (float64, error) {
 	}
 
 	var val float64
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return 0.0, err
-	}
-	if n != 1 {
-		return 0.0, errParseFailed
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return 0.0, err
+		}
+		if n != 1 {
+			return 0.0, errParseFailed
+		}
+	} else {
+		new, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return 0, err
+		}
+		val = new
 	}
 
 	return val, nil
 }
 
 func (s *stringToFloat) Set(val float64) error {
-	str := fmt.Sprintf(s.format, val)
+	var str string
+	if s.format != "" {
+		str = fmt.Sprintf(s.format, val)
+	} else {
+		str = strconv.FormatFloat(val, 'f', -1, 64)
+	}
 
 	old, err := s.from.Get()
 	if str == old {
@@ -418,7 +484,7 @@ type stringToInt struct {
 //
 // Since: 2.0
 func StringToInt(str String) Int {
-	return StringToIntWithFormat(str, "%d")
+	return StringToIntWithFormat(str, "")
 }
 
 // StringToIntWithFormat creates a binding that connects a String data item to a Int and is
@@ -440,19 +506,32 @@ func (s *stringToInt) Get() (int, error) {
 	}
 
 	var val int
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return 0, err
-	}
-	if n != 1 {
-		return 0, errParseFailed
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return 0, err
+		}
+		if n != 1 {
+			return 0, errParseFailed
+		}
+	} else {
+		new, err := strconv.Atoi(str)
+		if err != nil {
+			return 0, err
+		}
+		val = int(new)
 	}
 
 	return val, nil
 }
 
 func (s *stringToInt) Set(val int) error {
-	str := fmt.Sprintf(s.format, val)
+	var str string
+	if s.format != "" {
+		str = fmt.Sprintf(s.format, val)
+	} else {
+		str = strconv.Itoa(val)
+	}
 
 	old, err := s.from.Get()
 	if str == old {
