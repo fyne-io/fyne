@@ -415,7 +415,7 @@ const (
 	// Since: 2.0
 	IconNameComputer fyne.ThemeIconName = "computer"
 
-	// IconNameAccount is the name of theme lookup for computer icon.
+	// IconNameAccount is the name of theme lookup for accont icon.
 	//
 	// Since: 2.0.2
 	IconNameAccount fyne.ThemeIconName = "account"
