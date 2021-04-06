@@ -473,8 +473,3 @@ func Test_ChartIcon_FileSource(t *testing.T) {
 	result := ChartIcon().Name()
 	assert.Equal(t, "chart.svg", result)
 }
-
-func Test_TwitterIcon_FileSource(t *testing.T) {
-	result := TwitterIcon().Name()
-	assert.Equal(t, "twitter.svg", result)
-}

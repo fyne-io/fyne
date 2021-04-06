@@ -187,6 +187,5 @@ func loadIcons() []iconInfo {
 
 		{"AccountIcon", theme.AccountIcon()},
 		{"ChartIcon", theme.ChartIcon()},
-		{"TwitterIcon", theme.TwitterIcon()},
 	}
 }

@@ -192,7 +192,6 @@ func main() {
 
 	bundleIcon("account", f)
 	bundleIcon("chart", f)
-	bundleIcon("twitter", f)
 
 	err = writeFile("bundled-icons.go", f.Bytes())
 	if err != nil {
