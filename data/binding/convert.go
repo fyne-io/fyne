@@ -129,7 +129,7 @@ func (s *stringFromFloat) Get() (string, error) {
 		return fmt.Sprintf(s.format, val), nil
 	}
 
-	return strconv.FormatFloat(val, 'f', -1, 64), nil
+	return strconv.FormatFloat(val, 'f', 6, 64), nil
 }
 
 func (s *stringFromFloat) Set(str string) error {
@@ -448,7 +448,7 @@ func (s *stringToFloat) Set(val float64) error {
 	if s.format != "" {
 		str = fmt.Sprintf(s.format, val)
 	} else {
-		str = strconv.FormatFloat(val, 'f', -1, 64)
+		str = strconv.FormatFloat(val, 'f', 6, 64)
 	}
 
 	old, err := s.from.Get()
