@@ -98,11 +98,12 @@ func (l *Label) SetText(text string) {
 //
 // Since: 2.0
 func (l *Label) Unbind() {
-	if l.textSource == nil || l.textListener == nil {
+	src := l.textSource
+	if src == nil {
 		return
 	}
 
-	l.textSource.RemoveListener(l.textListener)
+	src.RemoveListener(l.textListener)
 	l.textSource = nil
 }
 
@@ -112,10 +113,11 @@ func (l *Label) createListener() {
 	}
 
 	l.textListener = binding.NewDataListener(func() {
-		if l.textSource == nil {
+		src := l.textSource
+		if src == nil {
 			return
 		}
-		val, err := l.textSource.Get()
+		val, err := src.Get()
 		if err != nil {
 			fyne.LogError("Error getting current data value", err)
 			return
