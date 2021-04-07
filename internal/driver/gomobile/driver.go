@@ -117,7 +117,7 @@ func (d *mobileDriver) Run() {
 		var currentSize size.Event
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-		draw := time.NewTicker(time.Second / 70)
+		draw := time.NewTicker(time.Second / 60)
 		onGoingPaint := false
 		sendPaintEvent := func() {
 			if onGoingPaint {
