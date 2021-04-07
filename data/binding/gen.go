@@ -317,12 +317,12 @@ const listBindTemplate = `
 type {{ .Name }}List interface {
 	DataList
 
-	Append({{ .Type }}) error
+	Append(value {{ .Type }}) error
 	Get() ([]{{ .Type }}, error)
-	GetValue(int) ({{ .Type }}, error)
-	Prepend({{ .Type }}) error
-	Set([]{{ .Type }}) error
-	SetValue(int, {{ .Type }}) error
+	GetValue(index int) ({{ .Type }}, error)
+	Prepend(value {{ .Type }}) error
+	Set(list []{{ .Type }}) error
+	SetValue(index int, value {{ .Type }}) error
 }
 
 // External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
