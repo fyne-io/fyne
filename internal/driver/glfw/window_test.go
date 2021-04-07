@@ -83,7 +83,9 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	c := w.Canvas().(*glCanvas)
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
 	menuBar := buildMenuOverlay(m, c).(*MenuBar)
+	c.Lock()
 	c.setMenuOverlay(menuBar)
+	c.Unlock()
 	w.SetContent(canvas.NewRectangle(color.Black))
 
 	require.False(t, menuBar.IsActive())

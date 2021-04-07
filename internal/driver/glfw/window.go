@@ -53,7 +53,6 @@ type window struct {
 	closing    bool
 	fixedSize  bool
 
-	cursorLock   sync.RWMutex
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
 	canvas       *glCanvas
@@ -600,8 +599,11 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mouseLock.Lock()
 	previousPos := w.mousePos
-	mousePos := fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
-	w.mousePos = mousePos
+	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
+	mousePos := w.mousePos
+	mouseButton := w.mouseButton
+	mouseDragStarted := w.mouseDragStarted
+	mouseOver := w.mouseOver
 	w.mouseLock.Unlock()
 
 	cursor := desktop.Cursor(desktop.DefaultCursor)
@@ -618,7 +620,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		return hover
 	})
 
-	w.cursorLock.Lock()
 	if w.cursor != cursor {
 		// cursor has changed, store new cursor and apply change via glfw
 		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
@@ -638,12 +639,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			w.customCursor = rawCursor
 		}
 	}
-	w.cursorLock.Unlock()
 
-	w.mouseLock.RLock()
-	mouseButton := w.mouseButton
-	mouseDragStarted := w.mouseDragStarted
-	w.mouseLock.RUnlock()
 	if mouseButton != 0 && !mouseDragStarted {
 		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
 			_, ok := object.(fyne.Draggable)
@@ -657,15 +653,16 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			w.mouseDraggedOffset = previousPos.Subtract(pos)
 			w.mouseDraggedObjStart = obj.Position()
 			w.mouseDragStarted = true
+			mouseDragStarted = w.mouseDragStarted
 			w.mouseLock.Unlock()
 		}
 	}
 
 	w.mouseLock.RLock()
-	mouseButton = w.mouseButton
-	mouseOver := w.mouseOver
+	isObjDragged := w.objIsDragged(obj)
+	isMouseOverDragged := w.objIsDragged(mouseOver)
 	w.mouseLock.RUnlock()
-	if obj != nil && !w.objIsDragged(obj) {
+	if obj != nil && !isObjDragged {
 		ev := new(desktop.MouseEvent)
 		ev.AbsolutePosition = mousePos
 		ev.Position = pos
@@ -692,12 +689,14 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 				w.mouseOut()
 			}
 		}
-	} else if mouseOver != nil && !w.objIsDragged(mouseOver) {
+	} else if mouseOver != nil && !isMouseOverDragged {
 		w.mouseOut()
 	}
 
 	w.mouseLock.RLock()
 	mouseButton = w.mouseButton
+	mouseOver = w.mouseOver
+	mouseDragStarted = w.mouseDragStarted
 	mouseDragged := w.mouseDragged
 	mouseDraggedObjStart := w.mouseDraggedObjStart
 	mouseDraggedOffset := w.mouseDraggedOffset
@@ -720,12 +719,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 }
 
 func (w *window) objIsDragged(obj interface{}) bool {
-	w.mouseLock.RLock()
-	mouseDragged := w.mouseDragged
-	w.mouseLock.RUnlock()
-	if mouseDragged != nil && obj != nil {
+	if w.mouseDragged != nil && obj != nil {
 		draggedObj, _ := obj.(fyne.Draggable)
-		return draggedObj == mouseDragged
+		return draggedObj == w.mouseDragged
 	}
 	return false
 }
@@ -787,7 +783,12 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	coMouse := co
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
-		w.mouseClickedHandleMouseable(ev, button, modifiers, action, wid)
+		mev := new(desktop.MouseEvent)
+		mev.Position = ev.Position
+		mev.AbsolutePosition = mousePos
+		mev.Button = button
+		mev.Modifier = modifiers
+		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
 	if wid, ok := co.(fyne.Focusable); ok {
@@ -802,12 +803,14 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	} else if action == glfw.Release {
 		w.mouseButton &= ^button
 	}
-	w.mouseLock.Unlock()
 
-	w.mouseLock.RLock()
 	mouseDragged := w.mouseDragged
 	mouseDragStarted = w.mouseDragStarted
-	w.mouseLock.RUnlock()
+	mouseOver := w.mouseOver
+	shouldMouseOut := w.objIsDragged(mouseOver) && !w.objIsDragged(coMouse)
+	mousePressed := w.mousePressed
+	w.mouseLock.Unlock()
+
 	if action == glfw.Release && mouseDragged != nil {
 		if mouseDragStarted {
 			w.queueEvent(mouseDragged.DragEnd)
@@ -815,10 +818,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mouseDragStarted = false
 			w.mouseLock.Unlock()
 		}
-		w.mouseLock.RLock()
-		mouseOver := w.mouseOver
-		w.mouseLock.RUnlock()
-		if w.objIsDragged(mouseOver) && !w.objIsDragged(coMouse) {
+		if shouldMouseOut {
 			w.mouseOut()
 		}
 		w.mouseLock.Lock()
@@ -834,9 +834,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mousePressed = co
 			w.mouseLock.Unlock()
 		} else if action == glfw.Release {
-			w.mouseLock.RLock()
-			mousePressed := w.mousePressed
-			w.mouseLock.RUnlock()
 			if co == mousePressed {
 				if button == desktop.MouseButtonSecondary && altTap {
 					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
@@ -851,20 +848,20 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 }
 
-func (w *window) mouseClickedHandleMouseable(ev *fyne.PointEvent, button desktop.MouseButton, modifiers desktop.Modifier, action glfw.Action, wid desktop.Mouseable) {
-	mev := new(desktop.MouseEvent)
-	mev.Position = ev.Position
-	mev.AbsolutePosition = w.mousePos
-	mev.Button = button
-	mev.Modifier = modifiers
+func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action glfw.Action, wid desktop.Mouseable) {
+	mousePos := mev.AbsolutePosition
 	if action == glfw.Press {
 		w.queueEvent(func() { wid.MouseDown(mev) })
 	} else if action == glfw.Release {
-		if w.mouseDragged == nil {
+		w.mouseLock.RLock()
+		mouseDragged := w.mouseDragged
+		mouseDraggedOffset := w.mouseDraggedOffset
+		w.mouseLock.RUnlock()
+		if mouseDragged == nil {
 			w.queueEvent(func() { wid.MouseUp(mev) })
 		} else {
-			if dragged, ok := w.mouseDragged.(desktop.Mouseable); ok {
-				mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
+			if dragged, ok := mouseDragged.(desktop.Mouseable); ok {
+				mev.Position = mousePos.Subtract(mouseDraggedOffset)
 				w.queueEvent(func() { dragged.MouseUp(mev) })
 			} else {
 				w.queueEvent(func() { wid.MouseUp(mev) })
@@ -876,18 +873,23 @@ func (w *window) mouseClickedHandleMouseable(ev *fyne.PointEvent, button desktop
 func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	_, doubleTap := co.(fyne.DoubleTappable)
 	if doubleTap {
+		w.mouseLock.Lock()
 		w.mouseClickCount++
 		w.mouseLastClick = co
-		if w.mouseCancelFunc != nil {
-			w.mouseCancelFunc()
+		mouseCancelFunc := w.mouseCancelFunc
+		w.mouseLock.Unlock()
+		if mouseCancelFunc != nil {
+			mouseCancelFunc()
 			return
 		}
 		go w.waitForDoubleTap(co, ev)
 	} else {
+		w.mouseLock.Lock()
 		if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
 			w.queueEvent(func() { wid.Tapped(ev) })
 		}
 		w.mousePressed = nil
+		w.mouseLock.Unlock()
 	}
 }
 
@@ -899,8 +901,10 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	w.mouseLock.Unlock()
 
 	<-ctx.Done()
-	// TODO is it better one single Lock() until end??
-	w.mouseLock.RLock()
+
+	w.mouseLock.Lock()
+	defer w.mouseLock.Unlock()
+
 	if w.mouseClickCount == 2 && w.mouseLastClick == co {
 		if wid, ok := co.(fyne.DoubleTappable); ok {
 			w.queueEvent(func() { wid.DoubleTapped(ev) })
@@ -910,14 +914,11 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 			w.queueEvent(func() { wid.Tapped(ev) })
 		}
 	}
-	w.mouseLock.RUnlock()
 
-	w.mouseLock.Lock()
 	w.mouseClickCount = 0
 	w.mousePressed = nil
 	w.mouseCancelFunc = nil
 	w.mouseLastClick = nil
-	w.mouseLock.Unlock()
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
