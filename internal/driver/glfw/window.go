@@ -738,25 +738,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	coMouse := co
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
-		mev := new(desktop.MouseEvent)
-		mev.Position = ev.Position
-		mev.AbsolutePosition = w.mousePos
-		mev.Button = button
-		mev.Modifier = modifiers
-		if action == glfw.Press {
-			w.queueEvent(func() { wid.MouseDown(mev) })
-		} else if action == glfw.Release {
-			if w.mouseDragged == nil {
-				w.queueEvent(func() { wid.MouseUp(mev) })
-			} else {
-				if dragged, ok := w.mouseDragged.(desktop.Mouseable); ok {
-					mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
-					w.queueEvent(func() { dragged.MouseUp(mev) })
-				} else {
-					w.queueEvent(func() { wid.MouseUp(mev) })
-				}
-			}
-		}
+		w.mouseClickedHandleMouseable(ev, button, modifiers, action, wid)
 	}
 
 	if wid, ok := co.(fyne.Focusable); ok {
@@ -797,21 +779,47 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 	// Check for double click/tap on left mouse button
 	if action == glfw.Release && button == desktop.MouseButtonPrimary {
-		_, doubleTap := co.(fyne.DoubleTappable)
-		if doubleTap {
-			w.mouseClickCount++
-			w.mouseLastClick = co
-			if w.mouseCancelFunc != nil {
-				w.mouseCancelFunc()
-				return
-			}
-			go w.waitForDoubleTap(co, ev)
+		w.mouseClickedHandleTapDoubleTap(co, ev)
+	}
+}
+
+func (w *window) mouseClickedHandleMouseable(ev *fyne.PointEvent, button desktop.MouseButton, modifiers desktop.Modifier, action glfw.Action, wid desktop.Mouseable) {
+	mev := new(desktop.MouseEvent)
+	mev.Position = ev.Position
+	mev.AbsolutePosition = w.mousePos
+	mev.Button = button
+	mev.Modifier = modifiers
+	if action == glfw.Press {
+		w.queueEvent(func() { wid.MouseDown(mev) })
+	} else if action == glfw.Release {
+		if w.mouseDragged == nil {
+			w.queueEvent(func() { wid.MouseUp(mev) })
 		} else {
-			if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
-				w.queueEvent(func() { wid.Tapped(ev) })
+			if dragged, ok := w.mouseDragged.(desktop.Mouseable); ok {
+				mev.Position = w.mousePos.Subtract(w.mouseDraggedOffset)
+				w.queueEvent(func() { dragged.MouseUp(mev) })
+			} else {
+				w.queueEvent(func() { wid.MouseUp(mev) })
 			}
-			w.mousePressed = nil
 		}
+	}
+}
+
+func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
+	_, doubleTap := co.(fyne.DoubleTappable)
+	if doubleTap {
+		w.mouseClickCount++
+		w.mouseLastClick = co
+		if w.mouseCancelFunc != nil {
+			w.mouseCancelFunc()
+			return
+		}
+		go w.waitForDoubleTap(co, ev)
+	} else {
+		if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
+			w.queueEvent(func() { wid.Tapped(ev) })
+		}
+		w.mousePressed = nil
 	}
 }
 
