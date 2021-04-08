@@ -653,7 +653,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			w.mouseDraggedOffset = previousPos.Subtract(pos)
 			w.mouseDraggedObjStart = obj.Position()
 			w.mouseDragStarted = true
-			mouseDragStarted = w.mouseDragStarted
 			w.mouseLock.Unlock()
 		}
 	}
@@ -695,8 +694,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	w.mouseLock.RLock()
 	mouseButton = w.mouseButton
-	mouseOver = w.mouseOver
-	mouseDragStarted = w.mouseDragStarted
 	mouseDragged := w.mouseDragged
 	mouseDraggedObjStart := w.mouseDraggedObjStart
 	mouseDraggedOffset := w.mouseDraggedOffset
