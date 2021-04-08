@@ -191,7 +191,8 @@ func main() {
 	bundleIcon("upload", f)
 
 	bundleIcon("account", f)
-	bundleIcon("chart", f)
+	bundleIcon("login", f)
+	bundleIcon("logout", f)
 
 	err = writeFile("bundled-icons.go", f.Bytes())
 	if err != nil {

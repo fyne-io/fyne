@@ -420,10 +420,15 @@ const (
 	// Since: 2.0.2
 	IconNameAccount fyne.ThemeIconName = "account"
 
-	// IconNameChart is the name of theme lookup for chart icon.
+	// IconNameLogin is the name of theme lookup for login icon.
 	//
 	// Since: 2.0.2
-	IconNameChart fyne.ThemeIconName = "chart"
+	IconNameLogin fyne.ThemeIconName = "login"
+
+	// IconNameLogout is the name of theme lookup for logout icon.
+	//
+	// Since: 2.0.2
+	IconNameLogout fyne.ThemeIconName = "logout"
 )
 
 var (
@@ -525,7 +530,8 @@ var (
 		IconNameUpload:   NewThemedResource(uploadIconRes),
 
 		IconNameAccount: NewThemedResource(accountIconRes),
-		IconNameChart:   NewThemedResource(chartIconRes),
+		IconNameLogin:   NewThemedResource(loginIconRes),
+		IconNameLogout:  NewThemedResource(logoutIconRes),
 	}
 )
 
@@ -1100,9 +1106,14 @@ func AccountIcon() fyne.Resource {
 	return safeIconLookup(IconNameAccount)
 }
 
-// ChartIcon returns a resource containing the standard chart icon for the current theme
-func ChartIcon() fyne.Resource {
-	return safeIconLookup(IconNameChart)
+// LoginIcon returns a resource containing the standard login icon for the current theme
+func LoginIcon() fyne.Resource {
+	return safeIconLookup(IconNameLogin)
+}
+
+// LogoutIcon returns a resource containing the standard logout icon for the current theme
+func LogoutIcon() fyne.Resource {
+	return safeIconLookup(IconNameLogout)
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {

@@ -469,7 +469,12 @@ func Test_AccountIcon_FileSource(t *testing.T) {
 	assert.Equal(t, "account.svg", result)
 }
 
-func Test_ChartIcon_FileSource(t *testing.T) {
-	result := ChartIcon().Name()
-	assert.Equal(t, "chart.svg", result)
+func Test_LoginIcon_FileSource(t *testing.T) {
+	result := LoginIcon().Name()
+	assert.Equal(t, "login.svg", result)
+}
+
+func Test_LogoutIcon_FileSource(t *testing.T) {
+	result := LogoutIcon().Name()
+	assert.Equal(t, "logout.svg", result)
 }

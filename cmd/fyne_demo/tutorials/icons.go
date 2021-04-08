@@ -186,6 +186,7 @@ func loadIcons() []iconInfo {
 		{"VolumeUp", theme.VolumeUpIcon()},
 
 		{"AccountIcon", theme.AccountIcon()},
-		{"ChartIcon", theme.ChartIcon()},
+		{"LoginIcon", theme.LoginIcon()},
+		{"LogoutIcon", theme.LogoutIcon()},
 	}
 }
