@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://pkg.go.dev/fyne.io/fyne/v2?tab=doc" title="Go API Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="Go API Reference"></a>
-  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.0.1" title="2.0.1 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.0.1-blue.svg?style=flat" alt="2.0.1 release"></a>
+  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.0.2" title="2.0.2 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.0.2-blue.svg?style=flat" alt="2.0.2 release"></a>
   <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
   <a href="https://goreportcard.com/report/fyne.io/fyne/v2"><img src="https://goreportcard.com/badge/fyne.io/fyne/v2" alt="Code Status" /></a>

@@ -30,6 +30,7 @@ var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
 var _ desktop.Keyable = (*Entry)(nil)
 var _ mobile.Keyboardable = (*Entry)(nil)
+var _ fyne.Tabbable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
@@ -113,6 +114,15 @@ func NewPasswordEntry() *Entry {
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
+}
+
+// AcceptsTab returns if Entry accepts the Tab key or not.
+//
+// Implements: fyne.Tabbable
+//
+// Since: 2.1
+func (e *Entry) AcceptsTab() bool {
+	return e.MultiLine
 }
 
 // Bind connects the specified data source to this Entry.
@@ -1569,6 +1579,10 @@ func (r *entryContentRenderer) moveCursor() {
 }
 
 func (r *entryContentRenderer) updateScrollDirections() {
+	if r.content.scroll == nil { // not scrolling
+		return
+	}
+
 	switch r.content.entry.Wrapping {
 	case fyne.TextWrapOff:
 		r.content.scroll.Direction = widget.ScrollNone

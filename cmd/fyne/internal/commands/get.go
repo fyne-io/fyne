@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -95,6 +96,7 @@ func (g *Getter) SetIcon(path string) {
 //
 // Deprecated: Get does not define any flags.
 func (g *Getter) AddFlags() {
+	flag.StringVar(&g.icon, "icon", "Icon.png", "The name of the application icon file")
 }
 
 // PrintHelp prints help for this command when used in a command-line context

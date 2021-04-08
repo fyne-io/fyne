@@ -71,6 +71,10 @@ func (i *Image) Alpha() float64 {
 // Resize on an image will scale the content or reposition it according to FillMode.
 // It will normally cause a Refresh to ensure the pixels are recalculated.
 func (i *Image) Resize(s fyne.Size) {
+	if s == i.Size() {
+		return
+	}
+
 	i.baseObject.Resize(s)
 
 	Refresh(i)

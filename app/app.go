@@ -89,6 +89,9 @@ func (app *fyneApp) Storage() fyne.Storage {
 }
 
 func (app *fyneApp) Preferences() fyne.Preferences {
+	if app.uniqueID == "" {
+		fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
+	}
 	return app.prefs
 }
 
