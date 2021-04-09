@@ -502,23 +502,16 @@ func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
 	}
 }
 
-func (c *glCanvas) setupThemeListener() {
-	listener := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			<-listener
-			c.RLock()
-			menu := c.menu
-			padded := c.padded
-			c.RUnlock()
-			if menu != nil {
-				app.ApplyThemeTo(menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-			}
+func (c *glCanvas) applyThemeOutOfTreeObjects() {
+	c.RLock()
+	menu := c.menu
+	padded := c.padded
+	c.RUnlock()
+	if menu != nil {
+		app.ApplyThemeTo(menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+	}
 
-			c.SetPadded(padded) // refresh the padding for potential theme differences
-		}
-	}()
+	c.SetPadded(padded) // refresh the padding for potential theme differences
 }
 
 func (c *glCanvas) walkTree(
@@ -660,8 +653,6 @@ func newCanvas() *glCanvas {
 
 	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}
-
-	c.setupThemeListener()
 
 	return c
 }
