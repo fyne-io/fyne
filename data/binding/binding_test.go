@@ -22,7 +22,6 @@ func TestBase_AddListener(t *testing.T) {
 	assert.Equal(t, 1, len(data.listeners))
 
 	waitForItems()
-	data.trigger()
 	assert.True(t, called)
 }
 

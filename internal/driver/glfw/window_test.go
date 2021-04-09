@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"sync"
 	"testing"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/layout"
-	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -82,7 +83,9 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	c := w.Canvas().(*glCanvas)
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
 	menuBar := buildMenuOverlay(m, c).(*MenuBar)
+	c.Lock()
 	c.setMenuOverlay(menuBar)
+	c.Unlock()
 	w.SetContent(canvas.NewRectangle(color.Black))
 
 	require.False(t, menuBar.IsActive())
@@ -264,6 +267,44 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 4),
 		AbsolutePosition: fyne.NewPos(19, 8)}}, h2.popMouseMovedEvent())
 	assert.Nil(t, h2.popMouseOutEvent())
+}
+
+func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
+	w := createWindow("Test").(*window)
+	test.ApplyTheme(t, theme.DarkTheme())
+	l := widget.NewList(
+		func() int { return 2 },
+		func() fyne.CanvasObject { return widget.NewEntry() },
+		func(lii widget.ListItemID, co fyne.CanvasObject) {},
+	)
+	l.Resize(fyne.NewSize(200, 300))
+	w.SetContent(l)
+	w.Resize(fyne.NewSize(200, 300))
+	repaintWindow(w)
+
+	w.mouseMoved(w.viewport, 9, 50)
+	w.waitForEvents()
+	repaintWindow(w)
+	w.mouseLock.RLock()
+	assert.NotNil(t, w.mouseOver)
+	w.mouseLock.RUnlock()
+	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
+
+	w.mouseMoved(w.viewport, 50, 50)
+	w.waitForEvents()
+	repaintWindow(w)
+	w.mouseLock.RLock()
+	assert.NotNil(t, w.mouseOver)
+	w.mouseLock.RUnlock()
+	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
+
+	w.mouseMoved(w.viewport, 50, 100)
+	w.waitForEvents()
+	repaintWindow(w)
+	w.mouseLock.RLock()
+	assert.Nil(t, w.mouseOver)
+	w.mouseLock.RUnlock()
+	test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 }
 
 func TestWindow_HandleDragging(t *testing.T) {
@@ -664,13 +705,22 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
+	var lock sync.RWMutex
+	waitSingleTapped := make(chan struct{})
+	waitDoubleTapped := make(chan struct{})
 	tapped := 0
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
+		lock.Lock()
 		tapped = 1
+		lock.Unlock()
+		waitSingleTapped <- struct{}{}
 	}
 	but.onDoubleTap = func() {
+		lock.Lock()
 		tapped = 2
+		lock.Unlock()
+		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
 
@@ -678,22 +728,30 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
+	<-waitSingleTapped
 	w.waitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
+	lock.RLock()
 	assert.Equal(t, 1, tapped, "Single tap should have fired")
+	lock.RUnlock()
+
+	lock.Lock()
 	tapped = 0
+	lock.Unlock()
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	w.waitForEvents()
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
+	<-waitDoubleTapped
 	w.waitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
+	lock.RLock()
 	assert.Equal(t, 2, tapped, "Double tap should have fired")
+	lock.RUnlock()
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
@@ -924,11 +982,13 @@ func TestWindow_Focus(t *testing.T) {
 	w.charInput(w.viewport, 'c')
 	w.charInput(w.viewport, 'd')
 	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
+	w.waitForEvents()
+
 	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
 	w.charInput(w.viewport, 'e')
 	w.charInput(w.viewport, 'f')
-
 	w.waitForEvents()
+
 	assert.Equal(t, "abcd", e1.Text)
 	assert.Equal(t, "ef", e2.Text)
 }

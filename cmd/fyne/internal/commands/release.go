@@ -289,11 +289,9 @@ func (r *Releaser) packageIOSRelease() error {
 }
 
 func (r *Releaser) packageMacOSRelease() error {
-	appCert := r.certificate // try to derive two certificates from one name (they will be consistent)
-	if strings.Contains(appCert, "Installer") {
-		appCert = strings.Replace(appCert, "Installer", "Application", 1)
-	}
-	installCert := strings.Replace(appCert, "Application", "Installer", 1)
+	// try to derive two certificates from one name (they will be consistent)
+	appCert := strings.Replace(r.certificate, "Installer", "Application", 1)
+	installCert := strings.Replace(r.certificate, "Application", "Installer", 1)
 	unsignedPath := r.name + "-unsigned.pkg"
 
 	defer os.RemoveAll(r.name + ".app") // this was the output of package and it can get in the way of future builds

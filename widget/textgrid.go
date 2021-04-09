@@ -6,6 +6,8 @@ import (
 	"math"
 	"strings"
 
+	"fyne.io/fyne/v2/internal/cache"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
@@ -296,8 +298,8 @@ func (t *TextGrid) ensureCells(row, col int) {
 }
 
 func (t *TextGrid) refreshCell(row, col int) {
-	// TODO trigger single cell refresh
-	t.Refresh()
+	r := cache.Renderer(t).(*textGridRenderer)
+	r.refreshCell(row, col)
 }
 
 // NewTextGrid creates a new empty TextGrid widget.
@@ -329,6 +331,19 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 
 	bg := canvas.NewRectangle(color.Transparent)
 	t.objects = append(t.objects, bg, text)
+}
+
+func (t *textGridRenderer) refreshCell(row, col int) {
+	pos := row*t.cols + col
+	if pos*2+1 >= len(t.objects) {
+		return
+	}
+
+	text := t.objects[pos*2+1].(*canvas.Text)
+	rect := t.objects[pos*2].(*canvas.Rectangle)
+
+	canvas.Refresh(text)
+	canvas.Refresh(rect)
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
