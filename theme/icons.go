@@ -417,17 +417,17 @@ const (
 
 	// IconNameAccount is the name of theme lookup for account icon.
 	//
-	// Since: 2.0.2
+	// Since: 2.1
 	IconNameAccount fyne.ThemeIconName = "account"
 
 	// IconNameLogin is the name of theme lookup for login icon.
 	//
-	// Since: 2.0.2
+	// Since: 2.1
 	IconNameLogin fyne.ThemeIconName = "login"
 
 	// IconNameLogout is the name of theme lookup for logout icon.
 	//
-	// Since: 2.0.2
+	// Since: 2.1
 	IconNameLogout fyne.ThemeIconName = "logout"
 )
 
