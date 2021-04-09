@@ -335,6 +335,10 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 
 func (t *textGridRenderer) refreshCell(row, col int) {
 	pos := row*t.cols + col
+	if pos*2+1 >= len(t.objects) {
+		return
+	}
+
 	text := t.objects[pos*2+1].(*canvas.Text)
 	rect := t.objects[pos*2].(*canvas.Rectangle)
 

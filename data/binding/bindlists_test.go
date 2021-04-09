@@ -160,3 +160,43 @@ func TestFloatList_Set(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 5.3, v)
 }
+
+func TestFloatList_NotifyOnlyOnceWhenChange(t *testing.T) {
+	f := NewFloatList()
+	triggered := 0
+	f.AddListener(NewDataListener(func() {
+		triggered++
+	}))
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	f.Set([]float64{55, 77})
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	f.SetValue(0, 5)
+	waitForItems()
+	assert.Zero(t, triggered)
+
+	triggered = 0
+	f.Set([]float64{101, 98})
+	waitForItems()
+	assert.Zero(t, triggered)
+
+	triggered = 0
+	f.Append(88)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	f.Prepend(23)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	f.Set([]float64{32})
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+}
