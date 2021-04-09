@@ -200,9 +200,6 @@ func (d *gLDriver) startDrawThread() {
 			case set := <-settingsChange:
 				painter.ClearFontCache()
 				cache.ResetSvg()
-				for _, win := range d.windowList() {
-					go win.Canvas().(*glCanvas).reloadScale()
-				}
 				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 					c, ok := w.Canvas().(*glCanvas)
 					if !ok {
