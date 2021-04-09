@@ -155,12 +155,18 @@ func (w *window) Close() {
 		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
 	}
 
+	// TODO free textures synchronously with the
+	// draw thread
+
 	w.canvas.walkTree(nil, func(obj, _ fyne.CanvasObject) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			cache.DestroyRenderer(co)
 		}
 	})
+
+	// TODO clean canvases cache and out of scope
+	// renderers
 
 	if w.onClosed != nil {
 		w.onClosed()

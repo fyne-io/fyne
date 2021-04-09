@@ -218,6 +218,7 @@ func (d *mobileDriver) Run() {
 						d.paintWindow(current, newSize)
 						a.Publish()
 					}
+					cache.CleanTask()
 				case touch.Event:
 					switch e.Type {
 					case touch.TypeBegin:
@@ -456,6 +457,9 @@ func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) bool {
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
 		default:
+			cache.RangeExpiredTexturesFor(canvas, func(obj fyne.CanvasObject) {
+				canvas.painter.Free(obj)
+			})
 			return freed
 		}
 	}

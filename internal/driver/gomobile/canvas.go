@@ -158,6 +158,7 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	default:
 		// queue is full, ignore
 	}
+	cache.NotifyCanvasRefresh()
 }
 
 func (c *mobileCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
@@ -274,6 +275,7 @@ func (c *mobileCanvas) minSizeChanged() bool {
 		}
 		minSize := obj.MinSize()
 
+		// TODO decision about minSizeCache
 		if minSize != c.minSizeCache[obj] {
 			minSizeChange = true
 
