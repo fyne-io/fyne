@@ -20,16 +20,6 @@ jobs:
       run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
       if: ${{ runner.os == 'Linux' }}
 
-    #- name: Verify go modules
-    #  run: |
-    #    if [ "$GO111MODULE" == "on" ]
-    #    then
-    #        # For some reason `git diff-index HEAD` does not work properly if the following line is missing.
-    #        git diff
-    #        # check that go mod tidy does not change go.mod/go.sum
-    #        go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
-    #    fi
-
     - name: Tests
       run: go test -tags ci ./...
 
