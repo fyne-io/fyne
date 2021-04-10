@@ -12,8 +12,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: WillAbides/setup-go-faster@v1.5.0
-      id: setup-go-faster
+    - uses: WillAbides/setup-go-faster@v1.6.0
       with:
         go-version: ${{ matrix.go-version }}
 
@@ -45,8 +44,6 @@ jobs:
 
     - name: Update PR Coverage
       uses: shogo82148/actions-goveralls@v1
-      env:
-        GOROOT: ${{steps.setup-go-faster.outputs.GOROOT}}
       with:
         path-to-profile: coverage.out
       if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
