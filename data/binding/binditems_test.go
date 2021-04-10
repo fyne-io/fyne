@@ -3,6 +3,7 @@ package binding
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,29 +52,152 @@ func TestNewFloat(t *testing.T) {
 	assert.Equal(t, 0.3, v)
 }
 
-func TestNewFloat_TriggerOnlyWhenChange(t *testing.T) {
-	f := NewFloat()
-	called := 0
+func TestBindFloat_TriggerOnlyWhenChange(t *testing.T) {
+	v := 9.8
+	f := BindFloat(&v)
+	triggered := 0
 	f.AddListener(NewDataListener(func() {
-		called++
+		triggered++
 	}))
 	waitForItems()
-	assert.Equal(t, 1, called)
+	assert.Equal(t, 1, triggered)
 
+	triggered = 0
 	for i := 0; i < 5; i++ {
 		err := f.Set(9.0)
 		assert.Nil(t, err)
 		waitForItems()
-		assert.Equal(t, 2, called)
+		assert.Equal(t, 1, triggered)
 	}
 
+	triggered = 0
 	err := f.Set(9.1)
 	assert.Nil(t, err)
 	waitForItems()
-	assert.Equal(t, 3, called)
+	assert.Equal(t, 1, triggered)
 
-	f.Set(8.0)
+	triggered = 0
+	err = f.Set(8.0)
 	assert.Nil(t, err)
 	waitForItems()
-	assert.Equal(t, 4, called)
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	v = 8.0
+	err = f.Reload()
+	assert.NoError(t, err)
+	waitForItems()
+	assert.Equal(t, 0, triggered)
+
+	triggered = 0
+	v = 9.2
+	err = f.Reload()
+	assert.NoError(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+}
+
+func TestNewFloat_TriggerOnlyWhenChange(t *testing.T) {
+	f := NewFloat()
+	triggered := 0
+	f.AddListener(NewDataListener(func() {
+		triggered++
+	}))
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	for i := 0; i < 5; i++ {
+		err := f.Set(9.0)
+		assert.Nil(t, err)
+		waitForItems()
+		assert.Equal(t, 1, triggered)
+	}
+
+	triggered = 0
+	err := f.Set(9.1)
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	err = f.Set(8.0)
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+}
+
+func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
+	v := storage.NewURI("first")
+	b := BindURI(&v)
+	triggered := 0
+	b.AddListener(NewDataListener(func() {
+		triggered++
+	}))
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	for i := 0; i < 5; i++ {
+		err := b.Set(storage.NewURI("second"))
+		assert.Nil(t, err)
+		waitForItems()
+		assert.Equal(t, 1, triggered)
+	}
+
+	triggered = 0
+	err := b.Set(storage.NewURI("third"))
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	err = b.Set(storage.NewURI("fourth"))
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	v = storage.NewURI("fourth")
+	err = b.Reload()
+	assert.NoError(t, err)
+	waitForItems()
+	assert.Equal(t, 0, triggered)
+
+	triggered = 0
+	v = storage.NewURI("fifth")
+	err = b.Reload()
+	assert.NoError(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+}
+
+func TestNewURI_TriggerOnlyWhenChange(t *testing.T) {
+	b := NewURI()
+	triggered := 0
+	b.AddListener(NewDataListener(func() {
+		triggered++
+	}))
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	for i := 0; i < 5; i++ {
+		err := b.Set(storage.NewURI("first"))
+		assert.Nil(t, err)
+		waitForItems()
+		assert.Equal(t, 1, triggered)
+	}
+
+	triggered = 0
+	err := b.Set(storage.NewURI("second"))
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
+
+	triggered = 0
+	err = b.Set(storage.NewURI("third"))
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, 1, triggered)
 }
