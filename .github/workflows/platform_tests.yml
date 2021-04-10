@@ -12,7 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: WillAbides/setup-go-faster@v1.6.0
+    - uses: WillAbides/setup-go-faster@v1.5.0
+      id: setup-go-faster
       with:
         go-version: ${{ matrix.go-version }}
 
@@ -26,7 +27,6 @@ jobs:
     - name: Update coverage
       run: |
         GO111MODULE=off go get github.com/mattn/goveralls
-
         set -e
         go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
         if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
@@ -34,6 +34,8 @@ jobs:
 
     - name: Update PR Coverage
       uses: shogo82148/actions-goveralls@v1
+      env:
+        GOROOT: ${{steps.setup-go-faster.outputs.GOROOT}}
       with:
         path-to-profile: coverage.out
       if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
