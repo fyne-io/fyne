@@ -5,7 +5,6 @@ package binding
 
 import (
 	"fmt"
-	"strconv"
 
 	"fyne.io/fyne/v2"
 )
@@ -24,7 +23,9 @@ type stringFromBool struct {
 //
 // Since: 2.0
 func BoolToString(v Bool) String {
-	return BoolToStringWithFormat(v, "")
+	str := &stringFromBool{from: v}
+	v.AddListener(str)
+	return str
 }
 
 // BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
@@ -33,6 +34,10 @@ func BoolToString(v Bool) String {
 //
 // Since: 2.0
 func BoolToStringWithFormat(v Bool, format string) String {
+	if format == "%t" { // Same as not using custom formatting.
+		return BoolToString(v)
+	}
+
 	str := &stringFromBool{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -48,12 +53,11 @@ func (s *stringFromBool) Get() (string, error) {
 		return fmt.Sprintf(s.format, val), nil
 	}
 
-	return strconv.FormatBool(val), nil
+	return formatBool(val), nil
 }
 
 func (s *stringFromBool) Set(str string) error {
 	var val bool
-
 	if s.format != "" {
 		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 		if err != nil {
@@ -63,7 +67,7 @@ func (s *stringFromBool) Set(str string) error {
 			return errParseFailed
 		}
 	} else {
-		new, err := strconv.ParseBool(str)
+		new, err := parseBool(str)
 		if err != nil {
 			return err
 		}
@@ -105,7 +109,9 @@ type stringFromFloat struct {
 //
 // Since: 2.0
 func FloatToString(v Float) String {
-	return FloatToStringWithFormat(v, "")
+	str := &stringFromFloat{from: v}
+	v.AddListener(str)
+	return str
 }
 
 // FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
@@ -114,6 +120,10 @@ func FloatToString(v Float) String {
 //
 // Since: 2.0
 func FloatToStringWithFormat(v Float, format string) String {
+	if format == "%f" { // Same as not using custom formatting.
+		return FloatToString(v)
+	}
+
 	str := &stringFromFloat{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -129,12 +139,11 @@ func (s *stringFromFloat) Get() (string, error) {
 		return fmt.Sprintf(s.format, val), nil
 	}
 
-	return strconv.FormatFloat(val, 'f', 6, 64), nil
+	return formatFloat(val), nil
 }
 
 func (s *stringFromFloat) Set(str string) error {
 	var val float64
-
 	if s.format != "" {
 		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 		if err != nil {
@@ -144,7 +153,7 @@ func (s *stringFromFloat) Set(str string) error {
 			return errParseFailed
 		}
 	} else {
-		new, err := strconv.ParseFloat(str, 64)
+		new, err := parseFloat(str)
 		if err != nil {
 			return err
 		}
@@ -186,7 +195,9 @@ type stringFromInt struct {
 //
 // Since: 2.0
 func IntToString(v Int) String {
-	return IntToStringWithFormat(v, "")
+	str := &stringFromInt{from: v}
+	v.AddListener(str)
+	return str
 }
 
 // IntToStringWithFormat creates a binding that connects a Int data item to a String and is
@@ -195,6 +206,10 @@ func IntToString(v Int) String {
 //
 // Since: 2.0
 func IntToStringWithFormat(v Int, format string) String {
+	if format == "%d" { // Same as not using custom formatting.
+		return IntToString(v)
+	}
+
 	str := &stringFromInt{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -210,12 +225,11 @@ func (s *stringFromInt) Get() (string, error) {
 		return fmt.Sprintf(s.format, val), nil
 	}
 
-	return strconv.Itoa(val), nil
+	return formatInt(val), nil
 }
 
 func (s *stringFromInt) Set(str string) error {
 	var val int
-
 	if s.format != "" {
 		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
 		if err != nil {
@@ -225,11 +239,11 @@ func (s *stringFromInt) Set(str string) error {
 			return errParseFailed
 		}
 	} else {
-		new, err := strconv.ParseInt(str, 0, 64)
+		new, err := parseInt(str)
 		if err != nil {
 			return err
 		}
-		val = int(new)
+		val = new
 	}
 
 	old, err := s.from.Get()
@@ -320,7 +334,9 @@ type stringToBool struct {
 //
 // Since: 2.0
 func StringToBool(str String) Bool {
-	return StringToBoolWithFormat(str, "")
+	v := &stringToBool{from: str}
+	str.AddListener(v)
+	return v
 }
 
 // StringToBoolWithFormat creates a binding that connects a String data item to a Bool and is
@@ -330,6 +346,10 @@ func StringToBool(str String) Bool {
 //
 // Since: 2.0
 func StringToBoolWithFormat(str String, format string) Bool {
+	if format == "%t" { // Same as not using custom format.
+		return StringToBool(str)
+	}
+
 	v := &stringToBool{from: str, format: format}
 	str.AddListener(v)
 	return v
@@ -351,7 +371,7 @@ func (s *stringToBool) Get() (bool, error) {
 			return false, errParseFailed
 		}
 	} else {
-		new, err := strconv.ParseBool(str)
+		new, err := parseBool(str)
 		if err != nil {
 			return false, err
 		}
@@ -366,7 +386,7 @@ func (s *stringToBool) Set(val bool) error {
 	if s.format != "" {
 		str = fmt.Sprintf(s.format, val)
 	} else {
-		str = strconv.FormatBool(val)
+		str = formatBool(val)
 	}
 
 	old, err := s.from.Get()
@@ -402,7 +422,9 @@ type stringToFloat struct {
 //
 // Since: 2.0
 func StringToFloat(str String) Float {
-	return StringToFloatWithFormat(str, "")
+	v := &stringToFloat{from: str}
+	str.AddListener(v)
+	return v
 }
 
 // StringToFloatWithFormat creates a binding that connects a String data item to a Float and is
@@ -412,6 +434,10 @@ func StringToFloat(str String) Float {
 //
 // Since: 2.0
 func StringToFloatWithFormat(str String, format string) Float {
+	if format == "%f" { // Same as not using custom format.
+		return StringToFloat(str)
+	}
+
 	v := &stringToFloat{from: str, format: format}
 	str.AddListener(v)
 	return v
@@ -433,9 +459,9 @@ func (s *stringToFloat) Get() (float64, error) {
 			return 0.0, errParseFailed
 		}
 	} else {
-		new, err := strconv.ParseFloat(str, 64)
+		new, err := parseFloat(str)
 		if err != nil {
-			return 0, err
+			return 0.0, err
 		}
 		val = new
 	}
@@ -448,7 +474,7 @@ func (s *stringToFloat) Set(val float64) error {
 	if s.format != "" {
 		str = fmt.Sprintf(s.format, val)
 	} else {
-		str = strconv.FormatFloat(val, 'f', 6, 64)
+		str = formatFloat(val)
 	}
 
 	old, err := s.from.Get()
@@ -484,7 +510,9 @@ type stringToInt struct {
 //
 // Since: 2.0
 func StringToInt(str String) Int {
-	return StringToIntWithFormat(str, "")
+	v := &stringToInt{from: str}
+	str.AddListener(v)
+	return v
 }
 
 // StringToIntWithFormat creates a binding that connects a String data item to a Int and is
@@ -494,6 +522,10 @@ func StringToInt(str String) Int {
 //
 // Since: 2.0
 func StringToIntWithFormat(str String, format string) Int {
+	if format == "%d" { // Same as not using custom format.
+		return StringToInt(str)
+	}
+
 	v := &stringToInt{from: str, format: format}
 	str.AddListener(v)
 	return v
@@ -515,11 +547,11 @@ func (s *stringToInt) Get() (int, error) {
 			return 0, errParseFailed
 		}
 	} else {
-		new, err := strconv.Atoi(str)
+		new, err := parseInt(str)
 		if err != nil {
 			return 0, err
 		}
-		val = int(new)
+		val = new
 	}
 
 	return val, nil
@@ -530,7 +562,7 @@ func (s *stringToInt) Set(val int) error {
 	if s.format != "" {
 		str = fmt.Sprintf(s.format, val)
 	} else {
-		str = strconv.Itoa(val)
+		str = formatInt(val)
 	}
 
 	old, err := s.from.Get()
