@@ -19,8 +19,26 @@ func NewFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) *
 	return dialog
 }
 
-// ShowFolderOpen creates and shows a file dialog allowing the user to choose a folder to open.
+// ShowFolderOpen creates and shows a file dialog allowing the user to choose a
+// folder to open. It takes a callback function that is called whenever the open
+// or cancel buttons are tapped.
+//
 // The dialog will appear over the window specified.
+//
+//    a := app.New()
+//    w := a.NewWindow("example")
+//    button := widget.NewButtonWithIcon("", theme.FolderIcon(),
+//       func() {
+//           dialog.ShowFolderOpen(
+//               func (uri fyne.ListableURI, err error) {
+//                   // Cancel will pass a nil value.
+//                   if uri == nil || err != nil {
+//                       return
+//                   }
+//                   fmt.Println("URI", uri)
+//               }, w)
+//       }
+//    )
 //
 // Since: 1.4
 func ShowFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) {
