@@ -28,7 +28,7 @@ jobs:
       run: test -z $(goimports -e -d . | tee /dev/stderr)
 
     - name: Gocyclo
-      run: gocyclo -over 50 .
+      run: gocyclo -over 30 .
 
     - name: Golint
       run: golint -set_exit_status $(go list -tags ci ./...)
