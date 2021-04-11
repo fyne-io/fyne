@@ -1231,7 +1231,7 @@ func (w *window) rescaleOnMain() {
 }
 
 func (w *window) Context() interface{} {
-	return nil
+	return w.viewport
 }
 
 // Use this method to queue up a callback that handles an event. This ensures
