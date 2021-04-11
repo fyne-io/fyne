@@ -1,10 +1,14 @@
 package fyne
 
 import (
+	"embed"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 )
+
+var embedRes embed.FS
 
 // Resource represents a single binary resource, such as an image or font.
 // A resource has an identifying name and byte array content.
@@ -46,9 +50,28 @@ func NewStaticResource(name string, content []byte) *StaticResource {
 	}
 }
 
+// Set up embedded file resources
+func SetEmbedResource(list embed.FS) {
+	embedRes = list
+}
+
 // LoadResourceFromPath creates a new StaticResource in memory using the contents of the specified file.
 func LoadResourceFromPath(path string) (Resource, error) {
-	bytes, err := ioutil.ReadFile(filepath.Clean(path))
+	if len(path) == 0 {
+		return nil, errors.New("file path is empty")
+	}
+
+	var (
+		bytes []byte
+		err error
+	)
+
+	if path[0] == '-' { //Used to distinguish whether it is an embedded file
+		bytes, err = embedRes.ReadFile(path[1:])
+	} else {
+		bytes, err = ioutil.ReadFile(filepath.Clean(path))
+	}
+
 	if err != nil {
 		return nil, err
 	}
