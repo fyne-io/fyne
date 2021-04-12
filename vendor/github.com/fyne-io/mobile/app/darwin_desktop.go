@@ -240,7 +240,7 @@ func driverShowFileOpenPicker(func(string, func()), *FileFilter) {
 }
 
 // driverShowFileSavePicker does nothing on desktop
-func driverShowFileSavePicker(func(string, func()), *FileFilter) {
+func driverShowFileSavePicker(func(string, func()), *FileFilter, string) {
 }
 
 // convRune marks the Carbon/Cocoa private-range unicode rune representing

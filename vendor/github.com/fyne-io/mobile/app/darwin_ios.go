@@ -306,7 +306,7 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 	C.showFileOpenPicker(mimeStr, extStr)
 }
 
-func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	fileCallback = callback
 
 	mimeStr, extStr := cStringsForFilter(filter)
