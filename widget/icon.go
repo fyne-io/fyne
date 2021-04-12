@@ -40,16 +40,6 @@ func (i *iconRenderer) Refresh() {
 	canvas.Refresh(i.image.super())
 }
 
-func (i *iconRenderer) updateObjects() {
-	var objects []fyne.CanvasObject
-	if i.image.Resource != nil {
-		raster := canvas.NewImageFromResource(i.image.Resource)
-		raster.FillMode = canvas.ImageFillContain
-		objects = append(objects, raster)
-	}
-	i.SetObjects(objects)
-}
-
 // Icon widget is a basic image component that load's its resource to match the theme.
 type Icon struct {
 	BaseWidget
