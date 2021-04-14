@@ -409,10 +409,10 @@ func (c *Canvas) Unfocus() {
 }
 
 func (c *Canvas) isMenuActive() bool {
-	menu := c.menuTree.root.obj
-	if menu == nil {
+	if c.menuTree == nil || c.menuTree.root == nil || c.menuTree.root.obj == nil {
 		return false
 	}
+	menu := c.menuTree.root.obj
 	if am, ok := menu.(activatableMenu); ok {
 		return am.IsActive()
 	}
