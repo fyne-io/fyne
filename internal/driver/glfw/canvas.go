@@ -241,10 +241,12 @@ func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
 
 func (c *glCanvas) SetPadded(padded bool) {
 	c.Lock()
-	defer c.Unlock()
+	content := c.content
 	c.padded = padded
+	pos := c.contentPos()
+	c.Unlock()
 
-	c.content.Move(c.contentPos())
+	content.Move(pos)
 }
 
 func (c *glCanvas) reloadScale() {
