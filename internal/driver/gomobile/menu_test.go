@@ -20,7 +20,7 @@ func TestMobileCanvas_DismissBar(t *testing.T) {
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test"))
 	c.showMenu(menu)
-	c.resize(fyne.NewSize(100, 100))
+	c.Resize(fyne.NewSize(100, 100))
 
 	assert.NotNil(t, c.menu)
 	// simulate tap as the test util does not know about our menu...
@@ -35,14 +35,14 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})))
 	c.showMenu(menu)
-	c.resize(fyne.NewSize(100, 100))
+	c.Resize(fyne.NewSize(100, 100))
 
 	assert.NotNil(t, c.menu)
 	menuObj := c.menu.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*menuLabel)
 	point := &fyne.PointEvent{Position: fyne.NewPos(10, 10)}
 	menuObj.Tapped(point)
 
-	tapMeItem := c.overlays.Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu).Items[0].(fyne.Tappable)
+	tapMeItem := c.Overlays().Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu).Items[0].(fyne.Tappable)
 	tapMeItem.Tapped(point)
 	assert.Nil(t, c.menu)
 }

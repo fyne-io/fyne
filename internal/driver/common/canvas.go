@@ -80,6 +80,9 @@ func (c *Canvas) TypedShortcut(shortcut fyne.Shortcut) {
 //
 // This function uses lock.
 func (c *Canvas) EnsureMinSize() bool {
+	if c.impl.Content() == nil {
+		return false
+	}
 	var lastParent fyne.CanvasObject
 
 	windowNeedsMinSizeUpdate := false
@@ -138,8 +141,13 @@ func (c *Canvas) EnsureMinSize() bool {
 // This function uses lock.
 func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
 	c.RLock()
-	content := c.contentTree.root.obj
-	menu := c.menuTree.root.obj
+	var content, menu fyne.CanvasObject
+	if c.contentTree != nil && c.contentTree.root != nil {
+		content = c.contentTree.root.obj
+	}
+	if c.menuTree != nil && c.menuTree.root != nil {
+		menu = c.menuTree.root.obj
+	}
 	c.RUnlock()
 	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
 	trees = append(trees, content)

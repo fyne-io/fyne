@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -39,7 +40,7 @@ func (w *window) SetFullScreen(bool) {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.Canvas().(*mobileCanvas).resize(size)
+	w.Canvas().(*mobileCanvas).Resize(size)
 }
 
 func (w *window) RequestFocus() {
@@ -111,12 +112,11 @@ func (w *window) Show() {
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
-		w.canvas.windowHead = container.NewHBox(menuButton,
-			layout.NewSpacer(), title, layout.NewSpacer(), exit)
-
-		w.canvas.resize(w.canvas.size)
+		w.canvas.setWindowHead(container.NewHBox(menuButton,
+			layout.NewSpacer(), title, layout.NewSpacer(), exit))
+		w.canvas.Resize(w.canvas.size)
 	} else {
-		w.canvas.windowHead = container.NewHBox(menuButton)
+		w.canvas.setWindowHead(container.NewHBox(menuButton))
 	}
 	w.visible = true
 
@@ -155,8 +155,8 @@ func (w *window) Close() {
 		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
 	}
 
-	w.canvas.walkTree(nil, func(obj, _ fyne.CanvasObject) {
-		switch co := obj.(type) {
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+		switch co := node.Obj().(type) {
 		case fyne.Widget:
 			cache.DestroyRenderer(co)
 		}
