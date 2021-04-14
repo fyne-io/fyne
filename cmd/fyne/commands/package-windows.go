@@ -89,6 +89,7 @@ func (p *packager) packageWindows() error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to write .syso file")
 	}
+	defer os.Remove(outPath)
 
 	err = os.Remove(icoPath)
 	if err != nil {
@@ -106,7 +107,7 @@ func (p *packager) packageWindows() error {
 	}
 
 	if p.install {
-		err := runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+		err := runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(p.dir, p.name)+"\"\"")
 		if err != nil {
 			return errors.Wrap(err, "Failed to run as administrator")
 		}
