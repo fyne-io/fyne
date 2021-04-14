@@ -154,6 +154,10 @@ func TestList_Select(t *testing.T) {
 
 func TestList_Unselect(t *testing.T) {
 	list := createList(1000)
+	var unselected ListItemID
+	list.OnUnselected = func(id ListItemID) {
+		unselected = id
+	}
 
 	list.Select(10)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
@@ -164,6 +168,12 @@ func TestList_Unselect(t *testing.T) {
 	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	assert.False(t, children[10].(*listItem).background.Visible())
 	assert.Nil(t, list.selected)
+	assert.Equal(t, 10, unselected)
+
+	list.Select(11)
+	list.UnselectAll()
+	assert.Nil(t, list.selected)
+	assert.Equal(t, 11, unselected)
 }
 
 func TestList_DataChange(t *testing.T) {

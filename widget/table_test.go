@@ -156,6 +156,12 @@ func TestTable_Unselect(t *testing.T) {
 	assert.Equal(t, 1, unselectedRow)
 	assert.Equal(t, 1, unselectedColumn)
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
+
+	table.Select(TableCellID{2, 2})
+
+	table.UnselectAll()
+	assert.Equal(t, 2, unselectedRow)
+	assert.Equal(t, 2, unselectedColumn)
 }
 
 func TestTable_Refresh(t *testing.T) {

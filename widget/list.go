@@ -143,6 +143,22 @@ func (l *List) Unselect(id ListItemID) {
 	}
 }
 
+// UnselectAll removes all items from the selection.
+func (l *List) UnselectAll() {
+	if len(l.selected) == 0 {
+		return
+	}
+
+	selected := l.selected
+	l.selected = nil
+	l.Refresh()
+	if f := l.OnUnselected; f != nil {
+		for _, id := range selected {
+			f(id)
+		}
+	}
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*listRenderer)(nil)
 

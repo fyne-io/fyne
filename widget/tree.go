@@ -234,7 +234,7 @@ func (t *Tree) ToggleBranch(uid string) {
 	}
 }
 
-// Unselect marks the specified node to be not selected
+// Unselect marks the specified node to be not selected.
 func (t *Tree) Unselect(uid TreeNodeID) {
 	if len(t.selected) == 0 {
 		return
@@ -244,6 +244,22 @@ func (t *Tree) Unselect(uid TreeNodeID) {
 	t.Refresh()
 	if f := t.OnUnselected; f != nil {
 		f(uid)
+	}
+}
+
+// UnselectAll sets all nodes to be not selected.
+func (t *Tree) UnselectAll() {
+	if len(t.selected) == 0 {
+		return
+	}
+
+	selected := t.selected
+	t.selected = nil
+	t.Refresh()
+	if f := t.OnUnselected; f != nil {
+		for _, uid := range selected {
+			f(uid)
+		}
 	}
 }
 

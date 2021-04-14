@@ -131,6 +131,24 @@ func (t *Table) Unselect(id TableCellID) {
 	}
 }
 
+// UnselectAll will mark all cells as unselected.
+func (t *Table) UnselectAll() {
+	if t.selectedCell == nil {
+		return
+	}
+
+	selected := *t.selectedCell
+	t.selectedCell = nil
+
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+
+	if f := t.OnUnselected; f != nil {
+		f(selected)
+	}
+}
+
 func (t *Table) scrollTo(id TableCellID) {
 	if t.scroll == nil {
 		return
