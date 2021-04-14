@@ -149,11 +149,11 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
-    static void showFileSave(String mimes) {
-        goNativeActivity.doShowFileSave(mimes);
+    static void showFileSave(String mimes, String filename) {
+        goNativeActivity.doShowFileSave(mimes, filename);
     }
 
-    void doShowFileSave(String mimes) {
+    void doShowFileSave(String mimes, String filename) {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.setType("*/*");
@@ -161,6 +161,7 @@ public class GoNativeActivity extends NativeActivity {
         } else {
             intent.setType(mimes);
         }
+        intent.putExtra(Intent.EXTRA_TITLE, filename);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Save File"), FILE_SAVE_CODE);
     }
