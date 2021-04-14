@@ -14,7 +14,6 @@ import (
 // SizeableCanvas defines a canvas with size related functions.
 type SizeableCanvas interface {
 	fyne.Canvas
-	Size() fyne.Size
 	Resize(fyne.Size)
 	MinSize() fyne.Size
 }
@@ -68,6 +67,11 @@ func (c *Canvas) RemoveShortcut(shortcut fyne.Shortcut) {
 	c.shortcut.RemoveShortcut(shortcut)
 }
 
+// TypedShortcut handle the registered shortcut.
+func (c *Canvas) TypedShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.TypedShortcut(shortcut)
+}
+
 // ===============================================================
 // Object tree related
 // ===============================================================
@@ -79,7 +83,10 @@ func (c *Canvas) EnsureMinSize() bool {
 	var lastParent fyne.CanvasObject
 
 	windowNeedsMinSizeUpdate := false
-	ensureMinSize := func(node *renderCacheNode) {
+	csize := c.impl.Size()
+	min := c.impl.MinSize()
+
+	ensureMinSize := func(node *RenderCacheNode) {
 		obj := node.obj
 		canvasMutex.Lock()
 		canvases[obj] = c.impl
@@ -99,7 +106,6 @@ func (c *Canvas) EnsureMinSize() bool {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
 				expectedSize := minSize.Max(size)
-				csize := c.impl.Size()
 				if expectedSize != size && size != csize {
 					objToLayout = nil
 					obj.Resize(expectedSize)
@@ -114,8 +120,6 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	c.WalkTrees(nil, ensureMinSize)
 
-	min := c.impl.MinSize()
-	csize := c.impl.Size()
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
 	if shouldResize {
 		c.impl.Resize(csize.Max(min))
@@ -150,7 +154,7 @@ func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
 //
 // This function does not use the canvas lock.
 func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
-	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: content}}
+	c.contentTree = &renderCacheTree{root: &RenderCacheNode{obj: content}}
 	var focused fyne.Focusable
 	if c.contentFocusMgr != nil {
 		focused = c.contentFocusMgr.Focused() // keep old focus if possible
@@ -165,7 +169,7 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 //
 // This function does not use the canvas lock.
 func (c *Canvas) SetMenuTreeAndFocusMgr(menu fyne.CanvasObject) {
-	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: menu}}
+	c.menuTree = &renderCacheTree{root: &RenderCacheNode{obj: menu}}
 	if menu != nil {
 		c.menuFocusMgr = app.NewFocusManager(menu)
 	} else {
@@ -177,13 +181,13 @@ func (c *Canvas) SetMenuTreeAndFocusMgr(menu fyne.CanvasObject) {
 //
 // This function does not use the canvas lock.
 func (c *Canvas) SetMobileWindowHeadTree(head fyne.CanvasObject) {
-	c.mWindowHeadTree = &renderCacheTree{root: &renderCacheNode{obj: head}}
+	c.mWindowHeadTree = &renderCacheTree{root: &RenderCacheNode{obj: head}}
 }
 
 // WalkTrees walks over the trees.
 func (c *Canvas) WalkTrees(
-	beforeChildren func(*renderCacheNode, fyne.Position),
-	afterChildren func(*renderCacheNode),
+	beforeChildren func(*RenderCacheNode, fyne.Position),
+	afterChildren func(*RenderCacheNode),
 ) {
 	c.walkTree(c.contentTree, beforeChildren, afterChildren)
 	if c.mWindowHeadTree != nil && c.mWindowHeadTree.root.obj != nil {
@@ -201,12 +205,12 @@ func (c *Canvas) WalkTrees(
 
 func (c *Canvas) walkTree(
 	tree *renderCacheTree,
-	beforeChildren func(*renderCacheNode, fyne.Position),
-	afterChildren func(*renderCacheNode),
+	beforeChildren func(*RenderCacheNode, fyne.Position),
+	afterChildren func(*RenderCacheNode),
 ) {
 	tree.Lock()
 	defer tree.Unlock()
-	var node, parent, prev *renderCacheNode
+	var node, parent, prev *RenderCacheNode
 	node = tree.root
 
 	bc := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
@@ -217,7 +221,7 @@ func (c *Canvas) walkTree(
 			node = nil
 		}
 		if node == nil {
-			node = &renderCacheNode{parent: parent, obj: obj}
+			node = &RenderCacheNode{parent: parent, obj: obj}
 			if parent.firstChild == nil {
 				parent.firstChild = node
 			} else {
@@ -463,7 +467,7 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 }
 
 func (o *overlayStack) add(overlay fyne.CanvasObject) {
-	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
+	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &RenderCacheNode{obj: overlay}})
 	o.OverlayStack.Add(overlay)
 }
 
@@ -481,12 +485,13 @@ type activatableMenu interface {
 	IsActive() bool
 }
 
-type renderCacheNode struct {
+// RenderCacheNode ...
+type RenderCacheNode struct {
 	// structural data
-	firstChild  *renderCacheNode
-	nextSibling *renderCacheNode
+	firstChild  *RenderCacheNode
+	nextSibling *RenderCacheNode
 	obj         fyne.CanvasObject
-	parent      *renderCacheNode
+	parent      *RenderCacheNode
 	// cache data
 	minSize fyne.Size
 	// painterData is some data from the painter associated with the drawed node
@@ -496,9 +501,14 @@ type renderCacheNode struct {
 	painterData interface{}
 }
 
+// Obj returns the node object.
+func (r *RenderCacheNode) Obj() fyne.CanvasObject {
+	return r.obj
+}
+
 type renderCacheTree struct {
 	sync.RWMutex
-	root *renderCacheNode
+	root *RenderCacheNode
 }
 
 func updateLayout(objToLayout fyne.CanvasObject) {

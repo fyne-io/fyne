@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -435,8 +436,8 @@ func (w *window) Close() {
 	w.viewLock.Unlock()
 	w.viewport.SetShouldClose(true)
 
-	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
-		switch co := node.obj.(type) {
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+		switch co := node.Obj().(type) {
 		case fyne.Widget:
 			cache.DestroyRenderer(co)
 		}
@@ -1290,7 +1291,7 @@ func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifie
 			}
 			return shouldRunShortcut
 		}
-		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+		w.queueEvent(func() { w.canvas.TypedShortcut(shortcut) })
 		return true
 	}
 
@@ -1442,8 +1443,8 @@ func (w *window) create() {
 
 	// run the GL init on the draw thread
 	runOnDraw(w, func() {
-		w.canvas.painter = gl.NewPainter(w.canvas, w)
-		w.canvas.painter.Init()
+		w.canvas.SetPainter(gl.NewPainter(w.canvas, w))
+		w.canvas.Painter().Init()
 	})
 
 	runOnMain(func() {
