@@ -59,8 +59,9 @@ func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
 
 	if e.dropDown != nil {
+		padding := fyne.NewSize(4*theme.Padding(), 0)
 		for _, item := range e.dropDown.Items {
-			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(fyne.NewSize(4*theme.Padding(), 0))
+			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(padding)
 			min = min.Max(itemMin)
 		}
 	}
