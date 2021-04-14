@@ -80,10 +80,10 @@ func (e *SelectEntry) Resize(size fyne.Size) {
 // SetOptions sets the options the user might select from.
 func (e *SelectEntry) SetOptions(options []string) {
 	e.options = options
-	var items []*fyne.MenuItem
-	for _, option := range options {
+	items := make([]*fyne.MenuItem, len(options))
+	for i, option := range options {
 		option := option // capture
-		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
+		items[i] = fyne.NewMenuItem(option, func() { e.SetText(option) })
 	}
 	e.dropDown = fyne.NewMenu("", items...)
 
