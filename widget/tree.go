@@ -248,6 +248,8 @@ func (t *Tree) Unselect(uid TreeNodeID) {
 }
 
 // UnselectAll sets all nodes to be not selected.
+//
+// Since: 2.1
 func (t *Tree) UnselectAll() {
 	if len(t.selected) == 0 {
 		return

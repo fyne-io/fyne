@@ -144,6 +144,8 @@ func (l *List) Unselect(id ListItemID) {
 }
 
 // UnselectAll removes all items from the selection.
+//
+// Since: 2.1
 func (l *List) UnselectAll() {
 	if len(l.selected) == 0 {
 		return

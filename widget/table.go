@@ -132,6 +132,8 @@ func (t *Table) Unselect(id TableCellID) {
 }
 
 // UnselectAll will mark all cells as unselected.
+//
+// Since: 2.1
 func (t *Table) UnselectAll() {
 	if t.selectedCell == nil {
 		return
