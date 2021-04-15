@@ -211,13 +211,25 @@ func (r *appTabsRenderer) Destroy() {
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
 	tabBarMinSize := r.tabBar.MinSize()
+	if fyne.CurrentDevice().IsMobile() {
+		cells := len(r.tabBar.Objects)
+		if cells == 0 {
+			cells = 1
+		}
+
+		if fyne.IsVertical(fyne.CurrentDevice().Orientation()) {
+			r.tabBar.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			r.tabBar.Layout = layout.NewGridLayoutWithRows(cells)
+		}
+	}
 	var tabBarPos fyne.Position
 	var tabBarSize fyne.Size
 	var linePos fyne.Position
 	var lineSize fyne.Size
 	var childPos fyne.Position
 	var childSize fyne.Size
-	switch r.adaptedLocation() {
+	switch r.adaptedLocation(r.container.tabLocation) {
 	case TabLocationTop:
 		buttonHeight := tabBarMinSize.Height
 		tabBarPos = fyne.NewPos(0, 0)
@@ -327,13 +339,25 @@ func (r *appTabsRenderer) Refresh() {
 	canvas.Refresh(r.container)
 }
 
-func (r *appTabsRenderer) adaptedLocation() TabLocation {
-	tabLocation := r.container.tabLocation
-	if fyne.CurrentDevice().IsMobile() && (tabLocation == TabLocationLeading || tabLocation == TabLocationTrailing) {
-		return TabLocationBottom
+func (r *appTabsRenderer) adaptedLocation(l TabLocation) TabLocation {
+	// Mobile has limited screen space, so don't put app tab bar on long edges
+	if d := fyne.CurrentDevice(); d.IsMobile() {
+		if o := d.Orientation(); fyne.IsVertical(o) {
+			if l == TabLocationLeading {
+				return TabLocationTop
+			} else if l == TabLocationTrailing {
+				return TabLocationBottom
+			}
+		} else {
+			if l == TabLocationTop {
+				return TabLocationLeading
+			} else if l == TabLocationBottom {
+				return TabLocationTrailing
+			}
+		}
 	}
 
-	return r.container.tabLocation
+	return l
 }
 
 func (r *appTabsRenderer) buildButton(item *TabItem, iconPos buttonIconPosition) *tabButton {
@@ -352,7 +376,12 @@ func (r *appTabsRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Contain
 		if cells == 0 {
 			cells = 1
 		}
-		lay = layout.NewGridLayout(cells)
+
+		if fyne.IsVertical(fyne.CurrentDevice().Orientation()) {
+			lay = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			lay = layout.NewGridLayoutWithRows(cells)
+		}
 	} else if r.container.tabLocation == TabLocationLeading || r.container.tabLocation == TabLocationTrailing {
 		lay = layout.NewVBoxLayout()
 	} else {
@@ -371,7 +400,7 @@ func (r *appTabsRenderer) moveSelection() {
 
 	var underlinePos fyne.Position
 	var underlineSize fyne.Size
-	switch r.adaptedLocation() {
+	switch r.adaptedLocation(r.container.tabLocation) {
 	case TabLocationTop:
 		underlinePos = fyne.NewPos(selected.Position().X, r.tabBar.MinSize().Height)
 		underlineSize = fyne.NewSize(selected.Size().Width, theme.Padding())
