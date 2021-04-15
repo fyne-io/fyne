@@ -145,7 +145,7 @@ func (t *DocTabs) SetItems(items []*TabItem) {
 
 // SetTabLocation sets the location of the tab bar
 func (t *DocTabs) SetTabLocation(l TabLocation) {
-	t.location = l
+	t.location = tabsAdjustedLocation(l)
 	t.Refresh()
 }
 

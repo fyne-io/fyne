@@ -311,7 +311,7 @@ func TestDocTabs_SetTabLocation(t *testing.T) {
 
 	tabs.SetTabLocation(container.TabLocationLeading)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_leading.xml", c)
+	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_top.xml", c)
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 	w.Resize(tabs.MinSize())
@@ -319,7 +319,7 @@ func TestDocTabs_SetTabLocation(t *testing.T) {
 
 	tabs.SetTabLocation(container.TabLocationTrailing)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_trailing.xml", c)
+	test.AssertRendersToMarkup(t, "doctabs/mobile/tab_location_bottom.xml", c)
 
 	tabs.SetTabLocation(container.TabLocationTop)
 	w.Resize(tabs.MinSize())

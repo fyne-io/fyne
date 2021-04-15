@@ -232,25 +232,25 @@ func TestAppTabs_Layout(t *testing.T) {
 			name:     "bottom: tab with icon only",
 			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: container.TabLocationBottom,
-			want:     "apptabs/mobile/layout_bottom_ico.xml",
+			want:     "apptabs/mobile/layout_bottom_icon.xml",
 		},
 		{
 			name:     "leading: tab with icon and text",
 			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: container.TabLocationLeading,
-			want:     "apptabs/mobile/layout_bottom_icon_and_text.xml",
+			want:     "apptabs/mobile/layout_top_icon_and_text.xml",
 		},
 		{
 			name:     "leading: tab with text only",
 			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location: container.TabLocationLeading,
-			want:     "apptabs/mobile/layout_bottom_text.xml",
+			want:     "apptabs/mobile/layout_top_text.xml",
 		},
 		{
 			name:     "leading: tab with icon only",
 			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location: container.TabLocationLeading,
-			want:     "apptabs/mobile/layout_bottom_icon.xml",
+			want:     "apptabs/mobile/layout_top_icon.xml",
 		},
 		{
 			name:     "trailing: tab with icon and text",
@@ -301,7 +301,7 @@ func TestAppTabs_SetTabLocation(t *testing.T) {
 
 	tabs.SetTabLocation(container.TabLocationLeading)
 	w.Resize(tabs.MinSize())
-	test.AssertRendersToMarkup(t, "apptabs/mobile/tab_location_bottom.xml", c, "leading is the same as bottom on mobile")
+	test.AssertRendersToMarkup(t, "apptabs/mobile/tab_location_top.xml", c, "leading is the same as top on mobile")
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 	w.Resize(tabs.MinSize())
