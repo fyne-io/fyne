@@ -391,6 +391,9 @@ func TestTree_Select_Unselects(t *testing.T) {
 		assert.Fail(t, "Selection should have been unselected")
 	}
 
+	tree.Unselect("C")
+	assert.Equal(t, 1, len(tree.selected))
+
 	tree.UnselectAll()
 	assert.Equal(t, 0, len(tree.selected))
 	select {

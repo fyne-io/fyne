@@ -117,7 +117,7 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 
 // Unselect will mark the cell provided by id as unselected.
 func (t *Table) Unselect(id TableCellID) {
-	if t.selectedCell == nil {
+	if t.selectedCell == nil || id != *t.selectedCell {
 		return
 	}
 	t.selectedCell = nil

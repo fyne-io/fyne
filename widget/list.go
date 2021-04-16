@@ -132,7 +132,7 @@ func (l *List) Select(id ListItemID) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
-	if len(l.selected) == 0 {
+	if len(l.selected) == 0 || l.selected[0] != id {
 		return
 	}
 

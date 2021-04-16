@@ -236,7 +236,7 @@ func (t *Tree) ToggleBranch(uid string) {
 
 // Unselect marks the specified node to be not selected.
 func (t *Tree) Unselect(uid TreeNodeID) {
-	if len(t.selected) == 0 {
+	if len(t.selected) == 0 || t.selected[0] != uid {
 		return
 	}
 

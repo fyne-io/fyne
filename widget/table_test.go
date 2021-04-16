@@ -142,7 +142,7 @@ func TestTable_Unselect(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
-	unselectedRow, unselectedColumn := 0, 0
+	unselectedRow, unselectedColumn := -1, -1
 	table.OnUnselected = func(id TableCellID) {
 		unselectedRow = id.Row
 		unselectedColumn = id.Col
@@ -157,7 +157,11 @@ func TestTable_Unselect(t *testing.T) {
 	assert.Equal(t, 1, unselectedColumn)
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
 
+	unselectedRow, unselectedColumn = -1, -1
 	table.Select(TableCellID{2, 2})
+	table.Unselect(TableCellID{1, 1})
+	assert.Equal(t, -1, unselectedRow)
+	assert.Equal(t, -1, unselectedColumn)
 
 	table.UnselectAll()
 	assert.Equal(t, 2, unselectedRow)
