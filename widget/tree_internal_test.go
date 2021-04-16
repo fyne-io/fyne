@@ -390,6 +390,18 @@ func TestTree_Select_Unselects(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		assert.Fail(t, "Selection should have been unselected")
 	}
+
+	tree.Unselect("C")
+	assert.Equal(t, 1, len(tree.selected))
+
+	tree.UnselectAll()
+	assert.Equal(t, 0, len(tree.selected))
+	select {
+	case s := <-unselection:
+		assert.Equal(t, "B", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been unselected")
+	}
 }
 
 func TestTree_ScrollToSelection(t *testing.T) {

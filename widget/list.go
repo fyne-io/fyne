@@ -132,7 +132,7 @@ func (l *List) Select(id ListItemID) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
-	if len(l.selected) == 0 {
+	if len(l.selected) == 0 || l.selected[0] != id {
 		return
 	}
 
@@ -140,6 +140,24 @@ func (l *List) Unselect(id ListItemID) {
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
 		f(id)
+	}
+}
+
+// UnselectAll removes all items from the selection.
+//
+// Since: 2.1
+func (l *List) UnselectAll() {
+	if len(l.selected) == 0 {
+		return
+	}
+
+	selected := l.selected
+	l.selected = nil
+	l.Refresh()
+	if f := l.OnUnselected; f != nil {
+		for _, id := range selected {
+			f(id)
+		}
 	}
 }
 
