@@ -43,10 +43,13 @@ func New{{ .Name }}() {{ .Name }} {
 // Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		return New{{ .Name }}().(External{{ .Name }}) // never allow a nil value pointer
+		blank := {{ .Default }}
+		v = &blank // never allow a nil value pointer
 	}
-
-	return &bound{{ .Name }}{val: v}
+	b := &boundExternal{{ .Name }}{}
+	b.val = v
+	b.old = *v
+	return b
 }
 
 type bound{{ .Name }} struct {
@@ -65,17 +68,51 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 	return *b.val, nil
 }
 
-func (b *bound{{ .Name }}) Reload() error {
-	return b.Set(*b.val)
-}
-
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	{{- if eq .Comparator "" }}
+	if *b.val == val {
+		return nil
+	}
+	{{- else }}
+	if {{ .Comparator }}(*b.val, val) {
+		return nil
+	}
+	{{- end }}
 	*b.val = val
 
 	b.trigger()
 	return nil
+}
+
+type boundExternal{{ .Name }} struct {
+	bound{{ .Name }}
+
+	old {{ .Type }}
+}
+
+func (b *boundExternal{{ .Name }}) Set(val {{ .Type }}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	{{- if eq .Comparator "" }}
+	if b.old == val {
+		return nil
+	}
+	{{- else }}
+	if {{ .Comparator }}(b.old, val) {
+		return nil
+	}
+	{{- end }}
+	*b.val = val
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundExternal{{ .Name }}) Reload() error {
+	return b.Set(*b.val)
 }
 `
 
@@ -555,6 +592,7 @@ type bindValues struct {
 	Format, Since        string
 	SupportsPreferences  bool
 	FromString, ToString string // function names...
+	Comparator           string // comparator function name
 }
 
 func newFile(name string) (*os.File, error) {
@@ -638,7 +676,7 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
-			FromString: "uriFromString", ToString: "uriToString"},
+			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
 	for _, b := range binds {
 		if b.Since == "" {
