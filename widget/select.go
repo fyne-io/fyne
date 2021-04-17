@@ -22,7 +22,8 @@ type Select struct {
 
 	focused bool
 	hovered bool
-	popUp   *PopUpMenu
+	popUp   *PopUp
+	list    *List
 	tapAnim *fyne.Animation
 }
 
@@ -64,6 +65,8 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
 
+	s.createPopUp()
+
 	background := &canvas.Rectangle{}
 	line := canvas.NewRectangle(theme.ShadowColor())
 	tapBG := canvas.NewRectangle(color.Transparent)
@@ -100,7 +103,6 @@ func (s *Select) FocusLost() {
 func (s *Select) Hide() {
 	if s.popUp != nil {
 		s.popUp.Hide()
-		s.popUp = nil
 	}
 	s.BaseWidget.Hide()
 }
@@ -231,18 +233,30 @@ func (s *Select) popUpPos() fyne.Position {
 	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-theme.InputBorderSize()))
 }
 
-func (s *Select) showPopUp() {
-	items := make([]*fyne.MenuItem, len(s.Options))
-	for i := range s.Options {
-		text := s.Options[i] // capture
-		items[i] = fyne.NewMenuItem(text, func() {
-			s.updateSelected(text)
-			s.popUp = nil
-		})
+func (s *Select) createPopUp() {
+	length := func() int {
+		return len(s.Options)
 	}
 
+	create := func() fyne.CanvasObject {
+		return &Button{Importance: LowImportance}
+	}
+
+	update := func(item ListItemID, object fyne.CanvasObject) {
+		button := object.(*Button)
+		button.SetText(s.Options[item])
+		button.OnTapped = func() {
+			s.updateSelected(s.Options[item])
+			s.popUp.Hide()
+		}
+	}
+
+	s.list = NewList(length, create, update)
+}
+
+func (s *Select) showPopUp() {
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
-	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp = NewPopUp(s.list, c)
 	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
