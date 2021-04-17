@@ -236,13 +236,12 @@ func (s *Select) popUpPos() fyne.Position {
 }
 
 func (s *Select) showPopUp() {
-	var items []*fyne.MenuItem
-	for _, option := range s.Options {
+	items := make([]*fyne.MenuItem, len(s.Options))
+	for i, option := range s.Options {
 		text := option // capture
-		item := fyne.NewMenuItem(option, func() {
+		items[i] = fyne.NewMenuItem(option, func() {
 			s.optionTapped(text)
 		})
-		items = append(items, item)
 	}
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
