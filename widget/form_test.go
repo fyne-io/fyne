@@ -302,6 +302,10 @@ func TestForm_Disable_Validation(t *testing.T) {
 }
 
 func TestForm_HintsRendered(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
 	f := NewForm()
 
 	fi1 := NewFormItem("Form Item 1", NewEntry())
