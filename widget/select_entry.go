@@ -8,14 +8,14 @@ import (
 // SelectEntry is an input field which supports selecting from a fixed set of options.
 type SelectEntry struct {
 	Entry
-	dropDown *fyne.Menu
-	popUp    *PopUpMenu
-	options  []string
+	popUp   *PopUp
+	list    *List
+	Options []string
 }
 
 // NewSelectEntry creates a SelectEntry.
 func NewSelectEntry(options []string) *SelectEntry {
-	e := &SelectEntry{options: options}
+	e := &SelectEntry{Options: options}
 	e.ExtendBaseWidget(e)
 	e.Wrapping = fyne.TextTruncate
 	return e
@@ -26,7 +26,12 @@ func NewSelectEntry(options []string) *SelectEntry {
 // Implements: fyne.Widget
 func (e *SelectEntry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
-	e.SetOptions(e.options)
+
+	e.ActionItem = e.setupDropDown()
+	if e.Disabled() {
+		e.ActionItem.(fyne.Disableable).Disable()
+	}
+
 	return e.Entry.CreateRenderer()
 }
 
@@ -55,15 +60,14 @@ func (e *SelectEntry) Disable() {
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
-	min := e.Entry.MinSize()
 
-	if e.dropDown != nil {
-		padding := fyne.NewSize(4*theme.Padding(), 0)
-		for _, item := range e.dropDown.Items {
-			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(padding)
-			min = min.Max(itemMin)
-		}
+	min := e.Entry.MinSize()
+	padding := fyne.NewSize(4*theme.Padding(), 0)
+	for _, item := range e.Options {
+		itemMin := fyne.MeasureText(item, theme.TextSize(), fyne.TextStyle{}).Add(padding)
+		min = min.Max(itemMin)
 	}
+
 	return min
 }
 
@@ -89,20 +93,18 @@ func (e *SelectEntry) Resize(size fyne.Size) {
 
 // SetOptions sets the options the user might select from.
 func (e *SelectEntry) SetOptions(options []string) {
-	e.options = options
-	items := make([]*fyne.MenuItem, len(options))
-	for i, option := range options {
-		option := option // capture
-		items[i] = fyne.NewMenuItem(option, func() { e.SetText(option) })
-	}
-	e.dropDown = fyne.NewMenu("", items...)
+	e.Options = options
+	e.Refresh()
+}
 
-	if e.ActionItem == nil {
-		e.ActionItem = e.setupDropDown()
-		if e.Disabled() {
-			e.ActionItem.(fyne.Disableable).Disable()
-		}
-	}
+func (e *SelectEntry) onDropDownTapped() {
+	c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
+	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
+	popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
+
+	e.popUp = NewPopUp(e.list, c)
+	e.popUp.ShowAtPosition(popUpPos)
+	e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 }
 
 func (e *SelectEntry) popUpPos() fyne.Position {
@@ -111,14 +113,27 @@ func (e *SelectEntry) popUpPos() fyne.Position {
 }
 
 func (e *SelectEntry) setupDropDown() *Button {
-	dropDownButton := NewButton("", func() {
-		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
+	length := func() int {
+		return len(e.Options)
+	}
 
-		e.popUp = NewPopUpMenu(e.dropDown, c)
-		e.popUp.ShowAtPosition(e.popUpPos())
-		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
-	})
-	dropDownButton.Importance = LowImportance
-	dropDownButton.SetIcon(theme.MenuDropDownIcon())
-	return dropDownButton
+	create := func() fyne.CanvasObject {
+		return &Button{Importance: LowImportance}
+	}
+
+	update := func(item ListItemID, object fyne.CanvasObject) {
+		button := object.(*Button)
+		button.SetText(e.Options[item])
+		button.OnTapped = func() {
+			e.SetText(e.Options[item])
+			e.popUp.Hide()
+		}
+	}
+
+	e.list = NewList(length, create, update)
+	return &Button{
+		Importance: LowImportance,
+		Icon:       theme.MenuDropDownIcon(),
+		OnTapped:   e.onDropDownTapped,
+	}
 }
