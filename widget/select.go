@@ -236,9 +236,9 @@ func (s *Select) popUpPos() fyne.Position {
 
 func (s *Select) showPopUp() {
 	items := make([]*fyne.MenuItem, len(s.Options))
-	for i, option := range s.Options {
-		text := option // capture
-		items[i] = fyne.NewMenuItem(option, func() {
+	for i := range s.Options {
+		text := s.Options[i] // capture
+		items[i] = fyne.NewMenuItem(text, func() {
 			s.optionTapped(text)
 		})
 	}
