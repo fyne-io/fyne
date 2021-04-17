@@ -67,7 +67,7 @@ func (f *Form) AppendItem(item *FormItem) {
 	f.Items = append(f.Items, item)
 	if f.itemGrid != nil {
 		f.itemGrid.Add(f.createLabel(item.Text))
-		f.itemGrid.Add(item.Widget)
+		f.itemGrid.Add(f.createInput(item))
 		f.setUpValidation(item.Widget, len(f.Items)-1)
 	}
 

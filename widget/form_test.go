@@ -232,3 +232,26 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_invalid.png", w.Canvas().Capture())
 }
+
+func TestForm_HintsRendered(t *testing.T) {
+	f := NewForm()
+
+	fi1 := NewFormItem("Form Item 1", NewEntry())
+	fi1.HintText = "HT1"
+	f.AppendItem(fi1)
+
+	fi2 := NewFormItem("Form Item 2", NewEntry())
+	fi2.HintText = "HT2"
+
+	f.AppendItem(fi2)
+
+	fi3 := NewFormItem("Form Item 3", NewEntry())
+	fi3.HintText = "HT3"
+
+	f.AppendItem(fi3)
+
+	w := test.NewWindow(f)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/hints_rendered.png", w.Canvas().Capture())
+}
