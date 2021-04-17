@@ -224,11 +224,6 @@ func (s *Select) object() fyne.Widget {
 	return nil
 }
 
-func (s *Select) optionTapped(text string) {
-	s.SetSelected(text)
-	s.popUp = nil
-}
-
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-theme.InputBorderSize()))
@@ -239,7 +234,8 @@ func (s *Select) showPopUp() {
 	for i := range s.Options {
 		text := s.Options[i] // capture
 		items[i] = fyne.NewMenuItem(text, func() {
-			s.optionTapped(text)
+			s.updateSelected(text)
+			s.popUp = nil
 		})
 	}
 
