@@ -49,6 +49,8 @@ func init() {
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
 	c := NewCanvas().(*mobileCanvas) // silence lint
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
+	ret.InitEventQueue()
+	go ret.RunEventQueue()
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
@@ -60,15 +62,15 @@ func (d *mobileDriver) AllWindows() []fyne.Window {
 }
 
 // currentWindow returns the most recently opened window - we can only show one at a time.
-func (d *mobileDriver) currentWindow() fyne.Window {
+func (d *mobileDriver) currentWindow() *window {
 	if len(d.windows) == 0 {
 		return nil
 	}
 
-	var last fyne.Window
+	var last *window
 	for i := len(d.windows) - 1; i >= 0; i-- {
-		last = d.windows[i]
-		if last.(*window).visible {
+		last = d.windows[i].(*window)
+		if last.visible {
 			return last
 		}
 	}
@@ -220,11 +222,11 @@ func (d *mobileDriver) Run() {
 				case touch.Event:
 					switch e.Type {
 					case touch.TypeBegin:
-						d.tapDownCanvas(canvas, e.X, e.Y, e.Sequence)
+						d.tapDownCanvas(current, e.X, e.Y, e.Sequence)
 					case touch.TypeMove:
-						d.tapMoveCanvas(canvas, e.X, e.Y, e.Sequence)
+						d.tapMoveCanvas(current, e.X, e.Y, e.Sequence)
 					case touch.TypeEnd:
-						d.tapUpCanvas(canvas, e.X, e.Y, e.Sequence)
+						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
 				case key.Event:
 					if e.Direction == key.DirPress {
@@ -274,37 +276,37 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	canvas.WalkTrees(paint, afterPaint)
 }
 
-func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
-	tapX := internal.UnscaleInt(canvas, int(x))
-	tapY := internal.UnscaleInt(canvas, int(y))
+func (d *mobileDriver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+	tapX := internal.UnscaleInt(w.canvas, int(x))
+	tapY := internal.UnscaleInt(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
-	canvas.tapDown(pos, int(tapID))
+	w.canvas.tapDown(pos, int(tapID))
 }
 
-func (d *mobileDriver) tapMoveCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
-	tapX := internal.UnscaleInt(canvas, int(x))
-	tapY := internal.UnscaleInt(canvas, int(y))
+func (d *mobileDriver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
+	tapX := internal.UnscaleInt(w.canvas, int(x))
+	tapY := internal.UnscaleInt(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
-	canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		go wid.Dragged(ev)
+	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		w.QueueEvent(func() { wid.Dragged(ev) })
 	})
 }
 
-func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
-	tapX := internal.UnscaleInt(canvas, int(x))
-	tapY := internal.UnscaleInt(canvas, int(y))
+func (d *mobileDriver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
+	tapX := internal.UnscaleInt(w.canvas, int(x))
+	tapY := internal.UnscaleInt(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
-	canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		go wid.Tapped(ev)
+	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		w.QueueEvent(func() { wid.Tapped(ev) })
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-		go wid.TappedSecondary(ev)
+		w.QueueEvent(func() { wid.TappedSecondary(ev) })
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-		go wid.DoubleTapped(ev)
+		w.QueueEvent(func() { wid.DoubleTapped(ev) })
 	}, func(wid fyne.Draggable) {
-		go wid.DragEnd()
+		w.QueueEvent(func() { wid.DragEnd() })
 	})
 }
 

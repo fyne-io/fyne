@@ -346,7 +346,6 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	ev.Position = objPos
 	ev.AbsolutePosition = pos
 
-	// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
 	if duration < tapSecondaryDelay {
 		_, doubleTap := co.(fyne.DoubleTappable)
 		if doubleTap {

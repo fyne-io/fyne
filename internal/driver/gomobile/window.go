@@ -11,6 +11,8 @@ import (
 )
 
 type window struct {
+	common.Window
+
 	title              string
 	visible            bool
 	onClosed           func()
@@ -136,7 +138,7 @@ func (w *window) Hide() {
 
 func (w *window) tryClose() {
 	if w.onCloseIntercepted != nil {
-		w.onCloseIntercepted()
+		w.QueueEvent(w.onCloseIntercepted)
 		return
 	}
 
@@ -161,6 +163,12 @@ func (w *window) Close() {
 			cache.DestroyRenderer(co)
 		}
 	})
+
+	// Call this in a go routine, because this function could be called
+	// inside a button which callback would be queued in this event queue
+	// and it will lead to a deadlock if this is performed in the same go
+	// routine.
+	go w.DestroyEventQueue()
 
 	if w.onClosed != nil {
 		w.onClosed()
