@@ -87,7 +87,7 @@ func (e *SelectEntry) Move(pos fyne.Position) {
 func (e *SelectEntry) Resize(size fyne.Size) {
 	e.Entry.Resize(size)
 	if e.popUp != nil {
-		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
+		e.popUp.Resize(e.popUpSize())
 	}
 }
 
@@ -97,14 +97,26 @@ func (e *SelectEntry) SetOptions(options []string) {
 	e.Refresh()
 }
 
+func (e *SelectEntry) popUpSize() fyne.Size {
+	length := float32(len(e.Options))
+	if length > 10 {
+		length = 10
+	}
+
+	return fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height*length-3*theme.Padding())
+}
+
+func (e *SelectEntry) popUpPos() fyne.Position {
+	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
+	return buttonPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
+}
+
 func (e *SelectEntry) onDropDownTapped() {
 	c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
-	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-	popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
 
 	e.popUp = NewPopUp(e.list, c)
-	e.popUp.ShowAtPosition(popUpPos)
-	e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height*float32(len(e.Options))-3*theme.Padding()))
+	e.popUp.ShowAtPosition(e.popUpPos())
+	e.popUp.Resize(e.popUpSize())
 }
 
 func (e *SelectEntry) popUpPos() fyne.Position {
