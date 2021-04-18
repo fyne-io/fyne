@@ -436,9 +436,8 @@ func (w *window) Close() {
 	w.viewport.SetShouldClose(true)
 
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
-		switch co := node.Obj().(type) {
-		case fyne.Widget:
-			cache.DestroyRenderer(co)
+		if wid, ok := node.Obj().(fyne.Widget); ok {
+			cache.DestroyRenderer(wid)
 		}
 	})
 
