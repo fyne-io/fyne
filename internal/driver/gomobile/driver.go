@@ -306,7 +306,7 @@ func (d *mobileDriver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		w.QueueEvent(func() { wid.DoubleTapped(ev) })
 	}, func(wid fyne.Draggable) {
-		w.QueueEvent(func() { wid.DragEnd() })
+		w.QueueEvent(wid.DragEnd)
 	})
 }
 

@@ -1095,10 +1095,10 @@ func (w *window) capturesTab(keyName fyne.KeyName, modifier desktop.Modifier) bo
 		if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && !ent.AcceptsTab() {
 			switch modifier {
 			case 0:
-				w.QueueEvent(func() { w.canvas.FocusNext() })
+				w.QueueEvent(w.canvas.FocusNext)
 				return false
 			case desktop.ShiftModifier:
-				w.QueueEvent(func() { w.canvas.FocusPrevious() })
+				w.QueueEvent(w.canvas.FocusPrevious)
 				return false
 			}
 		}
