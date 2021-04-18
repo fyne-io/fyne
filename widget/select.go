@@ -24,7 +24,6 @@ type Select struct {
 	hovered bool
 	popUp   *PopUpMenu
 	tapAnim *fyne.Animation
-	tapBG   *canvas.Rectangle
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -66,8 +65,10 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	background := &canvas.Rectangle{}
 	line := canvas.NewRectangle(theme.ShadowColor())
-	s.tapBG = canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{background, line, s.tapBG, txtProv, icon}
+	tapBG := canvas.NewRectangle(color.Transparent)
+	s.tapAnim = newButtonTapAnimation(tapBG, s)
+	s.tapAnim.Curve = fyne.AnimationEaseOut
+	objects := []fyne.CanvasObject{background, line, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, line, objects, s}
 	background.FillColor, line.FillColor = r.bgLineColor()
 	r.updateIcon()
@@ -251,17 +252,10 @@ func (s *Select) showPopUp() {
 }
 
 func (s *Select) tapAnimation() {
-	if s.tapBG == nil { // not rendered yet? (tests)
+	if s.tapAnim == nil {
 		return
 	}
-
-	if s.tapAnim == nil {
-		s.tapAnim = newButtonTapAnimation(s.tapBG, s)
-		s.tapAnim.Curve = fyne.AnimationEaseOut
-	} else {
-		s.tapAnim.Stop()
-	}
-
+	s.tapAnim.Stop()
 	s.tapAnim.Start()
 }
 
