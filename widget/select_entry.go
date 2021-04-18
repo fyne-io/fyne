@@ -104,7 +104,7 @@ func (e *SelectEntry) onDropDownTapped() {
 
 	e.popUp = NewPopUp(e.list, c)
 	e.popUp.ShowAtPosition(popUpPos)
-	e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
+	e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height*float32(len(e.Options))-3*theme.Padding()))
 }
 
 func (e *SelectEntry) popUpPos() fyne.Position {
