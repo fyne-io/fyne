@@ -41,40 +41,10 @@ type Canvas struct {
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
 
-// Initialize initializes the canvas.
-func (c *Canvas) Initialize(impl SizeableCanvas, refreshQueueLen int, onOverlayChanged func()) {
-	c.impl = impl
-	c.refreshQueue = make(chan fyne.CanvasObject, refreshQueueLen)
-	c.overlays = &overlayStack{
-		OverlayStack: internal.OverlayStack{
-			OnChange: onOverlayChanged,
-			Canvas:   impl,
-		},
-	}
-}
-
-// ===============================================================
-// Shortcut related
-// ===============================================================
-
 // AddShortcut adds a shortcut to the canvas.
 func (c *Canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
 	c.shortcut.AddShortcut(shortcut, handler)
 }
-
-// RemoveShortcut removes a shortcut from the canvas.
-func (c *Canvas) RemoveShortcut(shortcut fyne.Shortcut) {
-	c.shortcut.RemoveShortcut(shortcut)
-}
-
-// TypedShortcut handle the registered shortcut.
-func (c *Canvas) TypedShortcut(shortcut fyne.Shortcut) {
-	c.shortcut.TypedShortcut(shortcut)
-}
-
-// ===============================================================
-// Object tree related
-// ===============================================================
 
 // EnsureMinSize ensure canvas min size.
 //
@@ -136,6 +106,122 @@ func (c *Canvas) EnsureMinSize() bool {
 	return windowNeedsMinSizeUpdate
 }
 
+// Focus makes the provided item focused.
+func (c *Canvas) Focus(obj fyne.Focusable) {
+	focusMgr := c.focusManager()
+	if focusMgr != nil && focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+		if c.OnFocus != nil {
+			c.OnFocus(obj)
+		}
+		return
+	}
+
+	c.RLock()
+	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
+	c.RUnlock()
+
+	for _, mgr := range focusMgrs {
+		if mgr == nil {
+			continue
+		}
+		if focusMgr != mgr {
+			if mgr.Focus(obj) {
+				if c.OnFocus != nil {
+					c.OnFocus(obj)
+				}
+				return
+			}
+		}
+	}
+
+	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
+}
+
+// Focused returns the current focused object.
+func (c *Canvas) Focused() fyne.Focusable {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return nil
+	}
+	return mgr.Focused()
+}
+
+// FocusGained signals to the manager that its content got focus.
+// Valid only on Desktop.
+func (c *Canvas) FocusGained() {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusGained()
+}
+
+// FocusLost signals to the manager that its content lost focus.
+// Valid only on Desktop.
+func (c *Canvas) FocusLost() {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusLost()
+}
+
+// FocusNext focuses the next focusable item.
+func (c *Canvas) FocusNext() {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusNext()
+}
+
+// FocusPrevious focuses the previous focusable item.
+func (c *Canvas) FocusPrevious() {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	mgr.FocusPrevious()
+}
+
+// FreeDirtyTextures frees dirty textures.
+func (c *Canvas) FreeDirtyTextures() bool {
+	freed := false
+	for {
+		select {
+		case object := <-c.refreshQueue:
+			freed = true
+			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+				c.painter.Free(obj)
+				return false
+			}
+			driver.WalkCompleteObjectTree(object, freeWalked, nil)
+		default:
+			return freed
+		}
+	}
+}
+
+// Initialize initializes the canvas.
+func (c *Canvas) Initialize(impl SizeableCanvas, refreshQueueLen int, onOverlayChanged func()) {
+	c.impl = impl
+	c.refreshQueue = make(chan fyne.CanvasObject, refreshQueueLen)
+	c.overlays = &overlayStack{
+		OverlayStack: internal.OverlayStack{
+			OnChange: onOverlayChanged,
+			Canvas:   impl,
+		},
+	}
+}
+
+// IsDirty checks if the canvas is dirty.
+func (c *Canvas) IsDirty() bool {
+	c.dirtyMutex.Lock()
+	dirty := c.dirty
+	c.dirtyMutex.Unlock()
+	return dirty
+}
+
 // ObjectTrees return canvas object trees.
 //
 // This function uses lock.
@@ -158,6 +244,33 @@ func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
 	return trees
 }
 
+// Overlays returns the overlay stack.
+func (c *Canvas) Overlays() fyne.OverlayStack {
+	// we don't need to lock here, because overlays never changes
+	return c.overlays
+}
+
+// Painter returns the canvas painter.
+func (c *Canvas) Painter() gl.Painter {
+	return c.painter
+}
+
+// Refresh refreshes a canvas object.
+func (c *Canvas) Refresh(obj fyne.CanvasObject) {
+	select {
+	case c.refreshQueue <- obj:
+		// all good
+	default:
+		// queue is full, ignore
+	}
+	c.SetDirty(true)
+}
+
+// RemoveShortcut removes a shortcut from the canvas.
+func (c *Canvas) RemoveShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.RemoveShortcut(shortcut)
+}
+
 // SetContentTreeAndFocusMgr sets content tree and focus manager.
 //
 // This function does not use the canvas lock.
@@ -171,6 +284,13 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 	if focused != nil {
 		c.contentFocusMgr.Focus(focused)
 	}
+}
+
+// SetDirty sets canvas dirty flag.
+func (c *Canvas) SetDirty(dirty bool) {
+	c.dirtyMutex.Lock()
+	c.dirty = dirty
+	c.dirtyMutex.Unlock()
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.
@@ -192,6 +312,27 @@ func (c *Canvas) SetMobileWindowHeadTree(head fyne.CanvasObject) {
 	c.mWindowHeadTree = &renderCacheTree{root: &RenderCacheNode{obj: head}}
 }
 
+// SetPainter sets the canvas painter.
+func (c *Canvas) SetPainter(p gl.Painter) {
+	c.painter = p
+}
+
+// TypedShortcut handle the registered shortcut.
+func (c *Canvas) TypedShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.TypedShortcut(shortcut)
+}
+
+// Unfocus unfocuses all the objects in the canvas.
+func (c *Canvas) Unfocus() {
+	mgr := c.focusManager()
+	if mgr == nil {
+		return
+	}
+	if mgr.Focus(nil) && c.OnUnfocus != nil {
+		c.OnUnfocus()
+	}
+}
+
 // WalkTrees walks over the trees.
 func (c *Canvas) WalkTrees(
 	beforeChildren func(*RenderCacheNode, fyne.Position),
@@ -209,6 +350,29 @@ func (c *Canvas) WalkTrees(
 			c.walkTree(tree, beforeChildren, afterChildren)
 		}
 	}
+}
+
+func (c *Canvas) focusManager() *app.FocusManager {
+	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
+		return focusMgr
+	}
+	c.RLock()
+	defer c.RUnlock()
+	if c.isMenuActive() {
+		return c.menuFocusMgr
+	}
+	return c.contentFocusMgr
+}
+
+func (c *Canvas) isMenuActive() bool {
+	if c.menuTree == nil || c.menuTree.root == nil || c.menuTree.root.obj == nil {
+		return false
+	}
+	menu := c.menuTree.root.obj
+	if am, ok := menu.(activatableMenu); ok {
+		return am.IsActive()
+	}
+	return true
 }
 
 func (c *Canvas) walkTree(
@@ -265,188 +429,29 @@ func (c *Canvas) walkTree(
 	driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
 }
 
-// ===============================================================
-// Paint related
-// ===============================================================
-
-// FreeDirtyTextures frees dirty textures.
-func (c *Canvas) FreeDirtyTextures() bool {
-	freed := false
-	for {
-		select {
-		case object := <-c.refreshQueue:
-			freed = true
-			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				c.painter.Free(obj)
-				return false
-			}
-			driver.WalkCompleteObjectTree(object, freeWalked, nil)
-		default:
-			return freed
-		}
-	}
+// RenderCacheNode represents a node in a render cache tree.
+type RenderCacheNode struct {
+	// structural data
+	firstChild  *RenderCacheNode
+	nextSibling *RenderCacheNode
+	obj         fyne.CanvasObject
+	parent      *RenderCacheNode
+	// cache data
+	minSize fyne.Size
+	// painterData is some data from the painter associated with the drawed node
+	// it may for instance point to a GL texture
+	// it should free all associated resources when released
+	// i.e. it should not simply be a texture reference integer
+	painterData interface{}
 }
 
-// IsDirty checks if the canvas is dirty.
-func (c *Canvas) IsDirty() bool {
-	c.dirtyMutex.Lock()
-	dirty := c.dirty
-	c.dirtyMutex.Unlock()
-	return dirty
+// Obj returns the node object.
+func (r *RenderCacheNode) Obj() fyne.CanvasObject {
+	return r.obj
 }
 
-// Painter returns the canvas painter.
-func (c *Canvas) Painter() gl.Painter {
-	return c.painter
-}
-
-// Refresh refreshes a canvas object.
-func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	select {
-	case c.refreshQueue <- obj:
-		// all good
-	default:
-		// queue is full, ignore
-	}
-	c.SetDirty(true)
-}
-
-// SetDirty sets canvas dirty flag.
-func (c *Canvas) SetDirty(dirty bool) {
-	c.dirtyMutex.Lock()
-	c.dirty = dirty
-	c.dirtyMutex.Unlock()
-}
-
-// SetPainter sets the canvas painter.
-func (c *Canvas) SetPainter(p gl.Painter) {
-	c.painter = p
-}
-
-// ===============================================================
-// Focus related
-// ===============================================================
-
-// Focus makes the provided item focused.
-func (c *Canvas) Focus(obj fyne.Focusable) {
-	focusMgr := c.focusManager()
-	if focusMgr != nil && focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
-		if c.OnFocus != nil {
-			c.OnFocus(obj)
-		}
-		return
-	}
-
-	c.RLock()
-	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
-	c.RUnlock()
-
-	for _, mgr := range focusMgrs {
-		if mgr == nil {
-			continue
-		}
-		if focusMgr != mgr {
-			if mgr.Focus(obj) {
-				if c.OnFocus != nil {
-					c.OnFocus(obj)
-				}
-				return
-			}
-		}
-	}
-
-	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
-}
-
-// FocusGained signals to the manager that its content got focus.
-// Valid only on Desktop.
-func (c *Canvas) FocusGained() {
-	mgr := c.focusManager()
-	if mgr == nil {
-		return
-	}
-	mgr.FocusGained()
-}
-
-// FocusLost signals to the manager that its content lost focus.
-// Valid only on Desktop.
-func (c *Canvas) FocusLost() {
-	mgr := c.focusManager()
-	if mgr == nil {
-		return
-	}
-	mgr.FocusLost()
-}
-
-// FocusNext focuses the next focusable item.
-func (c *Canvas) FocusNext() {
-	mgr := c.focusManager()
-	if mgr == nil {
-		return
-	}
-	mgr.FocusNext()
-}
-
-// FocusPrevious focuses the previous focusable item.
-func (c *Canvas) FocusPrevious() {
-	mgr := c.focusManager()
-	if mgr == nil {
-		return
-	}
-	mgr.FocusPrevious()
-}
-
-// Focused returns the current focused object.
-func (c *Canvas) Focused() fyne.Focusable {
-	mgr := c.focusManager()
-	if mgr == nil {
-		return nil
-	}
-	return mgr.Focused()
-}
-
-// Unfocus unfocuses all the objects in the canvas.
-func (c *Canvas) Unfocus() {
-	mgr := c.focusManager()
-	if mgr == nil {
-		return
-	}
-	if mgr.Focus(nil) && c.OnUnfocus != nil {
-		c.OnUnfocus()
-	}
-}
-
-func (c *Canvas) isMenuActive() bool {
-	if c.menuTree == nil || c.menuTree.root == nil || c.menuTree.root.obj == nil {
-		return false
-	}
-	menu := c.menuTree.root.obj
-	if am, ok := menu.(activatableMenu); ok {
-		return am.IsActive()
-	}
-	return true
-}
-
-func (c *Canvas) focusManager() *app.FocusManager {
-	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
-		return focusMgr
-	}
-	c.RLock()
-	defer c.RUnlock()
-	if c.isMenuActive() {
-		return c.menuFocusMgr
-	}
-	return c.contentFocusMgr
-}
-
-// ===============================================================
-// Overlay related
-// ===============================================================
-
-// Overlays returns the overlay stack.
-func (c *Canvas) Overlays() fyne.OverlayStack {
-	// we don't need to lock here, because overlays never changes
-	return c.overlays
+type activatableMenu interface {
+	IsActive() bool
 }
 
 type overlayStack struct {
@@ -483,35 +488,6 @@ func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
-}
-
-// ===============================================================
-// Others
-// ===============================================================
-
-type activatableMenu interface {
-	IsActive() bool
-}
-
-// RenderCacheNode ...
-type RenderCacheNode struct {
-	// structural data
-	firstChild  *RenderCacheNode
-	nextSibling *RenderCacheNode
-	obj         fyne.CanvasObject
-	parent      *RenderCacheNode
-	// cache data
-	minSize fyne.Size
-	// painterData is some data from the painter associated with the drawed node
-	// it may for instance point to a GL texture
-	// it should free all associated resources when released
-	// i.e. it should not simply be a texture reference integer
-	painterData interface{}
-}
-
-// Obj returns the node object.
-func (r *RenderCacheNode) Obj() fyne.CanvasObject {
-	return r.obj
 }
 
 type renderCacheTree struct {
