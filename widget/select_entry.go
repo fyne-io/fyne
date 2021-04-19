@@ -98,11 +98,7 @@ func (e *SelectEntry) SetOptions(options []string) {
 }
 
 func (e *SelectEntry) popUpSize() fyne.Size {
-	length := float32(len(e.Options))
-	if length > 10 {
-		length = 10
-	}
-
+	length := fyne.Min(float32(len(e.Options)), 10.0)
 	return fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height*length-3*theme.Padding())
 }
 
@@ -130,19 +126,25 @@ func (e *SelectEntry) setupDropDown() *Button {
 	}
 
 	create := func() fyne.CanvasObject {
-		return &Button{Importance: LowImportance}
+		return &Label{}
 	}
 
 	update := func(item ListItemID, object fyne.CanvasObject) {
-		button := object.(*Button)
-		button.SetText(e.Options[item])
-		button.OnTapped = func() {
-			e.SetText(e.Options[item])
-			e.popUp.Hide()
-		}
+		object.(*Label).SetText(e.Options[item])
 	}
 
-	e.list = NewList(length, create, update)
+	onSelected := func(item ListItemID) {
+		e.SetText(e.Options[item])
+		e.popUp.Hide()
+	}
+
+	e.list = &List{
+		Length:     length,
+		CreateItem: create,
+		UpdateItem: update,
+		OnSelected: onSelected,
+	}
+
 	return &Button{
 		Importance: LowImportance,
 		Icon:       theme.MenuDropDownIcon(),

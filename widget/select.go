@@ -229,11 +229,7 @@ func (s *Select) object() fyne.Widget {
 }
 
 func (s *Select) popUpSize() fyne.Size {
-	length := float32(len(s.Options))
-	if length > 10 {
-		length = 10
-	}
-
+	length := fyne.Min(float32(len(s.Options)), 10.0)
 	return fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height*length-3*theme.Padding())
 }
 
@@ -248,19 +244,24 @@ func (s *Select) createPopUp() {
 	}
 
 	create := func() fyne.CanvasObject {
-		return &Button{Importance: LowImportance}
+		return &Label{}
 	}
 
 	update := func(item ListItemID, object fyne.CanvasObject) {
-		button := object.(*Button)
-		button.SetText(s.Options[item])
-		button.OnTapped = func() {
-			s.updateSelected(s.Options[item])
-			s.popUp.Hide()
-		}
+		object.(*Label).SetText(s.Options[item])
 	}
 
-	s.list = NewList(length, create, update)
+	onSelected := func(item ListItemID) {
+		s.updateSelected(s.Options[item])
+		s.popUp.Hide()
+	}
+
+	s.list = &List{
+		Length:     length,
+		CreateItem: create,
+		UpdateItem: update,
+		OnSelected: onSelected,
+	}
 }
 
 func (s *Select) showPopUp() {
