@@ -1201,6 +1201,20 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 	return m
 }
 
+func isKeyModifierPair(keyName fyne.KeyName, modifier desktop.Modifier) bool {
+	switch modifier {
+	case desktop.ShiftModifier:
+		return (keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight)
+	case desktop.ControlModifier:
+		return (keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight)
+	case desktop.AltModifier:
+		return (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight)
+	case desktop.SuperModifier:
+		return (keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight)
+	}
+	return false
+}
+
 // charInput defines the character with modifiers callback which is called when a
 // Unicode character is input.
 //
@@ -1268,7 +1282,7 @@ func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifie
 		}
 	}
 
-	if shortcut == nil && modifier != 0 && modifier != desktop.ShiftModifier {
+	if shortcut == nil && modifier != 0 && !isKeyModifierPair(keyName, modifier) && modifier != desktop.ShiftModifier {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: modifier,
