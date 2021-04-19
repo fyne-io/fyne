@@ -6,7 +6,7 @@
 			<widget pos="0,2" size="102x33" type="*widget.Scroll">
 				<widget size="102x33" type="*widget.entryContent">
 					<widget size="102x33" type="*widget.textProvider">
-						<text pos="8,6" size="90x21">C</text>
+						<text pos="8,6" size="90x21">B</text>
 					</widget>
 				</widget>
 			</widget>
@@ -17,4 +17,50 @@
 			</widget>
 		</widget>
 	</content>
+	<overlay>
+		<widget size="150x200" type="*widget.PopUp">
+			<widget pos="10,45" size="130x147" type="*widget.Shadow">
+				<radialGradient centerOffset="0.5,0.5" pos="-8,-8" size="8x8" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="0,-8" size="130x8"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="130,-8" size="8x8" startColor="shadow"/>
+				<linearGradient angle="270" pos="130,0" size="8x147" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="130,147" size="8x8" startColor="shadow"/>
+				<linearGradient pos="0,147" size="130x8" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-8,147" size="8x8" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x147"/>
+			</widget>
+			<rectangle fillColor="background" pos="10,45" size="130x147"/>
+			<widget pos="14,49" size="122x139" type="*widget.List">
+				<widget size="122x139" type="*widget.Scroll">
+					<container size="122x139">
+						<widget size="122x45" type="*widget.listItem">
+							<widget pos="8,4" size="110x37" type="*widget.Label">
+								<text pos="8,8" size="94x21">A</text>
+							</widget>
+						</widget>
+						<widget pos="0,46" size="122x45" type="*widget.listItem">
+							<rectangle fillColor="focus" size="122x45"/>
+							<widget pos="8,4" size="110x37" type="*widget.Label">
+								<text pos="8,8" size="94x21">B</text>
+							</widget>
+						</widget>
+						<widget pos="0,92" size="122x45" type="*widget.listItem">
+							<widget pos="8,4" size="110x37" type="*widget.Label">
+								<text pos="8,8" size="94x21">C</text>
+							</widget>
+						</widget>
+						<widget size="0x0" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="0x0"/>
+						</widget>
+						<widget pos="0,45" size="122x1" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="122x1"/>
+						</widget>
+						<widget pos="0,91" size="122x1" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="122x1"/>
+						</widget>
+					</container>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
 </canvas>
