@@ -74,10 +74,6 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	test.TapCanvas(c, switchPos)
 	test.AssertRendersToMarkup(t, "select_entry/dropdown_B_opened.xml", c)
-
-	test.TapCanvas(c, fyne.NewPos(50, 15+3*(theme.Padding()+e.Size().Height)))
-	test.AssertRendersToMarkup(t, "select_entry/dropdown_tapped_C.xml", c)
-	assert.Equal(t, "C", e.Text)
 }
 
 func TestSelectEntry_DropDownMove(t *testing.T) {
