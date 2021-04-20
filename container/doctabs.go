@@ -27,8 +27,9 @@ type DocTabs struct {
 	OnSelected     func(*TabItem)
 	OnUnselected   func(*TabItem)
 
-	current  int
-	location TabLocation
+	current         int
+	location        TabLocation
+	isTransitioning bool
 
 	popUpMenu *widget.PopUpMenu
 }
@@ -193,8 +194,16 @@ func (t *DocTabs) setSelected(selected int) {
 	t.current = selected
 }
 
+func (t *DocTabs) setTransitioning(transitioning bool) {
+	t.isTransitioning = transitioning
+}
+
 func (t *DocTabs) tabLocation() TabLocation {
 	return t.location
+}
+
+func (t *DocTabs) transitioning() bool {
+	return t.isTransitioning
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -214,7 +223,10 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.updateCreateTab()
 	r.updateTabs()
 	r.layout(r.docTabs, size)
-	r.updateIndicator(true)
+	r.updateIndicator(r.docTabs.transitioning())
+	if r.docTabs.transitioning() {
+		r.docTabs.setTransitioning(false)
+	}
 }
 
 func (r *docTabsRenderer) MinSize() fyne.Size {

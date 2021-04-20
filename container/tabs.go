@@ -59,6 +59,9 @@ type baseTabs interface {
 	setSelected(int)
 
 	tabLocation() TabLocation
+
+	transitioning() bool
+	setTransitioning(bool)
 }
 
 func buildPopUpMenu(t baseTabs, button *widget.Button, items []*fyne.MenuItem) *widget.PopUpMenu {
@@ -136,6 +139,7 @@ func selectIndex(t baseTabs, index int) {
 		return
 	}
 
+	t.setTransitioning(true)
 	t.setSelected(index)
 
 	if f := t.onSelected(); f != nil {
