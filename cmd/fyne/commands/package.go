@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -106,7 +107,9 @@ func (p *packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
-		defer p.removeBuild()
+		if runtime.GOOS != "windows" {
+			defer p.removeBuild()
+		}
 	}
 
 	switch p.os {
