@@ -16,7 +16,7 @@ jobs:
         GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
         GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
         GO111MODULE=off go get golang.org/x/lint/golint
-        GO111MODULE=off go get -u honnef.co/go/tools/cmd/staticcheck
+        GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
     - name: Cleanup repository
       run: rm -rf vendor/
 
