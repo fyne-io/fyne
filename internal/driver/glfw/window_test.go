@@ -993,6 +993,27 @@ func TestWindow_Focus(t *testing.T) {
 	assert.Equal(t, "ef", e2.Text)
 }
 
+func TestWindow_CaptureTypedShortcut(t *testing.T) {
+	w := createWindow("Test").(*window)
+	content := &typedShortcutable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.mouseMoved(w.viewport, 5, 5)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Press), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyA, 0, glfw.Action(glfw.Press), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Release), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyA, 0, glfw.Action(glfw.Release), glfw.ModControl)
+
+	w.waitForEvents()
+
+	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Equal(t, "CustomDesktop:Control+A", content.capturedShortcuts[0].ShortcutName())
+}
+
 func TestWindow_ManualFocus(t *testing.T) {
 	w := createWindow("Test").(*window)
 	content := &focusable{}
@@ -1331,6 +1352,15 @@ func (f *focusable) Disable() {
 
 func (f *focusable) Disabled() bool {
 	return f.disabled
+}
+
+type typedShortcutable struct {
+	focusable
+	capturedShortcuts []fyne.Shortcut
+}
+
+func (ts *typedShortcutable) TypedShortcut(s fyne.Shortcut) {
+	ts.capturedShortcuts = append(ts.capturedShortcuts, s)
 }
 
 //
