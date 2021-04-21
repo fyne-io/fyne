@@ -3,6 +3,20 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.0.3 - TBC
+
+### Fixed
+
+* Optimisations for TextGrid rendering
+* Data binding with widget.List sometimes crash while scrolling (#2125)
+* Fix compilation on FreeBSD 13
+* DataLists should notify only once when change.
+* Keyboard will appear on Android in disabled Entry Widget (#2139)
+* Save dialog with filename for Android
+* form widget can't draw hinttext of appended item. (#2028)
+* Don't create empty shortcuts (#2148)
+
+
 ## 2.0.2 - 1 April 2021
 
 ### Changed
