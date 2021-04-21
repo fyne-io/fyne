@@ -15,6 +15,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Save dialog with filename for Android
 * form widget can't draw hinttext of appended item. (#2028)
 * Don't create empty shortcuts (#2148)
+* Install directory for windows install command contains ".exe"
 
 
 ## 2.0.2 - 1 April 2021
