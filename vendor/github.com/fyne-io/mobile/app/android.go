@@ -45,7 +45,7 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
-void showFileSave(JNIEnv* env, char* mimes);
+void showFileSave(JNIEnv* env, char* mimes, char* filename);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -383,16 +383,18 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 	}
 }
 
-func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	fileCallback = callback
 
 	mimes := mimeStringFromFilter(filter)
 	mimeStr := C.CString(mimes)
 	defer C.free(unsafe.Pointer(mimeStr))
+	filenameStr := C.CString(filename)
+	defer C.free(unsafe.Pointer(filenameStr))
 
 	save := func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showFileSave(env, mimeStr)
+		C.showFileSave(env, mimeStr, filenameStr)
 		return nil
 	}
 

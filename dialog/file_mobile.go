@@ -36,7 +36,7 @@ func fileOpenOSOverride(f *FileDialog) bool {
 }
 
 func fileSaveOSOverride(f *FileDialog) bool {
-	gomobile.ShowFileSavePicker(f.callback.(func(fyne.URIWriteCloser, error)), f.filter)
+	gomobile.ShowFileSavePicker(f.callback.(func(fyne.URIWriteCloser, error)), f.filter, f.initialFileName)
 
 	return true
 }

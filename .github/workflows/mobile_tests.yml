@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: WillAbides/setup-go-faster@v1.5.0
+    - uses: WillAbides/setup-go-faster@v1.6.0
       with:
         go-version: ${{ matrix.go-version }}
 

@@ -463,3 +463,18 @@ func Test_VisibilityOffIcon_FileSource(t *testing.T) {
 	result := VisibilityOffIcon().Name()
 	assert.Equal(t, "visibility-off.svg", result)
 }
+
+func Test_AccountIcon_FileSource(t *testing.T) {
+	result := AccountIcon().Name()
+	assert.Equal(t, "account.svg", result)
+}
+
+func Test_LoginIcon_FileSource(t *testing.T) {
+	result := LoginIcon().Name()
+	assert.Equal(t, "login.svg", result)
+}
+
+func Test_LogoutIcon_FileSource(t *testing.T) {
+	result := LogoutIcon().Name()
+	assert.Equal(t, "logout.svg", result)
+}

@@ -232,3 +232,98 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_invalid.png", w.Canvas().Capture())
 }
+
+func TestForm_DisableEnable(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "test1", Widget: NewEntry()},
+		},
+		OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	if form.Disabled() {
+		t.Error("form.Disabled() returned true when it should have been false")
+	}
+
+	test.AssertImageMatches(t, "form/disable_initial.png", w.Canvas().Capture())
+
+	form.Disable()
+
+	if !form.Disabled() {
+		t.Error("form.Disabled() returned false when it should have been true")
+	}
+
+	test.AssertImageMatches(t, "form/disable_disabled.png", w.Canvas().Capture())
+
+	form.Enable()
+
+	if form.Disabled() {
+		t.Error("form.Disabled() returned true when it should have been false")
+	}
+
+	test.AssertImageMatches(t, "form/disable_re_enabled.png", w.Canvas().Capture())
+}
+
+func TestForm_Disable_Validation(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "wrong"}
+
+	form := &Form{Items: []*FormItem{{Text: "test", Widget: entry}}, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/disable_validation_initial.png", w.Canvas().Capture())
+
+	form.Disable()
+
+	test.AssertImageMatches(t, "form/disable_validation_disabled_invalid.png", w.Canvas().Capture())
+
+	form.Enable()
+
+	test.AssertImageMatches(t, "form/disable_validation_enabled_invalid.png", w.Canvas().Capture())
+
+	entry.SetText("15-true")
+	test.AssertImageMatches(t, "form/disable_validation_enabled_valid.png", w.Canvas().Capture())
+
+	// ensure we don't re-enable the form when entering something valid
+	entry.SetText("invalid")
+	form.Disable()
+	entry.SetText("15-true")
+
+	test.AssertImageMatches(t, "form/disable_validation_disabled_valid.png", w.Canvas().Capture())
+}
+
+func TestForm_HintsRendered(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	f := NewForm()
+
+	fi1 := NewFormItem("Form Item 1", NewEntry())
+	fi1.HintText = "HT1"
+	f.AppendItem(fi1)
+
+	fi2 := NewFormItem("Form Item 2", NewEntry())
+	fi2.HintText = "HT2"
+
+	f.AppendItem(fi2)
+
+	fi3 := NewFormItem("Form Item 3", NewEntry())
+	fi3.HintText = "HT3"
+
+	f.AppendItem(fi3)
+
+	w := test.NewWindow(f)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/hints_rendered.png", w.Canvas().Capture())
+}
