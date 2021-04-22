@@ -61,6 +61,27 @@ type baseTabs interface {
 	tabLocation() TabLocation
 }
 
+func tabsAdjustedLocation(l TabLocation) TabLocation {
+	// Mobile has limited screen space, so don't put app tab bar on long edges
+	if d := fyne.CurrentDevice(); d.IsMobile() {
+		if o := d.Orientation(); fyne.IsVertical(o) {
+			if l == TabLocationLeading {
+				return TabLocationTop
+			} else if l == TabLocationTrailing {
+				return TabLocationBottom
+			}
+		} else {
+			if l == TabLocationTop {
+				return TabLocationLeading
+			} else if l == TabLocationBottom {
+				return TabLocationTrailing
+			}
+		}
+	}
+
+	return l
+}
+
 func buildPopUpMenu(t baseTabs, button *widget.Button, items []*fyne.MenuItem) *widget.PopUpMenu {
 	d := fyne.CurrentApp().Driver()
 	c := d.CanvasForObject(button)

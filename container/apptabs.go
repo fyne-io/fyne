@@ -181,19 +181,7 @@ func (t *AppTabs) SetItems(items []*TabItem) {
 
 // SetTabLocation sets the location of the tab bar
 func (t *AppTabs) SetTabLocation(l TabLocation) {
-	// Mobile has limited screen space, so don't put app tab bar on long edges
-	if d := fyne.CurrentDevice(); d.IsMobile() {
-		if o := d.Orientation(); fyne.IsVertical(o) {
-			if l == TabLocationLeading || l == TabLocationTrailing {
-				l = TabLocationBottom
-			}
-		} else {
-			if l == TabLocationTop || l == TabLocationBottom {
-				l = TabLocationLeading
-			}
-		}
-	}
-	t.location = l
+	t.location = tabsAdjustedLocation(l)
 	t.Refresh()
 }
 
@@ -320,7 +308,11 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if cells == 0 {
 			cells = 1
 		}
-		buttons.Layout = layout.NewGridLayout(cells)
+		if r.appTabs.location == TabLocationTop || r.appTabs.location == TabLocationBottom {
+			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			buttons.Layout = layout.NewGridLayoutWithRows(cells)
+		}
 		iconPos = buttonIconTop
 	} else if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
