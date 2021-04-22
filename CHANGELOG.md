@@ -16,6 +16,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * form widget can't draw hinttext of appended item. (#2028)
 * Don't create empty shortcuts (#2148)
 * Install directory for windows install command contains ".exe"
+* Fix compilation for Linux Wayland apps
+* Fix tab button layout on mobile (#2117)
 
 
 ## 2.0.2 - 1 April 2021
