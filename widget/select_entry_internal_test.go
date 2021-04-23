@@ -1,4 +1,4 @@
-package widget_test
+package widget
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,7 +15,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 	defer test.NewApp()
 
 	options := []string{"A", "B", "C"}
-	e := widget.NewSelectEntry(options)
+	e := NewSelectEntry(options)
 	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
@@ -54,7 +53,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 	defer test.NewApp()
 
 	options := []string{"A", "B", "C"}
-	e := widget.NewSelectEntry(options)
+	e := NewSelectEntry(options)
 	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
@@ -81,12 +80,43 @@ func TestSelectEntry_DropDown(t *testing.T) {
 	assert.Equal(t, "C", e.Text)
 }
 
+func TestSelectEntry_DropDownMove(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	e := NewSelectEntry([]string{"one"})
+	w := test.NewWindow(e)
+	defer w.Close()
+	entrySize := e.MinSize()
+	w.Resize(entrySize.Add(fyne.NewSize(100, 100)))
+	e.Resize(entrySize)
+
+	// open the popup
+	test.Tap(e.ActionItem.(fyne.Tappable))
+
+	// first movement
+	e.Move(fyne.NewPos(10, 10))
+	assert.Equal(t, fyne.NewPos(10, 10), e.Entry.Position())
+	assert.Equal(t,
+		fyne.NewPos(10, 10+entrySize.Height-theme.InputBorderSize()),
+		e.popUp.Position(),
+	)
+
+	// second movement
+	e.Move(fyne.NewPos(30, 27))
+	assert.Equal(t, fyne.NewPos(30, 27), e.Entry.Position())
+	assert.Equal(t,
+		fyne.NewPos(30, 27+entrySize.Height-theme.InputBorderSize()),
+		e.popUp.Position(),
+	)
+}
+
 func TestSelectEntry_DropDownResize(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
 	options := []string{"A", "B", "C"}
-	e := widget.NewSelectEntry(options)
+	e := NewSelectEntry(options)
 	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
@@ -114,7 +144,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 	largeOptions := []string{"Large Option A", "Larger Option B", "Very Large Option C"}
 	largeOptionsMinWidth := optionsMinSize(largeOptions).Width
 
-	labelHeight := widget.NewLabel("W").MinSize().Height
+	labelHeight := NewLabel("W").MinSize().Height
 
 	tests := map[string]struct {
 		placeholder string
@@ -150,7 +180,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			e := widget.NewSelectEntry(tt.options)
+			e := NewSelectEntry(tt.options)
 			e.PlaceHolder = tt.placeholder
 			e.Text = tt.value
 			assert.Equal(t, tt.want, e.MinSize())
@@ -162,7 +192,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	e := widget.NewSelectEntry([]string{"A", "B", "C"})
+	e := NewSelectEntry([]string{"A", "B", "C"})
 	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
@@ -184,7 +214,7 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	e := widget.NewSelectEntry([]string{})
+	e := NewSelectEntry([]string{})
 	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
@@ -203,13 +233,13 @@ func dropDownIconWidth() float32 {
 }
 
 func emptyTextWidth() float32 {
-	return widget.NewLabel("M").MinSize().Width
+	return NewLabel("M").MinSize().Width
 }
 
 func optionsMinSize(options []string) fyne.Size {
-	var labels []*widget.Label
+	var labels []*Label
 	for _, option := range options {
-		labels = append(labels, widget.NewLabel(option))
+		labels = append(labels, NewLabel(option))
 	}
 	minWidth := float32(0)
 	minHeight := float32(0)
