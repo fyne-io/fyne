@@ -18,6 +18,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Install directory for windows install command contains ".exe"
 * Fix compilation for Linux Wayland apps
 * Fix tab button layout on mobile (#2117)
+* List does not move if a select widget moves with popup open
 
 
 ## 2.0.2 - 1 April 2021
