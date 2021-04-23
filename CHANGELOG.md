@@ -19,6 +19,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix compilation for Linux Wayland apps
 * Fix tab button layout on mobile (#2117)
 * List does not move if a select widget moves with popup open
+* Speed improvements to Select drop down (#2164)
 
 
 ## 2.0.2 - 1 April 2021
