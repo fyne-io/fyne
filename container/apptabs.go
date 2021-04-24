@@ -90,7 +90,7 @@ func (c *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	c.BaseWidget.ExtendBaseWidget(c)
 	r := &appTabsRenderer{line: canvas.NewRectangle(theme.ShadowColor()),
 		underline: canvas.NewRectangle(theme.PrimaryColor()), container: c}
-	r.updateTabs(c.isTransitioning)
+	r.updateTabs(false)
 	return r
 }
 
