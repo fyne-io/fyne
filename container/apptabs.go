@@ -425,30 +425,29 @@ func (r *appTabsRenderer) moveSelection(withAnimation bool) {
 		return
 	}
 
-	if withAnimation {
-		if r.animation != nil {
-			r.animation.Stop()
-		}
-		r.animation = canvas.NewPositionAnimation(r.underline.Position(), underlinePos, canvas.DurationShort, func(p fyne.Position) {
-			r.underline.Move(p)
-			canvas.Refresh(r.underline)
-			if p == underlinePos {
-				r.animation = nil
-			}
-		})
-		r.animation.Start()
-
-		canvas.NewSizeAnimation(r.underline.Size(), underlineSize, canvas.DurationShort, func(s fyne.Size) {
-			r.underline.Resize(s)
-			canvas.Refresh(r.underline)
-		}).Start()
-	} else {
-		if r.animation == nil {
-			r.underline.Move(underlinePos)
-			r.underline.Resize(underlineSize)
-			canvas.Refresh(r.underline)
-		}
+	if !withAnimation && r.animation == nil {
+		r.underline.Move(underlinePos)
+		r.underline.Resize(underlineSize)
+		canvas.Refresh(r.underline)
+		return
 	}
+
+	if r.animation != nil {
+		r.animation.Stop()
+	}
+	r.animation = canvas.NewPositionAnimation(r.underline.Position(), underlinePos, canvas.DurationShort, func(p fyne.Position) {
+		r.underline.Move(p)
+		canvas.Refresh(r.underline)
+		if p == underlinePos {
+			r.animation = nil
+		}
+	})
+	r.animation.Start()
+
+	canvas.NewSizeAnimation(r.underline.Size(), underlineSize, canvas.DurationShort, func(s fyne.Size) {
+		r.underline.Resize(s)
+		canvas.Refresh(r.underline)
+	}).Start()
 }
 
 func (r *appTabsRenderer) tabsInSync() bool {
