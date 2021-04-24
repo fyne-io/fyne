@@ -1120,7 +1120,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		}
 	}
 
-	if shortcut == nil && keyDesktopModifier != 0 && !isKeyModifierPair(keyName, keyDesktopModifier) && keyDesktopModifier != desktop.ShiftModifier {
+	if shortcut == nil && keyDesktopModifier != 0 && !isKeyModifier(keyName) && keyDesktopModifier != desktop.ShiftModifier {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: keyDesktopModifier,
@@ -1418,16 +1418,9 @@ func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
 }
 
-func isKeyModifierPair(keyName fyne.KeyName, modifier desktop.Modifier) bool {
-	switch modifier {
-	case desktop.ShiftModifier:
-		return (keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight)
-	case desktop.ControlModifier:
-		return (keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight)
-	case desktop.AltModifier:
-		return (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight)
-	case desktop.SuperModifier:
-		return (keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight)
-	}
-	return false
+func isKeyModifier(keyName fyne.KeyName) bool {
+	return keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight ||
+		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||
+		keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight ||
+		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
 }
