@@ -18,10 +18,11 @@ import (
 type AppTabs struct {
 	widget.BaseWidget
 
-	Items       []*TabItem
-	OnChanged   func(tab *TabItem)
-	current     int
-	tabLocation TabLocation
+	Items           []*TabItem
+	OnChanged       func(tab *TabItem)
+	current         int
+	tabLocation     TabLocation
+	isTransitioning bool
 }
 
 // TabItem represents a single view in a AppTabs.
@@ -89,7 +90,7 @@ func (c *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	c.BaseWidget.ExtendBaseWidget(c)
 	r := &appTabsRenderer{line: canvas.NewRectangle(theme.ShadowColor()),
 		underline: canvas.NewRectangle(theme.PrimaryColor()), container: c}
-	r.updateTabs()
+	r.updateTabs(false)
 	return r
 }
 
@@ -158,8 +159,10 @@ func (c *AppTabs) SelectTabIndex(index int) {
 	if index < 0 || index >= len(c.Items) || c.current == index {
 		return
 	}
+	c.isTransitioning = true
 	c.current = index
 	c.Refresh()
+	c.isTransitioning = false
 
 	if c.OnChanged != nil {
 		c.OnChanged(c.Items[c.current])
@@ -277,7 +280,7 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 		child.Move(childPos)
 		child.Resize(childSize)
 	}
-	r.moveSelection()
+	r.moveSelection(r.container.isTransitioning)
 }
 
 func (r *appTabsRenderer) MinSize() fyne.Size {
@@ -311,7 +314,7 @@ func (r *appTabsRenderer) Refresh() {
 	r.line.Refresh()
 	r.underline.FillColor = theme.PrimaryColor()
 
-	if r.updateTabs() {
+	if r.updateTabs(r.container.isTransitioning) {
 		r.Layout(r.container.Size())
 	} else {
 		current := r.container.current
@@ -335,7 +338,7 @@ func (r *appTabsRenderer) Refresh() {
 			button.Refresh()
 		}
 	}
-	r.moveSelection()
+	r.moveSelection(r.container.isTransitioning)
 	canvas.Refresh(r.container)
 }
 
@@ -391,7 +394,7 @@ func (r *appTabsRenderer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Contain
 	return fyne.NewContainerWithLayout(lay, buttons...)
 }
 
-func (r *appTabsRenderer) moveSelection() {
+func (r *appTabsRenderer) moveSelection(withAnimation bool) {
 	if r.container.current < 0 {
 		r.underline.Hide()
 		return
@@ -419,6 +422,13 @@ func (r *appTabsRenderer) moveSelection() {
 	if r.underline.Position().IsZero() {
 		r.underline.Move(underlinePos)
 		r.underline.Resize(underlineSize)
+		return
+	}
+
+	if !withAnimation && r.animation == nil {
+		r.underline.Move(underlinePos)
+		r.underline.Resize(underlineSize)
+		canvas.Refresh(r.underline)
 		return
 	}
 
@@ -468,7 +478,7 @@ func (r *appTabsRenderer) tabsInSync() bool {
 	return true
 }
 
-func (r *appTabsRenderer) updateTabs() bool {
+func (r *appTabsRenderer) updateTabs(withAnimation bool) bool {
 	if r.tabsInSync() {
 		return false
 	}
@@ -497,7 +507,7 @@ func (r *appTabsRenderer) updateTabs() bool {
 	}
 	r.tabBar = r.buildTabBar(buttons)
 	r.objects = objects
-	r.moveSelection()
+	r.moveSelection(withAnimation)
 
 	return true
 }
