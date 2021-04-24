@@ -7,7 +7,10 @@ import (
 
 var folderFilter = storage.NewMimeTypeFileFilter([]string{"application/x-directory"})
 
-// NewFolderOpen creates a file dialog allowing the user to choose a folder to open.
+// NewFolderOpen creates a file dialog allowing the user to choose a folder to
+// open. The callback function will run when the dialog closes.  The URI will be
+// nil when the user cancels or when nothing is selected.
+//
 // The dialog will appear over the window specified when Show() is called.
 //
 // Since: 1.4
