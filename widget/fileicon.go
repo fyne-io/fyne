@@ -91,7 +91,9 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	return s
 }
 
-// SetSelected makes the file look like it is selected
+// SetSelected makes the file look like it is selected.
+//
+// Deprecated: Selection will be handled externally in the future.
 func (i *FileIcon) SetSelected(selected bool) {
 	i.Selected = selected
 	i.Refresh()
