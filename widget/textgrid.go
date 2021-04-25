@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2/internal/cache"
@@ -452,7 +453,7 @@ func (t *textGridRenderer) refreshGrid() {
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
-	return len(fmt.Sprintf("%d", t.rows+1))
+	return len(strconv.Itoa(t.rows + 1))
 }
 
 func (t *textGridRenderer) updateGridSize(size fyne.Size) {

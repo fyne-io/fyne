@@ -4,8 +4,8 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
-	"fmt"
 	"os/exec"
+	"strconv"
 	"sync"
 	"time"
 
@@ -43,7 +43,7 @@ func (app *fyneApp) UniqueID() string {
 	}
 
 	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
-	app.uniqueID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
+	app.uniqueID = "missing-id-" + strconv.FormatInt(time.Now().Unix(), 10) // This is a fake unique - it just has to not be reused...
 	return app.uniqueID
 }
 
