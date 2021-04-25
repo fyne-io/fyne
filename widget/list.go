@@ -95,6 +95,19 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
+func (l *List) moveFocusTo(id ListItemID) {
+	if l.scroller == nil {
+		return
+	}
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
+	if y < l.scroller.Offset.Y {
+		l.scroller.Offset.Y = y
+	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
+		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
+	}
+	l.offsetUpdated(l.scroller.Offset)
+}
+
 // Select add the item identified by the given ID to the selection.
 func (l *List) Select(id ListItemID) {
 	if len(l.selected) > 0 && id == l.selected[0] {
@@ -117,16 +130,20 @@ func (l *List) Select(id ListItemID) {
 			f(id)
 		}
 	}()
-	if l.scroller == nil {
+	l.moveFocusTo(id)
+	l.Refresh()
+}
+
+// ScrollTo scrolls to the item represented by id
+func (l *List) ScrollTo(id ListItemID) {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	if id < 0 || id >= length {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
-	if y < l.scroller.Offset.Y {
-		l.scroller.Offset.Y = y
-	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
-		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
-	}
-	l.offsetUpdated(l.scroller.Offset)
+	l.moveFocusTo(id)
 	l.Refresh()
 }
 

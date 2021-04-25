@@ -97,6 +97,42 @@ func TestList_Hover(t *testing.T) {
 	}
 }
 
+func TestList_ScrollTo(t *testing.T) {
+	list := createList(1000)
+
+	offset := float32(0)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	list.ScrollTo(20)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(8245)
+	list.ScrollTo(200)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(44999)
+	list.ScrollTo(999)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(23000)
+	list.ScrollTo(500)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	list.ScrollTo(1000)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(46)
+	list.ScrollTo(1)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+}
+
 func TestList_Selection(t *testing.T) {
 	list := createList(1000)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
