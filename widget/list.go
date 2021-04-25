@@ -99,7 +99,7 @@ func (l *List) moveFocusTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
+	y := float32(id) * (l.itemMin.Height + theme.SeparatorThicknessSize())
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
