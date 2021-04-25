@@ -13,10 +13,7 @@ import (
 // Since: 2.1
 func NewTime(format string) fyne.StringValidator {
 	return func(text string) error {
-		if _, err := time.Parse(format, text); err != nil {
-			return err
-		}
-
-		return nil
+		_, err := time.Parse(format, text)
+		return err
 	}
 }
