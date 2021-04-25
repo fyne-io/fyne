@@ -12,8 +12,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const defaultText = "%d%%"
-
 type progressRenderer struct {
 	widget.BaseRenderer
 	background, bar *canvas.Rectangle

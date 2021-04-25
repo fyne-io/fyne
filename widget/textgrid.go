@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"strconv"
@@ -396,7 +395,7 @@ func (t *textGridRenderer) refreshGrid() {
 		rowStyle := row.Style
 		i := 0
 		if t.text.ShowLineNumbers {
-			lineStr := []rune(fmt.Sprintf("%d", line))
+			lineStr := []rune(strconv.Itoa(line))
 			pad := t.lineNumberWidth() - len(lineStr)
 			for ; i < pad; i++ {
 				t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
