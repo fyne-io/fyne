@@ -7,8 +7,8 @@ import (
 )
 
 // NewTime creates a new validator that verifies times using time.Parse.
-// The reference time for the format: Mon Jan 2 15:04:05 -0700 MST 2006.
 // The validator will return nil if valid, otherwise returns an error with a reason text.
+// See time.Parse() for reference time format: https://pkg.go.dev/time#Parse
 //
 // Since: 2.1
 func NewTime(format string) fyne.StringValidator {
