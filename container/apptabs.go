@@ -288,16 +288,18 @@ func (r *appTabsRenderer) Refresh() {
 }
 
 func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
-	overflow = widget.NewButtonWithIcon("", moreIcon(r.appTabs), func() {
+	return &widget.Button{Icon: moreIcon(r.appTabs), Importance: widget.LowImportance, OnTapped: func() {
 		// Show pop up containing all tabs which did not fit in the tab bar
 
-		var items []*fyne.MenuItem
-		for i := len(r.bar.Objects[0].(*fyne.Container).Objects); i < len(r.appTabs.Items); i++ {
+		itemLen, objLen := len(r.appTabs.Items), len(r.bar.Objects[0].(*fyne.Container).Objects)
+		items := make([]*fyne.MenuItem, 0, itemLen-objLen)
+		for i := objLen; i < itemLen; i++ {
 			item := r.appTabs.Items[i]
+			index := i // capture
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
 			items = append(items, fyne.NewMenuItem(item.Text, func() {
-				r.appTabs.Select(item)
+				r.appTabs.SelectIndex(index)
 				if r.appTabs.popUpMenu != nil {
 					r.appTabs.popUpMenu.Hide()
 					r.appTabs.popUpMenu = nil
@@ -306,9 +308,7 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 		}
 
 		r.appTabs.popUpMenu = buildPopUpMenu(r.appTabs, overflow, items)
-	})
-	overflow.Importance = widget.LowImportance
-	return
+	}}
 }
 
 func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
@@ -338,8 +338,9 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		item := r.appTabs.Items[i]
 		button, ok := r.buttonCache[item]
 		if !ok {
+			index := i // capture
 			button = &tabButton{
-				onTapped: func() { r.appTabs.Select(item) },
+				onTapped: func() { r.appTabs.SelectIndex(index) },
 			}
 			r.buttonCache[item] = button
 		}
