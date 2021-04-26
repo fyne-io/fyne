@@ -3,10 +3,10 @@ package theme
 import (
 	"encoding/hex"
 	"encoding/xml"
-	"fmt"
 	"image/color"
 	"io"
 	"io/ioutil"
+	"strconv"
 )
 
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
@@ -165,5 +165,5 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 func colorToHexAndOpacity(color color.Color) (string, string) {
 	r, g, b, a := color.RGBA()
 	cBytes := []byte{byte(r), byte(g), byte(b)}
-	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes)), fmt.Sprintf("%f", float64(a)/0xffff)
+	return "#" + hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xffff, 'f', 6, 64)
 }

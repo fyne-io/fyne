@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -11,8 +11,6 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
-
-const defaultText = "%d%%"
 
 type progressRenderer struct {
 	widget.BaseRenderer
@@ -48,7 +46,7 @@ func (p *progressRenderer) updateBar() {
 	if text := p.progress.TextFormatter; text != nil {
 		p.label.Text = text()
 	} else {
-		p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
+		p.label.Text = strconv.Itoa(int(ratio*100)) + "%"
 	}
 
 	size := p.progress.Size()

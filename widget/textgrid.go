@@ -1,9 +1,9 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2/internal/cache"
@@ -395,7 +395,7 @@ func (t *textGridRenderer) refreshGrid() {
 		rowStyle := row.Style
 		i := 0
 		if t.text.ShowLineNumbers {
-			lineStr := []rune(fmt.Sprintf("%d", line))
+			lineStr := []rune(strconv.Itoa(line))
 			pad := t.lineNumberWidth() - len(lineStr)
 			for ; i < pad; i++ {
 				t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
@@ -452,7 +452,7 @@ func (t *textGridRenderer) refreshGrid() {
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
-	return len(fmt.Sprintf("%d", t.rows+1))
+	return len(strconv.Itoa(t.rows + 1))
 }
 
 func (t *textGridRenderer) updateGridSize(size fyne.Size) {
