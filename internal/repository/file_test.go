@@ -158,7 +158,7 @@ func TestFileRepositoryWriter(t *testing.T) {
 	baz := storage.NewFileURI(bazPath)
 	spamHam := storage.NewFileURI(spamHamPath)
 
-	// Make sure that spamHam errors, since writing to a non-existant
+	// Make sure that spamHam errors, since writing to a non-existent
 	// parent directory should be an error.
 	spamHamWriter, err := storage.Writer(spamHam)
 	assert.NotNil(t, err)
