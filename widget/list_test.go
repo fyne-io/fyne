@@ -133,6 +133,24 @@ func TestList_ScrollTo(t *testing.T) {
 	assert.Equal(t, offset, list.scroller.Offset.Y)
 }
 
+func TestList_ScrollToBottom(t *testing.T) {
+	list := createList(1000)
+
+	offset := float32(44999)
+	list.ScrollToBottom()
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+}
+
+func TestList_ScrollToTop(t *testing.T) {
+	list := createList(1000)
+
+	offset := float32(0)
+	list.ScrollToTop()
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+}
+
 func TestList_Selection(t *testing.T) {
 	list := createList(1000)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children

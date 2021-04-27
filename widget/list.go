@@ -147,6 +147,22 @@ func (l *List) ScrollTo(id ListItemID) {
 	l.Refresh()
 }
 
+// ScrollToBottom scrolls to the end of the list
+func (l *List) ScrollToBottom() {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	l.scrollTo(length)
+	l.Refresh()
+}
+
+// ScrollToTop scrolls to the start of the list
+func (l *List) ScrollToTop() {
+	l.scrollTo(0)
+	l.Refresh()
+}
+
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
 	if len(l.selected) == 0 || l.selected[0] != id {
