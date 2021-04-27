@@ -95,7 +95,7 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *List) moveFocusTo(id ListItemID) {
+func (l *List) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
@@ -130,7 +130,7 @@ func (l *List) Select(id ListItemID) {
 			f(id)
 		}
 	}()
-	l.moveFocusTo(id)
+	l.scrollTo(id)
 	l.Refresh()
 }
 
@@ -143,7 +143,7 @@ func (l *List) ScrollTo(id ListItemID) {
 	if id < 0 || id >= length {
 		return
 	}
-	l.moveFocusTo(id)
+	l.scrollTo(id)
 	l.Refresh()
 }
 
