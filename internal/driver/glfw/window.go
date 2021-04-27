@@ -825,7 +825,7 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
@@ -838,6 +838,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 		}
 		ev := &fyne.ScrollEvent{}
 		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
+		ev.Position = pos
+		ev.AbsolutePosition = w.mousePos
 		wid.Scrolled(ev)
 	}
 }
