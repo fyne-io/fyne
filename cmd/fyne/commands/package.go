@@ -157,6 +157,10 @@ func (p *packager) validate() error {
 
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
+
+		if util.Exists(p.exe) { // the exe was not specified, assume stale
+			p.removeBuild()
+		}
 	} else if p.os == "ios" || p.os == "android" {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
