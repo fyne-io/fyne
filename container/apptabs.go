@@ -288,7 +288,7 @@ func (r *appTabsRenderer) Refresh() {
 }
 
 func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
-	return &widget.Button{Icon: moreIcon(r.appTabs), Importance: widget.LowImportance, OnTapped: func() {
+	overflow = &widget.Button{Icon: moreIcon(r.appTabs), Importance: widget.LowImportance, OnTapped: func() {
 		// Show pop up containing all tabs which did not fit in the tab bar
 
 		itemLen, objLen := len(r.appTabs.Items), len(r.bar.Objects[0].(*fyne.Container).Objects)
@@ -309,6 +309,8 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 
 		r.appTabs.popUpMenu = buildPopUpMenu(r.appTabs, overflow, items)
 	}}
+
+	return overflow
 }
 
 func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
