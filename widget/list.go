@@ -99,7 +99,7 @@ func (l *List) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := float32(id) * (l.itemMin.Height + theme.SeparatorThicknessSize())
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -153,7 +153,7 @@ func (l *List) ScrollToBottom() {
 	if f := l.Length; f != nil {
 		length = f()
 	}
-	l.scrollTo(length)
+	l.scrollTo(length - 1)
 	l.Refresh()
 }
 
