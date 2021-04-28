@@ -9,13 +9,13 @@ import (
 )
 
 func TestTime(t *testing.T) {
-	time := validation.NewTime("2006-01-02")
+	validate := validation.NewTime("2006-01-02")
 
-	assert.NoError(t, time("2021-02-21"))
-	assert.Error(t, time("21/02-2021"))
+	assert.NoError(t, validate("2021-02-21"))
+	assert.Error(t, validate("21/02-2021"))
 
-	time = validation.NewTime("15:04")
+	validate = validation.NewTime("15:04")
 
-	assert.NoError(t, time("12:30"))
-	assert.Error(t, time("25:77"))
+	assert.NoError(t, validate("12:30"))
+	assert.Error(t, validate("25:77"))
 }
