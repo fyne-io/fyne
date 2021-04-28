@@ -253,7 +253,7 @@ func (r *docTabsRenderer) Refresh() {
 }
 
 func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
-	return &widget.Button{Importance: widget.LowImportance, OnTapped: func() {
+	all = &widget.Button{Importance: widget.LowImportance, OnTapped: func() {
 		// Show pop up containing all tabs
 
 		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
@@ -273,6 +273,8 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 
 		r.docTabs.popUpMenu = buildPopUpMenu(r.docTabs, all, items)
 	}}
+
+	return all
 }
 
 func (r *docTabsRenderer) buildCreateTabsButton() *widget.Button {
