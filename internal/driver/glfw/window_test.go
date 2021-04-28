@@ -544,7 +544,7 @@ func TestWindow_Scrolled(t *testing.T) {
 	w.mouseScrolled(w.viewport, 10, 10)
 	w.waitForEvents()
 
-	if e, _ := o.popScrollEvent().(*fyne.PointEvent); assert.NotNil(t, e, "scroll event") {
+	if e, _ := o.popScrollEvent().(*fyne.ScrollEvent); assert.NotNil(t, e, "scroll event") {
 		assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
 		assert.Equal(t, fyne.NewPos(46, 56), e.Position)
 	}
