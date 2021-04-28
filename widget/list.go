@@ -153,7 +153,10 @@ func (l *List) ScrollToBottom() {
 	if f := l.Length; f != nil {
 		length = f()
 	}
-	l.scrollTo(length - 1)
+	if length > 0 {
+		length -= 1
+	}
+	l.scrollTo(length)
 	l.Refresh()
 }
 
