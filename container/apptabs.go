@@ -373,7 +373,7 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 			selectedPos = a.Position()
 			selectedSize = a.Size()
 		}
-	} else if r.appTabs.current >= 0 {
+	} else {
 		selected := buttons[r.appTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()

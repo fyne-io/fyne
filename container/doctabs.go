@@ -373,7 +373,12 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 
 	buttons := r.scroller.Content.(*fyne.Container).Objects
 
-	if r.docTabs.current >= 0 {
+	if r.docTabs.current >= len(buttons) {
+		if a := r.action; a != nil {
+			selectedPos = a.Position()
+			selectedSize = a.Size()
+		}
+	} else {
 		selected := buttons[r.docTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()
