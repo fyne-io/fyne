@@ -534,6 +534,22 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.NotNil(t, dh.popMouseOutEvent())
 }
 
+func TestWindow_Scrolled(t *testing.T) {
+	w := createWindow("Test").(*window)
+	o := &scrollable{Rectangle: canvas.NewRectangle(color.White)}
+	o.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(o)
+
+	w.mousePos = fyne.NewPos(50, 60)
+	w.mouseScrolled(w.viewport, 10, 10)
+	w.waitForEvents()
+
+	if e, _ := o.popScrollEvent().(*fyne.ScrollEvent); assert.NotNil(t, e, "scroll event") {
+		assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
+		assert.Equal(t, fyne.NewPos(46, 56), e.Position)
+	}
+}
+
 func TestWindow_Tapped(t *testing.T) {
 	w := createWindow("Test").(*window)
 	rect := canvas.NewRectangle(color.White)
@@ -1303,6 +1319,22 @@ type typedShortcutable struct {
 
 func (ts *typedShortcutable) TypedShortcut(s fyne.Shortcut) {
 	ts.capturedShortcuts = append(ts.capturedShortcuts, s)
+}
+
+var _ fyne.Draggable = (*draggable)(nil)
+
+type scrollable struct {
+	*canvas.Rectangle
+	events []interface{}
+}
+
+func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
+	s.events = append(s.events, e)
+}
+
+func (s *scrollable) popScrollEvent() (e interface{}) {
+	e, s.events = pop(s.events)
+	return
 }
 
 //
