@@ -135,6 +135,8 @@ func (l *List) Select(id ListItemID) {
 }
 
 // ScrollTo scrolls to the item represented by id
+//
+// Since: 2.1
 func (l *List) ScrollTo(id ListItemID) {
 	length := 0
 	if f := l.Length; f != nil {
@@ -148,6 +150,8 @@ func (l *List) ScrollTo(id ListItemID) {
 }
 
 // ScrollToBottom scrolls to the end of the list
+//
+// Since: 2.1
 func (l *List) ScrollToBottom() {
 	length := 0
 	if f := l.Length; f != nil {
@@ -161,6 +165,8 @@ func (l *List) ScrollToBottom() {
 }
 
 // ScrollToTop scrolls to the start of the list
+//
+// Since: 2.1
 func (l *List) ScrollToTop() {
 	l.scrollTo(0)
 	l.Refresh()
