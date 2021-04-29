@@ -1,10 +1,12 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 	"strings"
+
+	"fyne.io/fyne/v2/internal/cache"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -296,8 +298,8 @@ func (t *TextGrid) ensureCells(row, col int) {
 }
 
 func (t *TextGrid) refreshCell(row, col int) {
-	// TODO trigger single cell refresh
-	t.Refresh()
+	r := cache.Renderer(t).(*textGridRenderer)
+	r.refreshCell(row, col)
 }
 
 // NewTextGrid creates a new empty TextGrid widget.
@@ -329,6 +331,19 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 
 	bg := canvas.NewRectangle(color.Transparent)
 	t.objects = append(t.objects, bg, text)
+}
+
+func (t *textGridRenderer) refreshCell(row, col int) {
+	pos := row*t.cols + col
+	if pos*2+1 >= len(t.objects) {
+		return
+	}
+
+	text := t.objects[pos*2+1].(*canvas.Text)
+	rect := t.objects[pos*2].(*canvas.Rectangle)
+
+	canvas.Refresh(text)
+	canvas.Refresh(rect)
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
@@ -380,7 +395,7 @@ func (t *textGridRenderer) refreshGrid() {
 		rowStyle := row.Style
 		i := 0
 		if t.text.ShowLineNumbers {
-			lineStr := []rune(fmt.Sprintf("%d", line))
+			lineStr := []rune(strconv.Itoa(line))
 			pad := t.lineNumberWidth() - len(lineStr)
 			for ; i < pad; i++ {
 				t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
@@ -437,7 +452,7 @@ func (t *textGridRenderer) refreshGrid() {
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
-	return len(fmt.Sprintf("%d", t.rows+1))
+	return len(strconv.Itoa(t.rows + 1))
 }
 
 func (t *textGridRenderer) updateGridSize(size fyne.Size) {

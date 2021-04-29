@@ -64,8 +64,6 @@ func NewCanvas() fyne.Canvas {
 	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
 	ret.overlays = &internal.OverlayStack{Canvas: ret, OnChange: ret.overlayChanged}
 
-	ret.setupThemeListener()
-
 	return ret
 }
 
@@ -253,7 +251,11 @@ func (c *mobileCanvas) focusManager() *app.FocusManager {
 }
 
 func (c *mobileCanvas) handleKeyboard(obj fyne.Focusable) {
-	if keyb, ok := obj.(mobile.Keyboardable); ok {
+	isDisabled := false
+	if disWid, ok := obj.(fyne.Disableable); ok {
+		isDisabled = disWid.Disabled()
+	}
+	if keyb, ok := obj.(mobile.Keyboardable); ok && !isDisabled {
 		showVirtualKeyboard(keyb.Keyboard())
 	} else {
 		hideVirtualKeyboard()
@@ -314,20 +316,13 @@ func (c *mobileCanvas) setMenu(menu fyne.CanvasObject) {
 	}
 }
 
-func (c *mobileCanvas) setupThemeListener() {
-	listener := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			<-listener
-			if c.menu != nil {
-				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-			}
-			if c.windowHead != nil {
-				app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
-			}
-		}
-	}()
+func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
+	if c.menu != nil {
+		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+	}
+	if c.windowHead != nil {
+		app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
+	}
 }
 
 func (c *mobileCanvas) sizeContent(size fyne.Size) {

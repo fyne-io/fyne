@@ -27,8 +27,9 @@ type DocTabs struct {
 	OnSelected     func(*TabItem)
 	OnUnselected   func(*TabItem)
 
-	current  int
-	location TabLocation
+	current         int
+	location        TabLocation
+	isTransitioning bool
 
 	popUpMenu *widget.PopUpMenu
 }
@@ -145,7 +146,7 @@ func (t *DocTabs) SetItems(items []*TabItem) {
 
 // SetTabLocation sets the location of the tab bar
 func (t *DocTabs) SetTabLocation(l TabLocation) {
-	t.location = l
+	t.location = tabsAdjustedLocation(l)
 	t.Refresh()
 }
 
@@ -193,8 +194,16 @@ func (t *DocTabs) setSelected(selected int) {
 	t.current = selected
 }
 
+func (t *DocTabs) setTransitioning(transitioning bool) {
+	t.isTransitioning = transitioning
+}
+
 func (t *DocTabs) tabLocation() TabLocation {
 	return t.location
+}
+
+func (t *DocTabs) transitioning() bool {
+	return t.isTransitioning
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -214,7 +223,10 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.updateCreateTab()
 	r.updateTabs()
 	r.layout(r.docTabs, size)
-	r.updateIndicator(true)
+	r.updateIndicator(r.docTabs.transitioning())
+	if r.docTabs.transitioning() {
+		r.docTabs.setTransitioning(false)
+	}
 }
 
 func (r *docTabsRenderer) MinSize() fyne.Size {
@@ -286,7 +298,11 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if cells == 0 {
 			cells = 1
 		}
-		buttons.Layout = layout.NewGridLayout(cells)
+		if r.docTabs.location == TabLocationTop || r.docTabs.location == TabLocationBottom {
+			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			buttons.Layout = layout.NewGridLayoutWithRows(cells)
+		}
 		iconPos = buttonIconTop
 	} else if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
@@ -357,7 +373,12 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 
 	buttons := r.scroller.Content.(*fyne.Container).Objects
 
-	if r.docTabs.current >= 0 {
+	if r.docTabs.current >= len(buttons) {
+		if a := r.action; a != nil {
+			selectedPos = a.Position()
+			selectedSize = a.Size()
+		}
+	} else {
 		selected := buttons[r.docTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -156,4 +157,34 @@ func TestButtonRenderer_ApplyTheme(t *testing.T) {
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
+}
+
+func TestButtonRenderer_TapAnimation(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	button := NewButton("Hi", func() {})
+	w := test.NewWindow(button)
+	defer w.Close()
+	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(10, 10)))
+	button.Resize(fyne.NewSize(50, 50))
+
+	test.ApplyTheme(t, test.NewTheme())
+	button.Refresh()
+
+	render1 := test.WidgetRenderer(button).(*buttonRenderer)
+	test.Tap(button)
+	button.tapAnim.Tick(0.5)
+	test.AssertImageMatches(t, "button/tap_animation.png", w.Canvas().Capture())
+
+	cache.DestroyRenderer(button)
+	button.Refresh()
+
+	render2 := test.WidgetRenderer(button).(*buttonRenderer)
+
+	assert.NotEqual(t, render1, render2)
+
+	test.Tap(button)
+	button.tapAnim.Tick(0.5)
+	test.AssertImageMatches(t, "button/tap_animation.png", w.Canvas().Capture())
 }

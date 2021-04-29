@@ -4,14 +4,13 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
-	"fmt"
 	"os/exec"
+	"strconv"
 	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
-	helper "fyne.io/fyne/v2/internal/app"
 )
 
 // Declare conformity with App interface
@@ -44,7 +43,7 @@ func (app *fyneApp) UniqueID() string {
 	}
 
 	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
-	app.uniqueID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
+	app.uniqueID = "missing-id-" + strconv.FormatInt(time.Now().Unix(), 10) // This is a fake unique - it just has to not be reused...
 	return app.uniqueID
 }
 
@@ -90,6 +89,9 @@ func (app *fyneApp) Storage() fyne.Storage {
 }
 
 func (app *fyneApp) Preferences() fyne.Preferences {
+	if app.uniqueID == "" {
+		fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
+	}
 	return app.prefs
 }
 
@@ -110,14 +112,6 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}
 
-	listener := make(chan fyne.Settings)
-	newApp.Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			set := <-listener
-			helper.ApplySettings(set, newApp)
-		}
-	}()
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
 	}

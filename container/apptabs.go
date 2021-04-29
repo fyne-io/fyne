@@ -26,8 +26,9 @@ type AppTabs struct {
 	OnSelected   func(*TabItem)
 	OnUnselected func(*TabItem)
 
-	current  int
-	location TabLocation
+	current         int
+	location        TabLocation
+	isTransitioning bool
 
 	popUpMenu *widget.PopUpMenu
 }
@@ -59,7 +60,7 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
 	r.updateTabs(1)
-	r.updateIndicator()
+	r.updateIndicator(false)
 	r.applyTheme(t)
 	return r
 }
@@ -181,19 +182,7 @@ func (t *AppTabs) SetItems(items []*TabItem) {
 
 // SetTabLocation sets the location of the tab bar
 func (t *AppTabs) SetTabLocation(l TabLocation) {
-	// Mobile has limited screen space, so don't put app tab bar on long edges
-	if d := fyne.CurrentDevice(); d.IsMobile() {
-		if o := d.Orientation(); fyne.IsVertical(o) {
-			if l == TabLocationLeading || l == TabLocationTrailing {
-				l = TabLocationBottom
-			}
-		} else {
-			if l == TabLocationTop || l == TabLocationBottom {
-				l = TabLocationLeading
-			}
-		}
-	}
-	t.location = l
+	t.location = tabsAdjustedLocation(l)
 	t.Refresh()
 }
 
@@ -237,8 +226,16 @@ func (t *AppTabs) setSelected(selected int) {
 	t.current = selected
 }
 
+func (t *AppTabs) setTransitioning(transitioning bool) {
+	t.isTransitioning = transitioning
+}
+
 func (t *AppTabs) tabLocation() TabLocation {
 	return t.location
+}
+
+func (t *AppTabs) transitioning() bool {
+	return t.isTransitioning
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -268,7 +265,10 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 	}
 
 	r.layout(r.appTabs, size)
-	r.updateIndicator()
+	r.updateIndicator(r.appTabs.transitioning())
+	if r.appTabs.transitioning() {
+		r.appTabs.setTransitioning(false)
+	}
 }
 
 func (r *appTabsRenderer) MinSize() fyne.Size {
@@ -320,7 +320,11 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if cells == 0 {
 			cells = 1
 		}
-		buttons.Layout = layout.NewGridLayout(cells)
+		if r.appTabs.location == TabLocationTop || r.appTabs.location == TabLocationBottom {
+			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			buttons.Layout = layout.NewGridLayoutWithRows(cells)
+		}
 		iconPos = buttonIconTop
 	} else if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
@@ -354,7 +358,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	return buttons
 }
 
-func (r *appTabsRenderer) updateIndicator() {
+func (r *appTabsRenderer) updateIndicator(animate bool) {
 	if r.appTabs.current < 0 {
 		r.indicator.Hide()
 		return
@@ -369,7 +373,7 @@ func (r *appTabsRenderer) updateIndicator() {
 			selectedPos = a.Position()
 			selectedSize = a.Size()
 		}
-	} else if r.appTabs.current >= 0 {
+	} else {
 		selected := buttons[r.appTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()
@@ -393,7 +397,7 @@ func (r *appTabsRenderer) updateIndicator() {
 		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
 	}
 
-	r.moveIndicator(indicatorPos, indicatorSize, true)
+	r.moveIndicator(indicatorPos, indicatorSize, animate)
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {

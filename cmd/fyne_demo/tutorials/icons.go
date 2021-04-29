@@ -184,5 +184,9 @@ func loadIcons() []iconInfo {
 		{"VolumeDown", theme.VolumeDownIcon()},
 		{"VolumeMute", theme.VolumeMuteIcon()},
 		{"VolumeUp", theme.VolumeUpIcon()},
+
+		{"AccountIcon", theme.AccountIcon()},
+		{"LoginIcon", theme.LoginIcon()},
+		{"LogoutIcon", theme.LogoutIcon()},
 	}
 }

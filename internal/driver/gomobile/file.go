@@ -102,11 +102,11 @@ func fileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
 }
 
 type hasSavePicker interface {
-	ShowFileSavePicker(func(string, func()), *app.FileFilter)
+	ShowFileSavePicker(func(string, func()), *app.FileFilter, string)
 }
 
 // ShowFileSavePicker loads the native file save dialog and returns the chosen file path via the callback func.
-func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error), filter storage.FileFilter) {
+func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error), filter storage.FileFilter, filename string) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasSavePicker); ok {
 		a.ShowFileSavePicker(func(uri string, closer func()) {
@@ -119,6 +119,6 @@ func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error), filter storag
 				f.(*fileSave).done = closer
 			}
 			callback(f, err)
-		}, mobileFilter(filter))
+		}, mobileFilter(filter), filename)
 	}
 }

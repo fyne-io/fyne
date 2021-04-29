@@ -1361,6 +1361,20 @@ func TestEntry_Submit(t *testing.T) {
 	})
 }
 
+func TestTabable(t *testing.T) {
+	entry := &widget.Entry{}
+	t.Run("Multiline_Tab_Default", func(t *testing.T) {
+		entry.MultiLine = true
+		entry.SetText("a")
+		typeKeys(entry, fyne.KeyTab)
+		assert.Equal(t, "\ta", entry.Text)
+	})
+	t.Run("Singleline_Tab_Default", func(t *testing.T) {
+		entry.MultiLine = false
+		assert.False(t, entry.AcceptsTab())
+	})
+}
+
 func TestEntry_Tapped(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
