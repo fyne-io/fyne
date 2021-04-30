@@ -7,4 +7,4 @@ package glfw
 // generate` on this package. This exists to invalidate the build cache (see
 // https://github.com/go-gl/glfw/issues/269), which is unaffected by C source
 // inputs.
-const upstreamTreeSHA = "4490c2c270a92046291b021c15e33340289b33db"
+const upstreamTreeSHA = "35599f5c137b48f8395629e686000729426bf966"
