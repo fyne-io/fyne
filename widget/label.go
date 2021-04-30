@@ -55,18 +55,7 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 func (l *Label) Bind(data binding.String) {
 	l.Unbind()
 	l.textSource = data
-	l.textListener = binding.NewDataListener(func() {
-		val, err := l.textSource.Get()
-		if err != nil {
-			fyne.LogError("Error getting current data value", err)
-			return
-		}
-
-		l.Text = val
-		if cache.IsRendered(l) {
-			l.Refresh()
-		}
-	})
+	l.createListener()
 	data.AddListener(l.textListener)
 }
 
@@ -109,13 +98,36 @@ func (l *Label) SetText(text string) {
 //
 // Since: 2.0
 func (l *Label) Unbind() {
-	if l.textSource == nil || l.textListener == nil {
+	src := l.textSource
+	if src == nil {
 		return
 	}
 
-	l.textSource.RemoveListener(l.textListener)
-	l.textListener = nil
+	src.RemoveListener(l.textListener)
 	l.textSource = nil
+}
+
+func (l *Label) createListener() {
+	if l.textListener != nil {
+		return
+	}
+
+	l.textListener = binding.NewDataListener(func() {
+		src := l.textSource
+		if src == nil {
+			return
+		}
+		val, err := src.Get()
+		if err != nil {
+			fyne.LogError("Error getting current data value", err)
+			return
+		}
+
+		l.Text = val
+		if cache.IsRendered(l) {
+			l.Refresh()
+		}
+	})
 }
 
 // textAlign tells the rendering textProvider our alignment

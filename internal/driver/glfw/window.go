@@ -825,7 +825,7 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
@@ -838,6 +838,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 		}
 		ev := &fyne.ScrollEvent{}
 		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
+		ev.Position = pos
+		ev.AbsolutePosition = w.mousePos
 		wid.Scrolled(ev)
 	}
 }
@@ -1120,7 +1122,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		}
 	}
 
-	if shortcut == nil && keyDesktopModifier != 0 && keyDesktopModifier != desktop.ShiftModifier {
+	if shortcut == nil && keyDesktopModifier != 0 && !isKeyModifier(keyName) && keyDesktopModifier != desktop.ShiftModifier {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: keyDesktopModifier,
@@ -1416,4 +1418,11 @@ func (d *gLDriver) CreateSplashWindow() fyne.Window {
 
 func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
+}
+
+func isKeyModifier(keyName fyne.KeyName) bool {
+	return keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight ||
+		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||
+		keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight ||
+		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
 }

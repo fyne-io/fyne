@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -42,7 +43,7 @@ func NewPackager() Command {
 
 func (p *packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
+	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
@@ -106,7 +107,9 @@ func (p *packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
-		defer p.removeBuild()
+		if runtime.GOOS != "windows" {
+			defer p.removeBuild()
+		}
 	}
 
 	switch p.os {
@@ -154,6 +157,10 @@ func (p *packager) validate() error {
 
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
+
+		if util.Exists(p.exe) { // the exe was not specified, assume stale
+			p.removeBuild()
+		}
 	} else if p.os == "ios" || p.os == "android" {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -33,6 +34,7 @@ func (g *Getter) Get(pkg string) error {
 
 // AddFlags adds available flags to the current flags parser
 func (g *Getter) AddFlags() {
+	flag.StringVar(&g.icon, "icon", "Icon.png", "The name of the application icon file")
 }
 
 // PrintHelp prints help for this command when used in a command-line context

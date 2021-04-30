@@ -1546,6 +1546,10 @@ func (r *entryContentRenderer) moveCursor() {
 }
 
 func (r *entryContentRenderer) updateScrollDirections() {
+	if r.content.scroll == nil { // not scrolling
+		return
+	}
+
 	switch r.content.entry.Wrapping {
 	case fyne.TextWrapOff:
 		r.content.scroll.Direction = widget.ScrollNone
