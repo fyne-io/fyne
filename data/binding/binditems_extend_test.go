@@ -93,3 +93,43 @@ func (t *timeBinding) Set(time time.Time) error {
 	i := time.Unix()
 	return t.Int.Set(int(i))
 }
+
+func TestNewUserType(t *testing.T) {
+	u := newUserType()
+	v, err := u.GetUser()
+	assert.Nil(t, err)
+	assert.Equal(t, "User: ", v.String())
+
+	err = u.Set(user{name: "Dave"})
+	assert.Nil(t, err)
+	v, err = u.GetUser()
+	assert.Nil(t, err)
+	assert.Equal(t, "User: Dave", v.String())
+}
+
+type user struct {
+	name string
+}
+
+func (u *user) String() string {
+	return "User: " + u.name
+}
+
+type userType struct {
+	Untyped
+}
+
+func newUserType() *userType {
+	ret := &userType{Untyped: NewUntyped()}
+	_ = ret.Set(user{})
+	return ret
+}
+
+func (t *userType) GetUser() (user, error) {
+	val, err := t.Get()
+	return val.(user), err
+}
+
+func (t *userType) SetUser(u user) error {
+	return t.Set(u)
+}
