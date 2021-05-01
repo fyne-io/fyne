@@ -253,27 +253,27 @@ func (r *docTabsRenderer) Refresh() {
 }
 
 func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
-	all = widget.NewButton("", func() {
+	all = &widget.Button{Importance: widget.LowImportance, OnTapped: func() {
 		// Show pop up containing all tabs
 
-		var items []*fyne.MenuItem
+		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
 		for i := 0; i < len(r.docTabs.Items); i++ {
-			item := r.docTabs.Items[i]
+			index := i // capture
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
-			items = append(items, fyne.NewMenuItem(item.Text, func() {
-				r.docTabs.Select(item)
+			items[i] = fyne.NewMenuItem(r.docTabs.Items[i].Text, func() {
+				r.docTabs.SelectIndex(index)
 				if r.docTabs.popUpMenu != nil {
 					r.docTabs.popUpMenu.Hide()
 					r.docTabs.popUpMenu = nil
 				}
-			}))
+			})
 		}
 
 		r.docTabs.popUpMenu = buildPopUpMenu(r.docTabs, all, items)
-	})
-	all.Importance = widget.LowImportance
-	return
+	}}
+
+	return all
 }
 
 func (r *docTabsRenderer) buildCreateTabsButton() *widget.Button {
@@ -316,8 +316,9 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		item := r.docTabs.Items[i]
 		button, ok := r.buttonCache[item]
 		if !ok {
+			index := i // capture
 			button = &tabButton{
-				onTapped: func() { r.docTabs.Select(item) },
+				onTapped: func() { r.docTabs.SelectIndex(index) },
 				onClosed: func() { r.docTabs.close(item) },
 			}
 			r.buttonCache[item] = button
