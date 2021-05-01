@@ -205,7 +205,7 @@ func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	if format == "{{ .Format }}" { // Same as not using custom formatting.
 		return {{ .Name }}ToString(v)
 	}
-	
+
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -303,7 +303,7 @@ func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	if format == "{{ .Format }}" { // Same as not using custom format.
 		return StringTo{{ .Name }}(str)
 	}
-	
+
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
 	return v
