@@ -33,7 +33,7 @@ func TestBindTime(t *testing.T) {
 	newTime = newTime.Add(time.Minute)
 	called = false
 	val = newTime
-	f.Reload()
+	_ = f.Reload()
 	waitForItems()
 	assert.True(t, called)
 	v, err = f.Get()
@@ -94,6 +94,38 @@ func (t *timeBinding) Set(time time.Time) error {
 	return t.Int.Set(int(i))
 }
 
+func TestBindUserType(t *testing.T) {
+	val := user{name: "Unnamed"}
+	u := bindUserType(&val)
+	v, err := u.GetUser()
+	assert.Nil(t, err)
+	assert.Equal(t, "User: Unnamed", v.String())
+
+	called := false
+	fn := NewDataListener(func() {
+		called = true
+	})
+	u.AddListener(fn)
+	waitForItems()
+	assert.True(t, called)
+
+	called = false
+	err = u.Set(user{name: "Replace"})
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, "User: Replace", val.String())
+	assert.True(t, called)
+
+	called = false
+	val = user{name: "Direct"}
+	_ = u.Reload()
+	waitForItems()
+	assert.True(t, called)
+	v, err = u.GetUser()
+	assert.Nil(t, err)
+	assert.Equal(t, "User: Direct", v.String())
+}
+
 func TestNewUserType(t *testing.T) {
 	u := newUserType()
 	v, err := u.GetUser()
@@ -132,4 +164,35 @@ func (t *userType) GetUser() (user, error) {
 
 func (t *userType) SetUser(u user) error {
 	return t.Set(u)
+}
+
+type externalUserType struct {
+	*userType
+	*user
+}
+
+func bindUserType(u *user) *externalUserType {
+	return &externalUserType{userType: newUserType(), user: u}
+}
+
+func (t *externalUserType) GetUser() (user, error) {
+	val, err := t.Get()
+	return val.(user), err
+}
+
+func (t *externalUserType) SetUser(u user) error {
+	return t.Set(u)
+}
+
+func (t *externalUserType) Get() (interface{}, error) {
+	return *t.user, nil
+}
+
+func (t *externalUserType) Reload() error {
+	return t.Untyped.Set(*t.user)
+}
+
+func (t *externalUserType) Set(u interface{}) error {
+	*t.user = u.(user)
+	return t.userType.Set(u)
 }
