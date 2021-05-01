@@ -294,11 +294,10 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 		itemLen, objLen := len(r.appTabs.Items), len(r.bar.Objects[0].(*fyne.Container).Objects)
 		items := make([]*fyne.MenuItem, 0, itemLen-objLen)
 		for i := objLen; i < itemLen; i++ {
-			item := r.appTabs.Items[i]
 			index := i // capture
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
-			items = append(items, fyne.NewMenuItem(item.Text, func() {
+			items = append(items, fyne.NewMenuItem(r.appTabs.Items[i].Text, func() {
 				r.appTabs.SelectIndex(index)
 				if r.appTabs.popUpMenu != nil {
 					r.appTabs.popUpMenu.Hide()

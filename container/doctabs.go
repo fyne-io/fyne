@@ -258,11 +258,10 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 
 		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
 		for i := 0; i < len(r.docTabs.Items); i++ {
-			item := r.docTabs.Items[i]
 			index := i // capture
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
-			items[i] = fyne.NewMenuItem(item.Text, func() {
+			items[i] = fyne.NewMenuItem(r.docTabs.Items[i].Text, func() {
 				r.docTabs.SelectIndex(index)
 				if r.docTabs.popUpMenu != nil {
 					r.docTabs.popUpMenu.Hide()
