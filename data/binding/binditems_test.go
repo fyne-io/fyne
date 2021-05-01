@@ -127,8 +127,40 @@ func TestNewFloat_TriggerOnlyWhenChange(t *testing.T) {
 	assert.Equal(t, 1, triggered)
 }
 
+func TestBindURI(t *testing.T) {
+	val := storage.NewFileURI("/tmp")
+	f := BindURI(&val)
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///tmp", v.String())
+
+	called := false
+	fn := NewDataListener(func() {
+		called = true
+	})
+	f.AddListener(fn)
+	waitForItems()
+	assert.True(t, called)
+
+	called = false
+	err = f.Set(storage.NewFileURI("/tmp/test.txt"))
+	assert.Nil(t, err)
+	waitForItems()
+	assert.Equal(t, "file:///tmp/test.txt", val.String())
+	assert.True(t, called)
+
+	called = false
+	val = storage.NewFileURI("/hello")
+	_ = f.Reload()
+	waitForItems()
+	assert.True(t, called)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///hello", v.String())
+}
+
 func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
-	v := storage.NewURI("first")
+	v := storage.NewFileURI("first")
 	b := BindURI(&v)
 	triggered := 0
 	b.AddListener(NewDataListener(func() {
@@ -139,37 +171,50 @@ func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
 
 	triggered = 0
 	for i := 0; i < 5; i++ {
-		err := b.Set(storage.NewURI("second"))
+		err := b.Set(storage.NewFileURI("second"))
 		assert.Nil(t, err)
 		waitForItems()
 		assert.Equal(t, 1, triggered)
 	}
 
 	triggered = 0
-	err := b.Set(storage.NewURI("third"))
+	err := b.Set(storage.NewFileURI("third"))
 	assert.Nil(t, err)
 	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	err = b.Set(storage.NewURI("fourth"))
+	err = b.Set(storage.NewFileURI("fourth"))
 	assert.Nil(t, err)
 	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	v = storage.NewURI("fourth")
+	v = storage.NewFileURI("fourth")
 	err = b.Reload()
 	assert.NoError(t, err)
 	waitForItems()
 	assert.Equal(t, 0, triggered)
 
 	triggered = 0
-	v = storage.NewURI("fifth")
+	v = storage.NewFileURI("fifth")
 	err = b.Reload()
 	assert.NoError(t, err)
 	waitForItems()
 	assert.Equal(t, 1, triggered)
+}
+
+func TestNewURI(t *testing.T) {
+	f := NewURI()
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, nil, v)
+
+	err = f.Set(storage.NewFileURI("/var"))
+	assert.Nil(t, err)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///var", v.String())
 }
 
 func TestNewURI_TriggerOnlyWhenChange(t *testing.T) {
@@ -183,20 +228,20 @@ func TestNewURI_TriggerOnlyWhenChange(t *testing.T) {
 
 	triggered = 0
 	for i := 0; i < 5; i++ {
-		err := b.Set(storage.NewURI("first"))
+		err := b.Set(storage.NewFileURI("first"))
 		assert.Nil(t, err)
 		waitForItems()
 		assert.Equal(t, 1, triggered)
 	}
 
 	triggered = 0
-	err := b.Set(storage.NewURI("second"))
+	err := b.Set(storage.NewFileURI("second"))
 	assert.Nil(t, err)
 	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	err = b.Set(storage.NewURI("third"))
+	err = b.Set(storage.NewFileURI("third"))
 	assert.Nil(t, err)
 	waitForItems()
 	assert.Equal(t, 1, triggered)
