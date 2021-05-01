@@ -26,7 +26,8 @@ type ExternalBool interface {
 //
 // Since: 2.0
 func NewBool() Bool {
-	blank := false
+	var blank bool
+	blank = false
 	return &boundBool{val: &blank}
 }
 
@@ -36,7 +37,8 @@ func NewBool() Bool {
 // Since: 2.0
 func BindBool(v *bool) ExternalBool {
 	if v == nil {
-		blank := false
+		var blank bool
+		blank = false
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternalBool{}
@@ -117,7 +119,8 @@ type ExternalFloat interface {
 //
 // Since: 2.0
 func NewFloat() Float {
-	blank := 0.0
+	var blank float64
+	blank = 0.0
 	return &boundFloat{val: &blank}
 }
 
@@ -127,7 +130,8 @@ func NewFloat() Float {
 // Since: 2.0
 func BindFloat(v *float64) ExternalFloat {
 	if v == nil {
-		blank := 0.0
+		var blank float64
+		blank = 0.0
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternalFloat{}
@@ -208,7 +212,8 @@ type ExternalInt interface {
 //
 // Since: 2.0
 func NewInt() Int {
-	blank := 0
+	var blank int
+	blank = 0
 	return &boundInt{val: &blank}
 }
 
@@ -218,7 +223,8 @@ func NewInt() Int {
 // Since: 2.0
 func BindInt(v *int) ExternalInt {
 	if v == nil {
-		blank := 0
+		var blank int
+		blank = 0
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternalInt{}
@@ -299,7 +305,8 @@ type ExternalRune interface {
 //
 // Since: 2.0
 func NewRune() Rune {
-	blank := rune(0)
+	var blank rune
+	blank = rune(0)
 	return &boundRune{val: &blank}
 }
 
@@ -309,7 +316,8 @@ func NewRune() Rune {
 // Since: 2.0
 func BindRune(v *rune) ExternalRune {
 	if v == nil {
-		blank := rune(0)
+		var blank rune
+		blank = rune(0)
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternalRune{}
@@ -390,7 +398,8 @@ type ExternalString interface {
 //
 // Since: 2.0
 func NewString() String {
-	blank := ""
+	var blank string
+	blank = ""
 	return &boundString{val: &blank}
 }
 
@@ -400,7 +409,8 @@ func NewString() String {
 // Since: 2.0
 func BindString(v *string) ExternalString {
 	if v == nil {
-		blank := ""
+		var blank string
+		blank = ""
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternalString{}
@@ -460,6 +470,64 @@ func (b *boundExternalString) Reload() error {
 	return b.Set(*b.val)
 }
 
+// Untyped supports binding a interface{} value.
+//
+// Since: 2.1
+type Untyped interface {
+	DataItem
+	Get() (interface{}, error)
+	Set(interface{}) error
+}
+
+// ExternalUntyped supports binding a interface{} value to an external value.
+//
+// Since: 2.1
+type ExternalUntyped interface {
+	Untyped
+	Reload() error
+}
+
+// NewUntyped returns a bindable interface{} value that is managed internally.
+//
+// Since: 2.1
+func NewUntyped() Untyped {
+	var blank interface{}
+	blank = struct{}{}
+	return &boundUntyped{val: &blank}
+}
+
+type boundUntyped struct {
+	base
+
+	val interface{}
+}
+
+func (b *boundUntyped) Get() (interface{}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	if b.val == nil {
+		return struct{}{}, nil
+	}
+
+	v := b.val.(*interface{})
+	return *v, nil
+}
+
+func (b *boundUntyped) Set(val interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	v := b.val.(*interface{})
+	if *v == val {
+		return nil
+	}
+	*v = val
+
+	b.trigger()
+	return nil
+}
+
 // URI supports binding a fyne.URI value.
 //
 // Since: 2.1
@@ -481,7 +549,8 @@ type ExternalURI interface {
 //
 // Since: 2.1
 func NewURI() URI {
-	blank := fyne.URI(nil)
+	var blank fyne.URI
+	blank = fyne.URI(nil)
 	return &boundURI{val: &blank}
 }
 
@@ -491,7 +560,8 @@ func NewURI() URI {
 // Since: 2.1
 func BindURI(v *fyne.URI) ExternalURI {
 	if v == nil {
-		blank := fyne.URI(nil)
+		var blank fyne.URI
+		blank = fyne.URI(nil)
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternalURI{}
