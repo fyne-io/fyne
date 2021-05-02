@@ -31,7 +31,7 @@ func NewGridLayoutWithColumns(cols int) fyne.Layout {
 	return &gridLayout{Cols: cols}
 }
 
-// NewGridLayoutWithRows returns a new grid layout that specifies a row count that creates new columns as required.
+// NewGridLayoutWithRows returns a new grid layout that specifies a row count that creates new rows as required.
 func NewGridLayoutWithRows(rows int) fyne.Layout {
 	return &gridLayout{Cols: rows, vertical: true}
 }
