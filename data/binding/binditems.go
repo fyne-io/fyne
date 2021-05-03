@@ -492,14 +492,14 @@ type ExternalUntyped interface {
 // Since: 2.1
 func NewUntyped() Untyped {
 	var blank interface{}
-	blank = struct{}{}
+	blank = nil
 	return &boundUntyped{val: &blank}
 }
 
 type boundUntyped struct {
 	base
 
-	val interface{}
+	val *interface{}
 }
 
 func (b *boundUntyped) Get() (interface{}, error) {
@@ -507,22 +507,18 @@ func (b *boundUntyped) Get() (interface{}, error) {
 	defer b.lock.RUnlock()
 
 	if b.val == nil {
-		return struct{}{}, nil
+		return nil, nil
 	}
-
-	v := b.val.(*interface{})
-	return *v, nil
+	return *b.val, nil
 }
 
 func (b *boundUntyped) Set(val interface{}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
-	v := b.val.(*interface{})
-	if *v == val {
+	if *b.val == val {
 		return nil
 	}
-	*v = val
+	*b.val = val
 
 	b.trigger()
 	return nil
