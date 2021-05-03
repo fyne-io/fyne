@@ -33,8 +33,7 @@ type External{{ .Name }} interface {
 //
 // Since: {{ .Since }}
 func New{{ .Name }}() {{ .Name }} {
-	var blank {{ .Type }}
-	blank = {{ .Default }}
+	var blank {{ .Type }} = {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
@@ -44,8 +43,7 @@ func New{{ .Name }}() {{ .Name }} {
 // Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		var blank {{ .Type }}
-		blank = {{ .Default }}
+		var blank {{ .Type }} = {{ .Default }}
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternal{{ .Name }}{}

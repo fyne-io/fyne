@@ -171,7 +171,7 @@ func (b *mapBase) GetValue(key string) (interface{}, error) {
 	defer b.lock.RUnlock()
 
 	if i, ok := b.items[key]; ok {
-		return i.(reflectUntyped).get()
+		return i.get()
 	}
 
 	return nil, errKeyNotFound
@@ -203,7 +203,7 @@ func (b *mapBase) SetValue(key string, d interface{}) error {
 	defer b.lock.Unlock()
 
 	if i, ok := b.items[key]; ok {
-		return i.(reflectUntyped).set(d)
+		return i.set(d)
 	}
 
 	(*b.val)[key] = d
