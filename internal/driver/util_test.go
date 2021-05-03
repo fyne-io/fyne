@@ -439,23 +439,23 @@ type objectTree struct {
 	size     fyne.Size
 }
 
-func (o objectTree) Size() fyne.Size {
+func (o *objectTree) Size() fyne.Size {
 	return o.size
 }
 
-func (o objectTree) Resize(size fyne.Size) {
+func (o *objectTree) Resize(size fyne.Size) {
 	o.size = size
 }
 
-func (o objectTree) Position() fyne.Position {
+func (o *objectTree) Position() fyne.Position {
 	return o.pos
 }
 
-func (o objectTree) Move(position fyne.Position) {
+func (o *objectTree) Move(position fyne.Position) {
 	o.pos = position
 }
 
-func (o objectTree) MinSize() fyne.Size {
+func (o *objectTree) MinSize() fyne.Size {
 	return o.size
 }
 
@@ -463,18 +463,18 @@ func (o objectTree) Visible() bool {
 	return !o.hidden
 }
 
-func (o objectTree) Show() {
+func (o *objectTree) Show() {
 	o.hidden = false
 }
 
-func (o objectTree) Hide() {
+func (o *objectTree) Hide() {
 	o.hidden = true
 }
 
-func (o objectTree) Refresh() {
+func (o *objectTree) Refresh() {
 }
 
-func (o objectTree) CreateRenderer() fyne.WidgetRenderer {
+func (o *objectTree) CreateRenderer() fyne.WidgetRenderer {
 	r := &objectTreeRenderer{}
 	r.SetObjects(o.children)
 	return r

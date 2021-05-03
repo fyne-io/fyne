@@ -358,11 +358,9 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
-	if (text.Text == "" || str != []rune(text.Text)[0]) || fg != text.Color {
-		text.Text = string(str)
-		text.Color = fg
-		canvas.Refresh(text)
-	}
+	text.Text = string(str)
+	text.Color = fg
+	canvas.Refresh(text)
 
 	rect := t.objects[pos*2].(*canvas.Rectangle)
 	bg := color.Color(color.Transparent)
@@ -371,10 +369,8 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	} else if rowStyle != nil && rowStyle.BackgroundColor() != nil {
 		bg = rowStyle.BackgroundColor()
 	}
-	if bg != rect.FillColor {
-		rect.FillColor = bg
-		canvas.Refresh(rect)
-	}
+	rect.FillColor = bg
+	canvas.Refresh(rect)
 }
 
 func (t *textGridRenderer) addCellsIfRequired() {
