@@ -7,6 +7,7 @@ package gl
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"strings"
 
@@ -159,6 +160,42 @@ const (
         gl_FragColor = texture2D(tex, fragTexCoord);
     }
 ` + "\x00"
+
+	vertexLineShaderSource = `
+    #version 100
+    attribute vec2 vert;
+    attribute vec2 normal;
+    
+    uniform float lineWidth;
+
+    varying highp vec2 delta;
+
+    void main() {
+        delta = normal * lineWidth;
+
+        gl_Position = vec4(vert + delta, 0, 1);
+    }
+` + "\x00"
+
+	fragmentLineShaderSource = `
+    #version 100
+    uniform highp vec4 color;
+    uniform highp float lineWidth;
+    uniform highp float feather;
+
+    varying highp vec2 delta;
+
+    void main() {
+        highp float alpha = color.a;
+        highp float distance = length(delta);
+
+        if (feather == 0.0 || distance <= lineWidth - feather) {
+           gl_FragColor = color;
+        } else {
+           gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));
+        }
+    }
+` + "\x00"
 )
 
 func (p *glPainter) Init() {
@@ -178,6 +215,23 @@ func (p *glPainter) Init() {
 	logError()
 
 	p.program = Program(prog)
+
+	vertexLineShader, err := compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
+	if err != nil {
+		panic(err)
+	}
+	fragmentLineShader, err := compileShader(fragmentLineShaderSource, gl.FRAGMENT_SHADER)
+	if err != nil {
+		panic(err)
+	}
+
+	lineProg := gl.CreateProgram()
+	gl.AttachShader(lineProg, vertexLineShader)
+	gl.AttachShader(lineProg, fragmentLineShader)
+	gl.LinkProgram(lineProg)
+	logError()
+
+	p.lineProgram = Program(lineProg)
 }
 
 func (p *glPainter) glClearBuffer() {
@@ -203,6 +257,8 @@ func (p *glPainter) glScissorClose() {
 }
 
 func (p *glPainter) glCreateBuffer(points []float32) Buffer {
+	gl.UseProgram(uint32(p.program))
+
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	logError()
@@ -224,6 +280,30 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(vbo)
 }
 
+func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
+	gl.UseProgram(uint32(p.lineProgram))
+
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	logError()
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	logError()
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+	logError()
+
+	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("vert\x00")))
+	gl.EnableVertexAttribArray(vertAttrib)
+	gl.VertexAttribPointer(vertAttrib, 2, gl.FLOAT, false, 4*4, gl.PtrOffset(0))
+	logError()
+
+	normalAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("normal\x00")))
+	gl.EnableVertexAttribArray(normalAttrib)
+	gl.VertexAttribPointer(normalAttrib, 2, gl.FLOAT, false, 4*4, gl.PtrOffset(2*4))
+	logError()
+
+	return Buffer(vbo)
+}
+
 func (p *glPainter) glFreeBuffer(vbo Buffer) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	logError()
@@ -233,6 +313,8 @@ func (p *glPainter) glFreeBuffer(vbo Buffer) {
 }
 
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
+	gl.UseProgram(uint32(p.program))
+
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
 	if alpha != 1.0 {
@@ -248,6 +330,35 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	logError()
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	logError()
+}
+
+func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) {
+	gl.UseProgram(uint32(p.lineProgram))
+
+	r, g, b, a := col.RGBA()
+	if a != 0xffff {
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	} else {
+		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+	}
+	logError()
+
+	colorUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("color\x00"))
+	if a == 0 {
+		gl.Uniform4f(colorUniform, 0, 0, 0, 0)
+	} else {
+		alpha := float32(a)
+		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
+		gl.Uniform4fv(colorUniform, 1, &col[0])
+	}
+	lineWidthUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("lineWidth\x00"))
+	gl.Uniform1f(lineWidthUniform, width)
+
+	featherUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("feather\x00"))
+	gl.Uniform1f(featherUniform, feather)
+
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 	logError()
 }
 
