@@ -18,12 +18,6 @@ import (
 	"time"
 )
 
-//#include <stdlib.h>
-//#include <dwmapi.h>
-//#define GLFW_EXPOSE_NATIVE_WIN32
-//#include "../../../vendor/github.com/go-gl/glfw/v3.3/glfw/glfw/include/GLFW/glfw3.h"
-import "C"
-
 const (
 	scrollSpeed      = float32(10)
 	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)

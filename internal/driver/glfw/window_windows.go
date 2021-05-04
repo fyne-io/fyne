@@ -17,12 +17,12 @@ func (w *window) setDarkMode(dark bool) {
 
 		dwm := syscall.NewLazyDLL("dwmapi.dll")
 		setAtt := dwm.NewProc("DwmSetWindowAttribute")
-		_, _, err := setAtt.Call(uintptr(unsafe.Pointer(hwnd)), // window handle
+		ret, _, err := setAtt.Call(uintptr(unsafe.Pointer(hwnd)), // window handle
 			20,                             // DWMWA_USE_IMMERSIVE_DARK_MODE
 			uintptr(unsafe.Pointer(&dark)), // on or off
 			8)                              // sizeof(darkMode)
 
-		if err != nil {
+		if ret != 0 { // err is always non-nil, we check return value
 			fyne.LogError("Failed to set dark mode", err)
 		}
 	}
