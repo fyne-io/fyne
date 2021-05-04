@@ -1550,6 +1550,7 @@ func isKeyModifier(keyName fyne.KeyName) bool {
 		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
 }
 
+//lint:ignore U1000 This is fine, just a helper function for some platforms
 func standardResize(w *window, size fyne.Size) {
 	d, ok := fyne.CurrentApp().Driver().(*gLDriver)
 	if !ok { // don't wait to redraw in this way if we are running on test
