@@ -194,7 +194,7 @@ func (p *Packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
-		if runtime.GOOS != "windows" {
+		if p.os != "windows" {
 			defer p.removeBuild()
 		}
 	}
