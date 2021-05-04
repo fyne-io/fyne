@@ -1,18 +1,12 @@
-// +build !linux
+// +build !linux,!windows
 
 package glfw
 
 import "fyne.io/fyne/v2"
 
 func (w *window) platformResize(canvasSize fyne.Size) {
-	d, ok := fyne.CurrentApp().Driver().(*gLDriver)
-	if !ok { // don't wait to redraw in this way if we are running on test
-		w.canvas.Resize(canvasSize)
-		return
-	}
+	standardResize(w, canvasSize)
+}
 
-	runOnDraw(w, func() {
-		w.canvas.Resize(canvasSize)
-		d.repaintWindow(w)
-	})
+func (w *window) setDarkMode(dark bool) {
 }

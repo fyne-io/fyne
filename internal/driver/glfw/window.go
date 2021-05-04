@@ -1,24 +1,28 @@
 package glfw
 
-import "C"
 import (
 	"bytes"
 	"context"
-	"image"
-	_ "image/png" // for the icon
-	"runtime"
-	"sync"
-	"time"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
-
+	"fyne.io/fyne/v2/theme"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"image"
+	_ "image/png" // for the icon
+	"runtime"
+	"sync"
+	"time"
 )
+
+//#include <stdlib.h>
+//#include <dwmapi.h>
+//#define GLFW_EXPOSE_NATIVE_WIN32
+//#include "../../../vendor/github.com/go-gl/glfw/v3.3/glfw/glfw/include/GLFW/glfw3.h"
+import "C"
 
 const (
 	scrollSpeed      = float32(10)
@@ -1463,6 +1467,8 @@ func (w *window) create() {
 	})
 
 	runOnMain(func() {
+		w.setDarkMode(fyne.CurrentApp().Settings().ThemeVariant() == theme.VariantDark)
+
 		win := w.view()
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
@@ -1546,4 +1552,17 @@ func isKeyModifier(keyName fyne.KeyName) bool {
 		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||
 		keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight ||
 		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
+}
+
+func standardResize(w *window, size fyne.Size) {
+	d, ok := fyne.CurrentApp().Driver().(*gLDriver)
+	if !ok { // don't wait to redraw in this way if we are running on test
+		w.canvas.Resize(size)
+		return
+	}
+
+	runOnDraw(w, func() {
+		w.canvas.Resize(size)
+		d.repaintWindow(w)
+	})
 }
