@@ -82,13 +82,12 @@ func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.Te
 	return painter.RenderedTextSize(text, size, style)
 }
 
-func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
+func (d *mobileDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	if len(d.windows) == 0 {
 		return nil
 	}
 
 	// TODO figure out how we handle multiple windows...
-	// TODO should use common.CanvasForObject as in desktop?
 	return d.currentWindow().Canvas()
 }
 
@@ -207,7 +206,7 @@ func (d *mobileDriver) Run() {
 						canvas.Painter().Init() // we cannot init until the context is set above
 					}
 
-					if canvas.FreeDirtyTextures() {
+					if canvas.FreeDirtyTextures() || canvas.IsDirty() {
 						newSize := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
 
 						if canvas.EnsureMinSize() {
@@ -254,6 +253,8 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
+
+	canvas.SetDirty(false)
 
 	paint := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
