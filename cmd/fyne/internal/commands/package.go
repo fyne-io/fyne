@@ -3,20 +3,19 @@ package commands
 import (
 	"flag"
 	"fmt"
-	"log"
-	"runtime"
-	"strconv"
-	"strings"
-
 	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
+
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (
