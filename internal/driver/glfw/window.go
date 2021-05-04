@@ -3,6 +3,14 @@ package glfw
 import (
 	"bytes"
 	"context"
+	"image"
+	_ "image/png" // for the icon
+	"runtime"
+	"sync"
+	"time"
+
+	"github.com/go-gl/glfw/v3.3/glfw"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
@@ -10,12 +18,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/theme"
-	"github.com/go-gl/glfw/v3.3/glfw"
-	"image"
-	_ "image/png" // for the icon
-	"runtime"
-	"sync"
-	"time"
 )
 
 const (
