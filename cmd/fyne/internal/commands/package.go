@@ -3,20 +3,19 @@ package commands
 import (
 	"flag"
 	"fmt"
-	"log"
-	"runtime"
-	"strconv"
-	"strings"
-
 	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
+
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (
@@ -195,7 +194,7 @@ func (p *Packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
-		if runtime.GOOS != "windows" {
+		if p.os != "windows" {
 			defer p.removeBuild()
 		}
 	}
