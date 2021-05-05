@@ -331,15 +331,11 @@ func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) 
 
 	p.glctx().UseProgram(gl.Program(p.lineProgram))
 
-	r, g, b, a := col.RGBA()
-	if a != 0xffff {
-		ctx.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	} else {
-		ctx.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	}
+	ctx.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	p.logError()
 
 	colorUniform := ctx.GetUniformLocation(gl.Program(p.lineProgram), "color")
+	r, g, b, a := col.RGBA()
 	if a == 0 {
 		ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
 	} else {

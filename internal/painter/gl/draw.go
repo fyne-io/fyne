@@ -108,12 +108,10 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	// Shift line coordinates so that they match the target position.
 	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
 	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
-	pos1.X += xPosDiff
-	pos1.Y += yPosDiff
-	pos2.X += xPosDiff
-	pos2.Y += yPosDiff
-	pos1 = fyne.Position{roundToPixel(pos1.X, p.pixScale), roundToPixel(pos1.Y, p.pixScale)}
-	pos2 = fyne.Position{roundToPixel(pos2.X, p.pixScale), roundToPixel(pos2.Y, p.pixScale)}
+	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
+	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
+	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)
+	pos2.Y = roundToPixel(pos2.Y+yPosDiff, p.pixScale)
 
 	x1Pos := pos1.X / frame.Width
 	x1 := -1 + x1Pos*2
@@ -133,7 +131,7 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	normalObjX := normalX * 0.5 * frame.Width
 	normalObjY := normalY * 0.5 * frame.Height
 	widthMultiplier := float32(math.Sqrt(float64(normalObjX*normalObjX + normalObjY*normalObjY)))
-	halfWidth := lineWidth * 0.5 / widthMultiplier
+	halfWidth := (lineWidth * 0.5 + feather) / widthMultiplier
 	featherWidth := feather / widthMultiplier
 
 	return []float32{

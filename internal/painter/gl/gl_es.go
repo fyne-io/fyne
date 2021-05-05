@@ -336,15 +336,11 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) {
 	gl.UseProgram(uint32(p.lineProgram))
 
-	r, g, b, a := col.RGBA()
-	if a != 0xffff {
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	} else {
-		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	}
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	logError()
 
 	colorUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("color\x00"))
+	r, g, b, a := col.RGBA()
 	if a == 0 {
 		gl.Uniform4f(colorUniform, 0, 0, 0, 0)
 	} else {
