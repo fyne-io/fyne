@@ -176,7 +176,7 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 }
 
 func progressBackgroundColor() color.Color {
-	r, g, b, a := theme.PrimaryColor().RGBA()
+	r, g, b, a := theme.ColorToNRGBA(theme.PrimaryColor())
 	faded := uint8(a) / 3
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }

@@ -163,7 +163,7 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 }
 
 func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
-	r, g, b, a := ColorToRGBA(color)
+	r, g, b, a := ColorToNRGBA(color)
 	cBytes := []byte{byte(r), byte(g), byte(b)}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
 	return

@@ -13,8 +13,8 @@ var (
 	fallbackIcon  = &fyne.StaticResource{}
 )
 
-//ColorToRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
-func ColorToRGBA(c color.Color) (r, g, b, a int) {
+//ColorToNRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
+func ColorToNRGBA(c color.Color) (r, g, b, a int) {
 	//We use UnmultiplyAlpha with RGBA, RGBA64, and unrecognized implementations of Color.
 	//It works for all Colors whose RGBA() method is implemented according to spec, but is only necessary for those.
 	//Only RGBA and RGBA64 have components which are already premultiplied.

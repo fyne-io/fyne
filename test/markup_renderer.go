@@ -70,7 +70,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 		}
 	}
 
-	rd, g, b, a := c.RGBA()
+	rd, g, b, a := theme.ColorToNRGBA(c)
 	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
 }
 
@@ -375,26 +375,27 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.indentation++
 }
 
-func rgbaColor(c color.Color) color.RGBA {
-	r, g, b, a := c.RGBA()
-	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+func nrgbaColor(c color.Color) color.NRGBA {
+	//using ColorToNRGBA to avoid problems with colors with 16-bit components or alpha values that aren't 0 or the maximum possible alpha value
+	r, g, b, a := theme.ColorToNRGBA(c)
+	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		rgbaColor(theme.BackgroundColor()):     "background",
-		rgbaColor(theme.ButtonColor()):         "button",
-		rgbaColor(theme.DisabledButtonColor()): "disabled button",
-		rgbaColor(theme.DisabledColor()):       "disabled",
-		rgbaColor(theme.ErrorColor()):          "error",
-		rgbaColor(theme.FocusColor()):          "focus",
-		rgbaColor(theme.ForegroundColor()):     "foreground",
-		rgbaColor(theme.HoverColor()):          "hover",
-		rgbaColor(theme.PlaceHolderColor()):    "placeholder",
-		rgbaColor(theme.PrimaryColor()):        "primary",
-		rgbaColor(theme.ScrollBarColor()):      "scrollbar",
-		rgbaColor(theme.ShadowColor()):         "shadow",
-	}[rgbaColor(c)]
+		nrgbaColor(theme.BackgroundColor()):     "background",
+		nrgbaColor(theme.ButtonColor()):         "button",
+		nrgbaColor(theme.DisabledButtonColor()): "disabled button",
+		nrgbaColor(theme.DisabledColor()):       "disabled",
+		nrgbaColor(theme.ErrorColor()):          "error",
+		nrgbaColor(theme.FocusColor()):          "focus",
+		nrgbaColor(theme.ForegroundColor()):     "foreground",
+		nrgbaColor(theme.HoverColor()):          "hover",
+		nrgbaColor(theme.PlaceHolderColor()):    "placeholder",
+		nrgbaColor(theme.PrimaryColor()):        "primary",
+		nrgbaColor(theme.ScrollBarColor()):      "scrollbar",
+		nrgbaColor(theme.ShadowColor()):         "shadow",
+	}[nrgbaColor(c)]
 }
 
 func knownResource(rsc fyne.Resource) string {

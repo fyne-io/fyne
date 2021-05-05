@@ -304,7 +304,7 @@ func Test_colorToHSLA(t *testing.T) {
 func Test_colorToRGBA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			r, g, b, a := theme.ColorToRGBA(&color.NRGBA{
+			r, g, b, a := theme.ColorToNRGBA(&color.NRGBA{
 				R: uint8(tt.r),
 				G: uint8(tt.g),
 				B: uint8(tt.b),
