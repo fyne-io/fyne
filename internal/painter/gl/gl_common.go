@@ -45,13 +45,6 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
-	line := obj.(*canvas.Line)
-	raw := painter.DrawLine(line, painter.VectorPad(line), p.textureScale)
-
-	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
-}
-
 func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
