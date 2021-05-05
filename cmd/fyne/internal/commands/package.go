@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 	"fmt"
+
 	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
