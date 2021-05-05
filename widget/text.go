@@ -242,7 +242,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 
 	label := canvas.NewText(measureText, theme.ForegroundColor())
 	label.TextStyle = t.presenter.textStyle()
-	return label.MinSize().Add(fyne.NewSize(theme.Padding(), 0)).Subtract(t.inset)
+	return label.MinSize().Add(fyne.NewSize(theme.Padding() - t.inset.Width, 0))
 }
 
 // Renderer
