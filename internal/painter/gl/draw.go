@@ -131,7 +131,7 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	normalObjX := normalX * 0.5 * frame.Width
 	normalObjY := normalY * 0.5 * frame.Height
 	widthMultiplier := float32(math.Sqrt(float64(normalObjX*normalObjX + normalObjY*normalObjY)))
-	halfWidth := (lineWidth * 0.5 + feather) / widthMultiplier
+	halfWidth := (lineWidth*0.5 + feather) / widthMultiplier
 	featherWidth := feather / widthMultiplier
 
 	return []float32{
