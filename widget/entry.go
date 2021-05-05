@@ -857,7 +857,7 @@ func (e *Entry) placeholderProvider() *textProvider {
 
 	text := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 	text.ExtendBaseWidget(text)
-	text.extraPad = fyne.NewSize(theme.Padding(), theme.InputBorderSize())
+	text.inset = fyne.NewSize(0, theme.InputBorderSize())
 	e.placeholder = text
 	return e.placeholder
 }
@@ -1035,7 +1035,7 @@ func (e *Entry) textProvider() *textProvider {
 
 	text := newTextProvider(e.Text, e)
 	text.ExtendBaseWidget(text)
-	text.extraPad = fyne.NewSize(theme.Padding(), theme.InputBorderSize())
+	text.inset = fyne.NewSize(0, theme.InputBorderSize())
 	e.text = text
 	return e.text
 }
@@ -1179,6 +1179,8 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		}
 	}
 
+	r.entry.textProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
+	r.entry.placeholderProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
 	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	entryPos := fyne.NewPos(0, theme.InputBorderSize())
 	if r.entry.Wrapping == fyne.TextWrapOff {
