@@ -166,15 +166,15 @@ const (
 
 	fragmentLineShaderSource = `
     #version 100
-    uniform vec4 color;
-    uniform float lineWidth;
-    uniform float feather;
+    uniform highp vec4 color;
+    uniform highp float lineWidth;
+    uniform highp float feather;
 
     varying highp vec2 delta;
 
     void main() {
-        float alpha = color.a;
-        float distance = length(delta);
+        highp float alpha = color.a;
+        highp float distance = length(delta);
 
         if (feather == 0.0 || distance <= lineWidth - feather) {
            gl_FragColor = color;
