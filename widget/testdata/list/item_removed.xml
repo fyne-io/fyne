@@ -3,8 +3,8 @@
 		<widget pos="4,4" size="192x392" type="*widget.List">
 			<widget size="192x392" type="*widget.Scroll">
 				<container size="192x392">
-					<widget size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
@@ -13,8 +13,8 @@
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,46" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,38" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
@@ -26,7 +26,7 @@
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
-					<widget pos="0,45" size="192x1" type="*widget.Separator">
+					<widget pos="0,37" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>
