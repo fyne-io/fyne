@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -191,7 +192,7 @@ func writeRecentColor(color string) {
 }
 
 func colorToString(c color.Color) string {
-	red, green, blue, alpha := theme.ColorToNRGBA(c)
+	red, green, blue, alpha := col.ColorToNRGBA(c)
 	if alpha == 0xff {
 		return fmt.Sprintf("#%02x%02x%02x", red, green, blue)
 	}
@@ -226,7 +227,7 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 }
 
 func colorToHSLA(c color.Color) (int, int, int, int) {
-	r, g, b, a := theme.ColorToNRGBA(c)
+	r, g, b, a := col.ColorToNRGBA(c)
 	h, s, l := rgbToHsl(r, g, b)
 	return h, s, l, a
 }

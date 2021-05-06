@@ -6,8 +6,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -302,9 +302,10 @@ func Test_colorToHSLA(t *testing.T) {
 }
 
 func Test_colorToRGBA(t *testing.T) {
+	//Test_colorToRGBA is only still here instead of with ColorToNRGBA because it uses rgbhslMap
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			r, g, b, a := theme.ColorToNRGBA(&color.NRGBA{
+			r, g, b, a := col.ColorToNRGBA(&color.NRGBA{
 				R: uint8(tt.r),
 				G: uint8(tt.g),
 				B: uint8(tt.b),

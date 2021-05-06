@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -70,7 +71,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 		}
 	}
 
-	rd, g, b, a := theme.ColorToNRGBA(c)
+	rd, g, b, a := col.ColorToNRGBA(c)
 	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
 }
 
@@ -377,7 +378,7 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 
 func nrgbaColor(c color.Color) color.NRGBA {
 	//using ColorToNRGBA to avoid problems with colors with 16-bit components or alpha values that aren't 0 or the maximum possible alpha value
-	r, g, b, a := theme.ColorToNRGBA(c)
+	r, g, b, a := col.ColorToNRGBA(c)
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 

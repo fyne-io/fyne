@@ -7,6 +7,8 @@ import (
 	"io"
 	"io/ioutil"
 	"strconv"
+
+	col "fyne.io/fyne/v2/internal/color"
 )
 
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
@@ -163,7 +165,7 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 }
 
 func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
-	r, g, b, a := ColorToNRGBA(color)
+	r, g, b, a := col.ColorToNRGBA(color)
 	cBytes := []byte{byte(r), byte(g), byte(b)}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
 	return
