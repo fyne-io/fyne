@@ -667,21 +667,18 @@ type treeNodeRenderer struct {
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
-	x := float32(0)
+	x := theme.Padding() + r.treeNode.Indent()
 	y := float32(0)
 	r.background.Resize(size)
-	h := size.Height - 2*theme.Padding()
-	x += theme.Padding() + r.treeNode.Indent()
-	y += theme.Padding()
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Move(fyne.NewPos(x, y))
-		r.treeNode.icon.Resize(fyne.NewSize(theme.IconInlineSize(), h))
+		r.treeNode.icon.Resize(fyne.NewSize(theme.IconInlineSize(), size.Height))
 	}
 	x += theme.IconInlineSize()
 	x += theme.Padding()
 	if r.treeNode.content != nil {
 		r.treeNode.content.Move(fyne.NewPos(x, y))
-		r.treeNode.content.Resize(fyne.NewSize(size.Width-x-theme.Padding(), h))
+		r.treeNode.content.Resize(fyne.NewSize(size.Width-x, size.Height))
 	}
 }
 
@@ -689,10 +686,8 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	if r.treeNode.content != nil {
 		min = r.treeNode.content.MinSize()
 	}
-	min.Width += theme.Padding() + r.treeNode.Indent() + theme.IconInlineSize()
-	min.Width += 2 * theme.Padding()
+	min.Width += theme.Padding()*2 + r.treeNode.Indent() + theme.IconInlineSize()
 	min.Height = fyne.Max(min.Height, theme.IconInlineSize())
-	min.Height += 2 * theme.Padding()
 	return
 }
 

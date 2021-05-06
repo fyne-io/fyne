@@ -317,8 +317,7 @@ type listItemRenderer struct {
 // This is based on the size of the status indicator and the size of the child object.
 func (li *listItemRenderer) MinSize() (size fyne.Size) {
 	itemSize := li.item.child.MinSize()
-	size = fyne.NewSize(itemSize.Width+theme.Padding()*3,
-		itemSize.Height+theme.Padding()*2)
+	size = fyne.NewSize(itemSize.Width+theme.Padding(), itemSize.Height)
 	return
 }
 
@@ -326,8 +325,8 @@ func (li *listItemRenderer) MinSize() (size fyne.Size) {
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.background.Resize(size)
 
-	li.item.child.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
-	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding()*3, size.Height-theme.Padding()*2))
+	li.item.child.Move(fyne.NewPos(theme.Padding(), 0))
+	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding(), size.Height))
 }
 
 func (li *listItemRenderer) Refresh() {
