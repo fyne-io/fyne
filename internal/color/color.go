@@ -4,13 +4,13 @@ import (
 	"image/color"
 )
 
-//ToNRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
+// ToNRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
 func ToNRGBA(c color.Color) (r, g, b, a int) {
-	//We use UnmultiplyAlpha with RGBA, RGBA64, and unrecognized implementations of Color.
-	//It works for all Colors whose RGBA() method is implemented according to spec, but is only necessary for those.
-	//Only RGBA and RGBA64 have components which are already premultiplied.
+	// We use UnmultiplyAlpha with RGBA, RGBA64, and unrecognized implementations of Color.
+	// It works for all Colors whose RGBA() method is implemented according to spec, but is only necessary for those.
+	// Only RGBA and RGBA64 have components which are already premultiplied.
 	switch col := c.(type) {
-	//NRGBA and NRGBA64 are not premultiplied
+	// NRGBA and NRGBA64 are not premultiplied
 	case color.NRGBA:
 		r = int(col.R)
 		g = int(col.G)
@@ -31,7 +31,7 @@ func ToNRGBA(c color.Color) (r, g, b, a int) {
 		g = int(col.G) >> 8
 		b = int(col.B) >> 8
 		a = int(col.A) >> 8
-	//Gray and Gray16 have no alpha component
+	// Gray and Gray16 have no alpha component
 	case *color.Gray:
 		r = int(col.Y)
 		g = int(col.Y)
@@ -52,7 +52,7 @@ func ToNRGBA(c color.Color) (r, g, b, a int) {
 		g = int(col.Y) >> 8
 		b = int(col.Y) >> 8
 		a = 0xff
-	//Alpha and Alpha16 contain only an alpha component.
+	// Alpha and Alpha16 contain only an alpha component.
 	case color.Alpha:
 		r = 0xff
 		g = 0xff
@@ -73,14 +73,14 @@ func ToNRGBA(c color.Color) (r, g, b, a int) {
 		g = 0xff
 		b = 0xff
 		a = int(col.A) >> 8
-	default: //RGBA, RGBA64, and unknown implementations of Color
+	default: // RGBA, RGBA64, and unknown implementations of Color
 		r, g, b, a = unmultiplyAlpha(c)
 	}
 	return
 }
 
-//UnmultiplyAlpha returns a color's RGBA components as 8-bit integers by calling c.RGBA() and then removing the alpha premultiplication.
-//It is only used by ToRGBA.
+// unmultiplyAlpha returns a color's RGBA components as 8-bit integers by calling c.RGBA() and then removing the alpha premultiplication.
+// It is only used by ToRGBA.
 func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
 	red, green, blue, alpha := c.RGBA()
 	if alpha != 0 && alpha != 0xffff {

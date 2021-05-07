@@ -302,7 +302,7 @@ func Test_colorToHSLA(t *testing.T) {
 }
 
 func Test_toRGBA(t *testing.T) {
-	//Test_toRGBA is only still here instead of with ToNRGBA because it uses rgbhslMap
+	// Test_toRGBA is only still here instead of with ToNRGBA because it uses rgbhslMap
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			r, g, b, a := col.ToNRGBA(&color.NRGBA{
