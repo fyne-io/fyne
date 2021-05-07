@@ -211,7 +211,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := col.ColorToNRGBA(color)
+	r, g, b, a := col.ToNRGBA(color)
 	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
 		return false
 	}

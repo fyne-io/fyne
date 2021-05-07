@@ -4,8 +4,8 @@ import (
 	"image/color"
 )
 
-//ColorToNRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
-func ColorToNRGBA(c color.Color) (r, g, b, a int) {
+//ToNRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
+func ToNRGBA(c color.Color) (r, g, b, a int) {
 	//We use UnmultiplyAlpha with RGBA, RGBA64, and unrecognized implementations of Color.
 	//It works for all Colors whose RGBA() method is implemented according to spec, but is only necessary for those.
 	//Only RGBA and RGBA64 have components which are already premultiplied.
@@ -80,7 +80,7 @@ func ColorToNRGBA(c color.Color) (r, g, b, a int) {
 }
 
 //UnmultiplyAlpha returns a color's RGBA components as 8-bit integers by calling c.RGBA() and then removing the alpha premultiplication.
-//It is only used by ColorToRGBA.
+//It is only used by ToRGBA.
 func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
 	red, green, blue, alpha := c.RGBA()
 	if alpha != 0 && alpha != 0xffff {

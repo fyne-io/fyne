@@ -192,7 +192,7 @@ func writeRecentColor(color string) {
 }
 
 func colorToString(c color.Color) string {
-	red, green, blue, alpha := col.ColorToNRGBA(c)
+	red, green, blue, alpha := col.ToNRGBA(c)
 	if alpha == 0xff {
 		return fmt.Sprintf("#%02x%02x%02x", red, green, blue)
 	}
@@ -227,7 +227,7 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 }
 
 func colorToHSLA(c color.Color) (int, int, int, int) {
-	r, g, b, a := col.ColorToNRGBA(c)
+	r, g, b, a := col.ToNRGBA(c)
 	h, s, l := rgbToHsl(r, g, b)
 	return h, s, l, a
 }

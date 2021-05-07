@@ -301,11 +301,11 @@ func Test_colorToHSLA(t *testing.T) {
 	}
 }
 
-func Test_colorToRGBA(t *testing.T) {
-	//Test_colorToRGBA is only still here instead of with ColorToNRGBA because it uses rgbhslMap
+func Test_toRGBA(t *testing.T) {
+	//Test_toRGBA is only still here instead of with ToNRGBA because it uses rgbhslMap
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			r, g, b, a := col.ColorToNRGBA(&color.NRGBA{
+			r, g, b, a := col.ToNRGBA(&color.NRGBA{
 				R: uint8(tt.r),
 				G: uint8(tt.g),
 				B: uint8(tt.b),

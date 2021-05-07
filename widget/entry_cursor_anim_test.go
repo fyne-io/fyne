@@ -15,12 +15,12 @@ import (
 
 func TestEntryCursorAnim(t *testing.T) {
 	cursorOpaque := theme.PrimaryColor()
-	r, g, b, _ := col.ColorToNRGBA(theme.PrimaryColor())
+	r, g, b, _ := col.ToNRGBA(theme.PrimaryColor())
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
 
 	alphaEquals := func(color1, color2 color.Color) bool {
-		_, _, _, a1 := col.ColorToNRGBA(color1)
-		_, _, _, a2 := col.ColorToNRGBA(color2)
+		_, _, _, a1 := col.ToNRGBA(color1)
+		_, _, _, a2 := col.ToNRGBA(color2)
 		return a1 == a2
 	}
 

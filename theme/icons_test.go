@@ -248,9 +248,9 @@ func TestColorizeResource(t *testing.T) {
 			//Since alpha!=0xffff, if we were to use R:0xff00, G:0xffff, B:0x00ff like before,
 			//this would end up being drawn with 0xfeff00 instead of 0xffff00, and we would need a separate image to test for that.
 			//Instead, we use R:0xfff0, G:0xfff0, B:0x000f, A:0x7fff instead, which unmultiplyAlpha returns as 0xff, 0xff, 0x00, 0x7f,
-			//so that we correctly get 0xffff00 with alpha 0x7f when ColorToRGBA is used.
+			//so that we correctly get 0xffff00 with alpha 0x7f when ToRGBA is used.
 			//The RGBA64's contents are 0x7ff7, 0x7ff7, 0x0007, 0x7fff, so:
-			//If ColorToRGBA wasn't being called and instead the LSB of each component was being read, this would show up as 0xf7f707 with alpha 0xff.
+			//If ToRGBA wasn't being called and instead the LSB of each component was being read, this would show up as 0xf7f707 with alpha 0xff.
 			//If the MSB was being read without umultiplication, this would show up as 0x7f7f00 with alpha 0x7f.
 			color:     color.RGBA64Model.Convert(color.NRGBA64{R: 0xfff0, G: 0xfff0, B: 0x000f, A: 0x7fff}),
 			wantImage: "colorized/circles_yellow_translucent.png",
@@ -264,7 +264,7 @@ func TestColorizeResource(t *testing.T) {
 			svgFile: "circles.svg",
 			//If the LSB from components returned by RGBA() was being used, this would be black.
 			//If the MSB from components returned by RGBA() was being used, this would be grey.
-			//It is white when either we bypass RGBA() and directly make a 0xffffff color with the alpha's MSB (which is what ColorToRGBA does),
+			//It is white when either we bypass RGBA() and directly make a 0xffffff color with the alpha's MSB (which is what ToRGBA does),
 			//or if we call RBGA(), un-multiply the alpha from the non-alpha components, and use their MSB to get white (Or something very near it like 0xfefefe).
 			color:     color.Alpha16{A: 0x7f00},
 			wantImage: "colorized/circles_white_translucent.png",
@@ -277,7 +277,7 @@ func TestColorizeResource(t *testing.T) {
 		"Gray16": {
 			svgFile: "circles.svg",
 			//If the LSB from components returned by RGBA() was being used, this would be black.
-			//It is white when either we bypass RGBA() and directly make a 0xffffff color with the alpha's MSB (which is what ColorToRGBA does),
+			//It is white when either we bypass RGBA() and directly make a 0xffffff color with the alpha's MSB (which is what ToRGBA does),
 			//or if we call RBGA(), un-multiply the alpha from the non-alpha components, and use their MSB to get white (Or something very near it like 0xfefefe),
 			//or if the MSB from components returned by RGBA() was being used (because Gray and Gray16 do not have alpha values).
 			color:     color.Gray16{Y: 0xff00},
