@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 
 	"github.com/fyne-io/mobile/exp/f32"
@@ -147,6 +148,40 @@ const (
     void main() {
         gl_FragColor = texture2D(tex, fragTexCoord);
     }`
+
+	vertexLineShaderSource = `
+    #version 100
+    attribute vec2 vert;
+    attribute vec2 normal;
+    
+    uniform float lineWidth;
+
+    varying highp vec2 delta;
+
+    void main() {
+        delta = normal * lineWidth;
+
+        gl_Position = vec4(vert + delta, 0, 1);
+    }`
+
+	fragmentLineShaderSource = `
+    #version 100
+    uniform highp vec4 color;
+    uniform highp float lineWidth;
+    uniform highp float feather;
+
+    varying highp vec2 delta;
+
+    void main() {
+        highp float alpha = color.a;
+        highp float distance = length(delta);
+
+        if (feather == 0.0 || distance <= lineWidth - feather) {
+           gl_FragColor = color;
+        } else {
+           gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));
+        }
+    }`
 )
 
 func (p *glPainter) Init() {
@@ -169,7 +204,24 @@ func (p *glPainter) Init() {
 	p.logError()
 
 	p.program = Program(prog)
-	p.glctx().UseProgram(gl.Program(p.program))
+	p.logError()
+
+	vertexLineShader, err := p.compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
+	if err != nil {
+		panic(err)
+	}
+	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, gl.FRAGMENT_SHADER)
+	if err != nil {
+		panic(err)
+	}
+
+	lineProg := p.glctx().CreateProgram()
+	p.glctx().AttachShader(lineProg, vertexLineShader)
+	p.glctx().AttachShader(lineProg, fragmentLineShader)
+	p.glctx().LinkProgram(lineProg)
+	p.logError()
+
+	p.lineProgram = Program(lineProg)
 	p.logError()
 }
 
@@ -195,6 +247,8 @@ func (p *glPainter) glScissorClose() {
 func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
+	p.glctx().UseProgram(gl.Program(p.program))
+
 	buf := ctx.CreateBuffer()
 	p.logError()
 	ctx.BindBuffer(gl.ARRAY_BUFFER, buf)
@@ -215,6 +269,31 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(buf)
 }
 
+func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
+	ctx := p.glctx()
+
+	p.glctx().UseProgram(gl.Program(p.lineProgram))
+
+	buf := ctx.CreateBuffer()
+	p.logError()
+	ctx.BindBuffer(gl.ARRAY_BUFFER, buf)
+	p.logError()
+	ctx.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.DYNAMIC_DRAW)
+	p.logError()
+
+	vertAttrib := ctx.GetAttribLocation(gl.Program(p.lineProgram), "vert")
+	ctx.EnableVertexAttribArray(vertAttrib)
+	ctx.VertexAttribPointer(vertAttrib, 2, gl.FLOAT, false, 4*4, 0)
+	p.logError()
+
+	normalAttrib := ctx.GetAttribLocation(gl.Program(p.lineProgram), "normal")
+	ctx.EnableVertexAttribArray(normalAttrib)
+	ctx.VertexAttribPointer(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
+	p.logError()
+
+	return Buffer(buf)
+}
+
 func (p *glPainter) glFreeBuffer(b Buffer) {
 	ctx := p.glctx()
 
@@ -226,6 +305,8 @@ func (p *glPainter) glFreeBuffer(b Buffer) {
 
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
+
+	p.glctx().UseProgram(gl.Program(p.program))
 
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
@@ -242,6 +323,33 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	p.logError()
 
 	ctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	p.logError()
+}
+
+func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) {
+	ctx := p.glctx()
+
+	p.glctx().UseProgram(gl.Program(p.lineProgram))
+
+	ctx.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	p.logError()
+
+	colorUniform := ctx.GetUniformLocation(gl.Program(p.lineProgram), "color")
+	r, g, b, a := col.RGBA()
+	if a == 0 {
+		ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
+	} else {
+		alpha := float32(a)
+		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
+		ctx.Uniform4fv(colorUniform, col)
+	}
+	lineWidthUniform := ctx.GetUniformLocation(gl.Program(p.lineProgram), "lineWidth")
+	ctx.Uniform1f(lineWidthUniform, width)
+
+	featherUniform := ctx.GetUniformLocation(gl.Program(p.lineProgram), "feather")
+	ctx.Uniform1f(featherUniform, feather)
+
+	ctx.DrawArrays(gl.TRIANGLES, 0, 6)
 	p.logError()
 }
 
