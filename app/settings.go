@@ -5,7 +5,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -117,6 +119,13 @@ func (s *settings) load() {
 		fyne.LogError("Settings load error:", err)
 	}
 
+	if runtime.GOOS == "darwin" {
+		// when we return the first value it will be wrong, so delay a re-read
+		go func () {
+			time.Sleep(time.Millisecond*300) // TODO move to some "window ready" lifecycle event...
+			fyne.CurrentApp().(*fyneApp).settings.setupTheme()
+		}()
+	}
 	s.setupTheme()
 }
 

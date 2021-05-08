@@ -9,8 +9,10 @@ package app
 #cgo LDFLAGS: -framework Foundation -framework UIKit -framework UserNotifications
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 char *documentsPath(void);
+bool isDark();
 void openURL(char *urlStr);
 void sendNotification(char *title, char *content);
 */
@@ -25,7 +27,9 @@ import (
 )
 
 func defaultVariant() fyne.ThemeVariant {
-	// TODO read the iOS setting when 10.13 arrives in 2019
+	if bool(C.isDark()) {
+		return theme.VariantDark
+	}
 	return theme.VariantLight
 }
 
