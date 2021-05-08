@@ -121,8 +121,8 @@ func (s *settings) load() {
 
 	if runtime.GOOS == "darwin" {
 		// when we return the first value it will be wrong, so delay a re-read
-		go func () {
-			time.Sleep(time.Millisecond*300) // TODO move to some "window ready" lifecycle event...
+		go func() {
+			time.Sleep(time.Millisecond * 300) // TODO move to some "window ready" lifecycle event...
 			fyne.CurrentApp().(*fyneApp).settings.setupTheme()
 		}()
 	}
