@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -35,6 +36,11 @@ func TestDocTabs_Empty(t *testing.T) {
 	min := tabs.MinSize()
 	assert.Equal(t, float32(0), min.Width)
 	assert.Equal(t, 4*theme.Padding()+theme.IconInlineSize(), min.Height)
+
+	tabs = &container.DocTabs{}
+	assert.Equal(t, 0, len(tabs.Items))
+	assert.Nil(t, tabs.Selected())
+	assert.NotNil(t, test.WidgetRenderer(tabs)) // doesn't crash
 }
 
 func TestDocTabs_Hidden_AsChild(t *testing.T) {

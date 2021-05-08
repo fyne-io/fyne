@@ -3,7 +3,6 @@ package theme
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -657,7 +656,7 @@ type DisabledResource struct {
 
 // Name returns the resource source name prefixed with `disabled_` (used for caching)
 func (res *DisabledResource) Name() string {
-	return fmt.Sprintf("disabled_%s", res.source.Name())
+	return "disabled_" + res.source.Name()
 }
 
 // Content returns the disabled style content of the correct resource for the current theme

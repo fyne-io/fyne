@@ -575,6 +575,22 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.NotNil(t, dh.popMouseOutEvent())
 }
 
+func TestWindow_Scrolled(t *testing.T) {
+	w := createWindow("Test").(*window)
+	o := &scrollable{Rectangle: canvas.NewRectangle(color.White)}
+	o.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(o)
+
+	w.mousePos = fyne.NewPos(50, 60)
+	w.mouseScrolled(w.viewport, 10, 10)
+	w.waitForEvents()
+
+	if e, _ := o.popScrollEvent().(*fyne.ScrollEvent); assert.NotNil(t, e, "scroll event") {
+		assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
+		assert.Equal(t, fyne.NewPos(46, 56), e.Position)
+	}
+}
+
 func TestWindow_Tapped(t *testing.T) {
 	w := createWindow("Test").(*window)
 	rect := canvas.NewRectangle(color.White)
@@ -993,6 +1009,29 @@ func TestWindow_Focus(t *testing.T) {
 	assert.Equal(t, "ef", e2.Text)
 }
 
+func TestWindow_CaptureTypedShortcut(t *testing.T) {
+	w := createWindow("Test").(*window)
+	content := &typedShortcutable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.mouseMoved(w.viewport, 5, 5)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Press), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Action(glfw.Press), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Press), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Action(glfw.Press), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Release), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Release), glfw.ModControl)
+
+	w.waitForEvents()
+
+	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
+}
+
 func TestWindow_ManualFocus(t *testing.T) {
 	w := createWindow("Test").(*window)
 	content := &focusable{}
@@ -1331,6 +1370,31 @@ func (f *focusable) Disable() {
 
 func (f *focusable) Disabled() bool {
 	return f.disabled
+}
+
+type typedShortcutable struct {
+	focusable
+	capturedShortcuts []fyne.Shortcut
+}
+
+func (ts *typedShortcutable) TypedShortcut(s fyne.Shortcut) {
+	ts.capturedShortcuts = append(ts.capturedShortcuts, s)
+}
+
+var _ fyne.Scrollable = (*scrollable)(nil)
+
+type scrollable struct {
+	*canvas.Rectangle
+	events []interface{}
+}
+
+func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
+	s.events = append(s.events, e)
+}
+
+func (s *scrollable) popScrollEvent() (e interface{}) {
+	e, s.events = pop(s.events)
+	return
 }
 
 //

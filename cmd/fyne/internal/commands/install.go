@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -145,8 +146,9 @@ func (i *Installer) install() error {
 		case "linux", "openbsd", "freebsd", "netbsd":
 			i.installDir = "/" // the tarball contains the structure starting at usr/local
 		case "windows":
-			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), p.name)
-			err := runAsAdminWindows("mkdir", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+			dirName := p.name[:len(p.name)-4]
+			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), dirName)
+			err := runAsAdminWindows("mkdir", "\"\""+i.installDir+"\"\"")
 			if err != nil {
 				fyne.LogError("Failed to run as windows administrator", err)
 				return err
@@ -157,7 +159,12 @@ func (i *Installer) install() error {
 	}
 
 	p.dir = i.installDir
-	return p.doPackage()
+	err := p.doPackage()
+	if err != nil {
+		return err
+	}
+
+	return postInstall(i)
 }
 
 func (i *Installer) installAndroid() error {

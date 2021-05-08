@@ -117,7 +117,7 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 
 // Unselect will mark the cell provided by id as unselected.
 func (t *Table) Unselect(id TableCellID) {
-	if t.selectedCell == nil {
+	if t.selectedCell == nil || id != *t.selectedCell {
 		return
 	}
 	t.selectedCell = nil
@@ -128,6 +128,26 @@ func (t *Table) Unselect(id TableCellID) {
 
 	if f := t.OnUnselected; f != nil {
 		f(id)
+	}
+}
+
+// UnselectAll will mark all cells as unselected.
+//
+// Since: 2.1
+func (t *Table) UnselectAll() {
+	if t.selectedCell == nil {
+		return
+	}
+
+	selected := *t.selectedCell
+	t.selectedCell = nil
+
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+
+	if f := t.OnUnselected; f != nil {
+		f(selected)
 	}
 }
 
