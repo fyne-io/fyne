@@ -33,7 +33,7 @@ type External{{ .Name }} interface {
 //
 // Since: {{ .Since }}
 func New{{ .Name }}() {{ .Name }} {
-	blank := {{ .Default }}
+	var blank {{ .Type }} = {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
@@ -43,7 +43,7 @@ func New{{ .Name }}() {{ .Name }} {
 // Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		blank := {{ .Default }}
+		var blank {{ .Type }} = {{ .Default }}
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternal{{ .Name }}{}
@@ -205,7 +205,7 @@ func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	if format == "{{ .Format }}" { // Same as not using custom formatting.
 		return {{ .Name }}ToString(v)
 	}
-	
+
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -303,7 +303,7 @@ func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	if format == "{{ .Format }}" { // Same as not using custom format.
 		return StringTo{{ .Name }}(str)
 	}
-	
+
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
 	return v
@@ -675,6 +675,7 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
