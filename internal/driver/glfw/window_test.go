@@ -583,7 +583,6 @@ func TestWindow_Scrolled(t *testing.T) {
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseScrolled(w.viewport, 10, 10)
-	w.waitForEvents()
 
 	if e, _ := o.popScrollEvent().(*fyne.ScrollEvent); assert.NotNil(t, e, "scroll event") {
 		assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
@@ -1026,7 +1025,7 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Release), glfw.ModControl)
 	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Release), glfw.ModControl)
 
-	w.waitForEvents()
+	w.WaitForEvents()
 
 	assert.Equal(t, 1, len(content.capturedShortcuts))
 	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
