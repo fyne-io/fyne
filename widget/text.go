@@ -14,8 +14,6 @@ import (
 
 const (
 	passwordChar = "•"
-	// TODO move to complete tab handling, for now we just indent this far statically
-	textTabIndent = "    "
 )
 
 // textPresenter provides the widget specific information to a generic text provider
@@ -236,8 +234,6 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 	measureText := string(line[0:col])
 	if t.presenter.concealed() {
 		measureText = strings.Repeat(passwordChar, col)
-	} else {
-		measureText = strings.ReplaceAll(measureText, "\t", textTabIndent)
 	}
 
 	label := canvas.NewText(measureText, theme.ForegroundColor())
@@ -331,7 +327,7 @@ func (r *textRenderer) Refresh() {
 		if concealed {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
-			line = strings.ReplaceAll(string(row), "\t", textTabIndent)
+			line = string(row)
 		}
 
 		var textCanvas *canvas.Text
