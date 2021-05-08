@@ -2,5 +2,5 @@
 
 package glfw
 
-func (w *window) setDarkMode(dark bool) {
+func (w *window) setDarkMode() {
 }

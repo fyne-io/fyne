@@ -17,7 +17,6 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
-	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -1449,7 +1448,7 @@ func (w *window) create() {
 	})
 
 	runOnMain(func() {
-		w.setDarkMode(fyne.CurrentApp().Settings().ThemeVariant() == theme.VariantDark)
+		w.setDarkMode()
 
 		win := w.view()
 		win.SetCloseCallback(w.closed)
