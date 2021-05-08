@@ -8,10 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func (w *window) platformResize(canvasSize fyne.Size) {
-	standardResize(w, canvasSize)
-}
-
 func (w *window) setDarkMode(dark bool) {
 	if runtime.GOOS == "windows" {
 		hwnd := w.view().GetWin32Window()
