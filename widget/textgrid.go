@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -461,7 +462,7 @@ func (t *textGridRenderer) refreshGrid() {
 // tabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
 func (t *TextGrid) tabWidth() int {
 	if t.TabWidth == 0 {
-		return fyne.DefaultTabWidth
+		return painter.DefaultTabWidth
 	}
 	return t.TabWidth
 }

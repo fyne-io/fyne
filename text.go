@@ -30,33 +30,15 @@ const (
 	TextWrapWord
 )
 
-const (
-	// DefaultTabWidth is the default width in spaces
-	DefaultTabWidth = 4
-)
-
 // TextStyle represents the styles that can be applied to a text canvas object
 // or text based widget.
 type TextStyle struct {
 	Bold      bool // Should text be bold
 	Italic    bool // Should text be italic
 	Monospace bool // Use the system monospace font instead of regular
-	tabWidth  int  // Width of tabs in spaces
-}
 
-// TabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
-func (ts *TextStyle) TabWidth() int {
-	if ts.tabWidth == 0 {
-		return DefaultTabWidth
-	}
-	return ts.tabWidth
-}
-
-// SetTabWidth sets the tab width if the supplied value is greater than 0
-func (ts *TextStyle) SetTabWidth(tabWidth int) {
-	if tabWidth > 0 {
-		ts.tabWidth = tabWidth
-	}
+	// Since: 2.1
+	TabWidth int // Width of tabs in spaces
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.

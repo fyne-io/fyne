@@ -20,6 +20,9 @@ type FontDrawer struct {
 }
 
 func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
+	if tabWidth <= 0 {
+		tabWidth = DefaultTabWidth
+	}
 	spacew, ok := f.GlyphAdvance(' ')
 	if !ok {
 		log.Print("Failed to find space width for tab")
