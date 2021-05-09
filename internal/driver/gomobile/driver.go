@@ -27,6 +27,7 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	backspaceDelay    = 50 * time.Millisecond  // how quickly can a user type backspace in succession
 )
 
 type mobileDriver struct {
@@ -36,6 +37,8 @@ type mobileDriver struct {
 	windows   []fyne.Window
 	device    *device
 	animation *animation.Runner
+
+	lastBackspace time.Time
 }
 
 // Declare conformity with Driver
@@ -421,6 +424,14 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 	keyName := keyToName(code)
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
+
+	// If backspace was too quick, we received a real backspace followed by simulated backspace
+	if keyEvent.Name == fyne.KeyBackspace {
+		if time.Since(d.lastBackspace) < backspaceDelay {
+			return
+		}
+		d.lastBackspace = time.Now()
+	}
 
 	if canvas.Focused() != nil {
 		if keyName != "" {

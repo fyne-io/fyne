@@ -100,8 +100,10 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setImeOptions(imeOptions);
                 mTextEdit.setInputType(inputType);
 
-                oldState = "";
-                mTextEdit.setText("");
+                // always place one character so all keyboards can send backspace
+                oldState = "0";
+                mTextEdit.setText("0");
+
                 mTextEdit.setVisibility(View.VISIBLE);
                 mTextEdit.bringToFront();
                 mTextEdit.requestFocus();
@@ -231,13 +233,18 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setLayoutParams(mEditTextLayoutParams);
                 addContentView(mTextEdit, mEditTextLayoutParams);
 
+                // always place one character so all keyboards can send backspace
+                oldState = "0";
+                mTextEdit.setText("0");
+
                 mTextEdit.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (s.length() > oldState.length()) {
-                            keyboardTyped(s.subSequence(oldState.length(), s.length()).toString());
+                            keyboardTyped(s.subSequence(start,start+count).toString());
                         } else if (s.length() < oldState.length()) {
-                            // backspace key seems to be sent even for soft content
+                            // send a backspace
+                            keyboardDelete();
                         }
 
                         oldState = s.toString();
@@ -249,6 +256,12 @@ public class GoNativeActivity extends NativeActivity {
 
                     @Override
                     public void afterTextChanged(Editable s) {
+                        // always place one character so all keyboards can send backspace
+                        if (s.length() < 1) {
+                            oldState = "0";
+                            s.insert(0,"0");
+                            return;
+                        }
                     }
                 });
             }
