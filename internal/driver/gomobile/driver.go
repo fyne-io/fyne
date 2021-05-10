@@ -29,10 +29,12 @@ const (
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
 )
 
+// Configuration is the system information about the current device
 type Configuration struct {
 	SystemTheme fyne.ThemeVariant
 }
 
+// ConfiguredDriver is a simple type that allows packages to hook into configuration changes of this driver.
 type ConfiguredDriver interface {
 	SetOnConfigurationChanged(func(*Configuration))
 }
