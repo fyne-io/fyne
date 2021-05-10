@@ -333,7 +333,7 @@ func TestEntry_Tab(t *testing.T) {
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
 	assert.Equal(t, 3, len(r.texts))
 	assert.Equal(t, "a", r.texts[0].Text)
-	assert.Equal(t, textTabIndent+"b", r.texts[1].Text)
+	assert.Equal(t, "\tb", r.texts[1].Text)
 
 	w := test.NewWindow(e)
 	w.Resize(fyne.NewSize(86, 86))
