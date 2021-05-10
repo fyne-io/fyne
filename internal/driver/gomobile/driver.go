@@ -29,6 +29,14 @@ const (
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
 )
 
+type Configuration struct {
+	SystemTheme fyne.ThemeVariant
+}
+
+type ConfiguredDriver interface {
+	SetOnConfigurationChanged(func(*Configuration))
+}
+
 type mobileDriver struct {
 	app   app.App
 	glctx gl.Context
@@ -36,10 +44,14 @@ type mobileDriver struct {
 	windows   []fyne.Window
 	device    *device
 	animation *animation.Runner
+
+	theme           fyne.ThemeVariant
+	onConfigChanged func(*Configuration)
 }
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*mobileDriver)(nil)
+var _ ConfiguredDriver = (*mobileDriver)(nil)
 
 func init() {
 	runtime.LockOSThread()
@@ -182,6 +194,7 @@ func (d *mobileDriver) Run() {
 					currentSize = e
 					currentOrientation = e.Orientation
 					currentDPI = e.PixelsPerPt * 72
+					d.setTheme(e.DarkMode)
 
 					dev := d.device
 					dev.safeTop = e.InsetTopPx
@@ -272,6 +285,20 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	}
 
 	canvas.walkTree(paint, afterPaint)
+}
+
+func (d *mobileDriver) setTheme(dark bool) {
+	var mode fyne.ThemeVariant
+	if dark {
+		mode = theme.VariantDark
+	} else {
+		mode = theme.VariantLight
+	}
+
+	if d.theme != mode && d.onConfigChanged != nil {
+		d.onConfigChanged(&Configuration{SystemTheme: mode})
+	}
+	d.theme = mode
 }
 
 func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32, tapID touch.Sequence) {
@@ -468,10 +495,15 @@ func (d *mobileDriver) Device() fyne.Device {
 	return d.device
 }
 
+func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
+	d.onConfigChanged = f
+}
+
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
 	d := new(mobileDriver)
+	d.theme = fyne.ThemeVariant(2) // unspecified
 	d.animation = &animation.Runner{}
 
 	registerRepository(d)
