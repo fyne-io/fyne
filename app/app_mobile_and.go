@@ -24,10 +24,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func defaultVariant() fyne.ThemeVariant {
-	return systemTheme
-}
-
 func (app *fyneApp) OpenURL(url *url.URL) error {
 	cmd := app.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
 		"-d", url.String())

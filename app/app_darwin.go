@@ -30,9 +30,6 @@ import (
 )
 
 func defaultVariant() fyne.ThemeVariant {
-	if fyne.CurrentDevice().IsMobile() { // this is called in mobile simulate mode
-		return theme.VariantLight
-	}
 	if C.isDarkMode() {
 		return theme.VariantDark
 	}

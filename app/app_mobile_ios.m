@@ -52,8 +52,3 @@ char *documentsPath() {
     NSString *path = paths.firstObject;
     return [path UTF8String];
 }
-
-bool isDark() {
-    UIViewController *rootVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
-}

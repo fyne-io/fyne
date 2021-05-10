@@ -9,10 +9,8 @@ package app
 #cgo LDFLAGS: -framework Foundation -framework UIKit -framework UserNotifications
 
 #include <stdlib.h>
-#include <stdbool.h>
 
 char *documentsPath(void);
-bool isDark();
 void openURL(char *urlStr);
 void sendNotification(char *title, char *content);
 */
@@ -23,15 +21,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
-
-func defaultVariant() fyne.ThemeVariant {
-	if bool(C.isDark()) {
-		return theme.VariantDark
-	}
-	return theme.VariantLight
-}
 
 func rootConfigDir() string {
 	root := C.documentsPath()
