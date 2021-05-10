@@ -124,7 +124,7 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 	if !item.IsSeparator {
 		callbacks = append(callbacks, func() {
 			if item.Action != nil {
-				w.queueEvent(item.Action)
+				w.QueueEvent(item.Action)
 			}
 		})
 		nextItemID++
