@@ -22,12 +22,7 @@ import (
 	mobileApp "github.com/fyne-io/mobile/app"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
-
-func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantLight
-}
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
 	cmd := app.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",

@@ -189,6 +189,14 @@ static void sendTouches(int change, NSSet* touches) {
 - (void)touchesCanceled:(NSSet*)touches withEvent:(UIEvent*)event {
     sendTouches(TOUCH_TYPE_END, touches);
 }
+
+- (void) traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
+    [super traitCollectionDidChange: previousTraitCollection];
+
+	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	CGSize size = [UIScreen mainScreen].nativeBounds.size;
+	updateConfig((int)size.width, (int)size.height, orientation);
+}
 @end
 
 @implementation GoInputView
@@ -247,6 +255,11 @@ UIEdgeInsets getDevicePadding() {
     }
 
     return UIEdgeInsetsZero;
+}
+
+bool isDark() {
+    UIViewController *rootVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
 }
 
 #define DEFAULT_KEYBOARD_CODE 0
