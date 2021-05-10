@@ -426,6 +426,9 @@ func (r *Releaser) validate() error {
 		if r.certificate == "" {
 			r.certificate = "3rd Party Mac Developer Application"
 		}
+		if r.profile == "" {
+			return errors.New("missing required -profile parameter for macOS release")
+		}
 		if r.category == "" {
 			return errors.New("missing required -category parameter for macOS release")
 		} else if !isValidMacOSCategory(r.category) {

@@ -153,6 +153,8 @@ func (c *Container) Remove(rem CanvasObject) {
 		copy(c.Objects[i:], c.Objects[i+1:])
 		c.Objects[len(c.Objects)-1] = nil
 		c.Objects = c.Objects[:len(c.Objects)-1]
+
+		c.layout()
 		return
 	}
 }

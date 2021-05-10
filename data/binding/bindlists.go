@@ -1143,7 +1143,7 @@ func (l *boundUntypedList) Get() ([]interface{}, error) {
 
 func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
 	if i < 0 || i >= l.Length() {
-		return struct{}{}, errOutOfBounds
+		return nil, errOutOfBounds
 	}
 	l.lock.RLock()
 	defer l.lock.RUnlock()

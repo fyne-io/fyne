@@ -36,6 +36,9 @@ type TextStyle struct {
 	Bold      bool // Should text be bold
 	Italic    bool // Should text be italic
 	Monospace bool // Use the system monospace font instead of regular
+
+	// Since: 2.1
+	TabWidth int // Width of tabs in spaces
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.

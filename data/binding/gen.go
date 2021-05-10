@@ -33,8 +33,7 @@ type External{{ .Name }} interface {
 //
 // Since: {{ .Since }}
 func New{{ .Name }}() {{ .Name }} {
-	var blank {{ .Type }}
-	blank = {{ .Default }}
+	var blank {{ .Type }} = {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
@@ -44,8 +43,7 @@ func New{{ .Name }}() {{ .Name }} {
 // Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		var blank {{ .Type }}
-		blank = {{ .Default }}
+		var blank {{ .Type }} = {{ .Default }}
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternal{{ .Name }}{}
@@ -677,7 +675,7 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-		bindValues{Name: "Untyped", Type: "interface{}", Default: "struct{}{}", Since: "2.1"},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
