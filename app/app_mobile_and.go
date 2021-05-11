@@ -29,14 +29,14 @@ func defaultVariant() fyne.ThemeVariant {
 	return theme.VariantLight
 }
 
-func (app *fyneApp) OpenURL(url *url.URL) error {
-	cmd := app.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
+func (a *fyneApp) OpenURL(url *url.URL) error {
+	cmd := a.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
 		"-d", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
 
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	titleStr := C.CString(n.Title)
 	defer C.free(unsafe.Pointer(titleStr))
 	contentStr := C.CString(n.Content)
