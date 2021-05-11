@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
@@ -21,8 +22,6 @@ import (
 const mainGoroutineID = 1
 
 var (
-	canvasMutex sync.RWMutex
-	canvases    = make(map[fyne.CanvasObject]fyne.Canvas)
 	curWindow   *window
 	isWayland   = false
 )
@@ -45,9 +44,7 @@ func (d *gLDriver) RenderedTextSize(text string, size float32, style fyne.TextSt
 }
 
 func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	canvasMutex.RLock()
-	defer canvasMutex.RUnlock()
-	return canvases[obj]
+	return common.CanvasForObject(obj)
 }
 
 func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
@@ -57,7 +54,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	}
 
 	glc := c.(*glCanvas)
-	return driver.AbsolutePositionForObject(co, glc.objectTrees())
+	return driver.AbsolutePositionForObject(co, glc.ObjectTrees())
 }
 
 func (d *gLDriver) Device() fyne.Device {

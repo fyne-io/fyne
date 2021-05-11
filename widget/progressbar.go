@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -176,7 +177,7 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 }
 
 func progressBackgroundColor() color.Color {
-	r, g, b, a := theme.PrimaryColor().RGBA()
+	r, g, b, a := col.ToNRGBA(theme.PrimaryColor())
 	faded := uint8(a) / 3
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }

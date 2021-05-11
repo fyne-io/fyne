@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "_cgo_export.h"
 
@@ -269,4 +270,8 @@ void Java_org_golang_app_GoNativeActivity_keyboardTyped(JNIEnv *env, jclass claz
 
 void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass clazz) {
     keyboardDelete();
+}
+
+void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz, jboolean dark) {
+    setDarkMode((bool)dark);
 }

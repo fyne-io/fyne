@@ -34,6 +34,7 @@ package app
 #include <jni.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 extern EGLDisplay display;
 extern EGLSurface surface;
@@ -191,6 +192,11 @@ func onInputQueueDestroyed(activity *C.ANativeActivity, q *C.AInputQueue) {
 func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 }
 
+//export setDarkMode
+func setDarkMode(dark C.bool) {
+	darkMode = bool(dark)
+}
+
 type windowConfig struct {
 	orientation size.Orientation
 	pixelsPerPt float32
@@ -274,6 +280,7 @@ var (
 	activityDestroyed  = make(chan struct{})
 
 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
+	darkMode                                                             bool
 )
 
 func init() {
@@ -449,6 +456,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				InsetRightPx:  screenInsetRight,
 				PixelsPerPt:   pixelsPerPt,
 				Orientation:   screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
+				DarkMode:      darkMode,
 			}
 			theApp.eventsIn <- paint.Event{External: true}
 		case <-windowDestroyed:

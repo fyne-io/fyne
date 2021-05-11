@@ -12,6 +12,7 @@ package app
 #cgo LDFLAGS: -framework Foundation -framework UIKit -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
 #include <sys/utsname.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <UIKit/UIDevice.h>
 #import <GLKit/GLKit.h>
@@ -24,6 +25,7 @@ void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
 UIEdgeInsets getDevicePadding();
+bool isDark();
 void showKeyboard(int keyboardType);
 void hideKeyboard();
 
@@ -142,6 +144,7 @@ func updateConfig(width, height, orientation int32) {
 		InsetRightPx:  int(float32(insets.right) * float32(screenScale)),
 		PixelsPerPt:   pixelsPerPt,
 		Orientation:   o,
+		DarkMode:      bool(C.isDark()),
 	}
 	theApp.eventsIn <- paint.Event{External: true}
 }
