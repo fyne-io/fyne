@@ -96,6 +96,10 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
+func (a *fyneApp) Lifecycle() fyne.Lifecycle {
+	return &app.Lifecycle{}
+}
+
 // New returns a new application instance with the default driver and no unique ID
 func New() fyne.App {
 	internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")

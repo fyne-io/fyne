@@ -57,6 +57,9 @@ type App interface {
 
 	// Storage returns a storage handler specific to this application.
 	Storage() Storage
+
+	// Lifecycle returns a type that allows apps to hook in to lifecycle events.
+	Lifecycle() Lifecycle
 }
 
 var app App
@@ -79,4 +82,18 @@ func CurrentApp() App {
 		LogError("Attempt to access current Fyne app when none is started", nil)
 	}
 	return app
+}
+
+// Lifecycle represents the various phases that an app can transition through.
+//
+// Since: 2.1
+type Lifecycle interface {
+	// SetOnFocusGained hooks into the the app becoming foreground.
+	SetOnFocusGained(func())
+	// SetOnFocusLost hooks into the app losing foreground focus.
+	SetOnFocusLost(func())
+	// SetOnStarted hooks into an event that says the app is now running.
+	SetOnStarted(func())
+	// SetOnStopped hooks into an event that says the app is no longer running.
+	SetOnStopped(func())
 }
