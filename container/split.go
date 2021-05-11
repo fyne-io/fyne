@@ -56,7 +56,6 @@ func (s *Split) CreateRenderer() fyne.WidgetRenderer {
 	return &splitContainerRenderer{
 		split:   s,
 		divider: d,
-		objects: []fyne.CanvasObject{s.Leading, d, s.Trailing},
 	}
 }
 
@@ -84,7 +83,6 @@ var _ fyne.WidgetRenderer = (*splitContainerRenderer)(nil)
 type splitContainerRenderer struct {
 	split   *Split
 	divider *divider
-	objects []fyne.CanvasObject
 }
 
 func (r *splitContainerRenderer) Destroy() {
@@ -131,7 +129,7 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 
 func (r *splitContainerRenderer) MinSize() fyne.Size {
 	s := fyne.NewSize(0, 0)
-	for _, o := range r.objects {
+	for _, o := range r.Objects() {
 		min := o.MinSize()
 		if r.split.Horizontal {
 			s.Width += min.Width
@@ -145,7 +143,7 @@ func (r *splitContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
+	return []fyne.CanvasObject{r.split.Leading, r.divider, r.split.Trailing}
 }
 
 func (r *splitContainerRenderer) Refresh() {
