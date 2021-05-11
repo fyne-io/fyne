@@ -22,8 +22,8 @@ import (
 const mainGoroutineID = 1
 
 var (
-	curWindow   *window
-	isWayland   = false
+	curWindow *window
+	isWayland = false
 )
 
 // Declare conformity with Driver
