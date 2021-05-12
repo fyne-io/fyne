@@ -88,10 +88,10 @@ func CurrentApp() App {
 //
 // Since: 2.1
 type Lifecycle interface {
-	// SetOnFocusGained hooks into the the app becoming foreground.
-	SetOnFocusGained(func())
-	// SetOnFocusLost hooks into the app losing foreground focus.
-	SetOnFocusLost(func())
+	// SetOnEnteredForeground hooks into the the app becoming foreground.
+	SetOnEnteredForeground(func())
+	// SetOnExitedForeground hooks into the app losing foreground focus.
+	SetOnExitedForeground(func())
 	// SetOnStarted hooks into an event that says the app is now running.
 	SetOnStarted(func())
 	// SetOnStopped hooks into an event that says the app is no longer running.

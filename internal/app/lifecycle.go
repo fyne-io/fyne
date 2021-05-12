@@ -18,15 +18,17 @@ type Lifecycle struct {
 	mux sync.Mutex
 }
 
-// SetOnFocusGained hooks into the the app becoming foreground.
-func (l *Lifecycle) SetOnFocusGained(f func()) {
+// SetOnEnteredForeground hooks into the the app becoming foreground.
+func (l *Lifecycle) SetOnEnteredForeground(f func()) {
 	l.mux.Lock()
 	l.onFocusGained = f
 	l.mux.Unlock()
 }
 
-// SetOnFocusLost hooks into the app losing foreground focus.
-func (l *Lifecycle) SetOnFocusLost(f func()) {
+// SetOnExitedForeground hooks into the app having moved to the background.
+// Depending on the platform it may still be  visible but will not receive keyboard events.
+// On some systems hover or desktop mouse move events may still occur.
+func (l *Lifecycle) SetOnExitedForeground(f func()) {
 	l.mux.Lock()
 	l.onFocusLost = f
 }
