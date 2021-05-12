@@ -43,6 +43,10 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	})
 }
 
+func defaultVariant() fyne.ThemeVariant {
+	return systemTheme
+}
+
 func rootConfigDir() string {
 	filesDir := os.Getenv("FILESDIR")
 	if filesDir == "" {

@@ -44,3 +44,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 
 	C.sendNotification(titleStr, contentStr)
 }
+
+func defaultVariant() fyne.ThemeVariant {
+	return systemTheme
+}
