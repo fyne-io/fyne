@@ -220,7 +220,7 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 	}
 	switch e.Crosses(lifecycle.StageFocused) {
 	case lifecycle.CrossOn: // foregrounding
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerFocusGained()
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerEnteredForeground()
 	case lifecycle.CrossOff: // will enter background
 		if runtime.GOOS == "darwin" {
 			if d.glctx == nil {
@@ -231,7 +231,7 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 			d.paintWindow(w, s)
 			d.app.Publish()
 		}
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerFocusLost()
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
 }
 

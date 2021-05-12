@@ -45,8 +45,8 @@ func (l *Lifecycle) SetOnStopped(f func()) {
 	l.onStopped = f
 }
 
-// TriggerFocusGained will call the focus gained hook, if one is registered.
-func (l *Lifecycle) TriggerFocusGained() {
+// TriggerEnteredForeground will call the focus gained hook, if one is registered.
+func (l *Lifecycle) TriggerEnteredForeground() {
 	l.mux.Lock()
 	f := l.onFocusGained
 	l.mux.Unlock()
@@ -56,8 +56,8 @@ func (l *Lifecycle) TriggerFocusGained() {
 	}
 }
 
-// TriggerFocusLost will call the focus lost hook, if one is registered.
-func (l *Lifecycle) TriggerFocusLost() {
+// TriggerExitedForeground will call the focus lost hook, if one is registered.
+func (l *Lifecycle) TriggerExitedForeground() {
 	l.mux.Lock()
 	f := l.onFocusLost
 	l.mux.Unlock()

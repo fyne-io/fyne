@@ -1206,7 +1206,7 @@ func (w *window) charInput(_ *glfw.Window, char rune) {
 func (w *window) focused(_ *glfw.Window, focus bool) {
 	if focus {
 		if curWindow == nil {
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerFocusGained()
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerEnteredForeground()
 		}
 		curWindow = w
 		w.canvas.FocusGained()
@@ -1223,7 +1223,7 @@ func (w *window) focused(_ *glfw.Window, focus bool) {
 			}
 
 			curWindow = nil
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerFocusLost()
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerExitedForeground()
 		}()
 	}
 }

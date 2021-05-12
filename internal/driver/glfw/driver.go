@@ -68,7 +68,7 @@ func (d *gLDriver) Device() fyne.Device {
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
 		curWindow = nil
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerFocusLost()
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
 	defer func() {
 		recover() // we could be called twice - no safe way to check if d.done is closed
