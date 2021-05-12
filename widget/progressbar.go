@@ -1,18 +1,17 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
-
-const defaultText = "%d%%"
 
 type progressRenderer struct {
 	widget.BaseRenderer
@@ -48,7 +47,7 @@ func (p *progressRenderer) updateBar() {
 	if text := p.progress.TextFormatter; text != nil {
 		p.label.Text = text()
 	} else {
-		p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
+		p.label.Text = strconv.Itoa(int(ratio*100)) + "%"
 	}
 
 	size := p.progress.Size()
@@ -178,7 +177,7 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 }
 
 func progressBackgroundColor() color.Color {
-	r, g, b, a := theme.PrimaryColor().RGBA()
+	r, g, b, a := col.ToNRGBA(theme.PrimaryColor())
 	faded := uint8(a) / 3
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }

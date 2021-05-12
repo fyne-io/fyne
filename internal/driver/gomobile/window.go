@@ -4,12 +4,15 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 type window struct {
+	common.Window
+
 	title              string
 	visible            bool
 	onClosed           func()
@@ -39,7 +42,7 @@ func (w *window) SetFullScreen(bool) {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.Canvas().(*mobileCanvas).resize(size)
+	w.Canvas().(*mobileCanvas).Resize(size)
 }
 
 func (w *window) RequestFocus() {
@@ -111,12 +114,11 @@ func (w *window) Show() {
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
-		w.canvas.windowHead = container.NewHBox(menuButton,
-			layout.NewSpacer(), title, layout.NewSpacer(), exit)
-
-		w.canvas.resize(w.canvas.size)
+		w.canvas.setWindowHead(container.NewHBox(menuButton,
+			layout.NewSpacer(), title, layout.NewSpacer(), exit))
+		w.canvas.Resize(w.canvas.size)
 	} else {
-		w.canvas.windowHead = container.NewHBox(menuButton)
+		w.canvas.setWindowHead(container.NewHBox(menuButton))
 	}
 	w.visible = true
 
@@ -136,7 +138,7 @@ func (w *window) Hide() {
 
 func (w *window) tryClose() {
 	if w.onCloseIntercepted != nil {
-		w.onCloseIntercepted()
+		w.QueueEvent(w.onCloseIntercepted)
 		return
 	}
 
@@ -158,15 +160,20 @@ func (w *window) Close() {
 	// TODO free textures synchronously with the
 	// draw thread
 
-	w.canvas.walkTree(nil, func(obj, _ fyne.CanvasObject) {
-		switch co := obj.(type) {
-		case fyne.Widget:
-			cache.DestroyRenderer(co)
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+		if wid, ok := node.Obj().(fyne.Widget); ok {
+			cache.DestroyRenderer(wid)
 		}
 	})
 
 	// TODO clean canvases cache and out of scope
 	// renderers
+
+	// Call this in a go routine, because this function could be called
+	// inside a button which callback would be queued in this event queue
+	// and it will lead to a deadlock if this is performed in the same go
+	// routine.
+	go w.DestroyEventQueue()
 
 	if w.onClosed != nil {
 		w.onClosed()

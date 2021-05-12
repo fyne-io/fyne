@@ -34,6 +34,7 @@ package app
 #include <jni.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 extern EGLDisplay display;
 extern EGLSurface surface;
@@ -45,7 +46,7 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
-void showFileSave(JNIEnv* env, char* mimes);
+void showFileSave(JNIEnv* env, char* mimes, char* filename);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -191,6 +192,11 @@ func onInputQueueDestroyed(activity *C.ANativeActivity, q *C.AInputQueue) {
 func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 }
 
+//export setDarkMode
+func setDarkMode(dark C.bool) {
+	darkMode = bool(dark)
+}
+
 type windowConfig struct {
 	orientation size.Orientation
 	pixelsPerPt float32
@@ -274,6 +280,7 @@ var (
 	activityDestroyed  = make(chan struct{})
 
 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
+	darkMode                                                             bool
 )
 
 func init() {
@@ -383,16 +390,18 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 	}
 }
 
-func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter) {
+func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	fileCallback = callback
 
 	mimes := mimeStringFromFilter(filter)
 	mimeStr := C.CString(mimes)
 	defer C.free(unsafe.Pointer(mimeStr))
+	filenameStr := C.CString(filename)
+	defer C.free(unsafe.Pointer(filenameStr))
 
 	save := func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showFileSave(env, mimeStr)
+		C.showFileSave(env, mimeStr, filenameStr)
 		return nil
 	}
 
@@ -447,6 +456,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				InsetRightPx:  screenInsetRight,
 				PixelsPerPt:   pixelsPerPt,
 				Orientation:   screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
+				DarkMode:      darkMode,
 			}
 			theApp.eventsIn <- paint.Event{External: true}
 		case <-windowDestroyed:

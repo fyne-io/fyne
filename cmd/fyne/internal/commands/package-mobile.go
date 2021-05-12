@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
@@ -68,7 +68,7 @@ func (p *Packager) packageIOS() error {
 }
 
 func copyResizeIcon(size int, dir, source string) error {
-	path := fmt.Sprintf("%s/Icon_%d.png", dir, size)
-	strSize := fmt.Sprintf("%d", size)
+	strSize := strconv.Itoa(size)
+	path := dir + "/Icon_" + strSize + ".png"
 	return exec.Command("sips", "-o", path, "-Z", strSize, source).Run()
 }

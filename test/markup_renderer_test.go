@@ -25,7 +25,7 @@ func Test_snapshot(t *testing.T) {
 		want     string
 	}{
 		"circle": {
-			content: canvas.NewCircle(color.RGBA{R: 200, G: 100, B: 0, A: 50}),
+			content: canvas.NewCircle(color.NRGBA{R: 200, G: 100, B: 0, A: 50}),
 			size:    fyne.NewSize(42, 42),
 			pos:     fyne.NewPos(17, 17),
 			want: "<canvas size=\"100x100\">\n" +
@@ -52,7 +52,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"circle with stroke": {
 			content: func() fyne.CanvasObject {
-				c := canvas.NewCircle(color.RGBA{R: 200, G: 100, B: 0, A: 50})
+				c := canvas.NewCircle(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				c.StrokeWidth = 3
 				c.StrokeColor = theme.BackgroundColor()
 				return c
@@ -197,7 +197,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"line": {
-			content: canvas.NewLine(color.RGBA{R: 17, G: 42, B: 128, A: 255}),
+			content: canvas.NewLine(color.NRGBA{R: 17, G: 42, B: 128, A: 255}),
 			pos:     fyne.NewPos(13, 13),
 			size:    fyne.NewSize(10, 50),
 			want: "<canvas size=\"100x100\">\n" +
@@ -237,7 +237,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"linear gradient": {
-			content: canvas.NewLinearGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor(), 13.25),
+			content: canvas.NewLinearGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor(), 13.25),
 			pos:     fyne.NewPos(6, 13),
 			size:    fyne.NewSize(50, 10),
 			want: "<canvas size=\"100x100\">\n" +
@@ -247,7 +247,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"radial gradient": {
-			content: canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor()),
+			content: canvas.NewRadialGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<radialGradient endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
@@ -256,7 +256,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"radial gradient with offset": {
 			content: func() fyne.CanvasObject {
-				g := canvas.NewRadialGradient(color.RGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor())
+				g := canvas.NewRadialGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor())
 				g.CenterOffsetX = 1.5
 				g.CenterOffsetY = -13.7
 				return g
@@ -276,7 +276,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"rectangle": {
-			content: canvas.NewRectangle(color.RGBA{R: 100, G: 200, B: 50, A: 0}),
+			content: canvas.NewRectangle(color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
 			size:    fyne.NewSize(17, 42),
 			pos:     fyne.NewPos(42, 17),
 			want: "<canvas size=\"100x100\">\n" +
@@ -303,7 +303,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"rectangle with stroke": {
 			content: func() fyne.CanvasObject {
-				r := canvas.NewRectangle(color.RGBA{R: 200, G: 100, B: 0, A: 50})
+				r := canvas.NewRectangle(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				r.StrokeWidth = 6.375
 				r.StrokeColor = theme.PlaceHolderColor()
 				return r
@@ -407,7 +407,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"container": {
-			content: container.NewVBox(canvas.NewCircle(color.Black), canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250})),
+			content: container.NewVBox(canvas.NewCircle(color.Black), canvas.NewLine(color.NRGBA{R: 250, G: 250, B: 250, A: 250})),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<container size=\"100x100\">\n" +
@@ -430,7 +430,7 @@ func Test_snapshot(t *testing.T) {
 			content: &markupRendererTestWidget{
 				objs: []fyne.CanvasObject{
 					canvas.NewCircle(color.Black),
-					canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250}),
+					canvas.NewLine(color.NRGBA{R: 250, G: 250, B: 250, A: 250}),
 				},
 			},
 			want: "<canvas size=\"100x100\">\n" +
@@ -454,7 +454,7 @@ func Test_snapshot(t *testing.T) {
 			content: func() fyne.CanvasObject {
 				c := canvas.NewCircle(color.Black)
 				c.Hide()
-				l := canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250})
+				l := canvas.NewLine(color.NRGBA{R: 250, G: 250, B: 250, A: 250})
 				l.Hide()
 				w := widget.NewButton("tap me if you can", nil)
 				w.Hide()
@@ -503,7 +503,7 @@ func Test_snapshot(t *testing.T) {
 		c := NewCanvas()
 		c.SetPadded(true)
 		c.SetContent(canvas.NewCircle(color.Black))
-		c.Overlays().Add(canvas.NewRectangle(color.RGBA{R: 250, G: 250, B: 250, A: 250}))
+		c.Overlays().Add(canvas.NewRectangle(color.NRGBA{R: 250, G: 250, B: 250, A: 250}))
 		c.Overlays().Add(canvas.NewRectangle(color.Transparent))
 		c.Resize(fyne.NewSize(100, 100))
 		assert.Equal(

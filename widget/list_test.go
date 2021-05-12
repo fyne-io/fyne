@@ -97,6 +97,60 @@ func TestList_Hover(t *testing.T) {
 	}
 }
 
+func TestList_ScrollTo(t *testing.T) {
+	list := createList(1000)
+
+	offset := float32(0)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	list.ScrollTo(20)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(8245)
+	list.ScrollTo(200)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(44999)
+	list.ScrollTo(999)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(23000)
+	list.ScrollTo(500)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	list.ScrollTo(1000)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+
+	offset = float32(46)
+	list.ScrollTo(1)
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+}
+
+func TestList_ScrollToBottom(t *testing.T) {
+	list := createList(1000)
+
+	offset := float32(44999)
+	list.ScrollToBottom()
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+}
+
+func TestList_ScrollToTop(t *testing.T) {
+	list := createList(1000)
+
+	offset := float32(0)
+	list.ScrollToTop()
+	assert.Equal(t, offset, list.offsetY)
+	assert.Equal(t, offset, list.scroller.Offset.Y)
+}
+
 func TestList_Selection(t *testing.T) {
 	list := createList(1000)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
@@ -154,6 +208,10 @@ func TestList_Select(t *testing.T) {
 
 func TestList_Unselect(t *testing.T) {
 	list := createList(1000)
+	var unselected ListItemID
+	list.OnUnselected = func(id ListItemID) {
+		unselected = id
+	}
 
 	list.Select(10)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
@@ -164,6 +222,17 @@ func TestList_Unselect(t *testing.T) {
 	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	assert.False(t, children[10].(*listItem).background.Visible())
 	assert.Nil(t, list.selected)
+	assert.Equal(t, 10, unselected)
+
+	unselected = -1
+	list.Select(11)
+	list.Unselect(9)
+	assert.Equal(t, 1, len(list.selected))
+	assert.Equal(t, -1, unselected)
+
+	list.UnselectAll()
+	assert.Nil(t, list.selected)
+	assert.Equal(t, 11, unselected)
 }
 
 func TestList_DataChange(t *testing.T) {
