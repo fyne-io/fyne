@@ -22,9 +22,11 @@ type fyneApp struct {
 	icon     fyne.Resource
 	uniqueID string
 
-	settings *settings
-	storage  *store
-	prefs    fyne.Preferences
+	lifecycle fyne.Lifecycle
+	settings  *settings
+	storage   *store
+	prefs     fyne.Preferences
+
 	running  bool
 	runMutex sync.Mutex
 	exec     func(name string, arg ...string) *exec.Cmd
@@ -97,7 +99,7 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 }
 
 func (a *fyneApp) Lifecycle() fyne.Lifecycle {
-	return &app.Lifecycle{}
+	return a.lifecycle
 }
 
 // New returns a new application instance with the default driver and no unique ID
@@ -107,7 +109,7 @@ func New() fyne.App {
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	newApp := &fyneApp{uniqueID: id, driver: d, exec: exec.Command}
+	newApp := &fyneApp{uniqueID: id, driver: d, exec: exec.Command, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newPreferences(newApp)
