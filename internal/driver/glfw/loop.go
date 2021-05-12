@@ -90,13 +90,14 @@ func (d *gLDriver) runGL() {
 	runMutex.Unlock()
 
 	d.initGLFW()
-
+	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
 			d.drawDone <- nil // wait for draw thread to stop
 			glfw.Terminate()
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
 		case f := <-funcQueue:
 			f.f()

@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
+	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
@@ -21,6 +22,7 @@ import (
 const mainGoroutineID = 1
 
 var (
+	curWindow *window
 	isWayland = false
 )
 
@@ -64,6 +66,10 @@ func (d *gLDriver) Device() fyne.Device {
 }
 
 func (d *gLDriver) Quit() {
+	if curWindow != nil {
+		curWindow = nil
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
+	}
 	defer func() {
 		recover() // we could be called twice - no safe way to check if d.done is closed
 	}()

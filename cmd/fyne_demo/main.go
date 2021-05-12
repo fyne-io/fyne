@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 
 	"fyne.io/fyne/v2"
@@ -19,15 +20,10 @@ const preferenceCurrentTutorial = "currentTutorial"
 
 var topWindow fyne.Window
 
-func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
-	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
-		focused.TypedShortcut(s)
-	}
-}
-
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(theme.FyneLogo())
+	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")
 	topWindow = w
 
@@ -129,6 +125,21 @@ func main() {
 	w.ShowAndRun()
 }
 
+func logLifecycle(a fyne.App) {
+	a.Lifecycle().SetOnStarted(func() {
+		log.Println("Lifecycle: Started")
+	})
+	a.Lifecycle().SetOnStopped(func() {
+		log.Println("Lifecycle: Stopped")
+	})
+	a.Lifecycle().SetOnEnteredForeground(func() {
+		log.Println("Lifecycle: Entered Foreground")
+	})
+	a.Lifecycle().SetOnExitedForeground(func() {
+		log.Println("Lifecycle: Exited Foreground")
+	})
+}
+
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
 	a := fyne.CurrentApp()
 
@@ -175,4 +186,10 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 	)
 
 	return container.NewBorder(nil, themes, nil, nil, tree)
+}
+
+func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
+	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
+		focused.TypedShortcut(s)
+	}
 }

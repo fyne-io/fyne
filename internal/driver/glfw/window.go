@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -1202,14 +1203,28 @@ func (w *window) charInput(_ *glfw.Window, char rune) {
 	}
 }
 
-func (w *window) focused(_ *glfw.Window, isFocused bool) {
-	if isFocused {
+func (w *window) focused(_ *glfw.Window, focus bool) {
+	if focus {
+		if curWindow == nil {
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerEnteredForeground()
+		}
+		curWindow = w
 		w.canvas.FocusGained()
 	} else {
 		w.canvas.FocusLost()
 		w.mouseLock.Lock()
 		w.mousePos = fyne.Position{}
 		w.mouseLock.Unlock()
+
+		go func() { // check whether another window was focused or not
+			time.Sleep(time.Millisecond * 100)
+			if curWindow != w {
+				return
+			}
+
+			curWindow = nil
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerExitedForeground()
+		}()
 	}
 }
 

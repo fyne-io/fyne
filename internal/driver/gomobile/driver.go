@@ -44,12 +44,14 @@ type mobileDriver struct {
 	app   app.App
 	glctx gl.Context
 
-	windows   []fyne.Window
-	device    *device
-	animation *animation.Runner
+	windows     []fyne.Window
+	device      *device
+	animation   *animation.Runner
+	currentSize size.Event
 
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
+	painting        bool
 }
 
 // Declare conformity with Driver
@@ -131,23 +133,14 @@ func (d *mobileDriver) Quit() {
 func (d *mobileDriver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
-		var currentSize size.Event
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 60)
-		onGoingPaint := false
-		sendPaintEvent := func() {
-			if onGoingPaint {
-				return
-			}
-			a.Send(paint.Event{})
-			onGoingPaint = true
-		}
 
 		for {
 			select {
 			case <-draw.C:
-				sendPaintEvent()
+				d.sendPaintEvent()
 			case set := <-settingsChange:
 				painter.ClearFontCache()
 				painter.SvgCacheReset()
@@ -163,40 +156,16 @@ func (d *mobileDriver) Run() {
 				if current == nil {
 					continue
 				}
-				canvas := current.Canvas().(*mobileCanvas)
+				c := current.Canvas().(*mobileCanvas)
 
 				switch e := a.Filter(e).(type) {
 				case lifecycle.Event:
-					switch e.Crosses(lifecycle.StageVisible) {
-					case lifecycle.CrossOn:
-						d.glctx, _ = e.DrawContext.(gl.Context)
-						d.onStart()
-
-						// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
-						canvas.Content().Refresh()
-
-						sendPaintEvent()
-					case lifecycle.CrossOff:
-						d.onStop()
-						d.glctx = nil
-					}
-					switch e.Crosses(lifecycle.StageFocused) {
-					case lifecycle.CrossOff: // will enter background
-						if runtime.GOOS == "darwin" {
-							if d.glctx == nil {
-								continue
-							}
-
-							size := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
-							d.paintWindow(current, size)
-							a.Publish()
-						}
-					}
+					d.handleLifecycle(e, current)
 				case size.Event:
 					if e.WidthPx <= 0 {
 						continue
 					}
-					currentSize = e
+					d.currentSize = e
 					currentOrientation = e.Orientation
 					currentDPI = e.PixelsPerPt * 72
 					d.setTheme(e.DarkMode)
@@ -206,33 +175,13 @@ func (d *mobileDriver) Run() {
 					dev.safeLeft = e.InsetLeftPx
 					dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
 					dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
-					canvas.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
-					canvas.Painter().SetFrameBufferScale(1.0)
+					c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
+					c.Painter().SetFrameBufferScale(1.0)
 
 					// make sure that we paint on the next frame
-					canvas.Content().Refresh()
+					c.Content().Refresh()
 				case paint.Event:
-					onGoingPaint = false
-					if d.glctx == nil || e.External {
-						continue
-					}
-					if !canvas.inited {
-						canvas.inited = true
-						canvas.Painter().Init() // we cannot init until the context is set above
-					}
-
-					if canvas.FreeDirtyTextures() || canvas.IsDirty() {
-						newSize := fyne.NewSize(float32(currentSize.WidthPx)/canvas.scale, float32(currentSize.HeightPx)/canvas.scale)
-
-						if canvas.EnsureMinSize() {
-							canvas.sizeContent(newSize) // force resize of content
-						} else { // if screen changed
-							current.Resize(newSize)
-						}
-
-						d.paintWindow(current, newSize)
-						a.Publish()
-					}
+					d.handlePaint(e, current)
 				case touch.Event:
 					switch e.Type {
 					case touch.TypeBegin:
@@ -244,9 +193,9 @@ func (d *mobileDriver) Run() {
 					}
 				case key.Event:
 					if e.Direction == key.DirPress {
-						d.typeDownCanvas(canvas, e.Rune, e.Code)
+						d.typeDownCanvas(c, e.Rune, e.Code)
 					} else if e.Direction == key.DirRelease {
-						d.typeUpCanvas(canvas, e.Rune, e.Code)
+						d.typeUpCanvas(c, e.Rune, e.Code)
 					}
 				}
 			}
@@ -254,42 +203,109 @@ func (d *mobileDriver) Run() {
 	})
 }
 
+func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
+	c := w.Canvas().(*mobileCanvas)
+	switch e.Crosses(lifecycle.StageVisible) {
+	case lifecycle.CrossOn:
+		d.glctx, _ = e.DrawContext.(gl.Context)
+		d.onStart()
+
+		// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
+		c.Content().Refresh()
+
+		d.sendPaintEvent()
+	case lifecycle.CrossOff:
+		d.onStop()
+		d.glctx = nil
+	}
+	switch e.Crosses(lifecycle.StageFocused) {
+	case lifecycle.CrossOn: // foregrounding
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerEnteredForeground()
+	case lifecycle.CrossOff: // will enter background
+		if runtime.GOOS == "darwin" {
+			if d.glctx == nil {
+				return
+			}
+
+			s := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+			d.paintWindow(w, s)
+			d.app.Publish()
+		}
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
+	}
+}
+
+func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
+	c := w.Canvas().(*mobileCanvas)
+	d.painting = false
+	if d.glctx == nil || e.External {
+		return
+	}
+	if !c.inited {
+		c.inited = true
+		c.Painter().Init() // we cannot init until the context is set above
+	}
+
+	if c.FreeDirtyTextures() || c.IsDirty() {
+		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+
+		if c.EnsureMinSize() {
+			c.sizeContent(newSize) // force resize of content
+		} else { // if screen changed
+			w.Resize(newSize)
+		}
+
+		d.paintWindow(w, newSize)
+		d.app.Publish()
+	}
+}
+
 func (d *mobileDriver) onStart() {
+	fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerStarted()
 }
 
 func (d *mobileDriver) onStop() {
+	fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerStopped()
 }
 
 func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	clips := &internal.ClipStack{}
-	canvas := window.Canvas().(*mobileCanvas)
+	c := window.Canvas().(*mobileCanvas)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
-	canvas.SetDirty(false)
+	c.SetDirty(false)
 
-	paint := func(node *common.RenderCacheNode, pos fyne.Position) {
+	draw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
 		if _, ok := obj.(fyne.Scrollable); ok {
 			inner := clips.Push(pos, obj.Size())
-			canvas.Painter().StartClipping(inner.Rect())
+			c.Painter().StartClipping(inner.Rect())
 		}
-		canvas.Painter().Paint(obj, pos, size)
+		c.Painter().Paint(obj, pos, size)
 	}
-	afterPaint := func(node *common.RenderCacheNode) {
+	afterDraw := func(node *common.RenderCacheNode) {
 		if _, ok := node.Obj().(fyne.Scrollable); ok {
-			canvas.Painter().StopClipping()
+			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
-				canvas.Painter().StartClipping(top.Rect())
+				c.Painter().StartClipping(top.Rect())
 			}
 		}
 	}
 
-	canvas.WalkTrees(paint, afterPaint)
+	c.WalkTrees(draw, afterDraw)
+}
+
+func (d *mobileDriver) sendPaintEvent() {
+	if d.painting {
+		return
+	}
+	d.app.Send(paint.Event{})
+	d.painting = true
 }
 
 func (d *mobileDriver) setTheme(dark bool) {
