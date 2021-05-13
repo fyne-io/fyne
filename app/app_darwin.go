@@ -30,9 +30,6 @@ import (
 )
 
 func defaultVariant() fyne.ThemeVariant {
-	if fyne.CurrentDevice().IsMobile() { // this is called in mobile simulate mode
-		return theme.VariantLight
-	}
 	if C.isDarkMode() {
 		return theme.VariantDark
 	}
@@ -46,13 +43,13 @@ func rootConfigDir() string {
 	return filepath.Join(desktopConfig, "fyne")
 }
 
-func (app *fyneApp) OpenURL(url *url.URL) error {
-	cmd := app.exec("open", url.String())
+func (a *fyneApp) OpenURL(url *url.URL) error {
+	cmd := a.exec("open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
 
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	if C.isBundled() {
 		title := C.CString(n.Title)
 		defer C.free(unsafe.Pointer(title))
