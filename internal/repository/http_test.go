@@ -53,7 +53,9 @@ func TestHTTPRepositoryExists(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI == invalidPath {
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
+		return
 	}))
 	defer ts.Close()
 
@@ -99,6 +101,7 @@ func TestHTTPRepositoryReader(t *testing.T) {
 		} else {
 			w.Write(testData)
 		}
+		return
 	}))
 	defer ts.Close()
 
@@ -145,7 +148,9 @@ func TestHTTPRepositoryCanRead(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI == invalidPath {
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
+		return
 	}))
 	defer ts.Close()
 
