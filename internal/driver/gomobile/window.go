@@ -157,17 +157,22 @@ func (w *window) Close() {
 		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
 	}
 
-	// TODO free textures synchronously with the
-	// draw thread
+	// free textures
+	cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
+		w.canvas.Painter().Free(obj)
+	})
 
+	// destroy current renderers
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}
 	})
 
-	// TODO clean canvases cache and out of scope
-	// renderers
+	// remove all canvas objects from the cache
+	w.QueueEvent(func() {
+		cache.ForceCleanFor(w.canvas)
+	})
 
 	// Call this in a go routine, because this function could be called
 	// inside a button which callback would be queued in this event queue
