@@ -1,7 +1,6 @@
 package canvas
 
 import (
-	"errors"
 	"image"
 	"io"
 	"io/ioutil"
@@ -109,23 +108,12 @@ func NewImageFromURI(uri fyne.URI) *Image {
 		}
 	}
 
-	if uri.Scheme() == "http" || uri.Scheme() == "https" {
-		exists, err := storage.Exists(uri)
-		if err != nil || !exists {
-			if err == nil {
-				err = errors.New("resource not found at URI")
-			}
-			fyne.LogError("Failed to open image URI", err)
-			return &Image{}
-		}
-	}
-
 	var read io.ReadCloser
 
-	read, err := storage.Reader(uri) // attempt unknown file type
+	read, err := storage.Reader(uri) // attempt unknown / http file type
 	if err != nil {
 		fyne.LogError("Failed to open image URI", err)
-		return nil
+		return &Image{}
 	}
 
 	defer read.Close()
