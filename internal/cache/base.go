@@ -11,11 +11,11 @@ import (
 var (
 	cacheDuration     = 1 * time.Minute
 	cleanTaskInterval = cacheDuration / 2
-)
 
-var canvasRefreshCh = make(chan struct{}, 1)
-var expiredObjects = make([]fyne.CanvasObject, 0, 50)
-var lastClean time.Time
+	canvasRefreshCh = make(chan struct{}, 1)
+	expiredObjects  = make([]fyne.CanvasObject, 0, 50)
+	lastClean       time.Time
+)
 
 func init() {
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
