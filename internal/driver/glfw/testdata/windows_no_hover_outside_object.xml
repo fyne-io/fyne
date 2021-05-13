@@ -5,7 +5,7 @@
 				<container size="192x292">
 					<widget size="192x45" type="*widget.listItem">
 						<widget pos="8,4" size="180x37" type="*widget.Entry">
-							<rectangle fillColor="rgba(25,25,25,25)" pos="0,2" size="180x33"/>
+							<rectangle fillColor="rgba(255,255,255,25)" pos="0,2" size="180x33"/>
 							<rectangle fillColor="shadow" pos="0,35" size="180x2"/>
 							<widget pos="0,2" size="180x33" type="*widget.Scroll">
 								<widget size="180x33" type="*widget.entryContent">
@@ -21,7 +21,7 @@
 					</widget>
 					<widget pos="0,46" size="192x45" type="*widget.listItem">
 						<widget pos="8,4" size="180x37" type="*widget.Entry">
-							<rectangle fillColor="rgba(25,25,25,25)" pos="0,2" size="180x33"/>
+							<rectangle fillColor="rgba(255,255,255,25)" pos="0,2" size="180x33"/>
 							<rectangle fillColor="shadow" pos="0,35" size="180x2"/>
 							<widget pos="0,2" size="180x33" type="*widget.Scroll">
 								<widget size="180x33" type="*widget.entryContent">

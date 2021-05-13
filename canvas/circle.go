@@ -28,10 +28,11 @@ func (l *Circle) Size() fyne.Size {
 // Resize sets a new bottom-right position for the circle object
 // If it has a stroke width this will cause it to Refresh.
 func (l *Circle) Resize(size fyne.Size) {
-	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
-	if l.StrokeWidth == 0 {
+	if size == l.Size() {
 		return
 	}
+
+	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 
 	Refresh(l)
 }
