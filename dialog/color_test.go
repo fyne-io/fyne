@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
@@ -300,10 +301,11 @@ func Test_colorToHSLA(t *testing.T) {
 	}
 }
 
-func Test_colorToRGBA(t *testing.T) {
+func Test_toRGBA(t *testing.T) {
+	// Test_toRGBA is only still here instead of with ToNRGBA because it uses rgbhslMap
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			r, g, b, a := colorToRGBA(&color.NRGBA{
+			r, g, b, a := col.ToNRGBA(&color.NRGBA{
 				R: uint8(tt.r),
 				G: uint8(tt.g),
 				B: uint8(tt.b),
@@ -379,22 +381,4 @@ func Test_hueToChannel(t *testing.T) {
 			assert.InDelta(t, tt.expected, hueToChannel(tt.h, tt.v1, tt.v2), 0.000000000000001)
 		})
 	}
-}
-
-func Test_UnmultiplyAlpha(t *testing.T) {
-	c := color.RGBA{R: 100, G: 100, B: 100, A: 100}
-	r, g, b, a := unmultiplyAlpha(c)
-
-	assert.Equal(t, 255, r)
-	assert.Equal(t, 255, g)
-	assert.Equal(t, 255, b)
-	assert.Equal(t, 100, a)
-
-	c = color.RGBA{R: 100, G: 100, B: 100, A: 255}
-	r, g, b, a = unmultiplyAlpha(c)
-
-	assert.Equal(t, 100, r)
-	assert.Equal(t, 100, g)
-	assert.Equal(t, 100, b)
-	assert.Equal(t, 255, a)
 }

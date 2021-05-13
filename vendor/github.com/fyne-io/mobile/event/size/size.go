@@ -49,6 +49,9 @@ type Event struct {
 	// These values define how far in from the screen edge any controls should be drawn.
 	// The inset can be caused by status bars, button overlays or devices cutouts.
 	InsetTopPx, InsetBottomPx, InsetLeftPx, InsetRightPx int
+
+	// DarkMode is set to true if this window is currently shown in the OS configured dark / night mode.
+	DarkMode bool
 }
 
 // Size returns the window's size in pixels, at the time this size event was
