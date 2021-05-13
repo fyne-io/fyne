@@ -81,7 +81,6 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 			return
 		}
 		w.Write(f)
-		return
 	}))
 	defer ts.Close()
 

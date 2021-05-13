@@ -55,7 +55,6 @@ func TestHTTPRepositoryExists(t *testing.T) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		return
 	}))
 	defer ts.Close()
 
@@ -83,6 +82,7 @@ func TestHTTPRepositoryExists(t *testing.T) {
 
 	exists, err = storage.Exists(resInvalid)
 	assert.NotNil(t, err)
+	assert.Equal(t, false, exists)
 }
 
 func TestHTTPRepositoryReader(t *testing.T) {
@@ -101,7 +101,6 @@ func TestHTTPRepositoryReader(t *testing.T) {
 		} else {
 			w.Write(testData)
 		}
-		return
 	}))
 	defer ts.Close()
 
@@ -150,7 +149,6 @@ func TestHTTPRepositoryCanRead(t *testing.T) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		return
 	}))
 	defer ts.Close()
 

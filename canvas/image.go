@@ -113,7 +113,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 		exists, err := storage.Exists(uri)
 		if err != nil || !exists {
 			if err == nil {
-				err = errors.New("Resource not found at URI")
+				err = errors.New("resource not found at URI")
 			}
 			fyne.LogError("Failed to open image URI", err)
 			return &Image{}
