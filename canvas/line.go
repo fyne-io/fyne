@@ -34,7 +34,16 @@ func (l *Line) Resize(size fyne.Size) {
 		return
 	}
 
-	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	if l.Position1.X <= l.Position2.X {
+		l.Position2.X = l.Position1.X + size.Width
+	} else {
+		l.Position1.X = l.Position2.X + size.Width
+	}
+	if l.Position1.Y <= l.Position2.Y {
+		l.Position2.Y = l.Position1.Y + size.Height
+	} else {
+		l.Position1.Y = l.Position2.Y + size.Height
+	}
 	Refresh(l)
 }
 
