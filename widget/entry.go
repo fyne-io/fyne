@@ -68,8 +68,7 @@ type Entry struct {
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
-	onFocusGained func()
-	onFocusLost   func()
+	onFocusChanged func(bool)
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -312,8 +311,8 @@ func (e *Entry) FocusGained() {
 		e.dirty = true
 		e.focused = true
 	})
-	if e.onFocusGained != nil {
-		e.onFocusGained()
+	if e.onFocusChanged != nil {
+		e.onFocusChanged(true)
 	}
 }
 
@@ -325,8 +324,8 @@ func (e *Entry) FocusLost() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
-	if e.onFocusLost != nil {
-		e.onFocusLost()
+	if e.onFocusChanged != nil {
+		e.onFocusChanged(false)
 	}
 }
 
