@@ -171,8 +171,9 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
 		if e, ok := w.(*Entry); ok {
-			e.onFocusGained = func() { updateValidation(e.validationError) }
-			e.onFocusLost = func() { updateValidation(e.validationError) }
+			e.onFocusChanged = func(bool) {
+				updateValidation(e.validationError)
+			}
 			if e.Validator != nil && f.Items[i].invalid {
 				// set initial state error to guarantee next error (if triggers) is always different
 				e.SetValidationError(errFormItemInitialState)
