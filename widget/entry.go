@@ -1406,6 +1406,7 @@ func (r *entryContentRenderer) Refresh() {
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
+	placeholderText := r.content.entry.PlaceHolder
 	content := r.content.entry.Text
 	focusedAppearance := r.content.entry.focused && !r.content.entry.disabled
 	selections := r.selection
@@ -1414,6 +1415,10 @@ func (r *entryContentRenderer) Refresh() {
 
 	if content != string(provider.buffer) {
 		return
+	}
+
+	if placeholderText != string(placeholder.buffer) {
+		placeholder.setText(placeholderText)
 	}
 
 	if provider.len() == 0 {
