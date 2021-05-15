@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	col "fyne.io/fyne/v2/internal/color"
 	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -210,7 +211,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := colorToRGBA(color)
+	r, g, b, a := col.ToNRGBA(color)
 	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
 		return false
 	}

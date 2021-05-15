@@ -26,7 +26,8 @@ func TestIcon_Nil(t *testing.T) {
 	icon := NewIcon(nil)
 	render := test.WidgetRenderer(icon)
 
-	assert.Equal(t, 0, len(render.Objects()))
+	assert.Equal(t, 1, len(render.Objects()))
+	assert.Nil(t, render.Objects()[0].(*canvas.Image).Resource)
 }
 
 func TestIcon_MinSize(t *testing.T) {

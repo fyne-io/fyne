@@ -12,8 +12,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 
-	"github.com/go-ole/go-ole"
-	"github.com/go-ole/go-ole/oleutil"
 	"github.com/urfave/cli/v2"
 )
 
@@ -165,36 +163,8 @@ func (i *Installer) install() error {
 	if err != nil {
 		return err
 	}
-	if p.os == "windows" {
-		return linkToStartMenu(filepath.Join(i.installDir, filepath.Base(p.exe)), p.name[:len(p.name)-4])
-	}
-	return nil
-}
 
-func linkToStartMenu(path, name string) error {
-	ole.CoInitializeEx(0, ole.COINIT_APARTMENTTHREADED|ole.COINIT_SPEED_OVER_MEMORY)
-	oleShellObject, err := oleutil.CreateObject("WScript.Shell")
-	if err != nil {
-		return err
-	}
-	defer oleShellObject.Release()
-	wshell, err := oleShellObject.QueryInterface(ole.IID_IDispatch)
-	if err != nil {
-		return err
-	}
-	defer wshell.Release()
-
-	home, _ := os.UserHomeDir()
-	dst := filepath.Join(home, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", name+".lnk")
-	cs, err := oleutil.CallMethod(wshell, "CreateShortcut", dst)
-	if err != nil {
-		return err
-	}
-	dispatch := cs.ToIDispatch()
-
-	oleutil.PutProperty(dispatch, "TargetPath", path)
-	_, err = oleutil.CallMethod(dispatch, "Save")
-	return err
+	return postInstall(i)
 }
 
 func (i *Installer) installAndroid() error {

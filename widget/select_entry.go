@@ -67,6 +67,16 @@ func (e *SelectEntry) MinSize() fyne.Size {
 	return min
 }
 
+// Move changes the relative position of the select entry.
+//
+// Implements: fyne.Widget
+func (e *SelectEntry) Move(pos fyne.Position) {
+	e.Entry.Move(pos)
+	if e.popUp != nil {
+		e.popUp.Move(e.popUpPos())
+	}
+}
+
 // Resize changes the size of the select entry.
 //
 // Implements: fyne.Widget
@@ -95,15 +105,17 @@ func (e *SelectEntry) SetOptions(options []string) {
 	}
 }
 
+func (e *SelectEntry) popUpPos() fyne.Position {
+	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
+	return entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
+}
+
 func (e *SelectEntry) setupDropDown() *Button {
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
-		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-		popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
-
 		e.popUp = NewPopUpMenu(e.dropDown, c)
-		e.popUp.ShowAtPosition(popUpPos)
+		e.popUp.ShowAtPosition(e.popUpPos())
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.Importance = LowImportance

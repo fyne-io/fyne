@@ -61,6 +61,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 		s.PlaceHolder = defaultPlaceHolder
 	}
 	txtProv := newTextProvider(s.Selected, s)
+	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
 
 	background := &canvas.Rectangle{}
@@ -304,6 +305,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	s.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
 	s.background.Resize(fyne.NewSize(size.Width, size.Height-theme.InputBorderSize()*2))
 	s.background.Move(fyne.NewPos(0, theme.InputBorderSize()))
+	s.label.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 
 	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding()*2, (size.Height-theme.IconInlineSize())/2)
 	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), s.label.MinSize().Height)

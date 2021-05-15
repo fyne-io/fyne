@@ -95,6 +95,19 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
+func (l *List) scrollTo(id ListItemID) {
+	if l.scroller == nil {
+		return
+	}
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
+	if y < l.scroller.Offset.Y {
+		l.scroller.Offset.Y = y
+	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
+		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
+	}
+	l.offsetUpdated(l.scroller.Offset)
+}
+
 // Select add the item identified by the given ID to the selection.
 func (l *List) Select(id ListItemID) {
 	if len(l.selected) > 0 && id == l.selected[0] {
@@ -117,16 +130,45 @@ func (l *List) Select(id ListItemID) {
 			f(id)
 		}
 	}()
-	if l.scroller == nil {
+	l.scrollTo(id)
+	l.Refresh()
+}
+
+// ScrollTo scrolls to the item represented by id
+//
+// Since: 2.1
+func (l *List) ScrollTo(id ListItemID) {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	if id < 0 || id >= length {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
-	if y < l.scroller.Offset.Y {
-		l.scroller.Offset.Y = y
-	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
-		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
+	l.scrollTo(id)
+	l.Refresh()
+}
+
+// ScrollToBottom scrolls to the end of the list
+//
+// Since: 2.1
+func (l *List) ScrollToBottom() {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
 	}
-	l.offsetUpdated(l.scroller.Offset)
+	if length > 0 {
+		length--
+	}
+	l.scrollTo(length)
+	l.Refresh()
+}
+
+// ScrollToTop scrolls to the start of the list
+//
+// Since: 2.1
+func (l *List) ScrollToTop() {
+	l.scrollTo(0)
 	l.Refresh()
 }
 
@@ -275,8 +317,7 @@ type listItemRenderer struct {
 // This is based on the size of the status indicator and the size of the child object.
 func (li *listItemRenderer) MinSize() (size fyne.Size) {
 	itemSize := li.item.child.MinSize()
-	size = fyne.NewSize(itemSize.Width+theme.Padding()*3,
-		itemSize.Height+theme.Padding()*2)
+	size = fyne.NewSize(itemSize.Width+theme.Padding(), itemSize.Height)
 	return
 }
 
@@ -284,8 +325,8 @@ func (li *listItemRenderer) MinSize() (size fyne.Size) {
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.background.Resize(size)
 
-	li.item.child.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
-	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding()*3, size.Height-theme.Padding()*2))
+	li.item.child.Move(fyne.NewPos(theme.Padding(), 0))
+	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding(), size.Height))
 }
 
 func (li *listItemRenderer) Refresh() {

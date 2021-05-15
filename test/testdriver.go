@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/goki/freetype/truetype"
-	"golang.org/x/image/font"
 )
 
 // SoftwarePainter describes a simple type that can render canvases
@@ -107,7 +106,7 @@ func (d *testDriver) RenderedTextSize(text string, size float32, style fyne.Text
 	opts.DPI = painter.TextDPI
 
 	face := painter.CachedFontFace(style, &opts)
-	advance := font.MeasureString(face, text)
+	advance := painter.MeasureString(face, text, style.TabWidth)
 
 	sws := fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
 	gls := painter.RenderedTextSize(text, size, style)

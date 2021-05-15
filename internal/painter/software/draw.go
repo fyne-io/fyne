@@ -13,7 +13,6 @@ import (
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/draw"
-	"golang.org/x/image/font"
 )
 
 type gradient interface {
@@ -145,12 +144,12 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	opts.DPI = painter.TextDPI
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := font.Drawer{}
+	d := painter.FontDrawer{}
 	d.Dst = txtImg
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text)
+	d.DrawString(text.Text, text.TextStyle.TabWidth)
 
 	size := text.Size()
 	offsetX := float32(0)

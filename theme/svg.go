@@ -3,10 +3,12 @@ package theme
 import (
 	"encoding/hex"
 	"encoding/xml"
-	"fmt"
 	"image/color"
 	"io"
 	"io/ioutil"
+	"strconv"
+
+	col "fyne.io/fyne/v2/internal/color"
 )
 
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
@@ -162,8 +164,9 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 	return &s, nil
 }
 
-func colorToHexAndOpacity(color color.Color) (string, string) {
-	r, g, b, a := color.RGBA()
+func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
+	r, g, b, a := col.ToNRGBA(color)
 	cBytes := []byte{byte(r), byte(g), byte(b)}
-	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes)), fmt.Sprintf("%f", float64(a)/0xffff)
+	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
+	return
 }

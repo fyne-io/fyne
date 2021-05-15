@@ -1070,6 +1070,219 @@ func (b *boundExternalStringListItem) setIfChanged(val string) error {
 	return nil
 }
 
+// UntypedList supports binding a list of interface{} values.
+//
+// Since: 2.1
+type UntypedList interface {
+	DataList
+
+	Append(value interface{}) error
+	Get() ([]interface{}, error)
+	GetValue(index int) (interface{}, error)
+	Prepend(value interface{}) error
+	Set(list []interface{}) error
+	SetValue(index int, value interface{}) error
+}
+
+// ExternalUntypedList supports binding a list of interface{} values from an external variable.
+//
+// Since: 2.1
+type ExternalUntypedList interface {
+	UntypedList
+
+	Reload() error
+}
+
+// NewUntypedList returns a bindable list of interface{} values.
+//
+// Since: 2.1
+func NewUntypedList() UntypedList {
+	return &boundUntypedList{val: &[]interface{}{}}
+}
+
+// BindUntypedList returns a bound list of interface{} values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.1
+func BindUntypedList(v *[]interface{}) ExternalUntypedList {
+	if v == nil {
+		return NewUntypedList().(ExternalUntypedList)
+	}
+
+	b := &boundUntypedList{val: v, updateExternal: true}
+
+	for i := range *v {
+		b.appendItem(bindUntypedListItem(v, i, b.updateExternal))
+	}
+
+	return b
+}
+
+type boundUntypedList struct {
+	listBase
+
+	updateExternal bool
+	val            *[]interface{}
+}
+
+func (l *boundUntypedList) Append(val interface{}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	*l.val = append(*l.val, val)
+
+	return l.doReload()
+}
+
+func (l *boundUntypedList) Get() ([]interface{}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	return *l.val, nil
+}
+
+func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
+	if i < 0 || i >= l.Length() {
+		return nil, errOutOfBounds
+	}
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	return (*l.val)[i], nil
+}
+
+func (l *boundUntypedList) Prepend(val interface{}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = append([]interface{}{val}, *l.val...)
+
+	return l.doReload()
+}
+
+func (l *boundUntypedList) Reload() error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundUntypedList) Set(v []interface{}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = v
+
+	return l.doReload()
+}
+
+func (l *boundUntypedList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(bindUntypedListItem(l.val, i, l.updateExternal))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		var err error
+		if l.updateExternal {
+			item.(*boundExternalUntypedListItem).lock.Lock()
+			err = item.(*boundExternalUntypedListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalUntypedListItem).lock.Unlock()
+		} else {
+			item.(*boundUntypedListItem).lock.Lock()
+			err = item.(*boundUntypedListItem).doSet((*l.val)[i])
+			item.(*boundUntypedListItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (l *boundUntypedList) SetValue(i int, v interface{}) error {
+	if i < 0 || i >= l.Length() {
+		return errOutOfBounds
+	}
+
+	l.lock.Lock()
+	(*l.val)[i] = v
+	l.lock.Unlock()
+
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
+	}
+	return item.(Untyped).Set(v)
+}
+
+func bindUntypedListItem(v *[]interface{}, i int, external bool) Untyped {
+	if external {
+		ret := &boundExternalUntypedListItem{old: (*v)[i]}
+		ret.val = v
+		ret.index = i
+		return ret
+	}
+
+	return &boundUntypedListItem{val: v, index: i}
+}
+
+type boundUntypedListItem struct {
+	base
+
+	val   *[]interface{}
+	index int
+}
+
+func (b *boundUntypedListItem) Get() (interface{}, error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundUntypedListItem) Set(val interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	return b.doSet(val)
+}
+
+func (b *boundUntypedListItem) doSet(val interface{}) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
+}
+
+type boundExternalUntypedListItem struct {
+	boundUntypedListItem
+
+	old interface{}
+}
+
+func (b *boundExternalUntypedListItem) setIfChanged(val interface{}) error {
+	if val == b.old {
+		return nil
+	}
+	(*b.val)[b.index] = val
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
 // URIList supports binding a list of fyne.URI values.
 //
 // Since: 2.1

@@ -35,11 +35,12 @@ type Painter interface {
 var _ Painter = (*glPainter)(nil)
 
 type glPainter struct {
-	canvas   fyne.Canvas
-	context  driver.WithContext
-	program  Program
-	texScale float32
-	pixScale float32 // pre-calculate scale*texScale for each draw
+	canvas      fyne.Canvas
+	context     driver.WithContext
+	program     Program
+	lineProgram Program
+	texScale    float32
+	pixScale    float32 // pre-calculate scale*texScale for each draw
 }
 
 func (p *glPainter) SetFrameBufferScale(scale float32) {

@@ -60,6 +60,10 @@ func (t *themedApp) Preferences() fyne.Preferences {
 	return nil
 }
 
+func (t *themedApp) Lifecycle() fyne.Lifecycle {
+	return nil
+}
+
 func (t *themedApp) PrimaryColor() string {
 	return ColorBlue
 }
