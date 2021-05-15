@@ -59,6 +59,7 @@ type Entry struct {
 
 	cursorAnim *entryCursorAnimation
 
+	dirty       bool
 	focused     bool
 	text        *textProvider
 	placeholder *textProvider
@@ -142,7 +143,7 @@ func (e *Entry) Bind(data binding.String) {
 		val, err := data.Get()
 		if err != nil {
 			convertErr = err
-			e.SetValidationError(e.Validate())
+			e.Validate()
 			return
 		}
 		e.Text = val
@@ -156,7 +157,7 @@ func (e *Entry) Bind(data binding.String) {
 
 	e.OnChanged = func(s string) {
 		convertErr = data.Set(s)
-		e.SetValidationError(e.Validate())
+		e.Validate()
 	}
 }
 
@@ -303,6 +304,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 // Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {
+		e.dirty = true
 		e.focused = true
 	})
 }
@@ -1033,6 +1035,10 @@ func (e *Entry) textProvider() *textProvider {
 		return e.text
 	}
 
+	if e.Text != "" {
+		e.dirty = true
+	}
+
 	text := newTextProvider(e.Text, e)
 	text.ExtendBaseWidget(text)
 	text.inset = fyne.NewSize(0, theme.InputBorderSize())
@@ -1080,14 +1086,16 @@ func (e *Entry) updateText(text string) {
 		changed := e.Text != text
 		e.Text = text
 
+		if e.Text != "" {
+			e.dirty = true
+		}
+
 		if changed {
 			callback = e.OnChanged
 		}
 	})
 
-	if validate := e.Validator; validate != nil {
-		e.SetValidationError(validate(text))
-	}
+	e.Validate()
 
 	if callback != nil {
 		callback(text)
@@ -1287,7 +1295,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	if r.entry.Validator != nil {
-		if !r.entry.focused && !r.entry.Disabled() && r.entry.Text != "" && r.entry.validationError != nil {
+		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
 			r.line.FillColor = theme.ErrorColor()
 		}
 		r.ensureValidationSetup()
@@ -1306,9 +1314,8 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.size)
 
-		if r.entry.Text != "" {
-			r.entry.Validate()
-		}
+		r.entry.Validate()
+
 		r.Refresh()
 	}
 }
