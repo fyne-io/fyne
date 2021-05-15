@@ -186,8 +186,9 @@ func (p *InMemoryPreferences) RemoveValue(key string) {
 
 // NewInMemoryPreferences creates a new preferences implementation stored in memory
 func NewInMemoryPreferences() *InMemoryPreferences {
-	p := &InMemoryPreferences{}
-	p.values = make(map[string]interface{})
-	p.waitGroup = &sync.WaitGroup{}
+	p := &InMemoryPreferences{
+		values: make(map[string]interface{}),
+		waitGroup: &sync.WaitGroup{},
+	}
 	return p
 }
