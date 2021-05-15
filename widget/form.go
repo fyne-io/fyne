@@ -159,21 +159,26 @@ func (f *Form) checkValidation(err error) {
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
+	updateValidation := func(err error) {
+		if err == errFormItemInitialState {
+			return
+		}
+		f.Items[i].validationError = err
+		f.Items[i].invalid = err != nil
+		f.checkValidation(err)
+		f.updateHelperText(f.Items[i])
+	}
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok && e.Validator != nil && f.Items[i].invalid {
-			// set initial state error to guarantee next error (if triggers) is always different
-			e.SetValidationError(errFormItemInitialState)
-		}
-		w.SetOnValidationChanged(func(err error) {
-			if err == errFormItemInitialState {
-				return
+		if e, ok := w.(*Entry); ok {
+			e.onFocusGained = func() { updateValidation(e.validationError) }
+			e.onFocusLost = func() { updateValidation(e.validationError) }
+			if e.Validator != nil && f.Items[i].invalid {
+				// set initial state error to guarantee next error (if triggers) is always different
+				e.SetValidationError(errFormItemInitialState)
 			}
-			f.Items[i].validationError = err
-			f.Items[i].invalid = err != nil
-			f.checkValidation(err)
-			f.updateHelperText(f.Items[i])
-		})
+		}
+		w.SetOnValidationChanged(updateValidation)
 	}
 }
 
@@ -181,7 +186,11 @@ func (f *Form) updateHelperText(item *FormItem) {
 	if item.helperOutput == nil {
 		return // testing probably, either way not rendered yet
 	}
-	if item.validationError == nil {
+	showHintIfError := false
+	if e, ok := item.Widget.(*Entry); ok && (!e.dirty || e.focused) {
+		showHintIfError = true
+	}
+	if item.validationError == nil || showHintIfError {
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = theme.PlaceHolderColor()
 	} else {
