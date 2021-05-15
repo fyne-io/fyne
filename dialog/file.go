@@ -559,7 +559,7 @@ func (f *FileDialog) SetFileName(fileName string) {
 }
 
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
-// The callback function will run when the dialog closes.  The URI will be nil
+// The callback function will run when the dialog closes. The URI will be nil
 // when the user cancels or when nothing is selected.
 //
 // The dialog will appear over the window specified when Show() is called.
@@ -569,9 +569,9 @@ func NewFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) *
 }
 
 // NewFileSave creates a file dialog allowing the user to choose a file to save
-// to (new or overwrite).  If the user chooses an existing file they will be
-// asked if they are sure.  The callback function will run when the dialog
-// closes.  The URI will be nil when the user cancels or when nothing is
+// to (new or overwrite). If the user chooses an existing file they will be
+// asked if they are sure. The callback function will run when the dialog
+// closes. The URI will be nil when the user cancels or when nothing is
 // selected.
 //
 // The dialog will appear over the window specified when Show() is called.
@@ -581,7 +581,7 @@ func NewFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window) 
 }
 
 // ShowFileOpen creates and shows a file dialog allowing the user to choose a
-// file to open. The callback function will run when the dialog closes.  The URI
+// file to open. The callback function will run when the dialog closes. The URI
 // will be nil when the user cancels or when nothing is selected.
 //
 // The dialog will appear over the window specified.
@@ -596,7 +596,7 @@ func ShowFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) 
 // ShowFileSave creates and shows a file dialog allowing the user to choose a
 // file to save to (new or overwrite). If the user chooses an existing file they
 // will be asked if they are sure. The callback function will run when the
-// dialog closes.  The URI will be nil when the user cancels or when nothing is
+// dialog closes. The URI will be nil when the user cancels or when nothing is
 // selected.
 //
 // The dialog will appear over the window specified.
