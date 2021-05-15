@@ -66,6 +66,11 @@ type Entry struct {
 	content     *entryContent
 	scroll      *widget.Scroll
 
+	// useful for Form validation (as the error text should only be shown when
+	// the entry is unfocused)
+	onFocusGained func()
+	onFocusLost   func()
+
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
 	// position may occur before or after the select start position in the text.
@@ -307,6 +312,9 @@ func (e *Entry) FocusGained() {
 		e.dirty = true
 		e.focused = true
 	})
+	if e.onFocusGained != nil {
+		e.onFocusGained()
+	}
 }
 
 // FocusLost is called when the Entry has had focus removed.
@@ -317,6 +325,9 @@ func (e *Entry) FocusLost() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
+	if e.onFocusLost != nil {
+		e.onFocusLost()
+	}
 }
 
 // Hide hides the entry.
