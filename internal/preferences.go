@@ -23,10 +23,7 @@ func (p *InMemoryPreferences) AddChangeListener(listener func()) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	p.changeListeners = append(p.changeListeners, func() {
-		defer p.wg.Done()
-		listener()
-	})
+	p.changeListeners = append(p.changeListeners, listener)
 }
 
 // ReadValues provides read access to the underlying value map - for internal use only...
@@ -77,7 +74,10 @@ func (p *InMemoryPreferences) fireChange() {
 
 	for _, l := range p.changeListeners {
 		p.wg.Add(1)
-		go l()
+		go func() {
+			defer p.wg.Done()
+			l()
+		}()
 	}
 
 	p.wg.Wait()
