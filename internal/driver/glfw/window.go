@@ -775,7 +775,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mousePressed = co
 		} else if action == glfw.Release {
 			if co == w.mousePressed {
-				if button == desktop.MouseButtonSecondary && altTap {
+				if button == desktop.MouseButtonSecondary && altTap && !w.mouseDragStarted {
 					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
 				}
 			}
@@ -783,7 +783,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	// Check for double click/tap on left mouse button
-	if action == glfw.Release && button == desktop.MouseButtonPrimary {
+	if action == glfw.Release && button == desktop.MouseButtonPrimary && !w.mouseDragStarted {
 		_, doubleTap := co.(fyne.DoubleTappable)
 		if doubleTap {
 			w.mouseClickCount++
