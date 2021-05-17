@@ -5,9 +5,10 @@ import (
 )
 
 var (
-	itemQueueIn  chan<- *itemData
-	itemQueueOut <-chan *itemData
-	processOnce  sync.Once
+	itemQueueIn      chan<- *itemData
+	itemQueueOut     <-chan *itemData
+	processOnce      sync.Once
+	queueInitialized = make(chan int)
 )
 
 type itemData struct {
@@ -20,8 +21,10 @@ func queueItem(f func()) {
 		processOnce.Do(func() {
 			itemQueueIn, itemQueueOut = makeInfiniteQueue()
 			go processItems()
+			close(queueInitialized)
 		})
 	}
+	<-queueInitialized
 	itemQueueIn <- &itemData{fn: f}
 }
 
@@ -72,6 +75,7 @@ func processItems() {
 }
 
 func waitForItems() {
+	<-queueInitialized
 	done := make(chan interface{})
 	itemQueueIn <- &itemData{done: done}
 	<-done
