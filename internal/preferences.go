@@ -74,10 +74,10 @@ func (p *InMemoryPreferences) fireChange() {
 
 	for _, l := range p.changeListeners {
 		p.wg.Add(1)
-		go func() {
+		go func(listener func()) {
 			defer p.wg.Done()
-			l()
-		}()
+			listener()
+		}(l)
 	}
 
 	p.wg.Wait()
