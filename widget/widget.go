@@ -156,11 +156,15 @@ func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 	f()
 	w.propertyLock.Unlock()
 
-	w.Refresh()
+	impl := w.getImpl()
+	if impl == nil {
+		return
+	}
+	impl.Refresh()
 }
 
 // super will return the actual object that this represents.
-// If extended then this is the extending widget, otherwise it is nil.
+// If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
 	return w.getImpl()
 }
