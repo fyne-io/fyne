@@ -21,7 +21,7 @@ type BaseWidget struct {
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
-	impl := w.getImpl()
+	impl := w.super()
 	if impl != nil {
 		return
 	}
@@ -79,7 +79,7 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
-	impl := w.getImpl()
+	impl := w.super()
 
 	r := cache.Renderer(impl)
 	if r == nil {
@@ -117,9 +117,9 @@ func (w *BaseWidget) Hide() {
 
 	w.propertyLock.Lock()
 	w.Hidden = true
+	impl := w.impl
 	w.propertyLock.Unlock()
 
-	impl := w.getImpl()
 	if impl == nil {
 		return
 	}
@@ -128,7 +128,7 @@ func (w *BaseWidget) Hide() {
 
 // Refresh causes this widget to be redrawn in it's current state
 func (w *BaseWidget) Refresh() {
-	impl := w.getImpl()
+	impl := w.super()
 	if impl == nil {
 		return
 	}
@@ -137,26 +137,14 @@ func (w *BaseWidget) Refresh() {
 	render.Refresh()
 }
 
-func (w *BaseWidget) getImpl() fyne.Widget {
-	w.propertyLock.RLock()
-	impl := w.impl
-	w.propertyLock.RUnlock()
-
-	if impl == nil {
-		return nil
-	}
-
-	return impl
-}
-
 // setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
 func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 	w.propertyLock.Lock()
 	f()
+	impl := w.impl
 	w.propertyLock.Unlock()
 
-	impl := w.getImpl()
 	if impl == nil {
 		return
 	}
@@ -164,9 +152,12 @@ func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 }
 
 // super will return the actual object that this represents.
-// If extended then this is the extending widget, otherwise it is self.
+// If extended then this is the extending widget, otherwise it is nil.
 func (w *BaseWidget) super() fyne.Widget {
-	return w.getImpl()
+	w.propertyLock.RLock()
+	impl := w.impl
+	w.propertyLock.RUnlock()
+	return impl
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
