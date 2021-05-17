@@ -3,6 +3,7 @@ package tutorials
 import (
 	"fmt"
 	"image/color"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -61,7 +62,7 @@ func makeButtonList(count int) []fyne.CanvasObject {
 	var items []fyne.CanvasObject
 	for i := 1; i <= count; i++ {
 		index := i // capture
-		items = append(items, widget.NewButton(fmt.Sprintf("Button %d", index), func() {
+		items = append(items, widget.NewButton("Button "+strconv.Itoa(index), func() {
 			fmt.Println("Tapped", index)
 		}))
 	}

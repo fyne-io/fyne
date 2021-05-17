@@ -19,7 +19,7 @@ type clipboard struct {
 
 // Content returns the clipboard content
 func (c *clipboard) Content() string {
-	// This retry logic is to work arround the "Access Denied" error often thrown in windows PR#1679
+	// This retry logic is to work around the "Access Denied" error often thrown in windows PR#1679
 	if runtime.GOOS != "windows" {
 		return c.content()
 	}
@@ -44,7 +44,7 @@ func (c *clipboard) content() string {
 
 // SetContent sets the clipboard content
 func (c *clipboard) SetContent(content string) {
-	// This retry logic is to work arround the "Access Denied" error often thrown in windows PR#1679
+	// This retry logic is to work around the "Access Denied" error often thrown in windows PR#1679
 	if runtime.GOOS != "windows" {
 		c.setContent(content)
 		return

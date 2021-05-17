@@ -84,7 +84,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 	text.Alignment = fyne.TextAlignCenter
 	text.Resize(fyne.NewSize(380, 30))
 	text.Move(fyne.NewPos(0, yOff))
-	box = canvas.NewRectangle(theme.ForegroundColor())
+	box = newThemedBox()
 	box.Resize(fyne.NewSize(30, 30))
 	box.Move(fyne.NewPos(0, yOff))
 
@@ -97,4 +97,47 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 	anim.AutoReverse = true
 	anim.RepeatCount = 1
 	return
+}
+
+// themedBox is a simple box that change its background color according
+// to the selected theme
+type themedBox struct {
+	widget.BaseWidget
+}
+
+func newThemedBox() *themedBox {
+	b := &themedBox{}
+	b.ExtendBaseWidget(b)
+	return b
+}
+
+func (b *themedBox) CreateRenderer() fyne.WidgetRenderer {
+	b.ExtendBaseWidget(b)
+	bg := canvas.NewRectangle(theme.ForegroundColor())
+	return &themedBoxRenderer{bg: bg, objects: []fyne.CanvasObject{bg}}
+}
+
+type themedBoxRenderer struct {
+	bg      *canvas.Rectangle
+	objects []fyne.CanvasObject
+}
+
+func (r *themedBoxRenderer) Destroy() {
+}
+
+func (r *themedBoxRenderer) Layout(size fyne.Size) {
+	r.bg.Resize(size)
+}
+
+func (r *themedBoxRenderer) MinSize() fyne.Size {
+	return r.bg.MinSize()
+}
+
+func (r *themedBoxRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *themedBoxRenderer) Refresh() {
+	r.bg.FillColor = theme.ForegroundColor()
+	r.bg.Refresh()
 }

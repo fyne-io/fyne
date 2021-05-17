@@ -59,6 +59,30 @@ type baseTabs interface {
 	setSelected(int)
 
 	tabLocation() TabLocation
+
+	transitioning() bool
+	setTransitioning(bool)
+}
+
+func tabsAdjustedLocation(l TabLocation) TabLocation {
+	// Mobile has limited screen space, so don't put app tab bar on long edges
+	if d := fyne.CurrentDevice(); d.IsMobile() {
+		if o := d.Orientation(); fyne.IsVertical(o) {
+			if l == TabLocationLeading {
+				return TabLocationTop
+			} else if l == TabLocationTrailing {
+				return TabLocationBottom
+			}
+		} else {
+			if l == TabLocationTop {
+				return TabLocationLeading
+			} else if l == TabLocationBottom {
+				return TabLocationTrailing
+			}
+		}
+	}
+
+	return l
 }
 
 func buildPopUpMenu(t baseTabs, button *widget.Button, items []*fyne.MenuItem) *widget.PopUpMenu {
@@ -136,6 +160,7 @@ func selectIndex(t baseTabs, index int) {
 		return
 	}
 
+	t.setTransitioning(true)
 	t.setSelected(index)
 
 	if f := t.onSelected(); f != nil {
@@ -299,11 +324,12 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		return
 	}
 
+	r.lastIndicatorMutex.Lock()
+	r.lastIndicatorPos = pos
+	r.lastIndicatorSize = siz
+	r.lastIndicatorMutex.Unlock()
+
 	if animate {
-		r.lastIndicatorMutex.Lock()
-		r.lastIndicatorPos = pos
-		r.lastIndicatorSize = siz
-		r.lastIndicatorMutex.Unlock()
 		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
 			r.indicator.Move(p)
 			r.indicator.Refresh()

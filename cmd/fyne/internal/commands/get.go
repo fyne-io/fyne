@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -58,7 +59,7 @@ func NewGetter() *Getter {
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
 	cmd := exec.Command("go", "get", "-u", "-d", pkg)
-	cmd.Env = append(os.Environ(), "GO111MODULE=off")
+	cmd.Env = append(os.Environ(), "GO111MODULE=off") // cache the downloaded code
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 
 	err := cmd.Run()
@@ -95,6 +96,7 @@ func (g *Getter) SetIcon(path string) {
 //
 // Deprecated: Get does not define any flags.
 func (g *Getter) AddFlags() {
+	flag.StringVar(&g.icon, "icon", "Icon.png", "The name of the application icon file")
 }
 
 // PrintHelp prints help for this command when used in a command-line context

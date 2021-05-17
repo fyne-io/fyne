@@ -36,12 +36,7 @@ func fileOpenOSOverride(f *FileDialog) bool {
 }
 
 func fileSaveOSOverride(f *FileDialog) bool {
-	ShowInformation("File Save", "File save not available on mobile", f.parent)
-
-	callback := f.callback.(func(fyne.URIWriteCloser, error))
-	if callback != nil {
-		callback(nil, nil)
-	}
+	gomobile.ShowFileSavePicker(f.callback.(func(fyne.URIWriteCloser, error)), f.filter, f.initialFileName)
 
 	return true
 }

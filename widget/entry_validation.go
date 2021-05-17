@@ -95,7 +95,7 @@ func (r *validationStatusRenderer) MinSize() fyne.Size {
 func (r *validationStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
-	if r.entry.Text == "" {
+	if r.entry.Text == "" || r.entry.disabled {
 		r.icon.Hide()
 		return
 	}

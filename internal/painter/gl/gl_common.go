@@ -7,7 +7,6 @@ import (
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
-	"golang.org/x/image/font"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -45,13 +44,6 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
-	line := obj.(*canvas.Line)
-	raw := painter.DrawLine(line, painter.VectorPad(line), p.textureScale)
-
-	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
-}
-
 func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
@@ -84,12 +76,12 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	opts.DPI = float64(painter.TextDPI * p.texScale)
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := font.Drawer{}
+	d := painter.FontDrawer{}
 	d.Dst = img
 	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text)
+	d.DrawString(text.Text, text.TextStyle.TabWidth)
 
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }

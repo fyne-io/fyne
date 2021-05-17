@@ -195,6 +195,22 @@ func TestEntry_Disableable(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/disableable_enabled_custom_value.xml", c)
 }
 
+func TestEntry_Disabled_TextSelection(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	entry.SetText("Testing")
+	entry.Disable()
+	c := window.Canvas()
+
+	assert.True(t, entry.Disabled())
+	test.DoubleTap(entry)
+
+	test.AssertImageMatches(t, "entry/disabled_text_selected.png", c.Capture())
+
+	entry.FocusLost()
+	test.AssertImageMatches(t, "entry/disabled_text_unselected.png", c.Capture())
+}
+
 func TestEntry_EmptySelection(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("text")
@@ -1146,6 +1162,23 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
+func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, 0, len(entry.Text))
+
+	entry.PlaceHolder = "Test"
+	entry.Refresh()
+	assert.Equal(t, 0, len(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
+
+	entry.SetText("Hi")
+	assert.Equal(t, 2, len(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
+}
+
 func TestEntry_Disable_KeyDown(t *testing.T) {
 	entry := widget.NewEntry()
 
@@ -1342,6 +1375,20 @@ func TestEntry_Submit(t *testing.T) {
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
 			assert.Equal(t, "\nf", entry.Text)
 		})
+	})
+}
+
+func TestTabable(t *testing.T) {
+	entry := &widget.Entry{}
+	t.Run("Multiline_Tab_Default", func(t *testing.T) {
+		entry.MultiLine = true
+		entry.SetText("a")
+		typeKeys(entry, fyne.KeyTab)
+		assert.Equal(t, "\ta", entry.Text)
+	})
+	t.Run("Singleline_Tab_Default", func(t *testing.T) {
+		entry.MultiLine = false
+		assert.False(t, entry.AcceptsTab())
 	})
 }
 

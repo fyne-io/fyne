@@ -12,8 +12,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// TextDPI is a global constant that determines how text scales to interface sizes
-const TextDPI = 78
+const (
+	// DefaultTabWidth is the default width in spaces
+	DefaultTabWidth = 4
+
+	// TextDPI is a global constant that determines how text scales to interface sizes
+	TextDPI = 78
+)
 
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
@@ -31,7 +36,7 @@ func RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size
 	opts.DPI = TextDPI
 
 	face := CachedFontFace(style, &opts)
-	advance := font.MeasureString(face, text)
+	advance := MeasureString(face, text, style.TabWidth)
 
 	return fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
 }

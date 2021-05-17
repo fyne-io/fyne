@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	col "fyne.io/fyne/v2/internal/color"
 	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -162,17 +163,16 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 
 	// Hex
-	hex := &widget.Entry{
-		OnChanged: func(text string) {
-			c, err := stringToColor(text)
-			if err != nil {
-				fyne.LogError("Error parsing color: "+text, err)
-				// TODO trigger entry invalid state
-			} else {
-				p.SetColor(c)
-			}
-		},
-	}
+	hex := newUserChangeEntry("")
+	hex.setOnChanged(func(text string) {
+		c, err := stringToColor(text)
+		if err != nil {
+			fyne.LogError("Error parsing color: "+text, err)
+			// TODO trigger entry invalid state
+		} else {
+			p.SetColor(c)
+		}
+	})
 
 	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), container.NewVBox(
 		container.NewGridWithColumns(3,
@@ -211,7 +211,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := colorToRGBA(color)
+	r, g, b, a := col.ToNRGBA(color)
 	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
 		return false
 	}
@@ -264,7 +264,7 @@ type colorPickerRenderer struct {
 	wheel             *colorWheel
 	preview           *canvas.Rectangle
 	alphaChannel      *colorChannel
-	hex               *widget.Entry
+	hex               *userChangeEntry
 	contents          fyne.CanvasObject
 }
 

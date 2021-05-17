@@ -33,7 +33,7 @@ type External{{ .Name }} interface {
 //
 // Since: {{ .Since }}
 func New{{ .Name }}() {{ .Name }} {
-	blank := {{ .Default }}
+	var blank {{ .Type }} = {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
@@ -43,10 +43,13 @@ func New{{ .Name }}() {{ .Name }} {
 // Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		return New{{ .Name }}().(External{{ .Name }}) // never allow a nil value pointer
+		var blank {{ .Type }} = {{ .Default }}
+		v = &blank // never allow a nil value pointer
 	}
-
-	return &bound{{ .Name }}{val: v}
+	b := &boundExternal{{ .Name }}{}
+	b.val = v
+	b.old = *v
+	return b
 }
 
 type bound{{ .Name }} struct {
@@ -65,26 +68,62 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 	return *b.val, nil
 }
 
-func (b *bound{{ .Name }}) Reload() error {
-	return b.Set(*b.val)
-}
-
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	{{- if eq .Comparator "" }}
+	if *b.val == val {
+		return nil
+	}
+	{{- else }}
+	if {{ .Comparator }}(*b.val, val) {
+		return nil
+	}
+	{{- end }}
 	*b.val = val
 
 	b.trigger()
 	return nil
+}
+
+type boundExternal{{ .Name }} struct {
+	bound{{ .Name }}
+
+	old {{ .Type }}
+}
+
+func (b *boundExternal{{ .Name }}) Set(val {{ .Type }}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	{{- if eq .Comparator "" }}
+	if b.old == val {
+		return nil
+	}
+	{{- else }}
+	if {{ .Comparator }}(b.old, val) {
+		return nil
+	}
+	{{- end }}
+	*b.val = val
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundExternal{{ .Name }}) Reload() error {
+	return b.Set(*b.val)
 }
 `
 
 const prefTemplate = `
 type prefBound{{ .Name }} struct {
 	base
-	key   string
-	p     fyne.Preferences
-	cache {{ .Type }}
+	key string
+	p   fyne.Preferences
+
+	cacheLock sync.RWMutex
+	cache     {{ .Type }}
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
@@ -92,8 +131,9 @@ type prefBound{{ .Name }} struct {
 //
 // Since: {{ .Since }}
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
-	if prefBinds[p] != nil {
-		if listen, ok := prefBinds[p][key]; ok {
+	binds := prefBinds.getBindings(p)
+	if binds != nil {
+		if listen := binds.getItem(key); listen != nil {
 			if l, ok := listen.({{ .Name }}); ok {
 				return l
 			}
@@ -102,13 +142,16 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
-	ensurePreferencesAttached(p)
-	prefBinds[p][key] = listen
+	binds = prefBinds.ensurePreferencesAttached(p)
+	binds.setItem(key, listen)
 	return listen
 }
 
 func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
-	b.cache = b.p.{{ .Name }}(b.key)
+	cache := b.p.{{ .Name }}(b.key)
+	b.cacheLock.Lock()
+	b.cache = cache
+	b.cacheLock.Unlock()
 	return b.cache, nil
 }
 
@@ -122,7 +165,10 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 }
 
 func (b *prefBound{{ .Name }}) checkForChange() {
-	if b.p.{{ .Name }}(b.key) == b.cache {
+	b.cacheLock.RLock()
+	cache := b.cache
+	b.cacheLock.RUnlock()
+	if b.p.{{ .Name }}(b.key) == cache {
 		return
 	}
 
@@ -145,13 +191,9 @@ type stringFrom{{ .Name }} struct {
 //
 // Since: {{ .Since }}
 func {{ .Name }}ToString(v {{ .Name }}) String {
-{{- if .Format }}
-	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
-{{- else }}
 	str := &stringFrom{{ .Name }}{from: v}
 	v.AddListener(str)
 	return str
-{{- end }}
 }
 {{ if .Format }}
 // {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
@@ -160,6 +202,10 @@ func {{ .Name }}ToString(v {{ .Name }}) String {
 //
 // Since: {{ .Since }}
 func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
+	if format == "{{ .Format }}" { // Same as not using custom formatting.
+		return {{ .Name }}ToString(v)
+	}
+
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -173,7 +219,11 @@ func (s *stringFrom{{ .Name }}) Get() (string, error) {
 {{ if .ToString }}
 	return {{ .ToString }}(val)
 {{- else }}
-	return fmt.Sprintf(s.format, val), nil
+	if s.format != "" {
+		return fmt.Sprintf(s.format, val), nil
+	}
+
+	return format{{ .Name }}(val), nil
 {{- end }}
 }
 
@@ -185,12 +235,20 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 	}
 {{ else }}
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return err
-	}
-	if n != 1 {
-		return errParseFailed
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errParseFailed
+		}
+	} else {
+		new, err := parse{{ .Name }}(str)
+		if err != nil {
+			return err
+		}
+		val = new
 	}
 {{ end }}
 	old, err := s.from.Get()
@@ -230,13 +288,9 @@ type stringTo{{ .Name }} struct {
 //
 // Since: {{ .Since }}
 func StringTo{{ .Name }}(str String) {{ .Name }} {
-{{- if .Format }}
-	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
-{{- else }}
 	v := &stringTo{{ .Name }}{from: str}
 	str.AddListener(v)
 	return v
-{{- end }}
 }
 {{ if .Format }}
 // StringTo{{ .Name }}WithFormat creates a binding that connects a String data item to a {{ .Name }} and is
@@ -246,6 +300,10 @@ func StringTo{{ .Name }}(str String) {{ .Name }} {
 //
 // Since: {{ .Since }}
 func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
+	if format == "{{ .Format }}" { // Same as not using custom format.
+		return StringTo{{ .Name }}(str)
+	}
+
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
 	return v
@@ -260,12 +318,20 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 	return {{ .FromString }}(str)
 {{- else }}
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-	if err != nil {
-		return {{ .Default }}, err
-	}
-	if n != 1 {
-		return {{ .Default }}, errParseFailed
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return {{ .Default }}, err
+		}
+		if n != 1 {
+			return {{ .Default }}, errParseFailed
+		}
+	} else {
+		new, err := parse{{ .Name }}(str)
+		if err != nil {
+			return {{ .Default }}, err
+		}
+		val = new
 	}
 
 	return val, nil
@@ -279,7 +345,12 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 		return err
 	}
 {{- else }}
-	str := fmt.Sprintf(s.format, val)
+	var str string
+	if s.format != "" {
+		str = fmt.Sprintf(s.format, val)
+	} else {
+		str = format{{ .Name }}(val)
+	}
 {{ end }}
 	old, err := s.from.Get()
 	if str == old {
@@ -308,12 +379,12 @@ const listBindTemplate = `
 type {{ .Name }}List interface {
 	DataList
 
-	Append({{ .Type }}) error
+	Append(value {{ .Type }}) error
 	Get() ([]{{ .Type }}, error)
-	GetValue(int) ({{ .Type }}, error)
-	Prepend({{ .Type }}) error
-	Set([]{{ .Type }}) error
-	SetValue(int, {{ .Type }}) error
+	GetValue(index int) ({{ .Type }}, error)
+	Prepend(value {{ .Type }}) error
+	Set(list []{{ .Type }}) error
+	SetValue(index int, value {{ .Type }}) error
 }
 
 // External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
@@ -521,6 +592,7 @@ type bindValues struct {
 	Format, Since        string
 	SupportsPreferences  bool
 	FromString, ToString string // function names...
+	Comparator           string // comparator function name
 }
 
 func newFile(name string) (*os.File, error) {
@@ -574,7 +646,11 @@ import (
 	}
 	defer prefFile.Close()
 	prefFile.WriteString(`
-import "fyne.io/fyne/v2"
+import (
+	"sync"
+
+	"fyne.io/fyne/v2"
+)
 
 const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 `)
@@ -599,8 +675,9 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
-			FromString: "uriFromString", ToString: "uriToString"},
+			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
 	for _, b := range binds {
 		if b.Since == "" {

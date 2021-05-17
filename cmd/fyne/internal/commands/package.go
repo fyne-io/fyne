@@ -3,18 +3,20 @@ package commands
 import (
 	"flag"
 	"fmt"
-	"strconv"
-	"strings"
 
 	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
+
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (
@@ -108,7 +110,7 @@ type Packager struct {
 // Deprecated: Access to the individual cli commands are being removed.
 func (p *Packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
+	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
@@ -193,6 +195,9 @@ func (p *Packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
+		if p.os != "windows" {
+			defer p.removeBuild()
+		}
 	}
 
 	switch p.os {
@@ -208,6 +213,13 @@ func (p *Packager) doPackage() error {
 		return p.packageIOS()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
+	}
+}
+
+func (p *Packager) removeBuild() {
+	err := os.Remove(p.exe)
+	if err != nil {
+		log.Println("Unable to remove temporary build file", p.exe)
 	}
 }
 
@@ -233,6 +245,10 @@ func (p *Packager) validate() error {
 
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
+
+		if util.Exists(p.exe) { // the exe was not specified, assume stale
+			p.removeBuild()
+		}
 	} else if p.os == "ios" || p.os == "android" {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
