@@ -124,11 +124,13 @@ func (s fileItemRenderer) Layout(size fyne.Size) {
 }
 
 func (s fileItemRenderer) MinSize() fyne.Size {
+	var minsize fyne.Size
 	if s.item.picker.view == gridView {
-		return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize+theme.Padding())
+		minsize = fyne.NewSize(fileIconSize, fileIconSize+fileTextSize+theme.Padding())
 	} else {
-		return fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize+theme.Padding()*4)
+		minsize = fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize+theme.Padding()*4)
 	}
+	return minsize
 }
 
 func (s fileItemRenderer) Refresh() {
