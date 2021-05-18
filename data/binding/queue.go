@@ -8,7 +8,7 @@ var (
 	itemQueueIn      chan<- *itemData
 	itemQueueOut     <-chan *itemData
 	processOnce      sync.Once
-	queueInitialized = make(chan int)
+	queueInitialized = make(chan struct{})
 )
 
 type itemData struct {
