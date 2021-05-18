@@ -16,20 +16,29 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+type viewLayout int
+
+const (
+	gridView viewLayout = iota
+	listView
+)
+
 type textWidget interface {
 	fyne.Widget
 	SetText(string)
 }
 
 type fileDialog struct {
-	file       *FileDialog
-	fileName   textWidget
-	dismiss    *widget.Button
-	open       *widget.Button
-	breadcrumb *fyne.Container
-	files      *fyne.Container
-	fileScroll *container.Scroll
-	showHidden bool
+	file         *FileDialog
+	fileName     textWidget
+	dismiss      *widget.Button
+	open         *widget.Button
+	breadcrumb   *fyne.Container
+	files        *fyne.Container
+	filesWrapper *fyne.Container
+	fileScroll   *container.Scroll
+	showHidden   bool
+	view         viewLayout
 
 	win      *widget.PopUp
 	selected *fileDialogItem
@@ -167,10 +176,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, container.NewHScroll(f.fileName))
 
-	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
-		fileIconSize+theme.Padding()+fileTextSize)),
-	)
-	f.fileScroll = container.NewScroll(f.files)
+	f.filesWrapper = fyne.NewContainerWithLayout(layout.NewMaxLayout())
+	f.setView(gridView)
+	f.fileScroll = container.NewScroll(f.filesWrapper)
 	verticalExtra := float32(float64(fileIconSize) * 0.25)
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
@@ -194,7 +202,16 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
-	left := container.NewBorder(nil, optionsButton, nil, nil, favoritesGroup)
+	toggleViewButton := widget.NewButtonWithIcon("Toggle View", theme.VisibilityIcon(), func() {
+		f.toggleView()
+	})
+
+	optionsbuttons := container.NewVBox(
+		optionsButton,
+		toggleViewButton,
+	)
+
+	left := container.NewBorder(nil, optionsbuttons, nil, nil, favoritesGroup)
 
 	return container.NewBorder(header, footer, left, nil, body)
 }
@@ -362,6 +379,30 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 		file.isCurrent = true
 		f.fileName.SetText(file.location.Name())
 		f.open.Enable()
+	}
+}
+
+func (f *fileDialog) setView(view viewLayout) {
+	f.view = view
+	if f.view == gridView {
+		f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
+			fileIconSize+theme.Padding()+fileTextSize)),
+		)
+	} else {
+		f.files = fyne.NewContainerWithLayout(layout.NewVBoxLayout())
+	}
+	if f.dir != nil {
+		f.refreshDir(f.dir)
+	}
+	f.filesWrapper.Objects = []fyne.CanvasObject{f.files}
+	f.filesWrapper.Refresh()
+}
+
+func (f *fileDialog) toggleView() {
+	if f.view == gridView {
+		f.setView(listView)
+	} else {
+		f.setView(gridView)
 	}
 }
 
