@@ -1092,20 +1092,24 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
-func (w *window) capturesTab(keyName fyne.KeyName, modifier desktop.Modifier) bool {
-	if keyName == fyne.KeyTab {
-		if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && !ent.AcceptsTab() {
-			switch modifier {
-			case 0:
-				w.QueueEvent(w.canvas.FocusNext)
-				return false
-			case desktop.ShiftModifier:
-				w.QueueEvent(w.canvas.FocusPrevious)
-				return false
-			}
+func (w *window) capturesTab(modifier desktop.Modifier) bool {
+	captures := false
+
+	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok {
+		captures = ent.AcceptsTab()
+	}
+	if !captures {
+		switch modifier {
+		case 0:
+			w.QueueEvent(w.canvas.FocusNext)
+			return false
+		case desktop.ShiftModifier:
+			w.QueueEvent(w.canvas.FocusPrevious)
+			return false
 		}
 	}
-	return true
+
+	return captures
 }
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
@@ -1161,7 +1165,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if !w.capturesTab(keyName, keyDesktopModifier) || w.triggersShortcut(keyName, keyDesktopModifier) {
+	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}
 
