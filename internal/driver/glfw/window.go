@@ -1114,9 +1114,6 @@ func (w *window) capturesTab(modifier desktop.Modifier) bool {
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
-	if keyName == "" {
-		return
-	}
 
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
@@ -1165,6 +1162,9 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
+	if keyName == "" { // don't emit unknown
+		return
+	}
 	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}
