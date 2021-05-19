@@ -287,7 +287,7 @@ func (e *Entry) Enable() {
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
-	impl := e.getImpl()
+	impl := e.super()
 	if impl != nil {
 		return
 	}
