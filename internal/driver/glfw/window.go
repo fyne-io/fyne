@@ -625,7 +625,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		}
 	}
 
-	if w.mouseButton != 0 && !w.mouseDragStarted {
+	if w.mouseButton != 0 && w.mouseButton != desktop.MouseButtonSecondary && !w.mouseDragStarted {
 		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
 			_, ok := object.(fyne.Draggable)
 			return ok
@@ -658,7 +658,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		w.mouseOut()
 	}
 
-	if w.mouseDragged != nil {
+	if w.mouseDragged != nil && w.mouseButton != desktop.MouseButtonSecondary {
 		if w.mouseButton > 0 {
 			draggedObjDelta := w.mouseDraggedObjStart.Subtract(w.mouseDragged.(fyne.CanvasObject).Position())
 			ev := new(fyne.DragEvent)
