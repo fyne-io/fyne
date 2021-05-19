@@ -18,7 +18,7 @@ type InMemoryPreferences struct {
 var _ fyne.Preferences = (*InMemoryPreferences)(nil)
 
 // AddChangeListener allows code to be notified when some preferences change. This will fire on any update.
-// listener should not try to write values
+// The passed 'listener' should not try to write values.
 func (p *InMemoryPreferences) AddChangeListener(listener func()) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
