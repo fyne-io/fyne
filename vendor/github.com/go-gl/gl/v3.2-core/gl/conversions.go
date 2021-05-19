@@ -39,7 +39,7 @@ func Ptr(data interface{}) unsafe.Pointer {
 			panic(fmt.Errorf("unsupported pointer to type %s; must be a slice or pointer to a singular scalar value or the first element of an array or slice", e.Kind()))
 		}
 	case reflect.Uintptr:
-		addr = unsafe.Pointer(v.Pointer())
+		addr = unsafe.Pointer(data.(uintptr))
 	case reflect.Slice:
 		addr = unsafe.Pointer(v.Index(0).UnsafeAddr())
 	default:

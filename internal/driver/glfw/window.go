@@ -13,8 +13,10 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -46,6 +48,8 @@ func initCursors() {
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
+	common.Window
+
 	viewport   *glfw.Window
 	viewLock   sync.RWMutex
 	createLock sync.Once
@@ -92,10 +96,7 @@ type window struct {
 	width, height int
 	shouldExpand  bool
 
-	eventLock  sync.RWMutex
-	eventQueue chan func()
-	eventWait  sync.WaitGroup
-	pending    []func()
+	pending []func()
 }
 
 func (w *window) Title() string {
@@ -435,16 +436,15 @@ func (w *window) Close() {
 	w.viewLock.Unlock()
 	w.viewport.SetShouldClose(true)
 
-	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
-		switch co := node.obj.(type) {
-		case fyne.Widget:
-			cache.DestroyRenderer(co)
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+		if wid, ok := node.Obj().(fyne.Widget); ok {
+			cache.DestroyRenderer(wid)
 		}
 	})
 
 	// trigger callbacks
 	if w.onClosed != nil {
-		w.queueEvent(w.onClosed)
+		w.QueueEvent(w.onClosed)
 	}
 }
 
@@ -490,7 +490,7 @@ func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(false)
 
 	if w.onCloseIntercepted != nil {
-		w.queueEvent(w.onCloseIntercepted)
+		w.QueueEvent(w.onCloseIntercepted)
 		return
 	}
 
@@ -499,19 +499,7 @@ func (w *window) closed(viewport *glfw.Window) {
 
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
-	w.eventLock.RLock()
-	queue := w.eventQueue
-	w.eventLock.RUnlock()
-
-	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
-	if queue != nil {
-		w.waitForEvents()
-
-		w.eventLock.Lock()
-		close(w.eventQueue)
-		w.eventQueue = nil
-		w.eventLock.Unlock()
-	}
+	w.DestroyEventQueue()
 
 	if w.master {
 		d.Quit()
@@ -669,7 +657,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
 			if hovered == mouseOver {
-				w.queueEvent(func() { hovered.MouseMoved(ev) })
+				w.QueueEvent(func() { hovered.MouseMoved(ev) })
 			} else {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
@@ -706,7 +694,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		ev.Position = mousePos.Subtract(mouseDraggedOffset).Add(draggedObjDelta)
 		ev.Dragged = fyne.NewDelta(mousePos.X-mouseDragPos.X, mousePos.Y-mouseDragPos.Y)
 		wd := mouseDragged
-		w.queueEvent(func() { wd.Dragged(ev) })
+		w.QueueEvent(func() { wd.Dragged(ev) })
 
 		w.mouseLock.Lock()
 		w.mouseDragStarted = true
@@ -724,7 +712,7 @@ func (w *window) objIsDragged(obj interface{}) bool {
 }
 
 func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
-	w.queueEvent(func() {
+	w.QueueEvent(func() {
 		if obj != nil {
 			obj.MouseIn(ev)
 		}
@@ -735,7 +723,7 @@ func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
 }
 
 func (w *window) mouseOut() {
-	w.queueEvent(func() {
+	w.QueueEvent(func() {
 		w.mouseLock.RLock()
 		mouseOver := w.mouseOver
 		w.mouseLock.RUnlock()
@@ -810,7 +798,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 	if action == glfw.Release && mouseDragged != nil {
 		if mouseDragStarted {
-			w.queueEvent(mouseDragged.DragEnd)
+			w.QueueEvent(mouseDragged.DragEnd)
 			w.mouseLock.Lock()
 			w.mouseDragStarted = false
 			w.mouseLock.Unlock()
@@ -833,7 +821,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		} else if action == glfw.Release {
 			if co == mousePressed {
 				if button == desktop.MouseButtonSecondary && altTap {
-					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
+					w.QueueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
 				}
 			}
 		}
@@ -848,20 +836,20 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action glfw.Action, wid desktop.Mouseable) {
 	mousePos := mev.AbsolutePosition
 	if action == glfw.Press {
-		w.queueEvent(func() { wid.MouseDown(mev) })
+		w.QueueEvent(func() { wid.MouseDown(mev) })
 	} else if action == glfw.Release {
 		w.mouseLock.RLock()
 		mouseDragged := w.mouseDragged
 		mouseDraggedOffset := w.mouseDraggedOffset
 		w.mouseLock.RUnlock()
 		if mouseDragged == nil {
-			w.queueEvent(func() { wid.MouseUp(mev) })
+			w.QueueEvent(func() { wid.MouseUp(mev) })
 		} else {
 			if dragged, ok := mouseDragged.(desktop.Mouseable); ok {
 				mev.Position = mousePos.Subtract(mouseDraggedOffset)
-				w.queueEvent(func() { dragged.MouseUp(mev) })
+				w.QueueEvent(func() { dragged.MouseUp(mev) })
 			} else {
-				w.queueEvent(func() { wid.MouseUp(mev) })
+				w.QueueEvent(func() { wid.MouseUp(mev) })
 			}
 		}
 	}
@@ -883,7 +871,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 	} else {
 		w.mouseLock.Lock()
 		if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
-			w.queueEvent(func() { wid.Tapped(ev) })
+			w.QueueEvent(func() { wid.Tapped(ev) })
 		}
 		w.mousePressed = nil
 		w.mouseLock.Unlock()
@@ -904,11 +892,11 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 
 	if w.mouseClickCount == 2 && w.mouseLastClick == co {
 		if wid, ok := co.(fyne.DoubleTappable); ok {
-			w.queueEvent(func() { wid.DoubleTapped(ev) })
+			w.QueueEvent(func() { wid.DoubleTapped(ev) })
 		}
 	} else if co == w.mousePressed {
 		if wid, ok := co.(fyne.Tappable); ok {
-			w.queueEvent(func() { wid.Tapped(ev) })
+			w.QueueEvent(func() { wid.Tapped(ev) })
 		}
 	}
 
@@ -922,7 +910,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	w.mouseLock.RLock()
 	mousePos := w.mousePos
 	w.mouseLock.RUnlock()
-	co, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
@@ -935,6 +923,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 		}
 		ev := &fyne.ScrollEvent{}
 		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
+		ev.Position = pos
+		ev.AbsolutePosition = mousePos
 		wid.Scrolled(ev)
 	}
 }
@@ -1102,27 +1092,28 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
-func (w *window) capturesTab(keyName fyne.KeyName, modifier desktop.Modifier) bool {
-	if keyName == fyne.KeyTab {
-		if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && !ent.AcceptsTab() {
-			switch modifier {
-			case 0:
-				w.queueEvent(func() { w.canvas.FocusNext() })
-				return false
-			case desktop.ShiftModifier:
-				w.queueEvent(func() { w.canvas.FocusPrevious() })
-				return false
-			}
+func (w *window) capturesTab(modifier desktop.Modifier) bool {
+	captures := false
+
+	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok {
+		captures = ent.AcceptsTab()
+	}
+	if !captures {
+		switch modifier {
+		case 0:
+			w.QueueEvent(w.canvas.FocusNext)
+			return false
+		case desktop.ShiftModifier:
+			w.QueueEvent(w.canvas.FocusPrevious)
+			return false
 		}
 	}
-	return true
+
+	return captures
 }
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
-	if keyName == "" {
-		return
-	}
 
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
@@ -1145,10 +1136,10 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.queueEvent(func() { focused.KeyUp(keyEvent) })
+				w.QueueEvent(func() { focused.KeyUp(keyEvent) })
 			}
 		} else if w.canvas.onKeyUp != nil {
-			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
+			w.QueueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return // ignore key up in other core events
 	case glfw.Press:
@@ -1162,25 +1153,28 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		}
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.queueEvent(func() { focused.KeyDown(keyEvent) })
+				w.QueueEvent(func() { focused.KeyDown(keyEvent) })
 			}
 		} else if w.canvas.onKeyDown != nil {
-			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
+			w.QueueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
 	default:
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if !w.capturesTab(keyName, keyDesktopModifier) || w.triggersShortcut(keyName, keyDesktopModifier) {
+	if keyName == "" { // don't emit unknown
+		return
+	}
+	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}
 
 	// No shortcut detected, pass down to TypedKey
 	focused := w.canvas.Focused()
 	if focused != nil {
-		w.queueEvent(func() { focused.TypedKey(keyEvent) })
+		w.QueueEvent(func() { focused.TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {
-		w.queueEvent(func() { w.canvas.onTypedKey(keyEvent) })
+		w.QueueEvent(func() { w.canvas.onTypedKey(keyEvent) })
 	}
 }
 
@@ -1207,35 +1201,35 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 // Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
 func (w *window) charInput(_ *glfw.Window, char rune) {
 	if focused := w.canvas.Focused(); focused != nil {
-		w.queueEvent(func() { focused.TypedRune(char) })
+		w.QueueEvent(func() { focused.TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
-		w.queueEvent(func() { w.canvas.onTypedRune(char) })
+		w.QueueEvent(func() { w.canvas.onTypedRune(char) })
 	}
 }
 
-func (w *window) focused(_ *glfw.Window, isFocused bool) {
-	if isFocused {
+func (w *window) focused(_ *glfw.Window, focus bool) {
+	if focus {
+		if curWindow == nil {
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerEnteredForeground()
+		}
+		curWindow = w
 		w.canvas.FocusGained()
 	} else {
 		w.canvas.FocusLost()
 		w.mouseLock.Lock()
 		w.mousePos = fyne.Position{}
 		w.mouseLock.Unlock()
-	}
-}
 
-func isKeyModifierPair(keyName fyne.KeyName, modifier desktop.Modifier) bool {
-	switch modifier {
-	case desktop.ShiftModifier:
-		return (keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight)
-	case desktop.ControlModifier:
-		return (keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight)
-	case desktop.AltModifier:
-		return (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight)
-	case desktop.SuperModifier:
-		return (keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight)
+		go func() { // check whether another window was focused or not
+			time.Sleep(time.Millisecond * 100)
+			if curWindow != w {
+				return
+			}
+
+			curWindow = nil
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerExitedForeground()
+		}()
 	}
-	return false
 }
 
 func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifier) bool {
@@ -1282,7 +1276,7 @@ func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifie
 		}
 	}
 
-	if shortcut == nil && modifier != 0 && !isKeyModifierPair(keyName, modifier) && modifier != desktop.ShiftModifier {
+	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != desktop.ShiftModifier {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: modifier,
@@ -1300,11 +1294,11 @@ func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifie
 				shouldRunShortcut = shortcut.ShortcutName() == "Copy"
 			}
 			if shouldRunShortcut {
-				w.queueEvent(func() { focused.TypedShortcut(shortcut) })
+				w.QueueEvent(func() { focused.TypedShortcut(shortcut) })
 			}
 			return shouldRunShortcut
 		}
-		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+		w.QueueEvent(func() { w.canvas.TypedShortcut(shortcut) })
 		return true
 	}
 
@@ -1352,17 +1346,6 @@ func (w *window) Context() interface{} {
 	return nil
 }
 
-// Use this method to queue up a callback that handles an event. This ensures
-// user interaction events for a given window are processed in order.
-func (w *window) queueEvent(fn func()) {
-	w.eventWait.Add(1)
-	select {
-	case w.eventQueue <- fn:
-	default:
-		fyne.LogError("EventQueue full, perhaps a callback blocked the event handler", nil)
-	}
-}
-
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.viewport != nil {
 		runOnMain(fn)
@@ -1370,21 +1353,6 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 	}
 
 	w.pending = append(w.pending, fn)
-}
-
-func (w *window) runEventQueue() {
-	w.eventLock.Lock()
-	queue := w.eventQueue
-	w.eventLock.Unlock()
-
-	for fn := range queue {
-		fn()
-		w.eventWait.Done()
-	}
-}
-
-func (w *window) waitForEvents() {
-	w.eventWait.Wait()
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
@@ -1400,9 +1368,9 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		d.initGLFW()
 
 		ret = &window{title: title, decorate: decorate, driver: d}
-		// This channel will be closed when the window is closed.
-		ret.eventQueue = make(chan func(), 1024)
-		go ret.runEventQueue()
+		// This queue is destroyed when the window is closed.
+		ret.InitEventQueue()
+		go ret.RunEventQueue()
 
 		ret.canvas = newCanvas()
 		ret.canvas.context = ret
@@ -1456,8 +1424,8 @@ func (w *window) create() {
 
 	// run the GL init on the draw thread
 	runOnDraw(w, func() {
-		w.canvas.painter = gl.NewPainter(w.canvas, w)
-		w.canvas.painter.Init()
+		w.canvas.SetPainter(gl.NewPainter(w.canvas, w))
+		w.canvas.Painter().Init()
 	})
 
 	runOnMain(func() {
@@ -1537,4 +1505,11 @@ func (d *gLDriver) CreateSplashWindow() fyne.Window {
 
 func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
+}
+
+func isKeyModifier(keyName fyne.KeyName) bool {
+	return keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight ||
+		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||
+		keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight ||
+		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
 }

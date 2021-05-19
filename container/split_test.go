@@ -231,6 +231,44 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 	})
 }
 
+func TestSplitContainer_swap_contents(t *testing.T) {
+	dl := dividerLength()
+	dt := dividerThickness()
+	initialWidth := 10 + 10 + dt
+	initialHeight := fyne.Max(10, dl)
+	expectedWidth := 100 + 10 + dt
+	expectedHeight := fyne.Max(100, dl)
+
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objA.SetMinSize(fyne.NewSize(10, 10))
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objB.SetMinSize(fyne.NewSize(10, 10))
+	objC := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objC.SetMinSize(fyne.NewSize(100, 100))
+	t.Run("Leading", func(t *testing.T) {
+		sc := NewHSplit(objA, objB)
+		min := sc.MinSize()
+		assert.Equal(t, float32(initialWidth), min.Width)
+		assert.Equal(t, float32(initialHeight), min.Height)
+		sc.Leading = objC
+		sc.Refresh()
+		min = sc.MinSize()
+		assert.Equal(t, float32(expectedWidth), min.Width)
+		assert.Equal(t, float32(expectedHeight), min.Height)
+	})
+	t.Run("Trailing", func(t *testing.T) {
+		sc := NewHSplit(objA, objB)
+		min := sc.MinSize()
+		assert.Equal(t, float32(initialWidth), min.Width)
+		assert.Equal(t, float32(initialHeight), min.Height)
+		sc.Trailing = objC
+		sc.Refresh()
+		min = sc.MinSize()
+		assert.Equal(t, float32(expectedWidth), min.Width)
+		assert.Equal(t, float32(expectedHeight), min.Height)
+	})
+}
+
 func TestSplitContainer_divider_cursor(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		divider := newDivider(&Split{Horizontal: true})

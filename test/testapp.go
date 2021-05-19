@@ -23,6 +23,7 @@ type testApp struct {
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
+	lifecycle    fyne.Lifecycle
 
 	// user action variables
 	appliedTheme     fyne.Theme
@@ -81,6 +82,10 @@ func (a *testApp) Storage() fyne.Storage {
 	return a.storage
 }
 
+func (a *testApp) Lifecycle() fyne.Lifecycle {
+	return a.lifecycle
+}
+
 func (a *testApp) lastAppliedTheme() fyne.Theme {
 	a.propertyLock.Lock()
 	defer a.propertyLock.Unlock()
@@ -93,7 +98,8 @@ func (a *testApp) lastAppliedTheme() fyne.Theme {
 func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
-	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver)}
+	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver),
+		lifecycle: &app.Lifecycle{}}
 	painter.SvgCacheReset()
 	fyne.SetCurrentApp(test)
 
