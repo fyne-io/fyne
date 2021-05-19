@@ -820,7 +820,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mouseLock.Unlock()
 		} else if action == glfw.Release {
 			if co == mousePressed {
-				if button == desktop.MouseButtonSecondary && altTap && !mouseDragStarted {
+				if button == desktop.MouseButtonSecondary && altTap {
 					w.QueueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
 				}
 			}
