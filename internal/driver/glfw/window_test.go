@@ -558,6 +558,25 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.NotNil(t, dh.popMouseOutEvent())
 }
 
+func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
+	w := createWindow("Test").(*window)
+	do := &draggableTappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	do.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(do)
+
+	repaintWindow(w)
+	require.Equal(t, fyne.NewPos(4, 4), do.Position())
+
+	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	w.WaitForEvents()
+
+	assert.Nil(t, do.popTapEvent())
+}
+
 func TestWindow_Scrolled(t *testing.T) {
 	w := createWindow("Test").(*window)
 	o := &scrollable{Rectangle: canvas.NewRectangle(color.White)}
@@ -1291,6 +1310,12 @@ func (t *tappable) popTapEvent() (e interface{}) {
 func (t *tappable) popSecondaryTapEvent() (e interface{}) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
 	return
+}
+
+type draggableTappableObject struct {
+	*canvas.Rectangle
+	draggable
+	tappable
 }
 
 var _ fyne.Focusable = (*focusable)(nil)
