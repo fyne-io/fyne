@@ -42,13 +42,13 @@ func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	rightCol := container.NewVBox(rightObj1, rightObj2)
 	content := container.NewHBox(leftCol, rightCol)
 	c.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), content))
-	c.resize(fyne.NewSize(300, 300))
+	c.Resize(fyne.NewSize(300, 300))
 
 	oldContentSize := fyne.NewSize(200+theme.Padding(), 100+theme.Padding())
 	assert.Equal(t, oldContentSize, content.Size())
 
 	leftObj1.SetMinSize(fyne.NewSize(110, 60))
-	c.ensureMinSize()
+	c.EnsureMinSize()
 
 	expectedContentSize := oldContentSize.Add(fyne.NewSize(10, 10))
 	assert.Equal(t, expectedContentSize, content.Size())
@@ -75,7 +75,7 @@ func TestCanvas_Tapped(t *testing.T) {
 	})
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(button)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -110,7 +110,7 @@ func TestCanvas_Tapped_Multi(t *testing.T) {
 	})
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(button)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -133,7 +133,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	obj.ExtendBaseWidget(obj)
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(obj)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	obj.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -167,7 +167,7 @@ func TestCanvas_Dragged(t *testing.T) {
 	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(scroll)
-	c.resize(fyne.NewSize(40, 24))
+	c.Resize(fyne.NewSize(40, 24))
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
 	c.tapDown(fyne.NewPos(32, 3), 0)
@@ -192,7 +192,7 @@ func TestCanvas_DraggingOutOfWidget(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 	slider := widget.NewSlider(0.0, 100.0)
 	c.SetContent(container.NewGridWithRows(2, slider, widget.NewLabel("Outside")))
-	c.resize(fyne.NewSize(100, 200))
+	c.Resize(fyne.NewSize(100, 200))
 
 	assert.Zero(t, slider.Value)
 	lastValue := slider.Value
@@ -223,7 +223,7 @@ func TestCanvas_Tappable(t *testing.T) {
 	content.ExtendBaseWidget(content)
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(content)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	content.Resize(fyne.NewSize(24, 24))
 
 	c.tapDown(fyne.NewPos(15, 15), 0)
@@ -255,7 +255,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(fyne.NewContainerWithLayout(layout.NewMaxLayout(), but))
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 
 	simulateTap(c)
 	time.Sleep(700 * time.Millisecond)
@@ -278,7 +278,7 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	popup.Resize(popupBgSize)
 
 	canvasSize := fyne.NewSize(600, 700)
-	c.resize(canvasSize)
+	c.Resize(canvasSize)
 
 	// get popup content padding dynamically
 	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())

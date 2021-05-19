@@ -1162,6 +1162,23 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
+func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, 0, len(entry.Text))
+
+	entry.PlaceHolder = "Test"
+	entry.Refresh()
+	assert.Equal(t, 0, len(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
+
+	entry.SetText("Hi")
+	assert.Equal(t, 2, len(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
+}
+
 func TestEntry_Disable_KeyDown(t *testing.T) {
 	entry := widget.NewEntry()
 

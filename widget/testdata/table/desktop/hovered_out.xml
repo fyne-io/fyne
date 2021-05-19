@@ -2,34 +2,37 @@
 	<content>
 		<widget pos="4,4" size="172x172" type="*widget.Table">
 			<widget pos="4,4" size="168x168" type="*widget.Scroll">
-				<widget size="219x168" type="*widget.tableCells">
-					<widget pos="4,4" size="101x37" type="*widget.Label">
+				<widget size="203x168" type="*widget.tableCells">
+					<widget size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 0, 0</text>
 					</widget>
-					<widget pos="114,4" size="101x37" type="*widget.Label">
+					<widget pos="102,0" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 0, 1</text>
 					</widget>
-					<widget pos="4,50" size="101x37" type="*widget.Label">
+					<widget pos="0,38" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 1, 0</text>
 					</widget>
-					<widget pos="114,50" size="101x37" type="*widget.Label">
+					<widget pos="102,38" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 1, 1</text>
 					</widget>
 				</widget>
 				<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
-					<widget pos="0,3" size="128x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" size="128x3"/>
+					<widget pos="0,3" size="139x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="139x3"/>
 					</widget>
 				</widget>
 				<widget pos="168,0" size="0x168" type="*widget.Shadow">
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 				</widget>
 			</widget>
-			<widget pos="113,4" size="1x168" type="*widget.Separator">
+			<widget pos="105,4" size="1x168" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="1x168"/>
 			</widget>
-			<widget pos="4,49" size="168x1" type="*widget.Separator">
+			<widget pos="4,41" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
+			</widget>
+			<widget size="0x0" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="0x0"/>
 			</widget>
 			<widget size="0x0" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="0x0"/>

@@ -27,7 +27,7 @@ func TestDarwinMenu(t *testing.T) {
 		item := testNSMenuItemAtIndex(m, i)
 		assert.Equal(t, wantTitle, testNSMenuItemTitle(item))
 		testNSMenuPerformActionForItemAtIndex(m, i)
-		w.waitForEvents()
+		w.WaitForEvents()
 		assert.Equal(t, wantAction, lastAction)
 	}
 

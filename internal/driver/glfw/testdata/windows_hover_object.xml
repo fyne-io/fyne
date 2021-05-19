@@ -3,34 +3,34 @@
 		<widget pos="4,4" size="192x292" type="*widget.List">
 			<widget size="192x292" type="*widget.Scroll">
 				<container size="192x292">
-					<widget size="192x45" type="*widget.listItem">
-						<widget pos="8,4" size="180x37" type="*widget.Entry">
-							<rectangle fillColor="rgba(25,25,25,25)" pos="0,2" size="180x33"/>
-							<rectangle fillColor="shadow" pos="0,35" size="180x2"/>
-							<widget pos="0,2" size="180x33" type="*widget.Scroll">
-								<widget size="180x33" type="*widget.entryContent">
-									<widget size="180x33" type="*widget.textProvider">
-										<text color="placeholder" pos="8,6" size="168x21"></text>
+					<widget size="192x37" type="*widget.listItem">
+						<widget pos="4,0" size="188x37" type="*widget.Entry">
+							<rectangle fillColor="rgba(255,255,255,25)" pos="0,2" size="188x33"/>
+							<rectangle fillColor="shadow" pos="0,35" size="188x2"/>
+							<widget pos="0,2" size="188x33" type="*widget.Scroll">
+								<widget size="188x33" type="*widget.entryContent">
+									<widget size="188x33" type="*widget.textProvider">
+										<text color="placeholder" pos="8,6" size="176x21"></text>
 									</widget>
-									<widget size="180x33" type="*widget.textProvider">
-										<text pos="8,6" size="168x21"></text>
+									<widget size="188x33" type="*widget.textProvider">
+										<text pos="8,6" size="176x21"></text>
 									</widget>
 								</widget>
 							</widget>
 						</widget>
 					</widget>
-					<widget pos="0,46" size="192x45" type="*widget.listItem">
-						<rectangle fillColor="hover" size="192x45"/>
-						<widget pos="8,4" size="180x37" type="*widget.Entry">
-							<rectangle fillColor="rgba(25,25,25,25)" pos="0,2" size="180x33"/>
-							<rectangle fillColor="shadow" pos="0,35" size="180x2"/>
-							<widget pos="0,2" size="180x33" type="*widget.Scroll">
-								<widget size="180x33" type="*widget.entryContent">
-									<widget size="180x33" type="*widget.textProvider">
-										<text color="placeholder" pos="8,6" size="168x21"></text>
+					<widget pos="0,38" size="192x37" type="*widget.listItem">
+						<rectangle fillColor="hover" size="192x37"/>
+						<widget pos="4,0" size="188x37" type="*widget.Entry">
+							<rectangle fillColor="rgba(255,255,255,25)" pos="0,2" size="188x33"/>
+							<rectangle fillColor="shadow" pos="0,35" size="188x2"/>
+							<widget pos="0,2" size="188x33" type="*widget.Scroll">
+								<widget size="188x33" type="*widget.entryContent">
+									<widget size="188x33" type="*widget.textProvider">
+										<text color="placeholder" pos="8,6" size="176x21"></text>
 									</widget>
-									<widget size="180x33" type="*widget.textProvider">
-										<text pos="8,6" size="168x21"></text>
+									<widget size="188x33" type="*widget.textProvider">
+										<text pos="8,6" size="176x21"></text>
 									</widget>
 								</widget>
 							</widget>
@@ -39,7 +39,7 @@
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
-					<widget pos="0,45" size="192x1" type="*widget.Separator">
+					<widget pos="0,37" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>
