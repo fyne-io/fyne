@@ -470,64 +470,6 @@ func (b *boundExternalString) Reload() error {
 	return b.Set(*b.val)
 }
 
-// Untyped supports binding a interface{} value.
-//
-// Since: 2.1
-type Untyped interface {
-	DataItem
-	Get() (interface{}, error)
-	Set(interface{}) error
-}
-
-// ExternalUntyped supports binding a interface{} value to an external value.
-//
-// Since: 2.1
-type ExternalUntyped interface {
-	Untyped
-	Reload() error
-}
-
-// NewUntyped returns a bindable interface{} value that is managed internally.
-//
-// Since: 2.1
-func NewUntyped() Untyped {
-	var blank interface{}
-	blank = struct{}{}
-	return &boundUntyped{val: &blank}
-}
-
-type boundUntyped struct {
-	base
-
-	val interface{}
-}
-
-func (b *boundUntyped) Get() (interface{}, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return struct{}{}, nil
-	}
-
-	v := b.val.(*interface{})
-	return *v, nil
-}
-
-func (b *boundUntyped) Set(val interface{}) error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	v := b.val.(*interface{})
-	if *v == val {
-		return nil
-	}
-	*v = val
-
-	b.trigger()
-	return nil
-}
-
 // URI supports binding a fyne.URI value.
 //
 // Since: 2.1
