@@ -775,7 +775,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mousePressed = co
 		} else if action == glfw.Release {
 			if co == w.mousePressed {
-				if button == desktop.MouseButtonSecondary && altTap && !w.mouseDragStarted {
+				if button == desktop.MouseButtonSecondary && altTap {
 					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
 				}
 			}
