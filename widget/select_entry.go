@@ -115,11 +115,6 @@ func (e *SelectEntry) onDropDownTapped() {
 	e.popUp.Resize(e.popUpSize())
 }
 
-func (e *SelectEntry) popUpPos() fyne.Position {
-	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-	return entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
-}
-
 func (e *SelectEntry) setupDropDown() *Button {
 	length := func() int {
 		return len(e.Options)
