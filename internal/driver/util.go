@@ -57,6 +57,7 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		if matches(walked) {
 			found = walked
 			foundPos = fyne.NewPos(mouse.X-pos.X, mouse.Y-pos.Y)
+			// Trigger.
 		}
 		return false
 	}
