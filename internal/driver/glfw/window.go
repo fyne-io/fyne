@@ -1,6 +1,5 @@
 package glfw
 
-import "C"
 import (
 	"bytes"
 	"context"
@@ -10,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-gl/glfw/v3.3/glfw"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
@@ -17,8 +18,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/widget"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
@@ -1345,6 +1344,8 @@ func (w *window) create() {
 	})
 
 	runOnMain(func() {
+		w.setDarkMode()
+
 		win := w.view()
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
