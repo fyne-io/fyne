@@ -3,6 +3,16 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.0.4 - Ongoing
+
+### Fixed
+
+* Current app ID for Windows notifications
+* Fix accidental removal of windows builds during cross-compile
+* Removing an item from a container did not update layout
+* Update title bar on Windows 10 to match OS theme
+
+
 ## 2.0.3 - 30 April 2021
 
 ### Fixed
