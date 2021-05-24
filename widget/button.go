@@ -50,6 +50,8 @@ const (
 	LowImportance
 )
 
+var _ fyne.Focusable = (*Button)(nil)
+
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
@@ -64,8 +66,8 @@ type Button struct {
 
 	OnTapped func() `json:"-"`
 
-	hovered bool
-	tapAnim *fyne.Animation
+	hovered, focused bool
+	tapAnim          *fyne.Animation
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -128,6 +130,18 @@ func (b *Button) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
+// FocusGained is a hook called by the focus handling logic after this object gained the focus.
+func (b *Button) FocusGained() {
+	b.focused = true
+	b.Refresh()
+}
+
+// FocusLost is a hook called by the focus handling logic after this object lost the focus.
+func (b *Button) FocusLost() {
+	b.focused = false
+	b.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (b *Button) MinSize() fyne.Size {
 	b.ExtendBaseWidget(b)
@@ -175,6 +189,17 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 
 	if b.OnTapped != nil {
 		b.OnTapped()
+	}
+}
+
+// TypedRune is a hook called by the input handling logic on text input events if this object is focused.
+func (b *Button) TypedRune(rune) {
+}
+
+// TypedKey is a hook called by the input handling logic on key events if this object is focused.
+func (b *Button) TypedKey(ev *fyne.KeyEvent) {
+	if ev.Name == fyne.KeySpace {
+		b.Tapped(nil)
 	}
 }
 
@@ -308,6 +333,8 @@ func (r *buttonRenderer) buttonColor() color.Color {
 	switch {
 	case r.button.Disabled():
 		return theme.DisabledButtonColor()
+	case r.button.focused:
+		return theme.FocusColor()
 	case r.button.hovered:
 		bg := theme.ButtonColor()
 		if r.button.Importance == HighImportance {
