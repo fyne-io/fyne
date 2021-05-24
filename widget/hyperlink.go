@@ -38,9 +38,25 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 	return hl
 }
 
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
+	hl.ExtendBaseWidget(hl)
+	hl.provider = newTextProvider(hl.Text, hl)
+	return hl.provider.CreateRenderer()
+}
+
 // Cursor returns the cursor type of this widget
 func (hl *Hyperlink) Cursor() desktop.Cursor {
 	return desktop.PointerCursor
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (hl *Hyperlink) MinSize() fyne.Size {
+	hl.ExtendBaseWidget(hl)
+	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
+		p.setText(hl.Text)
+	}
+	return hl.BaseWidget.MinSize()
 }
 
 // Resize sets a new size for the hyperlink.
@@ -115,20 +131,4 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 			fyne.LogError("Failed to open url", err)
 		}
 	}
-}
-
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
-	hl.ExtendBaseWidget(hl)
-	hl.provider = newTextProvider(hl.Text, hl)
-	return hl.provider.CreateRenderer()
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (hl *Hyperlink) MinSize() fyne.Size {
-	hl.ExtendBaseWidget(hl)
-	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
-		p.setText(hl.Text)
-	}
-	return hl.BaseWidget.MinSize()
 }
