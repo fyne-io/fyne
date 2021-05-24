@@ -213,9 +213,6 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	w := test.NewWindow(form)
 	defer w.Close()
 
-	assert.Equal(t, errFormItemInitialState, entry1.validationError)
-	assert.Equal(t, errFormItemInitialState, entry2.validationError)
-
 	test.AssertImageMatches(t, "form/validation_entry_first_type_initial.png", w.Canvas().Capture())
 
 	test.Type(entry1, "H")
