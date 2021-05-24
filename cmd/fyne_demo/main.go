@@ -77,7 +77,7 @@ func main() {
 		}),
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Sponsor", func() {
-			u, _ := url.Parse("https://github.com/sponsors/fyne-io")
+			u, _ := url.Parse("https://fyne.io/sponsor/")
 			_ = a.OpenURL(u)
 		}))
 	file := fyne.NewMenu("File", newItem)
