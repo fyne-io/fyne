@@ -250,11 +250,8 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().Add(r.itemPadding())
+	minSize := r.text.MinSize().Add(r.itemPadding()).Add(fyne.NewSize(r.checkSpace(), 0))
 	if r.icon != nil {
-		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
-	}
-	if r.i.Item.HasCheckmark {
 		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
 	}
 	r.minSize = minSize
