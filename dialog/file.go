@@ -336,15 +336,15 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		return err
 	}
 
-	is_fav := false
+	isFav := false
 	for i, fav := range f.favorites {
 		if fav.loc.Path() == dir.Path() {
 			f.favoritesGroup.Select(i)
-			is_fav = true
+			isFav = true
 			break
 		}
 	}
-	if !is_fav {
+	if !isFav {
 		f.favoritesGroup.UnselectAll()
 	}
 
