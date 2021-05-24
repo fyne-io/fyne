@@ -274,11 +274,10 @@ func (r *menuItemRenderer) Refresh() {
 
 	if r.i.Item.Disabled {
 		r.text.Color = theme.DisabledColor()
-		// TODO: enable after fixing translucence and alpha channel (https://github.com/fyne-io/fyne/issues/1977)
-		// r.checkIcon.Translucency = 0.7
+		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
 	} else {
 		r.text.Color = theme.ForegroundColor()
-		r.checkIcon.Translucency = 0
+		r.checkIcon.Resource = theme.ConfirmIcon()
 	}
 	r.text.Refresh()
 
