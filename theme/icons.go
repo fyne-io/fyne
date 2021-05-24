@@ -428,6 +428,16 @@ const (
 	//
 	// Since: 2.1
 	IconNameLogout fyne.ThemeIconName = "logout"
+
+	// IconNameList is the name of theme lookup for list icon.
+	//
+	// Since: 2.1
+	IconNameList fyne.ThemeIconName = "list"
+
+	// IconNameGrid is the name of theme lookup for grid icon.
+	//
+	// Since: 2.1
+	IconNameGrid fyne.ThemeIconName = "grid"
 )
 
 var (
@@ -531,6 +541,9 @@ var (
 		IconNameAccount: NewThemedResource(accountIconRes),
 		IconNameLogin:   NewThemedResource(loginIconRes),
 		IconNameLogout:  NewThemedResource(logoutIconRes),
+
+		IconNameList: NewThemedResource(listIconRes),
+		IconNameGrid: NewThemedResource(gridIconRes),
 	}
 )
 
@@ -1113,6 +1126,16 @@ func LoginIcon() fyne.Resource {
 // LogoutIcon returns a resource containing the standard logout icon for the current theme
 func LogoutIcon() fyne.Resource {
 	return safeIconLookup(IconNameLogout)
+}
+
+// ListIcon returns a resource containing the standard list icon for the current theme
+func ListIcon() fyne.Resource {
+	return safeIconLookup(IconNameList)
+}
+
+// GridIcon returns a resource containing the standard grid icon for the current theme
+func GridIcon() fyne.Resource {
+	return safeIconLookup(IconNameGrid)
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {

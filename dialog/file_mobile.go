@@ -10,8 +10,8 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
-	return nil
+func (f *fileDialog) getPlaces() []favoriteItem {
+	return []favoriteItem{}
 }
 
 func isHidden(file fyne.URI) bool {
