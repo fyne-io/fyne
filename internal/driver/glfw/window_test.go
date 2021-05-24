@@ -572,7 +572,7 @@ func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 	w.mouseMoved(w.viewport, 8, 8)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	w.WaitForEvents()
+	w.waitForEvents()
 
 	assert.Nil(t, do.popTapEvent())
 }
