@@ -16,10 +16,26 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 type MenuItem struct {
 	ChildMenu *Menu
 	// Since: 2.1
-	IsQuit      bool
-	IsSeparator bool
-	Label       string
-	Action      func()
+	IsQuit       bool
+	IsSeparator  bool
+	Label        string
+	Action       func()
+	Disabled     bool
+	HasCheckmark bool
+	item         CanvasObject
+}
+
+// SetItem is used internally to be able to Refresh a menu item.
+func (i *MenuItem) SetItem(menuItem CanvasObject) {
+	i.item = menuItem
+}
+
+// Refresh refreshes the menu item.
+func (i *MenuItem) Refresh() {
+	if i.item == nil {
+		return
+	}
+	i.item.Refresh()
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.

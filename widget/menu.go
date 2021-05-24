@@ -14,10 +14,11 @@ var _ fyne.Tappable = (*Menu)(nil)
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
 	widget.Base
-	Items       []fyne.CanvasObject
-	OnDismiss   func()
-	activeItem  *menuItem
-	customSized bool
+	Items         []fyne.CanvasObject
+	OnDismiss     func()
+	activeItem    *menuItem
+	customSized   bool
+	containsCheck bool
 }
 
 // NewMenu creates a new Menu.
@@ -30,7 +31,9 @@ func NewMenu(menu *fyne.Menu) *Menu {
 		} else {
 			items[i] = newMenuItem(item, m)
 		}
+		item.SetItem(items[i])
 	}
+	m.containsCheck = m.getContainsCheck()
 	return m
 }
 
@@ -167,7 +170,31 @@ func (m *Menu) Move(pos fyne.Position) {
 //
 // Implements: fyne.Widget
 func (m *Menu) Refresh() {
+	if m.needsResize() {
+		m.Resize(m.MinSize())
+		return
+	}
+
 	widget.RefreshWidget(m)
+}
+
+func (m *Menu) needsResize() bool {
+	containedCheck := m.containsCheck
+	m.containsCheck = m.getContainsCheck()
+	return containedCheck != m.containsCheck
+}
+
+func (m *Menu) getContainsCheck() bool {
+	for _, item := range m.Items {
+		mi, ok := item.(*menuItem)
+		if !ok {
+			continue
+		}
+		if mi.Item.HasCheckmark {
+			return true
+		}
+	}
+	return false
 }
 
 // Resize has no effect because menus are always displayed with their minimal size.

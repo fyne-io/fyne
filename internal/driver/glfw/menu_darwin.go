@@ -35,6 +35,8 @@ const char* test_NSMenuItem_title(const void*);
 import "C"
 
 var callbacks []func()
+var menuEnableCallbacks []func() bool
+var menuCheckedCallbacks []func() bool
 var ecb func(string)
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
@@ -127,6 +129,12 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 				w.queueEvent(item.Action)
 			}
 		})
+		menuEnableCallbacks = append(menuEnableCallbacks, func() bool {
+			return !item.Disabled
+		})
+		menuCheckedCallbacks = append(menuCheckedCallbacks, func() bool {
+			return item.HasCheckmark
+		})
 		nextItemID++
 	}
 	return nextItemID
@@ -145,9 +153,21 @@ func menuCallback(id int) {
 	callbacks[id]()
 }
 
+//export menuEnabled
+func menuEnabled(id int) bool {
+	return menuEnableCallbacks[id]()
+}
+
+//export menuChecked
+func menuChecked(id int) bool {
+	return menuCheckedCallbacks[id]()
+}
+
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	nextItemID := 0
 	callbacks = []func(){}
+	menuEnableCallbacks = []func() bool{}
+	menuCheckedCallbacks = []func() bool{}
 	var helpMenu *fyne.Menu
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]
