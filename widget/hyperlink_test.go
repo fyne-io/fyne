@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/test"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -56,6 +57,24 @@ func TestHyperlink_Hide(t *testing.T) {
 	hyperlink.Show()
 	assert.False(t, hyperlink.Hidden)
 	assert.False(t, hyperlink.provider.Hidden)
+}
+
+func TestHyperlink_Focus(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	hyperlink := &Hyperlink{Text: "Test"}
+	w := test.NewWindow(hyperlink)
+	w.SetPadded(false)
+	defer w.Close()
+	w.Resize(hyperlink.MinSize())
+
+	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
+	hyperlink.FocusGained()
+	test.AssertImageMatches(t, "hyperlink/focus.png", w.Canvas().Capture())
+	hyperlink.FocusLost()
+	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
 }
 
 func TestHyperlink_Resize(t *testing.T) {
