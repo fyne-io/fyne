@@ -30,6 +30,7 @@ var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
 var _ desktop.Keyable = (*Entry)(nil)
 var _ mobile.Keyboardable = (*Entry)(nil)
+var _ mobile.Touchable = (*Entry)(nil)
 var _ fyne.Tabbable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
@@ -539,6 +540,18 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	e.popUp = NewPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
+}
+
+func (e *Entry) TouchDown(*mobile.TouchEvent) {
+	if c := fyne.CurrentApp().Driver().CanvasForObject(e); c != nil {
+		c.Focus(e)
+	}
+}
+
+func (e *Entry) TouchUp(*mobile.TouchEvent) {
+}
+
+func (e *Entry) TouchCancel(*mobile.TouchEvent) {
 }
 
 // TypedKey receives key input events when the Entry widget is focused.
