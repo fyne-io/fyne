@@ -52,6 +52,7 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	focus := canvas.NewRectangle(color.Transparent)
 	focus.StrokeColor = theme.FocusColor()
 	focus.StrokeWidth = 2
+	focus.Hide()
 	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus}, focus: focus}
 }
 
@@ -78,7 +79,10 @@ func (hl *Hyperlink) MinSize() fyne.Size {
 	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
 		p.setText(hl.Text)
 	}
-	return hl.BaseWidget.MinSize()
+
+	label := canvas.NewText(hl.Text, theme.ForegroundColor())
+	label.TextStyle = hl.textStyle()
+	return label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*4))
 }
 
 // Resize sets a new size for the hyperlink.
