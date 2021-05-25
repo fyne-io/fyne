@@ -296,15 +296,17 @@ func TestCanvas_Focusable(t *testing.T) {
 	pos := fyne.NewPos(10, 10)
 	c.tapDown(pos, 0)
 	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev) }, nil, nil, nil)
-	time.Sleep(time.Millisecond*(doubleClickDelay+150))
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
 	c.tapDown(pos, 1)
 	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev) }, nil, nil, nil)
-	time.Sleep(time.Millisecond*(doubleClickDelay+150))
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
