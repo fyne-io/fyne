@@ -1,6 +1,5 @@
 package glfw
 
-import "C"
 import (
 	"bytes"
 	"context"
@@ -10,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-gl/glfw/v3.3/glfw"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
@@ -18,8 +19,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
@@ -628,7 +627,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		}
 	}
 
-	if mouseButton != 0 && !mouseDragStarted {
+	if mouseButton != 0 && mouseButton != desktop.MouseButtonSecondary && !mouseDragStarted {
 		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
 			_, ok := object.(fyne.Draggable)
 			return ok
@@ -687,7 +686,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	mouseDraggedOffset := w.mouseDraggedOffset
 	mouseDragPos := w.mouseDragPos
 	w.mouseLock.RUnlock()
-	if mouseDragged != nil && mouseButton > 0 {
+	if mouseDragged != nil && mouseButton > 0 && mouseButton != desktop.MouseButtonSecondary {
 		draggedObjDelta := mouseDraggedObjStart.Subtract(mouseDragged.(fyne.CanvasObject).Position())
 		ev := new(fyne.DragEvent)
 		ev.AbsolutePosition = mousePos
@@ -828,7 +827,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	// Check for double click/tap on left mouse button
-	if action == glfw.Release && button == desktop.MouseButtonPrimary {
+	if action == glfw.Release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
 		w.mouseClickedHandleTapDoubleTap(co, ev)
 	}
 }
@@ -1429,6 +1428,8 @@ func (w *window) create() {
 	})
 
 	runOnMain(func() {
+		w.setDarkMode()
+
 		win := w.view()
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)

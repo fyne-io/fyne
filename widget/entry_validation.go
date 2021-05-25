@@ -95,15 +95,15 @@ func (r *validationStatusRenderer) MinSize() fyne.Size {
 func (r *validationStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
-	if r.entry.Text == "" || r.entry.disabled {
+	if r.entry.disabled {
 		r.icon.Hide()
 		return
 	}
 
-	if r.entry.validationError == nil {
+	if r.entry.validationError == nil && r.entry.Text != "" {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
-	} else if !r.entry.focused {
+	} else if r.entry.validationError != nil && !r.entry.focused && r.entry.dirty {
 		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		r.icon.Show()
 	} else {
