@@ -418,6 +418,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
+	fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
 	e.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
 }
 
@@ -488,6 +489,9 @@ func (e *Entry) SetText(text string) {
 //
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
+	if !e.Disabled() {
+		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
+	}
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
 	}
@@ -504,6 +508,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		return // no popup options for a disabled concealed field
 	}
 
+	fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.cutToClipboard(clipboard)

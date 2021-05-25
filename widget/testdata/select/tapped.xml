@@ -1,8 +1,8 @@
 <canvas padded size="200x150">
 	<content>
 		<widget pos="4,4" size="135x37" type="*widget.Select">
-			<rectangle fillColor="focus" pos="0,2" size="135x33"/>
-			<rectangle fillColor="primary" pos="0,35" size="135x2"/>
+			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="135x33"/>
+			<rectangle fillColor="shadow" pos="0,35" size="135x2"/>
 			<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="131x33"/>
 			<widget pos="4,4" size="103x29" type="*widget.textProvider">
 				<text pos="4,4" size="95x21">(Select one)</text>

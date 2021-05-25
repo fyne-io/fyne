@@ -2,8 +2,8 @@
 	<content>
 		<container pos="4,4" size="142x192">
 			<widget pos="19,77" size="103x37" type="*widget.Select">
-				<rectangle fillColor="focus" pos="0,2" size="103x33"/>
-				<rectangle fillColor="primary" pos="0,35" size="103x2"/>
+				<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="103x33"/>
+				<rectangle fillColor="shadow" pos="0,35" size="103x2"/>
 				<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="99x33"/>
 				<widget pos="4,4" size="71x29" type="*widget.textProvider">
 					<text pos="4,4" size="63x21">(Pick 1)</text>
