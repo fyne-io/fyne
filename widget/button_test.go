@@ -65,9 +65,9 @@ func TestButton_Tapped(t *testing.T) {
 }
 
 func TestButton_Disable(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	tapped := false
 	button := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {
@@ -122,9 +122,9 @@ func TestButton_Disabled(t *testing.T) {
 }
 
 func TestButton_Hover(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
 	w := test.NewWindow(b)
