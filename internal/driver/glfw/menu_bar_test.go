@@ -54,7 +54,7 @@ func TestMenuBar(t *testing.T) {
 
 		menuBar := glfw.NewMenuBar(menu, c)
 		themeCounter := 0
-		button := widget.NewButton("Button", func() {
+		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
 			case 0:
 				test.ApplyTheme(t, test.NewTheme())
