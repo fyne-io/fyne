@@ -182,7 +182,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
-	e.scroll = &widget.Scroll{}
+	e.scroll = widget.NewScroll(nil)
 	objects := []fyne.CanvasObject{box, line}
 	if e.Wrapping != fyne.TextWrapOff {
 		e.scroll.Content = e.content

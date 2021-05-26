@@ -302,6 +302,7 @@ func (r *buttonRenderer) applyTheme() {
 			}
 		}
 	}
+	r.ShadowingRenderer.RefreshShadow()
 }
 
 func (r *buttonRenderer) buttonColor() color.Color {

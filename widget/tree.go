@@ -643,6 +643,12 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.Select(n.uid)
 }
 
+func (n *treeNode) Resize(s fyne.Size) {
+	n.BaseWidget.Resize(s)
+	// TODO find out if the indentation changed. If not, and size is the same, then we can skip this as normal
+	cache.Renderer(n.super()).Layout(s)
+}
+
 func (n *treeNode) partialRefresh() {
 	if r := cache.Renderer(n.super()); r != nil {
 		r.(*treeNodeRenderer).partialRefresh()

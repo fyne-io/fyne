@@ -105,48 +105,6 @@ func (b *scrollBar) Dragged(e *fyne.DragEvent) {
 	b.area.moveBar(b.draggedDistance+b.dragStart, b.Size())
 }
 
-// Hide hides the shadow.
-//
-// Implements: fyne.Widget
-func (b *scrollBar) Hide() {
-	HideWidget(&b.Base, b)
-}
-
-// MinSize returns the minimal size of the shadow.
-//
-// Implements: fyne.Widget
-func (b *scrollBar) MinSize() fyne.Size {
-	return MinSizeOf(b)
-}
-
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (b *scrollBar) Move(pos fyne.Position) {
-	MoveWidget(&b.Base, b, pos)
-}
-
-// Refresh triggers a redraw of the shadow.
-//
-// Implements: fyne.Widget
-func (b *scrollBar) Refresh() {
-	RefreshWidget(b)
-}
-
-// Resize changes the size of the shadow.
-//
-// Implements: fyne.Widget
-func (b *scrollBar) Resize(size fyne.Size) {
-	ResizeWidget(&b.Base, b, size)
-}
-
-// Show makes the shadow visible.
-//
-// Implements: fyne.Widget
-func (b *scrollBar) Show() {
-	ShowWidget(&b.Base, b)
-}
-
 func (b *scrollBar) MouseIn(e *desktop.MouseEvent) {
 	b.area.MouseIn(e)
 }
@@ -160,6 +118,7 @@ func (b *scrollBar) MouseOut() {
 
 func newScrollBar(area *scrollBarArea) *scrollBar {
 	b := &scrollBar{area: area, orientation: area.orientation}
+	b.ExtendBaseWidget(b)
 	return b
 }
 
@@ -236,20 +195,6 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{bar}), area: a, bar: bar}
 }
 
-// Hide hides the shadow.
-//
-// Implements: fyne.Widget
-func (a *scrollBarArea) Hide() {
-	HideWidget(&a.Base, a)
-}
-
-// MinSize returns the minimal size of the shadow.
-//
-// Implements: fyne.Widget
-func (a *scrollBarArea) MinSize() fyne.Size {
-	return MinSizeOf(a)
-}
-
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
 	a.isLarge = true
 	a.scroll.Refresh()
@@ -261,34 +206,6 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 func (a *scrollBarArea) MouseOut() {
 	a.isLarge = false
 	a.scroll.Refresh()
-}
-
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (a *scrollBarArea) Move(pos fyne.Position) {
-	MoveWidget(&a.Base, a, pos)
-}
-
-// Refresh triggers a redraw of the shadow.
-//
-// Implements: fyne.Widget
-func (a *scrollBarArea) Refresh() {
-	RefreshWidget(a)
-}
-
-// Resize changes the size of the shadow.
-//
-// Implements: fyne.Widget
-func (a *scrollBarArea) Resize(size fyne.Size) {
-	ResizeWidget(&a.Base, a, size)
-}
-
-// Show makes the shadow visible.
-//
-// Implements: fyne.Widget
-func (a *scrollBarArea) Show() {
-	ShowWidget(&a.Base, a)
 }
 
 func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
@@ -318,6 +235,7 @@ func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, conten
 
 func newScrollBarArea(scroll *Scroll, orientation scrollBarOrientation) *scrollBarArea {
 	a := &scrollBarArea{scroll: scroll, orientation: orientation}
+	a.ExtendBaseWidget(a)
 	return a
 }
 
@@ -497,13 +415,6 @@ func (s *Scroll) Dragged(e *fyne.DragEvent) {
 	}
 }
 
-// Hide hides the shadow.
-//
-// Implements: fyne.Widget
-func (s *Scroll) Hide() {
-	HideWidget(&s.Base, s)
-}
-
 // MinSize returns the smallest size this widget can shrink to
 func (s *Scroll) MinSize() fyne.Size {
 	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
@@ -516,13 +427,6 @@ func (s *Scroll) MinSize() fyne.Size {
 		return s.Content.MinSize()
 	}
 	return min
-}
-
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (s *Scroll) Move(pos fyne.Position) {
-	MoveWidget(&s.Base, s, pos)
 }
 
 // SetMinSize specifies a minimum size for this scroll container.
@@ -538,16 +442,13 @@ func (s *Scroll) Refresh() {
 	s.refreshWithoutOffsetUpdate()
 }
 
-func (s *Scroll) refreshWithoutOffsetUpdate() {
-	RefreshWidget(s)
+func (s *Scroll) Resize(sz fyne.Size) {
+	s.Base.Resize(sz)
+	s.Refresh()
 }
 
-// Resize sets a new size for the scroll container.
-func (s *Scroll) Resize(size fyne.Size) {
-	if size != s.size {
-		s.size = size
-		s.Refresh()
-	}
+func (s *Scroll) refreshWithoutOffsetUpdate() {
+	s.Base.Refresh()
 }
 
 // Scrolled is called when an input device triggers a scroll event
@@ -559,13 +460,6 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 	if s.updateOffset(dx, dy) {
 		s.refreshWithoutOffsetUpdate()
 	}
-}
-
-// Show makes the shadow visible.
-//
-// Implements: fyne.Widget
-func (s *Scroll) Show() {
-	ShowWidget(&s.Base, s)
 }
 
 func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
@@ -599,19 +493,25 @@ func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 // NewScroll creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed object.
 func NewScroll(content fyne.CanvasObject) *Scroll {
-	return newScrollContainerWithDirection(ScrollBoth, content)
+	s := newScrollContainerWithDirection(ScrollBoth, content)
+	s.ExtendBaseWidget(s)
+	return s
 }
 
 // NewHScroll create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Width to be smaller than that of the passed object.
 func NewHScroll(content fyne.CanvasObject) *Scroll {
-	return newScrollContainerWithDirection(ScrollHorizontalOnly, content)
+	s := newScrollContainerWithDirection(ScrollHorizontalOnly, content)
+	s.ExtendBaseWidget(s)
+	return s
 }
 
 // NewVScroll create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
 func NewVScroll(content fyne.CanvasObject) *Scroll {
-	return newScrollContainerWithDirection(ScrollVerticalOnly, content)
+	s := newScrollContainerWithDirection(ScrollVerticalOnly, content)
+	s.ExtendBaseWidget(s)
+	return s
 }
 
 func newScrollContainerWithDirection(direction ScrollDirection, content fyne.CanvasObject) *Scroll {
@@ -619,5 +519,6 @@ func newScrollContainerWithDirection(direction ScrollDirection, content fyne.Can
 		Direction: direction,
 		Content:   content,
 	}
+	s.ExtendBaseWidget(s)
 	return s
 }
