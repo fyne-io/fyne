@@ -553,7 +553,7 @@ func (e *Entry) TouchDown(*mobile.TouchEvent) {
 	}
 }
 
-// TouchDown is called when this entry gets a touch up event on mobile device.
+// TouchUp is called when this entry gets a touch up event on mobile device.
 //
 // Since: 2.1
 //
@@ -561,7 +561,7 @@ func (e *Entry) TouchDown(*mobile.TouchEvent) {
 func (e *Entry) TouchUp(*mobile.TouchEvent) {
 }
 
-// TouchDown is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
+// TouchCancel is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
 //
 // Since: 2.1
 //
