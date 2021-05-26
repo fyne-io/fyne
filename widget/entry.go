@@ -542,15 +542,30 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
+// TouchDown is called when this entry gets a touch down event on mobile device, we ensure we have focus.
+//
+// Since: 2.1
+//
+// Implements: mobile.Touchable
 func (e *Entry) TouchDown(*mobile.TouchEvent) {
 	if c := fyne.CurrentApp().Driver().CanvasForObject(e); c != nil {
 		c.Focus(e.super().(fyne.Focusable))
 	}
 }
 
+// TouchDown is called when this entry gets a touch up event on mobile device.
+//
+// Since: 2.1
+//
+// Implements: mobile.Touchable
 func (e *Entry) TouchUp(*mobile.TouchEvent) {
 }
 
+// TouchDown is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
+//
+// Since: 2.1
+//
+// Implements: mobile.Touchable
 func (e *Entry) TouchCancel(*mobile.TouchEvent) {
 }
 
