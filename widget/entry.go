@@ -544,7 +544,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 func (e *Entry) TouchDown(*mobile.TouchEvent) {
 	if c := fyne.CurrentApp().Driver().CanvasForObject(e); c != nil {
-		c.Focus(e)
+		c.Focus(e.super().(fyne.Focusable))
 	}
 }
 
