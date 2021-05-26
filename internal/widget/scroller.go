@@ -442,6 +442,7 @@ func (s *Scroll) Refresh() {
 	s.refreshWithoutOffsetUpdate()
 }
 
+// Resize is called when this scroller should change size. We refresh to ensure the scroll bars are updated.
 func (s *Scroll) Resize(sz fyne.Size) {
 	s.Base.Resize(sz)
 	s.Refresh()
