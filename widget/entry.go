@@ -419,7 +419,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
-	fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
+	e.requestFocus()
 	e.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
 }
 
@@ -491,7 +491,7 @@ func (e *Entry) SetText(text string) {
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	if !e.Disabled() {
-		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
+		e.requestFocus()
 	}
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
@@ -509,7 +509,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		return // no popup options for a disabled concealed field
 	}
 
-	fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
+	e.requestFocus()
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.cutToClipboard(clipboard)
@@ -548,8 +548,8 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 //
 // Implements: mobile.Touchable
 func (e *Entry) TouchDown(*mobile.TouchEvent) {
-	if c := fyne.CurrentApp().Driver().CanvasForObject(e); c != nil {
-		c.Focus(e.super().(fyne.Focusable))
+	if !e.disabled {
+		e.requestFocus()
 	}
 }
 
@@ -923,6 +923,12 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
 		e.selectAll()
 	})
+}
+
+func (e *Entry) requestFocus() {
+	if c := fyne.CurrentApp().Driver().CanvasForObject(e.super()); c != nil {
+		c.Focus(e.super().(fyne.Focusable))
+	}
 }
 
 // Obtains row,col from a given textual position
@@ -1395,9 +1401,8 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 //
 // Implements: fyne.Draggable
 func (e *entryContent) DragEnd() {
-	impl := e.entry.super()
 	// we need to propagate the focus, top level widget handles focus APIs
-	fyne.CurrentApp().Driver().CanvasForObject(impl).Focus(impl.(interface{}).(fyne.Focusable))
+	e.entry.requestFocus()
 
 	e.entry.DragEnd()
 }
