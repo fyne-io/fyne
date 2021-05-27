@@ -12,6 +12,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 // Declare conformity with App interface
@@ -122,6 +124,9 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
 	}
+
+	repository.Register("http", intRepo.NewHTTPRepository())
+	repository.Register("https", intRepo.NewHTTPRepository())
 
 	return newApp
 }
