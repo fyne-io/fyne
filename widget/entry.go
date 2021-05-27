@@ -926,8 +926,9 @@ func (e *Entry) registerShortcut() {
 }
 
 func (e *Entry) requestFocus() {
-	if c := fyne.CurrentApp().Driver().CanvasForObject(e.super()); c != nil {
-		c.Focus(e.super().(fyne.Focusable))
+	impl := e.super()
+	if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+		c.Focus(impl.(fyne.Focusable))
 	}
 }
 
