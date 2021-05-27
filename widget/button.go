@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -314,17 +315,19 @@ func (r *buttonRenderer) buttonColor() color.Color {
 			bg = theme.PrimaryColor()
 		}
 
+		// This alpha blends with the over operator, and accounts for RGBA() returning alpha-premultiplied values
 		dstR, dstG, dstB, dstA := bg.RGBA()
 		srcR, srcG, srcB, srcA := theme.HoverColor().RGBA()
+
 		srcAlpha := float32(srcA) / 0xFFFF
 		dstAlpha := float32(dstA) / 0xFFFF
-		targetAlpha := 1 - srcAlpha*dstAlpha
 
-		outAlpha := srcAlpha + targetAlpha
-		outR := (srcAlpha*float32(srcR) + targetAlpha*float32(dstR)) / outAlpha
-		outG := (srcAlpha*float32(srcG) + targetAlpha*float32(dstG)) / outAlpha
-		outB := (srcAlpha*float32(srcB) + targetAlpha*float32(dstB)) / outAlpha
-		return color.RGBA{R: uint8(uint32(outR) >> 8), G: uint8(uint32(outG) >> 8), B: uint8(uint32(outB) >> 8), A: uint8(outAlpha * 0xFF)}
+		outAlpha := srcAlpha + dstAlpha*(1-srcAlpha)
+		outR := srcR + uint32(float32(dstR)*(1-srcAlpha))
+		outG := srcG + uint32(float32(dstG)*(1-srcAlpha))
+		outB := srcB + uint32(float32(dstB)*(1-srcAlpha))
+		// We create an RGBA64 here because the color components are already alpha-premultiplied 16-bit values (they're just stored in uint32s).
+		return color.RGBA64{R: uint16(outR), G: uint16(outG), B: uint16(outB), A: uint16(outAlpha * 0xFFFF)}
 	case r.button.Importance == HighImportance:
 		return theme.PrimaryColor()
 	default:
@@ -383,7 +386,7 @@ func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation 
 		bg.Resize(fyne.NewSize(size*2, w.Size().Height-theme.Padding()))
 		bg.Move(fyne.NewPos(mid-size, theme.Padding()/2))
 
-		r, g, bb, a := theme.PressedColor().RGBA()
+		r, g, bb, a := col.ToNRGBA(theme.PressedColor())
 		aa := uint8(a)
 		fade := aa - uint8(float32(aa)*done)
 		bg.FillColor = &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(bb), A: fade}

@@ -81,9 +81,9 @@ func TestTable_ChangeTheme(t *testing.T) {
 }
 
 func TestTable_Filled(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -261,9 +261,9 @@ func TestTable_Select(t *testing.T) {
 }
 
 func TestTable_SetColumnWidth(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },

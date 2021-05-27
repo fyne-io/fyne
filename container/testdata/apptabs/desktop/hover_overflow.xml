@@ -8,7 +8,7 @@
 					</widget>
 				</container>
 				<widget pos="114,0" size="36x37" type="*widget.Button">
-					<rectangle fillColor="rgba(46,48,48,255)" size="36x37"/>
+					<rectangle fillColor="rgba(62,78,78,255)" size="36x37"/>
 					<rectangle size="0x0"/>
 					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 				</widget>
