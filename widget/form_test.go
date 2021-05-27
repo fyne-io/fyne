@@ -134,9 +134,9 @@ func TestForm_ChangeTheme(t *testing.T) {
 }
 
 func TestForm_Hints(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	entry1 := &Entry{}
 	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
@@ -159,9 +159,9 @@ func TestForm_Hints(t *testing.T) {
 }
 
 func TestForm_Validation(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	entry1 := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "15-true"}
 	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
@@ -191,9 +191,9 @@ func TestForm_Validation(t *testing.T) {
 }
 
 func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	notEmptyValidator := func(s string) error {
 		if s == "" {
@@ -231,9 +231,9 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 }
 
 func TestForm_DisableEnable(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	form := &Form{
 		Items: []*FormItem{
@@ -267,9 +267,9 @@ func TestForm_DisableEnable(t *testing.T) {
 }
 
 func TestForm_Disable_Validation(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	entry := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "wrong"}
 
@@ -299,9 +299,9 @@ func TestForm_Disable_Validation(t *testing.T) {
 }
 
 func TestForm_HintsRendered(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	f := NewForm()
 

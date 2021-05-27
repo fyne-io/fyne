@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -89,7 +88,7 @@ func TestEntry_NotEmptyValidator(t *testing.T) {
 
 func TestEntry_SetValidationError(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
