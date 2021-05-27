@@ -14,7 +14,7 @@
 				</widget>
 				<container pos="90,0" size="60x32">
 					<widget size="28x32" type="*widget.Button">
-						<rectangle fillColor="rgba(46,48,48,255)" size="28x32"/>
+						<rectangle fillColor="rgba(62,78,78,255)" size="28x32"/>
 						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="4,6" rsc="contentAddIcon" size="iconInlineSize"/>
 					</widget>

@@ -299,9 +299,9 @@ func TestTree_Move(t *testing.T) {
 }
 
 func TestTree_Refresh(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	value := "Foo Leaf"
 	tree := widget.NewTreeWithStrings(treeData)
