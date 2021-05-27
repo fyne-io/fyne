@@ -129,7 +129,6 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			div.Resize(fyne.NewSize(size.Width, accordionDividerHeight))
 			y += accordionDividerHeight
 		}
-		y += theme.Padding()
 
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
@@ -144,14 +143,11 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
 		}
-
-		y += theme.Padding()
 	}
 }
 
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
-		size.Height += theme.Padding() * 2
 		if i != 0 {
 			size.Height += accordionDividerHeight
 		}

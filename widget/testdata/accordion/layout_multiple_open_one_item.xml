@@ -2,11 +2,11 @@
 	<content>
 		<container pos="4,4" size="142x192">
 			<widget pos="41,77" size="60x37" type="*widget.Accordion">
-				<widget pos="0,4" size="60x29" type="*widget.Button">
-					<rectangle fillColor="button" size="60x29"/>
+				<widget size="60x37" type="*widget.Button">
+					<rectangle fillColor="button" size="60x37"/>
 					<rectangle size="0x0"/>
-					<text bold pos="28,4" size="11x21">A</text>
-					<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
+					<text bold pos="36,8" size="11x21">A</text>
+					<image fillMode="contain" pos="12,8" rsc="menuDropDownIcon" size="20x21"/>
 				</widget>
 			</widget>
 		</container>

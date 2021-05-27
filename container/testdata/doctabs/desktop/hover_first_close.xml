@@ -1,37 +1,33 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.DocTabs">
-			<container size="150x32">
-				<widget size="86x32" type="*widget.Scroll">
-					<container size="166x32">
-						<widget size="81x32" type="*container.tabButton">
-							<text bold color="primary" pos="8,4" size="65x24">Test1</text>
-							<widget pos="57,6" size="20x20" type="*container.tabCloseButton">
-								<rectangle fillColor="hover" size="20x20"/>
-								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
-							</widget>
+			<container size="150x37">
+				<widget size="70x37" type="*widget.Scroll">
+					<container size="166x37">
+						<widget size="81x37" type="*container.tabButton">
+							<text bold color="primary" pos="8,4" size="65x29">Test1</text>
 						</widget>
-						<widget pos="85,0" size="81x32" type="*container.tabButton">
-							<text bold pos="8,4" size="65x24">Test2</text>
+						<widget pos="85,0" size="81x37" type="*container.tabButton">
+							<text bold pos="8,4" size="65x29">Test2</text>
 						</widget>
 					</container>
 				</widget>
-				<container pos="90,0" size="60x32">
-					<widget size="28x32" type="*widget.Button">
-						<rectangle fillColor="button" size="28x32"/>
+				<container pos="74,0" size="76x37">
+					<widget size="36x37" type="*widget.Button">
+						<rectangle fillColor="rgba(46,48,48,255)" size="36x37"/>
 						<rectangle size="0x0"/>
-						<image fillMode="contain" pos="4,6" rsc="contentAddIcon" size="iconInlineSize"/>
+						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize"/>
 					</widget>
-					<widget pos="32,0" size="28x32" type="*widget.Button">
-						<rectangle fillColor="button" size="28x32"/>
+					<widget pos="40,0" size="36x37" type="*widget.Button">
+						<rectangle fillColor="button" size="36x37"/>
 						<rectangle size="0x0"/>
-						<image fillMode="contain" pos="4,6" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,32" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,32" size="81x4"/>
-			<widget pos="0,36" size="150x114" type="*widget.Label">
+			<rectangle fillColor="shadow" pos="0,37" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,37" size="70x4"/>
+			<widget pos="0,41" size="150x109" type="*widget.Label">
 				<text pos="8,8" size="134x21">Text1</text>
 			</widget>
 		</widget>

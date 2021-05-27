@@ -1,30 +1,30 @@
-<canvas size="60x73">
+<canvas size="60x78">
 	<content>
-		<widget size="60x73" type="*container.DocTabs">
-			<container pos="0,41" size="60x32">
-				<widget size="28x32" type="*widget.Scroll">
-					<container size="251x32">
-						<widget size="81x32" type="*container.tabButton">
-							<text bold color="primary" pos="8,4" size="65x24">Test1</text>
+		<widget size="60x78" type="*container.DocTabs">
+			<container pos="0,41" size="60x37">
+				<widget size="20x37" type="*widget.Scroll">
+					<container size="251x37">
+						<widget size="81x37" type="*container.tabButton">
+							<text bold color="primary" pos="8,4" size="65x29">Test1</text>
 						</widget>
-						<widget pos="85,0" size="81x32" type="*container.tabButton">
-							<text bold pos="8,4" size="65x24">Test2</text>
+						<widget pos="85,0" size="81x37" type="*container.tabButton">
+							<text bold pos="8,4" size="65x29">Test2</text>
 						</widget>
-						<widget pos="170,0" size="81x32" type="*container.tabButton">
-							<text bold pos="8,4" size="65x24">Test3</text>
+						<widget pos="170,0" size="81x37" type="*container.tabButton">
+							<text bold pos="8,4" size="65x29">Test3</text>
 						</widget>
 					</container>
 				</widget>
-				<container pos="32,0" size="28x32">
-					<widget size="28x32" type="*widget.Button">
-						<rectangle fillColor="button" size="28x32"/>
+				<container pos="24,0" size="36x37">
+					<widget size="36x37" type="*widget.Button">
+						<rectangle fillColor="button" size="36x37"/>
 						<rectangle size="0x0"/>
-						<image fillMode="contain" pos="4,6" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,37" size="60x4"/>
-			<rectangle fillColor="primary" pos="0,37" size="28x4"/>
+			<rectangle fillColor="primary" pos="0,37" size="20x4"/>
 			<widget size="60x37" type="*widget.Label">
 				<text pos="8,8" size="44x21">Text 1</text>
 			</widget>

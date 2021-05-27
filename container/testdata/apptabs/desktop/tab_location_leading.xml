@@ -2,15 +2,15 @@
 	<content>
 		<widget size="113x37" type="*container.AppTabs">
 			<container size="49x37">
-				<container size="49x4">
+				<container size="49x-4">
 					<widget size="49x29" type="*container.tabButton">
 						<text alignment="center" bold color="primary" pos="4,4" size="41x21">Test1</text>
 					</widget>
 				</container>
-				<widget pos="0,8" size="49x29" type="*widget.Button">
-					<rectangle fillColor="button" size="49x29"/>
+				<widget size="49x37" type="*widget.Button">
+					<rectangle fillColor="button" size="49x37"/>
 					<rectangle size="0x0"/>
-					<image fillMode="contain" pos="14,4" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
+					<image fillMode="contain" pos="14,8" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
 				</widget>
 			</container>
 			<rectangle fillColor="shadow" pos="49,0" size="4x37"/>

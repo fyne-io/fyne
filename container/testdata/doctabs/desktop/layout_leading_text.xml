@@ -2,18 +2,18 @@
 	<content>
 		<widget size="150x150" type="*container.DocTabs">
 			<container size="74x150">
-				<widget size="74x117" type="*widget.Scroll">
-					<container size="74x117">
+				<widget size="74x109" type="*widget.Scroll">
+					<container size="74x109">
 						<widget size="74x29" type="*container.tabButton">
 							<text bold color="primary" pos="4,4" size="66x21">Text2</text>
 						</widget>
 					</container>
 				</widget>
-				<container pos="0,121" size="74x29">
-					<widget size="28x29" type="*widget.Button">
-						<rectangle fillColor="button" size="28x29"/>
+				<container pos="0,113" size="74x37">
+					<widget size="36x37" type="*widget.Button">
+						<rectangle fillColor="button" size="36x37"/>
 						<rectangle size="0x0"/>
-						<image fillMode="contain" pos="4,4" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>
