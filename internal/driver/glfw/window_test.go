@@ -282,7 +282,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 300))
 	repaintWindow(w)
 
-	w.mouseMoved(w.viewport, 9, 50)
+	w.mouseMoved(w.viewport, 5, 42)
 	w.WaitForEvents()
 	repaintWindow(w)
 	w.mouseLock.RLock()
@@ -290,7 +290,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
-	w.mouseMoved(w.viewport, 50, 50)
+	w.mouseMoved(w.viewport, 42, 42)
 	w.WaitForEvents()
 	repaintWindow(w)
 	w.mouseLock.RLock()
@@ -298,7 +298,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
-	w.mouseMoved(w.viewport, 50, 100)
+	w.mouseMoved(w.viewport, 42, 100)
 	w.WaitForEvents()
 	repaintWindow(w)
 	w.mouseLock.RLock()
@@ -318,6 +318,30 @@ func TestWindow_HandleDragging(t *testing.T) {
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 	require.Equal(t, fyne.NewPos(14, 0), d2.Position())
+
+	// no drag event in simple move
+	w.mouseMoved(w.viewport, 9, 9)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag event on secondary mouseDown
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag start and no drag event with pressed secondary mouse button
+	w.mouseMoved(w.viewport, 8, 8)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag end event on secondary mouseUp
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEndEvent())
+	assert.Nil(t, d2.popDragEndEvent())
 
 	// no drag event in simple move
 	w.mouseMoved(w.viewport, 9, 9)
@@ -573,6 +597,25 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.WaitForEvents()
 	assert.NotNil(t, dh.popMouseOutEvent())
+}
+
+func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
+	w := createWindow("Test").(*window)
+	do := &draggableTappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	do.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(do)
+
+	repaintWindow(w)
+	require.Equal(t, fyne.NewPos(4, 4), do.Position())
+
+	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	w.WaitForEvents()
+
+	assert.Nil(t, do.popTapEvent())
 }
 
 func TestWindow_Scrolled(t *testing.T) {
@@ -1326,6 +1369,12 @@ func (t *tappable) popTapEvent() (e interface{}) {
 func (t *tappable) popSecondaryTapEvent() (e interface{}) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
 	return
+}
+
+type draggableTappableObject struct {
+	*canvas.Rectangle
+	draggable
+	tappable
 }
 
 var _ fyne.Focusable = (*focusable)(nil)

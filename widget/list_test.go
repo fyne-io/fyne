@@ -38,7 +38,7 @@ func TestList_MinSize(t *testing.T) {
 		},
 		"large": {
 			fyne.NewSize(100, 100),
-			fyne.NewSize(100+3*theme.Padding(), 100+2*theme.Padding()),
+			fyne.NewSize(100+theme.Padding(), 100),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -108,17 +108,17 @@ func TestList_ScrollTo(t *testing.T) {
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
 
-	offset = float32(8245)
+	offset = float32(6637)
 	list.ScrollTo(200)
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
 
-	offset = float32(44999)
+	offset = float32(36999)
 	list.ScrollTo(999)
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
 
-	offset = float32(23000)
+	offset = float32(19000)
 	list.ScrollTo(500)
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
@@ -127,7 +127,7 @@ func TestList_ScrollTo(t *testing.T) {
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
 
-	offset = float32(46)
+	offset = float32(38)
 	list.ScrollTo(1)
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
@@ -136,7 +136,7 @@ func TestList_ScrollTo(t *testing.T) {
 func TestList_ScrollToBottom(t *testing.T) {
 	list := createList(1000)
 
-	offset := float32(44999)
+	offset := float32(36999)
 	list.ScrollToBottom()
 	assert.Equal(t, offset, list.offsetY)
 	assert.Equal(t, offset, list.scroller.Offset.Y)
@@ -187,19 +187,19 @@ func TestList_Select(t *testing.T) {
 
 	assert.Equal(t, float32(0), list.offsetY)
 	list.Select(50)
-	assert.Equal(t, float32(1345), list.offsetY)
+	assert.Equal(t, float32(937), list.offsetY)
 	visible := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.Equal(t, visible[50].background.FillColor, theme.FocusColor())
 	assert.True(t, visible[50].background.Visible())
 
 	list.Select(5)
-	assert.Equal(t, float32(230), list.offsetY)
+	assert.Equal(t, float32(190), list.offsetY)
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.Equal(t, visible[5].background.FillColor, theme.FocusColor())
 	assert.True(t, visible[5].background.Visible())
 
 	list.Select(6)
-	assert.Equal(t, float32(230), list.offsetY)
+	assert.Equal(t, float32(190), list.offsetY)
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.False(t, visible[5].background.Visible())
 	assert.Equal(t, visible[6].background.FillColor, theme.FocusColor())
@@ -369,7 +369,7 @@ func TestList_ScrollThenShrink(t *testing.T) {
 
 	visibles := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	visibleCount := len(visibles)
-	assert.Equal(t, visibleCount, 8)
+	assert.Equal(t, visibleCount, 9)
 
 	list.scroller.ScrollToBottom()
 	visibles = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children

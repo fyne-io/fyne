@@ -1,6 +1,15 @@
 package binding
 
-var itemQueueIn, itemQueueOut = makeInfiniteQueue()
+import (
+	"sync"
+)
+
+var (
+	itemQueueIn      chan<- *itemData
+	itemQueueOut     <-chan *itemData
+	processOnce      sync.Once
+	queueInitialized = make(chan struct{})
+)
 
 type itemData struct {
 	fn   func()
@@ -8,11 +17,15 @@ type itemData struct {
 }
 
 func queueItem(f func()) {
+	if itemQueueIn == nil || itemQueueOut == nil {
+		processOnce.Do(func() {
+			itemQueueIn, itemQueueOut = makeInfiniteQueue()
+			go processItems()
+			close(queueInitialized)
+		})
+	}
+	<-queueInitialized
 	itemQueueIn <- &itemData{fn: f}
-}
-
-func init() {
-	go processItems()
 }
 
 func makeInfiniteQueue() (chan<- *itemData, <-chan *itemData) {
@@ -62,6 +75,7 @@ func processItems() {
 }
 
 func waitForItems() {
+	<-queueInitialized
 	done := make(chan interface{})
 	itemQueueIn <- &itemData{done: done}
 	<-done

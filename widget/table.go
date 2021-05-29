@@ -63,7 +63,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	colHover := canvas.NewRectangle(theme.HoverColor())
 	rowHover := canvas.NewRectangle(theme.HoverColor())
 
-	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	cellSize := t.templateSize()
 	t.cells = newTableCells(t, cellSize)
 	t.scroll = widget.NewScroll(t.cells)
 
@@ -104,14 +104,14 @@ func (t *Table) Select(id TableCellID) {
 
 // SetColumnWidth supports changing the width of the specified column. Columns normally take the width of the template
 // cell returned from the CreateCell callback. The width parameter uses the same units as a fyne.Size type and refers
-// to the internal content width not including any standard padding or divider size.
+// to the internal content width not including the divider size.
 //
 // Since: 1.4.1
 func (t *Table) SetColumnWidth(id int, width float32) {
 	if t.columnWidths == nil {
 		t.columnWidths = make(map[int]float32)
 	}
-	t.columnWidths[id] = width + 2*theme.Padding() // The API uses content size so it's consistent with templates
+	t.columnWidths[id] = width
 	t.Refresh()
 }
 
@@ -157,8 +157,7 @@ func (t *Table) scrollTo(id TableCellID) {
 	}
 	scrollPos := t.offset
 
-	minSize := t.templateSize()
-	cellPadded := minSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	cellSize := t.templateSize()
 	cellX := float32(0)
 	cellWidth := float32(0)
 	for i := 0; i <= id.Col; i++ {
@@ -166,7 +165,7 @@ func (t *Table) scrollTo(id TableCellID) {
 			cellX += cellWidth + theme.SeparatorThicknessSize()
 		}
 
-		width := cellPadded.Width
+		width := cellSize.Width
 		if w, ok := t.columnWidths[i]; ok {
 			width = w
 		}
@@ -179,11 +178,11 @@ func (t *Table) scrollTo(id TableCellID) {
 		scrollPos.X = cellX + cellWidth - t.scroll.Size().Width
 	}
 
-	cellY := float32(id.Row) * (cellPadded.Height + theme.SeparatorThicknessSize())
+	cellY := float32(id.Row) * (cellSize.Height + theme.SeparatorThicknessSize())
 	if cellY < scrollPos.Y {
 		scrollPos.Y = cellY
-	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.Size().Height {
-		scrollPos.Y = cellY + cellPadded.Height - t.scroll.Size().Height
+	} else if cellY+cellSize.Height > scrollPos.Y+t.scroll.Size().Height {
+		scrollPos.Y = cellY + cellSize.Height - t.scroll.Size().Height
 	}
 	t.scroll.Offset = scrollPos
 	t.offset = scrollPos
@@ -268,7 +267,7 @@ func (t *tableRenderer) MinSize() fyne.Size {
 }
 
 func (t *tableRenderer) Refresh() {
-	t.cellSize = t.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	t.cellSize = t.t.templateSize()
 	t.moveIndicators()
 
 	t.colMarker.FillColor = theme.PrimaryColor()
@@ -548,7 +547,7 @@ func (r *tableCellsRenderer) Refresh() {
 	r.cells.propertyLock.Lock()
 	defer r.cells.propertyLock.Unlock()
 	oldSize := r.cells.cellSize
-	r.cells.cellSize = r.cells.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	r.cells.cellSize = r.cells.t.templateSize()
 	if oldSize != r.cells.cellSize { // theme changed probably
 		r.returnAllToPool()
 	}
@@ -591,9 +590,9 @@ func (r *tableCellsRenderer) Refresh() {
 				}
 			}
 
-			c.Move(fyne.NewPos(theme.Padding()+cellOffset,
-				theme.Padding()+float32(row)*(r.cells.cellSize.Height+separatorThickness)))
-			c.Resize(fyne.NewSize(colWidth-theme.Padding()*2, r.cells.cellSize.Height-theme.Padding()*2))
+			c.Move(fyne.NewPos(cellOffset,
+				float32(row)*(r.cells.cellSize.Height+separatorThickness)))
+			c.Resize(fyne.NewSize(colWidth, r.cells.cellSize.Height))
 
 			if updateCell != nil {
 				updateCell(TableCellID{row, col}, c)
