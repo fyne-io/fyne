@@ -48,8 +48,15 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 // DestroyRenderer frees a render implementation for a widget.
 // This is typically for internal use only.
 func DestroyRenderer(wid fyne.Widget) {
-	Renderer(wid).Destroy()
-
+	renderersLock.RLock()
+	rinfo, ok := renderers[wid]
+	renderersLock.RUnlock()
+	if !ok {
+		return
+	}
+	if rinfo != nil {
+		rinfo.renderer.Destroy()
+	}
 	renderersLock.Lock()
 	delete(renderers, wid)
 	renderersLock.Unlock()

@@ -40,11 +40,12 @@ func CleanTask() {
 			return
 		}
 	}
-	destroyExpiredRenderers(now)
 	destroyExpiredSvgs(now)
-	// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
-	// be a way to recover them later
 	if canvasRefresh {
+		// Destroy renderers on canvas refresh to avoid flickering screen.
+		destroyExpiredRenderers(now)
+		// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
+		// be a way to recover them later
 		destroyExpiredCanvases(now)
 	}
 	lastClean = time.Now()
