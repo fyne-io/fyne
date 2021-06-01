@@ -10,9 +10,9 @@ import (
 
 // Base provides a helper that handles basic widget behaviours.
 type Base struct {
-	size     fyne.Size
-	position fyne.Position
 	hidden   bool
+	position fyne.Position
+	size     fyne.Size
 
 	impl         fyne.Widget
 	propertyLock sync.RWMutex

@@ -89,6 +89,7 @@ func (b *MenuBar) activateChild(item *menuBarItem) {
 		return
 	}
 
+	item.Refresh()
 	item.Child().Show()
 	b.Refresh()
 }

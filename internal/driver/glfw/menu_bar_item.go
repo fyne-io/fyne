@@ -113,11 +113,6 @@ func (i *menuBarItem) MouseOut() {
 // Implements: fyne.Tappable
 func (i *menuBarItem) Tapped(*fyne.PointEvent) {
 	i.Parent.toggle(i)
-
-	if i.Parent.active {
-		i.Parent.canvas.Focus(i)
-	}
-	i.Refresh()
 }
 
 func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
