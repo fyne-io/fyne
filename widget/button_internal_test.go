@@ -137,7 +137,7 @@ func TestButton_Focus(t *testing.T) {
 	button.FocusGained()
 	render.Refresh() // force update without waiting
 
-	assert.Equal(t, theme.FocusColor(), render.buttonColor())
+	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.buttonColor())
 	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, true, tapped)
 
