@@ -131,7 +131,7 @@ func (pl *Pool) UnmarshalBinary(bin []byte) error {
 			}
 
 			data := bin[offset : offset+nbytes]
-			if x := uint8(bin[offset+nbytes]); x != 0 {
+			if x := bin[offset+nbytes]; x != 0 {
 				return fmt.Errorf("expected zero terminator, got 0x%02X for nchars=%v nbytes=%v data=%q", x, nchars, nbytes, data)
 			}
 			pl.strings[i] = string(data)

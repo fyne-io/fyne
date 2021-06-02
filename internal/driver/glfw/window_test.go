@@ -1061,12 +1061,12 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w.mouseMoved(w.viewport, 5, 5)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Release), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Release), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Release, glfw.ModControl)
 
 	w.WaitForEvents()
 
