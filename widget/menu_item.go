@@ -21,7 +21,9 @@ type menuItem struct {
 
 // newMenuItem creates a new menuItem.
 func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
-	return &menuItem{Item: item, Parent: parent}
+	i := &menuItem{Item: item, Parent: parent}
+	i.ExtendBaseWidget(i)
+	return i
 }
 
 func (i *menuItem) Child() *Menu {
@@ -56,20 +58,6 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// Hide hides the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Hide() {
-	widget.HideWidget(&i.Base, i)
-}
-
-// MinSize returns the minimal size of the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) MinSize() fyne.Size {
-	return widget.MinSizeOf(i)
-}
-
 // MouseIn activates the item which shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
 //
@@ -91,34 +79,6 @@ func (i *menuItem) MouseOut() {
 	if !i.isSubmenuOpen() {
 		i.deactivate()
 	}
-}
-
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Move(pos fyne.Position) {
-	widget.MoveWidget(&i.Base, i, pos)
-}
-
-// Refresh triggers a redraw of the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Refresh() {
-	widget.RefreshWidget(i)
-}
-
-// Resize changes the size of the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Resize(size fyne.Size) {
-	widget.ResizeWidget(&i.Base, i, size)
-}
-
-// Show makes the menu item visible.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Show() {
-	widget.ShowWidget(&i.Base, i)
 }
 
 // Tapped performs the action of the item and dismisses the menu.

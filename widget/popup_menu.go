@@ -55,14 +55,14 @@ func (p *PopUpMenu) Hide() {
 //
 // Implements: fyne.Widget
 func (p *PopUpMenu) Move(pos fyne.Position) {
-	widget.MoveWidget(&p.Base, p, p.adjustedPosition(pos, p.Size()))
+	p.Base.Move(p.adjustedPosition(pos, p.Size()))
 }
 
 // Resize changes the size of the pop-up menu.
 //
 // Implements: fyne.Widget
 func (p *PopUpMenu) Resize(size fyne.Size) {
-	widget.MoveWidget(&p.Base, p, p.adjustedPosition(p.Position(), size))
+	p.Base.Move(p.adjustedPosition(p.Position(), size))
 	p.Menu.Resize(size)
 }
 

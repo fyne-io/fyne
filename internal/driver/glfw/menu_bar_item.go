@@ -68,20 +68,6 @@ func (i *menuBarItem) Focused() bool {
 	return i.active
 }
 
-// Hide hides the menu bar item.
-//
-// Implements: fyne.Widget
-func (i *menuBarItem) Hide() {
-	widget.HideWidget(&i.Base, i)
-}
-
-// MinSize returns the minimal size of the menu bar item.
-//
-// Implements: fyne.Widget
-func (i *menuBarItem) MinSize() fyne.Size {
-	return widget.MinSizeOf(i)
-}
-
 // MouseIn activates the item and shows the menu if the bar is active.
 // The menu that was displayed before will be hidden.
 //
@@ -119,34 +105,6 @@ func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 func (i *menuBarItem) MouseOut() {
 	i.hovered = false
 	i.Refresh()
-}
-
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (i *menuBarItem) Move(pos fyne.Position) {
-	widget.MoveWidget(&i.Base, i, pos)
-}
-
-// Refresh triggers a redraw of the menu bar item.
-//
-// Implements: fyne.Widget
-func (i *menuBarItem) Refresh() {
-	widget.RefreshWidget(i)
-}
-
-// Resize changes the size of the menu bar item.
-//
-// Implements: fyne.Widget
-func (i *menuBarItem) Resize(size fyne.Size) {
-	widget.ResizeWidget(&i.Base, i, size)
-}
-
-// Show makes the menu bar item visible.
-//
-// Implements: fyne.Widget
-func (i *menuBarItem) Show() {
-	widget.ShowWidget(&i.Base, i)
 }
 
 // Tapped toggles the activation state of the menu bar.
