@@ -338,6 +338,9 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 
 	isFav := false
 	for i, fav := range f.favorites {
+		if fav.loc == nil {
+			continue
+		}
 		if fav.loc.Path() == dir.Path() {
 			f.favoritesList.Select(i)
 			isFav = true
