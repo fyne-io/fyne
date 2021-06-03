@@ -453,7 +453,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			// Node is below viewport and not visible
 		} else {
 			// Node is in viewport
-			var n *treeNode
+			var n fyne.CanvasObject
 			if isBranch {
 				b, ok := r.branches[uid]
 				if !ok {
@@ -464,7 +464,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 					b.update(uid, depth)
 				}
 				branches[uid] = b
-				n = b.treeNode
+				n = b
 				r.objects = append(r.objects, b)
 			} else {
 				l, ok := r.leaves[uid]
@@ -476,7 +476,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 					l.update(uid, depth)
 				}
 				leaves[uid] = l
-				n = l.treeNode
+				n = l
 				r.objects = append(r.objects, l)
 			}
 			if n != nil {
@@ -643,12 +643,6 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.Select(n.uid)
 }
 
-func (n *treeNode) Resize(s fyne.Size) {
-	n.BaseWidget.Resize(s)
-	// TODO find out if the indentation changed. If not, and size is the same, then we can skip this as normal
-	cache.Renderer(n.super()).Layout(s)
-}
-
 func (n *treeNode) partialRefresh() {
 	if r := cache.Renderer(n.super()); r != nil {
 		r.(*treeNodeRenderer).partialRefresh()
@@ -731,6 +725,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
+	r.Layout(r.treeNode.size)
 	canvas.Refresh(r.treeNode.super())
 }
 
