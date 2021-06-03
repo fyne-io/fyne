@@ -57,6 +57,8 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 		},
 		appTabs: t,
 	}
+	r.action = r.buildOverflowTabsButton()
+
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
 	r.updateTabs(1)
@@ -407,13 +409,12 @@ func (r *appTabsRenderer) updateTabs(max int) {
 
 	// Set overflow action
 	if tabCount <= max {
-		r.action = nil
+		r.action.Hide()
 		r.bar.Layout = layout.NewMaxLayout()
 	} else {
 		tabCount = max
-		if r.action == nil {
-			r.action = r.buildOverflowTabsButton()
-		}
+		r.action.Show()
+
 		// Set layout of tab bar containing tab buttons and overflow action
 		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 			r.bar.Layout = layout.NewBorderLayout(nil, r.action, nil, nil)
