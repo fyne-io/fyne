@@ -44,7 +44,7 @@ type fileDialog struct {
 	files            *fyne.Container
 	filesScroll      *container.Scroll
 	favorites        []favoriteItem
-	favoritesGroup   *widget.List
+	favoritesList    *widget.List
 	showHidden       bool
 
 	view viewLayout
@@ -197,7 +197,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	f.setView(gridView)
 	f.loadFavorites()
 
-	f.favoritesGroup = widget.NewList(
+	f.favoritesList = widget.NewList(
 		func() int {
 			return len(f.favorites)
 		},
@@ -209,7 +209,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(f.favorites[id].locName)
 		},
 	)
-	f.favoritesGroup.OnSelected = func(id widget.ListItemID) {
+	f.favoritesList.OnSelected = func(id widget.ListItemID) {
 		f.setLocation(f.favorites[id].loc)
 	}
 
@@ -240,9 +240,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, container.NewHScroll(f.fileName))
 
-	body := container.NewHSplit(f.favoritesGroup, fyne.NewContainerWithLayout(layout.NewBorderLayout(f.breadcrumbScroll, nil, nil, nil),
+	body := container.NewHSplit(f.favoritesList, fyne.NewContainerWithLayout(layout.NewBorderLayout(f.breadcrumbScroll, nil, nil, nil),
 		f.breadcrumbScroll, f.filesScroll))
-	body.SetOffset(0) // Set the minimum offset so that the favoritesGroup takes only it's minimal width
+	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only it's minimal width
 
 	return container.NewBorder(header, footer, nil, nil, body)
 }
@@ -339,13 +339,13 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 	isFav := false
 	for i, fav := range f.favorites {
 		if fav.loc.Path() == dir.Path() {
-			f.favoritesGroup.Select(i)
+			f.favoritesList.Select(i)
 			isFav = true
 			break
 		}
 	}
 	if !isFav {
-		f.favoritesGroup.UnselectAll()
+		f.favoritesList.UnselectAll()
 	}
 
 	f.setSelected(nil)
