@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-// NOTE: Texture cache functions should be called always in
-// the same go routine.
+// NOTE: Texture cache functions should always be called in
+// the same goroutine.
 
 var textures = make(map[fyne.CanvasObject]*textureInfo, 1024)
 
