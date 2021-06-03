@@ -125,6 +125,26 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 
 }
 
+func TestButton_Focus(t *testing.T) {
+	tapped := false
+	button := NewButton("Test", func() {
+		tapped = true
+	})
+	render := test.WidgetRenderer(button).(*buttonRenderer)
+	assert.Equal(t, theme.ButtonColor(), render.buttonColor())
+
+	assert.Equal(t, false, tapped)
+	button.FocusGained()
+	render.Refresh() // force update without waiting
+
+	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.buttonColor())
+	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.Equal(t, true, tapped)
+
+	button.FocusLost()
+	assert.Equal(t, theme.ButtonColor(), render.buttonColor())
+}
+
 func TestButtonRenderer_Layout(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
 	render := test.WidgetRenderer(button).(*buttonRenderer)

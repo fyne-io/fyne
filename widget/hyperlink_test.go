@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
-	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
@@ -18,6 +18,8 @@ func TestHyperlink_MinSize(t *testing.T) {
 	assert.Nil(t, err)
 
 	hyperlink := NewHyperlink("Test", u)
+	hyperlink.CreateRenderer()
+	hyperlink.provider.CreateRenderer()
 	minA := hyperlink.MinSize()
 
 	assert.Less(t, theme.Padding()*2, minA.Width)
@@ -41,7 +43,8 @@ func TestHyperlink_Cursor(t *testing.T) {
 
 func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
-	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink)[0].Alignment)
+	hyperlink.CreateRenderer()
+	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink.provider)[0].Alignment)
 }
 
 func TestHyperlink_Hide(t *testing.T) {
@@ -56,6 +59,24 @@ func TestHyperlink_Hide(t *testing.T) {
 	hyperlink.Show()
 	assert.False(t, hyperlink.Hidden)
 	assert.False(t, hyperlink.provider.Hidden)
+}
+
+func TestHyperlink_Focus(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	hyperlink := &Hyperlink{Text: "Test"}
+	w := test.NewWindow(hyperlink)
+	w.SetPadded(false)
+	defer w.Close()
+	w.Resize(hyperlink.MinSize())
+
+	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
+	hyperlink.FocusGained()
+	test.AssertImageMatches(t, "hyperlink/focus.png", w.Canvas().Capture())
+	hyperlink.FocusLost()
+	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
 }
 
 func TestHyperlink_Resize(t *testing.T) {
@@ -73,11 +94,11 @@ func TestHyperlink_SetText(t *testing.T) {
 	assert.Nil(t, err)
 
 	hyperlink := &Hyperlink{Text: "Test", URL: u}
-	hyperlink.Refresh()
+	hyperlink.CreateRenderer()
 	hyperlink.SetText("New")
 
 	assert.Equal(t, "New", hyperlink.Text)
-	assert.Equal(t, "New", textRenderTexts(hyperlink)[0].Text)
+	assert.Equal(t, "New", textRenderTexts(hyperlink.provider)[0].Text)
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
@@ -105,6 +126,7 @@ func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {
 	assert.Equal(t, size, link.MinSize())
 
 	r := link.CreateRenderer()
+	link.provider.CreateRenderer()
 	assert.Equal(t, size, link.Size())
 	assert.Equal(t, size, link.MinSize())
 	assert.Equal(t, size, r.MinSize())

@@ -241,9 +241,7 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 	}
 
 	if layer != 1 { // 0 - overlay, 1 - window head / menu, 2 - content
-		if wid, ok := co.(fyne.Focusable); ok {
-			c.Focus(wid)
-		} else {
+		if wid, ok := co.(fyne.Focusable); !ok || wid != c.Focused() {
 			c.Unfocus()
 		}
 	}
