@@ -114,7 +114,7 @@ func (s fileItemRenderer) Layout(size fyne.Size) {
 		s.text.Move(fyne.NewPos(0, size.Height-s.text.MinSize().Height))
 	} else {
 		s.icon.Resize(fyne.NewSize(fileInlineIconSize, fileInlineIconSize))
-		s.icon.Move(fyne.NewPos(0, (size.Height-fileInlineIconSize)/2))
+		s.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-fileInlineIconSize)/2))
 
 		s.text.Alignment = fyne.TextAlignLeading
 		s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
@@ -124,11 +124,23 @@ func (s fileItemRenderer) Layout(size fyne.Size) {
 }
 
 func (s fileItemRenderer) MinSize() fyne.Size {
+	var padding fyne.Size
+
 	if s.item.picker.view == gridView {
-		return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize+theme.Padding())
+		if s.item.picker.isCompact {
+			padding = fyne.NewSize(0, 0)
+		} else {
+			padding = fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
+		}
+		return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding)
 	}
 
-	return fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize+theme.Padding()*4)
+	if s.item.picker.isCompact {
+		padding = fyne.NewSize(theme.Padding(), theme.Padding()*2)
+	} else {
+		padding = fyne.NewSize(theme.Padding(), theme.Padding()*4)
+	}
+	return fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize).Add(padding)
 }
 
 func (s fileItemRenderer) Refresh() {

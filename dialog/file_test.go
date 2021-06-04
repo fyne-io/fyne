@@ -212,7 +212,7 @@ func TestShowFileOpen(t *testing.T) {
 		}
 	}
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -273,7 +273,7 @@ func TestHiddenFiles(t *testing.T) {
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	var target *fileDialogItem
@@ -316,7 +316,7 @@ func TestShowFileSave(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	save := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -439,7 +439,7 @@ func TestView(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	listLayout := layout.NewVBoxLayout()
 
@@ -452,7 +452,7 @@ func TestView(t *testing.T) {
 	// toggle view
 	test.Tap(toggleViewButton)
 	// reload files container
-	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	// view should be a list
 	assert.Equal(t, listLayout, files.Layout)
@@ -463,7 +463,7 @@ func TestView(t *testing.T) {
 	// toggle view
 	test.Tap(toggleViewButton)
 	// reload files container
-	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	// view should be a grid again
 	assert.NotEqual(t, listLayout, files.Layout)
