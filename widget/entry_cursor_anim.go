@@ -32,9 +32,9 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 	cursorOpaque := theme.PrimaryColor()
 	r, g, b, _ := col.ToNRGBA(theme.PrimaryColor())
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
-	start, end := color.Color(cursorDim), color.Color(cursorOpaque)
+	start, end := color.Color(cursorDim), cursorOpaque
 	if inverted {
-		start, end = color.Color(cursorOpaque), color.Color(cursorDim)
+		start, end = cursorOpaque, color.Color(cursorDim)
 	}
 	interrupted := false
 	anim := canvas.NewColorRGBAAnimation(start, end, time.Second/2, func(c color.Color) {

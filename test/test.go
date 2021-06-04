@@ -299,7 +299,7 @@ func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
 		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
 			unfocus = false
 			if focus != c.Focused() {
-				c.Focus(focus)
+				unfocus = true
 			}
 		}
 	}

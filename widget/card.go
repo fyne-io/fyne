@@ -214,6 +214,7 @@ func (c *cardRenderer) Refresh() {
 
 	c.applyTheme()
 	c.Layout(c.card.Size())
+	c.ShadowingRenderer.RefreshShadow()
 	canvas.Refresh(c.card.super())
 }
 

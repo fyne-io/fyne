@@ -288,16 +288,25 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 }
 
 func TestCanvas_Focusable(t *testing.T) {
-	content := newFocusableEntry()
 	c := NewCanvas().(*mobileCanvas)
+	content := newFocusableEntry(c)
 	c.SetContent(content)
 	content.Resize(fyne.NewSize(25, 25))
 
-	c.tapDown(fyne.NewPos(10, 10), 0)
+	pos := fyne.NewPos(10, 10)
+	c.tapDown(pos, 0)
+	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
-	c.tapDown(fyne.NewPos(10, 10), 1)
+	c.tapDown(pos, 1)
+	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
@@ -351,12 +360,14 @@ func (t *tappableLabel) TappedSecondary(_ *fyne.PointEvent) {
 
 type focusableEntry struct {
 	widget.Entry
+	c fyne.Canvas
+
 	focusedTimes   int
 	unfocusedTimes int
 }
 
-func newFocusableEntry() *focusableEntry {
-	entry := &focusableEntry{}
+func newFocusableEntry(c fyne.Canvas) *focusableEntry {
+	entry := &focusableEntry{c: c}
 	entry.ExtendBaseWidget(entry)
 	return entry
 }
@@ -369,6 +380,10 @@ func (f *focusableEntry) FocusGained() {
 func (f *focusableEntry) FocusLost() {
 	f.unfocusedTimes++
 	f.Entry.FocusLost()
+}
+
+func (f *focusableEntry) Tapped(ev *fyne.PointEvent) {
+	f.c.Focus(f)
 }
 
 type doubleTappableButton struct {

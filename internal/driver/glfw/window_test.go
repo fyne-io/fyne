@@ -1058,15 +1058,14 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w.SetContent(content)
 	repaintWindow(w)
 
-	w.mouseMoved(w.viewport, 5, 5)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.Canvas().Focus(content)
 
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Action(glfw.Press), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Action(glfw.Release), glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyF, 0, glfw.Action(glfw.Release), glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Release, glfw.ModControl)
 
 	w.WaitForEvents()
 
@@ -1083,11 +1082,13 @@ func TestWindow_ManualFocus(t *testing.T) {
 
 	w.mouseMoved(w.viewport, 9, 9)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.WaitForEvents()
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.WaitForEvents()
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
@@ -1387,6 +1388,10 @@ type focusable struct {
 	focusedTimes   int
 	unfocusedTimes int
 	disabled       bool
+}
+
+func (f *focusable) Tapped(*fyne.PointEvent) {
+	d.CanvasForObject(f).Focus(f)
 }
 
 func (f *focusable) TypedRune(rune) {

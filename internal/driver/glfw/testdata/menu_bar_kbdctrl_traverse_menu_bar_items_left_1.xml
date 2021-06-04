@@ -1,20 +1,8 @@
 <canvas size="300x300">
 	<content>
 		<container size="300x300">
-			<widget pos="100,50" size="77x37" type="*widget.Button">
-				<widget pos="2,2" size="73x33" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-2" size="73x2"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="73,-2" size="2x2" startColor="shadow"/>
-					<linearGradient angle="270" pos="73,0" size="2x33" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="73,33" size="2x2" startColor="shadow"/>
-					<linearGradient pos="0,33" size="73x2" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
-				</widget>
-				<rectangle fillColor="button" pos="2,2" size="73x33"/>
-				<rectangle size="0x0"/>
-				<text bold pos="12,8" size="53x21">Button</text>
+			<widget pos="100,50" size="65x37" type="*glfw_test.notFocusableButton">
+				<text pos="8,8" size="49x21">Button</text>
 			</widget>
 			<widget size="300x29" type="*glfw.MenuBar">
 				<widget size="300x29" type="*widget.Shadow">

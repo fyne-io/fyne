@@ -31,7 +31,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(0, 0))
-	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_tapped.xml", c)
+	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_tapped_selected.xml", c)
 
 	e.Disable()
 	assert.True(t, e.Disabled())

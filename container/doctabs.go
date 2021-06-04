@@ -62,7 +62,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 			buttonCache: make(map[*TabItem]*tabButton),
 		},
 		docTabs:  t,
-		scroller: &Scroll{},
+		scroller: NewScroll(nil),
 	}
 	r.action = r.buildAllTabsButton()
 	r.create = r.buildCreateTabsButton()
