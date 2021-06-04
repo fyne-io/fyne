@@ -222,7 +222,7 @@ func (d *gLDriver) startDrawThread() {
 
 					d.repaintWindow(w)
 				}
-				cache.CleanTask()
+				cache.Clean()
 			}
 		}
 	}()

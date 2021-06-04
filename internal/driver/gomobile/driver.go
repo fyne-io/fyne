@@ -262,7 +262,7 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		d.paintWindow(w, newSize)
 		d.app.Publish()
 	}
-	cache.CleanTask()
+	cache.Clean()
 }
 
 func (d *mobileDriver) onStart() {

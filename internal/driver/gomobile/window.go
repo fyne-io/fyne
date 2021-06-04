@@ -171,7 +171,7 @@ func (w *window) Close() {
 
 	// remove all canvas objects from the cache
 	w.QueueEvent(func() {
-		cache.ForceCleanFor(w.canvas)
+		cache.CleanCanvas(w.canvas)
 	})
 
 	// Call this in a go routine, because this function could be called

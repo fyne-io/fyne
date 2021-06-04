@@ -24,10 +24,10 @@ func init() {
 	}
 }
 
-// CleanTask run cache clean task, it should be called on paint events.
-func CleanTask() {
+// Clean run cache clean task, it should be called on paint events.
+func Clean() {
 	now := time.Now()
-	// do not run clean task so fast
+	// do not run clean task too fast
 	if now.Sub(lastClean) < 10*time.Second {
 		return
 	}
@@ -51,9 +51,9 @@ func CleanTask() {
 	lastClean = time.Now()
 }
 
-// ForceCleanFor forces a complete remove of all the objects that belong to the specified
+// CleanCanvas performs a complete remove of all the objects that belong to the specified
 // canvas. Usually used to free all objects from a closing windows.
-func ForceCleanFor(canvas fyne.Canvas) {
+func CleanCanvas(canvas fyne.Canvas) {
 	deletingObjs := make([]fyne.CanvasObject, 0, 50)
 
 	// find all objects that belong to the specified canvas

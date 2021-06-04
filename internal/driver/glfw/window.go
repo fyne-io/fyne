@@ -450,7 +450,7 @@ func (w *window) Close() {
 
 	// remove all canvas objects from the cache
 	w.QueueEvent(func() {
-		cache.ForceCleanFor(w.canvas)
+		cache.CleanCanvas(w.canvas)
 	})
 
 	// trigger callbacks
