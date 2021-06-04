@@ -250,7 +250,8 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
-	if c.FreeDirtyTextures() || c.IsDirty() {
+	canvasNeedRefresh := c.FreeDirtyTextures() || c.IsDirty()
+	if canvasNeedRefresh {
 		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
 
 		if c.EnsureMinSize() {
@@ -262,7 +263,7 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		d.paintWindow(w, newSize)
 		d.app.Publish()
 	}
-	cache.Clean()
+	cache.Clean(canvasNeedRefresh)
 }
 
 func (d *mobileDriver) onStart() {

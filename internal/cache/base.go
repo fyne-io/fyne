@@ -12,9 +12,9 @@ var (
 	cacheDuration     = 1 * time.Minute
 	cleanTaskInterval = cacheDuration / 2
 
-	canvasRefreshCh = make(chan struct{}, 1)
-	expiredObjects  = make([]fyne.CanvasObject, 0, 50)
-	lastClean       time.Time
+	expiredObjects                = make([]fyne.CanvasObject, 0, 50)
+	lastClean                     time.Time
+	skippedCleanWithCanvasRefresh = false
 )
 
 func init() {
@@ -25,23 +25,24 @@ func init() {
 }
 
 // Clean run cache clean task, it should be called on paint events.
-func Clean() {
+func Clean(canvasRefreshed bool) {
 	now := time.Now()
 	// do not run clean task too fast
 	if now.Sub(lastClean) < 10*time.Second {
+		if canvasRefreshed {
+			skippedCleanWithCanvasRefresh = true
+		}
 		return
 	}
-	canvasRefresh := false
-	select {
-	case <-canvasRefreshCh:
-		canvasRefresh = true
-	default:
-		if now.Sub(lastClean) < cleanTaskInterval {
-			return
-		}
+	if skippedCleanWithCanvasRefresh {
+		skippedCleanWithCanvasRefresh = false
+		canvasRefreshed = true
+	}
+	if !canvasRefreshed && now.Sub(lastClean) < cleanTaskInterval {
+		return
 	}
 	destroyExpiredSvgs(now)
-	if canvasRefresh {
+	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
 		destroyExpiredRenderers(now)
 		// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
@@ -87,15 +88,6 @@ func CleanCanvas(canvas fyne.Canvas) {
 		delete(renderers, wid)
 	}
 	renderersLock.Unlock()
-}
-
-// NotifyCanvasRefresh notifies to the caches that a canvas refresh was triggered.
-func NotifyCanvasRefresh() {
-	select {
-	case canvasRefreshCh <- struct{}{}:
-	default:
-		return
-	}
 }
 
 // destroyExpiredCanvases deletes objects from the canvases cache.

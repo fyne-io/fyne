@@ -292,9 +292,6 @@ func (c *Canvas) SetDirty(dirty bool) {
 	c.dirtyMutex.Lock()
 	c.dirty = dirty
 	c.dirtyMutex.Unlock()
-	if dirty {
-		cache.NotifyCanvasRefresh()
-	}
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.
