@@ -59,10 +59,6 @@ func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) 
 	textures[obj] = texInfo
 }
 
-// ===============================================================
-// Privates
-// ===============================================================
-
 // textureCacheBase defines base texture cache object.
 type textureCacheBase struct {
 	expiringCacheNoLock

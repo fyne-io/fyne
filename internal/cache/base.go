@@ -56,7 +56,6 @@ func Clean() {
 func CleanCanvas(canvas fyne.Canvas) {
 	deletingObjs := make([]fyne.CanvasObject, 0, 50)
 
-	// find all objects that belong to the specified canvas
 	canvasesLock.RLock()
 	for obj, cinfo := range canvases {
 		if cinfo.canvas == canvas {
@@ -68,15 +67,12 @@ func CleanCanvas(canvas fyne.Canvas) {
 		return
 	}
 
-	// remove them from canvas cache
 	canvasesLock.Lock()
 	for _, dobj := range deletingObjs {
 		delete(canvases, dobj)
 	}
 	canvasesLock.Unlock()
 
-	// destroy their renderers and delete them from the renderer
-	// cache if they are widgets
 	renderersLock.Lock()
 	for _, dobj := range deletingObjs {
 		wid, ok := dobj.(fyne.Widget)
@@ -101,10 +97,6 @@ func NotifyCanvasRefresh() {
 		return
 	}
 }
-
-// ===============================================================
-// Private functions
-// ===============================================================
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
@@ -166,10 +158,6 @@ func destroyExpiredSvgs(now time.Time) {
 		svgLock.Unlock()
 	}
 }
-
-// ===============================================================
-// Private types
-// ===============================================================
 
 type expiringCache struct {
 	expireLock sync.RWMutex

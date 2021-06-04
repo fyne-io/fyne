@@ -157,19 +157,16 @@ func (w *window) Close() {
 		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
 	}
 
-	// free textures
 	cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
 		w.canvas.Painter().Free(obj)
 	})
 
-	// destroy current renderers
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}
 	})
 
-	// remove all canvas objects from the cache
 	w.QueueEvent(func() {
 		cache.CleanCanvas(w.canvas)
 	})

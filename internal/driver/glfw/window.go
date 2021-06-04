@@ -441,14 +441,12 @@ func (w *window) Close() {
 		})
 	})
 
-	// destroy current renderers
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}
 	})
 
-	// remove all canvas objects from the cache
 	w.QueueEvent(func() {
 		cache.CleanCanvas(w.canvas)
 	})
