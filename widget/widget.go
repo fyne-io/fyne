@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -198,25 +199,4 @@ func (w *DisableableWidget) Disabled() bool {
 	return w.disabled
 }
 
-type simpleRenderer struct {
-	content *fyne.Container
-}
-
-func (s *simpleRenderer) Destroy() {
-}
-
-func (s *simpleRenderer) Layout(size fyne.Size) {
-	s.content.Resize(size)
-}
-
-func (s *simpleRenderer) MinSize() fyne.Size {
-	return s.content.MinSize()
-}
-
-func (s *simpleRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{s.content}
-}
-
-func (s *simpleRenderer) Refresh() {
-	s.content.Refresh()
-}
+type SimpleRenderer = internalWidget.SimpleRenderer

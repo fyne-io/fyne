@@ -192,7 +192,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	))
 
 	r := &colorPickerRenderer{
-		BaseRenderer:      internalwidget.NewBaseRenderer([]fyne.CanvasObject{contents}),
+		SimpleRenderer:    internalwidget.NewSimpleRenderer(contents),
 		picker:            p,
 		redChannel:        redChannel,
 		greenChannel:      greenChannel,
@@ -253,7 +253,7 @@ func (p *colorAdvancedPicker) updateRGBA(r, g, b, a int) bool {
 var _ fyne.WidgetRenderer = (*colorPickerRenderer)(nil)
 
 type colorPickerRenderer struct {
-	internalwidget.BaseRenderer
+	*internalwidget.SimpleRenderer
 	picker            *colorAdvancedPicker
 	redChannel        *colorChannel
 	greenChannel      *colorChannel
@@ -268,19 +268,9 @@ type colorPickerRenderer struct {
 	contents          fyne.CanvasObject
 }
 
-func (r *colorPickerRenderer) Layout(size fyne.Size) {
-	r.contents.Move(fyne.NewPos(0, 0))
-	r.contents.Resize(size)
-}
-
-func (r *colorPickerRenderer) MinSize() fyne.Size {
-	return r.contents.MinSize()
-}
-
 func (r *colorPickerRenderer) Refresh() {
 	r.updateObjects()
-	r.Layout(r.picker.Size())
-	canvas.Refresh(r.picker)
+	r.SimpleRenderer.Refresh()
 }
 
 func (r *colorPickerRenderer) updateObjects() {

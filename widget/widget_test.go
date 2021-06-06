@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -23,7 +24,7 @@ func (m *myWidget) Refresh() {
 
 func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 	m.ExtendBaseWidget(m)
-	return &simpleRenderer{&fyne.Container{}}
+	return internalWidget.NewSimpleRenderer(&fyne.Container{})
 }
 
 func TestApplyThemeCalled(t *testing.T) {

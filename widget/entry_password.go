@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -26,15 +24,16 @@ func newPasswordRevealer(e *Entry) *passwordRevealer {
 		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
 		entry: e,
 	}
+	pr.icon.SetMinSize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	pr.ExtendBaseWidget(pr)
 	return pr
 }
 
 func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	return &passwordRevealerRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
-		entry:        r.entry,
+		SimpleRenderer: widget.NewSimpleRenderer(r.icon),
+		icon:           r.icon,
+		entry:          r.entry,
 	}
 }
 
@@ -52,22 +51,14 @@ func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
 var _ fyne.WidgetRenderer = (*passwordRevealerRenderer)(nil)
 
 type passwordRevealerRenderer struct {
-	widget.BaseRenderer
+	*widget.SimpleRenderer
 	entry *Entry
 	icon  *canvas.Image
-}
-
-func (r *passwordRevealerRenderer) BackgroundColor() color.Color {
-	return color.Transparent
 }
 
 func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (r *passwordRevealerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 }
 
 func (r *passwordRevealerRenderer) Refresh() {
