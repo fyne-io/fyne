@@ -199,4 +199,8 @@ func (w *DisableableWidget) Disabled() bool {
 	return w.disabled
 }
 
+// SimpleRenderer is a basic renderer that satisfies widget.Renderer interface by wrapping
+// a single fyne.CanvasObject.
+//
+// Since: 2.1
 type SimpleRenderer = internalWidget.SimpleRenderer
