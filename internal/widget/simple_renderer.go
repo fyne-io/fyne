@@ -9,14 +9,14 @@ var _ fyne.WidgetRenderer = (*SimpleRenderer)(nil)
 //
 // Since: 2.1
 type SimpleRenderer struct {
-	object fyne.CanvasObject
+	objects []fyne.CanvasObject
 }
 
 // NewSimpleRenderer creates a new BaseRenderer.
 //
 // Since: 2.1
 func NewSimpleRenderer(object fyne.CanvasObject) *SimpleRenderer {
-	return &SimpleRenderer{object}
+	return &SimpleRenderer{[]fyne.CanvasObject{object}}
 }
 
 // Destroy does nothing in the base implementation.
@@ -33,7 +33,7 @@ func (r *SimpleRenderer) Destroy() {
 //
 // Since: 2.1
 func (r *SimpleRenderer) Layout(s fyne.Size) {
-	r.object.Resize(s)
+	r.objects[0].Resize(s)
 }
 
 // MinSize returns the smallest size that this render can use, returned from the underlying object.
@@ -42,7 +42,7 @@ func (r *SimpleRenderer) Layout(s fyne.Size) {
 //
 // Since: 2.1
 func (r *SimpleRenderer) MinSize() fyne.Size {
-	return r.object.MinSize()
+	return r.objects[0].MinSize()
 }
 
 // Objects returns the objects that should be rendered.
@@ -51,7 +51,7 @@ func (r *SimpleRenderer) MinSize() fyne.Size {
 //
 // Since: 2.1
 func (r *SimpleRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{r.object}
+	return r.objects
 }
 
 // Refresh requests the underlying object to redraw.
@@ -60,5 +60,5 @@ func (r *SimpleRenderer) Objects() []fyne.CanvasObject {
 //
 // Since: 2.1
 func (r *SimpleRenderer) Refresh() {
-	r.object.Refresh()
+	r.objects[0].Refresh()
 }
