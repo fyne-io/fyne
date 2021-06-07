@@ -271,13 +271,13 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
+	assert.Equal(t, "Ahnj\nBuki\n", entry.SelectedText())
 
 	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.SelectedText(), "")
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_PasteFromClipboard(t *testing.T) {
@@ -293,7 +293,7 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 
 	entry.pasteFromClipboard(clipboard)
 
-	assert.Equal(t, entry.Text, testContent)
+	assert.Equal(t, testContent, entry.Text)
 }
 
 func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
@@ -327,8 +327,8 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 func TestEntry_Tab(t *testing.T) {
 	e := NewEntry()
-	e.SetText("a\n\tb\nc")
 	e.TextStyle.Monospace = true
+	e.SetText("a\n\tb\nc")
 
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
 	assert.Equal(t, 3, len(r.texts))

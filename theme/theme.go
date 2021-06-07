@@ -275,6 +275,9 @@ func (t *builtinTheme) initFonts() {
 }
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	if t.variant != variantNameUserPreference {
+		v = t.variant
+	}
 	colors := darkPalette
 	if v == VariantLight {
 		colors = lightPalette
@@ -608,7 +611,7 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 }
 
 func setupDefaultTheme() fyne.Theme {
-	theme := &builtinTheme{}
+	theme := &builtinTheme{variant: variantNameUserPreference}
 
 	theme.initFonts()
 	return theme

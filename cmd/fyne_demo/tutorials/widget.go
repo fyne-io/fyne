@@ -156,6 +156,25 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
+	rich := widget.NewRichText(
+		widget.RichTextSegment{
+			Text:   "Normal",
+			Inline: true,
+		},
+		widget.RichTextSegment{
+			ColorName: theme.ColorNameError,
+			Inline:    true,
+			Text:      "Bold",
+			SizeName:  theme.SizeNameInlineIcon,
+			TextStyle: fyne.TextStyle{Bold: true},
+		},
+		widget.RichTextSegment{
+			Text:      "Italic",
+			Inline:    true,
+			SizeName:  theme.SizeNameCaptionText,
+			TextStyle: fyne.TextStyle{Italic: true},
+		})
+
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
@@ -169,9 +188,13 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 		label.Alignment = align
 		hyperlink.Alignment = align
+		for i := range rich.Segments {
+			rich.Segments[i].Alignment = align
+		}
 
 		label.Refresh()
 		hyperlink.Refresh()
+		rich.Refresh()
 	})
 	radioAlign.SetSelected("Text Alignment Leading")
 
@@ -191,10 +214,12 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		entryLoremIpsum.Wrapping = wrap
+		rich.Wrapping = wrap
 
 		label.Refresh()
 		hyperlink.Refresh()
 		entryLoremIpsum.Refresh()
+		rich.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
@@ -206,6 +231,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		),
 		label,
 		hyperlink,
+		rich,
 	)
 
 	grid := makeTextGrid()

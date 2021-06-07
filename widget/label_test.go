@@ -55,6 +55,7 @@ func TestLabel_MinSize(t *testing.T) {
 	assert.Less(t, minA.Width, minB.Width)
 
 	label.Text = "."
+	label.Refresh()
 	minC := label.MinSize()
 	assert.Greater(t, minB.Width, minC.Width)
 }
@@ -81,7 +82,7 @@ func TestLabel_Text(t *testing.T) {
 	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
 }
 
-func TestLabel_Text_Refresht(t *testing.T) {
+func TestLabel_Text_Refresh(t *testing.T) {
 	label := &Label{Text: ""}
 
 	assert.Equal(t, "", label.Text)

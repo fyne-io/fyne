@@ -1,13 +1,13 @@
 package widget
 
 import (
-	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,64 +15,25 @@ func textRenderTexts(p fyne.Widget) []*canvas.Text {
 	return cache.Renderer(p).(*textRenderer).texts
 }
 
-type testTextParent struct {
-	obj   fyne.Widget
-	fg    color.Color
-	align fyne.TextAlign
-	wrap  fyne.TextWrap
-	style fyne.TextStyle
-}
-
-func (t *testTextParent) textAlign() fyne.TextAlign {
-	return t.align
-}
-
-func (t *testTextParent) textWrap() fyne.TextWrap {
-	return t.wrap
-}
-
-func (t *testTextParent) textStyle() fyne.TextStyle {
-	return t.style
-}
-
-func (t *testTextParent) textColor() color.Color {
-	return t.fg
-}
-
-func (t *testTextParent) concealed() bool {
-	return false
-}
-
-func (t *testTextParent) object() fyne.Widget {
-	return t.obj
-}
-
-func newTestTextPresenter() textPresenter {
-	t := &testTextParent{}
-	t.obj = NewLabel("")
-
-	return t
-}
-
-func newTrailingBoldWhiteTextPresenter() textPresenter {
-	t := &testTextParent{}
-	t.style = fyne.TextStyle{Bold: true}
-	t.align = fyne.TextAlignTrailing
-	t.fg = color.White
-
-	t.obj = NewLabel("")
-	return t
+func trailingBoldErrorSegment() RichTextSegment {
+	return RichTextSegment{
+		Alignment: fyne.TextAlignTrailing,
+		ColorName: theme.ColorNameError,
+		TextStyle: fyne.TextStyle{Bold: true},
+	}
 }
 
 func TestText_Alignment(t *testing.T) {
-	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	text.setText("Test")
+	seg := trailingBoldErrorSegment()
+	seg.Text = "Test"
+	text := NewRichText(seg)
 	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).(*textRenderer).texts[0].Alignment)
 }
 
 func TestText_Row(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
-	text.setText("test")
+	text := NewRichTextWithText("")
+	text.Segments[0].Text = "test"
+	text.Refresh()
 
 	assert.Nil(t, text.row(-1))
 	assert.Nil(t, text.row(1))
@@ -81,42 +42,47 @@ func TestText_Row(t *testing.T) {
 }
 
 func TestText_Rows(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
-	text.setText("test")
+	text := NewRichTextWithText("test")
 	assert.Equal(t, 1, text.rows())
 
-	text.setText("test\ntest")
-	assert.Equal(t, text.rows(), 2)
+	text.Segments[0].Text = "test\ntest"
+	text.Refresh()
+	assert.Equal(t, 2, text.rows())
 
-	text.setText("test\ntest\ntest")
-	assert.Equal(t, text.rows(), 3)
+	text.Segments[0].Text = "test\ntest\ntest"
+	text.Refresh()
+	assert.Equal(t, 3, text.rows())
 
-	text.setText("test\ntest\ntest\n")
-	assert.Equal(t, text.rows(), 4)
+	text.Segments[0].Text = "test\ntest\ntest\n"
+	text.Refresh()
+	assert.Equal(t, 4, text.rows())
 
-	text.setText("\n")
-	assert.Equal(t, text.rows(), 2)
+	text.Segments[0].Text = "\n"
+	text.Refresh()
+	assert.Equal(t, 2, text.rows())
 }
 
 func TestText_RowLength(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
-	text.setText("test")
+	text := NewRichTextWithText("test")
 
 	rl := text.rowLength(0)
 	assert.Equal(t, 4, rl)
 
-	text.setText("test\ntèsts")
+	text.Segments[0].Text = "test\ntèsts"
+	text.Refresh()
 	rl = text.rowLength(0)
 	assert.Equal(t, 4, rl)
 
 	rl = text.rowLength(1)
 	assert.Equal(t, 5, rl)
 
-	text.setText("")
+	text.Segments[0].Text = ""
+	text.Refresh()
 	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
-	text.setText("\nhello")
+	text.Segments[0].Text = "\nhello"
+	text.Refresh()
 	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
@@ -126,62 +92,59 @@ func TestText_RowLength(t *testing.T) {
 
 func TestText_InsertAt(t *testing.T) {
 	type fields struct {
-		buffer []rune
+		buffer string
 	}
 	type args struct {
 		pos   int
-		runes []rune
+		runes string
 	}
 	tests := []struct {
 		name       string
 		fields     fields
 		args       args
-		wantBuffer []rune
+		wantBuffer string
 	}{
 		{
 			name:   "case_1",
-			fields: fields{buffer: []rune("A\n1")},
+			fields: fields{buffer: "A\n1"},
 			args: args{
 				pos:   0,
-				runes: []rune("\n"),
+				runes: "\n",
 			},
-			wantBuffer: []rune("\nA\n1"),
+			wantBuffer: "\nA\n1",
 		},
 		{
 			name:   "case_2",
-			fields: fields{buffer: []rune("hello\nèé+^#")},
+			fields: fields{buffer: "hello\nèé+^#"},
 			args: args{
 				pos:   5,
-				runes: []rune("\naddme"),
+				runes: "\naddme",
 			},
-			wantBuffer: []rune("hello\naddme\nèé+^#"),
+			wantBuffer: "hello\naddme\nèé+^#",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := &textProvider{
-				presenter: newTestTextPresenter(),
-				buffer:    tt.fields.buffer,
-			}
+			text := NewRichTextWithText(tt.fields.buffer)
 			text.insertAt(tt.args.pos, tt.args.runes)
-			assert.Equal(t, tt.wantBuffer, text.buffer)
+			assert.Equal(t, tt.wantBuffer, text.String())
 		})
 	}
 }
 
 func TestText_Insert(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
-	text.insertAt(0, []rune("a"))
-	assert.Equal(t, []rune("a"), text.buffer)
-	text.insertAt(1, []rune("\n"))
-	assert.Equal(t, []rune("a\n"), text.buffer)
-	text.insertAt(2, []rune("b"))
-	assert.Equal(t, []rune("a\nb"), text.buffer)
+	text := NewRichTextWithText("")
+	text.insertAt(0, "a")
+	assert.Equal(t, "a", text.String())
+	text.insertAt(1, "\n")
+	assert.Equal(t, "a\n", text.String())
+	text.insertAt(2, "b")
+	assert.Equal(t, "a\nb", text.String())
 }
 
 func TestText_DeleteFromTo(t *testing.T) {
 	type fields struct {
-		buffer []rune
+		buffer string
 	}
 	type args struct {
 		lowBound  int
@@ -191,58 +154,54 @@ func TestText_DeleteFromTo(t *testing.T) {
 		name       string
 		fields     fields
 		args       args
-		want       []rune
-		wantBuffer []rune
+		want       string
+		wantBuffer string
 	}{
 		{
 			name:   "case_1",
-			fields: fields{buffer: []rune("A\n1")},
+			fields: fields{buffer: "A\n1"},
 			args: args{
 				lowBound:  0,
 				highBound: 1,
 			},
-			want:       []rune("A"),
-			wantBuffer: []rune("\n1"),
+			want:       "A",
+			wantBuffer: "\n1",
 		},
 		{
 			name:   "case_2",
-			fields: fields{buffer: []rune("A\n1")},
+			fields: fields{buffer: "A\n1"},
 			args: args{
 				lowBound:  1,
 				highBound: 2,
 			},
-			want:       []rune("\n"),
-			wantBuffer: []rune("A1"),
+			want:       "\n",
+			wantBuffer: "A1",
 		},
 		{
 			name:   "case_3",
-			fields: fields{buffer: []rune("A\nè1")},
+			fields: fields{buffer: "A\nè1"},
 			args: args{
 				lowBound:  1,
 				highBound: 3,
 			},
-			want:       []rune("\nè"),
-			wantBuffer: []rune("A1"),
+			want:       "\nè",
+			wantBuffer: "A1",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := &textProvider{
-				presenter: newTestTextPresenter(),
-				buffer:    tt.fields.buffer,
-			}
+			text := NewRichTextWithText(tt.fields.buffer)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
 			assert.Equal(t, tt.want, got)
-			assert.Equal(t, tt.wantBuffer, text.buffer)
+			assert.Equal(t, tt.wantBuffer, text.String())
 		})
 	}
 }
 
 func TestText_Color(t *testing.T) {
-	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	text.presenter.object().Refresh()
+	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.ErrorColor(), textRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {
@@ -256,7 +215,7 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 	customTextSize1 := textSize1
 	customTextSize2 := textSize2
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
+		render.Refresh()
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})
@@ -315,7 +274,11 @@ func TestText_splitLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, splitLines([]rune(tt.text)))
+			got := splitLines(RichTextSegment{Text: tt.text})
+			for i, wantRow := range tt.want {
+				assert.Equal(t, wantRow[0], got[i].begin)
+				assert.Equal(t, wantRow[1], got[i].end)
+			}
 		})
 	}
 }
@@ -649,7 +612,11 @@ func TestText_lineBounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, lineBounds([]rune(tt.text), tt.wrap, 10, mockMeasurer))
+			got := lineBounds(RichTextSegment{Text: tt.text}, tt.wrap, 10, mockMeasurer)
+			for i, wantRow := range tt.want {
+				assert.Equal(t, wantRow[0], got[i].begin)
+				assert.Equal(t, wantRow[1], got[i].end)
+			}
 		})
 	}
 }
@@ -705,7 +672,11 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, lineBounds([]rune(tt.text), tt.wrap, 50, measurer))
+			got := lineBounds(RichTextSegment{Text: tt.text}, tt.wrap, 50, measurer)
+			for i, wantRow := range tt.want {
+				assert.Equal(t, wantRow[0], got[i].begin)
+				assert.Equal(t, wantRow[1], got[i].end)
+			}
 		})
 	}
 }

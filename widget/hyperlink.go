@@ -24,7 +24,7 @@ type Hyperlink struct {
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 
 	focused  bool
-	provider *textProvider
+	provider *RichText
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -47,7 +47,8 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
-	hl.provider = newTextProvider(hl.Text, hl)
+	hl.provider = NewRichTextWithText(hl.Text)
+	hl.syncSegments()
 
 	focus := canvas.NewRectangle(color.Transparent)
 	focus.StrokeColor = theme.FocusColor()
@@ -73,16 +74,26 @@ func (hl *Hyperlink) FocusLost() {
 	hl.Refresh()
 }
 
+// Refresh triggers a redraw of the hyperlink.
+//
+// Implements: fyne.Widget
+func (hl *Hyperlink) Refresh() {
+	if hl.provider == nil { // not created until visible
+		return
+	}
+	hl.syncSegments()
+
+	hl.provider.Refresh()
+	hl.BaseWidget.Refresh()
+}
+
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
-	hl.ExtendBaseWidget(hl)
-	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
-		p.setText(hl.Text)
+	if hl.provider == nil {
+		hl.CreateRenderer()
 	}
 
-	label := canvas.NewText(hl.Text, theme.ForegroundColor())
-	label.TextStyle = hl.textStyle()
-	return label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*4))
+	return hl.provider.MinSize()
 }
 
 // Resize sets a new size for the hyperlink.
@@ -101,7 +112,8 @@ func (hl *Hyperlink) SetText(text string) {
 	if hl.provider == nil { // not created until visible
 		return
 	}
-	hl.provider.setText(text) // calls refresh
+	hl.syncSegments()
+	hl.provider.Refresh()
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
@@ -135,36 +147,6 @@ func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 	}
 }
 
-// textAlign tells the rendering textProvider our alignment
-func (hl *Hyperlink) textAlign() fyne.TextAlign {
-	return hl.Alignment
-}
-
-// textWrap tells the rendering textProvider our wrapping
-func (hl *Hyperlink) textWrap() fyne.TextWrap {
-	return hl.Wrapping
-}
-
-// textStyle tells the rendering textProvider our style
-func (hl *Hyperlink) textStyle() fyne.TextStyle {
-	return hl.TextStyle
-}
-
-// textColor tells the rendering textProvider our color
-func (hl *Hyperlink) textColor() color.Color {
-	return theme.PrimaryColor()
-}
-
-// concealed tells the rendering textProvider if we are a concealed field
-func (hl *Hyperlink) concealed() bool {
-	return false
-}
-
-// object returns the root object of the widget so it can be referenced
-func (hl *Hyperlink) object() fyne.Widget {
-	return hl.provider
-}
-
 func (hl *Hyperlink) openURL() {
 	if hl.URL != nil {
 		err := fyne.CurrentApp().OpenURL(hl.URL)
@@ -172,6 +154,16 @@ func (hl *Hyperlink) openURL() {
 			fyne.LogError("Failed to open url", err)
 		}
 	}
+}
+
+func (hl *Hyperlink) syncSegments() {
+	hl.provider.Wrapping = hl.Wrapping
+	hl.provider.Segments = []RichTextSegment{{
+		Alignment: hl.Alignment,
+		ColorName: theme.ColorNamePrimary,
+		Text:      hl.Text,
+		TextStyle: hl.TextStyle,
+	}}
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
