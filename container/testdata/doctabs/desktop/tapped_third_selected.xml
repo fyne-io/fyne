@@ -5,13 +5,13 @@
 				<widget size="220x37" type="*widget.Scroll">
 					<container pos="-31,0" size="251x37">
 						<widget size="81x37" type="*container.tabButton">
-							<text bold pos="8,4" size="65x29">Test1</text>
+							<text bold pos="8,8" size="65x21">Test1</text>
 						</widget>
 						<widget pos="85,0" size="81x37" type="*container.tabButton">
-							<text bold pos="8,4" size="65x29">Test2</text>
+							<text bold pos="8,8" size="65x21">Test2</text>
 						</widget>
 						<widget pos="170,0" size="81x37" type="*container.tabButton">
-							<text bold color="primary" pos="8,4" size="65x29">Test3</text>
+							<text bold color="primary" pos="8,8" size="65x21">Test3</text>
 						</widget>
 					</container>
 				</widget>

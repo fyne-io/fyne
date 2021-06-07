@@ -3,15 +3,15 @@
 		<widget size="137x37" type="*container.DocTabs">
 			<container pos="64,0" size="73x37">
 				<widget size="73x-4" type="*widget.Scroll">
-					<container size="73x95">
-						<widget size="73x29" type="*container.tabButton">
-							<text bold color="primary" pos="4,4" size="65x21">Test1</text>
+					<container size="73x119">
+						<widget size="73x37" type="*container.tabButton">
+							<text bold color="primary" pos="4,8" size="65x21">Test1</text>
 						</widget>
-						<widget pos="0,33" size="73x29" type="*container.tabButton">
-							<text bold pos="4,4" size="65x21">Test2</text>
+						<widget pos="0,41" size="73x37" type="*container.tabButton">
+							<text bold pos="4,8" size="65x21">Test2</text>
 						</widget>
-						<widget pos="0,66" size="73x29" type="*container.tabButton">
-							<text bold pos="4,4" size="65x21">Test3</text>
+						<widget pos="0,82" size="73x37" type="*container.tabButton">
+							<text bold pos="4,8" size="65x21">Test3</text>
 						</widget>
 					</container>
 				</widget>

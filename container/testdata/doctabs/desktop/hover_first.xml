@@ -6,13 +6,13 @@
 					<container size="166x37">
 						<widget size="81x37" type="*container.tabButton">
 							<rectangle fillColor="hover" size="81x37"/>
-							<text bold color="primary" pos="8,4" size="65x29">Test1</text>
+							<text bold color="primary" pos="8,8" size="65x21">Test1</text>
 							<widget pos="57,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 						<widget pos="85,0" size="81x37" type="*container.tabButton">
-							<text bold pos="8,4" size="65x29">Test2</text>
+							<text bold pos="8,8" size="65x21">Test2</text>
 						</widget>
 					</container>
 				</widget>

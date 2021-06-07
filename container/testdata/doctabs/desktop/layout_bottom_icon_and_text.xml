@@ -5,7 +5,7 @@
 				<widget size="110x37" type="*widget.Scroll">
 					<container size="110x37">
 						<widget size="106x37" type="*container.tabButton">
-							<text bold color="primary" pos="32,4" size="66x29">Text1</text>
+							<text bold color="primary" pos="32,8" size="66x21">Text1</text>
 							<image pos="8,8" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 						</widget>
 					</container>

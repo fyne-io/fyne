@@ -5,25 +5,25 @@
 				<widget size="220x37" type="*widget.Scroll">
 					<container pos="-172,0" size="392x37">
 						<widget size="95x37" type="*container.tabButton">
-							<text bold pos="4,4" size="87x21">Test1</text>
+							<text bold pos="4,8" size="87x21">Test1</text>
 							<widget pos="71,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 						<widget pos="99,0" size="95x37" type="*container.tabButton">
-							<text bold pos="4,4" size="87x21">Test2</text>
+							<text bold pos="4,8" size="87x21">Test2</text>
 							<widget pos="71,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 						<widget pos="198,0" size="95x37" type="*container.tabButton">
-							<text bold pos="4,4" size="87x21">Test3</text>
+							<text bold pos="4,8" size="87x21">Test3</text>
 							<widget pos="71,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 						<widget pos="297,0" size="95x37" type="*container.tabButton">
-							<text bold color="primary" pos="4,4" size="87x21">Another</text>
+							<text bold color="primary" pos="4,8" size="87x21">Another</text>
 							<widget pos="71,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>

@@ -5,10 +5,10 @@
 				<widget size="110x37" type="*widget.Scroll">
 					<container size="178x37">
 						<widget size="87x37" type="*container.tabButton">
-							<text bold color="primary" pos="8,4" size="71x29">New 1</text>
+							<text bold color="primary" pos="8,8" size="71x21">New 1</text>
 						</widget>
 						<widget pos="91,0" size="87x37" type="*container.tabButton">
-							<text bold pos="8,4" size="71x29">New 2</text>
+							<text bold pos="8,8" size="71x21">New 2</text>
 						</widget>
 					</container>
 				</widget>

@@ -4,8 +4,8 @@
 			<container size="72x150">
 				<widget size="72x109" type="*widget.Scroll">
 					<container size="72x109">
-						<widget size="72x48" type="*container.tabButton">
-							<image pos="16,4" rsc="infoIcon" size="40x40" themed="primary"/>
+						<widget size="72x56" type="*container.tabButton">
+							<image pos="16,8" rsc="infoIcon" size="40x40" themed="primary"/>
 						</widget>
 					</container>
 				</widget>
@@ -18,7 +18,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="72,0" size="4x150"/>
-			<rectangle fillColor="primary" pos="72,0" size="4x48"/>
+			<rectangle fillColor="primary" pos="72,0" size="4x56"/>
 			<circle fillColor="background" pos="76,0" size="74x150"/>
 		</widget>
 	</content>
