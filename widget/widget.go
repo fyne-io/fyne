@@ -204,3 +204,11 @@ func (w *DisableableWidget) Disabled() bool {
 //
 // Since: 2.1
 type SimpleRenderer = internalWidget.SimpleRenderer
+
+// NewSimpleRenderer creates a new SimpleRenderer to render a widget using a
+// single fyne.CanvasObject.
+//
+// Since: 2.1
+func NewSimpleRenderer(object fyne.CanvasObject) *SimpleRenderer {
+	return internalWidget.NewSimpleRenderer(object)
+}
