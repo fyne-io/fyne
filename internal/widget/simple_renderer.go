@@ -12,14 +12,15 @@ type SimpleRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-// NewSimpleRenderer creates a new BaseRenderer.
+// NewSimpleRenderer creates a new SimpleRenderer to render a widget using a
+// single CanvasObject.
 //
 // Since: 2.1
 func NewSimpleRenderer(object fyne.CanvasObject) *SimpleRenderer {
 	return &SimpleRenderer{[]fyne.CanvasObject{object}}
 }
 
-// Destroy does nothing in the base implementation.
+// Destroy does nothing in this implementation.
 //
 // Implements: fyne.WidgetRenderer
 //
