@@ -24,7 +24,6 @@ func newPasswordRevealer(e *Entry) *passwordRevealer {
 		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
 		entry: e,
 	}
-	pr.icon.SetMinSize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	pr.ExtendBaseWidget(pr)
 	return pr
 }
@@ -59,6 +58,10 @@ type passwordRevealerRenderer struct {
 func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+}
+
+func (r *passwordRevealerRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 }
 
 func (r *passwordRevealerRenderer) Refresh() {

@@ -68,7 +68,6 @@ func newValidationStatus(e *Entry) *validationStatus {
 func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
 	icon := &canvas.Image{}
 	icon.Hide()
-	icon.SetMinSize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	return &validationStatusRenderer{
 		SimpleRenderer: widget.NewSimpleRenderer(icon),
 		icon:           icon,
@@ -87,6 +86,10 @@ type validationStatusRenderer struct {
 func (r *validationStatusRenderer) Layout(size fyne.Size) {
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+}
+
+func (r *validationStatusRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 }
 
 func (r *validationStatusRenderer) Refresh() {
