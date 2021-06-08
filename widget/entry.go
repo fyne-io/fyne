@@ -461,7 +461,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
 	e.propertyLock.Unlock()
 
-	e.placeholderProvider().Segments[0].Text = text
+	e.placeholderProvider().Segments[0].(*TextSegment).Text = text
 	e.placeholder.updateRowBounds()
 	e.placeholderProvider().Refresh()
 }
@@ -877,9 +877,11 @@ func (e *Entry) placeholderProvider() *RichText {
 		return e.placeholder
 	}
 
-	text := NewRichText(RichTextSegment{
-		ColorName: theme.ColorNamePlaceHolder,
-		Text:      e.PlaceHolder,
+	style := RichTextStyleInline
+	style.ColorName = theme.ColorNamePlaceHolder
+	text := NewRichText(&TextSegment{
+		Style: style,
+		Text:  e.PlaceHolder,
 	})
 	text.ExtendBaseWidget(text)
 	text.inset = fyne.NewSize(0, theme.InputBorderSize())
@@ -1060,11 +1062,13 @@ func (e *Entry) syncSegments() {
 		colName = theme.ColorNameDisabled
 	}
 	e.textProvider().Wrapping = wrap
-	e.textProvider().Segments = []RichTextSegment{{
-		Alignment: fyne.TextAlignLeading,
-		ColorName: colName,
+	e.textProvider().Segments = []RichTextSegment{&TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignLeading,
+			ColorName: colName,
+			TextStyle: e.TextStyle,
+		},
 		Text:      e.Text,
-		TextStyle: e.TextStyle,
 		concealed: e.Password,
 	}}
 	colName = theme.ColorNamePlaceHolder
@@ -1072,11 +1076,13 @@ func (e *Entry) syncSegments() {
 		colName = theme.ColorNameDisabled
 	}
 	e.placeholderProvider().Wrapping = wrap
-	e.placeholderProvider().Segments = []RichTextSegment{{
-		Alignment: fyne.TextAlignLeading,
-		ColorName: colName,
-		Text:      e.PlaceHolder,
-		TextStyle: e.TextStyle,
+	e.placeholderProvider().Segments = []RichTextSegment{&TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignLeading,
+			ColorName: colName,
+			TextStyle: e.TextStyle,
+		},
+		Text: e.PlaceHolder,
 	}}
 }
 

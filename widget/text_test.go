@@ -12,27 +12,32 @@ import (
 )
 
 func textRenderTexts(p fyne.Widget) []*canvas.Text {
-	return cache.Renderer(p).(*textRenderer).texts
+	renderer := cache.Renderer(p).(*textRenderer)
+	texts := make([]*canvas.Text, len(renderer.Objects()))
+	for i, obj := range renderer.Objects() {
+		texts[i] = obj.(*canvas.Text)
+	}
+	return texts
 }
 
-func trailingBoldErrorSegment() RichTextSegment {
-	return RichTextSegment{
+func trailingBoldErrorSegment() *TextSegment {
+	return &TextSegment{Style: RichTextStyle{
 		Alignment: fyne.TextAlignTrailing,
 		ColorName: theme.ColorNameError,
 		TextStyle: fyne.TextStyle{Bold: true},
-	}
+	}}
 }
 
 func TestText_Alignment(t *testing.T) {
 	seg := trailingBoldErrorSegment()
 	seg.Text = "Test"
 	text := NewRichText(seg)
-	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).(*textRenderer).texts[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).Objects()[0].(*canvas.Text).Alignment)
 }
 
 func TestText_Row(t *testing.T) {
 	text := NewRichTextWithText("")
-	text.Segments[0].Text = "test"
+	text.Segments[0].(*TextSegment).Text = "test"
 	text.Refresh()
 
 	assert.Nil(t, text.row(-1))
@@ -44,20 +49,21 @@ func TestText_Row(t *testing.T) {
 func TestText_Rows(t *testing.T) {
 	text := NewRichTextWithText("test")
 	assert.Equal(t, 1, text.rows())
+	textSeg := text.Segments[0].(*TextSegment)
 
-	text.Segments[0].Text = "test\ntest"
+	textSeg.Text = "test\ntest"
 	text.Refresh()
 	assert.Equal(t, 2, text.rows())
 
-	text.Segments[0].Text = "test\ntest\ntest"
+	textSeg.Text = "test\ntest\ntest"
 	text.Refresh()
 	assert.Equal(t, 3, text.rows())
 
-	text.Segments[0].Text = "test\ntest\ntest\n"
+	textSeg.Text = "test\ntest\ntest\n"
 	text.Refresh()
 	assert.Equal(t, 4, text.rows())
 
-	text.Segments[0].Text = "\n"
+	textSeg.Text = "\n"
 	text.Refresh()
 	assert.Equal(t, 2, text.rows())
 }
@@ -67,8 +73,9 @@ func TestText_RowLength(t *testing.T) {
 
 	rl := text.rowLength(0)
 	assert.Equal(t, 4, rl)
+	textSeg := text.Segments[0].(*TextSegment)
 
-	text.Segments[0].Text = "test\ntèsts"
+	textSeg.Text = "test\ntèsts"
 	text.Refresh()
 	rl = text.rowLength(0)
 	assert.Equal(t, 4, rl)
@@ -76,12 +83,12 @@ func TestText_RowLength(t *testing.T) {
 	rl = text.rowLength(1)
 	assert.Equal(t, 5, rl)
 
-	text.Segments[0].Text = ""
+	textSeg.Text = ""
 	text.Refresh()
 	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
-	text.Segments[0].Text = "\nhello"
+	textSeg.Text = "\nhello"
 	text.Refresh()
 	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
@@ -209,13 +216,15 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 	render := test.WidgetRenderer(label).(*textRenderer)
 
 	text1 := render.Objects()[0].(*canvas.Text)
-	text2 := render.Objects()[0].(*canvas.Text)
+	text2 := render.Objects()[1].(*canvas.Text)
 	textSize1 := text1.TextSize
 	textSize2 := text2.TextSize
 	customTextSize1 := textSize1
 	customTextSize2 := textSize2
 	test.WithTestTheme(t, func() {
-		render.Refresh()
+		label.Refresh()
+		text1 := render.Objects()[0].(*canvas.Text)
+		text2 := render.Objects()[1].(*canvas.Text)
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})
@@ -274,7 +283,7 @@ func TestText_splitLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := splitLines(RichTextSegment{Text: tt.text})
+			got := splitLines(&TextSegment{Text: tt.text})
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -612,7 +621,7 @@ func TestText_lineBounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(RichTextSegment{Text: tt.text}, tt.wrap, 10, mockMeasurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 10, mockMeasurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -672,7 +681,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(RichTextSegment{Text: tt.text}, tt.wrap, 50, measurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 50, measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)

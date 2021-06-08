@@ -29,7 +29,7 @@ Ut ac pulvinar purus. Pellentesque tellus quam, condimentum at odio id, viverra 
 
 func BenchmarkText_splitLines(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		splitLines(RichTextSegment{Text: loremIpsum})
+		splitLines(&TextSegment{Text: loremIpsum})
 	}
 }
 
@@ -40,7 +40,7 @@ func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
 	for n := 0; n < b.N; n++ {
-		lineBounds(RichTextSegment{Text: loremIpsum}, wrap, 10, measurer)
+		lineBounds(&TextSegment{Text: loremIpsum}, wrap, 10, measurer)
 	}
 }
 

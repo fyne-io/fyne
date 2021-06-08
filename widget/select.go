@@ -62,7 +62,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
 	if s.disabled {
-		txtProv.Segments[0].ColorName = theme.ColorNameDisabled
+		txtProv.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	}
 
 	background := &canvas.Rectangle{}
@@ -312,9 +312,9 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RUnlock()
 
 	if s.combo.disabled {
-		s.label.Segments[0].ColorName = theme.ColorNameDisabled
+		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	} else {
-		s.label.Segments[0].ColorName = theme.ColorNameForeground
+		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	}
 	s.label.Refresh()
 
@@ -355,9 +355,9 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	if s.combo.Selected == "" {
-		s.label.Segments[0].Text = s.combo.PlaceHolder
+		s.label.Segments[0].(*TextSegment).Text = s.combo.PlaceHolder
 	} else {
-		s.label.Segments[0].Text = s.combo.Selected
+		s.label.Segments[0].(*TextSegment).Text = s.combo.Selected
 	}
 	s.label.Refresh()
 }

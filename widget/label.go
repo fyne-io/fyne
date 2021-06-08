@@ -118,7 +118,7 @@ func (l *Label) SetText(text string) {
 	if l.provider == nil { // not created until visible
 		return
 	}
-	l.provider.Segments[0].Text = text
+	l.provider.Segments[0].(*TextSegment).Text = text
 	l.provider.Refresh()
 }
 
@@ -161,9 +161,11 @@ func (l *Label) createListener() {
 
 func (l *Label) syncSegments() {
 	l.provider.Wrapping = l.Wrapping
-	l.provider.Segments = []RichTextSegment{{
-		Alignment: l.Alignment,
-		Text:      l.Text,
-		TextStyle: l.TextStyle,
+	l.provider.Segments = []RichTextSegment{&TextSegment{
+		Style: RichTextStyle{
+			Alignment: l.Alignment,
+			TextStyle: l.TextStyle,
+		},
+		Text: l.Text,
 	}}
 }

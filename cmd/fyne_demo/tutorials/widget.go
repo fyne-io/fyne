@@ -157,22 +157,31 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
 	rich := widget.NewRichText(
-		widget.RichTextSegment{
-			Text:   "Normal",
-			Inline: true,
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				ColorName: theme.ColorNameForeground,
+				Inline:    true,
+				SizeName:  theme.SizeNameText,
+			},
+			Text: "Normal",
 		},
-		widget.RichTextSegment{
-			ColorName: theme.ColorNameError,
-			Inline:    true,
-			Text:      "Bold",
-			SizeName:  theme.SizeNameInlineIcon,
-			TextStyle: fyne.TextStyle{Bold: true},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				ColorName: theme.ColorNameError,
+				Inline:    true,
+				SizeName:  theme.SizeNameInlineIcon,
+				TextStyle: fyne.TextStyle{Bold: true},
+			},
+			Text: "Bold",
 		},
-		widget.RichTextSegment{
-			Text:      "Italic",
-			Inline:    true,
-			SizeName:  theme.SizeNameCaptionText,
-			TextStyle: fyne.TextStyle{Italic: true},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				ColorName: theme.ColorNameForeground,
+				Inline:    true,
+				SizeName:  theme.SizeNameCaptionText,
+				TextStyle: fyne.TextStyle{Italic: true},
+			},
+			Text: "Italic",
 		})
 
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
@@ -189,7 +198,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		label.Alignment = align
 		hyperlink.Alignment = align
 		for i := range rich.Segments {
-			rich.Segments[i].Alignment = align
+			rich.Segments[i].(*widget.TextSegment).Style.Alignment = align
 		}
 
 		label.Refresh()

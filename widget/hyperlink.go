@@ -158,11 +158,13 @@ func (hl *Hyperlink) openURL() {
 
 func (hl *Hyperlink) syncSegments() {
 	hl.provider.Wrapping = hl.Wrapping
-	hl.provider.Segments = []RichTextSegment{{
-		Alignment: hl.Alignment,
-		ColorName: theme.ColorNamePrimary,
-		Text:      hl.Text,
-		TextStyle: hl.TextStyle,
+	hl.provider.Segments = []RichTextSegment{&TextSegment{
+		Style: RichTextStyle{
+			Alignment: hl.Alignment,
+			ColorName: theme.ColorNamePrimary,
+			TextStyle: hl.TextStyle,
+		},
+		Text: hl.Text,
 	}}
 }
 

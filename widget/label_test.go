@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/test"
@@ -131,7 +132,7 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 	assert.True(t, min2.Height > min.Height)
 
 	yPos := float32(-1)
-	for _, text := range test.WidgetRenderer(textMultiLine).(*textRenderer).texts {
+	for _, text := range test.WidgetRenderer(textMultiLine).(*textRenderer).Objects() {
 		assert.True(t, text.Size().Height < min2.Height)
 		assert.True(t, text.Position().Y > yPos)
 		yPos = text.Position().Y
@@ -156,9 +157,9 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	text.Hide()
 
 	render := test.WidgetRenderer(text).(*textRenderer)
-	assert.Equal(t, theme.ForegroundColor(), render.texts[0].Color)
+	assert.Equal(t, theme.ForegroundColor(), render.Objects()[0].(*canvas.Text).Color)
 	text.Show()
-	assert.Equal(t, theme.ForegroundColor(), render.texts[0].Color)
+	assert.Equal(t, theme.ForegroundColor(), render.Objects()[0].(*canvas.Text).Color)
 }
 
 func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
