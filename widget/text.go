@@ -548,8 +548,6 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 }
 
 func (r *textRenderer) Refresh() {
-	r.obj.propertyLock.RLock()
-	r.obj.propertyLock.RUnlock()
 	index := 0
 	var objs []fyne.CanvasObject
 	for ; index < r.obj.rows(); index++ {
