@@ -47,8 +47,7 @@ type fileDialog struct {
 	favoritesList    *widget.List
 	showHidden       bool
 
-	view      viewLayout
-	isCompact bool
+	view viewLayout
 
 	win      *widget.PopUp
 	selected *fileDialogItem
@@ -195,7 +194,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		title = label + " Folder"
 	}
 
-	f.setView(gridView, false)
+	f.setView(gridView)
 	f.loadFavorites()
 
 	f.favoritesList = widget.NewList(
@@ -222,10 +221,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	var toggleViewButton *widget.Button
 	toggleViewButton = widget.NewButtonWithIcon("", theme.ListIcon(), func() {
 		if f.view == gridView {
-			f.setView(listView, f.isCompact)
+			f.setView(listView)
 			toggleViewButton.SetIcon(theme.GridIcon())
 		} else {
-			f.setView(gridView, f.isCompact)
+			f.setView(gridView)
 			toggleViewButton.SetIcon(theme.ListIcon())
 		}
 	})
@@ -249,19 +248,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 }
 
 func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
-	isCompact := widget.NewCheck("Compact View", func(changed bool) {
-		f.isCompact = changed
-		f.setView(f.view, f.isCompact)
-	})
-	isCompact.Checked = f.isCompact
-	isCompact.Refresh()
 	hiddenFiles := widget.NewCheck("Show Hidden Files", func(changed bool) {
 		f.showHidden = changed
 		f.refreshDir(f.dir)
 	})
 	hiddenFiles.Checked = f.showHidden
 	hiddenFiles.Refresh()
-	content := container.NewVBox(isCompact, hiddenFiles)
+	content := container.NewVBox(hiddenFiles)
 
 	p := position.Add(buttonSize)
 	pos := fyne.NewPos(p.X-content.MinSize().Width-theme.Padding()*2, p.Y+theme.Padding()*2)
@@ -442,16 +435,10 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 	}
 }
 
-func (f *fileDialog) setView(view viewLayout, isCompact bool) {
+func (f *fileDialog) setView(view viewLayout) {
 	f.view = view
-	f.isCompact = isCompact
 	if f.view == gridView {
-		var padding fyne.Size
-		if f.isCompact {
-			padding = fyne.NewSize(0, 0)
-		} else {
-			padding = fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
-		}
+		padding := fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
 		f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(
 			fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding),
 		))
@@ -533,14 +520,7 @@ func showFile(file *FileDialog) *fileDialog {
 
 	d.setLocation(file.effectiveStartingDir())
 
-	/*
-		Default grid view fits 4 items per column.
-		If isCompact is changed to true, 4 items will still be listed per column
-		but we will be having an empty space (a column that is not wide enough to fit another item)
-		thus we add an extra space in the first place to get to fit 5 items in that case.
-	*/
-	extra := theme.Padding()
-	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding()+extra,
+	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*6))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())

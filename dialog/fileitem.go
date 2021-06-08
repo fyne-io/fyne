@@ -127,19 +127,11 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 	var padding fyne.Size
 
 	if s.item.picker.view == gridView {
-		if s.item.picker.isCompact {
-			padding = fyne.NewSize(0, 0)
-		} else {
-			padding = fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
-		}
+		padding = fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
 		return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding)
 	}
 
-	if s.item.picker.isCompact {
-		padding = fyne.NewSize(theme.Padding(), theme.Padding()*2)
-	} else {
-		padding = fyne.NewSize(theme.Padding(), theme.Padding()*4)
-	}
+	padding = fyne.NewSize(theme.Padding(), theme.Padding()*4)
 	return fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize).Add(padding)
 }
 
