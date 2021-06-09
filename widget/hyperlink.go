@@ -48,6 +48,7 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
 	hl.provider = NewRichTextWithText(hl.Text)
+	hl.provider.ExtendBaseWidget(hl.provider)
 	hl.syncSegments()
 
 	focus := canvas.NewRectangle(color.Transparent)

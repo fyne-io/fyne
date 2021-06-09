@@ -148,6 +148,16 @@ const (
 	// Since: 2.0
 	SizeNameText fyne.ThemeSizeName = "text"
 
+	// SizeNameHeadingText is the name of theme lookup for text size of a heading.
+	//
+	// Since: 2.1
+	SizeNameHeadingText fyne.ThemeSizeName = "headingText"
+
+	// SizeNameSubHeadingText is the name of theme lookup for text size of a sub-heading.
+	//
+	// Since: 2.1
+	SizeNameSubHeadingText fyne.ThemeSizeName = "subHeadingText"
+
 	// SizeNameInputBorder is the name of theme lookup for input border size.
 	//
 	// Since: 2.0
@@ -326,6 +336,10 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
+	case SizeNameHeadingText:
+		return 24
+	case SizeNameSubHeadingText:
+		return 18
 	case SizeNameCaptionText:
 		return 11
 	case SizeNameInputBorder:
@@ -462,6 +476,13 @@ func TextBoldFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Bold: true})
 }
 
+// TextHeadingSize returns the text size for header text.
+//
+// Since: 2.1
+func TextHeadingSize() float32 {
+	return current().Size(SizeNameHeadingText)
+}
+
 // TextItalicFont returns the font resource for the italic font style
 func TextItalicFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Italic: true})
@@ -475,6 +496,13 @@ func TextBoldItalicFont() fyne.Resource {
 // TextMonospaceFont returns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Monospace: true})
+}
+
+// TextSubHeadingSize returns the text size for sub-header text.
+//
+// Since: 2.1
+func TextSubHeadingSize() float32 {
+	return current().Size(SizeNameSubHeadingText)
 }
 
 // Padding is the standard gap between elements and the border around interface

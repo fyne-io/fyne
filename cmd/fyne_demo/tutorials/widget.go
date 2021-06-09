@@ -158,6 +158,14 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 	rich := widget.NewRichText(
 		&widget.TextSegment{
+			Style: widget.RichTextStyleHeading,
+			Text:  "RichText Heading",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyleSubHeading,
+			Text:  "A Sub Heading",
+		},
+		&widget.TextSegment{
 			Style: widget.RichTextStyle{
 				ColorName: theme.ColorNameForeground,
 				Inline:    true,

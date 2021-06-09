@@ -17,6 +17,24 @@ const (
 )
 
 var (
+	// RichTextStyleHeading represents a heading text that stands on its own line.
+	//
+	// Since: 2.1
+	RichTextStyleHeading = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		SizeName:  theme.SizeNameHeadingText,
+		TextStyle: fyne.TextStyle{Bold: true},
+		Inline:    false,
+	}
+	// RichTextStyleSubHeading represents a sub-heading text that stands on its own line.
+	//
+	// Since: 2.1
+	RichTextStyleSubHeading = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		SizeName:  theme.SizeNameSubHeadingText,
+		TextStyle: fyne.TextStyle{Bold: true},
+		Inline:    false,
+	}
 	// RichTextStyleInline represents standard text that can be surrounded by other elements.
 	//
 	// Since: 2.1
@@ -162,47 +180,6 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 	t.updateRowBounds() // set up the initial text layout etc
 	r.Refresh()
 	return r
-}
-
-// MinSize calculates the minimum size of this rich text.
-// This is based on the contained text with a standard amount of padding added.
-func (t *RichText) MinSize() fyne.Size {
-	charMinSize := t.charMinSize(false)
-	concealedMinSize := t.charMinSize(true)
-	height := float32(0)
-	width := float32(0)
-	i := 0
-
-	t.propertyLock.RLock()
-	count := t.rows()
-	wrap := t.Wrapping
-	t.propertyLock.RUnlock()
-
-	for ; i < count; i++ {
-		str := string(t.row(i))
-		bound := t.rowBoundary(i)
-		min := fyne.MeasureText(str, bound.seg.size(), bound.seg.Style.TextStyle)
-		if str == "" {
-			if bound.seg.concealed {
-				min = concealedMinSize
-			} else {
-				min = charMinSize
-			}
-		}
-		if wrap == fyne.TextWrapOff {
-			width = fyne.Max(width, min.Width)
-		}
-		if i == count-1 || bound == nil || !bound.inline {
-			height += min.Height
-		}
-	}
-
-	if height == 0 {
-		height = charMinSize.Height
-	}
-
-	return fyne.NewSize(width, height).
-		Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*4).Subtract(t.inset).Subtract(t.inset))
 }
 
 // Resize sets a new size for the rich text.
@@ -449,6 +426,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 	count := int(fyne.Min(float32(len(objs)), float32(r.obj.rows())))
 	r.obj.propertyLock.RUnlock()
 
+	rowHeight := float32(0)
 	for ; i < count; i++ {
 		var bound *rowBoundary
 		if i < count {
@@ -459,8 +437,10 @@ func (r *textRenderer) MinSize() fyne.Size {
 			width = fyne.Max(width, min.Width)
 		}
 
+		rowHeight = fyne.Max(rowHeight, min.Height)
 		if i == count-1 || bound == nil || !bound.inline {
-			height += min.Height
+			height += rowHeight
+			rowHeight = 0
 		}
 	}
 
@@ -495,18 +475,19 @@ func (r *textRenderer) Layout(size fyne.Size) {
 		if i < len(r.Objects())-1 && (bound == nil || bound.inline) {
 			continue
 		}
-		r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth, lineHeight)
-		yPos += lineHeight
+		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth, lineHeight)
 		rowTexts = nil
 	}
 }
 
-func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPos, yPos, lineWidth, lineHeight float32) {
+func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPos, yPos, lineWidth, lineHeight float32) float32 {
 	if len(texts) == 1 {
 		texts[0].Resize(fyne.NewSize(lineWidth, lineHeight))
 		texts[0].Move(fyne.NewPos(xPos, yPos))
-		return
+		return texts[0].MinSize().Height
 	}
+
+	height := lineHeight
 	for i, text := range texts {
 		size := text.MinSize()
 
@@ -517,6 +498,7 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 		if i < len(texts)-1 {
 			xPos += fyne.MeasureText(" ", text.TextSize, text.TextStyle).Width
 		}
+		height = fyne.Max(height, size.Height)
 	}
 	spare := lineWidth - xPos
 	switch align {
@@ -545,6 +527,8 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 		last.Resize(fyne.NewSize(last.Size().Width+spare, lineHeight))
 		last.Alignment = fyne.TextAlignLeading
 	}
+
+	return height
 }
 
 func (r *textRenderer) Refresh() {
