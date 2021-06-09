@@ -22,34 +22,34 @@ var (
 	// Since: 2.1
 	RichTextStyleHeading = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
+		Inline:    false,
 		SizeName:  theme.SizeNameHeadingText,
 		TextStyle: fyne.TextStyle{Bold: true},
-		Inline:    false,
 	}
 	// RichTextStyleSubHeading represents a sub-heading text that stands on its own line.
 	//
 	// Since: 2.1
 	RichTextStyleSubHeading = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
+		Inline:    false,
 		SizeName:  theme.SizeNameSubHeadingText,
 		TextStyle: fyne.TextStyle{Bold: true},
-		Inline:    false,
 	}
 	// RichTextStyleInline represents standard text that can be surrounded by other elements.
 	//
 	// Since: 2.1
 	RichTextStyleInline = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		SizeName:  theme.SizeNameText,
 		Inline:    true,
+		SizeName:  theme.SizeNameText,
 	}
 	// RichTextStyleParagraph represents standard text that should appear separate from other text.
 	//
 	// Since: 2.1
 	RichTextStyleParagraph = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		SizeName:  theme.SizeNameText,
 		Inline:    false,
+		SizeName:  theme.SizeNameText,
 	}
 )
 
@@ -182,6 +182,15 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// Refresh triggers a redraw of the rich text.
+//
+// Implements: fyne.Widget
+func (t *RichText) Refresh() {
+	t.updateRowBounds()
+
+	t.BaseWidget.Refresh()
+}
+
 // Resize sets a new size for the rich text.
 // This should only be called if it is not in a container with a layout manager.
 //
@@ -203,15 +212,6 @@ func (t *RichText) Resize(size fyne.Size) {
 	cache.Renderer(t).Layout(size)
 }
 
-// Refresh triggers a redraw of the rich text.
-//
-// Implements: fyne.Widget
-func (t *RichText) Refresh() {
-	t.updateRowBounds()
-
-	t.BaseWidget.Refresh()
-}
-
 // String returns the text widget buffer as string
 func (t *RichText) String() string {
 	ret := strings.Builder{}
@@ -221,43 +221,15 @@ func (t *RichText) String() string {
 	return ret.String()
 }
 
-// Len returns the text widget buffer length
-func (t *RichText) len() int {
-	ret := 0
-	for _, seg := range t.Segments {
-		ret += len([]rune(seg.Textual()))
-	}
-	return ret
-}
-
-// insertAt inserts the text at the specified position
-func (t *RichText) insertAt(pos int, runes string) {
-	index := 0
-	start := 0
-	var into *TextSegment
-	for i, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
-			continue
-		}
-		end := start + len([]rune(seg.(*TextSegment).Text))
-		into = seg.(*TextSegment)
-		index = i
-		if end > pos {
-			break
-		}
-
-		start = end
+// CharMinSize returns the average char size to use for internal computation
+func (t *RichText) charMinSize(concealed bool) fyne.Size {
+	defaultChar := "M"
+	if concealed {
+		defaultChar = passwordChar
 	}
 
-	if into == nil {
-		return
-	}
-	r := ([]rune)(into.Text)
-	r2 := append(r[:pos], append([]rune(runes), r[pos:]...)...)
-	into.Text = string(r2)
-	t.Segments[index] = into
-
-	t.Refresh()
+	// TODO move this out as our first segment may not be text!
+	return fyne.MeasureText(defaultChar, t.Segments[0].(*TextSegment).size(), t.Segments[0].(*TextSegment).Style.TextStyle)
 }
 
 // deleteFromTo removes the text between the specified positions
@@ -296,10 +268,66 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) string {
 	return string(deleted)
 }
 
-// rows returns the number of text rows in this text entry.
-// The entry may be longer than required to show this amount of content.
-func (t *RichText) rows() int {
-	return len(t.rowBounds)
+// insertAt inserts the text at the specified position
+func (t *RichText) insertAt(pos int, runes string) {
+	index := 0
+	start := 0
+	var into *TextSegment
+	for i, seg := range t.Segments {
+		if _, ok := seg.(*TextSegment); !ok {
+			continue
+		}
+		end := start + len([]rune(seg.(*TextSegment).Text))
+		into = seg.(*TextSegment)
+		index = i
+		if end > pos {
+			break
+		}
+
+		start = end
+	}
+
+	if into == nil {
+		return
+	}
+	r := ([]rune)(into.Text)
+	r2 := append(r[:pos], append([]rune(runes), r[pos:]...)...)
+	into.Text = string(r2)
+	t.Segments[index] = into
+
+	t.Refresh()
+}
+
+// Len returns the text widget buffer length
+func (t *RichText) len() int {
+	ret := 0
+	for _, seg := range t.Segments {
+		ret += len([]rune(seg.Textual()))
+	}
+	return ret
+}
+
+// lineSizeToColumn returns the rendered size for the line specified by row up to the col position
+func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
+	line := t.row(row)
+	if line == nil {
+		return fyne.NewSize(0, 0)
+	}
+
+	if col >= len(line) {
+		col = len(line)
+	}
+
+	measureText := string(line[0:col])
+	bound := t.rowBoundary(row)
+	if bound.seg.concealed {
+		measureText = strings.Repeat(passwordChar, col)
+	}
+
+	label := canvas.NewText(measureText, color.Black)
+	label.TextStyle = bound.seg.Style.TextStyle
+	label.TextSize = bound.seg.size()
+	return label.MinSize().Add(fyne.NewSize(theme.Padding()-t.inset.Width, 0))
 }
 
 // Row returns the characters in the row specified.
@@ -339,38 +367,10 @@ func (t *RichText) rowLength(row int) int {
 	return len(t.row(row))
 }
 
-// CharMinSize returns the average char size to use for internal computation
-func (t *RichText) charMinSize(concealed bool) fyne.Size {
-	defaultChar := "M"
-	if concealed {
-		defaultChar = passwordChar
-	}
-
-	// TODO move this out as our first segment may not be text!
-	return fyne.MeasureText(defaultChar, t.Segments[0].(*TextSegment).size(), t.Segments[0].(*TextSegment).Style.TextStyle)
-}
-
-// lineSizeToColumn returns the rendered size for the line specified by row up to the col position
-func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
-	line := t.row(row)
-	if line == nil {
-		return fyne.NewSize(0, 0)
-	}
-
-	if col >= len(line) {
-		col = len(line)
-	}
-
-	measureText := string(line[0:col])
-	bound := t.rowBoundary(row)
-	if bound.seg.concealed {
-		measureText = strings.Repeat(passwordChar, col)
-	}
-
-	label := canvas.NewText(measureText, color.Black)
-	label.TextStyle = bound.seg.Style.TextStyle
-	label.TextSize = bound.seg.size()
-	return label.MinSize().Add(fyne.NewSize(theme.Padding()-t.inset.Width, 0))
+// rows returns the number of text rows in this text entry.
+// The entry may be longer than required to show this amount of content.
+func (t *RichText) rows() int {
+	return len(t.rowBounds)
 }
 
 // updateRowBounds updates the row bounds used to render properly the text widget.
@@ -406,6 +406,35 @@ func (t *RichText) updateRowBounds() {
 type textRenderer struct {
 	widget.BaseRenderer
 	obj *RichText
+}
+
+func (r *textRenderer) Layout(size fyne.Size) {
+	r.obj.propertyLock.RLock()
+	bounds := r.obj.rowBounds
+	defer r.obj.propertyLock.RUnlock()
+
+	left := theme.Padding()*2 - r.obj.inset.Width
+	yPos := theme.Padding()*2 - r.obj.inset.Height
+	lineHeight := r.obj.charMinSize(false).Height
+	lineWidth := size.Width - yPos*2
+	var rowTexts []*canvas.Text
+	rowAlign := fyne.TextAlignLeading
+	for i, obj := range r.Objects() {
+		rowTexts = append(rowTexts, obj.(*canvas.Text))
+		var bound *rowBoundary
+		if i < len(bounds) {
+			bound = &bounds[i]
+		}
+
+		if len(rowTexts) == 1 && bound != nil {
+			rowAlign = bound.seg.Style.Alignment
+		}
+		if i < len(r.Objects())-1 && (bound == nil || bound.inline) {
+			continue
+		}
+		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth, lineHeight)
+		rowTexts = nil
+	}
 }
 
 // MinSize calculates the minimum size of a rich text widget.
@@ -451,33 +480,31 @@ func (r *textRenderer) MinSize() fyne.Size {
 		Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*4).Subtract(r.obj.inset).Subtract(r.obj.inset))
 }
 
-func (r *textRenderer) Layout(size fyne.Size) {
-	r.obj.propertyLock.RLock()
-	bounds := r.obj.rowBounds
-	defer r.obj.propertyLock.RUnlock()
+func (r *textRenderer) Refresh() {
+	index := 0
+	var objs []fyne.CanvasObject
+	for ; index < r.obj.rows(); index++ {
+		bound := r.obj.rowBoundary(index)
 
-	left := theme.Padding()*2 - r.obj.inset.Width
-	yPos := theme.Padding()*2 - r.obj.inset.Height
-	lineHeight := r.obj.charMinSize(false).Height
-	lineWidth := size.Width - yPos*2
-	var rowTexts []*canvas.Text
-	rowAlign := fyne.TextAlignLeading
-	for i, obj := range r.Objects() {
-		rowTexts = append(rowTexts, obj.(*canvas.Text))
-		var bound *rowBoundary
-		if i < len(bounds) {
-			bound = &bounds[i]
-		}
+		obj := bound.seg.Visual()
 
-		if len(rowTexts) == 1 && bound != nil {
-			rowAlign = bound.seg.Style.Alignment
+		if txt, ok := obj.(*canvas.Text); ok {
+			if bound.begin != 0 || bound.end != len([]rune(txt.Text)) {
+				txt.Text = txt.Text[bound.begin:bound.end]
+			}
+			if bound.seg.concealed {
+				txt.Text = strings.Repeat(passwordChar, len([]rune(txt.Text)))
+			}
 		}
-		if i < len(r.Objects())-1 && (bound == nil || bound.inline) {
-			continue
-		}
-		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth, lineHeight)
-		rowTexts = nil
+		objs = append(objs, obj)
 	}
+
+	r.obj.propertyLock.Lock()
+	r.SetObjects(objs)
+	r.obj.propertyLock.Unlock()
+
+	r.Layout(r.obj.Size())
+	canvas.Refresh(r.obj)
 }
 
 func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPos, yPos, lineWidth, lineHeight float32) float32 {
@@ -529,50 +556,6 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 	}
 
 	return height
-}
-
-func (r *textRenderer) Refresh() {
-	index := 0
-	var objs []fyne.CanvasObject
-	for ; index < r.obj.rows(); index++ {
-		bound := r.obj.rowBoundary(index)
-
-		obj := bound.seg.Visual()
-
-		if txt, ok := obj.(*canvas.Text); ok {
-			if bound.begin != 0 || bound.end != len([]rune(txt.Text)) {
-				txt.Text = txt.Text[bound.begin:bound.end]
-			}
-			if bound.seg.concealed {
-				txt.Text = strings.Repeat(passwordChar, len([]rune(txt.Text)))
-			}
-		}
-		objs = append(objs, obj)
-	}
-
-	r.obj.propertyLock.Lock()
-	r.SetObjects(objs)
-	r.obj.propertyLock.Unlock()
-
-	r.Layout(r.obj.Size())
-	canvas.Refresh(r.obj)
-}
-
-// splitLines accepts a text segment and returns a slice of boundary metadata denoting the
-// start and end indices of each line delimited by the newline character.
-func splitLines(seg *TextSegment) []rowBoundary {
-	var low, high int
-	var lines []rowBoundary
-	text := []rune(seg.Text)
-	length := len(text)
-	for i := 0; i < length; i++ {
-		if text[i] == '\n' {
-			high = i
-			lines = append(lines, rowBoundary{seg, low, high, false})
-			low = i + 1
-		}
-	}
-	return append(lines, rowBoundary{seg, low, length, true})
 }
 
 // binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index
@@ -666,6 +649,23 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, maxWidth float32, measurer
 		}
 	}
 	return bounds
+}
+
+// splitLines accepts a text segment and returns a slice of boundary metadata denoting the
+// start and end indices of each line delimited by the newline character.
+func splitLines(seg *TextSegment) []rowBoundary {
+	var low, high int
+	var lines []rowBoundary
+	text := []rune(seg.Text)
+	length := len(text)
+	for i := 0; i < length; i++ {
+		if text[i] == '\n' {
+			high = i
+			lines = append(lines, rowBoundary{seg, low, high, false})
+			low = i + 1
+		}
+	}
+	return append(lines, rowBoundary{seg, low, length, true})
 }
 
 type rowBoundary struct {
