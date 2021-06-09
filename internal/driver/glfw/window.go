@@ -447,10 +447,6 @@ func (w *window) Close() {
 		}
 	})
 
-	w.QueueEvent(func() {
-		cache.CleanCanvas(w.canvas)
-	})
-
 	// trigger callbacks
 	if w.onClosed != nil {
 		w.QueueEvent(w.onClosed)
@@ -509,6 +505,7 @@ func (w *window) closed(viewport *glfw.Window) {
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
 	w.DestroyEventQueue()
+	cache.CleanCanvas(w.canvas)
 
 	if w.master {
 		d.Quit()
