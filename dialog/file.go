@@ -9,7 +9,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/theme"
@@ -234,14 +233,20 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		optionsButton,
 	)
 
-	header := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, optionsbuttons),
-		optionsbuttons, widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	header := container.NewBorder(nil, nil, nil, optionsbuttons,
+		optionsbuttons, widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+	)
 
-	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
-		buttons, container.NewHScroll(f.fileName))
+	footer := container.NewBorder(nil, nil, nil, buttons,
+		buttons, container.NewHScroll(f.fileName),
+	)
 
-	body := container.NewHSplit(f.favoritesList, fyne.NewContainerWithLayout(layout.NewBorderLayout(f.breadcrumbScroll, nil, nil, nil),
-		f.breadcrumbScroll, f.filesScroll))
+	body := container.NewHSplit(
+		f.favoritesList,
+		container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
+			f.breadcrumbScroll, f.filesScroll,
+		),
+	)
 	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only it's minimal width
 
 	return container.NewBorder(header, footer, nil, nil, body)
@@ -438,11 +443,11 @@ func (f *fileDialog) setView(view viewLayout) {
 	f.view = view
 	if f.view == gridView {
 		padding := fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
-		f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(
+		f.files = container.NewGridWrap(
 			fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding),
-		))
+		)
 	} else {
-		f.files = fyne.NewContainerWithLayout(layout.NewVBoxLayout())
+		f.files = container.NewVBox()
 	}
 	if f.dir != nil {
 		f.refreshDir(f.dir)
