@@ -262,8 +262,6 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 }
 
 func (f *fileDialog) loadFavorites() {
-	f.favorites = []favoriteItem{}
-
 	favoriteLocations, err := getFavoriteLocations()
 	if err != nil {
 		fyne.LogError("Getting favorite locations", err)
@@ -271,6 +269,7 @@ func (f *fileDialog) loadFavorites() {
 	favoriteIcons := getFavoriteIcons()
 	favoriteOrder := getFavoriteOrder()
 
+	f.favorites = []favoriteItem{}
 	for _, locName := range favoriteOrder {
 		loc, ok := favoriteLocations[locName]
 		if !ok {
