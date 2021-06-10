@@ -222,14 +222,13 @@ func (t *RichText) String() string {
 }
 
 // CharMinSize returns the average char size to use for internal computation
-func (t *RichText) charMinSize(concealed bool) fyne.Size {
+func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle) fyne.Size {
 	defaultChar := "M"
 	if concealed {
 		defaultChar = passwordChar
 	}
 
-	// TODO move this out as our first segment may not be text!
-	return fyne.MeasureText(defaultChar, t.Segments[0].(*TextSegment).size(), t.Segments[0].(*TextSegment).Style.TextStyle)
+	return fyne.MeasureText(defaultChar, theme.TextSize(), style)
 }
 
 // deleteFromTo removes the text between the specified positions
@@ -415,24 +414,40 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 	left := theme.Padding()*2 - r.obj.inset.Width
 	yPos := theme.Padding()*2 - r.obj.inset.Height
-	lineHeight := r.obj.charMinSize(false).Height
 	lineWidth := size.Width - yPos*2
 	var rowTexts []*canvas.Text
 	rowAlign := fyne.TextAlignLeading
-	for i, obj := range r.Objects() {
-		rowTexts = append(rowTexts, obj.(*canvas.Text))
-		var bound *rowBoundary
-		if i < len(bounds) {
-			bound = &bounds[i]
-		}
+	i := 0
+	for objIndex, obj := range r.Objects() {
+		if _, ok := obj.(*canvas.Text); !ok { // TODO actually check the segment type, not assume only text segment creates text
+			height := obj.MinSize().Height
 
-		if len(rowTexts) == 1 && bound != nil {
-			rowAlign = bound.seg.Style.Alignment
-		}
-		if i < len(r.Objects())-1 && (bound == nil || bound.inline) {
+			obj.Move(fyne.NewPos(left, yPos))
+			obj.Resize(fyne.NewSize(lineWidth, height))
+			yPos += height
+
+			if objIndex < len(r.Objects()) {
+				yPos += theme.Padding()
+			}
 			continue
 		}
-		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth, lineHeight)
+		rowTexts = append(rowTexts, obj.(*canvas.Text))
+		if i == len(bounds) {
+			continue
+		}
+		bound := bounds[i]
+		i++
+
+		if len(rowTexts) == 1 {
+			rowAlign = bound.seg.Style.Alignment
+		}
+		if i < len(bounds)-1 && bound.inline {
+			continue
+		}
+		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth)
+		if !bound.seg.Inline() && bound.end == len(bound.seg.Text) && objIndex < len(r.Objects())-1 {
+			yPos += theme.Padding()
+		}
 		rowTexts = nil
 	}
 }
@@ -445,31 +460,36 @@ func (r *textRenderer) MinSize() fyne.Size {
 	wrap := r.obj.Wrapping
 	r.obj.propertyLock.RUnlock()
 
-	charMinSize := r.obj.charMinSize(false)
+	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{})
 	height := float32(0)
 	width := float32(0)
 	i := 0
 
-	r.obj.propertyLock.RLock()
-	objs := r.Objects()
-	count := int(fyne.Min(float32(len(objs)), float32(r.obj.rows())))
-	r.obj.propertyLock.RUnlock()
-
 	rowHeight := float32(0)
-	for ; i < count; i++ {
-		var bound *rowBoundary
-		if i < count {
-			bound = &bounds[i]
+	for objIndex, obj := range r.Objects() {
+		if _, ok := obj.(*canvas.Text); !ok { // TODO actually check the segment type, not assume only text segment creates text
+			height += obj.MinSize().Height
+			if objIndex < len(r.Objects()) {
+				height += theme.Padding()
+			}
+			continue
 		}
-		min := objs[i].MinSize()
+
+		bound := bounds[i]
+		i++
+		min := obj.MinSize()
+		rowHeight = fyne.Max(rowHeight, min.Height)
+		if i < len(bounds) && bound.inline {
+			continue
+		}
+
 		if wrap == fyne.TextWrapOff {
 			width = fyne.Max(width, min.Width)
 		}
-
-		rowHeight = fyne.Max(rowHeight, min.Height)
-		if i == count-1 || bound == nil || !bound.inline {
-			height += rowHeight
-			rowHeight = 0
+		height += rowHeight
+		rowHeight = 0
+		if !bound.seg.Inline() && bound.end == len(bound.seg.Text) && objIndex < len(r.Objects())-1 {
+			height += theme.Padding()
 		}
 	}
 
@@ -483,20 +503,26 @@ func (r *textRenderer) MinSize() fyne.Size {
 func (r *textRenderer) Refresh() {
 	index := 0
 	var objs []fyne.CanvasObject
-	for ; index < r.obj.rows(); index++ {
+	for _, seg := range r.obj.Segments {
+		if _, ok := seg.(*TextSegment); !ok {
+			objs = append(objs, seg.Visual())
+			continue
+		}
+
 		bound := r.obj.rowBoundary(index)
+		for index < r.obj.rows() && bound.seg == seg {
+			txt := seg.Visual().(*canvas.Text)
 
-		obj := bound.seg.Visual()
-
-		if txt, ok := obj.(*canvas.Text); ok {
 			if bound.begin != 0 || bound.end != len([]rune(txt.Text)) {
 				txt.Text = txt.Text[bound.begin:bound.end]
 			}
 			if bound.seg.concealed {
 				txt.Text = strings.Repeat(passwordChar, len([]rune(txt.Text)))
 			}
+			objs = append(objs, txt)
+			index++
+			bound = r.obj.rowBoundary(index)
 		}
-		objs = append(objs, obj)
 	}
 
 	r.obj.propertyLock.Lock()
@@ -507,20 +533,18 @@ func (r *textRenderer) Refresh() {
 	canvas.Refresh(r.obj)
 }
 
-func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPos, yPos, lineWidth, lineHeight float32) float32 {
+func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPos, yPos, lineWidth float32) float32 {
 	if len(texts) == 1 {
-		texts[0].Resize(fyne.NewSize(lineWidth, lineHeight))
+		texts[0].Resize(fyne.NewSize(lineWidth, texts[0].MinSize().Height))
 		texts[0].Move(fyne.NewPos(xPos, yPos))
 		return texts[0].MinSize().Height
 	}
-
-	height := lineHeight
+	height := float32(0)
 	for i, text := range texts {
 		size := text.MinSize()
 
-		text.Resize(fyne.NewSize(size.Width, fyne.Max(lineHeight, size.Height)))
+		text.Resize(size)
 		text.Move(fyne.NewPos(xPos, yPos)) // TODO also baseline align for height (need new measure info)
-
 		xPos += size.Width
 		if i < len(texts)-1 {
 			xPos += fyne.MeasureText(" ", text.TextSize, text.TextStyle).Width
@@ -531,7 +555,7 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 	switch align {
 	case fyne.TextAlignTrailing:
 		first := texts[0]
-		first.Resize(fyne.NewSize(first.Size().Width+spare, lineHeight))
+		first.Resize(fyne.NewSize(first.Size().Width+spare, height))
 		first.Alignment = fyne.TextAlignTrailing
 
 		for _, text := range texts[1:] {
@@ -540,10 +564,10 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 	case fyne.TextAlignCenter:
 		pad := spare / 2
 		first := texts[0]
-		first.Resize(fyne.NewSize(first.Size().Width+pad, lineHeight))
+		first.Resize(fyne.NewSize(first.Size().Width+pad, height))
 		first.Alignment = fyne.TextAlignTrailing
 		last := texts[len(texts)-1]
-		last.Resize(fyne.NewSize(last.Size().Width+pad, lineHeight))
+		last.Resize(fyne.NewSize(last.Size().Width+pad, height))
 		last.Alignment = fyne.TextAlignLeading
 
 		for _, text := range texts[1:] {
@@ -551,7 +575,7 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 		}
 	default:
 		last := texts[len(texts)-1]
-		last.Resize(fyne.NewSize(last.Size().Width+spare, lineHeight))
+		last.Resize(fyne.NewSize(last.Size().Width+spare, height))
 		last.Alignment = fyne.TextAlignLeading
 	}
 

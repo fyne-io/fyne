@@ -167,9 +167,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
-				ColorName: theme.ColorNameForeground,
-				Inline:    true,
-				SizeName:  theme.SizeNameText,
+				Inline: true,
 			},
 			Text: "Normal",
 		},
@@ -177,16 +175,13 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			Style: widget.RichTextStyle{
 				ColorName: theme.ColorNameError,
 				Inline:    true,
-				SizeName:  theme.SizeNameInlineIcon,
 				TextStyle: fyne.TextStyle{Bold: true},
 			},
 			Text: "Bold",
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
-				ColorName: theme.ColorNameForeground,
 				Inline:    true,
-				SizeName:  theme.SizeNameCaptionText,
 				TextStyle: fyne.TextStyle{Italic: true},
 			},
 			Text: "Italic",
@@ -206,7 +201,9 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		label.Alignment = align
 		hyperlink.Alignment = align
 		for i := range rich.Segments {
-			rich.Segments[i].(*widget.TextSegment).Style.Alignment = align
+			if seg, ok := rich.Segments[i].(*widget.TextSegment); ok {
+				seg.Style.Alignment = align
+			}
 		}
 
 		label.Refresh()

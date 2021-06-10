@@ -835,7 +835,7 @@ func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 
-	rowHeight := e.textProvider().charMinSize(e.Password).Height
+	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle).Height
 	row := int(math.Floor(float64(ev.Position.Y+e.scroll.Offset.Y-theme.Padding()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
@@ -1279,11 +1279,12 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
 	}
 
-	minSize := r.entry.placeholderProvider().charMinSize(r.entry.Password).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle)
+	minSize := charMin.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if r.entry.MultiLine {
 		// ensure multiline height is at least charMinSize * multilineRows
-		rowHeight := r.entry.text.charMinSize(r.entry.Password).Height * multiLineRows
+		rowHeight := charMin.Height * multiLineRows
 		minSize.Height = fyne.Max(minSize.Height, rowHeight+(multiLineRows-1)*theme.Padding())
 	}
 
@@ -1531,7 +1532,7 @@ func (r *entryContentRenderer) buildSelection() {
 		return sz.Width + theme.Padding(), sz.Height*float32(row) + theme.Padding()
 	}
 
-	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password).Height
+	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
 
 	minmax := func(a, b int) (int, int) {
 		if a < b {
@@ -1629,7 +1630,7 @@ func (r *entryContentRenderer) moveCursor() {
 	r.content.entry.propertyLock.RUnlock()
 
 	r.content.entry.propertyLock.Lock()
-	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password).Height
+	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
 	r.cursor.Resize(fyne.NewSize(2, lineHeight))
 	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding(), yPos+theme.Padding()+theme.InputBorderSize()))
 

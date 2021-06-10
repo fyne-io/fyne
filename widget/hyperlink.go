@@ -163,6 +163,7 @@ func (hl *Hyperlink) syncSegments() {
 		Style: RichTextStyle{
 			Alignment: hl.Alignment,
 			ColorName: theme.ColorNamePrimary,
+			Inline:    true,
 			TextStyle: hl.TextStyle,
 		},
 		Text: hl.Text,

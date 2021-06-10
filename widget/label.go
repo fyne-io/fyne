@@ -164,6 +164,7 @@ func (l *Label) syncSegments() {
 	l.provider.Segments = []RichTextSegment{&TextSegment{
 		Style: RichTextStyle{
 			Alignment: l.Alignment,
+			Inline:    true,
 			TextStyle: l.TextStyle,
 		},
 		Text: l.Text,
