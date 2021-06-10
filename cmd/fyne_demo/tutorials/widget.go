@@ -165,6 +165,12 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			Style: widget.RichTextStyleSubHeading,
 			Text:  "A Sub Heading",
 		},
+		&widget.SeparatorSegment{},
+		&widget.TextSegment{
+			Style: widget.RichTextStyleParagraph,
+			Text:  "A paragraph between separators that is very long, it should respect the wrapping flag",
+		},
+		&widget.SeparatorSegment{},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
 				Inline: true,
@@ -185,6 +191,19 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 				TextStyle: fyne.TextStyle{Italic: true},
 			},
 			Text: "Italic",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				Inline: true,
+			},
+			Text: "This styled row should also wrap as expected, but only",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				Inline:    true,
+				TextStyle: fyne.TextStyle{Italic: true},
+			},
+			Text: "when required.",
 		})
 
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {

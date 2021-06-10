@@ -621,7 +621,7 @@ func TestText_lineBounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 10, mockMeasurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 10, 10, mockMeasurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -681,7 +681,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 50, measurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 50, 50, measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)

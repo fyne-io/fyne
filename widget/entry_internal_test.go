@@ -303,7 +303,7 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 	w := test.NewApp().NewWindow("")
 	w.SetContent(entry)
-	w.Resize(fyne.NewSize(100, 64))
+	w.Resize(fyne.NewSize(108, 64))
 
 	test.Type(entry, "T")
 	assert.Equal(t, 0, entry.CursorRow)

@@ -40,7 +40,7 @@ func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
 	for n := 0; n < b.N; n++ {
-		lineBounds(&TextSegment{Text: loremIpsum}, wrap, 10, measurer)
+		lineBounds(&TextSegment{Text: loremIpsum}, wrap, 10, 10, measurer)
 	}
 }
 

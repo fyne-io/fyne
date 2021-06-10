@@ -377,6 +377,8 @@ func (t *RichText) rows() int {
 func (t *RichText) updateRowBounds() {
 	t.propertyLock.RLock()
 	var bounds []rowBoundary
+	maxWidth := t.size.Width - 4*theme.Padding() - 2*t.inset.Width
+	wrapWidth := maxWidth
 	for _, seg := range t.Segments {
 		if _, ok := seg.(*TextSegment); !ok {
 			continue
@@ -384,15 +386,27 @@ func (t *RichText) updateRowBounds() {
 		textSeg := seg.(*TextSegment)
 		textStyle := textSeg.Style.TextStyle
 		textSize := textSeg.size()
-		maxWidth := t.size.Width - 2*theme.Padding()
 
-		bounds = append(bounds, lineBounds(textSeg, t.Wrapping, maxWidth, func(text []rune) float32 {
+		retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth, maxWidth, func(text []rune) float32 {
 			return fyne.MeasureText(string(text), textSize, textStyle).Width
-		})...)
+		})
+		bounds = append(bounds, retBounds...)
 		if len(bounds) == 0 {
 			continue
 		}
 		bounds[len(bounds)-1].inline = seg.Inline()
+		if seg.Inline() {
+			last := bounds[len(bounds)-1]
+			text := string([]rune(last.seg.Text)[last.begin:last.end]) + " "
+			lastWidth := fyne.MeasureText(text, last.seg.size(), last.seg.Style.TextStyle).Width
+			if len(retBounds) == 1 {
+				wrapWidth -= lastWidth
+			} else {
+				wrapWidth = maxWidth - lastWidth
+			}
+		} else {
+			wrapWidth = maxWidth
+		}
 	}
 	t.propertyLock.RUnlock()
 
@@ -441,7 +455,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 		if len(rowTexts) == 1 {
 			rowAlign = bound.seg.Style.Alignment
 		}
-		if i < len(bounds)-1 && bound.inline {
+		if i < len(bounds) && bound.inline {
 			continue
 		}
 		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth)
@@ -622,15 +636,16 @@ func findSpaceIndex(text []rune, fallback int) int {
 
 // lineBounds accepts a slice of Segments, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
-func lineBounds(seg *TextSegment, wrap fyne.TextWrap, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
+func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
 	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
 
+	measureWidth := firstWidth
 	text := []rune(seg.Text)
 	checker := func(low int, high int) bool {
-		return measurer(text[low:high]) <= maxWidth
+		return measurer(text[low:high]) <= measureWidth
 	}
 
 	var bounds []rowBoundary
@@ -647,10 +662,11 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, maxWidth float32, measurer
 			bounds = append(bounds, rowBoundary{seg, low, high, false})
 		case fyne.TextWrapBreak:
 			for low < high {
-				if measurer(text[low:high]) <= maxWidth {
+				if measurer(text[low:high]) <= measureWidth {
 					bounds = append(bounds, rowBoundary{seg, low, high, false})
 					low = high
 					high = l.end
+					measureWidth = maxWidth
 				} else {
 					high = binarySearch(checker, low, high)
 				}
@@ -658,16 +674,25 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, maxWidth float32, measurer
 		case fyne.TextWrapWord:
 			for low < high {
 				sub := text[low:high]
-				if measurer(sub) <= maxWidth {
+				if measurer(sub) <= measureWidth {
 					bounds = append(bounds, rowBoundary{seg, low, high, false})
 					low = high
 					high = l.end
 					if low < high && unicode.IsSpace(text[low]) {
 						low++
 					}
+					measureWidth = maxWidth
 				} else {
+					oldHigh := high
 					last := low + len(sub) - 1
-					high = low + findSpaceIndex(sub, binarySearch(checker, low, last)-low)
+					fallback := binarySearch(checker, low, last) - low
+					high = low + findSpaceIndex(sub, fallback)
+					if high == fallback && measurer(sub) <= maxWidth { // add a newline as there is more space on next
+						bounds = append(bounds, rowBoundary{seg, low, low, false})
+						high = oldHigh
+						measureWidth = maxWidth
+						continue
+					}
 				}
 			}
 		}
