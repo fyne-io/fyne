@@ -399,6 +399,9 @@ func (t *RichText) updateRowBounds() {
 	wrapWidth := maxWidth
 	for _, seg := range t.Segments {
 		if _, ok := seg.(*TextSegment); !ok {
+			if seg.Inline() {
+				wrapWidth -= seg.Visual().MinSize().Width
+			}
 			continue
 		}
 		textSeg := seg.(*TextSegment)
@@ -415,7 +418,7 @@ func (t *RichText) updateRowBounds() {
 		bounds[len(bounds)-1].inline = seg.Inline()
 		if seg.Inline() {
 			last := bounds[len(bounds)-1]
-			text := string([]rune(last.seg.Text)[last.begin:last.end]) + " "
+			text := string([]rune(last.seg.Text)[last.begin:last.end])
 			lastWidth := fyne.MeasureText(text, last.seg.size(), last.seg.Style.TextStyle).Width
 			if len(retBounds) == 1 {
 				wrapWidth -= lastWidth
@@ -447,11 +450,13 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	left := theme.Padding()*2 - r.obj.inset.Width
 	yPos := theme.Padding()*2 - r.obj.inset.Height
 	lineWidth := size.Width - yPos*2
-	var rowTexts []*canvas.Text
+	var rowItems []fyne.CanvasObject
 	rowAlign := fyne.TextAlignLeading
 	i := 0
 	for objIndex, obj := range r.Objects() {
-		if _, ok := obj.(*canvas.Text); !ok { // TODO actually check the segment type, not assume only text segment creates text
+		_, isText := obj.(*canvas.Text)
+		_, isLink := obj.(*fyne.Container)
+		if !isText && !isLink {
 			height := obj.MinSize().Height
 
 			obj.Move(fyne.NewPos(left, yPos))
@@ -463,24 +468,27 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			}
 			continue
 		}
-		rowTexts = append(rowTexts, obj.(*canvas.Text))
+		rowItems = append(rowItems, obj)
 		if i == len(bounds) {
 			continue
 		}
-		bound := bounds[i]
-		i++
+		var bound rowBoundary
+		if isText {
+			bound = bounds[i]
+			i++
+		}
 
-		if len(rowTexts) == 1 {
+		if len(rowItems) == 1 && isText { // TODO align link
 			rowAlign = bound.seg.Style.Alignment
 		}
-		if i < len(bounds) && bound.inline {
+		if isLink || (i < len(bounds) && bound.inline) {
 			continue
 		}
-		yPos += r.layoutRow(rowTexts, rowAlign, left, yPos, lineWidth)
+		yPos += r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
 		if !bound.seg.Inline() && bound.end == len(bound.seg.Text) && objIndex < len(r.Objects())-1 {
 			yPos += theme.Padding()
 		}
-		rowTexts = nil
+		rowItems = nil
 	}
 }
 
@@ -499,7 +507,9 @@ func (r *textRenderer) MinSize() fyne.Size {
 
 	rowHeight := float32(0)
 	for objIndex, obj := range r.Objects() {
-		if _, ok := obj.(*canvas.Text); !ok { // TODO actually check the segment type, not assume only text segment creates text
+		_, isText := obj.(*canvas.Text)
+		_, isLink := obj.(*fyne.Container)
+		if !isText && !isLink {
 			height += obj.MinSize().Height
 			if objIndex < len(r.Objects()) {
 				height += theme.Padding()
@@ -507,11 +517,14 @@ func (r *textRenderer) MinSize() fyne.Size {
 			continue
 		}
 
-		bound := bounds[i]
-		i++
+		var bound rowBoundary
+		if isText {
+			bound = bounds[i]
+			i++
+		}
 		min := obj.MinSize()
 		rowHeight = fyne.Max(rowHeight, min.Height)
-		if i < len(bounds) && bound.inline {
+		if isLink || (i < len(bounds) && bound.inline) {
 			continue
 		}
 
@@ -565,22 +578,19 @@ func (r *textRenderer) Refresh() {
 	canvas.Refresh(r.obj)
 }
 
-func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPos, yPos, lineWidth float32) float32 {
+func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) float32 {
 	if len(texts) == 1 {
 		texts[0].Resize(fyne.NewSize(lineWidth, texts[0].MinSize().Height))
 		texts[0].Move(fyne.NewPos(xPos, yPos))
 		return texts[0].MinSize().Height
 	}
 	height := float32(0)
-	for i, text := range texts {
+	for _, text := range texts {
 		size := text.MinSize()
 
 		text.Resize(size)
 		text.Move(fyne.NewPos(xPos, yPos)) // TODO also baseline align for height (need new measure info)
 		xPos += size.Width
-		if i < len(texts)-1 {
-			xPos += fyne.MeasureText(" ", text.TextSize, text.TextStyle).Width
-		}
 		height = fyne.Max(height, size.Height)
 	}
 	spare := lineWidth - xPos
@@ -588,7 +598,7 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 	case fyne.TextAlignTrailing:
 		first := texts[0]
 		first.Resize(fyne.NewSize(first.Size().Width+spare, height))
-		first.Alignment = fyne.TextAlignTrailing
+		setAlign(first, fyne.TextAlignTrailing)
 
 		for _, text := range texts[1:] {
 			text.Move(text.Position().Add(fyne.NewPos(spare, 0)))
@@ -597,10 +607,10 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 		pad := spare / 2
 		first := texts[0]
 		first.Resize(fyne.NewSize(first.Size().Width+pad, height))
-		first.Alignment = fyne.TextAlignTrailing
+		setAlign(first, fyne.TextAlignTrailing)
 		last := texts[len(texts)-1]
 		last.Resize(fyne.NewSize(last.Size().Width+pad, height))
-		last.Alignment = fyne.TextAlignLeading
+		setAlign(last, fyne.TextAlignLeading)
 
 		for _, text := range texts[1:] {
 			text.Move(text.Position().Add(fyne.NewPos(pad, 0)))
@@ -608,7 +618,7 @@ func (r *textRenderer) layoutRow(texts []*canvas.Text, align fyne.TextAlign, xPo
 	default:
 		last := texts[len(texts)-1]
 		last.Resize(fyne.NewSize(last.Size().Width+spare, height))
-		last.Alignment = fyne.TextAlignLeading
+		setAlign(last, fyne.TextAlignLeading)
 	}
 
 	return height
@@ -716,6 +726,19 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 		}
 	}
 	return bounds
+}
+
+func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
+	if text, ok := obj.(*canvas.Text); ok {
+		text.Alignment = align
+		return
+	}
+	if c, ok := obj.(*fyne.Container); ok {
+		wid := c.Objects[0]
+		if link, ok := wid.(*Hyperlink); ok {
+			link.Alignment = align
+		}
+	}
 }
 
 // splitLines accepts a text segment and returns a slice of boundary metadata denoting the

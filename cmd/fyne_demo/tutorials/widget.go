@@ -156,6 +156,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
+	u, _ := url.Parse("https://fyne.io/")
 	rich := widget.NewRichText(
 		&widget.TextSegment{
 			Style: widget.RichTextStyleHeading,
@@ -175,21 +176,25 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			Style: widget.RichTextStyle{
 				Inline: true,
 			},
-			Text: "Normal",
+			Text: "Normal ",
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyleStrong,
-			Text:  "Bold",
+			Text:  "Bold ",
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyleEmphasis,
-			Text:  "Italic",
+			Text:  "Italic ",
+		},
+		&widget.HyperlinkSegment{
+			Text: "Link",
+			URL:  u,
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
 				Inline: true,
 			},
-			Text: "This styled row should also wrap as expected, but only",
+			Text: ". This styled row should also wrap as expected, but only",
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
