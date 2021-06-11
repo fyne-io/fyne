@@ -178,19 +178,12 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			Text: "Normal",
 		},
 		&widget.TextSegment{
-			Style: widget.RichTextStyle{
-				ColorName: theme.ColorNameError,
-				Inline:    true,
-				TextStyle: fyne.TextStyle{Bold: true},
-			},
-			Text: "Bold",
+			Style: widget.RichTextStyleStrong,
+			Text:  "Bold",
 		},
 		&widget.TextSegment{
-			Style: widget.RichTextStyle{
-				Inline:    true,
-				TextStyle: fyne.TextStyle{Italic: true},
-			},
-			Text: "Italic",
+			Style: widget.RichTextStyleEmphasis,
+			Text:  "Italic",
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{

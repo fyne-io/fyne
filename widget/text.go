@@ -17,6 +17,15 @@ const (
 )
 
 var (
+	// RichTextStyleEmphasis represents standard text that can be surrounded by other elements.
+	//
+	// Since: 2.1
+	RichTextStyleEmphasis = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Italic: true},
+	}
 	// RichTextStyleHeading represents a heading text that stands on its own line.
 	//
 	// Since: 2.1
@@ -24,15 +33,6 @@ var (
 		ColorName: theme.ColorNameForeground,
 		Inline:    false,
 		SizeName:  theme.SizeNameHeadingText,
-		TextStyle: fyne.TextStyle{Bold: true},
-	}
-	// RichTextStyleSubHeading represents a sub-heading text that stands on its own line.
-	//
-	// Since: 2.1
-	RichTextStyleSubHeading = RichTextStyle{
-		ColorName: theme.ColorNameForeground,
-		Inline:    false,
-		SizeName:  theme.SizeNameSubHeadingText,
 		TextStyle: fyne.TextStyle{Bold: true},
 	}
 	// RichTextStyleInline represents standard text that can be surrounded by other elements.
@@ -50,6 +50,24 @@ var (
 		ColorName: theme.ColorNameForeground,
 		Inline:    false,
 		SizeName:  theme.SizeNameText,
+	}
+	// RichTextStyleStrong represents standard text that can be surrounded by other elements.
+	//
+	// Since: 2.1
+	RichTextStyleStrong = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Bold: true},
+	}
+	// RichTextStyleSubHeading represents a sub-heading text that stands on its own line.
+	//
+	// Since: 2.1
+	RichTextStyleSubHeading = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameSubHeadingText,
+		TextStyle: fyne.TextStyle{Bold: true},
 	}
 )
 
