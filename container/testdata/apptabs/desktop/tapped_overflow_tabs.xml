@@ -25,7 +25,7 @@
 	</content>
 	<overlay>
 		<widget size="200x100" type="*widget.OverlayContainer">
-			<widget pos="145,29" size="55x70" type="*widget.Menu">
+			<widget pos="145,29" size="55x70" type="*widget.PopUpMenu">
 				<widget size="55x70" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 					<linearGradient endColor="shadow" pos="0,-4" size="55x4"/>

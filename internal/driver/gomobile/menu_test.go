@@ -42,7 +42,7 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 	point := &fyne.PointEvent{Position: fyne.NewPos(10, 10)}
 	menuObj.Tapped(point)
 
-	tapMeItem := c.Overlays().Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu).Items[0].(fyne.Tappable)
+	tapMeItem := c.Overlays().Top().(*internalWidget.OverlayContainer).Content.(*widget.PopUpMenu).Items[0].(fyne.Tappable)
 	tapMeItem.Tapped(point)
 	assert.Nil(t, c.menu)
 }
