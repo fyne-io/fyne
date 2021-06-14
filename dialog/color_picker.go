@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	col "fyne.io/fyne/v2/internal/color"
-	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -192,7 +191,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	))
 
 	r := &colorPickerRenderer{
-		SimpleRenderer:    internalwidget.NewSimpleRenderer(contents),
+		WidgetRenderer:    widget.NewSimpleRenderer(contents),
 		picker:            p,
 		redChannel:        redChannel,
 		greenChannel:      greenChannel,
@@ -253,7 +252,7 @@ func (p *colorAdvancedPicker) updateRGBA(r, g, b, a int) bool {
 var _ fyne.WidgetRenderer = (*colorPickerRenderer)(nil)
 
 type colorPickerRenderer struct {
-	*internalwidget.SimpleRenderer
+	fyne.WidgetRenderer
 	picker            *colorAdvancedPicker
 	redChannel        *colorChannel
 	greenChannel      *colorChannel
@@ -270,7 +269,7 @@ type colorPickerRenderer struct {
 
 func (r *colorPickerRenderer) Refresh() {
 	r.updateObjects()
-	r.SimpleRenderer.Refresh()
+	r.WidgetRenderer.Refresh()
 }
 
 func (r *colorPickerRenderer) updateObjects() {

@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -262,7 +261,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	}
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
-	renderer := internalWidget.NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
+	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
 	f.updateButtons()      // will set correct visibility on the submit/cancel btns
 	f.checkValidation(nil) // will trigger a validation check for correct initial validation status
 	return renderer
