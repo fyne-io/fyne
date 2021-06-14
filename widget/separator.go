@@ -31,7 +31,7 @@ func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	bar := canvas.NewRectangle(theme.DisabledColor())
 	return &separatorRenderer{
-		SimpleRenderer: NewSimpleRenderer(bar),
+		WidgetRenderer: NewSimpleRenderer(bar),
 		bar:            bar,
 		d:              s,
 	}
@@ -49,7 +49,7 @@ func (s *Separator) MinSize() fyne.Size {
 var _ fyne.WidgetRenderer = (*separatorRenderer)(nil)
 
 type separatorRenderer struct {
-	*SimpleRenderer
+	fyne.WidgetRenderer
 	bar *canvas.Rectangle
 	d   *Separator
 }

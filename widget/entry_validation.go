@@ -68,7 +68,7 @@ func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
 	icon := &canvas.Image{}
 	icon.Hide()
 	return &validationStatusRenderer{
-		SimpleRenderer: NewSimpleRenderer(icon),
+		WidgetRenderer: NewSimpleRenderer(icon),
 		icon:           icon,
 		entry:          r.entry,
 	}
@@ -77,7 +77,7 @@ func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
 var _ fyne.WidgetRenderer = (*validationStatusRenderer)(nil)
 
 type validationStatusRenderer struct {
-	*SimpleRenderer
+	fyne.WidgetRenderer
 	entry *Entry
 	icon  *canvas.Image
 }

@@ -29,7 +29,7 @@ func newPasswordRevealer(e *Entry) *passwordRevealer {
 
 func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	return &passwordRevealerRenderer{
-		SimpleRenderer: NewSimpleRenderer(r.icon),
+		WidgetRenderer: NewSimpleRenderer(r.icon),
 		icon:           r.icon,
 		entry:          r.entry,
 	}
@@ -49,7 +49,7 @@ func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
 var _ fyne.WidgetRenderer = (*passwordRevealerRenderer)(nil)
 
 type passwordRevealerRenderer struct {
-	*SimpleRenderer
+	fyne.WidgetRenderer
 	entry *Entry
 	icon  *canvas.Image
 }
