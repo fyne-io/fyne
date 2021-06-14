@@ -22,16 +22,9 @@ type Menu struct {
 
 // NewMenu creates a new Menu.
 func NewMenu(menu *fyne.Menu) *Menu {
-	items := make([]fyne.CanvasObject, len(menu.Items))
-	m := &Menu{Items: items}
+	m := &Menu{}
 	m.ExtendBaseWidget(m)
-	for i, item := range menu.Items {
-		if item.IsSeparator {
-			items[i] = NewSeparator()
-		} else {
-			items[i] = newMenuItem(item, m)
-		}
-	}
+	m.setMenu(menu)
 	return m
 }
 
@@ -193,6 +186,17 @@ func (m *Menu) activateItem(item *menuItem) {
 	m.activeItem = item
 	m.activeItem.Refresh()
 	m.Refresh()
+}
+
+func (m *Menu) setMenu(menu *fyne.Menu) {
+	m.Items = make([]fyne.CanvasObject, len(menu.Items))
+	for i, item := range menu.Items {
+		if item.IsSeparator {
+			m.Items[i] = NewSeparator()
+		} else {
+			m.Items[i] = newMenuItem(item, m)
+		}
+	}
 }
 
 type menuRenderer struct {
