@@ -22,15 +22,9 @@ type Menu struct {
 
 // NewMenu creates a new Menu.
 func NewMenu(menu *fyne.Menu) *Menu {
-	items := make([]fyne.CanvasObject, len(menu.Items))
-	m := &Menu{Items: items}
-	for i, item := range menu.Items {
-		if item.IsSeparator {
-			items[i] = NewSeparator()
-		} else {
-			items[i] = newMenuItem(item, m)
-		}
-	}
+	m := &Menu{}
+	m.ExtendBaseWidget(m)
+	m.setMenu(menu)
 	return m
 }
 
@@ -102,6 +96,7 @@ func (m *Menu) ActivatePrevious() {
 //
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
+	m.ExtendBaseWidget(m)
 	box := newMenuBox(m.Items)
 	scroll := widget.NewVScroll(box)
 	scroll.SetMinSize(box.MinSize())
@@ -142,46 +137,12 @@ func (m *Menu) DeactivateLastSubmenu() bool {
 	return m.activeItem.deactivateLastSubmenu()
 }
 
-// Hide hides the menu.
-//
-// Implements: fyne.Widget
-func (m *Menu) Hide() {
-	widget.HideWidget(&m.Base, m)
-}
-
 // MinSize returns the minimal size of the menu.
 //
 // Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
-	return widget.MinSizeOf(m)
-}
-
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (m *Menu) Move(pos fyne.Position) {
-	widget.MoveWidget(&m.Base, m, pos)
-}
-
-// Refresh triggers a redraw of the menu.
-//
-// Implements: fyne.Widget
-func (m *Menu) Refresh() {
-	widget.RefreshWidget(m)
-}
-
-// Resize has no effect because menus are always displayed with their minimal size.
-//
-// Implements: fyne.Widget
-func (m *Menu) Resize(size fyne.Size) {
-	widget.ResizeWidget(&m.Base, m, size)
-}
-
-// Show makes the menu visible.
-//
-// Implements: fyne.Widget
-func (m *Menu) Show() {
-	widget.ShowWidget(&m.Base, m)
+	m.ExtendBaseWidget(m)
+	return m.Base.MinSize()
 }
 
 // Tapped catches taps on separators and the menu background. It doesn’t perform any action.
@@ -227,6 +188,17 @@ func (m *Menu) activateItem(item *menuItem) {
 	m.Refresh()
 }
 
+func (m *Menu) setMenu(menu *fyne.Menu) {
+	m.Items = make([]fyne.CanvasObject, len(menu.Items))
+	for i, item := range menu.Items {
+		if item.IsSeparator {
+			m.Items[i] = NewSeparator()
+		} else {
+			m.Items[i] = newMenuItem(item, m)
+		}
+	}
+}
+
 type menuRenderer struct {
 	*widget.ShadowingRenderer
 	box    *menuBox
@@ -268,6 +240,7 @@ func (r *menuRenderer) MinSize() fyne.Size {
 
 func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
+	r.ShadowingRenderer.RefreshShadow()
 	canvas.Refresh(r.m)
 }
 

@@ -45,15 +45,17 @@ func listDrives() []string {
 	return drives
 }
 
-func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
-	var places []fyne.CanvasObject
+func (f *fileDialog) getPlaces() []favoriteItem {
+	var places []favoriteItem
 
 	for _, drive := range listDrives() {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
 		driveRootURI, _ := storage.ListerForURI(storage.NewURI("file://" + driveRoot))
-		places = append(places, makeFavoriteButton(drive, theme.StorageIcon(), func() {
-			f.setLocation(driveRootURI)
-		}))
+		places = append(places, favoriteItem{
+			drive,
+			theme.StorageIcon(),
+			driveRootURI,
+		})
 	}
 	return places
 }

@@ -188,5 +188,8 @@ func loadIcons() []iconInfo {
 		{"AccountIcon", theme.AccountIcon()},
 		{"LoginIcon", theme.LoginIcon()},
 		{"LogoutIcon", theme.LogoutIcon()},
+
+		{"ListIcon", theme.ListIcon()},
+		{"GridIcon", theme.GridIcon()},
 	}
 }

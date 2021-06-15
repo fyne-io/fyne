@@ -775,9 +775,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
-	if wid, ok := co.(fyne.Focusable); ok {
-		w.canvas.Focus(wid)
-	} else {
+	if wid, ok := co.(fyne.Focusable); !ok || wid != w.canvas.Focused() {
 		w.canvas.Unfocus()
 	}
 
