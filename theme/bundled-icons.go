@@ -12,17 +12,17 @@ var fynelogo = &fyne.StaticResource{
 
 var cancelIconRes = &fyne.StaticResource{
 	StaticName:    "cancel.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\n"),
 }
 
 var checkIconRes = &fyne.StaticResource{
 	StaticName:    "check.svg",
-	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\r\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\r\n    <path d=\"M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z\"/>\r\n</svg>\r\n"),
+	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\n    <path d=\"M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z\"/>\n</svg>\n"),
 }
 
 var deleteIconRes = &fyne.StaticResource{
 	StaticName:    "delete.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\n"),
 }
 
 var searchIconRes = &fyne.StaticResource{
@@ -47,22 +47,22 @@ var menuexpandIconRes = &fyne.StaticResource{
 
 var checkboxIconRes = &fyne.StaticResource{
 	StaticName:    "check-box.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\r\n    <path d=\"M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/>\r\n</svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <path d=\"M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/>\n</svg>\n"),
 }
 
 var checkboxblankIconRes = &fyne.StaticResource{
 	StaticName:    "check-box-blank.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\r\n    <path d=\"M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z\"/>\r\n</svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <path d=\"M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z\"/>\n</svg>\n"),
 }
 
 var radiobuttonIconRes = &fyne.StaticResource{
 	StaticName:    "radio-button.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z\"/></svg>\n"),
 }
 
 var radiobuttoncheckedIconRes = &fyne.StaticResource{
 	StaticName:    "radio-button-checked.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z\"/></svg>\n"),
 }
 
 var contentaddIconRes = &fyne.StaticResource{
@@ -112,7 +112,7 @@ var colorchromaticIconRes = &fyne.StaticResource{
 
 var colorpaletteIconRes = &fyne.StaticResource{
 	StaticName:    "color-palette.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"black\" width=\"24px\" height=\"24px\">\r\n    <path d=\"M0 0h24v24H0z\" fill=\"none\"/>\r\n    <path d=\"M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z\"/>\r\n</svg>"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"black\" width=\"24px\" height=\"24px\">\n    <path d=\"M0 0h24v24H0z\" fill=\"none\"/>\n    <path d=\"M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z\"/>\n</svg>"),
 }
 
 var documentIconRes = &fyne.StaticResource{
@@ -137,27 +137,27 @@ var documentsaveIconRes = &fyne.StaticResource{
 
 var morehorizontalIconRes = &fyne.StaticResource{
 	StaticName:    "more-horizontal.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\r\n    <path d=\"M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z\" />\r\n</svg>"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <path d=\"M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z\" />\n</svg>"),
 }
 
 var moreverticalIconRes = &fyne.StaticResource{
 	StaticName:    "more-vertical.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\r\n    <path d=\"M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z\" />\r\n</svg>"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <path d=\"M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z\" />\n</svg>"),
 }
 
 var infoIconRes = &fyne.StaticResource{
 	StaticName:    "info.svg",
-	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\r\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\r\n\t<g>\r\n\t\t<rect x=\"11\" y=\"7\" width=\"2\" height=\"2\"/>\r\n\t\t<rect x=\"11\" y=\"11\" width=\"2\" height=\"6\"/>\r\n\t\t<path d=\"M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8\r\n\t\t\tc0-4.41,3.59-8,8-8s8,3.59,8,8C20,16.41,16.41,20,12,20z\"/>\r\n\t</g>\r\n</svg>\r\n"),
+	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\n\t<g>\n\t\t<rect x=\"11\" y=\"7\" width=\"2\" height=\"2\"/>\n\t\t<rect x=\"11\" y=\"11\" width=\"2\" height=\"6\"/>\n\t\t<path d=\"M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8\n\t\t\tc0-4.41,3.59-8,8-8s8,3.59,8,8C20,16.41,16.41,20,12,20z\"/>\n\t</g>\n</svg>\n"),
 }
 
 var questionIconRes = &fyne.StaticResource{
 	StaticName:    "question.svg",
-	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\r\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\r\n\t<path d=\"M11,18h2v-2h-2V18z M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8\r\n\t\ts3.59-8,8-8s8,3.59,8,8S16.41,20,12,20z M12,6c-2.21,0-4,1.79-4,4h2c0-1.1,0.9-2,2-2s2,0.9,2,2c0,2-3,1.75-3,5h2c0-2.25,3-2.5,3-5\r\n\t\tC16,7.79,14.21,6,12,6z\"/>\r\n</svg>\r\n"),
+	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\n\t<path d=\"M11,18h2v-2h-2V18z M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8\n\t\ts3.59-8,8-8s8,3.59,8,8S16.41,20,12,20z M12,6c-2.21,0-4,1.79-4,4h2c0-1.1,0.9-2,2-2s2,0.9,2,2c0,2-3,1.75-3,5h2c0-2.25,3-2.5,3-5\n\t\tC16,7.79,14.21,6,12,6z\"/>\n</svg>\n"),
 }
 
 var warningIconRes = &fyne.StaticResource{
 	StaticName:    "warning.svg",
-	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\r\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\r\n\t<g>\r\n\t\t<path d=\"M12,5.99L19.53,19H4.47L12,5.99 M12,2L1,21h22L12,2L12,2z\"/>\r\n\t\t<polygon points=\"13,16 11,16 11,18 13,18 13,16 \t\t\"/>\r\n\t\t<polygon points=\"13,10 11,10 11,14 13,14 13,10 \t\t\"/>\r\n\t</g>\r\n</svg>\r\n"),
+	StaticContent: []byte("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"24px\"\n\t height=\"24px\" viewBox=\"0 0 24 24\" enable-background=\"new 0 0 24 24\" xml:space=\"preserve\">\n\t<g>\n\t\t<path d=\"M12,5.99L19.53,19H4.47L12,5.99 M12,2L1,21h22L12,2L12,2z\"/>\n\t\t<polygon points=\"13,16 11,16 11,18 13,18 13,16 \t\t\"/>\n\t\t<polygon points=\"13,10 11,10 11,14 13,14 13,10 \t\t\"/>\n\t</g>\n</svg>\n"),
 }
 
 var errorIconRes = &fyne.StaticResource{
@@ -167,7 +167,7 @@ var errorIconRes = &fyne.StaticResource{
 
 var arrowbackIconRes = &fyne.StaticResource{
 	StaticName:    "arrow-back.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z\"/></svg>\n"),
 }
 
 var arrowdownIconRes = &fyne.StaticResource{
@@ -177,7 +177,7 @@ var arrowdownIconRes = &fyne.StaticResource{
 
 var arrowforwardIconRes = &fyne.StaticResource{
 	StaticName:    "arrow-forward.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z\"/></svg>\n"),
 }
 
 var arrowupIconRes = &fyne.StaticResource{
@@ -202,27 +202,27 @@ var fileIconRes = &fyne.StaticResource{
 
 var fileapplicationIconRes = &fyne.StaticResource{
 	StaticName:    "file-application.svg",
-	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000;stroke-width:0.758587\" d=\"m 8.5489811,5.1365526 c 0.6291226,0 1.136968,0.5086607 1.136968,1.1387931 0,0.6301315 -0.5078454,1.138793 -1.136968,1.138793 -0.636702,0 -1.1369682,-0.5086615 -1.1369682,-1.138793 0,-0.6301324 0.5078458,-1.1387931 1.1369682,-1.1387931 z M 8.12769,4.1000094 c -0.054902,0 -0.1013548,0.038698 -0.1098008,0.090302 L 7.9376517,4.7579098 C 7.8109575,4.8138129 7.6884879,4.8826089 7.5786873,4.9600091 L 7.0550226,4.7450081 c -0.046454,0 -0.1013542,0 -0.130916,0.055903 L 6.5017968,5.5448094 c -0.025338,0.047296 -0.016893,0.1031993 0.025338,0.1375997 L 6.974783,6.0350078 c -0.00845,0.073098 -0.012669,0.1418993 -0.012669,0.2149999 0,0.073098 0.00422,0.1418994 0.012669,0.214999 L 6.5271353,6.8176064 c -0.038008,0.034399 -0.050677,0.090302 -0.025338,0.1375997 l 0.4223099,0.7438975 c 0.025338,0.055903 0.080239,0.055903 0.1309161,0.055903 l 0.523664,-0.2150057 c 0.1098007,0.077396 0.2280475,0.1504996 0.3589638,0.2020989 l 0.080237,0.5675985 c 0.00844,0.051604 0.050679,0.090302 0.1098008,0.090302 h 0.8446195 c 0.046453,0 0.092906,-0.038698 0.101355,-0.090302 L 9.1539069,7.7420995 C 9.2806,7.6861968 9.3946235,7.6174007 9.5086472,7.5400006 l 0.5194388,0.2149989 c 0.05491,0 0.109802,0 0.139363,-0.055903 L 10.58976,6.9551982 C 10.6151,6.9079022 10.60243,6.8519989 10.56442,6.8175984 L 10.11255,6.4649991 c 0.0085,-0.073098 0.01689,-0.1418994 0.01689,-0.214999 0,-0.073098 -0.0043,-0.1418993 -0.01689,-0.2149999 l 0.447648,-0.3525988 c 0.03801,-0.0344 0.05068,-0.090302 0.02535,-0.1375998 l -0.42232,-0.7438974 c -0.02534,-0.055903 -0.08024,-0.055903 -0.135141,-0.055903 L 9.5086472,4.9599994 C 9.3946235,4.8826031 9.2806,4.8094997 9.1496836,4.7579005 L 9.069441,4.1903019 C 9.065281,4.1386979 9.018766,4.0999999 8.97231,4.0999999 H 8.12769 M 13,9 h 5.5 L 13,3.5 V 9 M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2\" /></svg>\r\n"),
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000;stroke-width:0.758587\" d=\"m 8.5489811,5.1365526 c 0.6291226,0 1.136968,0.5086607 1.136968,1.1387931 0,0.6301315 -0.5078454,1.138793 -1.136968,1.138793 -0.636702,0 -1.1369682,-0.5086615 -1.1369682,-1.138793 0,-0.6301324 0.5078458,-1.1387931 1.1369682,-1.1387931 z M 8.12769,4.1000094 c -0.054902,0 -0.1013548,0.038698 -0.1098008,0.090302 L 7.9376517,4.7579098 C 7.8109575,4.8138129 7.6884879,4.8826089 7.5786873,4.9600091 L 7.0550226,4.7450081 c -0.046454,0 -0.1013542,0 -0.130916,0.055903 L 6.5017968,5.5448094 c -0.025338,0.047296 -0.016893,0.1031993 0.025338,0.1375997 L 6.974783,6.0350078 c -0.00845,0.073098 -0.012669,0.1418993 -0.012669,0.2149999 0,0.073098 0.00422,0.1418994 0.012669,0.214999 L 6.5271353,6.8176064 c -0.038008,0.034399 -0.050677,0.090302 -0.025338,0.1375997 l 0.4223099,0.7438975 c 0.025338,0.055903 0.080239,0.055903 0.1309161,0.055903 l 0.523664,-0.2150057 c 0.1098007,0.077396 0.2280475,0.1504996 0.3589638,0.2020989 l 0.080237,0.5675985 c 0.00844,0.051604 0.050679,0.090302 0.1098008,0.090302 h 0.8446195 c 0.046453,0 0.092906,-0.038698 0.101355,-0.090302 L 9.1539069,7.7420995 C 9.2806,7.6861968 9.3946235,7.6174007 9.5086472,7.5400006 l 0.5194388,0.2149989 c 0.05491,0 0.109802,0 0.139363,-0.055903 L 10.58976,6.9551982 C 10.6151,6.9079022 10.60243,6.8519989 10.56442,6.8175984 L 10.11255,6.4649991 c 0.0085,-0.073098 0.01689,-0.1418994 0.01689,-0.214999 0,-0.073098 -0.0043,-0.1418993 -0.01689,-0.2149999 l 0.447648,-0.3525988 c 0.03801,-0.0344 0.05068,-0.090302 0.02535,-0.1375998 l -0.42232,-0.7438974 c -0.02534,-0.055903 -0.08024,-0.055903 -0.135141,-0.055903 L 9.5086472,4.9599994 C 9.3946235,4.8826031 9.2806,4.8094997 9.1496836,4.7579005 L 9.069441,4.1903019 C 9.065281,4.1386979 9.018766,4.0999999 8.97231,4.0999999 H 8.12769 M 13,9 h 5.5 L 13,3.5 V 9 M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2\" /></svg>\n"),
 }
 
 var fileaudioIconRes = &fyne.StaticResource{
 	StaticName:    "file-audio.svg",
-	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000;fill-rule:evenodd;stroke-width:0.777856\" d=\"M 6.0002511,2 A 1.9999348,2.000148 0 0 0 4,3.9992013 V 20.000799 A 1.9999348,2.000148 0 0 0 6.0002511,22 H 17.999749 A 1.9999348,2.000148 0 0 0 20,20.000799 V 7.9996008 L 13.999248,2 Z M 13,3.5 18.530514,9 H 13 Z M 8.2937119,4.3207511 h 0.4679302 v 0.00199 h 1.0824651 v 0.3195526 0.2516478 0.2176952 c 0,0.023816 -0.018227,0.043939 -0.042174,0.043939 H 8.7616421 V 7.4124229 7.5182746 C 8.7712047,7.939292 8.3059943,8.2307883 7.914146,8.1653687 7.5819917,8.1259354 7.2871265,7.8366816 7.2996111,7.4943082 7.305688,7.1339923 7.6598442,6.8656836 8.0065272,6.8691834 c 0.097728,-0.00598 0.1945364,0.013901 0.2871847,0.045936 z\"/></svg>\r\n"),
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000;fill-rule:evenodd;stroke-width:0.777856\" d=\"M 6.0002511,2 A 1.9999348,2.000148 0 0 0 4,3.9992013 V 20.000799 A 1.9999348,2.000148 0 0 0 6.0002511,22 H 17.999749 A 1.9999348,2.000148 0 0 0 20,20.000799 V 7.9996008 L 13.999248,2 Z M 13,3.5 18.530514,9 H 13 Z M 8.2937119,4.3207511 h 0.4679302 v 0.00199 h 1.0824651 v 0.3195526 0.2516478 0.2176952 c 0,0.023816 -0.018227,0.043939 -0.042174,0.043939 H 8.7616421 V 7.4124229 7.5182746 C 8.7712047,7.939292 8.3059943,8.2307883 7.914146,8.1653687 7.5819917,8.1259354 7.2871265,7.8366816 7.2996111,7.4943082 7.305688,7.1339923 7.6598442,6.8656836 8.0065272,6.8691834 c 0.097728,-0.00598 0.1945364,0.013901 0.2871847,0.045936 z\"/></svg>\n"),
 }
 
 var fileimageIconRes = &fyne.StaticResource{
 	StaticName:    "file-image.svg",
-	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000;fill-rule:evenodd;stroke-width:0.940877\" d=\"M 6 2 C 4.9979026 1.9799577 4.0915724 2.7956686 4.0097656 3.7949219 C 3.9858279 9.0765497 4.0068316 14.358462 4 19.640625 C 3.8556938 20.744226 4.6408127 21.907969 5.7949219 21.990234 C 9.7602778 22.014419 13.727457 21.993102 17.693359 22 C 18.814725 22.146504 19.961957 21.277434 19.996094 20.119141 C 20.004294 16.079629 19.9976 12.039599 20 8 L 14 2 L 6 2 z M 13 3.5 L 18.5 9 L 13 9 L 13 3.5 z M 6.8886719 4.4101562 C 7.4076408 4.3996432 7.8588673 4.8625721 7.8476562 5.3789062 C 7.8614266 5.8922419 7.4045151 6.3584357 6.8886719 6.3457031 C 6.3728164 6.3584316 5.917866 5.8922293 5.9316406 5.3789062 C 5.9178703 4.8655705 6.3728287 4.3974238 6.8886719 4.4101562 z M 11.363281 5.3730469 L 11.363281 8.4003906 L 5.6503906 8.4003906 L 8.5078125 6.1289062 L 9.4589844 6.8867188 L 11.363281 5.3730469 z \" /></svg>\r\n"),
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000;fill-rule:evenodd;stroke-width:0.940877\" d=\"M 6 2 C 4.9979026 1.9799577 4.0915724 2.7956686 4.0097656 3.7949219 C 3.9858279 9.0765497 4.0068316 14.358462 4 19.640625 C 3.8556938 20.744226 4.6408127 21.907969 5.7949219 21.990234 C 9.7602778 22.014419 13.727457 21.993102 17.693359 22 C 18.814725 22.146504 19.961957 21.277434 19.996094 20.119141 C 20.004294 16.079629 19.9976 12.039599 20 8 L 14 2 L 6 2 z M 13 3.5 L 18.5 9 L 13 9 L 13 3.5 z M 6.8886719 4.4101562 C 7.4076408 4.3996432 7.8588673 4.8625721 7.8476562 5.3789062 C 7.8614266 5.8922419 7.4045151 6.3584357 6.8886719 6.3457031 C 6.3728164 6.3584316 5.917866 5.8922293 5.9316406 5.3789062 C 5.9178703 4.8655705 6.3728287 4.3974238 6.8886719 4.4101562 z M 11.363281 5.3730469 L 11.363281 8.4003906 L 5.6503906 8.4003906 L 8.5078125 6.1289062 L 9.4589844 6.8867188 L 11.363281 5.3730469 z \" /></svg>\n"),
 }
 
 var filetextIconRes = &fyne.StaticResource{
 	StaticName:    "file-text.svg",
-	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000\" d=\"m 13,9 h 5.5 L 13,3.5 V 9 M 9.964966,8 V 6.5 H 5.3221088 V 8 H 9.964966 M 11.8,6 V 4.5 H 5.3 V 6 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2\" /></svg>\r\n"),
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"fill:#000000\" d=\"m 13,9 h 5.5 L 13,3.5 V 9 M 9.964966,8 V 6.5 H 5.3221088 V 8 H 9.964966 M 11.8,6 V 4.5 H 5.3 V 6 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2\" /></svg>\n"),
 }
 
 var filevideoIconRes = &fyne.StaticResource{
 	StaticName:    "file-video.svg",
-	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"display:inline;fill:#000000\" d=\"m 13,9 h 5.5 L 13,3.5 V 9 M 11.45625,7.7785579 V 4.7214421 L 9.75,5.8423846 V 4.7214421 H 5.76875 V 7.7785579 H 9.75 V 6.6576155 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2\"/></svg>\r\n"),
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path style=\"display:inline;fill:#000000\" d=\"m 13,9 h 5.5 L 13,3.5 V 9 M 11.45625,7.7785579 V 4.7214421 L 9.75,5.8423846 V 4.7214421 H 5.76875 V 7.7785579 H 9.75 V 6.6576155 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2\"/></svg>\n"),
 }
 
 var folderIconRes = &fyne.StaticResource{
@@ -267,22 +267,22 @@ var mailattachmentIconRes = &fyne.StaticResource{
 
 var mailcomposeIconRes = &fyne.StaticResource{
 	StaticName:    "mail-compose.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\n"),
 }
 
 var mailforwardIconRes = &fyne.StaticResource{
 	StaticName:    "mail-forward.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 8V4l8 8-8 8v-4H4V8z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 8V4l8 8-8 8v-4H4V8z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\n"),
 }
 
 var mailreplyIconRes = &fyne.StaticResource{
 	StaticName:    "mail-reply.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\n"),
 }
 
 var mailreplyallIconRes = &fyne.StaticResource{
 	StaticName:    "mail-reply_all.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M7 8V5l-7 7 7 7v-3l-4-4 4-4zm6 1V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\r\n"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M7 8V5l-7 7 7 7v-3l-4-4 4-4zm6 1V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>\n"),
 }
 
 var mailsendIconRes = &fyne.StaticResource{
@@ -312,7 +312,7 @@ var mediaplayIconRes = &fyne.StaticResource{
 
 var mediarecordIconRes = &fyne.StaticResource{
 	StaticName:    "media-record.svg",
-	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\r\n    <circle cx=\"12\" cy=\"12\" r=\"8\" />\r\n</svg>"),
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n    <circle cx=\"12\" cy=\"12\" r=\"8\" />\n</svg>"),
 }
 
 var mediareplayIconRes = &fyne.StaticResource{
@@ -418,4 +418,14 @@ var loginIconRes = &fyne.StaticResource{
 var logoutIconRes = &fyne.StaticResource{
 	StaticName:    "logout.svg",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M14.08,15.59L16.67,13H7V11H16.67L14.08,8.41L15.5,7L20.5,12L15.5,17L14.08,15.59M19,3A2,2 0 0,1 21,5V9.67L19,7.67V5H5V19H19V16.33L21,14.33V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5C3,3.89 3.89,3 5,3H19Z\" /></svg>"),
+}
+
+var listIconRes = &fyne.StaticResource{
+	StaticName:    "list.svg",
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"  width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path fill=\"#000000\" d=\"M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4V14Z\" /></svg>"),
+}
+
+var gridIconRes = &fyne.StaticResource{
+	StaticName:    "grid.svg",
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"  width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path fill=\"#000000\" d=\"M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3\" /></svg>"),
 }

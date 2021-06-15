@@ -194,6 +194,9 @@ func main() {
 	bundleIcon("login", f)
 	bundleIcon("logout", f)
 
+	bundleIcon("list", f)
+	bundleIcon("grid", f)
+
 	err = writeFile("bundled-icons.go", f.Bytes())
 	if err != nil {
 		fyne.LogError("Unable to write file: ", err)

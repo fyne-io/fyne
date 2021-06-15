@@ -548,3 +548,13 @@ func Test_LogoutIcon_FileSource(t *testing.T) {
 	result := LogoutIcon().Name()
 	assert.Equal(t, "logout.svg", result)
 }
+
+func Test_ListIcon_FileSource(t *testing.T) {
+	result := ListIcon().Name()
+	assert.Equal(t, "list.svg", result)
+}
+
+func Test_GridIcon_FileSource(t *testing.T) {
+	result := GridIcon().Name()
+	assert.Equal(t, "grid.svg", result)
+}
