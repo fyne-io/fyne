@@ -1,8 +1,6 @@
 package cache
 
 import (
-	"time"
-
 	"fyne.io/fyne/v2"
 )
 
@@ -31,7 +29,7 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 // Note: If this is used to free textures, then it should be called inside a current
 // gl context to ensure textures are deleted from gl.
 func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
-	now := time.Now()
+	now := timeNow()
 	for obj, tinfo := range textures {
 		if tinfo.isExpired(now) && tinfo.canvas == canvas {
 			f(obj)

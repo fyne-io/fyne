@@ -15,6 +15,9 @@ var (
 	expiredObjects                = make([]fyne.CanvasObject, 0, 50)
 	lastClean                     time.Time
 	skippedCleanWithCanvasRefresh = false
+
+	// testing purpose only
+	timeNow func() time.Time = time.Now
 )
 
 func init() {
@@ -26,7 +29,7 @@ func init() {
 
 // Clean run cache clean task, it should be called on paint events.
 func Clean(canvasRefreshed bool) {
-	now := time.Now()
+	now := timeNow()
 	// do not run clean task too fast
 	if now.Sub(lastClean) < 10*time.Second {
 		if canvasRefreshed {
@@ -49,7 +52,7 @@ func Clean(canvasRefreshed bool) {
 		// be a way to recover them later
 		destroyExpiredCanvases(now)
 	}
-	lastClean = time.Now()
+	lastClean = timeNow()
 }
 
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
@@ -165,7 +168,7 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	t := time.Now().Add(cacheDuration)
+	t := timeNow().Add(cacheDuration)
 	c.expireLock.Lock()
 	c.expires = t
 	c.expireLock.Unlock()
@@ -182,6 +185,6 @@ func (c *expiringCacheNoLock) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCacheNoLock) setAlive() {
-	t := time.Now().Add(cacheDuration)
+	t := timeNow().Add(cacheDuration)
 	c.expires = t
 }
