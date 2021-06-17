@@ -20,3 +20,4 @@ Fixes #(issue)
 
 - [ ] Public APIs match existing style.
 - [ ] Any breaking changes have a deprecation path or have been discussed.
+- [ ] Updated the vendor folder (using `go mod vendor`).
