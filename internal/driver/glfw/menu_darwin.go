@@ -133,7 +133,7 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 			return !item.Disabled
 		})
 		menuCheckedCallbacks = append(menuCheckedCallbacks, func() bool {
-			return item.HasCheckmark
+			return item.HasCheck
 		})
 		nextItemID++
 	}

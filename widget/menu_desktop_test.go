@@ -273,8 +273,6 @@ func TestMenu_RefreshOptions(t *testing.T) {
 	))
 	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
 	w.Resize(m.MinSize())
-	m.Resize(m.MinSize())
-
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
 
 	itemBar.Disabled = true
@@ -282,21 +280,21 @@ func TestMenu_RefreshOptions(t *testing.T) {
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_disabled.xml", c)
 
-	itemBaz.HasCheckmark = true
+	itemBaz.HasCheck = true
 	itemBaz.Refresh()
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_checkmark.xml", c)
 
-	itemBar.HasCheckmark = true
+	itemBar.HasCheck = true
 	itemBar.Refresh()
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_2nd_checkmark.xml", c)
 
-	itemBar.HasCheckmark = false
+	itemBar.HasCheck = false
 	itemBar.Disabled = false
 	itemBar.Refresh()
 
-	itemBaz.HasCheckmark = false
+	itemBaz.HasCheck = false
 	itemBaz.Refresh()
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)

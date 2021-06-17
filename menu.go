@@ -20,12 +20,16 @@ type MenuItem struct {
 	IsSeparator  bool
 	Label        string
 	Action       func()
-	Disabled     bool
-	HasCheckmark bool
-	item         CanvasObject
+	// Since: 2.1
+	Disabled bool
+	// Since: 2.1
+	HasCheck bool
+	item     CanvasObject
 }
 
 // SetItem is used internally to be able to Refresh a menu item.
+//
+// Since: 2.1
 func (i *MenuItem) SetItem(menuItem CanvasObject) {
 	i.item = menuItem
 }

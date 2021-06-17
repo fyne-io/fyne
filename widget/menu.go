@@ -148,7 +148,7 @@ func (m *Menu) MinSize() fyne.Size {
 
 func (m *Menu) getContainsCheck() bool {
 	for _, item := range m.Items {
-		if mi, ok := item.(*menuItem); ok && mi.Item.HasCheckmark {
+		if mi, ok := item.(*menuItem); ok && mi.Item.HasCheck {
 			return true
 		}
 	}
