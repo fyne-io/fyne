@@ -1062,14 +1062,19 @@ func (e *Entry) syncSegments() {
 		colName = theme.ColorNameDisabled
 	}
 	e.textProvider().Wrapping = wrap
+	style := RichTextStyle{
+		Alignment: fyne.TextAlignLeading,
+		ColorName: colName,
+		TextStyle: e.TextStyle,
+	}
+	if e.Password {
+		style = RichTextStylePassword
+		style.ColorName = colName
+		style.TextStyle = e.TextStyle
+	}
 	e.textProvider().Segments = []RichTextSegment{&TextSegment{
-		Style: RichTextStyle{
-			Alignment: fyne.TextAlignLeading,
-			ColorName: colName,
-			TextStyle: e.TextStyle,
-		},
-		Text:      e.Text,
-		concealed: e.Password,
+		Style: style,
+		Text:  e.Text,
 	}}
 	colName = theme.ColorNamePlaceHolder
 	if e.disabled {

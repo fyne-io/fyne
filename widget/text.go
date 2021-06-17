@@ -51,6 +51,15 @@ var (
 		Inline:    false,
 		SizeName:  theme.SizeNameText,
 	}
+	// RichTextStylePassword represents standard sized text where the characters are obscured.
+	//
+	// Since: 2.1
+	RichTextStylePassword = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		concealed: true,
+	}
 	// RichTextStyleStrong represents standard text that can be surrounded by other elements.
 	//
 	// Since: 2.1
@@ -80,6 +89,9 @@ type RichTextStyle struct {
 	Inline    bool
 	SizeName  fyne.ThemeSizeName
 	TextStyle fyne.TextStyle
+
+	// an internal detail where we obscure password fields
+	concealed bool
 }
 
 // RichTextSegment describes any element that can be rendered in a RichText widget.
@@ -101,8 +113,6 @@ type RichTextSegment interface {
 type TextSegment struct {
 	Style RichTextStyle
 	Text  string
-
-	concealed bool // TODO a different type
 }
 
 // Inline should return true if this text can be included within other elements, or false if it creates a new block.
@@ -337,7 +347,7 @@ func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 
 	measureText := string(line[0:col])
 	bound := t.rowBoundary(row)
-	if bound.seg.concealed {
+	if concealed(seg) {
 		measureText = strings.Repeat(passwordChar, col)
 	}
 
@@ -561,7 +571,7 @@ func (r *textRenderer) Refresh() {
 			if bound.begin != 0 || bound.end != len([]rune(txt.Text)) {
 				txt.Text = txt.Text[bound.begin:bound.end]
 			}
-			if bound.seg.concealed {
+			if concealed(seg) {
 				txt.Text = strings.Repeat(passwordChar, len([]rune(txt.Text)))
 			}
 			objs = append(objs, txt)
@@ -645,6 +655,15 @@ func binarySearch(lessMaxWidth func(int, int) bool, low int, maxHigh int) int {
 		high++
 	}
 	return high
+}
+
+// concealed returns true if the segment represents a password, meaning the text should be obscured.
+func concealed(seg RichTextSegment) bool {
+	if text, ok := seg.(*TextSegment); ok {
+		return text.Style.concealed
+	}
+
+	return false
 }
 
 // findSpaceIndex accepts a slice of runes and a fallback index
