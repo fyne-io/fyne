@@ -508,7 +508,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	rowAlign := fyne.TextAlignLeading
 	i := 0
 	for _, bound := range bounds {
-		for segI, _ := range bound.segments {
+		for segI := range bound.segments {
 			inline := segI < len(bound.segments)-1
 			obj := objs[i]
 			i++
