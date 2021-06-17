@@ -194,7 +194,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			Style: widget.RichTextStyle{
 				Inline: true,
 			},
-			Text: ". This styled row should also wrap as expected, but only",
+			Text: ". This styled row should also wrap as expected, but only ",
 		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
