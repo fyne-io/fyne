@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -237,7 +236,6 @@ func (t *RichText) Resize(size fyne.Size) {
 	t.updateRowBounds()
 
 	t.Refresh()
-	cache.Renderer(t).Layout(size)
 }
 
 // String returns the text widget buffer as string
