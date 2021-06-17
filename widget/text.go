@@ -513,8 +513,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			obj := objs[i]
 			i++
 			_, isText := obj.(*canvas.Text)
-			_, isLink := obj.(*fyne.Container)
-			if !isText && !isLink { // TODO - can this be simplified?
+			if !isText && !inline {
 				height := obj.MinSize().Height
 
 				obj.Move(fyne.NewPos(left, yPos))
@@ -527,8 +526,8 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 
-			if len(rowItems) == 1 && isText { // TODO align link
-				rowAlign = bound.segments[len(bound.segments)-1].(*TextSegment).Style.Alignment // TODO potential bad cast
+			if len(rowItems) == 1 { // TODO align link
+				rowAlign = bound.segments[len(bound.segments)-1].(*TextSegment).Style.Alignment
 			}
 			yPos += r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
 			if !inline && bound.end == len(bound.segments[len(bound.segments)-1].(*TextSegment).Text) && i < len(objs)-1 {
