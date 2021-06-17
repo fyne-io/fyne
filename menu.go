@@ -24,22 +24,6 @@ type MenuItem struct {
 	Disabled bool
 	// Since: 2.1
 	HasCheck bool
-	item     CanvasObject
-}
-
-// SetItem is used internally to be able to Refresh a menu item.
-//
-// Since: 2.1
-func (i *MenuItem) SetItem(menuItem CanvasObject) {
-	i.item = menuItem
-}
-
-// Refresh refreshes the menu item.
-func (i *MenuItem) Refresh() {
-	if i.item == nil {
-		return
-	}
-	i.item.Refresh()
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.

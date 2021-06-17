@@ -146,6 +146,16 @@ func (m *Menu) MinSize() fyne.Size {
 	return m.Base.MinSize()
 }
 
+// Refresh updates the menu to reflect changes in the data.
+//
+// Implements: fyne.Widget
+func (m *Menu) Refresh() {
+	for _, item := range m.Items {
+		item.Refresh()
+	}
+	m.Base.Refresh()
+}
+
 func (m *Menu) getContainsCheck() bool {
 	for _, item := range m.Items {
 		if mi, ok := item.(*menuItem); ok && mi.Item.HasCheck {
@@ -206,7 +216,6 @@ func (m *Menu) setMenu(menu *fyne.Menu) {
 		} else {
 			m.Items[i] = newMenuItem(item, m)
 		}
-		item.SetItem(m.Items[i])
 	}
 	m.containsCheck = m.getContainsCheck()
 }

@@ -247,8 +247,6 @@ func (r *menuItemRenderer) Refresh() {
 		r.checkIcon.Hide()
 	}
 	r.checkIcon.Refresh()
-
-	canvas.Refresh(r.i)
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {
