@@ -273,6 +273,7 @@ func TestMenu_RefreshOptions(t *testing.T) {
 	))
 	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
 	w.Resize(m.MinSize())
+	m.Resize(m.MinSize())
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
 
 	itemBar.Disabled = true
