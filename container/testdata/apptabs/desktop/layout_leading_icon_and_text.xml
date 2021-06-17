@@ -3,14 +3,14 @@
 		<widget size="150x150" type="*container.AppTabs">
 			<container size="50x150">
 				<container size="50x150">
-					<widget size="50x73" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,48" size="42x21">Text1</text>
-						<image pos="5,4" rsc="cancelIcon" size="40x40" themed="primary"/>
+					<widget size="50x81" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="4,52" size="42x21">Text1</text>
+						<image pos="5,8" rsc="cancelIcon" size="40x40" themed="primary"/>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="50,0" size="4x150"/>
-			<rectangle fillColor="primary" pos="50,0" size="4x73"/>
+			<rectangle fillColor="primary" pos="50,0" size="4x81"/>
 			<circle fillColor="background" pos="54,0" size="96x150"/>
 		</widget>
 	</content>

@@ -2,13 +2,13 @@
 	<content>
 		<container pos="4,4" size="142x192">
 			<widget pos="41,57" size="60x78" type="*widget.Accordion">
-				<widget pos="0,4" size="60x29" type="*widget.Button">
-					<rectangle fillColor="button" size="60x29"/>
+				<widget size="60x37" type="*widget.Button">
+					<rectangle fillColor="button" size="60x37"/>
 					<rectangle size="0x0"/>
-					<text bold pos="28,4" size="11x21">A</text>
-					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
+					<text bold pos="36,8" size="11x21">A</text>
+					<image fillMode="contain" pos="12,8" rsc="menuDropUpIcon" size="20x21"/>
 				</widget>
-				<widget pos="0,37" size="60x37" type="*widget.Label">
+				<widget pos="0,41" size="60x37" type="*widget.Label">
 					<text pos="8,8" size="44x21">11111</text>
 				</widget>
 			</widget>
