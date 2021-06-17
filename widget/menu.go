@@ -146,12 +146,6 @@ func (m *Menu) MinSize() fyne.Size {
 	return m.Base.MinSize()
 }
 
-func (m *Menu) needsResize() bool {
-	containedCheck := m.containsCheck
-	m.containsCheck = m.getContainsCheck()
-	return containedCheck != m.containsCheck
-}
-
 func (m *Menu) getContainsCheck() bool {
 	for _, item := range m.Items {
 		if mi, ok := item.(*menuItem); ok && mi.Item.HasCheckmark {
@@ -212,6 +206,7 @@ func (m *Menu) setMenu(menu *fyne.Menu) {
 		} else {
 			m.Items[i] = newMenuItem(item, m)
 		}
+		item.SetItem(m.Items[i])
 	}
 	m.containsCheck = m.getContainsCheck()
 }
