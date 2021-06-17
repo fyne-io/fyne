@@ -261,7 +261,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	}
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
-	renderer := &simpleRenderer{content: fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox)}
+	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
 	f.updateButtons()      // will set correct visibility on the submit/cancel btns
 	f.checkValidation(nil) // will trigger a validation check for correct initial validation status
 	return renderer
