@@ -34,6 +34,10 @@ func (r *Raster) Alpha() float64 {
 // Resize on a raster image causes the new size to be set and then calls Refresh.
 // This causes the underlying data to be recalculated and a new output to be drawn.
 func (r *Raster) Resize(s fyne.Size) {
+	if s == r.Size() {
+		return
+	}
+
 	r.baseObject.Resize(s)
 	Refresh(r)
 }
@@ -94,8 +98,8 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 				pix.img = dst
 			}
 
-			for x := 0; x < w; x++ {
-				for y := 0; y < h; y++ {
+			for y := 0; y < h; y++ {
+				for x := 0; x < w; x++ {
 					pix.img.Set(x, y, pixelColor(x, y, w, h))
 				}
 			}

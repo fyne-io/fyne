@@ -1,10 +1,13 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 	"strings"
+
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -67,6 +70,7 @@ type TextGrid struct {
 
 	ShowLineNumbers bool
 	ShowWhitespace  bool
+	TabWidth        int // If set to 0 the fyne.DefaultTabWidth is used
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -84,25 +88,22 @@ func (t *TextGrid) Resize(size fyne.Size) {
 // SetText updates the buffer of this textgrid to contain the specified text.
 // New lines and columns will be added as required. Lines are separated by '\n'.
 // The grid will use default text style and any previous content and style will be removed.
+// Tab characters are padded with spaces to the next tab stop.
 func (t *TextGrid) SetText(text string) {
 	lines := strings.Split(text, "\n")
 	rows := make([]TextGridRow, len(lines))
 	for i, line := range lines {
-		spaced := strings.ReplaceAll(line, "\t", textTabIndent)
-
-		cells := make([]TextGridCell, len(spaced))
-		extras := 0
-		for j, r := range line {
-			cells[j+extras] = TextGridCell{Rune: r}
-
+		cells := make([]TextGridCell, 0, len(line))
+		for _, r := range line {
+			cells = append(cells, TextGridCell{Rune: r})
 			if r == '\t' {
-				for k := j + extras + 1; k < j+extras+len(textTabIndent); k++ {
-					cells[k] = TextGridCell{Rune: ' '}
+				col := len(cells)
+				next := nextTab(col-1, t.tabWidth())
+				for i := col; i < next; i++ {
+					cells = append(cells, TextGridCell{Rune: ' '})
 				}
-				extras += len(textTabIndent) - 1
 			}
 		}
-
 		rows[i] = TextGridRow{Cells: cells}
 	}
 
@@ -112,6 +113,7 @@ func (t *TextGrid) SetText(text string) {
 
 // Text returns the contents of the buffer as a single string (with no style information).
 // It reconstructs the lines by joining with a `\n` character.
+// Tab characters have padded spaces removed.
 func (t *TextGrid) Text() string {
 	count := len(t.Rows) - 1 // newlines
 	for _, row := range t.Rows {
@@ -122,31 +124,25 @@ func (t *TextGrid) Text() string {
 		return ""
 	}
 
-	runes := make([]rune, count)
-	c := 0
-	skipped := 0
+	runes := make([]rune, 0, count)
+
 	for i, row := range t.Rows {
-		skip := 0
-		for _, r := range row.Cells {
-			if skip > 0 {
-				skip--
+		next := 0
+		for col, cell := range row.Cells {
+			if col < next {
 				continue
 			}
-			runes[c] = r.Rune
-			c++
-			if r.Rune == '\t' {
-				skip = len(textTabIndent) - 1
-				skipped += skip
+			runes = append(runes, cell.Rune)
+			if cell.Rune == '\t' {
+				next = nextTab(col, t.tabWidth())
 			}
 		}
-
 		if i < len(t.Rows)-1 {
-			runes[c] = '\n'
-			c++
+			runes = append(runes, '\n')
 		}
 	}
 
-	return string(runes[:len(runes)-skipped])
+	return string(runes)
 }
 
 // Row returns a copy of the content in a specified row as a TextGridRow.
@@ -163,18 +159,30 @@ func (t *TextGrid) Row(row int) TextGridRow {
 // If the index is out of bounds it returns an empty string.
 func (t *TextGrid) RowText(row int) string {
 	rowData := t.Row(row)
-	runes := make([]rune, len(rowData.Cells))
-	c := 0
-	for _, r := range rowData.Cells {
-		runes[c] = r.Rune
-		c++
+	count := len(rowData.Cells)
+
+	if count <= 0 {
+		return ""
 	}
 
+	runes := make([]rune, 0, count)
+
+	next := 0
+	for col, cell := range rowData.Cells {
+		if col < next {
+			continue
+		}
+		runes = append(runes, cell.Rune)
+		if cell.Rune == '\t' {
+			next = nextTab(col, t.tabWidth())
+		}
+	}
 	return string(runes)
 }
 
 // SetRow updates the specified row of the grid's contents using the specified content and style and then refreshes.
 // If the row is beyond the end of the current buffer it will be expanded.
+// Tab characters are not padded with spaces.
 func (t *TextGrid) SetRow(row int, content TextGridRow) {
 	if row < 0 {
 		return
@@ -296,8 +304,8 @@ func (t *TextGrid) ensureCells(row, col int) {
 }
 
 func (t *TextGrid) refreshCell(row, col int) {
-	// TODO trigger single cell refresh
-	t.Refresh()
+	r := cache.Renderer(t).(*textGridRenderer)
+	r.refreshCell(row, col)
 }
 
 // NewTextGrid creates a new empty TextGrid widget.
@@ -312,6 +320,12 @@ func NewTextGridFromString(content string) *TextGrid {
 	grid := NewTextGrid()
 	grid.SetText(content)
 	return grid
+}
+
+// nextTab finds the column of the next tab stop for the given column
+func nextTab(column int, tabWidth int) int {
+	tabStop, _ := math.Modf(float64(column+tabWidth) / float64(tabWidth))
+	return tabWidth * int(tabStop)
 }
 
 type textGridRenderer struct {
@@ -331,6 +345,19 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 	t.objects = append(t.objects, bg, text)
 }
 
+func (t *textGridRenderer) refreshCell(row, col int) {
+	pos := row*t.cols + col
+	if pos*2+1 >= len(t.objects) {
+		return
+	}
+
+	text := t.objects[pos*2+1].(*canvas.Text)
+	rect := t.objects[pos*2].(*canvas.Rectangle)
+
+	canvas.Refresh(text)
+	canvas.Refresh(rect)
+}
+
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
 	if str == 0 {
 		str = ' '
@@ -343,11 +370,9 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
-	if (text.Text == "" || str != []rune(text.Text)[0]) || fg != text.Color {
-		text.Text = string(str)
-		text.Color = fg
-		canvas.Refresh(text)
-	}
+	text.Text = string(str)
+	text.Color = fg
+	canvas.Refresh(text)
 
 	rect := t.objects[pos*2].(*canvas.Rectangle)
 	bg := color.Color(color.Transparent)
@@ -356,10 +381,8 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	} else if rowStyle != nil && rowStyle.BackgroundColor() != nil {
 		bg = rowStyle.BackgroundColor()
 	}
-	if bg != rect.FillColor {
-		rect.FillColor = bg
-		canvas.Refresh(rect)
-	}
+	rect.FillColor = bg
+	canvas.Refresh(rect)
 }
 
 func (t *textGridRenderer) addCellsIfRequired() {
@@ -380,7 +403,7 @@ func (t *textGridRenderer) refreshGrid() {
 		rowStyle := row.Style
 		i := 0
 		if t.text.ShowLineNumbers {
-			lineStr := []rune(fmt.Sprintf("%d", line))
+			lineStr := []rune(strconv.Itoa(line))
 			pad := t.lineNumberWidth() - len(lineStr)
 			for ; i < pad; i++ {
 				t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
@@ -436,8 +459,16 @@ func (t *textGridRenderer) refreshGrid() {
 	}
 }
 
+// tabWidth either returns the set tab width or if not set the returns the DefaultTabWidth
+func (t *TextGrid) tabWidth() int {
+	if t.TabWidth == 0 {
+		return painter.DefaultTabWidth
+	}
+	return t.TabWidth
+}
+
 func (t *textGridRenderer) lineNumberWidth() int {
-	return len(fmt.Sprintf("%d", t.rows+1))
+	return len(strconv.Itoa(t.rows + 1))
 }
 
 func (t *textGridRenderer) updateGridSize(size fyne.Size) {

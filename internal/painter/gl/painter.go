@@ -4,11 +4,9 @@ package gl
 import (
 	"image"
 	"math"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver"
-	"fyne.io/fyne/v2/internal/painter"
 )
 
 // Painter defines the functionality of our OpenGL based renderer
@@ -37,11 +35,12 @@ type Painter interface {
 var _ Painter = (*glPainter)(nil)
 
 type glPainter struct {
-	canvas   fyne.Canvas
-	context  driver.WithContext
-	program  Program
-	texScale float32
-	pixScale float32 // pre-calculate scale*texScale for each draw
+	canvas      fyne.Canvas
+	context     driver.WithContext
+	program     Program
+	lineProgram Program
+	texScale    float32
+	pixScale    float32 // pre-calculate scale*texScale for each draw
 }
 
 func (p *glPainter) SetFrameBufferScale(scale float32) {
@@ -83,8 +82,6 @@ func (p *glPainter) textureScale(v float32) float32 {
 	return float32(math.Round(float64(v * p.pixScale)))
 }
 
-var startCacheMonitor = &sync.Once{}
-
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
@@ -92,9 +89,6 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p.SetFrameBufferScale(1.0)
 
 	glInit()
-	startCacheMonitor.Do(func() {
-		go painter.SvgCacheMonitorTheme()
-	})
 
 	return p
 }

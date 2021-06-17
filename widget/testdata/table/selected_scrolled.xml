@@ -2,43 +2,49 @@
 	<content>
 		<widget pos="4,4" size="172x172" type="*widget.Table">
 			<widget pos="4,4" size="168x168" type="*widget.Scroll">
-				<widget pos="-271,-61" size="549x229" type="*widget.tableCells">
-					<widget pos="224,50" size="101x37" type="*widget.Label">
+				<widget pos="-239,-21" size="509x189" type="*widget.tableCells">
+					<widget pos="204,0" size="101x37" type="*widget.Label">
+						<text pos="8,8" size="85x21">Cell 0, 2</text>
+					</widget>
+					<widget pos="306,0" size="101x37" type="*widget.Label">
+						<text pos="8,8" size="85x21">Cell 0, 3</text>
+					</widget>
+					<widget pos="204,38" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 1, 2</text>
 					</widget>
-					<widget pos="334,50" size="101x37" type="*widget.Label">
+					<widget pos="306,38" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 1, 3</text>
 					</widget>
-					<widget pos="224,96" size="101x37" type="*widget.Label">
+					<widget pos="204,76" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 2, 2</text>
 					</widget>
-					<widget pos="334,96" size="101x37" type="*widget.Label">
+					<widget pos="306,76" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 2, 3</text>
 					</widget>
-					<widget pos="224,142" size="101x37" type="*widget.Label">
+					<widget pos="204,114" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 3, 2</text>
 					</widget>
-					<widget pos="334,142" size="101x37" type="*widget.Label">
+					<widget pos="306,114" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 3, 3</text>
 					</widget>
-					<widget pos="224,188" size="101x37" type="*widget.Label">
+					<widget pos="204,152" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 4, 2</text>
 					</widget>
-					<widget pos="334,188" size="101x37" type="*widget.Label">
+					<widget pos="306,152" size="101x37" type="*widget.Label">
 						<text pos="8,8" size="85x21">Cell 4, 3</text>
 					</widget>
 				</widget>
 				<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
-					<widget pos="3,44" size="3x123" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" size="3x123"/>
+					<widget pos="3,18" size="3x149" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="3x149"/>
 					</widget>
 				</widget>
 				<widget size="168x0" type="*widget.Shadow">
 					<linearGradient size="168x8" startColor="shadow"/>
 				</widget>
 				<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
-					<widget pos="82,3" size="51x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" size="51x3"/>
+					<widget pos="78,3" size="55x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="55x3"/>
 					</widget>
 				</widget>
 				<widget size="0x168" type="*widget.Shadow">
@@ -48,18 +54,21 @@
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 				</widget>
 			</widget>
-			<rectangle fillColor="primary" pos="63,0" size="109x4"/>
-			<rectangle fillColor="primary" pos="0,127" size="4x45"/>
-			<widget pos="62,4" size="1x168" type="*widget.Separator">
+			<rectangle fillColor="primary" pos="71,0" size="101x4"/>
+			<rectangle fillColor="primary" pos="0,135" size="4x37"/>
+			<widget pos="70,4" size="1x168" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="1x168"/>
 			</widget>
-			<widget pos="4,34" size="168x1" type="*widget.Separator">
+			<widget pos="4,20" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
-			<widget pos="4,80" size="168x1" type="*widget.Separator">
+			<widget pos="4,58" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
-			<widget pos="4,126" size="168x1" type="*widget.Separator">
+			<widget pos="4,96" size="168x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="168x1"/>
+			</widget>
+			<widget pos="4,134" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
 		</widget>

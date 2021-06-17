@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -26,6 +27,7 @@ import android.widget.FrameLayout;
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 	private static final int FILE_OPEN_CODE = 1;
+	private static final int FILE_SAVE_CODE = 2;
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
              InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD; // this is required to force samsung keyboards to not suggest
@@ -38,6 +40,7 @@ public class GoNativeActivity extends NativeActivity {
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
+    private native void setDarkMode(boolean dark);
 
 	private EditText mTextEdit;
 	private String oldState = "";
@@ -78,6 +81,10 @@ public class GoNativeActivity extends NativeActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                // If keyboard is already up, ignore request
+                if (mTextEdit.getVisibility() == View.VISIBLE) {
+                    return;
+                }
                 int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 int inputType = DEFAULT_INPUT_TYPE;
                 switch (keyboardType) {
@@ -99,8 +106,10 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setImeOptions(imeOptions);
                 mTextEdit.setInputType(inputType);
 
-                oldState = "";
-                mTextEdit.setText("");
+                // always place one character so all keyboards can send backspace
+                oldState = "0";
+                mTextEdit.setText("0");
+
                 mTextEdit.setVisibility(View.VISIBLE);
                 mTextEdit.bringToFront();
                 mTextEdit.requestFocus();
@@ -148,6 +157,22 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
+    static void showFileSave(String mimes, String filename) {
+        goNativeActivity.doShowFileSave(mimes, filename);
+    }
+
+    void doShowFileSave(String mimes, String filename) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
+        } else {
+            intent.setType(mimes);
+        }
+        intent.putExtra(Intent.EXTRA_TITLE, filename);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(Intent.createChooser(intent, "Save File"), FILE_SAVE_CODE);
+    }
 	static int getRune(int deviceId, int keyCode, int metaState) {
 		try {
 			int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
@@ -191,6 +216,7 @@ public class GoNativeActivity extends NativeActivity {
 		load();
 		super.onCreate(savedInstanceState);
 		setupEntry();
+		updateTheme(getResources().getConfiguration());
 
 		View view = findViewById(android.R.id.content).getRootView();
 		view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -214,13 +240,18 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setLayoutParams(mEditTextLayoutParams);
                 addContentView(mTextEdit, mEditTextLayoutParams);
 
+                // always place one character so all keyboards can send backspace
+                oldState = "0";
+                mTextEdit.setText("0");
+
                 mTextEdit.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (s.length() > oldState.length()) {
-                            keyboardTyped(s.subSequence(oldState.length(), s.length()).toString());
+                            keyboardTyped(s.subSequence(start,start+count).toString());
                         } else if (s.length() < oldState.length()) {
-                            // backspace key seems to be sent even for soft content
+                            // send a backspace
+                            keyboardDelete();
                         }
 
                         oldState = s.toString();
@@ -232,6 +263,12 @@ public class GoNativeActivity extends NativeActivity {
 
                     @Override
                     public void afterTextChanged(Editable s) {
+                        // always place one character so all keyboards can send backspace
+                        if (s.length() < 1) {
+                            oldState = "0";
+                            s.insert(0,"0");
+                            return;
+                        }
                     }
                 });
             }
@@ -241,7 +278,7 @@ public class GoNativeActivity extends NativeActivity {
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // unhandled request
-        if (requestCode != FILE_OPEN_CODE) {
+        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE) {
             return;
         }
 
@@ -253,5 +290,16 @@ public class GoNativeActivity extends NativeActivity {
 
         Uri uri = data.getData();
         filePickerReturned(uri.toString());
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        updateTheme(config);
+    }
+
+    protected void updateTheme(Configuration config) {
+        boolean dark = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        setDarkMode(dark);
     }
 }

@@ -20,13 +20,13 @@ func defaultVariant() fyne.ThemeVariant {
 	return theme.VariantDark
 }
 
-func (app *fyneApp) OpenURL(url *url.URL) error {
-	cmd := app.exec("xdg-open", url.String())
+func (a *fyneApp) OpenURL(url *url.URL) error {
+	cmd := a.exec("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
 
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	conn, err := dbus.SessionBus() // shared connection, don't close
 	if err != nil {
 		fyne.LogError("Unable to connect to session D-Bus", err)

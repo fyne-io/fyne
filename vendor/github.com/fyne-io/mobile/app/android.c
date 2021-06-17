@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "_cgo_export.h"
 
@@ -51,6 +52,7 @@ static jmethodID key_rune_method;
 static jmethodID show_keyboard_method;
 static jmethodID hide_keyboard_method;
 static jmethodID show_file_open_method;
+static jmethodID show_file_save_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
@@ -82,6 +84,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
+		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -239,6 +242,18 @@ void showFileOpen(JNIEnv* env, char* mimes) {
 	);
 }
 
+void showFileSave(JNIEnv* env, char* mimes, char* filename) {
+    jstring mimesJString = (*env)->NewStringUTF(env, mimes);
+    jstring filenameJString = (*env)->NewStringUTF(env, filename);
+    (*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		show_file_save_method,
+		mimesJString,
+		filenameJString
+	);
+}
+
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str) {
     const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
 	filePickerReturned((char*)cstr);
@@ -255,4 +270,8 @@ void Java_org_golang_app_GoNativeActivity_keyboardTyped(JNIEnv *env, jclass claz
 
 void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass clazz) {
     keyboardDelete();
+}
+
+void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz, jboolean dark) {
+    setDarkMode((bool)dark);
 }

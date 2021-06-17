@@ -149,6 +149,9 @@ func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *splitContainerRenderer) Refresh() {
+	r.objects[0] = r.split.Leading
+	// [1] is divider which doesn't change
+	r.objects[2] = r.split.Trailing
 	r.Layout(r.split.Size())
 	canvas.Refresh(r.split)
 }

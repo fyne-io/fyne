@@ -2,22 +2,22 @@
 	<content>
 		<container pos="4,4" size="142x192">
 			<widget pos="19,17" size="103x157" type="*widget.Accordion">
-				<widget pos="0,4" size="103x29" type="*widget.Button">
-					<rectangle fillColor="button" size="103x29"/>
+				<widget size="103x37" type="*widget.Button">
+					<rectangle fillColor="button" size="103x37"/>
 					<rectangle size="0x0"/>
-					<text bold pos="28,4" size="11x21">A</text>
-					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
+					<text bold pos="36,8" size="11x21">A</text>
+					<image fillMode="contain" pos="12,8" rsc="menuDropUpIcon" size="20x21"/>
 				</widget>
-				<widget pos="0,83" size="103x29" type="*widget.Button">
-					<rectangle fillColor="button" size="103x29"/>
+				<widget pos="0,79" size="103x37" type="*widget.Button">
+					<rectangle fillColor="button" size="103x37"/>
 					<rectangle size="0x0"/>
-					<text bold pos="28,4" size="11x21">B</text>
-					<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
+					<text bold pos="36,8" size="11x21">B</text>
+					<image fillMode="contain" pos="12,8" rsc="menuDropUpIcon" size="20x21"/>
 				</widget>
-				<widget pos="0,37" size="103x37" type="*widget.Label">
+				<widget pos="0,41" size="103x37" type="*widget.Label">
 					<text pos="8,8" size="87x21">11111</text>
 				</widget>
-				<widget pos="0,116" size="103x37" type="*widget.Label">
+				<widget pos="0,120" size="103x37" type="*widget.Label">
 					<text pos="8,8" size="87x21">2222222222</text>
 				</widget>
 				<widget pos="0,78" size="103x1" type="*widget.Separator">

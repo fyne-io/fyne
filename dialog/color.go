@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -191,7 +192,7 @@ func writeRecentColor(color string) {
 }
 
 func colorToString(c color.Color) string {
-	red, green, blue, alpha := colorToRGBA(c)
+	red, green, blue, alpha := col.ToNRGBA(c)
 	if alpha == 0xff {
 		return fmt.Sprintf("#%02x%02x%02x", red, green, blue)
 	}
@@ -226,27 +227,9 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 }
 
 func colorToHSLA(c color.Color) (int, int, int, int) {
-	r, g, b, a := colorToRGBA(c)
+	r, g, b, a := col.ToNRGBA(c)
 	h, s, l := rgbToHsl(r, g, b)
 	return h, s, l, a
-}
-
-func colorToRGBA(c color.Color) (r, g, b, a int) {
-	switch col := c.(type) {
-	case color.NRGBA:
-		r = int(col.R)
-		g = int(col.G)
-		b = int(col.B)
-		a = int(col.A)
-	case *color.NRGBA:
-		r = int(col.R)
-		g = int(col.G)
-		b = int(col.B)
-		a = int(col.A)
-	default:
-		r, g, b, a = unmultiplyAlpha(c)
-	}
-	return
 }
 
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
@@ -342,20 +325,4 @@ func hueToChannel(h, v1, v2 float64) float64 {
 		return v2 + (v1-v2)*6*((2.0/3.0)-h)
 	}
 	return v2
-}
-
-func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
-	red, green, blue, alpha := c.RGBA()
-	if alpha != 0 && alpha != 0xffff {
-		ratio := float64(alpha) / 0xffff
-		red = uint32(float64(red) / ratio)
-		green = uint32(float64(green) / ratio)
-		blue = uint32(float64(blue) / ratio)
-	}
-	// Convert from range 0-65535 to range 0-255
-	r = int(red >> 8)
-	g = int(green >> 8)
-	b = int(blue >> 8)
-	a = int(alpha >> 8)
-	return
 }

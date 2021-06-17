@@ -199,16 +199,17 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 func (r *popUpRenderer) Refresh() {
 	r.background.FillColor = theme.BackgroundColor()
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
-	shouldRelayout := !r.popUp.Content.Size().Subtract(expectedContentSize).IsZero()
+	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
 	if r.background.Size() != r.popUp.innerSize || r.background.Position() != r.popUp.innerPos || shouldRelayout {
 		r.Layout(r.popUp.Size())
 	}
-	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+	if r.popUp.Canvas.Size() != r.popUp.BaseWidget.Size() {
 		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
 	}
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
+	r.ShadowingRenderer.RefreshShadow()
 }
 
 type modalPopUpRenderer struct {
@@ -244,12 +245,12 @@ func (r *modalPopUpRenderer) Refresh() {
 	r.underlay.FillColor = theme.ShadowColor()
 	r.background.FillColor = theme.BackgroundColor()
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
-	shouldRelayout := !r.popUp.Content.Size().Subtract(expectedContentSize).IsZero()
+	shouldLayout := r.popUp.Content.Size() != expectedContentSize
 
-	if r.background.Size() != r.popUp.innerSize || shouldRelayout {
+	if r.background.Size() != r.popUp.innerSize || shouldLayout {
 		r.Layout(r.popUp.Size())
 	}
-	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+	if r.popUp.Canvas.Size() != r.popUp.BaseWidget.Size() {
 		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
 	}
 	r.popUp.Content.Refresh()

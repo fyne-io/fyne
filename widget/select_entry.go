@@ -15,10 +15,9 @@ type SelectEntry struct {
 
 // NewSelectEntry creates a SelectEntry.
 func NewSelectEntry(options []string) *SelectEntry {
-	e := &SelectEntry{}
+	e := &SelectEntry{options: options}
 	e.ExtendBaseWidget(e)
 	e.Wrapping = fyne.TextTruncate
-	e.options = options
 	return e
 }
 
@@ -59,12 +58,23 @@ func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
 
 	if e.dropDown != nil {
+		padding := fyne.NewSize(4*theme.Padding(), 0)
 		for _, item := range e.dropDown.Items {
-			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(fyne.NewSize(4*theme.Padding(), 0))
+			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(padding)
 			min = min.Max(itemMin)
 		}
 	}
 	return min
+}
+
+// Move changes the relative position of the select entry.
+//
+// Implements: fyne.Widget
+func (e *SelectEntry) Move(pos fyne.Position) {
+	e.Entry.Move(pos)
+	if e.popUp != nil {
+		e.popUp.Move(e.popUpPos())
+	}
 }
 
 // Resize changes the size of the select entry.
@@ -80,10 +90,10 @@ func (e *SelectEntry) Resize(size fyne.Size) {
 // SetOptions sets the options the user might select from.
 func (e *SelectEntry) SetOptions(options []string) {
 	e.options = options
-	var items []*fyne.MenuItem
-	for _, option := range options {
+	items := make([]*fyne.MenuItem, len(options))
+	for i, option := range options {
 		option := option // capture
-		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
+		items[i] = fyne.NewMenuItem(option, func() { e.SetText(option) })
 	}
 	e.dropDown = fyne.NewMenu("", items...)
 
@@ -95,15 +105,17 @@ func (e *SelectEntry) SetOptions(options []string) {
 	}
 }
 
+func (e *SelectEntry) popUpPos() fyne.Position {
+	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
+	return entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
+}
+
 func (e *SelectEntry) setupDropDown() *Button {
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
-		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-		popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
-
 		e.popUp = NewPopUpMenu(e.dropDown, c)
-		e.popUp.ShowAtPosition(popUpPos)
+		e.popUp.ShowAtPosition(e.popUpPos())
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.Importance = LowImportance

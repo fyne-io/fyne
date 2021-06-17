@@ -26,8 +26,9 @@ type AppTabs struct {
 	OnSelected   func(*TabItem)
 	OnUnselected func(*TabItem)
 
-	current  int
-	location TabLocation
+	current         int
+	location        TabLocation
+	isTransitioning bool
 
 	popUpMenu *widget.PopUpMenu
 }
@@ -56,10 +57,12 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 		},
 		appTabs: t,
 	}
+	r.action = r.buildOverflowTabsButton()
+
 	// Initially setup the tab bar to only show one tab, all others will be in overflow.
 	// When the widget is laid out, and we know the size, the tab bar will be updated to show as many as can fit.
 	r.updateTabs(1)
-	r.updateIndicator()
+	r.updateIndicator(false)
 	r.applyTheme(t)
 	return r
 }
@@ -181,19 +184,7 @@ func (t *AppTabs) SetItems(items []*TabItem) {
 
 // SetTabLocation sets the location of the tab bar
 func (t *AppTabs) SetTabLocation(l TabLocation) {
-	// Mobile has limited screen space, so don't put app tab bar on long edges
-	if d := fyne.CurrentDevice(); d.IsMobile() {
-		if o := d.Orientation(); fyne.IsVertical(o) {
-			if l == TabLocationLeading || l == TabLocationTrailing {
-				l = TabLocationBottom
-			}
-		} else {
-			if l == TabLocationTop || l == TabLocationBottom {
-				l = TabLocationLeading
-			}
-		}
-	}
-	t.location = l
+	t.location = tabsAdjustedLocation(l)
 	t.Refresh()
 }
 
@@ -237,8 +228,16 @@ func (t *AppTabs) setSelected(selected int) {
 	t.current = selected
 }
 
+func (t *AppTabs) setTransitioning(transitioning bool) {
+	t.isTransitioning = transitioning
+}
+
 func (t *AppTabs) tabLocation() TabLocation {
 	return t.location
+}
+
+func (t *AppTabs) transitioning() bool {
+	return t.isTransitioning
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -268,7 +267,10 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 	}
 
 	r.layout(r.appTabs, size)
-	r.updateIndicator()
+	r.updateIndicator(r.appTabs.transitioning())
+	if r.appTabs.transitioning() {
+		r.appTabs.setTransitioning(false)
+	}
 }
 
 func (r *appTabsRenderer) MinSize() fyne.Size {
@@ -288,16 +290,17 @@ func (r *appTabsRenderer) Refresh() {
 }
 
 func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
-	overflow = widget.NewButtonWithIcon("", moreIcon(r.appTabs), func() {
+	overflow = &widget.Button{Icon: moreIcon(r.appTabs), Importance: widget.LowImportance, OnTapped: func() {
 		// Show pop up containing all tabs which did not fit in the tab bar
 
-		var items []*fyne.MenuItem
-		for i := len(r.bar.Objects[0].(*fyne.Container).Objects); i < len(r.appTabs.Items); i++ {
-			item := r.appTabs.Items[i]
+		itemLen, objLen := len(r.appTabs.Items), len(r.bar.Objects[0].(*fyne.Container).Objects)
+		items := make([]*fyne.MenuItem, 0, itemLen-objLen)
+		for i := objLen; i < itemLen; i++ {
+			index := i // capture
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
-			items = append(items, fyne.NewMenuItem(item.Text, func() {
-				r.appTabs.Select(item)
+			items = append(items, fyne.NewMenuItem(r.appTabs.Items[i].Text, func() {
+				r.appTabs.SelectIndex(index)
 				if r.appTabs.popUpMenu != nil {
 					r.appTabs.popUpMenu.Hide()
 					r.appTabs.popUpMenu = nil
@@ -306,9 +309,9 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 		}
 
 		r.appTabs.popUpMenu = buildPopUpMenu(r.appTabs, overflow, items)
-	})
-	overflow.Importance = widget.LowImportance
-	return
+	}}
+
+	return overflow
 }
 
 func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
@@ -320,7 +323,11 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if cells == 0 {
 			cells = 1
 		}
-		buttons.Layout = layout.NewGridLayout(cells)
+		if r.appTabs.location == TabLocationTop || r.appTabs.location == TabLocationBottom {
+			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
+		} else {
+			buttons.Layout = layout.NewGridLayoutWithRows(cells)
+		}
 		iconPos = buttonIconTop
 	} else if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
@@ -334,8 +341,9 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		item := r.appTabs.Items[i]
 		button, ok := r.buttonCache[item]
 		if !ok {
+			index := i // capture
 			button = &tabButton{
-				onTapped: func() { r.appTabs.Select(item) },
+				onTapped: func() { r.appTabs.SelectIndex(index) },
 			}
 			r.buttonCache[item] = button
 		}
@@ -354,7 +362,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	return buttons
 }
 
-func (r *appTabsRenderer) updateIndicator() {
+func (r *appTabsRenderer) updateIndicator(animate bool) {
 	if r.appTabs.current < 0 {
 		r.indicator.Hide()
 		return
@@ -369,7 +377,7 @@ func (r *appTabsRenderer) updateIndicator() {
 			selectedPos = a.Position()
 			selectedSize = a.Size()
 		}
-	} else if r.appTabs.current >= 0 {
+	} else {
 		selected := buttons[r.appTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()
@@ -393,7 +401,7 @@ func (r *appTabsRenderer) updateIndicator() {
 		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
 	}
 
-	r.moveIndicator(indicatorPos, indicatorSize, true)
+	r.moveIndicator(indicatorPos, indicatorSize, animate)
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {
@@ -401,13 +409,12 @@ func (r *appTabsRenderer) updateTabs(max int) {
 
 	// Set overflow action
 	if tabCount <= max {
-		r.action = nil
+		r.action.Hide()
 		r.bar.Layout = layout.NewMaxLayout()
 	} else {
 		tabCount = max
-		if r.action == nil {
-			r.action = r.buildOverflowTabsButton()
-		}
+		r.action.Show()
+
 		// Set layout of tab bar containing tab buttons and overflow action
 		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
 			r.bar.Layout = layout.NewBorderLayout(nil, r.action, nil, nil)

@@ -5,8 +5,6 @@ package binding
 import (
 	"errors"
 	"sync"
-
-	"fyne.io/fyne/v2"
 )
 
 var (
@@ -15,8 +13,7 @@ var (
 	errParseFailed = errors.New("format did not match 1 value")
 
 	// As an optimisation we connect any listeners asking for the same key, so that there is only 1 per preference item.
-	prefBinds = make(map[fyne.Preferences]map[string]preferenceItem)
-	prefLock  sync.RWMutex
+	prefBinds = newPreferencesMap()
 )
 
 // DataItem is the base interface for all bindable data items.
@@ -90,31 +87,5 @@ func (b *base) RemoveListener(l DataListener) {
 func (b *base) trigger() {
 	for _, listen := range b.listeners {
 		queueItem(listen.DataChanged)
-	}
-}
-
-type preferenceItem interface {
-	checkForChange()
-}
-
-func ensurePreferencesAttached(p fyne.Preferences) {
-	prefLock.Lock()
-	defer prefLock.Unlock()
-	if prefBinds[p] != nil {
-		return
-	}
-
-	prefBinds[p] = make(map[string]preferenceItem)
-	p.AddChangeListener(func() {
-		preferencesChanged(p)
-	})
-}
-
-func preferencesChanged(p fyne.Preferences) {
-	prefLock.RLock()
-	defer prefLock.RUnlock()
-
-	for _, item := range prefBinds[p] {
-		item.checkForChange()
 	}
 }

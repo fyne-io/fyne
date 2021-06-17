@@ -1,12 +1,37 @@
 package binding
 
 import (
+	"sync"
 	"testing"
 	"time"
 
 	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestBindPreference_DataRace(t *testing.T) {
+	a := test.NewApp()
+	p := a.Preferences()
+	key := "test-key"
+	const n = 100
+
+	var wg sync.WaitGroup
+	binds := make([]Int, n)
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func(index int) {
+			bind := BindPreferenceInt(key, p)
+			binds[index] = bind
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	expectedBind := binds[0]
+	for i := 0; i < n; i++ {
+		assert.Equal(t, expectedBind, binds[i])
+	}
+}
 
 func TestBindPreferenceBool(t *testing.T) {
 	a := test.NewApp()

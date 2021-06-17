@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 
 	"fyne.io/fyne/v2"
@@ -19,15 +20,10 @@ const preferenceCurrentTutorial = "currentTutorial"
 
 var topWindow fyne.Window
 
-func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
-	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
-		focused.TypedShortcut(s)
-	}
-}
-
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(theme.FyneLogo())
+	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")
 	topWindow = w
 
@@ -77,12 +73,16 @@ func main() {
 		}),
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Sponsor", func() {
-			u, _ := url.Parse("https://github.com/sponsors/fyne-io")
+			u, _ := url.Parse("https://fyne.io/sponsor/")
 			_ = a.OpenURL(u)
 		}))
+	file := fyne.NewMenu("File", newItem)
+	if !fyne.CurrentDevice().IsMobile() {
+		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
+	}
 	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
-		fyne.NewMenu("File", newItem, fyne.NewMenuItemSeparator(), settingsItem),
+		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)
@@ -123,6 +123,21 @@ func main() {
 	}
 	w.Resize(fyne.NewSize(640, 460))
 	w.ShowAndRun()
+}
+
+func logLifecycle(a fyne.App) {
+	a.Lifecycle().SetOnStarted(func() {
+		log.Println("Lifecycle: Started")
+	})
+	a.Lifecycle().SetOnStopped(func() {
+		log.Println("Lifecycle: Stopped")
+	})
+	a.Lifecycle().SetOnEnteredForeground(func() {
+		log.Println("Lifecycle: Entered Foreground")
+	})
+	a.Lifecycle().SetOnExitedForeground(func() {
+		log.Println("Lifecycle: Exited Foreground")
+	})
 }
 
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
@@ -171,4 +186,10 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 	)
 
 	return container.NewBorder(nil, themes, nil, nil, tree)
+}
+
+func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
+	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
+		focused.TypedShortcut(s)
+	}
 }

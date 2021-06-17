@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	internalwidget "fyne.io/fyne/v2/internal/widget"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -162,17 +162,16 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 
 	// Hex
-	hex := &widget.Entry{
-		OnChanged: func(text string) {
-			c, err := stringToColor(text)
-			if err != nil {
-				fyne.LogError("Error parsing color: "+text, err)
-				// TODO trigger entry invalid state
-			} else {
-				p.SetColor(c)
-			}
-		},
-	}
+	hex := newUserChangeEntry("")
+	hex.setOnChanged(func(text string) {
+		c, err := stringToColor(text)
+		if err != nil {
+			fyne.LogError("Error parsing color: "+text, err)
+			// TODO trigger entry invalid state
+		} else {
+			p.SetColor(c)
+		}
+	})
 
 	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), container.NewVBox(
 		container.NewGridWithColumns(3,
@@ -192,7 +191,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	))
 
 	r := &colorPickerRenderer{
-		BaseRenderer:      internalwidget.NewBaseRenderer([]fyne.CanvasObject{contents}),
+		WidgetRenderer:    widget.NewSimpleRenderer(contents),
 		picker:            p,
 		redChannel:        redChannel,
 		greenChannel:      greenChannel,
@@ -211,7 +210,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := colorToRGBA(color)
+	r, g, b, a := col.ToNRGBA(color)
 	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
 		return false
 	}
@@ -253,7 +252,7 @@ func (p *colorAdvancedPicker) updateRGBA(r, g, b, a int) bool {
 var _ fyne.WidgetRenderer = (*colorPickerRenderer)(nil)
 
 type colorPickerRenderer struct {
-	internalwidget.BaseRenderer
+	fyne.WidgetRenderer
 	picker            *colorAdvancedPicker
 	redChannel        *colorChannel
 	greenChannel      *colorChannel
@@ -264,23 +263,13 @@ type colorPickerRenderer struct {
 	wheel             *colorWheel
 	preview           *canvas.Rectangle
 	alphaChannel      *colorChannel
-	hex               *widget.Entry
+	hex               *userChangeEntry
 	contents          fyne.CanvasObject
-}
-
-func (r *colorPickerRenderer) Layout(size fyne.Size) {
-	r.contents.Move(fyne.NewPos(0, 0))
-	r.contents.Resize(size)
-}
-
-func (r *colorPickerRenderer) MinSize() fyne.Size {
-	return r.contents.MinSize()
 }
 
 func (r *colorPickerRenderer) Refresh() {
 	r.updateObjects()
-	r.Layout(r.picker.Size())
-	canvas.Refresh(r.picker)
+	r.WidgetRenderer.Refresh()
 }
 
 func (r *colorPickerRenderer) updateObjects() {

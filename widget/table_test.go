@@ -81,9 +81,9 @@ func TestTable_ChangeTheme(t *testing.T) {
 }
 
 func TestTable_Filled(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -112,7 +112,7 @@ func TestTable_MinSize(t *testing.T) {
 		},
 		"large": {
 			fyne.NewSize(100, 100),
-			fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding()),
+			fyne.NewSize(100+theme.Padding(), 100+theme.Padding()),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -142,7 +142,7 @@ func TestTable_Unselect(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
-	unselectedRow, unselectedColumn := 0, 0
+	unselectedRow, unselectedColumn := -1, -1
 	table.OnUnselected = func(id TableCellID) {
 		unselectedRow = id.Row
 		unselectedColumn = id.Col
@@ -156,6 +156,16 @@ func TestTable_Unselect(t *testing.T) {
 	assert.Equal(t, 1, unselectedRow)
 	assert.Equal(t, 1, unselectedColumn)
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
+
+	unselectedRow, unselectedColumn = -1, -1
+	table.Select(TableCellID{2, 2})
+	table.Unselect(TableCellID{1, 1})
+	assert.Equal(t, -1, unselectedRow)
+	assert.Equal(t, -1, unselectedColumn)
+
+	table.UnselectAll()
+	assert.Equal(t, 2, unselectedRow)
+	assert.Equal(t, 2, unselectedColumn)
 }
 
 func TestTable_Refresh(t *testing.T) {
@@ -251,9 +261,9 @@ func TestTable_Select(t *testing.T) {
 }
 
 func TestTable_SetColumnWidth(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -274,9 +284,9 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 8, len(cellRenderer.Objects()))
+	assert.Equal(t, 10, len(cellRenderer.Objects()))
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
-	cell1Offset := theme.SeparatorThicknessSize() + theme.Padding()*3
+	cell1Offset := theme.SeparatorThicknessSize()
 	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
 
 	table.SetColumnWidth(0, 16)
@@ -301,7 +311,7 @@ func TestTable_ShowVisible(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 8, len(cellRenderer.Objects()))
+	assert.Equal(t, 10, len(cellRenderer.Objects()))
 }
 
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {

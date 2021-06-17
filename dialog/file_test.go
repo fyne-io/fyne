@@ -182,18 +182,22 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	//left
-	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
-	assert.Equal(t, "Options", optionsButton.Text)
 	//header
-	title := ui.Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
+	//optionsbuttons
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "", optionsButton.Text)
+	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
 	//footer
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
 	//body
-	breadcrumb := ui.Objects[0].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container)
+	breadcrumb := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(breadcrumb.Objects), 0)
 
 	assert.Nil(t, err)
@@ -208,7 +212,7 @@ func TestShowFileOpen(t *testing.T) {
 		}
 	}
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -262,10 +266,14 @@ func TestHiddenFiles(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 
-	optionsButton := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
-	assert.Equal(t, "Options", optionsButton.Text)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "", optionsButton.Text)
+	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	var target *fileDialogItem
@@ -301,14 +309,14 @@ func TestShowFileSave(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	title := ui.Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
 	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Entry)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	save := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name
@@ -415,6 +423,55 @@ func TestFileFilters(t *testing.T) {
 	assert.Equal(t, 6, count)
 }
 
+func TestView(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	dlg.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
+
+	listLayout := layout.NewVBoxLayout()
+
+	// view should be a grid
+	assert.NotEqual(t, listLayout, files.Layout)
+	// toggleViewButton should reflect to what it will do (change to a list view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+
+	// toggle view
+	test.Tap(toggleViewButton)
+	// reload files container
+	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
+
+	// view should be a list
+	assert.Equal(t, listLayout, files.Layout)
+	// toggleViewButton should reflect to what it will do (change to a grid view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
+
+	// toggle view
+	test.Tap(toggleViewButton)
+	// reload files container
+	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
+
+	// view should be a grid again
+	assert.NotEqual(t, listLayout, files.Layout)
+	// toggleViewButton should reflect to what it will do (change to a list view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+}
+
 func TestFileFavorites(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
 
@@ -425,24 +482,33 @@ func TestFileFavorites(t *testing.T) {
 
 	dlg.Show()
 
-	// error can be ignored. It just tells you why the fallback
-	// paths are used if they are.
-	favoriteLocations, _ := getFavoriteLocations()
-	favorites := dlg.dialog.loadFavorites()
-	places := dlg.dialog.loadPlaces()
-	assert.Len(t, favorites, len(favoriteLocations)+len(places))
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
 
-	for _, f := range favorites {
-		btn := f.(*widget.Button)
-		test.Tap(btn)
-		loc, ok := favoriteLocations[btn.Text]
+	ui := popup.Content.(*fyne.Container)
+
+	dlg.dialog.loadFavorites()
+	favoriteLocations, _ := getFavoriteLocations()
+	places := dlg.dialog.getPlaces()
+	assert.Len(t, dlg.dialog.favorites, len(favoriteLocations)+len(places))
+
+	favoritesList := ui.Objects[0].(*container.Split).Leading.(*widget.List)
+	assert.Equal(t, favoritesList.Length(), len(dlg.dialog.favorites))
+
+	for i := 0; i < favoritesList.Length(); i++ {
+		favoritesList.Select(i)
+
+		f := dlg.dialog.favorites[i]
+		loc, ok := favoriteLocations[f.locName]
 		if ok {
-			// button is Home, Documents, Downloads
+			// favoriteItem is Home, Documents, Downloads
 			assert.Equal(t, loc.String(), dlg.dialog.dir.String())
 		} else {
-			// button is (on windows) C:\, D:\, etc.
-			assert.NotEqual(t, "Home", btn.Text)
+			// favoriteItem is (on windows) C:\, D:\, etc.
+			assert.NotEqual(t, "Home", f.locName)
 		}
+
 		ok, err := storage.Exists(dlg.dialog.dir)
 		assert.Nil(t, err)
 		assert.True(t, ok)

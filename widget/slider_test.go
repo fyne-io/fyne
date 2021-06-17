@@ -118,7 +118,8 @@ func TestSlider_VerticalLayout(t *testing.T) {
 }
 
 func TestSlider_OnChanged(t *testing.T) {
-	slider := NewSlider(0, 1)
+	slider := NewSlider(0, 2)
+	slider.Resize(slider.MinSize())
 	assert.Empty(t, slider.OnChanged)
 
 	changes := 0
@@ -130,10 +131,53 @@ func TestSlider_OnChanged(t *testing.T) {
 	assert.Equal(t, 0, changes)
 
 	slider.SetValue(0.5)
+	assert.Equal(t, 0, changes)
+
+	drag := &fyne.DragEvent{}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
 	assert.Equal(t, 1, changes)
 
-	drag := &fyne.DragEvent{Dragged: fyne.NewDelta(10, 2)}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
+	assert.Equal(t, 1, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 2, changes)
+}
+
+func TestSlider_OnChanged_Float(t *testing.T) {
+	slider := NewSlider(0, 1)
+	slider.Step = 0.5
+	slider.Resize(slider.MinSize())
+	assert.Empty(t, slider.OnChanged)
+
+	changes := 0
+
+	slider.OnChanged = func(_ float64) {
+		changes++
+	}
+
+	assert.Equal(t, 0, changes)
+
+	slider.SetValue(0.15)
+	assert.Equal(t, 0, changes)
+
+	drag := &fyne.DragEvent{}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 1, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 1, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 2, changes)
+
+	slider.SetValue(0.9)
 	assert.Equal(t, 2, changes)
 }
 

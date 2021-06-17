@@ -1,7 +1,7 @@
 package tutorials
 
 import (
-	"fmt"
+	"strconv"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +11,7 @@ import (
 )
 
 func scaleString(c fyne.Canvas) string {
-	return fmt.Sprintf("%0.2f", c.Scale())
+	return strconv.FormatFloat(float64(c.Scale()), 'f', 2, 32)
 }
 
 func prependTo(g *fyne.Container, s string) {

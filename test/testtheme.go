@@ -46,6 +46,7 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameScrollBarSmall:     float32(2),
 			theme.SizeNameSeparatorThickness: float32(1),
 			theme.SizeNameText:               float32(18),
+			theme.SizeNameCaptionText:        float32(15),
 			theme.SizeNameInputBorder:        float32(5),
 		},
 	}

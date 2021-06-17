@@ -2,141 +2,167 @@
 	<content>
 		<widget pos="4,4" size="192x392" type="*widget.List">
 			<widget size="192x392" type="*widget.Scroll">
-				<container size="192x1195">
-					<widget size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+				<container size="192x987">
+					<widget size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">a</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">a</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,46" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,38" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">b</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">b</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,92" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,76" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">c</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">c</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,138" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,114" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">d</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">d</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,184" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,152" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">e</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">e</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,230" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,190" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">f</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">f</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,276" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,228" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">g</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">g</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,322" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,266" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">h</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">h</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,368" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,304" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">i</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">i</text>
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,414" size="192x45" type="*widget.listItem">
-						<container pos="8,4" size="180x37">
+					<widget pos="0,342" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
 							<widget size="20x37" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
 							</widget>
-							<widget pos="24,0" size="156x37" type="*widget.Label">
-								<text pos="8,8" size="140x21">j</text>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">j</text>
+							</widget>
+						</container>
+					</widget>
+					<widget pos="0,380" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
+							<widget size="20x37" type="*widget.Icon">
+								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
+							</widget>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">k</text>
+							</widget>
+						</container>
+					</widget>
+					<widget pos="0,418" size="192x37" type="*widget.listItem">
+						<container pos="4,0" size="188x37">
+							<widget size="20x37" type="*widget.Icon">
+								<image fillMode="contain" rsc="documentIcon" size="20x37"/>
+							</widget>
+							<widget pos="24,0" size="164x37" type="*widget.Label">
+								<text pos="8,8" size="148x21">l</text>
 							</widget>
 						</container>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
-					<widget pos="0,45" size="192x1" type="*widget.Separator">
+					<widget pos="0,37" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,91" size="192x1" type="*widget.Separator">
+					<widget pos="0,75" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,137" size="192x1" type="*widget.Separator">
+					<widget pos="0,113" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,183" size="192x1" type="*widget.Separator">
+					<widget pos="0,151" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,229" size="192x1" type="*widget.Separator">
+					<widget pos="0,189" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,275" size="192x1" type="*widget.Separator">
+					<widget pos="0,227" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,321" size="192x1" type="*widget.Separator">
+					<widget pos="0,265" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,367" size="192x1" type="*widget.Separator">
+					<widget pos="0,303" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,413" size="192x1" type="*widget.Separator">
+					<widget pos="0,341" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
+					</widget>
+					<widget pos="0,379" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
+					</widget>
+					<widget pos="0,417" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>
 				<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
-					<widget pos="3,0" size="3x128" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" size="3x128"/>
+					<widget pos="3,0" size="3x155" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="3x155"/>
 					</widget>
 				</widget>
 				<widget pos="0,392" size="192x0" type="*widget.Shadow">

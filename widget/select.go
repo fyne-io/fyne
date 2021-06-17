@@ -24,7 +24,6 @@ type Select struct {
 	hovered bool
 	popUp   *PopUpMenu
 	tapAnim *fyne.Animation
-	tapBG   *canvas.Rectangle
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -62,12 +61,15 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 		s.PlaceHolder = defaultPlaceHolder
 	}
 	txtProv := newTextProvider(s.Selected, s)
+	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
 
 	background := &canvas.Rectangle{}
 	line := canvas.NewRectangle(theme.ShadowColor())
-	s.tapBG = canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{background, line, s.tapBG, txtProv, icon}
+	tapBG := canvas.NewRectangle(color.Transparent)
+	s.tapAnim = newButtonTapAnimation(tapBG, s)
+	s.tapAnim.Curve = fyne.AnimationEaseOut
+	objects := []fyne.CanvasObject{background, line, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, line, objects, s}
 	background.FillColor, line.FillColor = r.bgLineColor()
 	r.updateIcon()
@@ -224,24 +226,19 @@ func (s *Select) object() fyne.Widget {
 	return nil
 }
 
-func (s *Select) optionTapped(text string) {
-	s.SetSelected(text)
-	s.popUp = nil
-}
-
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-theme.InputBorderSize()))
 }
 
 func (s *Select) showPopUp() {
-	var items []*fyne.MenuItem
-	for _, option := range s.Options {
-		text := option // capture
-		item := fyne.NewMenuItem(option, func() {
-			s.optionTapped(text)
+	items := make([]*fyne.MenuItem, len(s.Options))
+	for i := range s.Options {
+		text := s.Options[i] // capture
+		items[i] = fyne.NewMenuItem(text, func() {
+			s.updateSelected(text)
+			s.popUp = nil
 		})
-		items = append(items, item)
 	}
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
@@ -251,17 +248,10 @@ func (s *Select) showPopUp() {
 }
 
 func (s *Select) tapAnimation() {
-	if s.tapBG == nil { // not rendered yet? (tests)
+	if s.tapAnim == nil {
 		return
 	}
-
-	if s.tapAnim == nil {
-		s.tapAnim = newButtonTapAnimation(s.tapBG, s)
-		s.tapAnim.Curve = fyne.AnimationEaseOut
-	} else {
-		s.tapAnim.Stop()
-	}
-
+	s.tapAnim.Stop()
 	s.tapAnim.Start()
 }
 
@@ -315,6 +305,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	s.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
 	s.background.Resize(fyne.NewSize(size.Width, size.Height-theme.InputBorderSize()*2))
 	s.background.Move(fyne.NewPos(0, theme.InputBorderSize()))
+	s.label.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 
 	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding()*2, (size.Height-theme.IconInlineSize())/2)
 	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), s.label.MinSize().Height)

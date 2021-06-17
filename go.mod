@@ -7,10 +7,11 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/mobile v0.1.3-0.20210308120140-0925491569e9
-	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3
-	github.com/godbus/dbus/v5 v5.0.3
+	github.com/fyne-io/mobile v0.1.3-0.20210524083716-78f416561547
+	github.com/go-gl/gl v0.0.0-20210426225639-a3bfa832c8aa
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210410170116-ea3d685f79fb
+	github.com/go-ole/go-ole v1.2.5
+	github.com/godbus/dbus/v5 v5.0.4
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
@@ -30,5 +31,3 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
-
-replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201123143003-f2279069162d

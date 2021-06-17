@@ -93,6 +93,47 @@ func TestEntry_DragSelect(t *testing.T) {
 	assert.Equal(t, "r the laz", entry.SelectedText())
 }
 
+func TestEntry_DragSelectEmpty(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("Testing")
+
+	ev1 := getClickPosition("T", 0)
+	ev2 := getClickPosition("Testing", 0)
+
+	// Test empty selection - drag from 'e' to 'e' (empty)
+	de := &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
+	entry.Dragged(de)
+	de = &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
+	entry.Dragged(de)
+
+	entry.propertyLock.RLock()
+	assert.True(t, entry.selecting)
+	entry.propertyLock.RUnlock()
+
+	entry.DragEnd()
+	assert.Equal(t, "", entry.SelectedText())
+	entry.propertyLock.RLock()
+	assert.False(t, entry.selecting)
+	entry.propertyLock.RUnlock()
+
+	// Test non-empty selection - drag from 'T' to 'g' (empty)
+	ev1 = getClickPosition("", 0)
+	de = &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
+	entry.Dragged(de)
+	de = &fyne.DragEvent{PointEvent: *ev2, Dragged: fyne.NewDelta(1, 0)}
+	entry.Dragged(de)
+
+	entry.propertyLock.RLock()
+	assert.True(t, entry.selecting)
+	entry.propertyLock.RUnlock()
+
+	entry.DragEnd()
+	assert.Equal(t, "Testing", entry.SelectedText())
+	entry.propertyLock.RLock()
+	assert.True(t, entry.selecting)
+	entry.propertyLock.RUnlock()
+}
+
 func TestEntry_DragSelectWithScroll(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("The quick brown fox jumped over and over the lazy dog.")
@@ -255,6 +296,35 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 	assert.Equal(t, entry.Text, testContent)
 }
 
+func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
+	entry := NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+
+	w := test.NewApp().NewWindow("")
+	w.SetContent(entry)
+	w.Resize(fyne.NewSize(100, 64))
+
+	test.Type(entry, "T")
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard.SetContent("esting entry")
+
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, entry.Text, "Testing entry")
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 5, entry.CursorColumn)
+
+	clipboard.SetContent(" paste\ncontent")
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, "Testing entry paste\ncontent", entry.Text)
+	assert.Equal(t, 2, entry.CursorRow)
+	assert.Equal(t, 7, entry.CursorColumn)
+}
+
 func TestEntry_Tab(t *testing.T) {
 	e := NewEntry()
 	e.SetText("a\n\tb\nc")
@@ -263,7 +333,7 @@ func TestEntry_Tab(t *testing.T) {
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
 	assert.Equal(t, 3, len(r.texts))
 	assert.Equal(t, "a", r.texts[0].Text)
-	assert.Equal(t, textTabIndent+"b", r.texts[1].Text)
+	assert.Equal(t, "\tb", r.texts[1].Text)
 
 	w := test.NewWindow(e)
 	w.Resize(fyne.NewSize(86, 86))
@@ -288,6 +358,17 @@ func TestEntry_TabSelection(t *testing.T) {
 	w.Resize(fyne.NewSize(86, 86))
 	w.Canvas().Focus(e)
 	test.AssertImageMatches(t, "entry/tab-select.png", w.Canvas().Capture())
+}
+
+func TestEntry_ShiftSelection_ResetOnFocusLost(t *testing.T) {
+	e := NewEntry()
+	e.SetText("Hello")
+
+	e.KeyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+	assert.True(t, e.selectKeyDown)
+
+	e.FocusLost()
+	assert.False(t, e.selectKeyDown)
 }
 
 func getClickPosition(str string, row int) *fyne.PointEvent {

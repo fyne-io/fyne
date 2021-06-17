@@ -3,7 +3,6 @@ package theme
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -414,6 +413,31 @@ const (
 	//
 	// Since: 2.0
 	IconNameComputer fyne.ThemeIconName = "computer"
+
+	// IconNameAccount is the name of theme lookup for account icon.
+	//
+	// Since: 2.1
+	IconNameAccount fyne.ThemeIconName = "account"
+
+	// IconNameLogin is the name of theme lookup for login icon.
+	//
+	// Since: 2.1
+	IconNameLogin fyne.ThemeIconName = "login"
+
+	// IconNameLogout is the name of theme lookup for logout icon.
+	//
+	// Since: 2.1
+	IconNameLogout fyne.ThemeIconName = "logout"
+
+	// IconNameList is the name of theme lookup for list icon.
+	//
+	// Since: 2.1
+	IconNameList fyne.ThemeIconName = "list"
+
+	// IconNameGrid is the name of theme lookup for grid icon.
+	//
+	// Since: 2.1
+	IconNameGrid fyne.ThemeIconName = "grid"
 )
 
 var (
@@ -513,6 +537,13 @@ var (
 		IconNameComputer: NewThemedResource(computerIconRes),
 		IconNameStorage:  NewThemedResource(storageIconRes),
 		IconNameUpload:   NewThemedResource(uploadIconRes),
+
+		IconNameAccount: NewThemedResource(accountIconRes),
+		IconNameLogin:   NewThemedResource(loginIconRes),
+		IconNameLogout:  NewThemedResource(logoutIconRes),
+
+		IconNameList: NewThemedResource(listIconRes),
+		IconNameGrid: NewThemedResource(gridIconRes),
 	}
 )
 
@@ -638,7 +669,7 @@ type DisabledResource struct {
 
 // Name returns the resource source name prefixed with `disabled_` (used for caching)
 func (res *DisabledResource) Name() string {
-	return fmt.Sprintf("disabled_%s", res.source.Name())
+	return "disabled_" + res.source.Name()
 }
 
 // Content returns the disabled style content of the correct resource for the current theme
@@ -1037,12 +1068,12 @@ func ZoomOutIcon() fyne.Resource {
 	return safeIconLookup(IconNameViewZoomOut)
 }
 
-// VisibilityIcon returns a resource containing the standard visibity icon for the current theme
+// VisibilityIcon returns a resource containing the standard visibility icon for the current theme
 func VisibilityIcon() fyne.Resource {
 	return safeIconLookup(IconNameVisibility)
 }
 
-// VisibilityOffIcon returns a resource containing the standard visibity off icon for the current theme
+// VisibilityOffIcon returns a resource containing the standard visibility off icon for the current theme
 func VisibilityOffIcon() fyne.Resource {
 	return safeIconLookup(IconNameVisibilityOff)
 }
@@ -1080,6 +1111,31 @@ func StorageIcon() fyne.Resource {
 // UploadIcon returns a resource containing the standard upload icon for the current theme
 func UploadIcon() fyne.Resource {
 	return safeIconLookup(IconNameUpload)
+}
+
+// AccountIcon returns a resource containing the standard account icon for the current theme
+func AccountIcon() fyne.Resource {
+	return safeIconLookup(IconNameAccount)
+}
+
+// LoginIcon returns a resource containing the standard login icon for the current theme
+func LoginIcon() fyne.Resource {
+	return safeIconLookup(IconNameLogin)
+}
+
+// LogoutIcon returns a resource containing the standard logout icon for the current theme
+func LogoutIcon() fyne.Resource {
+	return safeIconLookup(IconNameLogout)
+}
+
+// ListIcon returns a resource containing the standard list icon for the current theme
+func ListIcon() fyne.Resource {
+	return safeIconLookup(IconNameList)
+}
+
+// GridIcon returns a resource containing the standard grid icon for the current theme
+func GridIcon() fyne.Resource {
+	return safeIconLookup(IconNameGrid)
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {

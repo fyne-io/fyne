@@ -234,9 +234,9 @@ func (t *Tree) ToggleBranch(uid string) {
 	}
 }
 
-// Unselect marks the specified node to be not selected
+// Unselect marks the specified node to be not selected.
 func (t *Tree) Unselect(uid TreeNodeID) {
-	if len(t.selected) == 0 {
+	if len(t.selected) == 0 || t.selected[0] != uid {
 		return
 	}
 
@@ -244,6 +244,24 @@ func (t *Tree) Unselect(uid TreeNodeID) {
 	t.Refresh()
 	if f := t.OnUnselected; f != nil {
 		f(uid)
+	}
+}
+
+// UnselectAll sets all nodes to be not selected.
+//
+// Since: 2.1
+func (t *Tree) UnselectAll() {
+	if len(t.selected) == 0 {
+		return
+	}
+
+	selected := t.selected
+	t.selected = nil
+	t.Refresh()
+	if f := t.OnUnselected; f != nil {
+		for _, uid := range selected {
+			f(uid)
+		}
 	}
 }
 
@@ -435,7 +453,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			// Node is below viewport and not visible
 		} else {
 			// Node is in viewport
-			var n *treeNode
+			var n fyne.CanvasObject
 			if isBranch {
 				b, ok := r.branches[uid]
 				if !ok {
@@ -446,7 +464,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 					b.update(uid, depth)
 				}
 				branches[uid] = b
-				n = b.treeNode
+				n = b
 				r.objects = append(r.objects, b)
 			} else {
 				l, ok := r.leaves[uid]
@@ -458,7 +476,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 					l.update(uid, depth)
 				}
 				leaves[uid] = l
-				n = l.treeNode
+				n = l
 				r.objects = append(r.objects, l)
 			}
 			if n != nil {
@@ -649,21 +667,18 @@ type treeNodeRenderer struct {
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
-	x := float32(0)
+	x := theme.Padding() + r.treeNode.Indent()
 	y := float32(0)
 	r.background.Resize(size)
-	h := size.Height - 2*theme.Padding()
-	x += theme.Padding() + r.treeNode.Indent()
-	y += theme.Padding()
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Move(fyne.NewPos(x, y))
-		r.treeNode.icon.Resize(fyne.NewSize(theme.IconInlineSize(), h))
+		r.treeNode.icon.Resize(fyne.NewSize(theme.IconInlineSize(), size.Height))
 	}
 	x += theme.IconInlineSize()
 	x += theme.Padding()
 	if r.treeNode.content != nil {
 		r.treeNode.content.Move(fyne.NewPos(x, y))
-		r.treeNode.content.Resize(fyne.NewSize(size.Width-x-theme.Padding(), h))
+		r.treeNode.content.Resize(fyne.NewSize(size.Width-x, size.Height))
 	}
 }
 
@@ -671,10 +686,8 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	if r.treeNode.content != nil {
 		min = r.treeNode.content.MinSize()
 	}
-	min.Width += theme.Padding() + r.treeNode.Indent() + theme.IconInlineSize()
-	min.Width += 2 * theme.Padding()
+	min.Width += theme.Padding()*2 + r.treeNode.Indent() + theme.IconInlineSize()
 	min.Height = fyne.Max(min.Height, theme.IconInlineSize())
-	min.Height += 2 * theme.Padding()
 	return
 }
 
@@ -712,6 +725,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
+	r.Layout(r.treeNode.size)
 	canvas.Refresh(r.treeNode.super())
 }
 

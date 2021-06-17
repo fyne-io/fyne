@@ -5,7 +5,7 @@ package binding
 // Since: 2.0
 type DataList interface {
 	DataItem
-	GetItem(int) (DataItem, error)
+	GetItem(index int) (DataItem, error)
 	Length() int
 }
 
@@ -30,12 +30,8 @@ func (b *listBase) Length() int {
 
 func (b *listBase) appendItem(i DataItem) {
 	b.items = append(b.items, i)
-
-	b.trigger()
 }
 
 func (b *listBase) deleteItem(i int) {
 	b.items = append(b.items[:i], b.items[i+1:]...)
-
-	b.trigger()
 }

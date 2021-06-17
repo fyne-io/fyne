@@ -4,6 +4,7 @@ package gomobile
 
 import (
 	"image/color"
+	"os"
 	"testing"
 	"time"
 
@@ -19,6 +20,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMain(m *testing.M) {
+	currentApp := fyne.CurrentApp()
+	fyne.SetCurrentApp(newTestMobileApp())
+	ret := m.Run()
+	fyne.SetCurrentApp(currentApp)
+	os.Exit(ret)
+}
+
 func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
@@ -33,13 +42,13 @@ func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	rightCol := container.NewVBox(rightObj1, rightObj2)
 	content := container.NewHBox(leftCol, rightCol)
 	c.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), content))
-	c.resize(fyne.NewSize(300, 300))
+	c.Resize(fyne.NewSize(300, 300))
 
 	oldContentSize := fyne.NewSize(200+theme.Padding(), 100+theme.Padding())
 	assert.Equal(t, oldContentSize, content.Size())
 
 	leftObj1.SetMinSize(fyne.NewSize(110, 60))
-	c.ensureMinSize()
+	c.EnsureMinSize()
 
 	expectedContentSize := oldContentSize.Add(fyne.NewSize(10, 10))
 	assert.Equal(t, expectedContentSize, content.Size())
@@ -66,7 +75,7 @@ func TestCanvas_Tapped(t *testing.T) {
 	})
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(button)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -101,7 +110,7 @@ func TestCanvas_Tapped_Multi(t *testing.T) {
 	})
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(button)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -124,7 +133,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	obj.ExtendBaseWidget(obj)
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(obj)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	obj.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -158,7 +167,7 @@ func TestCanvas_Dragged(t *testing.T) {
 	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(scroll)
-	c.resize(fyne.NewSize(40, 24))
+	c.Resize(fyne.NewSize(40, 24))
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
 	c.tapDown(fyne.NewPos(32, 3), 0)
@@ -170,12 +179,43 @@ func TestCanvas_Dragged(t *testing.T) {
 
 	assert.True(t, dragged)
 	assert.Equal(t, scroll, draggedObj)
-	// TODO find a way to get the test driver to report as mobile
 	dragged = false
 	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 	})
+	assert.True(t, dragged)
+	assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
+}
+
+func TestCanvas_DraggingOutOfWidget(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	slider := widget.NewSlider(0.0, 100.0)
+	c.SetContent(container.NewGridWithRows(2, slider, widget.NewLabel("Outside")))
+	c.Resize(fyne.NewSize(100, 200))
+
+	assert.Zero(t, slider.Value)
+	lastValue := slider.Value
+
+	dragged := false
+	c.tapDown(fyne.NewPos(23, 13), 0)
+	c.tapMove(fyne.NewPos(30, 13), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		assert.Equal(t, slider, wid)
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Greater(t, slider.Value, lastValue)
+	lastValue = slider.Value
+
+	dragged = false
+	c.tapMove(fyne.NewPos(40, 120), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		assert.Equal(t, slider, wid)
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Greater(t, slider.Value, lastValue)
 }
 
 func TestCanvas_Tappable(t *testing.T) {
@@ -183,7 +223,7 @@ func TestCanvas_Tappable(t *testing.T) {
 	content.ExtendBaseWidget(content)
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(content)
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 	content.Resize(fyne.NewSize(24, 24))
 
 	c.tapDown(fyne.NewPos(15, 15), 0)
@@ -215,7 +255,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(fyne.NewContainerWithLayout(layout.NewMaxLayout(), but))
-	c.resize(fyne.NewSize(36, 24))
+	c.Resize(fyne.NewSize(36, 24))
 
 	simulateTap(c)
 	time.Sleep(700 * time.Millisecond)
@@ -238,7 +278,7 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	popup.Resize(popupBgSize)
 
 	canvasSize := fyne.NewSize(600, 700)
-	c.resize(canvasSize)
+	c.Resize(canvasSize)
 
 	// get popup content padding dynamically
 	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
@@ -248,16 +288,25 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 }
 
 func TestCanvas_Focusable(t *testing.T) {
-	content := newFocusableEntry()
 	c := NewCanvas().(*mobileCanvas)
+	content := newFocusableEntry(c)
 	c.SetContent(content)
 	content.Resize(fyne.NewSize(25, 25))
 
-	c.tapDown(fyne.NewPos(10, 10), 0)
+	pos := fyne.NewPos(10, 10)
+	c.tapDown(pos, 0)
+	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
-	c.tapDown(fyne.NewPos(10, 10), 1)
+	c.tapDown(pos, 1)
+	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
@@ -311,12 +360,14 @@ func (t *tappableLabel) TappedSecondary(_ *fyne.PointEvent) {
 
 type focusableEntry struct {
 	widget.Entry
+	c fyne.Canvas
+
 	focusedTimes   int
 	unfocusedTimes int
 }
 
-func newFocusableEntry() *focusableEntry {
-	entry := &focusableEntry{}
+func newFocusableEntry(c fyne.Canvas) *focusableEntry {
+	entry := &focusableEntry{c: c}
 	entry.ExtendBaseWidget(entry)
 	return entry
 }
@@ -329,6 +380,10 @@ func (f *focusableEntry) FocusGained() {
 func (f *focusableEntry) FocusLost() {
 	f.unfocusedTimes++
 	f.Entry.FocusLost()
+}
+
+func (f *focusableEntry) Tapped(ev *fyne.PointEvent) {
+	f.c.Focus(f)
 }
 
 type doubleTappableButton struct {
@@ -358,4 +413,20 @@ func simulateTap(c *mobileCanvas) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable) {
 	})
+}
+
+type mobileApp struct {
+	fyne.App
+	driver fyne.Driver
+}
+
+func (a *mobileApp) Driver() fyne.Driver {
+	return a.driver
+}
+
+func newTestMobileApp() fyne.App {
+	return &mobileApp{
+		App:    fyne.CurrentApp(),
+		driver: NewGoMobileDriver(),
+	}
 }

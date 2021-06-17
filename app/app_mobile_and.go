@@ -16,26 +16,22 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"unsafe"
 
 	mobileApp "github.com/fyne-io/mobile/app"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
-func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantLight
-}
-
-func (app *fyneApp) OpenURL(url *url.URL) error {
-	cmd := app.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
+func (a *fyneApp) OpenURL(url *url.URL) error {
+	cmd := a.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
 		"-d", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
 
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	titleStr := C.CString(n.Title)
 	defer C.free(unsafe.Pointer(titleStr))
 	contentStr := C.CString(n.Content)
@@ -47,6 +43,10 @@ func (app *fyneApp) SendNotification(n *fyne.Notification) {
 	})
 }
 
+func defaultVariant() fyne.ThemeVariant {
+	return systemTheme
+}
+
 func rootConfigDir() string {
 	filesDir := os.Getenv("FILESDIR")
 	if filesDir == "" {
@@ -54,5 +54,5 @@ func rootConfigDir() string {
 		return "/data/data" // probably won't work, but we can't make a better guess
 	}
 
-	return filesDir
+	return filepath.Join(filesDir, "fyne")
 }
