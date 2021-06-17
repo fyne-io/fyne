@@ -16,10 +16,10 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 type MenuItem struct {
 	ChildMenu *Menu
 	// Since: 2.1
-	IsQuit       bool
-	IsSeparator  bool
-	Label        string
-	Action       func()
+	IsQuit      bool
+	IsSeparator bool
+	Label       string
+	Action      func()
 	// Since: 2.1
 	Disabled bool
 	// Since: 2.1
