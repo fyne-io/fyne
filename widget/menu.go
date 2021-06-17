@@ -186,11 +186,7 @@ func (m *Menu) needsResize() bool {
 
 func (m *Menu) getContainsCheck() bool {
 	for _, item := range m.Items {
-		mi, ok := item.(*menuItem)
-		if !ok {
-			continue
-		}
-		if mi.Item.HasCheckmark {
+		if mi, ok := item.(*menuItem); ok && mi.Item.HasCheckmark {
 			return true
 		}
 	}
