@@ -4,7 +4,10 @@ package binding
 
 import (
 	"errors"
+	"reflect"
 	"sync"
+
+	"fyne.io/fyne/v2"
 )
 
 var (
@@ -88,4 +91,101 @@ func (b *base) trigger() {
 	for _, listen := range b.listeners {
 		queueItem(listen.DataChanged)
 	}
+}
+
+// Untyped supports binding a interface{} value.
+//
+// Since: 2.1
+type Untyped interface {
+	DataItem
+	Get() (interface{}, error)
+	Set(interface{}) error
+}
+
+// NewUntyped returns a bindable interface{} value that is managed internally.
+//
+// Since: 2.1
+func NewUntyped() Untyped {
+	var blank interface{} = nil
+	v := &blank
+	return &boundUntyped{val: reflect.ValueOf(v).Elem()}
+}
+
+type boundUntyped struct {
+	base
+
+	val reflect.Value
+}
+
+func (b *boundUntyped) Get() (interface{}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	return b.val.Interface(), nil
+}
+
+func (b *boundUntyped) Set(val interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if b.val.Interface() == val {
+		return nil
+	}
+
+	b.val.Set(reflect.ValueOf(val))
+
+	b.trigger()
+	return nil
+}
+
+// ExternalUntyped supports binding a interface{} value to an external value.
+//
+// Since: 2.1
+type ExternalUntyped interface {
+	Untyped
+	Reload() error
+}
+
+// BindUntyped returns a bindable interface{} value that is bound to an external type.
+// The parameter must be a pointer to the type you wish to bind.
+//
+// Since: 2.1
+func BindUntyped(v interface{}) ExternalUntyped {
+	t := reflect.TypeOf(v)
+	if t.Kind() != reflect.Ptr {
+		fyne.LogError("Invalid type passed to BindUntyped, must be a pointer", nil)
+		v = nil
+	}
+
+	if v == nil {
+		var blank interface{}
+		v = &blank // never allow a nil value pointer
+	}
+
+	b := &boundExternalUntyped{}
+	b.val = reflect.ValueOf(v).Elem()
+	b.old = b.val.Interface()
+	return b
+}
+
+type boundExternalUntyped struct {
+	boundUntyped
+
+	old interface{}
+}
+
+func (b *boundExternalUntyped) Set(val interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if b.old == val {
+		return nil
+	}
+	b.val.Set(reflect.ValueOf(val))
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundExternalUntyped) Reload() error {
+	return b.Set(b.val.Interface())
 }
