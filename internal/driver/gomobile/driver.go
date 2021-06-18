@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
@@ -146,7 +147,7 @@ func (d *mobileDriver) Run() {
 				d.sendPaintEvent()
 			case set := <-settingsChange:
 				painter.ClearFontCache()
-				painter.SvgCacheReset()
+				cache.ResetSvg()
 				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 					c, ok := w.Canvas().(*mobileCanvas)
 					if !ok {
@@ -249,7 +250,8 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
-	if c.FreeDirtyTextures() || c.IsDirty() {
+	canvasNeedRefresh := c.FreeDirtyTextures() || c.IsDirty()
+	if canvasNeedRefresh {
 		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
 
 		if c.EnsureMinSize() {
@@ -261,6 +263,7 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		d.paintWindow(w, newSize)
 		d.app.Publish()
 	}
+	cache.Clean(canvasNeedRefresh)
 }
 
 func (d *mobileDriver) onStart() {

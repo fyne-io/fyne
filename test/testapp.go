@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -100,7 +100,7 @@ func NewApp() fyne.App {
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver),
 		lifecycle: &app.Lifecycle{}}
-	painter.SvgCacheReset()
+	cache.ResetSvg()
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
@@ -108,7 +108,7 @@ func NewApp() fyne.App {
 	go func() {
 		for {
 			<-listener
-			painter.SvgCacheReset()
+			cache.ResetSvg()
 			app.ApplySettings(test.Settings(), test)
 
 			test.propertyLock.Lock()

@@ -157,10 +157,18 @@ func (w *window) Close() {
 		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
 	}
 
+	cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
+		w.canvas.Painter().Free(obj)
+	})
+
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}
+	})
+
+	w.QueueEvent(func() {
+		cache.CleanCanvas(w.canvas)
 	})
 
 	// Call this in a go routine, because this function could be called

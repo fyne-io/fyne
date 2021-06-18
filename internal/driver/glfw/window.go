@@ -430,10 +430,16 @@ func (w *window) Close() {
 		return
 	}
 
-	w.viewLock.Lock()
-	w.closing = true
-	w.viewLock.Unlock()
-	w.viewport.SetShouldClose(true)
+	// set w.closing flag inside draw thread to ensure we can free textures
+	runOnDraw(w, func() {
+		w.viewLock.Lock()
+		w.closing = true
+		w.viewLock.Unlock()
+		w.viewport.SetShouldClose(true)
+		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
+			w.canvas.Painter().Free(obj)
+		})
+	})
 
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
@@ -499,6 +505,7 @@ func (w *window) closed(viewport *glfw.Window) {
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
 	w.DestroyEventQueue()
+	cache.CleanCanvas(w.canvas)
 
 	if w.master {
 		d.Quit()

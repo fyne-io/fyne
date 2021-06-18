@@ -61,9 +61,7 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	ensureMinSize := func(node *RenderCacheNode) {
 		obj := node.obj
-		canvasMutex.Lock()
-		canvases[obj] = c.impl
-		canvasMutex.Unlock()
+		cache.SetCanvasForObject(obj, c.impl)
 
 		if !obj.Visible() {
 			return
@@ -197,6 +195,9 @@ func (c *Canvas) FreeDirtyTextures() bool {
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
 		default:
+			cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
+				c.painter.Free(obj)
+			})
 			return freed
 		}
 	}

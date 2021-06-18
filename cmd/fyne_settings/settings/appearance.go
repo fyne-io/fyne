@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/tools/playground"
@@ -118,7 +118,7 @@ func (s *Settings) createPreview() image.Image {
 		th = theme.DarkTheme()
 	}
 
-	painter.SvgCacheReset() // reset icon cache
+	cache.ResetSvg() // reset icon cache
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
 	empty := widget.NewLabel("")
@@ -136,7 +136,7 @@ func (s *Settings) createPreview() image.Image {
 	time.Sleep(canvas.DurationShort)
 	img := c.Capture()
 
-	painter.SvgCacheReset() // ensure we re-create the correct cached assets
+	cache.ResetSvg() // ensure we re-create the correct cached assets
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(oldTheme, oldColor)
 	return img
 }

@@ -11,7 +11,7 @@ import (
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
 	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
 
-	texture := getTexture(o, creator)
+	texture := p.getTexture(o, creator)
 	if texture == NoTexture {
 		return
 	}
