@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -69,16 +68,16 @@ func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
 	icon := &canvas.Image{}
 	icon.Hide()
 	return &validationStatusRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{icon}),
-		icon:         icon,
-		entry:        r.entry,
+		WidgetRenderer: NewSimpleRenderer(icon),
+		icon:           icon,
+		entry:          r.entry,
 	}
 }
 
 var _ fyne.WidgetRenderer = (*validationStatusRenderer)(nil)
 
 type validationStatusRenderer struct {
-	widget.BaseRenderer
+	fyne.WidgetRenderer
 	entry *Entry
 	icon  *canvas.Image
 }

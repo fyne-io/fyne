@@ -1,31 +1,31 @@
 <canvas size="200x100">
 	<content>
 		<widget size="200x100" type="*container.AppTabs">
-			<container size="200x29">
-				<container size="168x29">
-					<widget size="57x29" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
+			<container size="200x37">
+				<container size="160x37">
+					<widget size="57x37" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="8,8" size="41x21">Test1</text>
 					</widget>
-					<widget pos="61,0" size="57x29" type="*container.tabButton">
-						<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
+					<widget pos="61,0" size="57x37" type="*container.tabButton">
+						<text alignment="center" bold pos="8,8" size="41x21">Test2</text>
 					</widget>
 				</container>
-				<widget pos="172,0" size="28x29" type="*widget.Button">
-					<rectangle fillColor="button" size="28x29"/>
-					<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="24x25"/>
-					<image fillMode="contain" pos="4,4" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+				<widget pos="164,0" size="36x37" type="*widget.Button">
+					<rectangle fillColor="button" size="36x37"/>
+					<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="32x33"/>
+					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 				</widget>
 			</container>
-			<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-			<rectangle fillColor="primary" pos="0,29" size="57x4"/>
-			<widget pos="0,33" size="200x67" type="*widget.Label">
+			<rectangle fillColor="shadow" pos="0,37" size="200x4"/>
+			<rectangle fillColor="primary" pos="0,37" size="57x4"/>
+			<widget pos="0,41" size="200x59" type="*widget.Label">
 				<text pos="8,8" size="184x21">Text 1</text>
 			</widget>
 		</widget>
 	</content>
 	<overlay>
 		<widget size="200x100" type="*widget.OverlayContainer">
-			<widget pos="145,29" size="55x70" type="*widget.PopUpMenu">
+			<widget pos="145,30" size="55x70" type="*widget.PopUpMenu">
 				<widget size="55x70" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 					<linearGradient endColor="shadow" pos="0,-4" size="55x4"/>

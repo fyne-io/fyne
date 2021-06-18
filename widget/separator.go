@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -31,11 +30,10 @@ func NewSeparator() *Separator {
 func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	bar := canvas.NewRectangle(theme.DisabledColor())
-	objects := []fyne.CanvasObject{bar}
 	return &separatorRenderer{
-		BaseRenderer: widget.NewBaseRenderer(objects),
-		bar:          bar,
-		d:            s,
+		WidgetRenderer: NewSimpleRenderer(bar),
+		bar:            bar,
+		d:              s,
 	}
 }
 
@@ -51,13 +49,9 @@ func (s *Separator) MinSize() fyne.Size {
 var _ fyne.WidgetRenderer = (*separatorRenderer)(nil)
 
 type separatorRenderer struct {
-	widget.BaseRenderer
+	fyne.WidgetRenderer
 	bar *canvas.Rectangle
 	d   *Separator
-}
-
-func (r *separatorRenderer) Layout(size fyne.Size) {
-	r.bar.Resize(size)
 }
 
 func (r *separatorRenderer) MinSize() fyne.Size {

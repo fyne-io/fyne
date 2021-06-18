@@ -1,34 +1,34 @@
 <canvas size="300x150">
 	<content>
 		<widget size="300x150" type="*container.DocTabs">
-			<container size="300x32">
-				<widget size="268x32" type="*widget.Scroll">
-					<container size="336x32">
-						<widget size="81x32" type="*container.tabButton">
-							<text bold color="primary" pos="8,4" size="65x24">Test2</text>
+			<container size="300x37">
+				<widget size="260x37" type="*widget.Scroll">
+					<container size="336x37">
+						<widget size="81x37" type="*container.tabButton">
+							<text bold color="primary" pos="8,8" size="65x21">Test2</text>
 						</widget>
-						<widget pos="85,0" size="81x32" type="*container.tabButton">
-							<text bold pos="8,4" size="65x24">Test3</text>
+						<widget pos="85,0" size="81x37" type="*container.tabButton">
+							<text bold pos="8,8" size="65x21">Test3</text>
 						</widget>
-						<widget pos="170,0" size="81x32" type="*container.tabButton">
-							<text bold pos="8,4" size="65x24">Test4</text>
+						<widget pos="170,0" size="81x37" type="*container.tabButton">
+							<text bold pos="8,8" size="65x21">Test4</text>
 						</widget>
-						<widget pos="255,0" size="81x32" type="*container.tabButton">
-							<text bold pos="8,4" size="65x24">Test5</text>
+						<widget pos="255,0" size="81x37" type="*container.tabButton">
+							<text bold pos="8,8" size="65x21">Test5</text>
 						</widget>
 					</container>
 				</widget>
-				<container pos="272,0" size="28x32">
-					<widget size="28x32" type="*widget.Button">
-						<rectangle fillColor="button" size="28x32"/>
+				<container pos="264,0" size="36x37">
+					<widget size="36x37" type="*widget.Button">
+						<rectangle fillColor="button" size="36x37"/>
 						<rectangle size="0x0"/>
-						<image fillMode="contain" pos="4,6" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,32" size="300x4"/>
-			<rectangle fillColor="primary" pos="0,32" size="81x4"/>
-			<widget pos="0,36" size="300x114" type="*widget.Label">
+			<rectangle fillColor="shadow" pos="0,37" size="300x4"/>
+			<rectangle fillColor="primary" pos="0,37" size="81x4"/>
+			<widget pos="0,41" size="300x109" type="*widget.Label">
 				<text pos="8,8" size="284x21">Text 2</text>
 			</widget>
 		</widget>
