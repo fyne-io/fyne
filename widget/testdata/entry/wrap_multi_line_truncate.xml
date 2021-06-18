@@ -6,7 +6,7 @@
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
 					<widget size="120x96" type="*widget.RichText">
-						<text pos="8,6" size="108x21">A long text on short words w/o NLs or LFs.</text>
+						<text pos="8,6" size="104x21">A long text on short words w/o NLs or LFs.</text>
 					</widget>
 					<rectangle fillColor="primary" pos="7,6" size="2x21"/>
 				</widget>

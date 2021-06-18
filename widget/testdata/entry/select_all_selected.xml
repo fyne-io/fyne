@@ -9,9 +9,9 @@
 					<rectangle fillColor="primary" pos="7,27" size="88x21"/>
 					<rectangle fillColor="primary" pos="7,48" size="73x21"/>
 					<widget size="120x96" type="*widget.RichText">
-						<text pos="8,6" size="108x21">First Row</text>
-						<text pos="8,27" size="108x21">Second Row</text>
-						<text pos="8,48" size="108x21">Third Row</text>
+						<text pos="8,6" size="104x21">First Row</text>
+						<text pos="8,27" size="104x21">Second Row</text>
+						<text pos="8,48" size="104x21">Third Row</text>
 					</widget>
 					<rectangle fillColor="primary" pos="79,48" size="2x21"/>
 				</widget>

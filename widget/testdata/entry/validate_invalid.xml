@@ -5,7 +5,7 @@
 			<rectangle fillColor="error" pos="0,35" size="120x2"/>
 			<widget pos="0,2" size="92x33" type="*widget.entryContent">
 				<widget size="92x33" type="*widget.RichText">
-					<text pos="8,6" size="80x21">2020-02</text>
+					<text pos="8,6" size="76x21">2020-02</text>
 				</widget>
 			</widget>
 			<widget pos="92,8" size="20x20" type="*widget.validationStatus">

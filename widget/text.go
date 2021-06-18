@@ -510,7 +510,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 	left := theme.Padding()*2 - r.obj.inset.Width
 	yPos := theme.Padding()*2 - r.obj.inset.Height
-	lineWidth := size.Width - yPos*2
+	lineWidth := size.Width - left*2
 	var rowItems []fyne.CanvasObject
 	rowAlign := fyne.TextAlignLeading
 	i := 0

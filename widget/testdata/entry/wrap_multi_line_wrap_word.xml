@@ -6,10 +6,10 @@
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
 					<widget size="120x96" type="*widget.RichText">
-						<text pos="8,6" size="108x21">A long text on</text>
-						<text pos="8,27" size="108x21">short words</text>
-						<text pos="8,48" size="108x21">w/o NLs or</text>
-						<text pos="8,69" size="108x21">LFs.</text>
+						<text pos="8,6" size="104x21">A long text on</text>
+						<text pos="8,27" size="104x21">short words</text>
+						<text pos="8,48" size="104x21">w/o NLs or</text>
+						<text pos="8,69" size="104x21">LFs.</text>
 					</widget>
 					<rectangle fillColor="primary" pos="7,6" size="2x21"/>
 				</widget>
