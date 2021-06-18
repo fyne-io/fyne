@@ -514,7 +514,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	var rowItems []fyne.CanvasObject
 	rowAlign := fyne.TextAlignLeading
 	i := 0
-	for _, bound := range bounds {
+	for row, bound := range bounds {
 		for segI := range bound.segments {
 			inline := segI < len(bound.segments)-1
 			obj := objs[i]
@@ -526,6 +526,10 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				obj.Move(fyne.NewPos(left, yPos))
 				obj.Resize(fyne.NewSize(lineWidth, height))
 				yPos += height
+
+				if !inline {
+					yPos += theme.Padding()
+				}
 				continue
 			}
 			rowItems = append(rowItems, obj)
@@ -533,14 +537,18 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 
-			if len(rowItems) == 1 { // TODO align link
-				rowAlign = bound.segments[len(bound.segments)-1].(*TextSegment).Style.Alignment
+			if text, ok := bound.segments[0].(*TextSegment); ok {
+				rowAlign = text.Style.Alignment
+			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
+				rowAlign = link.Alignment
 			}
 			yPos += r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
-			if !inline && bound.end == len(bound.segments[len(bound.segments)-1].(*TextSegment).Text) && i < len(objs)-1 {
-				yPos += theme.Padding()
-			}
 			rowItems = nil
+		}
+
+		lastSeg := bound.segments[len(bound.segments)-1]
+		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
+			yPos += theme.Padding()
 		}
 	}
 }
@@ -560,7 +568,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 	rowWidth := float32(0)
 
 	i := 0
-	for _, bound := range bounds {
+	for row, bound := range bounds {
 		for range bound.segments {
 			obj := objs[i]
 			i++
@@ -576,6 +584,11 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height += rowHeight
 		rowHeight = 0
 		rowWidth = 0
+
+		lastSeg := bound.segments[len(bound.segments)-1]
+		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
+			height += theme.Padding()
+		}
 	}
 
 	if height == 0 {
@@ -796,6 +809,7 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 		wid := c.Objects[0]
 		if link, ok := wid.(*Hyperlink); ok {
 			link.Alignment = align
+			link.Refresh()
 		}
 	}
 }

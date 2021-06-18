@@ -11,8 +11,9 @@ import (
 //
 // Since: 2.1
 type HyperlinkSegment struct {
-	Text string
-	URL  *url.URL
+	Alignment fyne.TextAlign
+	Text      string
+	URL       *url.URL
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -27,7 +28,9 @@ func (h *HyperlinkSegment) Textual() string {
 
 // Visual returns the hyperlink widget required to render this segment.
 func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
-	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{NewHyperlink(h.Text, h.URL)}}
+	link := NewHyperlink(h.Text, h.URL)
+	link.Alignment = h.Alignment
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{link}}
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.

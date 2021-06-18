@@ -221,6 +221,9 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			if seg, ok := rich.Segments[i].(*widget.TextSegment); ok {
 				seg.Style.Alignment = align
 			}
+			if seg, ok := rich.Segments[i].(*widget.HyperlinkSegment); ok {
+				seg.Alignment = align
+			}
 		}
 
 		label.Refresh()
