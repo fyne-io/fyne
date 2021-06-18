@@ -205,6 +205,94 @@ func TestText_DeleteFromTo(t *testing.T) {
 	}
 }
 
+func TestText_DeleteFromTo_Segments(t *testing.T) {
+	type args struct {
+		lowBound  int
+		highBound int
+	}
+	tests := []struct {
+		name         string
+		segments     []RichTextSegment
+		args         args
+		want         string
+		wantSegments []RichTextSegment
+	}{
+		{
+			name: "remove begin",
+			segments: []RichTextSegment{
+				&TextSegment{Text: "A\n"},
+				&TextSegment{Text: "1"},
+			},
+			args: args{
+				lowBound:  0,
+				highBound: 1,
+			},
+			want: "A",
+			wantSegments: []RichTextSegment{
+				&TextSegment{Text: "\n"},
+				&TextSegment{Text: "1"},
+			},
+		},
+		{
+			name: "remove end",
+			segments: []RichTextSegment{
+				&TextSegment{Text: "A"},
+				&TextSegment{Text: "\n1"},
+			},
+			args: args{
+				lowBound:  1,
+				highBound: 2,
+			},
+			want: "\n",
+			wantSegments: []RichTextSegment{
+				&TextSegment{Text: "A"},
+				&TextSegment{Text: "1"},
+			},
+		},
+		{
+			name: "remove both",
+			segments: []RichTextSegment{
+				&TextSegment{Text: "A\n"},
+				&TextSegment{Text: "è1"},
+			},
+			args: args{
+				lowBound:  1,
+				highBound: 3,
+			},
+			want: "\nè",
+			wantSegments: []RichTextSegment{
+				&TextSegment{Text: "A"},
+				&TextSegment{Text: "1"},
+			},
+		},
+		{
+			name: "remove nontext",
+			segments: []RichTextSegment{
+				&TextSegment{Text: "A\n"},
+				&SeparatorSegment{},
+				&TextSegment{Text: "B1"},
+			},
+			args: args{
+				lowBound:  1,
+				highBound: 3,
+			},
+			want: "\nB",
+			wantSegments: []RichTextSegment{
+				&TextSegment{Text: "A"},
+				&TextSegment{Text: "1"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			text := NewRichText(tt.segments...)
+			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
+			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.wantSegments, text.Segments)
+		})
+	}
+}
+
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 

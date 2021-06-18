@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"math"
 	"strings"
 	"unicode"
 
@@ -259,38 +260,46 @@ func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle) fyne.Size {
 
 // deleteFromTo removes the text between the specified positions
 func (t *RichText) deleteFromTo(lowBound int, highBound int) string {
-	// TODO handle start portion, whole elements and end portion!
-	index := 0
 	start := 0
-	var from *TextSegment
+	var ret []rune
+	deleting := false
+	var segs []RichTextSegment
 	for i, seg := range t.Segments {
 		if _, ok := seg.(*TextSegment); !ok {
+			if !deleting {
+				segs = append(segs, seg)
+			}
 			continue
 		}
 		end := start + len([]rune(seg.(*TextSegment).Text))
-		from = seg.(*TextSegment)
-		index = i
-		if end > lowBound {
-			break
+		if end < lowBound {
+			segs = append(segs, seg)
+			start = end
+			continue
 		}
 
-		start = end
-	}
+		startOff := int(math.Max(float64(lowBound-start), 0))
+		endOff := int(math.Min(float64(end), float64(highBound))) - start
+		deleted := make([]rune, endOff-startOff)
+		r := ([]rune)(seg.(*TextSegment).Text)
+		copy(deleted, r[startOff:endOff])
+		ret = append(ret, deleted...)
+		r2 := append(r[:startOff], r[endOff:]...)
+		seg.(*TextSegment).Text = string(r2)
+		segs = append(segs, seg)
 
-	if from == nil {
-		return ""
+		// prepare next iteration
+		start = end
+		if start >= highBound {
+			segs = append(segs, t.Segments[i+1:]...)
+			break
+		} else if start >= lowBound {
+			deleting = true
+		}
 	}
-	deleted := make([]rune, highBound-lowBound)
-	r := ([]rune)(from.Text)
-	copy(deleted, r[lowBound:highBound])
-	if highBound > len(r) {
-		highBound = len(r) // TODO remove this workaround and delete all segments)
-	}
-	r2 := append(r[:lowBound], r[highBound:]...)
-	from.Text = string(r2)
-	t.Segments[index] = from
+	t.Segments = segs
 	t.Refresh()
-	return string(deleted)
+	return string(ret)
 }
 
 // insertAt inserts the text at the specified position
