@@ -99,6 +99,15 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{link}}
 }
 
+// Update applies the current state of this hyperlink segment to an existing visual.
+func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
+	link := o.(*fyne.Container).Objects[0].(*Hyperlink)
+	link.Text = h.Text
+	link.URL = h.URL
+	link.Alignment = h.Alignment
+	link.Refresh()
+}
+
 // Select tells the segment that the user is selecting the content between the two positions.
 func (h *HyperlinkSegment) Select(begin, end fyne.Position) {
 	// no-op: this will be added when we progress to editor
@@ -136,6 +145,10 @@ func (s *SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
+// Update doesnt need to change a separator visual.
+func (s *SeparatorSegment) Update(fyne.CanvasObject) {
+}
+
 // Select does nothing for a separator.
 func (s *SeparatorSegment) Select(begin, end fyne.Position) {
 }
@@ -169,6 +182,7 @@ type RichTextStyle struct {
 type RichTextSegment interface {
 	Inline() bool
 	Textual() string
+	Update(fyne.CanvasObject)
 	Visual() fyne.CanvasObject
 
 	Select(pos1, pos2 fyne.Position)
@@ -198,10 +212,19 @@ func (t *TextSegment) Textual() string {
 func (t *TextSegment) Visual() fyne.CanvasObject {
 	obj := canvas.NewText(t.Text, t.color())
 
+	t.Update(obj)
+	return obj
+}
+
+// Update applies the current state of this text segment to an existing visual.
+func (t *TextSegment) Update(o fyne.CanvasObject) {
+	obj := o.(*canvas.Text)
+	obj.Text = t.Text
+	obj.Color = t.color()
 	obj.Alignment = t.Style.Alignment
 	obj.TextStyle = t.Style.TextStyle
 	obj.TextSize = t.size()
-	return obj
+	obj.Refresh()
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
