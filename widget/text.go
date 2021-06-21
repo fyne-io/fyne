@@ -516,6 +516,9 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	i := 0
 	for row, bound := range bounds {
 		for segI := range bound.segments {
+			if i == len(objs) {
+				break // Refresh may not have created all objects for all rows yet...
+			}
 			inline := segI < len(bound.segments)-1
 			obj := objs[i]
 			i++
@@ -570,6 +573,9 @@ func (r *textRenderer) MinSize() fyne.Size {
 	i := 0
 	for row, bound := range bounds {
 		for range bound.segments {
+			if i == len(objs) {
+				break // Refresh may not have created all objects for all rows yet...
+			}
 			obj := objs[i]
 			i++
 
