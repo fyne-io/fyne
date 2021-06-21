@@ -1,10 +1,76 @@
 package widget
 
 import (
+	"image/color"
 	"net/url"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
+)
+
+var (
+	// RichTextStyleEmphasis represents standard text that can be surrounded by other elements.
+	//
+	// Since: 2.1
+	RichTextStyleEmphasis = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Italic: true},
+	}
+	// RichTextStyleHeading represents a heading text that stands on its own line.
+	//
+	// Since: 2.1
+	RichTextStyleHeading = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameHeadingText,
+		TextStyle: fyne.TextStyle{Bold: true},
+	}
+	// RichTextStyleInline represents standard text that can be surrounded by other elements.
+	//
+	// Since: 2.1
+	RichTextStyleInline = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+	}
+	// RichTextStyleParagraph represents standard text that should appear separate from other text.
+	//
+	// Since: 2.1
+	RichTextStyleParagraph = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameText,
+	}
+	// RichTextStylePassword represents standard sized text where the characters are obscured.
+	//
+	// Since: 2.1
+	RichTextStylePassword = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		concealed: true,
+	}
+	// RichTextStyleStrong represents standard text that can be surrounded by other elements.
+	//
+	// Since: 2.1
+	RichTextStyleStrong = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Bold: true},
+	}
+	// RichTextStyleSubHeading represents a sub-heading text that stands on its own line.
+	//
+	// Since: 2.1
+	RichTextStyleSubHeading = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameSubHeadingText,
+		TextStyle: fyne.TextStyle{Bold: true},
+	}
 )
 
 // HyperlinkSegment represents a hyperlink within a rich text widget.
@@ -81,6 +147,93 @@ func (s *SeparatorSegment) SelectedText() string {
 
 // Unselect does nothing for a separator.
 func (s *SeparatorSegment) Unselect() {
+}
+
+// RichTextStyle describes the details of a text object inside a RichText widget.
+//
+// Since: 2.1
+type RichTextStyle struct {
+	Alignment fyne.TextAlign
+	ColorName fyne.ThemeColorName
+	Inline    bool
+	SizeName  fyne.ThemeSizeName
+	TextStyle fyne.TextStyle
+
+	// an internal detail where we obscure password fields
+	concealed bool
+}
+
+// RichTextSegment describes any element that can be rendered in a RichText widget.
+//
+// Since: 2.1
+type RichTextSegment interface {
+	Inline() bool
+	Textual() string
+	Visual() fyne.CanvasObject
+
+	Select(pos1, pos2 fyne.Position)
+	SelectedText() string
+	Unselect()
+}
+
+// TextSegment represents the styling for a segment of rich text.
+//
+// Since: 2.1
+type TextSegment struct {
+	Style RichTextStyle
+	Text  string
+}
+
+// Inline should return true if this text can be included within other elements, or false if it creates a new block.
+func (t *TextSegment) Inline() bool {
+	return t.Style.Inline
+}
+
+// Textual returns the content of this segment rendered to plain text.
+func (t *TextSegment) Textual() string {
+	return t.Text
+}
+
+// Visual returns the graphical elements required to render this segment.
+func (t *TextSegment) Visual() fyne.CanvasObject {
+	obj := canvas.NewText(t.Text, t.color())
+
+	obj.Alignment = t.Style.Alignment
+	obj.TextStyle = t.Style.TextStyle
+	obj.TextSize = t.size()
+	return obj
+}
+
+// Select tells the segment that the user is selecting the content between the two positions.
+func (t *TextSegment) Select(begin, end fyne.Position) {
+	// no-op: this will be added when we progress to editor
+}
+
+// SelectedText should return the text representation of any content currently selected through the Select call.
+func (t *TextSegment) SelectedText() string {
+	// no-op: this will be added when we progress to editor
+	return ""
+}
+
+// Unselect tells the segment that the user is has cancelled the previous selection.
+func (t *TextSegment) Unselect() {
+	// no-op: this will be added when we progress to editor
+}
+
+func (t *TextSegment) color() color.Color {
+	if t.Style.ColorName != "" {
+		return fyne.CurrentApp().Settings().Theme().Color(t.Style.ColorName, fyne.CurrentApp().Settings().ThemeVariant())
+	}
+
+	return theme.ForegroundColor()
+}
+
+func (t *TextSegment) size() float32 {
+	if t.Style.SizeName != "" {
+		return fyne.CurrentApp().Settings().Theme().Size(t.Style.SizeName)
+	}
+
+	return theme.TextSize()
 }
 
 type unpadTextWidgetLayout struct {
