@@ -3,6 +3,8 @@ package fyne
 // KeyEvent describes a keyboard input event.
 type KeyEvent struct {
 	Name KeyName
+	// ScanCode is a platform specific field that reports the hardware ID of the key event
+	ScanCode int
 }
 
 // PointEvent describes a pointer input event. The position is relative to the
