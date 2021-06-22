@@ -137,7 +137,7 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 
 func (s fileItemRenderer) Refresh() {
 	if s.item.isCurrent {
-		s.background.FillColor = theme.PrimaryColor()
+		s.background.FillColor = theme.FocusColor()
 		s.background.Show()
 	} else if s.item.hovered {
 		s.background.FillColor = theme.HoverColor()
@@ -146,7 +146,6 @@ func (s fileItemRenderer) Refresh() {
 		s.background.Hide()
 	}
 	s.background.Refresh()
-	s.icon.SetSelected(s.item.isCurrent)
 	canvas.Refresh(s.item)
 }
 
