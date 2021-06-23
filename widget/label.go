@@ -42,7 +42,7 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 		TextStyle: style,
 	}
 
-	l.ExtendBaseWidget(l.super())
+	l.ExtendBaseWidget(l)
 	return l
 }
 
@@ -60,7 +60,7 @@ func (l *Label) Bind(data binding.String) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.provider = NewRichTextWithText(l.Text)
-	l.ExtendBaseWidget(l.super())
+	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
 	return l.provider.CreateRenderer()
@@ -73,7 +73,7 @@ func (l *Label) ExtendBaseWidget(w fyne.Widget) {
 	}
 	l.BaseWidget.ExtendBaseWidget(w)
 	if l.provider != nil {
-		l.provider.ExtendBaseWidget(w)
+		l.provider.ExtendBaseWidget(l.super())
 	}
 }
 
@@ -82,7 +82,8 @@ func (l *Label) ExtendBaseWidget(w fyne.Widget) {
 // Implements: fyne.Widget
 func (l *Label) MinSize() fyne.Size {
 	if l.provider == nil {
-		l.CreateRenderer()
+		l.ExtendBaseWidget(l)
+		cache.Renderer(l.super())
 	}
 
 	return l.provider.MinSize()
@@ -97,8 +98,6 @@ func (l *Label) Refresh() {
 	}
 	l.syncSegments()
 	l.provider.Refresh()
-
-	l.BaseWidget.Refresh()
 }
 
 // Resize sets a new size for the label.
