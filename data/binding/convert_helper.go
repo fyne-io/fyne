@@ -11,7 +11,7 @@ import (
 
 func stripFormatPrecision(in string) string {
 	// quick exit if certainly not float
-	if strings.IndexAny(in, "f") == -1 {
+	if !strings.ContainsAny(in, "f") {
 		return in
 	}
 
