@@ -50,7 +50,7 @@ func stripFormatPrecision(in string) string {
 	if sizeRunes[0] == '.' { // formats like %.2f
 		return fmt.Sprintf("%s%s", string(runes[:start+1]), string(runes[end:]))
 	}
-	return fmt.Sprintf("%s%d%s", string(runes[:start+1]), int(width), string(runes[end:]))
+	return string(runes[:start+1]) + strconv.Itoa(int(width)) + string(runes[end:])
 }
 
 func uriFromString(in string) (fyne.URI, error) {
