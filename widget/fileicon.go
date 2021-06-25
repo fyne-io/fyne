@@ -75,7 +75,7 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	defer i.propertyLock.RUnlock()
 
 	// TODO remove background when `SetSelected` is gone.
-	background := canvas.NewRectangle(theme.FocusColor())
+	background := canvas.NewRectangle(theme.SelectionColor())
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
@@ -182,7 +182,7 @@ func (s *fileIconRenderer) Refresh() {
 
 	if s.file.Selected {
 		s.background.Show()
-		s.ext.Color = theme.FocusColor()
+		s.ext.Color = theme.SelectionColor()
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}
