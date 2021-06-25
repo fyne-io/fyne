@@ -1,11 +1,57 @@
 package binding
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 )
+
+func stripFormatPrecision(in string) string {
+	// quick exit if certainly not float
+	if strings.IndexAny(in, "f") == -1 {
+		return in
+	}
+
+	start := -1
+	end := -1
+	runes := []rune(in)
+	for i, r := range runes {
+		switch r {
+		case '%':
+			if i > 0 && start == i-1 { // ignore %%
+				start = -1
+			} else {
+				start = i
+			}
+		case 'f':
+			if start == -1 { // not part of format
+				continue
+			}
+			end = i
+		}
+
+		if end > -1 {
+			break
+		}
+	}
+	if end == start+1 { // no width/precision
+		return in
+	}
+
+	sizeRunes := runes[start+1 : end]
+	width, err := parseFloat(string(sizeRunes))
+	if err != nil {
+		return string(runes[:start+1]) + string(runes[:end])
+	}
+
+	if sizeRunes[0] == '.' { // formats like %.2f
+		return fmt.Sprintf("%s%s", string(runes[:start+1]), string(runes[end:]))
+	}
+	return fmt.Sprintf("%s%d%s", string(runes[:start+1]), int(width), string(runes[end:]))
+}
 
 func uriFromString(in string) (fyne.URI, error) {
 	return storage.ParseURI(in)

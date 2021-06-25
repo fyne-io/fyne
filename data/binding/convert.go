@@ -59,7 +59,8 @@ func (s *stringFromBool) Get() (string, error) {
 func (s *stringFromBool) Set(str string) error {
 	var val bool
 	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
 		if err != nil {
 			return err
 		}
@@ -145,7 +146,8 @@ func (s *stringFromFloat) Get() (string, error) {
 func (s *stringFromFloat) Set(str string) error {
 	var val float64
 	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
 		if err != nil {
 			return err
 		}
@@ -231,7 +233,8 @@ func (s *stringFromInt) Get() (string, error) {
 func (s *stringFromInt) Set(str string) error {
 	var val int
 	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
 		if err != nil {
 			return err
 		}
