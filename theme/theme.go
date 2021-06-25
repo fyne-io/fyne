@@ -108,7 +108,7 @@ const (
 	// Since: 2.0
 	ColorNameScrollBar fyne.ThemeColorName = "scrollBar"
 
-	// ColorNamePrimary is the name of theme lookup for primary color.
+	// ColorNameSelection is the name of theme lookup for selection color.
 	//
 	// Since: 2.1
 	ColorNameSelection fyne.ThemeColorName = "selection"
