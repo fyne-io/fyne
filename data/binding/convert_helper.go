@@ -1,7 +1,6 @@
 package binding
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
