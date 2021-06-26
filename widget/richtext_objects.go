@@ -128,7 +128,8 @@ func (h *HyperlinkSegment) Unselect() {
 //
 // Since: 2.1
 type SeparatorSegment struct {
-	dummy interface{} // without this a pointer to SeparatorSegment will always be the same
+	//lint:ignore U1000 This is required due to language design.
+	dummy uint8 // without this a pointer to SeparatorSegment will always be the same
 }
 
 // Inline returns false as a separator should be full width.
