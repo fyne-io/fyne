@@ -276,6 +276,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 			} else {
 				obj.(*Label).Text = "placeholder"
 			}
+			obj.Refresh()
 		})
 	table.SetColumnWidth(0, 32)
 	table.Resize(fyne.NewSize(120, 120))

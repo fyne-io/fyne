@@ -156,6 +156,54 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
+	u, _ := url.Parse("https://fyne.io/")
+	rich := widget.NewRichText(
+		&widget.TextSegment{
+			Style: widget.RichTextStyleHeading,
+			Text:  "RichText Heading",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyleSubHeading,
+			Text:  "A Sub Heading",
+		},
+		&widget.SeparatorSegment{},
+		&widget.TextSegment{
+			Style: widget.RichTextStyleParagraph,
+			Text:  "A paragraph between separators that is very long, it should respect the wrapping flag",
+		},
+		&widget.SeparatorSegment{},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				Inline: true,
+			},
+			Text: "Normal ",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyleStrong,
+			Text:  "Bold ",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyleEmphasis,
+			Text:  "Italic ",
+		},
+		&widget.HyperlinkSegment{
+			Text: "Link",
+			URL:  u,
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				Inline: true,
+			},
+			Text: ". This styled row should also wrap as expected, but only ",
+		},
+		&widget.TextSegment{
+			Style: widget.RichTextStyle{
+				Inline:    true,
+				TextStyle: fyne.TextStyle{Italic: true},
+			},
+			Text: "when required.",
+		})
+
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
@@ -169,9 +217,18 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 		label.Alignment = align
 		hyperlink.Alignment = align
+		for i := range rich.Segments {
+			if seg, ok := rich.Segments[i].(*widget.TextSegment); ok {
+				seg.Style.Alignment = align
+			}
+			if seg, ok := rich.Segments[i].(*widget.HyperlinkSegment); ok {
+				seg.Alignment = align
+			}
+		}
 
 		label.Refresh()
 		hyperlink.Refresh()
+		rich.Refresh()
 	})
 	radioAlign.SetSelected("Text Alignment Leading")
 
@@ -191,10 +248,12 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		entryLoremIpsum.Wrapping = wrap
+		rich.Wrapping = wrap
 
 		label.Refresh()
 		hyperlink.Refresh()
 		entryLoremIpsum.Refresh()
+		rich.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
@@ -206,6 +265,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		),
 		label,
 		hyperlink,
+		rich,
 	)
 
 	grid := makeTextGrid()

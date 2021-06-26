@@ -4,8 +4,8 @@
 			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="120x33"/>
 			<rectangle fillColor="shadow" pos="0,35" size="120x2"/>
 			<widget pos="0,2" size="120x33" type="*widget.entryContent">
-				<widget size="120x33" type="*widget.textProvider">
-					<text italic pos="8,6" size="108x21">Styled Text</text>
+				<widget size="120x33" type="*widget.RichText">
+					<text italic pos="8,6" size="104x21">Styled Text</text>
 				</widget>
 			</widget>
 		</widget>

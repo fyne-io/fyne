@@ -534,6 +534,7 @@ type notFocusableButton struct {
 
 func newNotFocusableButton(l string, f func()) *notFocusableButton {
 	n := &notFocusableButton{f: f}
+	n.ExtendBaseWidget(n)
 	n.Label.Text = l
 	return n
 }

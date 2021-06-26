@@ -11,11 +11,11 @@
 						<rectangle fillColor="shadow" pos="0,35" size="147x2"/>
 						<widget pos="0,2" size="147x33" type="*widget.Scroll">
 							<widget size="147x33" type="*widget.entryContent">
-								<widget size="147x33" type="*widget.textProvider">
-									<text color="placeholder" pos="8,6" size="135x21"></text>
+								<widget size="147x33" type="*widget.RichText">
+									<text color="placeholder" pos="8,6" size="131x21"></text>
 								</widget>
-								<widget size="147x33" type="*widget.textProvider">
-									<text pos="8,6" size="135x21"></text>
+								<widget size="147x33" type="*widget.RichText">
+									<text pos="8,6" size="131x21"></text>
 								</widget>
 							</widget>
 						</widget>
@@ -28,11 +28,11 @@
 						<rectangle fillColor="shadow" pos="0,35" size="147x2"/>
 						<widget pos="0,2" size="147x33" type="*widget.Scroll">
 							<widget size="147x33" type="*widget.entryContent">
-								<widget size="147x33" type="*widget.textProvider">
-									<text color="placeholder" pos="8,6" size="135x21"></text>
+								<widget size="147x33" type="*widget.RichText">
+									<text color="placeholder" pos="8,6" size="131x21"></text>
 								</widget>
-								<widget size="147x33" type="*widget.textProvider">
-									<text pos="8,6" size="135x21"></text>
+								<widget size="147x33" type="*widget.RichText">
+									<text pos="8,6" size="131x21"></text>
 								</widget>
 							</widget>
 						</widget>

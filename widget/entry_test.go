@@ -112,7 +112,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapWord
-	entry.Resize(fyne.NewSize(64, 64))
+	entry.Resize(fyne.NewSize(72, 64))
 	entry.SetText("1234")
 	entry.CursorColumn = 3
 	test.Type(entry, "a")
