@@ -6,6 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestRichTextMarkdown_Code(t *testing.T) {
+	r := NewRichTextFromMarkdown("a `code` inline")
+
+	assert.Equal(t, 3, len(r.Segments))
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "code", text.Text)
+		assert.Equal(t, RichTextStyleCodeInline, text.Style)
+	} else {
+		t.Error("Segment should be Text")
+	}
+}
+
 func TestRichTextMarkdown_Heading(t *testing.T) {
 	r := NewRichTextFromMarkdown("# Head1\n\n## Head2\n")
 

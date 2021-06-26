@@ -10,6 +10,24 @@ import (
 )
 
 var (
+	// RichTextStyleCodeBlock represents a code blog segment.
+	//
+	// Since: 2.1
+	RichTextStyleCodeBlock = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Monospace: true},
+	}
+	// RichTextStyleCodeInline represents an inline code segment.
+	//
+	// Since: 2.1
+	RichTextStyleCodeInline = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Monospace: true},
+	}
 	// RichTextStyleEmphasis represents regular text with emphasis.
 	//
 	// Since: 2.1

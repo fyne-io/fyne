@@ -57,6 +57,15 @@ func parseMarkdown(content string) []RichTextSegment {
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
 				Text:  string(node.Literal),
 			}
+		case blackfriday.Code:
+			segs = append(segs, &TextSegment{
+				Style: RichTextStyleCodeInline,
+				Text:  string(node.Literal),
+			})
+			nextSeg = &TextSegment{
+				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
+				Text:  string(node.Literal),
+			}
 		case blackfriday.Emph:
 			nextSeg = &TextSegment{
 				Style: RichTextStyleEmphasis,

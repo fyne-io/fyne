@@ -167,7 +167,7 @@ A paragraph between separators that is very long, it should respect the wrapping
 
 ---
 
-Normal **Bold** *Italic* [Link](https://fyne.io/).
+Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
 This styled row should also wrap as expected, but only *when required*.
 `)
 
