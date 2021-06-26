@@ -128,6 +128,7 @@ func (h *HyperlinkSegment) Unselect() {
 //
 // Since: 2.1
 type SeparatorSegment struct {
+	dummy interface{} // without this a pointer to SeparatorSegment will always be the same
 }
 
 // Inline returns false as a separator should be full width.
@@ -150,7 +151,7 @@ func (s *SeparatorSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a separator.
-func (s *SeparatorSegment) Select(begin, end fyne.Position) {
+func (s *SeparatorSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this separator.
