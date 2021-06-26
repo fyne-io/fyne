@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// RichTextStyleEmphasis represents standard text that can be surrounded by other elements.
+	// RichTextStyleEmphasis represents regular text with emphasis.
 	//
 	// Since: 2.1
 	RichTextStyleEmphasis = RichTextStyle{
@@ -53,7 +53,7 @@ var (
 		SizeName:  theme.SizeNameText,
 		concealed: true,
 	}
-	// RichTextStyleStrong represents standard text that can be surrounded by other elements.
+	// RichTextStyleStrong represents regular text with a strong emphasis.
 	//
 	// Since: 2.1
 	RichTextStyleStrong = RichTextStyle{
