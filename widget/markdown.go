@@ -1,10 +1,13 @@
 package widget
 
 import (
+	"io"
 	"net/url"
 	"strings"
 
-	"github.com/russross/blackfriday/v2"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/renderer"
 
 	"fyne.io/fyne/v2"
 )
@@ -17,70 +20,93 @@ func NewRichTextFromMarkdown(content string) *RichText {
 }
 
 func parseMarkdown(content string) []RichTextSegment {
-	nodes := blackfriday.New().Parse([]byte(content))
-	var segs []RichTextSegment
+	r := &markdownRenderer{}
+	md := goldmark.New(goldmark.WithRenderer(r))
+	err := md.Convert([]byte(content), nil)
+	if err != nil {
+		fyne.LogError("Failed to parse markdown", err)
+	}
+	return r.segs
+}
 
+type markdownRenderer struct {
+	segs []RichTextSegment
+}
+
+func (m *markdownRenderer) AddOptions(...renderer.Option) {}
+
+func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
+	m.segs = nil
 	var nextSeg RichTextSegment
-	nodes.Walk(func(node *blackfriday.Node, entering bool) blackfriday.WalkStatus {
+	return ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
-			if text, ok := nextSeg.(*TextSegment); ok && text.Style == RichTextStyleInline {
+			if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
 				text.Style = RichTextStyleParagraph
 			}
 			nextSeg = &TextSegment{
 				Style: RichTextStyleInline,
 			}
-
-			return blackfriday.GoToNext
+			return ast.WalkContinue, nil
 		}
 
-		switch node.Type {
-		case blackfriday.Heading:
-			switch node.HeadingData.Level {
+		switch n.Kind().String() {
+		case "Heading":
+			switch n.(*ast.Heading).Level {
 			case 1:
 				nextSeg = &TextSegment{
 					Style: RichTextStyleHeading,
-					Text:  string(node.Literal),
+					Text:  string(n.Text(source)),
 				}
 			case 2:
 				nextSeg = &TextSegment{
 					Style: RichTextStyleSubHeading,
-					Text:  string(node.Literal),
+					Text:  string(n.Text(source)),
 				}
 			}
-		case blackfriday.HorizontalRule:
-			segs = append(segs, &SeparatorSegment{})
-		case blackfriday.Link:
-			link, _ := url.Parse(string(node.LinkData.Destination))
-			nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, strings.TrimSpace(string(node.LinkData.Title)), link}
-		case blackfriday.Paragraph:
+		case "HorizontalRule", "ThematicBreak":
+			m.segs = append(m.segs, &SeparatorSegment{})
+		case "Link":
+			link, _ := url.Parse(string(n.(*ast.Link).Destination))
+			nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, strings.TrimSpace(string(n.Text(source))), link}
+		case "Paragraph":
 			nextSeg = &TextSegment{
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
-				Text:  string(node.Literal),
+				Text:  string(n.Text(source)),
 			}
-		case blackfriday.Code:
-			segs = append(segs, &TextSegment{
+		case "CodeSpan":
+			nextSeg = &TextSegment{
 				Style: RichTextStyleCodeInline,
-				Text:  string(node.Literal),
-			})
-			nextSeg = &TextSegment{
-				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
-				Text:  string(node.Literal),
+				Text:  string(n.Text(source)),
 			}
-		case blackfriday.Emph:
+		case "CodeBlock", "FencedCodeBlock":
+			var data []byte
+			lines := n.Lines()
+			for i := 0; i < lines.Len(); i++ {
+				line := lines.At(i)
+				data = append(data, line.Value(source)...)
+			}
+			if data[len(data)-1] == '\n' {
+				data = data[:len(data)-1]
+			}
+			m.segs = append(m.segs, &TextSegment{
+				Style: RichTextStyleCodeBlock,
+				Text:  string(data),
+			})
+		case "Emph":
 			nextSeg = &TextSegment{
 				Style: RichTextStyleEmphasis,
-				Text:  string(node.Literal),
+				Text:  string(n.Text(source)),
 			}
-		case blackfriday.Strong:
+		case "Strong":
 			nextSeg = &TextSegment{
 				Style: RichTextStyleStrong,
-				Text:  string(node.Literal),
+				Text:  string(n.Text(source)),
 			}
-		case blackfriday.Text:
-			trimmed := string(node.Literal)
+		case "Text":
+			trimmed := string(n.Text(source))
 			trimmed = strings.ReplaceAll(trimmed, "\n", " ") // newline inside paragraph is not newline
 			if trimmed == "" {
-				return blackfriday.GoToNext
+				return ast.WalkContinue, nil
 			}
 			if text, ok := nextSeg.(*TextSegment); ok {
 				text.Text = trimmed
@@ -88,10 +114,9 @@ func parseMarkdown(content string) []RichTextSegment {
 			if link, ok := nextSeg.(*HyperlinkSegment); ok {
 				link.Text = trimmed
 			}
-			segs = append(segs, nextSeg)
+			m.segs = append(m.segs, nextSeg)
 		}
 
-		return blackfriday.GoToNext
+		return ast.WalkContinue, nil
 	})
-	return segs
 }

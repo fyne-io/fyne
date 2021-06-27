@@ -16,6 +16,15 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 	} else {
 		t.Error("Segment should be Text")
 	}
+
+	r = NewRichTextFromMarkdown("``` go\ncode\nblock\n```")
+	assert.Equal(t, 1, len(r.Segments))
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "code\nblock", text.Text)
+		assert.Equal(t, RichTextStyleCodeBlock, text.Style)
+	} else {
+		t.Error("Segment should be Text")
+	}
 }
 
 func TestRichTextMarkdown_Heading(t *testing.T) {
@@ -51,9 +60,15 @@ func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 func TestRichTextMarkdown_Lines(t *testing.T) {
 	r := NewRichTextFromMarkdown("line1\nline2\n") // a single newline is not a new paragraph
 
-	assert.Equal(t, 1, len(r.Segments))
+	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "line1 line2", text.Text)
+		assert.Equal(t, "line1", text.Text)
+		assert.True(t, text.Inline())
+	} else {
+		t.Error("Segment should be Text")
+	}
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "line2", text.Text)
 	} else {
 		t.Error("Segment should be Text")
 	}
@@ -63,6 +78,7 @@ func TestRichTextMarkdown_Lines(t *testing.T) {
 	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "line1", text.Text)
+		assert.False(t, text.Inline())
 	} else {
 		t.Error("Segment should be Text")
 	}
