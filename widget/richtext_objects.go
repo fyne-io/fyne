@@ -10,6 +10,15 @@ import (
 )
 
 var (
+	// RichTextStyleBlockquote represents a quote presented in an indented block.
+	//
+	// Since: 2.1
+	RichTextStyleBlockquote = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Italic: true},
+	}
 	// RichTextStyleCodeBlock represents a code blog segment.
 	//
 	// Since: 2.1

@@ -38,13 +38,18 @@ func (m *markdownRenderer) AddOptions(...renderer.Option) {}
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
 	m.segs = nil
 	var nextSeg RichTextSegment
+	blockquote := false
 	return ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
-			if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
-				text.Style = RichTextStyleParagraph
-			}
-			nextSeg = &TextSegment{
-				Style: RichTextStyleInline,
+			if n.Kind().String() == "Blockquote" {
+				blockquote = false
+			} else if !blockquote {
+				if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
+					text.Style = RichTextStyleParagraph
+				}
+				nextSeg = &TextSegment{
+					Style: RichTextStyleInline,
+				}
 			}
 			return ast.WalkContinue, nil
 		}
@@ -72,6 +77,9 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			nextSeg = &TextSegment{
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
 				Text:  string(n.Text(source)),
+			}
+			if blockquote {
+				nextSeg.(*TextSegment).Style = RichTextStyleBlockquote
 			}
 		case "CodeSpan":
 			nextSeg = &TextSegment{
@@ -115,6 +123,11 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 				link.Text = trimmed
 			}
 			m.segs = append(m.segs, nextSeg)
+		case "Blockquote":
+			blockquote = true
+		case "Document":
+		default:
+			fyne.LogError("Unrecognised MarkDown type "+n.Kind().String(), nil)
 		}
 
 		return ast.WalkContinue, nil

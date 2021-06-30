@@ -6,6 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestRichTextMarkdown_Blockquote(t *testing.T) {
+	r := NewRichTextFromMarkdown("p1\n\n> quote\n\np2")
+
+	assert.Equal(t, 3, len(r.Segments))
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "quote", text.Text)
+		assert.Equal(t, RichTextStyleBlockquote, text.Style)
+	} else {
+		t.Error("Segment should be Text")
+	}
+}
+
 func TestRichTextMarkdown_Code(t *testing.T) {
 	r := NewRichTextFromMarkdown("a `code` inline")
 

@@ -345,7 +345,11 @@ func (t *RichText) updateRowBounds() {
 		textStyle := textSeg.Style.TextStyle
 		textSize := textSeg.size()
 
-		retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth, maxWidth, func(text []rune) float32 {
+		leftPad := float32(0)
+		if textSeg.Style == RichTextStyleBlockquote {
+			leftPad = theme.Padding() * 4
+		}
+		retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
 			return fyne.MeasureText(string(text), textSize, textStyle).Width
 		})
 		if currentBound != nil {
@@ -427,12 +431,16 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 
+			leftPad := float32(0)
 			if text, ok := bound.segments[0].(*TextSegment); ok {
 				rowAlign = text.Style.Alignment
+				if text.Style == RichTextStyleBlockquote {
+					leftPad = theme.Padding() * 4
+				}
 			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
 				rowAlign = link.Alignment
 			}
-			yPos += r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
+			yPos += r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 			rowItems = nil
 		}
 
