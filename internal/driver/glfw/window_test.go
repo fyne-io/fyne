@@ -599,6 +599,135 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.NotNil(t, dh.popMouseOutEvent())
 }
 
+func TestWindow_HoverableUnderDraggable(t *testing.T) {
+	w := createWindow("Test").(*window)
+	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
+	h.SetMinSize(fyne.NewSize(50, 50))
+	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d.SetMinSize(fyne.NewSize(30, 30))
+	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
+	dh.SetMinSize(fyne.NewSize(10, 10))
+
+	c := container.NewWithoutLayout(h, d, dh)
+	h.Resize(fyne.NewSize(50, 50))
+	h.Move(fyne.NewPos(0, 0))
+	d.Resize(fyne.NewSize(30, 30))
+	d.Move(fyne.NewPos(10, 10))
+	dh.Resize(fyne.NewSize(10, 10))
+	dh.Move(fyne.NewPos(20, 20))
+
+	w.SetContent(c)
+
+	repaintWindow(w)
+
+	// 1. move over to hoverableObject and verify
+	//  - mouseIn received by hoverableObject
+	//  - no events by draggableObject
+	//  - no events by draggableHoverableObject
+	w.mouseMoved(w.viewport, 5, 5)
+	w.WaitForEvents()
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 1),
+		AbsolutePosition: fyne.NewPos(5, 5)}}, h.popMouseInEvent())
+	assert.Nil(t, h.popMouseMovedEvent())
+	assert.Nil(t, h.popMouseOutEvent())
+	assert.Nil(t, d.popDragEvent())
+	assert.Nil(t, d.popDragEndEvent())
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+	assert.Nil(t, dh.popDragEvent())
+	assert.Nil(t, dh.popDragEndEvent())
+
+	// 2. move over to draggableObject and verify
+	//  - mouseMoved by hoverableObject
+	//  - no events by draggableObject
+	//  - no events by draggableHoverableObject
+	w.mouseMoved(w.viewport, 15, 15)
+	w.WaitForEvents()
+	assert.Nil(t, h.popMouseInEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(11, 11),
+		AbsolutePosition: fyne.NewPos(15, 15)}}, h.popMouseMovedEvent())
+	assert.Nil(t, h.popMouseOutEvent())
+	assert.Nil(t, h.popMouseOutEvent())
+	assert.Nil(t, d.popDragEvent())
+	assert.Nil(t, d.popDragEndEvent())
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+	assert.Nil(t, dh.popDragEvent())
+	assert.Nil(t, dh.popDragEndEvent())
+
+	// 3. move to draggableHoverableObject and verify
+	// - mouseOut received by hoverableObject
+	// - no events by draggableObject
+	// - mouseIn by draggableHoverableObject
+	w.mouseMoved(w.viewport, 25, 25)
+	w.WaitForEvents()
+	assert.Nil(t, h.popMouseInEvent())
+	assert.Nil(t, h.popMouseMovedEvent())
+	assert.NotNil(t, h.popMouseOutEvent())
+	assert.Nil(t, d.popDragEvent())
+	assert.Nil(t, d.popDragEndEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 1),
+		AbsolutePosition: fyne.NewPos(25, 25)}}, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+	assert.Nil(t, dh.popDragEvent())
+	assert.Nil(t, dh.popDragEndEvent())
+
+	// 4. move over to draggableObject and verify
+	// - mouseIn received by hoverableObject
+	// - no events by draggableObject
+	// - mouseOut by draggableHoverableObject
+	w.mouseMoved(w.viewport, 35, 35)
+	w.WaitForEvents()
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(31, 31),
+		AbsolutePosition: fyne.NewPos(35, 35)}}, h.popMouseInEvent())
+	assert.Nil(t, h.popMouseMovedEvent())
+	assert.Nil(t, h.popMouseOutEvent())
+	assert.Nil(t, d.popDragEvent())
+	assert.Nil(t, d.popDragEndEvent())
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.NotNil(t, dh.popMouseOutEvent())
+	assert.Nil(t, dh.popDragEvent())
+	assert.Nil(t, dh.popDragEndEvent())
+
+	// 5. move to  hoverableObject and verify
+	//  - mouseMoved by hoverableObject
+	//  - no events by draggableObject
+	//  - no events by draggableHoverableObject
+	w.mouseMoved(w.viewport, 45, 45)
+	w.WaitForEvents()
+	assert.Nil(t, h.popMouseInEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(41, 41),
+		AbsolutePosition: fyne.NewPos(45, 45)}}, h.popMouseMovedEvent())
+	assert.Nil(t, d.popDragEvent())
+	assert.Nil(t, d.popDragEndEvent())
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+	assert.Nil(t, dh.popDragEvent())
+	assert.Nil(t, dh.popDragEndEvent())
+
+	// 6. move ouside hoverableObject and verify
+	//  - mouseOut by hoverableObject
+	//  - no events by draggableObject
+	//  - no events by draggableHoverableObject
+	w.mouseMoved(w.viewport, 55, 55)
+	w.WaitForEvents()
+	assert.Nil(t, h.popMouseInEvent())
+	assert.Nil(t, h.popMouseMovedEvent())
+	assert.NotNil(t, h.popMouseOutEvent())
+	assert.Nil(t, d.popDragEvent())
+	assert.Nil(t, d.popDragEndEvent())
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+	assert.Nil(t, dh.popDragEvent())
+	assert.Nil(t, dh.popDragEndEvent())
+}
+
 func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 	w := createWindow("Test").(*window)
 	do := &draggableTappableObject{Rectangle: canvas.NewRectangle(color.White)}
