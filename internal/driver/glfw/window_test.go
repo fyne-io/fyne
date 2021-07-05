@@ -602,11 +602,8 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	w := createWindow("Test").(*window)
 	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
-	h.SetMinSize(fyne.NewSize(50, 50))
 	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
-	d.SetMinSize(fyne.NewSize(30, 30))
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
-	dh.SetMinSize(fyne.NewSize(10, 10))
 
 	c := container.NewWithoutLayout(h, d, dh)
 	h.Resize(fyne.NewSize(50, 50))
