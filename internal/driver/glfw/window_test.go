@@ -645,7 +645,6 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(11, 11),
 		AbsolutePosition: fyne.NewPos(15, 15)}}, h.popMouseMovedEvent())
 	assert.Nil(t, h.popMouseOutEvent())
-	assert.Nil(t, h.popMouseOutEvent())
 	assert.Nil(t, d.popDragEvent())
 	assert.Nil(t, d.popDragEndEvent())
 	assert.Nil(t, dh.popMouseInEvent())
