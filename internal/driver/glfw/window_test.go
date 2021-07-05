@@ -781,7 +781,7 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	assert.Nil(t, dh.popDragEndEvent())
 }
 
-func TestWindow_HoverableUnderDraggable_DargAcross(t *testing.T) {
+func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 	w := createWindow("Test").(*window)
 	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
@@ -893,7 +893,7 @@ func TestWindow_HoverableUnderDraggable_DargAcross(t *testing.T) {
 	assert.Nil(t, dh.popDragEndEvent())
 }
 
-func TestWindow_HoverableUnderDraggable_Darg_draggableHoverable(t *testing.T) {
+func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	w := createWindow("Test").(*window)
 	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
