@@ -34,9 +34,13 @@ const char* test_NSMenuItem_title(const void*);
 */
 import "C"
 
-var callbacks []func()
-var menuEnableCallbacks []func() bool
-var menuCheckedCallbacks []func() bool
+type menuCallbacks struct {
+	action  func()
+	enabled func() bool
+	checked func() bool
+}
+
+var callbacks []*menuCallbacks
 var ecb func(string)
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
@@ -124,16 +128,18 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 	if !item.IsSeparator {
-		callbacks = append(callbacks, func() {
-			if item.Action != nil {
-				w.QueueEvent(item.Action)
-			}
-		})
-		menuEnableCallbacks = append(menuEnableCallbacks, func() bool {
-			return !item.Disabled
-		})
-		menuCheckedCallbacks = append(menuCheckedCallbacks, func() bool {
-			return item.HasCheck
+		callbacks = append(callbacks, &menuCallbacks{
+			action: func() {
+				if item.Action != nil {
+					w.QueueEvent(item.Action)
+				}
+			},
+			enabled: func() bool {
+				return !item.Disabled
+			},
+			checked: func() bool {
+				return item.HasCheck
+			},
 		})
 		nextItemID++
 	}
@@ -150,24 +156,22 @@ func hasNativeMenu() bool {
 
 //export menuCallback
 func menuCallback(id int) {
-	callbacks[id]()
+	callbacks[id].action()
 }
 
 //export menuEnabled
 func menuEnabled(id int) bool {
-	return menuEnableCallbacks[id]()
+	return callbacks[id].enabled()
 }
 
 //export menuChecked
 func menuChecked(id int) bool {
-	return menuCheckedCallbacks[id]()
+	return callbacks[id].checked()
 }
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	nextItemID := 0
-	callbacks = []func(){}
-	menuEnableCallbacks = []func() bool{}
-	menuCheckedCallbacks = []func() bool{}
+	callbacks = []*menuCallbacks{}
 	var helpMenu *fyne.Menu
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]
