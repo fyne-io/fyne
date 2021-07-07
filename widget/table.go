@@ -354,7 +354,7 @@ func (t *tableRenderer) moveIndicators() {
 	}
 
 	for i := divs; i < len(t.dividers); i++ {
-		t.dividers[divs].Hide()
+		t.dividers[i].Hide()
 	}
 	canvas.Refresh(t.t)
 }

@@ -31,12 +31,6 @@
 			<widget pos="4,49" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
-			<widget size="0x0" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="0x0"/>
-			</widget>
-			<widget size="0x0" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="0x0"/>
-			</widget>
 		</widget>
 	</content>
 </canvas>
