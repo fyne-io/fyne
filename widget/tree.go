@@ -30,6 +30,7 @@ type Tree struct {
 	OnSelected     func(uid TreeNodeID)                                      // Called when the Node with the given TreeNodeID is selected.
 	OnUnselected   func(uid TreeNodeID)                                      // Called when the Node with the given TreeNodeID is unselected.
 	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given TreeNodeID
+	OnOpenPopup    func(uid TreeNodeID) *PopUpMenu                           // Return a PopUpMenu for the given Node TreeNodeID or nil
 
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size
@@ -590,9 +591,11 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	return
 }
 
+// Declare conformity with Widget interface.
 var _ desktop.Hoverable = (*treeNode)(nil)
 var _ fyne.CanvasObject = (*treeNode)(nil)
 var _ fyne.Tappable = (*treeNode)(nil)
+var _ fyne.SecondaryTappable = (*treeNode)(nil)
 
 type treeNode struct {
 	BaseWidget
@@ -641,6 +644,15 @@ func (n *treeNode) MouseOut() {
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.Select(n.uid)
+}
+
+func (n *treeNode) TappedSecondary(p *fyne.PointEvent) {
+	if n.tree.OnOpenPopup != nil {
+		n.tree.Select(n.uid)
+		if m := n.tree.OnOpenPopup(n.uid); m != nil {
+			m.ShowAtPosition(p.AbsolutePosition)
+		}
+	}
 }
 
 func (n *treeNode) partialRefresh() {

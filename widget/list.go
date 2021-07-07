@@ -32,6 +32,7 @@ type List struct {
 	UpdateItem   func(id ListItemID, item fyne.CanvasObject)
 	OnSelected   func(id ListItemID)
 	OnUnselected func(id ListItemID)
+	OnOpenPopup  func(id ListItemID) *PopUpMenu // Return a PopUpMenu for the given Node ListItemID or nil
 
 	scroller      *widget.Scroll
 	selected      []ListItemID
@@ -241,11 +242,13 @@ func (l *listRenderer) Refresh() {
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
+var _ fyne.SecondaryTappable = (*listItem)(nil)
 
 type listItem struct {
 	BaseWidget
 
 	onTapped          func()
+	onSecondaryTapped func(*fyne.PointEvent)
 	background        *canvas.Rectangle
 	child             fyne.CanvasObject
 	hovered, selected bool
@@ -301,6 +304,14 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.selected = true
 		li.Refresh()
 		li.onTapped()
+	}
+}
+
+func (li *listItem) TappedSecondary(p *fyne.PointEvent) {
+	if li.onSecondaryTapped != nil {
+		li.selected = true
+		li.Refresh()
+		li.onSecondaryTapped(p)
 	}
 }
 
@@ -409,6 +420,13 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 	}
 	li.onTapped = func() {
 		l.list.Select(id)
+	}
+	if onOpenPopup := l.list.OnOpenPopup; onOpenPopup != nil {
+		li.onSecondaryTapped = func(pe *fyne.PointEvent) {
+			if m := onOpenPopup(id); m != nil {
+				m.ShowAtPosition(pe.AbsolutePosition)
+			}
+		}
 	}
 }
 

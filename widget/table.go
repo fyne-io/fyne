@@ -32,6 +32,7 @@ type Table struct {
 	UpdateCell   func(id TableCellID, template fyne.CanvasObject)
 	OnSelected   func(id TableCellID)
 	OnUnselected func(id TableCellID)
+	OnOpenPopup  func(uid TableCellID) *PopUpMenu // Return a PopUpMenu for the given cell TableCellID or nil
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
@@ -407,6 +408,9 @@ var _ fyne.Tappable = (*tableCells)(nil)
 // Declare conformity with Widget interface.
 var _ fyne.Widget = (*tableCells)(nil)
 
+// Declare conformity with Widget interface.
+var _ fyne.SecondaryTappable = (*tableCells)(nil)
+
 type tableCells struct {
 	BaseWidget
 	t        *Table
@@ -453,6 +457,20 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	col := c.columnAt(e.Position)
 	row := int(e.Position.Y / (c.cellSize.Height + theme.SeparatorThicknessSize()))
 	c.t.Select(TableCellID{row, col})
+}
+
+func (c *tableCells) TappedSecondary(e *fyne.PointEvent) {
+	if c.t.OnOpenPopup != nil {
+		if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
+			return
+		}
+		col := c.columnAt(e.Position)
+		row := int(e.Position.Y / (c.cellSize.Height + theme.SeparatorThicknessSize()))
+		if m := c.t.OnOpenPopup(TableCellID{row, col}); m != nil {
+			c.t.Select(TableCellID{row, col})
+			m.ShowAtPosition(e.AbsolutePosition)
+		}
+	}
 }
 
 func (c *tableCells) columnAt(pos fyne.Position) int {
