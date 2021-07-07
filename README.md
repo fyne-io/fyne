@@ -173,4 +173,4 @@ These are optional applications but can help to create a more complete desktop e
 
 ## FyneDesk (Linux / BSD)
 
-To go all the way with Fyne on your desktop / laptop computer you could install [https://github.com/fyne-io/fynedesk](FyneDesk) as well :)
+To go all the way with Fyne on your desktop / laptop computer you could install [FyneDesk](https://github.com/fyne-io/fynedesk) as well :)
