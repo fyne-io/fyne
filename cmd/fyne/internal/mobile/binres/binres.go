@@ -211,11 +211,29 @@ type ltoken struct {
 // UnmarshalXML deserializes an AndroidManifest.xml document returning type XML
 // containing decoded resources.
 func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
+	q, err := readTokens(r, withIcon)
+	if err != nil {
+		return nil, err
+	}
+
+	tbl, err := OpenTable()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context{new(XML), new(Pool), tbl}
+	err = ctx.buildXML(q)
+	if err != nil {
+		return nil, err
+	}
+	return ctx.bx, nil
+}
+
+func readTokens(r io.Reader, withIcon bool) ([]ltoken, error) {
 	lr := &lineReader{r: r}
 	dec := xml.NewDecoder(lr)
 
 	var q []ltoken
-
 	for {
 		line := lr.line(dec.InputOffset())
 		tkn, err := dec.Token()
@@ -305,27 +323,18 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 			q = append(q, ltoken{tkn, line})
 		}
 	}
-
-	return buildXML(q)
+	return q, nil
 }
 
 // buildXML deserializes a queue of tokens into a binary XML resource
-func buildXML(q []ltoken) (*XML, error) {
-	// temporary pool to resolve real poolref later
-	pool := new(Pool)
-
-	tbl, err := OpenTable()
-	if err != nil {
-		return nil, err
-	}
-
-	bx := new(XML)
+func (ctx *context) buildXML(q []ltoken) error {
+	bx := ctx.bx
 	for _, ltkn := range q {
 		tkn, line := ltkn.Token, ltkn.line
 
-		err := handleTokens(tkn, line, pool, bx, tbl)
+		err := ctx.attachToken(tkn, line)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -344,8 +353,8 @@ func buildXML(q []ltoken) (*XML, error) {
 			if attr.NS == NoEntry {
 				continue
 			}
-			if attr.NS.Resolve(pool) == androidSchema {
-				bx.Pool.strings = append(bx.Pool.strings, attr.Name.Resolve(pool))
+			if attr.NS.Resolve(ctx.pool) == androidSchema {
+				bx.Pool.strings = append(bx.Pool.strings, attr.Name.Resolve(ctx.pool))
 			}
 		}
 		for _, child := range el.Children {
@@ -369,25 +378,25 @@ func buildXML(q []ltoken) (*XML, error) {
 	brecurse = func(el *Element) {
 		for _, attr := range el.attrs {
 			if attr.NS == NoEntry {
-				bx.Pool.strings = append(bx.Pool.strings, attr.Name.Resolve(pool))
+				bx.Pool.strings = append(bx.Pool.strings, attr.Name.Resolve(ctx.pool))
 			}
 		}
 
-		bx.Pool.strings = append(bx.Pool.strings, el.Name.Resolve(pool))
+		bx.Pool.strings = append(bx.Pool.strings, el.Name.Resolve(ctx.pool))
 
 		for _, attr := range el.attrs {
 			if attr.RawValue != NoEntry {
-				bx.Pool.strings = append(bx.Pool.strings, attr.RawValue.Resolve(pool))
+				bx.Pool.strings = append(bx.Pool.strings, attr.RawValue.Resolve(ctx.pool))
 			} else if attr.NS == NoEntry {
 				bx.Pool.strings = append(bx.Pool.strings, fmt.Sprintf("%+v", attr.TypedValue.Value))
 			}
 		}
 
 		if el.head != nil {
-			bx.Pool.strings = append(bx.Pool.strings, el.head.RawData.Resolve(pool))
+			bx.Pool.strings = append(bx.Pool.strings, el.head.RawData.Resolve(ctx.pool))
 		}
 		if el.tail != nil {
-			bx.Pool.strings = append(bx.Pool.strings, el.tail.RawData.Resolve(pool))
+			bx.Pool.strings = append(bx.Pool.strings, el.tail.RawData.Resolve(ctx.pool))
 		}
 
 		for _, child := range el.Children {
@@ -409,14 +418,14 @@ func buildXML(q []ltoken) (*XML, error) {
 	// before ever reaching this point.
 	bx.Map = new(Map)
 	for _, s := range bx.Pool.strings {
-		ref, err := tbl.RefByName("attr/" + s)
+		ref, err := ctx.tbl.RefByName("attr/" + s)
 		if err != nil {
 			break // break after first non-ref as all strings after are also non-refs.
 		}
 		bx.Map.rs = append(bx.Map.rs, ref)
 	}
 
-	resolveElements(bx.Children, pool, bx.Pool)
+	resolveElements(bx.Children, ctx.pool, bx.Pool)
 	for i, s := range bx.Pool.strings {
 		switch s {
 		case androidSchema:
@@ -428,7 +437,7 @@ func buildXML(q []ltoken) (*XML, error) {
 		}
 	}
 
-	return bx, nil
+	return nil
 }
 
 func resolveElements(elms []*Element, pool, bxPool *Pool) {
@@ -476,8 +485,16 @@ func resolveElements(elms []*Element, pool, bxPool *Pool) {
 	}
 }
 
-// handleTokens encodes tkn, attaching it to the binary xml
-func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) error {
+type context struct {
+	bx   *XML
+	pool *Pool // temporary pool to resolve real poolref later
+	tbl  *Table
+}
+
+// attachToken encodes tkn, attaching it to the binary xml
+func (ctx context) attachToken(tkn xml.Token, line int) error {
+	bx, pool := ctx.bx, ctx.pool
+
 	switch tkn := tkn.(type) {
 	case xml.StartElement:
 		el := &Element{
@@ -499,7 +516,7 @@ func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) erro
 		}
 		bx.stack = append(bx.stack, el)
 
-		err := addAttributes(tkn, bx, line, pool, el, tbl)
+		err := ctx.addAttributes(el, tkn.Attr, line)
 		if err != nil {
 			return err
 		}
@@ -554,73 +571,103 @@ func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) erro
 	return nil
 }
 
-// addAttributes encodes the attributes of tkn and adds them to el.
+// addAttributes deserializes the given xml attributes and adds them to el.
 // Any attributes which were not already present in Pool are added to it.
-func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Element, tbl *Table) error {
-	for _, attr := range tkn.Attr {
-		if (attr.Name.Space == "xmlns" && attr.Name.Local == "tools") || attr.Name.Space == toolsSchema {
-			continue // TODO can tbl be queried for schemas to determine validity instead?
+// This method has a specific use case, which is adding the attributes of the
+// xml.StartElement when deserializing a manifest file.
+// Furthermore, deserializing is only intended to be used in tests, to verify
+// that the data was serialized correcly in the first place.
+// This is not a general-purpose method.
+func (ctx *context) addAttributes(start *Element, attrs []xml.Attr, line int) error {
+	for _, attr := range attrs {
+		if (attr.Name.Space == "xmlns" && attr.Name.Local == "tools") ||
+			attr.Name.Space == toolsSchema {
+			// TODO can tbl be queried for schemas to determine validity instead?
+			continue
 		}
 
 		if attr.Name.Space == "xmlns" && attr.Name.Local == "android" {
-			if bx.Namespace != nil {
-				return fmt.Errorf("multiple declarations of xmlns:android encountered")
-			}
-			bx.Namespace = &Namespace{
-				NodeHeader: NodeHeader{
-					LineNumber: uint32(line),
-					Comment:    NoEntry,
-				},
-				prefix: 0,
-				uri:    0,
+			if err := ctx.bx.setNamespace(line); err != nil {
+				return err
 			}
 			continue
 		}
 
-		nattr := &Attribute{
-			NS:       pool.ref(attr.Name.Space),
-			Name:     pool.ref(attr.Name.Local),
-			RawValue: NoEntry,
+		nattr, err := ctx.deserialize(attr)
+		if err != nil {
+			return err
 		}
-		el.attrs = append(el.attrs, nattr)
-
-		if attr.Name.Space == "" {
-			nattr.NS = NoEntry
-			// TODO it's unclear how to query these
-			switch attr.Name.Local {
-			case "platformBuildVersionCode":
-				nattr.TypedValue.Type = DataIntDec
-				i, err := strconv.Atoi(attr.Value)
-				if err != nil {
-					return err
-				}
-				nattr.TypedValue.Value = uint32(i)
-			default: // "package", "platformBuildVersionName", and any invalid
-				nattr.RawValue = pool.ref(attr.Value)
-				nattr.TypedValue.Type = DataString
-			}
-		} else {
-			err := addAttributeNamespace(attr, nattr, tbl, pool)
-			if err != nil {
-				return err
-			}
-		}
+		start.attrs = append(start.attrs, nattr)
 	}
 	return nil
 }
 
-// addAttributeNamespace encodes attr based on its namespace
-// The encoded value is stored in nattr.
-// If the value was not already present in pool, it is added.
-func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Pool) error {
+func (bx *XML) setNamespace(line int) error {
+	if bx.Namespace != nil {
+		return fmt.Errorf("multiple declarations of xmlns:android encountered")
+	}
+	bx.Namespace = &Namespace{
+		NodeHeader: NodeHeader{
+			LineNumber: uint32(line),
+			Comment:    NoEntry,
+		},
+		prefix: 0,
+		uri:    0,
+	}
+	return nil
+}
+
+// deserializes the given xml attribute.
+// The name and value of the attribute are stored in the given pool.
+// If the attribute has a namespace then the given table is used
+// to get the type specification and data type for the attribute.
+func (ctx context) deserialize(attr xml.Attr) (*Attribute, error) {
+	if attr.Name.Space != "" {
+		return ctx.deserializeWithNamespace(attr)
+	}
+
+	nattr := &Attribute{
+		// TODO it's unclear how to query these
+		NS:       NoEntry,
+		Name:     ctx.pool.ref(attr.Name.Local),
+		RawValue: NoEntry,
+	}
+
+	switch attr.Name.Local {
+	case "platformBuildVersionCode":
+		nattr.TypedValue.Type = DataIntDec
+		i, err := strconv.Atoi(attr.Value)
+		if err != nil {
+			return nil, err
+		}
+		nattr.TypedValue.Value = uint32(i)
+	default: // "package", "platformBuildVersionName", and any invalid
+		nattr.RawValue = ctx.pool.ref(attr.Value)
+		nattr.TypedValue.Type = DataString
+	}
+	return nattr, nil
+}
+
+// deserializeWithNamespace an xml attribute that has a namespace.
+// The namespace is used to identify the type specification and datatype for
+// the attribute's value.
+func (ctx *context) deserializeWithNamespace(attr xml.Attr) (*Attribute, error) {
+	pool, tbl := ctx.pool, ctx.tbl
+
+	nattr := &Attribute{
+		NS:       pool.ref(attr.Name.Space),
+		Name:     pool.ref(attr.Name.Local),
+		RawValue: NoEntry,
+	}
+
 	// get type spec and value data type
 	ref, err := tbl.RefByName("attr/" + attr.Name.Local)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	nt, err := ref.Resolve(tbl)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(nt.values) == 0 {
 		panic("encountered empty values slice")
@@ -631,54 +678,22 @@ func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Po
 		if val.data.Type != DataIntDec {
 			panic("TODO only know how to handle DataIntDec type here")
 		}
-		abort, err := addAttributeDataIntDecScalar(val, nattr, pool, attr, tbl)
+		abort, err := nattr.addValue(ctx, attr, val)
 		if abort {
-			return err
+			return nattr, err
 		}
 	} else {
-		// 0x01000000 is an unknown ref that doesn't point to anything, typically
-		// located at the start of entry value lists, peek at last value to determine type.
-		t := nt.values[len(nt.values)-1].data.Type
-		switch t {
-		case DataIntDec:
-			for _, val := range nt.values {
-				if val.name == 0x01000000 {
-					continue
-				}
-				nr, err := val.name.Resolve(tbl)
-				if err != nil {
-					return err
-				}
-				if attr.Value == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
-					nattr.TypedValue = *val.data
-					break
-				}
-			}
-		case DataIntHex:
-			nattr.TypedValue.Type = t
-			for _, x := range strings.Split(attr.Value, "|") {
-				for _, val := range nt.values {
-					if val.name == 0x01000000 {
-						continue
-					}
-					nr, err := val.name.Resolve(tbl)
-					if err != nil {
-						return err
-					}
-					if x == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
-						nattr.TypedValue.Value |= val.data.Value
-						break
-					}
-				}
-			}
-		default:
-			return fmt.Errorf("unhandled data type for configuration %0#2x: %s", uint8(t), t)
+		err := nattr.addValues(ctx, attr, nt)
+		if err != nil {
+			return nil, err
 		}
 	}
-	return nil
+	return nattr, nil
 }
 
-func addAttributeDataIntDecScalar(val *Value, nattr *Attribute, pool *Pool, attr xml.Attr, tbl *Table) (abort bool, err error) {
+func (nattr *Attribute) addValue(ctx *context, attr xml.Attr, val *Value) (abort bool, err error) {
+	pool, tbl := ctx.pool, ctx.tbl
+
 	switch t := DataType(val.data.Value); t {
 	case DataString, DataAttribute, DataType(0x3e):
 		// TODO identify 0x3e, in bootstrap.xml this is the native lib name
@@ -716,6 +731,9 @@ func addAttributeDataIntDecScalar(val *Value, nattr *Attribute, pool *Pool, attr
 				// TODO resource table should generate ids as required.
 				const firstDrawableID = 0x7f020000
 				nattr.TypedValue.Value = firstDrawableID
+
+				// TODO: Understand why this is a special case.
+				// (We abort, but return a nil error)
 				return true, nil
 			}
 			return true, err
@@ -725,6 +743,50 @@ func addAttributeDataIntDecScalar(val *Value, nattr *Attribute, pool *Pool, attr
 		return true, fmt.Errorf("unhandled data type %0#2x: %s", uint8(t), t)
 	}
 	return false, nil
+}
+
+func (nattr *Attribute) addValues(ctx *context, attr xml.Attr, nt *Entry) error {
+	tbl := ctx.tbl
+
+	// 0x01000000 is an unknown ref that doesn't point to anything, typically
+	// located at the start of entry value lists, peek at last value to determine type.
+	t := nt.values[len(nt.values)-1].data.Type
+	switch t {
+	case DataIntDec:
+		for _, val := range nt.values {
+			if val.name == 0x01000000 {
+				continue
+			}
+			nr, err := val.name.Resolve(tbl)
+			if err != nil {
+				return err
+			}
+			if attr.Value == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
+				nattr.TypedValue = *val.data
+				break
+			}
+		}
+	case DataIntHex:
+		nattr.TypedValue.Type = t
+		for _, x := range strings.Split(attr.Value, "|") {
+			for _, val := range nt.values {
+				if val.name == 0x01000000 {
+					continue
+				}
+				nr, err := val.name.Resolve(tbl)
+				if err != nil {
+					return err
+				}
+				if x == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
+					nattr.TypedValue.Value |= val.data.Value
+					break
+				}
+			}
+		}
+	default:
+		return fmt.Errorf("unhandled data type for configuration %0#2x: %s", uint8(t), t)
+	}
+	return nil
 }
 
 // UnmarshalBinary decodes all resource chunks in buf returning any error encountered.
