@@ -49,7 +49,7 @@ func (m *preferencesMap) ensurePreferencesAttached(p fyne.Preferences) *preferen
 		return binds.(*preferenceBindings)
 	}
 
-	p.AddChangeListener(func() { m.preferencesChanged(p) })
+	p.AddChangeListener(func() { m.preferencesChanged(fyne.CurrentApp().Preferences()) })
 	return binds.(*preferenceBindings)
 }
 

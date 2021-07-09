@@ -26,6 +26,10 @@ func (p *InMemoryPreferences) AddChangeListener(listener func()) {
 	p.changeListeners = append(p.changeListeners, listener)
 }
 
+func (p *InMemoryPreferences) ChangeListeners() []func() {
+	return p.changeListeners
+}
+
 // ReadValues provides read access to the underlying value map - for internal use only...
 // You should not retain a reference to the map nor write to the values in the callback function
 func (p *InMemoryPreferences) ReadValues(fn func(map[string]interface{})) {

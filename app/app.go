@@ -78,10 +78,20 @@ func (a *fyneApp) Run() {
 func (a *fyneApp) SetCloudProvider(p fyne.CloudProvider) {
 	a.cloud = p
 
+	var listeners []func()
+	if a.prefs != nil { // we need to restore these on the new instance
+		listeners = a.prefs.ChangeListeners()
+	}
+
 	if pp, ok := p.(fyne.CloudProviderPreferences); ok {
 		a.prefs = pp.CloudPreferences(a)
 	} else {
-		a.loadDefaultPreferences()
+		a.prefs = a.newDefaultPreferences()
+	}
+
+	for _, l := range listeners {
+		a.prefs.AddChangeListener(l)
+		l() // assume that preferences have changed because we replaced the provider
 	}
 }
 
@@ -119,11 +129,12 @@ func (a *fyneApp) Lifecycle() fyne.Lifecycle {
 	return a.lifecycle
 }
 
-func (a *fyneApp) loadDefaultPreferences() {
-	a.prefs = newPreferences(a)
-	if pref, ok := a.prefs.(interface{ load() }); ok && a.uniqueID != "" {
+func (a *fyneApp) newDefaultPreferences() fyne.Preferences {
+	p := fyne.Preferences(newPreferences(a))
+	if pref, ok := p.(interface{ load() }); ok && a.uniqueID != "" {
 		pref.load()
 	}
+	return p
 }
 
 // New returns a new application instance with the default driver and no unique ID
@@ -136,7 +147,7 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
 
-	newApp.loadDefaultPreferences()
+	newApp.prefs = newApp.newDefaultPreferences()
 	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}
 	if id != "" {
