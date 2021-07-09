@@ -16,6 +16,7 @@ type SettingsSchema struct {
 	ThemeName    string  `json:"theme"`
 	Scale        float32 `json:"scale"`
 	PrimaryColor string  `json:"primary_color"`
+	CloudName    string  `json:"cloud_name"`
 }
 
 // StoragePath returns the location of the settings storage
