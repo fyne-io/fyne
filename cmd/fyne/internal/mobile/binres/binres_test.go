@@ -10,7 +10,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"os"
 	"sort"
@@ -25,7 +24,6 @@ func init() {
 }
 
 func printrecurse(t *testing.T, pl *Pool, el *Element, ws string) {
-
 	t.Logf("%s+elem:ns(%v) name(%s)", ws, el.NS, el.Name.Resolve(pl))
 
 	for _, attr := range el.attrs {
@@ -107,25 +105,22 @@ func compareBytes(a, b []byte) error {
 }
 
 func TestBootstrap(t *testing.T) {
+	r := require.New(t)
 	bin, err := ioutil.ReadFile("testdata/bootstrap.bin")
-	if err != nil {
-		log.Fatal(err)
-	}
+	r.NoError(err)
 
 	// unmarshal binary xml and store byte indices of decoded resources.
 	debugIndices := make(map[encoding.BinaryMarshaler]int)
 	trackUnmarshal := func(buf []byte) (*XML, error) {
 		bx := new(XML)
-		if err := (&bx.chunkHeader).UnmarshalBinary(buf); err != nil {
-			return nil, err
-		}
+		err = (&bx.chunkHeader).UnmarshalBinary(buf)
+		r.NoError(err)
+
 		buf = buf[8:]
 		debugIndex := 8
 		for len(buf) > 0 {
 			k, err := bx.unmarshalBinaryKind(buf)
-			if err != nil {
-				return nil, err
-			}
+			r.NoError(err)
 			debugIndices[k.(encoding.BinaryMarshaler)] = debugIndex
 			debugIndex += k.size()
 			buf = buf[k.size():]
@@ -135,9 +130,7 @@ func TestBootstrap(t *testing.T) {
 
 	checkMarshal := func(res encoding.BinaryMarshaler, bsize int) {
 		b, err := res.MarshalBinary()
-		if err != nil {
-			t.Error(err)
-		}
+		r.NoError(err)
 		idx := debugIndices[res]
 		a := bin[idx : idx+bsize]
 		if !bytes.Equal(a, b) {
@@ -180,9 +173,7 @@ func TestBootstrap(t *testing.T) {
 	}
 
 	bxml, err := trackUnmarshal(bin)
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	for i, x := range bxml.Pool.strings {
 		t.Logf("Pool(%v): %q\n", i, x)
@@ -207,70 +198,44 @@ func TestBootstrap(t *testing.T) {
 }
 
 func TestEncode(t *testing.T) {
+	r := require.New(t)
 	f, err := os.Open("testdata/bootstrap.xml")
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	bx, err := UnmarshalXML(f, false)
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	bin, err := ioutil.ReadFile("testdata/bootstrap.bin")
-	if err != nil {
-		log.Fatal(err)
-	}
+	r.NoError(err)
+
 	bxml := new(XML)
-	if err := bxml.UnmarshalBinary(bin); err != nil {
-		t.Fatal(err)
-	}
+	err = bxml.UnmarshalBinary(bin)
+	r.NoError(err)
 
-	if err := compareStrings(t, bxml.Pool.strings, bx.Pool.strings); err != nil {
-		t.Error(err)
-	}
+	err = compareStrings(t, bxml.Pool.strings, bx.Pool.strings)
+	r.NoError(err)
 
-	if err := compareUint32s(t, rtou(bxml.Map.rs), rtou(bx.Map.rs)); err != nil {
-		t.Error(err)
-	}
+	err = compareUint32s(t, rtou(bxml.Map.rs), rtou(bx.Map.rs))
+	r.NoError(err)
 
-	if err := compareNamespaces(bx.Namespace, bxml.Namespace); err != nil {
-		t.Error(err)
-	}
+	err = compareNamespaces(bx.Namespace, bxml.Namespace)
+	r.NoError(err)
 
-	if err := compareElements(bx, bxml); err != nil {
-		t.Error(err)
-	}
-
-	// Current output byte-for-byte of pkg binres is close, but not exact, to output of aapt.
-	// The current exceptions to this are as follows:
-	//  * sort order of certain attributes
-	//  * typed value of minSdkVersion
-	// The below check will produce an error, listing differences in the byte output of each.
-	// have, err := bx.MarshalBinary()
-	// if err != nil {
-	// t.Fatal(err)
-	// }
-	// if err := compareBytes(bin, have); err != nil {
-	// t.Fatal(err)
-	// }
+	err = compareElements(bx, bxml)
+	r.NoError(err)
 }
 
 func TestRawValueByName(t *testing.T) {
+	r := require.New(t)
 	f, err := os.Open("testdata/bootstrap.xml")
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	bx, err := UnmarshalXML(f, false)
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	pkgname, err := bx.RawValueByName("manifest", xml.Name{Local: "package"})
-	if want := "com.zentus.balloon"; err != nil || pkgname != want {
-		t.Fatalf("have (%q, %v), want (%q, nil)", pkgname, err, want)
-	}
+	r.NoError(err)
+	r.Equal("com.zentus.balloon", pkgname)
 }
 
 type byAttrName []*Attribute
@@ -457,14 +422,14 @@ func compareStrings(t *testing.T, a, b []string) error {
 }
 
 func TestOpenTable(t *testing.T) {
+	r := require.New(t)
 	sdkdir := os.Getenv("ANDROID_HOME")
 	if sdkdir == "" {
 		t.Skip("ANDROID_HOME env var not set")
 	}
 	tbl, err := OpenTable()
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
+
 	if len(tbl.pkgs) == 0 {
 		t.Fatal("failed to decode any resource packages")
 	}
@@ -496,19 +461,17 @@ func TestOpenTable(t *testing.T) {
 }
 
 func TestTableRefByName(t *testing.T) {
+	r := require.New(t)
 	checkResources(t)
 	tbl, err := OpenSDKTable()
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
+
 	if len(tbl.pkgs) == 0 {
 		t.Fatal("failed to decode any resource packages")
 	}
 
 	ref, err := tbl.RefByName("@android:style/Theme.NoTitleBar.Fullscreen")
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	if want := uint32(0x01030007); uint32(ref) != want {
 		t.Fatalf("RefByName does not match expected result, have %0#8x, want %0#8x", ref, want)
@@ -516,9 +479,10 @@ func TestTableRefByName(t *testing.T) {
 }
 
 func TestTableMarshal(t *testing.T) {
+	r := require.New(t)
+
 	checkResources(t)
 	tbl, err := OpenSDKTable()
-	r := require.New(t)
 	r.NoError(err)
 
 	bin, err := tbl.MarshalBinary()
