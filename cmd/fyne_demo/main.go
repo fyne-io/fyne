@@ -83,6 +83,10 @@ func logLifecycle(a fyne.App) {
 
 func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	newItem := fyne.NewMenuItem("New", nil)
+	checkedItem := fyne.NewMenuItem("Checked", nil)
+	checkedItem.HasCheck = true
+	disabledItem := fyne.NewMenuItem("Disabled", nil)
+	disabledItem.Disabled = true
 	otherItem := fyne.NewMenuItem("Other", nil)
 	otherItem.ChildMenu = fyne.NewMenu("",
 		fyne.NewMenuItem("Project", func() { fmt.Println("Menu New->Other->Project") }),
@@ -131,12 +135,13 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 			u, _ := url.Parse("https://fyne.io/sponsor/")
 			_ = a.OpenURL(u)
 		}))
-	file := fyne.NewMenu("File", newItem)
+
+	// a quit item will be appended to our first (File) menu
+	file := fyne.NewMenu("File", newItem, checkedItem, disabledItem)
 	if !fyne.CurrentDevice().IsMobile() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
 	return fyne.NewMainMenu(
-		// a quit item will be appended to our first menu
 		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
