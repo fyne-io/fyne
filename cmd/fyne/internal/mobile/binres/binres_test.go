@@ -16,6 +16,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -516,115 +518,27 @@ func TestTableRefByName(t *testing.T) {
 func TestTableMarshal(t *testing.T) {
 	checkResources(t)
 	tbl, err := OpenSDKTable()
-	if err != nil {
-		t.Fatal(err)
-	}
+	r := require.New(t)
+	r.NoError(err)
 
 	bin, err := tbl.MarshalBinary()
-	if err != nil {
-		t.Fatal(err)
-	}
+	r.NoError(err)
 
 	xtbl := new(Table)
-	if err := xtbl.UnmarshalBinary(bin); err != nil {
-		t.Fatal(err)
-	}
+	err = xtbl.UnmarshalBinary(bin)
+	r.NoError(err)
 
-	if len(tbl.pool.strings) != len(xtbl.pool.strings) {
-		t.Fatal("tbl.pool lengths don't match")
-	}
-	if len(tbl.pkgs) != len(xtbl.pkgs) {
-		t.Fatal("tbl.pkgs lengths don't match")
-	}
+	r.Equal(len(tbl.pool.strings), xtbl.pool.strings)
+	r.Equal(len(tbl.pkgs), len(xtbl.pkgs))
 
 	pkg, xpkg := tbl.pkgs[0], xtbl.pkgs[0]
-	if err := compareStrings(t, pkg.typePool.strings, xpkg.typePool.strings); err != nil {
-		t.Fatal(err)
-	}
-	if err := compareStrings(t, pkg.keyPool.strings, xpkg.keyPool.strings); err != nil {
-		t.Fatal(err)
-	}
+	err = compareStrings(t, pkg.typePool.strings, xpkg.typePool.strings)
+	r.NoError(err)
 
-	if len(pkg.specs) != len(xpkg.specs) {
-		t.Fatal("pkg.specs lengths don't match")
-	}
+	err = compareStrings(t, pkg.keyPool.strings, xpkg.keyPool.strings)
+	r.NoError(err)
 
-	for i, spec := range pkg.specs {
-		xspec := xpkg.specs[i]
-		if spec.id != xspec.id {
-			t.Fatal("spec.id doesn't match")
-		}
-		if spec.entryCount != xspec.entryCount {
-			t.Fatal("spec.entryCount doesn't match")
-		}
-		if len(spec.entries) != len(xspec.entries) {
-			t.Fatal("spec.entries lengths don't match")
-		}
-		for j, mask := range spec.entries {
-			xmask := xspec.entries[j]
-			if mask != xmask {
-				t.Fatal("entry mask doesn't match")
-			}
-		}
-		if len(spec.types) != len(xspec.types) {
-			t.Fatal("spec.types length don't match")
-		}
-		for j, typ := range spec.types {
-			xtyp := xspec.types[j]
-			if typ.id != xtyp.id {
-				t.Fatal("typ.id doesn't match")
-			}
-			if typ.entryCount != xtyp.entryCount {
-				t.Fatal("typ.entryCount doesn't match")
-			}
-			if typ.entriesStart != xtyp.entriesStart {
-				t.Fatal("typ.entriesStart doesn't match")
-			}
-			if len(typ.indices) != len(xtyp.indices) {
-				t.Fatal("typ.indices length don't match")
-			}
-			for k, index := range typ.indices {
-				xindex := xtyp.indices[k]
-				if index != xindex {
-					t.Errorf("type index doesn't match at %v, have %v, want %v", k, xindex, index)
-				}
-			}
-			if len(typ.entries) != len(xtyp.entries) {
-				t.Fatal("typ.entries lengths don't match")
-			}
-			for k, nt := range typ.entries {
-				xnt := xtyp.entries[k]
-				if nt == nil {
-					if xnt != nil {
-						t.Fatal("nt is nil but xnt is not")
-					}
-					continue
-				}
-				if nt.size != xnt.size {
-					t.Fatal("entry.size doesn't match")
-				}
-				if nt.flags != xnt.flags {
-					t.Fatal("entry.flags don't match")
-				}
-				if nt.key != xnt.key {
-					t.Fatal("entry.key doesn't match")
-				}
-
-				if nt.parent != xnt.parent {
-					t.Fatal("entry.parent doesn't match")
-				}
-				if nt.count != xnt.count {
-					t.Fatal("entry.count doesn't match")
-				}
-				for l, val := range nt.values {
-					xval := xnt.values[l]
-					if val.name != xval.name {
-						t.Fatal("value.name doesn't match")
-					}
-				}
-			}
-		}
-	}
+	r.Equal(pkg.specs, xpkg.specs)
 }
 
 func checkResources(t *testing.T) {
