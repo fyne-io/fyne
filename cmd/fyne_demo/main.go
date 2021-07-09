@@ -84,7 +84,7 @@ func logLifecycle(a fyne.App) {
 func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	newItem := fyne.NewMenuItem("New", nil)
 	checkedItem := fyne.NewMenuItem("Checked", nil)
-	checkedItem.HasCheck = true
+	checkedItem.Checked = true
 	disabledItem := fyne.NewMenuItem("Disabled", nil)
 	disabledItem.Disabled = true
 	otherItem := fyne.NewMenuItem("Other", nil)

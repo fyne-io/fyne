@@ -138,7 +138,7 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 				return !item.Disabled
 			},
 			checked: func() bool {
-				return item.HasCheck
+				return item.Checked
 			},
 		})
 		nextItemID++

@@ -281,21 +281,21 @@ func TestMenu_RefreshOptions(t *testing.T) {
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_disabled.xml", c)
 
-	itemBaz.HasCheck = true
+	itemBaz.Checked = true
 	m.Refresh()
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_checkmark.xml", c)
 
-	itemBar.HasCheck = true
+	itemBar.Checked = true
 	m.Refresh()
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_2nd_checkmark.xml", c)
 
-	itemBar.HasCheck = false
+	itemBar.Checked = false
 	itemBar.Disabled = false
 	m.Refresh()
 
-	itemBaz.HasCheck = false
+	itemBaz.Checked = false
 	m.Refresh()
 
 	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)

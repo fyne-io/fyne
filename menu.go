@@ -23,7 +23,7 @@ type MenuItem struct {
 	// Since: 2.1
 	Disabled bool
 	// Since: 2.1
-	HasCheck bool
+	Checked bool
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.

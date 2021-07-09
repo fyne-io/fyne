@@ -158,7 +158,7 @@ func (m *Menu) Refresh() {
 
 func (m *Menu) getContainsCheck() bool {
 	for _, item := range m.Items {
-		if mi, ok := item.(*menuItem); ok && mi.Item.HasCheck {
+		if mi, ok := item.(*menuItem); ok && mi.Item.Checked {
 			return true
 		}
 	}

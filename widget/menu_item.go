@@ -50,7 +50,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 	checkIcon := canvas.NewImageFromResource(theme.ConfirmIcon())
-	if !i.Item.HasCheck {
+	if !i.Item.Checked {
 		checkIcon.Hide()
 	}
 
@@ -241,7 +241,7 @@ func (r *menuItemRenderer) Refresh() {
 	}
 	r.text.Refresh()
 
-	if r.i.Item.HasCheck {
+	if r.i.Item.Checked {
 		r.checkIcon.Show()
 	} else {
 		r.checkIcon.Hide()
