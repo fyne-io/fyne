@@ -57,53 +57,6 @@ func printrecurse(t *testing.T, pl *Pool, el *Element, ws string) {
 	}
 }
 
-func compareBytes(a, b []byte) error {
-	if bytes.Equal(a, b) {
-		return nil
-	}
-	buf := new(bytes.Buffer)
-	x, y := len(a), len(b)
-	if x != y {
-		fmt.Fprintf(buf, "byte length does not match, have %v, want %v\n", y, x)
-	}
-	if x > y {
-		x, y = y, x
-	}
-	mismatch := false
-	for i := 0; i < x; i++ {
-		if mismatch = a[i] != b[i]; mismatch {
-			fmt.Fprintf(buf, "first byte mismatch at %v\n", i)
-			break
-		}
-	}
-	if mismatch {
-		// print out a reasonable amount of data to help identify issues
-		truncate := x > 3300
-		if truncate {
-			x = 3300
-		}
-		buf.WriteString("      HAVE               WANT\n")
-		for i := 0; i < x; i += 4 {
-			he, we := 4, 4
-			if i+he >= x {
-				he = x - i
-			}
-			if i+we >= y {
-				we = y - i
-			}
-			notequal := ""
-			if !bytes.Equal(b[i:i+he], a[i:i+we]) {
-				notequal = "***"
-			}
-			fmt.Fprintf(buf, "%3v | % X        % X    %s\n", i, b[i:i+he], a[i:i+we], notequal)
-		}
-		if truncate {
-			fmt.Fprint(buf, "... output truncated.\n")
-		}
-	}
-	return fmt.Errorf(buf.String())
-}
-
 func TestBootstrap(t *testing.T) {
 	r := require.New(t)
 	bin, err := ioutil.ReadFile("testdata/bootstrap.bin")
