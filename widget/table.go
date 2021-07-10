@@ -151,6 +151,50 @@ func (t *Table) UnselectAll() {
 	}
 }
 
+// ScrollTo will scroll to the given cell without changing the selection.
+// Attempting to scroll beyond the limits of the table will scroll to
+// the edge of the table instead.
+//
+// Since: 2.1
+func (t *Table) ScrollTo(id TableCellID) {
+	if t.Length == nil {
+		return
+	}
+
+	rows, cols := t.Length()
+	if id.Row >= rows {
+		id.Row = rows - 1
+	}
+
+	if id.Col >= cols {
+		id.Col = cols - 1
+	}
+
+	t.scrollTo(id)
+}
+
+// ScrollToEnd will scroll to the last cell in the table
+//
+// Since: 2.1
+func (t *Table) ScrollToEnd() {
+	if t.Length == nil {
+		return
+	}
+
+	rows, cols := t.Length()
+	t.scrollTo(TableCellID{
+		Row: rows - 1,
+		Col: cols - 1,
+	})
+}
+
+// ScrollToStart will scroll to the first cell in the table
+//
+// Since: 2.1
+func (t *Table) ScrollToStart() {
+	t.scrollTo(TableCellID{0, 0})
+}
+
 func (t *Table) scrollTo(id TableCellID) {
 	if t.scroll == nil {
 		return
