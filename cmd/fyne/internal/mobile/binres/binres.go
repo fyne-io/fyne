@@ -208,7 +208,7 @@ type ltoken struct {
 	line int
 }
 
-// UnmarshalXML deserializes an AndroidManifest.xml document returning type XML
+// UnmarshalXML decodes an AndroidManifest.xml document returning type XML
 // containing decoded resources.
 func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 	lr := &lineReader{r: r}
@@ -309,7 +309,7 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 	return buildXML(q)
 }
 
-// buildXML deserializes a queue of tokens into a binary XML resource
+// buildXML encodes a queue of tokens into a binary XML resource
 func buildXML(q []ltoken) (*XML, error) {
 	// temporary pool to resolve real poolref later
 	pool := new(Pool)
@@ -631,9 +631,52 @@ func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Po
 		if val.data.Type != DataIntDec {
 			panic("TODO only know how to handle DataIntDec type here")
 		}
-		abort, err := addAttributeDataIntDecScalar(val, nattr, pool, attr, tbl)
-		if abort {
-			return err
+
+		t := DataType(val.data.Value)
+		switch t {
+		case DataString, DataAttribute, DataType(0x3e):
+			// TODO identify 0x3e, in bootstrap.xml this is the native lib name
+			nattr.RawValue = pool.ref(attr.Value)
+			nattr.TypedValue.Type = DataString
+			nattr.TypedValue.Value = uint32(nattr.RawValue)
+		case DataIntBool, DataType(0x08):
+			nattr.TypedValue.Type = DataIntBool
+			switch attr.Value {
+			case "true":
+				nattr.TypedValue.Value = 0xFFFFFFFF
+			case "false":
+				nattr.TypedValue.Value = 0
+			default:
+				return fmt.Errorf("invalid bool value %q", attr.Value)
+			}
+		case DataIntDec, DataFloat, DataFraction:
+			// TODO DataFraction needs it's own case statement. minSdkVersion identifies as DataFraction
+			// but has accepted input in the past such as android:minSdkVersion="L"
+			// Other use-cases for DataFraction are currently unknown as applicable to manifest generation
+			// but this provides minimum support for writing out minSdkVersion="15" correctly.
+			nattr.TypedValue.Type = DataIntDec
+			i, err := strconv.Atoi(attr.Value)
+			if err != nil {
+				return err
+			}
+			nattr.TypedValue.Value = uint32(i)
+		case DataReference:
+			nattr.TypedValue.Type = DataReference
+			dref, err := tbl.RefByName(attr.Value)
+			if err != nil {
+				if strings.HasPrefix(attr.Value, "@mipmap") {
+					// firstDrawableId is a TableRef matching first entry of mipmap spec initialized by NewMipmapTable.
+					// 7f is default package, 02 is mipmap spec, 0000 is first entry; e.g. R.drawable.icon
+					// TODO resource table should generate ids as required.
+					const firstDrawableID = 0x7f020000
+					nattr.TypedValue.Value = firstDrawableID
+					return nil
+				}
+				return err
+			}
+			nattr.TypedValue.Value = uint32(dref)
+		default:
+			return fmt.Errorf("unhandled data type %0#2x: %s", uint8(t), t)
 		}
 	} else {
 		// 0x01000000 is an unknown ref that doesn't point to anything, typically
@@ -676,55 +719,6 @@ func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Po
 		}
 	}
 	return nil
-}
-
-func addAttributeDataIntDecScalar(val *Value, nattr *Attribute, pool *Pool, attr xml.Attr, tbl *Table) (abort bool, err error) {
-	switch t := DataType(val.data.Value); t {
-	case DataString, DataAttribute, DataType(0x3e):
-		// TODO identify 0x3e, in bootstrap.xml this is the native lib name
-		nattr.TypedValue.Type = DataString
-		nattr.RawValue = pool.ref(attr.Value)
-		nattr.TypedValue.Value = uint32(nattr.RawValue)
-	case DataIntBool, DataType(0x08):
-		nattr.TypedValue.Type = DataIntBool
-		switch attr.Value {
-		case "true":
-			nattr.TypedValue.Value = 0xFFFFFFFF
-		case "false":
-			nattr.TypedValue.Value = 0
-		default:
-			return true, fmt.Errorf("invalid bool value %q", attr.Value)
-		}
-	case DataIntDec, DataFloat, DataFraction:
-		// TODO DataFraction needs it's own case statement. minSdkVersion identifies as DataFraction
-		// but has accepted input in the past such as android:minSdkVersion="L"
-		// Other use-cases for DataFraction are currently unknown as applicable to manifest generation
-		// but this provides minimum support for writing out minSdkVersion="15" correctly.
-		nattr.TypedValue.Type = DataIntDec
-		i, err := strconv.Atoi(attr.Value)
-		if err != nil {
-			return true, err
-		}
-		nattr.TypedValue.Value = uint32(i)
-	case DataReference:
-		nattr.TypedValue.Type = DataReference
-		dref, err := tbl.RefByName(attr.Value)
-		if err != nil {
-			if strings.HasPrefix(attr.Value, "@mipmap") {
-				// firstDrawableId is a TableRef matching first entry of mipmap spec initialized by NewMipmapTable.
-				// 7f is default package, 02 is mipmap spec, 0000 is first entry; e.g. R.drawable.icon
-				// TODO resource table should generate ids as required.
-				const firstDrawableID = 0x7f020000
-				nattr.TypedValue.Value = firstDrawableID
-				return true, nil
-			}
-			return true, err
-		}
-		nattr.TypedValue.Value = uint32(dref)
-	default:
-		return true, fmt.Errorf("unhandled data type %0#2x: %s", uint8(t), t)
-	}
-	return false, nil
 }
 
 // UnmarshalBinary decodes all resource chunks in buf returning any error encountered.
