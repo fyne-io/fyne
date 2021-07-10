@@ -286,7 +286,7 @@ func TestTable_ScrollTo(t *testing.T) {
 	}
 }
 
-func TestTable_ScrollToEnd(t *testing.T) {
+func TestTable_ScrollToBottom(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -310,15 +310,15 @@ func TestTable_ScrollToEnd(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 
-	table.ScrollToEnd()
+	table.ScrollToBottom()
 
 	// element size of 50, plus separator thickness of 1
-	want := fyne.Position{X: 4 * (50 + 1), Y: 19 * (50 + 1)}
+	want := fyne.Position{X: 0, Y: 19 * (50 + 1)}
 	assert.Equal(t, want, table.offset)
 	assert.Equal(t, want, table.scroll.Offset)
 }
 
-func TestTable_ScrollToStart(t *testing.T) {
+func TestTable_ScrollToTop(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
@@ -341,7 +341,7 @@ func TestTable_ScrollToStart(t *testing.T) {
 	defer w.Close()
 
 	table.scrollTo(TableCellID{12, 3})
-	table.ScrollToStart()
+	table.ScrollToTop()
 
 	want := fyne.Position{}
 	assert.Equal(t, want, table.offset)

@@ -173,25 +173,22 @@ func (t *Table) ScrollTo(id TableCellID) {
 	t.scrollTo(id)
 }
 
-// ScrollToEnd will scroll to the last cell in the table
+// ScrollToBottom will scroll to the last row in the table
 //
 // Since: 2.1
-func (t *Table) ScrollToEnd() {
+func (t *Table) ScrollToBottom() {
 	if t.Length == nil {
 		return
 	}
 
-	rows, cols := t.Length()
-	t.scrollTo(TableCellID{
-		Row: rows - 1,
-		Col: cols - 1,
-	})
+	rows, _ := t.Length()
+	t.scrollTo(TableCellID{Row: rows - 1})
 }
 
-// ScrollToStart will scroll to the first cell in the table
+// ScrollToTop will scroll to the first row in the table
 //
 // Since: 2.1
-func (t *Table) ScrollToStart() {
+func (t *Table) ScrollToTop() {
 	t.scrollTo(TableCellID{0, 0})
 }
 
