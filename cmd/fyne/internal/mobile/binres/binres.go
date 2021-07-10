@@ -309,6 +309,7 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 	return buildXML(q)
 }
 
+// buildXML encodes a queue of tokens into a binary XML resource
 func buildXML(q []ltoken) (*XML, error) {
 	// temporary pool to resolve real poolref later
 	pool := new(Pool)
@@ -322,9 +323,9 @@ func buildXML(q []ltoken) (*XML, error) {
 	for _, ltkn := range q {
 		tkn, line := ltkn.Token, ltkn.line
 
-		i, err := handleTokens(tkn, line, pool, bx, tbl)
+		err := handleTokens(tkn, line, pool, bx, tbl)
 		if err != nil {
-			return i, err
+			return nil, err
 		}
 	}
 
@@ -475,7 +476,8 @@ func resolveElements(elms []*Element, pool, bxPool *Pool) {
 	}
 }
 
-func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) (*XML, error) {
+// handleTokens encodes tkn, attaching it to the binary xml
+func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) error {
 	switch tkn := tkn.(type) {
 	case xml.StartElement:
 		el := &Element{
@@ -497,9 +499,9 @@ func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) (*XM
 		}
 		bx.stack = append(bx.stack, el)
 
-		i, err := addAttributes(tkn, bx, line, pool, el, tbl)
+		err := addAttributes(tkn, bx, line, pool, el, tbl)
 		if err != nil {
-			return i, err
+			return err
 		}
 	case xml.CharData:
 		if s := poolTrim(string(tkn)); s != "" {
@@ -516,7 +518,7 @@ func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) (*XM
 			} else if el.tail == nil {
 				el.tail = cdt
 			} else {
-				return nil, fmt.Errorf("element head and tail already contain chardata")
+				return fmt.Errorf("element head and tail already contain chardata")
 			}
 		}
 	case xml.EndElement:
@@ -534,7 +536,7 @@ func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) (*XM
 		var el *Element
 		el, bx.stack = bx.stack[n-1], bx.stack[:n-1]
 		if el.end != nil {
-			return nil, fmt.Errorf("element end already exists")
+			return fmt.Errorf("element end already exists")
 		}
 		el.end = &ElementEnd{
 			NodeHeader: NodeHeader{
@@ -549,10 +551,12 @@ func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) (*XM
 	default:
 		panic(fmt.Errorf("unhandled token type: %T %+v", tkn, tkn))
 	}
-	return nil, nil
+	return nil
 }
 
-func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Element, tbl *Table) (*XML, error) {
+// addAttributes encodes the attributes of tkn and adds them to el.
+// Any attributes which were not already present in Pool are added to it.
+func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Element, tbl *Table) error {
 	for _, attr := range tkn.Attr {
 		if (attr.Name.Space == "xmlns" && attr.Name.Local == "tools") || attr.Name.Space == toolsSchema {
 			continue // TODO can tbl be queried for schemas to determine validity instead?
@@ -560,7 +564,7 @@ func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Elem
 
 		if attr.Name.Space == "xmlns" && attr.Name.Local == "android" {
 			if bx.Namespace != nil {
-				return nil, fmt.Errorf("multiple declarations of xmlns:android encountered")
+				return fmt.Errorf("multiple declarations of xmlns:android encountered")
 			}
 			bx.Namespace = &Namespace{
 				NodeHeader: NodeHeader{
@@ -588,7 +592,7 @@ func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Elem
 				nattr.TypedValue.Type = DataIntDec
 				i, err := strconv.Atoi(attr.Value)
 				if err != nil {
-					return nil, err
+					return err
 				}
 				nattr.TypedValue.Value = uint32(i)
 			default: // "package", "platformBuildVersionName", and any invalid
@@ -598,13 +602,16 @@ func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Elem
 		} else {
 			err := addAttributeNamespace(attr, nattr, tbl, pool)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
-	return nil, nil
+	return nil
 }
 
+// addAttributeNamespace encodes attr based on its namespace
+// The encoded value is stored in nattr.
+// If the value was not already present in pool, it is added.
 func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Pool) error {
 	// get type spec and value data type
 	ref, err := tbl.RefByName("attr/" + attr.Name.Local)
