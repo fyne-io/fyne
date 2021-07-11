@@ -173,7 +173,7 @@ func (t *Table) ScrollTo(id TableCellID) {
 	t.scrollTo(id)
 }
 
-// ScrollToBottom will scroll to the last row in the table
+// ScrollToBottom scrolls to the last row in the table
 //
 // Since: 2.1
 func (t *Table) ScrollToBottom() {
@@ -185,11 +185,65 @@ func (t *Table) ScrollToBottom() {
 	t.scrollTo(TableCellID{Row: rows - 1})
 }
 
-// ScrollToTop will scroll to the first row in the table
+// ScrollToLeading scrolls horizontally to the leading edge of the table
+//
+// Since: 2.1
+func (t *Table) ScrollToLeading() {
+	if t.scroll == nil {
+		return
+	}
+
+	t.scroll.Offset.X = 0
+	t.offset.X = 0
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+	t.scroll.Refresh()
+	t.cells.Refresh()
+}
+
+// ScrollToTop scrolls to the first row in the table
 //
 // Since: 2.1
 func (t *Table) ScrollToTop() {
 	t.scrollTo(TableCellID{0, 0})
+}
+
+// ScrollToTrailing scrolls horizontally to the trailing edge of the table
+//
+// Since: 2.1
+func (t *Table) ScrollToTrailing() {
+	if t.scroll == nil || t.Length == nil {
+		return
+	}
+
+	_, cols := t.Length()
+	lastCol := cols - 1
+
+	cellSize := t.templateSize()
+	cellX := float32(0)
+	cellWidth := float32(0)
+	for i := 0; i <= lastCol; i++ {
+		if cellWidth > 0 {
+			cellX += cellWidth + theme.SeparatorThicknessSize()
+		}
+
+		width := cellSize.Width
+		if w, ok := t.columnWidths[i]; ok {
+			width = w
+		}
+		cellWidth = width
+	}
+
+	scrollX := cellX + cellWidth - t.scroll.Size().Width
+	t.scroll.Offset.X = scrollX
+	t.offset.X = scrollX
+
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+	t.scroll.Refresh()
+	t.cells.Refresh()
 }
 
 func (t *Table) scrollTo(id TableCellID) {

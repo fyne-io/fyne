@@ -318,13 +318,39 @@ func TestTable_ScrollToBottom(t *testing.T) {
 	assert.Equal(t, want, table.scroll.Offset)
 }
 
+func TestTable_ScrollToLeading(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	table := NewTable(
+		func() (int, int) { return 3, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(id TableCellID, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
+			c.(*Label).SetText(text)
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	table.ScrollTo(TableCellID{Row: 8, Col: 4})
+	prev := table.offset
+	want := fyne.Position{X: 0, Y: prev.Y}
+
+	table.ScrollToLeading()
+	assert.Equal(t, want, table.offset)
+	assert.Equal(t, want, table.scroll.Offset)
+}
+
 func TestTable_ScrollToTop(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
 	const (
-		maxRows int     = 20
-		maxCols int     = 5
+		maxRows int     = 6
+		maxCols int     = 10
 		width   float32 = 50
 		height  float32 = 50
 	)
@@ -344,6 +370,54 @@ func TestTable_ScrollToTop(t *testing.T) {
 	table.ScrollToTop()
 
 	want := fyne.Position{}
+	assert.Equal(t, want, table.offset)
+	assert.Equal(t, want, table.scroll.Offset)
+}
+
+func TestTable_ScrollToTrailing(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	th := test.NewTheme()
+	test.ApplyTheme(t, th)
+
+	const (
+		maxRows    int     = 20
+		maxCols    int     = 8
+		cellWidth  float32 = 109 // observed from actual output
+		cellHeight float32 = 27  // observed
+	)
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(id TableCellID, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
+			c.(*Label).SetText(text)
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	var (
+		padding float32 = th.Size(theme.SizeNamePadding)
+		sep             = th.Size(theme.SizeNameSeparatorThickness)
+		sz1             = 4 * (cellWidth + sep) // the inner scroll area
+		sz2             = sz1 + 2*padding       // the table
+		sz3             = sz2 + 2*padding       // the window
+	)
+
+	w.Resize(fyne.Size{Width: sz3, Height: sz3})
+	table.Resize(fyne.Size{Width: sz2, Height: sz2})
+
+	table.ScrollTo(TableCellID{Row: 7, Col: 7})
+	want := table.offset
+
+	table.ScrollToTop()
+	table.ScrollTo(TableCellID{Row: 7})
+	table.ScrollToTrailing()
+
 	assert.Equal(t, want, table.offset)
 	assert.Equal(t, want, table.scroll.Offset)
 }
