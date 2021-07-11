@@ -174,6 +174,28 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
+// ScrollTo scrolls to the node with the given id
+func (t *Tree) ScrollTo(uid TreeNodeID) {
+	if t.scroller == nil {
+		return
+	}
+
+	y, size, ok := t.offsetAndSize(uid)
+	if !ok {
+		return
+	}
+
+	// TODO scrolling to a node should open all parents if they aren't already
+	if y < t.scroller.Offset.Y {
+		t.scroller.Offset.Y = y
+	} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
+		t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
+	}
+
+	t.offsetUpdated(t.scroller.Offset)
+	t.Refresh()
+}
+
 // Select marks the specified node to be selected
 func (t *Tree) Select(uid TreeNodeID) {
 	if len(t.selected) > 0 {
@@ -185,41 +207,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 		}
 	}
 	t.selected = []TreeNodeID{uid}
-	if t.scroller != nil {
-		var found bool
-		var y float32
-		var size fyne.Size
-		t.walkAll(func(id TreeNodeID, branch bool, depth int) {
-			m := t.leafMinSize
-			if branch {
-				m = t.branchMinSize
-			}
-			if id == uid {
-				found = true
-				size = m
-			} else if !found {
-				// Root node is not rendered unless it has been customized
-				if t.Root == "" && id == "" {
-					// This is root node, skip
-					return
-				}
-				// If this is not the first item, add a separator
-				if y > 0 {
-					y += theme.SeparatorThicknessSize()
-				}
-
-				y += m.Height
-			}
-		})
-		if y < t.scroller.Offset.Y {
-			t.scroller.Offset.Y = y
-		} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
-			t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
-		}
-		t.offsetUpdated(t.scroller.Offset)
-		// TODO Setting a node as selected should open all parents if they aren't already
-	}
-	t.Refresh()
+	t.ScrollTo(uid)
 	if f := t.OnSelected; f != nil {
 		f(uid)
 	}
@@ -271,6 +259,32 @@ func (t *Tree) ensureOpenMap() {
 	if t.open == nil {
 		t.open = make(map[string]bool)
 	}
+}
+
+func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found bool) {
+	t.walkAll(func(id TreeNodeID, branch bool, _ int) {
+		m := t.leafMinSize
+		if branch {
+			m = t.branchMinSize
+		}
+		if id == uid {
+			found = true
+			size = m
+		} else if !found {
+			// Root node is not rendered unless it has been customized
+			if t.Root == "" && id == "" {
+				// This is root node, skip
+				return
+			}
+			// If this is not the first item, add a separator
+			if y > 0 {
+				y += theme.SeparatorThicknessSize()
+			}
+
+			y += m.Height
+		}
+	})
+	return
 }
 
 func (t *Tree) offsetUpdated(pos fyne.Position) {

@@ -403,6 +403,42 @@ func TestTree_Select_Unselects(t *testing.T) {
 	}
 }
 
+func TestTree_ScrollTo(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	var (
+		min = getLeaf(t, tree, "A").MinSize()
+		sep = theme.SeparatorThicknessSize()
+		pad = theme.Padding()
+	)
+
+	// Resize tall enough to display two nodes and the separater between them
+	treeHeight := 2*(min.Height) + sep
+	w.Resize(fyne.Size{
+		Width:  400,
+		Height: treeHeight + 2*pad,
+	})
+
+	tree.ScrollTo("F")
+
+	want := 3*min.Height + 2*sep
+	assert.Equal(t, want, tree.offset.Y)
+	assert.Equal(t, want, tree.scroller.Offset.Y)
+}
+
 func TestTree_ScrollToSelection(t *testing.T) {
 	data := make(map[string][]string)
 	addTreePath(data, "A")
