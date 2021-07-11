@@ -174,6 +174,19 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
+// ScrollToBottom scrolls to the bottom of the tree
+func (t *Tree) ScrollToBottom() {
+	if t.scroller == nil {
+		return
+	}
+
+	y, size := t.findBottom()
+	t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
+
+	t.offsetUpdated(t.scroller.Offset)
+	t.Refresh()
+}
+
 // ScrollTo scrolls to the node with the given id
 func (t *Tree) ScrollTo(uid TreeNodeID) {
 	if t.scroller == nil {
@@ -192,6 +205,17 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
 	}
 
+	t.offsetUpdated(t.scroller.Offset)
+	t.Refresh()
+}
+
+// ScrollToTop scrolls to the top of the tree
+func (t *Tree) ScrollToTop() {
+	if t.scroller == nil {
+		return
+	}
+
+	t.scroller.Offset.Y = 0
 	t.offsetUpdated(t.scroller.Offset)
 	t.Refresh()
 }
@@ -259,6 +283,33 @@ func (t *Tree) ensureOpenMap() {
 	if t.open == nil {
 		t.open = make(map[string]bool)
 	}
+}
+
+func (t *Tree) findBottom() (y float32, size fyne.Size) {
+	sep := theme.SeparatorThicknessSize()
+	t.walkAll(func(id TreeNodeID, branch bool, _ int) {
+		size = t.leafMinSize
+		if branch {
+			size = t.branchMinSize
+		}
+
+		// Root node is not rendered unless it has been customized
+		if t.Root == "" && id == "" {
+			// This is root node, skip
+			return
+		}
+
+		// If this is not the first item, add a separator
+		if y > 0 {
+			y += sep
+		}
+
+		y += size.Height
+	})
+	if y > 0 {
+		y -= sep
+	}
+	return
 }
 
 func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found bool) {
