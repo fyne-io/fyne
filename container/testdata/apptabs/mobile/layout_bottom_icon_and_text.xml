@@ -1,10 +1,10 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.AppTabs">
-			<container pos="0,69" size="150x81">
-				<container size="150x81">
+			<container pos="0,69" size="150x80">
+				<container size="150x80">
 					<widget size="150x81" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,52" size="142x21">Text1</text>
+						<text alignment="center" bold color="primary" pos="4,52" size="142x20">Text1</text>
 						<image pos="55,8" rsc="cancelIcon" size="40x40" themed="primary"/>
 					</widget>
 				</container>

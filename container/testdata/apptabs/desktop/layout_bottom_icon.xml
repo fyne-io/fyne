@@ -1,9 +1,9 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.AppTabs">
-			<container pos="0,113" size="150x37">
-				<container size="150x37">
-					<widget size="28x37" type="*container.tabButton">
+			<container pos="0,113" size="150x36">
+				<container size="150x36">
+					<widget size="28x36" type="*container.tabButton">
 						<image pos="4,8" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
 					</widget>
 				</container>
