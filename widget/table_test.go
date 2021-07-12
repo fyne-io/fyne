@@ -216,7 +216,7 @@ func TestTable_ScrollTo(t *testing.T) {
 	defer w.Close()
 
 	// these position expectations have a built-in assumption that the window
-	// is smaller than the size of a single table cell.
+	// is smaller than or equal to the size of a single table cell.
 	expectedOffset := func(row, col float32) fyne.Position {
 		return fyne.Position{
 			X: col * width,
@@ -289,9 +289,8 @@ func TestTable_ScrollTo(t *testing.T) {
 func TestTable_ScrollToBottom(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
 
-	// we will test a 20 row x 5 column table where each cell is 50x50
-	// this table has a separator thickness of 1
 	const (
 		maxRows int     = 20
 		maxCols int     = 5
@@ -300,7 +299,7 @@ func TestTable_ScrollToBottom(t *testing.T) {
 	)
 
 	templ := canvas.NewRectangle(color.Gray16{})
-	templ.SetMinSize(fyne.Size{Width: width, Height: height})
+	templ.SetMinSize(fyne.NewSize(width, height))
 
 	table := NewTable(
 		func() (int, int) { return maxRows, maxCols },
@@ -310,10 +309,14 @@ func TestTable_ScrollToBottom(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 
+	w.Resize(fyne.NewSize(200, 200))
+
+	table.ScrollTo(TableCellID{19, 2})
+	want := table.offset
+
+	table.ScrollTo(TableCellID{2, 2})
 	table.ScrollToBottom()
 
-	// element size of 50, plus separator thickness of 1
-	want := fyne.Position{X: 0, Y: 19 * (50 + 1)}
 	assert.Equal(t, want, table.offset)
 	assert.Equal(t, want, table.scroll.Offset)
 }
@@ -337,9 +340,9 @@ func TestTable_ScrollToLeading(t *testing.T) {
 
 	table.ScrollTo(TableCellID{Row: 8, Col: 4})
 	prev := table.offset
-	want := fyne.Position{X: 0, Y: prev.Y}
-
 	table.ScrollToLeading()
+
+	want := fyne.Position{X: 0, Y: prev.Y}
 	assert.Equal(t, want, table.offset)
 	assert.Equal(t, want, table.scroll.Offset)
 }
@@ -366,10 +369,12 @@ func TestTable_ScrollToTop(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 
-	table.scrollTo(TableCellID{12, 3})
+	table.ScrollTo(TableCellID{12, 3})
+	prev := table.offset
+
 	table.ScrollToTop()
 
-	want := fyne.Position{}
+	want := fyne.Position{X: prev.X, Y: 0}
 	assert.Equal(t, want, table.offset)
 	assert.Equal(t, want, table.scroll.Offset)
 }
@@ -377,18 +382,9 @@ func TestTable_ScrollToTop(t *testing.T) {
 func TestTable_ScrollToTrailing(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	th := test.NewTheme()
-	test.ApplyTheme(t, th)
-
-	const (
-		maxRows    int     = 20
-		maxCols    int     = 8
-		cellWidth  float32 = 109 // observed from actual output
-		cellHeight float32 = 27  // observed
-	)
 
 	table := NewTable(
-		func() (int, int) { return maxRows, maxCols },
+		func() (int, int) { return 24, 24 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
@@ -400,21 +396,11 @@ func TestTable_ScrollToTrailing(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 
-	var (
-		padding float32 = th.Size(theme.SizeNamePadding)
-		sep             = th.Size(theme.SizeNameSeparatorThickness)
-		sz1             = 4 * (cellWidth + sep) // the inner scroll area
-		sz2             = sz1 + 2*padding       // the table
-		sz3             = sz2 + 2*padding       // the window
-	)
+	w.Resize(fyne.NewSize(200, 200))
 
-	w.Resize(fyne.Size{Width: sz3, Height: sz3})
-	table.Resize(fyne.Size{Width: sz2, Height: sz2})
-
-	table.ScrollTo(TableCellID{Row: 7, Col: 7})
+	table.ScrollTo(TableCellID{Row: 7, Col: 23})
 	want := table.offset
 
-	table.ScrollToTop()
 	table.ScrollTo(TableCellID{Row: 7})
 	table.ScrollToTrailing()
 
