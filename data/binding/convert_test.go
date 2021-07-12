@@ -85,16 +85,16 @@ func TestFloatToString(t *testing.T) {
 
 func TestFloatToStringWithFormat(t *testing.T) {
 	f := NewFloat()
-	s := FloatToStringWithFormat(f, "%f%%")
+	s := FloatToStringWithFormat(f, "%.2f%%")
 	v, err := s.Get()
 	assert.Nil(t, err)
-	assert.Equal(t, "0.000000%", v)
+	assert.Equal(t, "0.00%", v)
 
 	err = f.Set(0.3)
 	assert.Nil(t, err)
 	v, err = s.Get()
 	assert.Nil(t, err)
-	assert.Equal(t, "0.300000%", v)
+	assert.Equal(t, "0.30%", v)
 
 	err = s.Set("4.3") // valid float64 but not valid format
 	assert.NotNil(t, err)

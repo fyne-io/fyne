@@ -250,7 +250,8 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
 	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
-	f.buttonBox = fyne.NewContainerWithLayout(layout.NewHBoxLayout(), layout.NewSpacer(), f.cancelButton, f.submitButton)
+	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
+	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 
 	objects := make([]fyne.CanvasObject, len(f.Items)*2)
 	for i, item := range f.Items {

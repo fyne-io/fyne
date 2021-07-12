@@ -1,21 +1,21 @@
-<canvas padded size="212x126">
+<canvas padded size="220x126">
 	<content>
-		<widget pos="4,4" size="204x118" type="*widget.Form">
-			<container size="204x118">
-				<container size="204x77">
+		<widget pos="4,4" size="212x118" type="*widget.Form">
+			<container size="212x118">
+				<container size="212x77">
 					<widget size="54x36" type="*widget.Label">
 						<text alignment="trailing" bold pos="8,8" size="38x20">test1</text>
 					</widget>
-					<widget pos="58,0" size="145x36" type="*widget.Entry">
-						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="145x32"/>
-						<rectangle fillColor="shadow" pos="0,34" size="145x2"/>
-						<widget pos="0,2" size="145x32" type="*widget.Scroll">
-							<widget size="145x32" type="*widget.entryContent">
-								<widget size="145x32" type="*widget.RichText">
-									<text color="placeholder" pos="8,6" size="129x20"></text>
+					<widget pos="58,0" size="153x36" type="*widget.Entry">
+						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="153x32"/>
+						<rectangle fillColor="shadow" pos="0,34" size="153x2"/>
+						<widget pos="0,2" size="153x32" type="*widget.Scroll">
+							<widget size="153x32" type="*widget.entryContent">
+								<widget size="153x32" type="*widget.RichText">
+									<text color="placeholder" pos="8,6" size="137x20"></text>
 								</widget>
-								<widget size="145x32" type="*widget.RichText">
-									<text pos="8,6" size="129x20"></text>
+								<widget size="153x32" type="*widget.RichText">
+									<text pos="8,6" size="137x20"></text>
 								</widget>
 							</widget>
 						</widget>
@@ -23,55 +23,56 @@
 					<widget pos="0,40" size="54x36" type="*widget.Label">
 						<text alignment="trailing" bold pos="8,8" size="38x20">test2</text>
 					</widget>
-					<widget pos="58,40" size="145x36" type="*widget.Entry">
-						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="145x32"/>
-						<rectangle fillColor="shadow" pos="0,34" size="145x2"/>
-						<widget pos="0,2" size="145x32" type="*widget.Scroll">
-							<widget size="145x32" type="*widget.entryContent">
-								<widget size="145x32" type="*widget.RichText">
-									<text color="placeholder" pos="8,6" size="129x20"></text>
+					<widget pos="58,40" size="153x36" type="*widget.Entry">
+						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="153x32"/>
+						<rectangle fillColor="shadow" pos="0,34" size="153x2"/>
+						<widget pos="0,2" size="153x32" type="*widget.Scroll">
+							<widget size="153x32" type="*widget.entryContent">
+								<widget size="153x32" type="*widget.RichText">
+									<text color="placeholder" pos="8,6" size="137x20"></text>
 								</widget>
-								<widget size="145x32" type="*widget.RichText">
-									<text pos="8,6" size="129x20"></text>
+								<widget size="153x32" type="*widget.RichText">
+									<text pos="8,6" size="137x20"></text>
 								</widget>
 							</widget>
 						</widget>
 					</widget>
 				</container>
-				<container pos="0,81" size="204x36">
-					<spacer size="0x0"/>
-					<widget size="98x36" type="*widget.Button">
-						<widget pos="2,2" size="94x32" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-2" size="94x2"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="94,-2" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" pos="94,0" size="2x32" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="94,32" size="2x2" startColor="shadow"/>
-							<linearGradient pos="0,32" size="94x2" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-2,32" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x32"/>
+				<container pos="0,81" size="212x36">
+					<container pos="4,0" size="208x36">
+						<widget size="102x37" type="*widget.Button">
+							<widget pos="2,2" size="98x33" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-2" size="98x2"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="98,-2" size="2x2" startColor="shadow"/>
+								<linearGradient angle="270" pos="98,0" size="2x33" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="98,33" size="2x2" startColor="shadow"/>
+								<linearGradient pos="0,33" size="98x2" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
+							</widget>
+							<rectangle fillColor="button" pos="2,2" size="98x33"/>
+							<rectangle size="0x0"/>
+							<text bold pos="37,8" size="50x20">Cancel</text>
+							<image fillMode="contain" pos="13,8" rsc="cancelIcon" size="20x20"/>
 						</widget>
-						<rectangle fillColor="button" pos="2,2" size="94x32"/>
-						<rectangle size="0x0"/>
-						<text bold pos="36,8" size="50x20">Cancel</text>
-						<image fillMode="contain" pos="12,8" rsc="cancelIcon" size="20x20"/>
-					</widget>
-					<widget pos="102,0" size="102x36" type="*widget.Button">
-						<widget pos="2,2" size="98x32" type="*widget.Shadow">
-							<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-2" size="98x2"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="98,-2" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" pos="98,0" size="2x32" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="98,32" size="2x2" startColor="shadow"/>
-							<linearGradient pos="0,32" size="98x2" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-2,32" size="2x2" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x32"/>
+						<widget pos="106,0" size="102x37" type="*widget.Button">
+							<widget pos="2,2" size="98x33" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-2" size="98x2"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="98,-2" size="2x2" startColor="shadow"/>
+								<linearGradient angle="270" pos="98,0" size="2x33" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="98,33" size="2x2" startColor="shadow"/>
+								<linearGradient pos="0,33" size="98x2" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
+							</widget>
+							<rectangle fillColor="primary" pos="2,2" size="98x33"/>
+							<rectangle size="0x0"/>
+							<text bold color="background" pos="35,8" size="54x20">Submit</text>
+							<image fillMode="contain" pos="11,8" rsc="confirmIcon" size="20x20" themed="inverted"/>
 						</widget>
-						<rectangle fillColor="primary" pos="2,2" size="98x32"/>
-						<rectangle size="0x0"/>
-						<text bold color="background" pos="36,8" size="54x20">Submit</text>
-						<image fillMode="contain" pos="12,8" rsc="confirmIcon" size="20x20" themed="inverted"/>
-					</widget>
+					</container>
 				</container>
 			</container>
 		</widget>

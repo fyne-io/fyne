@@ -606,9 +606,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
 		}
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
-		}
 
 		_, hover := object.(desktop.Hoverable)
 		return hover

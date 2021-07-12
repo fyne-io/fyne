@@ -179,7 +179,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 		}
 	})
-	buttons := container.NewHBox(f.dismiss, f.open)
+	buttons := container.NewGridWithRows(1, f.dismiss, f.open)
 
 	f.filesScroll = container.NewScroll(nil) // filesScroll's content will be set by setView function.
 	verticalExtra := float32(float64(fileIconSize) * 0.25)
