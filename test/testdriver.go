@@ -97,7 +97,7 @@ func (d *testDriver) Device() fyne.Device {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *testDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
+func (d *testDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	return painter.RenderedTextSize(text, size, style)
 }
 

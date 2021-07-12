@@ -10,7 +10,7 @@ type Driver interface {
 
 	// RenderedTextSize returns the size required to render the given string of specified
 	// font size and style.
-	RenderedTextSize(string, float32, TextStyle) Size
+	RenderedTextSize(string, float32, TextStyle) (Size, float32)
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas

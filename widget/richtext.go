@@ -549,14 +549,47 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		return texts[0].MinSize().Height
 	}
 	height := float32(0)
+	tallestBaseline := float32(0)
+	realign := false
 	for _, text := range texts {
-		size := text.MinSize()
-
+		var size fyne.Size
+		if txt, ok := text.(*canvas.Text); ok {
+			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
+			if tallestBaseline == 0 {
+				tallestBaseline = base
+			} else if base != tallestBaseline {
+				base = fyne.Max(tallestBaseline, base)
+				realign = true
+			}
+			size = s
+		} else {
+			size = text.MinSize()
+		}
 		text.Resize(size)
-		text.Move(fyne.NewPos(xPos, yPos)) // TODO also baseline align for height (need new measure info)
+		text.Move(fyne.NewPos(xPos, yPos))
+
 		xPos += size.Width
-		height = fyne.Max(height, size.Height)
+		if height == 0 {
+			height = size.Height
+		} else if height != size.Height {
+			height = fyne.Max(height, size.Height)
+			realign = true
+		}
 	}
+
+	if realign {
+		for _, text := range texts {
+			if _, ok := text.(*canvas.Text); !ok {
+				continue
+			}
+
+			txt := text.(*canvas.Text)
+			_, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
+			delta := tallestBaseline - base
+			text.Move(fyne.NewPos(txt.Position().X, yPos+delta))
+		}
+	}
+
 	spare := lineWidth - xPos
 	switch align {
 	case fyne.TextAlignTrailing:

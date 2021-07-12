@@ -98,7 +98,7 @@ func (d *mobileDriver) currentWindow() *window {
 	return last
 }
 
-func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
+func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	return painter.RenderedTextSize(text, size, style)
 }
 
