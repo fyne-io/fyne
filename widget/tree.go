@@ -174,7 +174,9 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
-// ScrollToBottom scrolls to the bottom of the tree
+// ScrollToBottom scrolls to the bottom of the tree.
+//
+// Since 2.1
 func (t *Tree) ScrollToBottom() {
 	if t.scroller == nil {
 		return
@@ -187,7 +189,9 @@ func (t *Tree) ScrollToBottom() {
 	t.Refresh()
 }
 
-// ScrollTo scrolls to the node with the given id
+// ScrollTo scrolls to the node with the given id.
+//
+// Since 2.1
 func (t *Tree) ScrollTo(uid TreeNodeID) {
 	if t.scroller == nil {
 		return
@@ -209,7 +213,9 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 	t.Refresh()
 }
 
-// ScrollToTop scrolls to the top of the tree
+// ScrollToTop scrolls to the top of the tree.
+//
+// Since 2.1
 func (t *Tree) ScrollToTop() {
 	if t.scroller == nil {
 		return
@@ -220,7 +226,7 @@ func (t *Tree) ScrollToTop() {
 	t.Refresh()
 }
 
-// Select marks the specified node to be selected
+// Select marks the specified node to be selected.
 func (t *Tree) Select(uid TreeNodeID) {
 	if len(t.selected) > 0 {
 		if uid == t.selected[0] {
