@@ -470,7 +470,6 @@ func TestTree_ScrollToBottom(t *testing.T) {
 	})
 
 	tree.ScrollToBottom()
-	test.AssertImageMatches(t, "tree/scroll_to_bottom.png", w.Canvas().Capture())
 
 	want := 4 * (min.Height + sep)
 	assert.Equal(t, want, tree.offset.Y)
