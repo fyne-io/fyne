@@ -92,10 +92,7 @@ func (t *Table) Select(id TableCellID) {
 	}
 	t.selectedCell = &id
 
-	t.scrollTo(id)
-	if t.moveCallback != nil {
-		t.moveCallback()
-	}
+	t.ScrollTo(id)
 
 	if f := t.OnSelected; f != nil {
 		f(id)
@@ -151,16 +148,113 @@ func (t *Table) UnselectAll() {
 	}
 }
 
-func (t *Table) scrollTo(id TableCellID) {
+// ScrollTo will scroll to the given cell without changing the selection.
+// Attempting to scroll beyond the limits of the table will scroll to
+// the edge of the table instead.
+//
+// Since: 2.1
+func (t *Table) ScrollTo(id TableCellID) {
+	if t.Length == nil {
+		return
+	}
+
 	if t.scroll == nil {
 		return
 	}
+
+	rows, cols := t.Length()
+	if id.Row >= rows {
+		id.Row = rows - 1
+	}
+
+	if id.Col >= cols {
+		id.Col = cols - 1
+	}
+
 	scrollPos := t.offset
 
+	cellX, cellWidth := t.findX(id.Col)
+	if cellX < scrollPos.X {
+		scrollPos.X = cellX
+	} else if cellX+cellWidth > scrollPos.X+t.scroll.Size().Width {
+		scrollPos.X = cellX + cellWidth - t.scroll.Size().Width
+	}
+
+	cellY, cellHeight := t.findY(id.Row)
+	if cellY < scrollPos.Y {
+		scrollPos.Y = cellY
+	} else if cellY+cellHeight > scrollPos.Y+t.scroll.Size().Height {
+		scrollPos.Y = cellY + cellHeight - t.scroll.Size().Height
+	}
+
+	t.scroll.Offset = scrollPos
+	t.offset = scrollPos
+	t.finishScroll()
+}
+
+// ScrollToBottom scrolls to the last row in the table
+//
+// Since: 2.1
+func (t *Table) ScrollToBottom() {
+	if t.Length == nil || t.scroll == nil {
+		return
+	}
+
+	rows, _ := t.Length()
+	cellY, cellHeight := t.findY(rows - 1)
+	y := cellY + cellHeight - t.scroll.Size().Height
+
+	t.scroll.Offset.Y = y
+	t.offset.Y = y
+	t.finishScroll()
+}
+
+// ScrollToLeading scrolls horizontally to the leading edge of the table
+//
+// Since: 2.1
+func (t *Table) ScrollToLeading() {
+	if t.scroll == nil {
+		return
+	}
+
+	t.scroll.Offset.X = 0
+	t.offset.X = 0
+	t.finishScroll()
+}
+
+// ScrollToTop scrolls to the first row in the table
+//
+// Since: 2.1
+func (t *Table) ScrollToTop() {
+	if t.scroll == nil {
+		return
+	}
+
+	t.scroll.Offset.Y = 0
+	t.offset.Y = 0
+	t.finishScroll()
+}
+
+// ScrollToTrailing scrolls horizontally to the trailing edge of the table
+//
+// Since: 2.1
+func (t *Table) ScrollToTrailing() {
+	if t.scroll == nil || t.Length == nil {
+		return
+	}
+
+	_, cols := t.Length()
+	cellX, cellWidth := t.findX(cols - 1)
+	scrollX := cellX + cellWidth - t.scroll.Size().Width
+
+	t.scroll.Offset.X = scrollX
+	t.offset.X = scrollX
+	t.finishScroll()
+}
+
+func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 	cellSize := t.templateSize()
-	cellX := float32(0)
-	cellWidth := float32(0)
-	for i := 0; i <= id.Col; i++ {
+	for i := 0; i <= col; i++ {
 		if cellWidth > 0 {
 			cellX += cellWidth + theme.SeparatorThicknessSize()
 		}
@@ -171,21 +265,17 @@ func (t *Table) scrollTo(id TableCellID) {
 		}
 		cellWidth = width
 	}
+	return
+}
 
-	if cellX < scrollPos.X {
-		scrollPos.X = cellX
-	} else if cellX+cellWidth > scrollPos.X+t.scroll.Size().Width {
-		scrollPos.X = cellX + cellWidth - t.scroll.Size().Width
-	}
+func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
+	cellSize := t.templateSize()
+	cellHeight = cellSize.Height
+	cellY = float32(row) * (cellHeight + theme.SeparatorThicknessSize())
+	return
+}
 
-	cellY := float32(id.Row) * (cellSize.Height + theme.SeparatorThicknessSize())
-	if cellY < scrollPos.Y {
-		scrollPos.Y = cellY
-	} else if cellY+cellSize.Height > scrollPos.Y+t.scroll.Size().Height {
-		scrollPos.Y = cellY + cellSize.Height - t.scroll.Size().Height
-	}
-	t.scroll.Offset = scrollPos
-	t.offset = scrollPos
+func (t *Table) finishScroll() {
 	if t.moveCallback != nil {
 		t.moveCallback()
 	}
