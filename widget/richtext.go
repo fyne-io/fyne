@@ -552,16 +552,13 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	tallestBaseline := float32(0)
 	realign := false
 	for _, text := range texts {
-		var (
-			size fyne.Size
-			base float32
-		)
+		var size fyne.Size
 		if txt, ok := text.(*canvas.Text); ok {
-			s, b := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
+			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
 			if tallestBaseline == 0 {
-				tallestBaseline = b
+				tallestBaseline = base
 			} else if base != tallestBaseline {
-				base = fyne.Max(tallestBaseline, b)
+				tallestBaseline = fyne.Max(tallestBaseline, base)
 				realign = true
 			}
 			size = s
