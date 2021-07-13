@@ -47,6 +47,9 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 	width := int(scale(line.Size().Width + vectorPad*2))
 	height := int(scale(line.Size().Height + vectorPad*2))
 	stroke := scale(line.StrokeWidth)
+	if stroke < 1 { // software painter doesn't fade lines to compensate
+		stroke = 1
+	}
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(line.Size().Width), int(line.Size().Height), raw, raw.Bounds())
@@ -55,6 +58,17 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
 	p1x, p1y := scale(line.Position1.X-line.Position().X+vectorPad), scale(line.Position1.Y-line.Position().Y+vectorPad)
 	p2x, p2y := scale(line.Position2.X-line.Position().X+vectorPad), scale(line.Position2.Y-line.Position().Y+vectorPad)
+
+	if stroke <= 1.5 { // adjust to support 1px
+		if p1x == p2x {
+			p1x -= 0.5
+			p2x -= 0.5
+		}
+		if p1y == p2y {
+			p1y -= 0.5
+			p2y -= 0.5
+		}
+	}
 
 	dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
 	dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))

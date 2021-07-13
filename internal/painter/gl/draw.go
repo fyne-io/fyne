@@ -113,6 +113,17 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)
 	pos2.Y = roundToPixel(pos2.Y+yPosDiff, p.pixScale)
 
+	if lineWidth <= 0.5 && p.pixScale > 1 { // adjust to support 1px drawing on HiDPI (width 0.5)
+		if pos1.X == pos2.X {
+			pos1.X -= 0.25
+			pos2.X -= 0.25
+		}
+		if pos1.Y == pos2.Y {
+			pos1.Y -= 0.25
+			pos2.Y -= 0.25
+		}
+	}
+
 	x1Pos := pos1.X / frame.Width
 	x1 := -1 + x1Pos*2
 	y1Pos := pos1.Y / frame.Height
@@ -131,7 +142,7 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	normalObjX := normalX * 0.5 * frame.Width
 	normalObjY := normalY * 0.5 * frame.Height
 	widthMultiplier := float32(math.Sqrt(float64(normalObjX*normalObjX + normalObjY*normalObjY)))
-	halfWidth := (lineWidth*0.5 + feather) / widthMultiplier
+	halfWidth := (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
 	featherWidth := feather / widthMultiplier
 
 	return []float32{

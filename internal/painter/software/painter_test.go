@@ -222,6 +222,24 @@ func TestPainter_paintLine(t *testing.T) {
 	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
 }
 
+func TestPainter_paintLine_thin(t *testing.T) {
+	c := test.NewCanvas()
+	lines := [5]*canvas.Line{}
+	sws := []float32{4, 2, 1, 0.5, 0.3}
+	for i, sw := range sws {
+		lines[i] = canvas.NewLine(color.RGBA{255, 0, 0, 255})
+		lines[i].StrokeWidth = sw
+		x := float32(i * 20)
+		lines[i].Position1 = fyne.NewPos(x, 10)
+		lines[i].Position2 = fyne.NewPos(x+15, 10)
+	}
+	c.SetContent(container.NewWithoutLayout(lines[0], lines[1], lines[2], lines[3], lines[4]))
+	c.Resize(fyne.NewSize(109, 28))
+
+	p := software.NewPainter()
+	test.AssertImageMatches(t, "draw_line_thin.png", p.Paint(c))
+}
+
 func TestPainter_paintRaster(t *testing.T) {
 	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
 		x = x / 5
