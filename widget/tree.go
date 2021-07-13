@@ -787,7 +787,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 		r.treeNode.icon.Refresh()
 	}
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
-		r.background.FillColor = theme.FocusColor()
+		r.background.FillColor = theme.SelectionColor()
 		r.background.Show()
 	} else if r.treeNode.hovered {
 		r.background.FillColor = theme.HoverColor()

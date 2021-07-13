@@ -34,7 +34,7 @@
 						<rectangle fillColor="disabled" size="210x1"/>
 					</widget>
 					<widget pos="0,114" size="210x37" type="*widget.leaf">
-						<rectangle fillColor="focus" size="210x37"/>
+						<rectangle fillColor="selection" size="210x37"/>
 						<widget pos="52,0" size="158x37" type="*widget.Label">
 							<text pos="8,8" size="142x21">2222222222</text>
 						</widget>

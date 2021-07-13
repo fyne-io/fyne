@@ -395,6 +395,7 @@ func knownColor(c color.Color) string {
 		nrgbaColor(theme.PlaceHolderColor()):    "placeholder",
 		nrgbaColor(theme.PrimaryColor()):        "primary",
 		nrgbaColor(theme.ScrollBarColor()):      "scrollbar",
+		nrgbaColor(theme.SelectionColor()):      "selection",
 		nrgbaColor(theme.ShadowColor()):         "shadow",
 	}[nrgbaColor(c)]
 }

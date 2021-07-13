@@ -157,12 +157,12 @@ func TestList_Selection(t *testing.T) {
 
 	assert.False(t, children[0].(*listItem).background.Visible())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.FocusColor())
+	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.SelectionColor())
 	assert.True(t, children[0].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.FocusColor())
+	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.SelectionColor())
 	assert.True(t, children[1].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
@@ -189,20 +189,20 @@ func TestList_Select(t *testing.T) {
 	list.Select(50)
 	assert.Equal(t, float32(937), list.offsetY)
 	visible := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
-	assert.Equal(t, visible[50].background.FillColor, theme.FocusColor())
+	assert.Equal(t, visible[50].background.FillColor, theme.SelectionColor())
 	assert.True(t, visible[50].background.Visible())
 
 	list.Select(5)
 	assert.Equal(t, float32(190), list.offsetY)
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
-	assert.Equal(t, visible[5].background.FillColor, theme.FocusColor())
+	assert.Equal(t, visible[5].background.FillColor, theme.SelectionColor())
 	assert.True(t, visible[5].background.Visible())
 
 	list.Select(6)
 	assert.Equal(t, float32(190), list.offsetY)
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.False(t, visible[5].background.Visible())
-	assert.Equal(t, visible[6].background.FillColor, theme.FocusColor())
+	assert.Equal(t, visible[6].background.FillColor, theme.SelectionColor())
 	assert.True(t, visible[6].background.Visible())
 }
 
@@ -215,7 +215,7 @@ func TestList_Unselect(t *testing.T) {
 
 	list.Select(10)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
-	assert.Equal(t, children[10].(*listItem).background.FillColor, theme.FocusColor())
+	assert.Equal(t, children[10].(*listItem).background.FillColor, theme.SelectionColor())
 	assert.True(t, children[10].(*listItem).background.Visible())
 
 	list.Unselect(10)
