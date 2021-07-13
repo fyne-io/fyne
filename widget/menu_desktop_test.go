@@ -251,6 +251,56 @@ func TestMenu_TraverseMenu(t *testing.T) {
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c, "does nothing if there is no submenu opened")
 }
 
+func TestMenu_RefreshOptions(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	w := fyne.CurrentApp().NewWindow("")
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	itemFoo := fyne.NewMenuItem("Foo", nil)
+	itemBar := fyne.NewMenuItem("Bar", nil)
+	itemBaz := fyne.NewMenuItem("Baz", nil)
+
+	m := widget.NewMenu(fyne.NewMenu("",
+		itemFoo,
+		fyne.NewMenuItemSeparator(),
+		itemBar,
+		fyne.NewMenuItemSeparator(),
+		itemBaz,
+	))
+	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
+	w.Resize(m.MinSize())
+	m.Resize(m.MinSize())
+	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
+
+	itemBar.Disabled = true
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/desktop/refresh_disabled.xml", c)
+
+	itemBaz.Checked = true
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/desktop/refresh_checkmark.xml", c)
+
+	itemBar.Checked = true
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/desktop/refresh_2nd_checkmark.xml", c)
+
+	itemBar.Checked = false
+	itemBar.Disabled = false
+	m.Refresh()
+
+	itemBaz.Checked = false
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
+}
+
 func TestMenu_TriggerTraversedMenu(t *testing.T) {
 	var triggered string
 	var dismissed bool

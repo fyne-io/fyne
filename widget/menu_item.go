@@ -49,10 +49,17 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
 		objects = append(objects, icon)
 	}
+	checkIcon := canvas.NewImageFromResource(theme.ConfirmIcon())
+	if !i.Item.Checked {
+		checkIcon.Hide()
+	}
+
+	objects = append(objects, checkIcon)
 	return &menuItemRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
 		i:            i,
 		icon:         icon,
+		checkIcon:    checkIcon,
 		text:         text,
 		background:   background,
 	}
@@ -86,6 +93,9 @@ func (i *menuItem) MouseOut() {
 //
 // Implements: fyne.Tappable
 func (i *menuItem) Tapped(*fyne.PointEvent) {
+	if i.Item.Disabled {
+		return
+	}
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
 			i.activate()
@@ -97,6 +107,9 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 }
 
 func (i *menuItem) activate() {
+	if i.Item.Disabled {
+		return
+	}
 	if i.Child() != nil {
 		i.Child().Show()
 	}
@@ -160,6 +173,7 @@ type menuItemRenderer struct {
 	widget.BaseRenderer
 	i                *menuItem
 	icon             *canvas.Image
+	checkIcon        *canvas.Image
 	lastThemePadding float32
 	minSize          fyne.Size
 	text             *canvas.Text
@@ -171,15 +185,27 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 
 	r.text.TextSize = theme.TextSize()
 	r.text.Color = theme.ForegroundColor()
+	if r.i.Item.Disabled {
+		r.text.Color = theme.DisabledColor()
+	}
 	r.text.Resize(r.text.MinSize())
-	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+	r.text.Move(fyne.NewPos(padding.Width/2+r.checkSpace(), padding.Height/2))
 
 	if r.icon != nil {
 		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 		r.icon.Move(fyne.NewPos(size.Width-theme.IconInlineSize(), (size.Height-theme.IconInlineSize())/2))
 	}
+	r.checkIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	r.checkIcon.Move(fyne.NewPos(padding.Width/4, (size.Height-theme.IconInlineSize())/2))
 
 	r.background.Resize(size)
+}
+
+func (r *menuItemRenderer) checkSpace() float32 {
+	if r.i.Parent.containsCheck {
+		return theme.IconInlineSize()
+	}
+	return 0
 }
 
 func (r *menuItemRenderer) MinSize() fyne.Size {
@@ -187,7 +213,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().Add(r.itemPadding())
+	minSize := r.text.MinSize().Add(r.itemPadding()).Add(fyne.NewSize(r.checkSpace(), 0))
 	if r.icon != nil {
 		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
 	}
@@ -205,7 +231,22 @@ func (r *menuItemRenderer) Refresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
-	canvas.Refresh(r.i)
+
+	if r.i.Item.Disabled {
+		r.text.Color = theme.DisabledColor()
+		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
+	} else {
+		r.text.Color = theme.ForegroundColor()
+		r.checkIcon.Resource = theme.ConfirmIcon()
+	}
+	r.text.Refresh()
+
+	if r.i.Item.Checked {
+		r.checkIcon.Show()
+	} else {
+		r.checkIcon.Hide()
+	}
+	r.checkIcon.Refresh()
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {
