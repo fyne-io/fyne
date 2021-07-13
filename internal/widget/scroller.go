@@ -283,7 +283,7 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 func (r *scrollContainerRenderer) Refresh() {
 	if len(r.BaseRenderer.Objects()) == 0 || r.BaseRenderer.Objects()[0] != r.scroll.Content {
 		// push updated content object to baseRenderer
-		r.BaseRenderer.SetObjects([]fyne.CanvasObject{r.scroll.Content})
+		r.BaseRenderer.Objects()[0] = r.scroll.Content
 	}
 	if r.oldMinSize == r.scroll.Content.MinSize() && r.oldMinSize == r.scroll.Content.Size() &&
 		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
