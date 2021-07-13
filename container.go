@@ -57,6 +57,12 @@ func (c *Container) Add(add CanvasObject) {
 	c.layout()
 }
 
+// Prepend prepends the specified object to the items this container manages.
+func (c *Container) Prepend(add CanvasObject) {
+	c.Objects = append([]CanvasObject{add}, c.Objects...)
+	c.layout()
+}
+
 // AddObject adds another CanvasObject to the set this Container holds.
 //
 // Deprecated: Use replacement Add() function
