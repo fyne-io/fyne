@@ -1115,8 +1115,8 @@ func (w *window) capturesTab(modifier desktop.Modifier) bool {
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
+	keyEvent := &fyne.KeyEvent{Name: keyName, HardwareCode: fyne.ScanCode(scancode)}
 
-	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
 	pendingMenuToggle := w.menuTogglePending
 	pendingMenuDeactivation := w.menuDeactivationPending
