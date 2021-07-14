@@ -592,7 +592,8 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 
 	if realign {
 		for _, text := range texts {
-			if _, ok := text.(*canvas.Text); !ok {
+			txt, ok := text.(*canvas.Text)
+			if !ok {
 				if c, ok := text.(*fyne.Container); ok {
 					wid := c.Objects[0]
 					if link, ok := wid.(*Hyperlink); ok {
@@ -604,7 +605,6 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 				continue
 			}
 
-			txt := text.(*canvas.Text)
 			_, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
 			delta := tallestBaseline - base
 			text.Move(fyne.NewPos(txt.Position().X, yPos+delta))
