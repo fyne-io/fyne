@@ -9,9 +9,9 @@
 						</widget>
 					</container>
 				</widget>
-				<container pos="0,113" size="72x37">
-					<widget size="36x37" type="*widget.Button">
-						<rectangle fillColor="button" size="36x37"/>
+				<container pos="0,113" size="72x36">
+					<widget size="36x36" type="*widget.Button">
+						<rectangle fillColor="button" size="36x36"/>
 						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="8,8" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
 					</widget>

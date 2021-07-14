@@ -13,8 +13,8 @@
 			</widget>
 			<rectangle fillColor="button" pos="2,2" size="138x188"/>
 			<rectangle size="0x0"/>
-			<text bold pos="43,85" size="32x21">Test</text>
-			<image fillMode="contain" pos="79,85" rsc="cancelIcon" size="20x21"/>
+			<text bold pos="43,85" size="31x20">Test</text>
+			<image fillMode="contain" pos="78,85" rsc="cancelIcon" size="20x20"/>
 		</widget>
 	</content>
 </canvas>

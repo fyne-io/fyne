@@ -1,31 +1,31 @@
-<canvas size="137x37">
+<canvas size="135x36">
 	<content>
-		<widget size="137x37" type="*container.DocTabs">
-			<container pos="64,0" size="73x37">
-				<widget size="73x-4" type="*widget.Scroll">
-					<container size="73x119">
-						<widget size="73x37" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="65x21">Test1</text>
+		<widget size="135x36" type="*container.DocTabs">
+			<container pos="63,0" size="72x36">
+				<widget size="72x-4" type="*widget.Scroll">
+					<container size="72x118">
+						<widget size="72x36" type="*container.tabButton">
+							<text bold color="primary" pos="4,8" size="64x20">Test1</text>
 						</widget>
-						<widget pos="0,41" size="73x37" type="*container.tabButton">
-							<text bold pos="4,8" size="65x21">Test2</text>
+						<widget pos="0,40" size="72x36" type="*container.tabButton">
+							<text bold pos="4,8" size="64x20">Test2</text>
 						</widget>
-						<widget pos="0,82" size="73x37" type="*container.tabButton">
-							<text bold pos="4,8" size="65x21">Test3</text>
+						<widget pos="0,81" size="72x36" type="*container.tabButton">
+							<text bold pos="4,8" size="64x20">Test3</text>
 						</widget>
 					</container>
 				</widget>
-				<container size="73x37">
-					<widget size="36x37" type="*widget.Button">
-						<rectangle fillColor="button" size="36x37"/>
+				<container size="72x36">
+					<widget size="36x36" type="*widget.Button">
+						<rectangle fillColor="button" size="36x36"/>
 						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="8,8" rsc="more-vertical.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="60,0" size="4x37"/>
-			<widget size="60x37" type="*widget.Label">
-				<text pos="8,8" size="44x21">Text 1</text>
+			<rectangle fillColor="shadow" pos="59,0" size="4x36"/>
+			<widget size="59x36" type="*widget.Label">
+				<text pos="8,8" size="43x20">Text 1</text>
 			</widget>
 		</widget>
 	</content>

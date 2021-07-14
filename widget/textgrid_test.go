@@ -27,7 +27,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 	rend.Refresh()
 
-	assert.Equal(t, 10, len(rend.objects))
+	assert.Equal(t, 12, len(rend.objects))
 }
 
 func TestTextGrid_Row(t *testing.T) {

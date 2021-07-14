@@ -30,7 +30,7 @@ func loadFont(data fyne.Resource) *truetype.Font {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
+func RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	var opts truetype.Options
 	opts.Size = float64(size)
 	opts.DPI = TextDPI
@@ -38,7 +38,8 @@ func RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size
 	face := CachedFontFace(style, &opts)
 	advance := MeasureString(face, text, style.TabWidth)
 
-	return fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
+	return fyne.NewSize(fixed266ToFloat32(advance), fixed266ToFloat32(face.Metrics().Height)),
+		fixed266ToFloat32(face.Metrics().Ascent)
 }
 
 type compositeFace struct {
@@ -196,4 +197,8 @@ func ClearFontCache() {
 	}
 
 	fontCache = make(map[fyne.TextStyle]*fontCacheItem)
+}
+
+func fixed266ToFloat32(i fixed.Int26_6) float32 {
+	return float32(float64(i) / (1 << 6))
 }
