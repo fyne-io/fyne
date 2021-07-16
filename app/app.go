@@ -76,13 +76,23 @@ func (a *fyneApp) Run() {
 }
 
 func (a *fyneApp) SetCloudProvider(p fyne.CloudProvider) {
-	a.cloud = p
-
-	var listeners []func()
-	if a.prefs != nil { // we need to restore these on the new instance
-		listeners = a.prefs.ChangeListeners()
+	if p == nil {
+		a.cloud = nil
+		return
 	}
 
+	go a.transitionCloud(p)
+}
+
+func (a *fyneApp) transitionCloud(p fyne.CloudProvider) {
+	err := p.Setup()
+	if err != nil {
+		fyne.LogError("Failed to set up cloud provider "+ p.ProviderName(), err)
+		return
+	}
+	a.cloud = p
+
+	listeners := a.prefs.ChangeListeners()
 	if pp, ok := p.(fyne.CloudProviderPreferences); ok {
 		a.prefs = pp.CloudPreferences(a)
 	} else {
@@ -93,6 +103,9 @@ func (a *fyneApp) SetCloudProvider(p fyne.CloudProvider) {
 		a.prefs.AddChangeListener(l)
 		l() // assume that preferences have changed because we replaced the provider
 	}
+
+	// after transition ensure settings listener is fired
+	a.settings.apply()
 }
 
 func (a *fyneApp) Quit() {

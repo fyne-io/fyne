@@ -9,6 +9,9 @@ type CloudProvider interface {
 	ProviderIcon() Resource
 	// ProviderName returns the name of this cloud provider, usually the name of the service it uses.
 	ProviderName() string
+	// Setup is called when this provider is being used for the first time.
+	// Returning an error will exit the cloud setup process, though it can be retried.
+	Setup() error
 }
 
 // CloudProviderPreferences interface defines the functionality that a cloud provider will include if it is capable
