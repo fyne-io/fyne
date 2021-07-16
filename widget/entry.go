@@ -1192,8 +1192,9 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 			onSubmitted(text)
 		}
 		return
-	} else if selectDown && onSubmitted != nil {
-		// Multiline supports newline, unless shift is held and OnSubmitted is set.
+	} else if !selectDown && onSubmitted != nil {
+		// Multiline supports newline if shift is held, otherwise the return key causes the
+		// OnSubmitted function to be called if set.
 		onSubmitted(text)
 		return
 	}
