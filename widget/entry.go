@@ -1186,9 +1186,9 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.propertyLock.RUnlock()
 
 	if !multiLine {
-		// Single line doesn't support newline.
-		// Call submitted callback, if any.
 		if onSubmitted != nil {
+			// Single line doesn't support newline.
+			// Call submitted callback, if any.
 			onSubmitted(text)
 		}
 		return
@@ -1198,6 +1198,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		onSubmitted(text)
 		return
 	}
+
 	e.propertyLock.Lock()
 	provider.insertAt(e.cursorTextPos(), "\n")
 	e.CursorColumn = 0

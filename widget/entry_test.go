@@ -1323,24 +1323,25 @@ func TestEntry_Submit(t *testing.T) {
 		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
 			entry.MultiLine = true
 			entry.SetText("c")
+			submission = ""
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
-			assert.Equal(t, "c", entry.Text)
-			assert.Equal(t, "c", submission)
+			assert.Equal(t, "\nc", entry.Text)
+			assert.Equal(t, "", submission)
 			entry.SetText("d")
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
-			assert.Equal(t, "d", entry.Text)
-			assert.Equal(t, "d", submission)
+			assert.Equal(t, "\nd", entry.Text)
+			assert.Equal(t, "", submission)
 		})
 		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
 			entry.MultiLine = true
 			entry.SetText("e")
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
-			assert.Equal(t, "e", entry.Text)
-			assert.Equal(t, "e", submission)
+			assert.Equal(t, "\ne", entry.Text)
+			assert.Equal(t, "", submission)
 			entry.SetText("f")
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
-			assert.Equal(t, "f", entry.Text)
-			assert.Equal(t, "f", submission)
+			assert.Equal(t, "\nf", entry.Text)
+			assert.Equal(t, "", submission)
 		})
 	})
 	t.Run("NoCallback", func(t *testing.T) {
