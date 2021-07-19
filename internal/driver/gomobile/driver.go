@@ -147,7 +147,7 @@ func (d *mobileDriver) Run() {
 				d.sendPaintEvent()
 			case set := <-settingsChange:
 				painter.ClearFontCache()
-				cache.ResetSvg()
+				cache.ResetThemeCaches()
 				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 					c, ok := w.Canvas().(*mobileCanvas)
 					if !ok {

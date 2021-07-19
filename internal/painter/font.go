@@ -4,12 +4,13 @@ import (
 	"image"
 	"sync"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/theme"
+
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -19,22 +20,6 @@ const (
 	// TextDPI is a global constant that determines how text scales to interface sizes
 	TextDPI = 78
 )
-
-var (
-	sizeCache = map[sizeEntry]fontMetric{}
-	sizeLock  = sync.RWMutex{}
-)
-
-type fontMetric struct {
-	bound    fyne.Size
-	baseLine float32
-}
-
-type sizeEntry struct {
-	text  string
-	size  float32
-	style fyne.TextStyle
-}
 
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
@@ -47,18 +32,13 @@ func loadFont(data fyne.Resource) *truetype.Font {
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
 func RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
-	ent := sizeEntry{text, size, style}
-	sizeLock.RLock()
-	ret, found := sizeCache[ent]
-	sizeLock.RUnlock()
-	if found {
-		return ret.bound, ret.baseLine
+	bound, base := cache.GetFontSize(text, size, style)
+	if base != 0 {
+		return bound, base
 	}
 
-	bound, base := measureText(text, size, style)
-	sizeLock.Lock()
-	sizeCache[ent] = fontMetric{bound: bound, baseLine: base}
-	sizeLock.Unlock()
+	bound, base = measureText(text, size, style)
+	cache.SetFontSize(text, size, style, bound, base)
 	return bound, base
 }
 

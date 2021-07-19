@@ -20,11 +20,15 @@ func GetSvg(name string, w int, h int) *image.NRGBA {
 	return sinfo.pix
 }
 
-// ResetSvg clears all the svg cache map
-func ResetSvg() {
+// ResetThemeCaches clears all the svg and text size cache maps
+func ResetThemeCaches() {
 	svgLock.Lock()
 	svgs = make(map[string]*svgInfo)
 	svgLock.Unlock()
+
+	sizeLock.Lock()
+	sizeCache = map[sizeEntry]fontMetric{}
+	sizeLock.Unlock()
 }
 
 // SetSvg sets a svg into the cache map.
