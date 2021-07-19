@@ -20,6 +20,22 @@ const (
 	TextDPI = 78
 )
 
+var (
+	sizeCache = map[sizeEntry]fontMetric{}
+	sizeLock  = sync.RWMutex{}
+)
+
+type fontMetric struct {
+	bound    fyne.Size
+	baseLine float32
+}
+
+type sizeEntry struct {
+	text  string
+	size  float32
+	style fyne.TextStyle
+}
+
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
 	if err != nil {
@@ -31,6 +47,22 @@ func loadFont(data fyne.Resource) *truetype.Font {
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
 func RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
+	ent := sizeEntry{text, size, style}
+	sizeLock.RLock()
+	ret, found := sizeCache[ent]
+	sizeLock.RUnlock()
+	if found {
+		return ret.bound, ret.baseLine
+	}
+
+	bound, base := measureText(text, size, style)
+	sizeLock.Lock()
+	sizeCache[ent] = fontMetric{bound: bound, baseLine: base}
+	sizeLock.Unlock()
+	return bound, base
+}
+
+func measureText(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	var opts truetype.Options
 	opts.Size = float64(size)
 	opts.DPI = TextDPI
