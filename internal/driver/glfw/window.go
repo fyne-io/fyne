@@ -1090,7 +1090,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	keyName := glfw.GetKeyName(code, scancode)
 	ret, ok = keyNameMap[keyName]
 	if !ok {
-		return ""
+		return fyne.KeyUnknown
 	}
 
 	return ret
@@ -1166,9 +1166,6 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if keyName == "" { // don't emit unknown
-		return
-	}
 	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}

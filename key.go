@@ -167,4 +167,10 @@ const (
 	KeyPlus KeyName = "+"
 	// KeyBackTick is the key "`" on a US keyboard
 	KeyBackTick KeyName = "`"
+
+	// KeyUnknown is used for key events where the underlying hardware generated an
+	// event that Fyne could not decode.
+	//
+	// Since: 2.1
+	KeyUnknown KeyName = ""
 )
