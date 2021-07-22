@@ -1,15 +1,18 @@
 package fyne
 
-// ScanCode represents a hardware ID for (normally desktop) keyboard events.
+// HardwareKey contains information associated with physical key events
 // Most applications should use KeyName for cross-platform compatibility.
-type ScanCode int
+type HardwareKey struct {
+	// ScanCode represents a hardware ID for (normally desktop) keyboard events.
+	ScanCode int
+}
 
 // KeyEvent describes a keyboard input event.
 type KeyEvent struct {
 	// Name describes the keyboard event that is consistent across platforms.
 	Name KeyName
-	// HardwareCode is a platform specific field that reports the hardware ID of the keyboard events.
-	HardwareCode ScanCode
+	// Physical is a platform specific field that reports the hardware information of physical keyboard events.
+	Physical HardwareKey
 }
 
 // PointEvent describes a pointer input event. The position is relative to the
