@@ -108,8 +108,11 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
 }
 
-func (f *Form) createLabel(text string) *Label {
-	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
+func (f *Form) createLabel(text string) *canvas.Text {
+	return &canvas.Text{Text: text,
+		Alignment: fyne.TextAlignTrailing,
+		TextSize:  theme.TextSize(),
+		TextStyle: fyne.TextStyle{Bold: true}}
 }
 
 func (f *Form) updateButtons() {
@@ -193,12 +196,18 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
-		l := f.itemGrid.Objects[i*2].(*Label)
-		if l.Text == item.Text {
-			continue
+		l := f.itemGrid.Objects[i*2].(*canvas.Text)
+		l.TextSize = theme.TextSize()
+		if dis, ok := item.Widget.(fyne.Disableable); ok {
+			if dis.Disabled() {
+				l.Color = theme.DisabledColor()
+			} else {
+				l.Color = theme.ForegroundColor()
+			}
 		}
 
-		l.SetText(item.Text)
+		l.Text = item.Text
+		l.Refresh()
 		f.updateHelperText(item)
 	}
 }
@@ -221,7 +230,8 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
 	renderer := &simpleRenderer{content: fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox)}
-	f.updateButtons()      // will set correct visibility on the submit/cancel btns
+	f.updateButtons()
+	f.updateLabels()
 	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
 	return renderer
 }
