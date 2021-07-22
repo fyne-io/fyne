@@ -551,28 +551,31 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	height := float32(0)
 	tallestBaseline := float32(0)
 	realign := false
-	for _, text := range texts {
+	baselines := make([]float32, len(texts))
+	for i, text := range texts {
 		var size fyne.Size
 		if txt, ok := text.(*canvas.Text); ok {
 			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
-			if tallestBaseline == 0 {
+			if base > tallestBaseline {
+				if tallestBaseline > 0 {
+					realign = true
+				}
 				tallestBaseline = base
-			} else if base != tallestBaseline {
-				tallestBaseline = fyne.Max(tallestBaseline, base)
-				realign = true
 			}
 			size = s
+			baselines[i] = base
 		} else if c, ok := text.(*fyne.Container); ok {
 			wid := c.Objects[0]
 			if link, ok := wid.(*Hyperlink); ok {
 				s, base := fyne.CurrentApp().Driver().RenderedTextSize(link.Text, theme.TextSize(), link.TextStyle)
-				if tallestBaseline == 0 {
+				if base > tallestBaseline {
+					if tallestBaseline > 0 {
+						realign = true
+					}
 					tallestBaseline = base
-				} else if base != tallestBaseline {
-					tallestBaseline = fyne.Max(tallestBaseline, base)
-					realign = true
 				}
 				size = s
+				baselines[i] = base
 			}
 		}
 		if size.IsZero() {
@@ -591,23 +594,9 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	}
 
 	if realign {
-		for _, text := range texts {
-			txt, ok := text.(*canvas.Text)
-			if !ok {
-				if c, ok := text.(*fyne.Container); ok {
-					wid := c.Objects[0]
-					if link, ok := wid.(*Hyperlink); ok {
-						_, base := fyne.CurrentApp().Driver().RenderedTextSize(link.Text, theme.TextSize(), link.TextStyle)
-						delta := tallestBaseline - base
-						text.Move(fyne.NewPos(c.Position().X, yPos+delta))
-					}
-				}
-				continue
-			}
-
-			_, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
-			delta := tallestBaseline - base
-			text.Move(fyne.NewPos(txt.Position().X, yPos+delta))
+		for i, text := range texts {
+			delta := tallestBaseline - baselines[i]
+			text.Move(fyne.NewPos(text.Position().X, yPos+delta))
 		}
 	}
 

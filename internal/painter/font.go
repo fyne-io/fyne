@@ -30,7 +30,8 @@ func loadFont(data fyne.Resource) *truetype.Font {
 	return loaded
 }
 
-// RenderedTextSize looks up how bit a string would be if drawn on screen
+// RenderedTextSize looks up how big a string would be if drawn on screen.
+// It also returns the distance from top to the text baseline.
 func RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	bound, base := cache.GetFontSize(text, size, style)
 	if base != 0 {

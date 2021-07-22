@@ -98,8 +98,8 @@ func (d *mobileDriver) currentWindow() *window {
 	return last
 }
 
-func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) (bounds fyne.Size, baseline float32) {
-	return painter.RenderedTextSize(text, size, style)
+func (d *mobileDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
+	return painter.RenderedTextSize(text, textSize, style)
 }
 
 func (d *mobileDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
