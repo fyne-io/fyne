@@ -32,10 +32,10 @@
 						<rectangle fillColor="background" size="135x78"/>
 						<container pos="0,4" size="135x78">
 							<widget size="135x29" type="*widget.menuItem">
-								<text pos="8,4" size="27x21">Foo</text>
+								<text pos="8,4" size="119x21">Foo</text>
 							</widget>
 							<widget pos="0,33" size="135x29" type="*widget.menuItem">
-								<text pos="8,4" size="25x21">Bar</text>
+								<text pos="8,4" size="119x21">Bar</text>
 							</widget>
 						</container>
 					</widget>

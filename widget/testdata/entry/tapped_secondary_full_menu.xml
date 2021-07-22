@@ -32,13 +32,13 @@
 						<rectangle fillColor="background" size="79x144"/>
 						<container pos="0,4" size="79x144">
 							<widget size="79x29" type="*widget.menuItem">
-								<text pos="8,4" size="25x21">Cut</text>
+								<text pos="8,4" size="63x21">Cut</text>
 							</widget>
 							<widget pos="0,33" size="79x29" type="*widget.menuItem">
-								<text pos="8,4" size="36x21">Copy</text>
+								<text pos="8,4" size="63x21">Copy</text>
 							</widget>
 							<widget pos="0,66" size="79x29" type="*widget.menuItem">
-								<text pos="8,4" size="39x21">Paste</text>
+								<text pos="8,4" size="63x21">Paste</text>
 							</widget>
 							<widget pos="0,99" size="79x29" type="*widget.menuItem">
 								<text pos="8,4" size="63x21">Select all</text>

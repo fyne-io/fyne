@@ -20,10 +20,10 @@
 						<rectangle fillColor="background" size="210x208"/>
 						<container pos="0,4" size="210x208">
 							<widget size="210x29" type="*widget.menuItem">
-								<text pos="8,4" size="63x21">Option A</text>
+								<text pos="8,4" size="194x21">Option A</text>
 							</widget>
 							<widget pos="0,33" size="210x29" type="*widget.menuItem">
-								<text pos="8,4" size="63x21">Option B</text>
+								<text pos="8,4" size="194x21">Option B</text>
 							</widget>
 						</container>
 					</widget>

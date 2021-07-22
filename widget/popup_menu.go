@@ -67,6 +67,15 @@ func (p *PopUpMenu) Move(pos fyne.Position) {
 	p.Base.Move(p.adjustedPosition(pos, p.Size()))
 }
 
+// Refresh ensures the menu updates to reflect data changes.
+//
+// Implements: fyne.Widget
+func (p *PopUpMenu) Refresh() {
+	p.updateItems()
+
+	p.Menu.Refresh()
+}
+
 // Resize changes the size of the pop-up menu.
 //
 // Implements: fyne.Widget
@@ -79,6 +88,8 @@ func (p *PopUpMenu) Resize(size fyne.Size) {
 //
 // Implements: fyne.Widget
 func (p *PopUpMenu) Show() {
+	p.updateItems()
+
 	p.overlay.Show()
 	p.Menu.Show()
 	p.canvas.Focus(p)
@@ -131,4 +142,13 @@ func (p *PopUpMenu) adjustedPosition(pos fyne.Position, size fyne.Size) fyne.Pos
 		}
 	}
 	return fyne.NewPos(x, y)
+}
+
+func (p *PopUpMenu) updateItems() {
+	for _, item := range p.Menu.Items {
+		if mItem, ok := item.(*menuItem); ok {
+			mItem.alignment = p.alignment
+			mItem.Refresh()
+		}
+	}
 }

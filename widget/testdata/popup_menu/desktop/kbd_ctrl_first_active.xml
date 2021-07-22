@@ -21,10 +21,10 @@
 						<container pos="0,4" size="99x78">
 							<widget size="99x29" type="*widget.menuItem">
 								<rectangle fillColor="focus" size="99x29"/>
-								<text pos="8,4" size="63x21">Option A</text>
+								<text pos="8,4" size="83x21">Option A</text>
 							</widget>
 							<widget pos="0,33" size="99x29" type="*widget.menuItem">
-								<text pos="8,4" size="63x21">Option B</text>
+								<text pos="8,4" size="83x21">Option B</text>
 								<image pos="79,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>

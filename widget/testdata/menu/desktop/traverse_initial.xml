@@ -17,20 +17,20 @@
 						<rectangle fillColor="background" size="61x121"/>
 						<container pos="0,4" size="61x121">
 							<widget size="61x29" type="*widget.menuItem">
-								<text pos="8,4" size="27x21">Foo</text>
+								<text pos="8,4" size="45x21">Foo</text>
 							</widget>
 							<widget pos="0,33" size="61x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="61x1"/>
 							</widget>
 							<widget pos="0,38" size="61x29" type="*widget.menuItem">
-								<text pos="8,4" size="25x21">Bar</text>
+								<text pos="8,4" size="45x21">Bar</text>
 								<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 							<widget pos="0,71" size="61x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="61x1"/>
 							</widget>
 							<widget pos="0,76" size="61x29" type="*widget.menuItem">
-								<text pos="8,4" size="26x21">Baz</text>
+								<text pos="8,4" size="45x21">Baz</text>
 							</widget>
 						</container>
 					</widget>

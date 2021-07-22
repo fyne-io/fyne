@@ -20,7 +20,7 @@
 						<rectangle fillColor="background" size="71x116"/>
 						<container pos="0,4" size="71x116">
 							<widget size="71x29" type="*widget.menuItem">
-								<text pos="8,4" size="10x21">A</text>
+								<text pos="8,4" size="55x21">A</text>
 							</widget>
 							<widget pos="0,33" size="71x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="71x1"/>
@@ -29,7 +29,7 @@
 								<text pos="8,4" size="55x21">B (long)</text>
 							</widget>
 							<widget pos="0,71" size="71x29" type="*widget.menuItem">
-								<text pos="8,4" size="10x21">C</text>
+								<text pos="8,4" size="55x21">C</text>
 								<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>

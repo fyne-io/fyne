@@ -47,13 +47,13 @@
 							<container pos="0,4" size="85x111">
 								<widget size="85x29" type="*widget.menuItem">
 									<rectangle fillColor="focus" size="85x29"/>
-									<text pos="8,4" size="33x21">New</text>
+									<text pos="8,4" size="69x21">New</text>
 								</widget>
 								<widget pos="0,33" size="85x29" type="*widget.menuItem">
-									<text pos="8,4" size="40x21">Open</text>
+									<text pos="8,4" size="69x21">Open</text>
 								</widget>
 								<widget pos="0,66" size="85x29" type="*widget.menuItem">
-									<text pos="8,4" size="49x21">Recent</text>
+									<text pos="8,4" size="69x21">Recent</text>
 									<image pos="65,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
 							</container>

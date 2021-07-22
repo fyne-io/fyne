@@ -31,7 +31,7 @@
 						<rectangle fillColor="background" size="79x78"/>
 						<container pos="0,4" size="79x78">
 							<widget size="79x29" type="*widget.menuItem">
-								<text pos="8,4" size="36x21">Copy</text>
+								<text pos="8,4" size="63x21">Copy</text>
 							</widget>
 							<widget pos="0,33" size="79x29" type="*widget.menuItem">
 								<text pos="8,4" size="63x21">Select all</text>

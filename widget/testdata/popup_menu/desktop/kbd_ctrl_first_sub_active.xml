@@ -20,11 +20,11 @@
 						<rectangle fillColor="background" size="99x78"/>
 						<container pos="0,4" size="99x78">
 							<widget size="99x29" type="*widget.menuItem">
-								<text pos="8,4" size="63x21">Option A</text>
+								<text pos="8,4" size="83x21">Option A</text>
 							</widget>
 							<widget pos="0,33" size="99x29" type="*widget.menuItem">
 								<rectangle fillColor="focus" size="99x29"/>
-								<text pos="8,4" size="63x21">Option B</text>
+								<text pos="8,4" size="83x21">Option B</text>
 								<image pos="79,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
@@ -47,10 +47,10 @@
 							<container pos="0,4" size="130x78">
 								<widget size="130x29" type="*widget.menuItem">
 									<rectangle fillColor="focus" size="130x29"/>
-									<text pos="8,4" size="94x21">Sub Option A</text>
+									<text pos="8,4" size="114x21">Sub Option A</text>
 								</widget>
 								<widget pos="0,33" size="130x29" type="*widget.menuItem">
-									<text pos="8,4" size="94x21">Sub Option B</text>
+									<text pos="8,4" size="114x21">Sub Option B</text>
 									<image pos="110,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
 							</container>

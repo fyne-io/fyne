@@ -20,22 +20,22 @@
 						<rectangle fillColor="background" size="28x210"/>
 						<container pos="0,4" size="28x210">
 							<widget size="28x29" type="*widget.menuItem">
-								<text pos="8,4" size="10x21">A</text>
+								<text pos="8,4" size="12x21">A</text>
 							</widget>
 							<widget pos="0,33" size="28x29" type="*widget.menuItem">
-								<text pos="8,4" size="10x21">B</text>
+								<text pos="8,4" size="12x21">B</text>
 							</widget>
 							<widget pos="0,66" size="28x29" type="*widget.menuItem">
-								<text pos="8,4" size="10x21">C</text>
+								<text pos="8,4" size="12x21">C</text>
 							</widget>
 							<widget pos="0,99" size="28x29" type="*widget.menuItem">
 								<text pos="8,4" size="12x21">D</text>
 							</widget>
 							<widget pos="0,132" size="28x29" type="*widget.menuItem">
-								<text pos="8,4" size="9x21">E</text>
+								<text pos="8,4" size="12x21">E</text>
 							</widget>
 							<widget pos="0,165" size="28x29" type="*widget.menuItem">
-								<text pos="8,4" size="8x21">F</text>
+								<text pos="8,4" size="12x21">F</text>
 							</widget>
 						</container>
 					</widget>

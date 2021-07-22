@@ -20,7 +20,7 @@
 						<rectangle fillColor="background" size="71x116"/>
 						<container pos="0,4" size="71x116">
 							<widget size="71x29" type="*widget.menuItem">
-								<text pos="8,4" size="10x21">A</text>
+								<text pos="8,4" size="55x21">A</text>
 							</widget>
 							<widget pos="0,33" size="71x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="71x1"/>
@@ -30,7 +30,7 @@
 							</widget>
 							<widget pos="0,71" size="71x29" type="*widget.menuItem">
 								<rectangle fillColor="focus" size="71x29"/>
-								<text pos="8,4" size="10x21">C</text>
+								<text pos="8,4" size="55x21">C</text>
 								<image pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
@@ -52,14 +52,14 @@
 							<rectangle fillColor="background" size="153x111"/>
 							<container pos="0,4" size="153x111">
 								<widget size="153x29" type="*widget.menuItem">
-									<text pos="8,4" size="72x21">subitem A</text>
+									<text pos="8,4" size="137x21">subitem A</text>
 								</widget>
 								<widget pos="0,33" size="153x29" type="*widget.menuItem">
-									<text pos="8,4" size="72x21">subitem B</text>
+									<text pos="8,4" size="137x21">subitem B</text>
 								</widget>
 								<widget pos="0,66" size="153x29" type="*widget.menuItem">
 									<rectangle fillColor="focus" size="153x29"/>
-									<text pos="8,4" size="117x21">subitem C (long)</text>
+									<text pos="8,4" size="137x21">subitem C (long)</text>
 									<image pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
 							</container>
@@ -84,7 +84,7 @@
 										<text pos="8,4" size="143x21">subsubitem A (long)</text>
 									</widget>
 									<widget pos="0,33" size="159x29" type="*widget.menuItem">
-										<text pos="8,4" size="98x21">subsubitem B</text>
+										<text pos="8,4" size="143x21">subsubitem B</text>
 									</widget>
 								</container>
 							</widget>
