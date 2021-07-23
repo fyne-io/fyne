@@ -318,27 +318,35 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 		return
 	}
 
-	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+	var tappableO fyne.CanvasObject
+	var secondaryTappableO fyne.CanvasObject
+	var touchableO fyne.CanvasObject
+	var doubleTappableO fyne.CanvasObject
+
+	_, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		ret := false
 		if _, ok := object.(fyne.Tappable); ok {
-			return true
+			tappableO = object
+			ret = true
 		} else if _, ok := object.(fyne.SecondaryTappable); ok {
-			return true
+			secondaryTappableO = object
+			ret = true
 		} else if _, ok := object.(mobile.Touchable); ok {
-			return true
-		} else if _, ok := object.(fyne.Focusable); ok {
-			return true
+			touchableO = object
+			ret = true
 		} else if _, ok := object.(fyne.DoubleTappable); ok {
-			return true
+			doubleTappableO = object
+			ret = true
 		}
 
-		return false
+		return ret
 	})
 
-	if wid, ok := co.(mobile.Touchable); ok {
+	if touchableO != nil {
 		touchEv := &mobile.TouchEvent{}
 		touchEv.Position = objPos
 		touchEv.AbsolutePosition = pos
-		wid.TouchUp(touchEv)
+		touchableO.(mobile.Touchable).TouchUp(touchEv)
 		c.touched[tapID] = nil
 	}
 
@@ -347,23 +355,22 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	ev.AbsolutePosition = pos
 
 	if duration < tapSecondaryDelay {
-		_, doubleTap := co.(fyne.DoubleTappable)
-		if doubleTap {
+		if doubleTappableO != nil {
 			c.touchTapCount++
-			c.touchLastTapped = co
+			c.touchLastTapped = doubleTappableO
 			if c.touchCancelFunc != nil {
 				c.touchCancelFunc()
 				return
 			}
-			go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
+			go c.waitForDoubleTap(doubleTappableO, ev, tapCallback, doubleTapCallback)
 		} else {
-			if wid, ok := co.(fyne.Tappable); ok {
-				tapCallback(wid, ev)
+			if tappableO != nil {
+				tapCallback(tappableO.(fyne.Tappable), ev)
 			}
 		}
 	} else {
-		if wid, ok := co.(fyne.SecondaryTappable); ok {
-			tapAltCallback(wid, ev)
+		if secondaryTappableO != nil {
+			tapAltCallback(secondaryTappableO.(fyne.SecondaryTappable), ev)
 		}
 	}
 }
