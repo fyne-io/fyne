@@ -7,10 +7,10 @@
 				<widget size="120x96" type="*widget.entryContent">
 					<rectangle fillColor="primary" pos="24,27" size="37x21"/>
 					<rectangle fillColor="primary" pos="7,48" size="35x21"/>
-					<widget size="120x96" type="*widget.textProvider">
-						<text pos="8,6" size="108x21">Testing</text>
-						<text pos="8,27" size="108x21">Testing</text>
-						<text pos="8,48" size="108x21">Testing</text>
+					<widget size="120x96" type="*widget.RichText">
+						<text pos="8,6" size="104x21">Testing</text>
+						<text pos="8,27" size="104x21">Testing</text>
+						<text pos="8,48" size="104x21">Testing</text>
 					</widget>
 					<rectangle fillColor="primary" pos="41,48" size="2x21"/>
 				</widget>

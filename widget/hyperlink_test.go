@@ -29,6 +29,7 @@ func TestHyperlink_MinSize(t *testing.T) {
 	assert.Less(t, minA.Width, minB.Width)
 
 	hyperlink.Text = "."
+	hyperlink.Refresh()
 	minC := hyperlink.MinSize()
 	assert.Greater(t, minB.Width, minC.Width)
 }

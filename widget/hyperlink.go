@@ -23,8 +23,8 @@ type Hyperlink struct {
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 
-	focused  bool
-	provider *textProvider
+	focused, hovered bool
+	provider         *RichText
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -47,13 +47,17 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
-	hl.provider = newTextProvider(hl.Text, hl)
+	hl.provider = NewRichTextWithText(hl.Text)
+	hl.provider.ExtendBaseWidget(hl.provider)
+	hl.syncSegments()
 
 	focus := canvas.NewRectangle(color.Transparent)
 	focus.StrokeColor = theme.FocusColor()
 	focus.StrokeWidth = 2
 	focus.Hide()
-	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus}, focus: focus}
+	under := canvas.NewRectangle(theme.PrimaryColor())
+	under.Hide()
+	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus, under}, focus: focus, under: under}
 }
 
 // Cursor returns the cursor type of this widget
@@ -64,25 +68,51 @@ func (hl *Hyperlink) Cursor() desktop.Cursor {
 // FocusGained is a hook called by the focus handling logic after this object gained the focus.
 func (hl *Hyperlink) FocusGained() {
 	hl.focused = true
-	hl.Refresh()
+	hl.BaseWidget.Refresh()
 }
 
 // FocusLost is a hook called by the focus handling logic after this object lost the focus.
 func (hl *Hyperlink) FocusLost() {
 	hl.focused = false
-	hl.Refresh()
+	hl.BaseWidget.Refresh()
+}
+
+// MouseIn is a hook that is called if the mouse pointer enters the element.
+func (hl *Hyperlink) MouseIn(*desktop.MouseEvent) {
+	hl.hovered = true
+	hl.BaseWidget.Refresh()
+}
+
+// MouseMoved is a hook that is called if the mouse pointer moved over the element.
+func (hl *Hyperlink) MouseMoved(*desktop.MouseEvent) {
+}
+
+// MouseOut is a hook that is called if the mouse pointer leaves the element.
+func (hl *Hyperlink) MouseOut() {
+	hl.hovered = false
+	hl.BaseWidget.Refresh()
+}
+
+// Refresh triggers a redraw of the hyperlink.
+//
+// Implements: fyne.Widget
+func (hl *Hyperlink) Refresh() {
+	if hl.provider == nil { // not created until visible
+		return
+	}
+	hl.syncSegments()
+
+	hl.provider.Refresh()
+	hl.BaseWidget.Refresh()
 }
 
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
-	hl.ExtendBaseWidget(hl)
-	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
-		p.setText(hl.Text)
+	if hl.provider == nil {
+		hl.CreateRenderer()
 	}
 
-	label := canvas.NewText(hl.Text, theme.ForegroundColor())
-	label.TextStyle = hl.textStyle()
-	return label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*4))
+	return hl.provider.MinSize()
 }
 
 // Resize sets a new size for the hyperlink.
@@ -101,7 +131,8 @@ func (hl *Hyperlink) SetText(text string) {
 	if hl.provider == nil { // not created until visible
 		return
 	}
-	hl.provider.setText(text) // calls refresh
+	hl.syncSegments()
+	hl.provider.Refresh()
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
@@ -135,36 +166,6 @@ func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 	}
 }
 
-// textAlign tells the rendering textProvider our alignment
-func (hl *Hyperlink) textAlign() fyne.TextAlign {
-	return hl.Alignment
-}
-
-// textWrap tells the rendering textProvider our wrapping
-func (hl *Hyperlink) textWrap() fyne.TextWrap {
-	return hl.Wrapping
-}
-
-// textStyle tells the rendering textProvider our style
-func (hl *Hyperlink) textStyle() fyne.TextStyle {
-	return hl.TextStyle
-}
-
-// textColor tells the rendering textProvider our color
-func (hl *Hyperlink) textColor() color.Color {
-	return theme.PrimaryColor()
-}
-
-// concealed tells the rendering textProvider if we are a concealed field
-func (hl *Hyperlink) concealed() bool {
-	return false
-}
-
-// object returns the root object of the widget so it can be referenced
-func (hl *Hyperlink) object() fyne.Widget {
-	return hl.provider
-}
-
 func (hl *Hyperlink) openURL() {
 	if hl.URL != nil {
 		err := fyne.CurrentApp().OpenURL(hl.URL)
@@ -174,11 +175,25 @@ func (hl *Hyperlink) openURL() {
 	}
 }
 
+func (hl *Hyperlink) syncSegments() {
+	hl.provider.Wrapping = hl.Wrapping
+	hl.provider.Segments = []RichTextSegment{&TextSegment{
+		Style: RichTextStyle{
+			Alignment: hl.Alignment,
+			ColorName: theme.ColorNamePrimary,
+			Inline:    true,
+			TextStyle: hl.TextStyle,
+		},
+		Text: hl.Text,
+	}}
+}
+
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
 
 type hyperlinkRenderer struct {
 	hl    *Hyperlink
 	focus *canvas.Rectangle
+	under *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 }
@@ -190,6 +205,8 @@ func (r *hyperlinkRenderer) Layout(s fyne.Size) {
 	r.hl.provider.Resize(s)
 	r.focus.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	r.focus.Resize(fyne.NewSize(s.Width-theme.Padding()*2, s.Height-theme.Padding()*2))
+	r.under.Move(fyne.NewPos(theme.Padding()*2, s.Height-theme.Padding()*2))
+	r.under.Resize(fyne.NewSize(s.Width-theme.Padding()*4, 1))
 }
 
 func (r *hyperlinkRenderer) MinSize() fyne.Size {
@@ -204,4 +221,6 @@ func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
 	r.focus.StrokeColor = theme.FocusColor()
 	r.focus.Hidden = !r.hl.focused
+	r.under.StrokeColor = theme.PrimaryColor()
+	r.under.Hidden = !r.hl.hovered
 }

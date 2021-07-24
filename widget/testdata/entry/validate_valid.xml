@@ -4,8 +4,8 @@
 			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="120x33"/>
 			<rectangle fillColor="primary" pos="0,35" size="120x2"/>
 			<widget pos="0,2" size="92x33" type="*widget.entryContent">
-				<widget size="92x33" type="*widget.textProvider">
-					<text pos="8,6" size="80x21">2020-02-12</text>
+				<widget size="92x33" type="*widget.RichText">
+					<text pos="8,6" size="76x21">2020-02-12</text>
 				</widget>
 				<rectangle fillColor="primary" pos="87,6" size="2x21"/>
 			</widget>

@@ -23,8 +23,11 @@ type checkRenderer struct {
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
-	min := c.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), theme.Padding()*2))
+	pad4 := theme.Padding() * 4
+	min := c.label.MinSize().Add(fyne.NewSize(theme.IconInlineSize()+pad4, pad4))
+	if c.check.Text != "" {
+		min.Add(fyne.NewSize(theme.Padding(), 0))
+	}
 
 	return min
 }

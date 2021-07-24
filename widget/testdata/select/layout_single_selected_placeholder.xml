@@ -5,7 +5,7 @@
 				<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="103x33"/>
 				<rectangle fillColor="shadow" pos="0,35" size="103x2"/>
 				<rectangle size="0x0"/>
-				<widget pos="4,4" size="71x29" type="*widget.textProvider">
+				<widget pos="4,4" size="71x29" type="*widget.RichText">
 					<text pos="4,4" size="63x21">Test</text>
 				</widget>
 				<widget pos="75,8" size="20x20" type="*widget.Icon">

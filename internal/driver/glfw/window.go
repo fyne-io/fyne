@@ -272,7 +272,7 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 }
 
 func (w *window) fitContent() {
-	if w.canvas.Content() == nil {
+	if w.canvas.Content() == nil || w.fullScreen {
 		return
 	}
 
@@ -605,9 +605,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
-		}
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
 		}
 
 		_, hover := object.(desktop.Hoverable)

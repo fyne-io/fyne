@@ -5,7 +5,7 @@
 				<rectangle fillColor="focus" pos="0,2" size="135x33"/>
 				<rectangle fillColor="primary" pos="0,35" size="135x2"/>
 				<rectangle size="0x0"/>
-				<widget pos="4,4" size="103x29" type="*widget.textProvider">
+				<widget pos="4,4" size="103x29" type="*widget.RichText">
 					<text pos="4,4" size="95x21">(Select one)</text>
 				</widget>
 				<widget pos="107,8" size="20x20" type="*widget.Icon">

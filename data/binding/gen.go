@@ -236,7 +236,8 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 {{ else }}
 	var val {{ .Type }}
 	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
 		if err != nil {
 			return err
 		}

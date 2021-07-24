@@ -32,8 +32,6 @@ var _ fyne.Tappable = (*Select)(nil)
 var _ fyne.Focusable = (*Select)(nil)
 var _ fyne.Disableable = (*Select)(nil)
 
-var _ textPresenter = (*Select)(nil)
-
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
 	s := &Select{
@@ -60,9 +58,12 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
 	}
-	txtProv := newTextProvider(s.Selected, s)
+	txtProv := NewRichTextWithText(s.Selected)
 	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
+	if s.disabled {
+		txtProv.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
+	}
 
 	background := &canvas.Rectangle{}
 	line := canvas.NewRectangle(theme.ShadowColor())
@@ -218,14 +219,6 @@ func (s *Select) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
-func (s *Select) concealed() bool {
-	return false
-}
-
-func (s *Select) object() fyne.Widget {
-	return nil
-}
-
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-theme.InputBorderSize()))
@@ -255,25 +248,6 @@ func (s *Select) tapAnimation() {
 	s.tapAnim.Start()
 }
 
-func (s *Select) textAlign() fyne.TextAlign {
-	return fyne.TextAlignLeading
-}
-
-func (s *Select) textColor() color.Color {
-	if s.Disabled() {
-		return theme.DisabledColor()
-	}
-	return theme.ForegroundColor()
-}
-
-func (s *Select) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{Bold: false}
-}
-
-func (s *Select) textWrap() fyne.TextWrap {
-	return fyne.TextTruncate
-}
-
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
@@ -286,7 +260,7 @@ func (s *Select) updateSelected(text string) {
 
 type selectRenderer struct {
 	icon             *Icon
-	label            *textProvider
+	label            *RichText
 	background, line *canvas.Rectangle
 
 	objects []fyne.CanvasObject
@@ -323,7 +297,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.combo.textStyle()).Width
+	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), fyne.TextStyle{}).Width
 	min := s.label.MinSize()
 	min.Width = minPlaceholderWidth
 	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*2))
@@ -337,10 +311,17 @@ func (s *selectRenderer) Refresh() {
 	s.background.FillColor, s.line.FillColor = s.bgLineColor()
 	s.combo.propertyLock.RUnlock()
 
+	if s.combo.disabled {
+		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
+	} else {
+		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
+	}
+	s.label.Refresh()
+
 	s.Layout(s.combo.Size())
 	if s.combo.popUp != nil {
-		s.combo.Move(s.combo.position)
-		s.combo.Resize(s.combo.size)
+		s.combo.popUp.Move(s.combo.popUpPos())
+		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Width, s.combo.popUp.MinSize().Width))
 	}
 	s.background.Refresh()
 	canvas.Refresh(s.combo.super())
@@ -348,7 +329,7 @@ func (s *selectRenderer) Refresh() {
 
 func (s *selectRenderer) bgLineColor() (bg color.Color, line color.Color) {
 	if s.combo.Disabled() {
-		return theme.InputBackgroundColor(), theme.DisabledTextColor()
+		return theme.InputBackgroundColor(), theme.DisabledColor()
 	}
 	if s.combo.focused {
 		return theme.FocusColor(), theme.PrimaryColor()
@@ -374,8 +355,9 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	if s.combo.Selected == "" {
-		s.label.setText(s.combo.PlaceHolder)
+		s.label.Segments[0].(*TextSegment).Text = s.combo.PlaceHolder
 	} else {
-		s.label.setText(s.combo.Selected)
+		s.label.Segments[0].(*TextSegment).Text = s.combo.Selected
 	}
+	s.label.Refresh()
 }

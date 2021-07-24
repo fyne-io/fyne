@@ -4,11 +4,11 @@
 			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="38x33"/>
 			<rectangle fillColor="shadow" pos="0,35" size="38x2"/>
 			<widget pos="0,2" size="38x33" type="*widget.entryContent">
-				<widget size="38x33" type="*widget.textProvider">
-					<text color="placeholder" pos="8,6" size="26x21">Placehold</text>
+				<widget size="38x33" type="*widget.RichText">
+					<text color="placeholder" pos="8,6" size="22x21">Placehold</text>
 				</widget>
-				<widget size="38x33" type="*widget.textProvider">
-					<text pos="8,6" size="26x21"></text>
+				<widget size="38x33" type="*widget.RichText">
+					<text pos="8,6" size="22x21"></text>
 				</widget>
 			</widget>
 		</widget>
