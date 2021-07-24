@@ -704,6 +704,9 @@ func getFavoriteIcons() map[string]fyne.Resource {
 		"Home":      theme.HomeIcon(),
 		"Documents": theme.DocumentIcon(),
 		"Downloads": theme.DownloadIcon(),
+		"Music":     theme.MediaMusicIcon(),
+		"Pictures":  theme.MediaPhotoIcon(),
+		"Videos":    theme.MediaVideoIcon(),
 	}
 }
 
@@ -712,5 +715,8 @@ func getFavoriteOrder() []string {
 		"Home",
 		"Documents",
 		"Downloads",
+		"Music",
+		"Pictures",
+		"Videos",
 	}
 }

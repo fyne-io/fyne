@@ -162,6 +162,9 @@ func main() {
 	bundleIcon("mail-reply_all", f)
 	bundleIcon("mail-send", f)
 
+	bundleIcon("media-music", f)
+	bundleIcon("media-photo", f)
+	bundleIcon("media-video", f)
 	bundleIcon("media-fast-forward", f)
 	bundleIcon("media-fast-rewind", f)
 	bundleIcon("media-pause", f)
