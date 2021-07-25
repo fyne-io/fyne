@@ -817,7 +817,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	// when click outside currently Focusable object, remove focus.
-	if w.canvas.Focused() != nil && focusableO.(fyne.Focusable) != w.canvas.Focused() {
+	if focusableO, ok := focusableO.(fyne.Focusable); ok && w.canvas.Focused() != nil && focusableO != w.canvas.Focused() {
 		w.canvas.Unfocus()
 	}
 
