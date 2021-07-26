@@ -20,6 +20,10 @@ type MenuItem struct {
 	IsSeparator bool
 	Label       string
 	Action      func()
+	// Since: 2.1
+	Disabled bool
+	// Since: 2.1
+	Checked bool
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.

@@ -130,9 +130,10 @@ func (d *gLDriver) runGL() {
 
 				w.viewLock.RLock()
 				expand := w.shouldExpand
+				fullScreen := w.fullScreen
 				w.viewLock.RUnlock()
 
-				if expand {
+				if expand && !fullScreen {
 					w.fitContent()
 					w.viewLock.Lock()
 					w.shouldExpand = false

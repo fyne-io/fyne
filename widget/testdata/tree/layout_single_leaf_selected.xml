@@ -4,7 +4,7 @@
 			<widget size="192x292" type="*widget.Scroll">
 				<widget size="192x292" type="*widget.treeContent">
 					<widget size="192x36" type="*widget.leaf">
-						<rectangle fillColor="focus" size="192x36"/>
+						<rectangle fillColor="selection" size="192x36"/>
 						<widget pos="28,0" size="164x36" type="*widget.Label">
 							<text pos="8,8" size="148x20">11111</text>
 						</widget>

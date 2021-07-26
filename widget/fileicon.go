@@ -29,7 +29,7 @@ type FileIcon struct {
 	cachedURI fyne.URI
 }
 
-// NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
+// NewFileIcon takes a filepath and creates an icon with an overlaid label using the detected mimetype and extension
 //
 // Since: 1.4
 func NewFileIcon(uri fyne.URI) *FileIcon {
@@ -74,9 +74,8 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	// TODO should FileIcon render a background representing selection, or should it be in the collection?
-	// TODO file dialog currently uses a container with NewGridWrapLayout, but if this changes to List, or Table then the primary color background would be rendered twice.
-	background := canvas.NewRectangle(theme.PrimaryColor())
+	// TODO remove background when `SetSelected` is gone.
+	background := canvas.NewRectangle(theme.SelectionColor())
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
@@ -91,7 +90,9 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	return s
 }
 
-// SetSelected makes the file look like it is selected
+// SetSelected makes the file look like it is selected.
+//
+// Deprecated: Selection is now handled externally.
 func (i *FileIcon) SetSelected(selected bool) {
 	i.Selected = selected
 	i.Refresh()
@@ -183,7 +184,7 @@ func (s *fileIconRenderer) Refresh() {
 
 	if s.file.Selected {
 		s.background.Show()
-		s.ext.Color = theme.PrimaryColor()
+		s.ext.Color = theme.SelectionColor()
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}

@@ -14,10 +14,11 @@ var _ fyne.Tappable = (*Menu)(nil)
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
 	widget.Base
-	Items       []fyne.CanvasObject
-	OnDismiss   func()
-	activeItem  *menuItem
-	customSized bool
+	Items         []fyne.CanvasObject
+	OnDismiss     func()
+	activeItem    *menuItem
+	customSized   bool
+	containsCheck bool
 }
 
 // NewMenu creates a new Menu.
@@ -145,6 +146,25 @@ func (m *Menu) MinSize() fyne.Size {
 	return m.Base.MinSize()
 }
 
+// Refresh updates the menu to reflect changes in the data.
+//
+// Implements: fyne.Widget
+func (m *Menu) Refresh() {
+	for _, item := range m.Items {
+		item.Refresh()
+	}
+	m.Base.Refresh()
+}
+
+func (m *Menu) getContainsCheck() bool {
+	for _, item := range m.Items {
+		if mi, ok := item.(*menuItem); ok && mi.Item.Checked {
+			return true
+		}
+	}
+	return false
+}
+
 // Tapped catches taps on separators and the menu background. It doesn’t perform any action.
 //
 // Implements: fyne.Tappable
@@ -197,6 +217,7 @@ func (m *Menu) setMenu(menu *fyne.Menu) {
 			m.Items[i] = newMenuItem(item, m)
 		}
 	}
+	m.containsCheck = m.getContainsCheck()
 }
 
 type menuRenderer struct {

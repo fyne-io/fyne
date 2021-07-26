@@ -108,6 +108,11 @@ const (
 	// Since: 2.0
 	ColorNameScrollBar fyne.ThemeColorName = "scrollBar"
 
+	// ColorNameSelection is the name of theme lookup for selection color.
+	//
+	// Since: 2.1
+	ColorNameSelection fyne.ThemeColorName = "selection"
+
 	// ColorNameShadow is the name of theme lookup for shadow color.
 	//
 	// Since: 2.0
@@ -200,6 +205,16 @@ var (
 		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
 		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
+	}
+	selectionColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x3f},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
 	}
 
 	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
@@ -301,6 +316,8 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	} else if n == ColorNameFocus {
 		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	} else if n == ColorNameSelection {
+		return selectionColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	}
 
 	if c, ok := colors[n]; ok {
@@ -446,6 +463,13 @@ func ForegroundColor() color.Color {
 // InputBackgroundColor returns the color used to draw underneath input elements.
 func InputBackgroundColor() color.Color {
 	return current().Color(ColorNameInputBackground, currentVariant())
+}
+
+// SelectionColor returns the color for a selected element.
+//
+// Since: 2.1
+func SelectionColor() color.Color {
+	return safeColorLookup(ColorNameSelection, currentVariant())
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
@@ -640,6 +664,14 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	}
 
 	return DefaultTextFont()
+}
+
+func selectionColorNamed(name string) color.Color {
+	col, ok := selectionColors[name]
+	if !ok {
+		return selectionColors[ColorBlue]
+	}
+	return col
 }
 
 func setupDefaultTheme() fyne.Theme {
