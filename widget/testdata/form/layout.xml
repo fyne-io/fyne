@@ -3,9 +3,7 @@
 		<widget pos="4,4" size="206x119" type="*widget.Form">
 			<container size="206x119">
 				<container size="206x78">
-					<widget size="55x37" type="*widget.Label">
-						<text alignment="trailing" bold pos="8,8" size="39x21">test1</text>
-					</widget>
+					<text alignment="trailing" bold pos="8,8" size="39x21">test1</text>
 					<widget pos="59,0" size="147x37" type="*widget.Entry">
 						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="147x33"/>
 						<rectangle fillColor="shadow" pos="0,35" size="147x2"/>
@@ -20,9 +18,7 @@
 							</widget>
 						</widget>
 					</widget>
-					<widget pos="0,41" size="55x37" type="*widget.Label">
-						<text alignment="trailing" bold pos="8,8" size="39x21">test2</text>
-					</widget>
+					<text alignment="trailing" bold pos="8,49" size="39x21">test2</text>
 					<widget pos="59,41" size="147x37" type="*widget.Entry">
 						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="147x33"/>
 						<rectangle fillColor="shadow" pos="0,35" size="147x2"/>

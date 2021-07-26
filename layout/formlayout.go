@@ -2,6 +2,7 @@ package layout
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -53,6 +54,9 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 		}
 
 		labelCell := currentRow[0].MinSize()
+		if _, ok := currentRow[0].(*canvas.Text); ok {
+			labelCell.Width += theme.Padding() * 4
+		}
 		labelCellMaxWidth = fyne.Max(labelCellMaxWidth, labelCell.Width)
 
 		contentCell := currentRow[1].MinSize()
@@ -92,8 +96,13 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 
 		tableRow := table[row]
-		objects[i].Move(fyne.NewPos(0, y))
-		objects[i].Resize(fyne.NewSize(tableRow[0].Width, tableRow[0].Height))
+		if _, ok := objects[i].(*canvas.Text); ok {
+			objects[i].Move(fyne.NewPos(theme.Padding()*2, y+theme.Padding()*2))
+			objects[i].Resize(fyne.NewSize(tableRow[0].Width-theme.Padding()*4, objects[i].MinSize().Height))
+		} else {
+			objects[i].Move(fyne.NewPos(0, y))
+			objects[i].Resize(fyne.NewSize(tableRow[0].Width, tableRow[0].Height))
+		}
 
 		if i+1 < len(objects) {
 			objects[i+1].Move(fyne.NewPos(theme.Padding()+tableRow[0].Width, y))
