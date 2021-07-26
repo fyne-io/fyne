@@ -498,19 +498,19 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	e.requestFocus()
 	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	super := e.super()
 
 	cutItem := fyne.NewMenuItem("Cut", func() {
-		e.TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
+		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
 	copyItem := fyne.NewMenuItem("Copy", func() {
-		e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
+		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
 	})
 	pasteItem := fyne.NewMenuItem("Paste", func() {
-		e.TypedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
+		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
 	})
 	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
 
-	super := e.super()
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(super)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 	c := fyne.CurrentApp().Driver().CanvasForObject(super)
