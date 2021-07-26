@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
@@ -53,12 +54,15 @@ func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.Canva
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.FillColor == nil || rect.StrokeWidth == 0) {
+		return
+	}
 	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
 		1.0, painter.VectorPad(rect))
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if text.Text == "" {
+	if text.Text == "" || text.Text == " " {
 		return
 	}
 
