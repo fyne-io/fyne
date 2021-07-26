@@ -20,6 +20,7 @@ void        completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
 const void* insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
+void        resetDarwinMenu();
 
 // Used for tests.
 const void* test_darwinMainMenu();
@@ -66,6 +67,10 @@ func addNativeSubmenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Men
 	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
 	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
 	return nextItemID
+}
+
+func clearNativeMenu() {
+	C.resetDarwinMenu()
 }
 
 func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
@@ -170,6 +175,7 @@ func menuChecked(id int) bool {
 }
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
+	clearNativeMenu()
 	nextItemID := 0
 	callbacks = []*menuCallbacks{}
 	var helpMenu *fyne.Menu

@@ -3,6 +3,8 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
+const int menuTagMin = 5000;
+
 extern void menuCallback(int);
 extern BOOL menuEnabled(int);
 extern BOOL menuChecked(int);
@@ -14,17 +16,17 @@ extern void exceptionCallback(const char*);
 
 @implementation FyneMenuHandler
 + (void) tapped:(NSMenuItem*) item {
-    menuCallback([item tag]);
+    menuCallback([item tag]-menuTagMin);
 }
 + (BOOL) validateMenuItem:(NSMenuItem*) item {
-    BOOL checked = menuChecked([item tag]);
+    BOOL checked = menuChecked([item tag]-menuTagMin);
     if (checked) {
         [item setState:NSOnState];
     } else {
         [item setState:NSOffState];
     }
 
-    return menuEnabled([item tag]);
+    return menuEnabled([item tag]-menuTagMin);
 }
 @end
 
@@ -41,6 +43,7 @@ void assignDarwinSubmenu(const void* i, const void* m) {
 void completeDarwinMenu(const void* m, bool prepend) {
     NSMenu* main = nativeMainMenu();
     NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+    [top setTag:menuTagMin];
     if (prepend) {
         [main insertItem:top atIndex:1];
     } else {
@@ -73,7 +76,7 @@ const void* insertDarwinMenuItem(const void* m, const char* label, int id, int i
             action:@selector(tapped:)
             keyEquivalent:@""];
         [item setTarget:[FyneMenuHandler class]];
-        [item setTag:id];
+        [item setTag:id+menuTagMin];
     }
 
     if (index > -1) {
@@ -88,6 +91,32 @@ const void* insertDarwinMenuItem(const void* m, const char* label, int id, int i
 NSMenu* nativeMainMenu() {
     NSApplication* app = [NSApplication sharedApplication];
     return [app mainMenu];
+}
+
+void resetDarwinMenu() {
+    NSMenu *root = nativeMainMenu();
+    NSEnumerator *items = [[root itemArray] objectEnumerator];
+
+    id object;
+    while (object = [items nextObject]) {
+        NSMenuItem *item = object;
+        if ([item tag] < menuTagMin) {
+            // check for inserted items (like Settings...)
+            NSMenu *menu = [item submenu];
+            NSEnumerator *subItems = [[menu itemArray] objectEnumerator];
+
+            id sub;
+            while (sub = [subItems nextObject]) {
+                NSMenuItem *item = sub;
+                if ([item tag] >= menuTagMin) {
+                    [menu removeItem: item];
+                }
+            }
+
+            continue;
+        }
+        [root removeItem: item];
+    }
 }
 
 const void* test_darwinMainMenu() {
