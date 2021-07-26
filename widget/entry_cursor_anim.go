@@ -77,11 +77,6 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 // starts cursor animation.
 func (a *entryCursorAnimation) start() {
-	if fyne.CurrentDevice().IsMobile() {
-		a.cursor.FillColor = theme.PrimaryColor()
-		a.cursor.Show()
-		return
-	}
 	a.mu.Lock()
 	isStopped := a.anim == nil
 	if isStopped {
@@ -102,10 +97,6 @@ func (a *entryCursorAnimation) interrupt() {
 
 // stops cursor animation.
 func (a *entryCursorAnimation) stop() {
-	if fyne.CurrentDevice().IsMobile() {
-		a.cursor.Hide()
-		return
-	}
 	a.mu.Lock()
 	if a.anim != nil {
 		a.anim.Stop()
