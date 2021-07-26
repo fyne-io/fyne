@@ -494,17 +494,16 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		return // no popup options for a disabled concealed field
 	}
 
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+
 	cutItem := fyne.NewMenuItem("Cut", func() {
-		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
-		e.cutToClipboard(clipboard)
+		e.TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
 	copyItem := fyne.NewMenuItem("Copy", func() {
-		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
-		e.copyToClipboard(clipboard)
+		e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
 	})
 	pasteItem := fyne.NewMenuItem("Paste", func() {
-		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
-		e.pasteFromClipboard(clipboard)
+		e.TypedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
 	})
 	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
 
