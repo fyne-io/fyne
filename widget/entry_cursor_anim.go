@@ -78,6 +78,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 // starts cursor animation.
 func (a *entryCursorAnimation) start() {
 	if fyne.CurrentDevice().IsMobile() {
+		a.cursor.FillColor = theme.PrimaryColor()
 		a.cursor.Show()
 		return
 	}
