@@ -3,6 +3,7 @@ package cache
 import (
 	"image"
 	"sync"
+	"time"
 )
 
 var svgLock sync.RWMutex
@@ -18,17 +19,6 @@ func GetSvg(name string, w int, h int) *image.NRGBA {
 	}
 	sinfo.setAlive()
 	return sinfo.pix
-}
-
-// ResetThemeCaches clears all the svg and text size cache maps
-func ResetThemeCaches() {
-	svgLock.Lock()
-	svgs = make(map[string]*svgInfo)
-	svgLock.Unlock()
-
-	sizeLock.Lock()
-	sizeCache = map[sizeEntry]fontMetric{}
-	sizeLock.Unlock()
 }
 
 // SetSvg sets a svg into the cache map.
@@ -48,4 +38,23 @@ type svgInfo struct {
 	expiringCacheNoLock
 	pix  *image.NRGBA
 	w, h int
+}
+
+// destroyExpiredSvgs destroys expired svgs cache data.
+func destroyExpiredSvgs(now time.Time) {
+	expiredSvgs := make([]string, 0, 20)
+	svgLock.RLock()
+	for s, sinfo := range svgs {
+		if sinfo.isExpired(now) {
+			expiredSvgs = append(expiredSvgs, s)
+		}
+	}
+	svgLock.RUnlock()
+	if len(expiredSvgs) > 0 {
+		svgLock.Lock()
+		for _, exp := range expiredSvgs {
+			delete(svgs, exp)
+		}
+		svgLock.Unlock()
+	}
 }
