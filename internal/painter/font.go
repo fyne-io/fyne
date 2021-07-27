@@ -32,20 +32,20 @@ func loadFont(data fyne.Resource) *truetype.Font {
 
 // RenderedTextSize looks up how big a string would be if drawn on screen.
 // It also returns the distance from top to the text baseline.
-func RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
-	bound, base := cache.GetFontMetrics(text, size, style)
+func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
+	size, base := cache.GetFontMetrics(text, fontSize, style)
 	if base != 0 {
-		return bound, base
+		return size, base
 	}
 
-	bound, base = measureText(text, size, style)
-	cache.SetFontMetrics(text, size, style, bound, base)
-	return bound, base
+	size, base = measureText(text, fontSize, style)
+	cache.SetFontMetrics(text, fontSize, style, size, base)
+	return size, base
 }
 
-func measureText(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
+func measureText(text string, fontSize float32, style fyne.TextStyle) (fyne.Size, float32) {
 	var opts truetype.Options
-	opts.Size = float64(size)
+	opts.Size = float64(fontSize)
 	opts.DPI = TextDPI
 
 	face := CachedFontFace(style, &opts)
