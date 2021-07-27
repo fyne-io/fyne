@@ -10,7 +10,7 @@ import (
 )
 
 func TestSvgCacheGet(t *testing.T) {
-	ResetSvg()
+	ResetThemeCaches()
 	img := addToCache("empty.svg", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>", 25, 25)
 	assert.Equal(t, 1, len(svgs))
 
@@ -24,7 +24,7 @@ func TestSvgCacheGet(t *testing.T) {
 }
 
 func TestSvgCacheGet_File(t *testing.T) {
-	ResetSvg()
+	ResetThemeCaches()
 	img := addFileToCache("testdata/stroke.svg", 25, 25)
 	assert.Equal(t, 1, len(svgs))
 
@@ -38,11 +38,11 @@ func TestSvgCacheGet_File(t *testing.T) {
 }
 
 func TestSvgCacheReset(t *testing.T) {
-	ResetSvg()
+	ResetThemeCaches()
 	_ = addToCache("empty.svg", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>", 25, 25)
 	assert.Equal(t, 1, len(svgs))
 
-	ResetSvg()
+	ResetThemeCaches()
 	assert.Equal(t, 0, len(svgs))
 }
 

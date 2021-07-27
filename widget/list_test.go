@@ -100,46 +100,46 @@ func TestList_Hover(t *testing.T) {
 func TestList_ScrollTo(t *testing.T) {
 	list := createList(1000)
 
-	offset := float32(0)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	offset := 0
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 
 	list.ScrollTo(20)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 
-	offset = float32(6637)
+	offset = 6571
 	list.ScrollTo(200)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 
-	offset = float32(36999)
+	offset = 36670
 	list.ScrollTo(999)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 
-	offset = float32(19000)
+	offset = 18835
 	list.ScrollTo(500)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 
 	list.ScrollTo(1000)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 
-	offset = float32(38)
+	offset = 37
 	list.ScrollTo(1)
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 }
 
 func TestList_ScrollToBottom(t *testing.T) {
 	list := createList(1000)
 
-	offset := float32(36999)
+	offset := 36670
 	list.ScrollToBottom()
-	assert.Equal(t, offset, list.offsetY)
-	assert.Equal(t, offset, list.scroller.Offset.Y)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 }
 
 func TestList_ScrollToTop(t *testing.T) {
@@ -187,19 +187,19 @@ func TestList_Select(t *testing.T) {
 
 	assert.Equal(t, float32(0), list.offsetY)
 	list.Select(50)
-	assert.Equal(t, float32(937), list.offsetY)
+	assert.Equal(t, 920, int(list.offsetY))
 	visible := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.Equal(t, visible[50].background.FillColor, theme.SelectionColor())
 	assert.True(t, visible[50].background.Visible())
 
 	list.Select(5)
-	assert.Equal(t, float32(190), list.offsetY)
+	assert.Equal(t, 188, int(list.offsetY))
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.Equal(t, visible[5].background.FillColor, theme.SelectionColor())
 	assert.True(t, visible[5].background.Visible())
 
 	list.Select(6)
-	assert.Equal(t, float32(190), list.offsetY)
+	assert.Equal(t, 188, int(list.offsetY))
 	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
 	assert.False(t, visible[5].background.Visible())
 	assert.Equal(t, visible[6].background.FillColor, theme.SelectionColor())

@@ -100,7 +100,7 @@ func NewApp() fyne.App {
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver),
 		lifecycle: &app.Lifecycle{}}
-	cache.ResetSvg()
+	cache.ResetThemeCaches()
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
@@ -108,7 +108,7 @@ func NewApp() fyne.App {
 	go func() {
 		for {
 			<-listener
-			cache.ResetSvg()
+			cache.ResetThemeCaches()
 			app.ApplySettings(test.Settings(), test)
 
 			test.propertyLock.Lock()
