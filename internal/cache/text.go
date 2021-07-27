@@ -22,8 +22,8 @@ type fontSizeEntry struct {
 	style fyne.TextStyle
 }
 
-// GetFontSize looks up a calculated size required for the specified text parameters.
-func GetFontSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
+// GetFontMetrics looks up a calculated size required for the specified text parameters.
+func GetFontMetrics(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	ent := fontSizeEntry{text, size, style}
 	fontSizeLock.RLock()
 	ret, ok := fontSizeCache[ent]
@@ -34,8 +34,8 @@ func GetFontSize(text string, size float32, style fyne.TextStyle) (fyne.Size, fl
 	return ret.size, ret.baseLine
 }
 
-// SetFontSize stores a calculated font size for parameters that were missing from the cache.
-func SetFontSize(text string, fontSize float32, style fyne.TextStyle, size fyne.Size, base float32) {
+// SetFontMetrics stores a calculated font size for parameters that were missing from the cache.
+func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, size fyne.Size, base float32) {
 	ent := fontSizeEntry{text, fontSize, style}
 	fontSizeLock.Lock()
 	fontSizeCache[ent] = fontMetric{size: size, baseLine: base}
