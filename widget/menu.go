@@ -246,6 +246,7 @@ func (r *menuRenderer) Refresh() {
 	for _, i := range r.m.Items {
 		if txt, ok := i.(*menuItem); ok {
 			txt.alignment = r.m.alignment
+			txt.Refresh()
 		}
 	}
 
