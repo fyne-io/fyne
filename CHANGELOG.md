@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.0.4 - Ongoing
+## 2.0.4 - 2 August 2021
 
 ### Changed
 
@@ -25,6 +25,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Entry validation does not work for empty field (#2179)
 * Tab support for focus handling missing on mobile
 * ScrollToBottom not always scrolling all the way when items added to container.Scroller
+* Fixed scrollbar disappearing after changing content (#2303)
 
 ## 2.0.3 - 30 April 2021
 
