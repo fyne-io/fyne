@@ -17,6 +17,14 @@
 							<image pos="16,8" rsc="confirmIcon" size="40x40"/>
 						</widget>
 					</container>
+					<widget pos="0,50" size="110x6" type="*widget.scrollBarArea">
+						<widget pos="0,3" size="81x3" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="81x3"/>
+						</widget>
+					</widget>
+					<widget pos="110,0" size="0x56" type="*widget.Shadow">
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x56"/>
+					</widget>
 				</widget>
 				<container pos="114,0" size="36x56">
 					<widget size="36x56" type="*widget.Button">

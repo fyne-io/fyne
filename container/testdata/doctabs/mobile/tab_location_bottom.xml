@@ -23,6 +23,14 @@
 							</widget>
 						</widget>
 					</container>
+					<widget pos="0,30" size="19x6" type="*widget.scrollBarArea">
+						<widget pos="0,3" size="16x3" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="16x3"/>
+						</widget>
+					</widget>
+					<widget pos="19,0" size="0x36" type="*widget.Shadow">
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x36"/>
+					</widget>
 				</widget>
 				<container pos="23,0" size="36x36">
 					<widget size="36x36" type="*widget.Button">

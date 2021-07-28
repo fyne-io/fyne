@@ -17,6 +17,14 @@
 							<text bold color="primary" pos="8,8" size="86x20">Another</text>
 						</widget>
 					</container>
+					<widget pos="0,30" size="220x6" type="*widget.scrollBarArea">
+						<widget pos="83,3" size="136x3" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="136x3"/>
+						</widget>
+					</widget>
+					<widget size="0x36" type="*widget.Shadow">
+						<linearGradient angle="270" size="8x36" startColor="shadow"/>
+					</widget>
 				</widget>
 				<container pos="224,0" size="76x36">
 					<widget size="36x36" type="*widget.Button">
