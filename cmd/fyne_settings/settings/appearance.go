@@ -118,7 +118,7 @@ func (s *Settings) createPreview() image.Image {
 		th = theme.DarkTheme()
 	}
 
-	cache.ResetSvg() // reset icon cache
+	cache.ResetThemeCaches() // reset icon cache
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
 	empty := widget.NewLabel("")
@@ -136,7 +136,7 @@ func (s *Settings) createPreview() image.Image {
 	time.Sleep(canvas.DurationShort)
 	img := c.Capture()
 
-	cache.ResetSvg() // ensure we re-create the correct cached assets
+	cache.ResetThemeCaches() // ensure we re-create the correct cached assets
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(oldTheme, oldColor)
 	return img
 }

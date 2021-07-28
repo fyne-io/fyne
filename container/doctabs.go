@@ -316,9 +316,8 @@ func (r *docTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		item := r.docTabs.Items[i]
 		button, ok := r.buttonCache[item]
 		if !ok {
-			index := i // capture
 			button = &tabButton{
-				onTapped: func() { r.docTabs.SelectIndex(index) },
+				onTapped: func() { r.docTabs.Select(item) },
 				onClosed: func() { r.docTabs.close(item) },
 			}
 			r.buttonCache[item] = button

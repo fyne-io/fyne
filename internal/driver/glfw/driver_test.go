@@ -64,47 +64,57 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	m2 := mbarCont.Objects[1]
 
 	tests := map[string]struct {
-		object fyne.CanvasObject
-		want   fyne.Position
+		object       fyne.CanvasObject
+		wantX, wantY int
 	}{
 		"a cell": {
 			object: cr1c3,
-			want:   fyne.NewPos(198, 33),
+			wantX:  197,
+			wantY:  32,
 		},
 		"a row": {
 			object: cr2,
-			want:   fyne.NewPos(4, 74),
+			wantX:  4,
+			wantY:  73,
 		},
 		"the window content": {
 			object: content,
-			want:   fyne.NewPos(4, 33),
+			wantX:  4,
+			wantY:  32,
 		},
 		"a hidden element": {
 			object: cr2c2,
-			want:   fyne.NewPos(0, 0),
+			wantX:  0,
+			wantY:  0,
 		},
 
 		"a menu": {
 			object: m2,
-			want:   fyne.NewPos(78, 0),
+			wantX:  77,
+			wantY:  0,
 		},
 
 		"an overlay item": {
 			object: ovli2,
-			want:   fyne.NewPos(87, 81),
+			wantX:  87,
+			wantY:  59,
 		},
 		"the overlay content": {
 			object: ovlContent,
-			want:   fyne.NewPos(87, 40),
+			wantX:  87,
+			wantY:  18,
 		},
 		"the overlay": {
 			object: ovl,
-			want:   fyne.NewPos(0, 0),
+			wantX:  0,
+			wantY:  0,
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.want, d.AbsolutePositionForObject(tt.object))
+			pos := d.AbsolutePositionForObject(tt.object)
+			assert.Equal(t, tt.wantX, int(pos.X))
+			assert.Equal(t, tt.wantY, int(pos.Y))
 		})
 	}
 }

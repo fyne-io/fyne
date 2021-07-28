@@ -43,5 +43,6 @@ type TextStyle struct {
 
 // MeasureText uses the current driver to calculate the size of text when rendered.
 func MeasureText(text string, size float32, style TextStyle) Size {
-	return CurrentApp().Driver().RenderedTextSize(text, size, style)
+	s, _ := CurrentApp().Driver().RenderedTextSize(text, size, style)
+	return s
 }

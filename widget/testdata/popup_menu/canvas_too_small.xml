@@ -19,11 +19,11 @@
 					<widget size="210x200" type="*widget.menuBox">
 						<rectangle fillColor="background" size="210x208"/>
 						<container pos="0,4" size="210x208">
-							<widget size="210x29" type="*widget.menuItem">
-								<text pos="8,4" size="194x21">Option A</text>
+							<widget size="210x28" type="*widget.menuItem">
+								<text pos="8,4" size="194x20">Option A</text>
 							</widget>
-							<widget pos="0,33" size="210x29" type="*widget.menuItem">
-								<text pos="8,4" size="194x21">Option B</text>
+							<widget pos="0,32" size="210x28" type="*widget.menuItem">
+								<text pos="8,4" size="194x20">Option B</text>
 							</widget>
 						</container>
 					</widget>
