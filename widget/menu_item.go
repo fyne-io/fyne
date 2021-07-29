@@ -16,12 +16,14 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child *Menu
+	alignment fyne.TextAlign
+	child     *Menu
 }
 
 // newMenuItem creates a new menuItem.
 func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
 	i := &menuItem{Item: item, Parent: parent}
+	i.alignment = parent.alignment
 	i.ExtendBaseWidget(i)
 	return i
 }
@@ -43,6 +45,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
 	background.Hide()
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
+	text.Alignment = i.alignment
 	objects := []fyne.CanvasObject{background, text}
 	var icon *canvas.Image
 	if i.Item.ChildMenu != nil {
@@ -188,7 +191,7 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	if r.i.Item.Disabled {
 		r.text.Color = theme.DisabledColor()
 	}
-	r.text.Resize(r.text.MinSize())
+	r.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)))
 	r.text.Move(fyne.NewPos(padding.Width/2+r.checkSpace(), padding.Height/2))
 
 	if r.icon != nil {
@@ -231,7 +234,7 @@ func (r *menuItemRenderer) Refresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
-
+	r.text.Alignment = r.i.alignment
 	if r.i.Item.Disabled {
 		r.text.Color = theme.DisabledColor()
 		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
@@ -247,6 +250,7 @@ func (r *menuItemRenderer) Refresh() {
 		r.checkIcon.Hide()
 	}
 	r.checkIcon.Refresh()
+	canvas.Refresh(r.i)
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {

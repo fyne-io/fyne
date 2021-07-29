@@ -14,6 +14,7 @@ var _ fyne.Tappable = (*Menu)(nil)
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
 	widget.Base
+	alignment     fyne.TextAlign
 	Items         []fyne.CanvasObject
 	OnDismiss     func()
 	activeItem    *menuItem
@@ -262,6 +263,14 @@ func (r *menuRenderer) MinSize() fyne.Size {
 func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
 	r.ShadowingRenderer.RefreshShadow()
+
+	for _, i := range r.m.Items {
+		if txt, ok := i.(*menuItem); ok {
+			txt.alignment = r.m.alignment
+			txt.Refresh()
+		}
+	}
+
 	canvas.Refresh(r.m)
 }
 

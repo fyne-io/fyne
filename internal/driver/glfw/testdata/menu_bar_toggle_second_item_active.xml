@@ -40,7 +40,7 @@
 							<rectangle fillColor="background" size="55x77"/>
 							<container pos="0,4" size="55x77">
 								<widget size="55x28" type="*widget.menuItem">
-									<text pos="8,4" size="35x20">Copy</text>
+									<text pos="8,4" size="39x20">Copy</text>
 								</widget>
 								<widget pos="0,32" size="55x28" type="*widget.menuItem">
 									<text pos="8,4" size="39x20">Paste</text>

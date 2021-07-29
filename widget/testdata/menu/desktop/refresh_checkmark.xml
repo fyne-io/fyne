@@ -23,13 +23,13 @@
 								<rectangle fillColor="disabled" size="42x1"/>
 							</widget>
 							<widget pos="0,37" size="42x28" type="*widget.menuItem">
-								<text color="disabled" pos="8,4" size="24x20">Bar</text>
+								<text color="disabled" pos="8,4" size="26x20">Bar</text>
 							</widget>
 							<widget pos="0,70" size="42x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="42x1"/>
 							</widget>
 							<widget pos="0,75" size="42x28" type="*widget.menuItem">
-								<text pos="8,4" size="25x20">Baz</text>
+								<text pos="8,4" size="26x20">Baz</text>
 								<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
 							</widget>
 						</container>

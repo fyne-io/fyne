@@ -76,13 +76,13 @@
 						<rectangle fillColor="background" size="73x142"/>
 						<container pos="0,4" size="73x142">
 							<widget size="73x28" type="*widget.menuItem">
-								<text pos="8,4" size="38x20">Test1</text>
+								<text pos="8,4" size="57x20">Test1</text>
 							</widget>
 							<widget pos="0,32" size="73x28" type="*widget.menuItem">
-								<text pos="8,4" size="38x20">Test2</text>
+								<text pos="8,4" size="57x20">Test2</text>
 							</widget>
 							<widget pos="0,65" size="73x28" type="*widget.menuItem">
-								<text pos="8,4" size="38x20">Test3</text>
+								<text pos="8,4" size="57x20">Test3</text>
 							</widget>
 							<widget pos="0,98" size="73x28" type="*widget.menuItem">
 								<text pos="8,4" size="57x20">Another</text>
