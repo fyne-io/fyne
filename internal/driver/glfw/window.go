@@ -475,6 +475,10 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
+	// show new canvas element
+	if content != nil {
+		content.Show()
+	}
 	w.RescaleContext()
 }
 

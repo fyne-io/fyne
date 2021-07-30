@@ -26,6 +26,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Tab support for focus handling missing on mobile
 * ScrollToBottom not always scrolling all the way when items added to container.Scroller
 * Fixed scrollbar disappearing after changing content (#2303)
+* Calling SetContent a second time with the same content will not show
+
 
 ## 2.0.3 - 30 April 2021
 

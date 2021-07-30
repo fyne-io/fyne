@@ -1148,6 +1148,20 @@ func TestWindow_CloseInterception(t *testing.T) {
 	assert.True(t, onClosed) // Close is called if the interceptor is not set.
 }
 
+func TestWindow_SetContent_Twice(t *testing.T) {
+	w := createWindow("Test").(*window)
+
+	e1 := widget.NewLabel("1")
+	e2 := widget.NewLabel("2")
+
+	w.SetContent(e1)
+	assert.True(t, e1.Visible())
+	w.SetContent(e2)
+	assert.True(t, e2.Visible())
+	w.SetContent(e1)
+	assert.True(t, e1.Visible())
+}
+
 // This test makes our developer screens flash, let's not run it regularly...
 //func TestWindow_Shortcut(t *testing.T) {
 //	w := createWindow("Test")
