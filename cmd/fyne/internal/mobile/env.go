@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
+
+	"golang.org/x/sys/execabs"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -209,14 +210,14 @@ func envClang(sdkName string) (clang, cflags string, err error) {
 	if buildN {
 		return sdkName + "-clang", "-isysroot=" + sdkName, nil
 	}
-	cmd := exec.Command("xcrun", "--sdk", sdkName, "--find", "clang")
+	cmd := execabs.Command("xcrun", "--sdk", sdkName, "--find", "clang")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --find: %v\n%s", err, out)
 	}
 	clang = strings.TrimSpace(string(out))
 
-	cmd = exec.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
+	cmd = execabs.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --show-sdk-path: %v\n%s", err, out)
@@ -362,6 +363,6 @@ var ndk = ndkConfig{
 }
 
 func xcodeAvailable() bool {
-	err := exec.Command("xcrun", "xcodebuild", "-version").Run()
+	err := execabs.Command("xcrun", "xcodebuild", "-version").Run()
 	return err == nil
 }

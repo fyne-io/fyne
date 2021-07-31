@@ -2,12 +2,13 @@ package commands
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
+
+	"golang.org/x/sys/execabs"
 )
 
 type unixData struct {
@@ -66,7 +67,7 @@ func (p *Packager) packageUNIX() error {
 			return errors.Wrap(err, "Failed to write Makefile string")
 		}
 
-		tarCmd := exec.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
+		tarCmd := execabs.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
 		if err = tarCmd.Run(); err != nil {
 			return errors.Wrap(err, "Failed to create archive with tar")
 		}

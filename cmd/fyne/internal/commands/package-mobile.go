@@ -3,7 +3,6 @@ package commands
 import (
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 
@@ -12,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
+	"golang.org/x/sys/execabs"
 )
 
 func (p *Packager) packageAndroid(arch string) error {
@@ -61,7 +61,7 @@ func (p *Packager) packageIOS() error {
 	}
 
 	appDir := filepath.Join(p.dir, mobile.AppOutputName(p.os, p.name))
-	cmd := exec.Command("xcrun", "actool", "Images.xcassets", "--compile", appDir, "--platform",
+	cmd := execabs.Command("xcrun", "actool", "Images.xcassets", "--compile", appDir, "--platform",
 		"iphoneos", "--target-device", "iphone", "--minimum-deployment-target", "9.0", "--app-icon", "AppIcon",
 		"--output-partial-info-plist", "/dev/null")
 	return cmd.Run()
@@ -70,5 +70,5 @@ func (p *Packager) packageIOS() error {
 func copyResizeIcon(size int, dir, source string) error {
 	strSize := strconv.Itoa(size)
 	path := dir + "/Icon_" + strSize + ".png"
-	return exec.Command("sips", "-o", path, "-Z", strSize, source).Run()
+	return execabs.Command("sips", "-o", path, "-Z", strSize, source).Run()
 }

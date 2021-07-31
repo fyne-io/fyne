@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -15,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/sys/execabs"
 )
 
 var macAppStoreCategories = []string{
@@ -278,14 +278,14 @@ func (r *Releaser) packageIOSRelease() error {
 	}
 	defer cleanup()
 
-	cmd := exec.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
+	cmd := execabs.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
 		"entitlements.plist", "Payload/"+appName+"/")
 	if err := cmd.Run(); err != nil {
 		fyne.LogError("Codesign failed", err)
 		return errors.New("unable to codesign application bundle")
 	}
 
-	return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
+	return execabs.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
 }
 
 func (r *Releaser) packageMacOSRelease() error {
@@ -302,14 +302,14 @@ func (r *Releaser) packageMacOSRelease() error {
 	}
 	defer cleanup()
 
-	cmd := exec.Command("codesign", "-vfs", appCert, "--entitlement", "entitlements.plist", r.name+".app")
+	cmd := execabs.Command("codesign", "-vfs", appCert, "--entitlement", "entitlements.plist", r.name+".app")
 	err = cmd.Run()
 	if err != nil {
 		fyne.LogError("Codesign failed", err)
 		return errors.New("unable to codesign application bundle")
 	}
 
-	cmd = exec.Command("productbuild", "--component", r.name+".app", "/Applications/",
+	cmd = execabs.Command("productbuild", "--component", r.name+".app", "/Applications/",
 		"--product", r.name+".app/Contents/Info.plist", unsignedPath)
 	err = cmd.Run()
 	if err != nil {
@@ -318,7 +318,7 @@ func (r *Releaser) packageMacOSRelease() error {
 	}
 	defer os.Remove(unsignedPath)
 
-	cmd = exec.Command("productsign", "--sign", installCert, unsignedPath, r.name+".pkg")
+	cmd = execabs.Command("productsign", "--sign", installCert, unsignedPath, r.name+".pkg")
 	return cmd.Run()
 }
 
@@ -354,7 +354,7 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 		return errors.New("cannot find makeappx.exe, make sure you have installed the Windows SDK")
 	}
 
-	cmd := exec.Command(filepath.Join(binDir, "makeappx.exe"), "pack", "/d", payload, "/p", outFile)
+	cmd := execabs.Command(filepath.Join(binDir, "makeappx.exe"), "pack", "/d", payload, "/p", outFile)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -373,7 +373,7 @@ func (r *Releaser) signAndroid(path string) error {
 	}
 	args = append(args, path)
 
-	cmd := exec.Command(signer, args...)
+	cmd := execabs.Command(signer, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -386,7 +386,7 @@ func (r *Releaser) signWindows(appx string) error {
 		return errors.New("cannot find signtool.exe, make sure you have installed the Windows SDK")
 	}
 
-	cmd := exec.Command(filepath.Join(binDir, "signtool.exe"),
+	cmd := execabs.Command(filepath.Join(binDir, "signtool.exe"),
 		"sign", "/a", "/v", "/fd", "SHA256", "/f", r.certificate, "/p", r.password, appx)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -474,7 +474,7 @@ func (r *Releaser) zipAlign(path string) error {
 	}
 
 	cmd := filepath.Join(util.AndroidBuildToolsPath(), "zipalign")
-	err = exec.Command(cmd, "4", unaligned, path).Run()
+	err = execabs.Command(cmd, "4", unaligned, path).Run()
 	if err != nil {
 		_ = os.Rename(path, unaligned) // ignore error, return previous
 		return err
@@ -483,7 +483,7 @@ func (r *Releaser) zipAlign(path string) error {
 }
 
 func findWindowsSDKBin() (string, error) {
-	inPath, err := exec.LookPath("makeappx.exe")
+	inPath, err := execabs.LookPath("makeappx.exe")
 	if err == nil {
 		return inPath, nil
 	}
