@@ -328,13 +328,16 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 		if _, ok := object.(fyne.Tappable); ok {
 			tappableO = object
 			ret = true
-		} else if _, ok := object.(fyne.SecondaryTappable); ok {
+		}
+		if _, ok := object.(fyne.SecondaryTappable); ok {
 			secondaryTappableO = object
 			ret = true
-		} else if _, ok := object.(mobile.Touchable); ok {
+		}
+		if _, ok := object.(mobile.Touchable); ok {
 			touchableO = object
 			ret = true
-		} else if _, ok := object.(fyne.DoubleTappable); ok {
+		}
+		if _, ok := object.(fyne.DoubleTappable); ok {
 			doubleTappableO = object
 			ret = true
 		}
