@@ -832,30 +832,12 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	mouseDragged := w.mouseDragged
-	mouseDragStarted = w.mouseDragStarted
-	shouldMouseOut := w.objIsDragged(w.mouseOver) // mouseOut on mouse release after dragging out of dragged object's area
 	mousePrimaryPressed := w.mousePrimaryPressed
 	w.mouseLock.Unlock()
 
-	// when drag ends in Hoverable object, do not send MouseOut
-	if _, ok := draggableO.(desktop.Hoverable); ok {
-		shouldMouseOut = false
-	}
-
 	// button release must sent DragEnd during drag cycle
 	if action == glfw.Release && mouseDragged != nil {
-		if mouseDragStarted {
-			w.QueueEvent(mouseDragged.DragEnd)
-			w.mouseLock.Lock()
-			w.mouseDragStarted = false
-			w.mouseLock.Unlock()
-		}
-		if shouldMouseOut {
-			w.mouseOut()
-		}
-		w.mouseLock.Lock()
-		w.mouseDragged = nil
-		w.mouseLock.Unlock()
+		w.mouseDragEnd(mouseDragged, draggableO)
 		// do not send clicked on drag end
 		tappableO = nil
 	}
@@ -893,6 +875,26 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mouseLock.Unlock()
 		}
 	}
+}
+
+func (w *window) mouseDragEnd(mouseDragged fyne.Draggable, mouseDropped fyne.CanvasObject) {
+	w.mouseLock.Lock()
+	defer w.mouseLock.Unlock()
+
+	shouldMouseOut := w.objIsDragged(w.mouseOver) // mouseOut on mouse release after dragging out of dragged object's area
+	// when drag ends in Hoverable object, do not send MouseOut
+	if _, ok := mouseDropped.(desktop.Hoverable); ok {
+		shouldMouseOut = false
+	}
+
+	if w.mouseDragStarted {
+		w.QueueEvent(mouseDragged.DragEnd)
+		w.mouseDragStarted = false
+	}
+	if shouldMouseOut {
+		w.mouseOut()
+	}
+	w.mouseDragged = nil
 }
 
 func (w *window) mouseClickedHandleButtonSecondary(pev *fyne.PointEvent, action glfw.Action, wid fyne.SecondaryTappable) {
