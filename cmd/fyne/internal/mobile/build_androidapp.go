@@ -24,7 +24,7 @@ import (
 )
 
 func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
-	iconPath, appName, version string, build int) (map[string]bool, error) {
+	iconPath, appName, version string, build int, release bool) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
@@ -209,7 +209,11 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		}
 	}
 
-	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "")
+	target := 30
+	if !release {
+		target = 29 // TODO once we have gomobile debug signing working for v2 android signs
+	}
+	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", target)
 	if err != nil {
 		return nil, err
 	}

@@ -205,7 +205,7 @@ var skipSynthesize bool
 
 // UnmarshalXML decodes an AndroidManifest.xml document returning type XML
 // containing decoded resources.
-func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
+func UnmarshalXML(r io.Reader, withIcon bool, targetSDK int) (*XML, error) {
 	tbl, err := OpenTable()
 	if err != nil {
 		return nil, err
@@ -281,7 +281,7 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 									Space: androidSchema,
 									Local: "targetSdkVersion",
 								},
-								Value: "30",
+								Value: strconv.Itoa(targetSDK),
 							},
 						},
 					}
