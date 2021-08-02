@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/lucor/goinfo"
