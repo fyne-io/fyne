@@ -48,7 +48,7 @@ github.com/goki/freetype/truetype
 github.com/jackmordaunt/icns
 # github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 github.com/josephspurrier/goversioninfo
-# github.com/lucor/goinfo v0.0.0-20210802084040-fce12a312336
+# github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 github.com/lucor/goinfo
 github.com/lucor/goinfo/format
 github.com/lucor/goinfo/report
