@@ -143,7 +143,11 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build, buildRelease)
+		target := 30
+		if !buildRelease {
+			target = 29 // TODO once we have gomobile debug signing working for v2 android signs
+		}
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build, target, buildRelease)
 		if err != nil {
 			return nil, err
 		}
