@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.0.4 - 4 August 2021
+## 2.0.4 - 6 August 2021
 
 ### Changed
 
@@ -28,6 +28,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * ScrollToBottom not always scrolling all the way when items added to container.Scroller
 * Fixed scrollbar disappearing after changing content (#2303)
 * Calling SetContent a second time with the same content will not show
+* Drawing text can panic when Color is nil (#2347)
+* Optimisations when drawing transparent rectangle or whitespace strings
 
 
 ## 2.0.3 - 30 April 2021
