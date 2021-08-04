@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
@@ -139,6 +140,11 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	height := internal.ScaleInt(c, bounds.Height)
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
+	color := text.Color
+	if color == nil {
+		color = theme.ForegroundColor()
+	}
+
 	var opts truetype.Options
 	fontSize := text.TextSize * c.Scale()
 	opts.Size = float64(fontSize)
@@ -147,7 +153,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 
 	d := font.Drawer{}
 	d.Dst = txtImg
-	d.Src = &image.Uniform{C: text.Color}
+	d.Src = &image.Uniform{C: color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)

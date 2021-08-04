@@ -111,6 +111,7 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 func (f *Form) createLabel(text string) *canvas.Text {
 	return &canvas.Text{Text: text,
 		Alignment: fyne.TextAlignTrailing,
+		Color:     theme.ForegroundColor(),
 		TextSize:  theme.TextSize(),
 		TextStyle: fyne.TextStyle{Bold: true}}
 }
