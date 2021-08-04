@@ -40,9 +40,13 @@ func (t *Text) Refresh() {
 
 // NewText returns a new Text implementation
 func NewText(text string, color color.Color) *Text {
+	size := float32(0)
+	if fyne.CurrentApp() != nil { // nil app possible if app not started
+		size = fyne.CurrentApp().Settings().Theme().Size("text") // manually name the size to avoid import loop
+	}
 	return &Text{
 		Color:    color,
 		Text:     text,
-		TextSize: fyne.CurrentApp().Settings().Theme().Size("text"), // manually name the size to avoid import loop
+		TextSize: size,
 	}
 }
