@@ -2,8 +2,8 @@ package painter
 
 import (
 	"image"
-	"math"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 
 	"github.com/srwiley/rasterx"
@@ -14,7 +14,7 @@ import (
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawCircle(circle *canvas.Circle, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	radius := float32(math.Min(float64(circle.Size().Width), float64(circle.Size().Height)) / 2)
+	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
 
 	width := int(scale(circle.Size().Width + vectorPad*2))
 	height := int(scale(circle.Size().Height + vectorPad*2))
