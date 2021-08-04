@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -183,7 +183,7 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 		return map[string]bool{"github.com/fyne-io/mobile/app": true}, nil
 	}
 	r, w := io.Pipe()
-	cmd := exec.Command(nm, path)
+	cmd := execabs.Command(nm, path)
 	cmd.Stdout = w
 	cmd.Stderr = os.Stderr
 
@@ -312,7 +312,7 @@ func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
 }
 
 func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...string) error {
-	cmd := exec.Command("go", subcmd)
+	cmd := execabs.Command("go", subcmd)
 	tags := buildTags
 	targetOS, _, err := parseBuildTarget(buildTarget)
 	if err != nil {

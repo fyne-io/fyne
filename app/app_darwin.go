@@ -20,13 +20,14 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
+
+	"golang.org/x/sys/execabs"
 )
 
 func defaultVariant() fyne.ThemeVariant {
@@ -65,7 +66,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	template := `display notification "%s" with title "%s"`
 	script := fmt.Sprintf(template, content, title)
 
-	err := exec.Command("osascript", "-e", script).Start()
+	err := execabs.Command("osascript", "-e", script).Start()
 	if err != nil {
 		fyne.LogError("Failed to launch darwin notify script", err)
 	}

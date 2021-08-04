@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -18,6 +17,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
+
+	"golang.org/x/sys/execabs"
 )
 
 const notificationTemplate = `$title = "%s"
@@ -102,7 +103,7 @@ func runScript(name, script string) {
 	defer os.Remove(tmpFilePath)
 
 	launch := "(Get-Content -Encoding UTF8 -Path " + tmpFilePath + " -Raw) | Invoke-Expression"
-	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
+	cmd := execabs.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
 	if err != nil {

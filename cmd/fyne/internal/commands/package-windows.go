@@ -4,7 +4,6 @@ import (
 	"image"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
+	"golang.org/x/sys/execabs"
 )
 
 type windowsData struct {
@@ -144,5 +144,5 @@ func runAsAdminWindows(args ...string) error {
 		cmd += ",\"" + arg + "\""
 	}
 
-	return exec.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
+	return execabs.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }

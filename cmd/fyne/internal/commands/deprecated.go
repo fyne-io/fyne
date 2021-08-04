@@ -2,9 +2,9 @@ package commands
 
 import (
 	"os"
-	"os/exec"
 
 	"github.com/urfave/cli/v2"
+	"golang.org/x/sys/execabs"
 )
 
 // Vendor returns the vendor cli command.
@@ -15,7 +15,7 @@ func Vendor() *cli.Command {
 		Name:  "vendor",
 		Usage: "Deprecated: Use \"go mod vendor\" instead.",
 		Action: func(_ *cli.Context) error {
-			cmd := exec.Command("go", "mod", "vendor")
+			cmd := execabs.Command("go", "mod", "vendor")
 			cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 			return cmd.Run()
 		},
