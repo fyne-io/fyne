@@ -99,15 +99,13 @@ func (i *FileIcon) SetSelected(selected bool) {
 }
 
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
-	if i.isDir(uri) {
-		return theme.FolderIcon()
-	}
-
 	switch splitMimeType(uri) {
 	case "application":
 		return theme.FileApplicationIcon()
 	case "audio":
 		return theme.FileAudioIcon()
+	case "directory", "x-directory":
+		return theme.FolderIcon()
 	case "image":
 		return theme.FileImageIcon()
 	case "text":
@@ -115,11 +113,16 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 	case "video":
 		return theme.FileVideoIcon()
 	default:
+		if i.isDirSlow(uri) {
+			return theme.FolderIcon()
+		}
+
 		return theme.FileIcon()
 	}
 }
 
-func (i *FileIcon) isDir(uri fyne.URI) bool {
+// isDirSlow is a fallback if we can't find the directory using mime types.
+func (i *FileIcon) isDirSlow(uri fyne.URI) bool {
 	if _, ok := uri.(fyne.ListableURI); ok {
 		return true
 	}
