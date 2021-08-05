@@ -48,8 +48,11 @@ func (u *uri) MimeType() string {
 		if err == nil {
 			defer readCloser.Close()
 			scanner := bufio.NewScanner(readCloser)
-			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
+			bytes := scanner.Bytes()
+			if scanner.Scan() && !utf8.Valid(bytes) {
 				mimeTypeFull = "application/octet-stream"
+			} else if bytes == nil { // A readable uri without content is a directory.
+				mimeTypeFull = "inode/directory"
 			}
 		}
 	}
