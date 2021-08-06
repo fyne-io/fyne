@@ -210,7 +210,7 @@ type ltoken struct {
 
 // UnmarshalXML decodes an AndroidManifest.xml document returning type XML
 // containing decoded resources.
-func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
+func UnmarshalXML(r io.Reader, withIcon bool, targetSDK int) (*XML, error) {
 	lr := &lineReader{r: r}
 	dec := xml.NewDecoder(lr)
 
@@ -273,7 +273,7 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 									Space: androidSchema,
 									Local: "targetSdkVersion",
 								},
-								Value: "29",
+								Value: strconv.Itoa(targetSDK),
 							},
 						},
 					}

@@ -349,6 +349,30 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d1.popDragEvent())
 	assert.Nil(t, d2.popDragEvent())
 
+	// no drag event on secondary mouseDown
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag start and no drag event with pressed secondary mouse button
+	w.mouseMoved(w.viewport, 8, 8)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag end event on secondary mouseUp
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEndEvent())
+	assert.Nil(t, d2.popDragEndEvent())
+
+	// no drag event in simple move
+	w.mouseMoved(w.viewport, 9, 9)
+	w.WaitForEvents()
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
 	// no drag event on mouseDown
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.WaitForEvents()
@@ -1592,6 +1616,20 @@ func TestWindow_CloseInterception(t *testing.T) {
 	w.closed(w.viewport)
 	w.WaitForEvents()
 	assert.True(t, onClosed) // Close is called if the interceptor is not set.
+}
+
+func TestWindow_SetContent_Twice(t *testing.T) {
+	w := createWindow("Test").(*window)
+
+	e1 := widget.NewLabel("1")
+	e2 := widget.NewLabel("2")
+
+	w.SetContent(e1)
+	assert.True(t, e1.Visible())
+	w.SetContent(e2)
+	assert.True(t, e2.Visible())
+	w.SetContent(e1)
+	assert.True(t, e1.Visible())
 }
 
 // This test makes our developer screens flash, let's not run it regularly...

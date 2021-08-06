@@ -155,7 +155,7 @@ func TestEncode(t *testing.T) {
 	f, err := os.Open("testdata/bootstrap.xml")
 	r.NoError(err)
 
-	bx, err := UnmarshalXML(f, false)
+	bx, err := UnmarshalXML(f, false, 30)
 	r.NoError(err)
 
 	bin, err := ioutil.ReadFile("testdata/bootstrap.bin")
@@ -183,7 +183,7 @@ func TestRawValueByName(t *testing.T) {
 	f, err := os.Open("testdata/bootstrap.xml")
 	r.NoError(err)
 
-	bx, err := UnmarshalXML(f, false)
+	bx, err := UnmarshalXML(f, false, 30)
 	r.NoError(err)
 
 	pkgname, err := bx.RawValueByName("manifest", xml.Name{Local: "package"})

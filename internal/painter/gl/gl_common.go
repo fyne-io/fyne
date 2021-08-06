@@ -5,6 +5,7 @@ import (
 	"log"
 	"runtime"
 
+	"fyne.io/fyne/v2/theme"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 
@@ -63,6 +64,10 @@ func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
+	color := text.Color
+	if color == nil {
+		color = theme.ForegroundColor()
+	}
 
 	bounds := text.MinSize()
 	width := int(p.textureScale(bounds.Width))
@@ -77,7 +82,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 
 	d := painter.FontDrawer{}
 	d.Dst = img
-	d.Src = &image.Uniform{C: text.Color}
+	d.Src = &image.Uniform{C: color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text, text.TextStyle.TabWidth)

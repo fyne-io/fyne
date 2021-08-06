@@ -390,7 +390,7 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 
 //ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 func (s *Scroll) ScrollToBottom() {
-	s.Offset.Y = s.Content.Size().Height - s.Size().Height
+	s.Offset.Y = s.Content.MinSize().Height - s.Size().Height
 	s.Refresh()
 }
 

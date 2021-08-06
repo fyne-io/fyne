@@ -325,6 +325,9 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 	password := widget.NewPasswordEntry()
 	password.SetPlaceHolder("Password")
 
+	disabled := widget.NewRadioGroup([]string{"Option 1", "Option 2"}, func(string) {})
+	disabled.Horizontal = true
+	disabled.Disable()
 	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{
@@ -344,6 +347,7 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 		},
 	}
 	form.Append("Password", password)
+	form.Append("Disabled", disabled)
 	form.Append("Message", largeText)
 	return form
 }
