@@ -100,10 +100,18 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 				Style: RichTextStyleCodeBlock,
 				Text:  string(data),
 			})
-		case "Emph":
-			nextSeg = &TextSegment{
-				Style: RichTextStyleEmphasis,
-				Text:  string(n.Text(source)),
+		case "Emph", "Emphasis":
+			switch n.(*ast.Emphasis).Level {
+			case 2:
+				nextSeg = &TextSegment{
+					Style: RichTextStyleStrong,
+					Text:  string(n.Text(source)),
+				}
+			default:
+				nextSeg = &TextSegment{
+					Style: RichTextStyleEmphasis,
+					Text:  string(n.Text(source)),
+				}
 			}
 		case "Strong":
 			nextSeg = &TextSegment{
