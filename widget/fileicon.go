@@ -26,7 +26,6 @@ type FileIcon struct {
 
 	resource  fyne.Resource
 	extension string
-	cachedURI fyne.URI
 }
 
 // NewFileIcon takes a filepath and creates an icon with an overlaid label using the detected mimetype and extension
@@ -40,10 +39,8 @@ func NewFileIcon(uri fyne.URI) *FileIcon {
 
 // SetURI changes the URI and makes the icon reflect a different file
 func (i *FileIcon) SetURI(uri fyne.URI) {
-	if uri != i.URI {
-		i.URI = uri
-		i.Refresh()
-	}
+	i.URI = uri
+	i.Refresh()
 }
 
 func (i *FileIcon) setURI(uri fyne.URI) {
@@ -53,7 +50,6 @@ func (i *FileIcon) setURI(uri fyne.URI) {
 	}
 
 	i.URI = uri
-	i.cachedURI = nil
 	i.resource = i.lookupIcon(i.URI)
 	i.extension = trimmedExtension(uri)
 }
@@ -85,7 +81,6 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	s.ext.Alignment = fyne.TextAlignCenter
 
 	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
-	i.cachedURI = i.URI
 
 	return s
 }
@@ -124,11 +119,13 @@ func (i *FileIcon) isDir(uri fyne.URI) bool {
 		return true
 	}
 
-	can, err := storage.CanList(uri)
+	listable, err := storage.ListerForURI(uri)
 	if err != nil {
 		return false
 	}
-	return can
+
+	i.URI = listable // Avoid having to call storage.ListerForURI(uri) the next time.
+	return true
 }
 
 type fileIconRenderer struct {
@@ -170,17 +167,14 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileIconRenderer) Refresh() {
-	if s.file.URI != s.file.cachedURI {
-		s.file.propertyLock.Lock()
-		s.file.setURI(s.file.URI)
-		s.file.propertyLock.Unlock()
+	s.file.propertyLock.Lock()
+	s.file.setURI(s.file.URI)
+	s.file.propertyLock.Unlock()
 
-		s.file.propertyLock.RLock()
-		s.file.cachedURI = s.file.URI
-		s.img.Resource = s.file.resource
-		s.ext.Text = s.file.extension
-		s.file.propertyLock.RUnlock()
-	}
+	s.file.propertyLock.RLock()
+	s.img.Resource = s.file.resource
+	s.ext.Text = s.file.extension
+	s.file.propertyLock.RUnlock()
 
 	if s.file.Selected {
 		s.background.Show()
