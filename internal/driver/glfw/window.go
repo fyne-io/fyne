@@ -693,7 +693,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	mouseDraggedOffset := w.mouseDraggedOffset
 	mouseDragPos := w.mouseDragPos
 	w.mouseLock.RUnlock()
-	if w.mouseDragged != nil && w.mouseButton != desktop.MouseButtonSecondary {
+	if mouseDragged != nil && mouseButton != desktop.MouseButtonSecondary {
 		if w.mouseButton > 0 {
 			draggedObjDelta := mouseDraggedObjStart.Subtract(mouseDragged.(fyne.CanvasObject).Position())
 			ev := new(fyne.DragEvent)
