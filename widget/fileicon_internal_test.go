@@ -168,3 +168,27 @@ func TestFileIcon_SetURI_WithFolder(t *testing.T) {
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
+
+func TestFileIcon_DirURIUpdated(t *testing.T) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		fyne.LogError("Could not get current working directory", err)
+		t.FailNow()
+	}
+	testDir := filepath.Join(workingDir, "testdata", "notCreatedYet")
+
+	uri := storage.NewFileURI(testDir)
+	item := newRenderedFileIcon(uri)
+
+	// The directory has not been created. It can not be listed yet.
+	assert.Equal(t, theme.FileTextIcon(), item.resource)
+
+	err = os.Mkdir(testDir, 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(testDir)
+
+	item.Refresh()
+	assert.Equal(t, theme.FolderIcon(), item.resource)
+}
