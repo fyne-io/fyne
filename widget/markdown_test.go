@@ -29,7 +29,7 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 		t.Error("Segment should be Text")
 	}
 
-	r = NewRichTextFromMarkdown("``` go\ncode\nblock\n```")
+	r.ParseMarkdown("``` go\ncode\nblock\n```")
 	assert.Equal(t, 1, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "code\nblock", text.Text)
@@ -50,7 +50,7 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 		t.Error("Segment should be text")
 	}
 
-	r = NewRichTextFromMarkdown("**b**.")
+	r.ParseMarkdown("**b**.")
 
 	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
@@ -107,7 +107,7 @@ func TestRichTextMarkdown_Lines(t *testing.T) {
 		t.Error("Segment should be Text")
 	}
 
-	r = NewRichTextFromMarkdown("line1\n\nline2\n")
+	r.ParseMarkdown("line1\n\nline2\n")
 
 	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {

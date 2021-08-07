@@ -19,14 +19,11 @@ func NewRichTextFromMarkdown(content string) *RichText {
 	return NewRichText(parseMarkdown(content)...)
 }
 
-func parseMarkdown(content string) []RichTextSegment {
-	r := &markdownRenderer{}
-	md := goldmark.New(goldmark.WithRenderer(r))
-	err := md.Convert([]byte(content), nil)
-	if err != nil {
-		fyne.LogError("Failed to parse markdown", err)
-	}
-	return r.segs
+// ParseMarkdown allows setting the content of this RichText widget from a markdown string.
+// It will replace the content of this widget similarly to SetText, but with the appropriate formatting.
+func (t *RichText) ParseMarkdown(content string) {
+	t.Segments = parseMarkdown(content)
+	t.Refresh()
 }
 
 type markdownRenderer struct {
@@ -140,4 +137,18 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 
 		return ast.WalkContinue, nil
 	})
+}
+
+func parseMarkdown(content string) []RichTextSegment {
+	r := &markdownRenderer{}
+	if content == "" {
+		return r.segs
+	}
+
+	md := goldmark.New(goldmark.WithRenderer(r))
+	err := md.Convert([]byte(content), nil)
+	if err != nil {
+		fyne.LogError("Failed to parse markdown", err)
+	}
+	return r.segs
 }
