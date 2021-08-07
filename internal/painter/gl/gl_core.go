@@ -92,7 +92,7 @@ func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 		return
 	}
 
-	tex := uint32(texture)
+	tex := texture
 	gl.DeleteTextures(1, &tex)
 	logError()
 	cache.DeleteTexture(obj)
