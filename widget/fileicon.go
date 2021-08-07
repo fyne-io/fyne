@@ -119,11 +119,13 @@ func (i *FileIcon) isDir(uri fyne.URI) bool {
 		return true
 	}
 
-	can, err := storage.CanList(uri)
+	listable, err := storage.ListerForURI(uri)
 	if err != nil {
 		return false
 	}
-	return can
+
+	i.URI = listable // Avoid having to call storage.ListerForURI(uri) the next time.
+	return true
 }
 
 type fileIconRenderer struct {
