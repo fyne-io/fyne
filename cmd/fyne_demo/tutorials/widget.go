@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -105,7 +106,7 @@ func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated := newNumEntry()
 	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
@@ -430,4 +431,19 @@ func newContextMenuButton(label string, menu *fyne.Menu) *contextMenuButton {
 
 	b.ExtendBaseWidget(b)
 	return b
+}
+
+type numEntry struct {
+	widget.Entry
+}
+
+func (n *numEntry) Keyboard() mobile.KeyboardType {
+	return mobile.NumberKeyboard
+}
+
+func newNumEntry() *numEntry {
+	e := &numEntry{}
+	e.ExtendBaseWidget(e)
+	e.Validator = validation.NewRegexp(`\d`, "Must contain a number")
+	return e
 }
