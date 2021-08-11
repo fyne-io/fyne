@@ -360,8 +360,8 @@ func mimeStringFromFilter(filter *FileFilter) string {
 
 			mimeType := mime.TypeByExtension(ext)
 			if mimeType == "" {
-				mimeType = "*/*" // could not find one, so allow all
-				continue
+				log.Println("Could not find mime for extension " + ext + ", allowing all")
+				return "*/*" // could not find one, so allow all
 			}
 
 			mimeTypes = append(mimeTypes, mimeType)
