@@ -235,6 +235,7 @@ func (b *mapBase) doReload() (retErr error) {
 		for newKey := range *b.val {
 			if newKey == key {
 				found = true
+				break
 			}
 		}
 		if !found {
