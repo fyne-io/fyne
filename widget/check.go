@@ -53,7 +53,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 func (c *checkRenderer) applyTheme() {
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
-	if c.check.Disabled() {
+	if c.check.disabled {
 		c.label.Color = theme.DisabledColor()
 	}
 }
