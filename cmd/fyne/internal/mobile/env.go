@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"golang.org/x/mod/semver"
 
 	"golang.org/x/sys/execabs"
 )
@@ -86,6 +88,19 @@ func envInit() (err error) {
 	// An arbitrary standard package ('runtime' here) is given to go-list.
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
+
+	buildLegacy := false
+	ver, err := exec.Command("go", "version").Output()
+	if err == nil && string(ver) != "" {
+		fields := strings.Split(string(ver), " ")
+		if len(fields) >= 3 {
+			goVer := fields[2][2:] // strip "go" prefix
+			buildLegacy = semver.Compare("v"+goVer, "v1.15.0") < 0
+		}
+	}
+	if buildLegacy {
+		allArchs["ios"] = []string{"arm64", "amd64", "arm"}
+	}
 
 	// TODO re-enable once we find out what broke after September event 2020
 	//cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
