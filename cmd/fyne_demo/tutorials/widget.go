@@ -173,6 +173,17 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 			Text:  "A paragraph between separators that is very long, it should respect the wrapping flag",
 		},
 		&widget.SeparatorSegment{},
+		&widget.ListSegment{
+			Items: []widget.RichTextSegment{
+				&widget.ParagraphSegment{Texts: []widget.RichTextSegment{
+					&widget.TextSegment{Text: "Item1 in ", Style: widget.RichTextStyleInline},
+					&widget.TextSegment{Text: "three ", Style: widget.RichTextStyleEmphasis},
+					&widget.TextSegment{Text: "segments", Style: widget.RichTextStyleInline},
+				}},
+				&widget.TextSegment{Text: "Item2", Style: widget.RichTextStyleParagraph},
+				&widget.TextSegment{Text: "Item3", Style: widget.RichTextStyleParagraph},
+			},
+		},
 		&widget.TextSegment{
 			Style: widget.RichTextStyle{
 				Inline: true,
