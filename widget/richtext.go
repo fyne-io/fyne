@@ -324,63 +324,77 @@ func (t *RichText) updateRowBounds() {
 	maxWidth := t.size.Width - 4*theme.Padding() - 2*t.inset.Width
 	wrapWidth := maxWidth
 
-	var currentBound *rowBoundary
-	for _, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
-			if currentBound == nil {
-				bound := rowBoundary{segments: []RichTextSegment{seg}}
-				bounds = append(bounds, bound)
-				currentBound = &bound
-			} else {
-				bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+	var iterateSegments func(segList []RichTextSegment)
+	iterateSegments = func(segList []RichTextSegment) {
+		var currentBound *rowBoundary
+		for _, seg := range segList {
+			if parent, ok := seg.(RichTextBlock); ok {
+				iterateSegments(parent.Segments())
+				continue
 			}
+			if _, ok := seg.(*TextSegment); !ok {
+				if currentBound == nil {
+					bound := rowBoundary{segments: []RichTextSegment{seg}}
+					bounds = append(bounds, bound)
+					currentBound = &bound
+				} else {
+					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+				}
+				if seg.Inline() {
+					wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
+				} else {
+					currentBound = nil
+				}
+				continue
+			}
+			textSeg := seg.(*TextSegment)
+			textStyle := textSeg.Style.TextStyle
+			textSize := textSeg.size()
+
+			retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth, maxWidth, func(text []rune) float32 {
+				return fyne.MeasureText(string(text), textSize, textStyle).Width
+			})
+			if currentBound != nil {
+				if len(retBounds) > 0 {
+					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
+					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+					bounds = append(bounds, retBounds[1:]...)
+				}
+			} else {
+				bounds = append(bounds, retBounds...)
+			}
+			currentBound = &bounds[len(bounds)-1]
 			if seg.Inline() {
-				wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
+				last := bounds[len(bounds)-1]
+				begin := 0
+				if len(last.segments) == 1 {
+					begin = last.begin
+				}
+				text := string([]rune(textSeg.Text)[begin:last.end])
+				lastWidth := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle).Width
+				if len(retBounds) == 1 {
+					wrapWidth -= lastWidth
+				} else {
+					wrapWidth = maxWidth - lastWidth
+				}
 			} else {
 				currentBound = nil
+				wrapWidth = maxWidth
 			}
-			continue
-		}
-		textSeg := seg.(*TextSegment)
-		textStyle := textSeg.Style.TextStyle
-		textSize := textSeg.size()
-
-		retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth, maxWidth, func(text []rune) float32 {
-			return fyne.MeasureText(string(text), textSize, textStyle).Width
-		})
-		if currentBound != nil {
-			if len(retBounds) > 0 {
-				bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
-				bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-				bounds = append(bounds, retBounds[1:]...)
-			}
-		} else {
-			bounds = append(bounds, retBounds...)
-		}
-		currentBound = &bounds[len(bounds)-1]
-		if seg.Inline() {
-			last := bounds[len(bounds)-1]
-			begin := 0
-			if len(last.segments) == 1 {
-				begin = last.begin
-			}
-			text := string([]rune(textSeg.Text)[begin:last.end])
-			lastWidth := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle).Width
-			if len(retBounds) == 1 {
-				wrapWidth -= lastWidth
-			} else {
-				wrapWidth = maxWidth - lastWidth
-			}
-		} else {
-			currentBound = nil
-			wrapWidth = maxWidth
 		}
 	}
+
+	iterateSegments(t.Segments)
 	t.propertyLock.RUnlock()
 
 	t.propertyLock.Lock()
 	t.rowBounds = bounds
 	t.propertyLock.Unlock()
+}
+
+// RichTextBlock is an extension of a text segment that contains other segments
+type RichTextBlock interface {
+	Segments() []RichTextSegment
 }
 
 // Renderer
