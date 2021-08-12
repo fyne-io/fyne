@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"net/url"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -128,7 +129,8 @@ func (h *HyperlinkSegment) Unselect() {
 //
 // Since: 2.1
 type ListSegment struct {
-	Items []RichTextSegment
+	Items   []RichTextSegment
+	Ordered bool
 }
 
 // Inline returns false as a list should be in a block.
@@ -140,7 +142,11 @@ func (l *ListSegment) Inline() bool {
 func (l *ListSegment) Segments() []RichTextSegment {
 	out := make([]RichTextSegment, len(l.Items))
 	for i, in := range l.Items {
-		bullet := &TextSegment{Text: " •  ", Style: RichTextStyleStrong}
+		txt := "• "
+		if l.Ordered {
+			txt = strconv.Itoa(i+1) + "."
+		}
+		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
 		if para, ok := in.(*ParagraphSegment); ok {
 			seg := &ParagraphSegment{Texts: []RichTextSegment{bullet}}
 			seg.Texts = append(seg.Texts, para.Texts...)

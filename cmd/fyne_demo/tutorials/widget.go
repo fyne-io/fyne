@@ -174,6 +174,7 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		},
 		&widget.SeparatorSegment{},
 		&widget.ListSegment{
+			Ordered: true,
 			Items: []widget.RichTextSegment{
 				&widget.ParagraphSegment{Texts: []widget.RichTextSegment{
 					&widget.TextSegment{Text: "Item1 in ", Style: widget.RichTextStyleInline},
