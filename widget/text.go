@@ -291,7 +291,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	xPos := theme.Padding() + r.provider.extraPad.Width
 	yPos := theme.Padding() + r.provider.extraPad.Height
 	lineHeight := r.provider.charMinSize().Height
-	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
+	lineSize := fyne.NewSize(size.Width-yPos*2, lineHeight)
 	for i := 0; i < len(r.texts); i++ {
 		text := r.texts[i]
 		text.Resize(lineSize)

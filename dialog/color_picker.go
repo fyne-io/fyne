@@ -162,17 +162,16 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 
 	// Hex
-	hex := &widget.Entry{
-		OnChanged: func(text string) {
-			c, err := stringToColor(text)
-			if err != nil {
-				fyne.LogError("Error parsing color: "+text, err)
-				// TODO trigger entry invalid state
-			} else {
-				p.SetColor(c)
-			}
-		},
-	}
+	hex := newUserChangeEntry("")
+	hex.setOnChanged(func(text string) {
+		c, err := stringToColor(text)
+		if err != nil {
+			fyne.LogError("Error parsing color: "+text, err)
+			// TODO trigger entry invalid state
+		} else {
+			p.SetColor(c)
+		}
+	})
 
 	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), container.NewVBox(
 		container.NewGridWithColumns(3,
@@ -264,7 +263,7 @@ type colorPickerRenderer struct {
 	wheel             *colorWheel
 	preview           *canvas.Rectangle
 	alphaChannel      *colorChannel
-	hex               *widget.Entry
+	hex               *userChangeEntry
 	contents          fyne.CanvasObject
 }
 

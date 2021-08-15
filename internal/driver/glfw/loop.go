@@ -113,7 +113,6 @@ func (d *gLDriver) runGL() {
 					w.viewLock.Lock()
 					w.visible = false
 					v := w.viewport
-					w.viewport = nil
 					w.viewLock.Unlock()
 
 					// remove window from window list
@@ -124,9 +123,10 @@ func (d *gLDriver) runGL() {
 
 				w.viewLock.RLock()
 				expand := w.shouldExpand
+				fullScreen := w.fullScreen
 				w.viewLock.RUnlock()
 
-				if expand {
+				if expand && !fullScreen {
 					w.fitContent()
 					w.viewLock.Lock()
 					w.shouldExpand = false
@@ -201,10 +201,10 @@ func (d *gLDriver) startDrawThread() {
 					w := win.(*window)
 					w.viewLock.RLock()
 					canvas := w.canvas
-					view := w.viewport
+					closing := w.closing
 					visible := w.visible
 					w.viewLock.RUnlock()
-					if view == nil || !canvas.isDirty() || !visible {
+					if closing || !canvas.isDirty() || !visible {
 						continue
 					}
 

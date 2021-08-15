@@ -243,17 +243,7 @@ func colorToRGBA(c color.Color) (r, g, b, a int) {
 		b = int(col.B)
 		a = int(col.A)
 	default:
-		red, green, blue, alpha := c.RGBA()
-		if alpha != 0 && alpha != 1 {
-			red /= alpha
-			green /= alpha
-			blue /= alpha
-		}
-		// Convert from range 0-65535 to range 0-255
-		r = int(float64(red) / 255.0)
-		g = int(float64(green) / 255.0)
-		b = int(float64(blue) / 255.0)
-		a = int(float64(alpha) / 255.0)
+		r, g, b, a = unmultiplyAlpha(c)
 	}
 	return
 }
@@ -351,4 +341,20 @@ func hueToChannel(h, v1, v2 float64) float64 {
 		return v2 + (v1-v2)*6*((2.0/3.0)-h)
 	}
 	return v2
+}
+
+func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
+	red, green, blue, alpha := c.RGBA()
+	if alpha != 0 && alpha != 0xffff {
+		ratio := float64(alpha) / 0xffff
+		red = uint32(float64(red) / ratio)
+		green = uint32(float64(green) / ratio)
+		blue = uint32(float64(blue) / ratio)
+	}
+	// Convert from range 0-65535 to range 0-255
+	r = int(red >> 8)
+	g = int(green >> 8)
+	b = int(blue >> 8)
+	a = int(alpha >> 8)
+	return
 }

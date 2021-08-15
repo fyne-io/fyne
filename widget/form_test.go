@@ -1,9 +1,11 @@
 package widget
 
 import (
+	"errors"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -103,11 +105,11 @@ func TestForm_ChangeText(t *testing.T) {
 
 	renderer := test.WidgetRenderer(form)
 	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Equal(t, "Test", c.Objects[0].(*Label).Text)
+	assert.Equal(t, "Test", c.Objects[0].(*canvas.Text).Text)
 
 	item.Text = "Changed"
 	form.Refresh()
-	assert.Equal(t, "Changed", c.Objects[0].(*Label).Text)
+	assert.Equal(t, "Changed", c.Objects[0].(*canvas.Text).Text)
 }
 
 func TestForm_ChangeTheme(t *testing.T) {
@@ -130,6 +132,23 @@ func TestForm_ChangeTheme(t *testing.T) {
 		w.Resize(form.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		test.AssertImageMatches(t, "form/theme_changed.png", w.Canvas().Capture())
 	})
+}
+
+func TestForm_Disabled(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	disabled := NewEntry()
+	disabled.Disable()
+	f := NewForm(
+		NewFormItem("Form Item 1", NewEntry()),
+		NewFormItem("Form Item 2", disabled))
+
+	w := test.NewWindow(f)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/disabled.png", w.Canvas().Capture())
 }
 
 func TestForm_Hints(t *testing.T) {
@@ -187,4 +206,71 @@ func TestForm_Validation(t *testing.T) {
 	w = test.NewWindow(form)
 
 	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
+}
+
+func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	notEmptyValidator := func(s string) error {
+		if s == "" {
+			return errors.New("can't be empty")
+		}
+		return nil
+	}
+
+	entry1 := &Entry{Validator: notEmptyValidator, Text: ""}
+	entry2 := &Entry{Validator: notEmptyValidator, Text: ""}
+	items := []*FormItem{
+		{Text: "First", Widget: entry1},
+		{Text: "Second", Widget: entry2},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/validation_entry_first_type_initial.png", w.Canvas().Capture())
+
+	test.Type(entry1, "H")
+	test.Type(entry2, "L")
+	entry1.focused = false
+	entry1.Refresh()
+	w = test.NewWindow(form)
+
+	test.AssertImageMatches(t, "form/validation_entry_first_type_valid.png", w.Canvas().Capture())
+
+	entry1.SetText("")
+	entry2.SetText("")
+	w = test.NewWindow(form)
+
+	test.AssertImageMatches(t, "form/validation_entry_first_type_invalid.png", w.Canvas().Capture())
+}
+
+func TestForm_HintsRendered(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	f := NewForm()
+
+	fi1 := NewFormItem("Form Item 1", NewEntry())
+	fi1.HintText = "HT1"
+	f.AppendItem(fi1)
+
+	fi2 := NewFormItem("Form Item 2", NewEntry())
+	fi2.HintText = "HT2"
+
+	f.AppendItem(fi2)
+
+	fi3 := NewFormItem("Form Item 3", NewEntry())
+	fi3.HintText = "HT3"
+
+	f.AppendItem(fi3)
+
+	w := test.NewWindow(f)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form/hints_rendered.png", w.Canvas().Capture())
 }

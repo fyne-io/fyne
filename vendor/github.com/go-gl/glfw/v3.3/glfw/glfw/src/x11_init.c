@@ -38,24 +38,15 @@
 #include <locale.h>
 
 
-// Translate an X11 key code to a GLFW key code.
+// Translate the X11 KeySyms for a key to a GLFW key code
+// NOTE: This is only used as a fallback, in case the XKB method fails
+//       It is layout-dependent and will fail partially on most non-US layouts
 //
-static int translateKeyCode(int scancode)
+static int translateKeySyms(const KeySym* keysyms, int width)
 {
-    int keySym;
-
-    // Valid key code range is  [8,255], according to the Xlib manual
-    if (scancode < 8 || scancode > 255)
-        return GLFW_KEY_UNKNOWN;
-
-    if (_glfw.x11.xkb.available)
+    if (width > 1)
     {
-        // Try secondary keysym, for numeric keypad keys
-        // Note: This way we always force "NumLock = ON", which is intentional
-        // since the returned key code should correspond to a physical
-        // location.
-        keySym = XkbKeycodeToKeysym(_glfw.x11.display, scancode, _glfw.x11.xkb.group, 1);
-        switch (keySym)
+        switch (keysyms[1])
         {
             case XK_KP_0:           return GLFW_KEY_KP_0;
             case XK_KP_1:           return GLFW_KEY_KP_1;
@@ -73,22 +64,9 @@ static int translateKeyCode(int scancode)
             case XK_KP_Enter:       return GLFW_KEY_KP_ENTER;
             default:                break;
         }
-
-        // Now try primary keysym for function keys (non-printable keys)
-        // These should not depend on the current keyboard layout
-        keySym = XkbKeycodeToKeysym(_glfw.x11.display, scancode, _glfw.x11.xkb.group, 0);
-    }
-    else
-    {
-        int dummy;
-        KeySym* keySyms;
-
-        keySyms = XGetKeyboardMapping(_glfw.x11.display, scancode, 1, &dummy);
-        keySym = keySyms[0];
-        XFree(keySyms);
     }
 
-    switch (keySym)
+    switch (keysyms[0])
     {
         case XK_Escape:         return GLFW_KEY_ESCAPE;
         case XK_Tab:            return GLFW_KEY_TAB;
@@ -232,7 +210,7 @@ static int translateKeyCode(int scancode)
 //
 static void createKeyTables(void)
 {
-    int scancode, key;
+    int scancode, scancodeMin, scancodeMax;
 
     memset(_glfw.x11.keycodes, -1, sizeof(_glfw.x11.keycodes));
     memset(_glfw.x11.scancodes, -1, sizeof(_glfw.x11.scancodes));
@@ -242,89 +220,217 @@ static void createKeyTables(void)
         // Use XKB to determine physical key locations independently of the
         // current keyboard layout
 
-        char name[XkbKeyNameLength + 1];
         XkbDescPtr desc = XkbGetMap(_glfw.x11.display, 0, XkbUseCoreKbd);
-        XkbGetNames(_glfw.x11.display, XkbKeyNamesMask, desc);
+        XkbGetNames(_glfw.x11.display, XkbKeyNamesMask | XkbKeyAliasesMask, desc);
+
+        scancodeMin = desc->min_key_code;
+        scancodeMax = desc->max_key_code;
+
+        const struct
+        {
+            int key;
+            char* name;
+        } keymap[] =
+        {
+            { GLFW_KEY_GRAVE_ACCENT, "TLDE" },
+            { GLFW_KEY_1, "AE01" },
+            { GLFW_KEY_2, "AE02" },
+            { GLFW_KEY_3, "AE03" },
+            { GLFW_KEY_4, "AE04" },
+            { GLFW_KEY_5, "AE05" },
+            { GLFW_KEY_6, "AE06" },
+            { GLFW_KEY_7, "AE07" },
+            { GLFW_KEY_8, "AE08" },
+            { GLFW_KEY_9, "AE09" },
+            { GLFW_KEY_0, "AE10" },
+            { GLFW_KEY_MINUS, "AE11" },
+            { GLFW_KEY_EQUAL, "AE12" },
+            { GLFW_KEY_Q, "AD01" },
+            { GLFW_KEY_W, "AD02" },
+            { GLFW_KEY_E, "AD03" },
+            { GLFW_KEY_R, "AD04" },
+            { GLFW_KEY_T, "AD05" },
+            { GLFW_KEY_Y, "AD06" },
+            { GLFW_KEY_U, "AD07" },
+            { GLFW_KEY_I, "AD08" },
+            { GLFW_KEY_O, "AD09" },
+            { GLFW_KEY_P, "AD10" },
+            { GLFW_KEY_LEFT_BRACKET, "AD11" },
+            { GLFW_KEY_RIGHT_BRACKET, "AD12" },
+            { GLFW_KEY_A, "AC01" },
+            { GLFW_KEY_S, "AC02" },
+            { GLFW_KEY_D, "AC03" },
+            { GLFW_KEY_F, "AC04" },
+            { GLFW_KEY_G, "AC05" },
+            { GLFW_KEY_H, "AC06" },
+            { GLFW_KEY_J, "AC07" },
+            { GLFW_KEY_K, "AC08" },
+            { GLFW_KEY_L, "AC09" },
+            { GLFW_KEY_SEMICOLON, "AC10" },
+            { GLFW_KEY_APOSTROPHE, "AC11" },
+            { GLFW_KEY_Z, "AB01" },
+            { GLFW_KEY_X, "AB02" },
+            { GLFW_KEY_C, "AB03" },
+            { GLFW_KEY_V, "AB04" },
+            { GLFW_KEY_B, "AB05" },
+            { GLFW_KEY_N, "AB06" },
+            { GLFW_KEY_M, "AB07" },
+            { GLFW_KEY_COMMA, "AB08" },
+            { GLFW_KEY_PERIOD, "AB09" },
+            { GLFW_KEY_SLASH, "AB10" },
+            { GLFW_KEY_BACKSLASH, "BKSL" },
+            { GLFW_KEY_WORLD_1, "LSGT" },
+            { GLFW_KEY_SPACE, "SPCE" },
+            { GLFW_KEY_ESCAPE, "ESC" },
+            { GLFW_KEY_ENTER, "RTRN" },
+            { GLFW_KEY_TAB, "TAB" },
+            { GLFW_KEY_BACKSPACE, "BKSP" },
+            { GLFW_KEY_INSERT, "INS" },
+            { GLFW_KEY_DELETE, "DELE" },
+            { GLFW_KEY_RIGHT, "RGHT" },
+            { GLFW_KEY_LEFT, "LEFT" },
+            { GLFW_KEY_DOWN, "DOWN" },
+            { GLFW_KEY_UP, "UP" },
+            { GLFW_KEY_PAGE_UP, "PGUP" },
+            { GLFW_KEY_PAGE_DOWN, "PGDN" },
+            { GLFW_KEY_HOME, "HOME" },
+            { GLFW_KEY_END, "END" },
+            { GLFW_KEY_CAPS_LOCK, "CAPS" },
+            { GLFW_KEY_SCROLL_LOCK, "SCLK" },
+            { GLFW_KEY_NUM_LOCK, "NMLK" },
+            { GLFW_KEY_PRINT_SCREEN, "PRSC" },
+            { GLFW_KEY_PAUSE, "PAUS" },
+            { GLFW_KEY_F1, "FK01" },
+            { GLFW_KEY_F2, "FK02" },
+            { GLFW_KEY_F3, "FK03" },
+            { GLFW_KEY_F4, "FK04" },
+            { GLFW_KEY_F5, "FK05" },
+            { GLFW_KEY_F6, "FK06" },
+            { GLFW_KEY_F7, "FK07" },
+            { GLFW_KEY_F8, "FK08" },
+            { GLFW_KEY_F9, "FK09" },
+            { GLFW_KEY_F10, "FK10" },
+            { GLFW_KEY_F11, "FK11" },
+            { GLFW_KEY_F12, "FK12" },
+            { GLFW_KEY_F13, "FK13" },
+            { GLFW_KEY_F14, "FK14" },
+            { GLFW_KEY_F15, "FK15" },
+            { GLFW_KEY_F16, "FK16" },
+            { GLFW_KEY_F17, "FK17" },
+            { GLFW_KEY_F18, "FK18" },
+            { GLFW_KEY_F19, "FK19" },
+            { GLFW_KEY_F20, "FK20" },
+            { GLFW_KEY_F21, "FK21" },
+            { GLFW_KEY_F22, "FK22" },
+            { GLFW_KEY_F23, "FK23" },
+            { GLFW_KEY_F24, "FK24" },
+            { GLFW_KEY_F25, "FK25" },
+            { GLFW_KEY_KP_0, "KP0" },
+            { GLFW_KEY_KP_1, "KP1" },
+            { GLFW_KEY_KP_2, "KP2" },
+            { GLFW_KEY_KP_3, "KP3" },
+            { GLFW_KEY_KP_4, "KP4" },
+            { GLFW_KEY_KP_5, "KP5" },
+            { GLFW_KEY_KP_6, "KP6" },
+            { GLFW_KEY_KP_7, "KP7" },
+            { GLFW_KEY_KP_8, "KP8" },
+            { GLFW_KEY_KP_9, "KP9" },
+            { GLFW_KEY_KP_DECIMAL, "KPDL" },
+            { GLFW_KEY_KP_DIVIDE, "KPDV" },
+            { GLFW_KEY_KP_MULTIPLY, "KPMU" },
+            { GLFW_KEY_KP_SUBTRACT, "KPSU" },
+            { GLFW_KEY_KP_ADD, "KPAD" },
+            { GLFW_KEY_KP_ENTER, "KPEN" },
+            { GLFW_KEY_KP_EQUAL, "KPEQ" },
+            { GLFW_KEY_LEFT_SHIFT, "LFSH" },
+            { GLFW_KEY_LEFT_CONTROL, "LCTL" },
+            { GLFW_KEY_LEFT_ALT, "LALT" },
+            { GLFW_KEY_LEFT_SUPER, "LWIN" },
+            { GLFW_KEY_RIGHT_SHIFT, "RTSH" },
+            { GLFW_KEY_RIGHT_CONTROL, "RCTL" },
+            { GLFW_KEY_RIGHT_ALT, "RALT" },
+            { GLFW_KEY_RIGHT_ALT, "LVL3" },
+            { GLFW_KEY_RIGHT_ALT, "MDSW" },
+            { GLFW_KEY_RIGHT_SUPER, "RWIN" },
+            { GLFW_KEY_MENU, "MENU" }
+        };
 
         // Find the X11 key code -> GLFW key code mapping
-        for (scancode = desc->min_key_code;  scancode <= desc->max_key_code;  scancode++)
+        for (scancode = scancodeMin;  scancode <= scancodeMax;  scancode++)
         {
-            memcpy(name, desc->names->keys[scancode].name, XkbKeyNameLength);
-            name[XkbKeyNameLength] = '\0';
+            int key = GLFW_KEY_UNKNOWN;
 
-            // Map the key name to a GLFW key code. Note: We only map printable
-            // keys here, and we use the US keyboard layout. The rest of the
-            // keys (function keys) are mapped using traditional KeySym
-            // translations.
-            if (strcmp(name, "TLDE") == 0) key = GLFW_KEY_GRAVE_ACCENT;
-            else if (strcmp(name, "AE01") == 0) key = GLFW_KEY_1;
-            else if (strcmp(name, "AE02") == 0) key = GLFW_KEY_2;
-            else if (strcmp(name, "AE03") == 0) key = GLFW_KEY_3;
-            else if (strcmp(name, "AE04") == 0) key = GLFW_KEY_4;
-            else if (strcmp(name, "AE05") == 0) key = GLFW_KEY_5;
-            else if (strcmp(name, "AE06") == 0) key = GLFW_KEY_6;
-            else if (strcmp(name, "AE07") == 0) key = GLFW_KEY_7;
-            else if (strcmp(name, "AE08") == 0) key = GLFW_KEY_8;
-            else if (strcmp(name, "AE09") == 0) key = GLFW_KEY_9;
-            else if (strcmp(name, "AE10") == 0) key = GLFW_KEY_0;
-            else if (strcmp(name, "AE11") == 0) key = GLFW_KEY_MINUS;
-            else if (strcmp(name, "AE12") == 0) key = GLFW_KEY_EQUAL;
-            else if (strcmp(name, "AD01") == 0) key = GLFW_KEY_Q;
-            else if (strcmp(name, "AD02") == 0) key = GLFW_KEY_W;
-            else if (strcmp(name, "AD03") == 0) key = GLFW_KEY_E;
-            else if (strcmp(name, "AD04") == 0) key = GLFW_KEY_R;
-            else if (strcmp(name, "AD05") == 0) key = GLFW_KEY_T;
-            else if (strcmp(name, "AD06") == 0) key = GLFW_KEY_Y;
-            else if (strcmp(name, "AD07") == 0) key = GLFW_KEY_U;
-            else if (strcmp(name, "AD08") == 0) key = GLFW_KEY_I;
-            else if (strcmp(name, "AD09") == 0) key = GLFW_KEY_O;
-            else if (strcmp(name, "AD10") == 0) key = GLFW_KEY_P;
-            else if (strcmp(name, "AD11") == 0) key = GLFW_KEY_LEFT_BRACKET;
-            else if (strcmp(name, "AD12") == 0) key = GLFW_KEY_RIGHT_BRACKET;
-            else if (strcmp(name, "AC01") == 0) key = GLFW_KEY_A;
-            else if (strcmp(name, "AC02") == 0) key = GLFW_KEY_S;
-            else if (strcmp(name, "AC03") == 0) key = GLFW_KEY_D;
-            else if (strcmp(name, "AC04") == 0) key = GLFW_KEY_F;
-            else if (strcmp(name, "AC05") == 0) key = GLFW_KEY_G;
-            else if (strcmp(name, "AC06") == 0) key = GLFW_KEY_H;
-            else if (strcmp(name, "AC07") == 0) key = GLFW_KEY_J;
-            else if (strcmp(name, "AC08") == 0) key = GLFW_KEY_K;
-            else if (strcmp(name, "AC09") == 0) key = GLFW_KEY_L;
-            else if (strcmp(name, "AC10") == 0) key = GLFW_KEY_SEMICOLON;
-            else if (strcmp(name, "AC11") == 0) key = GLFW_KEY_APOSTROPHE;
-            else if (strcmp(name, "AB01") == 0) key = GLFW_KEY_Z;
-            else if (strcmp(name, "AB02") == 0) key = GLFW_KEY_X;
-            else if (strcmp(name, "AB03") == 0) key = GLFW_KEY_C;
-            else if (strcmp(name, "AB04") == 0) key = GLFW_KEY_V;
-            else if (strcmp(name, "AB05") == 0) key = GLFW_KEY_B;
-            else if (strcmp(name, "AB06") == 0) key = GLFW_KEY_N;
-            else if (strcmp(name, "AB07") == 0) key = GLFW_KEY_M;
-            else if (strcmp(name, "AB08") == 0) key = GLFW_KEY_COMMA;
-            else if (strcmp(name, "AB09") == 0) key = GLFW_KEY_PERIOD;
-            else if (strcmp(name, "AB10") == 0) key = GLFW_KEY_SLASH;
-            else if (strcmp(name, "BKSL") == 0) key = GLFW_KEY_BACKSLASH;
-            else if (strcmp(name, "LSGT") == 0) key = GLFW_KEY_WORLD_1;
-            else key = GLFW_KEY_UNKNOWN;
+            // Map the key name to a GLFW key code. Note: We use the US
+            // keyboard layout. Because function keys aren't mapped correctly
+            // when using traditional KeySym translations, they are mapped
+            // here instead.
+            for (int i = 0;  i < sizeof(keymap) / sizeof(keymap[0]);  i++)
+            {
+                if (strncmp(desc->names->keys[scancode].name,
+                            keymap[i].name,
+                            XkbKeyNameLength) == 0)
+                {
+                    key = keymap[i].key;
+                    break;
+                }
+            }
 
-            if ((scancode >= 0) && (scancode < 256))
-                _glfw.x11.keycodes[scancode] = key;
+            // Fall back to key aliases in case the key name did not match
+            for (int i = 0;  i < desc->names->num_key_aliases;  i++)
+            {
+                if (key != GLFW_KEY_UNKNOWN)
+                    break;
+
+                if (strncmp(desc->names->key_aliases[i].real,
+                            desc->names->keys[scancode].name,
+                            XkbKeyNameLength) != 0)
+                {
+                    continue;
+                }
+
+                for (int j = 0;  j < sizeof(keymap) / sizeof(keymap[0]);  j++)
+                {
+                    if (strncmp(desc->names->key_aliases[i].alias,
+                                keymap[j].name,
+                                XkbKeyNameLength) == 0)
+                    {
+                        key = keymap[j].key;
+                        break;
+                    }
+                }
+            }
+
+            _glfw.x11.keycodes[scancode] = key;
         }
 
         XkbFreeNames(desc, XkbKeyNamesMask, True);
         XkbFreeKeyboard(desc, 0, True);
     }
+    else
+        XDisplayKeycodes(_glfw.x11.display, &scancodeMin, &scancodeMax);
 
-    for (scancode = 0;  scancode < 256;  scancode++)
+    int width;
+    KeySym* keysyms = XGetKeyboardMapping(_glfw.x11.display,
+                                          scancodeMin,
+                                          scancodeMax - scancodeMin + 1,
+                                          &width);
+
+    for (scancode = scancodeMin;  scancode <= scancodeMax;  scancode++)
     {
         // Translate the un-translated key codes using traditional X11 KeySym
         // lookups
         if (_glfw.x11.keycodes[scancode] < 0)
-            _glfw.x11.keycodes[scancode] = translateKeyCode(scancode);
+        {
+            const size_t base = (scancode - scancodeMin) * width;
+            _glfw.x11.keycodes[scancode] = translateKeySyms(&keysyms[base], width);
+        }
 
         // Store the reverse translation for faster key name lookup
         if (_glfw.x11.keycodes[scancode] > 0)
             _glfw.x11.scancodes[_glfw.x11.keycodes[scancode]] = scancode;
     }
+
+    XFree(keysyms);
 }
 
 // Check whether the IM has a usable style
@@ -352,13 +458,13 @@ static GLFWbool hasUsableInputMethodStyle(void)
 
 // Check whether the specified atom is supported
 //
-static Atom getSupportedAtom(Atom* supportedAtoms,
-                             unsigned long atomCount,
-                             const char* atomName)
+static Atom getAtomIfSupported(Atom* supportedAtoms,
+                               unsigned long atomCount,
+                               const char* atomName)
 {
     const Atom atom = XInternAtom(_glfw.x11.display, atomName, False);
 
-    for (unsigned int i = 0;  i < atomCount;  i++)
+    for (unsigned long i = 0;  i < atomCount;  i++)
     {
         if (supportedAtoms[i] == atom)
             return atom;
@@ -426,33 +532,33 @@ static void detectEWMH(void)
     // See which of the atoms we support that are supported by the WM
 
     _glfw.x11.NET_WM_STATE =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_STATE");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_STATE");
     _glfw.x11.NET_WM_STATE_ABOVE =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_STATE_ABOVE");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_STATE_ABOVE");
     _glfw.x11.NET_WM_STATE_FULLSCREEN =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_STATE_FULLSCREEN");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_STATE_FULLSCREEN");
     _glfw.x11.NET_WM_STATE_MAXIMIZED_VERT =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_STATE_MAXIMIZED_VERT");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_STATE_MAXIMIZED_VERT");
     _glfw.x11.NET_WM_STATE_MAXIMIZED_HORZ =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_STATE_MAXIMIZED_HORZ");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_STATE_MAXIMIZED_HORZ");
     _glfw.x11.NET_WM_STATE_DEMANDS_ATTENTION =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_STATE_DEMANDS_ATTENTION");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_STATE_DEMANDS_ATTENTION");
     _glfw.x11.NET_WM_FULLSCREEN_MONITORS =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_FULLSCREEN_MONITORS");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_FULLSCREEN_MONITORS");
     _glfw.x11.NET_WM_WINDOW_TYPE =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_WINDOW_TYPE");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_WINDOW_TYPE");
     _glfw.x11.NET_WM_WINDOW_TYPE_NORMAL =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WM_WINDOW_TYPE_NORMAL");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WM_WINDOW_TYPE_NORMAL");
     _glfw.x11.NET_WORKAREA =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_WORKAREA");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_WORKAREA");
     _glfw.x11.NET_CURRENT_DESKTOP =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_CURRENT_DESKTOP");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_CURRENT_DESKTOP");
     _glfw.x11.NET_ACTIVE_WINDOW =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_ACTIVE_WINDOW");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_ACTIVE_WINDOW");
     _glfw.x11.NET_FRAME_EXTENTS =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_FRAME_EXTENTS");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_FRAME_EXTENTS");
     _glfw.x11.NET_REQUEST_FRAME_EXTENTS =
-        getSupportedAtom(supportedAtoms, atomCount, "_NET_REQUEST_FRAME_EXTENTS");
+        getAtomIfSupported(supportedAtoms, atomCount, "_NET_REQUEST_FRAME_EXTENTS");
 
     if (supportedAtoms)
         XFree(supportedAtoms);
@@ -660,13 +766,12 @@ static GLFWbool initExtensions(void)
                 _glfw.x11.xkb.detectable = GLFW_TRUE;
         }
 
-        _glfw.x11.xkb.group = 0;
         XkbStateRec state;
         if (XkbGetState(_glfw.x11.display, XkbUseCoreKbd, &state) == Success)
-        {
-            XkbSelectEventDetails(_glfw.x11.display, XkbUseCoreKbd, XkbStateNotify, XkbAllStateComponentsMask, XkbGroupStateMask);
             _glfw.x11.xkb.group = (unsigned int)state.group;
-        }
+
+        XkbSelectEventDetails(_glfw.x11.display, XkbUseCoreKbd, XkbStateNotify,
+                              XkbGroupStateMask, XkbGroupStateMask);
     }
 
 #if defined(__CYGWIN__)
@@ -851,6 +956,9 @@ static Window createHelperWindow(void)
 //
 static int errorHandler(Display *display, XErrorEvent* event)
 {
+    if (_glfw.x11.display != display)
+        return 0;
+
     _glfw.x11.errorCode = event->error_code;
     return 0;
 }
@@ -931,15 +1039,12 @@ Cursor _glfwCreateCursorX11(const GLFWimage* image, int xhot, int yhot)
 
 int _glfwPlatformInit(void)
 {
-#if !defined(X_HAVE_UTF8_STRING)
-    // HACK: If the current locale is "C" and the Xlib UTF-8 functions are
-    //       unavailable, apply the environment's locale in the hope that it's
-    //       both available and not "C"
-    //       This is done because the "C" locale breaks wide character input,
-    //       which is what we fall back on when UTF-8 support is missing
+    // HACK: If the application has left the locale as "C" then both wide
+    //       character text input and explicit UTF-8 input via XIM will break
+    //       This sets the CTYPE part of the current locale from the environment
+    //       in the hope that it is set to something more sane than "C"
     if (strcmp(setlocale(LC_CTYPE, NULL), "C") == 0)
         setlocale(LC_CTYPE, "");
-#endif
 
     XInitThreads();
     XrmInitialize();

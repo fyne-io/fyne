@@ -67,10 +67,12 @@ func (i *FileIcon) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
+	i.propertyLock.Lock()
+	i.setURI(i.URI)
+	i.propertyLock.Unlock()
+
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
-
-	i.setURI(i.URI)
 
 	// TODO should FileIcon render a background representing selection, or should it be in the collection?
 	// TODO file dialog currently uses a container with NewGridWrapLayout, but if this changes to List, or Table then the primary color background would be rendered twice.
@@ -78,7 +80,12 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
-	s.updateObjects()
+	s.img = canvas.NewImageFromResource(s.file.resource)
+	s.img.FillMode = canvas.ImageFillContain
+	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
+	s.ext.Alignment = fyne.TextAlignCenter
+
+	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
 	i.cachedURI = i.URI
 
 	return s
@@ -149,9 +156,13 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 	}
 	yoff += isize * ratioDown
 
+	oldSize := s.ext.TextSize
 	s.ext.TextSize = float32(int(isize * ratioTextSize))
 	s.ext.Resize(fyne.NewSize(isize, s.ext.MinSize().Height))
 	s.ext.Move(fyne.NewPos(xoff, yoff))
+	if oldSize != s.ext.TextSize {
+		s.ext.Refresh()
+	}
 
 	s.Objects()[0].Resize(size)
 	s.Objects()[1].Resize(size)
@@ -159,10 +170,14 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 
 func (s *fileIconRenderer) Refresh() {
 	if s.file.URI != s.file.cachedURI {
-		s.file.propertyLock.RLock()
+		s.file.propertyLock.Lock()
 		s.file.setURI(s.file.URI)
-		s.updateObjects()
+		s.file.propertyLock.Unlock()
+
+		s.file.propertyLock.RLock()
 		s.file.cachedURI = s.file.URI
+		s.img.Resource = s.file.resource
+		s.ext.Text = s.file.extension
 		s.file.propertyLock.RUnlock()
 	}
 
@@ -182,16 +197,6 @@ func (s *fileIconRenderer) Refresh() {
 
 	canvas.Refresh(s.file.super())
 	canvas.Refresh(s.ext)
-}
-
-func (s *fileIconRenderer) updateObjects() {
-	s.img = canvas.NewImageFromResource(s.file.resource)
-	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
-	s.img.FillMode = canvas.ImageFillContain
-	s.ext.Alignment = fyne.TextAlignCenter
-	s.ext.TextSize = theme.TextSize()
-
-	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
 }
 
 func trimmedExtension(uri fyne.URI) string {

@@ -1014,12 +1014,12 @@ func ZoomOutIcon() fyne.Resource {
 	return safeIconLookup(IconNameViewZoomOut)
 }
 
-// VisibilityIcon returns a resource containing the standard visibity icon for the current theme
+// VisibilityIcon returns a resource containing the standard visibility icon for the current theme
 func VisibilityIcon() fyne.Resource {
 	return safeIconLookup(IconNameVisibility)
 }
 
-// VisibilityOffIcon returns a resource containing the standard visibity off icon for the current theme
+// VisibilityOffIcon returns a resource containing the standard visibility off icon for the current theme
 func VisibilityOffIcon() fyne.Resource {
 	return safeIconLookup(IconNameVisibilityOff)
 }

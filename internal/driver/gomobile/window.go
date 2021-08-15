@@ -121,6 +121,7 @@ func (w *window) Show() {
 	w.visible = true
 
 	if w.Content() != nil {
+		w.Content().Refresh()
 		w.Content().Show()
 	}
 }

@@ -66,7 +66,6 @@ type Button struct {
 
 	hovered bool
 	tapAnim *fyne.Animation
-	tapBG   *canvas.Rectangle
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -99,10 +98,12 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.TextStyle.Bold = true
 
 	background := canvas.NewRectangle(theme.ButtonColor())
-	b.tapBG = canvas.NewRectangle(color.Transparent)
+	tapBG := canvas.NewRectangle(color.Transparent)
+	b.tapAnim = newButtonTapAnimation(tapBG, b)
+	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
 		background,
-		b.tapBG,
+		tapBG,
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
@@ -112,6 +113,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	r := &buttonRenderer{
 		ShadowingRenderer: widget.NewShadowingRenderer(objects, shadowLevel),
 		background:        background,
+		tapBG:             tapBG,
 		button:            b,
 		label:             text,
 		layout:            layout.NewHBoxLayout(),
@@ -177,17 +179,10 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 }
 
 func (b *Button) tapAnimation() {
-	if b.tapBG == nil { // not rendered yet? (tests)
+	if b.tapAnim == nil {
 		return
 	}
-
-	if b.tapAnim == nil {
-		b.tapAnim = newButtonTapAnimation(b.tapBG, b)
-		b.tapAnim.Curve = fyne.AnimationEaseOut
-	} else {
-		b.tapAnim.Stop()
-	}
-
+	b.tapAnim.Stop()
 	b.tapAnim.Start()
 }
 
@@ -197,6 +192,7 @@ type buttonRenderer struct {
 	icon       *canvas.Image
 	label      *canvas.Text
 	background *canvas.Rectangle
+	tapBG      *canvas.Rectangle
 	button     *Button
 	layout     fyne.Layout
 }
@@ -312,10 +308,25 @@ func (r *buttonRenderer) buttonColor() color.Color {
 	switch {
 	case r.button.Disabled():
 		return theme.DisabledButtonColor()
+	case r.button.hovered:
+		bg := theme.ButtonColor()
+		if r.button.Importance == HighImportance {
+			bg = theme.PrimaryColor()
+		}
+
+		dstR, dstG, dstB, dstA := bg.RGBA()
+		srcR, srcG, srcB, srcA := theme.HoverColor().RGBA()
+		srcAlpha := float32(srcA) / 0xFFFF
+		dstAlpha := float32(dstA) / 0xFFFF
+		targetAlpha := 1 - srcAlpha*dstAlpha
+
+		outAlpha := srcAlpha + targetAlpha
+		outR := (srcAlpha*float32(srcR) + targetAlpha*float32(dstR)) / outAlpha
+		outG := (srcAlpha*float32(srcG) + targetAlpha*float32(dstG)) / outAlpha
+		outB := (srcAlpha*float32(srcB) + targetAlpha*float32(dstB)) / outAlpha
+		return color.RGBA{R: uint8(uint32(outR) >> 8), G: uint8(uint32(outG) >> 8), B: uint8(uint32(outB) >> 8), A: uint8(outAlpha * 0xFF)}
 	case r.button.Importance == HighImportance:
 		return theme.PrimaryColor()
-	case r.button.hovered:
-		return theme.HoverColor()
 	default:
 		return theme.ButtonColor()
 	}
@@ -336,7 +347,7 @@ func (r *buttonRenderer) updateIconAndText() {
 		if r.icon == nil {
 			r.icon = canvas.NewImageFromResource(r.button.Icon)
 			r.icon.FillMode = canvas.ImageFillContain
-			r.SetObjects([]fyne.CanvasObject{r.background, r.button.tapBG, r.label, r.icon})
+			r.SetObjects([]fyne.CanvasObject{r.background, r.tapBG, r.label, r.icon})
 		}
 		if r.button.Disabled() {
 			r.icon.Resource = theme.NewDisabledResource(r.button.Icon)
