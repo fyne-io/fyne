@@ -121,6 +121,8 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	}
 	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}
+	root, _ := newApp.storage.docRootURI()
+	newApp.storage.Docs = &internal.Docs{RootDocURI: root}
 
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
