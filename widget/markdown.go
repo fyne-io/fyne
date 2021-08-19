@@ -27,80 +27,58 @@ func (t *RichText) ParseMarkdown(content string) {
 }
 
 type markdownRenderer struct {
-	segs []RichTextSegment
+	blockquote  bool
+	nextSeg     RichTextSegment
+	parentStack [][]RichTextSegment
+	segs        []RichTextSegment
 }
 
 func (m *markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
-	var segs []RichTextSegment
-	var parentStack [][]RichTextSegment
-	var nextSeg RichTextSegment
-	nextSeg = &TextSegment{}
-	blockquote := false
+	m.nextSeg = &TextSegment{}
 	err := ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
-			if n.Kind().String() == "Blockquote" {
-				blockquote = false
-			} else if n.Kind().String() == "List" {
-				listSegs := segs
-				segs = parentStack[len(parentStack)-1]
-				parentStack = parentStack[:len(parentStack)-1]
-				marker := n.(*ast.List).Marker
-				segs = append(segs, &ListSegment{Items: listSegs, Ordered: marker != '*' && marker != '-' && marker != '+'})
-			} else if n.Kind().String() == "ListItem" {
-				itemSegs := segs
-				segs = parentStack[len(parentStack)-1]
-				parentStack = parentStack[:len(parentStack)-1]
-				segs = append(segs, &ParagraphSegment{Texts: itemSegs})
-			} else if !blockquote {
-				if text, ok := segs[len(segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
-					text.Style = RichTextStyleParagraph
-				}
-				nextSeg = &TextSegment{
-					Style: RichTextStyleInline,
-				}
-			}
-			return ast.WalkContinue, nil
+			return ast.WalkContinue, m.handleExitNode(n)
 		}
 
 		switch n.Kind().String() {
 		case "List":
 			// prepare a new child level
-			parentStack = append(parentStack, segs)
-			segs = nil
+			m.parentStack = append(m.parentStack, m.segs)
+			m.segs = nil
 		case "ListItem":
 			// prepare a new item level
-			parentStack = append(parentStack, segs)
-			segs = nil
+			m.parentStack = append(m.parentStack, m.segs)
+			m.segs = nil
 		case "Heading":
 			switch n.(*ast.Heading).Level {
 			case 1:
-				nextSeg = &TextSegment{
+				m.nextSeg = &TextSegment{
 					Style: RichTextStyleHeading,
 					Text:  string(n.Text(source)),
 				}
 			case 2:
-				nextSeg = &TextSegment{
+				m.nextSeg = &TextSegment{
 					Style: RichTextStyleSubHeading,
 					Text:  string(n.Text(source)),
 				}
 			}
 		case "HorizontalRule", "ThematicBreak":
-			segs = append(segs, &SeparatorSegment{})
+			m.segs = append(m.segs, &SeparatorSegment{})
 		case "Link":
 			link, _ := url.Parse(string(n.(*ast.Link).Destination))
-			nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, strings.TrimSpace(string(n.Text(source))), link}
+			m.nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, strings.TrimSpace(string(n.Text(source))), link}
 		case "Paragraph":
-			nextSeg = &TextSegment{
+			m.nextSeg = &TextSegment{
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
 				Text:  string(n.Text(source)),
 			}
-			if blockquote {
-				nextSeg.(*TextSegment).Style = RichTextStyleBlockquote
+			if m.blockquote {
+				m.nextSeg.(*TextSegment).Style = RichTextStyleBlockquote
 			}
 		case "CodeSpan":
-			nextSeg = &TextSegment{
+			m.nextSeg = &TextSegment{
 				Style: RichTextStyleCodeInline,
 				Text:  string(n.Text(source)),
 			}
@@ -114,25 +92,25 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			if data[len(data)-1] == '\n' {
 				data = data[:len(data)-1]
 			}
-			segs = append(segs, &TextSegment{
+			m.segs = append(m.segs, &TextSegment{
 				Style: RichTextStyleCodeBlock,
 				Text:  string(data),
 			})
 		case "Emph", "Emphasis":
 			switch n.(*ast.Emphasis).Level {
 			case 2:
-				nextSeg = &TextSegment{
+				m.nextSeg = &TextSegment{
 					Style: RichTextStyleStrong,
 					Text:  string(n.Text(source)),
 				}
 			default:
-				nextSeg = &TextSegment{
+				m.nextSeg = &TextSegment{
 					Style: RichTextStyleEmphasis,
 					Text:  string(n.Text(source)),
 				}
 			}
 		case "Strong":
-			nextSeg = &TextSegment{
+			m.nextSeg = &TextSegment{
 				Style: RichTextStyleStrong,
 				Text:  string(n.Text(source)),
 			}
@@ -142,22 +120,45 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			if trimmed == "" {
 				return ast.WalkContinue, nil
 			}
-			if text, ok := nextSeg.(*TextSegment); ok {
+			if text, ok := m.nextSeg.(*TextSegment); ok {
 				text.Text = trimmed
 			}
-			if link, ok := nextSeg.(*HyperlinkSegment); ok {
+			if link, ok := m.nextSeg.(*HyperlinkSegment); ok {
 				link.Text = trimmed
 			}
-			segs = append(segs, nextSeg)
+			m.segs = append(m.segs, m.nextSeg)
 		case "Blockquote":
-			blockquote = true
+			m.blockquote = true
 		}
 
 		return ast.WalkContinue, nil
 	})
-
-	m.segs = segs
 	return err
+}
+
+func (m *markdownRenderer) handleExitNode(n ast.Node) error {
+	if n.Kind().String() == "Blockquote" {
+		m.blockquote = false
+	} else if n.Kind().String() == "List" {
+		listSegs := m.segs
+		m.segs = m.parentStack[len(m.parentStack)-1]
+		m.parentStack = m.parentStack[:len(m.parentStack)-1]
+		marker := n.(*ast.List).Marker
+		m.segs = append(m.segs, &ListSegment{Items: listSegs, Ordered: marker != '*' && marker != '-' && marker != '+'})
+	} else if n.Kind().String() == "ListItem" {
+		itemSegs := m.segs
+		m.segs = m.parentStack[len(m.parentStack)-1]
+		m.parentStack = m.parentStack[:len(m.parentStack)-1]
+		m.segs = append(m.segs, &ParagraphSegment{Texts: itemSegs})
+	} else if !m.blockquote {
+		if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
+			text.Style = RichTextStyleParagraph
+		}
+		m.nextSeg = &TextSegment{
+			Style: RichTextStyleInline,
+		}
+	}
+	return nil
 }
 
 func parseMarkdown(content string) []RichTextSegment {
