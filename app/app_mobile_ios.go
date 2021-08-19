@@ -36,15 +36,6 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 	return nil
 }
 
-func (a *fyneApp) SendNotification(n *fyne.Notification) {
-	titleStr := C.CString(n.Title)
-	defer C.free(unsafe.Pointer(titleStr))
-	contentStr := C.CString(n.Content)
-	defer C.free(unsafe.Pointer(contentStr))
-
-	C.sendNotification(titleStr, contentStr)
-}
-
 func defaultVariant() fyne.ThemeVariant {
 	return systemTheme
 }

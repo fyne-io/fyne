@@ -1,55 +1,51 @@
 // +build !ci
-// +build !ios
 
-extern void themeChanged();
+#import <UserNotifications/UserNotifications.h>
 
-#import <Foundation/Foundation.h>
+static int notifyNum = 0;
 
-@interface FyneUserNotificationCenterDelegate : NSObject<NSUserNotificationCenterDelegate>
+extern void fallbackSend(char *cTitle, char *cBody);
 
-- (BOOL)userNotificationCenter:(NSUserNotificationCenter*)center
-    shouldPresentNotification:(NSUserNotification*)notification;
+void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSString *body) {
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    [content autorelease];
+    content.title = title;
+    content.body = body;
 
-@end
+    notifyNum++;
+    NSString *identifier = [NSString stringWithFormat:@"fyne-notify-%d", notifyNum];
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+        content:content trigger:nil];
 
-@implementation FyneUserNotificationCenterDelegate
-
-- (BOOL)userNotificationCenter:(NSUserNotificationCenter*)center
-    shouldPresentNotification:(NSUserNotification*)notification
-{
-    return YES;
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"Could not send notification: %@", error);
+        }
+    }];
 }
-
-@end
-
-void sendNSUserNotification(const char *, const char *);
 
 bool isBundled() {
     return [[NSBundle mainBundle] bundleIdentifier] != nil;
 }
 
-bool isDarkMode() {
-    NSString *style = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
-    return [@"Dark" isEqualToString:style];
-}
+void sendNotification(char *cTitle, char *cBody) {
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    NSString *title = [NSString stringWithUTF8String:cTitle];
+    NSString *body = [NSString stringWithUTF8String:cBody];
 
-void sendNotification(const char *title, const char *body) {
-    NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
-    if (center.delegate == nil) {
-        center.delegate = [[FyneUserNotificationCenterDelegate new] autorelease];
-    }
-
-    NSString *uuid = [[NSUUID UUID] UUIDString];
-    NSUserNotification *notification = [[NSUserNotification new] autorelease];
-    notification.title = [NSString stringWithUTF8String:title];
-    notification.informativeText = [NSString stringWithUTF8String:body];
-    notification.identifier = [NSString stringWithFormat:@"%@-fyne-notify-%@", [[NSBundle mainBundle] bundleIdentifier], uuid];
-    [center scheduleNotification:notification];
-}
-
-void watchTheme() {
-    [[NSDistributedNotificationCenter defaultCenter] addObserverForName:@"AppleInterfaceThemeChangedNotification" object:nil queue:nil
-        usingBlock:^(NSNotification *note) {
-        themeChanged(); // calls back into Go
-    }];
+    UNAuthorizationOptions options = UNAuthorizationOptionAlert;
+    [center requestAuthorizationWithOptions:options
+        completionHandler:^(BOOL granted, NSError *_Nullable error) {
+            if (!granted) {
+                if (error != NULL) {
+                    NSLog(@"Error asking for permission to send notifications %@", error);
+                    // this happens if our app was not signed, so do it the old way
+                    fallbackSend((char *)[title UTF8String], (char *)[body UTF8String]);
+                } else {
+                    NSLog(@"Unable to get permission to send notifications");
+                }
+            } else {
+                doSendNotification(center, title, body);
+            }
+        }];
 }
