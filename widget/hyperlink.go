@@ -23,8 +23,8 @@ type Hyperlink struct {
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 
-	focused  bool
-	provider *RichText
+	focused, hovered bool
+	provider         *RichText
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -55,7 +55,9 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	focus.StrokeColor = theme.FocusColor()
 	focus.StrokeWidth = 2
 	focus.Hide()
-	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus}, focus: focus}
+	under := canvas.NewRectangle(theme.PrimaryColor())
+	under.Hide()
+	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus, under}, focus: focus, under: under}
 }
 
 // Cursor returns the cursor type of this widget
@@ -66,13 +68,29 @@ func (hl *Hyperlink) Cursor() desktop.Cursor {
 // FocusGained is a hook called by the focus handling logic after this object gained the focus.
 func (hl *Hyperlink) FocusGained() {
 	hl.focused = true
-	hl.Refresh()
+	hl.BaseWidget.Refresh()
 }
 
 // FocusLost is a hook called by the focus handling logic after this object lost the focus.
 func (hl *Hyperlink) FocusLost() {
 	hl.focused = false
-	hl.Refresh()
+	hl.BaseWidget.Refresh()
+}
+
+// MouseIn is a hook that is called if the mouse pointer enters the element.
+func (hl *Hyperlink) MouseIn(*desktop.MouseEvent) {
+	hl.hovered = true
+	hl.BaseWidget.Refresh()
+}
+
+// MouseMoved is a hook that is called if the mouse pointer moved over the element.
+func (hl *Hyperlink) MouseMoved(*desktop.MouseEvent) {
+}
+
+// MouseOut is a hook that is called if the mouse pointer leaves the element.
+func (hl *Hyperlink) MouseOut() {
+	hl.hovered = false
+	hl.BaseWidget.Refresh()
 }
 
 // Refresh triggers a redraw of the hyperlink.
@@ -175,6 +193,7 @@ var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
 type hyperlinkRenderer struct {
 	hl    *Hyperlink
 	focus *canvas.Rectangle
+	under *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 }
@@ -186,6 +205,8 @@ func (r *hyperlinkRenderer) Layout(s fyne.Size) {
 	r.hl.provider.Resize(s)
 	r.focus.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	r.focus.Resize(fyne.NewSize(s.Width-theme.Padding()*2, s.Height-theme.Padding()*2))
+	r.under.Move(fyne.NewPos(theme.Padding()*2, s.Height-theme.Padding()*2))
+	r.under.Resize(fyne.NewSize(s.Width-theme.Padding()*4, 1))
 }
 
 func (r *hyperlinkRenderer) MinSize() fyne.Size {
@@ -200,4 +221,6 @@ func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
 	r.focus.StrokeColor = theme.FocusColor()
 	r.focus.Hidden = !r.hl.focused
+	r.under.StrokeColor = theme.PrimaryColor()
+	r.under.Hidden = !r.hl.hovered
 }

@@ -324,67 +324,93 @@ func (t *RichText) updateRowBounds() {
 	maxWidth := t.size.Width - 4*theme.Padding() - 2*t.inset.Width
 	wrapWidth := maxWidth
 
-	var currentBound *rowBoundary
-	for _, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
-			if currentBound == nil {
-				bound := rowBoundary{segments: []RichTextSegment{seg}}
-				bounds = append(bounds, bound)
-				currentBound = &bound
-			} else {
-				bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+	var iterateSegments func(segList []RichTextSegment)
+	iterateSegments = func(segList []RichTextSegment) {
+		var currentBound *rowBoundary
+		for _, seg := range segList {
+			if parent, ok := seg.(RichTextBlock); ok {
+				count := len(bounds)
+				iterateSegments(parent.Segments())
+
+				// translate paragraph (block) effect to the last segment
+				if len(bounds) > count {
+					last := bounds[len(bounds)-1]
+					if len(last.segments) > 0 {
+						lastSeg := last.segments[len(last.segments)-1]
+						if txt, ok := lastSeg.(*TextSegment); ok {
+							txt.Style.Inline = false
+						}
+					}
+				}
+				continue
 			}
+			if _, ok := seg.(*TextSegment); !ok {
+				if currentBound == nil {
+					bound := rowBoundary{segments: []RichTextSegment{seg}}
+					bounds = append(bounds, bound)
+					currentBound = &bound
+				} else {
+					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+				}
+				if seg.Inline() {
+					wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
+				} else {
+					currentBound = nil
+				}
+				continue
+			}
+			textSeg := seg.(*TextSegment)
+			textStyle := textSeg.Style.TextStyle
+			textSize := textSeg.size()
+
+			leftPad := float32(0)
+			if textSeg.Style == RichTextStyleBlockquote {
+				leftPad = theme.Padding() * 4
+			}
+			retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
+				return fyne.MeasureText(string(text), textSize, textStyle).Width
+			})
+			if currentBound != nil {
+				if len(retBounds) > 0 {
+					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
+					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+					bounds = append(bounds, retBounds[1:]...)
+				}
+			} else {
+				bounds = append(bounds, retBounds...)
+			}
+			currentBound = &bounds[len(bounds)-1]
 			if seg.Inline() {
-				wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
+				last := bounds[len(bounds)-1]
+				begin := 0
+				if len(last.segments) == 1 {
+					begin = last.begin
+				}
+				text := string([]rune(textSeg.Text)[begin:last.end])
+				lastWidth := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle).Width
+				if len(retBounds) == 1 {
+					wrapWidth -= lastWidth
+				} else {
+					wrapWidth = maxWidth - lastWidth
+				}
 			} else {
 				currentBound = nil
+				wrapWidth = maxWidth
 			}
-			continue
-		}
-		textSeg := seg.(*TextSegment)
-		textStyle := textSeg.Style.TextStyle
-		textSize := textSeg.size()
-
-		leftPad := float32(0)
-		if textSeg.Style == RichTextStyleBlockquote {
-			leftPad = theme.Padding() * 4
-		}
-		retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
-			return fyne.MeasureText(string(text), textSize, textStyle).Width
-		})
-		if currentBound != nil {
-			if len(retBounds) > 0 {
-				bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
-				bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-				bounds = append(bounds, retBounds[1:]...)
-			}
-		} else {
-			bounds = append(bounds, retBounds...)
-		}
-		currentBound = &bounds[len(bounds)-1]
-		if seg.Inline() {
-			last := bounds[len(bounds)-1]
-			begin := 0
-			if len(last.segments) == 1 {
-				begin = last.begin
-			}
-			text := string([]rune(textSeg.Text)[begin:last.end])
-			lastWidth := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle).Width
-			if len(retBounds) == 1 {
-				wrapWidth -= lastWidth
-			} else {
-				wrapWidth = maxWidth - lastWidth
-			}
-		} else {
-			currentBound = nil
-			wrapWidth = maxWidth
 		}
 	}
+
+	iterateSegments(t.Segments)
 	t.propertyLock.RUnlock()
 
 	t.propertyLock.Lock()
 	t.rowBounds = bounds
 	t.propertyLock.Unlock()
+}
+
+// RichTextBlock is an extension of a text segment that contains other segments
+type RichTextBlock interface {
+	Segments() []RichTextSegment
 }
 
 // Renderer
@@ -557,14 +583,57 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		return texts[0].MinSize().Height
 	}
 	height := float32(0)
-	for _, text := range texts {
-		size := text.MinSize()
-
+	tallestBaseline := float32(0)
+	realign := false
+	baselines := make([]float32, len(texts))
+	for i, text := range texts {
+		var size fyne.Size
+		if txt, ok := text.(*canvas.Text); ok {
+			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
+			if base > tallestBaseline {
+				if tallestBaseline > 0 {
+					realign = true
+				}
+				tallestBaseline = base
+			}
+			size = s
+			baselines[i] = base
+		} else if c, ok := text.(*fyne.Container); ok {
+			wid := c.Objects[0]
+			if link, ok := wid.(*Hyperlink); ok {
+				s, base := fyne.CurrentApp().Driver().RenderedTextSize(link.Text, theme.TextSize(), link.TextStyle)
+				if base > tallestBaseline {
+					if tallestBaseline > 0 {
+						realign = true
+					}
+					tallestBaseline = base
+				}
+				size = s
+				baselines[i] = base
+			}
+		}
+		if size.IsZero() {
+			size = text.MinSize()
+		}
 		text.Resize(size)
-		text.Move(fyne.NewPos(xPos, yPos)) // TODO also baseline align for height (need new measure info)
+		text.Move(fyne.NewPos(xPos, yPos))
+
 		xPos += size.Width
-		height = fyne.Max(height, size.Height)
+		if height == 0 {
+			height = size.Height
+		} else if height != size.Height {
+			height = fyne.Max(height, size.Height)
+			realign = true
+		}
 	}
+
+	if realign {
+		for i, text := range texts {
+			delta := tallestBaseline - baselines[i]
+			text.Move(fyne.NewPos(text.Position().X, yPos+delta))
+		}
+	}
+
 	spare := lineWidth - xPos
 	switch align {
 	case fyne.TextAlignTrailing:

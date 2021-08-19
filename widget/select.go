@@ -15,6 +15,10 @@ const defaultPlaceHolder string = "(Select one)"
 type Select struct {
 	DisableableWidget
 
+	// Alignment sets the text alignment of the select and its list of options.
+	//
+	// Since: 2.1
+	Alignment   fyne.TextAlign
 	Selected    string
 	Options     []string
 	PlaceHolder string
@@ -236,6 +240,7 @@ func (s *Select) showPopUp() {
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp.alignment = s.Alignment
 	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
@@ -311,17 +316,12 @@ func (s *selectRenderer) Refresh() {
 	s.background.FillColor, s.line.FillColor = s.bgLineColor()
 	s.combo.propertyLock.RUnlock()
 
-	if s.combo.disabled {
-		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	} else {
-		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
-	}
-	s.label.Refresh()
-
 	s.Layout(s.combo.Size())
 	if s.combo.popUp != nil {
+		s.combo.popUp.alignment = s.combo.Alignment
 		s.combo.popUp.Move(s.combo.popUpPos())
 		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Width, s.combo.popUp.MinSize().Width))
+		s.combo.popUp.Refresh()
 	}
 	s.background.Refresh()
 	canvas.Refresh(s.combo.super())
@@ -354,6 +354,12 @@ func (s *selectRenderer) updateLabel() {
 		s.combo.PlaceHolder = defaultPlaceHolder
 	}
 
+	s.label.Segments[0].(*TextSegment).Style.Alignment = s.combo.Alignment
+	if s.combo.disabled {
+		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
+	} else {
+		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
+	}
 	if s.combo.Selected == "" {
 		s.label.Segments[0].(*TextSegment).Text = s.combo.PlaceHolder
 	} else {

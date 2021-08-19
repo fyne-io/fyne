@@ -3,9 +3,9 @@ package report
 import (
 	"encoding/json"
 	"fmt"
-	"os/exec"
 
 	"github.com/lucor/goinfo"
+	"golang.org/x/sys/execabs"
 )
 
 // GoEnv collects the info about the Go environment using the go env tool
@@ -21,7 +21,7 @@ func (i *GoEnv) Summary() string {
 // Info returns the collected info
 func (i *GoEnv) Info() (goinfo.Info, error) {
 	var info goinfo.Info
-	cmd := exec.Command("go", "env", "-json")
+	cmd := execabs.Command("go", "env", "-json")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("could not detect go env info: %w", err)

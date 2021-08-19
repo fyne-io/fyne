@@ -81,10 +81,6 @@ public class GoNativeActivity extends NativeActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // If keyboard is already up, ignore request
-                if (mTextEdit.getVisibility() == View.VISIBLE) {
-                    return;
-                }
                 int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 int inputType = DEFAULT_INPUT_TYPE;
                 switch (keyboardType) {

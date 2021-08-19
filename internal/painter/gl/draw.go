@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
@@ -55,12 +56,15 @@ func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.Canva
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.FillColor == nil || rect.StrokeWidth == 0) {
+		return
+	}
 	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
 		1.0, painter.VectorPad(rect))
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if text.Text == "" {
+	if text.Text == "" || text.Text == " " {
 		return
 	}
 
@@ -113,6 +117,21 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)
 	pos2.Y = roundToPixel(pos2.Y+yPosDiff, p.pixScale)
 
+	if lineWidth <= 1 {
+		offset := float32(0.5)                  // adjust location for lines < 1pt on regular display
+		if lineWidth <= 0.5 && p.pixScale > 1 { // and for 1px drawing on HiDPI (width 0.5)
+			offset = 0.25
+		}
+		if pos1.X == pos2.X {
+			pos1.X -= offset
+			pos2.X -= offset
+		}
+		if pos1.Y == pos2.Y {
+			pos1.Y -= offset
+			pos2.Y -= offset
+		}
+	}
+
 	x1Pos := pos1.X / frame.Width
 	x1 := -1 + x1Pos*2
 	y1Pos := pos1.Y / frame.Height
@@ -131,7 +150,7 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	normalObjX := normalX * 0.5 * frame.Width
 	normalObjY := normalY * 0.5 * frame.Height
 	widthMultiplier := float32(math.Sqrt(float64(normalObjX*normalObjX + normalObjY*normalObjY)))
-	halfWidth := (lineWidth*0.5 + feather) / widthMultiplier
+	halfWidth := (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
 	featherWidth := feather / widthMultiplier
 
 	return []float32{

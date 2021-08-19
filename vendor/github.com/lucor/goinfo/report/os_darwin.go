@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/lucor/goinfo"
+	"golang.org/x/sys/execabs"
 )
 
 // Info returns the collected info
@@ -32,7 +32,7 @@ func (i *OS) Info() (goinfo.Info, error) {
 }
 
 func (i *OS) swVers() (goinfo.Info, error) {
-	cmd := exec.Command("sw_vers")
+	cmd := execabs.Command("sw_vers")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("could not detect os info using sw_vers command: %w", err)
@@ -65,7 +65,7 @@ func (i *OS) parseSwVersCmdOutput(data []byte) (goinfo.Info, error) {
 }
 
 func (i *OS) architecture() (string, error) {
-	cmd := exec.Command("uname", "-m")
+	cmd := execabs.Command("uname", "-m")
 	out, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("could not detect architecture using uname command: %w", err)
@@ -77,7 +77,7 @@ func (i *OS) architecture() (string, error) {
 }
 
 func (i *OS) kernel() (string, error) {
-	cmd := exec.Command("uname", "-rsv")
+	cmd := execabs.Command("uname", "-rsv")
 	out, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("could not detect the kernel using uname command: %w", err)

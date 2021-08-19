@@ -130,9 +130,10 @@ func (d *gLDriver) runGL() {
 
 				w.viewLock.RLock()
 				expand := w.shouldExpand
+				fullScreen := w.fullScreen
 				w.viewLock.RUnlock()
 
-				if expand {
+				if expand && !fullScreen {
 					w.fitContent()
 					w.viewLock.Lock()
 					w.shouldExpand = false
@@ -199,7 +200,7 @@ func (d *gLDriver) startDrawThread() {
 				}
 			case set := <-settingsChange:
 				painter.ClearFontCache()
-				cache.ResetSvg()
+				cache.ResetThemeCaches()
 				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 					c, ok := w.Canvas().(*glCanvas)
 					if !ok {

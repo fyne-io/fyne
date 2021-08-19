@@ -380,6 +380,7 @@ func (r *buttonRenderer) updateIconAndText() {
 	} else {
 		r.label.Show()
 	}
+	r.label.Refresh()
 }
 
 func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Size) (pos fyne.Position) {

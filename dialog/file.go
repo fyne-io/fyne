@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -179,7 +180,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 		}
 	})
-	buttons := container.NewHBox(f.dismiss, f.open)
+	buttons := container.NewGridWithRows(1, f.dismiss, f.open)
 
 	f.filesScroll = container.NewScroll(nil) // filesScroll's content will be set by setView function.
 	verticalExtra := float32(float64(fileIconSize) * 0.25)
@@ -700,17 +701,40 @@ func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window)
 }
 
 func getFavoriteIcons() map[string]fyne.Resource {
+	if runtime.GOOS == "darwin" {
+		return map[string]fyne.Resource{
+			"Home":      theme.HomeIcon(),
+			"Documents": theme.DocumentIcon(),
+			"Downloads": theme.DownloadIcon(),
+			"Music":     theme.MediaMusicIcon(),
+			"Pictures":  theme.MediaPhotoIcon(),
+			"Movies":    theme.MediaVideoIcon(),
+		}
+	}
+
 	return map[string]fyne.Resource{
 		"Home":      theme.HomeIcon(),
 		"Documents": theme.DocumentIcon(),
 		"Downloads": theme.DownloadIcon(),
+		"Music":     theme.MediaMusicIcon(),
+		"Pictures":  theme.MediaPhotoIcon(),
+		"Videos":    theme.MediaVideoIcon(),
 	}
 }
 
 func getFavoriteOrder() []string {
-	return []string{
+	order := []string{
 		"Home",
 		"Documents",
 		"Downloads",
+		"Music",
+		"Pictures",
+		"Videos",
 	}
+
+	if runtime.GOOS == "darwin" {
+		order[5] = "Movies"
+	}
+
+	return order
 }

@@ -2,24 +2,24 @@
 	<content>
 		<widget pos="4,4" size="172x172" type="*widget.Table">
 			<widget pos="4,4" size="168x168" type="*widget.Scroll">
-				<widget size="509x168" type="*widget.tableCells">
-					<widget size="101x37" type="*widget.Label">
-						<text pos="8,8" size="85x21">Cell 0, 0</text>
+				<widget size="505x168" type="*widget.tableCells">
+					<widget size="100x36" type="*widget.Label">
+						<text pos="8,8" size="84x20">Cell 0, 0</text>
 					</widget>
-					<widget pos="102,0" size="101x37" type="*widget.Label">
-						<text pos="8,8" size="85x21">Cell 0, 1</text>
+					<widget pos="101,0" size="100x36" type="*widget.Label">
+						<text pos="8,8" size="84x20">Cell 0, 1</text>
 					</widget>
-					<widget pos="0,38" size="101x37" type="*widget.Label">
-						<text pos="8,8" size="85x21">Cell 1, 0</text>
+					<widget pos="0,37" size="100x36" type="*widget.Label">
+						<text pos="8,8" size="84x20">Cell 1, 0</text>
 					</widget>
-					<widget pos="102,38" size="101x37" type="*widget.Label">
-						<text pos="8,8" size="85x21">Cell 1, 1</text>
+					<widget pos="101,37" size="100x36" type="*widget.Label">
+						<text pos="8,8" size="84x20">Cell 1, 1</text>
 					</widget>
-					<widget pos="0,76" size="101x37" type="*widget.Label">
-						<text pos="8,8" size="85x21">Cell 2, 0</text>
+					<widget pos="0,75" size="100x36" type="*widget.Label">
+						<text pos="8,8" size="84x20">Cell 2, 0</text>
 					</widget>
-					<widget pos="102,76" size="101x37" type="*widget.Label">
-						<text pos="8,8" size="85x21">Cell 2, 1</text>
+					<widget pos="101,75" size="100x36" type="*widget.Label">
+						<text pos="8,8" size="84x20">Cell 2, 1</text>
 					</widget>
 				</widget>
 				<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
@@ -31,22 +31,16 @@
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 				</widget>
 			</widget>
-			<rectangle fillColor="hover" pos="4,0" size="101x4"/>
-			<rectangle fillColor="hover" pos="0,42" size="4x37"/>
-			<widget pos="105,4" size="1x168" type="*widget.Separator">
+			<rectangle fillColor="hover" pos="4,0" size="100x4"/>
+			<rectangle fillColor="hover" pos="0,41" size="4x36"/>
+			<widget pos="104,4" size="1x168" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="1x168"/>
 			</widget>
-			<widget pos="4,41" size="168x1" type="*widget.Separator">
+			<widget pos="4,40" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
-			<widget pos="4,79" size="168x1" type="*widget.Separator">
+			<widget pos="4,78" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
-			</widget>
-			<widget size="0x0" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="0x0"/>
-			</widget>
-			<widget size="0x0" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="0x0"/>
 			</widget>
 		</widget>
 	</content>

@@ -79,6 +79,9 @@ func (p *PopUpMenu) Resize(size fyne.Size) {
 //
 // Implements: fyne.Widget
 func (p *PopUpMenu) Show() {
+	p.Menu.alignment = p.alignment
+	p.Menu.Refresh()
+
 	p.overlay.Show()
 	p.Menu.Show()
 	p.canvas.Focus(p)

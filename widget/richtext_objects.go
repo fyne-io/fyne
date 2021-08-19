@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"net/url"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -149,6 +150,112 @@ func (h *HyperlinkSegment) SelectedText() string {
 // Unselect tells the segment that the user is has cancelled the previous selection.
 func (h *HyperlinkSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
+}
+
+// ListSegment includes an itemised list with the content set using the Items field.
+//
+// Since: 2.1
+type ListSegment struct {
+	Items   []RichTextSegment
+	Ordered bool
+}
+
+// Inline returns false as a list should be in a block.
+func (l *ListSegment) Inline() bool {
+	return false
+}
+
+// Segments returns the segments required to draw bullets before each item
+func (l *ListSegment) Segments() []RichTextSegment {
+	out := make([]RichTextSegment, len(l.Items))
+	for i, in := range l.Items {
+		txt := "• "
+		if l.Ordered {
+			txt = strconv.Itoa(i+1) + "."
+		}
+		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
+		if para, ok := in.(*ParagraphSegment); ok {
+			seg := &ParagraphSegment{Texts: []RichTextSegment{bullet}}
+			seg.Texts = append(seg.Texts, para.Texts...)
+			out[i] = seg
+		} else {
+			out[i] = &ParagraphSegment{Texts: []RichTextSegment{
+				bullet,
+				in,
+			}}
+		}
+	}
+	return out
+}
+
+// Textual returns no content for a list as the content is in sub-segments.
+func (l *ListSegment) Textual() string {
+	return ""
+}
+
+// Visual returns no additional elements for this segment.
+func (l *ListSegment) Visual() fyne.CanvasObject {
+	return nil
+}
+
+// Update doesnt need to change a list visual.
+func (l *ListSegment) Update(fyne.CanvasObject) {
+}
+
+// Select does nothing for a list container.
+func (l *ListSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the empty string for this list.
+func (l *ListSegment) SelectedText() string {
+	return ""
+}
+
+// Unselect does nothing for a list container.
+func (l *ListSegment) Unselect() {
+}
+
+// ParagraphSegment wraps a number of text elements in a paragraph.
+// It is similar to using a list of text elements when the final style is RichTextStyleParagraph.
+type ParagraphSegment struct {
+	Texts []RichTextSegment
+}
+
+// Inline returns false as a paragraph should be in a block.
+func (p *ParagraphSegment) Inline() bool {
+	return false
+}
+
+// Segments returns the list of text elements in this paragraph.
+func (p *ParagraphSegment) Segments() []RichTextSegment {
+	return p.Texts
+}
+
+// Textual returns no content for a paragraph container.
+func (p *ParagraphSegment) Textual() string {
+	return ""
+}
+
+// Visual returns the no extra elements.
+func (p *ParagraphSegment) Visual() fyne.CanvasObject {
+	return nil
+}
+
+// Update doesnt need to change a paragraph container.
+func (p *ParagraphSegment) Update(fyne.CanvasObject) {
+}
+
+// Select does nothing for a paragraph container.
+func (p *ParagraphSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the empty string for this paragraph container.
+func (p *ParagraphSegment) SelectedText() string {
+	return ""
+}
+
+// Unselect does nothing for a paragraph container.
+func (p *ParagraphSegment) Unselect() {
 }
 
 // SeparatorSegment includes a horizontal separator in a rich text widget.

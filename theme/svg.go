@@ -21,6 +21,7 @@ type svg struct {
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
 	Circles  []*circleObj  `xml:"circle"`
+	Ellipses []*ellipseObj `xml:"ellipse"`
 	Polygons []*polygonObj `xml:"polygon"`
 	Groups   []*objGroup   `xml:"g"`
 }
@@ -66,6 +67,21 @@ type circleObj struct {
 	R               string   `xml:"r,attr,omitempty"`
 }
 
+type ellipseObj struct {
+	XMLName         xml.Name `xml:"ellipse"`
+	Fill            string   `xml:"fill,attr,omitempty"`
+	FillOpacity     string   `xml:"fill-opacity,attr,omitempty"`
+	Stroke          string   `xml:"stroke,attr,omitempty"`
+	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
+	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
+	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
+	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
+	CX              string   `xml:"cx,attr,omitempty"`
+	CY              string   `xml:"cy,attr,omitempty"`
+	RX              string   `xml:"rx,attr,omitempty"`
+	RY              string   `xml:"ry,attr,omitempty"`
+}
+
 type polygonObj struct {
 	XMLName         xml.Name `xml:"polygon"`
 	Fill            string   `xml:"fill,attr,omitempty"`
@@ -89,6 +105,7 @@ type objGroup struct {
 	StrokeDashArray string        `xml:"stroke-dasharray,attr,omitempty"`
 	Paths           []*pathObj    `xml:"path"`
 	Circles         []*circleObj  `xml:"circle"`
+	Ellipses        []*ellipseObj `xml:"ellipse"`
 	Rects           []*rectObj    `xml:"rect"`
 	Polygons        []*polygonObj `xml:"polygon"`
 }
@@ -120,6 +137,15 @@ func replaceCirclesFill(circles []*circleObj, hexColor string, opacity string) {
 	}
 }
 
+func replaceEllipsesFill(ellipses []*ellipseObj, hexColor string, opacity string) {
+	for _, ellipse := range ellipses {
+		if ellipse.Fill != "none" {
+			ellipse.Fill = hexColor
+			ellipse.FillOpacity = opacity
+		}
+	}
+}
+
 func replacePolygonsFill(polys []*polygonObj, hexColor string, opacity string) {
 	for _, poly := range polys {
 		if poly.Fill != "none" {
@@ -132,6 +158,7 @@ func replacePolygonsFill(polys []*polygonObj, hexColor string, opacity string) {
 func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string) {
 	for _, grp := range groups {
 		replaceCirclesFill(grp.Circles, hexColor, opacity)
+		replaceEllipsesFill(grp.Ellipses, hexColor, opacity)
 		replacePathsFill(grp.Paths, hexColor, opacity)
 		replaceRectsFill(grp.Rects, hexColor, opacity)
 		replacePolygonsFill(grp.Polygons, hexColor, opacity)
@@ -146,6 +173,7 @@ func (s *svg) replaceFillColor(color color.Color) error {
 	replacePathsFill(s.Paths, hexColor, opacity)
 	replaceRectsFill(s.Rects, hexColor, opacity)
 	replaceCirclesFill(s.Circles, hexColor, opacity)
+	replaceEllipsesFill(s.Ellipses, hexColor, opacity)
 	replacePolygonsFill(s.Polygons, hexColor, opacity)
 	replaceGroupObjectFill(s.Groups, hexColor, opacity)
 	return nil

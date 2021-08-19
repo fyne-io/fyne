@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -54,6 +54,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		Name:     strings.Title(appName),
 		Version:  version,
 		Build:    build,
+		Legacy:   len(allArchs["ios"]) > 2,
 	}); err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	}
 
 	// We are using lipo tool to build multiarchitecture binaries.
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"xcrun", "lipo",
 		"-o", filepath.Join(tmpdir, "main/main"),
 		"-create",
@@ -122,7 +123,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		"DEVELOPMENT_TEAM=" + teamID,
 	}
 
-	cmd = exec.Command("xcrun", cmdStrings...)
+	cmd = execabs.Command("xcrun", cmdStrings...)
 	if err := runCmd(cmd); err != nil {
 		return nil, err
 	}
@@ -252,7 +253,7 @@ func lookupCert(optName string) ([]byte, error) {
 }
 
 func lookupCertNamed(name string) ([]byte, error) {
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"security", "find-certificate",
 		"-c", name, "-p",
 	)
@@ -264,6 +265,7 @@ type infoplistTmplData struct {
 	Name     string
 	Version  string
 	Build    int
+	Legacy   bool
 }
 
 var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -322,6 +324,9 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <key>UIRequiredDeviceCapabilities</key>
   <array>
     <string>arm64</string>
+{{ if .Legacy }}
+    <string>arm</string>
+{{ end }}
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>

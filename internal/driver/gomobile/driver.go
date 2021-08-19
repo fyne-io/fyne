@@ -98,8 +98,8 @@ func (d *mobileDriver) currentWindow() *window {
 	return last
 }
 
-func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
-	return painter.RenderedTextSize(text, size, style)
+func (d *mobileDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
+	return painter.RenderedTextSize(text, textSize, style)
 }
 
 func (d *mobileDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
@@ -147,7 +147,7 @@ func (d *mobileDriver) Run() {
 				d.sendPaintEvent()
 			case set := <-settingsChange:
 				painter.ClearFontCache()
-				cache.ResetSvg()
+				cache.ResetThemeCaches()
 				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 					c, ok := w.Canvas().(*mobileCanvas)
 					if !ok {
@@ -197,9 +197,9 @@ func (d *mobileDriver) Run() {
 					}
 				case key.Event:
 					if e.Direction == key.DirPress {
-						d.typeDownCanvas(c, e.Rune, e.Code)
+						d.typeDownCanvas(c, e.Rune, e.Code, e.Modifiers)
 					} else if e.Direction == key.DirRelease {
-						d.typeUpCanvas(c, e.Rune, e.Code)
+						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
 				}
 			}
@@ -471,8 +471,26 @@ func runeToPrintable(r rune) rune {
 	return 0
 }
 
-func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code) {
+func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code, mod key.Modifiers) {
 	keyName := keyToName(code)
+	switch keyName {
+	case fyne.KeyTab:
+		capture := false
+		if ent, ok := canvas.Focused().(fyne.Tabbable); ok {
+			capture = ent.AcceptsTab()
+		}
+		if !capture {
+			switch mod {
+			case 0:
+				canvas.FocusNext()
+				return
+			case key.ModShift:
+				canvas.FocusPrevious()
+				return
+			}
+		}
+	}
+
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 
@@ -501,8 +519,7 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 	}
 }
 
-func (d *mobileDriver) typeUpCanvas(canvas *mobileCanvas, r rune, code key.Code) {
-
+func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.Modifiers) {
 }
 
 func (d *mobileDriver) Device() fyne.Device {

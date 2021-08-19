@@ -93,6 +93,17 @@ func CleanCanvas(canvas fyne.Canvas) {
 	renderersLock.Unlock()
 }
 
+// ResetThemeCaches clears all the svg and text size cache maps
+func ResetThemeCaches() {
+	svgLock.Lock()
+	svgs = make(map[string]*svgInfo)
+	svgLock.Unlock()
+
+	fontSizeLock.Lock()
+	fontSizeCache = map[fontSizeEntry]fontMetric{}
+	fontSizeLock.Unlock()
+}
+
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
 	expiredObjects = expiredObjects[:0]
@@ -132,25 +143,6 @@ func destroyExpiredRenderers(now time.Time) {
 			expiredObjects[i] = nil
 		}
 		renderersLock.Unlock()
-	}
-}
-
-// destroyExpiredSvgs destroys expired svgs cache data.
-func destroyExpiredSvgs(now time.Time) {
-	expiredSvgs := make([]string, 0, 20)
-	svgLock.RLock()
-	for s, sinfo := range svgs {
-		if sinfo.isExpired(now) {
-			expiredSvgs = append(expiredSvgs, s)
-		}
-	}
-	svgLock.RUnlock()
-	if len(expiredSvgs) > 0 {
-		svgLock.Lock()
-		for _, exp := range expiredSvgs {
-			delete(svgs, exp)
-		}
-		svgLock.Unlock()
 	}
 }
 

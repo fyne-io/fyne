@@ -272,7 +272,7 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 }
 
 func (w *window) fitContent() {
-	if w.canvas.Content() == nil {
+	if w.canvas.Content() == nil || w.fullScreen {
 		return
 	}
 
@@ -484,6 +484,10 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
+	// show new canvas element
+	if content != nil {
+		content.Show()
+	}
 	w.RescaleContext()
 }
 
@@ -596,7 +600,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 	mousePos := w.mousePos
 	mouseButton := w.mouseButton
-	mouseDragStarted := w.mouseDragStarted
 	mouseOver := w.mouseOver
 	w.mouseLock.Unlock()
 
@@ -605,9 +608,6 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
-		}
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
 		}
 
 		_, hover := object.(desktop.Hoverable)
@@ -634,7 +634,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		}
 	}
 
-	if mouseButton != 0 && mouseButton != desktop.MouseButtonSecondary && !mouseDragStarted {
+	if w.mouseButton != 0 && w.mouseButton != desktop.MouseButtonSecondary && !w.mouseDragStarted {
 		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
 			_, ok := object.(fyne.Draggable)
 			return ok
@@ -693,14 +693,16 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	mouseDraggedOffset := w.mouseDraggedOffset
 	mouseDragPos := w.mouseDragPos
 	w.mouseLock.RUnlock()
-	if mouseDragged != nil && mouseButton > 0 && mouseButton != desktop.MouseButtonSecondary {
-		draggedObjDelta := mouseDraggedObjStart.Subtract(mouseDragged.(fyne.CanvasObject).Position())
-		ev := new(fyne.DragEvent)
-		ev.AbsolutePosition = mousePos
-		ev.Position = mousePos.Subtract(mouseDraggedOffset).Add(draggedObjDelta)
-		ev.Dragged = fyne.NewDelta(mousePos.X-mouseDragPos.X, mousePos.Y-mouseDragPos.Y)
-		wd := mouseDragged
-		w.QueueEvent(func() { wd.Dragged(ev) })
+	if mouseDragged != nil && mouseButton != desktop.MouseButtonSecondary {
+		if w.mouseButton > 0 {
+			draggedObjDelta := mouseDraggedObjStart.Subtract(mouseDragged.(fyne.CanvasObject).Position())
+			ev := new(fyne.DragEvent)
+			ev.AbsolutePosition = mousePos
+			ev.Position = mousePos.Subtract(mouseDraggedOffset).Add(draggedObjDelta)
+			ev.Dragged = fyne.NewDelta(mousePos.X-mouseDragPos.X, mousePos.Y-mouseDragPos.Y)
+			wd := mouseDragged
+			w.QueueEvent(func() { wd.Dragged(ev) })
+		}
 
 		w.mouseLock.Lock()
 		w.mouseDragStarted = true
@@ -1090,7 +1092,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	keyName := glfw.GetKeyName(code, scancode)
 	ret, ok = keyNameMap[keyName]
 	if !ok {
-		return ""
+		return fyne.KeyUnknown
 	}
 
 	return ret
@@ -1118,8 +1120,8 @@ func (w *window) capturesTab(modifier desktop.Modifier) bool {
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
+	keyEvent := &fyne.KeyEvent{Name: keyName, Physical: fyne.HardwareKey{ScanCode: scancode}}
 
-	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
 	pendingMenuToggle := w.menuTogglePending
 	pendingMenuDeactivation := w.menuDeactivationPending
@@ -1166,9 +1168,6 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if keyName == "" { // don't emit unknown
-		return
-	}
 	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyDesktopModifier) {
 		return
 	}
