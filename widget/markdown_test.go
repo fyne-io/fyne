@@ -123,6 +123,31 @@ func TestRichTextMarkdown_Lines(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_List(t *testing.T) {
+	r := NewRichTextFromMarkdown("* line1 in _three_ segments\n* line2")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.Equal(t, 2, len(list.Items))
+		assert.Equal(t, 3, len(list.Items[0].(*ParagraphSegment).Texts))
+		assert.Equal(t, "line1 in ", list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+	} else {
+		t.Error("Segment should be a List")
+	}
+
+	r.ParseMarkdown("1. line1\n2. line2")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.True(t, list.Ordered)
+		assert.Equal(t, 2, len(list.Items))
+		assert.Equal(t, 1, len(list.Items[1].(*ParagraphSegment).Texts))
+		assert.Equal(t, "line2", list.Items[1].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+	} else {
+		t.Error("Segment should be a List")
+	}
+}
+
 func TestRichTextMarkdown_Separator(t *testing.T) {
 	r := NewRichTextFromMarkdown("---\n")
 

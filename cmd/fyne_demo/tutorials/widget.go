@@ -164,6 +164,10 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 ---
 
+* Item1 in _three_ segments
+* Item2
+* Item3
+
 Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
 This styled row should also wrap as expected, but only *when required*.
 

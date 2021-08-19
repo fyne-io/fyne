@@ -33,15 +33,28 @@ type markdownRenderer struct {
 func (m *markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
-	m.segs = nil
+	var segs []RichTextSegment
+	var parentStack [][]RichTextSegment
 	var nextSeg RichTextSegment
+	nextSeg = &TextSegment{}
 	blockquote := false
-	return ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	err := ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			if n.Kind().String() == "Blockquote" {
 				blockquote = false
+			} else if n.Kind().String() == "List" {
+				listSegs := segs
+				segs = parentStack[len(parentStack)-1]
+				parentStack = parentStack[:len(parentStack)-1]
+				marker := n.(*ast.List).Marker
+				segs = append(segs, &ListSegment{Items: listSegs, Ordered: marker != '*' && marker != '-' && marker != '+'})
+			} else if n.Kind().String() == "ListItem" {
+				itemSegs := segs
+				segs = parentStack[len(parentStack)-1]
+				parentStack = parentStack[:len(parentStack)-1]
+				segs = append(segs, &ParagraphSegment{Texts: itemSegs})
 			} else if !blockquote {
-				if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
+				if text, ok := segs[len(segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
 					text.Style = RichTextStyleParagraph
 				}
 				nextSeg = &TextSegment{
@@ -52,6 +65,14 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 		}
 
 		switch n.Kind().String() {
+		case "List":
+			// prepare a new child level
+			parentStack = append(parentStack, segs)
+			segs = nil
+		case "ListItem":
+			// prepare a new item level
+			parentStack = append(parentStack, segs)
+			segs = nil
 		case "Heading":
 			switch n.(*ast.Heading).Level {
 			case 1:
@@ -66,7 +87,7 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 				}
 			}
 		case "HorizontalRule", "ThematicBreak":
-			m.segs = append(m.segs, &SeparatorSegment{})
+			segs = append(segs, &SeparatorSegment{})
 		case "Link":
 			link, _ := url.Parse(string(n.(*ast.Link).Destination))
 			nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, strings.TrimSpace(string(n.Text(source))), link}
@@ -93,7 +114,7 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			if data[len(data)-1] == '\n' {
 				data = data[:len(data)-1]
 			}
-			m.segs = append(m.segs, &TextSegment{
+			segs = append(segs, &TextSegment{
 				Style: RichTextStyleCodeBlock,
 				Text:  string(data),
 			})
@@ -127,16 +148,16 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			if link, ok := nextSeg.(*HyperlinkSegment); ok {
 				link.Text = trimmed
 			}
-			m.segs = append(m.segs, nextSeg)
+			segs = append(segs, nextSeg)
 		case "Blockquote":
 			blockquote = true
-		case "Document":
-		default:
-			fyne.LogError("Unrecognised MarkDown type "+n.Kind().String(), nil)
 		}
 
 		return ast.WalkContinue, nil
 	})
+
+	m.segs = segs
+	return err
 }
 
 func parseMarkdown(content string) []RichTextSegment {
