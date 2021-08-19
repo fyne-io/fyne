@@ -190,6 +190,8 @@ func (l *ListSegment) Unselect() {
 
 // ParagraphSegment wraps a number of text elements in a paragraph.
 // It is similar to using a list of text elements when the final style is RichTextStyleParagraph.
+//
+// Since: 2.1
 type ParagraphSegment struct {
 	Texts []RichTextSegment
 }

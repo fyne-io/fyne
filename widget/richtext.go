@@ -405,6 +405,8 @@ func (t *RichText) updateRowBounds() {
 }
 
 // RichTextBlock is an extension of a text segment that contains other segments
+//
+// Since: 2.1
 type RichTextBlock interface {
 	Segments() []RichTextSegment
 }
