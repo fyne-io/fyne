@@ -5,6 +5,15 @@
 
 const int menuTagMin = 5000;
 
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
+NSControlStateValue STATE_ON = NSControlStateValueOn;
+NSControlStateValue STATE_OFF = NSControlStateValueOff;
+#else
+NSControlStateValue STATE_ON = NSOnState;
+NSControlStateValue STATE_OFF = NSOffState;
+#endif
+
+
 extern void menuCallback(int);
 extern BOOL menuEnabled(int);
 extern BOOL menuChecked(int);
@@ -21,9 +30,9 @@ extern void exceptionCallback(const char*);
 + (BOOL) validateMenuItem:(NSMenuItem*) item {
     BOOL checked = menuChecked([item tag]-menuTagMin);
     if (checked) {
-        [item setState:NSOnState];
+        [item setState:STATE_ON];
     } else {
-        [item setState:NSOffState];
+        [item setState:STATE_OFF];
     }
 
     return menuEnabled([item tag]-menuTagMin);
