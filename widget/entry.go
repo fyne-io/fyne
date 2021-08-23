@@ -1500,7 +1500,7 @@ func (r *entryContentRenderer) Refresh() {
 
 	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
-		selection.(*canvas.Rectangle).FillColor = theme.PrimaryColor()
+		selection.(*canvas.Rectangle).FillColor = theme.SelectionColor()
 	}
 
 	canvas.Refresh(r.content)
@@ -1567,7 +1567,7 @@ func (r *entryContentRenderer) buildSelection() {
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
-			box := canvas.NewRectangle(theme.PrimaryColor())
+			box := canvas.NewRectangle(theme.SelectionColor())
 			r.selection = append(r.selection, box)
 		}
 

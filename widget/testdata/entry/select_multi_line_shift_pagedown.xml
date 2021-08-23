@@ -5,9 +5,9 @@
 			<rectangle fillColor="primary" pos="0,98" size="120x2"/>
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
-					<rectangle fillColor="primary" pos="15,6" size="44x20"/>
-					<rectangle fillColor="primary" pos="7,26" size="53x20"/>
-					<rectangle fillColor="primary" pos="7,47" size="53x20"/>
+					<rectangle fillColor="selection" pos="15,6" size="44x20"/>
+					<rectangle fillColor="selection" pos="7,26" size="53x20"/>
+					<rectangle fillColor="selection" pos="7,47" size="53x20"/>
 					<widget size="120x96" type="*widget.RichText">
 						<text pos="8,6" size="104x20">Testing</text>
 						<text pos="8,26" size="104x20">Testing</text>
