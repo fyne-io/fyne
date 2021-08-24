@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 
+	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
@@ -74,7 +75,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "icon",
 				Usage:       "The name of the application icon file.",
-				Value:       "Icon.png",
+				Value:       "",
 				Destination: &p.icon,
 			},
 			&cli.StringFlag{
@@ -124,7 +125,7 @@ func (p *Packager) AddFlags() {
 	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
+	flag.StringVar(&p.icon, "icon", "", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
@@ -252,6 +253,11 @@ func (p *Packager) validate() error {
 			"Change directory to the main package and try again.")
 	}
 
+	data, err := metadata.LoadStandard(p.srcDir)
+	if err == nil {
+		mergeMetadata(p, data)
+	}
+
 	exeName := calculateExeName(p.srcDir, p.os)
 
 	if p.exe == "" {
@@ -296,6 +302,24 @@ func isValidVersion(ver string) bool {
 		}
 	}
 	return true
+}
+
+func mergeMetadata(p *Packager, data *metadata.FyneApp) {
+	if p.icon == "" {
+		p.icon = data.Details.Icon
+	}
+	if p.name == "" {
+		p.name = data.Details.Name
+	}
+	if p.appID == "" {
+		p.appID = data.Details.ID
+	}
+	if p.appVersion == "" {
+		p.appVersion = data.Details.Version
+	}
+	if p.appBuild == 0 {
+		p.appBuild = data.Details.Build
+	}
 }
 
 func validateAppID(appID, os, name string, release bool) (string, error) {
