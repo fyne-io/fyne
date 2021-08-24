@@ -171,7 +171,12 @@ func (p *Packager) Package() error {
 		return err
 	}
 
-	return nil
+	data, err := metadata.LoadStandard(p.srcDir)
+	if err != nil {
+		return nil // no metadata to update
+	}
+	data.Details.Build++
+	return metadata.SaveStandard(data, p.srcDir)
 }
 
 func (p *Packager) buildPackage() error {
