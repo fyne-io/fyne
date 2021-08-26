@@ -273,15 +273,12 @@ func (e *Entry) DragEnd() {
 //
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
-	pevt := d.PointEvent
-	// Convert the relative drag position from our Entry coordinates to be relative
-	// for Scroll.Content
-	pevt.Position = pevt.Position.Subtract(e.scroll.Offset)
+	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InputBorderSize()-theme.Padding()))
 	if !e.selecting {
-		e.selectRow, e.selectColumn = e.getRowCol(&pevt)
+		e.selectRow, e.selectColumn = e.getRowCol(pos)
 		e.selecting = true
 	}
-	e.updateMousePointer(&pevt, false)
+	e.updateMousePointer(pos, false)
 }
 
 // Enable this widget, updating any style or features appropriately.
@@ -420,7 +417,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	e.propertyLock.Unlock()
 
 	e.requestFocus()
-	e.updateMousePointer(&m.PointEvent, m.Button == desktop.MouseButtonSecondary)
+	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
 // MouseUp called on mouse release
@@ -483,7 +480,7 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
 	}
-	e.updateMousePointer(ev, false)
+	e.updateMousePointer(ev.Position, false)
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -830,12 +827,12 @@ func (e *Entry) eraseSelection() {
 	e.updateText(provider.String())
 }
 
-func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
+func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 
 	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle).Height
-	row := int(math.Floor(float64(ev.Position.Y+e.scroll.Offset.Y-theme.Padding()) / float64(rowHeight)))
+	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-theme.Padding()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
 		row = 0
@@ -843,7 +840,7 @@ func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 		row = e.textProvider().rows() - 1
 		col = 0
 	} else {
-		col = e.cursorColAt(e.textProvider().row(row), ev.Position.Add(e.scroll.Offset))
+		col = e.cursorColAt(e.textProvider().row(row), p.Add(e.scroll.Offset))
 	}
 
 	return row, col
@@ -1137,8 +1134,8 @@ func (e *Entry) updateCursor() {
 	}
 }
 
-func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
-	row, col := e.getRowCol(ev)
+func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
+	row, col := e.getRowCol(p)
 	e.setFieldsAndRefresh(func() {
 		if !rightClick || rightClick && !e.selecting {
 			e.CursorRow = row
@@ -1533,7 +1530,7 @@ func (r *entryContentRenderer) buildSelection() {
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width, sz.Height*float32(row) + theme.Padding()
+		return sz.Width, sz.Height*float32(row) - theme.InputBorderSize() + theme.Padding()*2
 	}
 
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
@@ -1587,7 +1584,7 @@ func (r *entryContentRenderer) buildSelection() {
 
 		// resize and reposition each rectangle
 		r.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
-		r.selection[i].Move(fyne.NewPos(x1-1, y1+theme.InputBorderSize()))
+		r.selection[i].Move(fyne.NewPos(x1-1, y1))
 	}
 }
 
@@ -1636,7 +1633,7 @@ func (r *entryContentRenderer) moveCursor() {
 	r.content.entry.propertyLock.Lock()
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
 	r.cursor.Resize(fyne.NewSize(2, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-1, yPos+theme.Padding()+theme.InputBorderSize()))
+	r.cursor.Move(fyne.NewPos(xPos-1, yPos+theme.Padding()*2-theme.InputBorderSize()))
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()
