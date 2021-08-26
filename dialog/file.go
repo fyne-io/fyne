@@ -47,7 +47,7 @@ type FileDialog struct {
 	parent           fyne.Window
 	dialog           *fileDialog
 	dismissText      string
-	desiredSize      *fyne.Size
+	desiredSize      fyne.Size
 	// this will be applied to dialog.dir when it's loaded
 	startingLocation fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
@@ -67,7 +67,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
-		saveName.SetPlaceHolder("enter filename")
+		saveName.SetPlaceHolder("Enter filename")
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
@@ -459,9 +459,8 @@ func (f *FileDialog) Show() {
 		return
 	}
 	f.dialog = showFile(f)
-	if f.desiredSize != nil {
-		f.Resize(*f.desiredSize)
-		f.desiredSize = nil
+	if !f.desiredSize.IsZero() {
+		f.Resize(f.desiredSize)
 	}
 }
 
@@ -470,27 +469,14 @@ func (f *FileDialog) Refresh() {
 	f.dialog.win.Refresh()
 }
 
-// Resize dialog, call this function after dialog show
+// Resize dialog to the requested size, if there is sufficient space.
+// If the parent window is not large enough then the size will be reduced to fit.
 func (f *FileDialog) Resize(size fyne.Size) {
+	f.desiredSize = size
 	if f.dialog == nil {
-		f.desiredSize = &size
 		return
 	}
-	maxSize := f.dialog.win.Size()
-	minSize := f.dialog.win.MinSize()
-	newWidth := size.Width
-	if size.Width > maxSize.Width {
-		newWidth = maxSize.Width
-	} else if size.Width < minSize.Width {
-		newWidth = minSize.Width
-	}
-	newHeight := size.Height
-	if size.Height > maxSize.Height {
-		newHeight = maxSize.Height
-	} else if size.Height < minSize.Height {
-		newHeight = minSize.Height
-	}
-	f.dialog.win.Resize(fyne.NewSize(newWidth, newHeight))
+	f.dialog.win.Resize(size)
 }
 
 // Hide hides the file dialog.
@@ -566,21 +552,31 @@ func (f *FileDialog) SetFileName(fileName string) {
 }
 
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
+// The callback function will run when the dialog closes. The URI will be nil
+// when the user cancels or when nothing is selected.
+//
 // The dialog will appear over the window specified when Show() is called.
 func NewFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) *FileDialog {
 	dialog := &FileDialog{callback: callback, parent: parent}
 	return dialog
 }
 
-// NewFileSave creates a file dialog allowing the user to choose a file to save to (new or overwrite).
-// If the user chooses an existing file they will be asked if they are sure.
+// NewFileSave creates a file dialog allowing the user to choose a file to save
+// to (new or overwrite). If the user chooses an existing file they will be
+// asked if they are sure. The callback function will run when the dialog
+// closes. The URI will be nil when the user cancels or when nothing is
+// selected.
+//
 // The dialog will appear over the window specified when Show() is called.
 func NewFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window) *FileDialog {
 	dialog := &FileDialog{callback: callback, parent: parent, save: true}
 	return dialog
 }
 
-// ShowFileOpen creates and shows a file dialog allowing the user to choose a file to open.
+// ShowFileOpen creates and shows a file dialog allowing the user to choose a
+// file to open. The callback function will run when the dialog closes. The URI
+// will be nil when the user cancels or when nothing is selected.
+//
 // The dialog will appear over the window specified.
 func ShowFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) {
 	dialog := NewFileOpen(callback, parent)
@@ -590,8 +586,12 @@ func ShowFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) 
 	dialog.Show()
 }
 
-// ShowFileSave creates and shows a file dialog allowing the user to choose a file to save to (new or overwrite).
-// If the user chooses an existing file they will be asked if they are sure.
+// ShowFileSave creates and shows a file dialog allowing the user to choose a
+// file to save to (new or overwrite). If the user chooses an existing file they
+// will be asked if they are sure. The callback function will run when the
+// dialog closes. The URI will be nil when the user cancels or when nothing is
+// selected.
+//
 // The dialog will appear over the window specified.
 func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window) {
 	dialog := NewFileSave(callback, parent)

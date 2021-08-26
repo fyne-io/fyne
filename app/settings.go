@@ -139,26 +139,36 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
-	if s.themeSpecified {
-		return
-	}
 	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
-		s.themeSpecified = true
 		name = env
 	}
 
-	if name == "light" {
-		s.applyTheme(theme.LightTheme(), theme.VariantLight)
-	} else if name == "dark" {
-		s.applyTheme(theme.DarkTheme(), theme.VariantDark)
-	} else {
-		if defaultVariant() == theme.VariantLight {
-			s.applyTheme(theme.LightTheme(), theme.VariantLight)
-		} else {
-			s.applyTheme(theme.DarkTheme(), theme.VariantDark)
+	var variant fyne.ThemeVariant
+	effectiveTheme := s.theme
+	switch name {
+	case "light":
+		variant = theme.VariantLight
+		if !s.themeSpecified {
+			effectiveTheme = theme.LightTheme()
+		}
+	case "dark":
+		variant = theme.VariantDark
+		if !s.themeSpecified {
+			effectiveTheme = theme.DarkTheme()
+		}
+	default:
+		variant = defaultVariant()
+		if s.themeSpecified {
+			break
+		}
+		effectiveTheme = theme.DarkTheme()
+		if variant == theme.VariantLight {
+			effectiveTheme = theme.LightTheme()
 		}
 	}
+
+	s.applyTheme(effectiveTheme, variant)
 }
 
 func loadSettings() *settings {

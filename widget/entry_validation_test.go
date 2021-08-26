@@ -15,6 +15,18 @@ import (
 
 var validator = validation.NewRegexp(`^\d{4}-\d{2}-\d{2}$`, "Input is not a valid date")
 
+func TestEntry_DisabledHideValidation(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	entry.Validator = validator
+	entry.SetText("invalid text")
+	entry.Disable()
+
+	test.AssertImageMatches(t, "entry/validation_disabled.png", c.Capture())
+}
+
 func TestEntry_ValidatedEntry(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
@@ -49,6 +61,30 @@ func TestEntry_Validate(t *testing.T) {
 	entry.SetText("incorrect")
 	assert.Error(t, entry.Validate())
 	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
+}
+
+func TestEntry_NotEmptyValidator(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	entry := widget.NewEntry()
+	entry.Validator = func(s string) error {
+		if s == "" {
+			return errors.New("should not be empty")
+		}
+		return nil
+	}
+	w := test.NewWindow(entry)
+	defer w.Close()
+
+	test.AssertRendersToMarkup(t, "entry/validator_not_empty_initial.xml", w.Canvas())
+
+	w.Canvas().Focus(entry)
+
+	test.AssertRendersToMarkup(t, "entry/validator_not_empty_focused.xml", w.Canvas())
+
+	w.Canvas().Focus(nil)
+
+	test.AssertRendersToMarkup(t, "entry/validator_not_empty_unfocused.xml", w.Canvas())
 }
 
 func TestEntry_SetValidationError(t *testing.T) {

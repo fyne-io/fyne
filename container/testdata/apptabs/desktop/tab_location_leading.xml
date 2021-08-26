@@ -1,8 +1,8 @@
-<canvas size="105x95">
+<canvas size="113x95">
 	<content>
-		<widget size="105x95" type="*container.AppTabs">
-			<widget pos="53,0" size="52x95" type="*widget.Label">
-				<text pos="4,8" size="44x21">Text 1</text>
+		<widget size="113x95" type="*container.AppTabs">
+			<widget pos="53,0" size="60x95" type="*widget.Label">
+				<text pos="8,8" size="44x21">Text 1</text>
 			</widget>
 			<container size="49x95">
 				<widget size="49x29" type="*container.tabButton">

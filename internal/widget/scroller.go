@@ -365,7 +365,7 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 func (r *scrollContainerRenderer) Refresh() {
 	if len(r.BaseRenderer.Objects()) == 0 || r.BaseRenderer.Objects()[0] != r.scroll.Content {
 		// push updated content object to baseRenderer
-		r.BaseRenderer.SetObjects([]fyne.CanvasObject{r.scroll.Content})
+		r.BaseRenderer.Objects()[0] = r.scroll.Content
 	}
 	if r.oldMinSize == r.scroll.Content.MinSize() && r.oldMinSize == r.scroll.Content.Size() &&
 		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
@@ -402,6 +402,9 @@ func (r *scrollContainerRenderer) handleShadowVisibility(offset, contentSize, sc
 }
 
 func (r *scrollContainerRenderer) updatePosition() {
+	if r.scroll.Content == nil {
+		return
+	}
 	scrollSize := r.scroll.Size()
 	contentSize := r.scroll.Content.Size()
 
@@ -469,7 +472,7 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 
 //ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 func (s *Scroll) ScrollToBottom() {
-	s.Offset.Y = s.Content.Size().Height - s.Size().Height
+	s.Offset.Y = s.Content.MinSize().Height - s.Size().Height
 	s.Refresh()
 }
 

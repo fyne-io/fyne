@@ -17,7 +17,7 @@ jobs:
         go-version: ${{ matrix.go-version }}
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
       if: ${{ runner.os == 'Linux' }}
 
     #- name: Verify go modules

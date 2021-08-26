@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"fyne.io/fyne/v2/widget"
 	"github.com/fyne-io/mobile/app"
 	"github.com/fyne-io/mobile/event/key"
 	"github.com/fyne-io/mobile/event/lifecycle"
@@ -26,7 +27,6 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
-	tapYOffset        = -12.0                  // to compensate for how we hold our fingers on the device
 )
 
 type mobileDriver struct {
@@ -64,7 +64,15 @@ func (d *mobileDriver) currentWindow() fyne.Window {
 		return nil
 	}
 
-	return d.windows[len(d.windows)-1]
+	var last fyne.Window
+	for i := len(d.windows) - 1; i >= 0; i-- {
+		last = d.windows[i]
+		if last.(*window).visible {
+			return last
+		}
+	}
+
+	return last
 }
 
 func (d *mobileDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
@@ -197,9 +205,9 @@ func (d *mobileDriver) Run() {
 				}
 			case key.Event:
 				if e.Direction == key.DirPress {
-					d.typeDownCanvas(canvas, e.Rune, e.Code)
+					d.typeDownCanvas(canvas, e.Rune, e.Code, e.Modifiers)
 				} else if e.Direction == key.DirRelease {
-					d.typeUpCanvas(canvas, e.Rune, e.Code)
+					d.typeUpCanvas(canvas, e.Rune, e.Code, e.Modifiers)
 				}
 			}
 		}
@@ -385,8 +393,27 @@ func runeToPrintable(r rune) rune {
 	return 0
 }
 
-func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code) {
+func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code, mod key.Modifiers) {
 	keyName := keyToName(code)
+	switch keyName {
+	case fyne.KeyTab:
+		capture := false
+		// TODO in 2.1 allow widgets to mark as capturing
+		if ent, ok := canvas.Focused().(*widget.Entry); ok && ent.MultiLine {
+			capture = true
+		}
+		if !capture {
+			switch mod {
+			case 0:
+				canvas.FocusNext()
+				return
+			case key.ModShift:
+				canvas.FocusPrevious()
+				return
+			}
+		}
+	}
+
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 
@@ -407,8 +434,7 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 	}
 }
 
-func (d *mobileDriver) typeUpCanvas(canvas *mobileCanvas, r rune, code key.Code) {
-
+func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.Modifiers) {
 }
 
 func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) bool {

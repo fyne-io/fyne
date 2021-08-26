@@ -5,7 +5,7 @@
 				<widget size="212x212" type="*widget.treeContent">
 					<widget size="212x45" type="*widget.branch">
 						<widget pos="28,4" size="180x37" type="*widget.Label">
-							<text pos="4,8" size="172x21">foo</text>
+							<text pos="8,8" size="164x21">foo</text>
 						</widget>
 						<widget pos="4,4" size="20x37" type="*widget.branchIcon">
 							<image fillMode="contain" rsc="moveDownIcon" size="20x37"/>
@@ -16,7 +16,7 @@
 					</widget>
 					<widget pos="0,46" size="212x45" type="*widget.leaf">
 						<widget pos="52,4" size="156x37" type="*widget.Label">
-							<text pos="4,8" size="148x21">foobar</text>
+							<text pos="8,8" size="140x21">foobar</text>
 						</widget>
 					</widget>
 				</widget>
