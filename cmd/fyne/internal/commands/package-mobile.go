@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -61,14 +62,37 @@ func (p *Packager) packageIOS() error {
 	}
 
 	appDir := filepath.Join(p.dir, mobile.AppOutputName(p.os, p.name))
-	cmd := execabs.Command("xcrun", "actool", "Images.xcassets", "--compile", appDir, "--platform",
+	return runCmdCaptureOutput("xcrun", "actool", "Images.xcassets", "--compile", appDir, "--platform",
 		"iphoneos", "--target-device", "iphone", "--minimum-deployment-target", "9.0", "--app-icon", "AppIcon",
-		"--output-partial-info-plist", "/dev/null")
-	return cmd.Run()
+		"--output-format", "human-readable-text", "--output-partial-info-plist", "/dev/null")
 }
 
 func copyResizeIcon(size int, dir, source string) error {
 	strSize := strconv.Itoa(size)
 	path := dir + "/Icon_" + strSize + ".png"
-	return execabs.Command("sips", "-o", path, "-Z", strSize, source).Run()
+	return runCmdCaptureOutput("sips", "-o", path, "-Z", strSize, source)
+}
+
+// runCmdCaptureOutput is a exec.Command wrapper that offers better error messages from stdout and stderr.
+func runCmdCaptureOutput(name string, args ...string) error {
+	var (
+		outbuf = &bytes.Buffer{}
+		errbuf = &bytes.Buffer{}
+	)
+	cmd := execabs.Command(name, args...)
+	cmd.Stdout = outbuf
+	cmd.Stderr = errbuf
+	err := cmd.Run()
+	if err != nil {
+		outstr := outbuf.String()
+		errstr := errbuf.String()
+		if outstr != "" {
+			err = errors.Wrap(err, outbuf.String())
+		}
+		if errstr != "" {
+			err = errors.Wrap(err, errbuf.String())
+		}
+		return err
+	}
+	return nil
 }
