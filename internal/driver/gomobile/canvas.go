@@ -53,7 +53,7 @@ func NewCanvas() fyne.Canvas {
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
-	ret.Initialize(ret, 1024, ret.overlayChanged)
+	ret.Initialize(ret, ret.overlayChanged)
 	ret.OnFocus = ret.handleKeyboard
 	ret.OnUnfocus = hideVirtualKeyboard
 

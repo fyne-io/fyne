@@ -33,7 +33,7 @@ func TestCanvas_walkTree(t *testing.T) {
 
 	tree := &renderCacheTree{root: &RenderCacheNode{obj: content}}
 	c := &Canvas{}
-	c.Initialize(nil, 4096, func() {})
+	c.Initialize(nil, func() {})
 	c.SetContentTreeAndFocusMgr(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 
 	type nodeInfo struct {
