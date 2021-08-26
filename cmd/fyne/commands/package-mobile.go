@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -61,14 +62,37 @@ func (p *packager) packageIOS() error {
 	}
 
 	appDir := filepath.Join(p.dir, mobile.AppOutputName(p.os, p.name))
-	cmd := exec.Command("xcrun", "actool", "Images.xcassets", "--compile", appDir, "--platform",
+	return runCmd("xcrun", "actool", "Images.xcassets", "--compile", appDir, "--platform",
 		"iphoneos", "--target-device", "iphone", "--minimum-deployment-target", "9.0", "--app-icon", "AppIcon",
-		"--output-partial-info-plist", "/dev/null")
-	return cmd.Run()
+		"--output-format", "human-readable-text", "--output-partial-info-plist", "/dev/null")
 }
 
 func copyResizeIcon(size int, dir, source string) error {
 	path := fmt.Sprintf("%s/Icon_%d.png", dir, size)
 	strSize := fmt.Sprintf("%d", size)
-	return exec.Command("sips", "-o", path, "-Z", strSize, source).Run()
+	return runCmd("sips", "-o", path, "-Z", strSize, source)
+}
+
+// runCmd is a exec.Command wrapper that offers better error messages from stdout and stderr.
+func runCmd(name string, args ...string) error {
+	var (
+		outbuf = &bytes.Buffer{}
+		errbuf = &bytes.Buffer{}
+	)
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = outbuf
+	cmd.Stderr = errbuf
+	err := cmd.Run()
+	if err != nil {
+		outstr := outbuf.String()
+		errstr := errbuf.String()
+		if outstr != "" {
+			err = errors.Wrap(err, outbuf.String())
+		}
+		if errstr != "" {
+			err = errors.Wrap(err, errbuf.String())
+		}
+		return err
+	}
+	return nil
 }
