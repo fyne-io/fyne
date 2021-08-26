@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 
@@ -13,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
+	"golang.org/x/sys/execabs"
 )
 
 func (p *Packager) packageAndroid(arch string) error {
@@ -79,7 +79,7 @@ func runCmd(name string, args ...string) error {
 		outbuf = &bytes.Buffer{}
 		errbuf = &bytes.Buffer{}
 	)
-	cmd := exec.Command(name, args...)
+	cmd := execabs.Command(name, args...)
 	cmd.Stdout = outbuf
 	cmd.Stderr = errbuf
 	err := cmd.Run()
