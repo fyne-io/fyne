@@ -329,19 +329,7 @@ func (t *RichText) updateRowBounds() {
 		var currentBound *rowBoundary
 		for _, seg := range segList {
 			if parent, ok := seg.(RichTextBlock); ok {
-				count := len(bounds)
 				iterateSegments(parent.Segments())
-
-				// translate paragraph (block) effect to the last segment
-				if len(bounds) > count {
-					last := bounds[len(bounds)-1]
-					if len(last.segments) > 0 {
-						lastSeg := last.segments[len(last.segments)-1]
-						if txt, ok := lastSeg.(*TextSegment); ok {
-							txt.Style.Inline = false
-						}
-					}
-				}
 				continue
 			}
 			if _, ok := seg.(*TextSegment); !ok {
