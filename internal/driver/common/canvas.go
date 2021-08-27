@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
@@ -44,7 +45,7 @@ type Canvas struct {
 	// disappear or blink from the view at any frames. As of this reason,
 	// the refreshQueue is an unbounded channel which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
-	refreshQueue *unboundedChan
+	refreshQueue *async.UnboundedCanvasObjectChan
 	dirty        uint32 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
@@ -215,7 +216,7 @@ func (c *Canvas) FreeDirtyTextures() bool {
 // Initialize initializes the canvas.
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
-	c.refreshQueue = newUnboundedChan()
+	c.refreshQueue = async.NewUnboundedCanvasObjectChan()
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
@@ -514,63 +515,3 @@ func updateLayout(objToLayout fyne.CanvasObject) {
 		cache.Renderer(cont).Layout(cont.Size())
 	}
 }
-
-// unboundedChan is a channel with an unbounded buffer for caching
-// fyne.CanvasObject objects.
-//
-// Delicate dance: One must aware that an unbounded channel may lead
-// to OOM when the consuming speed of the buffer is lower than the
-// producing speed constantly. However, such a channel may be fairly
-// used for event delivering if the consumer of the channel consumes
-// the incoming forever, especially, rendering tasks.
-type unboundedChan struct {
-	in, out chan fyne.CanvasObject
-}
-
-func newUnboundedChan() *unboundedChan {
-	ch := &unboundedChan{
-		// A fyne.CanvasObject is a 16-bit pointer, we use 128 that fits
-		// a CPU cache line (L2, 256 Bytes) that may reduce cache misses.
-		in:  make(chan fyne.CanvasObject, 128),
-		out: make(chan fyne.CanvasObject, 128),
-	}
-	go func() {
-		// This is a preallocation of the internal unbounded buffer.
-		// The size is randomly picked. Further, there is no memory leak
-		// since the queue is garbage collected.
-		q := make([]fyne.CanvasObject, 0, 1<<10)
-		for {
-			e, ok := <-ch.in
-			if !ok {
-				close(ch.out)
-				return
-			}
-			q = append(q, e)
-			for len(q) > 0 {
-				select {
-				case ch.out <- q[0]:
-					q = q[1:]
-				case e, ok := <-ch.in:
-					if ok {
-						q = append(q, e)
-						break
-					}
-					for _, e := range q {
-						ch.out <- e
-					}
-					close(ch.out)
-					return
-				}
-				// If the remaining capacity is too small, we prefer to
-				// reallocate the entire buffer.
-				if cap(q) < 1<<5 {
-					q = make([]fyne.CanvasObject, 0, 1<<10)
-				}
-			}
-		}
-	}()
-	return ch
-}
-
-func (ch *unboundedChan) In() chan<- fyne.CanvasObject  { return ch.in }
-func (ch *unboundedChan) Out() <-chan fyne.CanvasObject { return ch.out }
