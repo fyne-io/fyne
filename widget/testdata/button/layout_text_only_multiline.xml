@@ -13,8 +13,9 @@
 			</widget>
 			<rectangle fillColor="button" pos="2,2" size="138x188"/>
 			<rectangle size="0x0"/>
-			<widget pos="55,85" size="31x20" type="*widget.RichText">
-				<text alignment="center" bold size="31x20">Test</text>
+			<widget pos="50,75" size="40x41" type="*widget.RichText">
+				<text alignment="center" bold size="40x20">Test</text>
+				<text alignment="center" bold pos="0,20" size="40x20">Line2</text>
 			</widget>
 		</widget>
 	</content>

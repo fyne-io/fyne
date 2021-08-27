@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
@@ -208,12 +209,13 @@ func TestButton_Shadow(t *testing.T) {
 func TestButtonRenderer_ApplyTheme(t *testing.T) {
 	button := &Button{}
 	render := test.WidgetRenderer(button).(*buttonRenderer)
+	textRender := test.WidgetRenderer(render.label).(*textRenderer)
 
-	textSize := render.label.TextSize
+	textSize := textRender.Objects()[0].(*canvas.Text).TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
-		customTextSize = render.label.TextSize
+		button.Refresh()
+		customTextSize = textRender.Objects()[0].(*canvas.Text).TextSize
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)

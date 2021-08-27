@@ -13,7 +13,9 @@
 			</widget>
 			<rectangle fillColor="button" pos="2,2" size="138x188"/>
 			<rectangle size="0x0"/>
-			<text bold pos="98,85" size="31x20">Test</text>
+			<widget pos="98,85" size="31x20" type="*widget.RichText">
+				<text alignment="center" bold size="31x20">Test</text>
+			</widget>
 			<image fillMode="contain" pos="74,85" rsc="cancelIcon" size="20x20"/>
 		</widget>
 	</content>

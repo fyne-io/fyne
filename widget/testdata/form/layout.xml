@@ -49,7 +49,9 @@
 							</widget>
 							<rectangle fillColor="button" pos="2,2" size="98x33"/>
 							<rectangle size="0x0"/>
-							<text bold pos="37,8" size="50x20">Cancel</text>
+							<widget pos="37,8" size="50x20" type="*widget.RichText">
+								<text alignment="center" bold size="50x20">Cancel</text>
+							</widget>
 							<image fillMode="contain" pos="13,8" rsc="cancelIcon" size="20x20"/>
 						</widget>
 						<widget pos="106,0" size="102x37" type="*widget.Button">
@@ -65,7 +67,9 @@
 							</widget>
 							<rectangle fillColor="primary" pos="2,2" size="98x33"/>
 							<rectangle size="0x0"/>
-							<text bold color="background" pos="35,8" size="54x20">Submit</text>
+							<widget pos="35,8" size="54x20" type="*widget.RichText">
+								<text alignment="center" bold color="background" size="54x20">Submit</text>
+							</widget>
 							<image fillMode="contain" pos="11,8" rsc="confirmIcon" size="20x20" themed="inverted"/>
 						</widget>
 					</container>

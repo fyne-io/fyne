@@ -97,8 +97,10 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	text := canvas.NewText(b.Text, theme.ForegroundColor())
-	text.TextStyle.Bold = true
+	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
+	seg.Style.Alignment = fyne.TextAlignCenter
+	text := NewRichText(seg)
+	text.inset = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 
 	background := canvas.NewRectangle(theme.ButtonColor())
 	tapBG := canvas.NewRectangle(color.Transparent)
@@ -216,7 +218,7 @@ type buttonRenderer struct {
 	*widget.ShadowingRenderer
 
 	icon       *canvas.Image
-	label      *canvas.Text
+	label      *RichText
 	background *canvas.Rectangle
 	tapBG      *canvas.Rectangle
 	button     *Button
@@ -237,7 +239,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 	r.background.Resize(bgSize)
 
 	hasIcon := r.icon != nil
-	hasLabel := r.label.Text != ""
+	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
 	if !hasIcon && !hasLabel {
 		// Nothing to layout
 		return
@@ -277,7 +279,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 // amount of padding added.
 func (r *buttonRenderer) MinSize() (size fyne.Size) {
 	hasIcon := r.icon != nil
-	hasLabel := r.label.Text != ""
+	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	labelSize := r.label.MinSize()
 	if hasLabel {
@@ -295,7 +297,8 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 }
 
 func (r *buttonRenderer) Refresh() {
-	r.label.Text = r.button.Text
+	r.label.inset = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
 	r.applyTheme()
 	r.background.Refresh()
@@ -306,14 +309,14 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 func (r *buttonRenderer) applyTheme() {
 	r.background.FillColor = r.buttonColor()
-	r.label.TextSize = theme.TextSize()
-	r.label.Color = theme.ForegroundColor()
+	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
 	case r.button.disabled:
-		r.label.Color = theme.DisabledColor()
+		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	case r.button.Importance == HighImportance:
-		r.label.Color = theme.BackgroundColor()
+		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
 	}
+	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
