@@ -18,7 +18,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Document storage API (App.Storage().Create() and others)
 * Tab overflow on AppTabs
 * Add URI and Unbound type to data bindings
-* Add OnSubmitted Callback to Entry (#1683)
 * Add keyboard support for menus, pop-ups and buttons
 * Add SimpleRenderer to help make simple widgets (#709)
 * Add scroll functions for List, Table, Tree (#1892)
@@ -43,7 +42,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Correctly align text tabs (#1791)
 * Mobile apps theme does not match system (#472)
 * Toolbar with widget.Label makes the ToolbarAction buttons higher (#2257)
-* Fix "appID" appearing in Windows notifications (#2053)
 * Memory leaks in renderers and canvases cache maps (#735)
 * FileDialog SetFilter does not work on Android devices (#2353)
 * Hover fix for List and Tree with Draggable objects
