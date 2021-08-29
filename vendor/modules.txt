@@ -1,9 +1,12 @@
 # github.com/BurntSushi/toml v0.4.1
+## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
 # github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
+## explicit
 github.com/Kodeworks/golang-image-ico
 # github.com/akavel/rsrc v0.8.0
+## explicit
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
@@ -12,10 +15,13 @@ github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
+## explicit
 github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.4.9
+## explicit
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/mobile v0.1.3-0.20210827162613-6586eab941ce
+## explicit
 github.com/fyne-io/mobile/app
 github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/event/key
@@ -28,11 +34,13 @@ github.com/fyne-io/mobile/geom
 github.com/fyne-io/mobile/gl
 github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20210813123233-e4099ee2221f
+## explicit
 github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.1/gles2/KHR
 github.com/go-gl/gl/v3.2-core/gl
 github.com/go-gl/gl/v3.2-core/gl/KHR
 # github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210410170116-ea3d685f79fb
+## explicit
 github.com/go-gl/glfw/v3.3/glfw
 github.com/go-gl/glfw/v3.3/glfw/glfw/deps
 github.com/go-gl/glfw/v3.3/glfw/glfw/deps/glad
@@ -41,25 +49,34 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/deps/vs2008
 github.com/go-gl/glfw/v3.3/glfw/glfw/include/GLFW
 github.com/go-gl/glfw/v3.3/glfw/glfw/src
 # github.com/go-ole/go-ole v1.2.5
+## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
 # github.com/godbus/dbus/v5 v5.0.4
+## explicit
 github.com/godbus/dbus/v5
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+## explicit
 github.com/goki/freetype
 github.com/goki/freetype/raster
 github.com/goki/freetype/truetype
 # github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
+## explicit
 github.com/jackmordaunt/icns
 # github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
+## explicit
 github.com/josephspurrier/goversioninfo
 # github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
+## explicit
 github.com/lucor/goinfo
 github.com/lucor/goinfo/format
 github.com/lucor/goinfo/report
 # github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 github.com/nfnt/resize
+# github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
+## explicit
 # github.com/pkg/errors v0.9.1
+## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
@@ -68,15 +85,20 @@ github.com/russross/blackfriday/v2
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
+## explicit
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
+## explicit
 github.com/srwiley/rasterx
 # github.com/stretchr/testify v1.5.1
+## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/urfave/cli/v2 v2.3.0
+## explicit
 github.com/urfave/cli/v2
 # github.com/yuin/goldmark v1.3.8
+## explicit
 github.com/yuin/goldmark
 github.com/yuin/goldmark/ast
 github.com/yuin/goldmark/parser
@@ -85,6 +107,7 @@ github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
 # golang.org/x/image v0.0.0-20200430140353-33d19683fad8
+## explicit
 golang.org/x/image/colornames
 golang.org/x/image/draw
 golang.org/x/image/font
@@ -92,6 +115,7 @@ golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/vector
 # golang.org/x/mod v0.4.2
+## explicit
 golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
@@ -101,6 +125,7 @@ golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
 # golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
+## explicit
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -125,6 +150,7 @@ golang.org/x/text/language
 golang.org/x/text/runes
 golang.org/x/text/transform
 # golang.org/x/tools v0.1.5
+## explicit
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
 golang.org/x/tools/go/internal/packagesdriver
@@ -139,5 +165,8 @@ golang.org/x/tools/internal/typesinternal
 # golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
+# gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
+## explicit
 # gopkg.in/yaml.v2 v2.2.8
+## explicit
 gopkg.in/yaml.v2
