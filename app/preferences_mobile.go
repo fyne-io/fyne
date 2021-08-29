@@ -1,4 +1,4 @@
-// +build mobile nacl
+// +build mobile
 
 package app
 
