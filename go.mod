@@ -27,4 +27,9 @@ require (
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 	golang.org/x/tools v0.1.5
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )
+
+replace github.com/goxjs/glfw => github.com/bluebugs/glfw v0.0.0-20200617002304-c6f252a0ddb9
+
+replace github.com/goxjs/gl => github.com/bluebugs/gl v0.0.0-20200330042442-1ea792523509
