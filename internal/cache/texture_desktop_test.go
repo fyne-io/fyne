@@ -13,6 +13,7 @@ import (
 // go test -race
 func TestTextureDesktop(t *testing.T) {
 	wg := sync.WaitGroup{}
+	wg.Add(2)
 
 	go func() {
 		defer wg.Done()

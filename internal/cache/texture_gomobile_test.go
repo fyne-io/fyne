@@ -14,6 +14,7 @@ import (
 // go test -race
 func TestTextureGomobile(t *testing.T) {
 	wg := sync.WaitGroup{}
+	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
