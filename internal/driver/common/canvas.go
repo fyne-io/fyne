@@ -2,10 +2,12 @@ package common
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
@@ -35,9 +37,17 @@ type Canvas struct {
 
 	painter gl.Painter
 
-	dirty                                  bool
-	dirtyMutex                             sync.Mutex
-	refreshQueue                           chan fyne.CanvasObject
+	// Any object that requestes to enter to the refresh queue should
+	// not be omitted as it is always a rendering task's decision
+	// for skipping frames or drawing calls.
+	//
+	// If an object failed to ender the refresh queue, the object may
+	// disappear or blink from the view at any frames. As of this reason,
+	// the refreshQueue is an unbounded channel which is bale to cache
+	// arbitrary number of fyne.CanvasObject for the rendering.
+	refreshQueue *async.UnboundedCanvasObjectChan
+	dirty        uint32 // atomic
+
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
 
@@ -187,7 +197,7 @@ func (c *Canvas) FreeDirtyTextures() bool {
 	freed := false
 	for {
 		select {
-		case object := <-c.refreshQueue:
+		case object := <-c.refreshQueue.Out():
 			freed = true
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 				c.painter.Free(obj)
@@ -204,23 +214,15 @@ func (c *Canvas) FreeDirtyTextures() bool {
 }
 
 // Initialize initializes the canvas.
-func (c *Canvas) Initialize(impl SizeableCanvas, refreshQueueLen int, onOverlayChanged func()) {
+func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
-	c.refreshQueue = make(chan fyne.CanvasObject, refreshQueueLen)
+	c.refreshQueue = async.NewUnboundedCanvasObjectChan()
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
 			Canvas:   impl,
 		},
 	}
-}
-
-// IsDirty checks if the canvas is dirty.
-func (c *Canvas) IsDirty() bool {
-	c.dirtyMutex.Lock()
-	dirty := c.dirty
-	c.dirtyMutex.Unlock()
-	return dirty
 }
 
 // ObjectTrees return canvas object trees.
@@ -258,12 +260,7 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	select {
-	case c.refreshQueue <- obj:
-		// all good
-	default:
-		// queue is full, ignore
-	}
+	c.refreshQueue.In() <- obj // never block
 	c.SetDirty(true)
 }
 
@@ -287,11 +284,23 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 	}
 }
 
+const (
+	dirtyTrue  = 1
+	dirtyFalse = 0
+)
+
+// IsDirty checks if the canvas is dirty.
+func (c *Canvas) IsDirty() bool {
+	return atomic.LoadUint32(&c.dirty) == dirtyTrue
+}
+
 // SetDirty sets canvas dirty flag.
 func (c *Canvas) SetDirty(dirty bool) {
-	c.dirtyMutex.Lock()
-	c.dirty = dirty
-	c.dirtyMutex.Unlock()
+	if dirty {
+		atomic.StoreUint32(&c.dirty, dirtyTrue)
+	} else {
+		atomic.StoreUint32(&c.dirty, dirtyFalse)
+	}
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.

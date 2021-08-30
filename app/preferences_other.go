@@ -1,4 +1,4 @@
-// +build !ios,!android,!mobile,!nacl
+// +build !ios,!android,!mobile
 
 package app
 

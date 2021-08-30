@@ -154,7 +154,12 @@ func updateConfig(width, height, orientation int32) {
 //
 // It is widely reported that the iPhone can handle up to 5 simultaneous
 // touch events, while the iPad can handle 11.
-var touchIDs [11]uintptr
+var (
+	// touchIDs may arrive concurrently, use a lock for safety.
+	// See https://github.com/fyne-io/fyne/issues/2407.
+	touchMu  sync.RWMutex
+	touchIDs [11]uintptr
+)
 
 var touchEvents struct {
 	sync.Mutex
@@ -164,12 +169,17 @@ var touchEvents struct {
 //export sendTouch
 func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 	id := -1
+
+	touchMu.RLock()
 	for i, val := range touchIDs {
 		if val == cTouch {
 			id = i
 			break
 		}
 	}
+	touchMu.RUnlock()
+
+	touchMu.Lock()
 	if id == -1 {
 		for i, val := range touchIDs {
 			if val == 0 {
@@ -187,6 +197,7 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 	if t == touch.TypeEnd {
 		touchIDs[id] = 0
 	}
+	touchMu.Unlock()
 
 	theApp.eventsIn <- touch.Event{
 		X:        x,

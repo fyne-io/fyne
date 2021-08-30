@@ -253,11 +253,7 @@ func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 
 			size = label.MinSize()
 		} else {
-			off := 0
-			if i == 0 {
-				off = bound.firstSegmentReuse
-			}
-			size = t.cachedSegmentVisual(seg, off).MinSize()
+			size = t.cachedSegmentVisual(seg, bound.firstSegmentReuse).MinSize()
 		}
 
 		total.Width += size.Width
@@ -329,18 +325,9 @@ func (t *RichText) updateRowBounds() {
 		var currentBound *rowBoundary
 		for _, seg := range segList {
 			if parent, ok := seg.(RichTextBlock); ok {
-				count := len(bounds)
 				iterateSegments(parent.Segments())
-
-				// translate paragraph (block) effect to the last segment
-				if len(bounds) > count {
-					last := bounds[len(bounds)-1]
-					if len(last.segments) > 0 {
-						lastSeg := last.segments[len(last.segments)-1]
-						if txt, ok := lastSeg.(*TextSegment); ok {
-							txt.Style.Inline = false
-						}
-					}
+				if !seg.Inline() {
+					wrapWidth = maxWidth
 				}
 				continue
 			}
@@ -355,6 +342,7 @@ func (t *RichText) updateRowBounds() {
 				if seg.Inline() {
 					wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
 				} else {
+					wrapWidth = maxWidth
 					currentBound = nil
 				}
 				continue
@@ -363,7 +351,11 @@ func (t *RichText) updateRowBounds() {
 			textStyle := textSeg.Style.TextStyle
 			textSize := textSeg.size()
 
-			retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth, maxWidth, func(text []rune) float32 {
+			leftPad := float32(0)
+			if textSeg.Style == RichTextStyleBlockquote {
+				leftPad = theme.Padding() * 4
+			}
+			retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
 				return fyne.MeasureText(string(text), textSize, textStyle).Width
 			})
 			if currentBound != nil {
@@ -455,12 +447,16 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 
+			leftPad := float32(0)
 			if text, ok := bound.segments[0].(*TextSegment); ok {
 				rowAlign = text.Style.Alignment
+				if text.Style == RichTextStyleBlockquote {
+					leftPad = theme.Padding() * 4
+				}
 			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
 				rowAlign = link.Alignment
 			}
-			yPos += r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
+			yPos += r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 			rowItems = nil
 		}
 
@@ -535,13 +531,9 @@ func (r *textRenderer) Refresh() {
 				continue
 			}
 
-			off := 0
-			if i == 0 {
-				off = bound.firstSegmentReuse
-			}
-			obj := r.obj.cachedSegmentVisual(seg, off)
+			obj := r.obj.cachedSegmentVisual(seg, bound.firstSegmentReuse)
 			seg.Update(obj)
-			txt := r.obj.cachedSegmentVisual(seg, off).(*canvas.Text)
+			txt := obj.(*canvas.Text)
 			textSeg := seg.(*TextSegment)
 			runes := []rune(textSeg.Text)
 
@@ -726,6 +718,8 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 		low := l.begin
 		high := l.end
 		if low == high {
+			l.firstSegmentReuse = reuse
+			reuse++
 			bounds = append(bounds, l)
 			continue
 		}
@@ -733,23 +727,25 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 		case fyne.TextTruncate:
 			high = binarySearch(checker, low, high)
 			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
+			reuse++
 		case fyne.TextWrapBreak:
 			for low < high {
 				if measurer(text[low:high]) <= measureWidth {
 					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
+					reuse++
 					low = high
 					high = l.end
 					measureWidth = maxWidth
 				} else {
 					high = binarySearch(checker, low, high)
 				}
-				reuse++
 			}
 		case fyne.TextWrapWord:
 			for low < high {
 				sub := text[low:high]
 				if measurer(sub) <= measureWidth {
 					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
+					reuse++
 					low = high
 					high = l.end
 					if low < high && unicode.IsSpace(text[low]) {
@@ -763,12 +759,12 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 					high = low + findSpaceIndex(sub, fallback)
 					if high == fallback && measurer(sub) <= maxWidth { // add a newline as there is more space on next
 						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low})
+						reuse++
 						high = oldHigh
 						measureWidth = maxWidth
 						continue
 					}
 				}
-				reuse++
 			}
 		}
 	}

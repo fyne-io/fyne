@@ -157,65 +157,21 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
-	u, _ := url.Parse("https://fyne.io/")
-	rich := widget.NewRichText(
-		&widget.TextSegment{
-			Style: widget.RichTextStyleHeading,
-			Text:  "RichText Heading",
-		},
-		&widget.TextSegment{
-			Style: widget.RichTextStyleSubHeading,
-			Text:  "A Sub Heading",
-		},
-		&widget.SeparatorSegment{},
-		&widget.TextSegment{
-			Style: widget.RichTextStyleParagraph,
-			Text:  "A paragraph between separators that is very long, it should respect the wrapping flag",
-		},
-		&widget.SeparatorSegment{},
-		&widget.ListSegment{
-			Ordered: true,
-			Items: []widget.RichTextSegment{
-				&widget.ParagraphSegment{Texts: []widget.RichTextSegment{
-					&widget.TextSegment{Text: "Item1 in ", Style: widget.RichTextStyleInline},
-					&widget.TextSegment{Text: "three ", Style: widget.RichTextStyleEmphasis},
-					&widget.TextSegment{Text: "segments", Style: widget.RichTextStyleInline},
-				}},
-				&widget.TextSegment{Text: "Item2", Style: widget.RichTextStyleParagraph},
-				&widget.TextSegment{Text: "Item3", Style: widget.RichTextStyleParagraph},
-			},
-		},
-		&widget.TextSegment{
-			Style: widget.RichTextStyle{
-				Inline: true,
-			},
-			Text: "Normal ",
-		},
-		&widget.TextSegment{
-			Style: widget.RichTextStyleStrong,
-			Text:  "Bold ",
-		},
-		&widget.TextSegment{
-			Style: widget.RichTextStyleEmphasis,
-			Text:  "Italic ",
-		},
-		&widget.HyperlinkSegment{
-			Text: "Link",
-			URL:  u,
-		},
-		&widget.TextSegment{
-			Style: widget.RichTextStyle{
-				Inline: true,
-			},
-			Text: ". This styled row should also wrap as expected, but only ",
-		},
-		&widget.TextSegment{
-			Style: widget.RichTextStyle{
-				Inline:    true,
-				TextStyle: fyne.TextStyle{Italic: true},
-			},
-			Text: "when required.",
-		})
+	rich := widget.NewRichTextFromMarkdown(`
+# RichText Heading
+
+## A Sub Heading
+
+---
+
+* Item1 in _three_ segments
+* Item2
+* Item3
+
+Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
+This styled row should also wrap as expected, but only *when required*.
+
+> An interesting quote here, most likely sharing some very interesting wisdom.`)
 
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign

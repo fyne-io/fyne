@@ -11,7 +11,34 @@ import (
 )
 
 var (
-	// RichTextStyleEmphasis represents standard text that can be surrounded by other elements.
+	// RichTextStyleBlockquote represents a quote presented in an indented block.
+	//
+	// Since: 2.1
+	RichTextStyleBlockquote = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Italic: true},
+	}
+	// RichTextStyleCodeBlock represents a code blog segment.
+	//
+	// Since: 2.1
+	RichTextStyleCodeBlock = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    false,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Monospace: true},
+	}
+	// RichTextStyleCodeInline represents an inline code segment.
+	//
+	// Since: 2.1
+	RichTextStyleCodeInline = RichTextStyle{
+		ColorName: theme.ColorNameForeground,
+		Inline:    true,
+		SizeName:  theme.SizeNameText,
+		TextStyle: fyne.TextStyle{Monospace: true},
+	}
+	// RichTextStyleEmphasis represents regular text with emphasis.
 	//
 	// Since: 2.1
 	RichTextStyleEmphasis = RichTextStyle{
@@ -54,7 +81,7 @@ var (
 		SizeName:  theme.SizeNameText,
 		concealed: true,
 	}
-	// RichTextStyleStrong represents standard text that can be surrounded by other elements.
+	// RichTextStyleStrong represents regular text with a strong emphasis.
 	//
 	// Since: 2.1
 	RichTextStyleStrong = RichTextStyle{

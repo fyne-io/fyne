@@ -1,13 +1,14 @@
 module fyne.io/fyne/v2
 
-go 1.12
+go 1.14
 
 require (
+	github.com/BurntSushi/toml v0.4.1
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/mobile v0.1.3-0.20210811181917-d62fb16c28ec
+	github.com/fyne-io/mobile v0.1.3-0.20210827162613-6586eab941ce
 	github.com/go-gl/gl v0.0.0-20210813123233-e4099ee2221f
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210410170116-ea3d685f79fb
 	github.com/go-ole/go-ole v1.2.5
@@ -22,6 +23,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.3.0
+	github.com/yuin/goldmark v1.3.8
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 	golang.org/x/mod v0.4.2
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c

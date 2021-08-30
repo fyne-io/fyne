@@ -114,15 +114,18 @@ func New() fyne.App {
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
+	newApp.settings = loadSettings()
 
 	newApp.prefs = newPreferences(newApp)
-	if pref, ok := newApp.prefs.(interface{ load() }); ok && id != "" {
-		pref.load()
-	}
-	newApp.settings = loadSettings()
 	newApp.storage = &store{a: newApp}
-	root, _ := newApp.storage.docRootURI()
-	newApp.storage.Docs = &internal.Docs{RootDocURI: root}
+	if id != "" {
+		if pref, ok := newApp.prefs.(interface{ load() }); ok {
+			pref.load()
+		}
+
+		root, _ := newApp.storage.docRootURI()
+		newApp.storage.Docs = &internal.Docs{RootDocURI: root}
+	}
 
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()

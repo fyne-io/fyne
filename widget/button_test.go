@@ -190,6 +190,10 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignTrailing,
 			placement: widget.ButtonIconTrailingText,
 		},
+		"text_only_multiline": {
+			text:      "Test\nLine2",
+			alignment: widget.ButtonAlignCenter,
+		},
 		"icon_only_center_leading": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
