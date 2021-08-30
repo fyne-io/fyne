@@ -3,6 +3,7 @@ package cache
 import (
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -267,7 +268,7 @@ func testClearAll() {
 	skippedCleanWithCanvasRefresh = false
 	canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
 	svgs = make(map[string]*svgInfo)
-	textures = make(map[fyne.CanvasObject]*textureInfo, 1024)
+	textures = sync.Map{}
 	renderers = map[fyne.Widget]*rendererInfo{}
 	timeNow = time.Now
 }
