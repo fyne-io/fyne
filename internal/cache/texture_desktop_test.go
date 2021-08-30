@@ -1,3 +1,6 @@
+//go:build !android && !ios && !mobile
+// +build !android,!ios,!mobile
+
 package cache_test
 
 import (
@@ -8,7 +11,7 @@ import (
 )
 
 // go test -race
-func TestTexture(t *testing.T) {
+func TestTextureDesktop(t *testing.T) {
 	wg := sync.WaitGroup{}
 
 	go func() {
