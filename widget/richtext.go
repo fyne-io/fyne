@@ -326,6 +326,9 @@ func (t *RichText) updateRowBounds() {
 		for _, seg := range segList {
 			if parent, ok := seg.(RichTextBlock); ok {
 				iterateSegments(parent.Segments())
+				if !seg.Inline() {
+					wrapWidth = maxWidth
+				}
 				continue
 			}
 			if _, ok := seg.(*TextSegment); !ok {
@@ -339,6 +342,7 @@ func (t *RichText) updateRowBounds() {
 				if seg.Inline() {
 					wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
 				} else {
+					wrapWidth = maxWidth
 					currentBound = nil
 				}
 				continue
