@@ -1,16 +1,16 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="19,67" size="102x57" type="*widget.RadioGroup">
-				<widget size="102x28" type="*widget.radioItem">
-					<circle fillColor="background" pos="2,4" size="28x28"/>
+			<widget pos="19,59" size="102x73" type="*widget.RadioGroup">
+				<widget size="102x36" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,6" size="28x24"/>
 					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,4" size="102x28">Option A</text>
+					<text color="disabled" pos="32,0" size="102x36">Option A</text>
 				</widget>
-				<widget pos="0,28" size="102x28" type="*widget.radioItem">
-					<circle fillColor="background" pos="2,4" size="28x28"/>
+				<widget pos="0,36" size="102x36" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,6" size="28x24"/>
 					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,4" size="102x28">Option B</text>
+					<text color="disabled" pos="32,0" size="102x36">Option B</text>
 				</widget>
 			</widget>
 		</container>

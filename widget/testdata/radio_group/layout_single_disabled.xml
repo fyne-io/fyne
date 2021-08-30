@@ -1,11 +1,11 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="36,81" size="69x28" type="*widget.RadioGroup">
-				<widget size="69x28" type="*widget.radioItem">
-					<circle fillColor="background" pos="2,4" size="28x28"/>
+			<widget pos="36,77" size="69x36" type="*widget.RadioGroup">
+				<widget size="69x36" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,6" size="28x24"/>
 					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,4" size="69x28">Test</text>
+					<text color="disabled" pos="32,0" size="69x36">Test</text>
 				</widget>
 			</widget>
 		</container>
