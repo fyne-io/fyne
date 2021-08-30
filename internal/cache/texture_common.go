@@ -1,25 +1,25 @@
 package cache
 
 import (
+	"sync"
+
 	"fyne.io/fyne/v2"
 )
 
-// NOTE: Texture cache functions should always be called in
-// the same goroutine.
-
-var textures = make(map[fyne.CanvasObject]*textureInfo, 1024)
+var textures = sync.Map{} // map[fyne.CanvasObject]*textureInfo
 
 // DeleteTexture deletes the texture from the cache map.
 func DeleteTexture(obj fyne.CanvasObject) {
-	delete(textures, obj)
+	textures.Delete(obj)
 }
 
 // GetTexture gets cached texture.
 func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
-	texInfo, ok := textures[obj]
-	if texInfo == nil || !ok {
+	t, ok := textures.Load(obj)
+	if t == nil || !ok {
 		return noTexture, false
 	}
+	texInfo := t.(*textureInfo)
 	texInfo.setAlive()
 	return texInfo.texture, true
 }
@@ -30,11 +30,13 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 // gl context to ensure textures are deleted from gl.
 func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	now := timeNow()
-	for obj, tinfo := range textures {
+	textures.Range(func(key, value interface{}) bool {
+		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
 		if tinfo.isExpired(now) && tinfo.canvas == canvas {
 			f(obj)
 		}
-	}
+		return true
+	})
 }
 
 // RangeTexturesFor range over the textures for the specified canvas.
@@ -42,11 +44,13 @@ func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 // Note: If this is used to free textures, then it should be called inside a current
 // gl context to ensure textures are deleted from gl.
 func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
-	for obj, tinfo := range textures {
+	textures.Range(func(key, value interface{}) bool {
+		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
 		if tinfo.canvas == canvas {
 			f(obj)
 		}
-	}
+		return true
+	})
 }
 
 // SetTexture sets cached texture.
@@ -54,7 +58,7 @@ func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) 
 	texInfo := &textureInfo{texture: texture}
 	texInfo.canvas = canvas
 	texInfo.setAlive()
-	textures[obj] = texInfo
+	textures.Store(obj, texInfo)
 }
 
 // textureCacheBase defines base texture cache object.
