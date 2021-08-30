@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strings"
 	"sync"
 	"testing"
 
@@ -52,33 +51,7 @@ func TestMakeInfiniteQueue(t *testing.T) {
 	assert.Equal(t, 2048, c)
 }
 
-type mainTest struct {
-	name string
-}
-
-func newMainTest(name string) *mainTest {
-	t := &mainTest{name: name}
-	fmt.Printf("=== RUN   %s\n", name)
-	return t
-}
-
-func (m *mainTest) exitError() {
-	fmt.Printf("--- FAIL: %s (0.00s)\n", m.name)
-	fmt.Println("FAIL")
-	os.Exit(1)
-}
-
-func (m *mainTest) Errorf(format string, args ...interface{}) {
-	_, file, line, ok := runtime.Caller(3)
-	if ok {
-		fmt.Fprintf(os.Stderr, "\t%s:%d\n", file, line)
-	}
-	fmt.Fprintf(os.Stderr, strings.TrimLeft(format, "\n"), args...)
-	m.exitError()
-}
-
 func testQueueLazyInit() {
-	t := newMainTest("TestQueueLazyInit")
 	initialGoRoutines := runtime.NumGoroutine()
 
 	wg := sync.WaitGroup{}
@@ -87,5 +60,8 @@ func testQueueLazyInit() {
 		go queueItem(func() { wg.Done() })
 	}
 	wg.Wait()
-	assert.Equal(t, initialGoRoutines+2, runtime.NumGoroutine())
+	if runtime.NumGoroutine() != initialGoRoutines+2 {
+		fmt.Println("--- FAIL: testQueueLazyInit")
+		os.Exit(1)
+	}
 }
