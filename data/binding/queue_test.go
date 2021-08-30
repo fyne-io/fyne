@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
-	"time"
 
+	"fyne.io/fyne/v2/internal/async"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,21 +32,21 @@ func TestQueueItem(t *testing.T) {
 
 func TestMakeInfiniteQueue(t *testing.T) {
 	var wg sync.WaitGroup
-	in, out := makeInfiniteQueue()
+	queue := async.NewUnboundedFuncChan()
 
 	wg.Add(1)
 	c := 0
 	go func() {
-		for range out {
+		for range queue.Out() {
 			c++
 		}
 		wg.Done()
 	}()
 
 	for i := 0; i < 2048; i++ {
-		in <- &itemData{}
+		queue.In() <- func() {}
 	}
-	close(in)
+	close(queue.In())
 
 	wg.Wait()
 	assert.Equal(t, 2048, c)
@@ -79,19 +79,13 @@ func (m *mainTest) Errorf(format string, args ...interface{}) {
 
 func testQueueLazyInit() {
 	t := newMainTest("TestQueueLazyInit")
-	assert.Nil(t, itemQueueIn)
-	assert.Nil(t, itemQueueOut)
-
 	initialGoRoutines := runtime.NumGoroutine()
 
+	wg := sync.WaitGroup{}
+	wg.Add(1000)
 	for i := 0; i < 1000; i++ {
-		go queueItem(func() {})
+		go queueItem(func() { wg.Done() })
 	}
-
-	waitForItems()
-	time.Sleep(100 * time.Millisecond)
-
+	wg.Wait()
 	assert.Equal(t, initialGoRoutines+2, runtime.NumGoroutine())
-	assert.NotNil(t, itemQueueIn)
-	assert.NotNil(t, itemQueueOut)
 }

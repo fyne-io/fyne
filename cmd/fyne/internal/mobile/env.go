@@ -94,7 +94,23 @@ func envInit() (err error) {
 	if err == nil && string(ver) != "" {
 		fields := strings.Split(string(ver), " ")
 		if len(fields) >= 3 {
-			goVer := fields[2][2:] // strip "go" prefix
+			goVer := strings.TrimPrefix(fields[2], "go")
+
+			// If a go command is a development version, the version
+			// information may only appears in the third elements.
+			// For instance:
+			// go version devel go1.18-527609d47b Wed Aug 25 17:07:58 2021 +0200 darwin/arm64
+			if goVer == "devel" && len(fields) >= 4 {
+				prefix := strings.Split(fields[3], "-")
+				// a go command may miss version inforamtion. If that happens
+				// we just use the environment version.
+				if len(prefix) > 0 {
+					goVer = strings.TrimPrefix(prefix[0], "go")
+				} else {
+					goVer = runtime.Version()
+				}
+			}
+
 			buildLegacy = semver.Compare("v"+goVer, "v1.15.0") < 0
 		}
 	}
