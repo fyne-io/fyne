@@ -5,6 +5,7 @@ import (
 	"context"
 	"image"
 	_ "image/png" // for the icon
+	"math"
 	"runtime"
 	"sync"
 	"time"
@@ -22,8 +23,10 @@ import (
 )
 
 const (
-	scrollSpeed      = float32(10)
-	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
+	scrollAccelerateRate   = float64(5)
+	scrollAccelerateCutoff = float64(5)
+	scrollSpeed            = float32(10)
+	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
 )
 
 var (
@@ -929,6 +932,13 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 				viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
 			xoff, yoff = yoff, xoff
 		}
+		if math.Abs(xoff) >= scrollAccelerateCutoff {
+			xoff *= scrollAccelerateRate
+		}
+		if math.Abs(yoff) >= scrollAccelerateCutoff {
+			yoff *= scrollAccelerateRate
+		}
+
 		ev := &fyne.ScrollEvent{}
 		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
 		ev.Position = pos
