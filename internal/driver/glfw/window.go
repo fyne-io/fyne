@@ -531,7 +531,7 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
-	canvasSize := fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height))
+	canvasSize := w.computeCanvasSize(width, height)
 	if !w.fullScreen {
 		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
 		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
