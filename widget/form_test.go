@@ -44,6 +44,19 @@ func TestForm_Append(t *testing.T) {
 	assert.Equal(t, item, form.Items[2])
 }
 
+func TestForm_Append_Items(t *testing.T) {
+	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
+	assert.Equal(t, 1, len(form.Items))
+	renderer := test.WidgetRenderer(form)
+
+	form.Items = append(form.Items, NewFormItem("test2", NewEntry()))
+	assert.True(t, len(form.Items) == 2)
+
+	form.Refresh()
+	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
+	assert.Equal(t, "test2", c.Objects[2].(*canvas.Text).Text)
+}
+
 func TestForm_CustomButtonsText(t *testing.T) {
 	form := &Form{OnSubmit: func() {}, OnCancel: func() {}}
 	form.Append("test", NewEntry())

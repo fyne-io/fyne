@@ -85,6 +85,7 @@ func (f *Form) MinSize() fyne.Size {
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
 	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
+	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
 	f.BaseWidget.Refresh()
@@ -193,6 +194,20 @@ func (f *Form) checkValidation(err error) {
 	}
 }
 
+func (f *Form) ensureRenderItems() {
+	objects := f.itemGrid.Objects
+	for i, item := range f.Items {
+		if i < len(objects)/2 {
+			continue
+		}
+
+		objects = append(objects, f.createLabel(item.Text))
+		f.setUpValidation(item.Widget, i)
+		objects = append(objects, f.createInput(item))
+	}
+	f.itemGrid.Objects = objects
+}
+
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	updateValidation := func(err error) {
 		if err == errFormItemInitialState {
@@ -263,16 +278,9 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 
-	objects := make([]fyne.CanvasObject, len(f.Items)*2)
-	for i, item := range f.Items {
-		objects[i*2] = f.createLabel(item.Text)
-
-		f.setUpValidation(item.Widget, i)
-		objects[i*2+1] = f.createInput(item)
-	}
-	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
-
+	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
 	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
+	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
 	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
