@@ -90,6 +90,7 @@ func envInit() (err error) {
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
 
 	buildLegacy := false
+	before116 := false
 	ver, err := exec.Command("go", "version").Output()
 	if err == nil && string(ver) != "" {
 		fields := strings.Split(string(ver), " ")
@@ -112,6 +113,7 @@ func envInit() (err error) {
 			}
 
 			buildLegacy = semver.Compare("v"+goVer, "v1.15.0") < 0
+			before116 = semver.Compare("v"+goVer, "v1.16.0") < 0
 		}
 	}
 	if buildLegacy {
@@ -196,8 +198,13 @@ func envInit() (err error) {
 		if bitcodeEnabled {
 			cflags += " -fembed-bitcode"
 		}
+
+		os := "ios"
+		if before116 {
+			os = "darwin"
+		}
 		env = append(env,
-			"GOOS=darwin",
+			"GOOS="+os,
 			"GOARCH="+arch,
 			"CC="+clang,
 			"CXX="+clang+"++",

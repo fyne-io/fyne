@@ -82,6 +82,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Calling SetContent a second time with the same content will not show
 * Drawing text can panic when Color is nil (#2347)
 * Optimisations when drawing transparent rectangle or whitespace strings
+* iOS builds fail since Go 1.16
 
 
 ## 2.0.3 - 30 April 2021
