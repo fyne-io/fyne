@@ -89,7 +89,7 @@ func envInit() (err error) {
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
 
-	buildLegacy := false
+	before115 := false
 	before116 := false
 	ver, err := exec.Command("go", "version").Output()
 	if err == nil && string(ver) != "" {
@@ -103,7 +103,7 @@ func envInit() (err error) {
 			// go version devel go1.18-527609d47b Wed Aug 25 17:07:58 2021 +0200 darwin/arm64
 			if goVer == "devel" && len(fields) >= 4 {
 				prefix := strings.Split(fields[3], "-")
-				// a go command may miss version inforamtion. If that happens
+				// a go command may miss version information. If that happens
 				// we just use the environment version.
 				if len(prefix) > 0 {
 					goVer = strings.TrimPrefix(prefix[0], "go")
@@ -112,11 +112,11 @@ func envInit() (err error) {
 				}
 			}
 
-			buildLegacy = semver.Compare("v"+goVer, "v1.15.0") < 0
+			before115 = semver.Compare("v"+goVer, "v1.15.0") < 0
 			before116 = semver.Compare("v"+goVer, "v1.16.0") < 0
 		}
 	}
-	if buildLegacy {
+	if before115 {
 		allArchs["ios"] = []string{"arm64", "amd64", "arm"}
 	}
 
