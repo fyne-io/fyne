@@ -54,6 +54,9 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Backspace key is not working on Android AOSP (#1941)
 * macOS: 'NSUserNotification' has been deprecated (#1833)
 * macOS: Native menu would add new items if refreshed
+* iOS builds fail since Go 1.16
+* Re-add support for 32 bit iOS devices, if built with Go 1.14
+
 
 ## 2.0.4 - 6 August 2021
 
@@ -82,7 +85,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Calling SetContent a second time with the same content will not show
 * Drawing text can panic when Color is nil (#2347)
 * Optimisations when drawing transparent rectangle or whitespace strings
-* iOS builds fail since Go 1.16
 
 
 ## 2.0.3 - 30 April 2021
