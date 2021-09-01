@@ -1399,6 +1399,7 @@ func (w *window) create() {
 		} else {
 			glfw.WindowHint(glfw.Resizable, 1)
 		}
+		glfw.WindowHint(glfw.CocoaGraphicsSwitching, glfw.True)
 		initWindowHints()
 
 		pixWidth, pixHeight := w.screenSize(w.canvas.size)
