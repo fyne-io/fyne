@@ -62,10 +62,10 @@
 			<widget pos="4,21" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
-			<widget pos="4,59" size="168x1" type="*widget.Separator">
+			<widget pos="4,58" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
-			<widget pos="4,97" size="168x1" type="*widget.Separator">
+			<widget pos="4,96" size="168x1" type="*widget.Separator">
 				<rectangle fillColor="disabled" size="168x1"/>
 			</widget>
 			<widget pos="4,134" size="168x1" type="*widget.Separator">

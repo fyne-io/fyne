@@ -449,8 +449,8 @@ func (t *tableRenderer) moveIndicators() {
 	}
 
 	i = 0
-	count := int(t.scroll.Offset.Y) % int(t.cellSize.Height+separatorThickness)
-	for y := theme.Padding() + t.scroll.Offset.Y - float32(count) - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1 && divs < len(t.dividers); y += t.cellSize.Height + separatorThickness {
+	count := float32(math.Mod(float64(t.scroll.Offset.Y), float64(t.cellSize.Height+separatorThickness)))
+	for y := theme.Padding() + t.scroll.Offset.Y - count - separatorThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1 && divs < len(t.dividers); y += t.cellSize.Height + separatorThickness {
 		if y < theme.Padding()+t.scroll.Offset.Y {
 			continue
 		}
