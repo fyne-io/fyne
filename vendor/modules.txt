@@ -20,19 +20,6 @@ github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.4.9
 ## explicit
 github.com/fsnotify/fsnotify
-# github.com/fyne-io/mobile v0.1.3-0.20210827162613-6586eab941ce
-## explicit
-github.com/fyne-io/mobile/app
-github.com/fyne-io/mobile/app/internal/callfn
-github.com/fyne-io/mobile/event/key
-github.com/fyne-io/mobile/event/lifecycle
-github.com/fyne-io/mobile/event/paint
-github.com/fyne-io/mobile/event/size
-github.com/fyne-io/mobile/event/touch
-github.com/fyne-io/mobile/exp/f32
-github.com/fyne-io/mobile/geom
-github.com/fyne-io/mobile/gl
-github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20210813123233-e4099ee2221f
 ## explicit
 github.com/go-gl/gl/v3.1/gles2
