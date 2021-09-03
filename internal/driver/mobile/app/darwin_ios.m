@@ -1,8 +1,3 @@
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// +build darwin
 // +build ios
 
 #include "_cgo_export.h"
@@ -237,14 +232,6 @@ void swapBuffers(GLintptr context) {
 		[EAGLContext setCurrentContext:ctx];
 		[ctx presentRenderbuffer:GL_RENDERBUFFER];
 	});
-}
-
-uint64_t threadID() {
-	uint64_t id;
-	if (pthread_threadid_np(pthread_self(), &id)) {
-		abort();
-	}
-	return id;
 }
 
 UIEdgeInsets getDevicePadding() {

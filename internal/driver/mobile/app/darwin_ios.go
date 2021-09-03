@@ -1,9 +1,5 @@
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-//go:build darwin && ios
-// +build darwin,ios
+//go:build ios
+// +build ios
 
 package app
 
@@ -22,7 +18,6 @@ extern struct utsname sysInfo;
 void runApp(void);
 void makeCurrentContext(GLintptr ctx);
 void swapBuffers(GLintptr ctx);
-uint64_t threadID();
 
 UIEdgeInsets getDevicePadding();
 bool isDark();
@@ -48,8 +43,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 )
 
-var initThreadID uint64
-
 func init() {
 	// Lock the goroutine responsible for initialization to an OS thread.
 	// This means the goroutine running main (and calling the run function
@@ -59,14 +52,9 @@ func init() {
 	// A discussion on this topic:
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
-	initThreadID = uint64(C.threadID())
 }
 
 func main(f func(App)) {
-	//if tid := uint64(C.threadID()); tid != initThreadID {
-	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
-	//}
-
 	go func() {
 		f(theApp)
 		// TODO(crawshaw): trigger runApp to return
@@ -223,14 +211,15 @@ func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	for workAvailable := theApp.worker.WorkAvailable(); ; {
+	workAvailable := theApp.worker.WorkAvailable()
+	for {
 		select {
 		case <-workAvailable:
 			theApp.worker.DoWork()
 		case <-theApp.publish:
 			theApp.publishResult <- PublishResult{}
 			return
-		case <-time.After(100 * time.Millisecond): // incase the method blocked!!
+		case <-time.After(time.Millisecond): // incase the method blocked!!
 			return
 		}
 	}

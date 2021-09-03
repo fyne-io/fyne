@@ -1,28 +1,13 @@
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 #ifdef os_android
 // TODO(crawshaw): We could include <android/api-level.h> and
 // condition on __ANDROID_API__ to get GLES3 headers. However
 // we also need to add -lGLESv3 to LDFLAGS, which we cannot do
 // from inside an ifdef.
 #include <GLES2/gl2.h>
-#elif os_linux
-#include <GLES3/gl3.h> // install on Ubuntu with: sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev libx11-dev
-#elif os_openbsd
-#include <GLES3/gl3.h>
-#elif os_freebsd
-#include <GLES3/gl3.h>
 #endif
 
 #ifdef os_ios
 #include <OpenGLES/ES2/glext.h>
-#endif
-
-#ifdef os_osx
-#include <OpenGL/gl3.h>
-#define GL_ES_VERSION_3_0 1
 #endif
 
 #if defined(GL_ES_VERSION_3_0) && GL_ES_VERSION_3_0

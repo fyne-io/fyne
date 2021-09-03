@@ -1,6 +1,3 @@
-//go:build android || ios
-// +build android ios
-
 package app
 
 import "C"
