@@ -449,8 +449,8 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			theApp.eventsIn <- size.Event{
 				WidthPx:       widthPx,
 				HeightPx:      heightPx,
-				WidthPt:       geom.Pt(float32(widthPx) / pixelsPerPt),
-				HeightPt:      geom.Pt(float32(heightPx) / pixelsPerPt),
+				WidthPt:       float32(widthPx) / pixelsPerPt,
+				HeightPt:      float32(heightPx) / pixelsPerPt,
 				InsetTopPx:    screenInsetTop,
 				InsetBottomPx: screenInsetBottom,
 				InsetLeftPx:   screenInsetLeft,
