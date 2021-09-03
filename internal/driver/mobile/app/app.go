@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build linux || darwin || windows
-// +build linux darwin windows
+//go:build android || ios
+// +build android ios
 
 package app
 
