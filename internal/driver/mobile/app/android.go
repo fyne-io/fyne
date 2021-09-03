@@ -67,7 +67,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
-	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 	"fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
 )
 
