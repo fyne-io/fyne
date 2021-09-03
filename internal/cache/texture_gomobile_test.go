@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver/gomobile/gl"
+	"fyne.io/fyne/v2/internal/driver/mobile/gl"
 )
 
 // go test -race

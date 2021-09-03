@@ -16,8 +16,8 @@
 // StageFocused means that the app has gained the focus. A negative crossing
 // means it has lost the focus.
 //
-// See the fyne.io/fyne/v2/internal/driver/gomobile/app package for details on the event model.
-package lifecycle // import "fyne.io/fyne/v2/internal/driver/gomobile/event/lifecycle"
+// See the fyne.io/fyne/v2/internal/driver/mobile/app package for details on the event model.
+package lifecycle // import "fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
 
 import "fmt"
 

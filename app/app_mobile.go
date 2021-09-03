@@ -1,12 +1,12 @@
+//go:build !ci && (android || ios || mobile)
 // +build !ci
-
 // +build android ios mobile
 
 package app
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/driver/gomobile"
+	"fyne.io/fyne/v2/internal/driver/mobile"
 )
 
 var systemTheme fyne.ThemeVariant

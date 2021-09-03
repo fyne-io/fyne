@@ -21,7 +21,7 @@ import (
 	"os"
 	"unsafe"
 
-	"fyne.io/fyne/v2/internal/driver/gomobile/app"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/storage/repository"
 )
 

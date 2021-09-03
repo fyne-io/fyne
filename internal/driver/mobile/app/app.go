@@ -8,10 +8,10 @@
 package app
 
 import (
-	"fyne.io/fyne/v2/internal/driver/gomobile/event/lifecycle"
-	"fyne.io/fyne/v2/internal/driver/gomobile/event/size"
-	"fyne.io/fyne/v2/internal/driver/gomobile/gl"
-	_ "fyne.io/fyne/v2/internal/driver/gomobile/mobileinit"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
+	"fyne.io/fyne/v2/internal/driver/mobile/gl"
+	_ "fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
 )
 
 // Main is called by the main.main function to run the mobile application.

@@ -4,8 +4,8 @@
 
 // Package paint defines an event for the app being ready to paint.
 //
-// See the fyne.io/fyne/v2/internal/driver/gomobile/app package for details on the event model.
-package paint // import "fyne.io/fyne/v2/internal/driver/gomobile/event/paint"
+// See the fyne.io/fyne/v2/internal/driver/mobile/app package for details on the event model.
+package paint // import "fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 
 // Event indicates that the app is ready to paint the next frame of the GUI.
 //

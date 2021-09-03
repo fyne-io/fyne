@@ -1,3 +1,4 @@
+//go:build ios || android
 // +build ios android
 
 package dialog
@@ -6,7 +7,7 @@ import (
 	"os"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/driver/gomobile"
+	"fyne.io/fyne/v2/internal/driver/mobile"
 	"fyne.io/fyne/v2/storage"
 )
 

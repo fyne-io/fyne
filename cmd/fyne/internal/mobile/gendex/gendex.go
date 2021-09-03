@@ -60,7 +60,7 @@ func gendex() error {
 	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0775); err != nil {
 		return err
 	}
-	javaFiles, err := filepath.Glob("../../../../internal/driver/gomobile/app/*.java")
+	javaFiles, err := filepath.Glob("../../../../internal/driver/mobile/app/*.java")
 	if err != nil {
 		return err
 	}

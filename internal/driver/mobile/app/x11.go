@@ -25,11 +25,11 @@ import (
 	"runtime"
 	"time"
 
-	"fyne.io/fyne/v2/internal/driver/gomobile/event/lifecycle"
-	"fyne.io/fyne/v2/internal/driver/gomobile/event/paint"
-	"fyne.io/fyne/v2/internal/driver/gomobile/event/size"
-	"fyne.io/fyne/v2/internal/driver/gomobile/event/touch"
-	"fyne.io/fyne/v2/internal/driver/gomobile/geom"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
+	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 func init() {

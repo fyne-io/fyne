@@ -15,7 +15,7 @@ import "C"
 import (
 	"unsafe"
 
-	"fyne.io/fyne/v2/internal/driver/gomobile/app"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 )
 
 // Content returns the clipboard content for Android

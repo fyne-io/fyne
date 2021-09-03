@@ -5,13 +5,13 @@
 // Package size defines an event for the dimensions, physical resolution and
 // orientation of the app's window.
 //
-// See the fyne.io/fyne/v2/internal/driver/gomobile/app package for details on the event model.
-package size // import "fyne.io/fyne/v2/internal/driver/gomobile/event/size"
+// See the fyne.io/fyne/v2/internal/driver/mobile/app package for details on the event model.
+package size // import "fyne.io/fyne/v2/internal/driver/mobile/event/size"
 
 import (
 	"image"
 
-	"fyne.io/fyne/v2/internal/driver/gomobile/geom"
+	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 // Event holds the dimensions, physical resolution and orientation of the app's

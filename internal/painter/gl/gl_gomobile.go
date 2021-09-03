@@ -13,8 +13,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver/gomobile/exp/f32"
-	"fyne.io/fyne/v2/internal/driver/gomobile/gl"
+	"fyne.io/fyne/v2/internal/driver/mobile/exp/f32"
+	"fyne.io/fyne/v2/internal/driver/mobile/gl"
 	"fyne.io/fyne/v2/theme"
 )
 

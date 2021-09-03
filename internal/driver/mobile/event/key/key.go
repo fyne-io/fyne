@@ -8,7 +8,7 @@
 //
 // On-screen software keyboards do not send key events.
 //
-// See the fyne.io/fyne/v2/internal/driver/gomobile/app package for details on the event model.
+// See the fyne.io/fyne/v2/internal/driver/mobile/app package for details on the event model.
 package key
 
 import (
