@@ -1,6 +1,6 @@
-//go:build !ci && (android || ios || mobile)
+//go:build !ci && (android || ios)
 // +build !ci
-// +build android ios mobile
+// +build android ios
 
 package app
 
@@ -14,9 +14,9 @@ var systemTheme fyne.ThemeVariant
 // NewWithID returns a new app instance using the appropriate runtime driver.
 // The ID string should be globally unique to this app.
 func NewWithID(id string) fyne.App {
-	d := gomobile.NewGoMobileDriver()
+	d := mobile.NewGoMobileDriver()
 	a := newAppWithDriver(d, id)
-	d.(gomobile.ConfiguredDriver).SetOnConfigurationChanged(func(c *gomobile.Configuration) {
+	d.(mobile.ConfiguredDriver).SetOnConfigurationChanged(func(c *mobile.Configuration) {
 		systemTheme = c.SystemTheme
 
 		a.Settings().(*settings).setupTheme()

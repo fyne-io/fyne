@@ -1,6 +1,7 @@
+//go:build ios
 // +build ios
 
-package gomobile
+package mobile
 
 /*
 #cgo CFLAGS: -x objective-c

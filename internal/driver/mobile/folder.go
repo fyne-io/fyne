@@ -1,4 +1,4 @@
-package gomobile
+package mobile
 
 import (
 	"fmt"

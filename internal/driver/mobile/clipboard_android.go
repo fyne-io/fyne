@@ -1,7 +1,7 @@
 //go:build android
 // +build android
 
-package gomobile
+package mobile
 
 /*
 #cgo LDFLAGS: -landroid -llog -lEGL -lGLESv2

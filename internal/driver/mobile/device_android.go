@@ -1,6 +1,7 @@
+//go:build android
 // +build android
 
-package gomobile
+package mobile
 
 import "fyne.io/fyne/v2"
 
