@@ -63,10 +63,6 @@ type context struct {
 
 func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable }
 
-type context3 struct {
-	*context
-}
-
 // NewContext creates a cgo OpenGL context.
 //
 // See the Worker interface for more details on how it is used.
@@ -79,7 +75,7 @@ func NewContext() (Context, Worker) {
 	if C.GLES_VERSION == "GL_ES_2_0" {
 		return glctx, glctx
 	}
-	return context3{glctx}, glctx
+	return glctx, glctx
 }
 
 // Version returns a GL ES version string, either "GL_ES_2_0" or "GL_ES_3_0".

@@ -1,5 +1,5 @@
-// +build darwin
-// +build arm arm64
+//go:build ios
+// +build ios
 
 #import <Foundation/Foundation.h>
 

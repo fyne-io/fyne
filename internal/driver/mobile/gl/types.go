@@ -7,8 +7,6 @@
 
 package gl
 
-import "fmt"
-
 // Enum is equivalent to GLenum, and is normally used with one of the
 // constants defined in this package.
 type Enum uint32
@@ -81,13 +79,3 @@ func (v Renderbuffer) c() uintptr { return uintptr(v.Value) }
 func (v Texture) c() uintptr      { return uintptr(v.Value) }
 func (v Uniform) c() uintptr      { return uintptr(v.Value) }
 func (v VertexArray) c() uintptr  { return uintptr(v.Value) }
-
-func (v Attrib) String() string       { return fmt.Sprintf("Attrib(%d)", v.Value) }
-func (v Program) String() string      { return fmt.Sprintf("Program(%d)", v.Value) }
-func (v Shader) String() string       { return fmt.Sprintf("Shader(%d)", v.Value) }
-func (v Buffer) String() string       { return fmt.Sprintf("Buffer(%d)", v.Value) }
-func (v Framebuffer) String() string  { return fmt.Sprintf("Framebuffer(%d)", v.Value) }
-func (v Renderbuffer) String() string { return fmt.Sprintf("Renderbuffer(%d)", v.Value) }
-func (v Texture) String() string      { return fmt.Sprintf("Texture(%d)", v.Value) }
-func (v Uniform) String() string      { return fmt.Sprintf("Uniform(%d)", v.Value) }
-func (v VertexArray) String() string  { return fmt.Sprintf("VertexArray(%d)", v.Value) }

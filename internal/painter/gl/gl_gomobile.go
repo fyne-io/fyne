@@ -315,7 +315,7 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 		ctx.BlendColor(0, 0, 0, alpha)
 		ctx.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
 	} else {
-		ctx.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+		ctx.BlendFunc(1, gl.ONE_MINUS_SRC_ALPHA)
 	}
 	p.logError()
 

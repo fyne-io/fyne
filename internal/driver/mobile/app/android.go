@@ -283,10 +283,6 @@ var (
 	darkMode                                                             bool
 )
 
-func init() {
-	theApp.registerGLViewportFilter()
-}
-
 func main(f func(App)) {
 	mainUserFn = f
 	// TODO: merge the runInputQueue and mainUI functions?
