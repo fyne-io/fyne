@@ -1,3 +1,4 @@
+//go:build android || ios || mobile
 // +build android ios mobile
 
 package gl
@@ -9,12 +10,11 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/fyne-io/mobile/exp/f32"
-	"github.com/fyne-io/mobile/gl"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/gomobile/exp/f32"
+	"fyne.io/fyne/v2/internal/driver/gomobile/gl"
 	"fyne.io/fyne/v2/theme"
 )
 
