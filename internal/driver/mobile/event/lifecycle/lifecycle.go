@@ -34,6 +34,7 @@ func (c Cross) String() string {
 	return "none"
 }
 
+// All possible cross
 const (
 	CrossNone Cross = 0
 	CrossOn   Cross = 1
