@@ -1,3 +1,4 @@
+//go:build android
 // +build android
 
 package gomobile
@@ -14,7 +15,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/fyne-io/mobile/app"
+	"fyne.io/fyne/v2/internal/driver/gomobile/app"
 )
 
 // Content returns the clipboard content for Android

@@ -326,6 +326,12 @@ func archNDK() string {
 		arch = "x86"
 	case "amd64":
 		arch = "x86_64"
+	case "arm64":
+		if runtime.GOOS == "darwin" {
+			arch = "x86_64"
+			break
+		}
+		fallthrough
 	default:
 		panic("unsupported GOARCH: " + runtime.GOARCH)
 	}

@@ -1,8 +1,9 @@
+//go:build android || ios || mobile
 // +build android ios mobile
 
 package cache
 
-import "github.com/fyne-io/mobile/gl"
+import "fyne.io/fyne/v2/internal/driver/gomobile/gl"
 
 // TextureType represents an uploaded GL texture
 type TextureType = gl.Texture

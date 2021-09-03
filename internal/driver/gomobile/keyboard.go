@@ -3,7 +3,7 @@ package gomobile
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/mobile"
-	"github.com/fyne-io/mobile/app"
+	"fyne.io/fyne/v2/internal/driver/gomobile/app"
 )
 
 func showVirtualKeyboard(keyboard mobile.KeyboardType) {

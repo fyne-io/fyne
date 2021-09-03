@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ignore
 // +build ignore
 
 // Gendex generates a dex file used by Go apps created with gomobile.
@@ -59,7 +60,7 @@ func gendex() error {
 	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0775); err != nil {
 		return err
 	}
-	javaFiles, err := filepath.Glob("../../../../vendor/github.com/fyne-io/mobile/app/*.java")
+	javaFiles, err := filepath.Glob("../../../../internal/driver/gomobile/app/*.java")
 	if err != nil {
 		return err
 	}

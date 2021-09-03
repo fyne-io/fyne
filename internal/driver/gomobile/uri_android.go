@@ -1,3 +1,4 @@
+//go:build android
 // +build android
 
 package gomobile
@@ -15,8 +16,8 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/gomobile/app"
 	"fyne.io/fyne/v2/storage"
-	"github.com/fyne-io/mobile/app"
 )
 
 type androidURI struct {
