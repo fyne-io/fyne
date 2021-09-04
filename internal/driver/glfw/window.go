@@ -91,9 +91,11 @@ type window struct {
 	menuTogglePending       fyne.KeyName
 	menuDeactivationPending fyne.KeyName
 
-	xpos, ypos    int
-	width, height int
-	shouldExpand  bool
+	xpos, ypos                      int
+	width, height                   int
+	requestedWidth, requestedHeight int
+	shouldWidth, shouldHeight       int
+	shouldExpand                    bool
 
 	pending []func()
 }
@@ -185,10 +187,11 @@ func (w *window) Resize(size fyne.Size) {
 
 		width, height := internal.ScaleInt(w.canvas, bigEnough.Width), internal.ScaleInt(w.canvas, bigEnough.Height)
 		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
+			w.shouldWidth, w.shouldHeight = width, height
 			w.width, w.height = width, height
 		}
 		w.viewLock.Unlock()
-
+		w.requestedWidth, w.requestedHeight = width, height
 		w.viewport.SetSize(width, height)
 	})
 }
@@ -282,22 +285,21 @@ func (w *window) fitContent() {
 	w.viewLock.RLock()
 	view := w.viewport
 	w.viewLock.RUnlock()
+	w.shouldWidth, w.shouldHeight = w.width, w.height
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
-			w.width = minWidth
+			w.shouldWidth = minWidth
 		}
 		if w.height < minHeight {
-			w.height = minHeight
+			w.shouldHeight = minHeight
 		}
 		w.viewLock.Lock()
 		w.shouldExpand = true // queue the resize to happen on main
 		w.viewLock.Unlock()
 	}
 	if w.fixedSize {
-		w.width = internal.ScaleInt(w.canvas, w.Canvas().Size().Width)
-		w.height = internal.ScaleInt(w.canvas, w.Canvas().Size().Height)
-
-		view.SetSizeLimits(w.width, w.height, w.width, w.height)
+		w.shouldWidth, w.shouldHeight = w.requestedWidth, w.requestedHeight
+		view.SetSizeLimits(w.requestedWidth, w.requestedHeight, w.requestedWidth, w.requestedHeight)
 	} else {
 		view.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
@@ -1457,11 +1459,13 @@ func (w *window) create() {
 			fn()
 		}
 
+		w.requestedWidth, w.requestedHeight = w.width, w.height
+
 		if w.fixedSize { // as the window will not be sized later we may need to pack menus etc
 			w.canvas.Resize(w.canvas.Size())
 		}
 		// order of operation matters so we do these last items in order
-		w.viewport.SetSize(w.width, w.height) // ensure we requested latest size
+		w.viewport.SetSize(w.shouldWidth, w.shouldHeight) // ensure we requested latest size
 	})
 }
 
