@@ -136,10 +136,13 @@ func (d *gLDriver) runGL() {
 				if expand && !fullScreen {
 					w.fitContent()
 					w.viewLock.Lock()
+					shouldExpand := w.shouldExpand
 					w.shouldExpand = false
 					view := w.viewport
 					w.viewLock.Unlock()
-					view.SetSize(w.width, w.height)
+					if shouldExpand {
+						view.SetSize(w.shouldWidth, w.shouldHeight)
+					}
 				}
 
 				newWindows = append(newWindows, win)
