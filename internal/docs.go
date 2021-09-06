@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-// Docs is an internal implemntation of the document features of the Storage interface.
+// Docs is an internal implementation of the document features of the Storage interface.
 // It is based on top of the current `file` repository and is rooted at RootDocURI.
 type Docs struct {
 	RootDocURI fyne.URI

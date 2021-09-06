@@ -99,10 +99,10 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	root, _ := store.docRootURI()
-	store.Docs = &internal.Docs{RootDocURI: root}
 	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*testDriver),
 		lifecycle: &app.Lifecycle{}}
+	root, _ := store.docRootURI()
+	store.Docs = &internal.Docs{RootDocURI: root}
 	cache.ResetThemeCaches()
 	fyne.SetCurrentApp(test)
 
