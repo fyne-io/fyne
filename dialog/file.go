@@ -277,6 +277,11 @@ func (f *fileDialog) loadFavorites() {
 
 	f.favorites = []favoriteItem{
 		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]}}
+	app := fyne.CurrentApp()
+	if hasAppFiles(app) {
+		f.favorites = append(f.favorites,
+			favoriteItem{locName: "App Files", locIcon: theme.FileIcon(), loc: storageURI(app)})
+	}
 	f.favorites = append(f.favorites, f.getPlaces()...)
 
 	for _, locName := range favoriteOrder {
@@ -487,6 +492,13 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 			}
 		}
 
+	}
+
+	// Try app storage
+	app := fyne.CurrentApp()
+	if hasAppFiles(app) {
+		list, _ := storage.ListerForURI(storageURI(app))
+		return list
 	}
 
 	// Try home dir
@@ -733,4 +745,13 @@ func getFavoriteOrder() []string {
 	}
 
 	return order
+}
+
+func hasAppFiles(a fyne.App) bool {
+	return a.UniqueID() != "" && len(a.Storage().List()) > 0
+}
+
+func storageURI(a fyne.App) fyne.URI {
+	dir, _ := storage.Child(a.Storage().RootURI(), "Documents")
+	return dir
 }
