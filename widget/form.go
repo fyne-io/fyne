@@ -195,17 +195,27 @@ func (f *Form) checkValidation(err error) {
 }
 
 func (f *Form) ensureRenderItems() {
-	objects := f.itemGrid.Objects
+	done := len(f.itemGrid.Objects) / 2
+	if done >= len(f.Items) {
+		f.itemGrid.Objects = f.itemGrid.Objects[0 : len(f.Items)*2]
+		return
+	}
+
+	adding := len(f.Items) - done
+	objects := make([]fyne.CanvasObject, adding*2)
+	off := 0
 	for i, item := range f.Items {
-		if i < len(objects)/2 {
+		if i < done {
 			continue
 		}
 
-		objects = append(objects, f.createLabel(item.Text))
+		objects[off] = f.createLabel(item.Text)
+		off++
 		f.setUpValidation(item.Widget, i)
-		objects = append(objects, f.createInput(item))
+		objects[off] = f.createInput(item)
+		off++
 	}
-	f.itemGrid.Objects = objects
+	f.itemGrid.Objects = append(f.itemGrid.Objects, objects...)
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
