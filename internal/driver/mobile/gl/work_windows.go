@@ -245,10 +245,6 @@ var glfnMap = map[glfn]func(c call) (ret uintptr){
 		syscall.Syscall(glDeleteShader.Addr(), 1, c.args.a0, 0, 0)
 		return
 	},
-	glfnDeleteVertexArray: func(c call) (ret uintptr) {
-		syscall.Syscall(glDeleteVertexArrays.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-		return
-	},
 	glfnDeleteTexture: func(c call) (ret uintptr) {
 		syscall.Syscall(glDeleteTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
 		return
@@ -745,7 +741,6 @@ var (
 	glDeleteRenderbuffers                 = libGLESv2.NewProc("glDeleteRenderbuffers")
 	glDeleteShader                        = libGLESv2.NewProc("glDeleteShader")
 	glDeleteTextures                      = libGLESv2.NewProc("glDeleteTextures")
-	glDeleteVertexArrays                  = libGLESv2.NewProc("glDeleteVertexArrays")
 	glDepthFunc                           = libGLESv2.NewProc("glDepthFunc")
 	glDepthRangef                         = libGLESv2.NewProc("glDepthRangef")
 	glDepthMask                           = libGLESv2.NewProc("glDepthMask")

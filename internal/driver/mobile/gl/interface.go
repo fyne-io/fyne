@@ -7,12 +7,6 @@ package gl
 // Context is an OpenGL ES context.
 //
 // A Context has a method for every GL function supported by ES 2 or later.
-// In a program compiled with ES 3 support, a Context is also a Context3.
-// For example, a program can:
-//
-//	func f(glctx gl.Context) {
-//		glctx.(gl.Context3).BlitFramebuffer(...)
-//	}
 //
 // Calls are not safe for concurrent use. However calls can be made from
 // any goroutine, the gl package removes the notion of thread-local
@@ -233,11 +227,6 @@ type Context interface {
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteTextures.xhtml
 	DeleteTexture(v Texture)
-
-	// DeleteVertexArray deletes the given render buffer object.
-	//
-	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteVertexArrays.xhtml
-	DeleteVertexArray(v VertexArray)
 
 	// DepthFunc sets the function used for depth buffer comparisons.
 	//
@@ -825,19 +814,6 @@ type Context interface {
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glViewport.xhtml
 	Viewport(x, y, width, height int)
-}
-
-// Context3 is an OpenGL ES 3 context.
-//
-// When the gl package is compiled with GL ES 3 support, the produced
-// Context object also implements the Context3 interface.
-type Context3 interface {
-	Context
-
-	// BlitFramebuffer copies a block of pixels between framebuffers.
-	//
-	// https://www.khronos.org/opengles/sdk/docs/man3/html/glBlitFramebuffer.xhtml
-	BlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1 int, mask uint, filter Enum)
 }
 
 // Worker is used by display driver code to execute OpenGL calls.
