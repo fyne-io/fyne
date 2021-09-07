@@ -2396,23 +2396,6 @@ func (ctx *context) GetShaderSource(s Shader) (r0 string) {
 	return goString(buf)
 }
 
-func (ctx *context) GetString(pname Enum) (r0 string) {
-	defer func() {
-		errstr := ctx.errDrain()
-		log.Printf("gl.GetString(%v) %v%v", pname, r0, errstr)
-	}()
-	ret := ctx.enqueue(call{
-		args: fnargs{
-			fn: glfnGetString,
-			a0: pname.c(),
-		},
-		blocking: true,
-	})
-	retp := unsafe.Pointer(ret)
-	buf := (*[1 << 24]byte)(retp)[:]
-	return goString(buf)
-}
-
 func (ctx *context) GetTexParameterfv(dst []float32, target, pname Enum) {
 	defer func() {
 		errstr := ctx.errDrain()

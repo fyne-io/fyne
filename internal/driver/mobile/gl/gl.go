@@ -892,19 +892,6 @@ func (ctx *context) GetShaderSource(s Shader) string {
 	return goString(buf)
 }
 
-func (ctx *context) GetString(pname Enum) string {
-	ret := ctx.enqueue(call{
-		args: fnargs{
-			fn: glfnGetString,
-			a0: pname.c(),
-		},
-		blocking: true,
-	})
-	retp := unsafe.Pointer(ret)
-	buf := (*[1 << 24]byte)(retp)[:]
-	return goString(buf)
-}
-
 func (ctx *context) GetTexParameterfv(dst []float32, target, pname Enum) {
 	ctx.enqueue(call{
 		args: fnargs{

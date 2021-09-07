@@ -440,18 +440,6 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetShaderSource.xhtml
 	GetShaderSource(s Shader) string
 
-	// GetString reports current GL state.
-	//
-	// Valid name values:
-	//	EXTENSIONS
-	//	RENDERER
-	//	SHADING_LANGUAGE_VERSION
-	//	VENDOR
-	//	VERSION
-	//
-	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetString.xhtml
-	GetString(pname Enum) string
-
 	// GetTexParameterfv returns the float values of a texture parameter.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetTexParameter.xhtml
