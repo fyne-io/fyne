@@ -999,73 +999,73 @@ func (ctx *context) Hint(target, mode Enum) {
 }
 
 func (ctx *context) IsBuffer(b Buffer) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsBuffer,
 			a0: b.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) IsEnabled(cap Enum) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsEnabled,
 			a0: cap.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) IsFramebuffer(fb Framebuffer) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsFramebuffer,
 			a0: fb.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) IsProgram(p Program) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsProgram,
 			a0: p.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) IsRenderbuffer(rb Renderbuffer) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsRenderbuffer,
 			a0: rb.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) IsShader(s Shader) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsShader,
 			a0: s.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) IsTexture(t Texture) bool {
-	return 0 != ctx.enqueue(call{
+	return ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnIsTexture,
 			a0: t.c(),
 		},
 		blocking: true,
-	})
+	}) != 0
 }
 
 func (ctx *context) LineWidth(width float32) {
