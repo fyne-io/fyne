@@ -60,7 +60,7 @@ import (
 	"time"
 	"unsafe"
 
-	"fyne.io/fyne/v2/internal/driver/mobile/app/internal/callfn"
+	"fyne.io/fyne/v2/internal/driver/mobile/app/callfn"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
