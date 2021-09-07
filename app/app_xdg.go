@@ -1,5 +1,5 @@
+//go:build !ci && (linux || openbsd || freebsd || netbsd) && !android
 // +build !ci
-
 // +build linux openbsd freebsd netbsd
 // +build !android
 

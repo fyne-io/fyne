@@ -1,3 +1,4 @@
+//go:build !darwin || no_native_menus
 // +build !darwin no_native_menus
 
 package glfw

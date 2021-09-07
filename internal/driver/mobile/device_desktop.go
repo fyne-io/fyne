@@ -1,3 +1,4 @@
+//go:build !ios && !android && !wayland
 // +build !ios,!android,!wayland
 
 package mobile
