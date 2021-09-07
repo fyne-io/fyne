@@ -16,6 +16,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add selection color to themes
 * Include baseline information in driver font measurement
 * Document storage API (App.Storage().Create() and others)
+* Add "App Files" to file dialog for apps that use document storage
 * Tab overflow on AppTabs
 * Add URI and Unbound type to data bindings
 * Add keyboard support for menus, pop-ups and buttons
@@ -24,6 +25,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add selection and disabling to MenuItem
 * Add Alignment to widget.Select (#2329)
 * Expose ScanCode for keyboard events originating from hardware (#1523)
+* Support macOS GPU switching (#2423)
 
 ### Changed
 
@@ -37,6 +39,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Support multiple lines of text on button (#2378)
 * Improved text layout speed by caching string size calculations
 * Updated to require Go 1.14 so we can use some new features
+* Window Resize request is now asynchronous
 
 ### Fixed
 
@@ -56,6 +59,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * macOS: Native menu would add new items if refreshed
 * iOS builds fail since Go 1.16
 * Re-add support for 32 bit iOS devices, if built with Go 1.14
+* Android builds fail on Apple M1 (#2439)
 
 
 ## 2.0.4 - 6 August 2021
