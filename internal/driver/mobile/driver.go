@@ -280,7 +280,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
+	d.glctx.Clear(gl.ColorBufferBit)
 
 	c.SetDirty(false)
 

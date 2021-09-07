@@ -629,7 +629,7 @@ func (ctx *context) GenerateMipmap(target Enum) {
 }
 
 func (ctx *context) GetActiveAttrib(p Program, index uint32) (name string, size int, ty Enum) {
-	bufSize := ctx.GetProgrami(p, ACTIVE_ATTRIBUTE_MAX_LENGTH)
+	bufSize := ctx.GetProgrami(p, ActiveAttributeMaxLength)
 	buf := make([]byte, bufSize)
 	var cType int
 
@@ -649,7 +649,7 @@ func (ctx *context) GetActiveAttrib(p Program, index uint32) (name string, size 
 }
 
 func (ctx *context) GetActiveUniform(p Program, index uint32) (name string, size int, ty Enum) {
-	bufSize := ctx.GetProgrami(p, ACTIVE_UNIFORM_MAX_LENGTH)
+	bufSize := ctx.GetProgrami(p, ActiveUniformMaxLength)
 	buf := make([]byte, bufSize+8) // extra space for cType
 	var cType int
 
@@ -669,7 +669,7 @@ func (ctx *context) GetActiveUniform(p Program, index uint32) (name string, size
 }
 
 func (ctx *context) GetAttachedShaders(p Program) []Shader {
-	shadersLen := ctx.GetProgrami(p, ATTACHED_SHADERS)
+	shadersLen := ctx.GetProgrami(p, AttachedShaders)
 	if shadersLen == 0 {
 		return nil
 	}
@@ -795,7 +795,7 @@ func (ctx *context) GetProgrami(p Program, pname Enum) int {
 }
 
 func (ctx *context) GetProgramInfoLog(p Program) string {
-	infoLen := ctx.GetProgrami(p, INFO_LOG_LENGTH)
+	infoLen := ctx.GetProgrami(p, InfoLogLength)
 	if infoLen == 0 {
 		return ""
 	}
@@ -837,7 +837,7 @@ func (ctx *context) GetShaderi(s Shader, pname Enum) int {
 }
 
 func (ctx *context) GetShaderInfoLog(s Shader) string {
-	infoLen := ctx.GetShaderi(s, INFO_LOG_LENGTH)
+	infoLen := ctx.GetShaderi(s, InfoLogLength)
 	if infoLen == 0 {
 		return ""
 	}
@@ -873,7 +873,7 @@ func (ctx *context) GetShaderPrecisionFormat(shadertype, precisiontype Enum) (ra
 }
 
 func (ctx *context) GetShaderSource(s Shader) string {
-	sourceLen := ctx.GetShaderi(s, SHADER_SOURCE_LENGTH)
+	sourceLen := ctx.GetShaderi(s, ShaderSourceLength)
 	if sourceLen == 0 {
 		return ""
 	}

@@ -204,7 +204,7 @@ func goString(buf []byte) string {
 
 func glBoolean(b bool) uintptr {
 	if b {
-		return TRUE
+		return True
 	}
-	return FALSE
+	return False
 }
