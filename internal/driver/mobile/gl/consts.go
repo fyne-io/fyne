@@ -31,6 +31,7 @@ format, which is covered by the license:
 
 */
 
+// Contains Khronos OpenGL API specification constants.
 const (
 	POINTS                                       = 0x0000
 	LINES                                        = 0x0001
@@ -307,15 +308,11 @@ const (
 	RENDERBUFFER_BINDING                         = 0x8CA7
 	MAX_RENDERBUFFER_SIZE                        = 0x84E8
 	INVALID_FRAMEBUFFER_OPERATION                = 0x0506
-)
 
-const (
 	DEPTH_BUFFER_BIT   = 0x00000100
 	STENCIL_BUFFER_BIT = 0x00000400
 	COLOR_BUFFER_BIT   = 0x00004000
-)
 
-const (
 	FLOAT_VEC2   = 0x8B50
 	FLOAT_VEC3   = 0x8B51
 	FLOAT_VEC4   = 0x8B52
@@ -331,24 +328,18 @@ const (
 	FLOAT_MAT4   = 0x8B5C
 	SAMPLER_2D   = 0x8B5E
 	SAMPLER_CUBE = 0x8B60
-)
 
-const (
 	FRAGMENT_SHADER = 0x8B30
 	VERTEX_SHADER   = 0x8B31
-)
 
-const (
 	FALSE    = 0
 	TRUE     = 1
 	ZERO     = 0
 	ONE      = 1
 	NO_ERROR = 0
 	NONE     = 0
-)
 
-// GL ES 3.0 constants.
-const (
+	// GL ES 3.0 constants.
 	ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH          = 0x8A35
 	ACTIVE_UNIFORM_BLOCKS                         = 0x8A36
 	ALREADY_SIGNALED                              = 0x911A

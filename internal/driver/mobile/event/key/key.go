@@ -64,6 +64,7 @@ func (e Event) String() string {
 // Direction is the direction of the key event.
 type Direction uint8
 
+// All possibledirections of key event.
 const (
 	DirNone    Direction = 0
 	DirPress   Direction = 1
@@ -73,6 +74,7 @@ const (
 // Modifiers is a bitmask representing a set of modifier keys.
 type Modifiers uint32
 
+// All possible modifier keys.
 const (
 	ModShift   Modifiers = 1 << 0
 	ModControl Modifiers = 1 << 1

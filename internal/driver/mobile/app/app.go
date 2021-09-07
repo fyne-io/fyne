@@ -10,6 +10,8 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
+
+	// Initialize necessary mobile functionality, such as logging.
 	_ "fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
 )
 
@@ -58,6 +60,7 @@ type App interface {
 	ShowFileSavePicker(func(string, func()), *FileFilter, string)
 }
 
+// FileFilter is a filter of files.
 type FileFilter struct {
 	Extensions []string
 	MimeTypes  []string

@@ -36,6 +36,7 @@ func (c Cross) String() string {
 	return "none"
 }
 
+// All possible cross of a lifecycle.
 const (
 	CrossNone Cross = 0
 	CrossOn   Cross = 1
