@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 // +build darwin linux openbsd freebsd windows
-// +build !gldebug
 
 package gl
 
