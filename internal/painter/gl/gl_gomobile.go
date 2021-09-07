@@ -9,8 +9,8 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/fyne-io/mobile/exp/f32"
-	"github.com/fyne-io/mobile/gl"
+	"fyne.io/fyne/v2/internal/driver/mobile/exp/f32"
+	"fyne.io/fyne/v2/internal/driver/mobile/gl"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"

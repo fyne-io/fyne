@@ -5,7 +5,7 @@
 // Package touch defines an event for touch input.
 //
 // See the golang.org/x/mobile/app package for details on the event model.
-package touch // import "github.com/fyne-io/mobile/event/touch"
+package touch // import "fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 
 // The best source on android input events is the NDK: include/android/input.h
 //

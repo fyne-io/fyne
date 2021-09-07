@@ -5,7 +5,7 @@
 // Package paint defines an event for the app being ready to paint.
 //
 // See the golang.org/x/mobile/app package for details on the event model.
-package paint // import "github.com/fyne-io/mobile/event/paint"
+package paint // import "fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 
 // Event indicates that the app is ready to paint the next frame of the GUI.
 //

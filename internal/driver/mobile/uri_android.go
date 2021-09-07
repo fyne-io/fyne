@@ -15,8 +15,8 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/storage"
-	"github.com/fyne-io/mobile/app"
 )
 
 type androidURI struct {

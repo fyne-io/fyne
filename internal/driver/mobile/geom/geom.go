@@ -19,7 +19,7 @@ the screen. Positions on the plane are measured in typographic points,
 Any interface that draws to the screen using types from the geom package
 scales the number of pixels to maintain a Pt as 1/72 of an inch.
 */
-package geom // import "github.com/fyne-io/mobile/geom"
+package geom // import "fyne.io/fyne/v2/internal/driver/mobile/geom"
 
 /*
 Notes on the various underlying coordinate systems.

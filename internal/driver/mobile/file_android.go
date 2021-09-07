@@ -20,8 +20,8 @@ import (
 	"os"
 	"unsafe"
 
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/storage/repository"
-	"github.com/fyne-io/mobile/app"
 )
 
 type javaStream struct {

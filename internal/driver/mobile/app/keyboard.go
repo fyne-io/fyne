@@ -1,7 +1,7 @@
 package app
 
 import "C"
-import "github.com/fyne-io/mobile/event/key"
+import "fyne.io/fyne/v2/internal/driver/mobile/event/key"
 
 type KeyboardType int32
 

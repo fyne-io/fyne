@@ -59,12 +59,12 @@ func gendex() error {
 	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0775); err != nil {
 		return err
 	}
-	javaFiles, err := filepath.Glob("../../../../vendor/github.com/fyne-io/mobile/app/*.java")
+	javaFiles, err := filepath.Glob("../../../../../internal/driver/mobile/app/*.java")
 	if err != nil {
 		return err
 	}
 	if len(javaFiles) == 0 {
-		return errors.New("could not find ../../app/*.java files")
+		return errors.New("could not find internal/driver/mobile/app/*.java files")
 	}
 	platform, err := findLast(androidHome + "/platforms")
 	if err != nil {

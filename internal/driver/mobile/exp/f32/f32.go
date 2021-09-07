@@ -23,7 +23,7 @@
 // The interface to this package is not stable. It will change considerably.
 // Only use functions that provide package documentation. Semantics are
 // non-obvious. Be prepared for the package name to change.
-package f32 // import "github.com/fyne-io/mobile/exp/f32"
+package f32 // import "fyne.io/fyne/v2/internal/driver/mobile/exp/f32"
 
 import (
 	"encoding/binary"

@@ -7,10 +7,10 @@
 package app
 
 import (
-	"github.com/fyne-io/mobile/event/lifecycle"
-	"github.com/fyne-io/mobile/event/size"
-	"github.com/fyne-io/mobile/gl"
-	_ "github.com/fyne-io/mobile/internal/mobileinit"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
+	"fyne.io/fyne/v2/internal/driver/mobile/gl"
+	_ "fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
 )
 
 // Main is called by the main.main function to run the mobile application.

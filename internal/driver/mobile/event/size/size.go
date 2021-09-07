@@ -6,12 +6,12 @@
 // orientation of the app's window.
 //
 // See the golang.org/x/mobile/app package for details on the event model.
-package size // import "github.com/fyne-io/mobile/event/size"
+package size // import "fyne.io/fyne/v2/internal/driver/mobile/event/size"
 
 import (
 	"image"
 
-	"github.com/fyne-io/mobile/geom"
+	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 // Event holds the dimensions, physical resolution and orientation of the app's
