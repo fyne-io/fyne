@@ -28,7 +28,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
-	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 func init() {
@@ -87,8 +86,8 @@ func onResize(w, h int) {
 	theApp.eventsIn <- size.Event{
 		WidthPx:     w,
 		HeightPx:    h,
-		WidthPt:     geom.Pt(w),
-		HeightPt:    geom.Pt(h),
+		WidthPt:     float32(w),
+		HeightPt:    float32(h),
 		PixelsPerPt: pixelsPerPt,
 		Orientation: screenOrientation(w, h),
 	}
