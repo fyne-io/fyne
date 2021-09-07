@@ -108,305 +108,592 @@ func (ctx *context) cStringPtr(str string) (uintptr, func()) {
 //	https://golang.org/issue/6510
 func fixFloat(x0, x1, x2, x3 uintptr)
 
+var glfnMap = map[glfn]func(c call) (ret uintptr){
+	glfnActiveTexture: func(c call) (ret uintptr) {
+		syscall.Syscall(glActiveTexture.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnAttachShader: func(c call) (ret uintptr) {
+		syscall.Syscall(glAttachShader.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBindAttribLocation: func(c call) (ret uintptr) {
+		syscall.Syscall(glBindAttribLocation.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
+		return
+	},
+	glfnBindBuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glBindBuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBindFramebuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glBindFramebuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBindRenderbuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glBindRenderbuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBindTexture: func(c call) (ret uintptr) {
+		syscall.Syscall(glBindTexture.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBindVertexArray: func(c call) (ret uintptr) {
+		syscall.Syscall(glBindVertexArray.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnBlendColor: func(c call) (ret uintptr) {
+		syscall.Syscall6(glBlendColor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnBlendEquation: func(c call) (ret uintptr) {
+		syscall.Syscall(glBlendEquation.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnBlendEquationSeparate: func(c call) (ret uintptr) {
+		syscall.Syscall(glBlendEquationSeparate.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBlendFunc: func(c call) (ret uintptr) {
+		syscall.Syscall(glBlendFunc.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnBlendFuncSeparate: func(c call) (ret uintptr) {
+		syscall.Syscall6(glBlendFuncSeparate.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnBufferData: func(c call) (ret uintptr) {
+		syscall.Syscall6(glBufferData.Addr(), 4, c.args.a0, c.args.a1, uintptr(c.parg), c.args.a2, 0, 0)
+		return
+	},
+	glfnBufferSubData: func(c call) (ret uintptr) {
+		syscall.Syscall6(glBufferSubData.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnCheckFramebufferStatus: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glCheckFramebufferStatus.Addr(), 1, c.args.a0, 0, 0)
+		return ret
+	},
+	glfnClear: func(c call) (ret uintptr) {
+		syscall.Syscall(glClear.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnClearColor: func(c call) (ret uintptr) {
+		syscall.Syscall6(glClearColor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnClearDepthf: func(c call) (ret uintptr) {
+		syscall.Syscall6(glClearDepthf.Addr(), 1, c.args.a0, 0, 0, 0, 0, 0)
+		return
+	},
+	glfnClearStencil: func(c call) (ret uintptr) {
+		syscall.Syscall(glClearStencil.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnColorMask: func(c call) (ret uintptr) {
+		syscall.Syscall6(glColorMask.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnCompileShader: func(c call) (ret uintptr) {
+		syscall.Syscall(glCompileShader.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnCompressedTexImage2D: func(c call) (ret uintptr) {
+		syscall.Syscall9(glCompressedTexImage2D.Addr(), 8, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, uintptr(c.parg), 0)
+		return
+	},
+	glfnCompressedTexSubImage2D: func(c call) (ret uintptr) {
+		syscall.Syscall9(glCompressedTexSubImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, uintptr(c.parg))
+		return
+	},
+	glfnCopyTexImage2D: func(c call) (ret uintptr) {
+		syscall.Syscall9(glCopyTexImage2D.Addr(), 8, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, 0)
+		return
+	},
+	glfnCopyTexSubImage2D: func(c call) (ret uintptr) {
+		syscall.Syscall9(glCopyTexSubImage2D.Addr(), 8, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, 0)
+		return
+	},
+	glfnCreateProgram: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glCreateProgram.Addr(), 0, 0, 0, 0)
+		return ret
+	},
+	glfnCreateShader: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glCreateShader.Addr(), 1, c.args.a0, 0, 0)
+		return ret
+	},
+	glfnCullFace: func(c call) (ret uintptr) {
+		syscall.Syscall(glCullFace.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDeleteBuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteBuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
+		return
+	},
+	glfnDeleteFramebuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteFramebuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
+		return
+	},
+	glfnDeleteProgram: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteProgram.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDeleteRenderbuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteRenderbuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
+		return
+	},
+	glfnDeleteShader: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteShader.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDeleteVertexArray: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteVertexArrays.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
+		return
+	},
+	glfnDeleteTexture: func(c call) (ret uintptr) {
+		syscall.Syscall(glDeleteTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
+		return
+	},
+	glfnDepthFunc: func(c call) (ret uintptr) {
+		syscall.Syscall(glDepthFunc.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDepthRangef: func(c call) (ret uintptr) {
+		syscall.Syscall6(glDepthRangef.Addr(), 2, c.args.a0, c.args.a1, 0, 0, 0, 0)
+		return
+	},
+	glfnDepthMask: func(c call) (ret uintptr) {
+		syscall.Syscall(glDepthMask.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDetachShader: func(c call) (ret uintptr) {
+		syscall.Syscall(glDetachShader.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnDisable: func(c call) (ret uintptr) {
+		syscall.Syscall(glDisable.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDisableVertexAttribArray: func(c call) (ret uintptr) {
+		syscall.Syscall(glDisableVertexAttribArray.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnDrawArrays: func(c call) (ret uintptr) {
+		syscall.Syscall(glDrawArrays.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
+		return
+	},
+	glfnDrawElements: func(c call) (ret uintptr) {
+		syscall.Syscall6(glDrawElements.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnEnable: func(c call) (ret uintptr) {
+		syscall.Syscall(glEnable.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnEnableVertexAttribArray: func(c call) (ret uintptr) {
+		syscall.Syscall(glEnableVertexAttribArray.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnFinish: func(c call) (ret uintptr) {
+		syscall.Syscall(glFinish.Addr(), 0, 0, 0, 0)
+		return
+	},
+	glfnFlush: func(c call) (ret uintptr) {
+		syscall.Syscall(glFlush.Addr(), 0, 0, 0, 0)
+		return
+	},
+	glfnFramebufferRenderbuffer: func(c call) (ret uintptr) {
+		syscall.Syscall6(glFramebufferRenderbuffer.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnFramebufferTexture2D: func(c call) (ret uintptr) {
+		syscall.Syscall6(glFramebufferTexture2D.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0)
+		return
+	},
+	glfnFrontFace: func(c call) (ret uintptr) {
+		syscall.Syscall(glFrontFace.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnGenBuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glGenBuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
+		return
+	},
+	glfnGenFramebuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glGenFramebuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
+		return
+	},
+	glfnGenRenderbuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glGenRenderbuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
+		return
+	},
+	glfnGenVertexArray: func(c call) (ret uintptr) {
+		syscall.Syscall(glGenVertexArrays.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
+		return
+	},
+	glfnGenTexture: func(c call) (ret uintptr) {
+		syscall.Syscall(glGenTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
+		return
+	},
+	glfnGenerateMipmap: func(c call) (ret uintptr) {
+		syscall.Syscall(glGenerateMipmap.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnGetActiveAttrib: func(c call) (ret uintptr) {
+		syscall.Syscall9(glGetActiveAttrib.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, 0, uintptr(unsafe.Pointer(&ret)), c.args.a3, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetActiveUniform: func(c call) (ret uintptr) {
+		syscall.Syscall9(glGetActiveUniform.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, 0, uintptr(unsafe.Pointer(&ret)), c.args.a3, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetAttachedShaders: func(c call) (ret uintptr) {
+		syscall.Syscall6(glGetAttachedShaders.Addr(), 4, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)), uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetAttribLocation: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glGetAttribLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return ret
+	},
+	glfnGetBooleanv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetBooleanv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnGetBufferParameteri: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetBufferParameteri.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return
+	},
+	glfnGetError: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glGetError.Addr(), 0, 0, 0, 0)
+		return ret
+	},
+	glfnGetFloatv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetFloatv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnGetFramebufferAttachmentParameteriv: func(c call) (ret uintptr) {
+		syscall.Syscall6(glGetFramebufferAttachmentParameteriv.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, uintptr(unsafe.Pointer(&ret)), 0, 0)
+		return
+	},
+	glfnGetIntegerv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetIntegerv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnGetProgramInfoLog: func(c call) (ret uintptr) {
+		syscall.Syscall6(glGetProgramInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetProgramiv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetProgramiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return
+	},
+	glfnGetRenderbufferParameteriv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetRenderbufferParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return
+	},
+	glfnGetShaderInfoLog: func(c call) (ret uintptr) {
+		syscall.Syscall6(glGetShaderInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetShaderPrecisionFormat: func(c call) (ret uintptr) {
+		// c.parg is a [3]int32. The first [2]int32 of the array is one
+		// parameter, the final *int32 is another parameter.
+		syscall.Syscall6(glGetShaderPrecisionFormat.Addr(), 4, c.args.a0, c.args.a1, uintptr(c.parg), uintptr(c.parg)+2*unsafe.Sizeof(uintptr(0)), 0, 0)
+		return
+	},
+	glfnGetShaderSource: func(c call) (ret uintptr) {
+		syscall.Syscall6(glGetShaderSource.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetShaderiv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetShaderiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return
+	},
+	glfnGetString: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glGetString.Addr(), 1, c.args.a0, 0, 0)
+		return ret
+	},
+	glfnGetTexParameterfv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetTexParameterfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnGetTexParameteriv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetTexParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnGetUniformLocation: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glGetUniformLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return ret
+	},
+	glfnGetUniformfv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetUniformfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnGetUniformiv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetUniformiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnGetVertexAttribfv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetVertexAttribfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnGetVertexAttribiv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetVertexAttribiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnHint: func(c call) (ret uintptr) {
+		syscall.Syscall(glHint.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnIsBuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glIsBuffer.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnIsEnabled: func(c call) (ret uintptr) {
+		syscall.Syscall(glIsEnabled.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnIsFramebuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glIsFramebuffer.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnIsProgram: func(c call) (ret uintptr) {
+		ret, _, _ = syscall.Syscall(glIsProgram.Addr(), 1, c.args.a0, 0, 0)
+		return ret
+	},
+	glfnIsRenderbuffer: func(c call) (ret uintptr) {
+		syscall.Syscall(glIsRenderbuffer.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnIsShader: func(c call) (ret uintptr) {
+		syscall.Syscall(glIsShader.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnIsTexture: func(c call) (ret uintptr) {
+		syscall.Syscall(glIsTexture.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnLineWidth: func(c call) (ret uintptr) {
+		syscall.Syscall(glLineWidth.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnLinkProgram: func(c call) (ret uintptr) {
+		syscall.Syscall(glLinkProgram.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnPixelStorei: func(c call) (ret uintptr) {
+		syscall.Syscall(glPixelStorei.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnPolygonOffset: func(c call) (ret uintptr) {
+		syscall.Syscall6(glPolygonOffset.Addr(), 2, c.args.a0, c.args.a1, 0, 0, 0, 0)
+		return
+	},
+	glfnReadPixels: func(c call) (ret uintptr) {
+		syscall.Syscall9(glReadPixels.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnReleaseShaderCompiler: func(c call) (ret uintptr) {
+		syscall.Syscall(glReleaseShaderCompiler.Addr(), 0, 0, 0, 0)
+		return
+	},
+	glfnRenderbufferStorage: func(c call) (ret uintptr) {
+		syscall.Syscall6(glRenderbufferStorage.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnSampleCoverage: func(c call) (ret uintptr) {
+		syscall.Syscall6(glSampleCoverage.Addr(), 1, c.args.a0, 0, 0, 0, 0, 0)
+		return
+	},
+	glfnScissor: func(c call) (ret uintptr) {
+		syscall.Syscall6(glScissor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnShaderSource: func(c call) (ret uintptr) {
+		syscall.Syscall6(glShaderSource.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, 0, 0, 0)
+		return
+	},
+	glfnStencilFunc: func(c call) (ret uintptr) {
+		syscall.Syscall(glStencilFunc.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
+		return
+	},
+	glfnStencilFuncSeparate: func(c call) (ret uintptr) {
+		syscall.Syscall6(glStencilFuncSeparate.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnStencilMask: func(c call) (ret uintptr) {
+		syscall.Syscall(glStencilMask.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnStencilMaskSeparate: func(c call) (ret uintptr) {
+		syscall.Syscall(glStencilMaskSeparate.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnStencilOp: func(c call) (ret uintptr) {
+		syscall.Syscall(glStencilOp.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
+		return
+	},
+	glfnStencilOpSeparate: func(c call) (ret uintptr) {
+		syscall.Syscall6(glStencilOpSeparate.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnTexImage2D: func(c call) (ret uintptr) {
+		syscall.Syscall9(glTexImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0, c.args.a5, c.args.a6, uintptr(c.parg))
+		return
+	},
+	glfnTexParameterf: func(c call) (ret uintptr) {
+		syscall.Syscall6(glTexParameterf.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnTexParameterfv: func(c call) (ret uintptr) {
+		syscall.Syscall(glTexParameterfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnTexParameteri: func(c call) (ret uintptr) {
+		syscall.Syscall(glTexParameteri.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
+		return
+	},
+	glfnTexParameteriv: func(c call) (ret uintptr) {
+		syscall.Syscall(glTexParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnTexSubImage2D: func(c call) (ret uintptr) {
+		syscall.Syscall9(glTexSubImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, uintptr(c.parg))
+		return
+	},
+	glfnUniform1f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniform1f.Addr(), 2, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnUniform1fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform1i: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform1i.Addr(), 2, c.args.a0, c.args.a1, 0)
+		return
+	},
+	glfnUniform1iv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform1iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform2f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniform2f.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnUniform2fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform2fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform2i: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform2i.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
+		return
+	},
+	glfnUniform2iv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform2iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform3f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniform3f.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnUniform3fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform3fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform3i: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniform3i.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+	glfnUniform3iv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform3iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform4f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniform4f.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnUniform4fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform4fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniform4i: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniform4i.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0)
+		return
+	},
+	glfnUniform4iv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform4iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
+	glfnUniformMatrix2fv: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniformMatrix2fv.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnUniformMatrix3fv: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniformMatrix3fv.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnUniformMatrix4fv: func(c call) (ret uintptr) {
+		syscall.Syscall6(glUniformMatrix4fv.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnUseProgram: func(c call) (ret uintptr) {
+		syscall.Syscall(glUseProgram.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnValidateProgram: func(c call) (ret uintptr) {
+		syscall.Syscall(glValidateProgram.Addr(), 1, c.args.a0, 0, 0)
+		return
+	},
+	glfnVertexAttrib1f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glVertexAttrib1f.Addr(), 2, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnVertexAttrib1fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glVertexAttrib1fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnVertexAttrib2f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glVertexAttrib2f.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnVertexAttrib2fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glVertexAttrib2fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnVertexAttrib3f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glVertexAttrib3f.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnVertexAttrib3fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glVertexAttrib3fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnVertexAttrib4f: func(c call) (ret uintptr) {
+		syscall.Syscall6(glVertexAttrib4f.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnVertexAttrib4fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glVertexAttrib4fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
+		return
+	},
+	glfnVertexAttribPointer: func(c call) (ret uintptr) {
+		syscall.Syscall6(glVertexAttribPointer.Addr(), 6, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return
+	},
+	glfnViewport: func(c call) (ret uintptr) {
+		syscall.Syscall6(glViewport.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
+		return
+	},
+}
+
 func (ctx *context) doWork(c call) (ret uintptr) {
 	if runtime.GOARCH == "amd64" {
 		fixFloat(c.args.a0, c.args.a1, c.args.a2, c.args.a3)
 	}
 
-	switch c.args.fn {
-	case glfnActiveTexture:
-		syscall.Syscall(glActiveTexture.Addr(), 1, c.args.a0, 0, 0)
-	case glfnAttachShader:
-		syscall.Syscall(glAttachShader.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBindAttribLocation:
-		syscall.Syscall(glBindAttribLocation.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-	case glfnBindBuffer:
-		syscall.Syscall(glBindBuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBindFramebuffer:
-		syscall.Syscall(glBindFramebuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBindRenderbuffer:
-		syscall.Syscall(glBindRenderbuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBindTexture:
-		syscall.Syscall(glBindTexture.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBindVertexArray:
-		syscall.Syscall(glBindVertexArray.Addr(), 1, c.args.a0, 0, 0)
-	case glfnBlendColor:
-		syscall.Syscall6(glBlendColor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnBlendEquation:
-		syscall.Syscall(glBlendEquation.Addr(), 1, c.args.a0, 0, 0)
-	case glfnBlendEquationSeparate:
-		syscall.Syscall(glBlendEquationSeparate.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBlendFunc:
-		syscall.Syscall(glBlendFunc.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnBlendFuncSeparate:
-		syscall.Syscall6(glBlendFuncSeparate.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnBufferData:
-		syscall.Syscall6(glBufferData.Addr(), 4, c.args.a0, c.args.a1, uintptr(c.parg), c.args.a2, 0, 0)
-	case glfnBufferSubData:
-		syscall.Syscall6(glBufferSubData.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, uintptr(c.parg), 0, 0)
-	case glfnCheckFramebufferStatus:
-		ret, _, _ = syscall.Syscall(glCheckFramebufferStatus.Addr(), 1, c.args.a0, 0, 0)
-	case glfnClear:
-		syscall.Syscall(glClear.Addr(), 1, c.args.a0, 0, 0)
-	case glfnClearColor:
-		syscall.Syscall6(glClearColor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnClearDepthf:
-		syscall.Syscall6(glClearDepthf.Addr(), 1, c.args.a0, 0, 0, 0, 0, 0)
-	case glfnClearStencil:
-		syscall.Syscall(glClearStencil.Addr(), 1, c.args.a0, 0, 0)
-	case glfnColorMask:
-		syscall.Syscall6(glColorMask.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnCompileShader:
-		syscall.Syscall(glCompileShader.Addr(), 1, c.args.a0, 0, 0)
-	case glfnCompressedTexImage2D:
-		syscall.Syscall9(glCompressedTexImage2D.Addr(), 8, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, uintptr(c.parg), 0)
-	case glfnCompressedTexSubImage2D:
-		syscall.Syscall9(glCompressedTexSubImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, uintptr(c.parg))
-	case glfnCopyTexImage2D:
-		syscall.Syscall9(glCopyTexImage2D.Addr(), 8, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, 0)
-	case glfnCopyTexSubImage2D:
-		syscall.Syscall9(glCopyTexSubImage2D.Addr(), 8, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, 0)
-	case glfnCreateProgram:
-		ret, _, _ = syscall.Syscall(glCreateProgram.Addr(), 0, 0, 0, 0)
-	case glfnCreateShader:
-		ret, _, _ = syscall.Syscall(glCreateShader.Addr(), 1, c.args.a0, 0, 0)
-	case glfnCullFace:
-		syscall.Syscall(glCullFace.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDeleteBuffer:
-		syscall.Syscall(glDeleteBuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-	case glfnDeleteFramebuffer:
-		syscall.Syscall(glDeleteFramebuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-	case glfnDeleteProgram:
-		syscall.Syscall(glDeleteProgram.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDeleteRenderbuffer:
-		syscall.Syscall(glDeleteRenderbuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-	case glfnDeleteShader:
-		syscall.Syscall(glDeleteShader.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDeleteVertexArray:
-		syscall.Syscall(glDeleteVertexArrays.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-	case glfnDeleteTexture:
-		syscall.Syscall(glDeleteTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-	case glfnDepthFunc:
-		syscall.Syscall(glDepthFunc.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDepthRangef:
-		syscall.Syscall6(glDepthRangef.Addr(), 2, c.args.a0, c.args.a1, 0, 0, 0, 0)
-	case glfnDepthMask:
-		syscall.Syscall(glDepthMask.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDetachShader:
-		syscall.Syscall(glDetachShader.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnDisable:
-		syscall.Syscall(glDisable.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDisableVertexAttribArray:
-		syscall.Syscall(glDisableVertexAttribArray.Addr(), 1, c.args.a0, 0, 0)
-	case glfnDrawArrays:
-		syscall.Syscall(glDrawArrays.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-	case glfnDrawElements:
-		syscall.Syscall6(glDrawElements.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnEnable:
-		syscall.Syscall(glEnable.Addr(), 1, c.args.a0, 0, 0)
-	case glfnEnableVertexAttribArray:
-		syscall.Syscall(glEnableVertexAttribArray.Addr(), 1, c.args.a0, 0, 0)
-	case glfnFinish:
-		syscall.Syscall(glFinish.Addr(), 0, 0, 0, 0)
-	case glfnFlush:
-		syscall.Syscall(glFlush.Addr(), 0, 0, 0, 0)
-	case glfnFramebufferRenderbuffer:
-		syscall.Syscall6(glFramebufferRenderbuffer.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnFramebufferTexture2D:
-		syscall.Syscall6(glFramebufferTexture2D.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0)
-	case glfnFrontFace:
-		syscall.Syscall(glFrontFace.Addr(), 1, c.args.a0, 0, 0)
-	case glfnGenBuffer:
-		syscall.Syscall(glGenBuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-	case glfnGenFramebuffer:
-		syscall.Syscall(glGenFramebuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-	case glfnGenRenderbuffer:
-		syscall.Syscall(glGenRenderbuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-	case glfnGenVertexArray:
-		syscall.Syscall(glGenVertexArrays.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-	case glfnGenTexture:
-		syscall.Syscall(glGenTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-	case glfnGenerateMipmap:
-		syscall.Syscall(glGenerateMipmap.Addr(), 1, c.args.a0, 0, 0)
-	case glfnGetActiveAttrib:
-		syscall.Syscall9(glGetActiveAttrib.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, 0, uintptr(unsafe.Pointer(&ret)), c.args.a3, uintptr(c.parg), 0, 0)
-	case glfnGetActiveUniform:
-		syscall.Syscall9(glGetActiveUniform.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, 0, uintptr(unsafe.Pointer(&ret)), c.args.a3, uintptr(c.parg), 0, 0)
-	case glfnGetAttachedShaders:
-		syscall.Syscall6(glGetAttachedShaders.Addr(), 4, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)), uintptr(c.parg), 0, 0)
-	case glfnGetAttribLocation:
-		ret, _, _ = syscall.Syscall(glGetAttribLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnGetBooleanv:
-		syscall.Syscall(glGetBooleanv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnGetBufferParameteri:
-		syscall.Syscall(glGetBufferParameteri.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
-	case glfnGetError:
-		ret, _, _ = syscall.Syscall(glGetError.Addr(), 0, 0, 0, 0)
-	case glfnGetFloatv:
-		syscall.Syscall(glGetFloatv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnGetFramebufferAttachmentParameteriv:
-		syscall.Syscall6(glGetFramebufferAttachmentParameteriv.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, uintptr(unsafe.Pointer(&ret)), 0, 0)
-	case glfnGetIntegerv:
-		syscall.Syscall(glGetIntegerv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnGetProgramInfoLog:
-		syscall.Syscall6(glGetProgramInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-	case glfnGetProgramiv:
-		syscall.Syscall(glGetProgramiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
-	case glfnGetRenderbufferParameteriv:
-		syscall.Syscall(glGetRenderbufferParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
-	case glfnGetShaderInfoLog:
-		syscall.Syscall6(glGetShaderInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-	case glfnGetShaderPrecisionFormat:
-		// c.parg is a [3]int32. The first [2]int32 of the array is one
-		// parameter, the final *int32 is another parameter.
-		syscall.Syscall6(glGetShaderPrecisionFormat.Addr(), 4, c.args.a0, c.args.a1, uintptr(c.parg), uintptr(c.parg)+2*unsafe.Sizeof(uintptr(0)), 0, 0)
-	case glfnGetShaderSource:
-		syscall.Syscall6(glGetShaderSource.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-	case glfnGetShaderiv:
-		syscall.Syscall(glGetShaderiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
-	case glfnGetString:
-		ret, _, _ = syscall.Syscall(glGetString.Addr(), 1, c.args.a0, 0, 0)
-	case glfnGetTexParameterfv:
-		syscall.Syscall(glGetTexParameterfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnGetTexParameteriv:
-		syscall.Syscall(glGetTexParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnGetUniformLocation:
-		ret, _, _ = syscall.Syscall(glGetUniformLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnGetUniformfv:
-		syscall.Syscall(glGetUniformfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnGetUniformiv:
-		syscall.Syscall(glGetUniformiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnGetVertexAttribfv:
-		syscall.Syscall(glGetVertexAttribfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnGetVertexAttribiv:
-		syscall.Syscall(glGetVertexAttribiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnHint:
-		syscall.Syscall(glHint.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnIsBuffer:
-		syscall.Syscall(glIsBuffer.Addr(), 1, c.args.a0, 0, 0)
-	case glfnIsEnabled:
-		syscall.Syscall(glIsEnabled.Addr(), 1, c.args.a0, 0, 0)
-	case glfnIsFramebuffer:
-		syscall.Syscall(glIsFramebuffer.Addr(), 1, c.args.a0, 0, 0)
-	case glfnIsProgram:
-		ret, _, _ = syscall.Syscall(glIsProgram.Addr(), 1, c.args.a0, 0, 0)
-	case glfnIsRenderbuffer:
-		syscall.Syscall(glIsRenderbuffer.Addr(), 1, c.args.a0, 0, 0)
-	case glfnIsShader:
-		syscall.Syscall(glIsShader.Addr(), 1, c.args.a0, 0, 0)
-	case glfnIsTexture:
-		syscall.Syscall(glIsTexture.Addr(), 1, c.args.a0, 0, 0)
-	case glfnLineWidth:
-		syscall.Syscall(glLineWidth.Addr(), 1, c.args.a0, 0, 0)
-	case glfnLinkProgram:
-		syscall.Syscall(glLinkProgram.Addr(), 1, c.args.a0, 0, 0)
-	case glfnPixelStorei:
-		syscall.Syscall(glPixelStorei.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnPolygonOffset:
-		syscall.Syscall6(glPolygonOffset.Addr(), 2, c.args.a0, c.args.a1, 0, 0, 0, 0)
-	case glfnReadPixels:
-		syscall.Syscall9(glReadPixels.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, uintptr(c.parg), 0, 0)
-	case glfnReleaseShaderCompiler:
-		syscall.Syscall(glReleaseShaderCompiler.Addr(), 0, 0, 0, 0)
-	case glfnRenderbufferStorage:
-		syscall.Syscall6(glRenderbufferStorage.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnSampleCoverage:
-		syscall.Syscall6(glSampleCoverage.Addr(), 1, c.args.a0, 0, 0, 0, 0, 0)
-	case glfnScissor:
-		syscall.Syscall6(glScissor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnShaderSource:
-		syscall.Syscall6(glShaderSource.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, 0, 0, 0)
-	case glfnStencilFunc:
-		syscall.Syscall(glStencilFunc.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-	case glfnStencilFuncSeparate:
-		syscall.Syscall6(glStencilFuncSeparate.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnStencilMask:
-		syscall.Syscall(glStencilMask.Addr(), 1, c.args.a0, 0, 0)
-	case glfnStencilMaskSeparate:
-		syscall.Syscall(glStencilMaskSeparate.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnStencilOp:
-		syscall.Syscall(glStencilOp.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-	case glfnStencilOpSeparate:
-		syscall.Syscall6(glStencilOpSeparate.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnTexImage2D:
-		syscall.Syscall9(glTexImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0, c.args.a5, c.args.a6, uintptr(c.parg))
-	case glfnTexParameterf:
-		syscall.Syscall6(glTexParameterf.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnTexParameterfv:
-		syscall.Syscall(glTexParameterfv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnTexParameteri:
-		syscall.Syscall(glTexParameteri.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-	case glfnTexParameteriv:
-		syscall.Syscall(glTexParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnTexSubImage2D:
-		syscall.Syscall9(glTexSubImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7, uintptr(c.parg))
-	case glfnUniform1f:
-		syscall.Syscall6(glUniform1f.Addr(), 2, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnUniform1fv:
-		syscall.Syscall(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform1i:
-		syscall.Syscall(glUniform1i.Addr(), 2, c.args.a0, c.args.a1, 0)
-	case glfnUniform1iv:
-		syscall.Syscall(glUniform1iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform2f:
-		syscall.Syscall6(glUniform2f.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnUniform2fv:
-		syscall.Syscall(glUniform2fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform2i:
-		syscall.Syscall(glUniform2i.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-	case glfnUniform2iv:
-		syscall.Syscall(glUniform2iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform3f:
-		syscall.Syscall6(glUniform3f.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnUniform3fv:
-		syscall.Syscall(glUniform3fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform3i:
-		syscall.Syscall6(glUniform3i.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	case glfnUniform3iv:
-		syscall.Syscall(glUniform3iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform4f:
-		syscall.Syscall6(glUniform4f.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnUniform4fv:
-		syscall.Syscall(glUniform4fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniform4i:
-		syscall.Syscall6(glUniform4i.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0)
-	case glfnUniform4iv:
-		syscall.Syscall(glUniform4iv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-	case glfnUniformMatrix2fv:
-		syscall.Syscall6(glUniformMatrix2fv.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-	case glfnUniformMatrix3fv:
-		syscall.Syscall6(glUniformMatrix3fv.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-	case glfnUniformMatrix4fv:
-		syscall.Syscall6(glUniformMatrix4fv.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-	case glfnUseProgram:
-		syscall.Syscall(glUseProgram.Addr(), 1, c.args.a0, 0, 0)
-	case glfnValidateProgram:
-		syscall.Syscall(glValidateProgram.Addr(), 1, c.args.a0, 0, 0)
-	case glfnVertexAttrib1f:
-		syscall.Syscall6(glVertexAttrib1f.Addr(), 2, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnVertexAttrib1fv:
-		syscall.Syscall(glVertexAttrib1fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnVertexAttrib2f:
-		syscall.Syscall6(glVertexAttrib2f.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnVertexAttrib2fv:
-		syscall.Syscall(glVertexAttrib2fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnVertexAttrib3f:
-		syscall.Syscall6(glVertexAttrib3f.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnVertexAttrib3fv:
-		syscall.Syscall(glVertexAttrib3fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnVertexAttrib4f:
-		syscall.Syscall6(glVertexAttrib4f.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnVertexAttrib4fv:
-		syscall.Syscall(glVertexAttrib4fv.Addr(), 2, c.args.a0, uintptr(c.parg), 0)
-	case glfnVertexAttribPointer:
-		syscall.Syscall6(glVertexAttribPointer.Addr(), 6, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-	case glfnViewport:
-		syscall.Syscall6(glViewport.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-	default:
-		panic("unknown GL function")
+	if f, ok := glfnMap[c.args.fn]; ok {
+		return f(c)
 	}
-
-	return ret
+	panic("unknown GL function")
 }
 
 // Exported libraries for a Windows GUI driver.
