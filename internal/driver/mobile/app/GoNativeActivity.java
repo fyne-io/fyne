@@ -29,8 +29,7 @@ public class GoNativeActivity extends NativeActivity {
 	private static final int FILE_OPEN_CODE = 1;
 	private static final int FILE_SAVE_CODE = 2;
 
-	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
-             InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD; // this is required to force samsung keyboards to not suggest
+	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
 	private static final int DEFAULT_KEYBOARD_CODE = 0;
 	private static final int SINGLELINE_KEYBOARD_CODE = 1;
@@ -43,7 +42,7 @@ public class GoNativeActivity extends NativeActivity {
     private native void setDarkMode(boolean dark);
 
 	private EditText mTextEdit;
-	private String oldState = "";
+	private boolean ignoreKey = false;
 
 	public GoNativeActivity() {
 		super();
@@ -86,15 +85,13 @@ public class GoNativeActivity extends NativeActivity {
                 switch (keyboardType) {
                     case DEFAULT_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
-                        inputType = DEFAULT_INPUT_TYPE;
                         break;
                     case SINGLELINE_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType = DEFAULT_INPUT_TYPE;
                         break;
                     case NUMBER_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType = DEFAULT_INPUT_TYPE | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+                        inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
                         break;
                     default:
                         Log.e("Fyne", "unknown keyboard type, use default");
@@ -103,8 +100,10 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setInputType(inputType);
 
                 // always place one character so all keyboards can send backspace
-                oldState = "0";
+                ignoreKey = true;
                 mTextEdit.setText("0");
+                mTextEdit.setSelection(mTextEdit.getText().length());
+                ignoreKey = false;
 
                 mTextEdit.setVisibility(View.VISIBLE);
                 mTextEdit.bringToFront();
@@ -237,32 +236,41 @@ public class GoNativeActivity extends NativeActivity {
                 addContentView(mTextEdit, mEditTextLayoutParams);
 
                 // always place one character so all keyboards can send backspace
-                oldState = "0";
                 mTextEdit.setText("0");
+                mTextEdit.setSelection(mTextEdit.getText().length());
 
                 mTextEdit.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if (s.length() > oldState.length()) {
-                            keyboardTyped(s.subSequence(start,start+count).toString());
-                        } else if (s.length() < oldState.length()) {
-                            // send a backspace
-                            keyboardDelete();
+                        if (ignoreKey) {
+                            return;
                         }
-
-                        oldState = s.toString();
+                        if (count > 0) {
+                            keyboardTyped(s.subSequence(start,start+count).toString());
+                        }
                     }
 
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        if (ignoreKey) {
+                            return;
+                        }
+                        if (count > 0) {
+                            for (int i = 0; i < count; i++) {
+                                // send a backspace
+                                keyboardDelete();
+                            }
+                        }
                     }
 
                     @Override
                     public void afterTextChanged(Editable s) {
                         // always place one character so all keyboards can send backspace
                         if (s.length() < 1) {
-                            oldState = "0";
-                            s.insert(0,"0");
+                            ignoreKey = true;
+                            mTextEdit.setText("0");
+                            mTextEdit.setSelection(mTextEdit.getText().length());
+                            ignoreKey = false;
                             return;
                         }
                     }
