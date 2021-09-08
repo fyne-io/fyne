@@ -2,7 +2,7 @@ package mobile
 
 import (
 	"fyne.io/fyne/v2/driver/mobile"
-	"github.com/fyne-io/mobile/event/size"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 
 	"fyne.io/fyne/v2"
 )

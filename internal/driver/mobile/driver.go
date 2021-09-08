@@ -5,14 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fyne-io/mobile/app"
-	"github.com/fyne-io/mobile/event/key"
-	"github.com/fyne-io/mobile/event/lifecycle"
-	"github.com/fyne-io/mobile/event/paint"
-	"github.com/fyne-io/mobile/event/size"
-	"github.com/fyne-io/mobile/event/touch"
-	"github.com/fyne-io/mobile/gl"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
@@ -21,6 +13,13 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
+	"fyne.io/fyne/v2/internal/driver/mobile/gl"
 	"fyne.io/fyne/v2/internal/painter"
 	pgl "fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/theme"
@@ -281,7 +280,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
+	d.glctx.Clear(gl.ColorBufferBit)
 
 	c.SetDirty(false)
 

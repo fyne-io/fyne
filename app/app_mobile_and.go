@@ -19,9 +19,8 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	mobileApp "github.com/fyne-io/mobile/app"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 )
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
@@ -37,7 +36,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	contentStr := C.CString(n.Content)
 	defer C.free(unsafe.Pointer(contentStr))
 
-	mobileApp.RunOnJVM(func(vm, env, ctx uintptr) error {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr)
 		return nil
 	})
