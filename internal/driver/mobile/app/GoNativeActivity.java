@@ -34,6 +34,7 @@ public class GoNativeActivity extends NativeActivity {
 	private static final int DEFAULT_KEYBOARD_CODE = 0;
 	private static final int SINGLELINE_KEYBOARD_CODE = 1;
 	private static final int NUMBER_KEYBOARD_CODE = 2;
+	private static final int PASSWORD_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
@@ -93,6 +94,9 @@ public class GoNativeActivity extends NativeActivity {
                         imeOptions = EditorInfo.IME_ACTION_DONE;
                         inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
                         break;
+                    case PASSWORD_KEYBOARD_CODE:
+                        imeOptions = EditorInfo.IME_ACTION_DONE;
+                        inputType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
                     default:
                         Log.e("Fyne", "unknown keyboard type, use default");
                 }
