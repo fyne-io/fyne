@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
@@ -31,6 +32,7 @@ func (p *preferences) saveToFile(path string) error {
 	p.ignoreChange = true
 	p.prefLock.Unlock()
 	defer func() {
+		time.Sleep(time.Millisecond * 100) // write notifies are not always atomic. 10ms worked, 100 is safer.
 		p.prefLock.Lock()
 		p.ignoreChange = false
 		p.prefLock.Unlock()
