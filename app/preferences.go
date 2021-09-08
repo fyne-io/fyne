@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
@@ -23,15 +22,6 @@ type preferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
 
-func (p *preferences) resetIgnore() {
-	go func() {
-		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
-		p.prefLock.Lock()
-		p.ignoreChange = false
-		p.prefLock.Unlock()
-	}()
-}
-
 func (p *preferences) save() error {
 	return p.saveToFile(p.storagePath())
 }
@@ -40,7 +30,11 @@ func (p *preferences) saveToFile(path string) error {
 	p.prefLock.Lock()
 	p.ignoreChange = true
 	p.prefLock.Unlock()
-	defer p.resetIgnore()
+	defer func() {
+		p.prefLock.Lock()
+		p.ignoreChange = false
+		p.prefLock.Unlock()
+	}()
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -56,11 +50,17 @@ func (p *preferences) saveToFile(path string) error {
 			return err
 		}
 	}
+	defer file.Close()
 	encode := json.NewEncoder(file)
 
 	p.InMemoryPreferences.ReadValues(func(values map[string]interface{}) {
 		err = encode.Encode(&values)
 	})
+
+	err2 := file.Sync()
+	if err == nil {
+		err = err2
+	}
 	return err
 }
 
