@@ -273,7 +273,7 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 }
 
 func (w *window) fitContent() {
-	if w.canvas.Content() == nil || w.fullScreen {
+	if w.canvas.Content() == nil || (w.fullScreen && w.visible) {
 		return
 	}
 
