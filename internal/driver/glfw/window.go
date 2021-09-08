@@ -273,7 +273,7 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 }
 
 func (w *window) fitContent() {
-	if w.canvas.Content() == nil || w.fullScreen {
+	if w.canvas.Content() == nil || (w.fullScreen && w.visible) {
 		return
 	}
 
@@ -1389,18 +1389,19 @@ func (w *window) create() {
 	runOnMain(func() {
 		if !isWayland {
 			// make the window hidden, we will set it up and then show it later
-			glfw.WindowHint(glfw.Visible, 0)
+			glfw.WindowHint(glfw.Visible, glfw.False)
 		}
 		if w.decorate {
-			glfw.WindowHint(glfw.Decorated, 1)
+			glfw.WindowHint(glfw.Decorated, glfw.True)
 		} else {
-			glfw.WindowHint(glfw.Decorated, 0)
+			glfw.WindowHint(glfw.Decorated, glfw.False)
 		}
 		if w.fixedSize {
-			glfw.WindowHint(glfw.Resizable, 0)
+			glfw.WindowHint(glfw.Resizable, glfw.False)
 		} else {
-			glfw.WindowHint(glfw.Resizable, 1)
+			glfw.WindowHint(glfw.Resizable, glfw.True)
 		}
+		glfw.WindowHint(glfw.AutoIconify, glfw.False)
 		initWindowHints()
 
 		pixWidth, pixHeight := w.screenSize(w.canvas.size)
