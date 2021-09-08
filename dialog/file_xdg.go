@@ -53,14 +53,13 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 		"Videos":    "VIDEOS",
 	}
 
-	favoriteLocations := make(map[string]fyne.ListableURI)
+	home, _ := storage.ListerForURI(homeURI)
+	favoriteLocations := map[string]fyne.ListableURI{
+		"Home": home,
+	}
 	for _, favName := range favoriteNames {
 		var uri fyne.URI
-		if favName == "Home" {
-			uri = homeURI
-		} else {
-			uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
-		}
+		uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
 
 		listURI, err1 := storage.ListerForURI(uri)
 		if err1 != nil {
