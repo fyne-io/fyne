@@ -17,7 +17,7 @@ func loadPreferences(id string) *preferences {
 }
 
 func TestPreferences_Save(t *testing.T) {
-	p := loadPreferences("dummy2")
+	p := loadPreferences("dummy")
 	p.WriteValues(func(val map[string]interface{}) {
 		val["keyString"] = "value"
 		val["keyInt"] = 4
@@ -41,7 +41,7 @@ func TestPreferences_Save(t *testing.T) {
 }
 
 func TestPreferences_Save_OverwriteFast(t *testing.T) {
-	p := loadPreferences("dummy")
+	p := loadPreferences("dummy2")
 	p.WriteValues(func(val map[string]interface{}) {
 		val["key"] = "value"
 	})
