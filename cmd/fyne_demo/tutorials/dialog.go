@@ -153,6 +153,10 @@ func fileSaved(f fyne.URIWriteCloser, w fyne.Window) {
 	if err != nil {
 		dialog.ShowError(err, w)
 	}
+	err = f.Close()
+	if err != nil {
+		dialog.ShowError(err, w)
+	}
 	log.Println("Saved to...", f.URI())
 }
 
