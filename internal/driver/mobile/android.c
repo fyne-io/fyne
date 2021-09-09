@@ -275,6 +275,27 @@ bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return false;
 }
 
+bool createListableFileURI(char* uriCstr) {
+	// Get file path from URI
+	size_t length = strlen(uriCstr)-7;// -7 for 'file://'
+	char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
+	memcpy(path, &uriCstr[7], length);
+	path[length] = '\0';
+
+	int result = mkdir(path, S_IRWXU);
+	free(path);
+
+	return result == 0;
+}
+
+bool createListableURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	if (hasPrefix(uriCstr, "file://")) {
+		return createListableFileURI(uriCstr);
+	}
+	LOG_FATAL("Cannot create directory for scheme: %s", uriCstr);
+	return false;
+}
+
 char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
@@ -305,6 +326,30 @@ char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	}
 
 	return NULL;
+}
+
+bool existsFileURI(char* uriCstr) {
+	// Get file path from URI
+	size_t length = strlen(uriCstr)-7;// -7 for 'file://'
+	char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
+	memcpy(path, &uriCstr[7], length);
+	path[length] = '\0';
+
+	// Stat path to determine if it points to an existing file
+	struct stat statbuf;
+	int result = stat(path, &statbuf);
+
+	free(path);
+
+	return result == 0;
+}
+
+bool existsURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	if (hasPrefix(uriCstr, "file://")) {
+		return existsFileURI(uriCstr);
+	}
+	LOG_FATAL("Cannot check exists for scheme: %s", uriCstr);
+	return false;
 }
 
 char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {

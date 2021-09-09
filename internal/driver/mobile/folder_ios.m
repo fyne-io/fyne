@@ -15,6 +15,13 @@ bool iosCanList(const char* url) {
     return listForURL(url) != nil;
 }
 
+bool iosCreateListable(const char* urlCstr) {
+    NSString *urlStr = [NSString stringWithUTF8String:urlCstr];
+    NSURL *url = [NSURL URLWithString:urlStr];
+
+    return [[NSFileManager defaultManager] createDirectoryAtURL:url withIntermediateDirectories:YES attributes:nil error:nil];
+}
+
 char* iosList(const char* url) {
     NSArray *children = listForURL(url);
 

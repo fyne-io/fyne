@@ -6,7 +6,9 @@ package mobile
 #cgo LDFLAGS: -landroid -llog
 
 #include <stdlib.h>
+#include <stdbool.h>
 
+bool existsURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total);
 void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
@@ -20,6 +22,7 @@ import (
 	"os"
 	"unsafe"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/storage/repository"
 )
@@ -136,6 +139,19 @@ func (s *javaStream) Write(p []byte) (int, error) {
 	})
 
 	return len(p), err
+}
+
+func existsURI(uri fyne.URI) (bool, error) {
+	uriStr := C.CString(uri.String())
+	defer C.free(unsafe.Pointer(uriStr))
+
+	ok := false
+	app.RunOnJVM(func(_, env, ctx uintptr) error {
+		ok = bool(C.existsURI(C.uintptr_t(env), C.uintptr_t(ctx), uriStr))
+		return nil
+	})
+
+	return ok, nil
 }
 
 func registerRepository(d *mobileDriver) {

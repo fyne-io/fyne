@@ -36,8 +36,7 @@ func (m *mobileFileRepo) Child(u fyne.URI, name string) (fyne.URI, error) {
 }
 
 func (m *mobileFileRepo) CreateListable(u fyne.URI) error {
-	// TODO: implement this
-	return repository.ErrOperationNotSupported
+	return createListableURI(u)
 }
 
 func (m *mobileFileRepo) Delete(u fyne.URI) error {
@@ -49,7 +48,7 @@ func (m *mobileFileRepo) Destroy(string) {
 }
 
 func (m *mobileFileRepo) Exists(u fyne.URI) (bool, error) {
-	return true, nil // TODO check a file exists
+	return existsURI(u)
 }
 
 func (m *mobileFileRepo) List(u fyne.URI) ([]fyne.URI, error) {

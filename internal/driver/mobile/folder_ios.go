@@ -10,10 +10,12 @@ package mobile
 #import <stdbool.h>
 
 bool iosCanList(const char* url);
+bool iosCreateListable(const char* url);
 char* iosList(const char* url);
 */
 import "C"
 import (
+	"errors"
 	"strings"
 	"unsafe"
 
@@ -28,6 +30,17 @@ func canListURI(uri fyne.URI) bool {
 	return bool(C.iosCanList(uriStr))
 }
 
+func createListableURI(uri fyne.URI) error {
+	uriStr := C.CString(uri.String())
+	defer C.free(unsafe.Pointer(uriStr))
+
+	ok := bool(C.iosCreateListable(uriStr))
+	if ok {
+		return nil
+	}
+	return errors.New("failed to create directory")
+}
+
 func listURI(uri fyne.URI) ([]fyne.URI, error) {
 	uriStr := C.CString(uri.String())
 	defer C.free(unsafe.Pointer(uriStr))
@@ -36,6 +49,9 @@ func listURI(uri fyne.URI) ([]fyne.URI, error) {
 	parts := strings.Split(C.GoString(str), "|")
 	var list []fyne.URI
 	for _, part := range parts {
+		if len(part) == 0 {
+			continue
+		}
 		list = append(list, storage.NewURI(part))
 	}
 	return list, nil

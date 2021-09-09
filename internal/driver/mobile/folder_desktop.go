@@ -11,6 +11,11 @@ func canListURI(fyne.URI) bool {
 	return false
 }
 
+func createListableURI(fyne.URI) error {
+	// no-op as we use the internal FileRepository
+	return nil
+}
+
 func listURI(fyne.URI) ([]fyne.URI, error) {
 	// no-op as we use the internal FileRepository
 	return nil, nil

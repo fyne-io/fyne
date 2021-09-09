@@ -4,6 +4,11 @@
 
 #import <stdbool.h>
 
+bool iosExistsPath(const char* path) {
+    NSString *pathStr = [NSString stringWithUTF8String:path];
+    return [[NSFileManager defaultManager] fileExistsAtPath:pathStr];
+}
+
 void* iosParseUrl(const char* url) {
     NSString *urlStr = [NSString stringWithUTF8String:url];
     return [NSURL URLWithString:urlStr];

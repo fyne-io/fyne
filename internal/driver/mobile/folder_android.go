@@ -9,10 +9,12 @@ package mobile
 #include <stdlib.h>
 
 bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
+bool createListableURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 char *listURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 */
 import "C"
 import (
+	"errors"
 	"strings"
 	"unsafe"
 
@@ -32,6 +34,22 @@ func canListURI(uri fyne.URI) bool {
 	})
 
 	return listable
+}
+
+func createListableURI(uri fyne.URI) error {
+	uriStr := C.CString(uri.String())
+	defer C.free(unsafe.Pointer(uriStr))
+
+	ok := false
+	app.RunOnJVM(func(_, env, ctx uintptr) error {
+		ok = bool(C.createListableURI(C.uintptr_t(env), C.uintptr_t(ctx), uriStr))
+		return nil
+	})
+
+	if ok {
+		return nil
+	}
+	return errors.New("failed to create directory")
 }
 
 func listURI(uri fyne.URI) ([]fyne.URI, error) {
