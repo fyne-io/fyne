@@ -9,6 +9,7 @@ package app
 
 #include <stdlib.h>
 
+void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url);
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
 */
 import "C"
@@ -24,10 +25,14 @@ import (
 )
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
-		"-d", url.String())
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	return cmd.Run()
+	urlStr := C.CString(url.String())
+	defer C.free(unsafe.Pointer(urlStr))
+
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.openURL(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), urlStr)
+		return nil
+	})
+	return nil
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
