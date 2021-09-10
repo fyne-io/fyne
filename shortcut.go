@@ -36,6 +36,13 @@ type Shortcut interface {
 	ShortcutName() string
 }
 
+// KeyboardShortcut describes a shortcut meant to be triggered by a keyboard action.
+type KeyboardShortcut interface {
+	Shortcut
+	Key() KeyName
+	Mod() KeyModifier
+}
+
 // ShortcutPaste describes a shortcut paste action.
 type ShortcutPaste struct {
 	Clipboard Clipboard
