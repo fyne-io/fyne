@@ -60,6 +60,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 * iOS builds fail since Go 1.16
 * Re-add support for 32 bit iOS devices, if built with Go 1.14
 * Android builds fail on Apple M1 (#2439)
+* SetFullScreen(true) before ShowAndRun fails (#2446)
+* Interacting with another app when window.SetFullScreen(true) will cause the application to hide itself. (#2448)
+* Sequential writes to preferences does not save to file (#2449)
+* Correct Android keyboard handling (#2447)
+* MIUI-Android: The widget’s Hyperlink cannot open the URL (#1514)
 
 
 ## 2.0.4 - 6 August 2021
