@@ -232,6 +232,13 @@ func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
 }
 
+// DefaultSymbolFont returns the font resource for the built-in symbol font.
+//
+// Since: 2.2
+func DefaultSymbolFont() fyne.Resource {
+	return symbol
+}
+
 // DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
 //
 // Since: 2.0
