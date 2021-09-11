@@ -151,7 +151,10 @@ func (d *mobileDriver) Run() {
 					}
 					c.applyThemeOutOfTreeObjects()
 				})
-			case e := <-a.Events():
+			case e, ok := <-a.Events():
+				if !ok {
+					return // events channel closed, app done
+				}
 				current := d.currentWindow()
 				if current == nil {
 					continue
