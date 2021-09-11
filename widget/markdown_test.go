@@ -39,6 +39,24 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {
+	r := NewRichTextFromMarkdown("` ")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "`", text.Text)
+		assert.Equal(t, RichTextStyleParagraph, text.Style)
+	} else {
+		t.Error("Segment should be Text")
+	}
+
+	r.ParseMarkdown("``` ")
+	assert.Equal(t, 0, len(r.Segments))
+
+	r.ParseMarkdown("~~~ ")
+	assert.Equal(t, 0, len(r.Segments))
+}
+
 func TestRichTextMarkdown_Emphasis(t *testing.T) {
 	r := NewRichTextFromMarkdown("*a*.")
 

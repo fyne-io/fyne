@@ -89,6 +89,9 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 				line := lines.At(i)
 				data = append(data, line.Value(source)...)
 			}
+			if len(data) == 0 {
+				return ast.WalkContinue, nil
+			}
 			if data[len(data)-1] == '\n' {
 				data = data[:len(data)-1]
 			}
