@@ -347,6 +347,8 @@ func (e *Entry) Keyboard() mobile.KeyboardType {
 
 	if e.MultiLine {
 		return mobile.DefaultKeyboard
+	} else if e.Password {
+		return mobile.PasswordKeyboard
 	}
 
 	return mobile.SingleLineKeyboard
