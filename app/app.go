@@ -125,6 +125,8 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 
 		root, _ := newApp.storage.docRootURI()
 		newApp.storage.Docs = &internal.Docs{RootDocURI: root}
+	} else {
+		newApp.storage.Docs = &internal.Docs{} // an empty impl to avoid crashes
 	}
 
 	if !d.Device().IsMobile() {

@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
+var noAppIDErr = errors.New("storage API requires a unique ID, use app.NewWithID()")
+
 // Docs is an internal implementation of the document features of the Storage interface.
 // It is based on top of the current `file` repository and is rooted at RootDocURI.
 type Docs struct {
@@ -17,6 +19,10 @@ type Docs struct {
 // for the create process to complete.
 // If the document for this app with that name already exists an error will be returned.
 func (d *Docs) Create(name string) (fyne.URIWriteCloser, error) {
+	if d.RootDocURI == nil {
+		return nil, noAppIDErr
+	}
+
 	err := d.ensureRootExists()
 	if err != nil {
 		return nil, err
@@ -41,6 +47,10 @@ func (d *Docs) Create(name string) (fyne.URIWriteCloser, error) {
 // List returns all documents that have been saved by the current application.
 // Remember to use `app.NewWithID` so that your storage is unique.
 func (d *Docs) List() []string {
+	if d.RootDocURI == nil {
+		return nil
+	}
+
 	var ret []string
 	uris, err := storage.List(d.RootDocURI)
 	if err != nil {
@@ -56,6 +66,10 @@ func (d *Docs) List() []string {
 
 // Open will grant access to the contents of the named file. If an error occurs it is returned instead.
 func (d *Docs) Open(name string) (fyne.URIReadCloser, error) {
+	if d.RootDocURI == nil {
+		return nil, noAppIDErr
+	}
+
 	u, err := storage.Child(d.RootDocURI, name)
 	if err != nil {
 		return nil, err
@@ -66,6 +80,10 @@ func (d *Docs) Open(name string) (fyne.URIReadCloser, error) {
 
 // Remove will delete the document with the specified name, if it exists
 func (d *Docs) Remove(name string) error {
+	if d.RootDocURI == nil {
+		return noAppIDErr
+	}
+
 	u, err := storage.Child(d.RootDocURI, name)
 	if err != nil {
 		return err
@@ -77,6 +95,10 @@ func (d *Docs) Remove(name string) error {
 // Save will open a document ready for writing, you close the returned writer for the save to complete.
 // If the document for this app with that name does not exist an error will be returned.
 func (d *Docs) Save(name string) (fyne.URIWriteCloser, error) {
+	if d.RootDocURI == nil {
+		return nil, noAppIDErr
+	}
+
 	u, err := storage.Child(d.RootDocURI, name)
 	if err != nil {
 		return nil, err

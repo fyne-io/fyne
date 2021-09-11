@@ -748,7 +748,7 @@ func getFavoriteOrder() []string {
 }
 
 func hasAppFiles(a fyne.App) bool {
-	return a.UniqueID() != "" && len(a.Storage().List()) > 0
+	return len(a.Storage().List()) > 0
 }
 
 func storageURI(a fyne.App) fyne.URI {
