@@ -79,6 +79,12 @@ func TestRichTextMarkdown_Heading(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
+	r := NewRichTextFromMarkdown("# ")
+
+	assert.Equal(t, 0, len(r.Segments))
+}
+
 func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 	r := NewRichTextFromMarkdown("[title](https://fyne.io/)")
 

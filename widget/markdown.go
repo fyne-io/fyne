@@ -151,8 +151,10 @@ func (m *markdownRenderer) handleExitNode(n ast.Node) error {
 		m.parentStack = m.parentStack[:len(m.parentStack)-1]
 		m.segs = append(m.segs, &ParagraphSegment{Texts: itemSegs})
 	} else if !m.blockquote {
-		if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
-			text.Style = RichTextStyleParagraph
+		if len(m.segs) > 0 {
+			if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
+				text.Style = RichTextStyleParagraph
+			}
 		}
 		m.nextSeg = &TextSegment{
 			Style: RichTextStyleInline,
