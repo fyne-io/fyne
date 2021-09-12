@@ -172,6 +172,7 @@ Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
 This styled row should also wrap as expected, but only *when required*.
 
 > An interesting quote here, most likely sharing some very interesting wisdom.`)
+	rich.Scroll = container.ScrollBoth
 
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
@@ -234,12 +235,11 @@ This styled row should also wrap as expected, but only *when required*.
 		),
 		label,
 		hyperlink,
-		rich,
 	)
 
 	grid := makeTextGrid()
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, grid, nil, nil),
-		fixed, entryLoremIpsum, grid)
+	return container.NewBorder(fixed, grid, nil, nil,
+		container.NewGridWithRows(2, rich, entryLoremIpsum))
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {

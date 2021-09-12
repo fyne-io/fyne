@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
@@ -95,6 +96,20 @@ func TestText_RowLength(t *testing.T) {
 
 	rl = text.rowLength(1)
 	assert.Equal(t, 5, rl)
+}
+
+func TestText_Scroll(t *testing.T) {
+	text1 := NewRichTextWithText("test1\ntest2")
+	text2 := NewRichTextWithText("test1\ntest2")
+	text2.Scroll = widget.ScrollBoth
+
+	assert.Less(t, text2.MinSize().Width, text1.MinSize().Width)
+	assert.Less(t, text2.MinSize().Height, text1.MinSize().Height)
+
+	text3 := NewRichTextWithText("test1\ntest2")
+	text3.Scroll = widget.ScrollVerticalOnly
+	assert.Equal(t, text3.MinSize().Width, text1.MinSize().Width)
+	assert.Less(t, text3.MinSize().Height, text1.MinSize().Height)
 }
 
 func TestText_InsertAt(t *testing.T) {
