@@ -65,7 +65,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Sequential writes to preferences does not save to file (#2449)
 * Correct Android keyboard handling (#2447)
 * MIUI-Android: The widget’s Hyperlink cannot open the URL (#1514)
-* Mobile simulator does not close (#2225)
 
 
 ## 2.0.4 - 6 August 2021
