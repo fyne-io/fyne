@@ -65,6 +65,24 @@ func TestEntry_CursorColumn(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
+func TestEntry_CursorColumn_Ends(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Hello")
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	// down should go to end for last line
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+	entry.TypedKey(down)
+	assert.Equal(t, 5, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	// up should go to start for first line
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
+	entry.TypedKey(up)
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+}
+
 func TestEntry_CursorColumn_Jump(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nbc")

@@ -40,6 +40,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Improved text layout speed by caching string size calculations
 * Updated to require Go 1.14 so we can use some new features
 * Window Resize request is now asynchronous
+* Up/Down keys take cursor home/end when on first/last lines respectively
 
 ### Fixed
 

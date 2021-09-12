@@ -652,13 +652,12 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 }
 
 func (e *Entry) typedKeyUp(provider *RichText, multiLine bool) {
-	if !multiLine {
-		return
-	}
-
 	e.propertyLock.Lock()
+
 	if e.CursorRow > 0 {
 		e.CursorRow--
+	} else {
+		e.CursorColumn = 0
 	}
 
 	rowLength := provider.rowLength(e.CursorRow)
@@ -669,16 +668,16 @@ func (e *Entry) typedKeyUp(provider *RichText, multiLine bool) {
 }
 
 func (e *Entry) typedKeyDown(provider *RichText, multiLine bool) {
-	if !multiLine {
-		return
-	}
-
 	e.propertyLock.Lock()
+	rowLength := provider.rowLength(e.CursorRow)
+
 	if e.CursorRow < provider.rows()-1 {
 		e.CursorRow++
+		rowLength = provider.rowLength(e.CursorRow)
+	} else {
+		e.CursorColumn = rowLength
 	}
 
-	rowLength := provider.rowLength(e.CursorRow)
 	if e.CursorColumn > rowLength {
 		e.CursorColumn = rowLength
 	}
