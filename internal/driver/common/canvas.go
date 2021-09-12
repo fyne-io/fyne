@@ -106,7 +106,7 @@ func (c *Canvas) EnsureMinSize() bool {
 		c.impl.Resize(csize.Max(min))
 	}
 
-	if lastParent != nil && windowNeedsMinSizeUpdate {
+	if lastParent != nil {
 		c.RLock()
 		updateLayout(lastParent)
 		c.RUnlock()
