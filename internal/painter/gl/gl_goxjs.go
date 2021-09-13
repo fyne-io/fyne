@@ -11,7 +11,7 @@ import (
 
 	"encoding/binary"
 
-	"github.com/goxjs/gl"
+	gl "github.com/fyne-io/gl-js"
 	"golang.org/x/mobile/exp/f32"
 
 	"fyne.io/fyne/v2"
@@ -25,12 +25,6 @@ type Buffer gl.Buffer
 
 // Program represents a compiled GL program
 type Program gl.Program
-
-// Texture represents an uploaded GL texture
-type Texture gl.Texture
-
-// NoTexture is the zero value for a Texture
-var NoTexture = Texture(gl.NoTexture)
 
 var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
 

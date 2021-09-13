@@ -8,6 +8,8 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/fyne-io/gl-js v0.0.0-20210104184919-e3fafc6f8f2a
+	github.com/fyne-io/glfw-js v0.0.0-20191126052801-d2efb5f20838
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 	github.com/go-ole/go-ole v1.2.6
@@ -17,19 +19,16 @@ require (
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
-	github.com/yuin/goldmark v1.3.8
+	github.com/yuin/goldmark v1.4.0
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
+	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
 	golang.org/x/mod v0.4.2
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
-	golang.org/x/tools v0.1.5
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e
+	golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )
-
-replace github.com/goxjs/glfw => github.com/bluebugs/glfw v0.0.0-20200617002304-c6f252a0ddb9
-
-replace github.com/goxjs/gl => github.com/bluebugs/gl v0.0.0-20200330042442-1ea792523509

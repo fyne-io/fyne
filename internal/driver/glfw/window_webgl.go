@@ -15,7 +15,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
 
-	"github.com/goxjs/glfw"
+	glfw "github.com/fyne-io/glfw-js"
 )
 
 type Cursor struct {

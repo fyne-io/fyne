@@ -8,8 +8,8 @@ import (
 
 	"fyne.io/fyne/v2"
 
-	"github.com/goxjs/gl"
-	"github.com/goxjs/glfw"
+	gl "github.com/fyne-io/gl-js"
+	glfw "github.com/fyne-io/glfw-js"
 )
 
 func (d *gLDriver) initGLFW() {
