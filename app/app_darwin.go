@@ -1,5 +1,5 @@
-//go:build !ci
-// +build !ci
+//go:build !ci || !js || !wasm || !web
+// +build !ci !js !wasm !web
 
 package app
 

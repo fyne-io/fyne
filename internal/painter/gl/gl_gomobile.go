@@ -1,5 +1,6 @@
-//go:build android || ios || mobile
+//go:build (android || ios || mobile) && (!js || !wasm || !web)
 // +build android ios mobile
+// +build !js !wasm !web
 
 package gl
 

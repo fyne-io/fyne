@@ -1,5 +1,5 @@
-//go:build ci || (!linux && !darwin && !windows && !freebsd && !openbsd && !netbsd)
-// +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
+//go:build ci || (!linux && !darwin && !windows && !freebsd && !openbsd && !netbsd && !js && !wasm && !web)
+// +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd,!js,!wasm,!web
 
 package app
 

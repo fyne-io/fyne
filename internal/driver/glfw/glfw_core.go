@@ -1,5 +1,8 @@
-//go:build (!gles && !arm && !arm64) || darwin
+//go:build ((!gles && !arm && !arm64) || darwin) && !js && !wasm && !web
 // +build !gles,!arm,!arm64 darwin
+// +build !js
+// +build !wasm
+// +build !web
 
 package glfw
 

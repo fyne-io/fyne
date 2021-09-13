@@ -1,5 +1,5 @@
-//go:build !ci && !android && !ios
-// +build !ci,!android,!ios
+//go:build !ci && !js && !android && !ios && !wasm && !web
+// +build !ci,!js,!android,!ios,!wasm,!web
 
 package app
 

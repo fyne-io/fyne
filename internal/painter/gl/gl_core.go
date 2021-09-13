@@ -1,5 +1,5 @@
-//go:build (!gles && !arm && !arm64 && !android && !ios && !mobile) || (darwin && !mobile && !ios)
-// +build !gles,!arm,!arm64,!android,!ios,!mobile darwin,!mobile,!ios
+//go:build (!gles && !arm && !arm64 && !android && !ios && !mobile && !js && !web && !wasm) || (darwin && !mobile && !ios)
+// +build !gles,!arm,!arm64,!android,!ios,!mobile,!js,!web,!wasm darwin,!mobile,!ios
 
 package gl
 
