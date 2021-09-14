@@ -4,122 +4,122 @@
 			<widget size="192x392" type="*widget.Scroll">
 				<container size="192x37670">
 					<widget size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 0</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 0</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,37" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 1</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 1</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,75" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 2</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 2</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,113" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 3</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 3</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,150" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 4</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 4</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,188" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 5</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 5</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,226" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 6</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 6</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,263" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 7</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 7</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,301" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 8</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 8</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,339" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 9</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 9</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,376" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 10</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 10</text>
 							</widget>
 						</container>
 					</widget>
 					<widget pos="0,414" size="192x36" type="*widget.listItem">
-						<container pos="4,0" size="188x36">
+						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
 							</widget>
-							<widget pos="24,0" size="164x36" type="*widget.Label">
-								<text pos="8,8" size="148x20">Test Item 11</text>
+							<widget pos="24,0" size="168x36" type="*widget.Label">
+								<text pos="8,8" size="152x20">Test Item 11</text>
 							</widget>
 						</container>
 					</widget>

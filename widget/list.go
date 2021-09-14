@@ -322,18 +322,14 @@ type listItemRenderer struct {
 
 // MinSize calculates the minimum size of a listItem.
 // This is based on the size of the status indicator and the size of the child object.
-func (li *listItemRenderer) MinSize() (size fyne.Size) {
-	itemSize := li.item.child.MinSize()
-	size = fyne.NewSize(itemSize.Width+theme.Padding(), itemSize.Height)
-	return
+func (li *listItemRenderer) MinSize() fyne.Size {
+	return li.item.child.MinSize()
 }
 
 // Layout the components of the listItem widget.
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.background.Resize(size)
-
-	li.item.child.Move(fyne.NewPos(theme.Padding(), 0))
-	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding(), size.Height))
+	li.item.child.Resize(size)
 }
 
 func (li *listItemRenderer) Refresh() {
@@ -429,7 +425,7 @@ func (l *listLayout) updateList(refresh bool) {
 		length = f()
 	}
 	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+theme.SeparatorThicknessSize()))) + 1
-	offY := l.list.offsetY - float32(int(l.list.offsetY)%int(l.list.itemMin.Height+separatorThickness))
+	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+separatorThickness)))
 	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
 	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
 
