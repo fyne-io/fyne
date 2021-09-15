@@ -47,7 +47,11 @@ uintptr_t process(struct fnargs* cargs, char* parg0, char* parg1, char* parg2, i
 */
 import "C"
 
-import "unsafe"
+import (
+	"unsafe"
+
+	"fyne.io/fyne/v2/internal/async"
+)
 
 const workbufLen = 3
 
@@ -55,7 +59,7 @@ type context struct {
 	cptr  uintptr
 	debug int32
 
-	workAvailable chan struct{}
+	workAvailable *async.UnboundedStructChan
 
 	// work is a queue of calls to execute.
 	work chan call
@@ -75,7 +79,7 @@ type context struct {
 	parg  [workbufLen]*C.char
 }
 
-func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable }
+func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable.Out() }
 
 type context3 struct {
 	*context
@@ -86,7 +90,7 @@ type context3 struct {
 // See the Worker interface for more details on how it is used.
 func NewContext() (Context, Worker) {
 	glctx := &context{
-		workAvailable: make(chan struct{}, 1),
+		workAvailable: async.NewUnboundedStructChan(),
 		work:          make(chan call, workbufLen*4),
 		retvalue:      make(chan C.uintptr_t),
 	}
@@ -104,11 +108,7 @@ func Version() string {
 
 func (ctx *context) enqueue(c call) uintptr {
 	ctx.work <- c
-
-	select {
-	case ctx.workAvailable <- struct{}{}:
-	default:
-	}
+	ctx.workAvailable.In() <- struct{}{}
 
 	if c.blocking {
 		return uintptr(<-ctx.retvalue)

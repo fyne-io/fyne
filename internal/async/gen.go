@@ -31,6 +31,11 @@ func main() {
 			Name:    "Func",
 			Imports: "",
 		},
+		"chan_struct.go": data{
+			Type:    "struct{}",
+			Name:    "Struct",
+			Imports: "",
+		},
 	}
 
 	for fname, data := range types {
