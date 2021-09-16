@@ -34,8 +34,8 @@ func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 
 // SetIcon updates the icon on a ToolbarItem
 func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
-    t.Icon = icon
-    t.ToolbarObject().Refresh()
+	t.Icon = icon
+	t.ToolbarObject().Refresh()
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
