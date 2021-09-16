@@ -74,14 +74,6 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 	}
 }
 
-type toolbarLabel struct {
-	*Label
-}
-
-func (t *toolbarLabel) ToolbarObject() fyne.CanvasObject {
-	return t.Label
-}
-
 func TestToolbar_SetIcon(t *testing.T) {
 	oldIcon := theme.FyneLogo()
 	toolbarItem := NewToolbarAction(oldIcon, func() {})
@@ -89,4 +81,12 @@ func TestToolbar_SetIcon(t *testing.T) {
 	toolbarItem.SetIcon(newIcon)
 	assert.NotEqual(t, oldIcon, toolbarItem.Icon)
 	assert.Equal(t, newIcon, toolbarItem.Icon)
+}
+
+type toolbarLabel struct {
+	*Label
+}
+
+func (t *toolbarLabel) ToolbarObject() fyne.CanvasObject {
+	return t.Label
 }
