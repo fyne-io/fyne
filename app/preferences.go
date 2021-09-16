@@ -16,6 +16,7 @@ type preferences struct {
 
 	prefLock     sync.RWMutex
 	ignoreChange bool
+	numIgnoredChanges int
 
 	app *fyneApp
 }
@@ -28,7 +29,13 @@ func (p *preferences) resetIgnore() {
 		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
 		p.prefLock.Lock()
 		p.ignoreChange = false
+		changes := p.numIgnoredChanges
+		p.numIgnoredChanges = 0
 		p.prefLock.Unlock()
+
+		if changes > 0 {
+			p.InMemoryPreferences.FireChange()
+		}
 	}()
 }
 
@@ -112,9 +119,12 @@ func newPreferences(app *fyneApp) *preferences {
 	}
 
 	p.AddChangeListener(func() {
-		p.prefLock.RLock()
+		p.prefLock.Lock()
 		shouldIgnoreChange := p.ignoreChange
-		p.prefLock.RUnlock()
+		if shouldIgnoreChange {
+			p.numIgnoredChanges++
+		}
+		p.prefLock.Unlock()
 		if shouldIgnoreChange { // callback after loading, no need to save
 			return
 		}
