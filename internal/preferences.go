@@ -41,7 +41,7 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 	fn(p.values)
 	p.lock.Unlock()
 
-	p.fireChange()
+	p.FireChange()
 }
 
 func (p *InMemoryPreferences) set(key string, value interface{}) {
@@ -50,7 +50,7 @@ func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.values[key] = value
 	p.lock.Unlock()
 
-	p.fireChange()
+	p.FireChange()
 }
 
 func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
@@ -68,7 +68,7 @@ func (p *InMemoryPreferences) remove(key string) {
 	delete(p.values, key)
 }
 
-func (p *InMemoryPreferences) fireChange() {
+func (p *InMemoryPreferences) FireChange() {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
