@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://pkg.go.dev/fyne.io/fyne/v2?tab=doc" title="Go API Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="Go API Reference"></a>
-  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.0.3" title="2.0.3 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.0.3-blue.svg?style=flat" alt="2.0.3 release"></a>
+  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.1.0" title="2.1.0 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.1.0-blue.svg?style=flat" alt="2.1.0 release"></a>
   <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
   <a href="https://goreportcard.com/report/fyne.io/fyne/v2"><img src="https://goreportcard.com/badge/fyne.io/fyne/v2" alt="Code Status" /></a>
@@ -14,12 +14,11 @@
 It is designed to build applications that run on desktop and mobile devices with a
 single codebase.
 
-Version 2.0 is the current release of the Fyne API, this represented the first release since
-1.0 that may break some API usage. It also added new features including data binding, animation,
-storage repositories and a new more flexible theme API.
-We also refreshed the default theme, adding animations, a focus colour and 
-redesigning the Entry, Select, SelectEntry, ProgressBar and ProgressBarInfinite widgets.
-We are now working towards the next [big release](https://github.com/fyne-io/fyne/milestone/14)
+Version 2.1 is the current release of the Fyne API, it introduced RichText
+and the DocTabs container, as well as the document storage API and FyneApp.toml
+metadata support.
+We are now working towards the next big release, codenamed 
+[bowmore](https://github.com/fyne-io/fyne/milestone/15)
 and more news will follow in our news feeds and GitHub project.
 
 # Prerequisites
