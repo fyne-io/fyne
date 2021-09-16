@@ -320,7 +320,7 @@ func (s *selectRenderer) Refresh() {
 	if s.combo.popUp != nil {
 		s.combo.popUp.alignment = s.combo.Alignment
 		s.combo.popUp.Move(s.combo.popUpPos())
-		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Width, s.combo.popUp.MinSize().Width))
+		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Width, s.combo.popUp.MinSize().Height))
 		s.combo.popUp.Refresh()
 	}
 	s.background.Refresh()
