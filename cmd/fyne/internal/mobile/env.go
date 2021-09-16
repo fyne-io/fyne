@@ -11,6 +11,9 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"golang.org/x/mod/semver"
+
+	"golang.org/x/sys/execabs"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -85,6 +88,37 @@ func envInit() (err error) {
 	// An arbitrary standard package ('runtime' here) is given to go-list.
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
+
+	before115 := false
+	before116 := false
+	ver, err := exec.Command("go", "version").Output()
+	if err == nil && string(ver) != "" {
+		fields := strings.Split(string(ver), " ")
+		if len(fields) >= 3 {
+			goVer := strings.TrimPrefix(fields[2], "go")
+
+			// If a go command is a development version, the version
+			// information may only appears in the third elements.
+			// For instance:
+			// go version devel go1.18-527609d47b Wed Aug 25 17:07:58 2021 +0200 darwin/arm64
+			if goVer == "devel" && len(fields) >= 4 {
+				prefix := strings.Split(fields[3], "-")
+				// a go command may miss version information. If that happens
+				// we just use the environment version.
+				if len(prefix) > 0 {
+					goVer = strings.TrimPrefix(prefix[0], "go")
+				} else {
+					goVer = runtime.Version()
+				}
+			}
+
+			before115 = semver.Compare("v"+goVer, "v1.15.0") < 0
+			before116 = semver.Compare("v"+goVer, "v1.16.0") < 0
+		}
+	}
+	if before115 {
+		allArchs["ios"] = []string{"arm64", "amd64", "arm"}
+	}
 
 	// TODO re-enable once we find out what broke after September event 2020
 	//cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
@@ -164,8 +198,13 @@ func envInit() (err error) {
 		if bitcodeEnabled {
 			cflags += " -fembed-bitcode"
 		}
+
+		os := "ios"
+		if before116 {
+			os = "darwin"
+		}
 		env = append(env,
-			"GOOS=darwin",
+			"GOOS="+os,
 			"GOARCH="+arch,
 			"CC="+clang,
 			"CXX="+clang+"++",
@@ -209,14 +248,14 @@ func envClang(sdkName string) (clang, cflags string, err error) {
 	if buildN {
 		return sdkName + "-clang", "-isysroot=" + sdkName, nil
 	}
-	cmd := exec.Command("xcrun", "--sdk", sdkName, "--find", "clang")
+	cmd := execabs.Command("xcrun", "--sdk", sdkName, "--find", "clang")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --find: %v\n%s", err, out)
 	}
 	clang = strings.TrimSpace(string(out))
 
-	cmd = exec.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
+	cmd = execabs.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --show-sdk-path: %v\n%s", err, out)
@@ -287,6 +326,13 @@ func archNDK() string {
 		arch = "x86"
 	case "amd64":
 		arch = "x86_64"
+	case "arm64":
+		// For darwin/arm64, see https://golang.org/cl/346153.
+		if runtime.GOOS == "darwin" {
+			arch = "x86_64"
+			break
+		}
+		fallthrough
 	default:
 		panic("unsupported GOARCH: " + runtime.GOARCH)
 	}
@@ -362,6 +408,6 @@ var ndk = ndkConfig{
 }
 
 func xcodeAvailable() bool {
-	err := exec.Command("xcrun", "xcodebuild", "-version").Run()
+	err := execabs.Command("xcrun", "xcodebuild", "-version").Run()
 	return err == nil
 }

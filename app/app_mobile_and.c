@@ -59,6 +59,32 @@ bool isOreoOrLater(JNIEnv *env) {
     return sdkVersion >= 26; // O = Oreo, will not be defined for older builds
 }
 
+jobject parseURL(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+	jclass uriClass = find_class(env, "android/net/Uri");
+	jmethodID parse = find_static_method(env, uriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
+
+	return (jobject)(*env)->CallStaticObjectMethod(env, uriClass, parse, uriStr);
+}
+
+void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject uri = parseURL(jni_env, ctx, url);
+
+	jclass intentClass = find_class(env, "android/content/Intent");
+	jfieldID viewFieldID = (*env)->GetStaticFieldID(env, intentClass, "ACTION_VIEW", "Ljava/lang/String;" );
+    jstring view = (*env)->GetStaticObjectField(env, intentClass, viewFieldID);
+
+	jmethodID constructor = find_method(env, intentClass, "<init>", "(Ljava/lang/String;Landroid/net/Uri;)V");
+	jobject intent = (*env)->NewObject(env, intentClass, constructor, view, uri);
+
+	jclass contextClass = find_class(env, "android/content/Context");
+	jmethodID start = find_method(env, contextClass, "startActivity", "(Landroid/content/Intent;)V");
+	(*env)->CallVoidMethod(env, ctx, start, intent);
+}
+
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *body) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jstring titleStr = (*env)->NewStringUTF(env, title);

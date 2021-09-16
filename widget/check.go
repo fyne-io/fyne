@@ -23,8 +23,11 @@ type checkRenderer struct {
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
-	min := c.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), theme.Padding()*2))
+	pad4 := theme.Padding() * 4
+	min := c.label.MinSize().Add(fyne.NewSize(theme.IconInlineSize()+pad4, pad4))
+	if c.check.Text != "" {
+		min.Add(fyne.NewSize(theme.Padding(), 0))
+	}
 
 	return min
 }
@@ -50,7 +53,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 func (c *checkRenderer) applyTheme() {
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
-	if c.check.Disabled() {
+	if c.check.disabled {
 		c.label.Color = theme.DisabledColor()
 	}
 }
@@ -184,7 +187,7 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
 	if !c.focused {
-		c.FocusGained()
+		fyne.CurrentApp().Driver().CanvasForObject(c.super()).Focus(c.super().(fyne.Focusable))
 	}
 	if !c.Disabled() {
 		c.SetChecked(!c.Checked)

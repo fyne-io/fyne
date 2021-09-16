@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -143,7 +143,11 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build)
+		target := 30
+		if !buildRelease {
+			target = 29 // TODO once we have gomobile debug signing working for v2 android signs
+		}
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build, target, buildRelease)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +156,11 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			return nil, fmt.Errorf("-os=ios requires XCode")
 		}
 		if buildRelease {
-			targetArchs = []string{"arm64"}
+			if len(allArchs["ios"]) > 2 {
+				targetArchs = []string{"arm", "arm64"}
+			} else {
+				targetArchs = []string{"arm64"}
+			}
 		}
 
 		if pkg.Name != "main" {
@@ -163,27 +171,27 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build, cmd.Cert, cmd.Profile)
+		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build, buildRelease, cmd.Cert, cmd.Profile)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if !nmpkgs["github.com/fyne-io/mobile/app"] {
-		return nil, fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.PkgPath)
+	if !nmpkgs["fyne.io/fyne/v2/internal/driver/mobile/app"] {
+		return nil, fmt.Errorf(`%s does not import "fyne.io/fyne/v2/internal/driver/mobile/app"`, pkg.PkgPath)
 	}
 
 	return pkg, nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(github.com/fyne-io.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(fyne.io/fyne/v2/internal/driver/mobile.*/[^.]*)`)
 
 func extractPkgs(nm string, path string) (map[string]bool, error) {
 	if buildN {
-		return map[string]bool{"github.com/fyne-io/mobile/app": true}, nil
+		return map[string]bool{"fyne.io/fyne/v2/internal/driver/mobile/app": true}, nil
 	}
 	r, w := io.Pipe()
-	cmd := exec.Command(nm, path)
+	cmd := execabs.Command(nm, path)
 	cmd.Stdout = w
 	cmd.Stderr = os.Stderr
 
@@ -312,7 +320,7 @@ func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
 }
 
 func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...string) error {
-	cmd := exec.Command("go", subcmd)
+	cmd := execabs.Command("go", subcmd)
 	tags := buildTags
 	targetOS, _, err := parseBuildTarget(buildTarget)
 	if err != nil {

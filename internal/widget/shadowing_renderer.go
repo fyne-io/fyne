@@ -39,3 +39,11 @@ func (r *ShadowingRenderer) SetObjects(objects []fyne.CanvasObject) {
 	}
 	r.BaseRenderer.SetObjects(objects)
 }
+
+// RefreshShadow asks the shadow graphical element to update to current theme
+func (r *ShadowingRenderer) RefreshShadow() {
+	if r.shadow == nil {
+		return
+	}
+	r.shadow.Refresh()
+}

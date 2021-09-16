@@ -20,6 +20,7 @@ void        completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
 const void* insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
+void        resetDarwinMenu();
 
 // Used for tests.
 const void* test_darwinMainMenu();
@@ -34,7 +35,13 @@ const char* test_NSMenuItem_title(const void*);
 */
 import "C"
 
-var callbacks []func()
+type menuCallbacks struct {
+	action  func()
+	enabled func() bool
+	checked func() bool
+}
+
+var callbacks []*menuCallbacks
 var ecb func(string)
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
@@ -60,6 +67,10 @@ func addNativeSubmenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Men
 	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
 	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
 	return nextItemID
+}
+
+func clearNativeMenu() {
+	C.resetDarwinMenu()
 }
 
 func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
@@ -122,10 +133,18 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 	if !item.IsSeparator {
-		callbacks = append(callbacks, func() {
-			if item.Action != nil {
-				w.queueEvent(item.Action)
-			}
+		callbacks = append(callbacks, &menuCallbacks{
+			action: func() {
+				if item.Action != nil {
+					w.QueueEvent(item.Action)
+				}
+			},
+			enabled: func() bool {
+				return !item.Disabled
+			},
+			checked: func() bool {
+				return item.Checked
+			},
 		})
 		nextItemID++
 	}
@@ -142,12 +161,23 @@ func hasNativeMenu() bool {
 
 //export menuCallback
 func menuCallback(id int) {
-	callbacks[id]()
+	callbacks[id].action()
+}
+
+//export menuEnabled
+func menuEnabled(id int) bool {
+	return callbacks[id].enabled()
+}
+
+//export menuChecked
+func menuChecked(id int) bool {
+	return callbacks[id].checked()
 }
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
+	clearNativeMenu()
 	nextItemID := 0
-	callbacks = []func(){}
+	callbacks = []*menuCallbacks{}
 	var helpMenu *fyne.Menu
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]

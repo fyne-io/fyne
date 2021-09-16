@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: 'bug'
+labels: 'unverified'
 assignees: ''
 
 ---
@@ -37,4 +37,4 @@ Write your code here.
  - **OS:** <!-- [e.g. Linux, MacOS or iOS] -->
  - **Version:** <!-- [e.g. 5.10.2, 10.13 High Sierra or 14.2] -->
  - **Go version:** <!-- [e.g. 1.12.3] -->
- - **Fyne version:** <!-- [e.g. 1.4.2 or git SHA] -->
+ - **Fyne version:** <!-- [e.g. 2.0.3 or git SHA] -->

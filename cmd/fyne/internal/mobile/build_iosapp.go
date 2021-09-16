@@ -11,17 +11,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
 func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
-	appName, version string, build int, cert, profile string) (map[string]bool, error) {
+	appName, version string, build int, release bool, cert, profile string) (map[string]bool, error) {
 	src := pkg.PkgPath
 	buildO = rfc1034Label(appName) + ".app"
 	// Detect the team ID
@@ -35,6 +35,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		BitcodeEnabled: bitcodeEnabled,
 		BundleID:       bundleID,
 		Certificate:    cert,
+		Debug:          !release,
 		Profile:        profile,
 		TeamID:         teamID,
 		Type:           "Manual",
@@ -81,7 +82,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	}
 
 	// We are using lipo tool to build multiarchitecture binaries.
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"xcrun", "lipo",
 		"-o", filepath.Join(tmpdir, "main/main"),
 		"-create",
@@ -121,7 +122,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		"DEVELOPMENT_TEAM=" + teamID,
 	}
 
-	cmd = exec.Command("xcrun", cmdStrings...)
+	cmd = execabs.Command("xcrun", cmdStrings...)
 	if err := runCmd(cmd); err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func lookupCert(optName string) ([]byte, error) {
 }
 
 func lookupCertNamed(name string) ([]byte, error) {
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"security", "find-certificate",
 		"-c", name, "-p",
 	)
@@ -320,7 +321,7 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
-    <string>arm64</string>
+    <string>armv7</string>
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>
@@ -347,6 +348,7 @@ type projPbxprojTmplData struct {
 	Certificate    string
 	Profile        string
 	TeamID, Type   string
+	Debug          bool
 }
 
 var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
@@ -505,7 +507,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         GCC_WARN_UNUSED_FUNCTION = YES;
         GCC_WARN_UNUSED_VARIABLE = YES;
         IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-        MTL_ENABLE_DEBUG_INFO = NO;
+        MTL_ENABLE_DEBUG_INFO = {{if .Debug}}YES{{else}}NO{{end}};
         PRODUCT_BUNDLE_IDENTIFIER = {{.BundleID}};
         PROVISIONING_PROFILE_SPECIFIER = "{{.Profile}}";
         SDKROOT = iphoneos;

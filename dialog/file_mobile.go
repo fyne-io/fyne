@@ -6,12 +6,12 @@ import (
 	"os"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/driver/gomobile"
+	"fyne.io/fyne/v2/internal/driver/mobile"
 	"fyne.io/fyne/v2/storage"
 )
 
-func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
-	return nil
+func (f *fileDialog) getPlaces() []favoriteItem {
+	return []favoriteItem{}
 }
 
 func isHidden(file fyne.URI) bool {
@@ -28,15 +28,15 @@ func hideFile(filename string) error {
 
 func fileOpenOSOverride(f *FileDialog) bool {
 	if f.isDirectory() {
-		gomobile.ShowFolderOpenPicker(f.callback.(func(fyne.ListableURI, error)))
+		mobile.ShowFolderOpenPicker(f.callback.(func(fyne.ListableURI, error)))
 	} else {
-		gomobile.ShowFileOpenPicker(f.callback.(func(fyne.URIReadCloser, error)), f.filter)
+		mobile.ShowFileOpenPicker(f.callback.(func(fyne.URIReadCloser, error)), f.filter)
 	}
 	return true
 }
 
 func fileSaveOSOverride(f *FileDialog) bool {
-	gomobile.ShowFileSavePicker(f.callback.(func(fyne.URIWriteCloser, error)), f.filter, f.initialFileName)
+	mobile.ShowFileSavePicker(f.callback.(func(fyne.URIWriteCloser, error)), f.filter, f.initialFileName)
 
 	return true
 }

@@ -13,6 +13,7 @@ cmd/hello/hello
 cmd/hello/hello.apk
 cmd/hello/hello.app
 cmd/hello/hello.exe
+fyne-cross
 
 ### Tests
 **/testdata/failed

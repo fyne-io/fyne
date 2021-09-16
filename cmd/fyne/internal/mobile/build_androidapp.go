@@ -24,7 +24,7 @@ import (
 )
 
 func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
-	iconPath, appName, version string, build int) (map[string]bool, error) {
+	iconPath, appName, version string, build, target int, release bool) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	if err != nil {
 		return nil, err
 	}
-	err = addAssets(apkw, manifestData, dir, iconPath)
+	err = addAssets(apkw, manifestData, dir, iconPath, target)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	return nmpkgs[androidArchs[0]], nil
 }
 
-func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string) error {
+func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target int) error {
 	// Add any assets.
 	var arsc struct {
 		iconPath string
@@ -186,7 +186,7 @@ func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string) error {
 		}
 	}
 
-	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "")
+	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", target)
 	if err != nil {
 		return err
 	}
@@ -263,11 +263,11 @@ func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []strin
 
 	for _, arch := range androidArchs {
 		toolchain := ndk.Toolchain(arch)
-		if nmpkgs[arch]["github.com/fyne-io/mobile/exp/audio/al"] {
+		if nmpkgs[arch]["fyne.io/fyne/v2/internal/driver/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.abi + "/libopenal.so"
 			src := filepath.Join(gomobilepath, dst)
 			if _, err := os.Stat(src); err != nil {
-				return nil, errors.New("the Android requires the github.com/fyne-io/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
+				return nil, errors.New("the Android requires the fyne.io/fyne/v2/internal/driver/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
 			}
 			if err := apkwWriteFile(dst, src, apkw); err != nil {
 				return nil, err

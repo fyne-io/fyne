@@ -3,19 +3,21 @@ package commands
 import (
 	"flag"
 	"fmt"
-	"log"
-	"strconv"
-	"strings"
 
 	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
+
+	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (
@@ -73,7 +75,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "icon",
 				Usage:       "The name of the application icon file.",
-				Value:       "Icon.png",
+				Value:       "",
 				Destination: &p.icon,
 			},
 			&cli.StringFlag{
@@ -81,6 +83,17 @@ func Package() *cli.Command {
 				Aliases:     []string{"id"},
 				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
 				Destination: &p.appID,
+			},
+			&cli.StringFlag{
+				Name:        "certificate",
+				Aliases:     []string{"cert"},
+				Usage:       "iOS/macOS/Windows: name of the certificate to sign the build",
+				Destination: &p.certificate,
+			},
+			&cli.StringFlag{
+				Name:        "profile",
+				Usage:       "iOS/macOS: name of the provisioning profile for this build",
+				Destination: &p.profile,
 			},
 			&cli.BoolFlag{
 				Name:        "release",
@@ -109,10 +122,10 @@ type Packager struct {
 // Deprecated: Access to the individual cli commands are being removed.
 func (p *Packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
+	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
+	flag.StringVar(&p.icon, "icon", "", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
@@ -158,7 +171,12 @@ func (p *Packager) Package() error {
 		return err
 	}
 
-	return nil
+	data, err := metadata.LoadStandard(p.srcDir)
+	if err != nil {
+		return nil // no metadata to update
+	}
+	data.Details.Build++
+	return metadata.SaveStandard(data, p.srcDir)
 }
 
 func (p *Packager) buildPackage() error {
@@ -194,7 +212,9 @@ func (p *Packager) doPackage() error {
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
-		defer p.removeBuild()
+		if p.os != "windows" {
+			defer p.removeBuild()
+		}
 	}
 
 	switch p.os {
@@ -238,10 +258,19 @@ func (p *Packager) validate() error {
 			"Change directory to the main package and try again.")
 	}
 
+	data, err := metadata.LoadStandard(p.srcDir)
+	if err == nil {
+		mergeMetadata(p, data)
+	}
+
 	exeName := calculateExeName(p.srcDir, p.os)
 
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
+
+		if util.Exists(p.exe) { // the exe was not specified, assume stale
+			p.removeBuild()
+		}
 	} else if p.os == "ios" || p.os == "android" {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
@@ -278,6 +307,24 @@ func isValidVersion(ver string) bool {
 		}
 	}
 	return true
+}
+
+func mergeMetadata(p *Packager, data *metadata.FyneApp) {
+	if p.icon == "" {
+		p.icon = data.Details.Icon
+	}
+	if p.name == "" {
+		p.name = data.Details.Name
+	}
+	if p.appID == "" {
+		p.appID = data.Details.ID
+	}
+	if p.appVersion == "" {
+		p.appVersion = data.Details.Version
+	}
+	if p.appBuild == 0 {
+		p.appBuild = data.Details.Build
+	}
 }
 
 func validateAppID(appID, os, name string, release bool) (string, error) {

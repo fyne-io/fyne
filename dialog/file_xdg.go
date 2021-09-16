@@ -6,19 +6,20 @@ package dialog
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
+
+	"golang.org/x/sys/execabs"
 )
 
 func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI, error) {
 	cmdName := "xdg-user-dir"
-	if _, err := exec.LookPath(cmdName); err != nil {
+	if _, err := execabs.LookPath(cmdName); err != nil {
 		return storage.Child(homeURI, fallbackName) // no lookup possible
 	}
 
-	cmd := exec.Command(cmdName, name)
+	cmd := execabs.Command(cmdName, name)
 	loc, err := cmd.Output()
 	if err != nil {
 		return storage.Child(homeURI, fallbackName)
@@ -47,16 +48,18 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	arguments := map[string]string{
 		"Documents": "DOCUMENTS",
 		"Downloads": "DOWNLOAD",
+		"Music":     "MUSIC",
+		"Pictures":  "PICTURES",
+		"Videos":    "VIDEOS",
 	}
 
-	favoriteLocations := make(map[string]fyne.ListableURI)
+	home, _ := storage.ListerForURI(homeURI)
+	favoriteLocations := map[string]fyne.ListableURI{
+		"Home": home,
+	}
 	for _, favName := range favoriteNames {
 		var uri fyne.URI
-		if favName == "Home" {
-			uri = homeURI
-		} else {
-			uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
-		}
+		uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
 
 		listURI, err1 := storage.ListerForURI(uri)
 		if err1 != nil {

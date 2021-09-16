@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -91,13 +91,14 @@ func (d *gLDriver) runGL() {
 	runMutex.Unlock()
 
 	d.initGLFW()
-
+	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
 			d.drawDone <- nil // wait for draw thread to stop
 			glfw.Terminate()
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
 		case f := <-funcQueue:
 			f.f()
@@ -129,15 +130,19 @@ func (d *gLDriver) runGL() {
 
 				w.viewLock.RLock()
 				expand := w.shouldExpand
+				fullScreen := w.fullScreen
 				w.viewLock.RUnlock()
 
-				if expand {
+				if expand && !fullScreen {
 					w.fitContent()
 					w.viewLock.Lock()
+					shouldExpand := w.shouldExpand
 					w.shouldExpand = false
 					view := w.viewport
 					w.viewLock.Unlock()
-					view.SetSize(w.width, w.height)
+					if shouldExpand {
+						view.SetSize(w.shouldWidth, w.shouldHeight)
+					}
 				}
 
 				newWindows = append(newWindows, win)
@@ -158,12 +163,12 @@ func (d *gLDriver) runGL() {
 func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
-		if w.canvas.ensureMinSize() {
+		if w.canvas.EnsureMinSize() {
 			w.viewLock.Lock()
 			w.shouldExpand = true
 			w.viewLock.Unlock()
 		}
-		freeDirtyTextures(canvas)
+		canvas.FreeDirtyTextures()
 
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
@@ -198,7 +203,7 @@ func (d *gLDriver) startDrawThread() {
 				}
 			case set := <-settingsChange:
 				painter.ClearFontCache()
-				painter.SvgCacheReset()
+				cache.ResetThemeCaches()
 				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 					c, ok := w.Canvas().(*glCanvas)
 					if !ok {
@@ -208,6 +213,7 @@ func (d *gLDriver) startDrawThread() {
 					go c.reloadScale()
 				})
 			case <-draw.C:
+				canvasRefreshed := false
 				for _, win := range d.windowList() {
 					w := win.(*window)
 					w.viewLock.RLock()
@@ -215,12 +221,13 @@ func (d *gLDriver) startDrawThread() {
 					closing := w.closing
 					visible := w.visible
 					w.viewLock.RUnlock()
-					if closing || !canvas.isDirty() || !visible {
+					if closing || !canvas.IsDirty() || !visible {
 						continue
 					}
-
+					canvasRefreshed = true
 					d.repaintWindow(w)
 				}
+				cache.Clean(canvasRefreshed)
 			}
 		}
 	}()
@@ -236,24 +243,9 @@ func (d *gLDriver) tryPollEvents() {
 	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
-func freeDirtyTextures(canvas *glCanvas) {
-	for {
-		select {
-		case object := <-canvas.refreshQueue:
-			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				canvas.painter.Free(obj)
-				return false
-			}
-			driver.WalkCompleteObjectTree(object, freeWalked, nil)
-		default:
-			return
-		}
-	}
-}
-
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
-	w.canvas.setDirty(true)
+	w.canvas.SetDirty(true)
 }
 
 func updateGLContext(w *window) {
@@ -264,6 +256,6 @@ func updateGLContext(w *window) {
 	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
 	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
 
-	canvas.painter.SetFrameBufferScale(canvas.texScale)
-	w.canvas.painter.SetOutputSize(int(winWidth), int(winHeight))
+	canvas.Painter().SetFrameBufferScale(canvas.texScale)
+	w.canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
 }

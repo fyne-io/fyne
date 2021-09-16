@@ -33,7 +33,7 @@ type External{{ .Name }} interface {
 //
 // Since: {{ .Since }}
 func New{{ .Name }}() {{ .Name }} {
-	blank := {{ .Default }}
+	var blank {{ .Type }} = {{ .Default }}
 	return &bound{{ .Name }}{val: &blank}
 }
 
@@ -43,7 +43,7 @@ func New{{ .Name }}() {{ .Name }} {
 // Since: {{ .Since }}
 func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
 	if v == nil {
-		blank := {{ .Default }}
+		var blank {{ .Type }} = {{ .Default }}
 		v = &blank // never allow a nil value pointer
 	}
 	b := &boundExternal{{ .Name }}{}
@@ -205,7 +205,7 @@ func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	if format == "{{ .Format }}" { // Same as not using custom formatting.
 		return {{ .Name }}ToString(v)
 	}
-	
+
 	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
@@ -236,7 +236,8 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 {{ else }}
 	var val {{ .Type }}
 	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
 		if err != nil {
 			return err
 		}
@@ -303,7 +304,7 @@ func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
 	if format == "{{ .Format }}" { // Same as not using custom format.
 		return StringTo{{ .Name }}(str)
 	}
-	
+
 	v := &stringTo{{ .Name }}{from: str, format: format}
 	str.AddListener(v)
 	return v

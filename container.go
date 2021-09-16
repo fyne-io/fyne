@@ -82,7 +82,6 @@ func (c *Container) MinSize() Size {
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
 	c.position = pos
-	c.layout()
 }
 
 // Position gets the current position of this Container, relative to its parent.
@@ -153,6 +152,8 @@ func (c *Container) Remove(rem CanvasObject) {
 		copy(c.Objects[i:], c.Objects[i+1:])
 		c.Objects[len(c.Objects)-1] = nil
 		c.Objects = c.Objects[:len(c.Objects)-1]
+
+		c.layout()
 		return
 	}
 }

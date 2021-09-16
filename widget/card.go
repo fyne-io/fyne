@@ -214,13 +214,14 @@ func (c *cardRenderer) Refresh() {
 
 	c.applyTheme()
 	c.Layout(c.card.Size())
+	c.ShadowingRenderer.RefreshShadow()
 	canvas.Refresh(c.card.super())
 }
 
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
 	if c.header != nil {
-		c.header.TextSize = theme.TextSize() * 1.7
+		c.header.TextSize = theme.TextHeadingSize()
 		c.header.Color = theme.ForegroundColor()
 	}
 	if c.subHeader != nil {

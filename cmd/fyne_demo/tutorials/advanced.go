@@ -1,7 +1,7 @@
 package tutorials
 
 import (
-	"fmt"
+	"strconv"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +11,13 @@ import (
 )
 
 func scaleString(c fyne.Canvas) string {
-	return fmt.Sprintf("%0.2f", c.Scale())
+	return strconv.FormatFloat(float64(c.Scale()), 'f', 2, 32)
+}
+
+func texScaleString(c fyne.Canvas) string {
+	pixels, _ := c.PixelCoordinateForPosition(fyne.NewPos(1, 1))
+	texScale := float32(pixels) / c.Scale()
+	return strconv.FormatFloat(float64(texScale), 'f', 2, 32)
 }
 
 func prependTo(g *fyne.Container, s string) {
@@ -19,9 +25,10 @@ func prependTo(g *fyne.Container, s string) {
 	g.Refresh()
 }
 
-func setScaleText(obj *widget.Label, win fyne.Window) {
-	for obj.Visible() {
-		obj.SetText(scaleString(win.Canvas()))
+func setScaleText(scale, tex *widget.Label, win fyne.Window) {
+	for scale.Visible() {
+		scale.SetText(scaleString(win.Canvas()))
+		tex.SetText(texScaleString(win.Canvas()))
 
 		time.Sleep(time.Second)
 	}
@@ -31,12 +38,14 @@ func setScaleText(obj *widget.Label, win fyne.Window) {
 // more detailed than normally needed.
 func advancedScreen(win fyne.Window) fyne.CanvasObject {
 	scale := widget.NewLabel("")
+	tex := widget.NewLabel("")
 
 	screen := widget.NewCard("Screen info", "", widget.NewForm(
 		&widget.FormItem{Text: "Scale", Widget: scale},
+		&widget.FormItem{Text: "Texture Scale", Widget: tex},
 	))
 
-	go setScaleText(scale, win)
+	go setScaleText(scale, tex, win)
 
 	label := widget.NewLabel("Just type...")
 	generic := container.NewVBox()

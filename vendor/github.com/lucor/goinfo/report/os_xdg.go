@@ -7,11 +7,11 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/lucor/goinfo"
+	"golang.org/x/sys/execabs"
 )
 
 // Info returns the collected info
@@ -79,7 +79,7 @@ func (i *OS) parseOsReleaseCmdOutput(data []byte) (goinfo.Info, error) {
 }
 
 func (i *OS) architecture() (string, error) {
-	cmd := exec.Command("uname", "-m")
+	cmd := execabs.Command("uname", "-m")
 	out, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("could not detect architecture using uname command: %w", err)
@@ -91,7 +91,7 @@ func (i *OS) architecture() (string, error) {
 }
 
 func (i *OS) kernel() (string, error) {
-	cmd := exec.Command("uname", "-rsv")
+	cmd := execabs.Command("uname", "-rsv")
 	out, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("could not detect the kernel using uname command: %w", err)

@@ -3,13 +3,13 @@
 		<widget size="150x150" type="*container.AppTabs">
 			<container size="48x150">
 				<container size="48x150">
-					<widget size="48x48" type="*container.tabButton">
-						<image pos="4,4" rsc="infoIcon" size="40x40" themed="primary"/>
+					<widget size="48x56" type="*container.tabButton">
+						<image pos="4,8" rsc="infoIcon" size="40x40" themed="primary"/>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="48,0" size="4x150"/>
-			<rectangle fillColor="primary" pos="48,0" size="4x48"/>
+			<rectangle fillColor="primary" pos="48,0" size="4x56"/>
 			<circle fillColor="background" pos="52,0" size="98x150"/>
 		</widget>
 	</content>

@@ -56,11 +56,17 @@ func (p *preferences) saveToFile(path string) error {
 			return err
 		}
 	}
+	defer file.Close()
 	encode := json.NewEncoder(file)
 
 	p.InMemoryPreferences.ReadValues(func(values map[string]interface{}) {
 		err = encode.Encode(&values)
 	})
+
+	err2 := file.Sync()
+	if err == nil {
+		err = err2
+	}
 	return err
 }
 

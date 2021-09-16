@@ -5,14 +5,16 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 const (
-	fileIconSize      = 64
-	fileTextSize      = 24
-	fileIconCellWidth = fileIconSize * 1.25
+	fileIconSize       = 64
+	fileInlineIconSize = 24
+	fileTextSize       = 24
+	fileIconCellWidth  = fileIconSize * 1.25
 )
 
 type fileDialogItem struct {
@@ -23,6 +25,21 @@ type fileDialogItem struct {
 	name     string
 	location fyne.URI
 	dir      bool
+
+	hovered bool
+}
+
+func (i *fileDialogItem) MouseIn(*desktop.MouseEvent) {
+	i.hovered = true
+	i.Refresh()
+}
+
+func (i *fileDialogItem) MouseMoved(*desktop.MouseEvent) {
+}
+
+func (i *fileDialogItem) MouseOut() {
+	i.hovered = false
+	i.Refresh()
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
@@ -88,27 +105,47 @@ type fileItemRenderer struct {
 func (s fileItemRenderer) Layout(size fyne.Size) {
 	s.background.Resize(size)
 
-	iconAlign := (size.Width - fileIconSize) / 2
-	s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
-	s.icon.Move(fyne.NewPos(iconAlign, 0))
+	if s.item.picker.view == gridView {
+		s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
+		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
 
-	s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
-	s.text.Move(fyne.NewPos(0, size.Height-fileTextSize-theme.Padding()*2))
+		s.text.Alignment = fyne.TextAlignCenter
+		s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
+		s.text.Move(fyne.NewPos(0, size.Height-s.text.MinSize().Height))
+	} else {
+		s.icon.Resize(fyne.NewSize(fileInlineIconSize, fileInlineIconSize))
+		s.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-fileInlineIconSize)/2))
+
+		s.text.Alignment = fyne.TextAlignLeading
+		s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
+		s.text.Move(fyne.NewPos(fileInlineIconSize, (size.Height-s.text.MinSize().Height)/2))
+	}
+
 }
 
 func (s fileItemRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize+theme.Padding())
+	var padding fyne.Size
+
+	if s.item.picker.view == gridView {
+		padding = fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
+		return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding)
+	}
+
+	padding = fyne.NewSize(theme.Padding(), theme.Padding()*4)
+	return fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize).Add(padding)
 }
 
 func (s fileItemRenderer) Refresh() {
 	if s.item.isCurrent {
-		s.background.FillColor = theme.PrimaryColor()
+		s.background.FillColor = theme.SelectionColor()
+		s.background.Show()
+	} else if s.item.hovered {
+		s.background.FillColor = theme.HoverColor()
 		s.background.Show()
 	} else {
 		s.background.Hide()
 	}
 	s.background.Refresh()
-	s.icon.SetSelected(s.item.isCurrent)
 	canvas.Refresh(s.item)
 }
 

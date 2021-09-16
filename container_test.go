@@ -8,11 +8,23 @@ import (
 
 func TestContainer_Add(t *testing.T) {
 	box := new(dummyObject)
-	container := NewContainerWithoutLayout()
+	container := NewContainerWithLayout(new(customLayout))
 	assert.Equal(t, 0, len(container.Objects))
+	assert.Equal(t, float32(10), container.MinSize().Width)
+	assert.Equal(t, float32(0), container.MinSize().Height)
 
 	container.Add(box)
 	assert.Equal(t, 1, len(container.Objects))
+	assert.Equal(t, float32(10), container.MinSize().Width)
+	assert.Equal(t, float32(10), container.MinSize().Height)
+
+	box2 := new(dummyObject)
+	container.Add(box2)
+	assert.Equal(t, 2, len(container.Objects))
+	assert.Equal(t, float32(10), container.MinSize().Width)
+	assert.Equal(t, float32(20), container.MinSize().Height)
+	assert.Equal(t, float32(0), box2.Position().X)
+	assert.Equal(t, float32(10), box2.Position().Y)
 }
 
 func TestContainer_CustomLayout(t *testing.T) {
@@ -75,12 +87,19 @@ func TestContainer_NilLayout(t *testing.T) {
 }
 
 func TestContainer_Remove(t *testing.T) {
-	box := new(dummyObject)
-	container := NewContainerWithoutLayout(box)
-	assert.Equal(t, 1, len(container.Objects))
+	box1 := new(dummyObject)
+	box2 := new(dummyObject)
+	container := NewContainerWithLayout(new(customLayout), box1, box2)
+	assert.Equal(t, 2, len(container.Objects))
+	assert.Equal(t, float32(10), container.MinSize().Width)
+	assert.Equal(t, float32(20), container.MinSize().Height)
 
-	container.Remove(box)
-	assert.Equal(t, 0, len(container.Objects))
+	container.Remove(box1)
+	assert.Equal(t, 1, len(container.Objects))
+	assert.Equal(t, float32(10), container.MinSize().Width)
+	assert.Equal(t, float32(10), container.MinSize().Height)
+	assert.Equal(t, float32(0), box2.Position().X)
+	assert.Equal(t, float32(0), box2.Position().Y)
 }
 
 func TestContainer_Show(t *testing.T) {
@@ -100,13 +119,16 @@ type customLayout struct {
 }
 
 func (c *customLayout) Layout(objs []CanvasObject, size Size) {
+	y := float32(0)
 	for _, child := range objs {
 		child.Resize(size)
+		child.Move(NewPos(0, y))
+		y += 10
 	}
 }
 
-func (c *customLayout) MinSize(_ []CanvasObject) Size {
-	return NewSize(10, 10)
+func (c *customLayout) MinSize(objs []CanvasObject) Size {
+	return NewSize(10, float32(10*len(objs)))
 }
 
 type dummyObject struct {

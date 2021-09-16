@@ -5,14 +5,14 @@
 			<rectangle fillColor="primary" pos="0,98" size="120x2"/>
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
-					<rectangle fillColor="primary" pos="41,6" size="20x21"/>
-					<rectangle fillColor="primary" pos="7,27" size="18x21"/>
-					<widget size="120x96" type="*widget.textProvider">
-						<text pos="8,6" size="108x21">Testing</text>
-						<text pos="8,27" size="108x21">Testing</text>
-						<text pos="8,48" size="108x21">Testing</text>
+					<rectangle fillColor="selection" pos="40,6" size="19x20"/>
+					<rectangle fillColor="selection" pos="7,26" size="18x20"/>
+					<widget size="120x96" type="*widget.RichText">
+						<text pos="8,6" size="104x20">Testing</text>
+						<text pos="8,26" size="104x20">Testing</text>
+						<text pos="8,47" size="104x20">Testing</text>
 					</widget>
-					<rectangle fillColor="primary" pos="41,6" size="2x21"/>
+					<rectangle fillColor="primary" pos="40,6" size="2x20"/>
 				</widget>
 			</widget>
 		</widget>

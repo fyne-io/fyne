@@ -4,7 +4,6 @@ import (
 	"image"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
+	"golang.org/x/sys/execabs"
 )
 
 type windowsData struct {
@@ -89,6 +89,7 @@ func (p *Packager) packageWindows() error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to write .syso file")
 	}
+	defer os.Remove(outPath)
 
 	err = os.Remove(icoPath)
 	if err != nil {
@@ -106,7 +107,7 @@ func (p *Packager) packageWindows() error {
 	}
 
 	if p.install {
-		err := runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+		err := runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(p.dir, p.name)+"\"\"")
 		if err != nil {
 			return errors.Wrap(err, "Failed to run as administrator")
 		}
@@ -143,5 +144,5 @@ func runAsAdminWindows(args ...string) error {
 		cmd += ",\"" + arg + "\""
 	}
 
-	return exec.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
+	return execabs.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }

@@ -530,5 +530,4 @@ func CreateListable(u fyne.URI) error {
 	}
 
 	return lrepo.CreateListable(u)
-
 }

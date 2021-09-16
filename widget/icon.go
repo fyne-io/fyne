@@ -9,6 +9,8 @@ import (
 
 type iconRenderer struct {
 	widget.BaseRenderer
+	raster *canvas.Image
+
 	image *Icon
 }
 
@@ -26,25 +28,16 @@ func (i *iconRenderer) Layout(size fyne.Size) {
 }
 
 func (i *iconRenderer) Refresh() {
-	if i.image.Resource != i.image.cachedRes {
-		i.image.propertyLock.RLock()
-		i.updateObjects()
-		i.image.cachedRes = i.image.Resource
-		i.image.propertyLock.RUnlock()
+	if i.image.Resource == i.image.cachedRes {
+		return
 	}
 
-	i.Layout(i.image.Size())
+	i.image.propertyLock.RLock()
+	i.raster.Resource = i.image.Resource
+	i.image.cachedRes = i.image.Resource
+	i.image.propertyLock.RUnlock()
+
 	canvas.Refresh(i.image.super())
-}
-
-func (i *iconRenderer) updateObjects() {
-	var objects []fyne.CanvasObject
-	if i.image.Resource != nil {
-		raster := canvas.NewImageFromResource(i.image.Resource)
-		raster.FillMode = canvas.ImageFillContain
-		objects = append(objects, raster)
-	}
-	i.SetObjects(objects)
 }
 
 // Icon widget is a basic image component that load's its resource to match the theme.
@@ -58,7 +51,6 @@ type Icon struct {
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
-	i.cachedRes = nil
 	i.Refresh()
 }
 
@@ -73,8 +65,12 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
-	r := &iconRenderer{image: i}
-	r.updateObjects()
+
+	img := canvas.NewImageFromResource(i.Resource)
+	img.FillMode = canvas.ImageFillContain
+	r := &iconRenderer{image: i, raster: img}
+	r.SetObjects([]fyne.CanvasObject{img})
+	i.cachedRes = i.Resource
 	return r
 }
 

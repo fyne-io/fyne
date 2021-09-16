@@ -108,6 +108,11 @@ const (
 	// Since: 2.0
 	ColorNameScrollBar fyne.ThemeColorName = "scrollBar"
 
+	// ColorNameSelection is the name of theme lookup for selection color.
+	//
+	// Since: 2.1
+	ColorNameSelection fyne.ThemeColorName = "selection"
+
 	// ColorNameShadow is the name of theme lookup for shadow color.
 	//
 	// Since: 2.0
@@ -147,6 +152,16 @@ const (
 	//
 	// Since: 2.0
 	SizeNameText fyne.ThemeSizeName = "text"
+
+	// SizeNameHeadingText is the name of theme lookup for text size of a heading.
+	//
+	// Since: 2.1
+	SizeNameHeadingText fyne.ThemeSizeName = "headingText"
+
+	// SizeNameSubHeadingText is the name of theme lookup for text size of a sub-heading.
+	//
+	// Since: 2.1
+	SizeNameSubHeadingText fyne.ThemeSizeName = "subHeadingText"
 
 	// SizeNameInputBorder is the name of theme lookup for input border size.
 	//
@@ -190,6 +205,16 @@ var (
 		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
 		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
+	}
+	selectionColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x3f},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
 	}
 
 	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
@@ -238,7 +263,9 @@ func DefaultTheme() fyne.Theme {
 	return defaultTheme
 }
 
-// LightTheme defines the built in light theme colors and sizes
+// LightTheme defines the built in light theme colors and sizes.
+//
+// Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{variant: VariantLight}
 
@@ -246,7 +273,9 @@ func LightTheme() fyne.Theme {
 	return theme
 }
 
-// DarkTheme defines the built in dark theme colors and sizes
+// DarkTheme defines the built in dark theme colors and sizes.
+//
+// Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{variant: VariantDark}
 
@@ -275,6 +304,9 @@ func (t *builtinTheme) initFonts() {
 }
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	if t.variant != variantNameUserPreference {
+		v = t.variant
+	}
 	colors := darkPalette
 	if v == VariantLight {
 		colors = lightPalette
@@ -284,6 +316,8 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	} else if n == ColorNameFocus {
 		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	} else if n == ColorNameSelection {
+		return selectionColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 	}
 
 	if c, ok := colors[n]; ok {
@@ -323,6 +357,10 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameText:
 		return 14
+	case SizeNameHeadingText:
+		return 24
+	case SizeNameSubHeadingText:
+		return 18
 	case SizeNameCaptionText:
 		return 11
 	case SizeNameInputBorder:
@@ -427,6 +465,13 @@ func InputBackgroundColor() color.Color {
 	return current().Color(ColorNameInputBackground, currentVariant())
 }
 
+// SelectionColor returns the color for a selected element.
+//
+// Since: 2.1
+func SelectionColor() color.Color {
+	return safeColorLookup(ColorNameSelection, currentVariant())
+}
+
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
 	return safeColorLookup(ColorNameScrollBar, currentVariant())
@@ -459,6 +504,13 @@ func TextBoldFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Bold: true})
 }
 
+// TextHeadingSize returns the text size for header text.
+//
+// Since: 2.1
+func TextHeadingSize() float32 {
+	return current().Size(SizeNameHeadingText)
+}
+
 // TextItalicFont returns the font resource for the italic font style
 func TextItalicFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Italic: true})
@@ -472,6 +524,13 @@ func TextBoldItalicFont() fyne.Resource {
 // TextMonospaceFont returns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Monospace: true})
+}
+
+// TextSubHeadingSize returns the text size for sub-header text.
+//
+// Since: 2.1
+func TextSubHeadingSize() float32 {
+	return current().Size(SizeNameSubHeadingText)
 }
 
 // Padding is the standard gap between elements and the border around interface
@@ -607,8 +666,16 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	return DefaultTextFont()
 }
 
+func selectionColorNamed(name string) color.Color {
+	col, ok := selectionColors[name]
+	if !ok {
+		return selectionColors[ColorBlue]
+	}
+	return col
+}
+
 func setupDefaultTheme() fyne.Theme {
-	theme := &builtinTheme{}
+	theme := &builtinTheme{variant: variantNameUserPreference}
 
 	theme.initFonts()
 	return theme

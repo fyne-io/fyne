@@ -3,9 +3,10 @@ package commands
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
+
+	"golang.org/x/sys/execabs"
 )
 
 type builder struct {
@@ -45,7 +46,7 @@ func (b *builder) build() error {
 		args = append(args, "-tags", strings.Join(tags, ","))
 	}
 
-	cmd := exec.Command("go", args...)
+	cmd := execabs.Command("go", args...)
 	cmd.Dir = b.srcdir
 	if goos != "ios" && goos != "android" {
 		env = append(env, "GOOS="+goos)

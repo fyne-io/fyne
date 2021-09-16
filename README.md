@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://pkg.go.dev/fyne.io/fyne/v2?tab=doc" title="Go API Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="Go API Reference"></a>
-  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.0.2" title="2.0.2 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.0.2-blue.svg?style=flat" alt="2.0.2 release"></a>
+  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.0.3" title="2.0.3 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.0.3-blue.svg?style=flat" alt="2.0.3 release"></a>
   <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
   <a href="https://goreportcard.com/report/fyne.io/fyne/v2"><img src="https://goreportcard.com/badge/fyne.io/fyne/v2" alt="Code Status" /></a>
@@ -154,3 +154,23 @@ More documentation is available at the [Fyne developer website](https://develope
 
 You can find many example applications in the [examples repository](https://github.com/fyne-io/examples/).
 Alternatively a list of applications using fyne can be found at [our website](https://apps.fyne.io/).
+
+# Shipping the Fyne Toolkit
+
+All Fyne apps will work without pre-installed libraries, this is one reason the apps are so portable.
+However, if looking to support Fyne in a bigger way on your operating system then you can install some utilities that help to make a more complete experience.
+
+## Additional apps
+
+It is recommended that you install the following additional apps:
+
+| app | go get | description |
+| --- | ------ | ----------- |
+| fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings` | A GUI for managing your global Fyne settings like theme and scaling |
+| apps | `github.com/fyne-io/apps` | A graphical installer for the Fyne apps listed at https://apps.fyne.io |
+
+These are optional applications but can help to create a more complete desktop experience.
+
+## FyneDesk (Linux / BSD)
+
+To go all the way with Fyne on your desktop / laptop computer you could install [FyneDesk](https://github.com/fyne-io/fynedesk) as well :)

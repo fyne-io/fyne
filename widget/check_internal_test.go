@@ -124,6 +124,8 @@ func TestCheck_Enable(t *testing.T) {
 
 func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
+	w := test.NewWindow(check)
+	defer w.Close()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	assert.False(t, check.focused)
@@ -153,6 +155,8 @@ func TestCheck_Focused(t *testing.T) {
 
 func TestCheck_Hovered(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
+	w := test.NewWindow(check)
+	defer w.Close()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	check.SetChecked(true)
@@ -187,6 +191,8 @@ func TestCheck_Hovered(t *testing.T) {
 
 func TestCheck_TypedRune(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
+	w := test.NewWindow(check)
+	defer w.Close()
 	assert.False(t, check.Checked)
 
 	test.Tap(check)

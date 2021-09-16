@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -63,9 +62,33 @@ func TestEntry_Validate(t *testing.T) {
 	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
 }
 
+func TestEntry_NotEmptyValidator(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	entry := widget.NewEntry()
+	entry.Validator = func(s string) error {
+		if s == "" {
+			return errors.New("should not be empty")
+		}
+		return nil
+	}
+	w := test.NewWindow(entry)
+	defer w.Close()
+
+	test.AssertRendersToMarkup(t, "entry/validator_not_empty_initial.xml", w.Canvas())
+
+	w.Canvas().Focus(entry)
+
+	test.AssertRendersToMarkup(t, "entry/validator_not_empty_focused.xml", w.Canvas())
+
+	w.Canvas().Focus(nil)
+
+	test.AssertRendersToMarkup(t, "entry/validator_not_empty_unfocused.xml", w.Canvas())
+}
+
 func TestEntry_SetValidationError(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 

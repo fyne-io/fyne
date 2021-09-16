@@ -30,6 +30,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNamePressed:         blue,
 			theme.ColorNamePrimary:         green,
 			theme.ColorNameScrollBar:       blue,
+			theme.ColorNameSelection:       color.RGBA{red.R, red.G, red.B, 44},
 			theme.ColorNameShadow:          blue,
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
@@ -46,6 +47,9 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameScrollBarSmall:     float32(2),
 			theme.SizeNameSeparatorThickness: float32(1),
 			theme.SizeNameText:               float32(18),
+			theme.SizeNameHeadingText:        float32(30.6),
+			theme.SizeNameSubHeadingText:     float32(24),
+			theme.SizeNameCaptionText:        float32(15),
 			theme.SizeNameInputBorder:        float32(5),
 		},
 	}
