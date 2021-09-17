@@ -53,6 +53,10 @@ func (dummyApp) Preferences() Preferences {
 	return nil
 }
 
+func (dummyApp) Lifecycle() Lifecycle {
+	return nil
+}
+
 func TestSetCurrentApp(t *testing.T) {
 	a := &dummyApp{}
 	SetCurrentApp(a)

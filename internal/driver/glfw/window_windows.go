@@ -6,6 +6,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -40,4 +41,11 @@ func isDark() bool {
 	}
 
 	return useLight == 0
+}
+
+func (w *window) computeCanvasSize(width, height int) fyne.Size {
+	if w.fixedSize {
+		return fyne.NewSize(internal.UnscaleInt(w.canvas, w.width), internal.UnscaleInt(w.canvas, w.height))
+	}
+	return fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height))
 }

@@ -8,14 +8,12 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
-	"golang.org/x/image/font"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 )
-
-var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
 func logGLError(err uint32) {
 	if err == 0 {
@@ -29,26 +27,19 @@ func logGLError(err uint32) {
 	}
 }
 
-func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
-	texture, ok := textures[object]
+func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
+	texture, ok := cache.GetTexture(object)
 
 	if !ok {
-		texture = creator(object)
-		textures[object] = texture
+		texture = cache.TextureType(creator(object))
+		cache.SetTexture(object, texture, p.canvas)
 	}
-	return texture
+	return Texture(texture)
 }
 
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
 	raw := painter.DrawCircle(circle, painter.VectorPad(circle), p.textureScale)
-
-	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
-}
-
-func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
-	line := obj.(*canvas.Line)
-	raw := painter.DrawLine(line, painter.VectorPad(line), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
@@ -89,12 +80,12 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	opts.DPI = float64(painter.TextDPI * p.texScale)
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := font.Drawer{}
+	d := painter.FontDrawer{}
 	d.Dst = img
 	d.Src = &image.Uniform{C: color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text)
+	d.DrawString(text.Text, text.TextStyle.TabWidth)
 
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }

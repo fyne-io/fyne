@@ -2,10 +2,13 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -30,6 +33,44 @@ func TestButton_DisabledColor(t *testing.T) {
 	button.Disable()
 	bg = test.WidgetRenderer(button).(*buttonRenderer).buttonColor()
 	assert.Equal(t, bg, theme.DisabledButtonColor())
+}
+
+func TestButton_Hover_Math(t *testing.T) {
+	button := NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
+	render := test.WidgetRenderer(button).(*buttonRenderer)
+	button.hovered = true
+	// unpremultiplied over operator:
+	// outA = srcA + dstA*(1-srcA)
+	// outC = (srcC*srcA + dstC*dstA*(1-srcA))/outA
+
+	// premultiplied over operator:
+	// outC = srcC + dstC*(1-srcA)
+	// outA = srcA + dstA*(1-srcA)
+
+	// the buttonRenderer's buttonColor() currently calls RGBA(), turns the alpha into a 0=<a<=1 float32,
+	// and blends with the premultiplied over operator, storing the result in an RGBA64.
+
+	// We're going to call ToNRGBA instead (which returns 8-bit components), use the unpremultiplied over operator,
+	// store the result in an NRGBA, then convert what buttonColor() returns to an nrgba and compare.
+	bg := theme.ButtonColor()
+	if render.button.Importance == HighImportance {
+		bg = theme.PrimaryColor()
+	}
+	dstR, dstG, dstB, dstA := col.ToNRGBA(bg)
+	srcR, srcG, srcB, srcA := col.ToNRGBA(theme.HoverColor())
+
+	srcAlpha := float32(srcA) / 0xFF
+	dstAlpha := float32(dstA) / 0xFF
+
+	outAlpha := (srcAlpha + dstAlpha*(1-srcAlpha))
+	outR := uint32((float32(srcR)*srcAlpha + float32(dstR)*dstAlpha*(1-srcAlpha)) / outAlpha)
+	outG := uint32((float32(srcG)*srcAlpha + float32(dstG)*dstAlpha*(1-srcAlpha)) / outAlpha)
+	outB := uint32((float32(srcB)*srcAlpha + float32(dstB)*dstAlpha*(1-srcAlpha)) / outAlpha)
+
+	nrgba := color.NRGBA{R: uint8(outR), G: uint8(outG), B: uint8(outB), A: uint8(outAlpha * 0xFF)}
+	bcn := color.NRGBAModel.Convert(render.buttonColor())
+
+	assert.Equal(t, nrgba, bcn)
 }
 
 func TestButton_DisabledIcon(t *testing.T) {
@@ -83,6 +124,26 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	button.Disable()
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.SearchIcon().Name()))
 
+}
+
+func TestButton_Focus(t *testing.T) {
+	tapped := false
+	button := NewButton("Test", func() {
+		tapped = true
+	})
+	render := test.WidgetRenderer(button).(*buttonRenderer)
+	assert.Equal(t, theme.ButtonColor(), render.buttonColor())
+
+	assert.Equal(t, false, tapped)
+	button.FocusGained()
+	render.Refresh() // force update without waiting
+
+	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.buttonColor())
+	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.Equal(t, true, tapped)
+
+	button.FocusLost()
+	assert.Equal(t, theme.ButtonColor(), render.buttonColor())
 }
 
 func TestButtonRenderer_Layout(t *testing.T) {
@@ -148,12 +209,13 @@ func TestButton_Shadow(t *testing.T) {
 func TestButtonRenderer_ApplyTheme(t *testing.T) {
 	button := &Button{}
 	render := test.WidgetRenderer(button).(*buttonRenderer)
+	textRender := test.WidgetRenderer(render.label).(*textRenderer)
 
-	textSize := render.label.TextSize
+	textSize := textRender.Objects()[0].(*canvas.Text).TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
-		customTextSize = render.label.TextSize
+		button.Refresh()
+		customTextSize = textRender.Objects()[0].(*canvas.Text).TextSize
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)

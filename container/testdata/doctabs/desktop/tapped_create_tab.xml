@@ -1,0 +1,49 @@
+<canvas size="300x100">
+	<content>
+		<widget size="300x100" type="*container.DocTabs">
+			<container size="300x36">
+				<widget size="220x36" type="*widget.Scroll">
+					<container pos="-135,0" size="355x36">
+						<widget size="80x36" type="*container.tabButton">
+							<text bold pos="8,8" size="64x20">Test1</text>
+						</widget>
+						<widget pos="84,0" size="80x36" type="*container.tabButton">
+							<text bold pos="8,8" size="64x20">Test2</text>
+						</widget>
+						<widget pos="169,0" size="80x36" type="*container.tabButton">
+							<text bold pos="8,8" size="64x20">Test3</text>
+						</widget>
+						<widget pos="253,0" size="102x36" type="*container.tabButton">
+							<text bold color="primary" pos="8,8" size="86x20">Another</text>
+						</widget>
+					</container>
+					<widget pos="0,30" size="220x6" type="*widget.scrollBarArea">
+						<widget pos="83,3" size="136x3" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="136x3"/>
+						</widget>
+					</widget>
+					<widget size="0x36" type="*widget.Shadow">
+						<linearGradient angle="270" size="8x36" startColor="shadow"/>
+					</widget>
+				</widget>
+				<container pos="224,0" size="76x36">
+					<widget size="36x36" type="*widget.Button">
+						<rectangle fillColor="button" size="36x36"/>
+						<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="32x32"/>
+						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize"/>
+					</widget>
+					<widget pos="40,0" size="36x36" type="*widget.Button">
+						<rectangle fillColor="button" size="36x36"/>
+						<rectangle size="0x0"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+					</widget>
+				</container>
+			</container>
+			<rectangle fillColor="shadow" pos="0,36" size="300x4"/>
+			<rectangle fillColor="primary" pos="117,36" size="102x4"/>
+			<widget pos="0,40" size="300x59" type="*widget.Label">
+				<text pos="8,8" size="284x20">Another Tab</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>

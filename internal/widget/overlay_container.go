@@ -20,7 +20,9 @@ type OverlayContainer struct {
 
 // NewOverlayContainer creates an OverlayContainer.
 func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, onDismiss func()) *OverlayContainer {
-	return &OverlayContainer{canvas: canvas, Content: c, onDismiss: onDismiss}
+	o := &OverlayContainer{canvas: canvas, Content: c, onDismiss: onDismiss}
+	o.ExtendBaseWidget(o)
+	return o
 }
 
 // CreateRenderer returns a new renderer for the overlay container.
@@ -38,15 +40,7 @@ func (o *OverlayContainer) Hide() {
 		o.canvas.Overlays().Remove(o)
 		o.shown = false
 	}
-	HideWidget(&o.Base, o)
-}
-
-// MinSize returns the minimal size of the overlay container.
-// This is the same as the size of the canvas.
-//
-// Implements: fyne.Widget
-func (o *OverlayContainer) MinSize() fyne.Size {
-	return MinSizeOf(o)
+	o.Base.Hide()
 }
 
 // MouseIn catches mouse-in events not handled by the container’s content. It does nothing.
@@ -67,28 +61,6 @@ func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 func (o *OverlayContainer) MouseOut() {
 }
 
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (o *OverlayContainer) Move(pos fyne.Position) {
-	MoveWidget(&o.Base, o, pos)
-}
-
-// Refresh triggers a redraw of the overlay container.
-//
-// Implements: fyne.Widget
-func (o *OverlayContainer) Refresh() {
-	RefreshWidget(o)
-}
-
-// Resize changes the size of the overlay container.
-// This is normally called by the canvas overlay management.
-//
-// Implements: fyne.Widget
-func (o *OverlayContainer) Resize(size fyne.Size) {
-	ResizeWidget(&o.Base, o, size)
-}
-
 // Show makes the overlay container visible.
 //
 // Implements: fyne.Widget
@@ -97,7 +69,7 @@ func (o *OverlayContainer) Show() {
 		o.canvas.Overlays().Add(o)
 		o.shown = true
 	}
-	ShowWidget(&o.Base, o)
+	o.Base.Show()
 }
 
 // Tapped catches tap events not handled by the container’s content.

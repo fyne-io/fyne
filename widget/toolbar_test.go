@@ -11,8 +11,14 @@ import (
 )
 
 func TestToolbarSize(t *testing.T) {
-	toolbar := NewToolbar(NewToolbarSpacer(), NewToolbarSpacer())
+	toolbar := NewToolbar(NewToolbarSpacer(), NewToolbarAction(theme.HomeIcon(), func() {}))
 	assert.Equal(t, 2, len(toolbar.Items))
+	size := toolbar.MinSize()
+
+	toolbar.Items = append(toolbar.Items, &toolbarLabel{NewLabel("Hi")})
+	toolbar.Refresh()
+	assert.Equal(t, size.Height, toolbar.MinSize().Height)
+	assert.Greater(t, toolbar.MinSize().Width, size.Width)
 }
 
 func TestToolbar_Apppend(t *testing.T) {
@@ -64,6 +70,14 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 	}
 	if assert.Equal(t, 2, len(items)) {
 		assert.Equal(t, fyne.NewPos(0, 0), items[0].Position())
-		assert.Equal(t, fyne.NewPos(32, 0), items[1].Position())
+		assert.Equal(t, fyne.NewPos(40, 0), items[1].Position())
 	}
+}
+
+type toolbarLabel struct {
+	*Label
+}
+
+func (t *toolbarLabel) ToolbarObject() fyne.CanvasObject {
+	return t.Label
 }

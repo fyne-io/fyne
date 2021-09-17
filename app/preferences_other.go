@@ -1,4 +1,4 @@
-// +build !ios,!android,!mobile,!nacl
+// +build !ios,!android,!mobile
 
 package app
 
@@ -16,7 +16,10 @@ func (a *fyneApp) storageRoot() string {
 
 func (p *preferences) watch() {
 	watchFile(p.storagePath(), func() {
-		if p.ignoreChange {
+		p.prefLock.RLock()
+		shouldIgnoreChange := p.ignoreChange
+		p.prefLock.RUnlock()
+		if shouldIgnoreChange {
 			return
 		}
 

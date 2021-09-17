@@ -12,7 +12,7 @@ import (
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
 	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
 
-	texture := getTexture(o, creator)
+	texture := p.getTexture(o, creator)
 	if texture == NoTexture {
 		return
 	}
@@ -37,8 +37,10 @@ func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame f
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(line, p.newGlLineTexture, pos, line.Size(), frame, canvas.ImageFillStretch,
-		1.0, painter.VectorPad(line))
+	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
+	vbo := p.glCreateLineBuffer(points)
+	p.glDrawLine(halfWidth, line.StrokeColor, feather)
+	p.glFreeBuffer(vbo)
 }
 
 func (p *glPainter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
@@ -75,8 +77,8 @@ func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Si
 		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
 	}
 
-	if text.Size().Height > text.MinSize().Height {
-		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
+	if containerSize.Height > size.Height {
+		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
@@ -104,6 +106,62 @@ func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyn
 	case *canvas.RadialGradient:
 		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
 	}
+}
+
+func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {
+	// Shift line coordinates so that they match the target position.
+	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
+	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
+	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
+	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
+	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)
+	pos2.Y = roundToPixel(pos2.Y+yPosDiff, p.pixScale)
+
+	if lineWidth <= 1 {
+		offset := float32(0.5)                  // adjust location for lines < 1pt on regular display
+		if lineWidth <= 0.5 && p.pixScale > 1 { // and for 1px drawing on HiDPI (width 0.5)
+			offset = 0.25
+		}
+		if pos1.X == pos2.X {
+			pos1.X -= offset
+			pos2.X -= offset
+		}
+		if pos1.Y == pos2.Y {
+			pos1.Y -= offset
+			pos2.Y -= offset
+		}
+	}
+
+	x1Pos := pos1.X / frame.Width
+	x1 := -1 + x1Pos*2
+	y1Pos := pos1.Y / frame.Height
+	y1 := 1 - y1Pos*2
+	x2Pos := pos2.X / frame.Width
+	x2 := -1 + x2Pos*2
+	y2Pos := pos2.Y / frame.Height
+	y2 := 1 - y2Pos*2
+
+	normalX := (pos2.Y - pos1.Y) / frame.Width
+	normalY := (pos2.X - pos1.X) / frame.Height
+	dirLength := float32(math.Sqrt(float64(normalX*normalX + normalY*normalY)))
+	normalX /= dirLength
+	normalY /= dirLength
+
+	normalObjX := normalX * 0.5 * frame.Width
+	normalObjY := normalY * 0.5 * frame.Height
+	widthMultiplier := float32(math.Sqrt(float64(normalObjX*normalObjX + normalObjY*normalObjY)))
+	halfWidth := (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
+	featherWidth := feather / widthMultiplier
+
+	return []float32{
+		// coord x, y normal x, y
+		x1, y1, normalX, normalY,
+		x2, y2, normalX, normalY,
+		x2, y2, -normalX, -normalY,
+		x2, y2, -normalX, -normalY,
+		x1, y1, normalX, normalY,
+		x1, y1, -normalX, -normalY,
+	}, halfWidth, featherWidth
 }
 
 // rectCoords calculates the openGL coordinate space of a rectangle

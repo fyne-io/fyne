@@ -82,7 +82,6 @@ func (c *Container) MinSize() Size {
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
 	c.position = pos
-	c.layout()
 }
 
 // Position gets the current position of this Container, relative to its parent.

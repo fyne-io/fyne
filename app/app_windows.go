@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -18,6 +17,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
+
+	"golang.org/x/sys/execabs"
 )
 
 const notificationTemplate = `$title = "%s"
@@ -63,18 +64,18 @@ func rootConfigDir() string {
 	return filepath.Join(desktopConfig, "fyne")
 }
 
-func (app *fyneApp) OpenURL(url *url.URL) error {
-	cmd := app.exec("rundll32", "url.dll,FileProtocolHandler", url.String())
+func (a *fyneApp) OpenURL(url *url.URL) error {
+	cmd := a.exec("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
 
 var scriptNum = 0
 
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
-	appID := app.UniqueID() // TODO once we have an app name compiled in this could be improved
+	appID := a.UniqueID() // TODO once we have an app name compiled in this could be improved
 	if appID == "" || strings.Index(appID, "missing-id") == 0 {
 		appID = "Fyne app"
 	}
@@ -102,7 +103,7 @@ func runScript(name, script string) {
 	defer os.Remove(tmpFilePath)
 
 	launch := "(Get-Content -Encoding UTF8 -Path " + tmpFilePath + " -Raw) | Invoke-Expression"
-	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
+	cmd := execabs.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
 	if err != nil {

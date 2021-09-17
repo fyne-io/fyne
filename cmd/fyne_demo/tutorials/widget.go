@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -105,7 +106,7 @@ func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated := newNumEntry()
 	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
@@ -156,6 +157,23 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
+	rich := widget.NewRichTextFromMarkdown(`
+# RichText Heading
+
+## A Sub Heading
+
+---
+
+* Item1 in _three_ segments
+* Item2
+* Item3
+
+Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
+This styled row should also wrap as expected, but only *when required*.
+
+> An interesting quote here, most likely sharing some very interesting wisdom.`)
+	rich.Scroll = container.ScrollBoth
+
 	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
@@ -169,9 +187,18 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 		label.Alignment = align
 		hyperlink.Alignment = align
+		for i := range rich.Segments {
+			if seg, ok := rich.Segments[i].(*widget.TextSegment); ok {
+				seg.Style.Alignment = align
+			}
+			if seg, ok := rich.Segments[i].(*widget.HyperlinkSegment); ok {
+				seg.Alignment = align
+			}
+		}
 
 		label.Refresh()
 		hyperlink.Refresh()
+		rich.Refresh()
 	})
 	radioAlign.SetSelected("Text Alignment Leading")
 
@@ -191,10 +218,12 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		entryLoremIpsum.Wrapping = wrap
+		rich.Wrapping = wrap
 
 		label.Refresh()
 		hyperlink.Refresh()
 		entryLoremIpsum.Refresh()
+		rich.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
@@ -209,8 +238,8 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	)
 
 	grid := makeTextGrid()
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, grid, nil, nil),
-		fixed, entryLoremIpsum, grid)
+	return container.NewBorder(fixed, grid, nil, nil,
+		container.NewGridWithRows(2, rich, entryLoremIpsum))
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {
@@ -218,6 +247,8 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
+	checkGroup := widget.NewCheckGroup([]string{"CheckGroup Item 1", "CheckGroup Item 2"}, func(s []string) { fmt.Println("selected", s) })
+	checkGroup.Horizontal = true
 	radio := widget.NewRadioGroup([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
 	radio.Horizontal = true
 	disabledRadio := widget.NewRadioGroup([]string{"Disabled radio"}, func(string) {})
@@ -228,6 +259,7 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 		selectEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		disabledCheck,
+		checkGroup,
 		radio,
 		disabledRadio,
 		widget.NewSlider(0, 100),
@@ -370,4 +402,19 @@ func newContextMenuButton(label string, menu *fyne.Menu) *contextMenuButton {
 
 	b.ExtendBaseWidget(b)
 	return b
+}
+
+type numEntry struct {
+	widget.Entry
+}
+
+func (n *numEntry) Keyboard() mobile.KeyboardType {
+	return mobile.NumberKeyboard
+}
+
+func newNumEntry() *numEntry {
+	e := &numEntry{}
+	e.ExtendBaseWidget(e)
+	e.Validator = validation.NewRegexp(`\d`, "Must contain a number")
+	return e
 }

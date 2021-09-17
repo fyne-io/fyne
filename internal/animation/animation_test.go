@@ -47,7 +47,9 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		t.Error("animation was not ticked")
 	}
 	run.Stop(a)
+	run.animationMutex.RLock()
 	assert.Zero(t, len(run.animations))
+	run.animationMutex.RUnlock()
 }
 
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {

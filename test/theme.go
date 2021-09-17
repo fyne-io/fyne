@@ -35,6 +35,7 @@ func Theme() fyne.Theme {
 				theme.ColorNamePressed:         color.NRGBA{A: 0x33},
 				theme.ColorNamePrimary:         color.NRGBA{R: 0xff, G: 0xcc, B: 0x80, A: 0xff},
 				theme.ColorNameScrollBar:       color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xaa},
+				theme.ColorNameSelection:       color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0x99},
 				theme.ColorNameShadow:          color.NRGBA{A: 0x88},
 			},
 			fonts: map[fyne.TextStyle]fyne.Resource{
@@ -51,6 +52,9 @@ func Theme() fyne.Theme {
 				theme.SizeNameScrollBarSmall:     float32(3),
 				theme.SizeNameSeparatorThickness: float32(1),
 				theme.SizeNameText:               float32(14),
+				theme.SizeNameHeadingText:        float32(23.8),
+				theme.SizeNameSubHeadingText:     float32(18),
+				theme.SizeNameCaptionText:        float32(11),
 				theme.SizeNameInputBorder:        float32(2),
 			},
 		}

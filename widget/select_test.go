@@ -21,6 +21,25 @@ func TestNewSelect(t *testing.T) {
 	assert.Equal(t, "", combo.Selected)
 }
 
+func TestSelect_Align(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
+	sel.Alignment = fyne.TextAlignCenter
+	w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+	defer w.Close()
+	w.Resize(fyne.NewSize(200, 150))
+	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
+
+	test.Tap(sel)
+	test.AssertRendersToMarkup(t, "select/center.xml", c)
+
+	sel.Alignment = fyne.TextAlignTrailing
+	sel.Refresh()
+	test.AssertRendersToMarkup(t, "select/trailing.xml", c)
+}
+
 func TestSelect_ChangeTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()

@@ -30,7 +30,20 @@ func (l *Line) Size() fyne.Size {
 
 // Resize sets a new bottom-right position for the line object and it will then be refreshed.
 func (l *Line) Resize(size fyne.Size) {
-	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	if size == l.Size() {
+		return
+	}
+
+	if l.Position1.X <= l.Position2.X {
+		l.Position2.X = l.Position1.X + size.Width
+	} else {
+		l.Position1.X = l.Position2.X + size.Width
+	}
+	if l.Position1.Y <= l.Position2.Y {
+		l.Position2.Y = l.Position1.Y + size.Height
+	} else {
+		l.Position1.Y = l.Position2.Y + size.Height
+	}
 	Refresh(l)
 }
 
@@ -41,9 +54,12 @@ func (l *Line) Position() fyne.Position {
 
 // Move the line object to a new position, relative to its parent / canvas
 func (l *Line) Move(pos fyne.Position) {
-	size := l.Size()
-	l.Position1 = pos
-	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	oldPos := l.Position()
+	deltaX := pos.X - oldPos.X
+	deltaY := pos.Y - oldPos.Y
+
+	l.Position1 = l.Position1.Add(fyne.NewPos(deltaX, deltaY))
+	l.Position2 = l.Position2.Add(fyne.NewPos(deltaX, deltaY))
 }
 
 // MinSize for a Line simply returns Size{1, 1} as there is no

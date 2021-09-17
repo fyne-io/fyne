@@ -34,14 +34,14 @@ func TestShowFolderOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	title := ui.Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
 	assert.Equal(t, "Open Folder", title.Text)
 
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
 	fileName := files.Objects[0].(*fileDialogItem).name

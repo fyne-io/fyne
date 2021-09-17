@@ -92,21 +92,13 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		libFiles = append(libFiles, libPath)
 	}
 
-	block, _ := pem.Decode([]byte(debugCert))
-	if block == nil {
-		return nil, errors.New("no debug cert")
-	}
-	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
 	if buildO == "" {
 		buildO = androidPkgName(appName) + ".apk"
 	}
 	if !strings.HasSuffix(buildO, ".apk") {
 		return nil, fmt.Errorf("output file name %q does not end in '.apk'", buildO)
 	}
+
 	var out io.Writer
 	if !buildN {
 		f, err := os.Create(buildO)
@@ -119,6 +111,131 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 			}
 		}()
 		out = f
+	}
+
+	apkw, err := buildAPK(out, nmpkgs, libFiles, androidArchs)
+	if err != nil {
+		return nil, err
+	}
+	err = addAssets(apkw, manifestData, dir, iconPath, target)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: add gdbserver to apk?
+
+	if !buildN {
+		if err := apkw.Close(); err != nil {
+			return nil, err
+		}
+	}
+
+	// TODO: return nmpkgs
+	return nmpkgs[androidArchs[0]], nil
+}
+
+func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target int) error {
+	// Add any assets.
+	var arsc struct {
+		iconPath string
+	}
+	arsc.iconPath = iconPath
+	assetsDir := filepath.Join(dir, "assets")
+	assetsDirExists := true
+	fi, err := os.Stat(assetsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			assetsDirExists = false
+		} else {
+			return err
+		}
+	} else {
+		assetsDirExists = fi.IsDir()
+	}
+	if assetsDirExists {
+		// if assets is a symlink, follow the symlink.
+		assetsDir, err = filepath.EvalSymlinks(assetsDir)
+		if err != nil {
+			return err
+		}
+		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if name := filepath.Base(path); strings.HasPrefix(name, ".") {
+				// Do not include the hidden files.
+				return nil
+			}
+			if info.IsDir() {
+				return nil
+			}
+
+			if rel, err := filepath.Rel(assetsDir, path); rel == "icon.png" && err == nil {
+				arsc.iconPath = path
+				// TODO returning here does not write the assets/icon.png to the final assets output,
+				// making it unavailable via the assets API. Should the file be duplicated into assets
+				// or should assets API be able to retrieve files from the generated resource table?
+				return nil
+			}
+
+			name := "assets/" + path[len(assetsDir)+1:]
+			return apkwWriteFile(name, path, apkw)
+		})
+		if err != nil {
+			return fmt.Errorf("asset %v", err)
+		}
+	}
+
+	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", target)
+	if err != nil {
+		return err
+	}
+
+	// generate resources.arsc identifying single xxxhdpi icon resource.
+	if arsc.iconPath != "" {
+		pkgname, err := bxml.RawValueByName("manifest", xml.Name{Local: "package"})
+		if err != nil {
+			return err
+		}
+		tbl, name := binres.NewMipmapTable(pkgname)
+		if err := apkwWriteFile(name, arsc.iconPath, apkw); err != nil {
+			return err
+		}
+		w, err := apkwCreate("resources.arsc", apkw)
+		if err != nil {
+			return err
+		}
+		bin, err := tbl.MarshalBinary()
+		if err != nil {
+			return err
+		}
+		if _, err := w.Write(bin); err != nil {
+			return err
+		}
+	}
+
+	w, err := apkwCreate("AndroidManifest.xml", apkw)
+	if err != nil {
+		return err
+	}
+	bin, err := bxml.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	if _, err := w.Write(bin); err != nil {
+		return err
+	}
+	return nil
+}
+
+func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []string, androidArchs []string) (*Writer, error) {
+	block, _ := pem.Decode([]byte(debugCert))
+	if block == nil {
+		return nil, errors.New("no debug cert")
+	}
+	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
 	}
 
 	var apkw *Writer
@@ -146,119 +263,18 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 	for _, arch := range androidArchs {
 		toolchain := ndk.Toolchain(arch)
-		if nmpkgs[arch]["github.com/fyne-io/mobile/exp/audio/al"] {
+		if nmpkgs[arch]["fyne.io/fyne/v2/internal/driver/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.abi + "/libopenal.so"
 			src := filepath.Join(gomobilepath, dst)
 			if _, err := os.Stat(src); err != nil {
-				return nil, errors.New("the Android requires the github.com/fyne-io/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
+				return nil, errors.New("the Android requires the fyne.io/fyne/v2/internal/driver/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
 			}
 			if err := apkwWriteFile(dst, src, apkw); err != nil {
 				return nil, err
 			}
 		}
 	}
-
-	// Add any assets.
-	var arsc struct {
-		iconPath string
-	}
-	arsc.iconPath = iconPath
-	assetsDir := filepath.Join(dir, "assets")
-	assetsDirExists := true
-	fi, err := os.Stat(assetsDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			assetsDirExists = false
-		} else {
-			return nil, err
-		}
-	} else {
-		assetsDirExists = fi.IsDir()
-	}
-	if assetsDirExists {
-		// if assets is a symlink, follow the symlink.
-		assetsDir, err = filepath.EvalSymlinks(assetsDir)
-		if err != nil {
-			return nil, err
-		}
-		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if name := filepath.Base(path); strings.HasPrefix(name, ".") {
-				// Do not include the hidden files.
-				return nil
-			}
-			if info.IsDir() {
-				return nil
-			}
-
-			if rel, err := filepath.Rel(assetsDir, path); rel == "icon.png" && err == nil {
-				arsc.iconPath = path
-				// TODO returning here does not write the assets/icon.png to the final assets output,
-				// making it unavailable via the assets API. Should the file be duplicated into assets
-				// or should assets API be able to retrieve files from the generated resource table?
-				return nil
-			}
-
-			name := "assets/" + path[len(assetsDir)+1:]
-			return apkwWriteFile(name, path, apkw)
-		})
-		if err != nil {
-			return nil, fmt.Errorf("asset %v", err)
-		}
-	}
-
-	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", target)
-	if err != nil {
-		return nil, err
-	}
-
-	// generate resources.arsc identifying single xxxhdpi icon resource.
-	if arsc.iconPath != "" {
-		pkgname, err := bxml.RawValueByName("manifest", xml.Name{Local: "package"})
-		if err != nil {
-			return nil, err
-		}
-		tbl, name := binres.NewMipmapTable(pkgname)
-		if err := apkwWriteFile(name, arsc.iconPath, apkw); err != nil {
-			return nil, err
-		}
-		w, err := apkwCreate("resources.arsc", apkw)
-		if err != nil {
-			return nil, err
-		}
-		bin, err := tbl.MarshalBinary()
-		if err != nil {
-			return nil, err
-		}
-		if _, err := w.Write(bin); err != nil {
-			return nil, err
-		}
-	}
-
-	w, err = apkwCreate("AndroidManifest.xml", apkw)
-	if err != nil {
-		return nil, err
-	}
-	bin, err := bxml.MarshalBinary()
-	if err != nil {
-		return nil, err
-	}
-	if _, err := w.Write(bin); err != nil {
-		return nil, err
-	}
-
-	// TODO: add gdbserver to apk?
-
-	if !buildN {
-		if err := apkw.Close(); err != nil {
-			return nil, err
-		}
-	}
-
-	// TODO: return nmpkgs
-	return nmpkgs[androidArchs[0]], nil
+	return apkw, nil
 }
 
 func apkwCreate(name string, apkw *Writer) (io.Writer, error) {

@@ -3,6 +3,73 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.1 - 17 September 2021
+
+### Added
+
+* DocTabs container for handling multiple open files
+* Lifecycle API for handling foreground, background and other event
+* Add RichText widget and Markdown parser
+* Add TabWidth to TextStyle to specify tab size in spaces
+* Add CheckGroup widget for multi-select
+* Add FyneApp.toml metadata file to ease build commands
+* Include http and https in standard repositories
+* Add selection color to themes
+* Include baseline information in driver font measurement
+* Document storage API (App.Storage().Create() and others)
+* Add "App Files" to file dialog for apps that use document storage
+* Tab overflow on AppTabs
+* Add URI and Unbound type to data bindings
+* Add keyboard support for menus, pop-ups and buttons
+* Add SimpleRenderer to help make simple widgets (#709)
+* Add scroll functions for List, Table, Tree (#1892)
+* Add selection and disabling to MenuItem
+* Add Alignment to widget.Select (#2329)
+* Expose ScanCode for keyboard events originating from hardware (#1523)
+* Support macOS GPU switching (#2423)
+
+### Changed
+
+* Focusable widgets are no longer focused on tap, add canvas.Focus(obj) in Tapped handler if required
+* Move to background based selection for List, Table and Tree
+* Update fyne command line tool to use --posix style parameters
+* Switch from gz to xz compression for unix packages
+* Performance improvements with line, text and raster rendering
+* Items not yet visible can no longer be focused
+* Lines can now be drawn down to 1px (instead of 1dp) (#2298)
+* Support multiple lines of text on button (#2378)
+* Improved text layout speed by caching string size calculations
+* Updated to require Go 1.14 so we can use some new features
+* Window Resize request is now asynchronous
+* Up/Down keys take cursor home/end when on first/last lines respectively
+
+### Fixed
+
+* Correctly align text tabs (#1791)
+* Mobile apps theme does not match system (#472)
+* Toolbar with widget.Label makes the ToolbarAction buttons higher (#2257)
+* Memory leaks in renderers and canvases cache maps (#735)
+* FileDialog SetFilter does not work on Android devices (#2353)
+* Hover fix for List and Tree with Draggable objects
+* Line resize can flip slope (#2208)
+* Deadlocks when using widgets with data (#2348)
+* Changing input type with keyboard visible would not update soft keyboards
+* MainMenu() Close item does NOT call function defined in SetCloseIntercept (#2355)
+* Entry cursor position with mouse is offset vertically by theme.SizeNameInputBorder (#2387)
+* Backspace key is not working on Android AOSP (#1941)
+* macOS: 'NSUserNotification' has been deprecated (#1833)
+* macOS: Native menu would add new items if refreshed
+* iOS builds fail since Go 1.16
+* Re-add support for 32 bit iOS devices, if built with Go 1.14
+* Android builds fail on Apple M1 (#2439)
+* SetFullScreen(true) before ShowAndRun fails (#2446)
+* Interacting with another app when window.SetFullScreen(true) will cause the application to hide itself. (#2448)
+* Sequential writes to preferences does not save to file (#2449)
+* Correct Android keyboard handling (#2447)
+* MIUI-Android: The widget’s Hyperlink cannot open the URL (#1514)
+* Improved performance of data binding conversions and text MinSize
+
+
 ## 2.0.4 - 6 August 2021
 
 ### Changed

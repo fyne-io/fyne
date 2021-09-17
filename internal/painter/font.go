@@ -4,16 +4,22 @@ import (
 	"image"
 	"sync"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/theme"
+
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
-// TextDPI is a global constant that determines how text scales to interface sizes
-const TextDPI = 78
+const (
+	// DefaultTabWidth is the default width in spaces
+	DefaultTabWidth = 4
+
+	// TextDPI is a global constant that determines how text scales to interface sizes
+	TextDPI = 78
+)
 
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
@@ -24,16 +30,29 @@ func loadFont(data fyne.Resource) *truetype.Font {
 	return loaded
 }
 
-// RenderedTextSize looks up how bit a string would be if drawn on screen
-func RenderedTextSize(text string, size float32, style fyne.TextStyle) fyne.Size {
+// RenderedTextSize looks up how big a string would be if drawn on screen.
+// It also returns the distance from top to the text baseline.
+func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
+	size, base := cache.GetFontMetrics(text, fontSize, style)
+	if base != 0 {
+		return size, base
+	}
+
+	size, base = measureText(text, fontSize, style)
+	cache.SetFontMetrics(text, fontSize, style, size, base)
+	return size, base
+}
+
+func measureText(text string, fontSize float32, style fyne.TextStyle) (fyne.Size, float32) {
 	var opts truetype.Options
-	opts.Size = float64(size)
+	opts.Size = float64(fontSize)
 	opts.DPI = TextDPI
 
 	face := CachedFontFace(style, &opts)
-	advance := font.MeasureString(face, text)
+	advance := MeasureString(face, text, style.TabWidth)
 
-	return fyne.NewSize(float32(advance.Ceil()), float32(face.Metrics().Height.Ceil()))
+	return fyne.NewSize(fixed266ToFloat32(advance), fixed266ToFloat32(face.Metrics().Height)),
+		fixed266ToFloat32(face.Metrics().Ascent)
 }
 
 type compositeFace struct {
@@ -191,4 +210,8 @@ func ClearFontCache() {
 	}
 
 	fontCache = make(map[fyne.TextStyle]*fontCacheItem)
+}
+
+func fixed266ToFloat32(i fixed.Int26_6) float32 {
+	return float32(float64(i) / (1 << 6))
 }

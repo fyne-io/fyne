@@ -14,11 +14,30 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
 
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/draw"
 )
+
+var aspects = make(map[interface{}]float32, 16)
+
+// GetAspect looks up an aspect ratio of an image
+func GetAspect(img *canvas.Image) float32 {
+	aspect := float32(0.0)
+	if img.Resource != nil {
+		aspect = aspects[img.Resource.Name()]
+	} else if img.File != "" {
+		aspect = aspects[img.File]
+	}
+
+	if aspect == 0 {
+		aspect = aspects[img]
+	}
+
+	return aspect
+}
 
 // PaintImage renders a given fyne Image to a Go standard image
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
@@ -39,14 +58,18 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 			isSVG = isResourceSVG(img.Resource)
 		} else {
 			name = img.File
-			handle, _ := os.Open(img.File)
+			handle, err := os.Open(img.File)
+			if err != nil {
+				fyne.LogError("image load error", err)
+				return nil
+			}
 			defer handle.Close()
 			file = handle
 			isSVG = isFileSVG(img.File)
 		}
 
 		if isSVG {
-			tex := svgCacheGet(name, width, height)
+			tex := cache.GetSvg(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
 
@@ -87,7 +110,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					return nil
 				}
 
-				svgCachePut(name, tex, width, height)
+				cache.SetSvg(name, tex, width, height)
 			}
 
 			return tex

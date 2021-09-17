@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 )
 
-// RadioGroup widget has a list of text labels and radio check icons next to each.
+// RadioGroup widget has a list of text labels and checks check icons next to each.
 // Changing the selection (only one can be selected) will trigger the changed func.
 //
 // Since: 1.4
@@ -23,7 +23,7 @@ type RadioGroup struct {
 
 var _ fyne.Widget = (*RadioGroup)(nil)
 
-// NewRadioGroup creates a new radio widget with the set options and change handler
+// NewRadioGroup creates a new radio group widget with the set options and change handler
 //
 // Since: 1.4
 func NewRadioGroup(options []string, changed func(string)) *RadioGroup {

@@ -126,6 +126,9 @@ func main() {
 	bundleIcon("document-print", f)
 	bundleIcon("document-save", f)
 
+	bundleIcon("more-horizontal", f)
+	bundleIcon("more-vertical", f)
+
 	bundleIcon("info", f)
 	bundleIcon("question", f)
 	bundleIcon("warning", f)
@@ -159,6 +162,9 @@ func main() {
 	bundleIcon("mail-reply_all", f)
 	bundleIcon("mail-send", f)
 
+	bundleIcon("media-music", f)
+	bundleIcon("media-photo", f)
+	bundleIcon("media-video", f)
 	bundleIcon("media-fast-forward", f)
 	bundleIcon("media-fast-rewind", f)
 	bundleIcon("media-pause", f)
@@ -186,6 +192,13 @@ func main() {
 	bundleIcon("computer", f)
 	bundleIcon("storage", f)
 	bundleIcon("upload", f)
+
+	bundleIcon("account", f)
+	bundleIcon("login", f)
+	bundleIcon("logout", f)
+
+	bundleIcon("list", f)
+	bundleIcon("grid", f)
 
 	err = writeFile("bundled-icons.go", f.Bytes())
 	if err != nil {

@@ -1,0 +1,50 @@
+<canvas size="59x77">
+	<content>
+		<widget size="59x77" type="*container.DocTabs">
+			<container pos="0,40" size="59x36">
+				<widget size="19x36" type="*widget.Scroll">
+					<container size="225x36">
+						<widget size="73x37" type="*container.tabButton">
+							<text bold color="primary" pos="4,8" size="65x20">Test1</text>
+							<widget pos="49,8" size="20x20" type="*container.tabCloseButton">
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
+							</widget>
+						</widget>
+						<widget pos="77,0" size="72x37" type="*container.tabButton">
+							<text bold pos="4,8" size="64x20">Test2</text>
+							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
+								<image rsc="cancelIcon" size="iconInlineSize"/>
+							</widget>
+						</widget>
+						<widget pos="153,0" size="73x37" type="*container.tabButton">
+							<text bold pos="4,8" size="65x20">Test3</text>
+							<widget pos="49,8" size="20x20" type="*container.tabCloseButton">
+								<image rsc="cancelIcon" size="iconInlineSize"/>
+							</widget>
+						</widget>
+					</container>
+					<widget pos="0,30" size="19x6" type="*widget.scrollBarArea">
+						<widget pos="0,3" size="16x3" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="16x3"/>
+						</widget>
+					</widget>
+					<widget pos="19,0" size="0x36" type="*widget.Shadow">
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x36"/>
+					</widget>
+				</widget>
+				<container pos="23,0" size="36x36">
+					<widget size="36x36" type="*widget.Button">
+						<rectangle fillColor="button" size="36x36"/>
+						<rectangle size="0x0"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+					</widget>
+				</container>
+			</container>
+			<rectangle fillColor="shadow" pos="0,36" size="59x4"/>
+			<rectangle fillColor="primary" pos="0,36" size="19x4"/>
+			<widget size="59x36" type="*widget.Label">
+				<text pos="8,8" size="43x20">Text 1</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>

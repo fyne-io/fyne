@@ -8,12 +8,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/tools/playground"
@@ -36,13 +37,15 @@ type Settings struct {
 func NewSettings() *Settings {
 	s := &Settings{}
 	s.load()
-
+	if s.fyneSettings.Scale == 0 {
+		s.fyneSettings.Scale = 1
+	}
 	return s
 }
 
 // AppearanceIcon returns the icon for appearance settings
 func (s *Settings) AppearanceIcon() fyne.Resource {
-	return theme.NewThemedResource(appearanceIcon)
+	return theme.NewThemedResource(resourceAppearanceSvg)
 }
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
@@ -115,7 +118,7 @@ func (s *Settings) createPreview() image.Image {
 		th = theme.DarkTheme()
 	}
 
-	painter.SvgCacheReset() // reset icon cache
+	cache.ResetThemeCaches() // reset icon cache
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
 	empty := widget.NewLabel("")
@@ -129,9 +132,11 @@ func (s *Settings) createPreview() image.Image {
 
 	c.SetContent(tabs)
 	c.Resize(fyne.NewSize(380, 380))
+	// wait for indicator animation
+	time.Sleep(canvas.DurationShort)
 	img := c.Capture()
 
-	painter.SvgCacheReset() // ensure we re-create the correct cached assets
+	cache.ResetThemeCaches() // ensure we re-create the correct cached assets
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(oldTheme, oldColor)
 	return img
 }

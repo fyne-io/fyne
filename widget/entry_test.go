@@ -65,6 +65,24 @@ func TestEntry_CursorColumn(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
+func TestEntry_CursorColumn_Ends(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Hello")
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	// down should go to end for last line
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+	entry.TypedKey(down)
+	assert.Equal(t, 5, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	// up should go to start for first line
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
+	entry.TypedKey(up)
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+}
+
 func TestEntry_CursorColumn_Jump(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nbc")
@@ -112,7 +130,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapWord
-	entry.Resize(fyne.NewSize(64, 64))
+	entry.Resize(fyne.NewSize(72, 64))
 	entry.SetText("1234")
 	entry.CursorColumn = 3
 	test.Type(entry, "a")
@@ -1162,6 +1180,23 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
+func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
+	entry, window := setupImageTest(t, false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, 0, len(entry.Text))
+
+	entry.PlaceHolder = "Test"
+	entry.Refresh()
+	assert.Equal(t, 0, len(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
+
+	entry.SetText("Hi")
+	assert.Equal(t, 2, len(entry.Text))
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
+}
+
 func TestEntry_Disable_KeyDown(t *testing.T) {
 	entry := widget.NewEntry()
 
@@ -1358,6 +1393,20 @@ func TestEntry_Submit(t *testing.T) {
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
 			assert.Equal(t, "\nf", entry.Text)
 		})
+	})
+}
+
+func TestTabable(t *testing.T) {
+	entry := &widget.Entry{}
+	t.Run("Multiline_Tab_Default", func(t *testing.T) {
+		entry.MultiLine = true
+		entry.SetText("a")
+		typeKeys(entry, fyne.KeyTab)
+		assert.Equal(t, "\ta", entry.Text)
+	})
+	t.Run("Singleline_Tab_Default", func(t *testing.T) {
+		entry.MultiLine = false
+		assert.False(t, entry.AcceptsTab())
 	})
 }
 

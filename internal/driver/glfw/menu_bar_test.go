@@ -54,7 +54,7 @@ func TestMenuBar(t *testing.T) {
 
 		menuBar := glfw.NewMenuBar(menu, c)
 		themeCounter := 0
-		button := widget.NewButton("Button", func() {
+		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
 			case 0:
 				test.ApplyTheme(t, test.NewTheme())
@@ -327,7 +327,7 @@ func TestMenuBar(t *testing.T) {
 
 		menuBar := glfw.NewMenuBar(menu, c)
 		themeCounter := 0
-		button := widget.NewButton("Button", func() {
+		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
 			case 0:
 				test.ApplyTheme(t, test.NewTheme())
@@ -525,4 +525,20 @@ func TestMenuBar_Toggle(t *testing.T) {
 		assert.Nil(t, c.Focused())
 		test.AssertRendersToMarkup(t, "menu_bar_toggle_deactivated.xml", c)
 	})
+}
+
+type notFocusableButton struct {
+	widget.Label
+	f func()
+}
+
+func newNotFocusableButton(l string, f func()) *notFocusableButton {
+	n := &notFocusableButton{f: f}
+	n.ExtendBaseWidget(n)
+	n.Label.Text = l
+	return n
+}
+
+func (n *notFocusableButton) Tapped(e *fyne.PointEvent) {
+	n.f()
 }

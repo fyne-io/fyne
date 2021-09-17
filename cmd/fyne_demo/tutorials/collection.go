@@ -2,6 +2,7 @@ package tutorials
 
 import (
 	"fmt"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -23,7 +24,7 @@ func collectionScreen(_ fyne.Window) fyne.CanvasObject {
 func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	data := make([]string, 1000)
 	for i := range data {
-		data[i] = fmt.Sprintf("Test Item %d", i)
+		data[i] = "Test Item " + strconv.Itoa(i)
 	}
 
 	icon := widget.NewIcon(nil)

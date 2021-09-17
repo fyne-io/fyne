@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -23,6 +23,7 @@ type testApp struct {
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
+	lifecycle    fyne.Lifecycle
 
 	// user action variables
 	appliedTheme     fyne.Theme
@@ -81,6 +82,10 @@ func (a *testApp) Storage() fyne.Storage {
 	return a.storage
 }
 
+func (a *testApp) Lifecycle() fyne.Lifecycle {
+	return a.lifecycle
+}
+
 func (a *testApp) lastAppliedTheme() fyne.Theme {
 	a.propertyLock.Lock()
 	defer a.propertyLock.Unlock()
@@ -93,8 +98,12 @@ func (a *testApp) lastAppliedTheme() fyne.Theme {
 func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
-	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver)}
-	painter.SvgCacheReset()
+	store := &testStorage{}
+	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*testDriver),
+		lifecycle: &app.Lifecycle{}}
+	root, _ := store.docRootURI()
+	store.Docs = &internal.Docs{RootDocURI: root}
+	cache.ResetThemeCaches()
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
@@ -102,7 +111,7 @@ func NewApp() fyne.App {
 	go func() {
 		for {
 			<-listener
-			painter.SvgCacheReset()
+			cache.ResetThemeCaches()
 			app.ApplySettings(test.Settings(), test)
 
 			test.propertyLock.Lock()

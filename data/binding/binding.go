@@ -4,6 +4,7 @@ package binding
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -15,8 +16,7 @@ var (
 	errParseFailed = errors.New("format did not match 1 value")
 
 	// As an optimisation we connect any listeners asking for the same key, so that there is only 1 per preference item.
-	prefBinds = make(map[fyne.Preferences]map[string]preferenceItem)
-	prefLock  sync.RWMutex
+	prefBinds = newPreferencesMap()
 )
 
 // DataItem is the base interface for all bindable data items.
@@ -93,28 +93,99 @@ func (b *base) trigger() {
 	}
 }
 
-type preferenceItem interface {
-	checkForChange()
+// Untyped supports binding a interface{} value.
+//
+// Since: 2.1
+type Untyped interface {
+	DataItem
+	Get() (interface{}, error)
+	Set(interface{}) error
 }
 
-func ensurePreferencesAttached(p fyne.Preferences) {
-	prefLock.Lock()
-	defer prefLock.Unlock()
-	if prefBinds[p] != nil {
-		return
-	}
-
-	prefBinds[p] = make(map[string]preferenceItem)
-	p.AddChangeListener(func() {
-		preferencesChanged(p)
-	})
+// NewUntyped returns a bindable interface{} value that is managed internally.
+//
+// Since: 2.1
+func NewUntyped() Untyped {
+	var blank interface{} = nil
+	v := &blank
+	return &boundUntyped{val: reflect.ValueOf(v).Elem()}
 }
 
-func preferencesChanged(p fyne.Preferences) {
-	prefLock.RLock()
-	defer prefLock.RUnlock()
+type boundUntyped struct {
+	base
 
-	for _, item := range prefBinds[p] {
-		item.checkForChange()
+	val reflect.Value
+}
+
+func (b *boundUntyped) Get() (interface{}, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	return b.val.Interface(), nil
+}
+
+func (b *boundUntyped) Set(val interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if b.val.Interface() == val {
+		return nil
 	}
+
+	b.val.Set(reflect.ValueOf(val))
+
+	b.trigger()
+	return nil
+}
+
+// ExternalUntyped supports binding a interface{} value to an external value.
+//
+// Since: 2.1
+type ExternalUntyped interface {
+	Untyped
+	Reload() error
+}
+
+// BindUntyped returns a bindable interface{} value that is bound to an external type.
+// The parameter must be a pointer to the type you wish to bind.
+//
+// Since: 2.1
+func BindUntyped(v interface{}) ExternalUntyped {
+	t := reflect.TypeOf(v)
+	if t.Kind() != reflect.Ptr {
+		fyne.LogError("Invalid type passed to BindUntyped, must be a pointer", nil)
+		v = nil
+	}
+
+	if v == nil {
+		var blank interface{}
+		v = &blank // never allow a nil value pointer
+	}
+
+	b := &boundExternalUntyped{}
+	b.val = reflect.ValueOf(v).Elem()
+	b.old = b.val.Interface()
+	return b
+}
+
+type boundExternalUntyped struct {
+	boundUntyped
+
+	old interface{}
+}
+
+func (b *boundExternalUntyped) Set(val interface{}) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if b.old == val {
+		return nil
+	}
+	b.val.Set(reflect.ValueOf(val))
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundExternalUntyped) Reload() error {
+	return b.Set(b.val.Interface())
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
@@ -271,13 +272,13 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
+	assert.Equal(t, "Ahnj\nBuki\n", entry.SelectedText())
 
 	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.SelectedText(), "")
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_PasteFromClipboard(t *testing.T) {
@@ -293,7 +294,7 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 
 	entry.pasteFromClipboard(clipboard)
 
-	assert.Equal(t, entry.Text, testContent)
+	assert.Equal(t, testContent, entry.Text)
 }
 
 func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
@@ -302,7 +303,7 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 	w := test.NewApp().NewWindow("")
 	w.SetContent(entry)
-	w.Resize(fyne.NewSize(100, 64))
+	w.Resize(fyne.NewSize(108, 64))
 
 	test.Type(entry, "T")
 	assert.Equal(t, 0, entry.CursorRow)
@@ -327,13 +328,13 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 func TestEntry_Tab(t *testing.T) {
 	e := NewEntry()
-	e.SetText("a\n\tb\nc")
 	e.TextStyle.Monospace = true
+	e.SetText("a\n\tb\nc")
 
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
-	assert.Equal(t, 3, len(r.texts))
-	assert.Equal(t, "a", r.texts[0].Text)
-	assert.Equal(t, textTabIndent+"b", r.texts[1].Text)
+	assert.Equal(t, 3, len(r.Objects()))
+	assert.Equal(t, "a", r.Objects()[0].(*canvas.Text).Text)
+	assert.Equal(t, "\tb", r.Objects()[1].(*canvas.Text).Text)
 
 	w := test.NewWindow(e)
 	w.Resize(fyne.NewSize(86, 86))

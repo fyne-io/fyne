@@ -17,7 +17,6 @@ import (
 var (
 	treeSize        = float32(200)
 	templateMinSize = NewLabel("Template Object").MinSize()
-	doublePadding   = 2 * theme.Padding()
 )
 
 func indentation() float32 {
@@ -195,8 +194,8 @@ func TestTree_Resize(t *testing.T) {
 	tree.OpenBranch("B")
 	separatorThickness := theme.SeparatorThicknessSize()
 
-	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + doublePadding + theme.Padding()
-	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + separatorThickness*2
+	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + theme.Padding()*2
+	height := fyne.Max(templateMinSize.Height, theme.IconInlineSize())*3 + separatorThickness*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
 	a := getLeaf(t, tree, "A")
@@ -206,17 +205,17 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, float32(0), a.Position().X)
 	assert.Equal(t, float32(0), a.Position().Y)
 	assert.Equal(t, treeSize, a.Size().Width)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize()), a.Size().Height)
 
 	assert.Equal(t, float32(0), b.Position().X)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness, b.Position().Y)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+separatorThickness, b.Position().Y)
 	assert.Equal(t, treeSize, b.Size().Width)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize()), b.Size().Height)
 
 	assert.Equal(t, float32(0), c.Position().X)
-	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+separatorThickness), c.Position().Y)
+	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+separatorThickness), c.Position().Y)
 	assert.Equal(t, treeSize, c.Size().Width)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize()), c.Size().Height)
 }
 
 func TestTree_MinSize(t *testing.T) {
@@ -236,17 +235,17 @@ func TestTree_MinSize(t *testing.T) {
 			"small": {
 				fyne.NewSize(1, 1),
 				fyne.NewSize(1, 1),
-				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), float32(32)), float32(32)),
+				fyne.NewSize(fyne.Max(1+2*theme.Padding()+theme.IconInlineSize(), float32(32)), float32(32)),
 			},
 			"large-leaf": {
 				fyne.NewSize(100, 100),
 				fyne.NewSize(1, 1),
-				fyne.NewSize(100+3*theme.Padding()+theme.IconInlineSize(), 100+2*theme.Padding()),
+				fyne.NewSize(100+2*theme.Padding()+theme.IconInlineSize(), 100),
 			},
 			"large-branch": {
 				fyne.NewSize(1, 1),
 				fyne.NewSize(100, 100),
-				fyne.NewSize(100+3*theme.Padding()+theme.IconInlineSize(), 100+2*theme.Padding()),
+				fyne.NewSize(100+2*theme.Padding()+theme.IconInlineSize(), 100),
 			},
 		} {
 			t.Run(name, func(t *testing.T) {
@@ -279,8 +278,8 @@ func TestTree_MinSize(t *testing.T) {
 				},
 			},
 			want: fyne.NewSize(
-				templateMinSize.Width+theme.Padding()+theme.IconInlineSize()+doublePadding,
-				fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding,
+				templateMinSize.Width+2*theme.Padding()+theme.IconInlineSize(),
+				fyne.Max(templateMinSize.Height, theme.IconInlineSize()),
 			),
 		},
 		"single_item_opened": {
@@ -291,8 +290,8 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			opened: []string{"A"},
 			want: fyne.NewSize(
-				templateMinSize.Width+indentation()+theme.Padding()+theme.IconInlineSize()+doublePadding,
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+separatorThickness,
+				templateMinSize.Width+indentation()+2*theme.Padding()+theme.IconInlineSize(),
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize()))*2+separatorThickness,
 			),
 		},
 		"multiple_items": {
@@ -308,8 +307,8 @@ func TestTree_MinSize(t *testing.T) {
 				},
 			},
 			want: fyne.NewSize(
-				templateMinSize.Width+theme.Padding()+theme.IconInlineSize()+doublePadding,
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+separatorThickness,
+				templateMinSize.Width+2*theme.Padding()+theme.IconInlineSize(),
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize()))*2+separatorThickness,
 			),
 		},
 		"multiple_items_opened": {
@@ -326,8 +325,8 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			opened: []string{"A", "B", "C"},
 			want: fyne.NewSize(
-				templateMinSize.Width+2*indentation()+doublePadding+theme.IconInlineSize()+theme.Padding(),
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*6+(5*separatorThickness),
+				templateMinSize.Width+2*indentation()+theme.IconInlineSize()+2*theme.Padding(),
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize()))*6+(5*separatorThickness),
 			),
 		},
 	} {
@@ -390,6 +389,91 @@ func TestTree_Select_Unselects(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		assert.Fail(t, "Selection should have been unselected")
 	}
+
+	tree.Unselect("C")
+	assert.Equal(t, 1, len(tree.selected))
+
+	tree.UnselectAll()
+	assert.Equal(t, 0, len(tree.selected))
+	select {
+	case s := <-unselection:
+		assert.Equal(t, "B", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been unselected")
+	}
+}
+
+func TestTree_ScrollTo(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	var (
+		min = getLeaf(t, tree, "A").MinSize()
+		sep = theme.SeparatorThicknessSize()
+		pad = theme.Padding()
+	)
+
+	// Resize tall enough to display two nodes and the separater between them
+	treeHeight := 2*(min.Height) + sep
+	w.Resize(fyne.Size{
+		Width:  400,
+		Height: treeHeight + 2*pad,
+	})
+
+	tree.ScrollTo("F")
+
+	want := 3*min.Height + 2*sep
+	assert.Equal(t, want, tree.offset.Y)
+	assert.Equal(t, want, tree.scroller.Offset.Y)
+}
+
+func TestTree_ScrollToBottom(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("B")
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	var (
+		min = getLeaf(t, tree, "A").MinSize()
+		sep = theme.SeparatorThicknessSize()
+		pad = theme.Padding()
+	)
+
+	// Resize tall enough to display two nodes and the separater between them
+	treeHeight := 2*(min.Height) + sep
+	w.Resize(fyne.Size{
+		Width:  400,
+		Height: treeHeight + 2*pad,
+	})
+
+	tree.ScrollToBottom()
+
+	want := 4 * (min.Height + sep)
+	assert.Equal(t, want, tree.offset.Y)
+	assert.Equal(t, want, tree.scroller.Offset.Y)
 }
 
 func TestTree_ScrollToSelection(t *testing.T) {
@@ -424,6 +508,29 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	tree.Select("F")
 	// Tree should scroll to the bottom to show F
 	assert.Equal(t, m.Height*4+separatorThickness*3, tree.scroller.Offset.Y)
+}
+
+func TestTree_ScrollToTop(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	tree.ScrollTo("F")
+
+	tree.ScrollToTop()
+	assert.Equal(t, float32(0), tree.offset.Y)
+	assert.Equal(t, float32(0), tree.scroller.Offset.Y)
 }
 
 func TestTree_Tap(t *testing.T) {
@@ -609,14 +716,14 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
 		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
-		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
-		assert.False(t, ar.indicator.Visible())
+		assert.Equal(t, theme.HoverColor(), ar.background.FillColor)
+		assert.False(t, ar.background.Visible())
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
 		br := test.WidgetRenderer(b).(*treeNodeRenderer)
-		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
-		assert.False(t, br.indicator.Visible())
+		assert.Equal(t, theme.HoverColor(), br.background.FillColor)
+		assert.False(t, br.background.Visible())
 	})
 }
 
@@ -630,21 +737,21 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		a := getBranch(t, tree, "A")
 		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
 		a.MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
-		assert.True(t, ar.indicator.Visible())
+		assert.Equal(t, theme.HoverColor(), ar.background.FillColor)
+		assert.True(t, ar.background.Visible())
 		a.MouseOut()
-		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
-		assert.False(t, ar.indicator.Visible())
+		assert.Equal(t, theme.HoverColor(), ar.background.FillColor)
+		assert.False(t, ar.background.Visible())
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
 		br := test.WidgetRenderer(b).(*treeNodeRenderer)
 		b.MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
-		assert.True(t, br.indicator.Visible())
+		assert.Equal(t, theme.HoverColor(), br.background.FillColor)
+		assert.True(t, br.background.Visible())
 		b.MouseOut()
-		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
-		assert.False(t, br.indicator.Visible())
+		assert.Equal(t, theme.HoverColor(), br.background.FillColor)
+		assert.False(t, br.background.Visible())
 	})
 }
 

@@ -150,6 +150,9 @@ func loadIcons() []iconInfo {
 		{"ZoomInIcon", theme.ZoomInIcon()},
 		{"ZoomOutIcon", theme.ZoomOutIcon()},
 
+		{"MoreHorizontalIcon", theme.MoreHorizontalIcon()},
+		{"MoreVerticalIcon", theme.MoreVerticalIcon()},
+
 		{"MoveDownIcon", theme.MoveDownIcon()},
 		{"MoveUpIcon", theme.MoveUpIcon()},
 
@@ -181,5 +184,12 @@ func loadIcons() []iconInfo {
 		{"VolumeDown", theme.VolumeDownIcon()},
 		{"VolumeMute", theme.VolumeMuteIcon()},
 		{"VolumeUp", theme.VolumeUpIcon()},
+
+		{"AccountIcon", theme.AccountIcon()},
+		{"LoginIcon", theme.LoginIcon()},
+		{"LogoutIcon", theme.LogoutIcon()},
+
+		{"ListIcon", theme.ListIcon()},
+		{"GridIcon", theme.GridIcon()},
 	}
 }

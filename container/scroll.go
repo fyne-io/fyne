@@ -18,9 +18,16 @@ type ScrollDirection = widget.ScrollDirection
 
 // Constants for valid values of ScrollDirection.
 const (
-	ScrollBoth ScrollDirection = iota
-	ScrollHorizontalOnly
-	ScrollVerticalOnly
+	// ScrollBoth supports horizontal and vertical scrolling.
+	ScrollBoth ScrollDirection = widget.ScrollBoth
+	// ScrollHorizontalOnly specifies the scrolling should only happen left to right.
+	ScrollHorizontalOnly = widget.ScrollHorizontalOnly
+	// ScrollVerticalOnly specifies the scrolling should only happen top to bottom.
+	ScrollVerticalOnly = widget.ScrollVerticalOnly
+	// ScrollNone turns off scrolling for this container.
+	//
+	// Since: 2.1
+	ScrollNone = widget.ScrollNone
 )
 
 // NewScroll creates a scrollable parent wrapping the specified content.
