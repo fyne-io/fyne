@@ -76,7 +76,7 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 
 func TestToolbar_SetIcon(t *testing.T) {
 	oldIcon := theme.FyneLogo()
-	toolbarItem := NewToolbarAction(oldIcon, func() {})
+	toolbarItem := NewToolbarAction(oldIcon, nil)
 	newIcon := theme.QuestionIcon()
 	toolbarItem.SetIcon(newIcon)
 	assert.NotEqual(t, oldIcon, toolbarItem.Icon)
