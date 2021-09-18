@@ -14,8 +14,8 @@ import (
 type preferences struct {
 	*internal.InMemoryPreferences
 
-	prefLock     sync.RWMutex
-	ignoreChange bool
+	prefLock          sync.RWMutex
+	ignoreChange      bool
 	numIgnoredChanges int
 
 	app *fyneApp
