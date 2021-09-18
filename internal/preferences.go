@@ -68,6 +68,7 @@ func (p *InMemoryPreferences) remove(key string) {
 	delete(p.values, key)
 }
 
+// FireChange causes InMemoryPreferences to activate all its .changeListeners
 func (p *InMemoryPreferences) FireChange() {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
