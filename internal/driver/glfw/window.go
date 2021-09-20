@@ -207,7 +207,7 @@ func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 
 	if w.view() != nil {
-		w.fitContent()
+		w.runOnMainWhenCreated(w.fitContent)
 	}
 }
 
