@@ -1,7 +1,6 @@
 package binding
 
 import (
-	"fmt"
 	"os"
 	"runtime"
 	"sync"
@@ -12,19 +11,45 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	testQueueLazyInit()
 	os.Exit(m.Run())
+}
+
+// TestQueryLazyInit resets the current unbounded func queue, and tests
+// if the queue is lazy initialized.
+//
+// Note that this test may fail, if any of other tests in this package
+// calls t.Parallel().
+func TestQueueLazyInit(t *testing.T) {
+
+	// Reset queues
+	if queue != nil {
+		// Drain all elements from the queue to avoid memory leaks
+		close(queue.In())
+		for range queue.Out() {
+		}
+		queue = nil
+		once = sync.Once{}
+	}
+
+	initialGoRoutines := runtime.NumGoroutine()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1000)
+	for i := 0; i < 1000; i++ {
+		queueItem(func() { wg.Done() })
+	}
+	wg.Wait()
+
+	n := runtime.NumGoroutine()
+	if n > initialGoRoutines+2 {
+		t.Fatalf("unexpected number of goroutines after initialization, probably leaking: got %v want %v", n, initialGoRoutines+2)
+	}
 }
 
 func TestQueueItem(t *testing.T) {
 	called := 0
-	queueItem(func() {
-		called++
-	})
-	queueItem(func() {
-		called++
-	})
-
+	queueItem(func() { called++ })
+	queueItem(func() { called++ })
 	waitForItems()
 	assert.Equal(t, 2, called)
 }
@@ -49,19 +74,4 @@ func TestMakeInfiniteQueue(t *testing.T) {
 
 	wg.Wait()
 	assert.Equal(t, 2048, c)
-}
-
-func testQueueLazyInit() {
-	initialGoRoutines := runtime.NumGoroutine()
-
-	wg := sync.WaitGroup{}
-	wg.Add(1000)
-	for i := 0; i < 1000; i++ {
-		go queueItem(func() { wg.Done() })
-	}
-	wg.Wait()
-	if runtime.NumGoroutine() != initialGoRoutines+2 {
-		fmt.Println("--- FAIL: testQueueLazyInit")
-		os.Exit(1)
-	}
 }
