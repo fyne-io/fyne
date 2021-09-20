@@ -81,6 +81,15 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 // Select will mark the specified cell as selected.
 func (t *Table) Select(id TableCellID) {
+	if t.Length == nil {
+		return
+	}
+
+	rows, cols := t.Length()
+	if id.Row >= rows || id.Col >= cols {
+		return
+	}
+
 	if t.selectedCell != nil && *t.selectedCell == id {
 		return
 	}
@@ -514,6 +523,9 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	}
 
 	col := c.columnAt(e.Position)
+	if col == -1 {
+		return // out of col range
+	}
 	row := int(e.Position.Y / (c.cellSize.Height + theme.SeparatorThicknessSize()))
 	c.t.Select(TableCellID{row, col})
 }
