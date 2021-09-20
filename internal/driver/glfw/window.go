@@ -813,6 +813,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mouseLock.Lock()
 			w.mouseDragStarted = false
 			w.mouseLock.Unlock()
+			mouseDragStarted = false
 		}
 		if shouldMouseOut {
 			w.mouseOut()
