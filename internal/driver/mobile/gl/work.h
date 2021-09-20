@@ -20,7 +20,7 @@
 #include <OpenGLES/ES2/glext.h>
 #endif
 
-#ifdef os_osx
+#ifdef os_macos
 #include <OpenGL/gl3.h>
 #define GL_ES_VERSION_3_0 1
 #endif

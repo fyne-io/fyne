@@ -7,26 +7,21 @@
 package gl
 
 /*
-#cgo ios                LDFLAGS: -framework OpenGLES
-#cgo darwin,amd64,!ios  LDFLAGS: -framework OpenGL
-#cgo darwin,arm         LDFLAGS: -framework OpenGLES
-#cgo darwin,arm64       LDFLAGS: -framework OpenGLES
-#cgo linux              LDFLAGS: -lGLESv2
-#cgo openbsd            LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
-#cgo freebsd            LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
+#cgo ios          LDFLAGS: -framework OpenGLES
+#cgo darwin,!ios  LDFLAGS: -framework OpenGL
+#cgo linux        LDFLAGS: -lGLESv2
+#cgo openbsd      LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
+#cgo freebsd      LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
 
-#cgo android            CFLAGS: -Dos_android
-#cgo ios                CFLAGS: -Dos_ios
-#cgo darwin,amd64,!ios  CFLAGS: -Dos_osx
-#cgo darwin,arm         CFLAGS: -Dos_ios
-#cgo darwin,arm64       CFLAGS: -Dos_ios
-#cgo darwin             CFLAGS: -DGL_SILENCE_DEPRECATION
-#cgo linux              CFLAGS: -Dos_linux
-#cgo openbsd            CFLAGS: -Dos_openbsd
-#cgo freebsd            CFLAGS: -Dos_freebsd
-
-#cgo openbsd            CFLAGS: -I/usr/X11R6/include/
-#cgo freebsd            CFLAGS: -I/usr/local/X11R6/include/
+#cgo android      CFLAGS: -Dos_android
+#cgo ios          CFLAGS: -Dos_ios
+#cgo darwin,!ios  CFLAGS: -Dos_macos
+#cgo darwin       CFLAGS: -DGL_SILENCE_DEPRECATION
+#cgo linux        CFLAGS: -Dos_linux
+#cgo openbsd      CFLAGS: -Dos_openbsd
+#cgo freebsd      CFLAGS: -Dos_freebsd
+#cgo openbsd      CFLAGS: -I/usr/X11R6/include/
+#cgo freebsd      CFLAGS: -I/usr/local/X11R6/include/
 
 #include <stdint.h>
 #include "work.h"
