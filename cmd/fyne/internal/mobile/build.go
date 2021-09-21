@@ -15,6 +15,8 @@ import (
 	"regexp"
 	"strings"
 
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+
 	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
@@ -372,8 +374,11 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 	archNames := []string{}
 	for i, p := range strings.Split(buildTarget, ",") {
 		osarch := strings.SplitN(p, "/", 2) // len(osarch) > 0
-		if osarch[0] != "android" && osarch[0] != "ios" {
+		if !util.IsAndroid(osarch[0]) && !util.IsIOS(osarch[0]) {
 			return "", nil, fmt.Errorf(`unsupported os`)
+		}
+		if osarch[0] == "iossimulator" {
+			osarch[0] = "ios"
 		}
 
 		if i == 0 {

@@ -38,7 +38,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
@@ -227,8 +227,8 @@ func (p *Packager) doPackage() error {
 		return p.packageWindows()
 	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
 		return p.packageAndroid(p.os)
-	case "ios":
-		return p.packageIOS()
+	case "ios", "iossimulator":
+		return p.packageIOS(p.os)
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
