@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 // +build darwin linux openbsd freebsd windows
-// +build !gldebug
 
 package gl
 
@@ -74,13 +73,11 @@ func (v Program) c() uintptr {
 	}
 	return uintptr(v.Value)
 }
-func (v Shader) c() uintptr       { return uintptr(v.Value) }
-func (v Buffer) c() uintptr       { return uintptr(v.Value) }
-func (v Framebuffer) c() uintptr  { return uintptr(v.Value) }
-func (v Renderbuffer) c() uintptr { return uintptr(v.Value) }
-func (v Texture) c() uintptr      { return uintptr(v.Value) }
-func (v Uniform) c() uintptr      { return uintptr(v.Value) }
-func (v VertexArray) c() uintptr  { return uintptr(v.Value) }
+func (v Shader) c() uintptr      { return uintptr(v.Value) }
+func (v Buffer) c() uintptr      { return uintptr(v.Value) }
+func (v Texture) c() uintptr     { return uintptr(v.Value) }
+func (v Uniform) c() uintptr     { return uintptr(v.Value) }
+func (v VertexArray) c() uintptr { return uintptr(v.Value) }
 
 func (v Attrib) String() string       { return fmt.Sprintf("Attrib(%d)", v.Value) }
 func (v Program) String() string      { return fmt.Sprintf("Program(%d)", v.Value) }

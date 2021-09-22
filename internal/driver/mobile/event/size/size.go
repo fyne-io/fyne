@@ -10,8 +10,6 @@ package size // import "fyne.io/fyne/v2/internal/driver/mobile/event/size"
 
 import (
 	"image"
-
-	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 // Event holds the dimensions, physical resolution and orientation of the app's
@@ -25,14 +23,14 @@ type Event struct {
 	//
 	// The values are based on PixelsPerPt and are therefore approximate, as
 	// per the comment on PixelsPerPt.
-	WidthPt, HeightPt geom.Pt
+	WidthPt, HeightPt float32
 
 	// PixelsPerPt is the window's physical resolution. It is the number of
-	// pixels in a single geom.Pt, from the golang.org/x/mobile/geom package.
+	// pixels in a single float32.
 	//
 	// There are a wide variety of pixel densities in existing phones and
 	// tablets, so apps should be written to expect various non-integer
-	// PixelsPerPt values. In general, work in geom.Pt.
+	// PixelsPerPt values.
 	//
 	// The value is approximate, in that the OS, drivers or hardware may report
 	// approximate or quantized values. An N x N pixel square should be roughly

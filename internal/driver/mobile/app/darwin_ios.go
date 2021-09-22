@@ -46,7 +46,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
-	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 var initThreadID uint64
@@ -136,8 +135,8 @@ func updateConfig(width, height, orientation int32) {
 	theApp.eventsIn <- size.Event{
 		WidthPx:       int(width),
 		HeightPx:      int(height),
-		WidthPt:       geom.Pt(float32(width) / pixelsPerPt),
-		HeightPt:      geom.Pt(float32(height) / pixelsPerPt),
+		WidthPt:       float32(width) / pixelsPerPt,
+		HeightPt:      float32(height) / pixelsPerPt,
 		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
 		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
 		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),
