@@ -154,9 +154,13 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		}
 	}
 
-	// Use codesign to sign the application so that it can be used in iOS simulator.
-	if err := execabs.Command("codesign", "--force", "--sign", "-", buildO).Run(); err != nil {
-		return nil, err
+	// Use codesign to remove the codesign certificate for the built application
+	// so that it can run in iOS simulator.
+	if buildTarget == "iossimulator" {
+		if out, err := execabs.Command("codesign", "--force", "--sign", "-", buildO).CombinedOutput(); err != nil {
+			printcmd("codesign --force --sign --keychain %s\n%s", buildO, out)
+			return nil, err
+		}
 	}
 
 	return nmpkgs, nil

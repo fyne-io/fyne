@@ -82,7 +82,7 @@ func AppOutputName(os, name string) string {
 	switch os {
 	case "android":
 		return androidPkgName(name) + ".apk"
-	case "ios":
+	case "ios", "iossimulator":
 		return rfc1034Label(name) + ".app"
 	}
 
