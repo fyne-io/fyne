@@ -29,7 +29,7 @@ var (
 
 	allArchs = map[string][]string{
 		"android":      {"arm", "arm64", "386", "amd64"},
-		"ios":          {"arm64", "amd64"},
+		"ios":          {"arm64"},
 		"iossimulator": {"arm64", "amd64"},
 	}
 
