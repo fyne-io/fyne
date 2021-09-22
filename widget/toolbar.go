@@ -16,7 +16,7 @@ type ToolbarItem interface {
 // ToolbarAction is push button style of ToolbarItem
 type ToolbarAction struct {
 	Icon        fyne.Resource
-	OnActivated func()
+	OnActivated func() `json:"-"`
 }
 
 // ToolbarObject gets a button to render this ToolbarAction

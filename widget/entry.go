@@ -50,7 +50,7 @@ type Entry struct {
 
 	// Set a validator that this entry will check against
 	// Since: 1.4
-	Validator           fyne.StringValidator
+	Validator           fyne.StringValidator `json:"-"`
 	validationStatus    *validationStatus
 	onValidationChanged func(error)
 	validationError     error
@@ -85,7 +85,7 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	ActionItem   fyne.CanvasObject
+	ActionItem   fyne.CanvasObject `json:"-"`
 	textSource   binding.String
 	textListener binding.DataListener
 }
