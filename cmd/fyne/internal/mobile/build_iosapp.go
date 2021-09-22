@@ -153,6 +153,12 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 			return nil, err
 		}
 	}
+
+	// Use codesign to sign the application so that it can be used in iOS simulator.
+	if err := execabs.Command("codesign", "--force", "--sign", "-", buildO).Run(); err != nil {
+		return nil, err
+	}
+
 	return nmpkgs, nil
 }
 
