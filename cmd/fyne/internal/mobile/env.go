@@ -359,6 +359,8 @@ func (tc *ndkToolchain) Path(ndkRoot, toolName string) string {
 	switch toolName {
 	case "clang", "clang++":
 		pref = tc.ClangPrefix()
+	case "nm":
+		pref = "llvm"
 	default:
 		pref = tc.toolPrefix
 	}
