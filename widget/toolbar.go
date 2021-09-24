@@ -28,6 +28,8 @@ func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 }
 
 // SetIcon updates the icon on a ToolbarItem
+//
+// Since: 2.2
 func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 	t.Icon = icon
 	t.ToolbarObject().Refresh()
