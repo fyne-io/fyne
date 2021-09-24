@@ -192,7 +192,9 @@ func (t *TextGrid) SetRow(row int, content TextGridRow) {
 	}
 
 	t.Rows[row] = content
-	t.Refresh()
+	for col := 0; col > len(content.Cells); col++ {
+		t.refreshCell(row, col)
+	}
 }
 
 // SetRowStyle sets a grid style to all the cells cell at the specified row.
@@ -351,11 +353,8 @@ func (t *textGridRenderer) refreshCell(row, col int) {
 		return
 	}
 
-	text := t.objects[pos*2+1].(*canvas.Text)
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-
-	canvas.Refresh(text)
-	canvas.Refresh(rect)
+	cell := t.text.Rows[row].Cells[col]
+	t.setCellRune(cell.Rune, pos, cell.Style, t.text.Rows[row].Style)
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
@@ -544,8 +543,8 @@ func (t *textGridRenderer) updateCellSize() {
 	size := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
 	// round it for seamless background
-	size.Width = float32(int(size.Width))
-	size.Height = float32(int(size.Height))
+	size.Width = float32(math.Round(float64((size.Width))))
+	size.Height = float32(math.Round(float64((size.Height))))
 
 	t.cellSize = size
 }
