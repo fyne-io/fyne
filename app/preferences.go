@@ -14,8 +14,16 @@ import (
 type preferences struct {
 	*internal.InMemoryPreferences
 
-	prefLock            sync.RWMutex
-	loadingInProgress   bool
+	prefLock sync.RWMutex
+	// Normally, any update of preferences is immediately written to disk,
+	// but the initial operation of loading the preferences file performs many separate
+	// changes. To avoid "load->changes!->write" pattern (rewriting preferences file
+	// after each loading), saving file to disk is disabled
+	// during the loading progress. Access guarded by prefLock.
+	loadingInProgress bool
+	// If an application changes its preferences 1000 times per second, we don't want to
+	// rewrite the preferences file after every update. Instead, a time-out mechanism is
+	// implemented in resetSuspend(), limiting the number of file operations per second.
 	suspendChange       bool
 	numSuspendedChanges int
 
