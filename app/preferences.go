@@ -14,9 +14,10 @@ import (
 type preferences struct {
 	*internal.InMemoryPreferences
 
-	prefLock          sync.RWMutex
-	ignoreChange      bool
-	numIgnoredChanges int
+	prefLock            sync.RWMutex
+	loadingInProgress   bool
+	suspendChange       bool
+	numSuspendedChanges int
 
 	app *fyneApp
 }
@@ -24,13 +25,13 @@ type preferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
 
-func (p *preferences) resetIgnore() {
+func (p *preferences) resetSuspend() {
 	go func() {
 		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
 		p.prefLock.Lock()
-		p.ignoreChange = false
-		changes := p.numIgnoredChanges
-		p.numIgnoredChanges = 0
+		p.suspendChange = false
+		changes := p.numSuspendedChanges
+		p.numSuspendedChanges = 0
 		p.prefLock.Unlock()
 
 		if changes > 0 {
@@ -45,9 +46,9 @@ func (p *preferences) save() error {
 
 func (p *preferences) saveToFile(path string) error {
 	p.prefLock.Lock()
-	p.ignoreChange = true
+	p.suspendChange = true
 	p.prefLock.Unlock()
-	defer p.resetIgnore()
+	defer p.resetSuspend()
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -102,9 +103,18 @@ func (p *preferences) loadFromFile(path string) (err error) {
 	}()
 	decode := json.NewDecoder(file)
 
+	p.prefLock.Lock()
+	p.loadingInProgress = true
+	p.prefLock.Unlock()
+
 	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
 		err = decode.Decode(&values)
 	})
+
+	p.prefLock.Lock()
+	p.loadingInProgress = false
+	p.prefLock.Unlock()
+
 	return err
 }
 
@@ -120,12 +130,13 @@ func newPreferences(app *fyneApp) *preferences {
 
 	p.AddChangeListener(func() {
 		p.prefLock.Lock()
-		shouldIgnoreChange := p.ignoreChange
-		if shouldIgnoreChange {
-			p.numIgnoredChanges++
+		shouldIgnoreChange := p.suspendChange || p.loadingInProgress
+		if p.suspendChange {
+			p.numSuspendedChanges++
 		}
 		p.prefLock.Unlock()
-		if shouldIgnoreChange { // callback after loading, no need to save
+
+		if shouldIgnoreChange { // callback after loading file, or too many updates in a row
 			return
 		}
 
