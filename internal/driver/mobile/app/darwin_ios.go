@@ -213,6 +213,11 @@ func lifecycleVisible() { theApp.sendLifecycle(lifecycle.StageVisible) }
 //export lifecycleFocused
 func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
 
+// Maximum allowed framerate. Starting from iPhone 13 Pro, the display refresh
+// rate can up to 120 fps. To offer smoother experience, allow the draw loop
+// to return sooner so that the application can be more responsive.
+const defaultFramerate = time.Second / 120
+
 //export drawloop
 func drawloop() {
 	runtime.LockOSThread()
@@ -225,44 +230,8 @@ func drawloop() {
 		case <-theApp.publish:
 			theApp.publishResult <- PublishResult{}
 			return
-		case <-time.After(100 * time.Millisecond): // incase the method blocked!!
+		case <-time.After(defaultFramerate):
 			return
-		}
-	}
-}
-
-//export startloop
-func startloop(ctx C.GLintptr) {
-	go theApp.loop(ctx)
-}
-
-// loop is the primary drawing loop.
-//
-// After UIKit has captured the initial OS thread for processing UIKit
-// events in runApp, it starts loop on another goroutine. It is locked
-// to an OS thread for its OpenGL context.
-func (a *app) loop(ctx C.GLintptr) {
-	runtime.LockOSThread()
-	C.makeCurrentContext(ctx)
-
-	workAvailable := a.worker.WorkAvailable()
-
-	for {
-		select {
-		case <-workAvailable:
-			a.worker.DoWork()
-		case <-theApp.publish:
-		loop1:
-			for {
-				select {
-				case <-workAvailable:
-					a.worker.DoWork()
-				default:
-					break loop1
-				}
-			}
-			C.swapBuffers(ctx)
-			theApp.publishResult <- PublishResult{}
 		}
 	}
 }
