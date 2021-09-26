@@ -17,7 +17,7 @@ type preferences struct {
 	prefLock            sync.RWMutex
 	loadingInProgress   bool
 	savedRecently       bool
-	numSuspendedChanges int
+	changedDuringSaving bool
 
 	app *fyneApp
 }
@@ -30,12 +30,12 @@ func (p *preferences) resetSavedRecently() {
 		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
 		p.prefLock.Lock()
 		p.savedRecently = false
-		changes := p.numSuspendedChanges
-		p.numSuspendedChanges = 0
+		changedDuringSaving := p.changedDuringSaving
+		p.changedDuringSaving = false
 		p.prefLock.Unlock()
 
-		if changes > 0 {
-			p.InMemoryPreferences.FireChange()
+		if changedDuringSaving {
+			p.save()
 		}
 	}()
 }
@@ -132,7 +132,7 @@ func newPreferences(app *fyneApp) *preferences {
 		p.prefLock.Lock()
 		shouldIgnoreChange := p.savedRecently || p.loadingInProgress
 		if p.savedRecently && !p.loadingInProgress {
-			p.numSuspendedChanges++
+			p.changedDuringSaving = true
 		}
 		p.prefLock.Unlock()
 
