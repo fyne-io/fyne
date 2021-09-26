@@ -20,13 +20,8 @@ func TestMain(m *testing.M) {
 // Note that this test may fail, if any of other tests in this package
 // calls t.Parallel().
 func TestQueueLazyInit(t *testing.T) {
-
-	// Reset queues
-	if queue != nil {
-		// Drain all elements from the queue to avoid memory leaks
-		close(queue.In())
-		for range queue.Out() {
-		}
+	if queue != nil { // Reset queues
+		queue.Close()
 		queue = nil
 		once = sync.Once{}
 	}
@@ -70,7 +65,7 @@ func TestMakeInfiniteQueue(t *testing.T) {
 	for i := 0; i < 2048; i++ {
 		queue.In() <- func() {}
 	}
-	close(queue.In())
+	queue.Close()
 
 	wg.Wait()
 	assert.Equal(t, 2048, c)

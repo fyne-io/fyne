@@ -6,23 +6,19 @@ import "fyne.io/fyne/v2"
 
 // UnboundedCanvasObjectChan is a channel with an unbounded buffer for caching
 // CanvasObject objects.
-//
-// Delicate dance: One must aware that an unbounded channel may lead
-// to OOM when the consuming speed of the buffer is lower than the
-// producing speed constantly. However, such a channel may be fairly
-// used for event delivering if the consumer of the channel consumes
-// the incoming forever. Especially, rendering and even processing tasks.
 type UnboundedCanvasObjectChan struct {
 	in, out chan fyne.CanvasObject
+	close   chan struct{}
 }
 
 // NewUnboundedCanvasObjectChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
 	ch := &UnboundedCanvasObjectChan{
-		// The size of CanvasObject is less than 16-bit, we use 128 to fit
+		// The size of CanvasObject is less than 16 bytes, we use 16 to fit
 		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
-		in:  make(chan fyne.CanvasObject, 128),
-		out: make(chan fyne.CanvasObject, 128),
+		in:    make(chan fyne.CanvasObject, 16),
+		out:   make(chan fyne.CanvasObject, 16),
+		close: make(chan struct{}),
 	}
 	go func() {
 		// This is a preallocation of the internal unbounded buffer.
@@ -32,15 +28,20 @@ func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
 		// queue is garbage collected.
 		q := make([]fyne.CanvasObject, 0, 1<<10)
 		for {
-			e, ok := <-ch.in
-			if !ok {
-				close(ch.out)
-				return
+			select {
+			case e, ok := <-ch.in:
+				if !ok {
+					close(ch.out)
+					return
+				}
+				q = append(q, e)
+			case <-ch.close:
+				goto closed
 			}
-			q = append(q, e)
 			for len(q) > 0 {
 				select {
 				case ch.out <- q[0]:
+					q[0] = nil // de-reference earlier to help GC
 					q = q[1:]
 				case e, ok := <-ch.in:
 					if ok {
@@ -52,6 +53,8 @@ func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
 					}
 					close(ch.out)
 					return
+				case <-ch.close:
+					goto closed
 				}
 			}
 			// If the remaining capacity is too small, we prefer to
@@ -60,14 +63,35 @@ func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
 				q = make([]fyne.CanvasObject, 0, 1<<10)
 			}
 		}
+
+	closed:
+		close(ch.in)
+		for e := range ch.in {
+			q = append(q, e)
+		}
+		for len(q) > 0 {
+			select {
+			case ch.out <- q[0]:
+				q[0] = nil // de-reference earlier to help GC
+				q = q[1:]
+			default:
+			}
+		}
+		close(ch.out)
+		close(ch.close)
 	}()
 	return ch
 }
 
-// In returns a send-only channel that can be used to send values
-// to the channel.
+// In returns the send channel of the given channel, which can be used to
+// send values to the channel.
 func (ch *UnboundedCanvasObjectChan) In() chan<- fyne.CanvasObject { return ch.in }
 
-// Out returns a receive-only channel that can be used to receive
-// values from the channel.
+// Out returns the receive channel of the given channel, which can be used
+// to receive values from the channel.
 func (ch *UnboundedCanvasObjectChan) Out() <-chan fyne.CanvasObject { return ch.out }
+
+// Close closes the channel.
+func (ch *UnboundedCanvasObjectChan) Close() {
+	ch.close <- struct{}{}
+}
