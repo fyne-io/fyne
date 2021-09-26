@@ -14,17 +14,9 @@ import (
 type preferences struct {
 	*internal.InMemoryPreferences
 
-	prefLock sync.RWMutex
-	// Normally, any update of preferences is immediately written to disk,
-	// but the initial operation of loading the preferences file performs many separate
-	// changes. To avoid "load->changes!->write" pattern (rewriting preferences file
-	// after each loading), saving file to disk is disabled
-	// during the loading progress. Access guarded by prefLock.
-	loadingInProgress bool
-	// If an application changes its preferences 1000 times per second, we don't want to
-	// rewrite the preferences file after every update. Instead, a time-out mechanism is
-	// implemented in resetSuspend(), limiting the number of file operations per second.
-	suspendChange       bool
+	prefLock            sync.RWMutex
+	loadingInProgress   bool
+	savedRecently       bool
 	numSuspendedChanges int
 
 	app *fyneApp
@@ -33,11 +25,11 @@ type preferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
 
-func (p *preferences) resetSuspend() {
+func (p *preferences) resetSavedRecently() {
 	go func() {
 		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
 		p.prefLock.Lock()
-		p.suspendChange = false
+		p.savedRecently = false
 		changes := p.numSuspendedChanges
 		p.numSuspendedChanges = 0
 		p.prefLock.Unlock()
@@ -54,9 +46,9 @@ func (p *preferences) save() error {
 
 func (p *preferences) saveToFile(path string) error {
 	p.prefLock.Lock()
-	p.suspendChange = true
+	p.savedRecently = true
 	p.prefLock.Unlock()
-	defer p.resetSuspend()
+	defer p.resetSavedRecently()
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -138,8 +130,8 @@ func newPreferences(app *fyneApp) *preferences {
 
 	p.AddChangeListener(func() {
 		p.prefLock.Lock()
-		shouldIgnoreChange := p.suspendChange || p.loadingInProgress
-		if p.suspendChange {
+		shouldIgnoreChange := p.savedRecently || p.loadingInProgress
+		if p.savedRecently && !p.loadingInProgress {
 			p.numSuspendedChanges++
 		}
 		p.prefLock.Unlock()

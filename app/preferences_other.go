@@ -17,7 +17,7 @@ func (a *fyneApp) storageRoot() string {
 func (p *preferences) watch() {
 	watchFile(p.storagePath(), func() {
 		p.prefLock.RLock()
-		shouldIgnoreChange := p.suspendChange
+		shouldIgnoreChange := p.savedRecently
 		p.prefLock.RUnlock()
 		if shouldIgnoreChange {
 			return
