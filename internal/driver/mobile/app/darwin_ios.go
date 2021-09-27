@@ -132,7 +132,7 @@ func updateConfig(width, height, orientation int32) {
 	}
 	insets := C.getDevicePadding()
 
-	theApp.eventsIn <- size.Event{
+	theApp.events.In() <- size.Event{
 		WidthPx:       int(width),
 		HeightPx:      int(height),
 		WidthPt:       float32(width) / pixelsPerPt,
@@ -145,7 +145,7 @@ func updateConfig(width, height, orientation int32) {
 		Orientation:   o,
 		DarkMode:      bool(C.isDark()),
 	}
-	theApp.eventsIn <- paint.Event{External: true}
+	theApp.events.In() <- paint.Event{External: true}
 }
 
 // touchIDs is the current active touches. The position in the array
@@ -193,7 +193,7 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		}
 	}
 
-	theApp.eventsIn <- touch.Event{
+	theApp.events.In() <- touch.Event{
 		X:        x,
 		Y:        y,
 		Sequence: touch.Sequence(id),

@@ -6,68 +6,96 @@ import "fyne.io/fyne/v2"
 
 // UnboundedCanvasObjectChan is a channel with an unbounded buffer for caching
 // CanvasObject objects.
-//
-// Delicate dance: One must aware that an unbounded channel may lead
-// to OOM when the consuming speed of the buffer is lower than the
-// producing speed constantly. However, such a channel may be fairly
-// used for event delivering if the consumer of the channel consumes
-// the incoming forever. Especially, rendering and even processing tasks.
 type UnboundedCanvasObjectChan struct {
 	in, out chan fyne.CanvasObject
+	close   chan struct{}
+	q       []fyne.CanvasObject
 }
 
 // NewUnboundedCanvasObjectChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
 	ch := &UnboundedCanvasObjectChan{
-		// The size of CanvasObject is less than 16-bit, we use 128 to fit
+		// The size of CanvasObject is less than 16 bytes, we use 16 to fit
 		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
-		in:  make(chan fyne.CanvasObject, 128),
-		out: make(chan fyne.CanvasObject, 128),
+		in:    make(chan fyne.CanvasObject, 16),
+		out:   make(chan fyne.CanvasObject, 16),
+		close: make(chan struct{}),
 	}
-	go func() {
-		// This is a preallocation of the internal unbounded buffer.
-		// The size is randomly picked. But if one changes the size, the
-		// reallocation size at the subsequent for loop should also be
-		// changed too. Furthermore, there is no memory leak since the
-		// queue is garbage collected.
-		q := make([]fyne.CanvasObject, 0, 1<<10)
-		for {
-			e, ok := <-ch.in
-			if !ok {
-				close(ch.out)
-				return
-			}
-			q = append(q, e)
-			for len(q) > 0 {
-				select {
-				case ch.out <- q[0]:
-					q = q[1:]
-				case e, ok := <-ch.in:
-					if ok {
-						q = append(q, e)
-						break
-					}
-					for _, e := range q {
-						ch.out <- e
-					}
-					close(ch.out)
-					return
-				}
-			}
-			// If the remaining capacity is too small, we prefer to
-			// reallocate the entire buffer.
-			if cap(q) < 1<<5 {
-				q = make([]fyne.CanvasObject, 0, 1<<10)
-			}
-		}
-	}()
+	go ch.processing()
 	return ch
 }
 
-// In returns a send-only channel that can be used to send values
-// to the channel.
+// In returns the send channel of the given channel, which can be used to
+// send values to the channel.
 func (ch *UnboundedCanvasObjectChan) In() chan<- fyne.CanvasObject { return ch.in }
 
-// Out returns a receive-only channel that can be used to receive
-// values from the channel.
+// Out returns the receive channel of the given channel, which can be used
+// to receive values from the channel.
 func (ch *UnboundedCanvasObjectChan) Out() <-chan fyne.CanvasObject { return ch.out }
+
+// Close closes the channel.
+func (ch *UnboundedCanvasObjectChan) Close() { ch.close <- struct{}{} }
+
+func (ch *UnboundedCanvasObjectChan) processing() {
+	// This is a preallocation of the internal unbounded buffer.
+	// The size is randomly picked. But if one changes the size, the
+	// reallocation size at the subsequent for loop should also be
+	// changed too. Furthermore, there is no memory leak since the
+	// queue is garbage collected.
+	ch.q = make([]fyne.CanvasObject, 0, 1<<10)
+	for {
+		select {
+		case e, ok := <-ch.in:
+			if !ok {
+				// We don't want the input channel be accidentally closed
+				// via close() instead of Close(). If that happens, it is
+				// a misuse, do a panic as warning.
+				panic("async: misuse of unbounded channel, In() was closed")
+			}
+			ch.q = append(ch.q, e)
+		case <-ch.close:
+			ch.closed()
+			return
+		}
+		for len(ch.q) > 0 {
+			select {
+			case ch.out <- ch.q[0]:
+				ch.q[0] = nil // de-reference earlier to help GC
+				ch.q = ch.q[1:]
+			case e, ok := <-ch.in:
+				if !ok {
+					// We don't want the input channel be accidentally closed
+					// via close() instead of Close(). If that happens, it is
+					// a misuse, do a panic as warning.
+					panic("async: misuse of unbounded channel, In() was closed")
+				}
+				ch.q = append(ch.q, e)
+			case <-ch.close:
+				ch.closed()
+				return
+			}
+		}
+		// If the remaining capacity is too small, we prefer to
+		// reallocate the entire buffer.
+		if cap(ch.q) < 1<<5 {
+			ch.q = make([]fyne.CanvasObject, 0, 1<<10)
+		}
+	}
+}
+
+func (ch *UnboundedCanvasObjectChan) closed() {
+	close(ch.in)
+	for e := range ch.in {
+		ch.q = append(ch.q, e)
+	}
+	for len(ch.q) > 0 {
+		select {
+		case ch.out <- ch.q[0]:
+			ch.q[0] = nil // de-reference earlier to help GC
+			ch.q = ch.q[1:]
+		default:
+		}
+	}
+	close(ch.out)
+	close(ch.close)
+}

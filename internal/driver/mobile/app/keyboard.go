@@ -23,20 +23,20 @@ func keyboardTyped(str *C.char) {
 			Code:      getCodeFromRune(r),
 			Direction: key.DirPress,
 		}
-		theApp.eventsIn <- k
+		theApp.events.In() <- k
 
 		k.Direction = key.DirRelease
-		theApp.eventsIn <- k
+		theApp.events.In() <- k
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.eventsIn <- key.Event{
+	theApp.events.In() <- key.Event{
 		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirPress,
 	}
-	theApp.eventsIn <- key.Event{
+	theApp.events.In() <- key.Event{
 		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirRelease,
 	}
