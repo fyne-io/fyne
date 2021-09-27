@@ -135,7 +135,7 @@ func (d *mobileDriver) Run() {
 		d.app = a
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-		draw := time.NewTicker(time.Second / 60)
+		draw := time.NewTicker(time.Second / 120)
 
 		for {
 			select {
