@@ -11,6 +11,7 @@ package async
 // the incoming forever. Especially, rendering and even processing tasks.
 type UnboundedStructChan struct {
 	in, out, close chan struct{}
+	n              uint64
 }
 
 // NewUnboundedStructChan returns a unbounded channel with unlimited capacity.
@@ -22,52 +23,7 @@ func NewUnboundedStructChan() *UnboundedStructChan {
 		out:   make(chan struct{}, 16),
 		close: make(chan struct{}),
 	}
-	go func() {
-		var n uint64
-		for {
-			select {
-			case _, ok := <-ch.in:
-				if !ok {
-					close(ch.out)
-					return
-				}
-				n++
-			case <-ch.close:
-				goto closed
-			}
-			for n > 0 {
-				select {
-				case ch.out <- struct{}{}:
-					n--
-				case _, ok := <-ch.in:
-					if ok {
-						n++
-						break
-					}
-					for ; n > 0; n-- {
-						ch.out <- struct{}{}
-					}
-					return
-				case <-ch.close:
-					goto closed
-				}
-			}
-		}
-
-	closed:
-		close(ch.in)
-		for range ch.in {
-			n++
-		}
-		for ; n > 0; n-- {
-			select {
-			case ch.out <- struct{}{}:
-			default:
-			}
-		}
-		close(ch.out)
-		close(ch.close)
-	}()
+	go ch.processing()
 	return ch
 }
 
@@ -80,6 +36,54 @@ func (ch *UnboundedStructChan) In() chan<- struct{} { return ch.in }
 func (ch *UnboundedStructChan) Out() <-chan struct{} { return ch.out }
 
 // Close closes the channel.
-func (ch *UnboundedStructChan) Close() {
-	ch.close <- struct{}{}
+func (ch *UnboundedStructChan) Close() { ch.close <- struct{}{} }
+
+func (ch *UnboundedStructChan) processing() {
+	for {
+		select {
+		case _, ok := <-ch.in:
+			if !ok {
+				// We don't want the input channel be accidentally closed
+				// via close() instead of Close(). If that happens, it is
+				// a misuse, do a panic as warning.
+				panic("async: misuse of unbounded channel, In() was closed")
+			}
+			ch.n++
+		case <-ch.close:
+			ch.closed()
+			return
+		}
+		for ch.n > 0 {
+			select {
+			case ch.out <- struct{}{}:
+				ch.n--
+			case _, ok := <-ch.in:
+				if !ok {
+					// We don't want the input channel be accidentally closed
+					// via close() instead of Close(). If that happens, it is
+					// a misuse, do a panic as warning.
+					panic("async: misuse of unbounded channel, In() was closed")
+				}
+				ch.n++
+			case <-ch.close:
+				ch.closed()
+				return
+			}
+		}
+	}
+}
+
+func (ch *UnboundedStructChan) closed() {
+	close(ch.in)
+	for range ch.in {
+		ch.n++
+	}
+	for ; ch.n > 0; ch.n-- {
+		select {
+		case ch.out <- struct{}{}:
+		default:
+		}
+	}
+	close(ch.out)
+	close(ch.close)
 }

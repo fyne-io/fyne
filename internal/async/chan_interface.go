@@ -7,6 +7,7 @@ package async
 type UnboundedInterfaceChan struct {
 	in, out chan interface{}
 	close   chan struct{}
+	q       []interface{}
 }
 
 // NewUnboundedInterfaceChan returns a unbounded channel with unlimited capacity.
@@ -18,66 +19,7 @@ func NewUnboundedInterfaceChan() *UnboundedInterfaceChan {
 		out:   make(chan interface{}, 16),
 		close: make(chan struct{}),
 	}
-	go func() {
-		// This is a preallocation of the internal unbounded buffer.
-		// The size is randomly picked. But if one changes the size, the
-		// reallocation size at the subsequent for loop should also be
-		// changed too. Furthermore, there is no memory leak since the
-		// queue is garbage collected.
-		q := make([]interface{}, 0, 1<<10)
-		for {
-			select {
-			case e, ok := <-ch.in:
-				if !ok {
-					close(ch.out)
-					return
-				}
-				q = append(q, e)
-			case <-ch.close:
-				goto closed
-			}
-			for len(q) > 0 {
-				select {
-				case ch.out <- q[0]:
-					q[0] = nil // de-reference earlier to help GC
-					q = q[1:]
-				case e, ok := <-ch.in:
-					if ok {
-						q = append(q, e)
-						break
-					}
-					for _, e := range q {
-						ch.out <- e
-					}
-					close(ch.out)
-					return
-				case <-ch.close:
-					goto closed
-				}
-			}
-			// If the remaining capacity is too small, we prefer to
-			// reallocate the entire buffer.
-			if cap(q) < 1<<5 {
-				q = make([]interface{}, 0, 1<<10)
-			}
-		}
-
-	closed:
-		close(ch.in)
-		for e := range ch.in {
-			q = append(q, e)
-		}
-		for len(q) > 0 {
-			select {
-			case ch.out <- q[0]:
-				q[0] = nil // de-reference earlier to help GC
-				q = q[1:]
-			default:
-			}
-		}
-		close(ch.out)
-		close(ch.close)
-	}()
+	go ch.processing()
 	return ch
 }
 
@@ -90,6 +32,68 @@ func (ch *UnboundedInterfaceChan) In() chan<- interface{} { return ch.in }
 func (ch *UnboundedInterfaceChan) Out() <-chan interface{} { return ch.out }
 
 // Close closes the channel.
-func (ch *UnboundedInterfaceChan) Close() {
-	ch.close <- struct{}{}
+func (ch *UnboundedInterfaceChan) Close() { ch.close <- struct{}{} }
+
+func (ch *UnboundedInterfaceChan) processing() {
+	// This is a preallocation of the internal unbounded buffer.
+	// The size is randomly picked. But if one changes the size, the
+	// reallocation size at the subsequent for loop should also be
+	// changed too. Furthermore, there is no memory leak since the
+	// queue is garbage collected.
+	ch.q = make([]interface{}, 0, 1<<10)
+	for {
+		select {
+		case e, ok := <-ch.in:
+			if !ok {
+				// We don't want the input channel be accidentally closed
+				// via close() instead of Close(). If that happens, it is
+				// a misuse, do a panic as warning.
+				panic("async: misuse of unbounded channel, In() was closed")
+			}
+			ch.q = append(ch.q, e)
+		case <-ch.close:
+			ch.closed()
+			return
+		}
+		for len(ch.q) > 0 {
+			select {
+			case ch.out <- ch.q[0]:
+				ch.q[0] = nil // de-reference earlier to help GC
+				ch.q = ch.q[1:]
+			case e, ok := <-ch.in:
+				if !ok {
+					// We don't want the input channel be accidentally closed
+					// via close() instead of Close(). If that happens, it is
+					// a misuse, do a panic as warning.
+					panic("async: misuse of unbounded channel, In() was closed")
+				}
+				ch.q = append(ch.q, e)
+			case <-ch.close:
+				ch.closed()
+				return
+			}
+		}
+		// If the remaining capacity is too small, we prefer to
+		// reallocate the entire buffer.
+		if cap(ch.q) < 1<<5 {
+			ch.q = make([]interface{}, 0, 1<<10)
+		}
+	}
+}
+
+func (ch *UnboundedInterfaceChan) closed() {
+	close(ch.in)
+	for e := range ch.in {
+		ch.q = append(ch.q, e)
+	}
+	for len(ch.q) > 0 {
+		select {
+		case ch.out <- ch.q[0]:
+			ch.q[0] = nil // de-reference earlier to help GC
+			ch.q = ch.q[1:]
+		default:
+		}
+	}
+	close(ch.out)
+	close(ch.close)
 }
