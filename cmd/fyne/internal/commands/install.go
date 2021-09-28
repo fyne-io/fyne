@@ -146,7 +146,10 @@ func (i *Installer) install() error {
 		case "linux", "openbsd", "freebsd", "netbsd":
 			i.installDir = "/" // the tarball contains the structure starting at usr/local
 		case "windows":
-			dirName := p.name[:len(p.name)-4]
+			dirName := p.name
+			if filepath.Ext(p.name) == ".exe" {
+				dirName = p.name[:len(p.name)-4]
+			}
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), dirName)
 			err := runAsAdminWindows("mkdir", "\"\""+i.installDir+"\"\"")
 			if err != nil {

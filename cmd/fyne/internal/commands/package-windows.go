@@ -106,8 +106,19 @@ func (p *Packager) packageWindows() error {
 		return errors.Wrap(err, "Failed to rebuild after adding metadata")
 	}
 
+	appPath := p.exe
+	appName := filepath.Base(p.exe)
+	if filepath.Base(p.exe) != p.name {
+		appName = p.name
+		if filepath.Ext(p.name) != ".exe" {
+			appName = appName + ".exe"
+		}
+		appPath = filepath.Join(filepath.Dir(p.exe), appName)
+		os.Rename(filepath.Base(p.exe), appName)
+	}
+
 	if p.install {
-		err := runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(p.dir, p.name)+"\"\"")
+		err := runAsAdminWindows("copy", "\"\""+appPath+"\"\"", "\"\""+filepath.Join(p.dir, appName)+"\"\"")
 		if err != nil {
 			return errors.Wrap(err, "Failed to run as administrator")
 		}

@@ -36,5 +36,12 @@ func linkToStartMenu(path, name string) error {
 
 func postInstall(i *Installer) error {
 	p := i.Packager
-	return linkToStartMenu(filepath.Join(i.installDir, filepath.Base(p.exe)), p.name[:len(p.name)-4])
+	appName := p.name
+	appExe := p.name
+	if filepath.Ext(p.name) == ".exe" {
+		appName = p.name[:len(p.name)-4]
+	} else {
+		appExe = appExe+".exe"
+	}
+	return linkToStartMenu(filepath.Join(i.installDir, appExe), appName)
 }
