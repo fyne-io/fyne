@@ -21,8 +21,11 @@ jobs:
       run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
       if: ${{ runner.os == 'Linux' }}
 
-    - name: Tests
+    - name: Regular Tests
       run: go test -tags ci ./...
+
+    - name: Race Tests
+      run: go test -tags ci -race ./...
 
     - name: Update coverage
       run: |

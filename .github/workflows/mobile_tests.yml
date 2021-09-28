@@ -18,6 +18,9 @@ jobs:
     - name: Get dependencies
       run: sudo apt-get update && sudo apt-get install gcc libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
-    - name: Tests
+    - name: Regular Tests
       run: go test -tags "ci mobile" ./...
+
+    - name: Race Tests
+      run: go test -tags "ci mobile" -race ./...
 
