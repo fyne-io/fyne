@@ -3,10 +3,10 @@ package commands
 import (
 	"flag"
 	"fmt"
-
 	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,6 +15,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/mod/modfile"
+	"golang.org/x/mod/module"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
@@ -294,6 +296,28 @@ func (p *Packager) validate() error {
 	}
 
 	return nil
+}
+
+func calculateExeName(sourceDir, os string) string {
+	exeName := filepath.Base(sourceDir)
+	/* #nosec */
+	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
+		modulePath := modfile.ModulePath(data)
+		moduleName, _, ok := module.SplitPathVersion(modulePath)
+		if ok {
+			paths := strings.Split(moduleName, "/")
+			name := paths[len(paths)-1]
+			if name != "" {
+				exeName = name
+			}
+		}
+	}
+
+	if os == "windows" {
+		exeName = exeName + ".exe"
+	}
+
+	return exeName
 }
 
 func isValidVersion(ver string) bool {

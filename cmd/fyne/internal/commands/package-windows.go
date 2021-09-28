@@ -2,18 +2,14 @@ package commands
 
 import (
 	"image"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/pkg/errors"
-	"golang.org/x/mod/modfile"
-	"golang.org/x/mod/module"
 	"golang.org/x/sys/execabs"
 )
 
@@ -124,28 +120,6 @@ func (p *Packager) packageWindows() error {
 		}
 	}
 	return nil
-}
-
-func calculateExeName(sourceDir, os string) string {
-	exeName := filepath.Base(sourceDir)
-	/* #nosec */
-	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
-		modulePath := modfile.ModulePath(data)
-		moduleName, _, ok := module.SplitPathVersion(modulePath)
-		if ok {
-			paths := strings.Split(moduleName, "/")
-			name := paths[len(paths)-1]
-			if name != "" {
-				exeName = name
-			}
-		}
-	}
-
-	if os == "windows" {
-		exeName = exeName + ".exe"
-	}
-
-	return exeName
 }
 
 func runAsAdminWindows(args ...string) error {
