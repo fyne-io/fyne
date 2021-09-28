@@ -41,7 +41,7 @@ func postInstall(i *Installer) error {
 	if filepath.Ext(p.name) == ".exe" {
 		appName = p.name[:len(p.name)-4]
 	} else {
-		appExe = appExe+".exe"
+		appExe = appExe + ".exe"
 	}
 	return linkToStartMenu(filepath.Join(i.installDir, appExe), appName)
 }
