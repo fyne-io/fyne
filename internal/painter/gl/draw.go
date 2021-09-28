@@ -37,6 +37,10 @@ func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame f
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
+	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
+		return
+	}
+
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
 	vbo := p.glCreateLineBuffer(points)
 	p.glDrawLine(halfWidth, line.StrokeColor, feather)
