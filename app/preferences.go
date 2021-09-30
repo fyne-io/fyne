@@ -14,8 +14,10 @@ import (
 type preferences struct {
 	*internal.InMemoryPreferences
 
-	prefLock     sync.RWMutex
-	ignoreChange bool
+	prefLock            sync.RWMutex
+	loadingInProgress   bool
+	savedRecently       bool
+	changedDuringSaving bool
 
 	app *fyneApp
 }
@@ -23,12 +25,18 @@ type preferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
 
-func (p *preferences) resetIgnore() {
+func (p *preferences) resetSavedRecently() {
 	go func() {
 		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
 		p.prefLock.Lock()
-		p.ignoreChange = false
+		p.savedRecently = false
+		changedDuringSaving := p.changedDuringSaving
+		p.changedDuringSaving = false
 		p.prefLock.Unlock()
+
+		if changedDuringSaving {
+			p.save()
+		}
 	}()
 }
 
@@ -38,9 +46,9 @@ func (p *preferences) save() error {
 
 func (p *preferences) saveToFile(path string) error {
 	p.prefLock.Lock()
-	p.ignoreChange = true
+	p.savedRecently = true
 	p.prefLock.Unlock()
-	defer p.resetIgnore()
+	defer p.resetSavedRecently()
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -95,9 +103,18 @@ func (p *preferences) loadFromFile(path string) (err error) {
 	}()
 	decode := json.NewDecoder(file)
 
+	p.prefLock.Lock()
+	p.loadingInProgress = true
+	p.prefLock.Unlock()
+
 	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
 		err = decode.Decode(&values)
 	})
+
+	p.prefLock.Lock()
+	p.loadingInProgress = false
+	p.prefLock.Unlock()
+
 	return err
 }
 
@@ -112,10 +129,14 @@ func newPreferences(app *fyneApp) *preferences {
 	}
 
 	p.AddChangeListener(func() {
-		p.prefLock.RLock()
-		shouldIgnoreChange := p.ignoreChange
-		p.prefLock.RUnlock()
-		if shouldIgnoreChange { // callback after loading, no need to save
+		p.prefLock.Lock()
+		shouldIgnoreChange := p.savedRecently || p.loadingInProgress
+		if p.savedRecently && !p.loadingInProgress {
+			p.changedDuringSaving = true
+		}
+		p.prefLock.Unlock()
+
+		if shouldIgnoreChange { // callback after loading file, or too many updates in a row
 			return
 		}
 
