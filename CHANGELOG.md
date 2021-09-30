@@ -3,7 +3,24 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.1 - 17 September 2021
+## 2.1.1 - Ongoing
+
+### Fixed
+
+* Fix issue where table could select cells beyond data bound
+* Some fast taps could be ignored (#2484)
+* iOS app stops re-drawing mid-frame after a while (#950)
+* Mobile simulation mode did not work on Apple M1 computers
+* TextGrid background color can show gaps in render (#2493)
+* Fix alignment of files in list view of file dialog
+* Crash setting visible window on macOS to fixed size (#2488)
+* fyne bundle ignores -name flag in windows (#2395)
+* Lines with nil colour would crash renderer
+* Android -nm tool not found with NDK 23 (#2498)
+* Runtime panic because out of touchID (#2407)
+
+
+## 2.1.0 - 17 September 2021
 
 ### Added
 
