@@ -3,6 +3,21 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## Bowmore - Ongoing
+
+### Added
+
+* Add SetIcon method on ToolbarAction (#2475)
+
+### Changed
+
+* Toolbar item constructors now return concrete types instead of ToolbarItem
+
+### Fixed
+
+* 
+
+
 ## 2.1 - 17 September 2021
 
 ### Added
