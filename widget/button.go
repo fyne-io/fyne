@@ -349,6 +349,8 @@ func (r *buttonRenderer) buttonColor() color.Color {
 		return blendColor(bg, theme.HoverColor())
 	case r.button.Importance == HighImportance:
 		return theme.PrimaryColor()
+	case r.button.Importance == LowImportance:
+		return color.Transparent
 	default:
 		return theme.ButtonColor()
 	}

@@ -3,7 +3,7 @@
 		<container pos="4,4" size="142x192">
 			<widget pos="41,57" size="59x77" type="*widget.Accordion">
 				<widget size="59x36" type="*widget.Button">
-					<rectangle fillColor="button" size="59x36"/>
+					<rectangle size="59x36"/>
 					<rectangle size="0x0"/>
 					<widget pos="36,8" size="10x20" type="*widget.RichText">
 						<text alignment="center" bold size="10x20">A</text>

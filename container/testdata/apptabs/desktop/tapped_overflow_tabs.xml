@@ -11,7 +11,7 @@
 					</widget>
 				</container>
 				<widget pos="164,0" size="36x36" type="*widget.Button">
-					<rectangle fillColor="button" size="36x36"/>
+					<rectangle size="36x36"/>
 					<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="32x32"/>
 					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 				</widget>
