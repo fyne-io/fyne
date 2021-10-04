@@ -27,11 +27,11 @@ type TableCellID struct {
 type Table struct {
 	BaseWidget
 
-	Length       func() (int, int)
-	CreateCell   func() fyne.CanvasObject
-	UpdateCell   func(id TableCellID, template fyne.CanvasObject)
-	OnSelected   func(id TableCellID)
-	OnUnselected func(id TableCellID)
+	Length       func() (int, int)                                `json:"-"`
+	CreateCell   func() fyne.CanvasObject                         `json:"-"`
+	UpdateCell   func(id TableCellID, template fyne.CanvasObject) `json:"-"`
+	OnSelected   func(id TableCellID)                             `json:"-"`
+	OnUnselected func(id TableCellID)                             `json:"-"`
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells

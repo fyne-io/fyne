@@ -87,7 +87,7 @@ type ProgressBar struct {
 	// If set, it overrides the percentage readout and runs each time the value updates.
 	//
 	// Since: 1.4
-	TextFormatter func() string
+	TextFormatter func() string `json:"-"`
 
 	valueSource   binding.Float
 	valueListener binding.DataListener

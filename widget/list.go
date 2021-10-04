@@ -27,11 +27,11 @@ var _ fyne.Widget = (*List)(nil)
 type List struct {
 	BaseWidget
 
-	Length       func() int
-	CreateItem   func() fyne.CanvasObject
-	UpdateItem   func(id ListItemID, item fyne.CanvasObject)
-	OnSelected   func(id ListItemID)
-	OnUnselected func(id ListItemID)
+	Length       func() int                                  `json:"-"`
+	CreateItem   func() fyne.CanvasObject                    `json:"-"`
+	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
+	OnSelected   func(id ListItemID)                         `json:"-"`
+	OnUnselected func(id ListItemID)                         `json:"-"`
 
 	scroller      *widget.Scroll
 	selected      []ListItemID
