@@ -328,7 +328,7 @@ func (t *RichText) rows() int {
 func (t *RichText) updateRowBounds() {
 	t.propertyLock.RLock()
 	var bounds []rowBoundary
-	maxWidth := t.size.Width - 4*theme.Padding() - 2*t.inset.Width
+	maxWidth := t.size.Width - 4*theme.Padding() + 2*t.inset.Width
 	wrapWidth := maxWidth
 
 	var iterateSegments func(segList []RichTextSegment)
