@@ -18,6 +18,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Lines with nil colour would crash renderer
 * Android -nm tool not found with NDK 23 (#2498)
 * Runtime panic because out of touchID (#2407)
+* Long text in Select boxes overflows out of the box (#2522)
 
 
 ## 2.1.0 - 17 September 2021
