@@ -422,6 +422,9 @@ func (t *textGridRenderer) refreshGrid() {
 			if i >= t.cols { // would be an overflow - bad
 				continue
 			}
+			if r.Rune == '\r' { // remove "\r" characters that don't render correctly
+				continue
+			}
 			if t.text.ShowWhitespace && (r.Rune == ' ' || r.Rune == '\t') {
 				sym := textAreaSpaceSymbol
 				if r.Rune == '\t' {
