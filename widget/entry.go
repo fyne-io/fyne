@@ -1152,6 +1152,7 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
+	text = strings.ReplaceAll(text, "\r", "") // remove "\r" characters that don't render correctly
 	var callback func(string)
 	e.setFieldsAndRefresh(func() {
 		changed := e.Text != text

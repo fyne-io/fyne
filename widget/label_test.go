@@ -105,6 +105,13 @@ func TestLabel_SetText(t *testing.T) {
 	assert.Equal(t, "New", textRenderTexts(label)[0].Text)
 }
 
+func TestLabel_SetText_CarriageReturn(t *testing.T) {
+	label := NewLabel("Test")
+	label.SetText("test\rtest")
+
+	assert.Equal(t, "testtest", label.Text)
+}
+
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	label.Refresh()

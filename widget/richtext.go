@@ -359,7 +359,6 @@ func (t *RichText) updateRowBounds() {
 				continue
 			}
 			textSeg := seg.(*TextSegment)
-			textSeg.Text = strings.ReplaceAll(textSeg.Text, "\r", "") // remove "\r" characters that otherwise render as space
 			textStyle := textSeg.Style.TextStyle
 			textSize := textSeg.size()
 

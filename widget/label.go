@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
@@ -113,6 +115,7 @@ func (l *Label) Resize(s fyne.Size) {
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
+	text = strings.ReplaceAll(text, "\r", "") // remove "\r" characters that don't render correctly
 	l.Text = text
 	if l.provider == nil { // not created until visible
 		return

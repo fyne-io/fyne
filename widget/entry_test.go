@@ -1247,6 +1247,13 @@ func TestEntry_SetText_EmptyString(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 }
 
+func TestEntry_SetText_CarriageReturn(t *testing.T) {
+	entry := widget.NewEntry()
+
+	entry.SetText("test\rtest")
+	assert.Equal(t, "testtest", entry.Text)
+}
+
 func TestEntry_SetText_Manual(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
