@@ -20,7 +20,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/yuin/goldmark v1.3.8
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
@@ -28,5 +28,4 @@ require (
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 	golang.org/x/tools v0.1.5
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
