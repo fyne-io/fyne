@@ -13,6 +13,16 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+func leftClick(e *Entry, ev *fyne.PointEvent) {
+	mouseEvent := &desktop.MouseEvent{
+		PointEvent: *ev,
+		Button:     desktop.LeftMouseButton,
+	}
+	e.MouseDown(mouseEvent)
+	e.MouseUp(mouseEvent)
+	e.Tapped(ev) // in the glfw driver there is a double click delay before Tapped()
+}
+
 func TestEntry_Cursor(t *testing.T) {
 	entry := NewEntry()
 	assert.Equal(t, desktop.TextCursor, entry.Cursor())
@@ -26,7 +36,7 @@ func TestEntry_DoubleTapped(t *testing.T) {
 
 	// select the word 'quick'
 	ev := getClickPosition("The qui", 0)
-	entry.Tapped(ev)
+	leftClick(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "quick", entry.SelectedText())
 
@@ -34,13 +44,13 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	ev = getClickPosition("The quick", 0)
 	// add half a ' ' character
 	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
-	entry.Tapped(ev)
+	leftClick(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
 
 	// select all whitespace after 'jumped'
 	ev = getClickPosition("jumped  ", 1)
-	entry.Tapped(ev)
+	leftClick(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "    ", entry.SelectedText())
 }
@@ -56,13 +66,14 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry.Resize(entry.MinSize())
 	c := window.Canvas()
 
-	test.Tap(entry)
+	ev := getClickPosition("", 0)
+	leftClick(entry, ev)
 	assert.Equal(t, entry, c.Focused())
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
+	ev = &fyne.PointEvent{Position: pos}
+	leftClick(entry, ev)
 	entry.DoubleTapped(ev)
 
 	assert.Equal(t, "", entry.SelectedText())

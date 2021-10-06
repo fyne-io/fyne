@@ -1410,7 +1410,7 @@ func TestTabable(t *testing.T) {
 	})
 }
 
-func TestEntry_Tapped(t *testing.T) {
+func TestEntry_LeftClicked(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -1423,25 +1423,25 @@ func TestEntry_Tapped(t *testing.T) {
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(entryOffset+theme.Padding()+testCharSize*1.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 2nd "M"
-	test.TapCanvas(window.Canvas(), pos)
+	test.LeftClickCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, "entry/tapped_tapped_2nd_m.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
 	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
-	test.TapCanvas(window.Canvas(), pos)
+	test.LeftClickCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, "entry/tapped_tapped_3rd_m.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
 
 	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*4, entryOffset+theme.Padding()+testCharSize/2) // tap after text
-	test.TapCanvas(window.Canvas(), pos)
+	test.LeftClickCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_col.xml", c)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 3, entry.CursorColumn)
 
 	pos = fyne.NewPos(entryOffset+testCharSize, entryOffset+testCharSize*4) // tap below rows
-	test.TapCanvas(window.Canvas(), pos)
+	test.LeftClickCanvas(window.Canvas(), pos)
 	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_row.xml", c)
 	assert.Equal(t, 2, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
