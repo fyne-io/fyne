@@ -21,8 +21,7 @@ const (
 type FileIcon struct {
 	BaseWidget
 
-	Selected bool
-	URI      fyne.URI
+	URI fyne.URI
 
 	resource  fyne.Resource
 	extension string
@@ -70,27 +69,15 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	// TODO remove background when `SetSelected` is gone.
-	background := canvas.NewRectangle(theme.SelectionColor())
-	background.Hide()
-
-	s := &fileIconRenderer{file: i, background: background}
+	s := &fileIconRenderer{file: i}
 	s.img = canvas.NewImageFromResource(s.file.resource)
 	s.img.FillMode = canvas.ImageFillContain
 	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
 	s.ext.Alignment = fyne.TextAlignCenter
 
-	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
+	s.SetObjects([]fyne.CanvasObject{s.img, s.ext})
 
 	return s
-}
-
-// SetSelected makes the file look like it is selected.
-//
-// Deprecated: Selection is now handled externally.
-func (i *FileIcon) SetSelected(selected bool) {
-	i.Selected = selected
-	i.Refresh()
 }
 
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
@@ -133,9 +120,8 @@ type fileIconRenderer struct {
 
 	file *FileIcon
 
-	background *canvas.Rectangle
-	ext        *canvas.Text
-	img        *canvas.Image
+	ext *canvas.Text
+	img *canvas.Image
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
@@ -163,7 +149,6 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 	}
 
 	s.Objects()[0].Resize(size)
-	s.Objects()[1].Resize(size)
 }
 
 func (s *fileIconRenderer) Refresh() {
@@ -176,19 +161,7 @@ func (s *fileIconRenderer) Refresh() {
 	s.ext.Text = s.file.extension
 	s.file.propertyLock.RUnlock()
 
-	if s.file.Selected {
-		s.background.Show()
-		s.ext.Color = theme.SelectionColor()
-		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
-			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
-		}
-	} else {
-		s.background.Hide()
-		s.ext.Color = theme.BackgroundColor()
-		if res, ok := s.img.Resource.(*theme.InvertedThemedResource); ok {
-			s.img.Resource = res.Original()
-		}
-	}
+	s.ext.Color = theme.BackgroundColor()
 
 	canvas.Refresh(s.file.super())
 	canvas.Refresh(s.ext)
