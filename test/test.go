@@ -126,6 +126,13 @@ func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	return objects
 }
 
+// LeftClickCanvas simulates a left mouse button click at an absolute position on the canvas.
+func LeftClickCanvas(c fyne.Canvas, pos fyne.Position) {
+	if o, p := findMouseable(c, pos); o != nil {
+		leftClick(c, o.(desktop.Mouseable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
+	}
+}
+
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	if fyne.CurrentDevice().IsMobile() {
@@ -274,6 +281,17 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 	return
 }
 
+func findMouseable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne.Position) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(desktop.Mouseable); ok {
+			return true
+		}
+		return false
+	}
+	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	return
+}
+
 func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
 	d := fyne.CurrentApp().Driver()
 	ev := &fyne.PointEvent{Position: pos}
@@ -288,6 +306,19 @@ func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canv
 func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
+}
+
+func leftClick(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
+	handleFocusOnTap(c, obj)
+	mouseEvent := &desktop.MouseEvent{
+		PointEvent: *ev,
+		Button:     desktop.LeftMouseButton,
+	}
+	obj.MouseDown(mouseEvent)
+	obj.MouseUp(mouseEvent)
+	if tap, ok := obj.(fyne.Tappable); ok {
+		tap.Tapped(ev)
+	}
 }
 
 func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
