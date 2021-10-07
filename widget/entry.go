@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"math"
 	"strings"
+	"time"
 	"unicode"
 
 	"fyne.io/fyne/v2"
@@ -88,6 +89,14 @@ type Entry struct {
 	ActionItem   fyne.CanvasObject `json:"-"`
 	textSource   binding.String
 	textListener binding.DataListener
+
+	historyEnabled bool
+	// timestamper is a function that returns the current moment. It is usually
+	// just time.Now(), but can be changed during widget tests.
+	timestamper   func() time.Time
+	historyOrigin entryHistoryState
+	actionLog     []entryUserAction
+	redoOffset    int
 }
 
 // NewEntry creates a new single line entry widget.
@@ -338,6 +347,24 @@ func (e *Entry) Hide() {
 	e.DisableableWidget.Hide()
 }
 
+func (e *Entry) HistoryEnable() {
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+
+	e.historyEnabled = true
+	e.timestamper = time.Now
+	e.registerInitialState()
+}
+
+func (e *Entry) HistoryDisable() {
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+
+	e.historyEnabled = false
+	e.timestamper = nil
+	e.registerInitialState()
+}
+
 // Keyboard implements the Keyboardable interface
 //
 // Implements: mobile.Keyboardable
@@ -465,11 +492,26 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.placeholderProvider().Refresh()
 }
 
-// SetText manually sets the text of the Entry to the given text value.
+// SetText manually sets the text of the Entry to the given text value and resets
+// the stored history of actions.
 func (e *Entry) SetText(text string) {
 	e.updateText(text)
-
 	e.updateCursor()
+
+	if e.historyEnabled {
+		e.registerInitialState()
+	}
+}
+
+// SetTextUndoable manually sets the text of the Entry as a new action in the action log
+// if action history is enabled.
+func (e *Entry) SetTextUndoable(text string) {
+	e.updateText(text)
+	e.updateCursor()
+
+	if e.historyEnabled {
+		e.registerAction(entryActionSetText)
+	}
 }
 
 // Tapped is called when this entry has been tapped so we should update the cursor position.
@@ -742,6 +784,9 @@ func (e *Entry) TypedRune(r rune) {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
 	content := provider.String()
+	if e.historyEnabled {
+		e.registerAction(entryActionTypedRune)
+	}
 	e.propertyLock.Unlock()
 	e.updateText(content)
 }
@@ -804,6 +849,9 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 
 	e.copyToClipboard(clipboard)
 	e.eraseSelection()
+	if e.historyEnabled {
+		e.registerAction(entryActionCut)
+	}
 }
 
 // eraseSelection removes the current selected region and moves the cursor
@@ -864,7 +912,13 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	provider.insertAt(pos, text)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-	e.updateText(provider.String())
+	content := provider.String()
+	e.updateText(content)
+
+	if e.historyEnabled {
+		e.registerAction(entryActionPaste)
+	}
+
 	e.Refresh()
 }
 
@@ -976,6 +1030,11 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
 		e.eraseSelection()
+		if e.historyEnabled {
+			e.propertyLock.RLock()
+			e.registerAction(entryActionErasing)
+			e.propertyLock.RUnlock()
+		}
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		// clear the selection -- return unhandled to add the newline
@@ -1198,6 +1257,10 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	provider.insertAt(e.cursorTextPos(), "\n")
 	e.CursorColumn = 0
 	e.CursorRow++
+
+	if e.historyEnabled {
+		e.registerAction(entryActionTypedRune)
+	}
 	e.propertyLock.Unlock()
 }
 
