@@ -631,6 +631,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		pos := e.cursorTextPos()
 		provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
+		if e.historyEnabled {
+			e.registerAction(entryActionErasing)
+		}
 		e.propertyLock.Unlock()
 	case fyne.KeyDelete:
 		pos := e.cursorTextPos()
@@ -640,6 +643,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		provider.deleteFromTo(pos, pos+1)
+		if e.historyEnabled {
+			e.registerAction(entryActionErasing)
+		}
 		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
 		e.typedKeyReturn(provider, multiLine)
