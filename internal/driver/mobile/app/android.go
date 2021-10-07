@@ -48,6 +48,8 @@ void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
 
+void android_permissions(JNIEnv* env,  char* perm_name);
+
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
 import "C"
@@ -85,6 +87,16 @@ var mimeMap = map[string]string{
 // ctx, a jobject representing the global android.context.Context.
 func RunOnJVM(fn func(vm, jniEnv, ctx uintptr) error) error {
 	return mobileinit.RunOnJVM(fn)
+}
+
+func requestPermision(permision string){
+	n := C.CString(permision)
+	RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+		C.android_permissions(env, n)
+		return nil
+	})
+	C.free(unsafe.Pointer(n))
 }
 
 //export setCurrentContext

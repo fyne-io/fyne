@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <jni.h>
+
 #include "_cgo_export.h"
 
 #define LOG_INFO(...) __android_log_print(ANDROID_LOG_INFO, "Fyne", __VA_ARGS__)
@@ -18,7 +20,7 @@
 
 static jclass current_class;
 
-static jclass find_class(JNIEnv *env, const char *class_name) {
+static jclass find_class(JNIEnv *env, const char* class_name) {
 	jclass clazz = (*env)->FindClass(env, class_name);
 	if (clazz == NULL) {
 		(*env)->ExceptionClear(env);
@@ -53,6 +55,7 @@ static jmethodID show_keyboard_method;
 static jmethodID hide_keyboard_method;
 static jmethodID show_file_open_method;
 static jmethodID show_file_save_method;
+static jmethodID request_permissions;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
@@ -85,6 +88,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
+		request_permissions =  find_static_method(env, current_class, "requestPermissions", "([Ljava/lang/String;I)V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -274,4 +278,68 @@ void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass cla
 
 void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz, jboolean dark) {
     setDarkMode((bool)dark);
+}
+
+jclass android_permission_name(JNIEnv* env, const char* perm_name) {
+    // nested class permission in class android.Manifest,
+    // hence android 'slash' Manifest 'dollar' permission
+    jclass ClassManifestpermission = find_class(env, "android/Manifest$permission");
+    jfieldID lid_PERM = (*env)->GetStaticFieldID(env,
+       ClassManifestpermission, perm_name, "Ljava/lang/String;"
+    );
+    jclass ls_PERM = (jclass)((*env)->GetStaticObjectField(env,
+        ClassManifestpermission, lid_PERM
+    ));
+    return ls_PERM;
+}
+
+bool android_has_permission(JNIEnv* env, const char* perm_name) {
+    bool result = false;
+
+    jstring ls_PERM = android_permission_name(env, perm_name);
+
+    int PERMISSION_GRANTED = -1;
+    {
+       jclass ClassPackageManager = find_class(env, "android/content/pm/PackageManager" );
+       jfieldID lid_PERMISSION_GRANTED = (*env)->GetStaticFieldID(env,
+          ClassPackageManager, "PERMISSION_GRANTED", "I"
+       );
+       PERMISSION_GRANTED = (*env)->GetStaticIntField(env,
+          ClassPackageManager, lid_PERMISSION_GRANTED
+       );
+    }
+    {
+       jclass ClassContext = find_class(env,  "android/content/Context"   );
+       jmethodID MethodcheckSelfPermission = find_method(env, ClassContext,
+       "checkSelfPermission", "(Ljava/lang/String;)I" );
+       int int_result =(int) (*env)->CallIntMethod(env,
+           current_class, MethodcheckSelfPermission, ls_PERM
+       );
+       result = (int_result == PERMISSION_GRANTED);
+    }
+    return result;
+}
+
+void android_request_file_permissions(JNIEnv* env, char* permissions) {
+    jobjectArray perm_array = (*env)->NewObjectArray(env,
+      2,
+      find_class(env, "java/lang/String"),
+      (*env)->NewStringUTF(env, "")
+    );
+    (*env)->SetObjectArrayElement(env,
+          perm_array, 1,
+          android_permission_name(env, permissions)
+        );
+    (*env)->CallVoidMethod(
+       current_class, request_permissions, perm_array, 0
+    );
+}
+
+void android_permissions(JNIEnv* env,  char* perm_name) {
+    bool OK = android_has_permission(
+       env, perm_name
+    ) ;
+    if(!OK) {
+       android_request_file_permissions(env,perm_name );
+    }
 }

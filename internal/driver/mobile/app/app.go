@@ -58,6 +58,7 @@ type App interface {
 	HideVirtualKeyboard()
 	ShowFileOpenPicker(func(string, func()), *FileFilter)
 	ShowFileSavePicker(func(string, func()), *FileFilter, string)
+	RequestPermision(permision string)
 }
 
 // FileFilter is a filter of files.
@@ -157,6 +158,9 @@ func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilt
 	driverShowFileSavePicker(callback, filter, filename)
 }
 
+func (a *app) RequestPermision(permision string) {
+	requestPermision(permision)
+}
 type stopPumping struct{}
 
 // pump returns a channel src such that sending on src will eventually send on

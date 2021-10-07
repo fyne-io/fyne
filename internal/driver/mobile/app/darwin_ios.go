@@ -121,6 +121,8 @@ func setScreen(scale int) {
 	screenScale = scale
 }
 
+func requestPermision(permision string){
+}
 //export updateConfig
 func updateConfig(width, height, orientation int32) {
 	o := size.OrientationUnknown

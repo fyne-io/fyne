@@ -29,3 +29,7 @@ func driverShowFileOpenPicker(func(string, func()), *FileFilter) {
 // driverShowFileSavePicker does nothing on desktop
 func driverShowFileSavePicker(func(string, func()), *FileFilter, string) {
 }
+
+// requestPermision does nothing on desktop
+func requestPermision(permision string){
+}
