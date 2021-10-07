@@ -79,6 +79,13 @@ func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, m
 	return true
 }
 
+// ClickCanvas simulates a primary mouse button click at an absolute position on the canvas.
+func ClickCanvas(c fyne.Canvas, pos fyne.Position) {
+	if o, p := findMouseable(c, pos); o != nil {
+		clickPrimary(c, o.(desktop.Mouseable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
+	}
+}
+
 // Drag drags at an absolute position on the canvas.
 // deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
 func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
@@ -124,13 +131,6 @@ func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
 	}
 	return objects
-}
-
-// LeftClickCanvas simulates a left mouse button click at an absolute position on the canvas.
-func LeftClickCanvas(c fyne.Canvas, pos fyne.Position) {
-	if o, p := findMouseable(c, pos); o != nil {
-		leftClick(c, o.(desktop.Mouseable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
-	}
 }
 
 // MoveMouse simulates a mouse movement to the given position.
@@ -304,11 +304,11 @@ func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	obj.Tapped(ev)
 }
 
-func leftClick(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
+func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	mouseEvent := &desktop.MouseEvent{
 		PointEvent: *ev,
-		Button:     desktop.LeftMouseButton,
+		Button:     desktop.MouseButtonPrimary,
 	}
 	obj.MouseDown(mouseEvent)
 	obj.MouseUp(mouseEvent)
