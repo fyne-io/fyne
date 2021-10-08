@@ -7,6 +7,12 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+type entryUserAction struct {
+	actionType entryActionType
+	timestamp  time.Time
+	state      entryHistoryState
+}
+
 type entryActionType int
 
 const (
@@ -23,12 +29,6 @@ type entryHistoryState struct {
 	cursorRow, cursorColumn int
 	scrollOffset            fyne.Position
 	contentScrollOffset     fyne.Position
-}
-
-type entryUserAction struct {
-	actionType entryActionType
-	timestamp  time.Time
-	state      entryHistoryState
 }
 
 // registerAction creates a new action of the specified type and stores
