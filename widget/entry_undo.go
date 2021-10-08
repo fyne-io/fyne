@@ -3,6 +3,8 @@ package widget
 import (
 	"log"
 	"time"
+
+	"fyne.io/fyne/v2"
 )
 
 type entryActionType int
@@ -19,6 +21,8 @@ const (
 type entryHistoryState struct {
 	content                 string
 	cursorRow, cursorColumn int
+	scrollOffset            fyne.Position
+	contentScrollOffset     fyne.Position
 }
 
 type entryUserAction struct {
@@ -30,9 +34,10 @@ type entryUserAction struct {
 // registerAction creates a new action of the specified type and stores
 // the snapshot in the action log. It expects the caller to hold .propertyLock().
 func (e *Entry) registerAction(actionType entryActionType) {
-	if !e.historyEnabled {
+	if !e.HistoryEnabled {
 		return
 	}
+	e.ensureHistoryDefined()
 
 	action := entryUserAction{
 		actionType: actionType,
@@ -77,22 +82,24 @@ func (e *Entry) shouldMergeAction(action entryUserAction) bool {
 
 // IsUndoAvailable returns true if Undo() may be called.
 func (e *Entry) IsUndoAvailable() bool {
-	return e.historyEnabled && (len(e.actionLog)-e.redoOffset > 0)
+	return e.HistoryEnabled && (len(e.actionLog)-e.redoOffset > 0)
 }
 
 // IsRedoAvailable returns true if Redo() may be called, i.e.,
 // if some action has just been undone.
 func (e *Entry) IsRedoAvailable() bool {
-	return e.historyEnabled && (e.redoOffset > 0)
+	return e.HistoryEnabled && (e.redoOffset > 0)
 }
 
+// Undo rolls back one user action at a time if history tracking is enabled.
 func (e *Entry) Undo() {
-	if !e.historyEnabled {
+	if !e.HistoryEnabled {
 		return
 	}
+	e.ensureHistoryDefined()
 
 	actionIndex := len(e.actionLog) - 2 - e.redoOffset
-	newState := e.historyOrigin
+	newState := *e.historyOrigin
 	if actionIndex >= 0 {
 		newState = e.actionLog[actionIndex].state
 	}
@@ -103,10 +110,12 @@ func (e *Entry) Undo() {
 	e.restoreHistorySnapshot(newState)
 }
 
+// Redo replicates the recently undone action.
 func (e *Entry) Redo() {
-	if !e.historyEnabled || (e.redoOffset == 0) {
+	if !e.HistoryEnabled || (e.redoOffset == 0) {
 		return
 	}
+	e.ensureHistoryDefined()
 
 	actionIndex := len(e.actionLog) - e.redoOffset
 	e.restoreHistorySnapshot(e.actionLog[actionIndex].state)
@@ -121,25 +130,49 @@ func (e *Entry) historySnapshot() entryHistoryState {
 	state.content = e.textProvider().String()
 	state.cursorRow = e.CursorRow
 	state.cursorColumn = e.CursorColumn
+	state.scrollOffset = e.scroll.Offset
+	state.contentScrollOffset = e.content.scroll.Offset
 	return state
 }
 
 func (e *Entry) restoreHistorySnapshot(state entryHistoryState) {
 	e.updateText(state.content)
+	e.selecting = false
+	e.selectKeyDown = false
+
 	e.CursorRow = state.cursorRow
 	e.CursorColumn = state.cursorColumn
 	e.updateCursor()
+
+	e.scroll.Offset = state.scrollOffset
+	e.content.scroll.Offset = state.scrollOffset
+	e.content.scroll.Refresh()
+	e.scroll.Refresh()
+
+	e.Refresh()
 }
 
 // registerInitialState resets the action history of an entry.
 func (e *Entry) registerInitialState() {
-	e.historyOrigin = e.historySnapshot()
+	snapshot := e.historySnapshot()
+	e.historyOrigin = &snapshot
 	e.actionLog = nil
 	e.redoOffset = 0
 }
 
+// ensureHistoryDefined handles the situation when user just switched HistoryEnabled flag
+// and various history-associated pieces of data may need to be initialized.
+func (e *Entry) ensureHistoryDefined() {
+	if e.historyOrigin == nil {
+		e.registerInitialState()
+	}
+	if e.timestamper == nil {
+		e.timestamper = time.Now
+	}
+}
+
 func (e *Entry) DumpHistoryState() {
-	if !e.historyEnabled {
+	if !e.HistoryEnabled {
 		log.Printf("History is disabled, nothing to dump\n")
 		return
 	}
