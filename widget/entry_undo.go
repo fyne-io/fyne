@@ -16,11 +16,10 @@ type entryActionType int
 
 const (
 	entryActionTypedRune entryActionType = iota
+	entryActionErasing
 	entryActionCut
 	entryActionPaste
-	entryActionErasing
 	entryActionSetText
-	entryActionOriginal
 )
 
 type entryHistoryState struct {
