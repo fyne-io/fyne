@@ -1274,6 +1274,12 @@ func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifie
 		case fyne.KeyA:
 			// detect selectAll shortcut
 			shortcut = &fyne.ShortcutSelectAll{}
+		case fyne.KeyZ:
+			// detect undo shortcut
+			shortcut = &fyne.ShortcutUndo{}
+		case fyne.KeyY:
+			// detect redo shortcut
+			shortcut = &fyne.ShortcutRedo{}
 		}
 	}
 

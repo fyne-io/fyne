@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
 	"math"
 	"strings"
 	"time"
@@ -975,11 +974,9 @@ func (e *Entry) registerShortcut() {
 		e.selectAll()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(se fyne.Shortcut) {
-		log.Printf("Ctrl+Z performed!\n")
 		e.Undo()
 	})
-	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(shortcut fyne.Shortcut) {
-		log.Printf("Redo!\n")
+	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(se fyne.Shortcut) {
 		e.Redo()
 	})
 }
