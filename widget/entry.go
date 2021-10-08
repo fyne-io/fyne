@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"log"
 	"math"
 	"strings"
 	"time"
@@ -541,6 +542,15 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 	super := e.super()
 
+	historyItems := make([]*fyne.MenuItem, 0)
+	if e.historyEnabled {
+		historyItems = append(historyItems, fyne.NewMenuItem("Undo", func() {
+			super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutUndo{})
+		}))
+		historyItems = append(historyItems, fyne.NewMenuItem("Redo", func() {
+			super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutRedo{})
+		}))
+	}
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
@@ -562,7 +572,9 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else if e.Password {
 		menu = fyne.NewMenu("", pasteItem, selectAllItem)
 	} else {
-		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
+		menuItems := historyItems
+		menuItems = append(menuItems, cutItem, copyItem, pasteItem, selectAllItem)
+		menu = fyne.NewMenu("", menuItems...)
 	}
 
 	e.popUp = NewPopUpMenu(menu, c)
@@ -961,6 +973,14 @@ func (e *Entry) registerShortcut() {
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
 		e.selectAll()
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(se fyne.Shortcut) {
+		log.Printf("Ctrl+Z performed!\n")
+		e.Undo()
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(shortcut fyne.Shortcut) {
+		log.Printf("Redo!\n")
+		e.Redo()
 	})
 }
 

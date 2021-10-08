@@ -83,3 +83,19 @@ type ShortcutSelectAll struct{}
 func (se *ShortcutSelectAll) ShortcutName() string {
 	return "SelectAll"
 }
+
+// ShortcutUndo describes a shortcut undo action.
+type ShortcutUndo struct{}
+
+// ShortcutName returns the shortcut name
+func (se *ShortcutUndo) ShortcutName() string {
+	return "Undo"
+}
+
+// ShortcutRedo describes a shortcut redo action.
+type ShortcutRedo struct{}
+
+// ShortcutName returns the shortcut name
+func (se *ShortcutRedo) ShortcutName() string {
+	return "Redo"
+}

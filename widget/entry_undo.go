@@ -28,7 +28,7 @@ type entryUserAction struct {
 }
 
 // registerAction creates a new action of the specified type and stores
-// the snapshot in the action log. It expects the called to hold .propertyLock().
+// the snapshot in the action log. It expects the caller to hold .propertyLock().
 func (e *Entry) registerAction(actionType entryActionType) {
 	if !e.historyEnabled {
 		return
@@ -75,10 +75,13 @@ func (e *Entry) shouldMergeAction(action entryUserAction) bool {
 	return (shouldMergeTyped || shouldMergeErased)
 }
 
+// IsUndoAvailable returns true if Undo() may be called.
 func (e *Entry) IsUndoAvailable() bool {
 	return e.historyEnabled && (len(e.actionLog)-e.redoOffset > 0)
 }
 
+// IsRedoAvailable returns true if Redo() may be called, i.e.,
+// if some action has just been undone.
 func (e *Entry) IsRedoAvailable() bool {
 	return e.historyEnabled && (e.redoOffset > 0)
 }
@@ -92,6 +95,8 @@ func (e *Entry) Undo() {
 	newState := e.historyOrigin
 	if actionIndex >= 0 {
 		newState = e.actionLog[actionIndex].state
+	}
+	if actionIndex >= -1 {
 		e.redoOffset++
 	}
 
