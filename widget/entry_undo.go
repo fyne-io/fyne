@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"log"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -168,18 +167,5 @@ func (e *Entry) ensureHistoryDefined() {
 	}
 	if e.timestamper == nil {
 		e.timestamper = time.Now
-	}
-}
-
-func (e *Entry) DumpHistoryState() {
-	if !e.HistoryEnabled {
-		log.Printf("History is disabled, nothing to dump\n")
-		return
-	}
-	log.Printf("Entry history action log with %d items\n", len(e.actionLog))
-	for i := range e.actionLog {
-		log.Printf("Action %d of type %d\n", i, int(e.actionLog[i].actionType))
-		log.Printf("Performed at %s\n", e.actionLog[i].timestamp.String())
-		log.Printf("Contents: %s\n", e.actionLog[i].state.content)
 	}
 }
