@@ -45,11 +45,13 @@ func TestOverrideTheme(t *testing.T) {
 
 	set.schema.ThemeName = "light"
 	set.setupTheme()
-	assert.Equal(t, theme.LightTheme(), set.Theme())
+	assert.Equal(t, theme.DefaultTheme(), set.Theme())
+	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
 	set.schema.ThemeName = "dark"
 	set.setupTheme()
-	assert.Equal(t, theme.DarkTheme(), set.Theme())
+	assert.Equal(t, theme.DefaultTheme(), set.Theme())
+	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 
 	set = &settings{}
 	set.setupTheme()
@@ -60,7 +62,8 @@ func TestOverrideTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.Equal(t, theme.LightTheme(), set.Theme())
+	assert.Equal(t, theme.DefaultTheme(), set.Theme())
+	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 	err = os.Setenv("FYNE_THEME", "")
 	if err != nil {
 		t.Error(err)
@@ -75,14 +78,16 @@ func TestOverrideTheme_IgnoresSettingsChange(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.Equal(t, theme.LightTheme(), set.Theme())
+	assert.Equal(t, theme.DefaultTheme(), set.Theme())
+	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
 	err = set.loadFromFile(filepath.Join("testdata", "dark-theme.json"))
 	if err != nil {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.Equal(t, theme.LightTheme(), set.Theme())
+	assert.Equal(t, theme.DefaultTheme(), set.Theme())
+	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 	err = os.Setenv("FYNE_THEME", "")
 	if err != nil {
 		t.Error(err)

@@ -144,28 +144,16 @@ func (s *settings) setupTheme() {
 		name = env
 	}
 
-	var variant fyne.ThemeVariant
+	variant := defaultVariant()
 	effectiveTheme := s.theme
+	if !s.themeSpecified {
+		effectiveTheme = theme.DefaultTheme()
+	}
 	switch name {
 	case "light":
 		variant = theme.VariantLight
-		if !s.themeSpecified {
-			effectiveTheme = theme.LightTheme()
-		}
 	case "dark":
 		variant = theme.VariantDark
-		if !s.themeSpecified {
-			effectiveTheme = theme.DarkTheme()
-		}
-	default:
-		variant = defaultVariant()
-		if s.themeSpecified {
-			break
-		}
-		effectiveTheme = theme.DarkTheme()
-		if variant == theme.VariantLight {
-			effectiveTheme = theme.LightTheme()
-		}
 	}
 
 	s.applyTheme(effectiveTheme, variant)
