@@ -144,8 +144,12 @@ func (e *Entry) restoreHistorySnapshot(state entryHistoryState) {
 
 	e.scroll.Offset = state.scrollOffset
 	e.content.scroll.Offset = state.scrollOffset
-	e.content.scroll.Refresh()
-	e.scroll.Refresh()
+	if e.content.scroll.Content != nil {
+		e.content.scroll.Refresh()
+	}
+	if e.scroll.Content != nil {
+		e.scroll.Refresh()
+	}
 
 	e.Refresh()
 }
