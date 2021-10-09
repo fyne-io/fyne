@@ -125,11 +125,20 @@ func (e *Entry) shouldMergeAction(action entryUserAction) bool {
 // It expects the caller to hold propertyLock().
 func (e *Entry) historySnapshot() entryHistoryState {
 	state := entryHistoryState{}
-	state.content = e.textProvider().String()
+	provider := e.textProvider()
+	if provider != nil {
+		state.content = provider.String()
+	} else {
+		state.content = ""
+	}
 	state.cursorRow = e.CursorRow
 	state.cursorColumn = e.CursorColumn
-	state.scrollOffset = e.scroll.Offset
-	state.contentScrollOffset = e.content.scroll.Offset
+	if e.scroll != nil {
+		state.scrollOffset = e.scroll.Offset
+	}
+	if (e.content != nil) && (e.content.scroll != nil) {
+		state.contentScrollOffset = e.content.scroll.Offset
+	}
 	return state
 }
 
