@@ -138,6 +138,24 @@ func (s *settings) fileChanged() {
 	s.apply()
 }
 
+func (s *settings) loadSystemTheme() fyne.Theme {
+	path := filepath.Join(rootConfigDir(), "theme.toml")
+	data, err := fyne.LoadResourceFromPath(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Failed to parse user theme file: "+path, err)
+		}
+		return theme.DefaultTheme()
+	}
+	if data != nil && data.Content() != nil {
+		th := theme.FromTOML(string(data.Content()))
+		if th != nil {
+			return th
+		}
+	}
+	return theme.DefaultTheme()
+}
+
 func (s *settings) setupTheme() {
 	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
@@ -147,7 +165,7 @@ func (s *settings) setupTheme() {
 	variant := defaultVariant()
 	effectiveTheme := s.theme
 	if !s.themeSpecified {
-		effectiveTheme = theme.DefaultTheme()
+		effectiveTheme = s.loadSystemTheme()
 	}
 	switch name {
 	case "light":
