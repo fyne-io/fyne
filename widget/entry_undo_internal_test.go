@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -125,13 +124,6 @@ func TestEntry_Undo(t *testing.T) {
 	entry.Redo()
 	assert.Equal(t, "abcZ def", entry.Text)
 	assert.Equal(t, 0, entry.redoOffset)
-}
-
-func clickEntry(e *Entry, ev *fyne.PointEvent) {
-	mouseEvent := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
-	e.MouseDown(mouseEvent)
-	e.MouseUp(mouseEvent)
-	e.Tapped(ev)
 }
 
 func typeToEntry(e *Entry, text string, fakeTime *fakeTime) {
