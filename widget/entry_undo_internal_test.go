@@ -99,13 +99,13 @@ func TestEntry_Undo(t *testing.T) {
 
 	// Empty action history should result in no changes (and no crashes).
 	entry.SetText(text)
-	assert.Equal(t, false, entry.IsUndoAvailable())
-	assert.Equal(t, false, entry.IsRedoAvailable())
+	assert.Equal(t, false, entry.CanUndo())
+	assert.Equal(t, false, entry.CanRedo())
 	entry.Undo()
 	entry.Undo()
 	entry.Redo()
-	assert.False(t, entry.IsUndoAvailable())
-	assert.False(t, entry.IsRedoAvailable())
+	assert.False(t, entry.CanUndo())
+	assert.False(t, entry.CanRedo())
 	assert.Equal(t, text, entry.Text)
 	assert.Equal(t, 0, entry.redoOffset)
 	assert.Equal(t, 0, len(entry.actionLog))
@@ -118,8 +118,8 @@ func TestEntry_Undo(t *testing.T) {
 	entry.Undo()
 	assert.Equal(t, text, entry.Text)
 	assert.Equal(t, 1, entry.redoOffset)
-	assert.False(t, entry.IsUndoAvailable())
-	assert.True(t, entry.IsRedoAvailable())
+	assert.False(t, entry.CanUndo())
+	assert.True(t, entry.CanRedo())
 
 	// Basic Redo operation.
 	entry.Redo()
@@ -154,7 +154,7 @@ func (ft *fakeTime) add(delta time.Duration) {
 func newEntryWithFakeTimestamper() (*Entry, *fakeTime) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff
-	entry.HistoryEnabled = true
+	entry.HistoryDisabled = false
 	entry.Refresh()
 
 	fakeTimestamper := fakeTime{

@@ -90,7 +90,7 @@ type Entry struct {
 	textSource   binding.String
 	textListener binding.DataListener
 
-	HistoryEnabled bool
+	HistoryDisabled bool
 	// timestamper is a function that returns the current moment. It is usually
 	// just time.Now(), but can be changed during widget tests.
 	timestamper   func() time.Time
@@ -480,7 +480,7 @@ func (e *Entry) SetText(text string) {
 	e.updateText(text)
 	e.updateCursor()
 
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		e.registerInitialState()
 	}
 }
@@ -491,7 +491,7 @@ func (e *Entry) SetTextUndoable(text string) {
 	e.updateText(text)
 	e.updateCursor()
 
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		e.registerAction(entryActionSetText)
 	}
 }
@@ -524,7 +524,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	super := e.super()
 
 	historyItems := make([]*fyne.MenuItem, 0)
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		historyItems = append(historyItems, fyne.NewMenuItem("Undo", func() {
 			super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutUndo{})
 		}))
@@ -624,7 +624,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		pos := e.cursorTextPos()
 		provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
-		if e.HistoryEnabled {
+		if !e.HistoryDisabled {
 			e.registerAction(entryActionErasing)
 		}
 		e.propertyLock.Unlock()
@@ -636,7 +636,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		provider.deleteFromTo(pos, pos+1)
-		if e.HistoryEnabled {
+		if !e.HistoryDisabled {
 			e.registerAction(entryActionErasing)
 		}
 		e.propertyLock.Unlock()
@@ -783,7 +783,7 @@ func (e *Entry) TypedRune(r rune) {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
 	content := provider.String()
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		e.registerAction(entryActionTypedRune)
 	}
 	e.propertyLock.Unlock()
@@ -848,7 +848,7 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 
 	e.copyToClipboard(clipboard)
 	e.eraseSelection()
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		e.registerAction(entryActionCut)
 	}
 }
@@ -914,7 +914,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	content := provider.String()
 	e.updateText(content)
 
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		e.registerAction(entryActionPaste)
 	}
 
@@ -1035,7 +1035,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
 		e.eraseSelection()
-		if e.HistoryEnabled {
+		if !e.HistoryDisabled {
 			e.propertyLock.RLock()
 			e.registerAction(entryActionErasing)
 			e.propertyLock.RUnlock()
@@ -1263,7 +1263,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 
-	if e.HistoryEnabled {
+	if !e.HistoryDisabled {
 		e.registerAction(entryActionTypedRune)
 	}
 	e.propertyLock.Unlock()

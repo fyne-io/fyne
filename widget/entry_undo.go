@@ -6,6 +6,48 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// CanUndo returns true if Undo() may be called.
+func (e *Entry) CanUndo() bool {
+	return !e.HistoryDisabled && (len(e.actionLog)-e.redoOffset > 0)
+}
+
+// CanRedo returns true if Redo() may be called, i.e.,
+// if some action has just been undone.
+func (e *Entry) CanRedo() bool {
+	return !e.HistoryDisabled && (e.redoOffset > 0)
+}
+
+// Undo rolls back one user action at a time if history tracking is enabled.
+func (e *Entry) Undo() {
+	if e.HistoryDisabled {
+		return
+	}
+	e.ensureHistoryDefined()
+
+	actionIndex := len(e.actionLog) - 2 - e.redoOffset
+	newState := *e.historyOrigin
+	if actionIndex >= 0 {
+		newState = e.actionLog[actionIndex].state
+	}
+	if actionIndex >= -1 {
+		e.redoOffset++
+	}
+
+	e.restoreHistorySnapshot(newState)
+}
+
+// Redo replicates the recently undone action.
+func (e *Entry) Redo() {
+	if e.HistoryDisabled || (e.redoOffset == 0) {
+		return
+	}
+	e.ensureHistoryDefined()
+
+	actionIndex := len(e.actionLog) - e.redoOffset
+	e.restoreHistorySnapshot(e.actionLog[actionIndex].state)
+	e.redoOffset--
+}
+
 type entryUserAction struct {
 	actionType entryActionType
 	timestamp  time.Time
@@ -32,7 +74,7 @@ type entryHistoryState struct {
 // registerAction creates a new action of the specified type and stores
 // the snapshot in the action log. It expects the caller to hold .propertyLock().
 func (e *Entry) registerAction(actionType entryActionType) {
-	if !e.HistoryEnabled {
+	if e.HistoryDisabled {
 		return
 	}
 	e.ensureHistoryDefined()
@@ -76,48 +118,6 @@ func (e *Entry) shouldMergeAction(action entryUserAction) bool {
 	shouldMergeErased := areBothOfType(entryActionErasing)
 
 	return (shouldMergeTyped || shouldMergeErased)
-}
-
-// IsUndoAvailable returns true if Undo() may be called.
-func (e *Entry) IsUndoAvailable() bool {
-	return e.HistoryEnabled && (len(e.actionLog)-e.redoOffset > 0)
-}
-
-// IsRedoAvailable returns true if Redo() may be called, i.e.,
-// if some action has just been undone.
-func (e *Entry) IsRedoAvailable() bool {
-	return e.HistoryEnabled && (e.redoOffset > 0)
-}
-
-// Undo rolls back one user action at a time if history tracking is enabled.
-func (e *Entry) Undo() {
-	if !e.HistoryEnabled {
-		return
-	}
-	e.ensureHistoryDefined()
-
-	actionIndex := len(e.actionLog) - 2 - e.redoOffset
-	newState := *e.historyOrigin
-	if actionIndex >= 0 {
-		newState = e.actionLog[actionIndex].state
-	}
-	if actionIndex >= -1 {
-		e.redoOffset++
-	}
-
-	e.restoreHistorySnapshot(newState)
-}
-
-// Redo replicates the recently undone action.
-func (e *Entry) Redo() {
-	if !e.HistoryEnabled || (e.redoOffset == 0) {
-		return
-	}
-	e.ensureHistoryDefined()
-
-	actionIndex := len(e.actionLog) - e.redoOffset
-	e.restoreHistorySnapshot(e.actionLog[actionIndex].state)
-	e.redoOffset--
 }
 
 // historySnapshot returns the information sufficient to restore the entry state
