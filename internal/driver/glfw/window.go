@@ -848,8 +848,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	// button release must sent DragEnd during drag cycle
 	if action == glfw.Release && mouseDragged != nil {
 		w.mouseDragEnd(mouseDragged, draggableO)
-		// do not send clicked on drag end
-		tappableO = nil
 	}
 
 	// trigger TappedSecondary on Secondary mouse release
