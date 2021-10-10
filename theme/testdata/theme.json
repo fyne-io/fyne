@@ -1,0 +1,12 @@
+{
+  "Colors": {
+    "foreground": "#ffffffff"
+  },
+  "Colors-light": {
+    "background": "#303030",
+    "foreground": "#c0c0c0ff"
+  },
+  "Sizes": {
+    "iconInline": 10.0
+  }
+}

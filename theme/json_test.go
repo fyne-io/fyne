@@ -8,17 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFromTOML(t *testing.T) {
-	th := FromTOML(`
-[Colors]
-background = "#c0c0c0ff"
-
-[Colors-light]
-foreground = "#ffffffff"
-
-[Sizes]
-iconInline = 5.0
-`)
+func TestFromJSON(t *testing.T) {
+	th := FromJSON(`{
+"Colors": {"background": "#c0c0c0ff"},
+"Colors-light": {"foreground": "#ffffffff"},
+"Sizes": {"iconInline": 5.0}
+}`)
 
 	assert.Equal(t, &color.NRGBA{R: 0xc0, G: 0xc0, B: 0xc0, A: 0xff}, th.Color(ColorNameBackground, VariantDark))
 	assert.Equal(t, &color.NRGBA{R: 0xc0, G: 0xc0, B: 0xc0, A: 0xff}, th.Color(ColorNameBackground, VariantLight))
@@ -27,9 +22,9 @@ iconInline = 5.0
 }
 
 func TestFromTOML_Resource(t *testing.T) {
-	r, err := fyne.LoadResourceFromPath("./testdata/theme.toml")
+	r, err := fyne.LoadResourceFromPath("./testdata/theme.json")
 	assert.Nil(t, err)
-	th := FromTOML(string(r.Content()))
+	th := FromJSON(string(r.Content()))
 
 	assert.Equal(t, &color.NRGBA{R: 0x30, G: 0x30, B: 0x30, A: 0xff}, th.Color(ColorNameBackground, VariantLight))
 	assert.Equal(t, &color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}, th.Color(ColorNameForeground, VariantDark))

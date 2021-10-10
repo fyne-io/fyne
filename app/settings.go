@@ -139,7 +139,7 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) loadSystemTheme() fyne.Theme {
-	path := filepath.Join(rootConfigDir(), "theme.toml")
+	path := filepath.Join(rootConfigDir(), "theme.json")
 	data, err := fyne.LoadResourceFromPath(path)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -148,7 +148,7 @@ func (s *settings) loadSystemTheme() fyne.Theme {
 		return theme.DefaultTheme()
 	}
 	if data != nil && data.Content() != nil {
-		th := theme.FromTOML(string(data.Content()))
+		th := theme.FromJSON(string(data.Content()))
 		if th != nil {
 			return th
 		}

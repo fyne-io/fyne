@@ -1,26 +1,27 @@
 package theme
 
 import (
+	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"github.com/BurntSushi/toml"
 )
 
-// FromTOML returns a Theme created from the given TOML metadata.
+// FromJSON returns a Theme created from the given JSON metadata.
 // Any values not present in the data will fall back to the default theme.
 //
 // Since: 2.2
-func FromTOML(data string) fyne.Theme {
+func FromJSON(data string) fyne.Theme {
 	var th *schema
-	if _, err := toml.Decode(data, &th); err != nil {
+	if err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&th); err != nil {
 		fyne.LogError("ERR", err)
 		return DefaultTheme()
 	}
 
-	return &tomlTheme{data: th, fallback: DefaultTheme()}
+	return &jsonTheme{data: th, fallback: DefaultTheme()}
 }
 
 type hexColor string
@@ -65,18 +66,19 @@ func (h hexColor) color() (color.Color, error) {
 }
 
 type schema struct {
-	Colors      map[string]hexColor `toml:",omitempty"`
-	DarkColors  map[string]hexColor `toml:"Colors-dark,omitempty"`
-	LightColors map[string]hexColor `toml:"Colors-light,omitempty"`
-	Sizes       map[string]float32  `toml:",omitempty"`
+	Thing       string              `json:"thing"`
+	Colors      map[string]hexColor `json:"Colors,omitempty"`
+	DarkColors  map[string]hexColor `json:"Colors-dark,omitempty"`
+	LightColors map[string]hexColor `json:"Colors-light,omitempty"`
+	Sizes       map[string]float32  `json:"Sizes,omitempty"`
 }
 
-type tomlTheme struct {
+type jsonTheme struct {
 	data     *schema
 	fallback fyne.Theme
 }
 
-func (t *tomlTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+func (t *jsonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	switch variant {
 	case VariantLight:
 		if val, ok := t.data.LightColors[string(name)]; ok {
@@ -110,15 +112,15 @@ func (t *tomlTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) c
 	return t.fallback.Color(name, variant)
 }
 
-func (t *tomlTheme) Font(style fyne.TextStyle) fyne.Resource {
+func (t *jsonTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return t.fallback.Font(style)
 }
 
-func (t *tomlTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
+func (t *jsonTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	return t.fallback.Icon(name)
 }
 
-func (t *tomlTheme) Size(name fyne.ThemeSizeName) float32 {
+func (t *jsonTheme) Size(name fyne.ThemeSizeName) float32 {
 	if val, ok := t.data.Sizes[string(name)]; ok {
 		return val
 	}
