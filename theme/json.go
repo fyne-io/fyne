@@ -66,7 +66,6 @@ func (h hexColor) color() (color.Color, error) {
 }
 
 type schema struct {
-	Thing       string              `json:"thing"`
 	Colors      map[string]hexColor `json:"Colors,omitempty"`
 	DarkColors  map[string]hexColor `json:"Colors-dark,omitempty"`
 	LightColors map[string]hexColor `json:"Colors-light,omitempty"`
