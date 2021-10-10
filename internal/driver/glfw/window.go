@@ -773,41 +773,41 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	// find individual objects with clickable interfaces
-	var tappableO fyne.CanvasObject
-	var secondaryTappableO fyne.CanvasObject
-	var doubleTappableO fyne.CanvasObject
-	var focusableO fyne.CanvasObject
-	var mouseableO fyne.CanvasObject
-	var draggableO fyne.CanvasObject
+	var tappable fyne.CanvasObject
+	var secondaryTappable fyne.CanvasObject
+	var doubleTappable fyne.CanvasObject
+	var focusable fyne.CanvasObject
+	var mouseable fyne.CanvasObject
+	var draggable fyne.CanvasObject
 
 	_, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) (ret bool) {
 		ret = false
 		// each Tappable, SecondaryTappable, DoubleTappable and Mouseable must receive appropriate event
 		if _, ok := object.(fyne.Tappable); ok {
-			tappableO = object
+			tappable = object
 			ret = true
 		}
 		if _, ok := object.(fyne.SecondaryTappable); ok {
-			secondaryTappableO = object
+			secondaryTappable = object
 			ret = true
 		}
 		if _, ok := object.(fyne.DoubleTappable); ok {
-			doubleTappableO = object
+			doubleTappable = object
 			ret = true
 		}
 		if _, ok := object.(desktop.Mouseable); ok {
-			mouseableO = object
+			mouseable = object
 			ret = true
 		}
 		// find fyne.Focusable to release focus when mouse clicked outside of currently focused object
 		if _, ok := object.(fyne.Focusable); ok {
-			focusableO = object
+			focusable = object
 			ret = true
 		}
 		// when drag started, we may need to know if mouse within the fyne.Draggable to ?
 		if mouseDragStarted {
 			if _, ok := object.(fyne.Draggable); ok {
-				draggableO = object
+				draggable = object
 				ret = true
 			}
 		}
@@ -820,17 +820,17 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	button, modifiers := convertMouseButton(btn, mods)
 
 	// deliver Mouseable when one found
-	if mouseableO != nil {
+	if mouseable != nil {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
 		mev.AbsolutePosition = mousePos
 		mev.Button = button
 		mev.Modifier = modifiers
-		w.mouseClickedHandleMouseable(mev, action, mouseableO.(desktop.Mouseable))
+		w.mouseClickedHandleMouseable(mev, action, mouseable.(desktop.Mouseable))
 	}
 
 	// when click outside currently Focusable object, remove focus.
-	if focusableO, ok := focusableO.(fyne.Focusable); ok && w.canvas.Focused() != nil && focusableO != w.canvas.Focused() {
+	if focusable, ok := focusable.(fyne.Focusable); ok && w.canvas.Focused() != nil && focusable != w.canvas.Focused() {
 		w.canvas.Unfocus()
 	}
 
@@ -847,23 +847,23 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 	// button release must sent DragEnd during drag cycle
 	if action == glfw.Release && mouseDragged != nil {
-		w.mouseDragEnd(mouseDragged, draggableO)
+		w.mouseDragEnd(mouseDragged, draggable)
 	}
 
 	// trigger TappedSecondary on Secondary mouse release
-	if secondaryTappableO != nil && button == desktop.MouseButtonSecondary {
-		w.mouseClickedHandleButtonSecondary(ev, action, secondaryTappableO.(fyne.SecondaryTappable))
+	if secondaryTappable != nil && button == desktop.MouseButtonSecondary {
+		w.mouseClickedHandleButtonSecondary(ev, action, secondaryTappable.(fyne.SecondaryTappable))
 	}
 
 	if action == glfw.Release && button == desktop.MouseButtonPrimary {
-		if doubleTappableO != nil {
-			w.mouseClickedHandleTapDoubleTap(doubleTappableO, ev)
-			if doubleTappableO == tappableO {
-				tappableO = nil
+		if doubleTappable != nil {
+			w.mouseClickedHandleTapDoubleTap(doubleTappable, ev)
+			if doubleTappable == tappable {
+				tappable = nil
 			}
 		}
-		if tappableO != nil && mousePrimaryPressed == tappableO.(fyne.Tappable) {
-			w.QueueEvent(func() { tappableO.(fyne.Tappable).Tapped(ev) })
+		if tappable != nil && mousePrimaryPressed == tappable.(fyne.Tappable) {
+			w.QueueEvent(func() { tappable.(fyne.Tappable).Tapped(ev) })
 		}
 		w.mouseLock.Lock()
 		w.mousePrimaryPressed = nil
@@ -872,14 +872,14 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	if action == glfw.Press {
-		if tappableO != nil {
+		if tappable != nil {
 			w.mouseLock.Lock()
-			w.mousePrimaryPressed = tappableO.(fyne.Tappable)
+			w.mousePrimaryPressed = tappable.(fyne.Tappable)
 			w.mouseLock.Unlock()
 		}
-		if doubleTappableO != nil {
+		if doubleTappable != nil {
 			w.mouseLock.Lock()
-			w.mouseDoublePressed = doubleTappableO
+			w.mouseDoublePressed = doubleTappable
 			w.mouseLock.Unlock()
 		}
 	}
