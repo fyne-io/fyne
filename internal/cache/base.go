@@ -55,6 +55,43 @@ func Clean(canvasRefreshed bool) {
 	lastClean = timeNow()
 }
 
+func CleanUpForCanvas(canvas fyne.Canvas) {
+
+	now := timeNow()
+	// do not run clean task too fast
+	if now.Sub(lastClean) < 10*time.Second {
+		return
+	}
+
+	if now.Sub(lastClean) < cleanTaskInterval {
+		return
+	}
+
+	destroyExpiredSvgs(now)
+
+	// Destroy renderers on canvas refresh to avoid flickering screen.
+	destroyRendererIfExpired(now, canvas.Content())
+
+	// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
+	// be a way to recover them later
+	destroyCanvasIfExpired(now, canvas.Content())
+
+	lastClean = timeNow()
+}
+
+func destroyCanvasIfExpired(now time.Time, canvasObject fyne.CanvasObject) {
+
+	canvasesLock.RLock()
+	cinfo := canvases[canvasObject]
+	canvasesLock.RUnlock()
+
+	if cinfo != nil && cinfo.isExpired(now) {
+		canvasesLock.Lock()
+		delete(canvases, canvasObject)
+		canvasesLock.Unlock()
+	}
+}
+
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
 // canvas. Usually used to free all objects from a closing windows.
 func CleanCanvas(canvas fyne.Canvas) {
@@ -142,6 +179,27 @@ func destroyExpiredRenderers(now time.Time) {
 			delete(renderers, exp.(fyne.Widget))
 			expiredObjects[i] = nil
 		}
+		renderersLock.Unlock()
+	}
+}
+
+func destroyRendererIfExpired(now time.Time, canvasObject fyne.CanvasObject) {
+
+	switch canvasObject.(type) {
+
+	case fyne.Widget:
+		wid := canvasObject.(fyne.Widget)
+
+		renderersLock.RLock()
+		rinfo := renderers[wid]
+
+		if rinfo.isExpired(now) {
+			rinfo.renderer.Destroy()
+		}
+		renderersLock.RUnlock()
+
+		renderersLock.Lock()
+		delete(renderers, wid)
 		renderersLock.Unlock()
 	}
 }
