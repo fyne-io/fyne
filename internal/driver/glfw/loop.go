@@ -213,7 +213,6 @@ func (d *gLDriver) startDrawThread() {
 					go c.reloadScale()
 				})
 			case <-draw.C:
-				canvasRefreshed := false
 				for _, win := range d.windowList() {
 					w := win.(*window)
 					w.viewLock.RLock()
@@ -221,13 +220,13 @@ func (d *gLDriver) startDrawThread() {
 					closing := w.closing
 					visible := w.visible
 					w.viewLock.RUnlock()
+
 					if closing || !canvas.IsDirty() || !visible {
 						continue
 					}
-					canvasRefreshed = true
 					d.repaintWindow(w)
+					cache.CleanUpForCanvas(canvas)
 				}
-				cache.Clean(canvasRefreshed)
 			}
 		}
 	}()
