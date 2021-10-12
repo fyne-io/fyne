@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"os"
@@ -148,7 +149,7 @@ func (s *settings) loadSystemTheme() fyne.Theme {
 		return theme.DefaultTheme()
 	}
 	if data != nil && data.Content() != nil {
-		th := theme.FromJSON(string(data.Content()))
+		th := theme.FromJSONReader(bytes.NewReader(data.Content()))
 		if th != nil {
 			return th
 		}

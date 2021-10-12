@@ -1,11 +1,12 @@
 package theme
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"image/color"
+	"io"
+	"strings"
 
 	"fyne.io/fyne/v2"
 )
@@ -15,8 +16,16 @@ import (
 //
 // Since: 2.2
 func FromJSON(data string) fyne.Theme {
+	return FromJSONReader(strings.NewReader(data))
+}
+
+// FromJSONReader returns a Theme created from the given JSON metadata through the reader.
+// Any values not present in the data will fall back to the default theme.
+//
+// Since: 2.2
+func FromJSONReader(r io.Reader) fyne.Theme {
 	var th *schema
-	if err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&th); err != nil {
+	if err := json.NewDecoder(r).Decode(&th); err != nil {
 		fyne.LogError("ERR", err)
 		return DefaultTheme()
 	}
