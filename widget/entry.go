@@ -1139,7 +1139,7 @@ func (e *Entry) truncatePosition(row, col int) (newRow, newCol int) {
 		newRow = e.textProvider().rows() - 1
 	}
 	rowLength := e.textProvider().rowLength(newRow)
-	if col >= rowLength {
+	if (col >= rowLength) || (newRow < row) {
 		newCol = rowLength
 	}
 	return
