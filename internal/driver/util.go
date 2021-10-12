@@ -80,6 +80,59 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 	return found, foundPos, layer
 }
 
+// WalkVisibleObjectsAtPosition is used to visit objects in a canvas at the specified position.
+// The notify function called for objects that are found at mouse position and position of mouse in the object is provided.
+// The various canvas roots and overlays that can be searched are also passed in.
+func WalkVisibleObjectsAtPosition(mouse fyne.Position, notify func(object fyne.CanvasObject, pos fyne.Position) bool, overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (bool, int) {
+	var found bool
+
+	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
+		if !walked.Visible() {
+			return false
+		}
+
+		if mouse.X < clipPos.X || mouse.Y < clipPos.Y {
+			return false
+		}
+
+		if mouse.X >= clipPos.X+clipSize.Width || mouse.Y >= clipPos.Y+clipSize.Height {
+			return false
+		}
+
+		if mouse.X < pos.X || mouse.Y < pos.Y {
+			return false
+		}
+
+		if mouse.X >= pos.X+walked.Size().Width || mouse.Y >= pos.Y+walked.Size().Height {
+			return false
+		}
+
+		objectPos := fyne.NewPos(mouse.X-pos.X, mouse.Y-pos.Y)
+		if notify(walked, objectPos) {
+			found = true
+		}
+		return false
+	}
+
+	layer := 0
+	if overlay != nil {
+		WalkVisibleObjectTree(overlay, findFunc, nil)
+	} else {
+		for _, root := range roots {
+			layer++
+			if root == nil {
+				continue
+			}
+			WalkVisibleObjectTree(root, findFunc, nil)
+			if found {
+				break
+			}
+		}
+	}
+
+	return found, layer
+}
+
 // ReverseWalkVisibleObjectTree will walk an object tree in reverse order for all visible objects
 // executing the passed functions following the following rules:
 // - beforeChildren is called for the start obj before traversing its children

@@ -29,6 +29,17 @@ const (
 	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
 )
 
+const (
+	tappableID = iota
+	secondaryTappableID
+	doubleTappableID
+	focusableID
+	mouseableID
+	draggableID
+	hoverableID
+	targetMax
+)
+
 var (
 	cursorMap    map[desktop.StandardCursor]*glfw.Cursor
 	defaultTitle = "Fyne Application"
@@ -88,6 +99,9 @@ type window struct {
 	mousePrimaryPressed   fyne.Tappable
 	mouseDoublePressed    fyne.CanvasObject
 	mouseCancelFunc       context.CancelFunc
+	pointPos              fyne.Position                // mouse position when pointObjects updated
+	pointObject           [targetMax]fyne.CanvasObject // objects found under pointPos
+	pointObjectPosition   [targetMax]fyne.Position     // position in object
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -583,6 +597,10 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
 }
 
+func (w *window) findObjectsAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject, pos fyne.Position) bool) (bool, int) {
+	return driver.WalkVisibleObjectsAtPosition(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
+}
+
 func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 	switch v := cursor.(type) {
 	case desktop.StandardCursor:
@@ -611,16 +629,14 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	cursor := desktop.Cursor(desktop.DefaultCursor)
 
-	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+	hoverable, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			cursor = cursorable.Cursor()
 		}
-		if _, ok := object.(fyne.Draggable); ok {
+		if _, ok := object.(desktop.Hoverable); ok {
 			return true
 		}
-
-		_, hover := object.(desktop.Hoverable)
-		return hover
+		return false
 	})
 
 	if w.cursor != cursor {
@@ -644,60 +660,52 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	}
 
 	if w.mouseButton != 0 && w.mouseButton != desktop.MouseButtonSecondary && !w.mouseDragStarted {
-		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
-			_, ok := object.(fyne.Draggable)
-			return ok
-		})
-
-		if wid, ok := obj.(fyne.Draggable); ok {
+		if w.mouseDragged == nil && w.pointObject[draggableID] != nil {
+			// the last mouse press was done over the fyne.Draggable
 			w.mouseLock.Lock()
 			w.mouseDragPos = previousPos
-			w.mouseDragged = wid
-			w.mouseDraggedOffset = previousPos.Subtract(pos)
-			w.mouseDraggedObjStart = obj.Position()
+			w.mouseDragged = w.pointObject[draggableID].(fyne.Draggable)
+			w.mouseDraggedOffset = previousPos.Subtract(w.pointObjectPosition[draggableID])
+			w.mouseDraggedObjStart = w.pointObject[draggableID].Position()
 			w.mouseDragStarted = true
 			w.mouseLock.Unlock()
 		}
 	}
 
 	w.mouseLock.RLock()
-	isObjDragged := w.objIsDragged(obj)
-	isMouseOverDragged := w.objIsDragged(mouseOver)
+	isObjDragged := w.objIsDragged(hoverable) // over the current draggable object
+	// isMouseOverDragged := w.objIsDragged(mouseOver) // was over hoverable object in previous position
 	w.mouseLock.RUnlock()
-	if obj != nil {
+	if hovered, ok := hoverable.(desktop.Hoverable); ok {
 		ev := new(desktop.MouseEvent)
 		ev.AbsolutePosition = mousePos
 		ev.Position = pos
 		ev.Button = mouseButton
-
-		if hovered, ok := obj.(desktop.Hoverable); ok {
-			if hovered == mouseOver {
-				// send MouseMoved when same object as before, unless object was dragged
-				if !isObjDragged {
-					w.QueueEvent(func() { hovered.MouseMoved(ev) })
-				}
-			} else {
-				// change the hover object
+		if hovered == mouseOver {
+			// send MouseMoved when same object as before, unless object was dragged
+			if !isObjDragged {
+				w.QueueEvent(func() { hovered.MouseMoved(ev) })
+			}
+		} else {
+			// change of hover object
+			// send mouse out unless obj is child of current hoverable
+			isChild := false
+			if mouseOver != nil {
+				driver.WalkCompleteObjectTree(mouseOver.(fyne.CanvasObject),
+					func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
+						if co == hoverable {
+							isChild = true
+							return true
+						}
+						return false
+					}, nil)
+			}
+			if !isChild {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
 			}
-		} else if mouseOver != nil {
-			// mouse was over the hoverable
-			// send mouse out unless obj is child of current hoverable
-			isChild := false
-			driver.WalkCompleteObjectTree(mouseOver.(fyne.CanvasObject),
-				func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
-					if co == obj {
-						isChild = true
-						return true
-					}
-					return false
-				}, nil)
-			if !isChild {
-				w.mouseOut()
-			}
 		}
-	} else if mouseOver != nil && !isMouseOverDragged {
+	} else if mouseOver != nil {
 		w.mouseOut()
 	}
 
@@ -772,65 +780,74 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseLock.Unlock()
 	}
 
-	// find individual objects with clickable interfaces
-	var tappable fyne.CanvasObject
-	var secondaryTappable fyne.CanvasObject
-	var doubleTappable fyne.CanvasObject
-	var focusable fyne.CanvasObject
-	var mouseable fyne.CanvasObject
-	var draggable fyne.CanvasObject
-
-	_, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) (ret bool) {
-		ret = false
-		// each Tappable, SecondaryTappable, DoubleTappable and Mouseable must receive appropriate event
-		if _, ok := object.(fyne.Tappable); ok {
-			tappable = object
-			ret = true
-		}
-		if _, ok := object.(fyne.SecondaryTappable); ok {
-			secondaryTappable = object
-			ret = true
-		}
-		if _, ok := object.(fyne.DoubleTappable); ok {
-			doubleTappable = object
-			ret = true
-		}
-		if _, ok := object.(desktop.Mouseable); ok {
-			mouseable = object
-			ret = true
-		}
-		// find fyne.Focusable to release focus when mouse clicked outside of currently focused object
-		if _, ok := object.(fyne.Focusable); ok {
-			focusable = object
-			ret = true
-		}
-		// when drag started, we may need to know if mouse within the fyne.Draggable to ?
-		if mouseDragStarted {
-			if _, ok := object.(fyne.Draggable); ok {
-				draggable = object
-				ret = true
-			}
-		}
-		return
-	})
-	ev := new(fyne.PointEvent)
-	ev.Position = pos
-	ev.AbsolutePosition = mousePos
-
 	button, modifiers := convertMouseButton(btn, mods)
 
+	// find individual objects with clickable interfaces
+	if w.pointPos != mousePos {
+		w.pointPos = mousePos
+		// clean cached targets
+		for i := range w.pointObject {
+			w.pointObject[i] = nil
+		}
+		_, _ = w.findObjectsAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject, pos fyne.Position) (ret bool) {
+			ret = false
+			// each Tappable, SecondaryTappable, DoubleTappable and Mouseable must receive appropriate event
+			if _, ok := object.(fyne.Tappable); ok {
+				w.pointObject[tappableID] = object
+				w.pointObjectPosition[tappableID] = pos
+				ret = true
+			}
+			if _, ok := object.(fyne.SecondaryTappable); ok {
+				w.pointObject[secondaryTappableID] = object
+				w.pointObjectPosition[secondaryTappableID] = pos
+				ret = true
+			}
+			if _, ok := object.(fyne.DoubleTappable); ok {
+				w.pointObject[doubleTappableID] = object
+				w.pointObjectPosition[doubleTappableID] = pos
+				ret = true
+			}
+			if _, ok := object.(desktop.Mouseable); ok {
+				w.pointObject[mouseableID] = object
+				w.pointObjectPosition[mouseableID] = pos
+				ret = true
+			}
+			// find fyne.Focusable to release focus when mouse clicked outside of currently focused object
+			if _, ok := object.(fyne.Focusable); ok {
+				w.pointObject[focusableID] = object
+				w.pointObjectPosition[focusableID] = pos
+				ret = true
+			}
+			if _, ok := object.(desktop.Hoverable); ok {
+				w.pointObject[hoverableID] = object
+				w.pointObjectPosition[hoverableID] = pos
+			}
+
+			// when primary button pressed, find if object fyne.Draggable
+			if mouseDragStarted || button == desktop.MouseButtonPrimary && action == glfw.Press {
+				if _, ok := object.(fyne.Draggable); ok {
+					w.pointObject[draggableID] = object
+					w.pointObjectPosition[draggableID] = pos
+					ret = true
+				}
+			}
+			return
+		})
+		w.pointPos = mousePos
+	}
+
 	// deliver Mouseable when one found
-	if mouseable != nil {
+	if w.pointObject[mouseableID] != nil {
 		mev := new(desktop.MouseEvent)
-		mev.Position = ev.Position
+		mev.Position = w.pointObjectPosition[mouseableID]
 		mev.AbsolutePosition = mousePos
 		mev.Button = button
 		mev.Modifier = modifiers
-		w.mouseClickedHandleMouseable(mev, action, mouseable.(desktop.Mouseable))
+		w.mouseClickedHandleMouseable(mev, action, w.pointObject[mouseableID].(desktop.Mouseable))
 	}
 
 	// when click outside currently Focusable object, remove focus.
-	if focusable, ok := focusable.(fyne.Focusable); ok && w.canvas.Focused() != nil && focusable != w.canvas.Focused() {
+	if focusable, ok := w.pointObject[focusableID].(fyne.Focusable); ok && w.canvas.Focused() != nil && focusable != w.canvas.Focused() {
 		w.canvas.Unfocus()
 	}
 
@@ -847,23 +864,33 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 	// button release must sent DragEnd during drag cycle
 	if action == glfw.Release && mouseDragged != nil {
-		w.mouseDragEnd(mouseDragged, draggable)
+		w.mouseDragEnd(mouseDragged, w.pointObject[draggableID])
 	}
 
 	// trigger TappedSecondary on Secondary mouse release
-	if secondaryTappable != nil && button == desktop.MouseButtonSecondary {
-		w.mouseClickedHandleButtonSecondary(ev, action, secondaryTappable.(fyne.SecondaryTappable))
+	if w.pointObject[secondaryTappableID] != nil && button == desktop.MouseButtonSecondary {
+		ev := new(fyne.PointEvent)
+		ev.AbsolutePosition = mousePos
+		ev.Position = w.pointObjectPosition[secondaryTappableID]
+		w.mouseClickedHandleButtonSecondary(ev, action, w.pointObject[secondaryTappableID].(fyne.SecondaryTappable))
 	}
 
+	tappableObject := w.pointObject[tappableID]
 	if action == glfw.Release && button == desktop.MouseButtonPrimary {
-		if doubleTappable != nil {
-			w.mouseClickedHandleTapDoubleTap(doubleTappable, ev)
-			if doubleTappable == tappable {
-				tappable = nil
+		if w.pointObject[doubleTappableID] != nil {
+			ev := new(fyne.PointEvent)
+			ev.AbsolutePosition = mousePos
+			ev.Position = w.pointObjectPosition[doubleTappableID]
+			w.mouseClickedHandleTapDoubleTap(w.pointObject[doubleTappableID], ev)
+			if w.pointObject[doubleTappableID] == tappableObject {
+				tappableObject = nil
 			}
 		}
-		if tappable != nil && mousePrimaryPressed == tappable.(fyne.Tappable) {
-			w.QueueEvent(func() { tappable.(fyne.Tappable).Tapped(ev) })
+		if tappableObject != nil && mousePrimaryPressed == tappableObject.(fyne.Tappable) {
+			ev := new(fyne.PointEvent)
+			ev.AbsolutePosition = mousePos
+			ev.Position = w.pointObjectPosition[tappableID]
+			w.QueueEvent(func() { tappableObject.(fyne.Tappable).Tapped(ev) })
 		}
 		w.mouseLock.Lock()
 		w.mousePrimaryPressed = nil
@@ -872,14 +899,14 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	if action == glfw.Press {
-		if tappable != nil {
+		if tappableObject != nil {
 			w.mouseLock.Lock()
-			w.mousePrimaryPressed = tappable.(fyne.Tappable)
+			w.mousePrimaryPressed = tappableObject.(fyne.Tappable)
 			w.mouseLock.Unlock()
 		}
-		if doubleTappable != nil {
+		if w.pointObject[doubleTappableID] != nil {
 			w.mouseLock.Lock()
-			w.mouseDoublePressed = doubleTappable
+			w.mouseDoublePressed = w.pointObject[doubleTappableID]
 			w.mouseLock.Unlock()
 		}
 	}

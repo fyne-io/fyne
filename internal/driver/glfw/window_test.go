@@ -580,7 +580,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	)
 
 	// drag event going outside the widget's area
-	// expected behavior is to keep hover and only get DragEvent without mouse move
+	// expected behavior is to loose hover, get DragEvent, and no mouse move
 	w.mouseMoved(w.viewport, 16, 8)
 	w.WaitForEvents()
 	assert.Equal(t,
@@ -592,10 +592,10 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		dh.popDragEvent(),
 	)
 	assert.Nil(t, dh.popMouseMovedEvent())
-	assert.Nil(t, dh.popMouseOutEvent())
+	assert.NotNil(t, dh.popMouseOutEvent())
 
-	// drag event going inside the widget's area again
-	// expected behavior is to keep hover and only get DragEvent without mouse move
+	// drag event going back inside the widget's area again
+	// expected behavior is get hover, get DragEvent, and no mouse move
 	w.mouseMoved(w.viewport, 8, 8)
 	w.WaitForEvents()
 	assert.Equal(t,
@@ -606,7 +606,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		},
 		dh.popDragEvent(),
 	)
-	assert.Nil(t, dh.popMouseInEvent())
+	assert.NotNil(t, dh.popMouseInEvent())
 	assert.Nil(t, dh.popMouseMovedEvent())
 
 	// no hover events on end of drag event
