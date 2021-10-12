@@ -1416,18 +1416,26 @@ func TestEntry_Submit(t *testing.T) {
 		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
 			entry.MultiLine = true
 			entry.SetText("c")
+			entry.CursorRow = 0
+			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
 			assert.Equal(t, "\nc", entry.Text)
 			entry.SetText("d")
+			entry.CursorRow = 0
+			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
 			assert.Equal(t, "\nd", entry.Text)
 		})
 		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
 			entry.MultiLine = true
 			entry.SetText("e")
+			entry.CursorRow = 0
+			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
 			assert.Equal(t, "\ne", entry.Text)
 			entry.SetText("f")
+			entry.CursorRow = 0
+			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
 			assert.Equal(t, "\nf", entry.Text)
 		})
