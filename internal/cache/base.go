@@ -55,9 +55,12 @@ func Clean(canvasRefreshed bool) {
 	lastClean = timeNow()
 }
 
+// Clean canvas and renderer cache on a per-canvas basis, and run SVG clean-up.
+// Called on repaint events.
 func CleanUpForCanvas(canvas fyne.Canvas) {
 
 	now := timeNow()
+
 	// do not run clean task too fast
 	if now.Sub(lastClean) < 10*time.Second {
 		return
@@ -70,26 +73,12 @@ func CleanUpForCanvas(canvas fyne.Canvas) {
 	destroyExpiredSvgs(now)
 
 	// Destroy renderers on canvas refresh to avoid flickering screen.
-	destroyRendererIfExpired(now, canvas.Content())
+	destroyExpiredRenderer(now, canvas.Content())
 
-	// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
-	// be a way to recover them later
-	destroyCanvasIfExpired(now, canvas.Content())
+	// Clean up canvases cache for a given canvas.
+	destroyExpiredCanvas(now, canvas.Content())
 
 	lastClean = timeNow()
-}
-
-func destroyCanvasIfExpired(now time.Time, canvasObject fyne.CanvasObject) {
-
-	canvasesLock.RLock()
-	cinfo := canvases[canvasObject]
-	canvasesLock.RUnlock()
-
-	if cinfo != nil && cinfo.isExpired(now) {
-		canvasesLock.Lock()
-		delete(canvases, canvasObject)
-		canvasesLock.Unlock()
-	}
 }
 
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
@@ -183,24 +172,38 @@ func destroyExpiredRenderers(now time.Time) {
 	}
 }
 
-func destroyRendererIfExpired(now time.Time, canvasObject fyne.CanvasObject) {
-
+// destroyExpiredRenderer deletes the renderer from the cache if expired, and calls
+// renderer.Destroy(), for a given CanvasObject.
+func destroyExpiredRenderer(now time.Time, canvasObject fyne.CanvasObject) {
 	switch canvasObject.(type) {
-
 	case fyne.Widget:
 		wid := canvasObject.(fyne.Widget)
 
 		renderersLock.RLock()
 		rinfo := renderers[wid]
-
-		if rinfo.isExpired(now) {
-			rinfo.renderer.Destroy()
-		}
 		renderersLock.RUnlock()
 
-		renderersLock.Lock()
-		delete(renderers, wid)
-		renderersLock.Unlock()
+		if rinfo != nil && rinfo.isExpired(now) {
+			rinfo.renderer.Destroy()
+
+			renderersLock.Lock()
+			delete(renderers, wid)
+			renderersLock.Unlock()
+		}
+	}
+}
+
+// destroyExpiredCanvas deletes objects from the canvases cache for a given CanvasObject,
+// if expired.
+func destroyExpiredCanvas(now time.Time, canvasObject fyne.CanvasObject) {
+	canvasesLock.RLock()
+	cinfo := canvases[canvasObject]
+	canvasesLock.RUnlock()
+
+	if cinfo != nil && cinfo.isExpired(now) {
+		canvasesLock.Lock()
+		delete(canvases, canvasObject)
+		canvasesLock.Unlock()
 	}
 }
 
