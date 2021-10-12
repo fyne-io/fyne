@@ -13,24 +13,25 @@ import (
 
 // FromJSON returns a Theme created from the given JSON metadata.
 // Any values not present in the data will fall back to the default theme.
+// If a parse error occurs it will be returned along with a default theme.
 //
 // Since: 2.2
-func FromJSON(data string) fyne.Theme {
+func FromJSON(data string) (fyne.Theme, error) {
 	return FromJSONReader(strings.NewReader(data))
 }
 
 // FromJSONReader returns a Theme created from the given JSON metadata through the reader.
 // Any values not present in the data will fall back to the default theme.
+// If a parse error occurs it will be returned along with a default theme.
 //
 // Since: 2.2
-func FromJSONReader(r io.Reader) fyne.Theme {
+func FromJSONReader(r io.Reader) (fyne.Theme, error) {
 	var th *schema
 	if err := json.NewDecoder(r).Decode(&th); err != nil {
-		fyne.LogError("ERR", err)
-		return DefaultTheme()
+		return DefaultTheme(), err
 	}
 
-	return &jsonTheme{data: th, fallback: DefaultTheme()}
+	return &jsonTheme{data: th, fallback: DefaultTheme()}, nil
 }
 
 type hexColor string
