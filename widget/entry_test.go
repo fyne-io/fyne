@@ -1335,6 +1335,23 @@ func TestEntry_SetText_Underflow(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_SetText_Overflow_Multiline(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.MultiLine = true
+
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	entry.SetText("ab\ncd\nef")
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	typeKeys(entry, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight)
+	entry.SetText("AB\nAAAA")
+	assert.Equal(t, 4, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
+}
+
 func TestEntry_SetTextStyle(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
