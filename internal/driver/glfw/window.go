@@ -1142,7 +1142,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	w.menuDeactivationPending = desktop.KeyNone
 	switch action {
 	case glfw.Release:
-		if action == glfw.Release {
+		if action == glfw.Release && keyName != "" {
 			switch keyName {
 			case pendingMenuToggle:
 				w.canvas.ToggleMenu()
@@ -1164,9 +1164,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	case glfw.Press:
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
-			if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
-				w.menuTogglePending = keyName
-			}
+			w.menuTogglePending = keyName
 		case fyne.KeyEscape:
 			w.menuDeactivationPending = keyName
 		}
