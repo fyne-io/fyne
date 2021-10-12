@@ -1123,18 +1123,18 @@ func (e *Entry) textWrap() fyne.TextWrap {
 func (e *Entry) updateCursorAndSelection() {
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
-	e.CursorColumn, e.CursorRow = e.truncatePosition(e.CursorColumn, e.CursorRow)
-	e.selectColumn, e.selectRow = e.truncatePosition(e.selectColumn, e.selectRow)
+	e.CursorRow, e.CursorColumn = e.truncatePosition(e.CursorRow, e.CursorColumn)
+	e.selectRow, e.selectColumn = e.truncatePosition(e.selectRow, e.selectColumn)
 }
 
-func (e *Entry) truncatePosition(col, row int) (newCol, newRow int) {
+func (e *Entry) truncatePosition(row, col int) (newRow, newCol int) {
 	if e.Text == "" {
-		newCol = 0
 		newRow = 0
+		newCol = 0
 		return
 	}
-	newCol = col
 	newRow = row
+	newCol = col
 	if row >= e.textProvider().rows() {
 		newRow = e.textProvider().rows() - 1
 	}
