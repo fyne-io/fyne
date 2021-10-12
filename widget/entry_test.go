@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -39,6 +40,43 @@ func TestEntry_Binding(t *testing.T) {
 	entry.Unbind()
 	waitForBinding()
 	assert.Equal(t, "Typed", entry.Text)
+}
+
+func TestEntry_Clicked(t *testing.T) {
+	entry, window := setupImageTest(t, true)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	entry.SetText("MMM\nWWW\n")
+	test.AssertRendersToMarkup(t, "entry/tapped_initial.xml", c)
+
+	entry.FocusGained()
+	test.AssertRendersToMarkup(t, "entry/tapped_focused.xml", c)
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(entryOffset+theme.Padding()+testCharSize*1.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 2nd "M"
+	clickCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_2nd_m.xml", c)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
+	clickCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_3rd_m.xml", c)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*4, entryOffset+theme.Padding()+testCharSize/2) // tap after text
+	clickCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_col.xml", c)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 3, entry.CursorColumn)
+
+	pos = fyne.NewPos(entryOffset+testCharSize, entryOffset+testCharSize*4) // tap below rows
+	clickCanvas(window.Canvas(), pos)
+	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_row.xml", c)
+	assert.Equal(t, 2, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
 }
 
 func TestEntry_CursorColumn(t *testing.T) {
@@ -1410,43 +1448,6 @@ func TestTabable(t *testing.T) {
 	})
 }
 
-func TestEntry_Tapped(t *testing.T) {
-	entry, window := setupImageTest(t, true)
-	defer teardownImageTest(window)
-	c := window.Canvas()
-
-	entry.SetText("MMM\nWWW\n")
-	test.AssertRendersToMarkup(t, "entry/tapped_initial.xml", c)
-
-	entry.FocusGained()
-	test.AssertRendersToMarkup(t, "entry/tapped_focused.xml", c)
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(entryOffset+theme.Padding()+testCharSize*1.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 2nd "M"
-	test.TapCanvas(window.Canvas(), pos)
-	test.AssertRendersToMarkup(t, "entry/tapped_tapped_2nd_m.xml", c)
-	assert.Equal(t, 0, entry.CursorRow)
-	assert.Equal(t, 1, entry.CursorColumn)
-
-	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*2.5, entryOffset+theme.Padding()+testCharSize/2) // tap in the middle of the 3rd "M"
-	test.TapCanvas(window.Canvas(), pos)
-	test.AssertRendersToMarkup(t, "entry/tapped_tapped_3rd_m.xml", c)
-	assert.Equal(t, 0, entry.CursorRow)
-	assert.Equal(t, 2, entry.CursorColumn)
-
-	pos = fyne.NewPos(entryOffset+theme.Padding()+testCharSize*4, entryOffset+theme.Padding()+testCharSize/2) // tap after text
-	test.TapCanvas(window.Canvas(), pos)
-	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_col.xml", c)
-	assert.Equal(t, 0, entry.CursorRow)
-	assert.Equal(t, 3, entry.CursorColumn)
-
-	pos = fyne.NewPos(entryOffset+testCharSize, entryOffset+testCharSize*4) // tap below rows
-	test.TapCanvas(window.Canvas(), pos)
-	test.AssertRendersToMarkup(t, "entry/tapped_tapped_after_last_row.xml", c)
-	assert.Equal(t, 2, entry.CursorRow)
-	assert.Equal(t, 0, entry.CursorColumn)
-}
-
 func TestEntry_TappedSecondary(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
@@ -1840,4 +1841,51 @@ func teardownImageTest(w fyne.Window) {
 
 func waitForBinding() {
 	time.Sleep(time.Millisecond * 100) // data resolves on background thread
+}
+
+// clickCanvas is an analogue of test.TapCanvas that also sends MouseDown/MouseUp events
+func clickCanvas(c fyne.Canvas, pos fyne.Position) {
+	if o, p := findMouseable(c, pos); o != nil {
+		clickPrimary(c, o.(desktop.Mouseable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
+	}
+}
+
+func findMouseable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne.Position) {
+	matches := func(object fyne.CanvasObject) bool {
+		_, ok := object.(desktop.Mouseable)
+		return ok
+	}
+	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	return
+}
+
+func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
+	handleFocusOnTap(c, obj)
+	mouseEvent := &desktop.MouseEvent{
+		PointEvent: *ev,
+		Button:     desktop.MouseButtonPrimary,
+	}
+	obj.MouseDown(mouseEvent)
+	obj.MouseUp(mouseEvent)
+	if tap, ok := obj.(fyne.Tappable); ok {
+		tap.Tapped(ev)
+	}
+}
+
+func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+	if c == nil {
+		return
+	}
+	unfocus := true
+	if focus, ok := obj.(fyne.Focusable); ok {
+		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
+			unfocus = false
+			if focus != c.Focused() {
+				unfocus = true
+			}
+		}
+	}
+	if unfocus {
+		c.Unfocus()
+	}
 }
