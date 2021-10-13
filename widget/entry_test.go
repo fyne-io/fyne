@@ -1417,23 +1417,27 @@ func TestEntry_Submit(t *testing.T) {
 	})
 	t.Run("NoCallback", func(t *testing.T) {
 		entry := &widget.Entry{}
+		resetEntry := func() {
+			entry.SetText("")
+		}
 		t.Run("SingleLine_Enter", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = false
 			entry.SetText("a")
 			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
 			assert.Equal(t, "a", entry.Text)
 		})
 		t.Run("SingleLine_Return", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = false
 			entry.SetText("b")
 			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
 			assert.Equal(t, "b", entry.Text)
 		})
 		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = true
 			entry.SetText("c")
-			entry.CursorRow = 0
-			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
 			assert.Equal(t, "\nc", entry.Text)
 			entry.SetText("d")
@@ -1443,10 +1447,9 @@ func TestEntry_Submit(t *testing.T) {
 			assert.Equal(t, "\nd", entry.Text)
 		})
 		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = true
 			entry.SetText("e")
-			entry.CursorRow = 0
-			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
 			assert.Equal(t, "\ne", entry.Text)
 			entry.SetText("f")
