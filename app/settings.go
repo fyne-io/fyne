@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"os"
@@ -138,34 +139,41 @@ func (s *settings) fileChanged() {
 	s.apply()
 }
 
+func (s *settings) loadSystemTheme() fyne.Theme {
+	path := filepath.Join(rootConfigDir(), "theme.json")
+	data, err := fyne.LoadResourceFromPath(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Failed to load user theme file: "+path, err)
+		}
+		return theme.DefaultTheme()
+	}
+	if data != nil && data.Content() != nil {
+		th, err := theme.FromJSONReader(bytes.NewReader(data.Content()))
+		if err == nil {
+			return th
+		}
+		fyne.LogError("Failed to parse user theme file: "+path, err)
+	}
+	return theme.DefaultTheme()
+}
+
 func (s *settings) setupTheme() {
 	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
 		name = env
 	}
 
-	var variant fyne.ThemeVariant
+	variant := defaultVariant()
 	effectiveTheme := s.theme
+	if !s.themeSpecified {
+		effectiveTheme = s.loadSystemTheme()
+	}
 	switch name {
 	case "light":
 		variant = theme.VariantLight
-		if !s.themeSpecified {
-			effectiveTheme = theme.LightTheme()
-		}
 	case "dark":
 		variant = theme.VariantDark
-		if !s.themeSpecified {
-			effectiveTheme = theme.DarkTheme()
-		}
-	default:
-		variant = defaultVariant()
-		if s.themeSpecified {
-			break
-		}
-		effectiveTheme = theme.DarkTheme()
-		if variant == theme.VariantLight {
-			effectiveTheme = theme.LightTheme()
-		}
 	}
 
 	s.applyTheme(effectiveTheme, variant)
