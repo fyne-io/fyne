@@ -1127,22 +1127,20 @@ func (e *Entry) updateCursorAndSelection() {
 	e.selectRow, e.selectColumn = e.truncatePosition(e.selectRow, e.selectColumn)
 }
 
-func (e *Entry) truncatePosition(row, col int) (newRow, newCol int) {
+func (e *Entry) truncatePosition(row, col int) (int, int) {
 	if e.Text == "" {
-		newRow = 0
-		newCol = 0
-		return
+		return 0, 0
 	}
-	newRow = row
-	newCol = col
+	newRow := row
+	newCol := col
 	if row >= e.textProvider().rows() {
 		newRow = e.textProvider().rows() - 1
 	}
 	rowLength := e.textProvider().rowLength(newRow)
-	if (col >= rowLength) || (newRow < row) {
+	if (newCol >= rowLength) || (newRow < row) {
 		newCol = rowLength
 	}
-	return
+	return newRow, newCol
 }
 
 func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
