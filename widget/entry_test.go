@@ -1343,10 +1343,9 @@ func TestEntry_SetText_Overflow_Multiline(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 
 	entry.SetText("ab\ncd\nef")
-	assert.Equal(t, 0, entry.CursorColumn)
-	assert.Equal(t, 0, entry.CursorRow)
-
 	typeKeys(entry, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight)
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 2, entry.CursorRow)
 	entry.SetText("AB\nAAAA")
 	assert.Equal(t, 4, entry.CursorColumn)
 	assert.Equal(t, 1, entry.CursorRow)
