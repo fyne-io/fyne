@@ -55,10 +55,9 @@ func Clean(canvasRefreshed bool) {
 	lastClean = timeNow()
 }
 
-// Clean canvas and renderer cache on a per-canvas basis, and run SVG clean-up.
+// CleanUpForCanvas cleans canvas and renderer cache on a per-canvas basis, and runs SVG clean-up.
 // Called on repaint events.
 func CleanUpForCanvas(canvas fyne.Canvas) {
-
 	now := timeNow()
 
 	// do not run clean task too fast
