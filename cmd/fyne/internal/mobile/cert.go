@@ -96,7 +96,7 @@ type signedData struct {
 	Version          int
 	DigestAlgorithms []pkix.AlgorithmIdentifier `asn1:"set"`
 	ContentInfo      contentInfo
-	Certificates     certificate  `asn1:"tag0,explicit"`
+	Certificates     certificate  `asn1:"tag:0,explicit"`
 	SignerInfos      []signerInfo `asn1:"set"`
 }
 
