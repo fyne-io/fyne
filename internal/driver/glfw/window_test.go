@@ -279,6 +279,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	)
 	l.Resize(fyne.NewSize(200, 300))
 	w.SetContent(l)
+	w.SetFixedSize(true)
 	w.Resize(fyne.NewSize(200, 300))
 	repaintWindow(w)
 
