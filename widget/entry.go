@@ -418,7 +418,10 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
-	e.requestFocus()
+	if !e.Disabled() {
+		e.requestFocus()
+	}
+
 	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
@@ -472,17 +475,14 @@ func (e *Entry) SetText(text string) {
 	e.updateCursor()
 }
 
-// Tapped is called when this entry has been tapped so we should update the cursor position.
+// Tapped is called when this entry has been tapped. We update the cursor position in
+// device-specific callbacks (MouseDown() and TouchDown()).
 //
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if !e.Disabled() {
-		e.requestFocus()
-	}
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
 	}
-	e.updateMousePointer(ev.Position, false)
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -532,10 +532,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // Since: 2.1
 //
 // Implements: mobile.Touchable
-func (e *Entry) TouchDown(*mobile.TouchEvent) {
-	if !e.disabled {
+func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
+	if !e.Disabled() {
 		e.requestFocus()
 	}
+
+	e.updateMousePointer(ev.Position, false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
