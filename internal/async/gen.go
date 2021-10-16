@@ -83,13 +83,20 @@ package async
 
 {{.Imports}}
 
+import "sync"
+
 // Unbounded{{.Name}}Chan is a channel with an unbounded buffer for caching
 // {{.Name}} objects.
 type Unbounded{{.Name}}Chan struct {
 	in, out chan {{.Type}}
 	close   chan struct{}
 	q       []{{.Type}}
+
+	estimateLock sync.Mutex
+	estimate     int // a number guaranteed to be <= len(ch.q) at all times
 }
+
+const estimate{{.Name}}Precision = 10
 
 // NewUnbounded{{.Name}}Chan returns a unbounded channel with unlimited capacity.
 func NewUnbounded{{.Name}}Chan() *Unbounded{{.Name}}Chan {
@@ -140,6 +147,11 @@ func (ch *Unbounded{{.Name}}Chan) processing() {
 			select {
 			case ch.out <- ch.q[0]:
 				ch.q[0] = nil // de-reference earlier to help GC
+				if (len(ch.q)%estimate{{.Name}}Precision == 1) || (len(ch.q) <= estimate{{.Name}}Precision) {
+					ch.estimateLock.Lock()
+					ch.estimate = len(ch.q) - 1
+					ch.estimateLock.Unlock()
+				}
 				ch.q = ch.q[1:]
 			case e, ok := <-ch.in:
 				if !ok {
@@ -149,6 +161,11 @@ func (ch *Unbounded{{.Name}}Chan) processing() {
 					panic("async: misuse of unbounded channel, In() was closed")
 				}
 				ch.q = append(ch.q, e)
+				if len(ch.q)%estimate{{.Name}}Precision == 0 || (len(ch.q) <= estimate{{.Name}}Precision) {
+					ch.estimateLock.Lock()
+					ch.estimate = len(ch.q)
+					ch.estimateLock.Unlock()
+				}
 			case <-ch.close:
 				ch.closed()
 				return
@@ -160,6 +177,15 @@ func (ch *Unbounded{{.Name}}Chan) processing() {
 			ch.q = make([]{{.Type}}, 0, 1<<10)
 		}
 	}
+}
+
+// EstimatedLength returns the number guaranteed to be less than or equal to
+// the number of items in the internal buffer ready to be consumed.
+func (ch *Unbounded{{.Name}}Chan) EstimatedLength() int {
+	ch.estimateLock.Lock()
+	result := ch.estimate
+	ch.estimateLock.Unlock()
+	return result
 }
 
 func (ch *Unbounded{{.Name}}Chan) closed() {
