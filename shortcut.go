@@ -21,7 +21,7 @@ func (sh *ShortcutHandler) TypedShortcut(shortcut Shortcut) {
 	f(shortcut)
 }
 
-// AddShortcut register an handler to be executed when the shortcut action is triggered
+// AddShortcut register a handler to be executed when the shortcut action is triggered
 func (sh *ShortcutHandler) AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut)) {
 	sh.entry.Store(shortcut.ShortcutName(), handler)
 }
