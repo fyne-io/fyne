@@ -2,13 +2,20 @@
 
 package async
 
+import "sync"
+
 // UnboundedInterfaceChan is a channel with an unbounded buffer for caching
 // Interface objects.
 type UnboundedInterfaceChan struct {
 	in, out chan interface{}
 	close   chan struct{}
 	q       []interface{}
+
+	estimateLock sync.Mutex
+	estimate     int // a number guaranteed to be <= len(ch.q) at all times
 }
+
+const estimateInterfacePrecision = 10
 
 // NewUnboundedInterfaceChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedInterfaceChan() *UnboundedInterfaceChan {
@@ -59,6 +66,11 @@ func (ch *UnboundedInterfaceChan) processing() {
 			select {
 			case ch.out <- ch.q[0]:
 				ch.q[0] = nil // de-reference earlier to help GC
+				if (len(ch.q)%estimateInterfacePrecision == 1) || (len(ch.q) <= estimateInterfacePrecision) {
+					ch.estimateLock.Lock()
+					ch.estimate = len(ch.q) - 1
+					ch.estimateLock.Unlock()
+				}
 				ch.q = ch.q[1:]
 			case e, ok := <-ch.in:
 				if !ok {
@@ -68,6 +80,11 @@ func (ch *UnboundedInterfaceChan) processing() {
 					panic("async: misuse of unbounded channel, In() was closed")
 				}
 				ch.q = append(ch.q, e)
+				if len(ch.q)%estimateInterfacePrecision == 0 || (len(ch.q) <= estimateInterfacePrecision) {
+					ch.estimateLock.Lock()
+					ch.estimate = len(ch.q)
+					ch.estimateLock.Unlock()
+				}
 			case <-ch.close:
 				ch.closed()
 				return
@@ -79,6 +96,15 @@ func (ch *UnboundedInterfaceChan) processing() {
 			ch.q = make([]interface{}, 0, 1<<10)
 		}
 	}
+}
+
+// EstimatedLength returns the number guaranteed to be less than or equal to
+// the number of items in the internal buffer ready to be consumed.
+func (ch *UnboundedInterfaceChan) EstimatedLength() int {
+	ch.estimateLock.Lock()
+	result := ch.estimate
+	ch.estimateLock.Unlock()
+	return result
 }
 
 func (ch *UnboundedInterfaceChan) closed() {
