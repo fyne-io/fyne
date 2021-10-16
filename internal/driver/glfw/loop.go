@@ -213,6 +213,7 @@ func (d *gLDriver) startDrawThread() {
 					go c.reloadScale()
 				})
 			case <-draw.C:
+				refreshingCanvases := make([]fyne.Canvas, 0)
 				for _, win := range d.windowList() {
 					w := win.(*window)
 					w.viewLock.RLock()
@@ -225,8 +226,9 @@ func (d *gLDriver) startDrawThread() {
 						continue
 					}
 					d.repaintWindow(w)
-					cache.CleanUpForCanvas(canvas)
+					refreshingCanvases = append(refreshingCanvases, canvas)
 				}
+				cache.CleanCanvases(refreshingCanvases)
 			}
 		}
 	}()
