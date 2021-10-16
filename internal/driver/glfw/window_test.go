@@ -5,6 +5,7 @@ package glfw
 
 import (
 	"image/color"
+	"log"
 	"net/url"
 	"os"
 	"runtime"
@@ -135,6 +136,7 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 		"left super":    {key: glfw.KeyLeftSuper, mod: glfw.ModSuper},
 		"right super":   {key: glfw.KeyRightSuper, mod: glfw.ModSuper},
 	} {
+		log.Println("enter", name)
 		require.False(t, menuBar.IsActive())
 		t.Run("press and release "+name+" after pressing Alt and before releasing it", func(t *testing.T) {
 			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
@@ -148,19 +150,39 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 		require.False(t, menuBar.IsActive())
 		t.Run("press "+name+" before pressing Alt and release it before releasing Alt", func(t *testing.T) {
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			// Known issue with inconsistency https://github.com/glfw/glfw/issues/1630
+			if runtime.GOOS == "linux" {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod)
+			} else {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			}
 			assert.False(t, menuBar.IsActive())
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			// Known issue with inconsistency https://github.com/glfw/glfw/issues/1630
+			if runtime.GOOS == "linux" {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, glfw.ModAlt)
+			} else {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			}
 			assert.False(t, menuBar.IsActive())
 		})
 
 		require.False(t, menuBar.IsActive())
 		t.Run("press "+name+" after pressing Alt and release it after releasing Alt", func(t *testing.T) {
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			// Known issue with inconsistency https://github.com/glfw/glfw/issues/1630
+			if runtime.GOOS == "linux" {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, 0)
+			} else {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			}
 			assert.False(t, menuBar.IsActive())
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			// Known issue with inconsistency https://github.com/glfw/glfw/issues/1630
+			if runtime.GOOS == "linux" {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, glfw.ModAlt&tt.mod)
+			} else {
+				w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			}
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
 			assert.False(t, menuBar.IsActive())
 		})
