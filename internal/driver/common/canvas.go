@@ -194,11 +194,7 @@ func (c *Canvas) FocusPrevious() {
 
 // FreeDirtyTextures frees dirty textures.
 func (c *Canvas) FreeDirtyTextures() bool {
-	estimate := c.refreshQueue.EstimatedLength()
-	// Since FreeDirtyTextures is the only consumer of refreshQueue,
-	// consuming this many elements from the refreshQueue will not block.
-	for i := 0; i < estimate; i++ {
-		object := <-c.refreshQueue.Out()
+	freeObject := func(object fyne.CanvasObject) {
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 			c.painter.Free(obj)
 			return false
@@ -206,10 +202,28 @@ func (c *Canvas) FreeDirtyTextures() bool {
 		driver.WalkCompleteObjectTree(object, freeWalked, nil)
 	}
 
-	cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
-		c.painter.Free(obj)
-	})
-	return (estimate > 0)
+	estimate := c.refreshQueue.EstimatedLength()
+	// Since FreeDirtyTextures is the only consumer of refreshQueue,
+	// consuming this many elements from the refreshQueue will not block.
+	for i := 0; i < estimate; i++ {
+		object := <-c.refreshQueue.Out()
+		freeObject(object)
+	}
+
+	freed := (estimate > 0)
+	// The estimate may be conservative, so consume more if possible
+	for {
+		select {
+		case object := <-c.refreshQueue.Out():
+			freeObject(object)
+			freed = true
+		default:
+			cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
+				c.painter.Free(obj)
+			})
+			return freed
+		}
+	}
 }
 
 // Initialize initializes the canvas.
