@@ -472,7 +472,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 func (e *Entry) SetText(text string) {
 	e.updateText(text)
 
-	e.updateCursor()
+	e.updateCursorAndSelection()
 }
 
 // Tapped is called when this entry has been tapped. We update the cursor position in
@@ -1120,21 +1120,27 @@ func (e *Entry) textWrap() fyne.TextWrap {
 	return e.Wrapping
 }
 
-func (e *Entry) updateCursor() {
+func (e *Entry) updateCursorAndSelection() {
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
+	e.CursorRow, e.CursorColumn = e.truncatePosition(e.CursorRow, e.CursorColumn)
+	e.selectRow, e.selectColumn = e.truncatePosition(e.selectRow, e.selectColumn)
+}
+
+func (e *Entry) truncatePosition(row, col int) (int, int) {
 	if e.Text == "" {
-		e.CursorColumn = 0
-		e.CursorRow = 0
-		return
+		return 0, 0
 	}
-	if e.CursorRow >= e.textProvider().rows() {
-		e.CursorRow = e.textProvider().rows() - 1
+	newRow := row
+	newCol := col
+	if row >= e.textProvider().rows() {
+		newRow = e.textProvider().rows() - 1
 	}
-	rowLength := e.textProvider().rowLength(e.CursorRow)
-	if e.CursorColumn >= rowLength {
-		e.CursorColumn = rowLength
+	rowLength := e.textProvider().rowLength(newRow)
+	if (newCol >= rowLength) || (newRow < row) {
+		newCol = rowLength
 	}
+	return newRow, newCol
 }
 
 func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
@@ -1344,7 +1350,7 @@ func (r *entryRenderer) Refresh() {
 			}
 		}
 	}
-	r.entry.updateCursor()
+	r.entry.updateCursorAndSelection()
 
 	r.box.FillColor = theme.InputBackgroundColor()
 	if focusedAppearance {
