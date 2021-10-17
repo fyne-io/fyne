@@ -1335,6 +1335,22 @@ func TestEntry_SetText_Underflow(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_SetText_Overflow_Multiline(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.MultiLine = true
+
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	entry.SetText("ab\ncd\nef")
+	typeKeys(entry, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight)
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, 2, entry.CursorRow)
+	entry.SetText("AB\nAAAA")
+	assert.Equal(t, 4, entry.CursorColumn)
+	assert.Equal(t, 1, entry.CursorRow)
+}
+
 func TestEntry_SetTextStyle(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
@@ -1401,33 +1417,44 @@ func TestEntry_Submit(t *testing.T) {
 	})
 	t.Run("NoCallback", func(t *testing.T) {
 		entry := &widget.Entry{}
+		resetEntry := func() {
+			entry.SetText("")
+		}
 		t.Run("SingleLine_Enter", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = false
 			entry.SetText("a")
 			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
 			assert.Equal(t, "a", entry.Text)
 		})
 		t.Run("SingleLine_Return", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = false
 			entry.SetText("b")
 			entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
 			assert.Equal(t, "b", entry.Text)
 		})
 		t.Run("MultiLine_ShiftEnter", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = true
 			entry.SetText("c")
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
 			assert.Equal(t, "\nc", entry.Text)
 			entry.SetText("d")
+			entry.CursorRow = 0
+			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
 			assert.Equal(t, "\nd", entry.Text)
 		})
 		t.Run("MultiLine_ShiftReturn", func(t *testing.T) {
+			resetEntry()
 			entry.MultiLine = true
 			entry.SetText("e")
 			typeKeys(entry, keyShiftLeftDown, fyne.KeyReturn, keyShiftLeftUp)
 			assert.Equal(t, "\ne", entry.Text)
 			entry.SetText("f")
+			entry.CursorRow = 0
+			entry.CursorColumn = 0
 			typeKeys(entry, keyShiftRightDown, fyne.KeyReturn, keyShiftRightUp)
 			assert.Equal(t, "\nf", entry.Text)
 		})
