@@ -2,9 +2,11 @@
 
 package async
 
-import "fyne.io/fyne/v2"
+import (
+	"sync"
 
-import "sync"
+	"fyne.io/fyne/v2"
+)
 
 // UnboundedCanvasObjectChan is a channel with an unbounded buffer for caching
 // CanvasObject objects.
