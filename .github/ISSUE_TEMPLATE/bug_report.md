@@ -25,8 +25,9 @@ Steps to reproduce the behaviour:
 
 
 ### Example code:
-<!-- If applicable, add a short code snippet to help explain and simplify reproduction of the problem. -->
-<!-- Please write the code inside a code block with go syntax, like this:
+<!-- If applicable, add a short code snippet to help explain and simplify reproduction of the problem. 
+Please refrain from adding screenshots of code, links to other projects or very long code examples. -->
+<!-- Please write the code inside a code block with go syntax highlighting enabled, like this:
 ```go
 Write your code here.
 ```
