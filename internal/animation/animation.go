@@ -21,7 +21,7 @@ type anim struct {
 
 func newAnim(a *fyne.Animation) *anim {
 	animate := &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)}
-	animate.total = animate.end.Sub(animate.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
+	animate.total = animate.end.Sub(animate.start).Milliseconds()
 	animate.repeatsLeft = a.RepeatCount
 	return animate
 }
