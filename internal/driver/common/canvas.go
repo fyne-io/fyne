@@ -1,6 +1,7 @@
 package common
 
 import (
+	"runtime"
 	"sync"
 	"sync/atomic"
 
@@ -202,7 +203,17 @@ func (c *Canvas) FreeDirtyTextures() uint64 {
 	// in a frame. Use a counter to guarantee that all desired tasks are
 	// processed. See https://github.com/fyne-io/fyne/issues/2548.
 	for atomic.LoadUint64(&c.refreshCount) > 0 {
-		object := <-c.refreshQueue.Out()
+		var object fyne.CanvasObject
+		select {
+		case object = <-c.refreshQueue.Out():
+		default:
+			// If refreshCount is positive but we cannot receive any object
+			// from the refreshQueue, this means that the refresh task is
+			// not yet ready to receive, continue until we can receive it.
+			// Furthermore, we use Gosched to avoid CPU spin.
+			runtime.Gosched()
+			continue
+		}
 		atomic.AddUint64(&c.refreshCount, ^uint64(0))
 		freed++
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
