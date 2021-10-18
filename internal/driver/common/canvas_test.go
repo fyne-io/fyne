@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"image/color"
 	"testing"
 
@@ -372,4 +373,33 @@ func insert(c *fyne.Container, object fyne.CanvasObject, index int) {
 func Prepend(c *fyne.Container, object fyne.CanvasObject) {
 	c.Objects = append([]fyne.CanvasObject{object}, c.Objects...)
 	c.Refresh()
+}
+
+func TestRefreshCount(t *testing.T) { // Issue 2548.
+	var (
+		c              = &Canvas{}
+		errCh          = make(chan error)
+		freed   uint64 = 0
+		refresh uint64 = 1000
+	)
+	c.Initialize(nil, func() {})
+	for i := uint64(0); i < refresh; i++ {
+		c.Refresh(canvas.NewRectangle(color.Gray16{Y: 1}))
+	}
+
+	go func() {
+		freed = c.FreeDirtyTextures()
+		if freed == 0 {
+			errCh <- errors.New("expected to free dirty textures but actually not freed")
+			return
+		}
+		errCh <- nil
+	}()
+	err := <-errCh
+	if err != nil {
+		t.Fatal(err)
+	}
+	if freed != refresh {
+		t.Fatalf("FreeDirtyTextures left refresh tasks behind in a frame, got %v, want %v", freed, refresh)
+	}
 }
