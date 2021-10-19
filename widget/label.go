@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"sync/atomic"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
@@ -15,8 +17,8 @@ type Label struct {
 	TextStyle fyne.TextStyle // The style of the label text
 	provider  *RichText
 
-	textSource   binding.String
-	textListener binding.DataListener
+	textSource   atomic.Value // of type textSourceInformation = {isSet bool, binding.String}
+	textListener atomic.Value // of type binding.DataListener
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -52,9 +54,13 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 // Since: 2.0
 func (l *Label) Bind(data binding.String) {
 	l.Unbind()
-	l.textSource = data
+	source := textSourceInformation{
+		isSet:  true,
+		source: data,
+	}
+	l.textSource.Store(source)
 	l.createListener()
-	data.AddListener(l.textListener)
+	data.AddListener(l.textListener.Load().(binding.DataListener))
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -126,25 +132,40 @@ func (l *Label) SetText(text string) {
 //
 // Since: 2.0
 func (l *Label) Unbind() {
-	src := l.textSource
-	if src == nil {
+	srcI := l.textSource.Load()
+	if srcI == nil {
 		return
 	}
+	sourceInformation := srcI.(textSourceInformation)
+	if !sourceInformation.isSet {
+		return
+	}
+	src := sourceInformation.source
 
-	src.RemoveListener(l.textListener)
-	l.textSource = nil
+	src.RemoveListener(l.textListener.Load().(binding.DataListener))
+	l.textSource.Store(textSourceInformation{
+		isSet: false,
+	})
 }
 
 func (l *Label) createListener() {
-	if l.textListener != nil {
+	listenerI := l.textListener.Load()
+	if listenerI != nil && listenerI.(binding.DataListener) != nil {
 		return
 	}
 
-	l.textListener = binding.NewDataListener(func() {
-		src := l.textSource
-		if src == nil {
+	l.textListener.Store(binding.NewDataListener(func() {
+		srcI := l.textSource.Load()
+		if srcI == nil {
 			return
 		}
+
+		sourceInformation := srcI.(textSourceInformation)
+		if !sourceInformation.isSet {
+			return
+		}
+
+		src := sourceInformation.source
 		val, err := src.Get()
 		if err != nil {
 			fyne.LogError("Error getting current data value", err)
@@ -155,7 +176,7 @@ func (l *Label) createListener() {
 		if cache.IsRendered(l) {
 			l.Refresh()
 		}
-	})
+	}))
 }
 
 func (l *Label) syncSegments() {
@@ -168,4 +189,9 @@ func (l *Label) syncSegments() {
 		},
 		Text: l.Text,
 	}}
+}
+
+type textSourceInformation struct {
+	isSet  bool // This is needed only because atomic.Value cannot hold nil interfaces
+	source binding.String
 }
