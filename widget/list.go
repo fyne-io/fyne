@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -36,7 +37,7 @@ type List struct {
 	scroller      *widget.Scroll
 	selected      []ListItemID
 	itemMin       fyne.Size
-	offsetY       float32
+	offsetY       atomic.Value // float32
 	offsetUpdated func(fyne.Position)
 }
 
@@ -46,6 +47,7 @@ type List struct {
 // Since: 1.4
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(ListItemID, fyne.CanvasObject)) *List {
 	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem}
+	list.offsetY.Store(float32(0))
 	list.ExtendBaseWidget(list)
 	return list
 }
@@ -388,10 +390,10 @@ func (l *listLayout) getItem() *listItem {
 	return item.(*listItem)
 }
 func (l *listLayout) offsetUpdated(pos fyne.Position) {
-	if l.list.offsetY == pos.Y {
+	if l.list.offsetY.Load().(float32) == pos.Y {
 		return
 	}
-	l.list.offsetY = pos.Y
+	l.list.offsetY.Store(pos.Y)
 	l.updateList(false)
 }
 
@@ -425,7 +427,8 @@ func (l *listLayout) updateList(refresh bool) {
 		length = f()
 	}
 	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+theme.SeparatorThicknessSize()))) + 1
-	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+separatorThickness)))
+	offsetY := l.list.offsetY.Load().(float32)
+	offY := offsetY - float32(math.Mod(float64(offsetY), float64(l.list.itemMin.Height+separatorThickness)))
 	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
 	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
 
@@ -472,7 +475,11 @@ func (l *listLayout) updateList(refresh bool) {
 
 	objects := l.children
 	objects = append(objects, l.separators...)
-	l.list.scroller.Content.(*fyne.Container).Objects = objects
+
+	c := l.list.scroller.Content.(*fyne.Container)
+	c.Lock()
+	c.Objects = objects
+	c.Unlock()
 }
 
 func (l *listLayout) updateSeparators() {

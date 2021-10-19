@@ -155,7 +155,9 @@ func walkObjectTree(
 	var children []fyne.CanvasObject
 	switch co := obj.(type) {
 	case *fyne.Container:
+		co.Lock()
 		children = co.Objects
+		co.Unlock()
 	case fyne.Widget:
 		children = cache.Renderer(co).Objects()
 	}
