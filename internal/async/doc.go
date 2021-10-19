@@ -1,6 +1,6 @@
 //go:generate go run gen.go
 
-// Package async provides unbounded channel data structures that are
+// Package async provides unbounded channel and queue structures that are
 // designed for caching unlimited number of a concrete type. For better
 // performance, a given type should be less or euqal than 16 bytes.
 //
