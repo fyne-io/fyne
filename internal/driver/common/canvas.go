@@ -195,9 +195,8 @@ func (c *Canvas) FocusPrevious() {
 // FreeDirtyTextures frees dirty textures and returns the number of freed textures.
 func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 	// Within a frame, refresh tasks are requested from the Refresh method,
-	// and we desire to process all requested operations as much as possible
-	// in a frame. Use a counter to guarantee that all desired tasks are
-	// processed. See https://github.com/fyne-io/fyne/issues/2548.
+	// and we desire to clear out all requested operations within a frame.
+	// See https://github.com/fyne-io/fyne/issues/2548.
 	for c.refreshQueue.Len() > 0 {
 		freed++
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
