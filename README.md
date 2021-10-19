@@ -23,7 +23,7 @@ and more news will follow in our news feeds and GitHub project.
 
 # Prerequisites
 
-To develop apps using Fyne you will need Go version 1.12 or later, a C compiler and your system's development tools.
+To develop apps using Fyne you will need Go version 1.14 or later, a C compiler and your system's development tools.
 If you're not sure if that's all installed or you don't know how then check out our
 [Getting Started](https://fyne.io/develop/) document.
 
