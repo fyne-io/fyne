@@ -1,6 +1,7 @@
 package async
 
 import (
+	"sync"
 	"sync/atomic"
 	"unsafe"
 )
@@ -23,9 +24,16 @@ func NewQueue() *Queue {
 	}
 }
 
+var itemPool = sync.Pool{
+	New: func() interface{} { return &item{next: nil, v: nil} },
+}
+
 // In puts the given value at the tail of the queue.
 func (q *Queue) In(v interface{}) {
-	i := &item{next: nil, v: v}
+	i := itemPool.Get().(*item)
+	i.next = nil
+	i.v = v
+
 	var last, lastnext *item
 	for {
 		last = load(&q.tail)
@@ -62,6 +70,7 @@ func (q *Queue) Out() interface{} {
 				v := firstnext.v
 				if cas(&q.head, first, firstnext) {
 					atomic.AddUint64(&q.len, ^uint64(0))
+					itemPool.Put(first)
 					return v
 				}
 			}
