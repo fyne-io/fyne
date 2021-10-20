@@ -860,7 +860,7 @@ func TestWindow_HoverableOnDraggingOverHoverableAndBack(t *testing.T) {
 	assert.Nil(t, h.popMouseMovedEvent())
 }
 
-func TestWindow_DragEndWithinWidgetWithTappedEvent(t *testing.T) {
+func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 	w := createWindow("Test").(*window)
 	do := &draggableTappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	do.SetMinSize(fyne.NewSize(10, 10))
@@ -872,11 +872,16 @@ func TestWindow_DragEndWithinWidgetWithTappedEvent(t *testing.T) {
 	w.mouseMoved(w.viewport, 9, 9)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 8, 8)
+
+	w.WaitForEvents()
+	assert.NotNil(t, do.popDragEvent())
+
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.WaitForEvents()
 
-	assert.NotNil(t, do.popTapEvent())
+	assert.NotNil(t, do.popDragEndEvent())
+	assert.Nil(t, do.popTapEvent())
 }
 
 func TestWindow_Scrolled(t *testing.T) {
