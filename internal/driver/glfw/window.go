@@ -846,11 +846,14 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 	mouseDragged := w.mouseDragged
 	mousePrimaryPressed := w.mousePrimaryPressed
+	tappableObject := w.pointCache.tappable
 	w.mouseLock.Unlock()
 
 	// button release must sent DragEnd during drag cycle
 	if action == glfw.Release && mouseDragged != nil {
 		w.mouseDragEnd(mouseDragged, w.pointCache.draggable)
+		// do not send tap event when sending dragEnd
+		tappableObject = nil
 	}
 
 	// trigger TappedSecondary on Secondary mouse release
@@ -861,7 +864,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseClickedHandleButtonSecondary(ev, action, w.pointCache.secondaryTappable.(fyne.SecondaryTappable))
 	}
 
-	tappableObject := w.pointCache.tappable
 	if action == glfw.Release && button == desktop.MouseButtonPrimary {
 		if w.pointCache.doubleTappable != nil {
 			ev := new(fyne.PointEvent)
