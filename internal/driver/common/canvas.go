@@ -194,19 +194,45 @@ func (c *Canvas) FocusPrevious() {
 
 // FreeDirtyTextures frees dirty textures and returns the number of freed textures.
 func (c *Canvas) FreeDirtyTextures() (freed uint64) {
-	// Within a frame, refresh tasks are requested from the Refresh method,
-	// and we desire to clear out all requested operations within a frame.
-	// See https://github.com/fyne-io/fyne/issues/2548.
-	for c.refreshQueue.Len() > 0 {
-		freed++
+	freeObject := func(object fyne.CanvasObject) {
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 			if c.painter != nil {
 				c.painter.Free(obj)
 			}
 			return false
 		}
-		driver.WalkCompleteObjectTree(c.refreshQueue.Out(), freeWalked, nil)
+		driver.WalkCompleteObjectTree(object, freeWalked, nil)
 	}
+
+	// Within a frame, refresh tasks are requested from the Refresh method,
+	// and we desire to clear out all requested operations within a frame.
+	// See https://github.com/fyne-io/fyne/issues/2548.
+	tasksToDo := c.refreshQueue.Len()
+
+	shouldFilterDuplicates := (tasksToDo > 200) // filtering has overhead, not worth enabling for few tasks
+	var refreshSet map[fyne.CanvasObject]struct{}
+	if shouldFilterDuplicates {
+		refreshSet = make(map[fyne.CanvasObject]struct{})
+	}
+
+	for c.refreshQueue.Len() > 0 {
+		object := c.refreshQueue.Out()
+		if !shouldFilterDuplicates {
+			freed++
+			freeObject(object)
+		} else {
+			refreshSet[object] = struct{}{}
+			tasksToDo--
+			if tasksToDo == 0 {
+				shouldFilterDuplicates = false // stop collecting messages to avoid starvation
+				for object := range refreshSet {
+					freed++
+					freeObject(object)
+				}
+			}
+		}
+	}
+
 	cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
 		if c.painter != nil {
 			c.painter.Free(obj)
