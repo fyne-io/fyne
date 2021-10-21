@@ -9,7 +9,7 @@ import (
 )
 
 func TestGroup(t *testing.T) {
-	validate := validation.NewGroup(
+	validate := validation.NewAll(
 		validation.NewTime("2006-01-02"),
 		validation.NewRegexp(`1\d{3}-\d{2}-\d{2}`, "Only years before 2000 are allowed"),
 	)
