@@ -97,6 +97,7 @@ func (l *Label) Refresh() {
 		return
 	}
 	l.syncSegments()
+	l.BaseWidget.Refresh()
 	l.provider.Refresh()
 }
 
