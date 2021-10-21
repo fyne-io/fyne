@@ -1,7 +1,6 @@
 package glfw
 
 import (
-	"bytes"
 	"context"
 	"image"
 	_ "image/png" // for the icon
@@ -13,12 +12,14 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
 )
 
@@ -240,22 +241,14 @@ func (w *window) SetIcon(icon fyne.Resource) {
 		return
 	}
 
-	if string(icon.Content()[:4]) == "<svg" {
-		fyne.LogError("Window icon does not support vector images", nil)
-		return
-	}
-
 	w.runOnMainWhenCreated(func() {
 		if w.icon == nil {
 			w.viewport.SetIcon(nil)
 			return
 		}
 
-		pix, _, err := image.Decode(bytes.NewReader(w.icon.Content()))
-		if err != nil {
-			fyne.LogError("Failed to decode image for window icon", err)
-			return
-		}
+		width, height := w.viewport.GetSize()
+		pix := painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, width, height)
 
 		w.viewport.SetIcon([]image.Image{pix})
 	})
