@@ -15,7 +15,7 @@ type Label struct {
 	TextStyle fyne.TextStyle // The style of the label text
 	provider  *RichText
 
-	binder binding.BasicBinder
+	binder basicBinder
 }
 
 // NewLabel creates a new label widget with the set text content
