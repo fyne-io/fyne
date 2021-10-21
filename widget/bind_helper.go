@@ -1,29 +1,30 @@
-//go:build !go1.17
-// +build !go1.17
+package widget
 
-package binding
+import (
+	"sync"
 
-import "sync"
+	"fyne.io/fyne/v2/data/binding"
+)
 
-// BasicBinder stores a DataItem and a function to be called when it changes.
+// basicBinder stores a DataItem and a function to be called when it changes.
 // It provides a convenient way to replace data and callback independently.
-type BasicBinder struct {
+type basicBinder struct {
 	callbackLock         sync.RWMutex
-	callback             func(DataItem) // access guarded by callbackLock
+	callback             func(binding.DataItem) // access guarded by callbackLock
 	dataListenerPairLock sync.RWMutex
 	dataListenerPair     annotatedListener // access guarded by dataListenerPairLock
 }
 
 // SetCallback replaces the function to be called when the data changes.
-func (binder *BasicBinder) SetCallback(f func(data DataItem)) {
+func (binder *basicBinder) SetCallback(f func(data binding.DataItem)) {
 	binder.callbackLock.Lock()
 	binder.callback = f
 	binder.callbackLock.Unlock()
 }
 
 // Bind replaces the data item whose changes are tracked by the callback function.
-func (binder *BasicBinder) Bind(data DataItem) {
-	listener := NewDataListener(func() { // NB: listener captures `data` but always calls the up-to-date callback
+func (binder *basicBinder) Bind(data binding.DataItem) {
+	listener := binding.NewDataListener(func() { // NB: listener captures `data` but always calls the up-to-date callback
 		binder.callbackLock.RLock()
 		f := binder.callback
 		binder.callbackLock.RUnlock()
@@ -54,7 +55,7 @@ func (binder *BasicBinder) Bind(data DataItem) {
 
 // Unbind requests the callback to be no longer called when the previously bound
 // data item changes.
-func (binder *BasicBinder) Unbind() {
+func (binder *basicBinder) Unbind() {
 	nilPair := annotatedListener{nil, nil}
 
 	binder.dataListenerPairLock.Lock()
@@ -69,6 +70,6 @@ func (binder *BasicBinder) Unbind() {
 }
 
 type annotatedListener struct {
-	data     DataItem
-	listener DataListener
+	data     binding.DataItem
+	listener binding.DataListener
 }
