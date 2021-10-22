@@ -65,6 +65,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv := NewRichTextWithText(s.Selected)
 	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
+	txtProv.Wrapping = fyne.TextTruncate
 	if s.disabled {
 		txtProv.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	}

@@ -2,21 +2,21 @@
 
 package async
 
-// UnboundedFuncChan is a channel with an unbounded buffer for caching
-// Func objects.
-type UnboundedFuncChan struct {
-	in, out chan func()
+// UnboundedInterfaceChan is a channel with an unbounded buffer for caching
+// Interface objects.
+type UnboundedInterfaceChan struct {
+	in, out chan interface{}
 	close   chan struct{}
-	q       []func()
+	q       []interface{}
 }
 
-// NewUnboundedFuncChan returns a unbounded channel with unlimited capacity.
-func NewUnboundedFuncChan() *UnboundedFuncChan {
-	ch := &UnboundedFuncChan{
-		// The size of Func is less than 16 bytes, we use 16 to fit
+// NewUnboundedInterfaceChan returns a unbounded channel with unlimited capacity.
+func NewUnboundedInterfaceChan() *UnboundedInterfaceChan {
+	ch := &UnboundedInterfaceChan{
+		// The size of Interface is less than 16 bytes, we use 16 to fit
 		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
-		in:    make(chan func(), 16),
-		out:   make(chan func(), 16),
+		in:    make(chan interface{}, 16),
+		out:   make(chan interface{}, 16),
 		close: make(chan struct{}),
 	}
 	go ch.processing()
@@ -25,22 +25,22 @@ func NewUnboundedFuncChan() *UnboundedFuncChan {
 
 // In returns the send channel of the given channel, which can be used to
 // send values to the channel.
-func (ch *UnboundedFuncChan) In() chan<- func() { return ch.in }
+func (ch *UnboundedInterfaceChan) In() chan<- interface{} { return ch.in }
 
 // Out returns the receive channel of the given channel, which can be used
 // to receive values from the channel.
-func (ch *UnboundedFuncChan) Out() <-chan func() { return ch.out }
+func (ch *UnboundedInterfaceChan) Out() <-chan interface{} { return ch.out }
 
 // Close closes the channel.
-func (ch *UnboundedFuncChan) Close() { ch.close <- struct{}{} }
+func (ch *UnboundedInterfaceChan) Close() { ch.close <- struct{}{} }
 
-func (ch *UnboundedFuncChan) processing() {
+func (ch *UnboundedInterfaceChan) processing() {
 	// This is a preallocation of the internal unbounded buffer.
 	// The size is randomly picked. But if one changes the size, the
 	// reallocation size at the subsequent for loop should also be
 	// changed too. Furthermore, there is no memory leak since the
 	// queue is garbage collected.
-	ch.q = make([]func(), 0, 1<<10)
+	ch.q = make([]interface{}, 0, 1<<10)
 	for {
 		select {
 		case e, ok := <-ch.in:
@@ -76,12 +76,12 @@ func (ch *UnboundedFuncChan) processing() {
 		// If the remaining capacity is too small, we prefer to
 		// reallocate the entire buffer.
 		if cap(ch.q) < 1<<5 {
-			ch.q = make([]func(), 0, 1<<10)
+			ch.q = make([]interface{}, 0, 1<<10)
 		}
 	}
 }
 
-func (ch *UnboundedFuncChan) closed() {
+func (ch *UnboundedInterfaceChan) closed() {
 	close(ch.in)
 	for e := range ch.in {
 		ch.q = append(ch.q, e)

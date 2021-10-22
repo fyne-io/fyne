@@ -34,7 +34,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
-	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 var initThreadID uint64
@@ -131,11 +130,11 @@ var windowHeightPx float32
 //export setGeom
 func setGeom(pixelsPerPt float32, widthPx, heightPx int) {
 	windowHeightPx = float32(heightPx)
-	theApp.eventsIn <- size.Event{
+	theApp.events.In() <- size.Event{
 		WidthPx:     widthPx,
 		HeightPx:    heightPx,
-		WidthPt:     geom.Pt(float32(widthPx) / pixelsPerPt),
-		HeightPt:    geom.Pt(float32(heightPx) / pixelsPerPt),
+		WidthPt:     float32(widthPx) / pixelsPerPt,
+		HeightPt:    float32(heightPx) / pixelsPerPt,
 		PixelsPerPt: pixelsPerPt,
 		Orientation: screenOrientation(widthPx, heightPx),
 	}
@@ -147,7 +146,7 @@ var touchEvents struct {
 }
 
 func sendTouch(t touch.Type, x, y float32) {
-	theApp.eventsIn <- touch.Event{
+	theApp.events.In() <- touch.Event{
 		X:        x,
 		Y:        windowHeightPx - y,
 		Sequence: 0,
@@ -176,7 +175,7 @@ func eventKey(runeVal int32, direction uint8, code uint16, flags uint32) {
 		}
 	}
 
-	theApp.eventsIn <- key.Event{
+	theApp.events.In() <- key.Event{
 		Rune:      convRune(rune(runeVal)),
 		Code:      convVirtualKeyCode(code),
 		Modifiers: modifiers,

@@ -7,26 +7,21 @@
 package gl
 
 /*
-#cgo ios                LDFLAGS: -framework OpenGLES
-#cgo darwin,amd64,!ios  LDFLAGS: -framework OpenGL
-#cgo darwin,arm         LDFLAGS: -framework OpenGLES
-#cgo darwin,arm64       LDFLAGS: -framework OpenGLES
-#cgo linux              LDFLAGS: -lGLESv2
-#cgo openbsd            LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
-#cgo freebsd            LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
+#cgo ios          LDFLAGS: -framework OpenGLES
+#cgo darwin,!ios  LDFLAGS: -framework OpenGL
+#cgo linux        LDFLAGS: -lGLESv2
+#cgo openbsd      LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
+#cgo freebsd      LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
 
-#cgo android            CFLAGS: -Dos_android
-#cgo ios                CFLAGS: -Dos_ios
-#cgo darwin,amd64,!ios  CFLAGS: -Dos_osx
-#cgo darwin,arm         CFLAGS: -Dos_ios
-#cgo darwin,arm64       CFLAGS: -Dos_ios
-#cgo darwin             CFLAGS: -DGL_SILENCE_DEPRECATION
-#cgo linux              CFLAGS: -Dos_linux
-#cgo openbsd            CFLAGS: -Dos_openbsd
-#cgo freebsd            CFLAGS: -Dos_freebsd
-
-#cgo openbsd            CFLAGS: -I/usr/X11R6/include/
-#cgo freebsd            CFLAGS: -I/usr/local/X11R6/include/
+#cgo android      CFLAGS: -Dos_android
+#cgo ios          CFLAGS: -Dos_ios
+#cgo darwin,!ios  CFLAGS: -Dos_macos
+#cgo darwin       CFLAGS: -DGL_SILENCE_DEPRECATION
+#cgo linux        CFLAGS: -Dos_linux
+#cgo openbsd      CFLAGS: -Dos_openbsd
+#cgo freebsd      CFLAGS: -Dos_freebsd
+#cgo openbsd      CFLAGS: -I/usr/X11R6/include/
+#cgo freebsd      CFLAGS: -I/usr/local/X11R6/include/
 
 #include <stdint.h>
 #include "work.h"
@@ -47,7 +42,11 @@ uintptr_t process(struct fnargs* cargs, char* parg0, char* parg1, char* parg2, i
 */
 import "C"
 
-import "unsafe"
+import (
+	"unsafe"
+
+	"fyne.io/fyne/v2/internal/async"
+)
 
 const workbufLen = 3
 
@@ -55,7 +54,7 @@ type context struct {
 	cptr  uintptr
 	debug int32
 
-	workAvailable chan struct{}
+	workAvailable *async.UnboundedStructChan
 
 	// work is a queue of calls to execute.
 	work chan call
@@ -75,7 +74,7 @@ type context struct {
 	parg  [workbufLen]*C.char
 }
 
-func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable }
+func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable.Out() }
 
 type context3 struct {
 	*context
@@ -86,7 +85,7 @@ type context3 struct {
 // See the Worker interface for more details on how it is used.
 func NewContext() (Context, Worker) {
 	glctx := &context{
-		workAvailable: make(chan struct{}, 1),
+		workAvailable: async.NewUnboundedStructChan(),
 		work:          make(chan call, workbufLen*4),
 		retvalue:      make(chan C.uintptr_t),
 	}
@@ -104,11 +103,7 @@ func Version() string {
 
 func (ctx *context) enqueue(c call) uintptr {
 	ctx.work <- c
-
-	select {
-	case ctx.workAvailable <- struct{}{}:
-	default:
-	}
+	ctx.workAvailable.In() <- struct{}{}
 
 	if c.blocking {
 		return uintptr(<-ctx.retvalue)

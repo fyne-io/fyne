@@ -46,7 +46,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
-	"fyne.io/fyne/v2/internal/driver/mobile/geom"
 )
 
 var initThreadID uint64
@@ -133,11 +132,11 @@ func updateConfig(width, height, orientation int32) {
 	}
 	insets := C.getDevicePadding()
 
-	theApp.eventsIn <- size.Event{
+	theApp.events.In() <- size.Event{
 		WidthPx:       int(width),
 		HeightPx:      int(height),
-		WidthPt:       geom.Pt(float32(width) / pixelsPerPt),
-		HeightPt:      geom.Pt(float32(height) / pixelsPerPt),
+		WidthPt:       float32(width) / pixelsPerPt,
+		HeightPt:      float32(height) / pixelsPerPt,
 		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
 		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
 		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),
@@ -146,7 +145,7 @@ func updateConfig(width, height, orientation int32) {
 		Orientation:   o,
 		DarkMode:      bool(C.isDark()),
 	}
-	theApp.eventsIn <- paint.Event{External: true}
+	theApp.events.In() <- paint.Event{External: true}
 }
 
 // touchIDs is the current active touches. The position in the array
@@ -154,12 +153,7 @@ func updateConfig(width, height, orientation int32) {
 //
 // It is widely reported that the iPhone can handle up to 5 simultaneous
 // touch events, while the iPad can handle 11.
-var (
-	// touchIDs may arrive concurrently, use a lock for safety.
-	// See https://github.com/fyne-io/fyne/issues/2407.
-	touchMu  sync.RWMutex
-	touchIDs [11]uintptr
-)
+var touchIDs [11]uintptr
 
 var touchEvents struct {
 	sync.Mutex
@@ -169,17 +163,12 @@ var touchEvents struct {
 //export sendTouch
 func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 	id := -1
-
-	touchMu.RLock()
 	for i, val := range touchIDs {
 		if val == cTouch {
 			id = i
 			break
 		}
 	}
-	touchMu.RUnlock()
-
-	touchMu.Lock()
 	if id == -1 {
 		for i, val := range touchIDs {
 			if val == 0 {
@@ -195,11 +184,16 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 
 	t := touch.Type(cTouchType)
 	if t == touch.TypeEnd {
-		touchIDs[id] = 0
+		// Clear all touchIDs when touch ends. The UITouch pointers are unique
+		// at every multi-touch event. See:
+		// https://github.com/fyne-io/fyne/issues/2407
+		// https://developer.apple.com/documentation/uikit/touches_presses_and_gestures?language=objc
+		for idx := range touchIDs {
+			touchIDs[idx] = 0
+		}
 	}
-	touchMu.Unlock()
 
-	theApp.eventsIn <- touch.Event{
+	theApp.events.In() <- touch.Event{
 		X:        x,
 		Y:        y,
 		Sequence: touch.Sequence(id),

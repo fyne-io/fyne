@@ -192,7 +192,9 @@ func (t *TextGrid) SetRow(row int, content TextGridRow) {
 	}
 
 	t.Rows[row] = content
-	t.Refresh()
+	for col := 0; col > len(content.Cells); col++ {
+		t.refreshCell(row, col)
+	}
 }
 
 // SetRowStyle sets a grid style to all the cells cell at the specified row.
@@ -283,7 +285,7 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	render := &textGridRenderer{text: t}
-	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+	render.updateCellSize()
 
 	TextGridStyleDefault = &CustomTextGridStyle{}
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
@@ -351,11 +353,8 @@ func (t *textGridRenderer) refreshCell(row, col int) {
 		return
 	}
 
-	text := t.objects[pos*2+1].(*canvas.Text)
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-
-	canvas.Refresh(text)
-	canvas.Refresh(rect)
+	cell := t.text.Rows[row].Cells[col]
+	t.setCellRune(cell.Rune, pos, cell.Style, t.text.Rows[row].Style)
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
@@ -477,8 +476,8 @@ func (t *textGridRenderer) updateGridSize(size fyne.Size) {
 	for _, row := range t.text.Rows {
 		bufCols = int(math.Max(float64(bufCols), float64(len(row.Cells))))
 	}
-	sizeCols := int(math.Floor(float64(size.Width) / float64(t.cellSize.Width)))
-	sizeRows := int(math.Floor(float64(size.Height) / float64(t.cellSize.Height)))
+	sizeCols := math.Floor(float64(size.Width) / float64(t.cellSize.Width))
+	sizeRows := math.Floor(float64(size.Height) / float64(t.cellSize.Height))
 
 	if t.text.ShowWhitespace {
 		bufCols++
@@ -487,8 +486,8 @@ func (t *textGridRenderer) updateGridSize(size fyne.Size) {
 		bufCols += t.lineNumberWidth()
 	}
 
-	t.cols = int(math.Max(float64(sizeCols), float64(bufCols)))
-	t.rows = int(math.Max(float64(sizeRows), float64(bufRows)))
+	t.cols = int(math.Max(sizeCols, float64(bufCols)))
+	t.rows = int(math.Max(sizeRows, float64(bufRows)))
 	t.addCellsIfRequired()
 }
 
@@ -523,7 +522,7 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 
 func (t *textGridRenderer) Refresh() {
 	// theme could change text size
-	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+	t.updateCellSize()
 
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
 	t.updateGridSize(t.text.size)
@@ -538,4 +537,14 @@ func (t *textGridRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (t *textGridRenderer) Destroy() {
+}
+
+func (t *textGridRenderer) updateCellSize() {
+	size := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+
+	// round it for seamless background
+	size.Width = float32(math.Round(float64((size.Width))))
+	size.Height = float32(math.Round(float64((size.Height))))
+
+	t.cellSize = size
 }

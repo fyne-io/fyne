@@ -37,6 +37,10 @@ func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame f
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
+	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
+		return
+	}
+
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
 	vbo := p.glCreateLineBuffer(points)
 	p.glDrawLine(halfWidth, line.StrokeColor, feather)
@@ -56,7 +60,7 @@ func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.Canva
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.FillColor == nil || rect.StrokeWidth == 0) {
+	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.StrokeColor == nil || rect.StrokeWidth == 0) {
 		return
 	}
 	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,

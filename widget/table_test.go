@@ -439,6 +439,16 @@ func TestTable_Selection(t *testing.T) {
 	assert.Equal(t, 1, selectedRow)
 
 	test.AssertRendersToMarkup(t, "table/selected.xml", w.Canvas())
+
+	// check out of bounds col
+	w.Resize(fyne.NewSize(680, 180))
+	test.TapCanvas(w.Canvas(), fyne.NewPos(575, 58))
+	assert.Equal(t, 0, selectedCol)
+
+	// check out of bounds row
+	w.Resize(fyne.NewSize(180, 480))
+	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 428))
+	assert.Equal(t, 1, selectedRow)
 }
 
 func TestTable_Select(t *testing.T) {

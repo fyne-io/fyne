@@ -27,6 +27,7 @@ const (
 	scrollAccelerateCutoff = float64(5)
 	scrollSpeed            = float32(10)
 	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
+	dragMoveThreshold      = 2   // how far can we move before it is a drag
 )
 
 var (
@@ -207,7 +208,7 @@ func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 
 	if w.view() != nil {
-		w.fitContent()
+		w.runOnMainWhenCreated(w.fitContent)
 	}
 }
 
@@ -605,6 +606,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 	mousePos := w.mousePos
 	mouseButton := w.mouseButton
+	mouseDragPos := w.mouseDragPos
 	mouseOver := w.mouseOver
 	w.mouseLock.Unlock()
 
@@ -645,9 +647,12 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			return ok
 		})
 
-		if wid, ok := obj.(fyne.Draggable); ok {
+		deltaX := mousePos.X - mouseDragPos.X
+		deltaY := mousePos.Y - mouseDragPos.Y
+		overThreshold := math.Abs(float64(deltaX)) >= dragMoveThreshold || math.Abs(float64(deltaY)) >= dragMoveThreshold
+
+		if wid, ok := obj.(fyne.Draggable); ok && overThreshold {
 			w.mouseLock.Lock()
-			w.mouseDragPos = previousPos
 			w.mouseDragged = wid
 			w.mouseDraggedOffset = previousPos.Subtract(pos)
 			w.mouseDraggedObjStart = obj.Position()
@@ -696,7 +701,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	mouseDragged := w.mouseDragged
 	mouseDraggedObjStart := w.mouseDraggedObjStart
 	mouseDraggedOffset := w.mouseDraggedOffset
-	mouseDragPos := w.mouseDragPos
+	mouseDragPos = w.mouseDragPos
 	w.mouseLock.RUnlock()
 	if mouseDragged != nil && mouseButton != desktop.MouseButtonSecondary {
 		if w.mouseButton > 0 {
@@ -751,6 +756,7 @@ func (w *window) mouseOut() {
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	w.mouseLock.RLock()
+	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
 	mouseDragStarted := w.mouseDragStarted
 	w.mouseLock.RUnlock()
@@ -921,7 +927,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	w.mouseLock.RLock()
 	mousePos := w.mousePos
 	w.mouseLock.RUnlock()
-	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
@@ -1141,7 +1147,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	w.menuDeactivationPending = desktop.KeyNone
 	switch action {
 	case glfw.Release:
-		if action == glfw.Release {
+		if action == glfw.Release && keyName != "" {
 			switch keyName {
 			case pendingMenuToggle:
 				w.canvas.ToggleMenu()
@@ -1163,7 +1169,8 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	case glfw.Press:
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
-			if (keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight) && keyDesktopModifier == desktop.AltModifier {
+			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
+			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == desktop.AltModifier) {
 				w.menuTogglePending = keyName
 			}
 		case fyne.KeyEscape:

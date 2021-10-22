@@ -88,39 +88,47 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	c.Unlock()
 	w.SetContent(canvas.NewRectangle(color.Black))
 
+	altPressingMod := glfw.ModAlt
+	altReleasingMod := glfw.ModifierKey(0)
+	// Simulate known issue with GLFW inconsistency https://github.com/glfw/glfw/issues/1630
+	if runtime.GOOS == "linux" {
+		altPressingMod = 0
+		altReleasingMod = glfw.ModAlt
+	}
+
 	require.False(t, menuBar.IsActive())
 	t.Run("toggle via left Alt", func(t *testing.T) {
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
 		assert.False(t, menuBar.IsActive())
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
 		assert.True(t, menuBar.IsActive())
 
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
 		assert.True(t, menuBar.IsActive())
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
 		assert.False(t, menuBar.IsActive())
 	})
 
 	require.False(t, menuBar.IsActive())
 	t.Run("toggle via right Alt", func(t *testing.T) {
-		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, altPressingMod)
 		assert.False(t, menuBar.IsActive())
-		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, 0)
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, altReleasingMod)
 		assert.True(t, menuBar.IsActive())
 
-		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Press, altPressingMod)
 		assert.True(t, menuBar.IsActive())
-		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, 0)
+		w.keyPressed(w.viewport, glfw.KeyRightAlt, 0, glfw.Release, altReleasingMod)
 		assert.False(t, menuBar.IsActive())
 	})
 
 	require.False(t, menuBar.IsActive())
 	t.Run("press non-special key after pressing Alt and release it before releasing Alt", func(t *testing.T) {
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
 		assert.False(t, menuBar.IsActive())
 		w.keyPressed(w.viewport, glfw.KeyA, 0, glfw.Press, glfw.ModAlt)
 		w.keyPressed(w.viewport, glfw.KeyA, 0, glfw.Release, glfw.ModAlt)
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
 		assert.False(t, menuBar.IsActive())
 	})
 
@@ -137,30 +145,30 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	} {
 		require.False(t, menuBar.IsActive())
 		t.Run("press and release "+name+" after pressing Alt and before releasing it", func(t *testing.T) {
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
 			assert.False(t, menuBar.IsActive())
-			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt|tt.mod)
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
 			assert.False(t, menuBar.IsActive())
 		})
 
 		require.False(t, menuBar.IsActive())
 		t.Run("press "+name+" before pressing Alt and release it before releasing Alt", func(t *testing.T) {
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod|altPressingMod)
 			assert.False(t, menuBar.IsActive())
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, glfw.ModAlt)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
 			assert.False(t, menuBar.IsActive())
 		})
 
 		require.False(t, menuBar.IsActive())
 		t.Run("press "+name+" after pressing Alt and release it after releasing Alt", func(t *testing.T) {
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
 			assert.False(t, menuBar.IsActive())
-			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt&tt.mod)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, glfw.ModAlt|tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod|tt.mod)
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
 			assert.False(t, menuBar.IsActive())
 		})
@@ -168,9 +176,9 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 		require.False(t, menuBar.IsActive())
 		t.Run("press "+name+" before pressing Alt and release it after releasing Alt", func(t *testing.T) {
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Press, tt.mod)
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod&glfw.ModAlt)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, tt.mod|altPressingMod)
 			assert.False(t, menuBar.IsActive())
-			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod)
+			w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, tt.mod|altReleasingMod)
 			w.keyPressed(w.viewport, tt.key, 0, glfw.Release, 0)
 			assert.False(t, menuBar.IsActive())
 		})
@@ -196,8 +204,8 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 		w = createWindow("Test").(*window)
 		w.SetContent(canvas.NewRectangle(color.Black))
 
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, glfw.ModAlt)
-		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, 0)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
+		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
 		// does not crash :)
 	})
 }
@@ -279,6 +287,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	)
 	l.Resize(fyne.NewSize(200, 300))
 	w.SetContent(l)
+	w.SetFixedSize(true)
 	w.Resize(fyne.NewSize(200, 300))
 	repaintWindow(w)
 
@@ -368,7 +377,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d2.popDragEndEvent())
 
 	// no drag event in simple move
-	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseMoved(w.viewport, 10, 10)
 	w.WaitForEvents()
 	assert.Nil(t, d1.popDragEvent())
 	assert.Nil(t, d2.popDragEvent())
@@ -386,7 +395,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewDelta(-1, -1),
+			Dragged: fyne.NewDelta(-2, -2),
 		},
 		d1.popDragEvent(),
 	)
@@ -428,7 +437,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d2.popDragEvent())
 
 	// no drag event on further mouse move
-	w.mouseMoved(w.viewport, 22, 6)
+	w.mouseMoved(w.viewport, 22, 5)
 	w.WaitForEvents()
 	assert.Nil(t, d1.popDragEvent())
 	assert.Nil(t, d2.popDragEvent())
@@ -447,7 +456,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 3),
 				AbsolutePosition: fyne.NewPos(22, 7)},
-			Dragged: fyne.NewDelta(0, 1),
+			Dragged: fyne.NewDelta(0, 2),
 		},
 		d2.popDragEvent(),
 	)
@@ -463,7 +472,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 
 	// drag -1,-1
-	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseMoved(w.viewport, 10, 10)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 8, 8)
 	w.WaitForEvents()
@@ -471,7 +480,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
 				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewDelta(-1, -1),
+			Dragged: fyne.NewDelta(-2, -2),
 		},
 		d1.popDragEvent(),
 	)
@@ -568,24 +577,24 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		dh.popMouseInEvent(),
 	)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseMoved(w.viewport, 10, 10)
 	w.WaitForEvents()
 	assert.Equal(t,
 		&fyne.DragEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-				AbsolutePosition: fyne.NewPos(8, 8)},
-			Dragged: fyne.NewDelta(0, 0),
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(6, 6),
+				AbsolutePosition: fyne.NewPos(10, 10)},
+			Dragged: fyne.NewDelta(2, 2),
 		},
 		dh.popDragEvent(),
 	)
 
 	// drag event going outside the widget's area
-	w.mouseMoved(w.viewport, 16, 8)
+	w.mouseMoved(w.viewport, 18, 10)
 	w.WaitForEvents()
 	assert.Equal(t,
 		&fyne.DragEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4),
-				AbsolutePosition: fyne.NewPos(16, 8)},
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(14, 6),
+				AbsolutePosition: fyne.NewPos(18, 10)},
 			Dragged: fyne.NewDelta(8, 0),
 		},
 		dh.popDragEvent(),
@@ -594,12 +603,12 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.Nil(t, dh.popMouseOutEvent())
 
 	// drag event going inside the widget's area again
-	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseMoved(w.viewport, 10, 10)
 	w.WaitForEvents()
 	assert.Equal(t,
 		&fyne.DragEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-				AbsolutePosition: fyne.NewPos(8, 8)},
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(6, 6),
+				AbsolutePosition: fyne.NewPos(10, 10)},
 			Dragged: fyne.NewDelta(-8, 0),
 		},
 		dh.popDragEvent(),
@@ -615,9 +624,9 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.Nil(t, dh.popMouseOutEvent())
 
 	// mouseOut on mouse release after dragging out of area
-	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseMoved(w.viewport, 10, 10)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 16, 8) // outside the 10x10 object
+	w.mouseMoved(w.viewport, 18, 10) // outside the 10x10 object
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.WaitForEvents()
 	assert.NotNil(t, dh.popMouseOutEvent())
@@ -683,11 +692,11 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	//  - mouseMoved by hoverableObject
 	//  - no events by draggableObject
 	//  - no events by draggableHoverableObject
-	w.mouseMoved(w.viewport, 15, 15)
+	w.mouseMoved(w.viewport, 14, 14)
 	w.WaitForEvents()
 	assert.Nil(t, h.popMouseInEvent())
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(11, 11),
-		AbsolutePosition: fyne.NewPos(15, 15)}}, h.popMouseMovedEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(10, 10),
+		AbsolutePosition: fyne.NewPos(14, 14)}}, h.popMouseMovedEvent())
 	assert.Nil(t, h.popMouseOutEvent())
 	assert.Nil(t, d.popDragEvent())
 	assert.Nil(t, d.popDragEndEvent())
@@ -709,7 +718,7 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 		AbsolutePosition: fyne.NewPos(16, 16)}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
 	assert.Nil(t, h.popMouseOutEvent())
 	assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(2, 2),
-		AbsolutePosition: fyne.NewPos(16, 16)}, Dragged: fyne.NewDelta(1, 1)}, d.popDragEvent())
+		AbsolutePosition: fyne.NewPos(16, 16)}, Dragged: fyne.NewDelta(2, 2)}, d.popDragEvent())
 	assert.Nil(t, d.popDragEndEvent())
 	assert.Nil(t, dh.popMouseInEvent())
 	assert.Nil(t, dh.popMouseMovedEvent())
@@ -827,10 +836,10 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 	//  - mouseIn by hoverableObject
 	//  - no events by draggableObject
 	//  - no events by draggableHoverableObject
-	w.mouseMoved(w.viewport, 15, 15)
+	w.mouseMoved(w.viewport, 14, 14)
 	w.WaitForEvents()
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(11, 11),
-		AbsolutePosition: fyne.NewPos(15, 15)}}, h.popMouseInEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(10, 10),
+		AbsolutePosition: fyne.NewPos(14, 14)}}, h.popMouseInEvent())
 	assert.Nil(t, h.popMouseMovedEvent())
 	assert.Nil(t, h.popMouseOutEvent())
 	assert.Nil(t, d.popDragEvent())
@@ -853,7 +862,7 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 		AbsolutePosition: fyne.NewPos(16, 16)}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
 	assert.Nil(t, h.popMouseOutEvent())
 	assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(2, 2),
-		AbsolutePosition: fyne.NewPos(16, 16)}, Dragged: fyne.NewDelta(1, 1)}, d.popDragEvent())
+		AbsolutePosition: fyne.NewPos(16, 16)}, Dragged: fyne.NewDelta(2, 2)}, d.popDragEvent())
 	assert.Nil(t, d.popDragEndEvent())
 	assert.Nil(t, dh.popMouseInEvent())
 	assert.Nil(t, dh.popMouseMovedEvent())
@@ -939,15 +948,15 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	//  - no event by hoverableObject
 	//  - no event by draggableObject
 	//  - moveIn event by draggableHoverableObject
-	w.mouseMoved(w.viewport, 25, 25)
+	w.mouseMoved(w.viewport, 26, 26)
 	w.WaitForEvents()
 	assert.Nil(t, h.popMouseInEvent())
 	assert.Nil(t, h.popMouseMovedEvent())
 	assert.Nil(t, h.popMouseOutEvent())
 	assert.Nil(t, d.popDragEvent())
 	assert.Nil(t, d.popDragEndEvent())
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 1),
-		AbsolutePosition: fyne.NewPos(25, 25)}}, dh.popMouseInEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(2, 2),
+		AbsolutePosition: fyne.NewPos(26, 26)}}, dh.popMouseInEvent())
 	assert.Nil(t, dh.popMouseMovedEvent())
 	assert.Nil(t, dh.popMouseOutEvent())
 	assert.Nil(t, dh.popDragEvent())
@@ -958,7 +967,7 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	//  - no events by draggableObject
 	//  - drag begin by draggableHoverableObject
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 26, 26)
+	w.mouseMoved(w.viewport, 28, 28)
 	w.WaitForEvents()
 	assert.Nil(t, h.popMouseInEvent())
 	assert.Nil(t, h.popMouseMovedEvent())
@@ -968,8 +977,8 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	assert.Nil(t, dh.popMouseInEvent())
 	assert.Nil(t, dh.popMouseMovedEvent())
 	assert.Nil(t, dh.popMouseOutEvent())
-	assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(2, 2),
-		AbsolutePosition: fyne.NewPos(26, 26)}, Dragged: fyne.NewDelta(1, 1)}, dh.popDragEvent())
+	assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
+		AbsolutePosition: fyne.NewPos(28, 28)}, Dragged: fyne.NewDelta(2, 2)}, dh.popDragEvent())
 	assert.Nil(t, dh.popDragEndEvent())
 
 	// 3. drag to hoverable
@@ -988,7 +997,7 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	assert.Nil(t, dh.popMouseMovedEvent())
 	assert.NotNil(t, dh.popMouseOutEvent())
 	assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(21, 21),
-		AbsolutePosition: fyne.NewPos(45, 45)}, Dragged: fyne.NewDelta(19, 19)}, dh.popDragEvent())
+		AbsolutePosition: fyne.NewPos(45, 45)}, Dragged: fyne.NewDelta(17, 17)}, dh.popDragEvent())
 	assert.Nil(t, dh.popDragEndEvent())
 
 	// 4. drag end
@@ -1020,7 +1029,13 @@ func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 
 	w.mouseMoved(w.viewport, 9, 9)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseMoved(w.viewport, 8, 8) // Less than drag threshold
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	w.WaitForEvents()
+	assert.NotNil(t, do.popTapEvent()) // it was slight drag, so call it a tap
+
+	w.mouseMoved(w.viewport, 5, 5)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.WaitForEvents()

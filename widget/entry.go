@@ -50,7 +50,7 @@ type Entry struct {
 
 	// Set a validator that this entry will check against
 	// Since: 1.4
-	Validator           fyne.StringValidator
+	Validator           fyne.StringValidator `json:"-"`
 	validationStatus    *validationStatus
 	onValidationChanged func(error)
 	validationError     error
@@ -85,7 +85,7 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	ActionItem   fyne.CanvasObject
+	ActionItem   fyne.CanvasObject `json:"-"`
 	textSource   binding.String
 	textListener binding.DataListener
 }
@@ -418,7 +418,10 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
-	e.requestFocus()
+	if !e.Disabled() {
+		e.requestFocus()
+	}
+
 	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
@@ -469,20 +472,17 @@ func (e *Entry) SetPlaceHolder(text string) {
 func (e *Entry) SetText(text string) {
 	e.updateText(text)
 
-	e.updateCursor()
+	e.updateCursorAndSelection()
 }
 
-// Tapped is called when this entry has been tapped so we should update the cursor position.
+// Tapped is called when this entry has been tapped. We update the cursor position in
+// device-specific callbacks (MouseDown() and TouchDown()).
 //
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if !e.Disabled() {
-		e.requestFocus()
-	}
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
 	}
-	e.updateMousePointer(ev.Position, false)
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -532,10 +532,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // Since: 2.1
 //
 // Implements: mobile.Touchable
-func (e *Entry) TouchDown(*mobile.TouchEvent) {
-	if !e.disabled {
+func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
+	if !e.Disabled() {
 		e.requestFocus()
 	}
+
+	e.updateMousePointer(ev.Position, false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
@@ -1118,21 +1120,27 @@ func (e *Entry) textWrap() fyne.TextWrap {
 	return e.Wrapping
 }
 
-func (e *Entry) updateCursor() {
+func (e *Entry) updateCursorAndSelection() {
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
+	e.CursorRow, e.CursorColumn = e.truncatePosition(e.CursorRow, e.CursorColumn)
+	e.selectRow, e.selectColumn = e.truncatePosition(e.selectRow, e.selectColumn)
+}
+
+func (e *Entry) truncatePosition(row, col int) (int, int) {
 	if e.Text == "" {
-		e.CursorColumn = 0
-		e.CursorRow = 0
-		return
+		return 0, 0
 	}
-	if e.CursorRow >= e.textProvider().rows() {
-		e.CursorRow = e.textProvider().rows() - 1
+	newRow := row
+	newCol := col
+	if row >= e.textProvider().rows() {
+		newRow = e.textProvider().rows() - 1
 	}
-	rowLength := e.textProvider().rowLength(e.CursorRow)
-	if e.CursorColumn >= rowLength {
-		e.CursorColumn = rowLength
+	rowLength := e.textProvider().rowLength(newRow)
+	if (newCol >= rowLength) || (newRow < row) {
+		newCol = rowLength
 	}
+	return newRow, newCol
 }
 
 func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
@@ -1342,7 +1350,7 @@ func (r *entryRenderer) Refresh() {
 			}
 		}
 	}
-	r.entry.updateCursor()
+	r.entry.updateCursorAndSelection()
 
 	r.box.FillColor = theme.InputBackgroundColor()
 	if focusedAppearance {

@@ -7,6 +7,7 @@
 package app
 
 import (
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
@@ -74,14 +75,13 @@ type PublishResult struct {
 }
 
 var theApp = &app{
-	eventsOut:      make(chan interface{}),
+	events:         async.NewUnboundedInterfaceChan(),
 	lifecycleStage: lifecycle.StageDead,
 	publish:        make(chan struct{}),
 	publishResult:  make(chan PublishResult),
 }
 
 func init() {
-	theApp.eventsIn = pump(theApp.eventsOut)
 	theApp.glctx, theApp.worker = gl.NewContext()
 }
 
@@ -89,7 +89,7 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
 	if a.lifecycleStage == to {
 		return
 	}
-	a.eventsIn <- lifecycle.Event{
+	a.events.In() <- lifecycle.Event{
 		From:        a.lifecycleStage,
 		To:          to,
 		DrawContext: a.glctx,
@@ -100,8 +100,7 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
 type app struct {
 	filters []func(interface{}) interface{}
 
-	eventsOut      chan interface{}
-	eventsIn       chan interface{}
+	events         *async.UnboundedInterfaceChan
 	lifecycleStage lifecycle.Stage
 	publish        chan struct{}
 	publishResult  chan PublishResult
@@ -111,11 +110,11 @@ type app struct {
 }
 
 func (a *app) Events() <-chan interface{} {
-	return a.eventsOut
+	return a.events.Out()
 }
 
 func (a *app) Send(event interface{}) {
-	a.eventsIn <- event
+	a.events.In() <- event
 }
 
 func (a *app) Publish() PublishResult {
@@ -155,75 +154,6 @@ func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilt
 }
 func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	driverShowFileSavePicker(callback, filter, filename)
-}
-
-type stopPumping struct{}
-
-// pump returns a channel src such that sending on src will eventually send on
-// dst, in order, but that src will always be ready to send/receive soon, even
-// if dst currently isn't. It is effectively an infinitely buffered channel.
-//
-// In particular, goroutine A sending on src will not deadlock even if goroutine
-// B that's responsible for receiving on dst is currently blocked trying to
-// send to A on a separate channel.
-//
-// Send a stopPumping on the src channel to close the dst channel after all queued
-// events are sent on dst. After that, other goroutines can still send to src,
-// so that such sends won't block forever, but such events will be ignored.
-func pump(dst chan interface{}) (src chan interface{}) {
-	src = make(chan interface{})
-	go func() {
-		// initialSize is the initial size of the circular buffer. It must be a
-		// power of 2.
-		const initialSize = 16
-		i, j, buf, mask := 0, 0, make([]interface{}, initialSize), initialSize-1
-
-		srcActive := true
-		for {
-			maybeDst := dst
-			if i == j {
-				maybeDst = nil
-			}
-			if maybeDst == nil && !srcActive {
-				// Pump is stopped and empty.
-				break
-			}
-
-			select {
-			case maybeDst <- buf[i&mask]:
-				buf[i&mask] = nil
-				i++
-
-			case e := <-src:
-				if _, ok := e.(stopPumping); ok {
-					srcActive = false
-					continue
-				}
-
-				if !srcActive {
-					continue
-				}
-
-				// Allocate a bigger buffer if necessary.
-				if i+len(buf) == j {
-					b := make([]interface{}, 2*len(buf))
-					n := copy(b, buf[j&mask:])
-					copy(b[n:], buf[:j&mask])
-					i, j = 0, len(buf)
-					buf, mask = b, len(b)-1
-				}
-
-				buf[j&mask] = e
-				j++
-			}
-		}
-
-		close(dst)
-		// Block forever.
-		for range src {
-		}
-	}()
-	return src
 }
 
 // TODO: do this for all build targets, not just linux (x11 and Android)? If

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"runtime"
 	"sync"
 	"sync/atomic"
 
@@ -46,6 +47,7 @@ type Canvas struct {
 	// the refreshQueue is an unbounded channel which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.UnboundedCanvasObjectChan
+	refreshCount uint64 // atomic
 	dirty        uint32 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
@@ -192,25 +194,43 @@ func (c *Canvas) FocusPrevious() {
 	mgr.FocusPrevious()
 }
 
-// FreeDirtyTextures frees dirty textures.
-func (c *Canvas) FreeDirtyTextures() bool {
-	freed := false
-	for {
+// FreeDirtyTextures frees dirty textures and returns the number of freed textures.
+func (c *Canvas) FreeDirtyTextures() uint64 {
+	freed := uint64(0)
+
+	// Within a frame, refresh tasks are requested from the Refresh method,
+	// and we desire to process all requested operations as much as possible
+	// in a frame. Use a counter to guarantee that all desired tasks are
+	// processed. See https://github.com/fyne-io/fyne/issues/2548.
+	for atomic.LoadUint64(&c.refreshCount) > 0 {
+		var object fyne.CanvasObject
 		select {
-		case object := <-c.refreshQueue.Out():
-			freed = true
-			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				c.painter.Free(obj)
-				return false
-			}
-			driver.WalkCompleteObjectTree(object, freeWalked, nil)
+		case object = <-c.refreshQueue.Out():
 		default:
-			cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
-				c.painter.Free(obj)
-			})
-			return freed
+			// If refreshCount is positive but we cannot receive any object
+			// from the refreshQueue, this means that the refresh task is
+			// not yet ready to receive, continue until we can receive it.
+			// Furthermore, we use Gosched to avoid CPU spin.
+			runtime.Gosched()
+			continue
 		}
+		atomic.AddUint64(&c.refreshCount, ^uint64(0))
+		freed++
+		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+			if c.painter != nil {
+				c.painter.Free(obj)
+			}
+			return false
+		}
+		driver.WalkCompleteObjectTree(object, freeWalked, nil)
 	}
+
+	cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
+		if c.painter != nil {
+			c.painter.Free(obj)
+		}
+	})
+	return freed
 }
 
 // Initialize initializes the canvas.
@@ -260,6 +280,7 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
+	atomic.AddUint64(&c.refreshCount, 1)
 	c.refreshQueue.In() <- obj // never block
 	c.SetDirty(true)
 }
