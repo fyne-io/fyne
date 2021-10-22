@@ -247,8 +247,8 @@ func (w *window) SetIcon(icon fyne.Resource) {
 			return
 		}
 
-		width, height := w.viewport.GetSize()
-		pix := painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, width, height)
+		iconW, iconH := 256, 256
+		pix := painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, iconW, iconH)
 
 		w.viewport.SetIcon([]image.Image{pix})
 	})
