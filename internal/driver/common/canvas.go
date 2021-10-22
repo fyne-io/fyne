@@ -43,9 +43,9 @@ type Canvas struct {
 	//
 	// If an object failed to ender the refresh queue, the object may
 	// disappear or blink from the view at any frames. As of this reason,
-	// the refreshQueue is an unbounded channel which is bale to cache
+	// the refreshQueue is an unbounded queue which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
-	refreshQueue *async.Queue
+	refreshQueue *async.CanvasObjectQueue
 	dirty        uint32 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
@@ -205,7 +205,7 @@ func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 			}
 			return false
 		}
-		driver.WalkCompleteObjectTree(c.refreshQueue.Out().(fyne.CanvasObject), freeWalked, nil)
+		driver.WalkCompleteObjectTree(c.refreshQueue.Out(), freeWalked, nil)
 	}
 	cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
 		if c.painter != nil {
@@ -218,7 +218,7 @@ func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 // Initialize initializes the canvas.
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
-	c.refreshQueue = async.NewQueue()
+	c.refreshQueue = async.NewCanvasObjectQueue()
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
