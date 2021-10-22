@@ -3,7 +3,7 @@
 package async
 
 // UnboundedInterfaceChan is a channel with an unbounded buffer for caching
-// Interface objects.
+// Interface objects. A channel must be closed via Close method.
 type UnboundedInterfaceChan struct {
 	in, out chan interface{}
 	close   chan struct{}
