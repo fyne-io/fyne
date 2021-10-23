@@ -37,6 +37,33 @@ func TestPosition_Add_Vector(t *testing.T) {
 	assert.Equal(t, float32(35), pos2.Y)
 }
 
+func TestPosition_AddX(t *testing.T) {
+	pos1 := fyne.NewPos(10, 10)
+
+	pos2 := pos1.AddX(25)
+
+	assert.Equal(t, float32(35), pos2.X)
+	assert.Equal(t, float32(10), pos2.Y)
+}
+
+func TestPosition_AddXAndY(t *testing.T) {
+	pos1 := fyne.NewPos(10, 10)
+
+	pos2 := pos1.AddXAndY(25, 25)
+
+	assert.Equal(t, float32(35), pos2.X)
+	assert.Equal(t, float32(35), pos2.Y)
+}
+
+func TestPosition_AddY(t *testing.T) {
+	pos1 := fyne.NewPos(10, 10)
+
+	pos2 := pos1.AddY(25)
+
+	assert.Equal(t, float32(10), pos2.X)
+	assert.Equal(t, float32(35), pos2.Y)
+}
+
 func TestPosition_IsZero(t *testing.T) {
 	for name, tt := range map[string]struct {
 		p    fyne.Position

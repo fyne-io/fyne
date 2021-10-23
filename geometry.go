@@ -49,6 +49,21 @@ func (p Position) Add(v Vector2) Position {
 	return Position{p.X + x, p.Y + y}
 }
 
+// AddX returns a new Position by adding x to the current one.
+func (p Position) AddX(x float32) Position {
+	return Position{p.X + x, p.Y}
+}
+
+// AddXAndY returns a new Position by adding x and y to the current one.
+func (p Position) AddXAndY(x, y float32) Position {
+	return Position{p.X + x, p.Y + y}
+}
+
+// AddY returns a new Position by adding y to the current one.
+func (p Position) AddY(y float32) Position {
+	return Position{p.X, p.Y + y}
+}
+
 // Components returns the X and Y elements of this Position
 func (p Position) Components() (float32, float32) {
 	return p.X, p.Y
