@@ -680,7 +680,7 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 }
 
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
-// the current theme's `DisabledIconColor` color.
+// the current theme's `DisabledColor` color.
 type DisabledResource struct {
 	source fyne.Resource
 }
@@ -695,7 +695,7 @@ func (res *DisabledResource) Content() []byte {
 	return colorizeResource(res.source, DisabledColor())
 }
 
-// NewDisabledResource creates a resource that adapts to the current theme's DisabledIconColor setting.
+// NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
 func NewDisabledResource(res fyne.Resource) *DisabledResource {
 	return &DisabledResource{
 		source: res,
