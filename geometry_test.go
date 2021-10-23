@@ -121,6 +121,33 @@ func TestSize_Add_Vector(t *testing.T) {
 	assert.Equal(t, float32(35), size2.Height)
 }
 
+func TestSize_AddHeight(t *testing.T) {
+	size1 := fyne.NewSize(10, 10)
+
+	size2 := size1.AddHeight(25)
+
+	assert.Equal(t, float32(10), size2.Width)
+	assert.Equal(t, float32(35), size2.Height)
+}
+
+func TestSize_AddWidth(t *testing.T) {
+	size1 := fyne.NewSize(10, 10)
+
+	size2 := size1.AddWidth(25)
+
+	assert.Equal(t, float32(35), size2.Width)
+	assert.Equal(t, float32(10), size2.Height)
+}
+
+func TestSize_AddWidthAndHeight(t *testing.T) {
+	size1 := fyne.NewSize(10, 10)
+
+	size2 := size1.AddWidthAndHeight(25, 25)
+
+	assert.Equal(t, float32(35), size2.Width)
+	assert.Equal(t, float32(35), size2.Height)
+}
+
 func TestSize_IsZero(t *testing.T) {
 	for name, tt := range map[string]struct {
 		s    fyne.Size

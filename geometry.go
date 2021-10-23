@@ -99,6 +99,21 @@ func (s Size) Add(v Vector2) Size {
 	return Size{s.Width + w, s.Height + h}
 }
 
+// AddHeight returns a new Size by adding height to the current one.
+func (s Size) AddHeight(height float32) Size {
+	return Size{s.Width, s.Height + height}
+}
+
+// AddWidth returns a new Size by adding width to the current one.
+func (s Size) AddWidth(width float32) Size {
+	return Size{s.Width + width, s.Height}
+}
+
+// AddWidthAndHeight returns a new Size by adding width and height to the current one.
+func (s Size) AddWidthAndHeight(width, height float32) Size {
+	return Size{s.Width + width, s.Height + height}
+}
+
 // IsZero returns whether the Size has zero width and zero height.
 func (s Size) IsZero() bool {
 	return s.Width == 0.0 && s.Height == 0.0
