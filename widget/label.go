@@ -98,6 +98,7 @@ func (l *Label) Refresh() {
 	}
 	l.syncSegments()
 	l.provider.Refresh()
+	l.BaseWidget.Refresh()
 }
 
 // Resize sets a new size for the label.
@@ -114,11 +115,7 @@ func (l *Label) Resize(s fyne.Size) {
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
-	if l.provider == nil { // not created until visible
-		return
-	}
-	l.syncSegments()
-	l.provider.Refresh()
+	l.Refresh()
 }
 
 // Unbind disconnects any configured data source from this Label.
