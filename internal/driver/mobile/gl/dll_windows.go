@@ -203,31 +203,43 @@ func findDLLs() (err error) {
 		return false, nil
 	}
 
+	var savedError error = nil
+
 	// Look in the system directory.
-	if ok, err := load(""); ok || err != nil {
-		return err
+	if ok, err := load(""); ok {
+		return nil
+	} else {
+		savedError = fmt.Errorf("System load error: %v.\n\r", err)
 	}
 
 	// Look in the AppData directory.
-	if ok, err := load(appdataPath()); ok || err != nil {
-		return err
+	if ok, err := load(appdataPath()); ok {
+		return nil
+	} else {
+		savedError = fmt.Errorf("%vAppData load error: %v.\n\r", savedError, err)
 	}
 
 	// Look for a Chrome installation
 	if dir := chromePath(); dir != "" {
-		if ok, err := load(dir); ok || err != nil {
-			return err
+		if ok, err := load(dir); ok {
+			return nil
+		} else {
+			savedError = fmt.Errorf("%vChrome load error: %v.\n\r", savedError, err)
 		}
 	}
 
 	// Look in GOPATH/pkg.
-	if ok, err := load(filepath.Join(os.Getenv("GOPATH"), "pkg")); ok || err != nil {
-		return err
+	if ok, err := load(filepath.Join(os.Getenv("GOPATH"), "pkg")); ok {
+		return nil
+	} else {
+		savedError = fmt.Errorf("%vGOPATH load error: %v.\n\r", savedError, err)
 	}
 
 	// Look in temporary directory.
-	if ok, err := load(os.TempDir()); ok || err != nil {
-		return err
+	if ok, err := load(os.TempDir()); ok {
+		return nil
+	} else {
+		savedError = fmt.Errorf("%vTemp directory load error: %v.\n\r", savedError, err)
 	}
 
 	// Download the DLL binary.
@@ -237,7 +249,9 @@ func findDLLs() (err error) {
 	}
 	debug.Printf("DLLs written to %s", path)
 	if ok, err := load(path); !ok || err != nil {
-		return fmt.Errorf("gl: unable to load ANGLE after installation: %v", err)
+		savedError = fmt.Errorf("%vDLL Binary download (ANGLE) load error: %v", savedError, err)
+	} else if ok {
+		return nil
 	}
-	return nil
+	return savedError
 }
