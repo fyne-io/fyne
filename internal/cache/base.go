@@ -44,7 +44,7 @@ func Clean(canvasRefreshed bool) {
 	if !canvasRefreshed && now.Sub(lastClean) < cleanTaskInterval {
 		return
 	}
-	destroyExpiredSvgs(now)
+	destroyExpiredImgs(now)
 	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
 		destroyExpiredRenderers(now)
@@ -106,7 +106,7 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 		return
 	}
 
-	destroyExpiredSvgs(now)
+	destroyExpiredImgs(now)
 
 	deletingObjs := make([]fyne.CanvasObject, 0, 50)
 
@@ -146,11 +146,11 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 	lastClean = timeNow()
 }
 
-// ResetThemeCaches clears all the svg and text size cache maps
+// ResetThemeCaches clears all the img and text size cache maps
 func ResetThemeCaches() {
-	svgLock.Lock()
-	svgs = make(map[string]*svgInfo)
-	svgLock.Unlock()
+	imgLock.Lock()
+	imgs = make(map[string]*imgInfo)
+	imgLock.Unlock()
 
 	fontSizeLock.Lock()
 	fontSizeCache = map[fontSizeEntry]fontMetric{}

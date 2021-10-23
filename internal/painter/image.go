@@ -7,7 +7,6 @@ import (
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -28,8 +27,6 @@ func GetAspect(img *canvas.Image) float32 {
 	aspect := float32(0.0)
 	if img.Resource != nil {
 		aspect = aspects[img.Resource.Name()]
-	} else if img.File != "" {
-		aspect = aspects[img.File]
 	}
 
 	if aspect == 0 {
@@ -45,34 +42,21 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		return nil
 	}
 
-	switch {
-	case img.File != "" || img.Resource != nil:
-		var (
-			file  io.Reader
-			name  string
-			isSVG bool
-		)
-		if img.Resource != nil {
-			name = img.Resource.Name()
+	name := img.Resource.Name()
+	tex := cache.GetImg(name, width, height)
+	if tex == nil {
+		// Not in cache, so load the item and add to cache
+		switch {
+		case img.Resource != nil:
+			var (
+				file  io.Reader
+				isSVG bool
+			)
+
 			file = bytes.NewReader(img.Resource.Content())
 			isSVG = isResourceSVG(img.Resource)
-		} else {
-			name = img.File
-			handle, err := os.Open(img.File)
-			if err != nil {
-				fyne.LogError("image load error", err)
-				return nil
-			}
-			defer handle.Close()
-			file = handle
-			isSVG = isFileSVG(img.File)
-		}
 
-		if isSVG {
-			tex := cache.GetSvg(name, width, height)
-			if tex == nil {
-				// Not in cache, so load the item and add to cache
-
+			if isSVG {
 				icon, err := oksvg.ReadIconStream(file)
 				if err != nil {
 					fyne.LogError("SVG Load error:", err)
@@ -109,58 +93,62 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					fyne.LogError("SVG Render error:", err)
 					return nil
 				}
+			} else {
+				pixels, _, err := image.Decode(file)
 
-				cache.SetSvg(name, tex, width, height)
+				if err != nil {
+					fyne.LogError("image err", err)
+
+					return nil
+				}
+				origSize := pixels.Bounds().Size()
+				// this is used by our render code, so let's set it to the file aspect
+				aspects[name] = float32(origSize.X) / float32(origSize.Y)
+				// if the image specifies it should be original size we need at least that many pixels on screen
+				if img.FillMode == canvas.ImageFillOriginal {
+					if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
+						return nil
+					}
+				}
+
+				tex = scaleImage(pixels, width, height, img.ScaleMode)
+			}
+		case img.Image != nil:
+			origSize := img.Image.Bounds().Size()
+			// this is used by our render code, so let's set it to the file aspect
+			aspects[img] = float32(origSize.X) / float32(origSize.Y)
+			// if the image specifies it should be original size we need at least that many pixels on screen
+			if img.FillMode == canvas.ImageFillOriginal {
+				if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
+					return nil
+				}
 			}
 
-			return tex
+			tex = scaleImage(img.Image, width, height, img.ScaleMode)
+		default:
+			tex = image.NewNRGBA(image.Rect(0, 0, 1, 1))
 		}
 
-		pixels, _, err := image.Decode(file)
-
-		if err != nil {
-			fyne.LogError("image err", err)
-
-			return nil
-		}
-		origSize := pixels.Bounds().Size()
-		// this is used by our render code, so let's set it to the file aspect
-		aspects[name] = float32(origSize.X) / float32(origSize.Y)
-		// if the image specifies it should be original size we need at least that many pixels on screen
-		if img.FillMode == canvas.ImageFillOriginal {
-			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
-				return nil
-			}
-		}
-
-		return scaleImage(pixels, width, height, img.ScaleMode)
-	case img.Image != nil:
-		origSize := img.Image.Bounds().Size()
-		// this is used by our render code, so let's set it to the file aspect
-		aspects[img] = float32(origSize.X) / float32(origSize.Y)
-		// if the image specifies it should be original size we need at least that many pixels on screen
-		if img.FillMode == canvas.ImageFillOriginal {
-			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
-				return nil
-			}
-		}
-
-		return scaleImage(img.Image, width, height, img.ScaleMode)
-	default:
-		return image.NewNRGBA(image.Rect(0, 0, 1, 1))
+		cache.SetImg(name, tex, width, height)
 	}
+
+	return tex
 }
 
-func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {
-	if scale == canvas.ImageScaleFastest || scale == canvas.ImageScalePixels {
-		// do not perform software scaling
-		return pixels
-	}
-
+func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) *image.NRGBA {
 	pixW := int(fyne.Min(float32(scaledW), float32(pixels.Bounds().Dx()))) // don't push more pixels than we have to
 	pixH := int(fyne.Min(float32(scaledH), float32(pixels.Bounds().Dy()))) // the GL calls will scale this up on GPU.
 	scaledBounds := image.Rect(0, 0, pixW, pixH)
 	tex := image.NewNRGBA(scaledBounds)
+
+	if scale == canvas.ImageScaleFastest || scale == canvas.ImageScalePixels {
+		// do not perform software scaling
+		// Convert image.Image to image.NRGBA
+		draw.Draw(tex, scaledBounds, pixels, pixels.Bounds().Min, draw.Src)
+
+		return tex
+	}
+
 	switch scale {
 	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(tex, scaledBounds, pixels, pixels.Bounds(), draw.Over, nil)

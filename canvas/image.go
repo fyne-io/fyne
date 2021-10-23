@@ -52,7 +52,6 @@ type Image struct {
 	baseObject
 
 	// one of the following sources will provide our image data
-	File     string        // Load the image from a file
 	Resource fyne.Resource // Load the image from an in-memory resource
 	Image    image.Image   // Specify a loaded image to use in this canvas object
 
@@ -92,8 +91,13 @@ func (i *Image) Refresh() {
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
 func NewImageFromFile(file string) *Image {
+	res, err := fyne.LoadResourceFromPath(file)
+	if err != nil {
+		fyne.LogError("Failed to open image file", err)
+	}
+
 	return &Image{
-		File: file,
+		Resource: res,
 	}
 }
 
@@ -106,9 +110,7 @@ func NewImageFromFile(file string) *Image {
 // Since: 2.0
 func NewImageFromURI(uri fyne.URI) *Image {
 	if uri.Scheme() == "file" && len(uri.String()) > 7 {
-		return &Image{
-			File: uri.String()[7:],
-		}
+		return NewImageFromFile(uri.String()[7:])
 	}
 
 	var read io.ReadCloser
