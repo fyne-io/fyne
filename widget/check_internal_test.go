@@ -44,10 +44,10 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check.SetChecked(true)
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
-	assert.Equal(t, render.icon.Resource.Name(), theme.CheckButtonCheckedIcon().Name())
+	assert.Equal(t, "primary-"+theme.CheckButtonCheckedIcon().Name(), render.icon.Resource.Name())
 
 	check.Disable()
-	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.CheckButtonCheckedIcon().Name()))
+	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
 }
 
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
