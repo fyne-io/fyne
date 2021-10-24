@@ -22,11 +22,11 @@ const (
 type Dialog interface {
 	Show()
 	Hide()
-	SetDismissText(label string)
-	SetOnClosed(closed func())
+	SetDismissText(string)
+	SetOnClosed(func())
 	SetTitle(string)
 	Refresh()
-	Resize(size fyne.Size)
+	Resize(fyne.Size)
 
 	// Since: 2.1
 	MinSize() fyne.Size
@@ -152,6 +152,7 @@ func (d *dialog) SetOnClosed(closed func()) {
 	}
 }
 
+// SetTitle allows developers to set a new title for this dialog.
 func (d *dialog) SetTitle(title string) {
 	d.title = title
 	d.label.SetText(title)

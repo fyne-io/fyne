@@ -663,6 +663,7 @@ func (f *FileDialog) SetFileName(fileName string) {
 	}
 }
 
+// SetTitle allows developers to set a new title for this dialog.
 func (f *FileDialog) SetTitle(title string) {
 	f.dialog.title.SetText(title)
 }
