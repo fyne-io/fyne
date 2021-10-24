@@ -26,7 +26,7 @@ github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.1/gles2/KHR
 github.com/go-gl/gl/v3.2-core/gl
 github.com/go-gl/gl/v3.2-core/gl/KHR
-# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210410170116-ea3d685f79fb
+# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211024062804-40e447a793be
 ## explicit
 github.com/go-gl/glfw/v3.3/glfw
 github.com/go-gl/glfw/v3.3/glfw/glfw/deps
