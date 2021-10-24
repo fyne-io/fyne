@@ -551,3 +551,13 @@ func TestSetFileNameAfterShow(t *testing.T) {
 	assert.NotEqual(t, "testfile.zip", dOpen.dialog.fileName.(*widget.Label).Text)
 
 }
+
+func TestFileDialog_SetTitle(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen.Show()
+	assert.Equal(t, "Open File", dOpen.dialog.title.Text)
+
+	dOpen.SetTitle("New title")
+	assert.Equal(t, "New title", dOpen.dialog.title.Text)
+}

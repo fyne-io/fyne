@@ -49,6 +49,20 @@ func TestShowCustom_Resize(t *testing.T) {
 	assert.Equal(t, size, d.(*dialog).win.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 }
 
+func TestShowCustom_SetTitle(t *testing.T) {
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(300, 300))
+
+	label := widget.NewLabel("Content")
+	label.Alignment = fyne.TextAlignCenter
+	d := NewCustom("Title", "OK", label, w)
+	d.Show()
+	assert.Equal(t, "Title", d.(*dialog).label.Text)
+
+	d.SetTitle("New title")
+	assert.Equal(t, "New title", d.(*dialog).label.Text)
+}
+
 func TestCustom_ApplyThemeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()

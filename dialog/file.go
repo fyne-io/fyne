@@ -54,6 +54,7 @@ type fileDialog struct {
 	dir      fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+	title           *widget.Label
 }
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
@@ -234,8 +235,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		optionsButton,
 	)
 
+	f.title = widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
-		optionsbuttons, widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		optionsbuttons, f.title,
 	)
 
 	footer := container.NewBorder(nil, nil, nil, buttons,
@@ -659,6 +661,10 @@ func (f *FileDialog) SetFileName(fileName string) {
 			f.dialog.fileName.SetText(fileName)
 		}
 	}
+}
+
+func (f *FileDialog) SetTitle(title string) {
+	f.dialog.title.SetText(title)
 }
 
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.

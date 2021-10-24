@@ -24,6 +24,7 @@ type Dialog interface {
 	Hide()
 	SetDismissText(label string)
 	SetOnClosed(closed func())
+	SetTitle(string)
 	Refresh()
 	Resize(size fyne.Size)
 
@@ -40,12 +41,13 @@ type dialog struct {
 	icon        fyne.Resource
 	desiredSize fyne.Size
 
-	win            *widget.PopUp
-	bg             *themedBackground
-	content, label fyne.CanvasObject
-	dismiss        *widget.Button
-	parent         fyne.Window
-	layout         *dialogLayout
+	win     *widget.PopUp
+	bg      *themedBackground
+	content fyne.CanvasObject
+	dismiss *widget.Button
+	label   *widget.Label
+	parent  fyne.Window
+	layout  *dialogLayout
 }
 
 // NewCustom creates and returns a dialog over the specified application using custom
@@ -148,6 +150,11 @@ func (d *dialog) SetOnClosed(closed func()) {
 			originalCallback(response)
 		}
 	}
+}
+
+func (d *dialog) SetTitle(title string) {
+	d.title = title
+	d.label.SetText(title)
 }
 
 func (d *dialog) hideWithResponse(resp bool) {
