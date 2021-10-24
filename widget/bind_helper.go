@@ -38,30 +38,24 @@ func (binder *basicBinder) Bind(data binding.DataItem) {
 		listener: listener,
 	}
 
-	binder.Unbind()
-	nilPair := annotatedListener{nil, nil}
-	for {
-		binder.dataListenerPairLock.Lock()
-		if binder.dataListenerPair != nilPair {
-			binder.dataListenerPairLock.Unlock()
-			binder.Unbind()
-			continue // keep unbinding until dataListenerPair is a nil pair
-		}
-		binder.dataListenerPair = listenerInfo
-		binder.dataListenerPairLock.Unlock()
-		break
-	}
+	binder.dataListenerPairLock.Lock()
+	binder.unbind_Locked()
+	binder.dataListenerPair = listenerInfo
+	binder.dataListenerPairLock.Unlock()
 }
 
 // Unbind requests the callback to be no longer called when the previously bound
 // data item changes.
 func (binder *basicBinder) Unbind() {
-	nilPair := annotatedListener{nil, nil}
-
 	binder.dataListenerPairLock.Lock()
-	previousListener := binder.dataListenerPair
-	binder.dataListenerPair = nilPair
+	binder.unbind_Locked()
 	binder.dataListenerPairLock.Unlock()
+}
+
+// unbind_Locked expects the caller to hold dataListenerPairLock.
+func (binder *basicBinder) unbind_Locked() {
+	previousListener := binder.dataListenerPair
+	binder.dataListenerPair = annotatedListener{nil, nil}
 
 	if previousListener.listener == nil || previousListener.data == nil {
 		return
