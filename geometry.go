@@ -165,3 +165,18 @@ func (s Size) Subtract(v Vector2) Size {
 	w, h := v.Components()
 	return Size{s.Width - w, s.Height - h}
 }
+
+// SubtractHeight returns a new Size by subtracting height from the current one.
+func (s Size) SubtractHeight(height float32) Size {
+	return Size{s.Width, s.Height - height}
+}
+
+// SubtractWidth returns a new Size by subtracting width from the current one.
+func (s Size) SubtractWidth(width float32) Size {
+	return Size{s.Width - width, s.Height}
+}
+
+// SubtractWidthAndHeight returns a new Size by subtracting width and height from the current one.
+func (s Size) SubtractWidthAndHeight(width, height float32) Size {
+	return Size{s.Width - width, s.Height - height}
+}

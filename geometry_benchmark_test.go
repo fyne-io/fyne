@@ -31,6 +31,13 @@ func BenchmarkSize_Add(b *testing.B) {
 	b.Run("AddWidthAndHeight()", benchmarkSizeAddWidthAndHeight)
 }
 
+func BenchmarkSize_Subtract(b *testing.B) {
+	b.Run("Subtract()", benchmarkSizeSubtract)
+	b.Run("SubtractHeight()", benchmarkSizeSubtractHeight)
+	b.Run("SubtractWidth()", benchmarkSizeSubtractWidth)
+	b.Run("SubtractWidthAndHeight()", benchmarkSizeSubtractWidthAndHeight)
+}
+
 // This test prevents Position.Add to be simplified to `return p.AddXAndY(v.Components())`
 // because this slows down the speed by factor 10.
 func TestPosition_Add_Speed(t *testing.T) {
@@ -68,6 +75,19 @@ func TestSize_Add_Speed(t *testing.T) {
 	assert.Less(t, addHeight.NsPerOp(), int64(1))
 	assert.Less(t, addWidthAndHeight.NsPerOp(), int64(1))
 	assert.Less(t, addWidth.NsPerOp(), int64(1))
+}
+
+// This test prevents Size.Subtract to be simplified to `return s.SubtractWidthAndHeight(v.Components())`
+// because this slows down the speed by factor 10.
+func TestSize_Subtract_Speed(t *testing.T) {
+	subtract := testing.Benchmark(benchmarkSizeSubtract)
+	subtractHeight := testing.Benchmark(benchmarkSizeSubtractHeight)
+	subtractWidthAndHeight := testing.Benchmark(benchmarkSizeSubtractWidth)
+	subtractWidth := testing.Benchmark(benchmarkSizeSubtractWidthAndHeight)
+	assert.Less(t, subtract.NsPerOp(), int64(5))
+	assert.Less(t, subtractHeight.NsPerOp(), int64(1))
+	assert.Less(t, subtractWidthAndHeight.NsPerOp(), int64(1))
+	assert.Less(t, subtractWidth.NsPerOp(), int64(1))
 }
 
 func benchmarkPositionAdd(b *testing.B) {
@@ -154,5 +174,34 @@ func benchmarkSizeAddHeight(b *testing.B) {
 	size := fyne.NewSize(10, 10)
 	for n := 0; n < b.N; n++ {
 		size.AddHeight(25)
+	}
+}
+
+func benchmarkSizeSubtract(b *testing.B) {
+	size1 := fyne.NewSize(10, 10)
+	size2 := fyne.NewSize(25, 25)
+	for n := 0; n < b.N; n++ {
+		size1.Subtract(size2)
+	}
+}
+
+func benchmarkSizeSubtractWidth(b *testing.B) {
+	size := fyne.NewSize(10, 10)
+	for n := 0; n < b.N; n++ {
+		size.SubtractWidth(25)
+	}
+}
+
+func benchmarkSizeSubtractWidthAndHeight(b *testing.B) {
+	size := fyne.NewSize(10, 10)
+	for n := 0; n < b.N; n++ {
+		size.SubtractWidthAndHeight(25, 25)
+	}
+}
+
+func benchmarkSizeSubtractHeight(b *testing.B) {
+	size := fyne.NewSize(10, 10)
+	for n := 0; n < b.N; n++ {
+		size.SubtractHeight(25)
 	}
 }

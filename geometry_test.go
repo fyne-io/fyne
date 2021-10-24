@@ -222,6 +222,33 @@ func TestSize_Subtract(t *testing.T) {
 	assert.Equal(t, float32(15), size3.Height)
 }
 
+func TestSize_SubtractHeight(t *testing.T) {
+	size1 := fyne.NewSize(25, 25)
+
+	size2 := size1.SubtractHeight(10)
+
+	assert.Equal(t, float32(25), size2.Width)
+	assert.Equal(t, float32(15), size2.Height)
+}
+
+func TestSize_SubtractWidth(t *testing.T) {
+	size1 := fyne.NewSize(25, 25)
+
+	size2 := size1.SubtractWidth(10)
+
+	assert.Equal(t, float32(15), size2.Width)
+	assert.Equal(t, float32(25), size2.Height)
+}
+
+func TestSize_SubtractWidthAndHeight(t *testing.T) {
+	size1 := fyne.NewSize(25, 25)
+
+	size2 := size1.SubtractWidthAndHeight(10, 10)
+
+	assert.Equal(t, float32(15), size2.Width)
+	assert.Equal(t, float32(15), size2.Height)
+}
+
 func TestVector_IsZero(t *testing.T) {
 	v := fyne.NewDelta(0, 0)
 
