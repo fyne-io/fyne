@@ -39,7 +39,7 @@ func (binder *basicBinder) Bind(data binding.DataItem) {
 	}
 
 	binder.dataListenerPairLock.Lock()
-	binder.unbind_Locked()
+	binder.unbindLocked()
 	binder.dataListenerPair = listenerInfo
 	binder.dataListenerPairLock.Unlock()
 }
@@ -48,12 +48,12 @@ func (binder *basicBinder) Bind(data binding.DataItem) {
 // data item changes.
 func (binder *basicBinder) Unbind() {
 	binder.dataListenerPairLock.Lock()
-	binder.unbind_Locked()
+	binder.unbindLocked()
 	binder.dataListenerPairLock.Unlock()
 }
 
-// unbind_Locked expects the caller to hold dataListenerPairLock.
-func (binder *basicBinder) unbind_Locked() {
+// unbindLocked expects the caller to hold dataListenerPairLock.
+func (binder *basicBinder) unbindLocked() {
 	previousListener := binder.dataListenerPair
 	binder.dataListenerPair = annotatedListener{nil, nil}
 
