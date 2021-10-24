@@ -4,7 +4,7 @@
 			<widget pos="36,77" size="69x36" type="*widget.RadioGroup">
 				<widget size="69x36" type="*widget.radioItem">
 					<circle fillColor="background" pos="2,6" size="28x24"/>
-					<image pos="6,8" rsc="radioButtonCheckedIcon" size="iconInlineSize"/>
+					<image pos="6,8" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
 					<text pos="32,0" size="69x36">Test</text>
 				</widget>
 			</widget>

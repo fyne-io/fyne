@@ -194,6 +194,8 @@ func (r *radioItemRenderer) update() {
 	}
 	if r.item.Disabled() {
 		res = theme.NewDisabledResource(res)
+	} else if r.item.Selected {
+		res = theme.NewPrimaryThemedResource(res)
 	}
 	r.icon.Resource = res
 
