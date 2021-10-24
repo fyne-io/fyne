@@ -15,6 +15,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * storage.List doesn't return complete URI on Android for "content:" scheme (#2619)
 * Last word of the line and first word of the next line are joined in markdown parse (#2647)
 * Support building on Windows arm64
+* Compiling for FreeBSD brings in glfw library dependency (#1928)
 
 
 ## 2.1.1 - 22 October 2021
