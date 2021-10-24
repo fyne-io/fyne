@@ -81,6 +81,21 @@ func (p Position) Subtract(v Vector2) Position {
 	return Position{p.X - x, p.Y - y}
 }
 
+// SubtractX returns a new Position by subtracting x from the current one.
+func (p Position) SubtractX(x float32) Position {
+	return Position{p.X - x, p.Y}
+}
+
+// SubtractXAndY returns a new Position by subtracting x and y from the current one.
+func (p Position) SubtractXAndY(x, y float32) Position {
+	return Position{p.X - x, p.Y - y}
+}
+
+// SubtractY returns a new Position by subtracting y from the current one.
+func (p Position) SubtractY(y float32) Position {
+	return Position{p.X, p.Y - y}
+}
+
 // Size describes something with width and height.
 type Size struct {
 	Width  float32 // The number of units along the X axis.

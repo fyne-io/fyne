@@ -91,6 +91,33 @@ func TestPosition_Subtract(t *testing.T) {
 	assert.Equal(t, float32(15), pos3.Y)
 }
 
+func TestPosition_SubtractX(t *testing.T) {
+	pos1 := fyne.NewPos(25, 25)
+
+	pos2 := pos1.SubtractX(10)
+
+	assert.Equal(t, float32(15), pos2.X)
+	assert.Equal(t, float32(25), pos2.Y)
+}
+
+func TestPosition_SubtractXAndY(t *testing.T) {
+	pos1 := fyne.NewPos(25, 25)
+
+	pos2 := pos1.SubtractXAndY(10, 10)
+
+	assert.Equal(t, float32(15), pos2.X)
+	assert.Equal(t, float32(15), pos2.Y)
+}
+
+func TestPosition_SubtractY(t *testing.T) {
+	pos1 := fyne.NewPos(25, 25)
+
+	pos2 := pos1.SubtractY(10)
+
+	assert.Equal(t, float32(25), pos2.X)
+	assert.Equal(t, float32(15), pos2.Y)
+}
+
 func TestSize_Add(t *testing.T) {
 	size1 := fyne.NewSize(10, 10)
 	size2 := fyne.NewSize(25, 25)

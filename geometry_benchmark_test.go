@@ -17,6 +17,13 @@ func BenchmarkPosition_Add(b *testing.B) {
 	b.Run("AddY()", benchmarkPositionAddY)
 }
 
+func BenchmarkPosition_Subtract(b *testing.B) {
+	b.Run("Subtract()", benchmarkPositionSubtract)
+	b.Run("SubtractX()", benchmarkPositionSubtractX)
+	b.Run("SubtractXAndY()", benchmarkPositionSubtractXAndY)
+	b.Run("SubtractY()", benchmarkPositionSubtractY)
+}
+
 func BenchmarkSize_Add(b *testing.B) {
 	b.Run("Add()", benchmarkSizeAdd)
 	b.Run("AddHeight()", benchmarkSizeAddHeight)
@@ -35,6 +42,19 @@ func TestPosition_Add_Speed(t *testing.T) {
 	assert.Less(t, addX.NsPerOp(), int64(1))
 	assert.Less(t, addXAndY.NsPerOp(), int64(1))
 	assert.Less(t, addY.NsPerOp(), int64(1))
+}
+
+// This test prevents Position.Subtract to be simplified to `return p.SubtractXAndY(v.Components())`
+// because this slows down the speed by factor 10.
+func TestPosition_Subtract_Speed(t *testing.T) {
+	subtract := testing.Benchmark(benchmarkPositionSubtract)
+	subtractX := testing.Benchmark(benchmarkPositionSubtractX)
+	subtractXAndY := testing.Benchmark(benchmarkPositionSubtractXAndY)
+	subtractY := testing.Benchmark(benchmarkPositionSubtractY)
+	assert.Less(t, subtract.NsPerOp(), int64(5))
+	assert.Less(t, subtractX.NsPerOp(), int64(1))
+	assert.Less(t, subtractXAndY.NsPerOp(), int64(1))
+	assert.Less(t, subtractY.NsPerOp(), int64(1))
 }
 
 // This test prevents Size.Add to be simplified to `return s.AddWidthAndHeight(v.Components())`
@@ -76,6 +96,35 @@ func benchmarkPositionAddY(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
 	for n := 0; n < b.N; n++ {
 		pos.AddY(25)
+	}
+}
+
+func benchmarkPositionSubtract(b *testing.B) {
+	pos1 := fyne.NewPos(10, 10)
+	pos2 := fyne.NewPos(25, 25)
+	for n := 0; n < b.N; n++ {
+		pos1.Subtract(pos2)
+	}
+}
+
+func benchmarkPositionSubtractX(b *testing.B) {
+	pos := fyne.NewPos(10, 10)
+	for n := 0; n < b.N; n++ {
+		pos.SubtractX(25)
+	}
+}
+
+func benchmarkPositionSubtractXAndY(b *testing.B) {
+	pos := fyne.NewPos(10, 10)
+	for n := 0; n < b.N; n++ {
+		pos.SubtractXAndY(25, 25)
+	}
+}
+
+func benchmarkPositionSubtractY(b *testing.B) {
+	pos := fyne.NewPos(10, 10)
+	for n := 0; n < b.N; n++ {
+		pos.SubtractY(25)
 	}
 }
 
