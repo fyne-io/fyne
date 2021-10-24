@@ -46,7 +46,7 @@ type Canvas struct {
 	// the refreshQueue is an unbounded queue which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.CanvasObjectQueue
-	dirty        uint32 // atomic
+	dirty        uint64 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
@@ -263,7 +263,7 @@ func (c *Canvas) Painter() gl.Painter {
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
 	c.refreshQueue.In(obj)
-	c.SetDirty(true)
+	c.SetDirty()
 }
 
 // RemoveShortcut removes a shortcut from the canvas.
@@ -286,23 +286,15 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 	}
 }
 
-const (
-	dirtyTrue  = 1
-	dirtyFalse = 0
-)
-
-// IsDirty checks if the canvas is dirty.
-func (c *Canvas) IsDirty() bool {
-	return atomic.LoadUint32(&c.dirty) == dirtyTrue
+// CheckDirtyAndClear returns true if the canvas is dirty and
+// clears the dirty state atomically.
+func (c *Canvas) CheckDirtyAndClear() bool {
+	return atomic.SwapUint64(&c.dirty, 0) != 0
 }
 
-// SetDirty sets canvas dirty flag.
-func (c *Canvas) SetDirty(dirty bool) {
-	if dirty {
-		atomic.StoreUint32(&c.dirty, dirtyTrue)
-	} else {
-		atomic.StoreUint32(&c.dirty, dirtyFalse)
-	}
+// SetDirty sets canvas dirty flag atomically.
+func (c *Canvas) SetDirty() {
+	atomic.AddUint64(&c.dirty, 1)
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.

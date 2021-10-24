@@ -222,7 +222,7 @@ func (d *gLDriver) startDrawThread() {
 					visible := w.visible
 					w.viewLock.RUnlock()
 
-					if closing || !canvas.IsDirty() || !visible {
+					if closing || !canvas.CheckDirtyAndClear() || !visible {
 						continue
 					}
 					d.repaintWindow(w)
@@ -246,7 +246,7 @@ func (d *gLDriver) tryPollEvents() {
 
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
-	w.canvas.SetDirty(true)
+	w.canvas.SetDirty()
 }
 
 func updateGLContext(w *window) {
