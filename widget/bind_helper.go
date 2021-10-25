@@ -15,13 +15,6 @@ type basicBinder struct {
 	dataListenerPair     annotatedListener // access guarded by dataListenerPairLock
 }
 
-// SetCallback replaces the function to be called when the data changes.
-func (binder *basicBinder) SetCallback(f func(data binding.DataItem)) {
-	binder.callbackLock.Lock()
-	binder.callback = f
-	binder.callbackLock.Unlock()
-}
-
 // Bind replaces the data item whose changes are tracked by the callback function.
 func (binder *basicBinder) Bind(data binding.DataItem) {
 	listener := binding.NewDataListener(func() { // NB: listener captures `data` but always calls the up-to-date callback
@@ -42,6 +35,13 @@ func (binder *basicBinder) Bind(data binding.DataItem) {
 	binder.unbindLocked()
 	binder.dataListenerPair = listenerInfo
 	binder.dataListenerPairLock.Unlock()
+}
+
+// SetCallback replaces the function to be called when the data changes.
+func (binder *basicBinder) SetCallback(f func(data binding.DataItem)) {
+	binder.callbackLock.Lock()
+	binder.callback = f
+	binder.callbackLock.Unlock()
 }
 
 // Unbind requests the callback to be no longer called when the previously bound
