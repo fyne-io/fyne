@@ -99,7 +99,7 @@ func (c *mobileCanvas) Scale() float32 {
 func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.setContent(content)
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
-	c.SetDirty(true)
+	c.SetDirty()
 }
 
 func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
@@ -144,7 +144,7 @@ func (c *mobileCanvas) handleKeyboard(obj fyne.Focusable) {
 
 func (c *mobileCanvas) overlayChanged() {
 	c.handleKeyboard(c.Focused())
-	c.SetDirty(true)
+	c.SetDirty()
 }
 
 func (c *mobileCanvas) Resize(size fyne.Size) {

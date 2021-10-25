@@ -75,10 +75,14 @@ func (c *checkRenderer) updateLabel() {
 func (c *checkRenderer) updateResource() {
 	res := theme.CheckButtonIcon()
 	if c.check.Checked {
-		res = theme.CheckButtonCheckedIcon()
+		res = theme.NewPrimaryThemedResource(theme.CheckButtonCheckedIcon())
 	}
 	if c.check.Disabled() {
-		res = theme.NewDisabledResource(res)
+		if c.check.Checked {
+			res = theme.NewDisabledResource(theme.CheckButtonCheckedIcon())
+		} else {
+			res = theme.NewDisabledResource(res)
+		}
 	}
 	c.icon.Resource = res
 }

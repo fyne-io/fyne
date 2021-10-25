@@ -9,7 +9,7 @@
 				</widget>
 				<widget pos="0,36" size="102x36" type="*widget.radioItem">
 					<circle fillColor="background" pos="2,6" size="28x24"/>
-					<image pos="6,8" rsc="radioButtonCheckedIcon" size="iconInlineSize"/>
+					<image pos="6,8" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
 					<text pos="32,0" size="102x36">Option B</text>
 				</widget>
 				<widget pos="0,73" size="102x36" type="*widget.radioItem">
