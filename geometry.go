@@ -49,19 +49,9 @@ func (p Position) Add(v Vector2) Position {
 	return Position{p.X + x, p.Y + y}
 }
 
-// AddX returns a new Position by adding x to the current one.
-func (p Position) AddX(x float32) Position {
-	return Position{p.X + x, p.Y}
-}
-
 // AddXAndY returns a new Position by adding x and y to the current one.
 func (p Position) AddXAndY(x, y float32) Position {
 	return Position{p.X + x, p.Y + y}
-}
-
-// AddY returns a new Position by adding y to the current one.
-func (p Position) AddY(y float32) Position {
-	return Position{p.X, p.Y + y}
 }
 
 // Components returns the X and Y elements of this Position
@@ -81,19 +71,9 @@ func (p Position) Subtract(v Vector2) Position {
 	return Position{p.X - x, p.Y - y}
 }
 
-// SubtractX returns a new Position by subtracting x from the current one.
-func (p Position) SubtractX(x float32) Position {
-	return Position{p.X - x, p.Y}
-}
-
 // SubtractXAndY returns a new Position by subtracting x and y from the current one.
 func (p Position) SubtractXAndY(x, y float32) Position {
 	return Position{p.X - x, p.Y - y}
-}
-
-// SubtractY returns a new Position by subtracting y from the current one.
-func (p Position) SubtractY(y float32) Position {
-	return Position{p.X, p.Y - y}
 }
 
 // Size describes something with width and height.
@@ -112,16 +92,6 @@ func NewSize(w float32, h float32) Size {
 func (s Size) Add(v Vector2) Size {
 	w, h := v.Components()
 	return Size{s.Width + w, s.Height + h}
-}
-
-// AddHeight returns a new Size by adding height to the current one.
-func (s Size) AddHeight(height float32) Size {
-	return Size{s.Width, s.Height + height}
-}
-
-// AddWidth returns a new Size by adding width to the current one.
-func (s Size) AddWidth(width float32) Size {
-	return Size{s.Width + width, s.Height}
 }
 
 // AddWidthAndHeight returns a new Size by adding width and height to the current one.
@@ -164,16 +134,6 @@ func (s Size) Components() (float32, float32) {
 func (s Size) Subtract(v Vector2) Size {
 	w, h := v.Components()
 	return Size{s.Width - w, s.Height - h}
-}
-
-// SubtractHeight returns a new Size by subtracting height from the current one.
-func (s Size) SubtractHeight(height float32) Size {
-	return Size{s.Width, s.Height - height}
-}
-
-// SubtractWidth returns a new Size by subtracting width from the current one.
-func (s Size) SubtractWidth(width float32) Size {
-	return Size{s.Width - width, s.Height}
 }
 
 // SubtractWidthAndHeight returns a new Size by subtracting width and height from the current one.

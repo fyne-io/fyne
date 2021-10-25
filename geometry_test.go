@@ -37,30 +37,12 @@ func TestPosition_Add_Vector(t *testing.T) {
 	assert.Equal(t, float32(35), pos2.Y)
 }
 
-func TestPosition_AddX(t *testing.T) {
-	pos1 := fyne.NewPos(10, 10)
-
-	pos2 := pos1.AddX(25)
-
-	assert.Equal(t, float32(35), pos2.X)
-	assert.Equal(t, float32(10), pos2.Y)
-}
-
 func TestPosition_AddXAndY(t *testing.T) {
 	pos1 := fyne.NewPos(10, 10)
 
 	pos2 := pos1.AddXAndY(25, 25)
 
 	assert.Equal(t, float32(35), pos2.X)
-	assert.Equal(t, float32(35), pos2.Y)
-}
-
-func TestPosition_AddY(t *testing.T) {
-	pos1 := fyne.NewPos(10, 10)
-
-	pos2 := pos1.AddY(25)
-
-	assert.Equal(t, float32(10), pos2.X)
 	assert.Equal(t, float32(35), pos2.Y)
 }
 
@@ -91,30 +73,12 @@ func TestPosition_Subtract(t *testing.T) {
 	assert.Equal(t, float32(15), pos3.Y)
 }
 
-func TestPosition_SubtractX(t *testing.T) {
-	pos1 := fyne.NewPos(25, 25)
-
-	pos2 := pos1.SubtractX(10)
-
-	assert.Equal(t, float32(15), pos2.X)
-	assert.Equal(t, float32(25), pos2.Y)
-}
-
 func TestPosition_SubtractXAndY(t *testing.T) {
 	pos1 := fyne.NewPos(25, 25)
 
 	pos2 := pos1.SubtractXAndY(10, 10)
 
 	assert.Equal(t, float32(15), pos2.X)
-	assert.Equal(t, float32(15), pos2.Y)
-}
-
-func TestPosition_SubtractY(t *testing.T) {
-	pos1 := fyne.NewPos(25, 25)
-
-	pos2 := pos1.SubtractY(10)
-
-	assert.Equal(t, float32(25), pos2.X)
 	assert.Equal(t, float32(15), pos2.Y)
 }
 
@@ -146,24 +110,6 @@ func TestSize_Add_Vector(t *testing.T) {
 
 	assert.Equal(t, float32(35), size2.Width)
 	assert.Equal(t, float32(35), size2.Height)
-}
-
-func TestSize_AddHeight(t *testing.T) {
-	size1 := fyne.NewSize(10, 10)
-
-	size2 := size1.AddHeight(25)
-
-	assert.Equal(t, float32(10), size2.Width)
-	assert.Equal(t, float32(35), size2.Height)
-}
-
-func TestSize_AddWidth(t *testing.T) {
-	size1 := fyne.NewSize(10, 10)
-
-	size2 := size1.AddWidth(25)
-
-	assert.Equal(t, float32(35), size2.Width)
-	assert.Equal(t, float32(10), size2.Height)
 }
 
 func TestSize_AddWidthAndHeight(t *testing.T) {
@@ -220,24 +166,6 @@ func TestSize_Subtract(t *testing.T) {
 
 	assert.Equal(t, float32(15), size3.Width)
 	assert.Equal(t, float32(15), size3.Height)
-}
-
-func TestSize_SubtractHeight(t *testing.T) {
-	size1 := fyne.NewSize(25, 25)
-
-	size2 := size1.SubtractHeight(10)
-
-	assert.Equal(t, float32(25), size2.Width)
-	assert.Equal(t, float32(15), size2.Height)
-}
-
-func TestSize_SubtractWidth(t *testing.T) {
-	size1 := fyne.NewSize(25, 25)
-
-	size2 := size1.SubtractWidth(10)
-
-	assert.Equal(t, float32(15), size2.Width)
-	assert.Equal(t, float32(25), size2.Height)
 }
 
 func TestSize_SubtractWidthAndHeight(t *testing.T) {

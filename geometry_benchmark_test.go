@@ -12,29 +12,21 @@ import (
 
 func BenchmarkPosition_Add(b *testing.B) {
 	b.Run("Add()", benchmarkPositionAdd)
-	b.Run("AddX()", benchmarkPositionAddX)
 	b.Run("AddXAndY()", benchmarkPositionAddXAndY)
-	b.Run("AddY()", benchmarkPositionAddY)
 }
 
 func BenchmarkPosition_Subtract(b *testing.B) {
 	b.Run("Subtract()", benchmarkPositionSubtract)
-	b.Run("SubtractX()", benchmarkPositionSubtractX)
 	b.Run("SubtractXAndY()", benchmarkPositionSubtractXAndY)
-	b.Run("SubtractY()", benchmarkPositionSubtractY)
 }
 
 func BenchmarkSize_Add(b *testing.B) {
 	b.Run("Add()", benchmarkSizeAdd)
-	b.Run("AddHeight()", benchmarkSizeAddHeight)
-	b.Run("AddWidth()", benchmarkSizeAddWidth)
 	b.Run("AddWidthAndHeight()", benchmarkSizeAddWidthAndHeight)
 }
 
 func BenchmarkSize_Subtract(b *testing.B) {
 	b.Run("Subtract()", benchmarkSizeSubtract)
-	b.Run("SubtractHeight()", benchmarkSizeSubtractHeight)
-	b.Run("SubtractWidth()", benchmarkSizeSubtractWidth)
 	b.Run("SubtractWidthAndHeight()", benchmarkSizeSubtractWidthAndHeight)
 }
 
@@ -42,52 +34,36 @@ func BenchmarkSize_Subtract(b *testing.B) {
 // because this slows down the speed by factor 10.
 func TestPosition_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkPositionAdd)
-	addX := testing.Benchmark(benchmarkPositionAddX)
 	addXAndY := testing.Benchmark(benchmarkPositionAddXAndY)
-	addY := testing.Benchmark(benchmarkPositionAddY)
 	assert.Less(t, add.NsPerOp(), int64(5))
-	assert.Less(t, addX.NsPerOp(), int64(1))
 	assert.Less(t, addXAndY.NsPerOp(), int64(1))
-	assert.Less(t, addY.NsPerOp(), int64(1))
 }
 
 // This test prevents Position.Subtract to be simplified to `return p.SubtractXAndY(v.Components())`
 // because this slows down the speed by factor 10.
 func TestPosition_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkPositionSubtract)
-	subtractX := testing.Benchmark(benchmarkPositionSubtractX)
 	subtractXAndY := testing.Benchmark(benchmarkPositionSubtractXAndY)
-	subtractY := testing.Benchmark(benchmarkPositionSubtractY)
 	assert.Less(t, subtract.NsPerOp(), int64(5))
-	assert.Less(t, subtractX.NsPerOp(), int64(1))
 	assert.Less(t, subtractXAndY.NsPerOp(), int64(1))
-	assert.Less(t, subtractY.NsPerOp(), int64(1))
 }
 
 // This test prevents Size.Add to be simplified to `return s.AddWidthAndHeight(v.Components())`
 // because this slows down the speed by factor 10.
 func TestSize_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkSizeAdd)
-	addHeight := testing.Benchmark(benchmarkSizeAddHeight)
 	addWidthAndHeight := testing.Benchmark(benchmarkSizeAddWidthAndHeight)
-	addWidth := testing.Benchmark(benchmarkSizeAddWidthAndHeight)
 	assert.Less(t, add.NsPerOp(), int64(5))
-	assert.Less(t, addHeight.NsPerOp(), int64(1))
 	assert.Less(t, addWidthAndHeight.NsPerOp(), int64(1))
-	assert.Less(t, addWidth.NsPerOp(), int64(1))
 }
 
 // This test prevents Size.Subtract to be simplified to `return s.SubtractWidthAndHeight(v.Components())`
 // because this slows down the speed by factor 10.
 func TestSize_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkSizeSubtract)
-	subtractHeight := testing.Benchmark(benchmarkSizeSubtractHeight)
 	subtractWidthAndHeight := testing.Benchmark(benchmarkSizeSubtractWidthAndHeight)
-	subtractWidth := testing.Benchmark(benchmarkSizeSubtractWidthAndHeight)
 	assert.Less(t, subtract.NsPerOp(), int64(5))
-	assert.Less(t, subtractHeight.NsPerOp(), int64(1))
 	assert.Less(t, subtractWidthAndHeight.NsPerOp(), int64(1))
-	assert.Less(t, subtractWidth.NsPerOp(), int64(1))
 }
 
 func benchmarkPositionAdd(b *testing.B) {
@@ -98,24 +74,10 @@ func benchmarkPositionAdd(b *testing.B) {
 	}
 }
 
-func benchmarkPositionAddX(b *testing.B) {
-	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
-		pos.AddX(25)
-	}
-}
-
 func benchmarkPositionAddXAndY(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
 	for n := 0; n < b.N; n++ {
 		pos.AddXAndY(25, 25)
-	}
-}
-
-func benchmarkPositionAddY(b *testing.B) {
-	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
-		pos.AddY(25)
 	}
 }
 
@@ -127,24 +89,10 @@ func benchmarkPositionSubtract(b *testing.B) {
 	}
 }
 
-func benchmarkPositionSubtractX(b *testing.B) {
-	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
-		pos.SubtractX(25)
-	}
-}
-
 func benchmarkPositionSubtractXAndY(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
 	for n := 0; n < b.N; n++ {
 		pos.SubtractXAndY(25, 25)
-	}
-}
-
-func benchmarkPositionSubtractY(b *testing.B) {
-	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
-		pos.SubtractY(25)
 	}
 }
 
@@ -156,24 +104,10 @@ func benchmarkSizeAdd(b *testing.B) {
 	}
 }
 
-func benchmarkSizeAddWidth(b *testing.B) {
-	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
-		size.AddWidth(25)
-	}
-}
-
 func benchmarkSizeAddWidthAndHeight(b *testing.B) {
 	size := fyne.NewSize(10, 10)
 	for n := 0; n < b.N; n++ {
 		size.AddWidthAndHeight(25, 25)
-	}
-}
-
-func benchmarkSizeAddHeight(b *testing.B) {
-	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
-		size.AddHeight(25)
 	}
 }
 
@@ -185,23 +119,9 @@ func benchmarkSizeSubtract(b *testing.B) {
 	}
 }
 
-func benchmarkSizeSubtractWidth(b *testing.B) {
-	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
-		size.SubtractWidth(25)
-	}
-}
-
 func benchmarkSizeSubtractWidthAndHeight(b *testing.B) {
 	size := fyne.NewSize(10, 10)
 	for n := 0; n < b.N; n++ {
 		size.SubtractWidthAndHeight(25, 25)
-	}
-}
-
-func benchmarkSizeSubtractHeight(b *testing.B) {
-	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
-		size.SubtractHeight(25)
 	}
 }
