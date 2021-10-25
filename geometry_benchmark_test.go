@@ -69,7 +69,7 @@ func TestPosition_Subtract_Speed(t *testing.T) {
 func TestSize_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkSizeAdd)
 	addHeight := testing.Benchmark(benchmarkSizeAddHeight)
-	addWidthAndHeight := testing.Benchmark(benchmarkSizeAddWidth)
+	addWidthAndHeight := testing.Benchmark(benchmarkSizeAddWidthAndHeight)
 	addWidth := testing.Benchmark(benchmarkSizeAddWidthAndHeight)
 	assert.Less(t, add.NsPerOp(), int64(5))
 	assert.Less(t, addHeight.NsPerOp(), int64(1))
@@ -82,7 +82,7 @@ func TestSize_Add_Speed(t *testing.T) {
 func TestSize_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkSizeSubtract)
 	subtractHeight := testing.Benchmark(benchmarkSizeSubtractHeight)
-	subtractWidthAndHeight := testing.Benchmark(benchmarkSizeSubtractWidth)
+	subtractWidthAndHeight := testing.Benchmark(benchmarkSizeSubtractWidthAndHeight)
 	subtractWidth := testing.Benchmark(benchmarkSizeSubtractWidthAndHeight)
 	assert.Less(t, subtract.NsPerOp(), int64(5))
 	assert.Less(t, subtractHeight.NsPerOp(), int64(1))
