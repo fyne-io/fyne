@@ -222,9 +222,14 @@ func (d *gLDriver) startDrawThread() {
 					visible := w.visible
 					w.viewLock.RUnlock()
 
-					if closing || !canvas.IsDirty() || !visible {
+					// CheckDirtyAndClear must be checked after visibility,
+					// because when a window becomes visible, it could be
+					// showing old content without a dirty flag set to true.
+					// Do the clear if and only if the window is visible.
+					if closing || !visible || !canvas.CheckDirtyAndClear() {
 						continue
 					}
+
 					d.repaintWindow(w)
 					refreshingCanvases = append(refreshingCanvases, canvas)
 				}
@@ -246,7 +251,7 @@ func (d *gLDriver) tryPollEvents() {
 
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
-	w.canvas.SetDirty(true)
+	w.canvas.SetDirty()
 }
 
 func updateGLContext(w *window) {
