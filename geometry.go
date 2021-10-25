@@ -49,8 +49,8 @@ func (p Position) Add(v Vector2) Position {
 	return Position{p.X + x, p.Y + y}
 }
 
-// AddXAndY returns a new Position by adding x and y to the current one.
-func (p Position) AddXAndY(x, y float32) Position {
+// AddXY returns a new Position by adding x and y to the current one.
+func (p Position) AddXY(x, y float32) Position {
 	return Position{p.X + x, p.Y + y}
 }
 
@@ -71,8 +71,8 @@ func (p Position) Subtract(v Vector2) Position {
 	return Position{p.X - x, p.Y - y}
 }
 
-// SubtractXAndY returns a new Position by subtracting x and y from the current one.
-func (p Position) SubtractXAndY(x, y float32) Position {
+// SubtractXY returns a new Position by subtracting x and y from the current one.
+func (p Position) SubtractXY(x, y float32) Position {
 	return Position{p.X - x, p.Y - y}
 }
 
@@ -94,8 +94,8 @@ func (s Size) Add(v Vector2) Size {
 	return Size{s.Width + w, s.Height + h}
 }
 
-// AddWidthAndHeight returns a new Size by adding width and height to the current one.
-func (s Size) AddWidthAndHeight(width, height float32) Size {
+// AddWidthHeight returns a new Size by adding width and height to the current one.
+func (s Size) AddWidthHeight(width, height float32) Size {
 	return Size{s.Width + width, s.Height + height}
 }
 
@@ -136,7 +136,7 @@ func (s Size) Subtract(v Vector2) Size {
 	return Size{s.Width - w, s.Height - h}
 }
 
-// SubtractWidthAndHeight returns a new Size by subtracting width and height from the current one.
-func (s Size) SubtractWidthAndHeight(width, height float32) Size {
+// SubtractWidthHeight returns a new Size by subtracting width and height from the current one.
+func (s Size) SubtractWidthHeight(width, height float32) Size {
 	return Size{s.Width - width, s.Height - height}
 }
