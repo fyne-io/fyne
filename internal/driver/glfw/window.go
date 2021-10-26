@@ -1293,9 +1293,8 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, m
 	// is reported as a fyne.KeyUnknown key with Control modifier. We should still consider this
 	// as a "Paste" shortcut.
 	keyName := localizedKeyName
-	if (localizedKeyName == fyne.KeyUnknown) && (modifier&(desktop.ControlModifier|desktop.AltModifier|desktop.SuperModifier) != 0) {
-		asciiKey, ok := keyCodeMapASCII[key]
-		if ok {
+	if (localizedKeyName == fyne.KeyUnknown) && (modifier == ctrlMod) {
+		if asciiKey, ok := keyCodeMapASCII[key]; ok {
 			keyName = asciiKey
 		}
 	}
