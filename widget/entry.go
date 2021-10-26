@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -85,9 +86,8 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	ActionItem   fyne.CanvasObject `json:"-"`
-	textSource   binding.String
-	textListener binding.DataListener
+	ActionItem fyne.CanvasObject `json:"-"`
+	binder     basicBinder
 }
 
 // NewEntry creates a new single line entry widget.
@@ -137,31 +137,11 @@ func (e *Entry) AcceptsTab() bool {
 //
 // Since: 2.0
 func (e *Entry) Bind(data binding.String) {
-	e.Unbind()
-	e.textSource = data
+	e.binder.SetCallback(e.updateFromData)
+	e.binder.Bind(data)
 
-	var convertErr error
-	e.Validator = func(string) error {
-		return convertErr
-	}
-	e.textListener = binding.NewDataListener(func() {
-		val, err := data.Get()
-		if err != nil {
-			convertErr = err
-			e.Validate()
-			return
-		}
-		e.Text = val
-		convertErr = nil
-		e.Refresh()
-		if cache.IsRendered(e) {
-			e.Refresh()
-		}
-	})
-	data.AddListener(e.textListener)
-
-	e.OnChanged = func(s string) {
-		convertErr = data.Set(s)
+	e.OnChanged = func(_ string) {
+		e.binder.CallWithData(e.writeData)
 		e.Validate()
 	}
 }
@@ -761,14 +741,7 @@ func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 // Since: 2.0
 func (e *Entry) Unbind() {
 	e.OnChanged = nil
-	if e.textSource == nil || e.textListener == nil {
-		return
-	}
-
-	e.Validator = nil
-	e.textSource.RemoveListener(e.textListener)
-	e.textListener = nil
-	e.textSource = nil
+	e.binder.Unbind()
 }
 
 // copyToClipboard copies the current selection to a given clipboard.
@@ -1127,6 +1100,23 @@ func (e *Entry) updateCursorAndSelection() {
 	e.selectRow, e.selectColumn = e.truncatePosition(e.selectRow, e.selectColumn)
 }
 
+func (e *Entry) updateFromData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	textSource, ok := data.(binding.String)
+	if !ok {
+		return
+	}
+
+	val, err := textSource.Get()
+	if err != nil {
+		fyne.LogError("Error getting current data value", err)
+		return
+	}
+	e.SetText(val)
+}
+
 func (e *Entry) truncatePosition(row, col int) (int, int) {
 	if e.Text == "" {
 		return 0, 0
@@ -1180,6 +1170,27 @@ func (e *Entry) updateText(text string) {
 
 	if callback != nil {
 		callback(text)
+	}
+}
+
+func (e *Entry) writeData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	textTarget, ok := data.(binding.String)
+	if !ok {
+		return
+	}
+	curValue, err := textTarget.Get()
+	if err != nil {
+		return
+	}
+
+	if curValue != e.Text {
+		err := textTarget.Set(e.Text)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %s", e.Text), err)
+		}
 	}
 }
 
