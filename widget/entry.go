@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -86,8 +85,9 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	ActionItem fyne.CanvasObject `json:"-"`
-	binder     basicBinder
+	ActionItem      fyne.CanvasObject `json:"-"`
+	binder          basicBinder
+	conversionError error
 }
 
 // NewEntry creates a new single line entry widget.
@@ -139,6 +139,10 @@ func (e *Entry) AcceptsTab() bool {
 func (e *Entry) Bind(data binding.String) {
 	e.binder.SetCallback(e.updateFromData)
 	e.binder.Bind(data)
+
+	e.Validator = func(string) error {
+		return e.conversionError
+	}
 
 	e.OnChanged = func(_ string) {
 		e.binder.CallWithData(e.writeData)
@@ -741,6 +745,7 @@ func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 // Since: 2.0
 func (e *Entry) Unbind() {
 	e.OnChanged = nil
+	e.Validator = nil
 	e.binder.Unbind()
 }
 
@@ -1110,8 +1115,9 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 	}
 
 	val, err := textSource.Get()
+	e.conversionError = err
+	e.Validate()
 	if err != nil {
-		fyne.LogError("Error getting current data value", err)
 		return
 	}
 	e.SetText(val)
@@ -1182,16 +1188,11 @@ func (e *Entry) writeData(data binding.DataItem) {
 		return
 	}
 	curValue, err := textTarget.Get()
-	if err != nil {
+	if err == nil && curValue == e.Text {
+		e.conversionError = nil
 		return
 	}
-
-	if curValue != e.Text {
-		err := textTarget.Set(e.Text)
-		if err != nil {
-			fyne.LogError(fmt.Sprintf("Failed to set binding value to %s", e.Text), err)
-		}
-	}
+	e.conversionError = textTarget.Set(e.Text)
 }
 
 func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
