@@ -1292,8 +1292,10 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, m
 	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
 	// is reported as a fyne.KeyUnknown key with Control modifier. We should still consider this
 	// as a "Paste" shortcut.
+	// See https://github.com/fyne-io/fyne/pull/2587 for discussion.
 	keyName := localizedKeyName
-	if (localizedKeyName == fyne.KeyUnknown) && (modifier == ctrlMod) {
+	resemblesShortcut := (modifier&(desktop.ControlModifier|desktop.SuperModifier) != 0)
+	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut {
 		if asciiKey, ok := keyCodeMapASCII[key]; ok {
 			keyName = asciiKey
 		}
