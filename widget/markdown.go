@@ -63,6 +63,12 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 					Style: RichTextStyleSubHeading,
 					Text:  string(n.Text(source)),
 				}
+			default:
+				m.nextSeg = &TextSegment{
+					Style: RichTextStyleParagraph,
+					Text:  string(n.Text(source)),
+				}
+				m.nextSeg.(*TextSegment).Style.TextStyle.Bold = true
 			}
 		case "HorizontalRule", "ThematicBreak":
 			m.segs = append(m.segs, &SeparatorSegment{})
