@@ -47,7 +47,7 @@ type Canvas struct {
 	// the refreshQueue is an unbounded channel which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.UnboundedCanvasObjectChan
-	refreshCount uint64 // atomic
+	refreshCount uint32 // atomic
 	dirty        uint32 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
@@ -202,7 +202,7 @@ func (c *Canvas) FreeDirtyTextures() uint64 {
 	// and we desire to process all requested operations as much as possible
 	// in a frame. Use a counter to guarantee that all desired tasks are
 	// processed. See https://github.com/fyne-io/fyne/issues/2548.
-	for atomic.LoadUint64(&c.refreshCount) > 0 {
+	for atomic.LoadUint32(&c.refreshCount) > 0 {
 		var object fyne.CanvasObject
 		select {
 		case object = <-c.refreshQueue.Out():
@@ -214,7 +214,7 @@ func (c *Canvas) FreeDirtyTextures() uint64 {
 			runtime.Gosched()
 			continue
 		}
-		atomic.AddUint64(&c.refreshCount, ^uint64(0))
+		atomic.AddUint32(&c.refreshCount, ^uint32(0))
 		freed++
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 			if c.painter != nil {
@@ -280,7 +280,7 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	atomic.AddUint64(&c.refreshCount, 1)
+	atomic.AddUint32(&c.refreshCount, 1)
 	c.refreshQueue.In() <- obj // never block
 	c.SetDirty(true)
 }
