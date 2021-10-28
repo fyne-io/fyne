@@ -9,8 +9,8 @@ const int menuTagMin = 5000;
 NSControlStateValue STATE_ON = NSControlStateValueOn;
 NSControlStateValue STATE_OFF = NSControlStateValueOff;
 #else
-NSControlStateValue STATE_ON = NSOnState;
-NSControlStateValue STATE_OFF = NSOffState;
+NSCellStateValue STATE_ON = NSOnState;
+NSCellStateValue STATE_OFF = NSOffState;
 #endif
 
 
