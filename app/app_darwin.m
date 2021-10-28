@@ -1,3 +1,4 @@
+//go:build !ci
 // +build !ci
 
 #import <UserNotifications/UserNotifications.h>
