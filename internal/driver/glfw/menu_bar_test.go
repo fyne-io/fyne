@@ -1,3 +1,4 @@
+//go:build !mobile && (!ci || !windows)
 // +build !mobile
 // +build !ci !windows
 

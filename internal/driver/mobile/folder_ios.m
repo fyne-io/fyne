@@ -1,3 +1,4 @@
+//go:build ios
 // +build ios
 
 #import <Foundation/Foundation.h>
