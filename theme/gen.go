@@ -46,15 +46,10 @@ func bundleFile(name string, filepath string, f io.Writer) {
 	}
 }
 
-func bundleFont(font, name string, f io.Writer) {
+func bundleFont(fontFile, varName string, f io.Writer) {
 	_, dirname, _, _ := runtime.Caller(0)
-	path := path.Join(path.Dir(dirname), "font", fmt.Sprintf("%s-%s.ttf", font, name))
-
-	if name == "Powerline" && font != fontFace {
-		name = "Monospace"
-	}
-
-	bundleFile(strings.ToLower(name), path, f)
+	path := path.Join(path.Dir(dirname), "font", fontFile)
+	bundleFile(varName, path, f)
 }
 
 func iconDir() string {
@@ -81,11 +76,11 @@ func writeFile(filename string, contents []byte) error {
 func main() {
 	f := &bytes.Buffer{}
 	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
-	bundleFont(fontFace, "Regular", f)
-	bundleFont(fontFace, "Bold", f)
-	bundleFont(fontFace, "Italic", f)
-	bundleFont(fontFace, "BoldItalic", f)
-	bundleFont("DejaVuSansMono", "Powerline", f)
+	bundleFont(fontFace+"-Regular.ttf", "regular", f)
+	bundleFont(fontFace+"-Bold.ttf", "bold", f)
+	bundleFont(fontFace+"-Italic.ttf", "italic", f)
+	bundleFont(fontFace+"-BoldItalic.ttf", "bolditalic", f)
+	bundleFont("DejaVuSansMono-Powerline.ttf", "monospace", f)
 	err := writeFile("bundled-fonts.go", f.Bytes())
 	if err != nil {
 		fyne.LogError("Unable to write file:", err)
