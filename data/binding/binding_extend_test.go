@@ -6,6 +6,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMustBinding(t *testing.T) {
+	type someStruct struct {
+		Exposed string
+		unexposed bool
+	}
+	structVal := someStruct{
+		Exposed: "I'm an exposed string",
+		unexposed: true,
+	}
+	sbind := BindStruct(&structVal)
+
+	assert.NotPanics(t, func() {
+		boundExposed := sbind.MustGetItem("Exposed").(String)
+		assert.Equal(t, "I'm an exposed string", boundExposed.MustGet())
+	}, "Exposed fields are readable by reflection, and thus bindable")
+	assert.NotPanics(t, func() {
+		assert.Equal(t, "I'm an exposed string", sbind.MustGetValue("Exposed").(string))
+	}, "MustGetValue gets the struct field value directly")
+	assert.Panics(t, func() {
+		_ = sbind.MustGetItem("unexposed")
+	}, "Unexposed fields should not be readable by reflection")
+}
+
 func TestBindUserType(t *testing.T) {
 	val := user{name: "Unnamed"}
 	u := bindUserType(&val)

@@ -12,11 +12,17 @@ type BoolList interface {
 	DataList
 
 	Append(value bool) error
+	MustAppend(value bool)
 	Get() ([]bool, error)
+	MustGet() []bool
 	GetValue(index int) (bool, error)
+	MustGetValue(index int) bool
 	Prepend(value bool) error
+	MustPrepend(value bool)
 	Set(list []bool) error
+	MustSet(list []bool)
 	SetValue(index int, value bool) error
+	MustSetValue(index int, value bool)
 }
 
 // ExternalBoolList supports binding a list of bool values from an external variable.
@@ -69,11 +75,25 @@ func (l *boundBoolList) Append(val bool) error {
 	return l.doReload()
 }
 
+func (l *boundBoolList) MustAppend(value bool) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *boundBoolList) Get() ([]bool, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *boundBoolList) MustGet() []bool {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *boundBoolList) GetValue(i int) (bool, error) {
@@ -86,12 +106,26 @@ func (l *boundBoolList) GetValue(i int) (bool, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *boundBoolList) MustGetValue(i int) bool {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *boundBoolList) Prepend(val bool) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]bool{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *boundBoolList) MustPrepend(val bool) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundBoolList) Reload() error {
@@ -107,6 +141,12 @@ func (l *boundBoolList) Set(v []bool) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *boundBoolList) MustSet(v []bool) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundBoolList) doReload() (retErr error) {
@@ -162,6 +202,12 @@ func (l *boundBoolList) SetValue(i int, v bool) error {
 	return item.(Bool).Set(v)
 }
 
+func (l *boundBoolList) MustSetValue(i int, v bool) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bindBoolListItem(v *[]bool, i int, external bool) Bool {
 	if external {
 		ret := &boundExternalBoolListItem{old: (*v)[i]}
@@ -187,11 +233,25 @@ func (b *boundBoolListItem) Get() (bool, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *boundBoolListItem) MustGet() bool {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundBoolListItem) Set(val bool) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *boundBoolListItem) MustSet(val bool) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *boundBoolListItem) doSet(val bool) error {
@@ -225,11 +285,17 @@ type FloatList interface {
 	DataList
 
 	Append(value float64) error
+	MustAppend(value float64)
 	Get() ([]float64, error)
+	MustGet() []float64
 	GetValue(index int) (float64, error)
+	MustGetValue(index int) float64
 	Prepend(value float64) error
+	MustPrepend(value float64)
 	Set(list []float64) error
+	MustSet(list []float64)
 	SetValue(index int, value float64) error
+	MustSetValue(index int, value float64)
 }
 
 // ExternalFloatList supports binding a list of float64 values from an external variable.
@@ -282,11 +348,25 @@ func (l *boundFloatList) Append(val float64) error {
 	return l.doReload()
 }
 
+func (l *boundFloatList) MustAppend(value float64) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *boundFloatList) Get() ([]float64, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *boundFloatList) MustGet() []float64 {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *boundFloatList) GetValue(i int) (float64, error) {
@@ -299,12 +379,26 @@ func (l *boundFloatList) GetValue(i int) (float64, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *boundFloatList) MustGetValue(i int) float64 {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *boundFloatList) Prepend(val float64) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]float64{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *boundFloatList) MustPrepend(val float64) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundFloatList) Reload() error {
@@ -320,6 +414,12 @@ func (l *boundFloatList) Set(v []float64) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *boundFloatList) MustSet(v []float64) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundFloatList) doReload() (retErr error) {
@@ -375,6 +475,12 @@ func (l *boundFloatList) SetValue(i int, v float64) error {
 	return item.(Float).Set(v)
 }
 
+func (l *boundFloatList) MustSetValue(i int, v float64) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bindFloatListItem(v *[]float64, i int, external bool) Float {
 	if external {
 		ret := &boundExternalFloatListItem{old: (*v)[i]}
@@ -400,11 +506,25 @@ func (b *boundFloatListItem) Get() (float64, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *boundFloatListItem) MustGet() float64 {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundFloatListItem) Set(val float64) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *boundFloatListItem) MustSet(val float64) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *boundFloatListItem) doSet(val float64) error {
@@ -438,11 +558,17 @@ type IntList interface {
 	DataList
 
 	Append(value int) error
+	MustAppend(value int)
 	Get() ([]int, error)
+	MustGet() []int
 	GetValue(index int) (int, error)
+	MustGetValue(index int) int
 	Prepend(value int) error
+	MustPrepend(value int)
 	Set(list []int) error
+	MustSet(list []int)
 	SetValue(index int, value int) error
+	MustSetValue(index int, value int)
 }
 
 // ExternalIntList supports binding a list of int values from an external variable.
@@ -495,11 +621,25 @@ func (l *boundIntList) Append(val int) error {
 	return l.doReload()
 }
 
+func (l *boundIntList) MustAppend(value int) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *boundIntList) Get() ([]int, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *boundIntList) MustGet() []int {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *boundIntList) GetValue(i int) (int, error) {
@@ -512,12 +652,26 @@ func (l *boundIntList) GetValue(i int) (int, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *boundIntList) MustGetValue(i int) int {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *boundIntList) Prepend(val int) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]int{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *boundIntList) MustPrepend(val int) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundIntList) Reload() error {
@@ -533,6 +687,12 @@ func (l *boundIntList) Set(v []int) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *boundIntList) MustSet(v []int) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundIntList) doReload() (retErr error) {
@@ -588,6 +748,12 @@ func (l *boundIntList) SetValue(i int, v int) error {
 	return item.(Int).Set(v)
 }
 
+func (l *boundIntList) MustSetValue(i int, v int) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bindIntListItem(v *[]int, i int, external bool) Int {
 	if external {
 		ret := &boundExternalIntListItem{old: (*v)[i]}
@@ -613,11 +779,25 @@ func (b *boundIntListItem) Get() (int, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *boundIntListItem) MustGet() int {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundIntListItem) Set(val int) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *boundIntListItem) MustSet(val int) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *boundIntListItem) doSet(val int) error {
@@ -651,11 +831,17 @@ type RuneList interface {
 	DataList
 
 	Append(value rune) error
+	MustAppend(value rune)
 	Get() ([]rune, error)
+	MustGet() []rune
 	GetValue(index int) (rune, error)
+	MustGetValue(index int) rune
 	Prepend(value rune) error
+	MustPrepend(value rune)
 	Set(list []rune) error
+	MustSet(list []rune)
 	SetValue(index int, value rune) error
+	MustSetValue(index int, value rune)
 }
 
 // ExternalRuneList supports binding a list of rune values from an external variable.
@@ -708,11 +894,25 @@ func (l *boundRuneList) Append(val rune) error {
 	return l.doReload()
 }
 
+func (l *boundRuneList) MustAppend(value rune) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *boundRuneList) Get() ([]rune, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *boundRuneList) MustGet() []rune {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *boundRuneList) GetValue(i int) (rune, error) {
@@ -725,12 +925,26 @@ func (l *boundRuneList) GetValue(i int) (rune, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *boundRuneList) MustGetValue(i int) rune {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *boundRuneList) Prepend(val rune) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]rune{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *boundRuneList) MustPrepend(val rune) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundRuneList) Reload() error {
@@ -746,6 +960,12 @@ func (l *boundRuneList) Set(v []rune) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *boundRuneList) MustSet(v []rune) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundRuneList) doReload() (retErr error) {
@@ -801,6 +1021,12 @@ func (l *boundRuneList) SetValue(i int, v rune) error {
 	return item.(Rune).Set(v)
 }
 
+func (l *boundRuneList) MustSetValue(i int, v rune) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bindRuneListItem(v *[]rune, i int, external bool) Rune {
 	if external {
 		ret := &boundExternalRuneListItem{old: (*v)[i]}
@@ -826,11 +1052,25 @@ func (b *boundRuneListItem) Get() (rune, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *boundRuneListItem) MustGet() rune {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundRuneListItem) Set(val rune) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *boundRuneListItem) MustSet(val rune) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *boundRuneListItem) doSet(val rune) error {
@@ -864,11 +1104,17 @@ type StringList interface {
 	DataList
 
 	Append(value string) error
+	MustAppend(value string)
 	Get() ([]string, error)
+	MustGet() []string
 	GetValue(index int) (string, error)
+	MustGetValue(index int) string
 	Prepend(value string) error
+	MustPrepend(value string)
 	Set(list []string) error
+	MustSet(list []string)
 	SetValue(index int, value string) error
+	MustSetValue(index int, value string)
 }
 
 // ExternalStringList supports binding a list of string values from an external variable.
@@ -921,11 +1167,25 @@ func (l *boundStringList) Append(val string) error {
 	return l.doReload()
 }
 
+func (l *boundStringList) MustAppend(value string) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *boundStringList) Get() ([]string, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *boundStringList) MustGet() []string {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *boundStringList) GetValue(i int) (string, error) {
@@ -938,12 +1198,26 @@ func (l *boundStringList) GetValue(i int) (string, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *boundStringList) MustGetValue(i int) string {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *boundStringList) Prepend(val string) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]string{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *boundStringList) MustPrepend(val string) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundStringList) Reload() error {
@@ -959,6 +1233,12 @@ func (l *boundStringList) Set(v []string) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *boundStringList) MustSet(v []string) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundStringList) doReload() (retErr error) {
@@ -1014,6 +1294,12 @@ func (l *boundStringList) SetValue(i int, v string) error {
 	return item.(String).Set(v)
 }
 
+func (l *boundStringList) MustSetValue(i int, v string) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bindStringListItem(v *[]string, i int, external bool) String {
 	if external {
 		ret := &boundExternalStringListItem{old: (*v)[i]}
@@ -1039,11 +1325,25 @@ func (b *boundStringListItem) Get() (string, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *boundStringListItem) MustGet() string {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundStringListItem) Set(val string) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *boundStringListItem) MustSet(val string) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *boundStringListItem) doSet(val string) error {
@@ -1070,219 +1370,6 @@ func (b *boundExternalStringListItem) setIfChanged(val string) error {
 	return nil
 }
 
-// UntypedList supports binding a list of interface{} values.
-//
-// Since: 2.1
-type UntypedList interface {
-	DataList
-
-	Append(value interface{}) error
-	Get() ([]interface{}, error)
-	GetValue(index int) (interface{}, error)
-	Prepend(value interface{}) error
-	Set(list []interface{}) error
-	SetValue(index int, value interface{}) error
-}
-
-// ExternalUntypedList supports binding a list of interface{} values from an external variable.
-//
-// Since: 2.1
-type ExternalUntypedList interface {
-	UntypedList
-
-	Reload() error
-}
-
-// NewUntypedList returns a bindable list of interface{} values.
-//
-// Since: 2.1
-func NewUntypedList() UntypedList {
-	return &boundUntypedList{val: &[]interface{}{}}
-}
-
-// BindUntypedList returns a bound list of interface{} values, based on the contents of the passed slice.
-// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
-//
-// Since: 2.1
-func BindUntypedList(v *[]interface{}) ExternalUntypedList {
-	if v == nil {
-		return NewUntypedList().(ExternalUntypedList)
-	}
-
-	b := &boundUntypedList{val: v, updateExternal: true}
-
-	for i := range *v {
-		b.appendItem(bindUntypedListItem(v, i, b.updateExternal))
-	}
-
-	return b
-}
-
-type boundUntypedList struct {
-	listBase
-
-	updateExternal bool
-	val            *[]interface{}
-}
-
-func (l *boundUntypedList) Append(val interface{}) error {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-
-	*l.val = append(*l.val, val)
-
-	return l.doReload()
-}
-
-func (l *boundUntypedList) Get() ([]interface{}, error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-
-	return *l.val, nil
-}
-
-func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
-	if i < 0 || i >= l.Length() {
-		return nil, errOutOfBounds
-	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-
-	return (*l.val)[i], nil
-}
-
-func (l *boundUntypedList) Prepend(val interface{}) error {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	*l.val = append([]interface{}{val}, *l.val...)
-
-	return l.doReload()
-}
-
-func (l *boundUntypedList) Reload() error {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-
-	return l.doReload()
-}
-
-func (l *boundUntypedList) Set(v []interface{}) error {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	*l.val = v
-
-	return l.doReload()
-}
-
-func (l *boundUntypedList) doReload() (retErr error) {
-	oldLen := len(l.items)
-	newLen := len(*l.val)
-	if oldLen > newLen {
-		for i := oldLen - 1; i >= newLen; i-- {
-			l.deleteItem(i)
-		}
-		l.trigger()
-	} else if oldLen < newLen {
-		for i := oldLen; i < newLen; i++ {
-			l.appendItem(bindUntypedListItem(l.val, i, l.updateExternal))
-		}
-		l.trigger()
-	}
-
-	for i, item := range l.items {
-		if i > oldLen || i > newLen {
-			break
-		}
-
-		var err error
-		if l.updateExternal {
-			item.(*boundExternalUntypedListItem).lock.Lock()
-			err = item.(*boundExternalUntypedListItem).setIfChanged((*l.val)[i])
-			item.(*boundExternalUntypedListItem).lock.Unlock()
-		} else {
-			item.(*boundUntypedListItem).lock.Lock()
-			err = item.(*boundUntypedListItem).doSet((*l.val)[i])
-			item.(*boundUntypedListItem).lock.Unlock()
-		}
-		if err != nil {
-			retErr = err
-		}
-	}
-	return
-}
-
-func (l *boundUntypedList) SetValue(i int, v interface{}) error {
-	if i < 0 || i >= l.Length() {
-		return errOutOfBounds
-	}
-
-	l.lock.Lock()
-	(*l.val)[i] = v
-	l.lock.Unlock()
-
-	item, err := l.GetItem(i)
-	if err != nil {
-		return err
-	}
-	return item.(Untyped).Set(v)
-}
-
-func bindUntypedListItem(v *[]interface{}, i int, external bool) Untyped {
-	if external {
-		ret := &boundExternalUntypedListItem{old: (*v)[i]}
-		ret.val = v
-		ret.index = i
-		return ret
-	}
-
-	return &boundUntypedListItem{val: v, index: i}
-}
-
-type boundUntypedListItem struct {
-	base
-
-	val   *[]interface{}
-	index int
-}
-
-func (b *boundUntypedListItem) Get() (interface{}, error) {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return (*b.val)[b.index], nil
-}
-
-func (b *boundUntypedListItem) Set(val interface{}) error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	return b.doSet(val)
-}
-
-func (b *boundUntypedListItem) doSet(val interface{}) error {
-	(*b.val)[b.index] = val
-
-	b.trigger()
-	return nil
-}
-
-type boundExternalUntypedListItem struct {
-	boundUntypedListItem
-
-	old interface{}
-}
-
-func (b *boundExternalUntypedListItem) setIfChanged(val interface{}) error {
-	if val == b.old {
-		return nil
-	}
-	(*b.val)[b.index] = val
-	b.old = val
-
-	b.trigger()
-	return nil
-}
-
 // URIList supports binding a list of fyne.URI values.
 //
 // Since: 2.1
@@ -1290,11 +1377,17 @@ type URIList interface {
 	DataList
 
 	Append(value fyne.URI) error
+	MustAppend(value fyne.URI)
 	Get() ([]fyne.URI, error)
+	MustGet() []fyne.URI
 	GetValue(index int) (fyne.URI, error)
+	MustGetValue(index int) fyne.URI
 	Prepend(value fyne.URI) error
+	MustPrepend(value fyne.URI)
 	Set(list []fyne.URI) error
+	MustSet(list []fyne.URI)
 	SetValue(index int, value fyne.URI) error
+	MustSetValue(index int, value fyne.URI)
 }
 
 // ExternalURIList supports binding a list of fyne.URI values from an external variable.
@@ -1347,11 +1440,25 @@ func (l *boundURIList) Append(val fyne.URI) error {
 	return l.doReload()
 }
 
+func (l *boundURIList) MustAppend(value fyne.URI) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *boundURIList) Get() ([]fyne.URI, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *boundURIList) MustGet() []fyne.URI {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *boundURIList) GetValue(i int) (fyne.URI, error) {
@@ -1364,12 +1471,26 @@ func (l *boundURIList) GetValue(i int) (fyne.URI, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *boundURIList) MustGetValue(i int) fyne.URI {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *boundURIList) Prepend(val fyne.URI) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]fyne.URI{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *boundURIList) MustPrepend(val fyne.URI) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundURIList) Reload() error {
@@ -1385,6 +1506,12 @@ func (l *boundURIList) Set(v []fyne.URI) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *boundURIList) MustSet(v []fyne.URI) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *boundURIList) doReload() (retErr error) {
@@ -1440,6 +1567,12 @@ func (l *boundURIList) SetValue(i int, v fyne.URI) error {
 	return item.(URI).Set(v)
 }
 
+func (l *boundURIList) MustSetValue(i int, v fyne.URI) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bindURIListItem(v *[]fyne.URI, i int, external bool) URI {
 	if external {
 		ret := &boundExternalURIListItem{old: (*v)[i]}
@@ -1465,11 +1598,25 @@ func (b *boundURIListItem) Get() (fyne.URI, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *boundURIListItem) MustGet() fyne.URI {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundURIListItem) Set(val fyne.URI) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *boundURIListItem) MustSet(val fyne.URI) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *boundURIListItem) doSet(val fyne.URI) error {

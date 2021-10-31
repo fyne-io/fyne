@@ -19,7 +19,9 @@ const itemBindTemplate = `
 type {{ .Name }} interface {
 	DataItem
 	Get() ({{ .Type }}, error)
+	MustGet() {{ .Type }}
 	Set({{ .Type }}) error
+	MustSet({{ .Type }})
 }
 
 // External{{ .Name }} supports binding a {{ .Type }} value to an external value.
@@ -69,6 +71,14 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 	return *b.val, nil
 }
 
+func (b *bound{{ .Name }}) MustGet() {{ .Type }} {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -85,6 +95,12 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *bound{{ .Name }}) MustSet(val {{ .Type }}) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternal{{ .Name }} struct {
@@ -156,6 +172,14 @@ func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
 	return b.cache, nil
 }
 
+func (b *prefBound{{ .Name }}) MustGet() {{ .Type }} {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 	b.p.Set{{ .Name }}(b.key, v)
 
@@ -163,6 +187,12 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
+}
+
+func (b *prefBound{{ .Name }}) MustSet(v {{ .Type }}) {
+	if err := b.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (b *prefBound{{ .Name }}) checkForChange() {
@@ -228,6 +258,14 @@ func (s *stringFrom{{ .Name }}) Get() (string, error) {
 {{- end }}
 }
 
+func (s *stringFrom{{ .Name }}) MustGet() string {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringFrom{{ .Name }}) Set(str string) error {
 {{- if .FromString }}
 	val, err := {{ .FromString }}(str)
@@ -266,6 +304,12 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringFrom{{ .Name }}) MustSet(str string) {
+	if err := s.Set(str); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringFrom{{ .Name }}) DataChanged() {
@@ -340,6 +384,14 @@ func (s *stringTo{{ .Name }}) Get() ({{ .Type }}, error) {
 {{- end }}
 }
 
+func (s *stringTo{{ .Name }}) MustGet() {{ .Type }} {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 {{- if .ToString }}
 	str, err := {{ .ToString }}(val)
@@ -367,6 +419,12 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 	return nil
 }
 
+func (s *stringTo{{ .Name }}) MustSet(val {{ .Type }}) {
+	if err := s.Set(val); err != nil {
+		panic(err)
+	}
+}
+
 func (s *stringTo{{ .Name }}) DataChanged() {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
@@ -382,11 +440,17 @@ type {{ .Name }}List interface {
 	DataList
 
 	Append(value {{ .Type }}) error
+	MustAppend(value {{ .Type }})
 	Get() ([]{{ .Type }}, error)
+	MustGet() []{{ .Type }}
 	GetValue(index int) ({{ .Type }}, error)
+	MustGetValue(index int) {{ .Type }}
 	Prepend(value {{ .Type }}) error
+	MustPrepend(value {{ .Type }})
 	Set(list []{{ .Type }}) error
+	MustSet(list []{{ .Type }})
 	SetValue(index int, value {{ .Type }}) error
+	MustSetValue(index int, value {{ .Type }})
 }
 
 // External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
@@ -439,11 +503,25 @@ func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 	return l.doReload()
 }
 
+func (l *bound{{ .Name }}List) MustAppend(value {{ .Type }}) {
+	if err := l.Append(value); err != nil {
+		panic(err)
+	}
+}
+
 func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
+}
+
+func (l *bound{{ .Name }}List) MustGet() []{{ .Type }} {
+	val, err := l.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
@@ -456,12 +534,26 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 	return (*l.val)[i], nil
 }
 
+func (l *bound{{ .Name }}List) MustGetValue(i int) {{ .Type }} {
+	val, err := l.GetValue(i)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = append([]{{ .Type }}{val}, *l.val...)
 
 	return l.doReload()
+}
+
+func (l *bound{{ .Name }}List) MustPrepend(val {{ .Type }}) {
+	if err := l.Prepend(val); err != nil {
+		panic(err)
+	}
 }
 
 func (l *bound{{ .Name }}List) Reload() error {
@@ -477,6 +569,12 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 	*l.val = v
 
 	return l.doReload()
+}
+
+func (l *bound{{ .Name }}List) MustSet(v []{{ .Type }}) {
+	if err := l.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (l *bound{{ .Name }}List) doReload() (retErr error) {
@@ -532,6 +630,12 @@ func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
 	return item.({{ .Name }}).Set(v)
 }
 
+func (l *bound{{ .Name }}List) MustSetValue(i int, v {{ .Type }}) {
+	if err := l.SetValue(i, v); err != nil {
+		panic(err)
+	}
+}
+
 func bind{{ .Name }}ListItem(v *[]{{ .Type }}, i int, external bool) {{ .Name }} {
 	if external {
 		ret := &boundExternal{{ .Name }}ListItem{old: (*v)[i]}
@@ -557,11 +661,25 @@ func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
 	return (*b.val)[b.index], nil
 }
 
+func (b *bound{{ .Name }}ListItem) MustGet() {{ .Type }} {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
+}
+
+func (b *bound{{ .Name }}ListItem) MustSet(val {{ .Type }}) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (b *bound{{ .Name }}ListItem) doSet(val {{ .Type }}) error {

@@ -56,6 +56,14 @@ func (s *stringFromBool) Get() (string, error) {
 	return formatBool(val), nil
 }
 
+func (s *stringFromBool) MustGet() string {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringFromBool) Set(str string) error {
 	var val bool
 	if s.format != "" {
@@ -88,6 +96,12 @@ func (s *stringFromBool) Set(str string) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringFromBool) MustSet(str string) {
+	if err := s.Set(str); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringFromBool) DataChanged() {
@@ -143,6 +157,14 @@ func (s *stringFromFloat) Get() (string, error) {
 	return formatFloat(val), nil
 }
 
+func (s *stringFromFloat) MustGet() string {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringFromFloat) Set(str string) error {
 	var val float64
 	if s.format != "" {
@@ -175,6 +197,12 @@ func (s *stringFromFloat) Set(str string) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringFromFloat) MustSet(str string) {
+	if err := s.Set(str); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringFromFloat) DataChanged() {
@@ -230,6 +258,14 @@ func (s *stringFromInt) Get() (string, error) {
 	return formatInt(val), nil
 }
 
+func (s *stringFromInt) MustGet() string {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringFromInt) Set(str string) error {
 	var val int
 	if s.format != "" {
@@ -264,6 +300,12 @@ func (s *stringFromInt) Set(str string) error {
 	return nil
 }
 
+func (s *stringFromInt) MustSet(str string) {
+	if err := s.Set(str); err != nil {
+		panic(err)
+	}
+}
+
 func (s *stringFromInt) DataChanged() {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
@@ -296,6 +338,14 @@ func (s *stringFromURI) Get() (string, error) {
 	return uriToString(val)
 }
 
+func (s *stringFromURI) MustGet() string {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringFromURI) Set(str string) error {
 	val, err := uriFromString(str)
 	if err != nil {
@@ -315,6 +365,12 @@ func (s *stringFromURI) Set(str string) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringFromURI) MustSet(str string) {
+	if err := s.Set(str); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringFromURI) DataChanged() {
@@ -384,6 +440,14 @@ func (s *stringToBool) Get() (bool, error) {
 	return val, nil
 }
 
+func (s *stringToBool) MustGet() bool {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringToBool) Set(val bool) error {
 	var str string
 	if s.format != "" {
@@ -403,6 +467,12 @@ func (s *stringToBool) Set(val bool) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringToBool) MustSet(val bool) {
+	if err := s.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringToBool) DataChanged() {
@@ -472,6 +542,14 @@ func (s *stringToFloat) Get() (float64, error) {
 	return val, nil
 }
 
+func (s *stringToFloat) MustGet() float64 {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringToFloat) Set(val float64) error {
 	var str string
 	if s.format != "" {
@@ -491,6 +569,12 @@ func (s *stringToFloat) Set(val float64) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringToFloat) MustSet(val float64) {
+	if err := s.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringToFloat) DataChanged() {
@@ -560,6 +644,14 @@ func (s *stringToInt) Get() (int, error) {
 	return val, nil
 }
 
+func (s *stringToInt) MustGet() int {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringToInt) Set(val int) error {
 	var str string
 	if s.format != "" {
@@ -579,6 +671,12 @@ func (s *stringToInt) Set(val int) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringToInt) MustSet(val int) {
+	if err := s.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringToInt) DataChanged() {
@@ -613,6 +711,14 @@ func (s *stringToURI) Get() (fyne.URI, error) {
 	return uriFromString(str)
 }
 
+func (s *stringToURI) MustGet() fyne.URI {
+	val, err := s.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (s *stringToURI) Set(val fyne.URI) error {
 	str, err := uriToString(val)
 	if err != nil {
@@ -629,6 +735,12 @@ func (s *stringToURI) Set(val fyne.URI) error {
 
 	s.DataChanged()
 	return nil
+}
+
+func (s *stringToURI) MustSet(val fyne.URI) {
+	if err := s.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 func (s *stringToURI) DataChanged() {

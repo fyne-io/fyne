@@ -13,6 +13,7 @@ import (
 type DataMap interface {
 	DataItem
 	GetItem(string) (DataItem, error)
+	MustGetItem(string) DataItem
 	Keys() []string
 }
 
@@ -31,9 +32,13 @@ type UntypedMap interface {
 	DataMap
 	Delete(string)
 	Get() (map[string]interface{}, error)
+	MustGet() map[string]interface{}
 	GetValue(string) (interface{}, error)
+	MustGetValue(string) interface{}
 	Set(map[string]interface{}) error
+	MustSet(map[string]interface{})
 	SetValue(string, interface{}) error
+	MustSetValue(string, interface{})
 }
 
 // NewUntypedMap creates a new, empty map binding of string to interface{}.
@@ -66,7 +71,9 @@ func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 type Struct interface {
 	DataMap
 	GetValue(string) (interface{}, error)
+	MustGetValue(string) interface{}
 	SetValue(string, interface{}) error
+	MustSetValue(string, interface{})
 	Reload() error
 }
 
@@ -132,6 +139,14 @@ func (b *mapBase) GetItem(key string) (DataItem, error) {
 	return nil, errKeyNotFound
 }
 
+func (b *mapBase) MustGetItem(key string) DataItem {
+	item, err := b.GetItem(key)
+	if err != nil {
+		panic(err)
+	}
+	return item
+}
+
 func (b *mapBase) Keys() []string {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -166,6 +181,14 @@ func (b *mapBase) Get() (map[string]interface{}, error) {
 	return *b.val, nil
 }
 
+func (b *mapBase) MustGet() map[string]interface{} {
+	m, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return m
+}
+
 func (b *mapBase) GetValue(key string) (interface{}, error) {
 	b.lock.RLock()
 	defer b.lock.RUnlock()
@@ -175,6 +198,14 @@ func (b *mapBase) GetValue(key string) (interface{}, error) {
 	}
 
 	return nil, errKeyNotFound
+}
+
+func (b *mapBase) MustGetValue(key string) interface{} {
+	val, err := b.GetValue(key)
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 func (b *mapBase) Reload() error {
@@ -198,6 +229,12 @@ func (b *mapBase) Set(v map[string]interface{}) error {
 	return b.doReload()
 }
 
+func (b *mapBase) MustSet(v map[string]interface{}) {
+	if err := b.Set(v); err != nil {
+		panic(err)
+	}
+}
+
 func (b *mapBase) SetValue(key string, d interface{}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -210,6 +247,12 @@ func (b *mapBase) SetValue(key string, d interface{}) error {
 	item := bindUntypedMapValue(b.val, key, b.updateExternal)
 	b.setItem(key, item)
 	return nil
+}
+
+func (b *mapBase) MustSetValue(key string, d interface{}) {
+	if err := b.SetValue(key, d); err != nil {
+		panic(err)
+	}
 }
 
 func (b *mapBase) doReload() (retErr error) {
@@ -397,6 +440,14 @@ func (r *reflectBool) Get() (val bool, err error) {
 	return
 }
 
+func (r *reflectBool) MustGet() bool {
+	val, err := r.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (r *reflectBool) Set(b bool) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -407,6 +458,12 @@ func (r *reflectBool) Set(b bool) (err error) {
 	r.val.SetBool(b)
 	r.trigger()
 	return
+}
+
+func (r *reflectBool) MustSet(b bool) {
+	if err := r.Set(b); err != nil {
+		panic(err)
+	}
 }
 
 func bindReflectBool(f reflect.Value) reflectUntyped {
@@ -430,6 +487,14 @@ func (r *reflectFloat) Get() (val float64, err error) {
 	return
 }
 
+func (r *reflectFloat) MustGet() float64 {
+	val, err := r.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (r *reflectFloat) Set(f float64) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -440,6 +505,12 @@ func (r *reflectFloat) Set(f float64) (err error) {
 	r.val.SetFloat(f)
 	r.trigger()
 	return
+}
+
+func (r *reflectFloat) MustSet(f float64) {
+	if err := r.Set(f); err != nil {
+		panic(err)
+	}
 }
 
 func bindReflectFloat(f reflect.Value) reflectUntyped {
@@ -463,6 +534,14 @@ func (r *reflectInt) Get() (val int, err error) {
 	return
 }
 
+func (r *reflectInt) MustGet() int {
+	val, err := r.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (r *reflectInt) Set(i int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -473,6 +552,12 @@ func (r *reflectInt) Set(i int) (err error) {
 	r.val.SetInt(int64(i))
 	r.trigger()
 	return
+}
+
+func (r *reflectInt) MustSet(i int) {
+	if err := r.Set(i); err != nil {
+		panic(err)
+	}
 }
 
 func bindReflectInt(f reflect.Value) reflectUntyped {
@@ -496,6 +581,14 @@ func (r *reflectString) Get() (val string, err error) {
 	return
 }
 
+func (r *reflectString) MustGet() string {
+	val, err := r.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (r *reflectString) Set(s string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -506,6 +599,12 @@ func (r *reflectString) Set(s string) (err error) {
 	r.val.SetString(s)
 	r.trigger()
 	return
+}
+
+func (r *reflectString) MustSet(s string) {
+	if err := r.Set(s); err != nil {
+		panic(err)
+	}
 }
 
 func bindReflectString(f reflect.Value) reflectUntyped {

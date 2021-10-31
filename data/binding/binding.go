@@ -99,7 +99,9 @@ func (b *base) trigger() {
 type Untyped interface {
 	DataItem
 	Get() (interface{}, error)
+	MustGet() interface{}
 	Set(interface{}) error
+	MustSet(interface{})
 }
 
 // NewUntyped returns a bindable interface{} value that is managed internally.
@@ -124,6 +126,14 @@ func (b *boundUntyped) Get() (interface{}, error) {
 	return b.val.Interface(), nil
 }
 
+func (b *boundUntyped) MustGet() interface{} {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundUntyped) Set(val interface{}) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -135,6 +145,12 @@ func (b *boundUntyped) Set(val interface{}) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundUntyped) MustSet(val interface{}) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 // ExternalUntyped supports binding a interface{} value to an external value.

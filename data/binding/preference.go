@@ -49,6 +49,14 @@ func (b *prefBoundBool) Get() (bool, error) {
 	return b.cache, nil
 }
 
+func (b *prefBoundBool) MustGet() bool {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *prefBoundBool) Set(v bool) error {
 	b.p.SetBool(b.key, v)
 
@@ -56,6 +64,12 @@ func (b *prefBoundBool) Set(v bool) error {
 	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
+}
+
+func (b *prefBoundBool) MustSet(v bool) {
+	if err := b.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (b *prefBoundBool) checkForChange() {
@@ -107,6 +121,14 @@ func (b *prefBoundFloat) Get() (float64, error) {
 	return b.cache, nil
 }
 
+func (b *prefBoundFloat) MustGet() float64 {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *prefBoundFloat) Set(v float64) error {
 	b.p.SetFloat(b.key, v)
 
@@ -114,6 +136,12 @@ func (b *prefBoundFloat) Set(v float64) error {
 	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
+}
+
+func (b *prefBoundFloat) MustSet(v float64) {
+	if err := b.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (b *prefBoundFloat) checkForChange() {
@@ -165,6 +193,14 @@ func (b *prefBoundInt) Get() (int, error) {
 	return b.cache, nil
 }
 
+func (b *prefBoundInt) MustGet() int {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *prefBoundInt) Set(v int) error {
 	b.p.SetInt(b.key, v)
 
@@ -172,6 +208,12 @@ func (b *prefBoundInt) Set(v int) error {
 	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
+}
+
+func (b *prefBoundInt) MustSet(v int) {
+	if err := b.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (b *prefBoundInt) checkForChange() {
@@ -223,6 +265,14 @@ func (b *prefBoundString) Get() (string, error) {
 	return b.cache, nil
 }
 
+func (b *prefBoundString) MustGet() string {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *prefBoundString) Set(v string) error {
 	b.p.SetString(b.key, v)
 
@@ -230,6 +280,12 @@ func (b *prefBoundString) Set(v string) error {
 	defer b.lock.RUnlock()
 	b.trigger()
 	return nil
+}
+
+func (b *prefBoundString) MustSet(v string) {
+	if err := b.Set(v); err != nil {
+		panic(err)
+	}
 }
 
 func (b *prefBoundString) checkForChange() {

@@ -11,7 +11,9 @@ import "fyne.io/fyne/v2"
 type Bool interface {
 	DataItem
 	Get() (bool, error)
+	MustGet() bool
 	Set(bool) error
+	MustSet(bool)
 }
 
 // ExternalBool supports binding a bool value to an external value.
@@ -61,6 +63,14 @@ func (b *boundBool) Get() (bool, error) {
 	return *b.val, nil
 }
 
+func (b *boundBool) MustGet() bool {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundBool) Set(val bool) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -71,6 +81,12 @@ func (b *boundBool) Set(val bool) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundBool) MustSet(val bool) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternalBool struct {
@@ -102,7 +118,9 @@ func (b *boundExternalBool) Reload() error {
 type Float interface {
 	DataItem
 	Get() (float64, error)
+	MustGet() float64
 	Set(float64) error
+	MustSet(float64)
 }
 
 // ExternalFloat supports binding a float64 value to an external value.
@@ -152,6 +170,14 @@ func (b *boundFloat) Get() (float64, error) {
 	return *b.val, nil
 }
 
+func (b *boundFloat) MustGet() float64 {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundFloat) Set(val float64) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -162,6 +188,12 @@ func (b *boundFloat) Set(val float64) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundFloat) MustSet(val float64) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternalFloat struct {
@@ -193,7 +225,9 @@ func (b *boundExternalFloat) Reload() error {
 type Int interface {
 	DataItem
 	Get() (int, error)
+	MustGet() int
 	Set(int) error
+	MustSet(int)
 }
 
 // ExternalInt supports binding a int value to an external value.
@@ -243,6 +277,14 @@ func (b *boundInt) Get() (int, error) {
 	return *b.val, nil
 }
 
+func (b *boundInt) MustGet() int {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundInt) Set(val int) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -253,6 +295,12 @@ func (b *boundInt) Set(val int) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundInt) MustSet(val int) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternalInt struct {
@@ -284,7 +332,9 @@ func (b *boundExternalInt) Reload() error {
 type Rune interface {
 	DataItem
 	Get() (rune, error)
+	MustGet() rune
 	Set(rune) error
+	MustSet(rune)
 }
 
 // ExternalRune supports binding a rune value to an external value.
@@ -334,6 +384,14 @@ func (b *boundRune) Get() (rune, error) {
 	return *b.val, nil
 }
 
+func (b *boundRune) MustGet() rune {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundRune) Set(val rune) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -344,6 +402,12 @@ func (b *boundRune) Set(val rune) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundRune) MustSet(val rune) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternalRune struct {
@@ -375,7 +439,9 @@ func (b *boundExternalRune) Reload() error {
 type String interface {
 	DataItem
 	Get() (string, error)
+	MustGet() string
 	Set(string) error
+	MustSet(string)
 }
 
 // ExternalString supports binding a string value to an external value.
@@ -425,6 +491,14 @@ func (b *boundString) Get() (string, error) {
 	return *b.val, nil
 }
 
+func (b *boundString) MustGet() string {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundString) Set(val string) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -435,6 +509,12 @@ func (b *boundString) Set(val string) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundString) MustSet(val string) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternalString struct {
@@ -466,7 +546,9 @@ func (b *boundExternalString) Reload() error {
 type URI interface {
 	DataItem
 	Get() (fyne.URI, error)
+	MustGet() fyne.URI
 	Set(fyne.URI) error
+	MustSet(fyne.URI)
 }
 
 // ExternalURI supports binding a fyne.URI value to an external value.
@@ -516,6 +598,14 @@ func (b *boundURI) Get() (fyne.URI, error) {
 	return *b.val, nil
 }
 
+func (b *boundURI) MustGet() fyne.URI {
+	val, err := b.Get()
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func (b *boundURI) Set(val fyne.URI) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -526,6 +616,12 @@ func (b *boundURI) Set(val fyne.URI) error {
 
 	b.trigger()
 	return nil
+}
+
+func (b *boundURI) MustSet(val fyne.URI) {
+	if err := b.Set(val); err != nil {
+		panic(err)
+	}
 }
 
 type boundExternalURI struct {
