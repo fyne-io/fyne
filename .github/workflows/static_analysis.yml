@@ -1,11 +1,15 @@
 name: Static Analysis
 on: [push, pull_request]
+permissions:
+  contents: read
 
 jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
     - uses: WillAbides/setup-go-faster@v1.6.0
       with:
         go-version: '1.17.x'
