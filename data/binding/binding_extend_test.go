@@ -8,11 +8,11 @@ import (
 
 func TestMustBinding(t *testing.T) {
 	type someStruct struct {
-		Exposed string
+		Exposed   string
 		unexposed bool
 	}
 	structVal := someStruct{
-		Exposed: "I'm an exposed string",
+		Exposed:   "I'm an exposed string",
 		unexposed: true,
 	}
 	sbind := BindStruct(&structVal)
