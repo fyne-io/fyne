@@ -1,11 +1,18 @@
 name: Static Analysis
 on: [push, pull_request]
+permissions:
+  contents: read
 
 jobs:
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
     steps:
     - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
     - uses: WillAbides/setup-go-faster@v1.6.0
       with:
         go-version: '1.17.x'
@@ -16,7 +23,7 @@ jobs:
         go install golang.org/x/tools/cmd/goimports@latest
         go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
         go install golang.org/x/lint/golint@latest
-        go install honnef.co/go/tools/cmd/staticcheck@v0.2.0
+        go install honnef.co/go/tools/cmd/staticcheck@v0.2.1
 
     - name: Cleanup repository
       run: rm -rf vendor/

@@ -1,5 +1,7 @@
 name: Platform Tests
 on: [push, pull_request]
+permissions:
+  contents: read
 
 jobs:
   platform_tests:
@@ -12,6 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
     - uses: WillAbides/setup-go-faster@v1.5.0
       id: setup-go-faster
       with:
