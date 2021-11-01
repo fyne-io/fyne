@@ -186,7 +186,7 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	if !c.focused {
+	if !c.focused && !fyne.CurrentDevice().IsMobile() {
 		fyne.CurrentApp().Driver().CanvasForObject(c.super()).Focus(c.super().(fyne.Focusable))
 	}
 	if !c.Disabled() {

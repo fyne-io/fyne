@@ -84,7 +84,9 @@ func (p *PopUpMenu) Show() {
 
 	p.overlay.Show()
 	p.Menu.Show()
-	p.canvas.Focus(p)
+	if !fyne.CurrentDevice().IsMobile() {
+		p.canvas.Focus(p)
+	}
 }
 
 // ShowAtPosition shows the pop-up menu at the specified position.
