@@ -329,8 +329,6 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 			return true
 		} else if _, ok := object.(mobile.Touchable); ok {
 			return true
-		} else if _, ok := object.(fyne.Focusable); ok {
-			return true
 		} else if _, ok := object.(fyne.DoubleTappable); ok {
 			return true
 		}
