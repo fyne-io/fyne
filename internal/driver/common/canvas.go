@@ -46,7 +46,13 @@ type Canvas struct {
 	// the refreshQueue is an unbounded queue which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.CanvasObjectQueue
-	dirty        uint64 // atomic
+
+	// Align with 64-bit the dirty field. Failing to do so on 32 bits
+	// causes the error: "panic: unaligned 64-bit atomic operation"
+	// TODO: remove this once 64-bit fields are 64-bit aligned on 32-bit
+	// systems. See: https://github.com/golang/go/issues/36606
+	pad   uint32 // unused
+	dirty uint64 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
