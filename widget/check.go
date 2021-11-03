@@ -102,9 +102,7 @@ func (c *checkRenderer) updateFocusIndicator() {
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
 	DisableableWidget
-	Text string
-
-	// Deprecated: Use SetChecked and IsChecked instead.
+	Text      string
 	Checked   bool
 	OnChanged func(bool) `json:"-"`
 
@@ -154,7 +152,7 @@ func (c *Check) SetChecked(checked bool) {
 
 // IsChecked checks if the given Check is checked.
 //
-// Since: 2.0
+// Since: 2.2
 func (c *Check) IsChecked() bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
