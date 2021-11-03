@@ -104,8 +104,19 @@ func (p *ProgressBar) Bind(data binding.Float) {
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
+	p.propertyLock.Lock()
 	p.Value = v
+	p.propertyLock.Unlock()
 	p.Refresh()
+}
+
+// GetValue returns the current progress bar value.
+//
+// Since: 2.2
+func (p *ProgressBar) GetValue() float64 {
+	p.propertyLock.RLock()
+	defer p.propertyLock.RUnlock()
+	return p.Value
 }
 
 // MinSize returns the size that this widget should not shrink below

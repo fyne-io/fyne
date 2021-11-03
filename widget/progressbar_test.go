@@ -14,28 +14,28 @@ func TestNewProgressBarWithData(t *testing.T) {
 	val := binding.NewFloat()
 	val.Set(0.4)
 
-	label := NewProgressBarWithData(val)
+	bar := NewProgressBarWithData(val)
 	waitForBinding()
-	assert.Equal(t, 0.4, label.Value)
+	assert.Equal(t, 0.4, bar.GetValue())
 }
 
 func TestProgressBar_Binding(t *testing.T) {
 	bar := NewProgressBar()
-	assert.Equal(t, 0.0, bar.Value)
+	assert.Equal(t, 0.0, bar.GetValue())
 
 	val := binding.NewFloat()
 	val.Set(0.1)
 	bar.Bind(val)
 	waitForBinding()
-	assert.Equal(t, 0.1, bar.Value)
+	assert.Equal(t, 0.1, bar.GetValue())
 
 	val.Set(0.4)
 	waitForBinding()
-	assert.Equal(t, 0.4, bar.Value)
+	assert.Equal(t, 0.4, bar.GetValue())
 
 	bar.Unbind()
 	waitForBinding()
-	assert.Equal(t, 0.4, bar.Value)
+	assert.Equal(t, 0.4, bar.GetValue())
 }
 
 func TestProgressBar_SetValue(t *testing.T) {
@@ -43,10 +43,10 @@ func TestProgressBar_SetValue(t *testing.T) {
 
 	assert.Equal(t, 0.0, bar.Min)
 	assert.Equal(t, 1.0, bar.Max)
-	assert.Equal(t, 0.0, bar.Value)
+	assert.Equal(t, 0.0, bar.GetValue())
 
 	bar.SetValue(.5)
-	assert.Equal(t, .5, bar.Value)
+	assert.Equal(t, .5, bar.GetValue())
 }
 
 func TestProgressBar_TextFormatter(t *testing.T) {
@@ -58,7 +58,7 @@ func TestProgressBar_TextFormatter(t *testing.T) {
 
 	formatter := func() string {
 		formatted = true
-		return fmt.Sprintf("%.2f out of %.2f", bar.Value, bar.Max)
+		return fmt.Sprintf("%.2f out of %.2f", bar.GetValue(), bar.Max)
 	}
 	bar.TextFormatter = formatter
 
