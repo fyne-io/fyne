@@ -37,6 +37,15 @@ func (binder *basicBinder) Bind(data binding.DataItem) {
 	binder.dataListenerPairLock.Unlock()
 }
 
+// CallWithData passes the currently bound data item as an argument to the
+// provided function.
+func (binder *basicBinder) CallWithData(f func(data binding.DataItem)) {
+	binder.dataListenerPairLock.RLock()
+	data := binder.dataListenerPair.data
+	binder.dataListenerPairLock.RUnlock()
+	f(data)
+}
+
 // SetCallback replaces the function to be called when the data changes.
 func (binder *basicBinder) SetCallback(f func(data binding.DataItem)) {
 	binder.callbackLock.Lock()
