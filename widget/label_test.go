@@ -15,20 +15,20 @@ import (
 
 func TestLabel_Binding(t *testing.T) {
 	label := NewLabel("Init")
-	assert.Equal(t, "Init", label.Text)
+	assert.Equal(t, "Init", label.GetText())
 
 	str := binding.NewString()
 	label.Bind(str)
 	waitForBinding()
-	assert.Equal(t, "", label.Text)
+	assert.Equal(t, "", label.GetText())
 
 	str.Set("Updated")
 	waitForBinding()
-	assert.Equal(t, "Updated", label.Text)
+	assert.Equal(t, "Updated", label.GetText())
 
 	label.Unbind()
 	waitForBinding()
-	assert.Equal(t, "Updated", label.Text)
+	assert.Equal(t, "Updated", label.GetText())
 }
 
 func TestLabel_Hide(t *testing.T) {
@@ -55,8 +55,7 @@ func TestLabel_MinSize(t *testing.T) {
 	minB := label.MinSize()
 	assert.Less(t, minA.Width, minB.Width)
 
-	label.Text = "."
-	label.Refresh()
+	label.SetText(".")
 	minC := label.MinSize()
 	assert.Greater(t, minB.Width, minC.Width)
 }
@@ -79,19 +78,18 @@ func TestLabel_Text(t *testing.T) {
 	label := &Label{Text: "Test"}
 	label.Refresh()
 
-	assert.Equal(t, "Test", label.Text)
+	assert.Equal(t, "Test", label.GetText())
 	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
 }
 
 func TestLabel_Text_Refresh(t *testing.T) {
 	label := &Label{Text: ""}
 
-	assert.Equal(t, "", label.Text)
+	assert.Equal(t, "", label.GetText())
 	assert.Equal(t, "", textRenderTexts(label)[0].Text)
 
-	label.Text = "Test"
-	label.Refresh()
-	assert.Equal(t, "Test", label.Text)
+	label.SetText("Test")
+	assert.Equal(t, "Test", label.GetText())
 	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
 }
 
@@ -101,7 +99,7 @@ func TestLabel_SetText(t *testing.T) {
 	label.Refresh()
 	label.SetText("New")
 
-	assert.Equal(t, "New", label.Text)
+	assert.Equal(t, "New", label.GetText())
 	assert.Equal(t, "New", textRenderTexts(label)[0].Text)
 }
 
@@ -202,5 +200,5 @@ func TestNewLabelWithData(t *testing.T) {
 
 	label := NewLabelWithData(str)
 	waitForBinding()
-	assert.Equal(t, "Init", label.Text)
+	assert.Equal(t, "Init", label.GetText())
 }

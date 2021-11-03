@@ -111,8 +111,19 @@ func (l *Label) Resize(s fyne.Size) {
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
+	l.propertyLock.Lock()
 	l.Text = text
+	l.propertyLock.Unlock()
 	l.Refresh()
+}
+
+// GetText returns the text of the label
+//
+// Since: 2.1
+func (l *Label) GetText() string {
+	l.propertyLock.RLock()
+	defer l.propertyLock.RUnlock()
+	return l.Text
 }
 
 // Unbind disconnects any configured data source from this Label.
