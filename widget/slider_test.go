@@ -18,7 +18,7 @@ func TestNewSliderWithData(t *testing.T) {
 
 	s := NewSliderWithData(0, 10, val)
 	waitForBinding()
-	assert.Equal(t, 4.0, s.Value)
+	assert.Equal(t, 4.0, s.GetValue())
 
 	s.SetValue(2.0)
 	f, err := val.Get()
@@ -29,17 +29,17 @@ func TestNewSliderWithData(t *testing.T) {
 func TestSlider_Binding(t *testing.T) {
 	s := NewSlider(0, 10)
 	s.SetValue(2)
-	assert.Equal(t, 2.0, s.Value)
+	assert.Equal(t, 2.0, s.GetValue())
 
 	val := binding.NewFloat()
 	s.Bind(val)
 	waitForBinding()
-	assert.Equal(t, 0.0, s.Value)
+	assert.Equal(t, 0.0, s.GetValue())
 
 	err := val.Set(3)
 	assert.Nil(t, err)
 	waitForBinding()
-	assert.Equal(t, 3.0, s.Value)
+	assert.Equal(t, 3.0, s.GetValue())
 
 	s.SetValue(5)
 	f, err := val.Get()
@@ -48,7 +48,7 @@ func TestSlider_Binding(t *testing.T) {
 
 	s.Unbind()
 	waitForBinding()
-	assert.Equal(t, 5.0, s.Value)
+	assert.Equal(t, 5.0, s.GetValue())
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {

@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"math"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -69,9 +70,11 @@ func (s *Slider) Bind(data binding.Float) {
 	s.binder.SetCallback(s.updateFromData)
 	s.binder.Bind(data)
 
+	s.propertyLock.Lock()
 	s.OnChanged = func(_ float64) {
 		s.binder.CallWithData(s.writeData)
 	}
+	s.propertyLock.Unlock()
 }
 
 // DragEnd function.
@@ -82,19 +85,23 @@ func (s *Slider) DragEnd() {
 func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
 
+	s.propertyLock.Lock()
 	lastValue := s.Value
-
 	s.updateValue(ratio)
 
 	if s.almostEqual(lastValue, s.Value) {
+		s.propertyLock.Unlock()
 		return
 	}
+	s.propertyLock.Unlock()
 
 	s.Refresh()
 
+	s.propertyLock.RLock()
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
+	s.propertyLock.RUnlock()
 }
 
 func (s *Slider) buttonDiameter() float32 {
@@ -164,24 +171,37 @@ func (s *Slider) updateValue(ratio float64) {
 
 // SetValue updates the value of the slider and clamps the value to be within the range.
 func (s *Slider) SetValue(value float64) {
+	s.propertyLock.Lock()
 	if s.Value == value {
+		s.propertyLock.Unlock()
 		return
 	}
 
 	lastValue := s.Value
-
 	s.Value = value
+
 	s.clampValueToRange()
 
 	if s.almostEqual(lastValue, s.Value) {
+		s.propertyLock.Unlock()
 		return
 	}
 
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
+	s.propertyLock.Unlock()
 
 	s.Refresh()
+}
+
+// GetValue returns the value of the slider.
+//
+// Since: 2.2
+func (s *Slider) GetValue() float64 {
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
+	return s.Value
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -201,7 +221,13 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{track, active, thumb}
 
-	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
+	slide := &sliderRenderer{
+		BaseRenderer: widget.NewBaseRenderer(objects),
+		track:        track,
+		active:       active,
+		thumb:        thumb,
+		slider:       s,
+	}
 	slide.Refresh() // prepare for first draw
 	return slide
 }
@@ -264,6 +290,8 @@ const (
 
 type sliderRenderer struct {
 	widget.BaseRenderer
+
+	mu     sync.Mutex
 	track  *canvas.Rectangle
 	active *canvas.Rectangle
 	thumb  *canvas.Circle
@@ -272,12 +300,18 @@ type sliderRenderer struct {
 
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
+	s.mu.Lock()
 	s.track.FillColor = theme.ShadowColor()
 	s.thumb.FillColor = theme.ForegroundColor()
 	s.active.FillColor = theme.ForegroundColor()
+	s.mu.Unlock()
 
+	s.slider.propertyLock.Lock()
 	s.slider.clampValueToRange()
+	s.slider.propertyLock.Unlock()
+
 	s.Layout(s.slider.Size())
+
 	canvas.Refresh(s.slider.super())
 }
 
