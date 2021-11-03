@@ -6,6 +6,7 @@ package mobile
 import (
 	"image/color"
 	"os"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -245,13 +246,13 @@ func TestCanvas_Tappable(t *testing.T) {
 }
 
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
-	tapped := 0
+	tapped := uint32(0)
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
-		tapped = 1
+		atomic.StoreUint32(&tapped, 1)
 	}
 	but.onDoubleTap = func() {
-		tapped = 2
+		atomic.StoreUint32(&tapped, 2)
 	}
 
 	c := NewCanvas().(*mobileCanvas)
@@ -260,12 +261,12 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 
 	simulateTap(c)
 	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 1, tapped)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&tapped)))
 
 	simulateTap(c)
 	simulateTap(c)
 	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 2, tapped)
+	assert.Equal(t, 2, int(atomic.LoadUint32(&tapped)))
 }
 
 func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
@@ -300,33 +301,33 @@ func TestCanvas_Focusable(t *testing.T) {
 		wid.Tapped(ev)
 	}, nil, nil, nil)
 	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.focusedTimes)))
+	assert.Equal(t, 0, int(atomic.LoadUint32(&content.unfocusedTimes)))
 
 	c.tapDown(pos, 1)
 	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, nil, nil, nil)
 	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.focusedTimes)))
+	assert.Equal(t, 0, int(atomic.LoadUint32(&content.unfocusedTimes)))
 
 	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.focusedTimes)))
+	assert.Equal(t, 0, int(atomic.LoadUint32(&content.unfocusedTimes)))
 
 	c.Unfocus()
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.focusedTimes)))
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.unfocusedTimes)))
 
 	content.Disable()
 	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.focusedTimes)))
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.unfocusedTimes)))
 
 	c.tapDown(fyne.NewPos(10, 10), 2)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.focusedTimes)))
+	assert.Equal(t, 1, int(atomic.LoadUint32(&content.unfocusedTimes)))
 }
 
 type touchableLabel struct {
@@ -363,8 +364,8 @@ type focusableEntry struct {
 	widget.Entry
 	c fyne.Canvas
 
-	focusedTimes   int
-	unfocusedTimes int
+	focusedTimes   uint32 // atomic
+	unfocusedTimes uint32 // atomic
 }
 
 func newFocusableEntry(c fyne.Canvas) *focusableEntry {
@@ -374,12 +375,12 @@ func newFocusableEntry(c fyne.Canvas) *focusableEntry {
 }
 
 func (f *focusableEntry) FocusGained() {
-	f.focusedTimes++
+	atomic.AddUint32(&f.focusedTimes, 1)
 	f.Entry.FocusGained()
 }
 
 func (f *focusableEntry) FocusLost() {
-	f.unfocusedTimes++
+	atomic.AddUint32(&f.unfocusedTimes, 1)
 	f.Entry.FocusLost()
 }
 

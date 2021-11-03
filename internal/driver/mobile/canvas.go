@@ -41,7 +41,7 @@ type mobileCanvas struct {
 	dragging              fyne.Draggable
 	dragStart, dragOffset fyne.Position
 
-	touchTapCount   int
+	touchTapCount   uint32
 	touchCancelFunc context.CancelFunc
 	touchLastTapped fyne.CanvasObject
 }
@@ -353,10 +353,13 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	if duration < tapSecondaryDelay {
 		_, doubleTap := co.(fyne.DoubleTappable)
 		if doubleTap {
+			c.Lock()
 			c.touchTapCount++
 			c.touchLastTapped = co
-			if c.touchCancelFunc != nil {
-				c.touchCancelFunc()
+			cancel := c.touchCancelFunc
+			c.Unlock()
+			if cancel != nil {
+				cancel()
 				return
 			}
 			go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
@@ -373,11 +376,29 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 }
 
 func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
-	var ctx context.Context
-	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
-	defer c.touchCancelFunc()
+	ctx, cancel := context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+
+	c.Lock()
+	c.touchCancelFunc = cancel
+	c.Unlock()
+
+	defer func() {
+		c.Lock()
+		cancel := c.touchCancelFunc
+		c.Unlock()
+
+		if cancel != nil {
+			cancel()
+		}
+	}()
 	<-ctx.Done()
-	if c.touchTapCount == 2 && c.touchLastTapped == co {
+
+	c.Lock()
+	count := c.touchTapCount
+	last := c.touchLastTapped
+	c.Unlock()
+
+	if count == 2 && last == co {
 		if wid, ok := co.(fyne.DoubleTappable); ok {
 			doubleTapCallback(wid, ev)
 		}
@@ -386,7 +407,10 @@ func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEven
 			tapCallback(wid, ev)
 		}
 	}
+
+	c.Lock()
 	c.touchTapCount = 0
 	c.touchCancelFunc = nil
 	c.touchLastTapped = nil
+	c.Unlock()
 }
