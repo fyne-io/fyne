@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -58,12 +59,12 @@ func (c *checkRenderer) applyTheme() {
 }
 
 func (c *checkRenderer) Refresh() {
-	c.check.propertyLock.RLock()
+	c.check.mu.RLock()
 	c.applyTheme()
 	c.updateLabel()
 	c.updateResource()
 	c.updateFocusIndicator()
-	c.check.propertyLock.RUnlock()
+	c.check.mu.RUnlock()
 	canvas.Refresh(c.check.super())
 }
 
@@ -73,7 +74,7 @@ func (c *checkRenderer) updateLabel() {
 
 func (c *checkRenderer) updateResource() {
 	res := theme.CheckButtonIcon()
-	if c.check.Checked {
+	if c.check.IsChecked() {
 		res = theme.NewPrimaryThemedResource(theme.CheckButtonCheckedIcon())
 	}
 	if c.check.Disabled() {
@@ -101,15 +102,18 @@ func (c *checkRenderer) updateFocusIndicator() {
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
 	DisableableWidget
-	Text    string
-	Checked bool
+	Text string
 
+	// Deprecated: Use SetChecked and IsChecked instead.
+	Checked   bool
 	OnChanged func(bool) `json:"-"`
 
 	focused bool
 	hovered bool
 
 	binder basicBinder
+
+	mu sync.RWMutex
 }
 
 // Bind connects the specified data source to this Check.
@@ -121,24 +125,40 @@ func (c *Check) Bind(data binding.Bool) {
 	c.binder.SetCallback(c.updateFromData)
 	c.binder.Bind(data)
 
+	c.mu.Lock()
 	c.OnChanged = func(_ bool) {
 		c.binder.CallWithData(c.writeData)
 	}
+	c.mu.Unlock()
 }
 
 // SetChecked sets the the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
+	c.mu.RLock()
 	if checked == c.Checked {
+		c.mu.RUnlock()
 		return
 	}
+	c.mu.RUnlock()
 
+	c.mu.Lock()
 	c.Checked = checked
-
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
+	callback := c.OnChanged
+	c.mu.Unlock()
+	if callback != nil {
+		callback(c.Checked)
 	}
 
 	c.Refresh()
+}
+
+// IsChecked checks if the given Check is checked.
+//
+// Since: 2.0
+func (c *Check) IsChecked() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.Checked
 }
 
 // Hide this widget, if it was previously visible

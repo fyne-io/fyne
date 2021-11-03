@@ -15,17 +15,17 @@ import (
 func TestCheck_Binding(t *testing.T) {
 	c := widget.NewCheck("", nil)
 	c.SetChecked(true)
-	assert.Equal(t, true, c.Checked)
+	assert.Equal(t, true, c.IsChecked())
 
 	val := binding.NewBool()
 	c.Bind(val)
 	waitForBinding()
-	assert.Equal(t, false, c.Checked)
+	assert.Equal(t, false, c.IsChecked())
 
 	err := val.Set(true)
 	assert.Nil(t, err)
 	waitForBinding()
-	assert.Equal(t, true, c.Checked)
+	assert.Equal(t, true, c.IsChecked())
 
 	c.SetChecked(false)
 	v, err := val.Get()
@@ -34,7 +34,7 @@ func TestCheck_Binding(t *testing.T) {
 
 	c.Unbind()
 	waitForBinding()
-	assert.Equal(t, false, c.Checked)
+	assert.Equal(t, false, c.IsChecked())
 }
 
 func TestCheck_Layout(t *testing.T) {
@@ -89,7 +89,7 @@ func TestNewCheckWithData(t *testing.T) {
 
 	c := widget.NewCheckWithData("", val)
 	waitForBinding()
-	assert.Equal(t, true, c.Checked)
+	assert.Equal(t, true, c.IsChecked())
 
 	c.SetChecked(false)
 	v, err := val.Get()
