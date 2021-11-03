@@ -119,7 +119,7 @@ func (l *Label) SetText(text string) {
 
 // GetText returns the text of the label
 //
-// Since: 2.1
+// Since: 2.2
 func (l *Label) GetText() string {
 	l.propertyLock.RLock()
 	defer l.propertyLock.RUnlock()
