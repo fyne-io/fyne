@@ -438,7 +438,7 @@ func TextSubHeadingSize() float32 {
 var (
 	defaultTheme = setupDefaultTheme()
 
-	errorColor  = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
+	errorColor  = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
 	focusColors = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
@@ -473,33 +473,33 @@ var (
 	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
 
 	darkPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{0x30, 0x30, 0x30, 0xff},
+		ColorNameBackground:      color.NRGBA{R: 0x30, G: 0x30, B: 0x30, A: 0xff},
 		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{0xff, 0xff, 0xff, 0x42},
-		ColorNameDisabledButton:  color.NRGBA{0x26, 0x26, 0x26, 0xff},
+		ColorNameDisabled:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x42},
+		ColorNameDisabledButton:  color.NRGBA{R: 0x26, G: 0x26, B: 0x26, A: 0xff},
 		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		ColorNameHover:           color.NRGBA{0xff, 0xff, 0xff, 0x0f},
-		ColorNameInputBackground: color.NRGBA{0xff, 0xff, 0xff, 0x19},
-		ColorNamePlaceHolder:     color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		ColorNamePressed:         color.NRGBA{0xff, 0xff, 0xff, 0x66},
-		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		ColorNameForeground:      color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
+		ColorNameHover:           color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f},
+		ColorNameInputBackground: color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x19},
+		ColorNamePlaceHolder:     color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff},
+		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
+		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameShadow:          color.NRGBA{A: 0x66},
 	}
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameBackground:      color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{0x0, 0x0, 0x0, 0x42},
-		ColorNameDisabledButton:  color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
+		ColorNameDisabled:        color.NRGBA{A: 0x42},
+		ColorNameDisabledButton:  color.NRGBA{R: 0xe5, G: 0xe5, B: 0xe5, A: 0xff},
 		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		ColorNameHover:           color.NRGBA{0x0, 0x0, 0x0, 0x0f},
-		ColorNameInputBackground: color.NRGBA{0x0, 0x0, 0x0, 0x19},
-		ColorNamePlaceHolder:     color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		ColorNamePressed:         color.NRGBA{0x0, 0x0, 0x0, 0x19},
-		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x33},
+		ColorNameForeground:      color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xff},
+		ColorNameHover:           color.NRGBA{A: 0x0f},
+		ColorNameInputBackground: color.NRGBA{A: 0x19},
+		ColorNamePlaceHolder:     color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
+		ColorNamePressed:         color.NRGBA{A: 0x19},
+		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameShadow:          color.NRGBA{A: 0x33},
 	}
 )
 
