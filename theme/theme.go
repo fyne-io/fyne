@@ -197,7 +197,7 @@ func CaptionTextSize() float32 {
 	return current().Size(SizeNameCaptionText)
 }
 
-// DarkTheme defines the built in dark theme colors and sizes.
+// DarkTheme defines the built-in dark theme colors and sizes.
 //
 // Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
 func DarkTheme() fyne.Theme {
@@ -299,7 +299,7 @@ func InputBorderSize() float32 {
 	return current().Size(SizeNameInputBorder)
 }
 
-// LightTheme defines the built in light theme colors and sizes.
+// LightTheme defines the built-in light theme colors and sizes.
 //
 // Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
 func LightTheme() fyne.Theme {
