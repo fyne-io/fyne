@@ -370,14 +370,6 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	}
 }
 
-func current() fyne.Theme {
-	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
-		return DarkTheme()
-	}
-
-	return fyne.CurrentApp().Settings().Theme()
-}
-
 // BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
 	return safeColorLookup(ColorNameBackground, currentVariant())
@@ -602,6 +594,14 @@ func PrimaryColorNamed(name string) color.Color {
 		return primaryColors[ColorBlue]
 	}
 	return col
+}
+
+func current() fyne.Theme {
+	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
+		return DarkTheme()
+	}
+
+	return fyne.CurrentApp().Settings().Theme()
 }
 
 func currentVariant() fyne.ThemeVariant {
