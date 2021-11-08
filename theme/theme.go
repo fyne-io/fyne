@@ -182,33 +182,6 @@ const (
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
 )
 
-// DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
-//
-// Since: 2.0
-func DefaultTheme() fyne.Theme {
-	return defaultTheme
-}
-
-// LightTheme defines the built in light theme colors and sizes.
-//
-// Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
-func LightTheme() fyne.Theme {
-	theme := &builtinTheme{variant: VariantLight}
-
-	theme.initFonts()
-	return theme
-}
-
-// DarkTheme defines the built in dark theme colors and sizes.
-//
-// Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
-func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{variant: VariantDark}
-
-	theme.initFonts()
-	return theme
-}
-
 // BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
 	return safeColorLookup(ColorNameBackground, currentVariant())
@@ -224,16 +197,51 @@ func CaptionTextSize() float32 {
 	return current().Size(SizeNameCaptionText)
 }
 
+// DarkTheme defines the built in dark theme colors and sizes.
+//
+// Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
+func DarkTheme() fyne.Theme {
+	theme := &builtinTheme{variant: VariantDark}
+
+	theme.initFonts()
+	return theme
+}
+
+// DefaultTextBoldFont returns the font resource for the built-in bold font style
+func DefaultTextBoldFont() fyne.Resource {
+	return bold
+}
+
+// DefaultTextBoldItalicFont returns the font resource for the built-in bold and italic font style
+func DefaultTextBoldItalicFont() fyne.Resource {
+	return bolditalic
+}
+
+// DefaultTextFont returns the font resource for the built-in regular font style
+func DefaultTextFont() fyne.Resource {
+	return regular
+}
+
+// DefaultTextItalicFont returns the font resource for the built-in italic font style
+func DefaultTextItalicFont() fyne.Resource {
+	return italic
+}
+
+// DefaultTextMonospaceFont returns the font resource for the built-in monospace font face
+func DefaultTextMonospaceFont() fyne.Resource {
+	return monospace
+}
+
+// DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
+//
+// Since: 2.0
+func DefaultTheme() fyne.Theme {
+	return defaultTheme
+}
+
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
 	return safeColorLookup(ColorNameDisabledButton, currentVariant())
-}
-
-// TextColor returns the theme's standard text color - this is actually the foreground color since 1.4.
-//
-// Deprecated: Use theme.ForegroundColor() colour instead
-func TextColor() color.Color {
-	return safeColorLookup(ColorNameForeground, currentVariant())
 }
 
 // DisabledColor returns the foreground color for a disabled UI element
@@ -257,6 +265,56 @@ func ErrorColor() color.Color {
 	return safeColorLookup(ColorNameError, currentVariant())
 }
 
+// FocusColor returns the color used to highlight a focused widget
+func FocusColor() color.Color {
+	return safeColorLookup(ColorNameFocus, currentVariant())
+}
+
+// ForegroundColor returns the theme's standard foreground color for text and icons
+//
+// Since: 2.0
+func ForegroundColor() color.Color {
+	return safeColorLookup(ColorNameForeground, currentVariant())
+}
+
+// HoverColor returns the color used to highlight interactive elements currently under a cursor
+func HoverColor() color.Color {
+	return safeColorLookup(ColorNameHover, currentVariant())
+}
+
+// IconInlineSize is the standard size of icons which appear within buttons, labels etc.
+func IconInlineSize() float32 {
+	return current().Size(SizeNameInlineIcon)
+}
+
+// InputBackgroundColor returns the color used to draw underneath input elements.
+func InputBackgroundColor() color.Color {
+	return current().Color(ColorNameInputBackground, currentVariant())
+}
+
+// InputBorderSize returns the input border size (or underline size for an entry).
+//
+// Since: 2.0
+func InputBorderSize() float32 {
+	return current().Size(SizeNameInputBorder)
+}
+
+// LightTheme defines the built in light theme colors and sizes.
+//
+// Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
+func LightTheme() fyne.Theme {
+	theme := &builtinTheme{variant: VariantLight}
+
+	theme.initFonts()
+	return theme
+}
+
+// Padding is the standard gap between elements and the border around interface
+// elements
+func Padding() float32 {
+	return current().Size(SizeNamePadding)
+}
+
 // PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
 	return safeColorLookup(ColorNamePlaceHolder, currentVariant())
@@ -274,26 +332,37 @@ func PrimaryColor() color.Color {
 	return safeColorLookup(ColorNamePrimary, currentVariant())
 }
 
-// HoverColor returns the color used to highlight interactive elements currently under a cursor
-func HoverColor() color.Color {
-	return safeColorLookup(ColorNameHover, currentVariant())
-}
-
-// FocusColor returns the color used to highlight a focused widget
-func FocusColor() color.Color {
-	return safeColorLookup(ColorNameFocus, currentVariant())
-}
-
-// ForegroundColor returns the theme's standard foreground color for text and icons
+// PrimaryColorNamed returns a theme specific color value for a named primary color.
 //
-// Since: 2.0
-func ForegroundColor() color.Color {
-	return safeColorLookup(ColorNameForeground, currentVariant())
+// Since: 1.4
+func PrimaryColorNamed(name string) color.Color {
+	col, ok := primaryColors[name]
+	if !ok {
+		return primaryColors[ColorBlue]
+	}
+	return col
 }
 
-// InputBackgroundColor returns the color used to draw underneath input elements.
-func InputBackgroundColor() color.Color {
-	return current().Color(ColorNameInputBackground, currentVariant())
+// PrimaryColorNames returns a list of the standard primary color options.
+//
+// Since: 1.4
+func PrimaryColorNames() []string {
+	return []string{ColorRed, ColorOrange, ColorYellow, ColorGreen, ColorBlue, ColorPurple, ColorBrown, ColorGray}
+}
+
+// ScrollBarColor returns the color (and translucency) for a scrollBar
+func ScrollBarColor() color.Color {
+	return safeColorLookup(ColorNameScrollBar, currentVariant())
+}
+
+// ScrollBarSize is the width (or height) of the bars on a ScrollContainer
+func ScrollBarSize() float32 {
+	return current().Size(SizeNameScrollBar)
+}
+
+// ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
+func ScrollBarSmallSize() float32 {
+	return current().Size(SizeNameScrollBarSmall)
 }
 
 // SelectionColor returns the color for a selected element.
@@ -303,9 +372,11 @@ func SelectionColor() color.Color {
 	return safeColorLookup(ColorNameSelection, currentVariant())
 }
 
-// ScrollBarColor returns the color (and translucency) for a scrollBar
-func ScrollBarColor() color.Color {
-	return safeColorLookup(ColorNameScrollBar, currentVariant())
+// SeparatorThicknessSize is the standard thickness of the separator widget.
+//
+// Since: 2.0
+func SeparatorThicknessSize() float32 {
+	return current().Size(SizeNameSeparatorThickness)
 }
 
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
@@ -313,26 +384,26 @@ func ShadowColor() color.Color {
 	return safeColorLookup(ColorNameShadow, currentVariant())
 }
 
-// InputBorderSize returns the input border size (or underline size for an entry).
-//
-// Since: 2.0
-func InputBorderSize() float32 {
-	return current().Size(SizeNameInputBorder)
+// TextBoldFont returns the font resource for the bold font style
+func TextBoldFont() fyne.Resource {
+	return safeFontLookup(fyne.TextStyle{Bold: true})
 }
 
-// TextSize returns the standard text size
-func TextSize() float32 {
-	return current().Size(SizeNameText)
+// TextBoldItalicFont returns the font resource for the bold and italic font style
+func TextBoldItalicFont() fyne.Resource {
+	return safeFontLookup(fyne.TextStyle{Bold: true, Italic: true})
+}
+
+// TextColor returns the theme's standard text color - this is actually the foreground color since 1.4.
+//
+// Deprecated: Use theme.ForegroundColor() colour instead
+func TextColor() color.Color {
+	return safeColorLookup(ColorNameForeground, currentVariant())
 }
 
 // TextFont returns the font resource for the regular font style
 func TextFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{})
-}
-
-// TextBoldFont returns the font resource for the bold font style
-func TextBoldFont() fyne.Resource {
-	return safeFontLookup(fyne.TextStyle{Bold: true})
 }
 
 // TextHeadingSize returns the text size for header text.
@@ -347,14 +418,14 @@ func TextItalicFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Italic: true})
 }
 
-// TextBoldItalicFont returns the font resource for the bold and italic font style
-func TextBoldItalicFont() fyne.Resource {
-	return safeFontLookup(fyne.TextStyle{Bold: true, Italic: true})
-}
-
 // TextMonospaceFont returns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Monospace: true})
+}
+
+// TextSize returns the standard text size
+func TextSize() float32 {
+	return current().Size(SizeNameText)
 }
 
 // TextSubHeadingSize returns the text size for sub-header text.
@@ -362,77 +433,6 @@ func TextMonospaceFont() fyne.Resource {
 // Since: 2.1
 func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
-}
-
-// Padding is the standard gap between elements and the border around interface
-// elements
-func Padding() float32 {
-	return current().Size(SizeNamePadding)
-}
-
-// IconInlineSize is the standard size of icons which appear within buttons, labels etc.
-func IconInlineSize() float32 {
-	return current().Size(SizeNameInlineIcon)
-}
-
-// SeparatorThicknessSize is the standard thickness of the separator widget.
-//
-// Since: 2.0
-func SeparatorThicknessSize() float32 {
-	return current().Size(SizeNameSeparatorThickness)
-}
-
-// ScrollBarSize is the width (or height) of the bars on a ScrollContainer
-func ScrollBarSize() float32 {
-	return current().Size(SizeNameScrollBar)
-}
-
-// ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
-func ScrollBarSmallSize() float32 {
-	return current().Size(SizeNameScrollBarSmall)
-}
-
-// DefaultTextFont returns the font resource for the built-in regular font style
-func DefaultTextFont() fyne.Resource {
-	return regular
-}
-
-// DefaultTextBoldFont returns the font resource for the built-in bold font style
-func DefaultTextBoldFont() fyne.Resource {
-	return bold
-}
-
-// DefaultTextItalicFont returns the font resource for the built-in italic font style
-func DefaultTextItalicFont() fyne.Resource {
-	return italic
-}
-
-// DefaultTextBoldItalicFont returns the font resource for the built-in bold and italic font style
-func DefaultTextBoldItalicFont() fyne.Resource {
-	return bolditalic
-}
-
-// DefaultTextMonospaceFont returns the font resource for the built-in monospace font face
-func DefaultTextMonospaceFont() fyne.Resource {
-	return monospace
-}
-
-// PrimaryColorNames returns a list of the standard primary color options.
-//
-// Since: 1.4
-func PrimaryColorNames() []string {
-	return []string{ColorRed, ColorOrange, ColorYellow, ColorGreen, ColorBlue, ColorPurple, ColorBrown, ColorGray}
-}
-
-// PrimaryColorNamed returns a theme specific color value for a named primary color.
-//
-// Since: 1.4
-func PrimaryColorNamed(name string) color.Color {
-	col, ok := primaryColors[name]
-	if !ok {
-		return primaryColors[ColorBlue]
-	}
-	return col
 }
 
 var (
