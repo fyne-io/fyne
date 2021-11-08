@@ -470,8 +470,6 @@ var (
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
 	}
 
-	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
-
 	darkPalette = map[fyne.ThemeColorName]color.Color{
 		ColorNameBackground:      color.NRGBA{R: 0x30, G: 0x30, B: 0x30, A: 0xff},
 		ColorNameButton:          color.Transparent,
