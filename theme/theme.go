@@ -182,80 +182,6 @@ const (
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
 )
 
-var (
-	defaultTheme = setupDefaultTheme()
-
-	errorColor  = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
-	focusColors = map[string]color.Color{
-		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x7f},
-		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f},
-		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f},
-		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f},
-	}
-	primaryColors = map[string]color.Color{
-		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
-		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
-		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
-		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
-	}
-	selectionColors = map[string]color.Color{
-		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x3f},
-		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f},
-		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f},
-		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
-	}
-
-	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
-
-	darkPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{0x30, 0x30, 0x30, 0xff},
-		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{0xff, 0xff, 0xff, 0x42},
-		ColorNameDisabledButton:  color.NRGBA{0x26, 0x26, 0x26, 0xff},
-		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		ColorNameHover:           color.NRGBA{0xff, 0xff, 0xff, 0x0f},
-		ColorNameInputBackground: color.NRGBA{0xff, 0xff, 0xff, 0x19},
-		ColorNamePlaceHolder:     color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		ColorNamePressed:         color.NRGBA{0xff, 0xff, 0xff, 0x66},
-		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x66},
-	}
-
-	lightPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{0x0, 0x0, 0x0, 0x42},
-		ColorNameDisabledButton:  color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
-		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		ColorNameHover:           color.NRGBA{0x0, 0x0, 0x0, 0x0f},
-		ColorNameInputBackground: color.NRGBA{0x0, 0x0, 0x0, 0x19},
-		ColorNamePlaceHolder:     color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		ColorNamePressed:         color.NRGBA{0x0, 0x0, 0x0, 0x19},
-		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x33},
-	}
-)
-
-type builtinTheme struct {
-	variant fyne.ThemeVariant
-
-	regular, bold, italic, boldItalic, monospace fyne.Resource
-}
-
 // DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
 //
 // Since: 2.0
@@ -281,93 +207,6 @@ func DarkTheme() fyne.Theme {
 
 	theme.initFonts()
 	return theme
-}
-
-func (t *builtinTheme) initFonts() {
-	t.regular = regular
-	t.bold = bold
-	t.italic = italic
-	t.boldItalic = bolditalic
-	t.monospace = monospace
-
-	font := os.Getenv("FYNE_FONT")
-	if font != "" {
-		t.regular = loadCustomFont(font, "Regular", regular)
-		t.bold = loadCustomFont(font, "Bold", bold)
-		t.italic = loadCustomFont(font, "Italic", italic)
-		t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
-	}
-	font = os.Getenv("FYNE_FONT_MONOSPACE")
-	if font != "" {
-		t.monospace = loadCustomFont(font, "Regular", monospace)
-	}
-}
-
-func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	if t.variant != variantNameUserPreference {
-		v = t.variant
-	}
-	colors := darkPalette
-	if v == VariantLight {
-		colors = lightPalette
-	}
-
-	if n == ColorNamePrimary {
-		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
-	} else if n == ColorNameFocus {
-		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
-	} else if n == ColorNameSelection {
-		return selectionColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
-	}
-
-	if c, ok := colors[n]; ok {
-		return c
-	}
-	return color.Transparent
-}
-
-// TextFont returns the font resource for the regular font style
-func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
-	if style.Monospace {
-		return t.monospace
-	}
-	if style.Bold {
-		if style.Italic {
-			return t.boldItalic
-		}
-		return t.bold
-	}
-	if style.Italic {
-		return t.italic
-	}
-	return t.regular
-}
-
-func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
-	switch s {
-	case SizeNameSeparatorThickness:
-		return 1
-	case SizeNameInlineIcon:
-		return 20
-	case SizeNamePadding:
-		return 4
-	case SizeNameScrollBar:
-		return 16
-	case SizeNameScrollBarSmall:
-		return 3
-	case SizeNameText:
-		return 14
-	case SizeNameHeadingText:
-		return 24
-	case SizeNameSubHeadingText:
-		return 18
-	case SizeNameCaptionText:
-		return 11
-	case SizeNameInputBorder:
-		return 2
-	default:
-		return 0
-	}
 }
 
 // BackgroundColor returns the theme's background color
@@ -594,6 +433,166 @@ func PrimaryColorNamed(name string) color.Color {
 		return primaryColors[ColorBlue]
 	}
 	return col
+}
+
+var (
+	defaultTheme = setupDefaultTheme()
+
+	errorColor  = color.NRGBA{0xf4, 0x43, 0x36, 0xff}
+	focusColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x7f},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f},
+	}
+	primaryColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
+	}
+	selectionColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x3f},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
+	}
+
+	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
+
+	darkPalette = map[fyne.ThemeColorName]color.Color{
+		ColorNameBackground:      color.NRGBA{0x30, 0x30, 0x30, 0xff},
+		ColorNameButton:          color.Transparent,
+		ColorNameDisabled:        color.NRGBA{0xff, 0xff, 0xff, 0x42},
+		ColorNameDisabledButton:  color.NRGBA{0x26, 0x26, 0x26, 0xff},
+		ColorNameError:           errorColor,
+		ColorNameForeground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameHover:           color.NRGBA{0xff, 0xff, 0xff, 0x0f},
+		ColorNameInputBackground: color.NRGBA{0xff, 0xff, 0xff, 0x19},
+		ColorNamePlaceHolder:     color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		ColorNamePressed:         color.NRGBA{0xff, 0xff, 0xff, 0x66},
+		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x66},
+	}
+
+	lightPalette = map[fyne.ThemeColorName]color.Color{
+		ColorNameBackground:      color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		ColorNameButton:          color.Transparent,
+		ColorNameDisabled:        color.NRGBA{0x0, 0x0, 0x0, 0x42},
+		ColorNameDisabledButton:  color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
+		ColorNameError:           errorColor,
+		ColorNameForeground:      color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		ColorNameHover:           color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+		ColorNameInputBackground: color.NRGBA{0x0, 0x0, 0x0, 0x19},
+		ColorNamePlaceHolder:     color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		ColorNamePressed:         color.NRGBA{0x0, 0x0, 0x0, 0x19},
+		ColorNameScrollBar:       color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		ColorNameShadow:          color.NRGBA{0x0, 0x0, 0x0, 0x33},
+	}
+)
+
+type builtinTheme struct {
+	variant fyne.ThemeVariant
+
+	regular, bold, italic, boldItalic, monospace fyne.Resource
+}
+
+func (t *builtinTheme) initFonts() {
+	t.regular = regular
+	t.bold = bold
+	t.italic = italic
+	t.boldItalic = bolditalic
+	t.monospace = monospace
+
+	font := os.Getenv("FYNE_FONT")
+	if font != "" {
+		t.regular = loadCustomFont(font, "Regular", regular)
+		t.bold = loadCustomFont(font, "Bold", bold)
+		t.italic = loadCustomFont(font, "Italic", italic)
+		t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
+	}
+	font = os.Getenv("FYNE_FONT_MONOSPACE")
+	if font != "" {
+		t.monospace = loadCustomFont(font, "Regular", monospace)
+	}
+}
+
+func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	if t.variant != variantNameUserPreference {
+		v = t.variant
+	}
+	colors := darkPalette
+	if v == VariantLight {
+		colors = lightPalette
+	}
+
+	if n == ColorNamePrimary {
+		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	} else if n == ColorNameFocus {
+		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	} else if n == ColorNameSelection {
+		return selectionColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	}
+
+	if c, ok := colors[n]; ok {
+		return c
+	}
+	return color.Transparent
+}
+
+func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if style.Monospace {
+		return t.monospace
+	}
+	if style.Bold {
+		if style.Italic {
+			return t.boldItalic
+		}
+		return t.bold
+	}
+	if style.Italic {
+		return t.italic
+	}
+	return t.regular
+}
+
+func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
+	switch s {
+	case SizeNameSeparatorThickness:
+		return 1
+	case SizeNameInlineIcon:
+		return 20
+	case SizeNamePadding:
+		return 4
+	case SizeNameScrollBar:
+		return 16
+	case SizeNameScrollBarSmall:
+		return 3
+	case SizeNameText:
+		return 14
+	case SizeNameHeadingText:
+		return 24
+	case SizeNameSubHeadingText:
+		return 18
+	case SizeNameCaptionText:
+		return 11
+	case SizeNameInputBorder:
+		return 2
+	default:
+		return 0
+	}
 }
 
 func current() fyne.Theme {
