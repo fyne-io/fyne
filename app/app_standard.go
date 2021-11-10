@@ -1,3 +1,4 @@
+//go:build !debug && !release
 // +build !debug,!release
 
 package app

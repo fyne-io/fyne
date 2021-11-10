@@ -40,12 +40,12 @@
 				</widget>
 				<container pos="224,0" size="76x36">
 					<widget size="36x36" type="*widget.Button">
-						<rectangle fillColor="button" size="36x36"/>
+						<rectangle size="36x36"/>
 						<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="32x32"/>
 						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize"/>
 					</widget>
 					<widget pos="40,0" size="36x36" type="*widget.Button">
-						<rectangle fillColor="button" size="36x36"/>
+						<rectangle size="36x36"/>
 						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>

@@ -1,3 +1,4 @@
+//go:build android
 // +build android
 
 #include <android/log.h>

@@ -1,3 +1,4 @@
+//go:build ci || (!linux && !darwin && !windows && !freebsd && !openbsd && !netbsd)
 // +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
 
 package app

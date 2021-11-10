@@ -80,27 +80,50 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 }
 
 func TestRichTextMarkdown_Heading(t *testing.T) {
-	r := NewRichTextFromMarkdown("# Head1\n\n## Head2\n")
+	r := NewRichTextFromMarkdown("# Head1\n\n## Head2!\n### Head3\n")
 
-	assert.Equal(t, 2, len(r.Segments))
+	assert.Equal(t, 3, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "Head1", text.Text)
 		assert.Equal(t, RichTextStyleHeading, text.Style)
 	} else {
-		t.Error("Segment should be Text")
+		t.Error("Segment should be Heading")
 	}
 	if text, ok := r.Segments[1].(*TextSegment); ok {
-		assert.Equal(t, "Head2", text.Text)
+		assert.Equal(t, "Head2!", text.Text)
 		assert.Equal(t, RichTextStyleSubHeading, text.Style)
 	} else {
-		t.Error("Segment should be Text")
+		t.Error("Segment should be SubHeading")
+	}
+
+	if text, ok := r.Segments[2].(*TextSegment); ok {
+		assert.Equal(t, "Head3", text.Text)
+		assert.Equal(t, true, text.Style.TextStyle.Bold) // we don't have 6 levels of heading so just bold others
+	} else {
+		t.Error("Segment should be Strong")
 	}
 }
 
 func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
-	r := NewRichTextFromMarkdown("# ")
+	r := NewRichTextFromMarkdown("#")
 
-	assert.Equal(t, 0, len(r.Segments))
+	assert.Equal(t, 1, len(r.Segments))
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "#", text.Text)
+		assert.Equal(t, RichTextStyleParagraph, text.Style)
+	} else {
+		t.Error("Segment should be Text")
+	}
+
+	r = NewRichTextFromMarkdown("# ")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "", text.Text)
+		assert.Equal(t, RichTextStyleHeading, text.Style)
+	} else {
+		t.Error("Segment should be Text")
+	}
 }
 
 func TestRichTextMarkdown_Hyperlink(t *testing.T) {

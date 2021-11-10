@@ -1,3 +1,4 @@
+//go:build (gles || arm || arm64) && !darwin
 // +build gles arm arm64
 // +build !darwin
 

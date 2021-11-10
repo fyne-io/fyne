@@ -146,7 +146,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Unlock()
 
 	c.Resize(newSize)
-	c.SetDirty(true)
+	c.SetDirty()
 }
 
 func (c *glCanvas) SetOnKeyDown(typed func(*fyne.KeyEvent)) {
@@ -187,7 +187,7 @@ func (c *glCanvas) reloadScale() {
 	c.Lock()
 	c.scale = c.context.(*window).calculatedScale()
 	c.Unlock()
-	c.SetDirty(true)
+	c.SetDirty()
 
 	c.context.RescaleContext()
 }
@@ -259,7 +259,7 @@ func (c *glCanvas) menuHeight() float32 {
 }
 
 func (c *glCanvas) overlayChanged() {
-	c.SetDirty(true)
+	c.SetDirty()
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
@@ -267,7 +267,6 @@ func (c *glCanvas) paint(size fyne.Size) {
 	if c.Content() == nil {
 		return
 	}
-	c.SetDirty(false)
 	c.Painter().Clear()
 
 	paint := func(node *common.RenderCacheNode, pos fyne.Position) {

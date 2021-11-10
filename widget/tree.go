@@ -22,14 +22,14 @@ type Tree struct {
 	BaseWidget
 	Root TreeNodeID
 
-	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     // Return a sorted slice of Children TreeNodeIDs for the given Node TreeNodeID
-	CreateNode     func(branch bool) (o fyne.CanvasObject)                   // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
-	IsBranch       func(uid TreeNodeID) (ok bool)                            // Return true if the given TreeNodeID represents a Branch
-	OnBranchClosed func(uid TreeNodeID)                                      // Called when a Branch is closed
-	OnBranchOpened func(uid TreeNodeID)                                      // Called when a Branch is opened
-	OnSelected     func(uid TreeNodeID)                                      // Called when the Node with the given TreeNodeID is selected.
-	OnUnselected   func(uid TreeNodeID)                                      // Called when the Node with the given TreeNodeID is unselected.
-	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given TreeNodeID
+	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     `json:"-"` // Return a sorted slice of Children TreeNodeIDs for the given Node TreeNodeID
+	CreateNode     func(branch bool) (o fyne.CanvasObject)                   `json:"-"` // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
+	IsBranch       func(uid TreeNodeID) (ok bool)                            `json:"-"` // Return true if the given TreeNodeID represents a Branch
+	OnBranchClosed func(uid TreeNodeID)                                      `json:"-"` // Called when a Branch is closed
+	OnBranchOpened func(uid TreeNodeID)                                      `json:"-"` // Called when a Branch is opened
+	OnSelected     func(uid TreeNodeID)                                      `json:"-"` // Called when the Node with the given TreeNodeID is selected.
+	OnUnselected   func(uid TreeNodeID)                                      `json:"-"` // Called when the Node with the given TreeNodeID is unselected.
+	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
 
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size

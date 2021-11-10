@@ -1,6 +1,5 @@
-// +build !ci
-// +build !no_native_menus
-// +build !mobile
+//go:build !ci && !no_native_menus && !mobile
+// +build !ci,!no_native_menus,!mobile
 
 package glfw
 

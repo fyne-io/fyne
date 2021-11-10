@@ -1,7 +1,6 @@
 package common
 
 import (
-	"runtime"
 	"sync"
 	"sync/atomic"
 
@@ -44,11 +43,10 @@ type Canvas struct {
 	//
 	// If an object failed to ender the refresh queue, the object may
 	// disappear or blink from the view at any frames. As of this reason,
-	// the refreshQueue is an unbounded channel which is bale to cache
+	// the refreshQueue is an unbounded queue which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
-	refreshQueue *async.UnboundedCanvasObjectChan
-	refreshCount uint64 // atomic
-	dirty        uint32 // atomic
+	refreshQueue *async.CanvasObjectQueue
+	dirty        uint64 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
@@ -195,27 +193,8 @@ func (c *Canvas) FocusPrevious() {
 }
 
 // FreeDirtyTextures frees dirty textures and returns the number of freed textures.
-func (c *Canvas) FreeDirtyTextures() uint64 {
-	freed := uint64(0)
-
-	// Within a frame, refresh tasks are requested from the Refresh method,
-	// and we desire to process all requested operations as much as possible
-	// in a frame. Use a counter to guarantee that all desired tasks are
-	// processed. See https://github.com/fyne-io/fyne/issues/2548.
-	for atomic.LoadUint64(&c.refreshCount) > 0 {
-		var object fyne.CanvasObject
-		select {
-		case object = <-c.refreshQueue.Out():
-		default:
-			// If refreshCount is positive but we cannot receive any object
-			// from the refreshQueue, this means that the refresh task is
-			// not yet ready to receive, continue until we can receive it.
-			// Furthermore, we use Gosched to avoid CPU spin.
-			runtime.Gosched()
-			continue
-		}
-		atomic.AddUint64(&c.refreshCount, ^uint64(0))
-		freed++
+func (c *Canvas) FreeDirtyTextures() (freed uint64) {
+	freeObject := func(object fyne.CanvasObject) {
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 			if c.painter != nil {
 				c.painter.Free(obj)
@@ -225,18 +204,47 @@ func (c *Canvas) FreeDirtyTextures() uint64 {
 		driver.WalkCompleteObjectTree(object, freeWalked, nil)
 	}
 
+	// Within a frame, refresh tasks are requested from the Refresh method,
+	// and we desire to clear out all requested operations within a frame.
+	// See https://github.com/fyne-io/fyne/issues/2548.
+	tasksToDo := c.refreshQueue.Len()
+
+	shouldFilterDuplicates := (tasksToDo > 200) // filtering has overhead, not worth enabling for few tasks
+	var refreshSet map[fyne.CanvasObject]struct{}
+	if shouldFilterDuplicates {
+		refreshSet = make(map[fyne.CanvasObject]struct{})
+	}
+
+	for c.refreshQueue.Len() > 0 {
+		object := c.refreshQueue.Out()
+		if !shouldFilterDuplicates {
+			freed++
+			freeObject(object)
+		} else {
+			refreshSet[object] = struct{}{}
+			tasksToDo--
+			if tasksToDo == 0 {
+				shouldFilterDuplicates = false // stop collecting messages to avoid starvation
+				for object := range refreshSet {
+					freed++
+					freeObject(object)
+				}
+			}
+		}
+	}
+
 	cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
 		if c.painter != nil {
 			c.painter.Free(obj)
 		}
 	})
-	return freed
+	return
 }
 
 // Initialize initializes the canvas.
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
-	c.refreshQueue = async.NewUnboundedCanvasObjectChan()
+	c.refreshQueue = async.NewCanvasObjectQueue()
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
@@ -280,9 +288,8 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	atomic.AddUint64(&c.refreshCount, 1)
-	c.refreshQueue.In() <- obj // never block
-	c.SetDirty(true)
+	c.refreshQueue.In(obj)
+	c.SetDirty()
 }
 
 // RemoveShortcut removes a shortcut from the canvas.
@@ -305,23 +312,15 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 	}
 }
 
-const (
-	dirtyTrue  = 1
-	dirtyFalse = 0
-)
-
-// IsDirty checks if the canvas is dirty.
-func (c *Canvas) IsDirty() bool {
-	return atomic.LoadUint32(&c.dirty) == dirtyTrue
+// CheckDirtyAndClear returns true if the canvas is dirty and
+// clears the dirty state atomically.
+func (c *Canvas) CheckDirtyAndClear() bool {
+	return atomic.SwapUint64(&c.dirty, 0) != 0
 }
 
-// SetDirty sets canvas dirty flag.
-func (c *Canvas) SetDirty(dirty bool) {
-	if dirty {
-		atomic.StoreUint32(&c.dirty, dirtyTrue)
-	} else {
-		atomic.StoreUint32(&c.dirty, dirtyFalse)
-	}
+// SetDirty sets canvas dirty flag atomically.
+func (c *Canvas) SetDirty() {
+	atomic.AddUint64(&c.dirty, 1)
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.

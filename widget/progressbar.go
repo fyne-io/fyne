@@ -30,7 +30,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 		tsize = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 	}
 
-	return fyne.NewSize(tsize.Width+theme.Padding()*4, tsize.Height+theme.Padding()*2)
+	return fyne.NewSize(tsize.Width+theme.Padding()*4, tsize.Height+theme.Padding()*4)
 }
 
 func (p *progressRenderer) updateBar() {
@@ -87,10 +87,9 @@ type ProgressBar struct {
 	// If set, it overrides the percentage readout and runs each time the value updates.
 	//
 	// Since: 1.4
-	TextFormatter func() string
+	TextFormatter func() string `json:"-"`
 
-	valueSource   binding.Float
-	valueListener binding.DataListener
+	binder basicBinder
 }
 
 // Bind connects the specified data source to this ProgressBar.
@@ -98,21 +97,8 @@ type ProgressBar struct {
 //
 // Since: 2.0
 func (p *ProgressBar) Bind(data binding.Float) {
-	p.Unbind()
-	p.valueSource = data
-
-	p.valueListener = binding.NewDataListener(func() {
-		val, err := data.Get()
-		if err != nil {
-			fyne.LogError("Error getting current data value", err)
-			return
-		}
-		p.Value = val
-		if cache.IsRendered(p) {
-			p.Refresh()
-		}
-	})
-	data.AddListener(p.valueListener)
+	p.binder.SetCallback(p.updateFromData)
+	p.binder.Bind(data)
 }
 
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
@@ -147,13 +133,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 //
 // Since: 2.0
 func (p *ProgressBar) Unbind() {
-	if p.valueSource == nil || p.valueListener == nil {
-		return
-	}
-
-	p.valueSource.RemoveListener(p.valueListener)
-	p.valueListener = nil
-	p.valueSource = nil
+	p.binder.Unbind()
 }
 
 // NewProgressBar creates a new progress bar widget.
@@ -180,4 +160,21 @@ func progressBackgroundColor() color.Color {
 	r, g, b, a := col.ToNRGBA(theme.PrimaryColor())
 	faded := uint8(a) / 3
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
+}
+
+func (p *ProgressBar) updateFromData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	floatSource, ok := data.(binding.Float)
+	if !ok {
+		return
+	}
+
+	val, err := floatSource.Get()
+	if err != nil {
+		fyne.LogError("Error getting current data value", err)
+		return
+	}
+	p.SetValue(val)
 }

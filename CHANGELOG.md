@@ -3,6 +3,23 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## Bowmore - Ongoing
+
+### Added
+
+* Add SetIcon method on ToolbarAction (#2475)
+
+### Changed
+
+* Toolbar item constructors now return concrete types instead of ToolbarItem
+* Low importance buttons no longer draw button color as a background
+* ProgressBar widget height is now consistent with other widgets
+
+### Fixed
+
+* 
+
+
 ## 2.1.1 - 22 October 2021
 
 ### Fixed

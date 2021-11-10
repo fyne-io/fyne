@@ -26,7 +26,7 @@ github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.1/gles2/KHR
 github.com/go-gl/gl/v3.2-core/gl
 github.com/go-gl/gl/v3.2-core/gl/KHR
-# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210410170116-ea3d685f79fb
+# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211024062804-40e447a793be
 ## explicit
 github.com/go-gl/glfw/v3.3/glfw
 github.com/go-gl/glfw/v3.3/glfw/glfw/deps
@@ -77,7 +77,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 ## explicit
 github.com/srwiley/rasterx
-# github.com/stretchr/testify v1.5.1
+# github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
@@ -154,6 +154,5 @@ golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
 ## explicit
-# gopkg.in/yaml.v2 v2.2.8
-## explicit
-gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3

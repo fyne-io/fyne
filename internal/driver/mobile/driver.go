@@ -249,7 +249,7 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
-	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.IsDirty()
+	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
 	if canvasNeedRefresh {
 		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
 
@@ -281,8 +281,6 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.ColorBufferBit)
-
-	c.SetDirty(false)
 
 	draw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
