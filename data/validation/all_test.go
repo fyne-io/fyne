@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewAllString(t *testing.T) {
-	validate := validation.NewAllString(
+func TestNewAllStrings(t *testing.T) {
+	validate := validation.NewAllStrings(
 		validation.NewTime("2006-01-02"),
 		validation.NewRegexp(`1\d{3}-\d{2}-\d{2}`, "Only years before 2000 are allowed"),
 	)
