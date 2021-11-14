@@ -170,15 +170,24 @@ func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 }
 
 func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
-	contains := c.containsGlyph(c.chosenFont, r)
+	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
+	var fallbackContainsGlyph bool
+	if !chosenContainsGlyph {
+		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
+	}
 
 	c.Lock()
 	defer c.Unlock()
 
-	if contains {
+	if chosenContainsGlyph {
 		return c.chosen.GlyphAdvance(r)
 	}
-	return c.fallback.GlyphAdvance(r)
+
+	if fallbackContainsGlyph {
+		return c.fallback.GlyphAdvance(r)
+	}
+
+	return
 }
 
 func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {

@@ -30,7 +30,7 @@ func TestText_MinSize_NoMultiLine(t *testing.T) {
 
 	text = canvas.NewText("Bre\nak", color.NRGBA{0, 0, 0, 0xff})
 	min2 := text.MinSize()
-	assert.True(t, min2.Width > min.Width)
+	assert.True(t, min2.Width == min.Width, "newline character has no glyph and therefore does not consume space for now")
 	assert.True(t, min2.Height == min.Height)
 }
 
