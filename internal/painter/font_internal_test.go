@@ -216,6 +216,63 @@ func Test_compositeFace_GlyphFunctions(t *testing.T) {
 	})
 }
 
+func Test_compositeFace_Kern(t *testing.T) {
+	chosenFont := &mockFont{IndexFunc: func(r rune) truetype.Index {
+		if r == 'e' || r == 'p' {
+			return 1
+		}
+		return 0
+	}}
+	fallbackFont := &mockFont{IndexFunc: func(r rune) truetype.Index {
+		if r == 'e' || r == 's' {
+			return 1
+		}
+		return 0
+	}}
+
+	t.Run("when primary has both glyphs", func(t *testing.T) {
+		chosen := &mockFace{KernFunc: func(r1, r2 rune) fixed.Int26_6 {
+			assert.Equal(t, 'e', r1)
+			assert.Equal(t, 'p', r2)
+			return 1
+		}}
+		fallback := &mockFace{KernFunc: func(r1, r2 rune) fixed.Int26_6 { return 0 }}
+		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
+		k := c.Kern('e', 'p')
+		assert.True(t, chosen.KernInvoked)
+		assert.False(t, fallback.KernInvoked)
+		assert.Equal(t, fixed.Int26_6(1), k)
+	})
+
+	t.Run("when primary misses first glyph", func(t *testing.T) {
+		chosen := &mockFace{KernFunc: func(r1, r2 rune) fixed.Int26_6 { return 0 }}
+		fallback := &mockFace{KernFunc: func(r1, r2 rune) fixed.Int26_6 {
+			assert.Equal(t, 's', r1)
+			assert.Equal(t, 'e', r2)
+			return 2
+		}}
+		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
+		k := c.Kern('s', 'e')
+		assert.False(t, chosen.KernInvoked)
+		assert.True(t, fallback.KernInvoked)
+		assert.Equal(t, fixed.Int26_6(2), k)
+	})
+
+	t.Run("when primary misses second glyph", func(t *testing.T) {
+		chosen := &mockFace{KernFunc: func(r1, r2 rune) fixed.Int26_6 { return 0 }}
+		fallback := &mockFace{KernFunc: func(r1, r2 rune) fixed.Int26_6 {
+			assert.Equal(t, 'e', r1)
+			assert.Equal(t, 's', r2)
+			return 2
+		}}
+		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
+		k := c.Kern('e', 's')
+		assert.False(t, chosen.KernInvoked)
+		assert.True(t, fallback.KernInvoked)
+		assert.Equal(t, fixed.Int26_6(2), k)
+	})
+}
+
 type mockFace struct {
 	CloseFunc           func() error
 	CloseInvoked        bool
@@ -225,6 +282,8 @@ type mockFace struct {
 	GlyphAdvanceInvoked bool
 	GlyphBoundsFunc     func(rune) (fixed.Rectangle26_6, fixed.Int26_6, bool)
 	GlyphBoundsInvoked  bool
+	KernFunc            func(rune, rune) fixed.Int26_6
+	KernInvoked         bool
 }
 
 var _ font.Face = (*mockFace)(nil)
@@ -250,7 +309,8 @@ func (f *mockFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixe
 }
 
 func (f *mockFace) Kern(r0, r1 rune) fixed.Int26_6 {
-	panic("implement me")
+	f.KernInvoked = true
+	return f.KernFunc(r0, r1)
 }
 
 func (f *mockFace) Metrics() font.Metrics {
