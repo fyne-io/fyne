@@ -273,6 +273,20 @@ func Test_compositeFace_Kern(t *testing.T) {
 	})
 }
 
+func Test_compositeFace_Metrics(t *testing.T) {
+	chosenFont := &truetype.Font{}
+	fallbackFont := &truetype.Font{}
+	chosen := &mockFace{MetricsFunc: func() font.Metrics {
+		return font.Metrics{Height: 1, Ascent: 2, Descent: 3, XHeight: 4, CapHeight: 5, CaretSlope: image.Pt(6, 7)}
+	}}
+	fallback := &mockFace{MetricsFunc: func() font.Metrics { return font.Metrics{} }}
+	c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
+	m := c.Metrics()
+	assert.True(t, chosen.MetricsInvoked)
+	assert.False(t, fallback.MetricsInvoked)
+	assert.Equal(t, font.Metrics{Height: 1, Ascent: 2, Descent: 3, XHeight: 4, CapHeight: 5, CaretSlope: image.Pt(6, 7)}, m)
+}
+
 type mockFace struct {
 	CloseFunc           func() error
 	CloseInvoked        bool
@@ -284,6 +298,8 @@ type mockFace struct {
 	GlyphBoundsInvoked  bool
 	KernFunc            func(rune, rune) fixed.Int26_6
 	KernInvoked         bool
+	MetricsFunc         func() font.Metrics
+	MetricsInvoked      bool
 }
 
 var _ font.Face = (*mockFace)(nil)
@@ -314,7 +330,8 @@ func (f *mockFace) Kern(r0, r1 rune) fixed.Int26_6 {
 }
 
 func (f *mockFace) Metrics() font.Metrics {
-	panic("implement me")
+	f.MetricsInvoked = true
+	return f.MetricsFunc()
 }
 
 type mockFont struct {
