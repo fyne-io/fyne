@@ -47,7 +47,7 @@ func Test_compositeFace_Close(t *testing.T) {
 	})
 }
 
-func Test_compositeFace_Glyph(t *testing.T) {
+func Test_compositeFace_GlyphFunctions(t *testing.T) {
 	chosenFont := &mockFont{IndexFunc: func(r rune) truetype.Index {
 		if r == 'e' || r == 'p' {
 			return 1
@@ -72,6 +72,10 @@ func Test_compositeFace_Glyph(t *testing.T) {
 				assert.Equal(t, 'e', r)
 				return 11, true
 			},
+			GlyphBoundsFunc: func(r rune) (fixed.Rectangle26_6, fixed.Int26_6, bool) {
+				assert.Equal(t, 'e', r)
+				return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 12, Y: 13}, Max: fixed.Point26_6{X: 14, Y: 15}}, 11, true
+			},
 		}
 		fallback := &mockFace{
 			GlyphFunc: func(p fixed.Point26_6, r rune) (image.Rectangle, image.Image, image.Point, fixed.Int26_6, bool) {
@@ -79,6 +83,9 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			},
 			GlyphAdvanceFunc: func(r rune) (advance fixed.Int26_6, ok bool) {
 				return 0, false
+			},
+			GlyphBoundsFunc: func(r rune) (fixed.Rectangle26_6, fixed.Int26_6, bool) {
+				return fixed.Rectangle26_6{}, 0, false
 			},
 		}
 		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
@@ -99,6 +106,14 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			assert.Equal(t, fixed.Int26_6(11), a)
 			assert.True(t, ok)
 		})
+		t.Run("GlyphBounds", func(t *testing.T) {
+			b, a, ok := c.GlyphBounds('e')
+			assert.True(t, chosen.GlyphBoundsInvoked)
+			assert.False(t, fallback.GlyphBoundsInvoked)
+			assert.Equal(t, fixed.Rectangle26_6{Min: fixed.Point26_6{X: 12, Y: 13}, Max: fixed.Point26_6{X: 14, Y: 15}}, b)
+			assert.Equal(t, fixed.Int26_6(11), a)
+			assert.True(t, ok)
+		})
 	})
 
 	t.Run("when only fallback has glyph", func(t *testing.T) {
@@ -108,6 +123,9 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			},
 			GlyphAdvanceFunc: func(r rune) (advance fixed.Int26_6, ok bool) {
 				return 0, false
+			},
+			GlyphBoundsFunc: func(r rune) (fixed.Rectangle26_6, fixed.Int26_6, bool) {
+				return fixed.Rectangle26_6{}, 0, false
 			},
 		}
 		fallback := &mockFace{
@@ -119,6 +137,10 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			GlyphAdvanceFunc: func(r rune) (advance fixed.Int26_6, ok bool) {
 				assert.Equal(t, 's', r)
 				return 31, true
+			},
+			GlyphBoundsFunc: func(r rune) (fixed.Rectangle26_6, fixed.Int26_6, bool) {
+				assert.Equal(t, 's', r)
+				return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 32, Y: 33}, Max: fixed.Point26_6{X: 34, Y: 35}}, 31, true
 			},
 		}
 		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
@@ -139,6 +161,14 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			assert.Equal(t, fixed.Int26_6(31), a)
 			assert.True(t, ok)
 		})
+		t.Run("GlyphBounds", func(t *testing.T) {
+			b, a, ok := c.GlyphBounds('s')
+			assert.False(t, chosen.GlyphBoundsInvoked)
+			assert.True(t, fallback.GlyphBoundsInvoked)
+			assert.Equal(t, fixed.Rectangle26_6{Min: fixed.Point26_6{X: 32, Y: 33}, Max: fixed.Point26_6{X: 34, Y: 35}}, b)
+			assert.Equal(t, fixed.Int26_6(31), a)
+			assert.True(t, ok)
+		})
 	})
 
 	t.Run("when no font has glyph", func(t *testing.T) {
@@ -149,6 +179,9 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			GlyphAdvanceFunc: func(r rune) (advance fixed.Int26_6, ok bool) {
 				return 0, false
 			},
+			GlyphBoundsFunc: func(r rune) (fixed.Rectangle26_6, fixed.Int26_6, bool) {
+				return fixed.Rectangle26_6{}, 0, false
+			},
 		}
 		fallback := &mockFace{
 			GlyphFunc: func(p fixed.Point26_6, r rune) (image.Rectangle, image.Image, image.Point, fixed.Int26_6, bool) {
@@ -156,6 +189,9 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			},
 			GlyphAdvanceFunc: func(r rune) (advance fixed.Int26_6, ok bool) {
 				return 0, false
+			},
+			GlyphBoundsFunc: func(r rune) (fixed.Rectangle26_6, fixed.Int26_6, bool) {
+				return fixed.Rectangle26_6{}, 0, false
 			},
 		}
 		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
@@ -171,6 +207,12 @@ func Test_compositeFace_Glyph(t *testing.T) {
 			assert.False(t, fallback.GlyphAdvanceInvoked)
 			assert.False(t, ok)
 		})
+		t.Run("GlyphBounds", func(t *testing.T) {
+			_, _, ok := c.GlyphBounds('x')
+			assert.False(t, chosen.GlyphBoundsInvoked)
+			assert.False(t, fallback.GlyphBoundsInvoked)
+			assert.False(t, ok)
+		})
 	})
 }
 
@@ -181,6 +223,8 @@ type mockFace struct {
 	GlyphInvoked        bool
 	GlyphAdvanceFunc    func(rune) (fixed.Int26_6, bool)
 	GlyphAdvanceInvoked bool
+	GlyphBoundsFunc     func(rune) (fixed.Rectangle26_6, fixed.Int26_6, bool)
+	GlyphBoundsInvoked  bool
 }
 
 var _ font.Face = (*mockFace)(nil)
@@ -201,7 +245,8 @@ func (f *mockFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 }
 
 func (f *mockFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {
-	panic("implement me")
+	f.GlyphBoundsInvoked = true
+	return f.GlyphBoundsFunc(r)
 }
 
 func (f *mockFace) Kern(r0, r1 rune) fixed.Int26_6 {
