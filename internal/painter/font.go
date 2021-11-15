@@ -136,6 +136,9 @@ type compositeFace struct {
 }
 
 func (c *compositeFace) Close() (err error) {
+	c.Lock()
+	defer c.Unlock()
+
 	if c.chosen != nil {
 		err = c.chosen.Close()
 	}
@@ -149,14 +152,14 @@ func (c *compositeFace) Close() (err error) {
 
 func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
+	c.Lock()
+	defer c.Unlock()
+
 	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
 	var fallbackContainsGlyph bool
 	if !chosenContainsGlyph {
 		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
 	}
-
-	c.Lock()
-	defer c.Unlock()
 
 	if chosenContainsGlyph {
 		return c.chosen.Glyph(dot, r)
@@ -170,14 +173,14 @@ func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 }
 
 func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
+	c.Lock()
+	defer c.Unlock()
+
 	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
 	var fallbackContainsGlyph bool
 	if !chosenContainsGlyph {
 		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
 	}
-
-	c.Lock()
-	defer c.Unlock()
 
 	if chosenContainsGlyph {
 		return c.chosen.GlyphAdvance(r)
@@ -191,14 +194,14 @@ func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 }
 
 func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {
+	c.Lock()
+	defer c.Unlock()
+
 	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
 	var fallbackContainsGlyph bool
 	if !chosenContainsGlyph {
 		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
 	}
-
-	c.Lock()
-	defer c.Unlock()
 
 	if chosenContainsGlyph {
 		return c.chosen.GlyphBounds(r)
@@ -212,11 +215,11 @@ func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance
 }
 
 func (c *compositeFace) Kern(r0, r1 rune) fixed.Int26_6 {
-	contains0 := c.containsGlyph(c.chosenFont, r0)
-	contains1 := c.containsGlyph(c.chosenFont, r1)
-
 	c.Lock()
 	defer c.Unlock()
+
+	contains0 := c.containsGlyph(c.chosenFont, r0)
+	contains1 := c.containsGlyph(c.chosenFont, r1)
 
 	if contains0 && contains1 {
 		return c.chosen.Kern(r0, r1)
@@ -232,9 +235,6 @@ func (c *compositeFace) Metrics() font.Metrics {
 }
 
 func (c *compositeFace) containsGlyph(font ttfFont, r rune) bool {
-	c.Lock()
-	defer c.Unlock()
-
 	return font != nil && font.Index(r) != 0
 }
 
