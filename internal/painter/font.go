@@ -147,6 +147,7 @@ func (c *compositeFace) Close() (err error) {
 	if err2 != nil {
 		return err2
 	}
+
 	return
 }
 
@@ -155,17 +156,11 @@ func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 	c.Lock()
 	defer c.Unlock()
 
-	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
-	var fallbackContainsGlyph bool
-	if !chosenContainsGlyph {
-		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
-	}
-
-	if chosenContainsGlyph {
+	if c.containsGlyph(c.chosenFont, r) {
 		return c.chosen.Glyph(dot, r)
 	}
 
-	if fallbackContainsGlyph {
+	if c.containsGlyph(c.fallbackFont, r) {
 		return c.fallback.Glyph(dot, r)
 	}
 
@@ -176,17 +171,11 @@ func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 	c.Lock()
 	defer c.Unlock()
 
-	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
-	var fallbackContainsGlyph bool
-	if !chosenContainsGlyph {
-		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
-	}
-
-	if chosenContainsGlyph {
+	if c.containsGlyph(c.chosenFont, r) {
 		return c.chosen.GlyphAdvance(r)
 	}
 
-	if fallbackContainsGlyph {
+	if c.containsGlyph(c.fallbackFont, r) {
 		return c.fallback.GlyphAdvance(r)
 	}
 
@@ -197,17 +186,11 @@ func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance
 	c.Lock()
 	defer c.Unlock()
 
-	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
-	var fallbackContainsGlyph bool
-	if !chosenContainsGlyph {
-		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
-	}
-
-	if chosenContainsGlyph {
+	if c.containsGlyph(c.chosenFont, r) {
 		return c.chosen.GlyphBounds(r)
 	}
 
-	if fallbackContainsGlyph {
+	if c.containsGlyph(c.fallbackFont, r) {
 		return c.fallback.GlyphBounds(r)
 	}
 
@@ -218,12 +201,10 @@ func (c *compositeFace) Kern(r0, r1 rune) fixed.Int26_6 {
 	c.Lock()
 	defer c.Unlock()
 
-	contains0 := c.containsGlyph(c.chosenFont, r0)
-	contains1 := c.containsGlyph(c.chosenFont, r1)
-
-	if contains0 && contains1 {
+	if c.containsGlyph(c.chosenFont, r0) && c.containsGlyph(c.chosenFont, r1) {
 		return c.chosen.Kern(r0, r1)
 	}
+
 	return c.fallback.Kern(r0, r1)
 }
 
