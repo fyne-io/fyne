@@ -227,21 +227,3 @@ func dropDownIconWidth() float32 {
 func emptyTextWidth() float32 {
 	return NewLabel("M").MinSize().Width
 }
-
-func optionsMinSize(options []string) fyne.Size {
-	var labels []*Label
-	for _, option := range options {
-		labels = append(labels, NewLabel(option))
-	}
-	minWidth := float32(0)
-	minHeight := float32(0)
-	for _, label := range labels {
-		if minWidth < label.MinSize().Width {
-			minWidth = label.MinSize().Width
-		}
-		minHeight += label.MinSize().Height
-	}
-	// padding between all options
-	minHeight += float32(len(labels)-1) * theme.Padding()
-	return fyne.NewSize(minWidth, minHeight)
-}
