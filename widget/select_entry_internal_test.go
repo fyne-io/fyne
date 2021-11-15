@@ -149,8 +149,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		value       string
 		options     []string
 	}{
-		"empty": {
-		},
+		"empty": {},
 		"empty + small options": {
 			options: smallOptions,
 		},
