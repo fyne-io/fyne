@@ -135,12 +135,16 @@ type compositeFace struct {
 	chosenFont, fallbackFont *truetype.Font
 }
 
-func (c *compositeFace) Close() error {
+func (c *compositeFace) Close() (err error) {
 	if c.chosen != nil {
-		_ = c.chosen.Close()
+		err = c.chosen.Close()
 	}
 
-	return c.fallback.Close()
+	err2 := c.fallback.Close()
+	if err2 != nil {
+		return err2
+	}
+	return
 }
 
 func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
