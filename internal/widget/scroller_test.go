@@ -90,6 +90,25 @@ func TestScrollContainer_MinSize_Direction(t *testing.T) {
 	})
 }
 
+func TestScrollContainer_OnScrolled(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(1000, 1000))
+	scroll := NewScroll(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+
+	scrolled := false
+	scroll.OnScrolled = func(fyne.Position) {
+		scrolled = true
+	}
+
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
+	assert.True(t, scrolled)
+	scrolled = false
+
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, 0)})
+	assert.False(t, scrolled) // don't repeat for no-change
+}
+
 func TestScrollContainer_SetMinSize_Direction(t *testing.T) {
 	t.Run("Both", func(t *testing.T) {
 		rect := canvas.NewRectangle(color.Black)
@@ -181,7 +200,6 @@ func TestScrollContainer_Scrolled(t *testing.T) {
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
 	assert.Equal(t, float32(10), scroll.Offset.X)
 	assert.Equal(t, float32(10), scroll.Offset.Y)
-
 }
 
 func TestScrollContainer_Scrolled_Limit(t *testing.T) {
