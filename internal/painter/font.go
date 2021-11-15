@@ -124,7 +124,7 @@ func measureText(text string, fontSize float32, style fyne.TextStyle) (fyne.Size
 		fixed266ToFloat32(face.Metrics().Ascent)
 }
 
-func newFontWithFallback(chosen, fallback font.Face, chosenFont, fallbackFont *truetype.Font) font.Face {
+func newFontWithFallback(chosen, fallback font.Face, chosenFont, fallbackFont ttfFont) font.Face {
 	return &compositeFace{chosen: chosen, fallback: fallback, chosenFont: chosenFont, fallbackFont: fallbackFont}
 }
 
@@ -132,7 +132,7 @@ type compositeFace struct {
 	sync.Mutex
 
 	chosen, fallback         font.Face
-	chosenFont, fallbackFont *truetype.Font
+	chosenFont, fallbackFont ttfFont
 }
 
 func (c *compositeFace) Close() (err error) {
@@ -149,16 +149,24 @@ func (c *compositeFace) Close() (err error) {
 
 func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
-	contains := c.containsGlyph(c.chosenFont, r)
+	chosenContainsGlyph := c.containsGlyph(c.chosenFont, r)
+	var fallbackContainsGlyph bool
+	if !chosenContainsGlyph {
+		fallbackContainsGlyph = c.containsGlyph(c.fallbackFont, r)
+	}
 
 	c.Lock()
 	defer c.Unlock()
 
-	if contains {
+	if chosenContainsGlyph {
 		return c.chosen.Glyph(dot, r)
 	}
 
-	return c.fallback.Glyph(dot, r)
+	if fallbackContainsGlyph {
+		return c.fallback.Glyph(dot, r)
+	}
+
+	return
 }
 
 func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
@@ -205,11 +213,15 @@ func (c *compositeFace) Metrics() font.Metrics {
 	return c.chosen.Metrics()
 }
 
-func (c *compositeFace) containsGlyph(font *truetype.Font, r rune) bool {
+func (c *compositeFace) containsGlyph(font ttfFont, r rune) bool {
 	c.Lock()
 	defer c.Unlock()
 
 	return font != nil && font.Index(r) != 0
+}
+
+type ttfFont interface {
+	Index(rune) truetype.Index
 }
 
 type fontCacheItem struct {
