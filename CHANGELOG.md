@@ -3,6 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.1.2 - Ongoing
+
+### Fixed
+
+* Scrolling list bound to data programmatically causes nil pointer dereference (#2549)
+* Rich text from markdown can get newlines wrong (#2589)
+* Crash on Raspberry PI 4 (#2603)
+* Compile failure on MacOS 10.12 Sierra (#2478)
+* Don't focus widgets on mobile where keyboard should not display (#2598)
+* storage.List doesn't return complete URI on Android for "content:" scheme (#2619)
+* Last word of the line and first word of the next line are joined in markdown parse (#2647)
+
+
 ## 2.1.1 - 22 October 2021
 
 ### Fixed
