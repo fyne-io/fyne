@@ -67,10 +67,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.action = r.buildAllTabsButton()
 	r.create = r.buildCreateTabsButton()
 	r.box = NewHBox(r.create, r.action)
-	var lastX, lastY float32
 	r.scroller.OnScrolled = func(offset fyne.Position) {
-		lastX = offset.X
-		lastY = offset.Y
 		r.updateIndicator(false)
 	}
 	r.updateAllTabs()
