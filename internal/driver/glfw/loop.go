@@ -214,11 +214,11 @@ func (d *gLDriver) repaintWindow(w *window) {
 func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	var draw *time.Ticker
+	var drawCh chan Time
 	if d.drawOnMainThread {
-		draw = time.NewTicker(time.Hour * 24 * 365 * 100) // don't tick when on M1
+		drawCh = make(chan Time) // don't tick when on M1
 	} else {
-		draw = time.NewTicker(time.Second / 60)
+		drawCh = time.NewTicker(time.Second / 60).C
 	}
 
 	go func() {
