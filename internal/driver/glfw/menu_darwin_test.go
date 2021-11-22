@@ -22,10 +22,13 @@ func TestDarwinMenu(t *testing.T) {
 	w := createWindow("Test").(*window)
 
 	var lastAction string
-	assertNSMenuItem := func(wantTitle, wantAction string, m unsafe.Pointer, i int) {
+	assertNSMenuItem := func(wantTitle string, m unsafe.Pointer, i int) {
 		item := testNSMenuItemAtIndex(m, i)
 		assert.Equal(t, wantTitle, testNSMenuItemTitle(item))
 		testNSMenuPerformActionForItemAtIndex(m, i)
+	}
+
+	assertLastAction := func(wantAction string) {
 		w.WaitForEvents()
 		assert.Equal(t, wantAction, lastAction)
 	}
@@ -68,30 +71,39 @@ func TestDarwinMenu(t *testing.T) {
 	m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 0))
 	assert.Equal(t, "", testNSMenuTitle(m), "app menu doesn’t have a title")
 	assertNSMenuItemSeparator(m, 1)
-	assertNSMenuItem("Preferences", "prefs", m, 2)
-	assertNSMenuItem("Preferences…", "more prefs", m, 3)
+	assertNSMenuItem("Preferences", m, 2)
+	assertLastAction("prefs")
+	assertNSMenuItem("Preferences…", m, 3)
+	assertLastAction("more prefs")
 	assertNSMenuItemSeparator(m, 4)
-	assertNSMenuItem("Settings", "settings", m, 5)
-	assertNSMenuItem("Settings…", "more settings", m, 6)
+	assertNSMenuItem("Settings", m, 5)
+	assertLastAction("settings")
+	assertNSMenuItem("Settings…", m, 6)
+	assertLastAction("more settings")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
 	assert.Equal(t, "File", testNSMenuTitle(m))
 	assert.Equal(t, 4, testNSMenuNumberOfItems(m))
-	assertNSMenuItem("New", "new", m, 0)
-	assertNSMenuItem("Open", "open", m, 1)
+	assertNSMenuItem("New", m, 0)
+	assertLastAction("new")
+	assertNSMenuItem("Open", m, 1)
+	assertLastAction("open")
 	assertNSMenuItemSeparator(m, 2)
 	i := testNSMenuItemAtIndex(m, 3)
 	assert.Equal(t, "Recent", testNSMenuItemTitle(i))
 	sm := testNSMenuItemSubmenu(i)
 	assert.NotNil(t, sm, "item has submenu")
 	assert.Equal(t, 1, testNSMenuNumberOfItems(sm))
-	assertNSMenuItem("Foo", "foo", sm, 0)
+	assertNSMenuItem("Foo", sm, 0)
+	assertLastAction("foo")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 2))
 	assert.Equal(t, "More Stuff", testNSMenuTitle(m))
 	assert.Equal(t, 2, testNSMenuNumberOfItems(m))
-	assertNSMenuItem("Hello World", "Hello World!", m, 0)
-	assertNSMenuItem("More", "more", m, 1)
+	assertNSMenuItem("Hello World", m, 0)
+	assertLastAction("Hello World!")
+	assertNSMenuItem("More", m, 1)
+	assertLastAction("more")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 3))
 	assert.Equal(t, "Window", testNSMenuTitle(m))
@@ -99,13 +111,16 @@ func TestDarwinMenu(t *testing.T) {
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 4))
 	assert.Equal(t, "Help", testNSMenuTitle(m))
 	assert.Equal(t, 2, testNSMenuNumberOfItems(m))
-	assertNSMenuItem("Help", "Help!!!", m, 0)
-	assertNSMenuItem("Help Me", "Help me!!!", m, 1)
+	assertNSMenuItem("Help", m, 0)
+	assertLastAction("Help!!!")
+	assertNSMenuItem("Help Me", m, 1)
+	assertLastAction("Help me!!!")
 
 	// change action works
 	itemOpen.Action = func() { lastAction = "new open" }
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
-	assertNSMenuItem("Open", "new open", m, 1)
+	assertNSMenuItem("Open", m, 1)
+	assertLastAction("new open")
 }
 
 var initialAppMenuItems []string
