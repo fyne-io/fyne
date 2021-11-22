@@ -7,6 +7,7 @@ import (
 	"testing"
 	"unsafe"
 
+	"fyne.io/fyne/v2/driver/desktop"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
@@ -32,17 +33,22 @@ func TestDarwinMenu(t *testing.T) {
 	}
 
 	itemNew := fyne.NewMenuItem("New", func() { lastAction = "new" })
+	itemNew.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyN, Modifier: fyne.KeyModifierShortcutDefault}
 	itemOpen := fyne.NewMenuItem("Open", func() { lastAction = "open" })
+	itemOpen.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyO, Modifier: fyne.KeyModifierAlt}
 	itemRecent := fyne.NewMenuItem("Recent", nil)
 	itemFoo := fyne.NewMenuItem("Foo", func() { lastAction = "foo" })
 	itemRecent.ChildMenu = fyne.NewMenu("", itemFoo)
 	menuEdit := fyne.NewMenu("File", itemNew, itemOpen, fyne.NewMenuItemSeparator(), itemRecent)
 
 	itemHelp := fyne.NewMenuItem("Help", func() { lastAction = "Help!!!" })
+	itemHelp.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierControl}
 	itemHelpMe := fyne.NewMenuItem("Help Me", func() { lastAction = "Help me!!!" })
+	itemHelpMe.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierShift}
 	menuHelp := fyne.NewMenu("Help", itemHelp, itemHelpMe)
 
 	itemHelloWorld := fyne.NewMenuItem("Hello World", func() { lastAction = "Hello World!" })
+	itemHelloWorld.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierControl | fyne.KeyModifierAlt | fyne.KeyModifierShift | fyne.KeyModifierSuper}
 	itemPrefs := fyne.NewMenuItem("Preferences", func() { lastAction = "prefs" })
 	itemMore := fyne.NewMenuItem("More", func() { lastAction = "more" })
 	itemMorePrefs := fyne.NewMenuItem("Preferences…", func() { lastAction = "more prefs" })
@@ -63,22 +69,24 @@ func TestDarwinMenu(t *testing.T) {
 	m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 0))
 	assert.Equal(t, "", testNSMenuTitle(m), "app menu doesn’t have a title")
 	assertNSMenuItemSeparator(m, 1)
-	assertNSMenuItem(t, "Preferences", m, 2)
+	assertNSMenuItem(t, "Preferences", "", 0, m, 2)
 	assertLastAction("prefs")
-	assertNSMenuItem(t, "Preferences…", m, 3)
+	assertNSMenuItem(t, "Preferences…", "", 0, m, 3)
 	assertLastAction("more prefs")
 	assertNSMenuItemSeparator(m, 4)
-	assertNSMenuItem(t, "Settings", m, 5)
+	assertNSMenuItem(t, "Settings", "", 0, m, 5)
 	assertLastAction("settings")
-	assertNSMenuItem(t, "Settings…", m, 6)
+	assertNSMenuItem(t, "Settings…", "", 0, m, 6)
 	assertLastAction("more settings")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
 	assert.Equal(t, "File", testNSMenuTitle(m))
 	assert.Equal(t, 4, testNSMenuNumberOfItems(m))
-	assertNSMenuItem(t, "New", m, 0)
+	// NSEventModifierFlagCommand = 1 << 20
+	assertNSMenuItem(t, "New", "n", 0b100000000000000000000, m, 0)
 	assertLastAction("new")
-	assertNSMenuItem(t, "Open", m, 1)
+	// NSEventModifierFlagOption = 1 << 19
+	assertNSMenuItem(t, "Open", "o", 0b10000000000000000000, m, 1)
 	assertLastAction("open")
 	assertNSMenuItemSeparator(m, 2)
 	i := testNSMenuItemAtIndex(m, 3)
@@ -86,15 +94,15 @@ func TestDarwinMenu(t *testing.T) {
 	sm := testNSMenuItemSubmenu(i)
 	assert.NotNil(t, sm, "item has submenu")
 	assert.Equal(t, 1, testNSMenuNumberOfItems(sm))
-	assertNSMenuItem(t, "Foo", sm, 0)
+	assertNSMenuItem(t, "Foo", "", 0, sm, 0)
 	assertLastAction("foo")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 2))
 	assert.Equal(t, "More Stuff", testNSMenuTitle(m))
 	assert.Equal(t, 2, testNSMenuNumberOfItems(m))
-	assertNSMenuItem(t, "Hello World", m, 0)
+	assertNSMenuItem(t, "Hello World", "h", 0b111100000000000000000, m, 0)
 	assertLastAction("Hello World!")
-	assertNSMenuItem(t, "More", m, 1)
+	assertNSMenuItem(t, "More", "", 0, m, 1)
 	assertLastAction("more")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 3))
@@ -103,24 +111,30 @@ func TestDarwinMenu(t *testing.T) {
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 4))
 	assert.Equal(t, "Help", testNSMenuTitle(m))
 	assert.Equal(t, 2, testNSMenuNumberOfItems(m))
-	assertNSMenuItem(t, "Help", m, 0)
+	// NSEventModifierFlagControl = 1 << 18
+	assertNSMenuItem(t, "Help", "h", 0b1000000000000000000, m, 0)
 	assertLastAction("Help!!!")
-	assertNSMenuItem(t, "Help Me", m, 1)
+	// NSEventModifierFlagShift = 1 << 17
+	assertNSMenuItem(t, "Help Me", "h", 0b100000000000000000, m, 1)
 	assertLastAction("Help me!!!")
 
 	// change action works
 	itemOpen.Action = func() { lastAction = "new open" }
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
-	assertNSMenuItem(t, "Open", m, 1)
+	assertNSMenuItem(t, "Open", "", 0, m, 1)
 	assertLastAction("new open")
 }
 
 var initialAppMenuItems []string
 var initialMenus []string
 
-func assertNSMenuItem(t *testing.T, wantTitle string, m unsafe.Pointer, i int) {
+func assertNSMenuItem(t *testing.T, wantTitle, wantKey string, wantModifier uint64, m unsafe.Pointer, i int) {
 	item := testNSMenuItemAtIndex(m, i)
 	assert.Equal(t, wantTitle, testNSMenuItemTitle(item))
+	if wantKey != "" {
+		assert.Equal(t, wantKey, testNSMenuItemKeyEquivalent(item))
+		assert.Equal(t, wantModifier, testNSMenuItemKeyEquivalentModifierMask(item))
+	}
 	testNSMenuPerformActionForItemAtIndex(m, i)
 }
 
