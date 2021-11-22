@@ -4,7 +4,6 @@
 package glfw
 
 import (
-	"fmt"
 	"testing"
 	"unsafe"
 
@@ -55,7 +54,6 @@ func TestDarwinMenu(t *testing.T) {
 
 	mainMenu := fyne.NewMainMenu(menuEdit, menuHelp, menuMore, menuSettings)
 	setupNativeMenu(w, mainMenu)
-	fmt.Println(lastAction)
 
 	mm := testDarwinMainMenu()
 	// The custom “Preferences” menu should be moved to the system app menu completely.
