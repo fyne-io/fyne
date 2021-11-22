@@ -9,13 +9,13 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Scrolling list bound to data programmatically causes nil pointer dereference (#2549)
 * Rich text from markdown can get newlines wrong (#2589)
-* Crash on Raspberry PI 4 (#2603)
+* Fix crash on 32bit operating systems (#2603)
 * Compile failure on MacOS 10.12 Sierra (#2478)
 * Don't focus widgets on mobile where keyboard should not display (#2598)
 * storage.List doesn't return complete URI on Android for "content:" scheme (#2619)
 * Last word of the line and first word of the next line are joined in markdown parse (#2647)
-* Support building on Windows arm64
-* Compiling for FreeBSD brings in glfw library dependency (#1928)
+* Support for building `cmd/fyne` on Windows arm64
+* Fixed FreeBSD requiring installed glfw library dependency (#1928)
 
 
 ## 2.1.1 - 22 October 2021
