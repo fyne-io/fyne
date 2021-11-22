@@ -244,7 +244,7 @@ func (d *gLDriver) startDrawThread() {
 					c.applyThemeOutOfTreeObjects()
 					go c.reloadScale()
 				})
-			case <-draw.C:
+			case <-drawCh:
 				d.drawSingleFrame()
 			}
 		}
