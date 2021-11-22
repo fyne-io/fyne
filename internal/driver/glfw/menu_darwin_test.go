@@ -125,6 +125,143 @@ func TestDarwinMenu(t *testing.T) {
 	assertLastAction("new open")
 }
 
+func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
+	setExceptionCallback(func(msg string) { t.Error("Obj-C exception:", msg) })
+	defer setExceptionCallback(nil)
+
+	for name, tt := range map[string]struct {
+		key     fyne.KeyName
+		wantKey string
+	}{
+		"Backspace": {
+			key:     fyne.KeyBackspace,
+			wantKey: "\x08", // NSBackspaceCharacter
+		},
+		"Delete": {
+			key:     fyne.KeyDelete,
+			wantKey: "\x7f", // NSDeleteCharacter
+		},
+		"Down": {
+			key:     fyne.KeyDown,
+			wantKey: "\uf701", // NSDownArrowFunctionKey
+		},
+		"End": {
+			key:     fyne.KeyEnd,
+			wantKey: "\uf72b", // NSEndFunctionKey
+		},
+		"Enter": {
+			key:     fyne.KeyEnter,
+			wantKey: "\x03", // NSEnterCharacter
+		},
+		"Escape": {
+			key:     fyne.KeyEscape,
+			wantKey: "\x1b", // escape
+		},
+		"F10": {
+			key:     fyne.KeyF10,
+			wantKey: "\uf70d", // NSF10FunctionKey
+		},
+		"F11": {
+			key:     fyne.KeyF11,
+			wantKey: "\uf70e", // NSF11FunctionKey
+		},
+		"F12": {
+			key:     fyne.KeyF12,
+			wantKey: "\uf70f", // NSF12FunctionKey
+		},
+		"F1": {
+			key:     fyne.KeyF1,
+			wantKey: "\uf704", // NSF1FunctionKey
+		},
+		"F2": {
+			key:     fyne.KeyF2,
+			wantKey: "\uf705", // NSF2FunctionKey
+		},
+		"F3": {
+			key:     fyne.KeyF3,
+			wantKey: "\uf706", // NSF3FunctionKey
+		},
+		"F4": {
+			key:     fyne.KeyF4,
+			wantKey: "\uf707", // NSF4FunctionKey
+		},
+		"F5": {
+			key:     fyne.KeyF5,
+			wantKey: "\uf708", // NSF5FunctionKey
+		},
+		"F6": {
+			key:     fyne.KeyF6,
+			wantKey: "\uf709", // NSF6FunctionKey
+		},
+		"F7": {
+			key:     fyne.KeyF7,
+			wantKey: "\uf70a", // NSF7FunctionKey
+		},
+		"F8": {
+			key:     fyne.KeyF8,
+			wantKey: "\uf70b", // NSF8FunctionKey
+		},
+		"F9": {
+			key:     fyne.KeyF9,
+			wantKey: "\uf70c", // NSF9FunctionKey
+		},
+		"Home": {
+			key:     fyne.KeyHome,
+			wantKey: "\uf729", // NSHomeFunctionKey
+		},
+		"Insert": {
+			key:     fyne.KeyInsert,
+			wantKey: "\uf727", // NSInsertFunctionKey
+		},
+		"Left": {
+			key:     fyne.KeyLeft,
+			wantKey: "\uf702", // NSLeftArrowFunctionKey
+		},
+		"PageDown": {
+			key:     fyne.KeyPageDown,
+			wantKey: "\uf72d", // NSPageDownFunctionKey
+		},
+		"PageUp": {
+			key:     fyne.KeyPageUp,
+			wantKey: "\uf72c", // NSPageUpFunctionKey
+		},
+		"Return": {
+			key:     fyne.KeyReturn,
+			wantKey: "\n",
+		},
+		"Right": {
+			key:     fyne.KeyRight,
+			wantKey: "\uf703", // NSRightArrowFunctionKey
+		},
+		"Space": {
+			key:     fyne.KeySpace,
+			wantKey: " ",
+		},
+		"Tab": {
+			key:     fyne.KeyTab,
+			wantKey: "\t",
+		},
+		"Up": {
+			key:     fyne.KeyUp,
+			wantKey: "\uf700", // NSUpArrowFunctionKey
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			resetMainMenu()
+			w := createWindow("Test").(*window)
+			item := fyne.NewMenuItem("Special", func() {})
+			item.Shortcut = &desktop.CustomShortcut{KeyName: tt.key, Modifier: fyne.KeyModifierShortcutDefault}
+			menu := fyne.NewMenu("Special", item)
+			mainMenu := fyne.NewMainMenu(menu)
+			setupNativeMenu(w, mainMenu)
+
+			mm := testDarwinMainMenu()
+			m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
+			assertNSMenuItem(t, "Special", tt.wantKey, 0b100000000000000000000, m, 0)
+		})
+	}
+}
+
 var initialAppMenuItems []string
 var initialMenus []string
 

@@ -4,6 +4,7 @@
 package glfw
 
 import (
+	"fmt"
 	"strings"
 	"unsafe"
 
@@ -48,6 +49,36 @@ type menuCallbacks struct {
 
 var callbacks []*menuCallbacks
 var ecb func(string)
+var specialKeys = map[fyne.KeyName]string{
+	fyne.KeyBackspace: "\x08",
+	fyne.KeyDelete:    "\x7f",
+	fyne.KeyDown:      "\uf701",
+	fyne.KeyEnd:       "\uf72b",
+	fyne.KeyEnter:     "\x03",
+	fyne.KeyEscape:    "\x1b",
+	fyne.KeyF10:       "\uf70d",
+	fyne.KeyF11:       "\uf70e",
+	fyne.KeyF12:       "\uf70f",
+	fyne.KeyF1:        "\uf704",
+	fyne.KeyF2:        "\uf705",
+	fyne.KeyF3:        "\uf706",
+	fyne.KeyF4:        "\uf707",
+	fyne.KeyF5:        "\uf708",
+	fyne.KeyF6:        "\uf709",
+	fyne.KeyF7:        "\uf70a",
+	fyne.KeyF8:        "\uf70b",
+	fyne.KeyF9:        "\uf70c",
+	fyne.KeyHome:      "\uf729",
+	fyne.KeyInsert:    "\uf727",
+	fyne.KeyLeft:      "\uf702",
+	fyne.KeyPageDown:  "\uf72d",
+	fyne.KeyPageUp:    "\uf72c",
+	fyne.KeyReturn:    "\n",
+	fyne.KeyRight:     "\uf703",
+	fyne.KeySpace:     " ",
+	fyne.KeyTab:       "\t",
+	fyne.KeyUp:        "\uf700",
+}
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
 	menu, nextItemID = handleSpecialItems(w, menu, nextItemID, true)
@@ -144,7 +175,12 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 
 func keyEquivalent(item *fyne.MenuItem) (key string) {
 	if s, ok := item.Shortcut.(fyne.KeyboardShortcut); ok {
-		key = strings.ToLower(string(s.Key()))
+		if key = specialKeys[s.Key()]; key == "" {
+			if len(s.Key()) > 1 {
+				fyne.LogError(fmt.Sprintf("unsupported key “%s” for menu shortcut", s.Key()), nil)
+			}
+			key = strings.ToLower(string(s.Key()))
+		}
 	}
 	return
 }
