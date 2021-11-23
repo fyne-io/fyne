@@ -1,7 +1,7 @@
 package app
 
 import (
-	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 )
@@ -12,82 +12,62 @@ var _ fyne.Lifecycle = (*Lifecycle)(nil)
 //
 // Since: 2.1
 type Lifecycle struct {
-	onForeground, onBackground func()
-	onStarted, onStopped       func()
-
-	mux sync.Mutex
+	onForeground atomic.Value // func()
+	onBackground atomic.Value // func()
+	onStarted    atomic.Value // func()
+	onStopped    atomic.Value // func()
 }
 
 // SetOnEnteredForeground hooks into the the app becoming foreground.
 func (l *Lifecycle) SetOnEnteredForeground(f func()) {
-	l.mux.Lock()
-	l.onForeground = f
-	l.mux.Unlock()
+	l.onForeground.Store(f)
 }
 
 // SetOnExitedForeground hooks into the app having moved to the background.
 // Depending on the platform it may still be  visible but will not receive keyboard events.
 // On some systems hover or desktop mouse move events may still occur.
 func (l *Lifecycle) SetOnExitedForeground(f func()) {
-	l.mux.Lock()
-	l.onBackground = f
-	l.mux.Unlock()
+	l.onBackground.Store(f)
 }
 
 // SetOnStarted hooks into an event that says the app is now running.
 func (l *Lifecycle) SetOnStarted(f func()) {
-	l.mux.Lock()
-	l.onStarted = f
-	l.mux.Unlock()
+	l.onStarted.Store(f)
 }
 
 // SetOnStopped hooks into an event that says the app is no longer running.
 func (l *Lifecycle) SetOnStopped(f func()) {
-	l.mux.Lock()
-	l.onStopped = f
-	l.mux.Unlock()
+	l.onStopped.Store(f)
 }
 
 // TriggerEnteredForeground will call the focus gained hook, if one is registered.
 func (l *Lifecycle) TriggerEnteredForeground() {
-	l.mux.Lock()
-	f := l.onForeground
-	l.mux.Unlock()
-
-	if f != nil {
-		f()
+	f := l.onForeground.Load()
+	if ff, ok := f.(func()); ok && ff != nil {
+		ff()
 	}
 }
 
 // TriggerExitedForeground will call the focus lost hook, if one is registered.
 func (l *Lifecycle) TriggerExitedForeground() {
-	l.mux.Lock()
-	f := l.onBackground
-	l.mux.Unlock()
-
-	if f != nil {
-		f()
+	f := l.onBackground.Load()
+	if ff, ok := f.(func()); ok && ff != nil {
+		ff()
 	}
 }
 
 // TriggerStarted will call the started hook, if one is registered.
 func (l *Lifecycle) TriggerStarted() {
-	l.mux.Lock()
-	f := l.onStarted
-	l.mux.Unlock()
-
-	if f != nil {
-		f()
+	f := l.onStarted.Load()
+	if ff, ok := f.(func()); ok && ff != nil {
+		ff()
 	}
 }
 
 // TriggerStopped will call the stopped hook, if one is registered.
 func (l *Lifecycle) TriggerStopped() {
-	l.mux.Lock()
-	f := l.onStopped
-	l.mux.Unlock()
-
-	if f != nil {
-		f()
+	f := l.onStopped.Load()
+	if ff, ok := f.(func()); ok && ff != nil {
+		ff()
 	}
 }
