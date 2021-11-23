@@ -2,7 +2,7 @@ package cache
 
 import (
 	"os"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -213,23 +213,21 @@ func matchesACanvas(cinfo *canvasInfo, canvases []fyne.Canvas) bool {
 }
 
 type expiringCache struct {
-	expireLock sync.RWMutex
-	expires    time.Time
+	expires atomic.Value // time.Time
 }
 
 // isExpired check if the cache data is expired.
 func (c *expiringCache) isExpired(now time.Time) bool {
-	c.expireLock.RLock()
-	defer c.expireLock.RUnlock()
-	return c.expires.Before(now)
+	t := c.expires.Load()
+	if t == nil {
+		return (time.Time{}).Before(now)
+	}
+	return t.(time.Time).Before(now)
 }
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	t := timeNow().Add(cacheDuration)
-	c.expireLock.Lock()
-	c.expires = t
-	c.expireLock.Unlock()
+	c.expires.Store(timeNow().Add(cacheDuration))
 }
 
 type expiringCacheNoLock struct {
