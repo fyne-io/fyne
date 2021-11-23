@@ -40,9 +40,7 @@ func TestBase_RemoveListener(t *testing.T) {
 		called = true
 	})
 	data := &simpleItem{}
-	m := sync.Map{}
-	m.Store(fn, true)
-	data.listeners = m
+	data.listeners.Store(fn, true)
 
 	assert.Equal(t, 1, syncMapLen(&data.listeners))
 	data.RemoveListener(fn)

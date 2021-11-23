@@ -1,7 +1,6 @@
 package binding
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,9 +56,7 @@ func TestListBase_RemoveListener(t *testing.T) {
 		called = true
 	})
 	data := &simpleList{}
-	m := sync.Map{}
-	m.Store(fn, true)
-	data.listeners = m
+	data.listeners.Store(fn, true)
 
 	assert.Equal(t, 1, syncMapLen(&data.listeners))
 	data.RemoveListener(fn)
