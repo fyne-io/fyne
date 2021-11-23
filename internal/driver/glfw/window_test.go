@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
-	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1188,21 +1188,16 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
-	var lock sync.RWMutex
 	waitSingleTapped := make(chan struct{})
 	waitDoubleTapped := make(chan struct{})
-	tapped := 0
+	tapped := int32(0) // atomic
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
-		lock.Lock()
-		tapped = 1
-		lock.Unlock()
+		atomic.StoreInt32(&tapped, 1)
 		waitSingleTapped <- struct{}{}
 	}
 	but.onDoubleTap = func() {
-		lock.Lock()
-		tapped = 2
-		lock.Unlock()
+		atomic.StoreInt32(&tapped, 2)
 		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
@@ -1215,13 +1210,8 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.WaitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
-	lock.RLock()
-	assert.Equal(t, 1, tapped, "Single tap should have fired")
-	lock.RUnlock()
-
-	lock.Lock()
-	tapped = 0
-	lock.Unlock()
+	assert.Equal(t, int32(1), atomic.LoadInt32(&tapped), "Single tap should have fired")
+	atomic.StoreInt32(&tapped, 0)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
@@ -1232,9 +1222,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.WaitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
-	lock.RLock()
-	assert.Equal(t, 2, tapped, "Double tap should have fired")
-	lock.RUnlock()
+	assert.Equal(t, int32(2), atomic.LoadInt32(&tapped), "Double tap should have fired")
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
