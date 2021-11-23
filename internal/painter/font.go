@@ -144,16 +144,12 @@ type fontCacheItem struct {
 	faces          map[truetype.Options]font.Face
 }
 
-var fontCache = make(map[fyne.TextStyle]*fontCacheItem)
-var fontCacheLock = new(sync.Mutex)
+var fontCache = &sync.Map{} // map[fyne.TextStyle]*fontCacheItem
 
 // CachedFontFace returns a font face held in memory. These are loaded from the current theme.
 func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
-	fontCacheLock.Lock()
-	defer fontCacheLock.Unlock()
-	comp := fontCache[style]
-
-	if comp == nil {
+	val, ok := fontCache.Load(style)
+	if !ok {
 		var f1, f2 *truetype.Font
 		switch {
 		case style.Monospace:
@@ -178,10 +174,11 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 		if f1 == nil {
 			f1 = f2
 		}
-		comp = &fontCacheItem{font: f1, fallback: f2, faces: make(map[truetype.Options]font.Face)}
-		fontCache[style] = comp
+		val = &fontCacheItem{font: f1, fallback: f2, faces: make(map[truetype.Options]font.Face)}
+		fontCache.Store(style, val)
 	}
 
+	comp := val.(*fontCacheItem)
 	face := comp.faces[*opts]
 	if face == nil {
 		f1 := truetype.NewFace(comp.font, opts)
@@ -196,20 +193,20 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 
 // ClearFontCache is used to remove cached fonts in the case that we wish to re-load font faces
 func ClearFontCache() {
-	fontCacheLock.Lock()
-	defer fontCacheLock.Unlock()
-	for _, item := range fontCache {
+	fontCache.Range(func(_, val interface{}) bool {
+		item := val.(*fontCacheItem)
 		for _, face := range item.faces {
 			err := face.Close()
 
 			if err != nil {
 				fyne.LogError("failed to close font face", err)
-				return
+				return false
 			}
 		}
-	}
+		return true
+	})
 
-	fontCache = make(map[fyne.TextStyle]*fontCacheItem)
+	fontCache = &sync.Map{}
 }
 
 func fixed266ToFloat32(i fixed.Int26_6) float32 {
