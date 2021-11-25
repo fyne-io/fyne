@@ -17,6 +17,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Support for building `cmd/fyne` on Windows arm64
 * Fixed FreeBSD requiring installed glfw library dependency (#1928)
 * Apple M1: error when using mouse drag to resize window (#2188)
+* Struct binding panics in reload with slice field (#2607)
 
 
 ## 2.1.1 - 22 October 2021
