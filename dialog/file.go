@@ -474,21 +474,15 @@ func (f *fileDialog) setView(view viewLayout) {
 // * "/" (should be filesystem root on all supported platforms)
 //
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
-	var startdir fyne.ListableURI = nil
-
 	if f.startingLocation != nil {
-		startdir = f.startingLocation
-	}
-
-	if startdir != nil {
-		if startdir.Scheme() == "file" {
-			path := startdir.String()[len(startdir.Scheme())+3:]
+		if f.startingLocation.Scheme() == "file" {
+			path := f.startingLocation.Path()
 
 			// the starting directory is set explicitly
 			if _, err := os.Stat(path); err != nil {
 				fyne.LogError("Error with StartingLocation", err)
 			} else {
-				return startdir
+				return f.startingLocation
 			}
 		}
 
@@ -533,15 +527,13 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
-
-	d.setLocation(file.effectiveStartingDir())
-
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*6))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
 	d.win.Resize(size)
 
+	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
 	return d
 }
