@@ -78,11 +78,12 @@ func TestMenu_Layout(t *testing.T) {
 	menu := fyne.NewMenu("", item1, sep, item2, item3, sep, item4)
 
 	for name, tt := range map[string]struct {
-		windowSize     fyne.Size
-		menuPos        fyne.Position
-		mousePositions []fyne.Position
-		useTestTheme   bool
-		want           string
+		windowSize         fyne.Size
+		menuPos            fyne.Position
+		mousePositions     []fyne.Position
+		want               string
+		wantImage          string
+		wantTestThemeImage string
 	}{
 		"normal": {
 			windowSize: fyne.NewSize(500, 300),
@@ -137,10 +138,11 @@ func TestMenu_Layout(t *testing.T) {
 			want: "menu/desktop/layout_window_too_short_for_submenu.xml",
 		},
 		"theme change": {
-			windowSize:   fyne.NewSize(500, 300),
-			menuPos:      fyne.NewPos(10, 10),
-			useTestTheme: true,
-			want:         "menu/desktop/layout_theme_changed.xml",
+			windowSize:         fyne.NewSize(500, 300),
+			menuPos:            fyne.NewPos(10, 10),
+			want:               "menu/desktop/layout_theme_changed.xml",
+			wantImage:          "menu/desktop/layout_normal.png",
+			wantTestThemeImage: "menu/desktop/layout_theme_changed.png",
 		},
 		"window too short for menu": {
 			windowSize: fyne.NewSize(100, 50),
@@ -160,10 +162,12 @@ func TestMenu_Layout(t *testing.T) {
 				test.MoveMouse(c, pos)
 			}
 			test.AssertRendersToMarkup(t, tt.want, w.Canvas())
-			if tt.useTestTheme {
-				test.AssertImageMatches(t, "menu/desktop/layout_normal.png", c.Capture())
+			if tt.wantImage != "" {
+				test.AssertImageMatches(t, tt.wantImage, c.Capture())
+			}
+			if tt.wantTestThemeImage != "" {
 				test.WithTestTheme(t, func() {
-					test.AssertImageMatches(t, "menu/desktop/layout_theme_changed.png", c.Capture())
+					test.AssertImageMatches(t, tt.wantTestThemeImage, c.Capture())
 				})
 			}
 		})
