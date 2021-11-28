@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -37,7 +38,44 @@ func TestMenu_Layout(t *testing.T) {
 	subsubItem2 := fyne.NewMenuItem("subsubitem B", nil)
 	subItem3.ChildMenu = fyne.NewMenu("", subsubItem1, subsubItem2)
 	item3.ChildMenu = fyne.NewMenu("", subItem1, subItem2, subItem3)
-	menu := fyne.NewMenu("", item1, sep, item2, item3)
+	item4 := fyne.NewMenuItem("D", nil)
+	subItem4a := fyne.NewMenuItem("a", nil)
+	subItem4a.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyA, Modifier: fyne.KeyModifierControl}
+	subItem4b := fyne.NewMenuItem("b", nil)
+	subItem4b.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierAlt}
+	subItem4c := fyne.NewMenuItem("c", nil)
+	subItem4c.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: fyne.KeyModifierSuper}
+	subItem4d := fyne.NewMenuItem("d", nil)
+	subItem4d.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyDown, Modifier: fyne.KeyModifierShift}
+	subItem4e := fyne.NewMenuItem("e", nil)
+	subItem4e.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyEnd, Modifier: fyne.KeyModifierControl | fyne.KeyModifierAlt}
+	subItem4f := fyne.NewMenuItem("f", nil)
+	subItem4f.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyEnter, Modifier: fyne.KeyModifierControl | fyne.KeyModifierSuper}
+	subItem4g := fyne.NewMenuItem("g", nil)
+	subItem4g.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyEscape, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift}
+	subItem4h := fyne.NewMenuItem("h", nil)
+	subItem4h.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyHome, Modifier: fyne.KeyModifierAlt | fyne.KeyModifierSuper}
+	subItem4i := fyne.NewMenuItem("i", nil)
+	subItem4i.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierAlt | fyne.KeyModifierShift}
+	subItem4j := fyne.NewMenuItem("j", nil)
+	subItem4j.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyPageDown, Modifier: fyne.KeyModifierSuper | fyne.KeyModifierShift}
+	subItem4k := fyne.NewMenuItem("k", nil)
+	subItem4k.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyPageUp, Modifier: fyne.KeyModifierControl | fyne.KeyModifierAlt | fyne.KeyModifierSuper}
+	subItem4l := fyne.NewMenuItem("l", nil)
+	subItem4l.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyReturn, Modifier: fyne.KeyModifierControl | fyne.KeyModifierAlt | fyne.KeyModifierShift}
+	subItem4m := fyne.NewMenuItem("m", nil)
+	subItem4m.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierControl | fyne.KeyModifierSuper | fyne.KeyModifierShift}
+	subItem4n := fyne.NewMenuItem("n", nil)
+	subItem4n.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeySpace, Modifier: fyne.KeyModifierControl | fyne.KeyModifierAlt | fyne.KeyModifierSuper | fyne.KeyModifierShift}
+	subItem4o := fyne.NewMenuItem("o", nil)
+	subItem4o.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyTab, Modifier: fyne.KeyModifierControl}
+	subItem4p := fyne.NewMenuItem("p", nil)
+	subItem4p.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyUp, Modifier: fyne.KeyModifierControl}
+	subItem4q := fyne.NewMenuItem("q", nil)
+	subItem4q.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyF6}
+	item4.ChildMenu = fyne.NewMenu("", subItem4a, subItem4b, subItem4c, subItem4d, subItem4e, subItem4f, subItem4g, subItem4h, subItem4i, subItem4j, subItem4k, subItem4l, subItem4m, subItem4n, subItem4o, subItem4p, subItem4q)
+
+	menu := fyne.NewMenu("", item1, sep, item2, item3, sep, item4)
 
 	for name, tt := range map[string]struct {
 		windowSize     fyne.Size
@@ -123,9 +161,9 @@ func TestMenu_Layout(t *testing.T) {
 			}
 			test.AssertRendersToMarkup(t, tt.want, w.Canvas())
 			if tt.useTestTheme {
-				test.AssertImageMatches(t, "menu/layout_normal.png", c.Capture())
+				test.AssertImageMatches(t, "menu/desktop/layout_normal.png", c.Capture())
 				test.WithTestTheme(t, func() {
-					test.AssertImageMatches(t, "menu/layout_theme_changed.png", c.Capture())
+					test.AssertImageMatches(t, "menu/desktop/layout_theme_changed.png", c.Capture())
 				})
 			}
 		})
