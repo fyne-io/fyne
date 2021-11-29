@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Toolbar item constructors now return concrete types instead of ToolbarItem
 * Low importance buttons no longer draw button color as a background
 * ProgressBar widget height is now consistent with other widgets
+* Include check in DocTabs menu to show current tab
 
 ### Fixed
 

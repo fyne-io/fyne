@@ -4,7 +4,7 @@
 package binding
 
 import (
-	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 )
@@ -13,11 +13,9 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 
 type prefBoundBool struct {
 	base
-	key string
-	p   fyne.Preferences
-
-	cacheLock sync.RWMutex
-	cache     bool
+	key   string
+	p     fyne.Preferences
+	cache atomic.Value // bool
 }
 
 // BindPreferenceBool returns a bindable bool value that is managed by the application preferences.
@@ -43,10 +41,8 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 
 func (b *prefBoundBool) Get() (bool, error) {
 	cache := b.p.Bool(b.key)
-	b.cacheLock.Lock()
-	b.cache = cache
-	b.cacheLock.Unlock()
-	return b.cache, nil
+	b.cache.Store(cache)
+	return cache, nil
 }
 
 func (b *prefBoundBool) Set(v bool) error {
@@ -59,23 +55,21 @@ func (b *prefBoundBool) Set(v bool) error {
 }
 
 func (b *prefBoundBool) checkForChange() {
-	b.cacheLock.RLock()
-	cache := b.cache
-	b.cacheLock.RUnlock()
-	if b.p.Bool(b.key) == cache {
-		return
+	val := b.cache.Load()
+	if val != nil {
+		cache := val.(bool)
+		if b.p.Bool(b.key) == cache {
+			return
+		}
 	}
-
 	b.trigger()
 }
 
 type prefBoundFloat struct {
 	base
-	key string
-	p   fyne.Preferences
-
-	cacheLock sync.RWMutex
-	cache     float64
+	key   string
+	p     fyne.Preferences
+	cache atomic.Value // float64
 }
 
 // BindPreferenceFloat returns a bindable float64 value that is managed by the application preferences.
@@ -101,10 +95,8 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 
 func (b *prefBoundFloat) Get() (float64, error) {
 	cache := b.p.Float(b.key)
-	b.cacheLock.Lock()
-	b.cache = cache
-	b.cacheLock.Unlock()
-	return b.cache, nil
+	b.cache.Store(cache)
+	return cache, nil
 }
 
 func (b *prefBoundFloat) Set(v float64) error {
@@ -117,23 +109,21 @@ func (b *prefBoundFloat) Set(v float64) error {
 }
 
 func (b *prefBoundFloat) checkForChange() {
-	b.cacheLock.RLock()
-	cache := b.cache
-	b.cacheLock.RUnlock()
-	if b.p.Float(b.key) == cache {
-		return
+	val := b.cache.Load()
+	if val != nil {
+		cache := val.(float64)
+		if b.p.Float(b.key) == cache {
+			return
+		}
 	}
-
 	b.trigger()
 }
 
 type prefBoundInt struct {
 	base
-	key string
-	p   fyne.Preferences
-
-	cacheLock sync.RWMutex
-	cache     int
+	key   string
+	p     fyne.Preferences
+	cache atomic.Value // int
 }
 
 // BindPreferenceInt returns a bindable int value that is managed by the application preferences.
@@ -159,10 +149,8 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 
 func (b *prefBoundInt) Get() (int, error) {
 	cache := b.p.Int(b.key)
-	b.cacheLock.Lock()
-	b.cache = cache
-	b.cacheLock.Unlock()
-	return b.cache, nil
+	b.cache.Store(cache)
+	return cache, nil
 }
 
 func (b *prefBoundInt) Set(v int) error {
@@ -175,23 +163,21 @@ func (b *prefBoundInt) Set(v int) error {
 }
 
 func (b *prefBoundInt) checkForChange() {
-	b.cacheLock.RLock()
-	cache := b.cache
-	b.cacheLock.RUnlock()
-	if b.p.Int(b.key) == cache {
-		return
+	val := b.cache.Load()
+	if val != nil {
+		cache := val.(int)
+		if b.p.Int(b.key) == cache {
+			return
+		}
 	}
-
 	b.trigger()
 }
 
 type prefBoundString struct {
 	base
-	key string
-	p   fyne.Preferences
-
-	cacheLock sync.RWMutex
-	cache     string
+	key   string
+	p     fyne.Preferences
+	cache atomic.Value // string
 }
 
 // BindPreferenceString returns a bindable string value that is managed by the application preferences.
@@ -217,10 +203,8 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 
 func (b *prefBoundString) Get() (string, error) {
 	cache := b.p.String(b.key)
-	b.cacheLock.Lock()
-	b.cache = cache
-	b.cacheLock.Unlock()
-	return b.cache, nil
+	b.cache.Store(cache)
+	return cache, nil
 }
 
 func (b *prefBoundString) Set(v string) error {
@@ -233,12 +217,12 @@ func (b *prefBoundString) Set(v string) error {
 }
 
 func (b *prefBoundString) checkForChange() {
-	b.cacheLock.RLock()
-	cache := b.cache
-	b.cacheLock.RUnlock()
-	if b.p.String(b.key) == cache {
-		return
+	val := b.cache.Load()
+	if val != nil {
+		cache := val.(string)
+		if b.p.String(b.key) == cache {
+			return
+		}
 	}
-
 	b.trigger()
 }

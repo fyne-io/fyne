@@ -1,5 +1,7 @@
 name: Mobile Tests
 on: [push, pull_request]
+permissions:
+  contents: read
 
 jobs:
   mobile_tests:
@@ -11,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
     - uses: WillAbides/setup-go-faster@v1.6.0
       with:
         go-version: ${{ matrix.go-version }}

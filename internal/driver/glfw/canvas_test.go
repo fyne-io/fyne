@@ -1,5 +1,5 @@
-// +build !ci
-// +build !mobile
+//go:build !ci && !mobile
+// +build !ci,!mobile
 
 package glfw
 

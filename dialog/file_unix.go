@@ -1,3 +1,4 @@
+//go:build !windows && !android && !ios
 // +build !windows,!android,!ios
 
 package dialog

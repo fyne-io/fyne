@@ -1,3 +1,4 @@
+//go:build !no_native_menus
 // +build !no_native_menus
 
 package glfw

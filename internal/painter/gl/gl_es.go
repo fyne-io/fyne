@@ -1,5 +1,8 @@
+//go:build (gles || arm || arm64) && !android && !ios && !mobile && !darwin
 // +build gles arm arm64
-// +build !android,!ios,!mobile
+// +build !android
+// +build !ios
+// +build !mobile
 // +build !darwin
 
 package gl

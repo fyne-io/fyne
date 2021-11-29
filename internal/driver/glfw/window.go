@@ -1059,6 +1059,35 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
+var keyCodeMapASCII = map[glfw.Key]fyne.KeyName{
+	glfw.KeyA: fyne.KeyA,
+	glfw.KeyB: fyne.KeyB,
+	glfw.KeyC: fyne.KeyC,
+	glfw.KeyD: fyne.KeyD,
+	glfw.KeyE: fyne.KeyE,
+	glfw.KeyF: fyne.KeyF,
+	glfw.KeyG: fyne.KeyG,
+	glfw.KeyH: fyne.KeyH,
+	glfw.KeyI: fyne.KeyI,
+	glfw.KeyJ: fyne.KeyJ,
+	glfw.KeyK: fyne.KeyK,
+	glfw.KeyL: fyne.KeyL,
+	glfw.KeyM: fyne.KeyM,
+	glfw.KeyN: fyne.KeyN,
+	glfw.KeyO: fyne.KeyO,
+	glfw.KeyP: fyne.KeyP,
+	glfw.KeyQ: fyne.KeyQ,
+	glfw.KeyR: fyne.KeyR,
+	glfw.KeyS: fyne.KeyS,
+	glfw.KeyT: fyne.KeyT,
+	glfw.KeyU: fyne.KeyU,
+	glfw.KeyV: fyne.KeyV,
+	glfw.KeyW: fyne.KeyW,
+	glfw.KeyX: fyne.KeyX,
+	glfw.KeyY: fyne.KeyY,
+	glfw.KeyZ: fyne.KeyZ,
+}
+
 var keyNameMap = map[string]fyne.KeyName{
 	"'": fyne.KeyApostrophe,
 	",": fyne.KeyComma,
@@ -1194,7 +1223,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyDesktopModifier) {
+	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, key, keyDesktopModifier) {
 		return
 	}
 
@@ -1261,11 +1290,22 @@ func (w *window) focused(_ *glfw.Window, focus bool) {
 	}
 }
 
-func (w *window) triggersShortcut(keyName fyne.KeyName, modifier desktop.Modifier) bool {
+func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, modifier desktop.Modifier) bool {
 	var shortcut fyne.Shortcut
 	ctrlMod := desktop.ControlModifier
 	if runtime.GOOS == "darwin" {
 		ctrlMod = desktop.SuperModifier
+	}
+	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
+	// is reported as a fyne.KeyUnknown key with Control modifier. We should still consider this
+	// as a "Paste" shortcut.
+	// See https://github.com/fyne-io/fyne/pull/2587 for discussion.
+	keyName := localizedKeyName
+	resemblesShortcut := (modifier&(desktop.ControlModifier|desktop.SuperModifier) != 0)
+	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut {
+		if asciiKey, ok := keyCodeMapASCII[key]; ok {
+			keyName = asciiKey
+		}
 	}
 	if modifier == ctrlMod {
 		switch keyName {
