@@ -1,6 +1,7 @@
 package glfw
 
 import (
+	"bytes"
 	"context"
 	"image"
 	_ "image/png" // for the icon
@@ -247,8 +248,21 @@ func (w *window) SetIcon(icon fyne.Resource) {
 			return
 		}
 
-		iconW, iconH := 256, 256
-		pix := painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, iconW, iconH)
+		var (
+			pix image.Image
+			err error
+		)
+
+		if painter.IsResourceSVG(w.icon) {
+			iconW, iconH := 256, 256
+			pix = painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, iconW, iconH)
+		} else {
+			pix, _, err = image.Decode(bytes.NewReader(w.icon.Content()))
+			if err != nil {
+				fyne.LogError("Failed to decode image for window icon", err)
+				return
+			}
+		}
 
 		w.viewport.SetIcon([]image.Image{pix})
 	})
