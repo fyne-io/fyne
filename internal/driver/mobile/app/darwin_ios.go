@@ -38,7 +38,6 @@ import (
 	"log"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 	"unsafe"
 
