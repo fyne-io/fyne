@@ -201,6 +201,7 @@ func isFileSVG(path string) bool {
 	return strings.ToLower(filepath.Ext(path)) == ".svg"
 }
 
+// IsResourceSVG checks if given fyne Resource is svg or not
 func IsResourceSVG(res fyne.Resource) bool {
 	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
 		return true
