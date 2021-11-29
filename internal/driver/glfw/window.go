@@ -148,6 +148,12 @@ func (w *window) CenterOnScreen() {
 
 func (w *window) doCenterOnScreen() {
 	viewWidth, viewHeight := w.screenSize(w.canvas.size)
+	if w.width > viewWidth { // in case our window has not called back to canvas size yet
+		viewWidth = w.width
+	}
+	if w.height > viewHeight {
+		viewHeight = w.height
+	}
 
 	// get window dimensions in pixels
 	monitor := w.getMonitorForWindow()
