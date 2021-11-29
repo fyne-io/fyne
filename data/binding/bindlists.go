@@ -77,11 +77,12 @@ func (l *boundBoolList) Get() ([]bool, error) {
 }
 
 func (l *boundBoolList) GetValue(i int) (bool, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return false, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -147,7 +148,11 @@ func (l *boundBoolList) doReload() (retErr error) {
 }
 
 func (l *boundBoolList) SetValue(i int, v bool) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -183,6 +188,10 @@ type boundBoolListItem struct {
 func (b *boundBoolListItem) Get() (bool, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return false, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -290,11 +299,12 @@ func (l *boundFloatList) Get() ([]float64, error) {
 }
 
 func (l *boundFloatList) GetValue(i int) (float64, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return 0.0, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -360,7 +370,11 @@ func (l *boundFloatList) doReload() (retErr error) {
 }
 
 func (l *boundFloatList) SetValue(i int, v float64) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -396,6 +410,10 @@ type boundFloatListItem struct {
 func (b *boundFloatListItem) Get() (float64, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return 0.0, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -503,11 +521,12 @@ func (l *boundIntList) Get() ([]int, error) {
 }
 
 func (l *boundIntList) GetValue(i int) (int, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return 0, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -573,7 +592,11 @@ func (l *boundIntList) doReload() (retErr error) {
 }
 
 func (l *boundIntList) SetValue(i int, v int) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -609,6 +632,10 @@ type boundIntListItem struct {
 func (b *boundIntListItem) Get() (int, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return 0, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -716,11 +743,12 @@ func (l *boundRuneList) Get() ([]rune, error) {
 }
 
 func (l *boundRuneList) GetValue(i int) (rune, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return rune(0), errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -786,7 +814,11 @@ func (l *boundRuneList) doReload() (retErr error) {
 }
 
 func (l *boundRuneList) SetValue(i int, v rune) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -822,6 +854,10 @@ type boundRuneListItem struct {
 func (b *boundRuneListItem) Get() (rune, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return rune(0), errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -929,11 +965,12 @@ func (l *boundStringList) Get() ([]string, error) {
 }
 
 func (l *boundStringList) GetValue(i int) (string, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return "", errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -999,7 +1036,11 @@ func (l *boundStringList) doReload() (retErr error) {
 }
 
 func (l *boundStringList) SetValue(i int, v string) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -1035,6 +1076,10 @@ type boundStringListItem struct {
 func (b *boundStringListItem) Get() (string, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return "", errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -1142,11 +1187,12 @@ func (l *boundUntypedList) Get() ([]interface{}, error) {
 }
 
 func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return nil, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -1212,7 +1258,11 @@ func (l *boundUntypedList) doReload() (retErr error) {
 }
 
 func (l *boundUntypedList) SetValue(i int, v interface{}) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -1248,6 +1298,10 @@ type boundUntypedListItem struct {
 func (b *boundUntypedListItem) Get() (interface{}, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return nil, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -1355,11 +1409,12 @@ func (l *boundURIList) Get() ([]fyne.URI, error) {
 }
 
 func (l *boundURIList) GetValue(i int) (fyne.URI, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return fyne.URI(nil), errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -1425,7 +1480,11 @@ func (l *boundURIList) doReload() (retErr error) {
 }
 
 func (l *boundURIList) SetValue(i int, v fyne.URI) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -1461,6 +1520,10 @@ type boundURIListItem struct {
 func (b *boundURIListItem) Get() (fyne.URI, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return fyne.URI(nil), errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
