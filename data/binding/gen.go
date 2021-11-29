@@ -446,11 +446,12 @@ func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
 }
 
 func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -516,7 +517,11 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 }
 
 func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -552,6 +557,10 @@ type bound{{ .Name }}ListItem struct {
 func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return {{ .Default }}, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
