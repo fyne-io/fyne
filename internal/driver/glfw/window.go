@@ -30,6 +30,7 @@ const (
 	scrollSpeed            = float32(10)
 	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
 	dragMoveThreshold      = 2   // how far can we move before it is a drag
+	windowIconSize         = 256
 )
 
 var (
@@ -248,23 +249,19 @@ func (w *window) SetIcon(icon fyne.Resource) {
 			return
 		}
 
-		var (
-			pix image.Image
-			err error
-		)
-
+		var img image.Image
 		if painter.IsResourceSVG(w.icon) {
-			iconW, iconH := 256, 256
-			pix = painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, iconW, iconH)
+			img = painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, windowIconSize, windowIconSize)
 		} else {
-			pix, _, err = image.Decode(bytes.NewReader(w.icon.Content()))
+			pix, _, err := image.Decode(bytes.NewReader(w.icon.Content()))
 			if err != nil {
 				fyne.LogError("Failed to decode image for window icon", err)
 				return
 			}
+			img = pix
 		}
 
-		w.viewport.SetIcon([]image.Image{pix})
+		w.viewport.SetIcon([]image.Image{img})
 	})
 }
 
