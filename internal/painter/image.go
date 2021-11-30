@@ -55,7 +55,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		if img.Resource != nil {
 			name = img.Resource.Name()
 			file = bytes.NewReader(img.Resource.Content())
-			isSVG = isResourceSVG(img.Resource)
+			isSVG = IsResourceSVG(img.Resource)
 		} else {
 			name = img.File
 			handle, err := os.Open(img.File)
@@ -201,7 +201,8 @@ func isFileSVG(path string) bool {
 	return strings.ToLower(filepath.Ext(path)) == ".svg"
 }
 
-func isResourceSVG(res fyne.Resource) bool {
+// IsResourceSVG checks if the resource is an SVG or not.
+func IsResourceSVG(res fyne.Resource) bool {
 	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
 		return true
 	}
