@@ -136,6 +136,9 @@ func (w *window) SetFullScreen(full bool) {
 		if full {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
+			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
+				w.width, w.height = w.screenSize(w.canvas.Size())
+			}
 			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
 		}
 	})
