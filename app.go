@@ -62,20 +62,20 @@ type App interface {
 	Lifecycle() Lifecycle
 }
 
-// app is a App typed variable. Note that we cannot use atomic.Value as
-// this app may be replaced by different types.
-var app atomic.Value // internalApp
+// app contains an App variable, but due to atomic.Value restrictions on
+// interfaces we need to use an indirect type, i.e. appContainer.
+var app atomic.Value // appContainer
 
-// internalApp is a dummy container that holds an App instance. This
+// appContainer is a dummy container that holds an App instance. This
 // struct exists to guarantee that atomic.Value can store objects with
 // same type.
-type internalApp struct {
+type appContainer struct {
 	current App
 }
 
 // SetCurrentApp is an internal function to set the app instance currently running.
 func SetCurrentApp(current App) {
-	app.Store(internalApp{current})
+	app.Store(appContainer{current})
 }
 
 // CurrentApp returns the current application, for which there is only 1 per process.
@@ -85,7 +85,7 @@ func CurrentApp() App {
 		LogError("Attempt to access current Fyne app when none is started", nil)
 		return nil
 	}
-	return (val).(internalApp).current
+	return (val).(appContainer).current
 }
 
 // Lifecycle represents the various phases that an app can transition through.
