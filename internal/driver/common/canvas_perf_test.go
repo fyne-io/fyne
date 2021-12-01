@@ -25,7 +25,7 @@ func Example() {
 	// with master version of Canvas.EnsureMinSize : 1028000
 	// with patched version of Canvas.EnsureMinSize : 29000
 
-	// Output: Number of isBranch calls: 1028000
+	// Output: Number of isBranch calls: 29000
 }
 
 var count int

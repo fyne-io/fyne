@@ -65,6 +65,8 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	var lastParent fyne.CanvasObject
 
+	seenObj := map[fyne.CanvasObject]struct{}{}
+
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
 	min := c.impl.MinSize()
@@ -93,8 +95,9 @@ func (c *Canvas) EnsureMinSize() bool {
 				}
 			}
 
-			if objToLayout != lastParent {
-				updateLayout(lastParent)
+			if _, hasSeen := seenObj[objToLayout]; !hasSeen {
+				updateLayout(objToLayout)
+				seenObj[objToLayout] = struct{}{}
 				lastParent = objToLayout
 			}
 		}
