@@ -694,6 +694,11 @@ import "fyne.io/fyne/v2"
 			b.Since = "2.0"
 		}
 
+		writeFile(listFile, list, b)
+		if b.Name == "Untyped" {
+			continue // interface{} is special, we have it in binding.go instead
+		}
+
 		writeFile(itemFile, item, b)
 		if b.SupportsPreferences {
 			writeFile(prefFile, preference, b)
@@ -701,7 +706,6 @@ import "fyne.io/fyne/v2"
 		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}
-		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {
