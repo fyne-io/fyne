@@ -86,14 +86,17 @@ func buildEnvInit() (cleanup func(), err error) {
 	return cleanupFn, nil
 }
 
+var (
+	before115 = false
+	before116 = false
+)
+
 func envInit() (err error) {
 	// Check the current Go version by go-list.
 	// An arbitrary standard package ('runtime' here) is given to go-list.
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
 
-	before115 := false
-	before116 := false
 	ver, err := exec.Command("go", "version").Output()
 	if err == nil && string(ver) != "" {
 		fields := strings.Split(string(ver), " ")
