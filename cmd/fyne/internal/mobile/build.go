@@ -303,8 +303,8 @@ func addBuildFlags(cmd *command) {
 func addBuildFlagsNVXWork(cmd *command) {
 	cmd.Flag.BoolVar(&buildN, "n", false, "")
 	cmd.Flag.BoolVar(&buildV, "v", false, "")
-	cmd.Flag.BoolVar(&buildX, "x", true, "")
-	cmd.Flag.BoolVar(&buildWork, "work", true, "")
+	cmd.Flag.BoolVar(&buildX, "x", false, "")
+	cmd.Flag.BoolVar(&buildWork, "work", false, "")
 }
 
 func init() {
