@@ -9,9 +9,9 @@ require (
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-gl/gl v0.0.0-20210813123233-e4099ee2221f
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211024062804-40e447a793be
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211204153444-caad923f49f4
 	github.com/go-ole/go-ole v1.2.6
-	github.com/godbus/dbus/v5 v5.0.4
+	github.com/godbus/dbus/v5 v5.0.6
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
