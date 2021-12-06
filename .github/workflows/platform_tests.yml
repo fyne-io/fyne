@@ -32,7 +32,8 @@ jobs:
         GO111MODULE=off go get github.com/mattn/goveralls
         set -e
         go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-        if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
+        coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
+        if [ $coverage -lt 63 ]; then echo "Test coverage lowered"; exit 1; fi
       if: ${{ runner.os == 'Linux' }}
 
     - name: Update PR Coverage
