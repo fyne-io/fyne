@@ -13,12 +13,14 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
 )
 
@@ -28,6 +30,7 @@ const (
 	scrollSpeed            = float32(10)
 	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
 	dragMoveThreshold      = 2   // how far can we move before it is a drag
+	windowIconSize         = 256
 )
 
 var (
@@ -133,6 +136,9 @@ func (w *window) SetFullScreen(full bool) {
 		if full {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
+			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
+				w.width, w.height = w.screenSize(w.canvas.Size())
+			}
 			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
 		}
 	})
@@ -148,6 +154,12 @@ func (w *window) CenterOnScreen() {
 
 func (w *window) doCenterOnScreen() {
 	viewWidth, viewHeight := w.screenSize(w.canvas.size)
+	if w.width > viewWidth { // in case our window has not called back to canvas size yet
+		viewWidth = w.width
+	}
+	if w.height > viewHeight {
+		viewHeight = w.height
+	}
 
 	// get window dimensions in pixels
 	monitor := w.getMonitorForWindow()
@@ -240,24 +252,25 @@ func (w *window) SetIcon(icon fyne.Resource) {
 		return
 	}
 
-	if string(icon.Content()[:4]) == "<svg" {
-		fyne.LogError("Window icon does not support vector images", nil)
-		return
-	}
-
 	w.runOnMainWhenCreated(func() {
 		if w.icon == nil {
 			w.viewport.SetIcon(nil)
 			return
 		}
 
-		pix, _, err := image.Decode(bytes.NewReader(w.icon.Content()))
-		if err != nil {
-			fyne.LogError("Failed to decode image for window icon", err)
-			return
+		var img image.Image
+		if painter.IsResourceSVG(w.icon) {
+			img = painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, windowIconSize, windowIconSize)
+		} else {
+			pix, _, err := image.Decode(bytes.NewReader(w.icon.Content()))
+			if err != nil {
+				fyne.LogError("Failed to decode image for window icon", err)
+				return
+			}
+			img = pix
 		}
 
-		w.viewport.SetIcon([]image.Image{pix})
+		w.viewport.SetIcon([]image.Image{img})
 	})
 }
 
