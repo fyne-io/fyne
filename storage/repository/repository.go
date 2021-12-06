@@ -1,4 +1,4 @@
-// Package repository provides storage primitives for working with storage repositories.
+// Package repository provides primitives for working with storage repositories.
 package repository
 
 import (
