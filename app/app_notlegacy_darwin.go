@@ -1,5 +1,5 @@
-// +build !ci
-// +build !legacy
+//go:build !ci && !legacy
+// +build !ci,!legacy
 
 package app
 
