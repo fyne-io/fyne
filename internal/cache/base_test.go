@@ -36,7 +36,7 @@ func TestCacheClean(t *testing.T) {
 	t.Run("no_expired_objects", func(t *testing.T) {
 		lastClean = tm.createTime(10, 20)
 		Clean(false)
-		assert.Len(t, svgs, 40)
+		assert.Equal(t, syncMapLen(svgs), 40)
 		assert.Len(t, renderers, 40)
 		assert.Len(t, canvases, 40)
 		assert.Zero(t, destroyedRenderersCnt)
@@ -44,7 +44,7 @@ func TestCacheClean(t *testing.T) {
 
 		tm.setTime(10, 30)
 		Clean(true)
-		assert.Len(t, svgs, 40)
+		assert.Equal(t, syncMapLen(svgs), 40)
 		assert.Len(t, renderers, 40)
 		assert.Len(t, canvases, 40)
 		assert.Zero(t, destroyedRenderersCnt)
@@ -72,7 +72,7 @@ func TestCacheClean(t *testing.T) {
 		Clean(true)
 		assert.Equal(t, tm.now, lastClean)
 
-		assert.Len(t, svgs, 40)
+		assert.Equal(t, syncMapLen(svgs), 40)
 		assert.Len(t, renderers, 40)
 		assert.Len(t, canvases, 40)
 		assert.Zero(t, destroyedRenderersCnt)
@@ -82,14 +82,14 @@ func TestCacheClean(t *testing.T) {
 		lastClean = tm.createTime(10, 11)
 		tm.setTime(11, 12)
 		Clean(false)
-		assert.Len(t, svgs, 20)
+		assert.Equal(t, syncMapLen(svgs), 20)
 		assert.Len(t, renderers, 40)
 		assert.Len(t, canvases, 40)
 		assert.Zero(t, destroyedRenderersCnt)
 
 		tm.setTime(11, 42)
 		Clean(false)
-		assert.Len(t, svgs, 0)
+		assert.Equal(t, syncMapLen(svgs), 0)
 		assert.Len(t, renderers, 40)
 		assert.Len(t, canvases, 40)
 		assert.Zero(t, destroyedRenderersCnt)
@@ -99,14 +99,14 @@ func TestCacheClean(t *testing.T) {
 		lastClean = tm.createTime(10, 11)
 		tm.setTime(11, 11)
 		Clean(true)
-		assert.Len(t, svgs, 0)
+		assert.Equal(t, syncMapLen(svgs), 0)
 		assert.Len(t, renderers, 20)
 		assert.Len(t, canvases, 20)
 		assert.Equal(t, 20, destroyedRenderersCnt)
 
 		tm.setTime(11, 22)
 		Clean(true)
-		assert.Len(t, svgs, 0)
+		assert.Equal(t, syncMapLen(svgs), 0)
 		assert.Len(t, renderers, 0)
 		assert.Len(t, canvases, 0)
 		assert.Equal(t, 40, destroyedRenderersCnt)
@@ -267,7 +267,10 @@ func testClearAll() {
 	expiredObjects = make([]fyne.CanvasObject, 0, 50)
 	skippedCleanWithCanvasRefresh = false
 	canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
-	svgs = make(map[string]*svgInfo)
+	svgs.Range(func(key, _ interface{}) bool {
+		svgs.Delete(key)
+		return true
+	})
 	textures = sync.Map{}
 	renderers = map[fyne.Widget]*rendererInfo{}
 	timeNow = time.Now

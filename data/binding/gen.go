@@ -120,11 +120,9 @@ func (b *boundExternal{{ .Name }}) Reload() error {
 const prefTemplate = `
 type prefBound{{ .Name }} struct {
 	base
-	key string
-	p   fyne.Preferences
-
-	cacheLock sync.RWMutex
-	cache     {{ .Type }}
+	key   string
+	p     fyne.Preferences
+	cache atomic.Value // {{ .Type }}
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
@@ -150,10 +148,8 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 
 func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
 	cache := b.p.{{ .Name }}(b.key)
-	b.cacheLock.Lock()
-	b.cache = cache
-	b.cacheLock.Unlock()
-	return b.cache, nil
+	b.cache.Store(cache)
+	return cache, nil
 }
 
 func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
@@ -166,13 +162,13 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 }
 
 func (b *prefBound{{ .Name }}) checkForChange() {
-	b.cacheLock.RLock()
-	cache := b.cache
-	b.cacheLock.RUnlock()
-	if b.p.{{ .Name }}(b.key) == cache {
-		return
+	val := b.cache.Load()
+	if val != nil {
+		cache := val.({{ .Type }})
+		if b.p.{{ .Name }}(b.key) == cache {
+			return
+		}
 	}
-
 	b.trigger()
 }
 `
@@ -658,7 +654,7 @@ import (
 	defer prefFile.Close()
 	prefFile.WriteString(`
 import (
-	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 )

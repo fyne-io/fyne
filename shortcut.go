@@ -7,38 +7,28 @@ import (
 // ShortcutHandler is a default implementation of the shortcut handler
 // for the canvasObject
 type ShortcutHandler struct {
-	mu    sync.RWMutex
-	entry map[string]func(Shortcut)
+	entry sync.Map // map[string]func(Shortcut)
 }
 
 // TypedShortcut handle the registered shortcut
 func (sh *ShortcutHandler) TypedShortcut(shortcut Shortcut) {
-	if _, ok := sh.entry[shortcut.ShortcutName()]; !ok {
+	val, ok := sh.entry.Load(shortcut.ShortcutName())
+	if !ok {
 		return
 	}
 
-	sh.entry[shortcut.ShortcutName()](shortcut)
+	f := val.(func(Shortcut))
+	f(shortcut)
 }
 
 // AddShortcut register an handler to be executed when the shortcut action is triggered
 func (sh *ShortcutHandler) AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut)) {
-	sh.mu.Lock()
-	defer sh.mu.Unlock()
-	if sh.entry == nil {
-		sh.entry = make(map[string]func(Shortcut))
-	}
-	sh.entry[shortcut.ShortcutName()] = handler
+	sh.entry.Store(shortcut.ShortcutName(), handler)
 }
 
 // RemoveShortcut removes a registered shortcut
 func (sh *ShortcutHandler) RemoveShortcut(shortcut Shortcut) {
-	sh.mu.Lock()
-	defer sh.mu.Unlock()
-	if sh.entry == nil {
-		return
-	}
-
-	delete(sh.entry, shortcut.ShortcutName())
+	sh.entry.Delete(shortcut.ShortcutName())
 }
 
 // Shortcut is the interface used to describe a shortcut action

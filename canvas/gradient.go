@@ -31,19 +31,19 @@ func (g *LinearGradient) Generate(iw, ih int) image.Image {
 		}
 	case 45: // diagonal negative flipped
 		generator = func(x, y float64) float64 {
-			return math.Abs((w+h)-(x+h-y)) / math.Abs(w+h)
+			return math.Abs((w - x + y) / (w + h)) // ((w+h)-(x+h-y)) / (w+h)
 		}
 	case 225: // diagonal negative
 		generator = func(x, y float64) float64 {
-			return math.Abs(x+h-y) / math.Abs(w+h)
+			return math.Abs((x + h - y) / (w + h))
 		}
 	case 135: // diagonal positive flipped
 		generator = func(x, y float64) float64 {
-			return math.Abs((w+h)-(x+y)) / math.Abs(w+h)
+			return math.Abs((w + h - (x + y)) / (w + h))
 		}
 	case 315: // diagonal positive
 		generator = func(x, y float64) float64 {
-			return math.Abs(x+y) / math.Abs(w+h)
+			return math.Abs((x + y) / (w + h))
 		}
 	case 180: // vertical flipped
 		generator = func(_, y float64) float64 {
