@@ -34,8 +34,7 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
-	listenerLock    sync.Mutex
-	changeListeners []chan fyne.Settings
+	changeListeners sync.Map    // map[chan fyne.Settings]bool
 	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
@@ -93,23 +92,20 @@ func (s *settings) Scale() float32 {
 }
 
 func (s *settings) AddChangeListener(listener chan fyne.Settings) {
-	s.listenerLock.Lock()
-	defer s.listenerLock.Unlock()
-	s.changeListeners = append(s.changeListeners, listener)
+	s.changeListeners.Store(listener, true) // the boolean is just a dummy value here.
 }
 
 func (s *settings) apply() {
-	s.listenerLock.Lock()
-	defer s.listenerLock.Unlock()
-
-	for _, listener := range s.changeListeners {
+	s.changeListeners.Range(func(key, _ interface{}) bool {
+		listener := key.(chan fyne.Settings)
 		select {
 		case listener <- s:
 		default:
 			l := listener
 			go func() { l <- s }()
 		}
-	}
+		return true
+	})
 }
 
 func (s *settings) load() {

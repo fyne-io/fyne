@@ -5,7 +5,7 @@ package app // import "fyne.io/fyne/v2/app"
 
 import (
 	"strconv"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -30,9 +30,8 @@ type fyneApp struct {
 	storage   *store
 	prefs     fyne.Preferences
 
-	running  bool
-	runMutex sync.Mutex
-	exec     func(name string, arg ...string) *execabs.Cmd
+	running uint32 // atomic, 1 == running, 0 == stopped
+	exec    func(name string, arg ...string) *execabs.Cmd
 }
 
 func (a *fyneApp) Icon() fyne.Resource {
@@ -58,17 +57,10 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (a *fyneApp) Run() {
-	a.runMutex.Lock()
-
-	if a.running {
-		a.runMutex.Unlock()
+	if atomic.CompareAndSwapUint32(&a.running, 0, 1) {
+		a.driver.Run()
 		return
 	}
-
-	a.running = true
-	a.runMutex.Unlock()
-
-	a.driver.Run()
 }
 
 func (a *fyneApp) Quit() {
@@ -78,7 +70,7 @@ func (a *fyneApp) Quit() {
 
 	a.driver.Quit()
 	a.settings.stopWatching()
-	a.running = false
+	atomic.StoreUint32(&a.running, 0)
 }
 
 func (a *fyneApp) Driver() fyne.Driver {
