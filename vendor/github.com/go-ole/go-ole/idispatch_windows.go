@@ -185,7 +185,9 @@ func invoke(disp *IDispatch, dispid int32, dispatch int16, params ...interface{}
 		uintptr(unsafe.Pointer(&excepInfo)),
 		0)
 	if hr != 0 {
-		err = NewErrorWithSubError(hr, BstrToString(excepInfo.bstrDescription), excepInfo)
+		excepInfo.renderStrings()
+		excepInfo.Clear()
+		err = NewErrorWithSubError(hr, excepInfo.description, excepInfo)
 	}
 	for i, varg := range vargs {
 		n := len(params) - i - 1

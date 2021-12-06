@@ -143,7 +143,7 @@ func TestRichTextMarkdown_Lines(t *testing.T) {
 
 	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "line1", text.Text)
+		assert.Equal(t, "line1 ", text.Text)
 		assert.True(t, text.Inline())
 	} else {
 		t.Error("Segment should be Text")

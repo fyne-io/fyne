@@ -447,11 +447,12 @@ func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
 }
 
 func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -517,7 +518,11 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 }
 
 func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -553,6 +558,10 @@ type bound{{ .Name }}ListItem struct {
 func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return {{ .Default }}, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -677,12 +686,18 @@ import "fyne.io/fyne/v2"
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
 	for _, b := range binds {
 		if b.Since == "" {
 			b.Since = "2.0"
+		}
+
+		writeFile(listFile, list, b)
+		if b.Name == "Untyped" {
+			continue // interface{} is special, we have it in binding.go instead
 		}
 
 		writeFile(itemFile, item, b)
@@ -692,7 +707,6 @@ import "fyne.io/fyne/v2"
 		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}
-		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {

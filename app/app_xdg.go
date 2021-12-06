@@ -46,9 +46,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 }
 
 func rootConfigDir() string {
-	homeDir, _ := os.UserHomeDir()
-
-	desktopConfig := filepath.Join(homeDir, ".config")
+	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")
 }
 

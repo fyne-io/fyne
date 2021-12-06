@@ -1647,6 +1647,24 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 	assert.True(t, e1.Visible())
 }
 
+func TestWindow_SetFullScreen(t *testing.T) {
+	w := createWindow("Full").(*window)
+	w.SetFullScreen(true)
+	w.create()
+	w.doShow()
+	waitForMain()
+
+	// initial state - no window size set
+	assert.Zero(t, w.width)
+	assert.Zero(t, w.height)
+
+	w.SetFullScreen(false)
+	waitForMain()
+	// ensure we realised size now!
+	assert.NotZero(t, w.width)
+	assert.NotZero(t, w.height)
+}
+
 // This test makes our developer screens flash, let's not run it regularly...
 //func TestWindow_Shortcut(t *testing.T) {
 //	w := createWindow("Test")
@@ -1915,4 +1933,8 @@ func newDoubleTappableButton() *doubleTappableButton {
 	but.ExtendBaseWidget(but)
 
 	return but
+}
+
+func waitForMain() {
+	runOnMain(func() {}) // this blocks until processed
 }

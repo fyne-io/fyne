@@ -71,8 +71,36 @@ func runOnDraw(w *window, f func()) {
 	<-done
 }
 
+func (d *gLDriver) drawSingleFrame() {
+	refreshingCanvases := make([]fyne.Canvas, 0)
+	for _, win := range d.windowList() {
+		w := win.(*window)
+		w.viewLock.RLock()
+		canvas := w.canvas
+		closing := w.closing
+		visible := w.visible
+		w.viewLock.RUnlock()
+
+		// CheckDirtyAndClear must be checked after visibility,
+		// because when a window becomes visible, it could be
+		// showing old content without a dirty flag set to true.
+		// Do the clear if and only if the window is visible.
+		if closing || !visible || !canvas.CheckDirtyAndClear() {
+			continue
+		}
+
+		d.repaintWindow(w)
+		refreshingCanvases = append(refreshingCanvases, canvas)
+	}
+	cache.CleanCanvases(refreshingCanvases)
+}
+
 func (d *gLDriver) initGLFW() {
 	initOnce.Do(func() {
+		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+			d.drawOnMainThread = true
+		}
+
 		err := glfw.Init()
 		if err != nil {
 			fyne.LogError("failed to initialise GLFW", err)
@@ -146,6 +174,10 @@ func (d *gLDriver) runGL() {
 				}
 
 				newWindows = append(newWindows, win)
+
+				if d.drawOnMainThread {
+					d.drawSingleFrame()
+				}
 			}
 			if reassign {
 				d.windowLock.Lock()
@@ -187,7 +219,12 @@ func (d *gLDriver) repaintWindow(w *window) {
 func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	draw := time.NewTicker(time.Second / 60)
+	var drawCh <-chan time.Time
+	if d.drawOnMainThread {
+		drawCh = make(chan time.Time) // don't tick when on M1
+	} else {
+		drawCh = time.NewTicker(time.Second / 60).C
+	}
 
 	go func() {
 		runtime.LockOSThread()
@@ -212,28 +249,8 @@ func (d *gLDriver) startDrawThread() {
 					c.applyThemeOutOfTreeObjects()
 					go c.reloadScale()
 				})
-			case <-draw.C:
-				refreshingCanvases := make([]fyne.Canvas, 0)
-				for _, win := range d.windowList() {
-					w := win.(*window)
-					w.viewLock.RLock()
-					canvas := w.canvas
-					closing := w.closing
-					visible := w.visible
-					w.viewLock.RUnlock()
-
-					// CheckDirtyAndClear must be checked after visibility,
-					// because when a window becomes visible, it could be
-					// showing old content without a dirty flag set to true.
-					// Do the clear if and only if the window is visible.
-					if closing || !visible || !canvas.CheckDirtyAndClear() {
-						continue
-					}
-
-					d.repaintWindow(w)
-					refreshingCanvases = append(refreshingCanvases, canvas)
-				}
-				cache.CleanCanvases(refreshingCanvases)
+			case <-drawCh:
+				d.drawSingleFrame()
 			}
 		}
 	}()

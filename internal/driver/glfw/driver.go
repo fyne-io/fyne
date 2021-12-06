@@ -37,6 +37,8 @@ type gLDriver struct {
 	drawDone   chan interface{}
 
 	animation *animation.Runner
+
+	drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {

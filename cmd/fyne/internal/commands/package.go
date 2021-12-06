@@ -167,7 +167,11 @@ func (p *Packager) Package() error {
 		return err
 	}
 
-	err = p.doPackage()
+	return p.packageWithoutValidate()
+}
+
+func (p *Packager) packageWithoutValidate() error {
+	err := p.doPackage()
 	if err != nil {
 		return err
 	}
