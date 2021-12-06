@@ -1,6 +1,6 @@
 //go:generate go run gen.go
 
-// Package binding implements data binding for widgets.
+// Package binding provides support for binding data to widgets.
 package binding
 
 import (
