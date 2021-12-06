@@ -54,6 +54,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		Name:     strings.Title(appName),
 		Version:  version,
 		Build:    build,
+		Legacy:   len(allArchs["ios"]) > 2,
 	}); err != nil {
 		return nil, err
 	}
@@ -264,6 +265,7 @@ type infoplistTmplData struct {
 	Name     string
 	Version  string
 	Build    int
+	Legacy   bool
 }
 
 var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -321,7 +323,11 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
+{{ if .Legacy }}
     <string>armv7</string>
+{{ else }}
+    <string>arm64</string>
+{{ end }}
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>
