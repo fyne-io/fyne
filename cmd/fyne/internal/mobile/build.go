@@ -13,7 +13,10 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
+
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 
 	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
@@ -80,7 +83,7 @@ func AppOutputName(os, name string) string {
 	switch os {
 	case "android":
 		return androidPkgName(name) + ".apk"
-	case "ios":
+	case "ios", "iossimulator":
 		return rfc1034Label(name) + ".app"
 	}
 
@@ -372,8 +375,11 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 	archNames := []string{}
 	for i, p := range strings.Split(buildTarget, ",") {
 		osarch := strings.SplitN(p, "/", 2) // len(osarch) > 0
-		if osarch[0] != "android" && osarch[0] != "ios" {
+		if !util.IsAndroid(osarch[0]) && !util.IsIOS(osarch[0]) {
 			return "", nil, fmt.Errorf(`unsupported os`)
+		}
+		if osarch[0] == "iossimulator" {
+			osarch[0] = "ios"
 		}
 
 		if i == 0 {
@@ -418,6 +424,19 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 	if os == "ios" {
 		targetOS = "darwin"
 	}
+
+	if buildTarget == "iossimulator" {
+		if before116 {
+			// If the build target is iossimulator, and the go distribution also before
+			// 1.16, then we can only build amd64 arch app for simulators. Because
+			// arm64 simulators is only supported after go 1.16.
+			allArchs[os] = []string{"amd64"}
+		} else {
+			// Otherwise, the iossimulator arch is depending on the host arch.
+			allArchs[os] = []string{runtime.GOARCH}
+		}
+	}
+
 	if all {
 		return targetOS, allArchs[os], nil
 	}

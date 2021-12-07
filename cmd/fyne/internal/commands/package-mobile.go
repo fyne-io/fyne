@@ -19,8 +19,8 @@ func (p *Packager) packageAndroid(arch string) error {
 	return mobile.RunNewBuild(arch, p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, "", "")
 }
 
-func (p *Packager) packageIOS() error {
-	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, p.certificate, p.profile)
+func (p *Packager) packageIOS(target string) error {
+	err := mobile.RunNewBuild(target, p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, p.certificate, p.profile)
 	if err != nil {
 		return err
 	}
