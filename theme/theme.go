@@ -1,4 +1,4 @@
-// Package theme defines how a Fyne app should look when rendered
+// Package theme defines how a Fyne app should look when rendered.
 package theme // import "fyne.io/fyne/v2/theme"
 
 import (
