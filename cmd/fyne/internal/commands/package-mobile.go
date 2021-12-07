@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-	"github.com/pkg/errors"
 	"golang.org/x/sys/execabs"
 )
 
@@ -42,7 +42,7 @@ func (p *Packager) packageIOS(target string) error {
 
 	err = templates.XCAssetsDarwin.Execute(contentFile, nil)
 	if err != nil {
-		return errors.Wrap(err, "Failed to write xcassets content template")
+		return fmt.Errorf("failed to write xcassets content template: %w", err)
 	}
 
 	if err = copyResizeIcon(1024, iconDir, p.icon); err != nil {
@@ -87,10 +87,10 @@ func runCmdCaptureOutput(name string, args ...string) error {
 		outstr := outbuf.String()
 		errstr := errbuf.String()
 		if outstr != "" {
-			err = errors.Wrap(err, outbuf.String())
+			err = fmt.Errorf(outbuf.String()+": %w", err)
 		}
 		if errstr != "" {
-			err = errors.Wrap(err, errbuf.String())
+			err = fmt.Errorf(outbuf.String()+": %w", err)
 		}
 		return err
 	}
