@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	_ "image/jpeg" // import image encodings
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
@@ -212,7 +212,7 @@ func (p *Packager) doPackage() error {
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
 		err := p.buildPackage()
 		if err != nil {
-			return errors.Wrap(err, "Error building application")
+			return fmt.Errorf("error building application: %w", err)
 		}
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
@@ -251,7 +251,7 @@ func (p *Packager) validate() error {
 	}
 	baseDir, err := os.Getwd()
 	if err != nil {
-		return errors.Wrap(err, "Unable to get the current directory, needed to find main executable")
+		return fmt.Errorf("unable to get the current directory, needed to find main executable: %w", err)
 	}
 	if p.dir == "" {
 		p.dir = baseDir
@@ -259,8 +259,8 @@ func (p *Packager) validate() error {
 	if p.srcDir == "" {
 		p.srcDir = baseDir
 	} else if p.os == "ios" || p.os == "android" {
-		return errors.New("Parameter -sourceDir is currently not supported for mobile builds.\n" +
-			"Change directory to the main package and try again.")
+		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
+			"Change directory to the main package and try again")
 	}
 
 	data, err := metadata.LoadStandard(p.srcDir)
@@ -363,7 +363,7 @@ func validateAppID(appID, os, name string, release bool) (string, error) {
 	} else if os == "ios" || util.IsAndroid(os) || (os == "windows" && release) {
 		// all mobile, and for windows when releasing, needs a unique id - usually reverse DNS style
 		if appID == "" {
-			return "", errors.New("Missing appID parameter for package")
+			return "", errors.New("missing appID parameter for package")
 		} else if !strings.Contains(appID, ".") {
 			return "", errors.New("appID must be globally unique and contain at least 1 '.'")
 		}
