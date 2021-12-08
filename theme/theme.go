@@ -296,7 +296,7 @@ func (t *builtinTheme) initFonts() {
 		if t.regular == regular { // failed to load
 			t.bold = loadCustomFont(font, "Bold", bold)
 			t.italic = loadCustomFont(font, "Italic", italic)
-			t.boldItalic = loadCustomFont(font, "BoldItalic", boldItalic)
+			t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
 		} else { // first custom font loaded, fall back to that
 			t.bold = loadCustomFont(font, "Bold", t.regular)
 			t.italic = loadCustomFont(font, "Italic", t.regular)
