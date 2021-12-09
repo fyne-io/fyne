@@ -17,5 +17,5 @@ func compareURI(v1, v2 fyne.URI) bool {
 }
 
 func compareBytes(v1, v2 []byte) bool {
-	return bytes.Compare(v1, v2) == 0
+	return bytes.Equal(v1, v2)
 }
