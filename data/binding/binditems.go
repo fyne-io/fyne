@@ -3,7 +3,11 @@
 
 package binding
 
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 
 // Bool supports binding a bool value.
 //
@@ -155,7 +159,7 @@ func (b *boundBytes) Get() ([]byte, error) {
 func (b *boundBytes) Set(val []byte) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	if compareBytes(*b.val, val) {
+	if bytes.Equal(*b.val, val) {
 		return nil
 	}
 	*b.val = val
@@ -173,7 +177,7 @@ type boundExternalBytes struct {
 func (b *boundExternalBytes) Set(val []byte) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	if compareBytes(b.old, val) {
+	if bytes.Equal(b.old, val) {
 		return nil
 	}
 	*b.val = val

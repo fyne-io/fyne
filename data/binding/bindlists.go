@@ -3,7 +3,11 @@
 
 package binding
 
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 
 // BoolList supports binding a list of bool values.
 //
@@ -439,7 +443,7 @@ type boundExternalBytesListItem struct {
 }
 
 func (b *boundExternalBytesListItem) setIfChanged(val []byte) error {
-	if compareBytes(val, b.old) {
+	if bytes.Equal(val, b.old) {
 		return nil
 	}
 	(*b.val)[b.index] = val
