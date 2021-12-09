@@ -1,6 +1,10 @@
 package binding
 
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 
 func compareURI(v1, v2 fyne.URI) bool {
 	if v1 == nil && v1 == v2 {
@@ -10,4 +14,8 @@ func compareURI(v1, v2 fyne.URI) bool {
 		return false
 	}
 	return v1.String() == v2.String()
+}
+
+func compareBytes(v1, v2 []byte) bool {
+	return bytes.Compare(v1, v2) == 0
 }
