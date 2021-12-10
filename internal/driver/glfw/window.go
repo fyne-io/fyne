@@ -425,15 +425,18 @@ func (w *window) doShow() {
 }
 
 func (w *window) Hide() {
-	if w.isClosing() {
-		return
-	}
-
 	runOnMain(func() {
 		w.viewLock.Lock()
+		if w.closing || w.viewport == nil {
+			w.viewLock.Unlock()
+			return
+		}
+
 		w.visible = false
-		w.viewport.Hide()
+		v := w.viewport
 		w.viewLock.Unlock()
+
+		v.Hide()
 
 		// hide top canvas element
 		if w.canvas.Content() != nil {
@@ -452,7 +455,6 @@ func (w *window) Close() {
 		w.viewLock.Lock()
 		w.closing = true
 		w.viewLock.Unlock()
-		w.viewport.SetShouldClose(true)
 		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
 			w.canvas.Painter().Free(obj)
 		})
