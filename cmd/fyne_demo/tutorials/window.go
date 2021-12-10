@@ -10,6 +10,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var visibilityWindow fyne.Window = nil
+var visibilityState bool = false
+
 func windowScreen(_ fyne.Window) fyne.CanvasObject {
 	windowGroup := container.NewVBox(
 		widget.NewButton("New window", func() {
@@ -41,6 +44,21 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 
 			w.CenterOnScreen()
 			w.Show()
+		}),
+		widget.NewButton("Show/Hide window", func() {
+			if visibilityWindow == nil {
+				visibilityWindow = fyne.CurrentApp().NewWindow("Hello")
+				visibilityWindow.SetContent(widget.NewLabel("Hello World!"))
+				visibilityWindow.SetOnClosed(func() {
+					visibilityWindow = nil
+				})
+			}
+			if visibilityState {
+				visibilityWindow.Hide()
+			} else {
+				visibilityWindow.Show()
+			}
+			visibilityState = !visibilityState
 		}))
 
 	drv := fyne.CurrentApp().Driver()
