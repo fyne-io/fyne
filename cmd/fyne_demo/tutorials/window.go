@@ -10,10 +10,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var visibilityWindow fyne.Window = nil
-var visibilityState bool = false
-
 func windowScreen(_ fyne.Window) fyne.CanvasObject {
+	var visibilityWindow fyne.Window = nil
+	var visibilityState bool = false
+
 	windowGroup := container.NewVBox(
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
