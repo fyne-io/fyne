@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/driver/glfw"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -64,7 +65,7 @@ func TestMenuBar(t *testing.T) {
 			}
 			themeCounter++
 		})
-		container := fyne.NewContainerWithoutLayout(button, menuBar)
+		container := container.NewWithoutLayout(button, menuBar)
 		w.SetContent(container)
 		w.Resize(fyne.NewSize(300, 300))
 		button.Resize(button.MinSize())
@@ -337,7 +338,7 @@ func TestMenuBar(t *testing.T) {
 			}
 			themeCounter++
 		})
-		container := fyne.NewContainerWithoutLayout(button, menuBar)
+		container := container.NewWithoutLayout(button, menuBar)
 		w.SetContent(container)
 		w.Resize(fyne.NewSize(300, 300))
 		button.Resize(button.MinSize())
@@ -471,7 +472,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 		menuBar := glfw.NewMenuBar(menu, c)
-		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
@@ -491,7 +492,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 		menuBar := glfw.NewMenuBar(menu, c)
-		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
@@ -512,7 +513,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 		menuBar := glfw.NewMenuBar(menu, c)
-		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 

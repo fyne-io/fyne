@@ -265,8 +265,8 @@ func showOverlay(c fyne.Canvas) {
 	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
 	over := container.NewMax(
-		canvas.NewRectangle(theme.ShadowColor()), fyne.NewContainerWithLayout(layout.NewCenterLayout(),
-			wrap))
+		canvas.NewRectangle(theme.ShadowColor()), container.NewCenter(wrap),
+	)
 
 	c.Overlays().Add(over)
 	c.Focus(username)

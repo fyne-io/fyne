@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -184,7 +183,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 		tree.Select(currentPref)
 	}
 
-	themes := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+	themes := container.NewGridWithColumns(2,
 		widget.NewButton("Dark", func() {
 			a.Settings().SetTheme(theme.DarkTheme())
 		}),

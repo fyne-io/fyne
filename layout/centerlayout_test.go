@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
 	"github.com/stretchr/testify/assert"
@@ -32,7 +33,7 @@ func TestCenterLayout_MinSize(t *testing.T) {
 	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
-	container := fyne.NewContainer(text)
+	container := container.NewWithoutLayout(text)
 	layoutMin := layout.NewCenterLayout().MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
@@ -43,7 +44,7 @@ func TestCenterLayout_MinSize_Hidden(t *testing.T) {
 	text1.Hide()
 	text2 := canvas.NewText("1\n2", color.NRGBA{0, 0xff, 0, 0})
 
-	container := fyne.NewContainer(text1, text2)
+	container := container.NewWithoutLayout(text1, text2)
 	layoutMin := layout.NewCenterLayout().MinSize(container.Objects)
 
 	assert.Equal(t, text2.MinSize(), layoutMin)
@@ -53,7 +54,7 @@ func TestContainerCenterLayoutMinSize(t *testing.T) {
 	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
-	container := fyne.NewContainer(text)
+	container := container.NewWithoutLayout(text)
 	container.Layout = layout.NewCenterLayout()
 	layoutMin := container.MinSize()
 
