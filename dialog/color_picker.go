@@ -174,19 +174,18 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	contents := container.NewPadded(container.NewVBox(
 		container.NewGridWithColumns(3,
-			container.NewPadded(wheel,
-				hslBox,
-				rgbBox),
-			container.NewGridWithColumns(3,
-				container.NewPadded(
-					container.NewMax(
-						newCheckeredBackground(),
-						preview,
-					),
+			container.NewPadded(wheel),
+			hslBox,
+			rgbBox),
+		container.NewGridWithColumns(3,
+			container.NewPadded(
+				container.NewMax(
+					newCheckeredBackground(),
+					preview,
 				),
-				hex,
-				alphaChannel,
 			),
+			hex,
+			alphaChannel,
 		),
 	))
 
