@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"runtime"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -27,35 +26,50 @@ type drawData struct {
 	done chan struct{} // Zero allocation signalling channel
 }
 
+type runFlag struct {
+	sync.RWMutex
+	flag bool
+	cond *sync.Cond
+}
+
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var runFlag uint32 = 0 // atomic, 0 == stopped, 1 == running
+var run *runFlag
 var initOnce = &sync.Once{}
 var donePool = &sync.Pool{New: func() interface{} {
 	return make(chan struct{})
 }}
 
+func newRun() *runFlag {
+	r := runFlag{}
+	r.cond = sync.NewCond(&r)
+	return &r
+}
+
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
-}
 
-func running() bool {
-	return atomic.LoadUint32(&runFlag) == 1
+	run = newRun()
 }
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	if !running() {
+	run.RLock()
+	if !run.flag {
 		f()
+		run.RUnlock()
 	} else {
+		run.RUnlock()
+
 		done := donePool.Get().(chan struct{})
 		defer donePool.Put(done)
 
 		funcQueue <- funcData{f: f, done: done}
+
 		<-done
 	}
 }
@@ -112,7 +126,10 @@ func (d *gLDriver) initGLFW() {
 
 func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(time.Second / 60)
-	atomic.StoreUint32(&runFlag, 1)
+	run.Lock()
+	run.flag = true
+	run.Unlock()
+	run.cond.Broadcast()
 
 	d.initGLFW()
 	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
