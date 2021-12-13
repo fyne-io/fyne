@@ -583,9 +583,15 @@ type boundExternal{{ .Name }}ListItem struct {
 }
 
 func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+	{{- if eq .Comparator "" }}
 	if val == b.old {
 		return nil
 	}
+	{{- else }}
+	if {{ .Comparator }}(val, b.old) {
+		return nil
+	}
+	{{- end }}
 	(*b.val)[b.index] = val
 	b.old = val
 
@@ -633,7 +639,11 @@ func main() {
 	}
 	defer itemFile.Close()
 	itemFile.WriteString(`
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 `)
 	convertFile, err := newFile("convert")
 	if err != nil {
@@ -668,7 +678,11 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 	}
 	defer listFile.Close()
 	listFile.WriteString(`
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 `)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
@@ -678,6 +692,7 @@ import "fyne.io/fyne/v2"
 	list := template.Must(template.New("list").Parse(listBindTemplate))
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
+		bindValues{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},

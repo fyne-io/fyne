@@ -3,7 +3,11 @@
 
 package binding
 
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 
 // BoolList supports binding a list of bool values.
 //
@@ -218,6 +222,228 @@ type boundExternalBoolListItem struct {
 
 func (b *boundExternalBoolListItem) setIfChanged(val bool) error {
 	if val == b.old {
+		return nil
+	}
+	(*b.val)[b.index] = val
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+// BytesList supports binding a list of []byte values.
+//
+// Since: 2.2
+type BytesList interface {
+	DataList
+
+	Append(value []byte) error
+	Get() ([][]byte, error)
+	GetValue(index int) ([]byte, error)
+	Prepend(value []byte) error
+	Set(list [][]byte) error
+	SetValue(index int, value []byte) error
+}
+
+// ExternalBytesList supports binding a list of []byte values from an external variable.
+//
+// Since: 2.2
+type ExternalBytesList interface {
+	BytesList
+
+	Reload() error
+}
+
+// NewBytesList returns a bindable list of []byte values.
+//
+// Since: 2.2
+func NewBytesList() BytesList {
+	return &boundBytesList{val: &[][]byte{}}
+}
+
+// BindBytesList returns a bound list of []byte values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.2
+func BindBytesList(v *[][]byte) ExternalBytesList {
+	if v == nil {
+		return NewBytesList().(ExternalBytesList)
+	}
+
+	b := &boundBytesList{val: v, updateExternal: true}
+
+	for i := range *v {
+		b.appendItem(bindBytesListItem(v, i, b.updateExternal))
+	}
+
+	return b
+}
+
+type boundBytesList struct {
+	listBase
+
+	updateExternal bool
+	val            *[][]byte
+}
+
+func (l *boundBytesList) Append(val []byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	*l.val = append(*l.val, val)
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Get() ([][]byte, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	return *l.val, nil
+}
+
+func (l *boundBytesList) GetValue(i int) ([]byte, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	if i < 0 || i >= l.Length() {
+		return nil, errOutOfBounds
+	}
+
+	return (*l.val)[i], nil
+}
+
+func (l *boundBytesList) Prepend(val []byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = append([][]byte{val}, *l.val...)
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Reload() error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Set(v [][]byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = v
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(bindBytesListItem(l.val, i, l.updateExternal))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		var err error
+		if l.updateExternal {
+			item.(*boundExternalBytesListItem).lock.Lock()
+			err = item.(*boundExternalBytesListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalBytesListItem).lock.Unlock()
+		} else {
+			item.(*boundBytesListItem).lock.Lock()
+			err = item.(*boundBytesListItem).doSet((*l.val)[i])
+			item.(*boundBytesListItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (l *boundBytesList) SetValue(i int, v []byte) error {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
+		return errOutOfBounds
+	}
+
+	l.lock.Lock()
+	(*l.val)[i] = v
+	l.lock.Unlock()
+
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
+	}
+	return item.(Bytes).Set(v)
+}
+
+func bindBytesListItem(v *[][]byte, i int, external bool) Bytes {
+	if external {
+		ret := &boundExternalBytesListItem{old: (*v)[i]}
+		ret.val = v
+		ret.index = i
+		return ret
+	}
+
+	return &boundBytesListItem{val: v, index: i}
+}
+
+type boundBytesListItem struct {
+	base
+
+	val   *[][]byte
+	index int
+}
+
+func (b *boundBytesListItem) Get() ([]byte, error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return nil, errOutOfBounds
+	}
+
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundBytesListItem) Set(val []byte) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	return b.doSet(val)
+}
+
+func (b *boundBytesListItem) doSet(val []byte) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
+}
+
+type boundExternalBytesListItem struct {
+	boundBytesListItem
+
+	old []byte
+}
+
+func (b *boundExternalBytesListItem) setIfChanged(val []byte) error {
+	if bytes.Equal(val, b.old) {
 		return nil
 	}
 	(*b.val)[b.index] = val
@@ -1549,7 +1775,7 @@ type boundExternalURIListItem struct {
 }
 
 func (b *boundExternalURIListItem) setIfChanged(val fyne.URI) error {
-	if val == b.old {
+	if compareURI(val, b.old) {
 		return nil
 	}
 	(*b.val)[b.index] = val
