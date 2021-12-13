@@ -205,6 +205,8 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     window->focusOnShow = wndconfig.focusOnShow;
     window->cursorMode  = GLFW_CURSOR_NORMAL;
 
+    window->doublebuffer = fbconfig.doublebuffer;
+
     window->minwidth    = GLFW_DONT_CARE;
     window->minheight   = GLFW_DONT_CARE;
     window->maxwidth    = GLFW_DONT_CARE;
