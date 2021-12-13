@@ -458,6 +458,7 @@ func (w *window) Close() {
 		w.viewLock.Lock()
 		w.closing = true
 		w.viewLock.Unlock()
+		w.viewport.SetShouldClose(true)
 		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
 			w.canvas.Painter().Free(obj)
 		})
