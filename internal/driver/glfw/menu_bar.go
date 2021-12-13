@@ -3,9 +3,9 @@ package glfw
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -38,7 +38,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 //
 // Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
-	cont := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), b.Items...)
+	cont := container.NewHBox(b.Items...)
 	background := canvas.NewRectangle(theme.ButtonColor())
 	underlay := &menuBarUnderlay{action: b.deactivate}
 	underlay.ExtendBaseWidget(underlay)

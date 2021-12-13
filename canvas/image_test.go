@@ -60,7 +60,7 @@ func TestNewImageFromURI_File(t *testing.T) {
 		path = strings.ReplaceAll(path, "\\", "/")
 	}
 
-	img := canvas.NewImageFromURI(storage.NewURI("file://" + path))
+	img := canvas.NewImageFromURI(storage.NewFileURI(path))
 	assert.NotNil(t, img)
 	assert.Equal(t, path, img.File)
 }
@@ -84,7 +84,7 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	url := storage.NewURI(ts.URL)
+	url, _ := storage.ParseURI(ts.URL)
 	img := canvas.NewImageFromURI(url)
 	assert.NotNil(t, img)
 	assert.Equal(t, "", img.File)

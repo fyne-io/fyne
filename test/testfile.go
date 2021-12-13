@@ -40,7 +40,7 @@ func (f *file) Name() string {
 }
 
 func (f *file) URI() fyne.URI {
-	return storage.NewURI("file://" + f.path)
+	return storage.NewFileURI(f.path)
 }
 
 func openFile(uri fyne.URI, create bool) (*file, error) {
@@ -96,7 +96,7 @@ func (d *directory) List() ([]fyne.URI, error) {
 	urilist := []fyne.URI{}
 
 	for _, f := range files {
-		uri := storage.NewURI("file://" + filepath.Join(path, f.Name()))
+		uri := storage.NewFileURI(filepath.Join(path, f.Name()))
 		urilist = append(urilist, uri)
 	}
 

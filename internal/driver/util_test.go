@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/driver"
 	internal_widget "fyne.io/fyne/v2/internal/widget"
-	"fyne.io/fyne/v2/layout"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -22,9 +21,9 @@ func TestAbsolutePositionForObject(t *testing.T) {
 	t1r2c1 := widget.NewLabel("row 2 col 1")
 	t1r2c2 := widget.NewLabel("row 2 col 2")
 	t1r2c2.Hide()
-	t1r1 := fyne.NewContainer(t1r1c1, t1r1c2)
-	t1r2 := fyne.NewContainer(t1r2c1, t1r2c2)
-	tree1 := fyne.NewContainer(t1r1, t1r2)
+	t1r1 := container.NewWithoutLayout(t1r1c1, t1r1c2)
+	t1r2 := container.NewWithoutLayout(t1r2c1, t1r2c2)
+	tree1 := container.NewWithoutLayout(t1r1, t1r2)
 
 	t1r1c1.Move(fyne.NewPos(111, 111))
 	t1r1c2.Move(fyne.NewPos(112, 112))
@@ -38,9 +37,9 @@ func TestAbsolutePositionForObject(t *testing.T) {
 	t2r1c2 := widget.NewLabel("row 1 col 2")
 	t2r2c1 := widget.NewLabel("row 2 col 1")
 	t2r2c2 := widget.NewLabel("row 2 col 2")
-	t2r1 := fyne.NewContainer(t2r1c1, t2r1c2)
-	t2r2 := fyne.NewContainer(t2r2c1, t2r2c2)
-	tree2 := fyne.NewContainer(t2r1, t2r2)
+	t2r1 := container.NewWithoutLayout(t2r1c1, t2r1c2)
+	t2r2 := container.NewWithoutLayout(t2r2c1, t2r2c2)
+	tree2 := container.NewWithoutLayout(t2r1, t2r2)
 
 	t2r1c1.Move(fyne.NewPos(211, 211))
 	t2r1c2.Move(fyne.NewPos(212, 212))
@@ -52,7 +51,7 @@ func TestAbsolutePositionForObject(t *testing.T) {
 
 	t3r1 := widget.NewLabel("row 1")
 	t3r2 := widget.NewLabel("row 2")
-	tree3 := fyne.NewContainer(t3r1, t3r2)
+	tree3 := container.NewWithoutLayout(t3r1, t3r2)
 
 	t3r1.Move(fyne.NewPos(31, 31))
 	t3r2.Move(fyne.NewPos(32, 32))
@@ -294,12 +293,10 @@ func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	child := canvas.NewRectangle(color.Black)
-	base := fyne.NewContainerWithLayout(
-		layout.NewGridLayout(1),
+	base := container.NewGridWithColumns(1,
 		rect,
 		internal_widget.NewScroll(child),
-		fyne.NewContainerWithLayout(
-			layout.NewGridLayout(2),
+		container.NewGridWithColumns(2,
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),
@@ -364,12 +361,10 @@ func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	child := canvas.NewRectangle(color.Black)
-	base := fyne.NewContainerWithLayout(
-		layout.NewGridLayout(1),
+	base := container.NewGridWithColumns(1,
 		rect,
 		internal_widget.NewScroll(child),
-		fyne.NewContainerWithLayout(
-			layout.NewGridLayout(2),
+		container.NewGridWithColumns(2,
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),

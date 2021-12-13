@@ -51,7 +51,7 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 		itemObjects[i*2] = widget.NewLabel(item.Text)
 		itemObjects[i*2+1] = item.Widget
 	}
-	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
+	content := container.New(layout.NewFormLayout(), itemObjects...)
 
 	d := &dialog{content: content, callback: callback, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}

@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -62,8 +61,8 @@ func (s *Settings) makeScaleButtons() []fyne.CanvasObject {
 }
 
 func (s *Settings) makeScaleGroup(scale float32) *widget.Card {
-	scalePreviewBox := fyne.NewContainerWithLayout(layout.NewGridLayout(5), s.makeScalePreviews(scale)...)
-	scaleBox := fyne.NewContainerWithLayout(layout.NewGridLayout(5), s.makeScaleButtons()...)
+	scalePreviewBox := container.NewGridWithColumns(5, s.makeScalePreviews(scale)...)
+	scaleBox := container.NewGridWithColumns(5, s.makeScaleButtons()...)
 
 	return widget.NewCard("Scale", "", container.NewVBox(scalePreviewBox, scaleBox, newRefreshMonitor(s)))
 }

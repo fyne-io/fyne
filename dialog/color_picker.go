@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	col "fyne.io/fyne/v2/internal/color"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -173,14 +172,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		}
 	})
 
-	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), container.NewVBox(
+	contents := container.NewPadded(container.NewVBox(
 		container.NewGridWithColumns(3,
-			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
+			container.NewPadded(wheel),
 			hslBox,
 			rgbBox),
 		container.NewGridWithColumns(3,
-			fyne.NewContainerWithLayout(layout.NewPaddedLayout(),
-				fyne.NewContainerWithLayout(layout.NewMaxLayout(),
+			container.NewPadded(
+				container.NewMax(
 					newCheckeredBackground(),
 					preview,
 				),

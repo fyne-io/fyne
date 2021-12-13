@@ -404,7 +404,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 		icon = canvas.NewImageFromResource(b.icon)
 	}
 
-	label := canvas.NewText(b.text, theme.TextColor())
+	label := canvas.NewText(b.text, theme.ForegroundColor())
 	label.TextStyle.Bold = true
 
 	close := &tabCloseButton{
@@ -554,7 +554,7 @@ func (r *tabButtonRenderer) Refresh() {
 	if r.button.importance == widget.HighImportance {
 		r.label.Color = theme.PrimaryColor()
 	} else {
-		r.label.Color = theme.TextColor()
+		r.label.Color = theme.ForegroundColor()
 	}
 	r.label.TextSize = theme.TextSize()
 	if r.button.text == "" {

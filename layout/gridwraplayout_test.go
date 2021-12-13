@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 
@@ -80,7 +81,7 @@ func TestGridLWrapLayout_MinSize(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 	minSize := cellSize
 
-	container := fyne.NewContainer(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
+	container := container.NewWithoutLayout(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
 	layout := layout.NewGridWrapLayout(cellSize)
 
 	layoutMin := layout.MinSize(container.Objects)
@@ -100,7 +101,7 @@ func TestGridLWrapLayout_MinSize_Hidden(t *testing.T) {
 	obj2.Hide()
 	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
-	container := fyne.NewContainer(obj1, obj2, obj3)
+	container := container.NewWithoutLayout(obj1, obj2, obj3)
 	layout := layout.NewGridWrapLayout(cellSize)
 
 	layoutMin := layout.MinSize(container.Objects)
@@ -116,7 +117,7 @@ func TestGridLWrapLayout_Resize_LessThanMinSize(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 	minSize := cellSize
 
-	container := fyne.NewContainer(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
+	container := container.NewWithoutLayout(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
 	l := layout.NewGridWrapLayout(cellSize)
 	container.Resize(fyne.NewSize(25, 25))
 

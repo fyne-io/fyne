@@ -13,7 +13,7 @@ type testStorage struct {
 }
 
 func (s *testStorage) RootURI() fyne.URI {
-	return storage.NewURI("file://" + os.TempDir())
+	return storage.NewFileURI(os.TempDir())
 }
 
 func (s *testStorage) docRootURI() (fyne.URI, error) {

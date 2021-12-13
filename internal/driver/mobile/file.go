@@ -69,13 +69,19 @@ func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
 	filter := storage.NewMimeTypeFileFilter([]string{"application/x-directory"})
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasOpenPicker); ok {
-		a.ShowFileOpenPicker(func(uri string, _ func()) {
-			if uri == "" {
+		a.ShowFileOpenPicker(func(path string, _ func()) {
+			if path == "" {
 				callback(nil, nil)
 				return
 			}
-			f, err := listerForURI(storage.NewURI(uri))
-			callback(f, err)
+
+			uri, err := storage.ParseURI(path)
+			if err != nil {
+				callback(nil, err)
+				return
+			}
+
+			callback(listerForURI(uri))
 		}, mobileFilter(filter))
 	}
 }
@@ -108,12 +114,19 @@ type hasSavePicker interface {
 func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error), filter storage.FileFilter, filename string) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasSavePicker); ok {
-		a.ShowFileSavePicker(func(uri string, closer func()) {
-			if uri == "" {
+		a.ShowFileSavePicker(func(path string, closer func()) {
+			if path == "" {
 				callback(nil, nil)
 				return
 			}
-			f, err := fileWriterForURI(storage.NewURI(uri))
+
+			uri, err := storage.ParseURI(path)
+			if err != nil {
+				callback(nil, err)
+				return
+			}
+
+			f, err := fileWriterForURI(uri)
 			if f != nil {
 				f.(*fileSave).done = closer
 			}
