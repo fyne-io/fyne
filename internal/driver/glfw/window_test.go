@@ -1607,6 +1607,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	w.WaitForEvents()
 	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
 	assert.True(t, onClosed)
+	assert.True(t, w.viewport.ShouldClose()) // For #2694
 
 	w.closing = false // fake a fresh window
 	onIntercepted = false
