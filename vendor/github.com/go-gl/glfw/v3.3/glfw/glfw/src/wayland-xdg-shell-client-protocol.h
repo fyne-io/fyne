@@ -58,6 +58,8 @@ struct xdg_surface;
 struct xdg_toplevel;
 struct xdg_wm_base;
 
+#ifndef XDG_WM_BASE_INTERFACE
+#define XDG_WM_BASE_INTERFACE
 /**
  * @page page_iface_xdg_wm_base xdg_wm_base
  * @section page_iface_xdg_wm_base_desc Description
@@ -80,6 +82,9 @@ struct xdg_wm_base;
  * creating transient windows such as popup menus.
  */
 extern const struct wl_interface xdg_wm_base_interface;
+#endif
+#ifndef XDG_POSITIONER_INTERFACE
+#define XDG_POSITIONER_INTERFACE
 /**
  * @page page_iface_xdg_positioner xdg_positioner
  * @section page_iface_xdg_positioner_desc Description
@@ -130,6 +135,9 @@ extern const struct wl_interface xdg_wm_base_interface;
  * positioning a surface raises an error.
  */
 extern const struct wl_interface xdg_positioner_interface;
+#endif
+#ifndef XDG_SURFACE_INTERFACE
+#define XDG_SURFACE_INTERFACE
 /**
  * @page page_iface_xdg_surface xdg_surface
  * @section page_iface_xdg_surface_desc Description
@@ -177,7 +185,8 @@ extern const struct wl_interface xdg_positioner_interface;
  *
  * A newly-unmapped surface is considered to have met condition (1) out
  * of the 3 required conditions for mapping a surface if its role surface
- * has not been destroyed.
+ * has not been destroyed, i.e. the client must perform the initial commit
+ * again before attaching a buffer.
  * @section page_iface_xdg_surface_api API
  * See @ref iface_xdg_surface.
  */
@@ -227,9 +236,13 @@ extern const struct wl_interface xdg_positioner_interface;
  *
  * A newly-unmapped surface is considered to have met condition (1) out
  * of the 3 required conditions for mapping a surface if its role surface
- * has not been destroyed.
+ * has not been destroyed, i.e. the client must perform the initial commit
+ * again before attaching a buffer.
  */
 extern const struct wl_interface xdg_surface_interface;
+#endif
+#ifndef XDG_TOPLEVEL_INTERFACE
+#define XDG_TOPLEVEL_INTERFACE
 /**
  * @page page_iface_xdg_toplevel xdg_toplevel
  * @section page_iface_xdg_toplevel_desc Description
@@ -276,6 +289,9 @@ extern const struct wl_interface xdg_surface_interface;
  * Attaching a null buffer to a toplevel unmaps the surface.
  */
 extern const struct wl_interface xdg_toplevel_interface;
+#endif
+#ifndef XDG_POPUP_INTERFACE
+#define XDG_POPUP_INTERFACE
 /**
  * @page page_iface_xdg_popup xdg_popup
  * @section page_iface_xdg_popup_desc Description
@@ -336,6 +352,7 @@ extern const struct wl_interface xdg_toplevel_interface;
  * for the xdg_popup state to take effect.
  */
 extern const struct wl_interface xdg_popup_interface;
+#endif
 
 #ifndef XDG_WM_BASE_ERROR_ENUM
 #define XDG_WM_BASE_ERROR_ENUM
@@ -493,7 +510,9 @@ xdg_wm_base_create_positioner(struct xdg_wm_base *xdg_wm_base)
  *
  * This creates an xdg_surface for the given surface. While xdg_surface
  * itself is not a role, the corresponding surface may only be assigned
- * a role extending xdg_surface, such as xdg_toplevel or xdg_popup.
+ * a role extending xdg_surface, such as xdg_toplevel or xdg_popup. It is
+ * illegal to create an xdg_surface for a wl_surface which already has an
+ * assigned role and this will result in a protocol error.
  *
  * This creates an xdg_surface for the given surface. An xdg_surface is
  * used as basis to define a role to a given surface, such as xdg_toplevel
@@ -1100,7 +1119,7 @@ enum xdg_toplevel_resize_edge {
 #define XDG_TOPLEVEL_STATE_ENUM
 /**
  * @ingroup iface_xdg_toplevel
- * the surface is tiled
+ * the surface’s bottom edge is tiled
  *
  * The window is currently in a tiled layout and the bottom edge is
  * considered to be adjacent to another part of the tiling grid.

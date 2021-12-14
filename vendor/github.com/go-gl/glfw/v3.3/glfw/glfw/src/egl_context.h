@@ -80,6 +80,8 @@ typedef struct wl_egl_window* EGLNativeWindowType;
 #define EGL_OPENGL_ES_API 0x30a0
 #define EGL_OPENGL_API 0x30a2
 #define EGL_NONE 0x3038
+#define EGL_RENDER_BUFFER 0x3086
+#define EGL_SINGLE_BUFFER 0x3085
 #define EGL_EXTENSIONS 0x3055
 #define EGL_CONTEXT_CLIENT_VERSION 0x3098
 #define EGL_NATIVE_VISUAL_ID 0x302e
@@ -162,7 +164,6 @@ typedef struct _GLFWcontextEGL
    EGLSurface       surface;
 
    void*            client;
-
 } _GLFWcontextEGL;
 
 // EGL-specific global data
@@ -197,7 +198,6 @@ typedef struct _GLFWlibraryEGL
     PFN_eglSwapInterval         SwapInterval;
     PFN_eglQueryString          QueryString;
     PFN_eglGetProcAddress       GetProcAddress;
-
 } _GLFWlibraryEGL;
 
 

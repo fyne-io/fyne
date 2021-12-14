@@ -28,6 +28,7 @@
 //========================================================================
 
 #include "internal.h"
+#include "mappings.h"
 
 #include <assert.h>
 #include <float.h>
@@ -85,25 +86,13 @@ static _GLFWmapping* findValidMapping(const _GLFWjoystick* js)
         for (i = 0;  i <= GLFW_GAMEPAD_BUTTON_LAST;  i++)
         {
             if (!isValidElementForJoystick(mapping->buttons + i, js))
-            {
-                _glfwInputError(GLFW_INVALID_VALUE,
-                                "Invalid button in gamepad mapping %s (%s)",
-                                mapping->guid,
-                                mapping->name);
                 return NULL;
-            }
         }
 
         for (i = 0;  i <= GLFW_GAMEPAD_AXIS_LAST;  i++)
         {
             if (!isValidElementForJoystick(mapping->axes + i, js))
-            {
-                _glfwInputError(GLFW_INVALID_VALUE,
-                                "Invalid axis in gamepad mapping %s (%s)",
-                                mapping->guid,
-                                mapping->name);
                 return NULL;
-            }
         }
     }
 
@@ -408,6 +397,29 @@ void _glfwInputJoystickHat(_GLFWjoystick* js, int hat, char value)
 //////                       GLFW internal API                      //////
 //////////////////////////////////////////////////////////////////////////
 
+// Adds the built-in set of gamepad mappings
+//
+void _glfwInitGamepadMappings(void)
+{
+    int jid;
+    size_t i;
+    const size_t count = sizeof(_glfwDefaultMappings) / sizeof(char*);
+    _glfw.mappings = calloc(count, sizeof(_GLFWmapping));
+
+    for (i = 0;  i < count;  i++)
+    {
+        if (parseMapping(&_glfw.mappings[_glfw.mappingCount], _glfwDefaultMappings[i]))
+            _glfw.mappingCount++;
+    }
+
+    for (jid = 0;  jid <= GLFW_JOYSTICK_LAST;  jid++)
+    {
+        _GLFWjoystick* js = _glfw.joysticks + jid;
+        if (js->present)
+            js->mapping = findValidMapping(js);
+    }
+}
+
 // Returns an available joystick object with arrays and name allocated
 //
 _GLFWjoystick* _glfwAllocJoystick(const char* name,
@@ -430,7 +442,6 @@ _GLFWjoystick* _glfwAllocJoystick(const char* name,
 
     js = _glfw.joysticks + jid;
     js->present     = GLFW_TRUE;
-    js->name        = _glfw_strdup(name);
     js->axes        = calloc(axisCount, sizeof(float));
     js->buttons     = calloc(buttonCount + (size_t) hatCount * 4, 1);
     js->hats        = calloc(hatCount, 1);
@@ -438,6 +449,7 @@ _GLFWjoystick* _glfwAllocJoystick(const char* name,
     js->buttonCount = buttonCount;
     js->hatCount    = hatCount;
 
+    strncpy(js->name, name, sizeof(js->name) - 1);
     strncpy(js->guid, guid, sizeof(js->guid) - 1);
     js->mapping = findValidMapping(js);
 
@@ -448,7 +460,6 @@ _GLFWjoystick* _glfwAllocJoystick(const char* name,
 //
 void _glfwFreeJoystick(_GLFWjoystick* js)
 {
-    free(js->name);
     free(js->axes);
     free(js->buttons);
     free(js->hats);
