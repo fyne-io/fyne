@@ -388,11 +388,11 @@ func (w *window) doShow() {
 		return
 	}
 
-	run.RLock()
+	run.Lock()
 	for !run.flag {
 		run.cond.Wait()
 	}
-	run.RUnlock()
+	run.Unlock()
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {
@@ -458,6 +458,7 @@ func (w *window) Close() {
 		w.viewLock.Lock()
 		w.closing = true
 		w.viewLock.Unlock()
+		w.viewport.SetShouldClose(true)
 		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
 			w.canvas.Painter().Free(obj)
 		})

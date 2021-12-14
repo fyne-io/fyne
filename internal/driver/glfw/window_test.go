@@ -40,11 +40,11 @@ func TestMain(m *testing.M) {
 	go func() {
 		// Wait for GLFW loop to be running.
 		// If we try to create windows before the context is created, this will fail with an exception.
-		run.RLock()
+		run.Lock()
 		for !run.flag {
 			run.cond.Wait()
 		}
-		run.RUnlock()
+		run.Unlock()
 
 		initMainMenu()
 		os.Exit(m.Run())
@@ -1607,6 +1607,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	w.WaitForEvents()
 	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
 	assert.True(t, onClosed)
+	assert.True(t, w.viewport.ShouldClose()) // For #2694
 
 	w.closing = false // fake a fresh window
 	onIntercepted = false

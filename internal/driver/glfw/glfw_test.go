@@ -8,11 +8,11 @@ import "time"
 func repaintWindow(w *window) {
 	// Wait for GLFW loop to be running.
 	// If we try to paint windows before the context is created, we will end up on the wrong thread.
-	run.RLock()
+	run.Lock()
 	for !run.flag {
 		run.cond.Wait()
 	}
-	run.RUnlock()
+	run.Unlock()
 
 	runOnDraw(w, func() {
 		d.(*gLDriver).repaintWindow(w)
