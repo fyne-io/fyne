@@ -27,7 +27,7 @@ type drawData struct {
 }
 
 type runFlag struct {
-	sync.RWMutex
+	sync.Mutex
 	flag bool
 	cond *sync.Cond
 }
@@ -58,12 +58,12 @@ func init() {
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	run.RLock()
+	run.Lock()
 	if !run.flag {
 		f()
-		run.RUnlock()
+		run.Unlock()
 	} else {
-		run.RUnlock()
+		run.Unlock()
 
 		done := donePool.Get().(chan struct{})
 		defer donePool.Put(done)

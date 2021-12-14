@@ -40,11 +40,11 @@ func TestMain(m *testing.M) {
 	go func() {
 		// Wait for GLFW loop to be running.
 		// If we try to create windows before the context is created, this will fail with an exception.
-		run.RLock()
+		run.Lock()
 		for !run.flag {
 			run.cond.Wait()
 		}
-		run.RUnlock()
+		run.Unlock()
 
 		initMainMenu()
 		os.Exit(m.Run())
