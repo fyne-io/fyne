@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -147,6 +148,13 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	)
 }
 
+func supportedTutorial(t tutorials.Tutorial) bool {
+	if !t.SupportWeb && (runtime.GOARCH == "js" || runtime.GOOS == "js") {
+		return false
+	}
+	return true
+}
+
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
 	a := fyne.CurrentApp()
 
@@ -169,9 +177,15 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				return
 			}
 			obj.(*widget.Label).SetText(t.Title)
+			if !supportedTutorial(t) {
+				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
+			}
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
+				if !supportedTutorial(t) {
+					return
+				}
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
 			}
