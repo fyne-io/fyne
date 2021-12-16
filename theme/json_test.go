@@ -5,14 +5,20 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFromJSON(t *testing.T) {
+	repository.Register("file", intRepo.NewFileRepository()) // file uri resolving (avoid test import loop)
 	th, err := FromJSON(`{
 "Colors": {"background": "#c0c0c0ff"},
 "Colors-light": {"foreground": "#ffffffff"},
-"Sizes": {"iconInline": 5.0}
+"Sizes": {"iconInline": 5.0},
+"Fonts": {"monospace": "file://./testdata/NotoMono-Regular.ttf"},
+"Icons": {"cancel": "file://./testdata/cancel_Paths.svg"}
 }`)
 
 	assert.Nil(t, err)
@@ -20,6 +26,8 @@ func TestFromJSON(t *testing.T) {
 	assert.Equal(t, &color.NRGBA{R: 0xc0, G: 0xc0, B: 0xc0, A: 0xff}, th.Color(ColorNameBackground, VariantLight))
 	assert.Equal(t, &color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}, th.Color(ColorNameForeground, VariantLight))
 	assert.Equal(t, float32(5), th.Size(SizeNameInlineIcon))
+	assert.Equal(t, "NotoMono-Regular.ttf", th.Font(fyne.TextStyle{Monospace: true}).Name())
+	assert.Equal(t, "cancel_Paths.svg", th.Icon(IconNameCancel).Name())
 }
 
 func TestFromTOML_Resource(t *testing.T) {
