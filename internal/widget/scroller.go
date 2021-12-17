@@ -392,14 +392,13 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 
 //ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 func (s *Scroll) ScrollToBottom() {
-	s.Offset.Y = s.Content.MinSize().Height - s.Size().Height
+	s.scrollBy(0, -1*(s.Content.MinSize().Height - s.Size().Height - s.Offset.Y))
 	s.Refresh()
 }
 
 //ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
-	s.Offset.Y = 0
-	s.Refresh()
+	s.scrollBy(0, -s.Offset.Y)
 }
 
 // DragEnd will stop scrolling on mobile has stopped
@@ -460,7 +459,10 @@ func (s *Scroll) refreshWithoutOffsetUpdate() {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
-	dx, dy := ev.Scrolled.DX, ev.Scrolled.DY
+	s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
+}
+
+func (s *Scroll) scrollBy(dx, dy float32) {
 	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
 		dx, dy = dy, dx
 	}

@@ -116,6 +116,7 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 	}
 	t.columnWidths[id] = width
 	t.Refresh()
+	t.scroll.Refresh()
 }
 
 // Unselect will mark the cell provided by id as unselected.

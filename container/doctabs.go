@@ -352,6 +352,7 @@ func (r *docTabsRenderer) scrollToSelected() {
 		}
 	}
 	r.scroller.Offset = offset
+	r.updateIndicator(false)
 }
 
 func (r *docTabsRenderer) updateIndicator(animate bool) {
