@@ -217,7 +217,7 @@ func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
 	default:
 		a.scroll.Offset.Y = a.computeScrollOffset(barSize.Height, offset, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	}
-	if f := a.scroll.OnScrolled; f != nil && (a.scroll.Offset.X != oldX || a.scroll.Offset.Y != oldY){
+	if f := a.scroll.OnScrolled; f != nil && (a.scroll.Offset.X != oldX || a.scroll.Offset.Y != oldY) {
 		f(a.scroll.Offset)
 	}
 	a.scroll.refreshWithoutOffsetUpdate()
