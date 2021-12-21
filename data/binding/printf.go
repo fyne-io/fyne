@@ -44,7 +44,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, b)
-				break
 			}
 		case Bytes:
 			{
@@ -55,7 +54,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, b)
-				break
 			}
 		case Float:
 			{
@@ -66,7 +64,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, f)
-				break
 			}
 		case Int:
 			{
@@ -77,7 +74,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, i)
-				break
 			}
 		case Rune:
 			{
@@ -88,7 +84,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, r)
-				break
 			}
 		case String:
 			{
@@ -100,7 +95,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, str)
-				break
 			}
 		case URI:
 			{
@@ -111,7 +105,6 @@ func (s *sprintfString) DataChanged() {
 				}
 
 				data = append(data, u)
-				break
 			}
 		}
 	}
@@ -134,38 +127,19 @@ func (s *sprintfString) Set(str string) error {
 	for _, value := range s.source {
 		switch value.(type) {
 		case Bool:
-			{
-				data = append(data, new(bool))
-				break
-			}
+			data = append(data, new(bool))
 		case Bytes:
-			{
-				return fmt.Errorf("impossible to convert '%s' to []bytes type", str)
-			}
+			return fmt.Errorf("impossible to convert '%s' to []bytes type", str)
 		case Float:
-			{
-				data = append(data, new(float64))
-				break
-			}
+			data = append(data, new(float64))
 		case Int:
-			{
-				data = append(data, new(int))
-				break
-			}
+			data = append(data, new(int))
 		case Rune:
-			{
-				data = append(data, new(rune))
-				break
-			}
+			data = append(data, new(rune))
 		case String:
-			{
-				data = append(data, new(string))
-				break
-			}
+			data = append(data, new(string))
 		case URI:
-			{
-				return fmt.Errorf("impossible to convert '%s' to fyne.URI type", str)
-			}
+			return fmt.Errorf("impossible to convert '%s' to fyne.URI type", str)
 		}
 	}
 
@@ -188,8 +162,6 @@ func (s *sprintfString) Set(str string) error {
 				if err != nil {
 					return err
 				}
-
-				break
 			}
 		case Bytes:
 			{
@@ -203,8 +175,6 @@ func (s *sprintfString) Set(str string) error {
 				if err != nil {
 					return err
 				}
-
-				break
 			}
 		case Int:
 			{
@@ -214,8 +184,6 @@ func (s *sprintfString) Set(str string) error {
 				if err != nil {
 					return err
 				}
-
-				break
 			}
 		case Rune:
 			{
@@ -225,8 +193,6 @@ func (s *sprintfString) Set(str string) error {
 				if err != nil {
 					return err
 				}
-
-				break
 			}
 		case String:
 			{
@@ -236,8 +202,6 @@ func (s *sprintfString) Set(str string) error {
 				if err != nil {
 					return err
 				}
-
-				break
 			}
 		case URI:
 			{
