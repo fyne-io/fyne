@@ -67,14 +67,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.action = r.buildAllTabsButton()
 	r.create = r.buildCreateTabsButton()
 	r.box = NewHBox(r.create, r.action)
-	var lastX, lastY float32
 	r.scroller.OnScrolled = func(offset fyne.Position) {
-		// FIXME OnScrolled can be called when the offset hasn't changed (#1868)
-		if offset.X == lastX && offset.Y == lastY {
-			return
-		}
-		lastX = offset.X
-		lastY = offset.Y
 		r.updateIndicator(false)
 	}
 	r.updateAllTabs()
@@ -359,6 +352,7 @@ func (r *docTabsRenderer) scrollToSelected() {
 		}
 	}
 	r.scroller.Offset = offset
+	r.updateIndicator(false)
 }
 
 func (r *docTabsRenderer) updateIndicator(animate bool) {
