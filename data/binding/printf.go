@@ -36,76 +36,62 @@ func (s *sprintfString) DataChanged() {
 	for _, value := range s.source {
 		switch x := value.(type) {
 		case Bool:
-			{
-				b, err := x.Get()
-				if err != nil {
-					s.err = err
-					return
-				}
-
-				data = append(data, b)
+			b, err := x.Get()
+			if err != nil {
+				s.err = err
+				return
 			}
+
+			data = append(data, b)
 		case Bytes:
-			{
-				b, err := x.Get()
-				if err != nil {
-					s.err = err
-					return
-				}
-
-				data = append(data, b)
+			b, err := x.Get()
+			if err != nil {
+				s.err = err
+				return
 			}
+
+			data = append(data, b)
 		case Float:
-			{
-				f, err := x.Get()
-				if err != nil {
-					s.err = err
-					return
-				}
-
-				data = append(data, f)
+			f, err := x.Get()
+			if err != nil {
+				s.err = err
+				return
 			}
+
+			data = append(data, f)
 		case Int:
-			{
-				i, err := x.Get()
-				if err != nil {
-					s.err = err
-					return
-				}
-
-				data = append(data, i)
+			i, err := x.Get()
+			if err != nil {
+				s.err = err
+				return
 			}
+
+			data = append(data, i)
 		case Rune:
-			{
-				r, err := x.Get()
-				if err != nil {
-					s.err = err
-					return
-				}
-
-				data = append(data, r)
+			r, err := x.Get()
+			if err != nil {
+				s.err = err
+				return
 			}
+
+			data = append(data, r)
 		case String:
-			{
-				str, err := x.Get()
-				if err != nil {
-					s.err = err
-					// Set error?
-					return
-				}
-
-				data = append(data, str)
+			str, err := x.Get()
+			if err != nil {
+				s.err = err
+				// Set error?
+				return
 			}
+
+			data = append(data, str)
 		case URI:
-			{
-				u, err := x.Get()
-				if err != nil {
-					s.err = err
-					return
-				}
-
-				data = append(data, u)
+			u, err := x.Get()
+			if err != nil {
+				s.err = err
+				return
 			}
+
+			data = append(data, u)
 		}
 	}
 
@@ -155,58 +141,44 @@ func (s *sprintfString) Set(str string) error {
 	for i, value := range s.source {
 		switch x := value.(type) {
 		case Bool:
-			{
-				v := data[i].(*bool)
+			v := data[i].(*bool)
 
-				err := x.Set(*v)
-				if err != nil {
-					return err
-				}
+			err := x.Set(*v)
+			if err != nil {
+				return err
 			}
 		case Bytes:
-			{
-				return fmt.Errorf("impossible to convert '%s' to []bytes type", str)
-			}
+			return fmt.Errorf("impossible to convert '%s' to []bytes type", str)
 		case Float:
-			{
-				v := data[i].(*float64)
+			v := data[i].(*float64)
 
-				err := x.Set(*v)
-				if err != nil {
-					return err
-				}
+			err := x.Set(*v)
+			if err != nil {
+				return err
 			}
 		case Int:
-			{
-				v := data[i].(*int)
+			v := data[i].(*int)
 
-				err := x.Set(*v)
-				if err != nil {
-					return err
-				}
+			err := x.Set(*v)
+			if err != nil {
+				return err
 			}
 		case Rune:
-			{
-				v := data[i].(*rune)
+			v := data[i].(*rune)
 
-				err := x.Set(*v)
-				if err != nil {
-					return err
-				}
+			err := x.Set(*v)
+			if err != nil {
+				return err
 			}
 		case String:
-			{
-				v := data[i].(*string)
+			v := data[i].(*string)
 
-				err := x.Set(*v)
-				if err != nil {
-					return err
-				}
+			err := x.Set(*v)
+			if err != nil {
+				return err
 			}
 		case URI:
-			{
-				return fmt.Errorf("impossible to convert '%s' to fyne.URI type", str)
-			}
+			return fmt.Errorf("impossible to convert '%s' to fyne.URI type", str)
 		}
 	}
 
