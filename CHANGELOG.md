@@ -15,6 +15,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Low importance buttons no longer draw button color as a background
 * ProgressBar widget height is now consistent with other widgets
 * Include check in DocTabs menu to show current tab
+* Don't call OnScrolled if offset did not change (#2646)
 
 ### Fixed
 
