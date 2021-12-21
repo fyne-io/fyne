@@ -8,7 +8,7 @@ type sprintfString struct {
 	String
 
 	format string
-	source []interface{}
+	source []DataItem
 	err    error
 }
 
@@ -17,15 +17,11 @@ type sprintfString struct {
 // data bindings.
 //
 // Since: 2.2
-func NewSprintf(format string, b ...interface{}) (String, error) {
-	ret := &sprintfString{String: NewString(), format: format, source: make([]interface{}, 0)}
+func NewSprintf(format string, b ...DataItem) (String, error) {
+	ret := &sprintfString{String: NewString(), format: format}
 
 	for _, value := range b {
-		dataItem, ok := value.(DataItem)
-		if !ok {
-			return nil, fmt.Errorf("unexpected data type %T", value)
-		}
-		dataItem.AddListener(ret)
+		value.AddListener(ret)
 
 		ret.source = append(ret.source, value)
 	}

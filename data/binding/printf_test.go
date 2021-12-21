@@ -9,12 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSprintfWrongType(t *testing.T) {
-	_, err := NewSprintf("shouldn't work %v", true)
-
-	assert.NotNil(t, err)
-}
-
 func TestSprintfConversionRead(t *testing.T) {
 	var b bool = true
 	var f float64 = 42
