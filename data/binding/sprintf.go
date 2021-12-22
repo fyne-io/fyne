@@ -18,7 +18,7 @@ type sprintfString struct {
 //
 // Since: 2.2
 func NewSprintf(format string, b ...DataItem) (String, error) {
-	ret := &sprintfString{String: NewString(), format: format}
+	ret := &sprintfString{String: NewString(), format: format, source: make([]DataItem, 0, len(b))}
 
 	for _, value := range b {
 		value.AddListener(ret)
@@ -30,7 +30,7 @@ func NewSprintf(format string, b ...DataItem) (String, error) {
 }
 
 func (s *sprintfString) DataChanged() {
-	var data []interface{}
+	data := make([]interface{}, 0, len(s.source))
 
 	s.err = nil
 	for _, value := range s.source {
@@ -107,7 +107,7 @@ func (s *sprintfString) Get() (string, error) {
 }
 
 func (s *sprintfString) Set(str string) error {
-	var data []interface{}
+	data := make([]interface{}, 0, len(s.source))
 
 	s.err = nil
 	for _, value := range s.source {
