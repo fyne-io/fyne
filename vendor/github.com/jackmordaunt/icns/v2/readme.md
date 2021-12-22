@@ -15,13 +15,48 @@ A small CLI app `icnsify` is provided allowing you to create icns files using th
 
 Note: All icons within the `icns` are sized for high dpi retina screens, using the appropriate `icns` OSTypes.
 
+## GUI
+
+`preview` is a gui for displaying `icns` files cross-platform.
+
+### Go Tool
+
+```
+go install github.com/jackmordaunt/icns/cmd/preview@latest
+```
+
+### Clone
+
+```
+git clone https://github.com/jackmordaunt/icns
+cd icns/cmd/preview && go install .
+```
+
+Note: Gio cannot be cross-compiled right now, so there are no `preview` builds in releases.
+Note: `preview` has it's own `go.mod` and therefore is versioned independently (unversioned).
+
+![preview](docs/preview.png)
+
 ## Command Line
+
+### Go Tool
+
+```
+go install github.com/jackmordaunt/icns/v2/cmd/icnsify@latest
+```
+
+### Clone
+
+```
+git clone https://github.com/jackmordaunt/icns
+cd icns && go install ./cmd/icnsify
+```
 
 Pipe it
 
-`cat icon.png | icnsify | cat > icon.icns`
+`cat icon.png | icnsify > icon.icns`
 
-`cat icon.icns | icnsify | cat > icon.png`
+`cat icon.icns | icnsify > icon.png`
 
 Standard
 
@@ -29,7 +64,9 @@ Standard
 
 `icnsify -i icon.icns -o icon.png`
 
-## Library Usage
+## Library
+
+`go get github.com/jackmordaunt/icns/v2`
 
 ```go
 func main() {
@@ -55,10 +92,16 @@ func main() {
 
 ## Roadmap
 
-* [x] Encoder: `image.Image -> .icns`
-* [x] Command Line Interface
-  * [x] Encoding
-  * [x] Pipe support
-  * [x] Decoding
-* [x] Implement Decoder: `.icns -> image.Image`
-* [ ] Symmetric test: `decode(encode(img)) == img`
+- [x] Encoder: `image.Image -> .icns`
+- [x] Command Line Interface
+  - [x] Encoding
+  - [x] Pipe support
+  - [x] Decoding
+- [x] Implement Decoder: `.icns -> image.Image`
+- [ ] Symmetric test: `decode(encode(img)) == img`
+
+## Coffee
+
+If this software is useful to you, consider buying me a coffee!
+
+[https://liberapay.com/JackMordaunt](https://liberapay.com/JackMordaunt)
