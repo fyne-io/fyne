@@ -13,7 +13,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/godbus/dbus/v5 v5.0.6
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
+	github.com/jackmordaunt/icns/v2 v2.1.3
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
