@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -8,6 +9,7 @@ import (
 	"go/format"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -39,6 +41,54 @@ func bundleFile(name string, filepath string, f io.Writer) {
 	}
 	v := fmt.Sprintf("var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(%q),\n}\n\n",
 		formatVariable(name), staticRes.StaticName, staticRes.StaticContent)
+	_, err = f.Write([]byte(v))
+	if err != nil {
+		fyne.LogError("Unable to write to bundled file", err)
+	}
+}
+
+func bundleCustomIcons(f io.Writer) {
+	customIconStaticRes := make(map[string]*fyne.StaticResource)
+
+	err := filepath.Walk("./icons/custom/",
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if info.Name() == "custom" {
+				return nil
+			}
+
+			res, err := fyne.LoadResourceFromPath(path)
+			if err != nil {
+				fyne.LogError("Unable to load file "+path, err)
+				return nil
+			}
+
+			staticRes, ok := res.(*fyne.StaticResource)
+			if !ok {
+				fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
+				return nil
+			}
+
+			n := info.Name()[:len(info.Name())-4] // Remove ".svg" from file name
+
+			customIconStaticRes[n] = staticRes
+
+			return nil
+		})
+	if err != nil {
+		fyne.LogError("Error custom icon bundle", err)
+	}
+
+	// Create bundled-icons function
+	bufferstd, buffer := "var customIconRes = map[string]*fyne.StaticResource{\n", ""
+	for iname, r := range customIconStaticRes {
+		buffer = buffer + "\t" + `"` + iname + `": {StaticName: "` + r.StaticName + `", StaticContent: []byte(` + fmt.Sprintf("%q", r.StaticContent) + `)},` + "\n"
+	}
+	v := bufferstd + buffer + "\n}"
+
 	_, err = f.Write([]byte(v))
 	if err != nil {
 		fyne.LogError("Unable to write to bundled file", err)
@@ -199,6 +249,8 @@ func main() {
 
 	bundleIcon("list", f)
 	bundleIcon("grid", f)
+
+	bundleCustomIcons(f)
 
 	err = writeFile("bundled-icons.go", f.Bytes())
 	if err != nil {

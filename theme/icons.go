@@ -565,6 +565,10 @@ var (
 	}
 )
 
+func init() {
+	loadCustomIcons()
+}
+
 func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }
@@ -1184,4 +1188,19 @@ func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
 		return fallbackIcon
 	}
 	return icon
+}
+
+var customIcons = make(map[string]fyne.Resource)
+
+// Loads all custom icons into memory
+func loadCustomIcons() {
+	for _, v := range customIconRes {
+		n := v.StaticName[:len(v.StaticName)-4] // Get icon name and remove ".svg"
+		customIcons[n] = NewThemedResource(customIconRes[n])
+	}
+}
+
+// CustomIcon returns a resource containing the given input icon name for the current theme
+func CustomIcon(n string) fyne.Resource {
+	return customIcons[n]
 }
