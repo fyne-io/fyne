@@ -107,6 +107,12 @@ func buildPopUpMenu(t baseTabs, button *widget.Button, items []*fyne.MenuItem) *
 		popUpPos.X = buttonPos.X + buttonSize.Width - popUpMin.Width
 		popUpPos.Y = buttonPos.Y - popUpMin.Height
 	}
+	if popUpPos.X < 0 {
+		popUpPos.X = 0
+	}
+	if popUpPos.Y < 0 {
+		popUpPos.Y = 0
+	}
 	popUpMenu.ShowAtPosition(popUpPos)
 	return popUpMenu
 }
