@@ -1,6 +1,8 @@
 package container
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/layout"
@@ -363,7 +365,7 @@ func (r *docTabsRenderer) scrollToSelected() {
 
 func (r *docTabsRenderer) updateIndicator(animate bool) {
 	if r.docTabs.current < 0 {
-		r.indicator.Hide()
+		r.indicator.FillColor = color.Transparent
 		r.indicator.Refresh()
 		return
 	}
@@ -414,7 +416,7 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 		indicatorPos.Y = 0
 	}
 	if indicatorSize.Width < 0 || indicatorSize.Height < 0 {
-		r.indicator.Hide()
+		r.indicator.FillColor = color.Transparent
 		r.indicator.Refresh()
 		return
 	}
