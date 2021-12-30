@@ -569,13 +569,16 @@ func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }
 
-// ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
-// for the currently selected theme.
+// ThemedResource is a resource wrapper used to represent a version of a resource.
+// It changes colors based on the active theme.
+// This is currently achieved using XML attributes.
+// This is designed for use with Icons of 24px x 24px.
 type ThemedResource struct {
 	source fyne.Resource
 }
 
-// NewThemedResource creates a resource that adapts to the current theme setting.
+// NewThemedResource creates a resource that adapts to the current theme primary color.
+// Receives any struct implementing the Resource interface of Content() and Name()
 func NewThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: src,
@@ -597,13 +600,18 @@ func (res *ThemedResource) Error() *ErrorThemedResource {
 	return NewErrorThemedResource(res)
 }
 
-// InvertedThemedResource is a resource wrapper that will return a version of the resource with the main color changed
-// for use over highlighted elements.
+// InvertedThemedResource is a resource wrapper used to represent a version of a resource.
+// It changes colors based on the active theme.
+// It is for use with active states.
+// This is currently achieved using XML attributes.
+// This is designed for use with Icons of 24px x 24px.
 type InvertedThemedResource struct {
 	source fyne.Resource
 }
 
-// NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
+// NewInvertedThemedResource creates a resource that adapts to the current theme.
+// It adapts for use over highlighted elements.
+// Receives any struct implementing the Resource interface of Content() and Name()
 func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
 	res := &InvertedThemedResource{source: orig}
 	return res
@@ -625,13 +633,18 @@ func (res *InvertedThemedResource) Original() fyne.Resource {
 	return res.source
 }
 
-// ErrorThemedResource is a resource wrapper that will return a version of the resource with the main color changed
-// to indicate an error.
+// ErrorThemedResource is a resource wrapper used to represent a version of a resource.
+// It changes colors based on the active theme.
+// It is designed to communicate error states, and indicate error.
+// This is currently achieved using XML attributes.
+// This is designed for use with Icons of 24px x 24px.
 type ErrorThemedResource struct {
 	source fyne.Resource
 }
 
-// NewErrorThemedResource creates a resource that adapts to the error color for the current theme.
+// NewErrorThemedResource creates a resource that adapts to the current theme.
+// It adapts for use over error-state elements.
+// Receives any struct implementing the Resource interface of Content() and Name()
 func NewErrorThemedResource(orig fyne.Resource) *ErrorThemedResource {
 	res := &ErrorThemedResource{source: orig}
 	return res
@@ -652,13 +665,16 @@ func (res *ErrorThemedResource) Original() fyne.Resource {
 	return res.source
 }
 
-// PrimaryThemedResource is a resource wrapper that will return a version of the resource with the main color changed
-// to the theme primary color.
+// PrimaryThemedResource is a resource wrapper used to represent a version of a resource.
+// It changes colors based on the active theme.
+// This is currently achieved using XML attributes.
+// This is designed for use with Icons of 24px x 24px.
 type PrimaryThemedResource struct {
 	source fyne.Resource
 }
 
-// NewPrimaryThemedResource creates a resource that adapts to the primary color for the current theme.
+// NewThemedResource creates a resource that adapts to the current theme primary color.
+// Receives any struct implementing the Resource interface of Content() and Name()
 func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
 	res := &PrimaryThemedResource{source: orig}
 	return res
@@ -679,8 +695,11 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 	return res.source
 }
 
-// DisabledResource is a resource wrapper that will return an appropriate resource colorized by
-// the current theme's `DisabledIconColor` color.
+// DisabledResource is a resource wrapper used to represent a version of a resource.
+// It changes colors based on the active theme.
+// It is designed to communicate disabled states, and indicate components are inactive.
+// This is currently achieved using XML attributes.
+// This is designed for use with Icons of 24px x 24px.
 type DisabledResource struct {
 	source fyne.Resource
 }
@@ -695,7 +714,9 @@ func (res *DisabledResource) Content() []byte {
 	return colorizeResource(res.source, DisabledColor())
 }
 
-// NewDisabledResource creates a resource that adapts to the current theme's DisabledIconColor setting.
+// NewDisabledResource creates a resource that adapts to the current theme.
+// It adapts for use over disabled-state elements, using the DisabledIconColor setting.
+// Receives any struct implementing the Resource interface of Content() and Name()
 func NewDisabledResource(res fyne.Resource) *DisabledResource {
 	return &DisabledResource{
 		source: res,
