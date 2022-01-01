@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -56,15 +58,23 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	if !i.Item.Checked {
 		checkIcon.Hide()
 	}
+	var shortcutTexts []*canvas.Text
+	if s, ok := i.Item.Shortcut.(fyne.KeyboardShortcut); ok {
+		shortcutTexts = textsForShortcut(s)
+		for _, t := range shortcutTexts {
+			objects = append(objects, t)
+		}
+	}
 
 	objects = append(objects, checkIcon)
 	return &menuItemRenderer{
-		BaseRenderer: widget.NewBaseRenderer(objects),
-		i:            i,
-		icon:         icon,
-		checkIcon:    checkIcon,
-		text:         text,
-		background:   background,
+		BaseRenderer:  widget.NewBaseRenderer(objects),
+		i:             i,
+		icon:          icon,
+		checkIcon:     checkIcon,
+		shortcutTexts: shortcutTexts,
+		text:          text,
+		background:    background,
 	}
 }
 
@@ -179,6 +189,7 @@ type menuItemRenderer struct {
 	checkIcon        *canvas.Image
 	lastThemePadding float32
 	minSize          fyne.Size
+	shortcutTexts    []*canvas.Text
 	text             *canvas.Text
 	background       *canvas.Rectangle
 }
@@ -194,9 +205,21 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	r.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)))
 	r.text.Move(fyne.NewPos(padding.Width/2+r.checkSpace(), padding.Height/2))
 
+	widthWithoutIcon := size.Width
 	if r.icon != nil {
+		widthWithoutIcon -= theme.IconInlineSize()
 		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		r.icon.Move(fyne.NewPos(size.Width-theme.IconInlineSize(), (size.Height-theme.IconInlineSize())/2))
+		r.icon.Move(fyne.NewPos(widthWithoutIcon, (size.Height-theme.IconInlineSize())/2))
+	}
+	{
+		offset := widthWithoutIcon - padding.Width/2
+		for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
+			text := r.shortcutTexts[i]
+			text.TextSize = theme.TextSize()
+			text.Resize(text.MinSize())
+			offset -= text.MinSize().Width
+			text.Move(fyne.NewPos(offset, padding.Height/2))
+		}
 	}
 	r.checkIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.checkIcon.Move(fyne.NewPos(padding.Width/4, (size.Height-theme.IconInlineSize())/2))
@@ -212,6 +235,13 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 	minSize := r.text.MinSize().Add(r.itemPadding()).Add(fyne.NewSize(r.checkSpace(), 0))
 	if r.icon != nil {
 		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
+	}
+	if r.shortcutTexts != nil {
+		var textWidth float32
+		for _, text := range r.shortcutTexts {
+			textWidth += text.MinSize().Width
+		}
+		minSize = minSize.AddWidthHeight(textWidth+theme.Padding()*2, 0)
 	}
 	r.minSize = minSize
 	return r.minSize
@@ -236,6 +266,9 @@ func (r *menuItemRenderer) Refresh() {
 		r.checkIcon.Resource = theme.ConfirmIcon()
 	}
 	r.text.Refresh()
+	for _, text := range r.shortcutTexts {
+		r.refreshText(text)
+	}
 
 	if r.i.Item.Checked {
 		r.checkIcon.Show()
@@ -262,4 +295,59 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 		r.text.TextSize == theme.TextSize() &&
 		(r.icon == nil || r.icon.Size().Width == theme.IconInlineSize()) &&
 		r.lastThemePadding == theme.Padding()
+}
+
+func (r *menuItemRenderer) refreshText(text *canvas.Text) {
+	if r.i.Item.Disabled {
+		text.Color = theme.DisabledColor()
+	} else {
+		text.Color = theme.ForegroundColor()
+	}
+	text.Refresh()
+}
+
+var keySymbols map[fyne.KeyName]rune = map[fyne.KeyName]rune{
+	fyne.KeyBackspace: '⌫',
+	fyne.KeyDelete:    '⌦',
+	fyne.KeyDown:      '↓',
+	fyne.KeyEnd:       '↘',
+	fyne.KeyEnter:     '↩',
+	fyne.KeyEscape:    '⎋',
+	fyne.KeyHome:      '↖',
+	fyne.KeyLeft:      '←',
+	fyne.KeyPageDown:  '⇟',
+	fyne.KeyPageUp:    '⇞',
+	fyne.KeyReturn:    '↩',
+	fyne.KeyRight:     '→',
+	fyne.KeySpace:     '␣',
+	fyne.KeyTab:       '⇥',
+	fyne.KeyUp:        '↑',
+}
+
+func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
+	b := strings.Builder{}
+	mods := s.Mod()
+	if mods&desktop.ControlModifier != 0 {
+		b.WriteRune('⌃')
+	}
+	if mods&desktop.AltModifier != 0 {
+		b.WriteRune('⌥')
+	}
+	if mods&desktop.ShiftModifier != 0 {
+		b.WriteRune('⇧')
+	}
+	if mods&desktop.SuperModifier != 0 {
+		b.WriteRune('⌘')
+	}
+	r := keySymbols[s.Key()]
+	if r != 0 {
+		b.WriteRune(r)
+	}
+	t := canvas.NewText(b.String(), theme.ForegroundColor())
+	t.TextStyle.Symbol = true
+	texts = append(texts, t)
+	if r == 0 {
+		texts = append(texts, canvas.NewText(string(s.Key()), theme.ForegroundColor()))
+	}
+	return
 }
