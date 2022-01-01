@@ -258,18 +258,16 @@ func (r *menuItemRenderer) Refresh() {
 	}
 	r.background.Refresh()
 	r.text.Alignment = r.i.alignment
-	if r.i.Item.Disabled {
-		r.text.Color = theme.DisabledColor()
-		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
-	} else {
-		r.text.Color = theme.ForegroundColor()
-		r.checkIcon.Resource = theme.ConfirmIcon()
-	}
-	r.text.Refresh()
+	r.refreshText(r.text)
 	for _, text := range r.shortcutTexts {
 		r.refreshText(text)
 	}
 
+	if r.i.Item.Disabled {
+		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
+	} else {
+		r.checkIcon.Resource = theme.ConfirmIcon()
+	}
 	if r.i.Item.Checked {
 		r.checkIcon.Show()
 	} else {
