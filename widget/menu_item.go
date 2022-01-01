@@ -204,13 +204,6 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	r.background.Resize(size)
 }
 
-func (r *menuItemRenderer) checkSpace() float32 {
-	if r.i.Parent.containsCheck {
-		return theme.IconInlineSize()
-	}
-	return 0
-}
-
 func (r *menuItemRenderer) MinSize() fyne.Size {
 	if r.minSizeUnchanged() {
 		return r.minSize
@@ -253,13 +246,20 @@ func (r *menuItemRenderer) Refresh() {
 	canvas.Refresh(r.i)
 }
 
+func (r *menuItemRenderer) checkSpace() float32 {
+	if r.i.Parent.containsCheck {
+		return theme.IconInlineSize()
+	}
+	return 0
+}
+
+func (r *menuItemRenderer) itemPadding() fyne.Size {
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+}
+
 func (r *menuItemRenderer) minSizeUnchanged() bool {
 	return !r.minSize.IsZero() &&
 		r.text.TextSize == theme.TextSize() &&
 		(r.icon == nil || r.icon.Size().Width == theme.IconInlineSize()) &&
 		r.lastThemePadding == theme.Padding()
-}
-
-func (r *menuItemRenderer) itemPadding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 }
