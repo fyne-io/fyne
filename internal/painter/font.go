@@ -178,8 +178,10 @@ func walkString(f font.Face, s string, tabWidth int, advance *fixed.Int26_6, cb 
 		} else {
 			a, ok := cb(c)
 			if !ok {
-				// TODO: is falling back on the U+FFFD glyph the responsibility of
-				// the Drawer or the Face?
+				c = '�' // U+FFFD, the Unicode replacement character
+				a, ok = cb(c)
+			}
+			if !ok {
 				// TODO: set prevC = '\ufffd'?
 				continue
 			}

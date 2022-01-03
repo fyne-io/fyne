@@ -61,6 +61,14 @@ func TestDrawString(t *testing.T) {
 			tabWidth: 3,
 			want:     "hello_TAB_world_bold_italic_size_27.42_height_42_tab_width_3.png",
 		},
+		"missing glyphs": {
+			color:    color.Black,
+			face:     regular,
+			height:   50,
+			string:   "Missing: ↩",
+			tabWidth: 4,
+			want:     "missing_glyph.png",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
@@ -88,6 +96,12 @@ func TestMeasureString(t *testing.T) {
 			string:   "Hello\tworld!",
 			tabWidth: 3,
 			want:     11576, // 180.875
+		},
+		"missing glyph": {
+			face:     regular,
+			string:   "Missing: ↩",
+			tabWidth: 4,
+			want:     14257, // 222.765625
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
