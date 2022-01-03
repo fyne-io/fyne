@@ -36,51 +36,41 @@ func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
 // DrawString draws s at the dot and advances the dot's location.
 // Tabs are translated into a dot location change.
 func (d *FontDrawer) DrawString(s string, tabWidth int) {
-	prevC := rune(-1)
-	for _, c := range s {
-		if prevC >= 0 {
-			d.Dot.X += d.Face.Kern(prevC, c)
-		}
-		if c == '\t' {
-			d.Dot.X = tabStop(d.Face, d.Dot.X, tabWidth)
-		} else {
-			dr, mask, maskp, a, ok := d.Face.Glyph(d.Dot, c)
-			if !ok {
-				// TODO: is falling back on the U+FFFD glyph the responsibility of
-				// the Drawer or the Face?
-				// TODO: set prevC = '\ufffd'?
-				continue
-			}
+	walkString(d.Face, s, tabWidth, &d.Dot.X, func(r rune) (fixed.Int26_6, bool) {
+		dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, r)
+		if ok {
 			draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
-			d.Dot.X += a
 		}
-
-		prevC = c
-	}
+		return advance, ok
+	})
 }
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f font.Face, s string, tabWidth int) (advance fixed.Int26_6) {
+	walkString(f, s, tabWidth, &advance, f.GlyphAdvance)
+	return
+}
+
+func walkString(f font.Face, s string, tabWidth int, advance *fixed.Int26_6, cb func(r rune) (fixed.Int26_6, bool)) {
 	prevC := rune(-1)
 	for _, c := range s {
 		if prevC >= 0 {
-			advance += f.Kern(prevC, c)
+			*advance += f.Kern(prevC, c)
 		}
 		if c == '\t' {
-			advance = tabStop(f, advance, tabWidth)
+			*advance = tabStop(f, *advance, tabWidth)
 		} else {
-			a, ok := f.GlyphAdvance(c)
+			a, ok := cb(c)
 			if !ok {
 				// TODO: is falling back on the U+FFFD glyph the responsibility of
 				// the Drawer or the Face?
 				// TODO: set prevC = '\ufffd'?
 				continue
 			}
-			advance += a
+			*advance += a
 		}
 
 		prevC = c
 	}
-	return advance
 }
