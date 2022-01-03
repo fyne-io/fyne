@@ -1258,7 +1258,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift": {
 			modifier:              glfw.ModShift,
-			expectedEventModifier: desktop.ShiftModifier,
+			expectedEventModifier: fyne.KeyModifierShift,
 		},
 		"ctrl": {
 			modifier:              glfw.ModControl,
@@ -1274,15 +1274,15 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+ctrl": {
 			modifier:              glfw.ModShift | glfw.ModControl,
-			expectedEventModifier: desktop.ShiftModifier | ctrlModifier,
+			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier,
 		},
 		"shift+alt": {
 			modifier:              glfw.ModShift | glfw.ModAlt,
-			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier,
+			expectedEventModifier: fyne.KeyModifierShift | desktop.AltModifier,
 		},
 		"shift+super": {
 			modifier:              glfw.ModShift | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierShift | superModifier,
 		},
 		"ctrl+alt": {
 			modifier:              glfw.ModControl | glfw.ModAlt,
@@ -1298,15 +1298,15 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+ctrl+alt": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | desktop.AltModifier,
+			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | desktop.AltModifier,
 		},
 		"shift+ctrl+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | superModifier,
 		},
 		"shift+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierShift | desktop.AltModifier | superModifier,
 		},
 		"ctrl+alt+super": {
 			modifier:              glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
@@ -1314,7 +1314,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+ctrl+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | desktop.AltModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | desktop.AltModifier | superModifier,
 		},
 	}
 	for name, tt := range tests {
@@ -1658,7 +1658,7 @@ func TestWindow_SetFullScreen(t *testing.T) {
 }
 
 // This test makes our developer screens flash, let's not run it regularly...
-//func TestWindow_Shortcut(t *testing.T) {
+// func TestWindow_Shortcut(t *testing.T) {
 //	w := createWindow("Test")
 //
 //	shortcutFullScreenWindow := &desktop.CustomShortcut{
@@ -1673,7 +1673,7 @@ func TestWindow_SetFullScreen(t *testing.T) {
 //
 //	w.Canvas().(*glCanvas).shortcut.TypedShortcut(shortcutFullScreenWindow)
 //	assert.True(t, w.FullScreen())
-//}
+// }
 
 func createWindow(title string) fyne.Window {
 	w := d.CreateWindow(title)

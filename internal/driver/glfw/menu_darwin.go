@@ -187,7 +187,7 @@ func keyEquivalent(item *fyne.MenuItem) (key string) {
 
 func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 	if s, ok := item.Shortcut.(fyne.KeyboardShortcut); ok {
-		if (s.Mod() & desktop.ShiftModifier) != 0 {
+		if (s.Mod() & fyne.KeyModifierShift) != 0 {
 			mask |= 1 << 17 // NSEventModifierFlagShift
 		}
 		if (s.Mod() & desktop.AltModifier) != 0 {

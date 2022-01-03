@@ -1175,7 +1175,7 @@ func (w *window) capturesTab(modifier fyne.KeyModifier) bool {
 		case 0:
 			w.QueueEvent(w.canvas.FocusNext)
 			return false
-		case desktop.ShiftModifier:
+		case fyne.KeyModifierShift:
 			w.QueueEvent(w.canvas.FocusPrevious)
 			return false
 		}
@@ -1251,7 +1251,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 	var m fyne.KeyModifier
 	if (mods & glfw.ModShift) != 0 {
-		m |= desktop.ShiftModifier
+		m |= fyne.KeyModifierShift
 	}
 	if (mods & glfw.ModControl) != 0 {
 		m |= desktop.ControlModifier
@@ -1342,7 +1342,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, m
 		}
 	}
 
-	if modifier == desktop.ShiftModifier {
+	if modifier == fyne.KeyModifierShift {
 		switch keyName {
 		case fyne.KeyInsert:
 			// detect paste shortcut
@@ -1357,7 +1357,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, m
 		}
 	}
 
-	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != desktop.ShiftModifier {
+	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != fyne.KeyModifierShift {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: modifier,

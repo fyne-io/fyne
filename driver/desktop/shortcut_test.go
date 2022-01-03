@@ -64,7 +64,7 @@ func Test_modifierToString(t *testing.T) {
 		},
 		{
 			name: "Shift+Ctrl",
-			mods: ShiftModifier + ControlModifier,
+			mods: fyne.KeyModifierShift + ControlModifier,
 			want: "Shift+Control",
 		},
 	}
