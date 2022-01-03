@@ -176,15 +176,25 @@ const (
 )
 
 // KeyModifier represents any modifier key (shift etc.) that is being pressed together with a key.
+//
+// Since: 2.2
 type KeyModifier int
 
 const (
 	// KeyModifierShift represents a shift key being held
+	//
+	// Since: 2.2
 	KeyModifierShift KeyModifier = 1 << iota
 	// KeyModifierControl represents the ctrl key being held
+	//
+	// Since: 2.2
 	KeyModifierControl
 	// KeyModifierAlt represents either alt keys being held
+	//
+	// Since: 2.2
 	KeyModifierAlt
 	// KeyModifierSuper represents either super keys being held
+	//
+	// Since: 2.2
 	KeyModifierSuper
 )
