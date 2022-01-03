@@ -193,7 +193,7 @@ func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 		if (s.Mod() & desktop.AltModifier) != 0 {
 			mask |= 1 << 19 // NSEventModifierFlagOption
 		}
-		if (s.Mod() & desktop.ControlModifier) != 0 {
+		if (s.Mod() & fyne.KeyModifierControl) != 0 {
 			mask |= 1 << 18 // NSEventModifierFlagControl
 		}
 		if (s.Mod() & desktop.SuperModifier) != 0 {

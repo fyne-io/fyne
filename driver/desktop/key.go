@@ -43,6 +43,8 @@ const (
 	// Deprecated: Use fyne.KeyModifierShift instead.
 	ShiftModifier = fyne.KeyModifierShift
 	// ControlModifier represents the ctrl key being held
+	//
+	// Deprecated: Use fyne.KeyModifierControl instead.
 	ControlModifier = fyne.KeyModifierControl
 	// AltModifier represents either alt keys being held
 	AltModifier = fyne.KeyModifierAlt

@@ -20,7 +20,7 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 			name: "Ctrl+C",
 			fields: fields{
 				KeyName:  fyne.KeyC,
-				Modifier: ControlModifier,
+				Modifier: fyne.KeyModifierControl,
 			},
 			want: "CustomDesktop:Control+C",
 		},
@@ -28,7 +28,7 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 			name: "Ctrl+Alt+Esc",
 			fields: fields{
 				KeyName:  fyne.KeyEscape,
-				Modifier: ControlModifier + AltModifier,
+				Modifier: fyne.KeyModifierControl + AltModifier,
 			},
 			want: "CustomDesktop:Control+Alt+Escape",
 		},
@@ -59,12 +59,12 @@ func Test_modifierToString(t *testing.T) {
 		},
 		{
 			name: "Ctrl",
-			mods: ControlModifier,
+			mods: fyne.KeyModifierControl,
 			want: "Control",
 		},
 		{
 			name: "Shift+Ctrl",
-			mods: fyne.KeyModifierShift + ControlModifier,
+			mods: fyne.KeyModifierShift + fyne.KeyModifierControl,
 			want: "Shift+Control",
 		},
 	}

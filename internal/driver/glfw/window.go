@@ -977,12 +977,12 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 	var button desktop.MouseButton
 	rightClick := false
 	if runtime.GOOS == "darwin" {
-		if modifier&desktop.ControlModifier != 0 {
+		if modifier&fyne.KeyModifierControl != 0 {
 			rightClick = true
-			modifier &^= desktop.ControlModifier
+			modifier &^= fyne.KeyModifierControl
 		}
 		if modifier&desktop.SuperModifier != 0 {
-			modifier |= desktop.ControlModifier
+			modifier |= fyne.KeyModifierControl
 			modifier &^= desktop.SuperModifier
 		}
 	}
@@ -1254,7 +1254,7 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 		m |= fyne.KeyModifierShift
 	}
 	if (mods & glfw.ModControl) != 0 {
-		m |= desktop.ControlModifier
+		m |= fyne.KeyModifierControl
 	}
 	if (mods & glfw.ModAlt) != 0 {
 		m |= desktop.AltModifier
@@ -1304,7 +1304,7 @@ func (w *window) focused(_ *glfw.Window, focus bool) {
 
 func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, modifier fyne.KeyModifier) bool {
 	var shortcut fyne.Shortcut
-	ctrlMod := desktop.ControlModifier
+	ctrlMod := fyne.KeyModifierControl
 	if runtime.GOOS == "darwin" {
 		ctrlMod = desktop.SuperModifier
 	}
@@ -1313,7 +1313,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, m
 	// as a "Paste" shortcut.
 	// See https://github.com/fyne-io/fyne/pull/2587 for discussion.
 	keyName := localizedKeyName
-	resemblesShortcut := (modifier&(desktop.ControlModifier|desktop.SuperModifier) != 0)
+	resemblesShortcut := (modifier&(fyne.KeyModifierControl|desktop.SuperModifier) != 0)
 	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut {
 		if asciiKey, ok := keyCodeMapASCII[key]; ok {
 			keyName = asciiKey

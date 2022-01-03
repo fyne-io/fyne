@@ -325,7 +325,7 @@ var keySymbols map[fyne.KeyName]rune = map[fyne.KeyName]rune{
 func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	b := strings.Builder{}
 	mods := s.Mod()
-	if mods&desktop.ControlModifier != 0 {
+	if mods&fyne.KeyModifierControl != 0 {
 		b.WriteRune('⌃')
 	}
 	if mods&desktop.AltModifier != 0 {

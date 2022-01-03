@@ -1241,11 +1241,11 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	// The well-known Ctrl+Click for extending a selection is a Cmd+Click there.
 	var superModifier, ctrlModifier fyne.KeyModifier
 	if runtime.GOOS == "darwin" {
-		superModifier = desktop.ControlModifier
+		superModifier = fyne.KeyModifierControl
 		ctrlModifier = 0
 	} else {
 		superModifier = desktop.SuperModifier
-		ctrlModifier = desktop.ControlModifier
+		ctrlModifier = fyne.KeyModifierControl
 	}
 
 	tests := map[string]struct {
