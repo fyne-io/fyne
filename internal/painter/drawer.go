@@ -19,20 +19,6 @@ type FontDrawer struct {
 	font.Drawer
 }
 
-func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
-	if tabWidth <= 0 {
-		tabWidth = DefaultTabWidth
-	}
-	spacew, ok := f.GlyphAdvance(' ')
-	if !ok {
-		log.Print("Failed to find space width for tab")
-		return x
-	}
-	tabw := spacew * fixed.Int26_6(tabWidth)
-	tabs, _ := math.Modf(float64((x + tabw) / tabw))
-	return tabw * fixed.Int26_6(tabs)
-}
-
 // DrawString draws s at the dot and advances the dot's location.
 // Tabs are translated into a dot location change.
 func (d *FontDrawer) DrawString(s string, tabWidth int) {
@@ -50,6 +36,20 @@ func (d *FontDrawer) DrawString(s string, tabWidth int) {
 func MeasureString(f font.Face, s string, tabWidth int) (advance fixed.Int26_6) {
 	walkString(f, s, tabWidth, &advance, f.GlyphAdvance)
 	return
+}
+
+func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
+	if tabWidth <= 0 {
+		tabWidth = DefaultTabWidth
+	}
+	spacew, ok := f.GlyphAdvance(' ')
+	if !ok {
+		log.Print("Failed to find space width for tab")
+		return x
+	}
+	tabw := spacew * fixed.Int26_6(tabWidth)
+	tabs, _ := math.Modf(float64((x + tabw) / tabw))
+	return tabw * fixed.Int26_6(tabs)
 }
 
 func walkString(f font.Face, s string, tabWidth int, advance *fixed.Int26_6, cb func(r rune) (fixed.Int26_6, bool)) {
