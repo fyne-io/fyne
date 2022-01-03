@@ -10,6 +10,13 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// MeasureString returns how far dot would advance by drawing s with f.
+// Tabs are translated into a dot location change.
+func MeasureString(f font.Face, s string, tabWidth int) (advance fixed.Int26_6) {
+	walkString(f, s, tabWidth, &advance, f.GlyphAdvance)
+	return
+}
+
 // FontDrawer is a simplified implementation of  "golang.org/x/image/font.Drawer" which includes
 // support for tabs.
 //
@@ -31,13 +38,6 @@ func (d *FontDrawer) DrawString(s string, tabWidth int) {
 		}
 		return advance, ok
 	})
-}
-
-// MeasureString returns how far dot would advance by drawing s with f.
-// Tabs are translated into a dot location change.
-func MeasureString(f font.Face, s string, tabWidth int) (advance fixed.Int26_6) {
-	walkString(f, s, tabWidth, &advance, f.GlyphAdvance)
-	return
 }
 
 func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
