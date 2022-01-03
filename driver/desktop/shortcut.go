@@ -47,7 +47,7 @@ func modifierToString(mods fyne.KeyModifier) string {
 	if (mods & fyne.KeyModifierControl) != 0 {
 		s = append(s, string("Control"))
 	}
-	if (mods & AltModifier) != 0 {
+	if (mods & fyne.KeyModifierAlt) != 0 {
 		s = append(s, string("Alt"))
 	}
 	if (mods & SuperModifier) != 0 {

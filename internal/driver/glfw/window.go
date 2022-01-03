@@ -1218,7 +1218,7 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
 			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
-			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == desktop.AltModifier) {
+			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == fyne.KeyModifierAlt) {
 				w.menuTogglePending = keyName
 			}
 		case fyne.KeyEscape:
@@ -1257,7 +1257,7 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 		m |= fyne.KeyModifierControl
 	}
 	if (mods & glfw.ModAlt) != 0 {
-		m |= desktop.AltModifier
+		m |= fyne.KeyModifierAlt
 	}
 	if (mods & glfw.ModSuper) != 0 {
 		m |= desktop.SuperModifier

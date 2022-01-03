@@ -328,7 +328,7 @@ func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	if mods&fyne.KeyModifierControl != 0 {
 		b.WriteRune('⌃')
 	}
-	if mods&desktop.AltModifier != 0 {
+	if mods&fyne.KeyModifierAlt != 0 {
 		b.WriteRune('⌥')
 	}
 	if mods&fyne.KeyModifierShift != 0 {

@@ -190,7 +190,7 @@ func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 		if (s.Mod() & fyne.KeyModifierShift) != 0 {
 			mask |= 1 << 17 // NSEventModifierFlagShift
 		}
-		if (s.Mod() & desktop.AltModifier) != 0 {
+		if (s.Mod() & fyne.KeyModifierAlt) != 0 {
 			mask |= 1 << 19 // NSEventModifierFlagOption
 		}
 		if (s.Mod() & fyne.KeyModifierControl) != 0 {

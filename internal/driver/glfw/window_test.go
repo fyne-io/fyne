@@ -1266,7 +1266,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"alt": {
 			modifier:              glfw.ModAlt,
-			expectedEventModifier: desktop.AltModifier,
+			expectedEventModifier: fyne.KeyModifierAlt,
 		},
 		"super": {
 			modifier:              glfw.ModSuper,
@@ -1278,7 +1278,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+alt": {
 			modifier:              glfw.ModShift | glfw.ModAlt,
-			expectedEventModifier: fyne.KeyModifierShift | desktop.AltModifier,
+			expectedEventModifier: fyne.KeyModifierShift | fyne.KeyModifierAlt,
 		},
 		"shift+super": {
 			modifier:              glfw.ModShift | glfw.ModSuper,
@@ -1286,7 +1286,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"ctrl+alt": {
 			modifier:              glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: ctrlModifier | desktop.AltModifier,
+			expectedEventModifier: ctrlModifier | fyne.KeyModifierAlt,
 		},
 		"ctrl+super": {
 			modifier:              glfw.ModControl | glfw.ModSuper,
@@ -1294,11 +1294,11 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"alt+super": {
 			modifier:              glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.AltModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierAlt | superModifier,
 		},
 		"shift+ctrl+alt": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | desktop.AltModifier,
+			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | fyne.KeyModifierAlt,
 		},
 		"shift+ctrl+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModSuper,
@@ -1306,15 +1306,15 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: fyne.KeyModifierShift | desktop.AltModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierShift | fyne.KeyModifierAlt | superModifier,
 		},
 		"ctrl+alt+super": {
 			modifier:              glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: ctrlModifier | desktop.AltModifier | superModifier,
+			expectedEventModifier: ctrlModifier | fyne.KeyModifierAlt | superModifier,
 		},
 		"shift+ctrl+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | desktop.AltModifier | superModifier,
+			expectedEventModifier: fyne.KeyModifierShift | ctrlModifier | fyne.KeyModifierAlt | superModifier,
 		},
 	}
 	for name, tt := range tests {
