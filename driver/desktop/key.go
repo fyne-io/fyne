@@ -51,6 +51,8 @@ const (
 	// Deprecated: Use fyne.KeyModifierAlt instead.
 	AltModifier = fyne.KeyModifierAlt
 	// SuperModifier represents either super keys being held
+	//
+	// Deprecated: Use fyne.KeyModifierSuper instead.
 	SuperModifier = fyne.KeyModifierSuper
 )
 

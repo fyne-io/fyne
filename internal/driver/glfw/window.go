@@ -981,9 +981,9 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 			rightClick = true
 			modifier &^= fyne.KeyModifierControl
 		}
-		if modifier&desktop.SuperModifier != 0 {
+		if modifier&fyne.KeyModifierSuper != 0 {
 			modifier |= fyne.KeyModifierControl
-			modifier &^= desktop.SuperModifier
+			modifier &^= fyne.KeyModifierSuper
 		}
 	}
 	switch btn {
@@ -1260,7 +1260,7 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 		m |= fyne.KeyModifierAlt
 	}
 	if (mods & glfw.ModSuper) != 0 {
-		m |= desktop.SuperModifier
+		m |= fyne.KeyModifierSuper
 	}
 	return m
 }
@@ -1306,14 +1306,14 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, m
 	var shortcut fyne.Shortcut
 	ctrlMod := fyne.KeyModifierControl
 	if runtime.GOOS == "darwin" {
-		ctrlMod = desktop.SuperModifier
+		ctrlMod = fyne.KeyModifierSuper
 	}
 	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
 	// is reported as a fyne.KeyUnknown key with Control modifier. We should still consider this
 	// as a "Paste" shortcut.
 	// See https://github.com/fyne-io/fyne/pull/2587 for discussion.
 	keyName := localizedKeyName
-	resemblesShortcut := (modifier&(fyne.KeyModifierControl|desktop.SuperModifier) != 0)
+	resemblesShortcut := (modifier&(fyne.KeyModifierControl|fyne.KeyModifierSuper) != 0)
 	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut {
 		if asciiKey, ok := keyCodeMapASCII[key]; ok {
 			keyName = asciiKey

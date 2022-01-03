@@ -9,7 +9,6 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/driver/desktop"
 )
 
 /*
@@ -196,7 +195,7 @@ func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 		if (s.Mod() & fyne.KeyModifierControl) != 0 {
 			mask |= 1 << 18 // NSEventModifierFlagControl
 		}
-		if (s.Mod() & desktop.SuperModifier) != 0 {
+		if (s.Mod() & fyne.KeyModifierSuper) != 0 {
 			mask |= 1 << 20 // NSEventModifierFlagCommand
 		}
 	}

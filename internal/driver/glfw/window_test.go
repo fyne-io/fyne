@@ -1244,7 +1244,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		superModifier = fyne.KeyModifierControl
 		ctrlModifier = 0
 	} else {
-		superModifier = desktop.SuperModifier
+		superModifier = fyne.KeyModifierSuper
 		ctrlModifier = fyne.KeyModifierControl
 	}
 

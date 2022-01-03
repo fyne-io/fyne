@@ -50,7 +50,7 @@ func modifierToString(mods fyne.KeyModifier) string {
 	if (mods & fyne.KeyModifierAlt) != 0 {
 		s = append(s, string("Alt"))
 	}
-	if (mods & SuperModifier) != 0 {
+	if (mods & fyne.KeyModifierSuper) != 0 {
 		if runtime.GOOS == "darwin" {
 			s = append(s, string("Command"))
 		} else {
