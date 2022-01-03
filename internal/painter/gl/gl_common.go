@@ -6,7 +6,6 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2/theme"
-	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 
 	"fyne.io/fyne/v2"
@@ -80,13 +79,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	opts.DPI = float64(painter.TextDPI * p.texScale)
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := painter.FontDrawer{}
-	d.Dst = img
-	d.Src = &image.Uniform{C: color}
-	d.Face = face
-	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text, text.TextStyle.TabWidth)
-
+	painter.DrawString(img, text.Text, color, face, height, text.TextStyle.TabWidth)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 

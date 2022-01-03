@@ -2,13 +2,25 @@ package painter
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"log"
 	"math"
 
+	"github.com/goki/freetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
+
+// DrawString draws a string into an image.
+func DrawString(dst draw.Image, s string, color color.Color, face font.Face, height int, tabWidth int) {
+	d := FontDrawer{}
+	d.Dst = dst
+	d.Src = &image.Uniform{C: color}
+	d.Face = face
+	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
+	d.DrawString(s, tabWidth)
+}
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
