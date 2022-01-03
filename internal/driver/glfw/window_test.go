@@ -1239,7 +1239,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 
 	// On OS X a Ctrl+Click is normally translated into a Right-Click.
 	// The well-known Ctrl+Click for extending a selection is a Cmd+Click there.
-	var superModifier, ctrlModifier desktop.Modifier
+	var superModifier, ctrlModifier fyne.KeyModifier
 	if runtime.GOOS == "darwin" {
 		superModifier = desktop.ControlModifier
 		ctrlModifier = 0
@@ -1250,7 +1250,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 
 	tests := map[string]struct {
 		modifier              glfw.ModifierKey
-		expectedEventModifier desktop.Modifier
+		expectedEventModifier fyne.KeyModifier
 	}{
 		"no modifier key": {
 			modifier:              0,

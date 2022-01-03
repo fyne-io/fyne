@@ -38,7 +38,7 @@ const (
 type MouseEvent struct {
 	fyne.PointEvent
 	Button   MouseButton
-	Modifier Modifier
+	Modifier fyne.KeyModifier
 }
 
 // Mouseable represents desktop mouse events that can be sent to CanvasObjects

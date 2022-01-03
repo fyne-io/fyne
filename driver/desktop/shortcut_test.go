@@ -9,7 +9,7 @@ import (
 func TestCustomShortcut_Shortcut(t *testing.T) {
 	type fields struct {
 		KeyName  fyne.KeyName
-		Modifier Modifier
+		Modifier fyne.KeyModifier
 	}
 	tests := []struct {
 		name   string
@@ -49,7 +49,7 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 func Test_modifierToString(t *testing.T) {
 	tests := []struct {
 		name string
-		mods Modifier
+		mods fyne.KeyModifier
 		want string
 	}{
 		{

@@ -972,7 +972,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	}
 }
 
-func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, desktop.Modifier) {
+func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
 	var button desktop.MouseButton
 	rightClick := false
@@ -1164,7 +1164,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
-func (w *window) capturesTab(modifier desktop.Modifier) bool {
+func (w *window) capturesTab(modifier fyne.KeyModifier) bool {
 	captures := false
 
 	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok {
@@ -1248,8 +1248,8 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	}
 }
 
-func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
-	var m desktop.Modifier
+func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
+	var m fyne.KeyModifier
 	if (mods & glfw.ModShift) != 0 {
 		m |= desktop.ShiftModifier
 	}
@@ -1302,7 +1302,7 @@ func (w *window) focused(_ *glfw.Window, focus bool) {
 	}
 }
 
-func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, modifier desktop.Modifier) bool {
+func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key glfw.Key, modifier fyne.KeyModifier) bool {
 	var shortcut fyne.Shortcut
 	ctrlMod := desktop.ControlModifier
 	if runtime.GOOS == "darwin" {

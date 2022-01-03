@@ -14,7 +14,7 @@ var _ fyne.KeyboardShortcut = (*CustomShortcut)(nil)
 // CustomShortcut describes a shortcut desktop event.
 type CustomShortcut struct {
 	fyne.KeyName
-	Modifier
+	Modifier fyne.KeyModifier
 }
 
 // Key returns the key name of this shortcut.
@@ -39,7 +39,7 @@ func (cs *CustomShortcut) ShortcutName() string {
 	return id.String()
 }
 
-func modifierToString(mods Modifier) string {
+func modifierToString(mods fyne.KeyModifier) string {
 	s := []string{}
 	if (mods & ShiftModifier) != 0 {
 		s = append(s, string("Shift"))
