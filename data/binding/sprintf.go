@@ -2,6 +2,8 @@ package binding
 
 import (
 	"fmt"
+
+	"fyne.io/fyne/v2/storage"
 )
 
 type sprintfString struct {
@@ -125,7 +127,7 @@ func (s *sprintfString) Set(str string) error {
 		case String:
 			data = append(data, new(string))
 		case URI:
-			return fmt.Errorf("impossible to convert '%s' to fyne.URI type", str)
+			data = append(data, new(string))
 		}
 	}
 
@@ -178,7 +180,16 @@ func (s *sprintfString) Set(str string) error {
 				return err
 			}
 		case URI:
-			return fmt.Errorf("impossible to convert '%s' to fyne.URI type", str)
+			v := data[i].(*string)
+
+			if v == nil {
+				return fmt.Errorf("URI can not be nil in '%s'", str)
+			}
+
+			err := x.Set(storage.NewURI(*v))
+			if err != nil {
+				return err
+			}
 		}
 	}
 

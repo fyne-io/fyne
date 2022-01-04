@@ -63,16 +63,18 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	var i int = 7
 	var r rune = 'B'
 	var s string = "this is a string"
+	var u fyne.URI = storage.NewFileURI("/")
 
 	bb := BindBool(&b)
 	bf := BindFloat(&f)
 	bi := BindInt(&i)
 	br := BindRune(&r)
 	bs := BindString(&s)
+	bu := BindURI(&u)
 
-	format := "Bool %v , Float %f , Int %v , Rune %v , String %s"
-	sp, err := NewSprintf(format, bb, bf, bi, br, bs)
-	expected := fmt.Sprintf(format, b, f, i, r, s)
+	format := "Bool %v , Float %f , Int %v , Rune %v , String %s , URI %s"
+	sp, err := NewSprintf(format, bb, bf, bi, br, bs, bu)
+	expected := fmt.Sprintf(format, b, f, i, r, s, u)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, sp)
@@ -85,7 +87,7 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	assert.NotNil(t, sGenerated)
 	assert.Equal(t, expected, sGenerated)
 
-	err = sp.Set("Bool false , Float 7.000000 , Int 42 , Rune 67 , String nospacestring")
+	err = sp.Set("Bool false , Float 7.000000 , Int 42 , Rune 67 , String nospacestring , URI file:///var/")
 
 	assert.Nil(t, err)
 
@@ -96,8 +98,9 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	assert.Equal(t, i, 42)
 	assert.Equal(t, r, 'C')
 	assert.Equal(t, s, "nospacestring")
+	assert.Equal(t, u.String(), "file:///var/")
 
-	expectedChange := fmt.Sprintf(format, b, f, i, r, s)
+	expectedChange := fmt.Sprintf(format, b, f, i, r, s, u)
 
 	sChange, err := sp.Get()
 
