@@ -16,7 +16,8 @@ type sprintfString struct {
 
 // NewSprintf returns a String binding that format its content using the
 // format string and the provide additional parameter that must be other
-// data bindings.
+// data bindings. This data binding use fmt.Sprintf and fmt.Scanf internally
+// and will have all the same limitation as those function.
 //
 // Since: 2.2
 func NewSprintf(format string, b ...DataItem) (String, error) {
