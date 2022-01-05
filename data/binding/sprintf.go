@@ -187,7 +187,12 @@ func (s *sprintfString) Set(str string) error {
 				return fmt.Errorf("URI can not be nil in '%s'", str)
 			}
 
-			err := x.Set(storage.NewURI(*v))
+			uri, err := storage.ParseURI(*v)
+			if err != nil {
+				return err
+			}
+
+			err = x.Set(uri)
 			if err != nil {
 				return err
 			}
