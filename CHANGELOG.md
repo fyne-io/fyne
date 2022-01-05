@@ -22,6 +22,13 @@ More detailed release notes can be found on the [releases page](https://github.c
 * 
 
 
+## 2.1.3 - Ongoing
+
+### Fixed
+
+* The text on button can't be show correctly when use imported font (#2512)
+* Fix issues with DocTabs scrolling (#2709)
+
 ## 2.1.2 - 6 December 2021
 
 ### Fixed
