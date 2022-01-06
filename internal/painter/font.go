@@ -166,6 +166,8 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 		case style.Italic:
 			f1 = loadFont(theme.TextItalicFont())
 			f2 = loadFont(theme.DefaultTextItalicFont())
+		case style.Symbol:
+			f2 = loadFont(theme.DefaultSymbolFont())
 		default:
 			f1 = loadFont(theme.TextFont())
 			f2 = loadFont(theme.DefaultTextFont())

@@ -16,9 +16,9 @@
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x40"/>
 				</widget>
 				<widget size="70x40" type="*widget.Scroll">
-					<widget size="70x107" type="*widget.menuBox">
-						<rectangle fillColor="background" size="70x115"/>
-						<container pos="0,4" size="70x115">
+					<widget size="70x144" type="*widget.menuBox">
+						<rectangle fillColor="background" size="70x152"/>
+						<container pos="0,4" size="70x152">
 							<widget size="70x28" type="*widget.menuItem">
 								<text pos="8,4" size="54x20">A</text>
 							</widget>
@@ -30,6 +30,13 @@
 							</widget>
 							<widget pos="0,70" size="70x28" type="*widget.menuItem">
 								<text pos="8,4" size="54x20">C</text>
+								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							</widget>
+							<widget pos="0,103" size="70x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="70x1"/>
+							</widget>
+							<widget pos="0,108" size="70x28" type="*widget.menuItem">
+								<text pos="8,4" size="54x20">D</text>
 								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
