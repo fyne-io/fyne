@@ -27,6 +27,10 @@ jobs:
     - name: Tests
       run: go test -tags ci ./...
 
+    - name: Wayland Tests
+      run: go test -tags ci,wayland ./...
+      if: ${{ runner.os == 'Linux' }}
+
     - name: Update coverage
       run: |
         GO111MODULE=off go get github.com/mattn/goveralls
