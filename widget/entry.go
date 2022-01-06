@@ -402,11 +402,11 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
+	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
+
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-
-	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
 // MouseUp called on mouse release
