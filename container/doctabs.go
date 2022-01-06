@@ -133,7 +133,7 @@ func (t *DocTabs) SelectedIndex() int {
 	return t.current
 }
 
-// SetItems sets the container’s items and refreshes.
+// SetItems sets the containers items and refreshes.
 func (t *DocTabs) SetItems(items []*TabItem) {
 	setItems(t, items)
 	t.Refresh()
