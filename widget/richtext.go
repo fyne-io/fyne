@@ -237,42 +237,47 @@ func (t *RichText) len() int {
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
 func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
+
 	bound := t.rowBoundary(row)
 	total := fyne.NewSize(0, 0)
 	counted := 0
 	last := false
-	for i, seg := range bound.segments {
-		var size fyne.Size
-		if text, ok := seg.(*TextSegment); ok {
-			start := 0
-			if i == 0 {
-				start = bound.begin
-			}
-			measureText := []rune(text.Text)[start:]
-			if col < counted+len(measureText) {
-				measureText = measureText[0 : col-counted]
-				last = true
-			}
-			if concealed(seg) {
-				measureText = []rune(strings.Repeat(passwordChar, len(measureText)))
-			}
-			counted += len(measureText)
 
-			label := canvas.NewText(string(measureText), color.Black)
-			label.TextStyle = text.Style.TextStyle
-			label.TextSize = text.size()
+	if nil != bound {
+		for i, seg := range bound.segments {
+			var size fyne.Size
+			if text, ok := seg.(*TextSegment); ok {
+				start := 0
+				if i == 0 {
+					start = bound.begin
+				}
+				measureText := []rune(text.Text)[start:]
+				if col < counted+len(measureText) {
+					measureText = measureText[0 : col-counted]
+					last = true
+				}
+				if concealed(seg) {
+					measureText = []rune(strings.Repeat(passwordChar, len(measureText)))
+				}
+				counted += len(measureText)
 
-			size = label.MinSize()
-		} else {
-			size = t.cachedSegmentVisual(seg, bound.firstSegmentReuse).MinSize()
-		}
+				label := canvas.NewText(string(measureText), color.Black)
+				label.TextStyle = text.Style.TextStyle
+				label.TextSize = text.size()
 
-		total.Width += size.Width
-		total.Height = fyne.Max(total.Height, size.Height)
-		if last {
-			break
+				size = label.MinSize()
+			} else {
+				size = t.cachedSegmentVisual(seg, bound.firstSegmentReuse).MinSize()
+			}
+
+			total.Width += size.Width
+			total.Height = fyne.Max(total.Height, size.Height)
+			if last {
+				break
+			}
 		}
 	}
+
 	return total.Add(fyne.NewSize(theme.Padding()*2-t.inset.Width, 0))
 }
 
