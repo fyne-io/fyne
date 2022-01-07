@@ -402,11 +402,11 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
+	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
+
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-
-	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
 // MouseUp called on mouse release
@@ -574,7 +574,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.propertyLock.Lock()
 		pos := e.cursorTextPos()
 		provider.deleteFromTo(pos-1, pos)
-		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
+		e.CursorRow, e.CursorColumn = e.rowColFromTextPosForBackspace(pos - 1)
 		e.propertyLock.Unlock()
 	case fyne.KeyDelete:
 		pos := e.cursorTextPos()
@@ -909,6 +909,32 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 			col = pos - b.begin
 			if canWrap && b.begin == pos && col == 0 && pos != 0 && row < (totalRows-1) {
 				row++
+			}
+		} else {
+			break
+		}
+	}
+	return
+}
+
+// rowColFromTextPosForBackspace Fix the logic error of rowColFromTextPos in Backspace
+func (e *Entry) rowColFromTextPosForBackspace(pos int) (row int, col int) {
+	provider := e.textProvider()
+	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
+	totalRows := provider.rows()
+	for i := 0; i < totalRows; i++ {
+		b := provider.rowBoundary(i)
+		if b == nil {
+			continue
+		}
+		if b.begin <= pos {
+			if b.end < pos {
+				row++
+			}
+			col = pos - b.begin
+			if canWrap && b.begin == pos && col == 0 && pos != 0 && row < (totalRows-1) {
+				col = pos
+				row--
 			}
 		} else {
 			break
