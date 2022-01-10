@@ -1,13 +1,13 @@
 package commands
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
@@ -123,7 +123,7 @@ func (s *Server) validate() error {
 		s.port = 8080
 	}
 	if s.port < 0 || s.port > 65535 {
-		return errors.Errorf("The port must be a strictly positive number and be strictly smaller than 65536 (Got %v).", s.port)
+		return fmt.Errorf("the port must be a strictly positive number and be strictly smaller than 65536 (Got %v)", s.port)
 	}
 	return nil
 }
