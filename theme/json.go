@@ -78,16 +78,18 @@ func (h hexColor) color() (color.Color, error) {
 
 type uriString string
 
-func (u uriString) uri() (fyne.URI, error) {
-	return storage.ParseURI(string(u))
-}
-
-func (u uriString) resource() (fyne.Resource, error) {
-	uri, err := u.uri()
+func (u uriString) resource() fyne.Resource {
+	uri, err := storage.ParseURI(string(u))
 	if err != nil {
-		return nil, err
+		fyne.LogError("Failed to parse URI", err)
+		return nil
 	}
-	return storage.LoadResourceFromURI(uri)
+	r, err := storage.LoadResourceFromURI(uri)
+	if err != nil {
+		fyne.LogError("Failed to load resource from URI", err)
+		return nil
+	}
+	return r
 }
 
 type schema struct {
@@ -141,10 +143,8 @@ func (t *jsonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) c
 
 func (t *jsonTheme) Font(style fyne.TextStyle) fyne.Resource {
 	if val, ok := t.data.Fonts[styleString(style)]; ok {
-		r, err := val.resource()
-		if err != nil {
-			fyne.LogError("Failed to parse URI", err)
-		} else {
+		r := val.resource()
+		if r != nil {
 			return r
 		}
 	}
@@ -153,10 +153,8 @@ func (t *jsonTheme) Font(style fyne.TextStyle) fyne.Resource {
 
 func (t *jsonTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	if val, ok := t.data.Icons[string(name)]; ok {
-		r, err := val.resource()
-		if err != nil {
-			fyne.LogError("Failed to parse URI", err)
-		} else {
+		r := val.resource()
+		if r != nil {
 			return r
 		}
 	}
