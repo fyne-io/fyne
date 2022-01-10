@@ -79,6 +79,10 @@ github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3 h1:FDqhDm7pcsLhhWl1QtD8
 github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3/go.mod h1:CzM2G82Q9BDUvMTGHnXf/6OExw/Dz2ivDj48nVg7Lg8=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
+github.com/fyne-io/gl-js v0.0.0-20220110211630-fc9d330fb674 h1:9V8qlAmfRNuuy/K3o+4cP/yCPe00NMKOHW4xaHKRqFE=
+github.com/fyne-io/gl-js v0.0.0-20220110211630-fc9d330fb674/go.mod h1:rkRynSXq0GIjaw5t7cm5nhQlJuKIlL1NsamWarDeG9Y=
+github.com/fyne-io/glfw-js v0.0.0-20220110191915-4168a95955c6 h1:rbGsqF9lO+4kr4C2jt3Gs8CZnRxRA+Z/uu4lUDDGP9U=
+github.com/fyne-io/glfw-js v0.0.0-20220110191915-4168a95955c6/go.mod h1:glCh0YGSuIRTcjjWCYIv+KQkIgGCof6VmHqLPAMOqdI=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 h1:zDw5v7qm4yH7N8C8uWd+8Ii9rROdgWxQuGoJ9WDXxfk=
 github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6/go.mod h1:9YTyiznxEY1fVinfM7RvRcjRHbw2xLBJ3AAGIT0I4Nw=

@@ -9,16 +9,16 @@
 package gl
 
 /*
-#cgo darwin LDFLAGS: -framework OpenGLES
-#cgo linux  LDFLAGS: -lGLESv2
+#cgo ios     LDFLAGS: -framework OpenGLES
+#cgo android LDFLAGS: -lGLESv2
 
-#cgo darwin CFLAGS: -Dos_darwin_arm
-#cgo linux  CFLAGS: -Dos_linux_arm
+#cgo ios     CFLAGS: -Dos_ios
+#cgo android CFLAGS: -Dos_android
 
-#ifdef os_darwin_arm
+#ifdef os_ios
 #include <OpenGLES/ES2/gl.h>
 #endif
-#ifdef os_linux_arm
+#ifdef os_android
 #include <GLES2/gl2.h>
 #endif
 

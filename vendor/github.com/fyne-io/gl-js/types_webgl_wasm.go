@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build js && wasm
 // +build js,wasm
 
 package gl
@@ -42,7 +43,7 @@ type Uniform struct {
 	js.Value
 }
 
-var NoAttrib = Attrib{0}
+var NoAttrib Attrib
 var NoProgram = Program{js.Null()}
 var NoShader = Shader{js.Null()}
 var NoBuffer = Buffer{js.Null()}

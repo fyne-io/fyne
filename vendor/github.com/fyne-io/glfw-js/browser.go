@@ -113,8 +113,6 @@ func CreateWindow(_, _ int, title string, monitor *Monitor, share *Window) (*Win
 		devicePixelRatio := js.Global.Get("devicePixelRatio").Float()
 		w.canvas.Width = int(float64(width)*devicePixelRatio + 0.5)   // Nearest non-negative int.
 		w.canvas.Height = int(float64(height)*devicePixelRatio + 0.5) // Nearest non-negative int.
-		// w.canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
-		// w.canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
 
 		if w.framebufferSizeCallback != nil {
 			// TODO: Callbacks may be blocking so they need to happen asyncronously. However,

@@ -555,6 +555,7 @@ var ErrInvalidValue = errors.New("invalid value")
 func (w *Window) SetInputMode(mode InputMode, value int) {
 	switch mode {
 	case CursorMode:
+		// TODO; Make cursor API compatible with GLFW and Fyne use/expectation.
 		/*
 			// Temporarily disable cursor change
 			if w.missing.pointerLock {

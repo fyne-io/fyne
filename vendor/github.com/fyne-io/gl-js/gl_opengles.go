@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin linux
-// +build arm arm64
+// +build ios android
 
 package gl
 
 /*
 #include <stdlib.h>
 
-#ifdef os_darwin_arm
+#ifdef os_ios
 #include <OpenGLES/ES2/glext.h>
 #endif
-#ifdef os_linux_arm
+#ifdef os_android
 #include <GLES2/gl2.h>
 #endif
 */
