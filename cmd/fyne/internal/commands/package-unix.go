@@ -72,7 +72,7 @@ func (p *Packager) packageUNIX() error {
 		tarCmd := execabs.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
 		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
-			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.Bytes(), err)
+			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.String(), err)
 		}
 	}
 
