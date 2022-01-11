@@ -1,6 +1,8 @@
 package glfw
 
 import (
+	"runtime"
+
 	"fyne.io/fyne/v2"
 )
 
@@ -16,4 +18,8 @@ func (*glDevice) Orientation() fyne.DeviceOrientation {
 
 func (*glDevice) HasKeyboard() bool {
 	return true // TODO actually check - we could be in tablet mode
+}
+
+func (*glDevice) IsWeb() bool {
+	return (runtime.GOARCH == "js" || runtime.GOOS == "js")
 }
