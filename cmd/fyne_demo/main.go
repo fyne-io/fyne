@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -149,7 +148,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 }
 
 func supportedTutorial(t tutorials.Tutorial) bool {
-	if !t.SupportWeb && (runtime.GOARCH == "js" || runtime.GOOS == "js") {
+	if !t.SupportWeb && fyne.CurrentDevice().IsWeb() {
 		return false
 	}
 	return true

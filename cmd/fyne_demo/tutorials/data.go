@@ -18,7 +18,7 @@ var (
 		"canvas": {"Canvas",
 			"See the canvas capabilities.",
 			canvasScreen,
-			false,
+			true,
 		},
 		"animations": {"Animations",
 			"See how to animate components.",
