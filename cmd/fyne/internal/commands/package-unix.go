@@ -68,7 +68,7 @@ func (p *Packager) packageUNIX() error {
 			return fmt.Errorf("failed to write Makefile string: %w", err)
 		}
 
-		buf := bytes.Buffer{}
+		var buf bytes.Buffer
 		tarCmd := execabs.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
 		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
