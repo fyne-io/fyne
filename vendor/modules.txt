@@ -20,7 +20,7 @@ github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.4.9
 ## explicit
 github.com/fsnotify/fsnotify
-# github.com/fyne-io/gl-js v0.0.0-20220110211630-fc9d330fb674
+# github.com/fyne-io/gl-js v0.0.0-20220112040916-2d2fb9db1f2a
 ## explicit
 github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220110191915-4168a95955c6
@@ -74,7 +74,6 @@ github.com/nfnt/resize
 ## explicit
 # github.com/pkg/errors v0.8.1
 ## explicit
-github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/russross/blackfriday/v2 v2.0.1

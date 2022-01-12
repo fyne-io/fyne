@@ -8,7 +8,7 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/gl-js v0.0.0-20220110211630-fc9d330fb674
+	github.com/fyne-io/gl-js v0.0.0-20220112040916-2d2fb9db1f2a
 	github.com/fyne-io/glfw-js v0.0.0-20220110191915-4168a95955c6
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
@@ -19,7 +19,6 @@ require (
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/pkg/errors v0.8.1
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/stretchr/testify v1.7.0

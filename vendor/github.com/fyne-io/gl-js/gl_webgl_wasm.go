@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build js && wasm
 // +build js,wasm
 
 package gl
@@ -659,7 +660,7 @@ func TexParameterf(target, pname Enum, param float32) {
 func TexParameterfv(target, pname Enum, params []float32) {
 	println("TexParameterfv: not yet tested (TODO: remove this after it's confirmed to work. Your feedback is welcome.)")
 	for _, param := range params {
-		c.Call("texParameterf", int(target), int(pname), param)
+		c.Call("texParameterf", int(target), int(pname), SliceToTypedArray(param))
 	}
 }
 
@@ -670,7 +671,7 @@ func TexParameteri(target, pname Enum, param int) {
 func TexParameteriv(target, pname Enum, params []int32) {
 	println("TexParameteriv: not yet tested (TODO: remove this after it's confirmed to work. Your feedback is welcome.)")
 	for _, param := range params {
-		c.Call("texParameteri", int(target), int(pname), param)
+		c.Call("texParameteri", int(target), int(pname), SliceToTypedArray(param))
 	}
 }
 
@@ -679,7 +680,7 @@ func Uniform1f(dst Uniform, v float32) {
 }
 
 func Uniform1fv(dst Uniform, src []float32) {
-	c.Call("uniform1fv", dst.Value, src)
+	c.Call("uniform1fv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform1i(dst Uniform, v int) {
@@ -687,7 +688,7 @@ func Uniform1i(dst Uniform, v int) {
 }
 
 func Uniform1iv(dst Uniform, src []int32) {
-	c.Call("uniform1iv", dst.Value, src)
+	c.Call("uniform1iv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform2f(dst Uniform, v0, v1 float32) {
@@ -695,7 +696,7 @@ func Uniform2f(dst Uniform, v0, v1 float32) {
 }
 
 func Uniform2fv(dst Uniform, src []float32) {
-	c.Call("uniform2fv", dst.Value, src)
+	c.Call("uniform2fv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform2i(dst Uniform, v0, v1 int) {
@@ -703,7 +704,7 @@ func Uniform2i(dst Uniform, v0, v1 int) {
 }
 
 func Uniform2iv(dst Uniform, src []int32) {
-	c.Call("uniform2iv", dst.Value, src)
+	c.Call("uniform2iv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform3f(dst Uniform, v0, v1, v2 float32) {
@@ -711,7 +712,7 @@ func Uniform3f(dst Uniform, v0, v1, v2 float32) {
 }
 
 func Uniform3fv(dst Uniform, src []float32) {
-	c.Call("uniform3fv", dst.Value, src)
+	c.Call("uniform3fv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform3i(dst Uniform, v0, v1, v2 int32) {
@@ -719,7 +720,7 @@ func Uniform3i(dst Uniform, v0, v1, v2 int32) {
 }
 
 func Uniform3iv(dst Uniform, src []int32) {
-	c.Call("uniform3iv", dst.Value, src)
+	c.Call("uniform3iv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform4f(dst Uniform, v0, v1, v2, v3 float32) {
@@ -727,7 +728,7 @@ func Uniform4f(dst Uniform, v0, v1, v2, v3 float32) {
 }
 
 func Uniform4fv(dst Uniform, src []float32) {
-	c.Call("uniform4fv", dst.Value, src)
+	c.Call("uniform4fv", dst.Value, SliceToTypedArray(src))
 }
 
 func Uniform4i(dst Uniform, v0, v1, v2, v3 int32) {
@@ -735,7 +736,7 @@ func Uniform4i(dst Uniform, v0, v1, v2, v3 int32) {
 }
 
 func Uniform4iv(dst Uniform, src []int32) {
-	c.Call("uniform4iv", dst.Value, src)
+	c.Call("uniform4iv", dst.Value, SliceToTypedArray(src))
 }
 
 func UniformMatrix2fv(dst Uniform, src []float32) {
@@ -767,7 +768,7 @@ func VertexAttrib1f(dst Attrib, x float32) {
 }
 
 func VertexAttrib1fv(dst Attrib, src []float32) {
-	c.Call("vertexAttrib1fv", dst.Value, src)
+	c.Call("vertexAttrib1fv", dst.Value, SliceToTypedArray(src))
 }
 
 func VertexAttrib2f(dst Attrib, x, y float32) {
@@ -775,7 +776,7 @@ func VertexAttrib2f(dst Attrib, x, y float32) {
 }
 
 func VertexAttrib2fv(dst Attrib, src []float32) {
-	c.Call("vertexAttrib2fv", dst.Value, src)
+	c.Call("vertexAttrib2fv", dst.Value, SliceToTypedArray(src))
 }
 
 func VertexAttrib3f(dst Attrib, x, y, z float32) {
@@ -783,7 +784,7 @@ func VertexAttrib3f(dst Attrib, x, y, z float32) {
 }
 
 func VertexAttrib3fv(dst Attrib, src []float32) {
-	c.Call("vertexAttrib3fv", dst.Value, src)
+	c.Call("vertexAttrib3fv", dst.Value, SliceToTypedArray(src))
 }
 
 func VertexAttrib4f(dst Attrib, x, y, z, w float32) {
@@ -791,7 +792,7 @@ func VertexAttrib4f(dst Attrib, x, y, z, w float32) {
 }
 
 func VertexAttrib4fv(dst Attrib, src []float32) {
-	c.Call("vertexAttrib4fv", dst.Value, src)
+	c.Call("vertexAttrib4fv", dst.Value, SliceToTypedArray(src))
 }
 
 func VertexAttribPointer(dst Attrib, size int, ty Enum, normalized bool, stride, offset int) {
