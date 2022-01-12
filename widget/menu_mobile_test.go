@@ -120,9 +120,9 @@ func TestMenu_Layout(t *testing.T) {
 			}
 			test.AssertRendersToMarkup(t, tt.want, w.Canvas())
 			if tt.useTestTheme {
-				test.AssertImageMatches(t, "menu/layout_normal.png", c.Capture())
+				test.AssertImageMatches(t, "menu/mobile/layout_normal.png", c.Capture())
 				test.WithTestTheme(t, func() {
-					test.AssertImageMatches(t, "menu/layout_theme_changed.png", c.Capture())
+					test.AssertImageMatches(t, "menu/mobile/layout_theme_changed.png", c.Capture())
 				})
 			}
 		})

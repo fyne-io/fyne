@@ -9,11 +9,24 @@ import (
 
 // Declare conformity with Shortcut interface
 var _ fyne.Shortcut = (*CustomShortcut)(nil)
+var _ fyne.KeyboardShortcut = (*CustomShortcut)(nil)
 
 // CustomShortcut describes a shortcut desktop event.
 type CustomShortcut struct {
 	fyne.KeyName
 	Modifier
+}
+
+// Key returns the key name of this shortcut.
+// @implements KeyboardShortcut
+func (cs *CustomShortcut) Key() fyne.KeyName {
+	return cs.KeyName
+}
+
+// Mod returns the modifier of this shortcut.
+// @implements KeyboardShortcut
+func (cs *CustomShortcut) Mod() fyne.KeyModifier {
+	return cs.Modifier
 }
 
 // ShortcutName returns the shortcut name associated to the event

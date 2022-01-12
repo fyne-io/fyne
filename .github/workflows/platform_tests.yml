@@ -21,11 +21,15 @@ jobs:
         go-version: ${{ matrix.go-version }}
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libwayland-dev libxkbcommon-dev bc
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
       run: go test -tags ci ./...
+
+    - name: Wayland Tests
+      run: go test -tags ci,wayland ./...
+      if: ${{ runner.os == 'Linux' }}
 
     - name: Update coverage
       run: |
@@ -33,7 +37,7 @@ jobs:
         set -e
         go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
         coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-        if [ $coverage -lt 63 ]; then echo "Test coverage lowered"; exit 1; fi
+        if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
       if: ${{ runner.os == 'Linux' }}
 
     - name: Update PR Coverage

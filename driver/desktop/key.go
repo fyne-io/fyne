@@ -32,18 +32,20 @@ const (
 	KeyCapsLock fyne.KeyName = "CapsLock"
 )
 
-// Modifier captures any key modifiers (shift etc) pressed during this key event
-type Modifier int
+// Modifier captures any key modifiers (shift etc.) pressed during a key event
+//
+// Deprecated: Use fyne.KeyModifier instead.
+type Modifier = fyne.KeyModifier
 
 const (
 	// ShiftModifier represents a shift key being held
-	ShiftModifier Modifier = 1 << iota
+	ShiftModifier = fyne.KeyModifierShift
 	// ControlModifier represents the ctrl key being held
-	ControlModifier
+	ControlModifier = fyne.KeyModifierControl
 	// AltModifier represents either alt keys being held
-	AltModifier
+	AltModifier = fyne.KeyModifierAlt
 	// SuperModifier represents either super keys being held
-	SuperModifier
+	SuperModifier = fyne.KeyModifierSuper
 )
 
 // Action represents the change of state of a key or mouse button event

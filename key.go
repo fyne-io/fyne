@@ -1,6 +1,6 @@
 package fyne
 
-// KeyName represents the name of a key that has been pressed
+// KeyName represents the name of a key that has been pressed.
 type KeyName string
 
 const (
@@ -173,4 +173,18 @@ const (
 	//
 	// Since: 2.1
 	KeyUnknown KeyName = ""
+)
+
+// KeyModifier represents any modifier key (shift etc.) that is being pressed together with a key.
+type KeyModifier int
+
+const (
+	// KeyModifierShift represents a shift key being held
+	KeyModifierShift KeyModifier = 1 << iota
+	// KeyModifierControl represents the ctrl key being held
+	KeyModifierControl
+	// KeyModifierAlt represents either alt keys being held
+	KeyModifierAlt
+	// KeyModifierSuper represents either super keys being held
+	KeyModifierSuper
 )

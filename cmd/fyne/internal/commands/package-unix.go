@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -67,9 +68,11 @@ func (p *Packager) packageUNIX() error {
 			return fmt.Errorf("failed to write Makefile string: %w", err)
 		}
 
+		var buf bytes.Buffer
 		tarCmd := execabs.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
+		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
-			return fmt.Errorf("failed to create archive with tar: %w", err)
+			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.String(), err)
 		}
 	}
 
