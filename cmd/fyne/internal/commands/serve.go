@@ -24,9 +24,9 @@ func Serve() *cli.Command {
 	s := &Server{}
 
 	return &cli.Command{
-		Name:        "server",
+		Name:        "serve",
 		Usage:       "Package an application using WebAssembly and expose it via a web server.",
-		Description: `The server command packages an application using WebAssembly and expose it via a web server which port can be overridden with port.`,
+		Description: `The serve command packages an application using WebAssembly and expose it via a web server which port can be overridden with port.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "sourceDir",
@@ -64,8 +64,8 @@ func (s *Server) AddFlags() {
 //
 // Deprecated: Access to the individual cli commands are being removed.
 func (s *Server) PrintHelp(indent string) {
-	fmt.Println(indent, "The server command setup a local http server that is necessary to test WebAssembly package.")
-	fmt.Println(indent, "Command usage: fyne server [parameters]")
+	fmt.Println(indent, "The serve command setup a local http server that is necessary to test WebAssembly package.")
+	fmt.Println(indent, "Command usage: fyne serve [parameters]")
 }
 
 func (s *Server) requestPackage() {
