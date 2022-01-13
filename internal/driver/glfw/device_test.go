@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Orientation(t *testing.T) {
+func Test_Device(t *testing.T) {
 	dev := &glDevice{}
 
 	assert.Equal(t, false, dev.IsMobile())
