@@ -33,7 +33,7 @@ func (*device) IsMobile() bool {
 	return true
 }
 
-func (*device) IsWeb() bool {
+func (*device) IsBrowser() bool {
 	return false
 }
 

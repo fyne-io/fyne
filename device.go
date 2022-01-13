@@ -28,7 +28,7 @@ func IsHorizontal(orient DeviceOrientation) bool {
 type Device interface {
 	Orientation() DeviceOrientation
 	IsMobile() bool
-	IsWeb() bool
+	IsBrowser() bool
 	HasKeyboard() bool
 	SystemScaleForWindow(Window) float32
 }

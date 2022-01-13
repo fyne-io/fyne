@@ -20,6 +20,6 @@ func (*glDevice) HasKeyboard() bool {
 	return true // TODO actually check - we could be in tablet mode
 }
 
-func (*glDevice) IsWeb() bool {
+func (*glDevice) IsBrowser() bool {
 	return (runtime.GOARCH == "js" || runtime.GOOS == "js")
 }

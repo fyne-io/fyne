@@ -82,7 +82,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 		}, win)
 	})
 
-	if fyne.CurrentDevice().IsWeb() {
+	if fyne.CurrentDevice().IsBrowser() {
 		openFile.Disable()
 		saveFile.Disable()
 		openFolder.Disable()

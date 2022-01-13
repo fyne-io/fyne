@@ -160,7 +160,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 }
 
 func supportedTutorial(t tutorials.Tutorial) bool {
-	if !t.SupportWeb && fyne.CurrentDevice().IsWeb() {
+	if !t.SupportWeb && fyne.CurrentDevice().IsBrowser() {
 		return false
 	}
 	return true
