@@ -52,4 +52,4 @@ jobs:
         GOARCH: wasm
       working-directory: cmd/fyne_demo
       run: go build
-      if: ${{ matix.go-version == '1.17' }}
+      if: ${{ matrix.go-version == '1.17' }}
