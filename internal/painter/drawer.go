@@ -35,9 +35,14 @@ func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
 
 // DrawString draws s at the dot and advances the dot's location.
 // Tabs are translated into a dot location change.
+// Carriage Returns are ignored.
 func (d *FontDrawer) DrawString(s string, tabWidth int) {
 	prevC := rune(-1)
 	for _, c := range s {
+		if c == '\r' {
+			prevC = rune(-1)
+			continue
+		}
 		if prevC >= 0 {
 			d.Dot.X += d.Face.Kern(prevC, c)
 		}
@@ -61,9 +66,14 @@ func (d *FontDrawer) DrawString(s string, tabWidth int) {
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
+// Carriage Returns are ignored.
 func MeasureString(f font.Face, s string, tabWidth int) (advance fixed.Int26_6) {
 	prevC := rune(-1)
 	for _, c := range s {
+		if c == '\r' {
+			prevC = rune(-1)
+			continue
+		}
 		if prevC >= 0 {
 			advance += f.Kern(prevC, c)
 		}

@@ -30,3 +30,11 @@ func TestCachedFontFace(t *testing.T) {
 		})
 	}
 }
+
+func TestRenderedTextSize(t *testing.T) {
+	size1, baseline1 := painter.RenderedTextSize("Hello World!", 20, fyne.TextStyle{})
+	size2, baseline2 := painter.RenderedTextSize("\rH\re\rl\rl\ro\r \rW\ro\rr\rl\rd\r!\r", 20, fyne.TextStyle{})
+	assert.Equal(t, size1.Width, size2.Width)
+	assert.Equal(t, size1.Height, size2.Height)
+	assert.Equal(t, baseline1, baseline2)
+}
