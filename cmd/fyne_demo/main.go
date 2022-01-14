@@ -190,6 +190,8 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 			obj.(*widget.Label).SetText(t.Title)
 			if !supportedTutorial(t) {
 				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
+			} else {
+				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
 			}
 		},
 		OnSelected: func(uid string) {
