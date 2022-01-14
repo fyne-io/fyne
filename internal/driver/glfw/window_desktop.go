@@ -547,14 +547,14 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
-func convertAction(action glfw.Action) desktop.Action {
+func convertAction(action glfw.Action) Action {
 	switch action {
 	case glfw.Press:
-		return desktop.Press
+		return Press
 	case glfw.Release:
-		return desktop.Release
+		return Release
 	case glfw.Repeat:
-		return desktop.Repeat
+		return Repeat
 	}
 	panic("Could not convert glfw.Action.")
 }
