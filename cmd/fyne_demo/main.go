@@ -97,6 +97,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
 		otherItem,
 	)
+
 	openSettings := func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
@@ -149,7 +150,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	// a quit item will be appended to our first (File) menu
 	file := fyne.NewMenu("File", newItem, checkedItem, disabledItem)
-	if !fyne.CurrentDevice().IsMobile() {
+	if !fyne.CurrentDevice().IsMobile() && !fyne.CurrentDevice().IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
 	return fyne.NewMainMenu(
