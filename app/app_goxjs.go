@@ -18,10 +18,12 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
+	// TODO #2736
 	return errors.New("OpenURL is not supported yet with GopherJS backend.")
 }
 
 func (app *fyneApp) SendNotification(_ *fyne.Notification) {
+	// TODO #2735
 	fyne.LogError("Sending notification is not supported yet.", nil)
 }
 
