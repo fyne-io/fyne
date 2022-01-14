@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"runtime"
@@ -18,8 +19,7 @@ import (
 // Texture represents an uploaded GL texture
 type Texture cache.TextureType
 
-// NoTexture is the zero value for a Texture
-var NoTexture = Texture(cache.NoTexture)
+var noTexture = Texture(cache.NoTexture)
 
 func logGLError(err uint32) {
 	if err == 0 {
@@ -31,6 +31,19 @@ func logGLError(err uint32) {
 	if ok {
 		log.Printf("  At: %s:%d", file, line)
 	}
+}
+
+func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
+	texture, ok := cache.GetTexture(object)
+
+	if !ok {
+		texture = cache.TextureType(creator(object))
+		cache.SetTexture(object, texture, p.canvas)
+	}
+	if !cache.Valid(texture) {
+		return noTexture, fmt.Errorf("no texture available")
+	}
+	return Texture(texture), nil
 }
 
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
@@ -46,7 +59,7 @@ func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 		return p.newGlStrokedRectTexture(rect)
 	}
 	if rect.FillColor == nil {
-		return NoTexture
+		return noTexture
 	}
 	return p.imgToTexture(image.NewUniform(rect.FillColor), canvas.ImageScaleSmooth)
 }
@@ -94,7 +107,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 
 	tex := painter.PaintImage(img, p.canvas, int(width), int(height))
 	if tex == nil {
-		return NoTexture
+		return noTexture
 	}
 
 	return p.imgToTexture(tex, img.ScaleMode)

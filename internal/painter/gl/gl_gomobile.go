@@ -60,19 +60,6 @@ func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
 	return Texture(texture)
 }
 
-func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
-	texture, ok := cache.GetTexture(object)
-
-	if !ok {
-		texture = cache.TextureType(creator(object))
-		cache.SetTexture(object, texture, p.canvas)
-	}
-	if texture == cache.NoTexture {
-		return NoTexture, fmt.Errorf("No texture available.")
-	}
-	return Texture(texture), nil
-}
-
 func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
@@ -86,7 +73,7 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 		return texture
 	case *image.RGBA:
 		if len(i.Pix) == 0 { // image is empty
-			return NoTexture
+			return noTexture
 		}
 
 		texture := p.newTexture(textureFilter)

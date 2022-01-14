@@ -13,3 +13,8 @@ type textureInfo struct {
 	textureCacheBase
 	texture TextureType
 }
+
+// Valid will return true if the passed texture is potentially a texture
+func Valid(texture TextureType) bool {
+	return texture != NoTexture
+}
