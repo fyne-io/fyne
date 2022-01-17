@@ -40,7 +40,7 @@ func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObje
 		texture = cache.TextureType(creator(object))
 		cache.SetTexture(object, texture, p.canvas)
 	}
-	if !cache.Valid(texture) {
+	if !cache.IsValid(texture) {
 		return noTexture, fmt.Errorf("no texture available")
 	}
 	return Texture(texture), nil
