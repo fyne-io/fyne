@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // FromJSON returns a Theme created from the given JSON metadata.
@@ -75,11 +76,30 @@ func (h hexColor) color() (color.Color, error) {
 	return ret, nil
 }
 
+type uriString string
+
+func (u uriString) resource() fyne.Resource {
+	uri, err := storage.ParseURI(string(u))
+	if err != nil {
+		fyne.LogError("Failed to parse URI", err)
+		return nil
+	}
+	r, err := storage.LoadResourceFromURI(uri)
+	if err != nil {
+		fyne.LogError("Failed to load resource from URI", err)
+		return nil
+	}
+	return r
+}
+
 type schema struct {
 	Colors      map[string]hexColor `json:"Colors,omitempty"`
 	DarkColors  map[string]hexColor `json:"Colors-dark,omitempty"`
 	LightColors map[string]hexColor `json:"Colors-light,omitempty"`
 	Sizes       map[string]float32  `json:"Sizes,omitempty"`
+
+	Fonts map[string]uriString `json:"Fonts,omitempty"`
+	Icons map[string]uriString `json:"Icons,omitempty"`
 }
 
 type jsonTheme struct {
@@ -122,10 +142,22 @@ func (t *jsonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) c
 }
 
 func (t *jsonTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if val, ok := t.data.Fonts[styleString(style)]; ok {
+		r := val.resource()
+		if r != nil {
+			return r
+		}
+	}
 	return t.fallback.Font(style)
 }
 
 func (t *jsonTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
+	if val, ok := t.data.Icons[string(name)]; ok {
+		r := val.resource()
+		if r != nil {
+			return r
+		}
+	}
 	return t.fallback.Icon(name)
 }
 
@@ -135,4 +167,17 @@ func (t *jsonTheme) Size(name fyne.ThemeSizeName) float32 {
 	}
 
 	return t.fallback.Size(name)
+}
+
+func styleString(s fyne.TextStyle) string {
+	if s.Bold {
+		if s.Italic {
+			return "boldItalic"
+		}
+		return "bold"
+	}
+	if s.Monospace {
+		return "monospace"
+	}
+	return "regular"
 }
