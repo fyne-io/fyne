@@ -21,5 +21,5 @@ func (*glDevice) HasKeyboard() bool {
 }
 
 func (*glDevice) IsBrowser() bool {
-	return (runtime.GOARCH == "js" || runtime.GOOS == "js")
+	return runtime.GOARCH == "js" || runtime.GOOS == "js"
 }

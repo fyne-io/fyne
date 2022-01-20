@@ -29,5 +29,5 @@ func (d *device) SystemScaleForWindow(fyne.Window) float32 {
 }
 
 func (*device) IsBrowser() bool {
-	return (runtime.GOARCH == "js" || runtime.GOOS == "js")
+	return runtime.GOARCH == "js" || runtime.GOOS == "js"
 }
