@@ -160,11 +160,8 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	)
 }
 
-func supportedTutorial(t tutorials.Tutorial) bool {
-	if !t.SupportWeb && fyne.CurrentDevice().IsBrowser() {
-		return false
-	}
-	return true
+func unsupportedTutorial(t tutorials.Tutorial) bool {
+	return !t.SupportWeb && fyne.CurrentDevice().IsBrowser()
 }
 
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
@@ -189,7 +186,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				return
 			}
 			obj.(*widget.Label).SetText(t.Title)
-			if !supportedTutorial(t) {
+			if unsupportedTutorial(t) {
 				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
 			} else {
 				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
@@ -197,7 +194,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
-				if !supportedTutorial(t) {
+				if unsupportedTutorial(t) {
 					return
 				}
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
