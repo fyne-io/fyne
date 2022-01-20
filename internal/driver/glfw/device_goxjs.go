@@ -25,10 +25,7 @@ var mobileCheck = AndroidId.MatchString(userAgent) ||
 	WindowsMobileID.MatchString(userAgent)
 
 func (*glDevice) IsMobile() bool {
-	if mobileCheck {
-		return true
-	}
-	return false
+	return mobileCheck
 }
 
 func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
