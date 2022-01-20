@@ -2,10 +2,8 @@ package commands
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
@@ -51,23 +49,6 @@ func Serve() *cli.Command {
 	}
 }
 
-// AddFlags adds the flags for interacting with the Installer.
-//
-// Deprecated: Access to the individual cli commands are being removed.
-func (s *Server) AddFlags() {
-	flag.IntVar(&s.port, "port", 8080, "The port to have the http server listen on (default: 8080).")
-	flag.StringVar(&s.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
-	flag.StringVar(&s.icon, "icon", "Icon.png", "The name of the application icon file")
-}
-
-// PrintHelp prints the help for the install command.
-//
-// Deprecated: Access to the individual cli commands are being removed.
-func (s *Server) PrintHelp(indent string) {
-	fmt.Println(indent, "The serve command setup a local http server that is necessary to test WebAssembly package.")
-	fmt.Println(indent, "Command usage: fyne serve [parameters]")
-}
-
 func (s *Server) requestPackage() {
 	p := &Packager{
 		os:     "wasm",
@@ -96,17 +77,6 @@ func (s *Server) serve() error {
 	err = http.ListenAndServe(":"+strconv.Itoa(s.port), nil)
 
 	return err
-}
-
-// Run runs the install command.
-//
-// Deprecated: A better version will be exposed in the future.
-func (s *Server) Run(_ []string) {
-	err := s.serve()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
 }
 
 // Server serve the wasm application over http

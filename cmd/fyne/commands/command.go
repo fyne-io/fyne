@@ -49,10 +49,3 @@ func NewPackager() Command {
 func NewReleaser() Command {
 	return &commands.Releaser{}
 }
-
-// NewServer returns a command that can serve wasm application over http.
-//
-// Deprecated: A better version will be exposed in the future.
-func NewServer() Command {
-	return &commands.Server{}
-}
