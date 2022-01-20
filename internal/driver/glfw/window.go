@@ -498,7 +498,7 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) processMouseClicked(button desktop.MouseButton, action Action, modifiers desktop.Modifier) {
+func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers desktop.Modifier) {
 	w.mouseLock.RLock()
 	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
@@ -543,9 +543,9 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action Action, 
 	}
 
 	w.mouseLock.Lock()
-	if action == Press {
+	if action == press {
 		w.mouseButton |= button
-	} else if action == Release {
+	} else if action == release {
 		w.mouseButton &= ^button
 	}
 
@@ -556,7 +556,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action Action, 
 	mousePressed := w.mousePressed
 	w.mouseLock.Unlock()
 
-	if action == Release && mouseDragged != nil {
+	if action == release && mouseDragged != nil {
 		if mouseDragStarted {
 			w.QueueEvent(mouseDragged.DragEnd)
 			w.mouseLock.Lock()
@@ -574,11 +574,11 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action Action, 
 	_, tap := co.(fyne.Tappable)
 	_, altTap := co.(fyne.SecondaryTappable)
 	if tap || altTap {
-		if action == Press {
+		if action == press {
 			w.mouseLock.Lock()
 			w.mousePressed = co
 			w.mouseLock.Unlock()
-		} else if action == Release {
+		} else if action == release {
 			if co == mousePressed {
 				if button == desktop.MouseButtonSecondary && altTap {
 					w.QueueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
@@ -588,16 +588,16 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action Action, 
 	}
 
 	// Check for double click/tap on left mouse button
-	if action == Release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
+	if action == release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
 		w.mouseClickedHandleTapDoubleTap(co, ev)
 	}
 }
 
-func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action Action, wid desktop.Mouseable) {
+func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action action, wid desktop.Mouseable) {
 	mousePos := mev.AbsolutePosition
-	if action == Press {
+	if action == press {
 		w.QueueEvent(func() { wid.MouseDown(mev) })
-	} else if action == Release {
+	} else if action == release {
 		w.mouseLock.RLock()
 		mouseDragged := w.mouseDragged
 		mouseDraggedOffset := w.mouseDraggedOffset
@@ -711,7 +711,7 @@ func (w *window) capturesTab(modifier desktop.Modifier) bool {
 	return captures
 }
 
-func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action Action, keyDesktopModifier desktop.Modifier) {
+func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action action, keyDesktopModifier desktop.Modifier) {
 	keyEvent := &fyne.KeyEvent{Name: keyName, Physical: fyne.HardwareKey{ScanCode: scancode}}
 
 	pendingMenuToggle := w.menuTogglePending
@@ -719,8 +719,8 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 	w.menuTogglePending = desktop.KeyNone
 	w.menuDeactivationPending = desktop.KeyNone
 	switch action {
-	case Release:
-		if action == Release && keyName != "" {
+	case release:
+		if action == release && keyName != "" {
 			switch keyName {
 			case pendingMenuToggle:
 				w.canvas.ToggleMenu()
@@ -739,7 +739,7 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 			w.QueueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return // ignore key up in other core events
-	case Press:
+	case press:
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
 			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
