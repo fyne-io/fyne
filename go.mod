@@ -8,8 +8,8 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/gl-js v0.0.0-20220112040916-2d2fb9db1f2a
-	github.com/fyne-io/glfw-js v0.0.0-20220110191915-4168a95955c6
+	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
+	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 	github.com/go-ole/go-ole v1.2.6

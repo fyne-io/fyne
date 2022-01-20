@@ -1,7 +1,7 @@
 glfw
 ====
 
-[![Build Status](https://travis-ci.org/goxjs/glfw.svg?branch=master)](https://travis-ci.org/goxjs/glfw) [![GoDoc](https://godoc.org/github.com/goxjs/glfw?status.svg)](https://godoc.org/github.com/goxjs/glfw)
+[![Go Reference](https://pkg.go.dev/badge/github.com/fyne-io/glfw-js.svg)](https://pkg.go.dev/github.com/fyne-io/glfw-js)
 
 Package glfw experimentally provides a glfw-like API
 with desktop (via glfw) and browser (via HTML5 canvas) backends.
@@ -14,18 +14,17 @@ Installation
 ------------
 
 ```bash
-go get -u github.com/goxjs/glfw
-GOARCH=js go get -u -d github.com/goxjs/glfw
+go get github.com/fyne-io/glfw-js
 ```
 
 Directories
 -----------
 
-| Path                                                               | Synopsis                                                           |
-|--------------------------------------------------------------------|--------------------------------------------------------------------|
-| [test/events](https://godoc.org/github.com/goxjs/glfw/test/events) | events hooks every available callback and outputs their arguments. |
+| Path                                                                | Synopsis                                                           |
+|---------------------------------------------------------------------|--------------------------------------------------------------------|
+| [test/events](https://pkg.go.dev/github.com/goxjs/glfw/test/events) | events hooks every available callback and outputs their arguments. |
 
 License
 -------
 
--	[MIT License](https://opensource.org/licenses/mit-license.php)
+-	[MIT License](LICENSE)

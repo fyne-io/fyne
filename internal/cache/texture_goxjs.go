@@ -17,5 +17,5 @@ type textureInfo struct {
 
 // IsValid will return true if the passed texture is potentially a texture
 func IsValid(texture TextureType) bool {
-	return gl.Texture(texture).Valid()
+	return gl.Texture(texture).IsValid()
 }

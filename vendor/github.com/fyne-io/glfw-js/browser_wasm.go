@@ -99,21 +99,19 @@ func CreateWindow(_, _ int, title string, monitor *Monitor, share *Window) (*Win
 
 	js.Global().Call("addEventListener", "resize", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		// HACK: Go fullscreen?
-		width := canvas.Get("clientWidth").Int()
-		height := canvas.Get("clientHeight").Int()
-
 		w.devicePixelRatio = js.Global().Get("devicePixelRatio").Float()
-		canvas.Set("width", int(float64(width)*devicePixelRatio+0.5))   // Nearest non-negative int.
-		canvas.Set("height", int(float64(height)*devicePixelRatio+0.5)) // Nearest non-negative int.
+		widthScaled, heightScaled := w.GetSize()
+		canvas.Set("width", widthScaled)
+		canvas.Set("height", heightScaled)
 
 		if w.framebufferSizeCallback != nil {
 			// TODO: Callbacks may be blocking so they need to happen asyncronously. However,
 			//       GLFW API promises the callbacks will occur from one thread (i.e., sequentially), so may want to do that.
-			go w.framebufferSizeCallback(w, w.canvas.Get("width").Int(), w.canvas.Get("height").Int())
+			widthFramebuffer, heightFramebuffer := w.GetFramebufferSize()
+			go w.framebufferSizeCallback(w, widthFramebuffer, heightFramebuffer)
 		}
 		if w.sizeCallback != nil {
-			boundingW, boundingH := width, height
-			go w.sizeCallback(w, boundingW, boundingH)
+			go w.sizeCallback(w, widthScaled, heightScaled)
 		}
 		return nil
 	}))
@@ -456,11 +454,13 @@ func (w *Window) SetFramebufferSizeCallback(cbfun FramebufferSizeCallback) (prev
 	return nil
 }
 
-func (w *Window) GetSize() (width, height int) {
-	width = int(w.canvas.Get("clientWidth").Float()*w.devicePixelRatio + 0.5)
-	height = int(w.canvas.Get("clientHeight").Float()*w.devicePixelRatio + 0.5)
+// Nearest non-negative int.
+func (w *Window) scaleRound(f float64) int {
+	return int(f*w.devicePixelRatio + 0.5)
+}
 
-	return width, height
+func (w *Window) GetSize() (width, height int) {
+	return w.scaleRound(w.canvas.Get("clientWidth").Float()), w.scaleRound(w.canvas.Get("clientHeight").Float())
 }
 
 func (w *Window) GetFramebufferSize() (width, height int) {

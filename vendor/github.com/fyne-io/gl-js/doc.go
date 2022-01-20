@@ -37,4 +37,4 @@ you make a context current or detached.
 	glfw.DetachCurrentContext()
 	gl.ContextWatcher.OnDetach()
 */
-package gl // import "github.com/goxjs/gl"
+package gl // import "github.com/fyne-io/gl-js"

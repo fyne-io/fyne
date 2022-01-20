@@ -151,8 +151,8 @@ func CreateWindow(_, _ int, title string, monitor *Monitor, share *Window) (*Win
 		}
 
 		if w.charCallback != nil {
-			if len(ke.key) == 1 {
-				keyRune := []rune(ke.key)
+			if len(ke.Key) == 1 {
+				keyRune := []rune(ke.Key)
 				go w.charCallback(w, keyRune[0])
 			}
 		}
@@ -546,28 +546,32 @@ var ErrInvalidValue = errors.New("invalid value")
 func (w *Window) SetInputMode(mode InputMode, value int) {
 	switch mode {
 	case CursorMode:
-		if w.missing.pointerLock {
-			log.Println("warning: Pointer Lock API unsupported")
-			return
-		}
-		switch value {
-		case CursorNormal:
-			w.cursorMode = value
-			document.Underlying().Call("exitPointerLock")
-			w.canvas.Style().SetProperty("cursor", "initial", "")
-			return
-		case CursorHidden:
-			w.cursorMode = value
-			document.Underlying().Call("exitPointerLock")
-			w.canvas.Style().SetProperty("cursor", "none", "")
-			return
-		case CursorDisabled:
-			w.cursorMode = value
-			w.canvas.Underlying().Call("requestPointerLock")
-			return
-		default:
-			panic(ErrInvalidValue)
-		}
+		// TODO; Make cursor API compatible with GLFW and Fyne use/expectation.
+		/*
+			if w.missing.pointerLock {
+				log.Println("warning: Pointer Lock API unsupported")
+				return
+			}
+			switch value {
+			case CursorNormal:
+				w.cursorMode = value
+				document.Underlying().Call("exitPointerLock")
+				w.canvas.Style().SetProperty("cursor", "initial", "")
+				return
+			case CursorHidden:
+				w.cursorMode = value
+				document.Underlying().Call("exitPointerLock")
+				w.canvas.Style().SetProperty("cursor", "none", "")
+				return
+			case CursorDisabled:
+				w.cursorMode = value
+				w.canvas.Underlying().Call("requestPointerLock")
+				return
+			default:
+				panic(ErrInvalidValue)
+			}
+		*/
+		return
 	case StickyKeysMode:
 		panic(errors.New("not implemented"))
 	case StickyMouseButtonsMode:
