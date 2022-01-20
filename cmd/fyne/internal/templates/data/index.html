@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="icon" type="image/png" href="icon.png">
+		<script src="wasm_exec.js"></script>
+		{{if not .IsReleased}}
+		<script src="webgl-debug.js"></script>
+		{{end}}
+		<script>
+			function webgl_support () {
+				try {
+					var canvas = document.createElement('canvas');
+					return !!window.WebGLRenderingContext &&
+						(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+				} catch(e) {
+					return false;
+				}
+			}
+
+			if (webgl_support() && WebAssembly) {
+				// WebAssembly.instantiateStreaming is not currently available in Safari
+				if (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill
+					WebAssembly.instantiateStreaming = async (resp, importObject) => {
+						const source = await (await resp).arrayBuffer();
+						return await WebAssembly.instantiate(source, importObject);
+					};
+				}
+
+				const go = new Go();
+				WebAssembly.instantiateStreaming(fetch("{{.Name}}"), go.importObject).then((result) => {
+					go.run(result.instance);
+				});
+			} else {
+				console.log("WebAssembly and WebGL are not supported in your browser")
+				var main = document.querySelector('#main');
+				main.innerHTML = "WebAssembly and WebGL are not supported in your browser";			}
+
+		</script>
+	</head>
+	<body>
+		<main id="wasm"></main>
+	</body>
+</html>
