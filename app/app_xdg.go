@@ -1,8 +1,8 @@
-//go:build !ci && !js && !wasm && !web && (linux || openbsd || freebsd || netbsd) && !android
+//go:build !ci && !js && !wasm && !test_web_driver && (linux || openbsd || freebsd || netbsd) && !android
 // +build !ci
 // +build !js
 // +build !wasm
-// +build !web
+// +build !test_web_driver
 // +build linux openbsd freebsd netbsd
 // +build !android
 

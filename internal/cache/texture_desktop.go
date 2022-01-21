@@ -1,5 +1,5 @@
-//go:build !android && !ios && !mobile && !js && !wasm && !web
-// +build !android,!ios,!mobile,!js,!wasm,!web
+//go:build !android && !ios && !mobile && !js && !wasm && !test_web_driver
+// +build !android,!ios,!mobile,!js,!wasm,!test_web_driver
 
 package cache
 

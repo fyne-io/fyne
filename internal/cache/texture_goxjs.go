@@ -1,5 +1,5 @@
-//go:build js || wasm || web
-// +build js wasm web
+//go:build js || wasm || test_web_driver
+// +build js wasm test_web_driver
 
 package cache
 
