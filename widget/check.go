@@ -141,7 +141,11 @@ func (c *Check) SetChecked(checked bool) {
 func (c *Check) Hide() {
 	if c.focused {
 		c.FocusLost()
-		fyne.CurrentApp().Driver().CanvasForObject(c).Focus(nil)
+		impl := c.super()
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+			c.Focus(nil)
+		}
 	}
 
 	c.BaseWidget.Hide()
@@ -169,7 +173,11 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
 	if !c.focused && !fyne.CurrentDevice().IsMobile() {
-		fyne.CurrentApp().Driver().CanvasForObject(c.super()).Focus(c.super().(fyne.Focusable))
+		impl := c.super()
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+			c.Focus(impl.(fyne.Focusable))
+		}
 	}
 	if !c.Disabled() {
 		c.SetChecked(!c.Checked)
