@@ -8,7 +8,7 @@
 					<widget size="102x32" type="*widget.RichText">
 						<text pos="8,6" size="86x20">Hié™שרה</text>
 					</widget>
-					<rectangle fillColor="primary" pos="69,6" size="2x20"/>
+					<rectangle fillColor="primary" pos="87,6" size="2x20"/>
 				</widget>
 			</widget>
 			<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
