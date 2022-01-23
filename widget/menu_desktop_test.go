@@ -5,6 +5,7 @@ package widget_test
 
 import (
 	"image/color"
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -76,6 +77,13 @@ func TestMenu_Layout(t *testing.T) {
 	item4.ChildMenu = fyne.NewMenu("", subItem4a, subItem4b, subItem4c, subItem4d, subItem4e, subItem4f, subItem4g, subItem4h, subItem4i, subItem4j, subItem4k, subItem4l, subItem4m, subItem4n, subItem4o, subItem4p, subItem4q)
 
 	menu := fyne.NewMenu("", item1, sep, item2, item3, sep, item4)
+
+	var shortcutsMasterPrefixPath string
+	if runtime.GOOS == "darwin" {
+		shortcutsMasterPrefixPath = "menu/desktop/layout_shortcuts_darwin"
+	} else {
+		shortcutsMasterPrefixPath = "menu/desktop/layout_shortcuts_other"
+	}
 
 	for name, tt := range map[string]struct {
 		windowSize         fyne.Size
@@ -155,9 +163,9 @@ func TestMenu_Layout(t *testing.T) {
 			mousePositions: []fyne.Position{
 				fyne.NewPos(30, 150), // open submenu
 			},
-			want:               "menu/desktop/layout_shortcuts.xml",
-			wantImage:          "menu/desktop/layout_shortcuts.png",
-			wantTestThemeImage: "menu/desktop/layout_shortcuts_theme_changed.png",
+			want:               shortcutsMasterPrefixPath + ".xml",
+			wantImage:          shortcutsMasterPrefixPath + ".png",
+			wantTestThemeImage: shortcutsMasterPrefixPath + "_theme_changed.png",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
