@@ -1,6 +1,8 @@
-//go:build (linux || openbsd || freebsd || netbsd) && !android
+//go:build (linux || openbsd || freebsd || netbsd) && !android && !wasm && !js
 // +build linux openbsd freebsd netbsd
 // +build !android
+// +build !wasm
+// +build !js
 
 package dialog
 

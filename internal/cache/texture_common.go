@@ -17,7 +17,7 @@ func DeleteTexture(obj fyne.CanvasObject) {
 func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 	t, ok := textures.Load(obj)
 	if t == nil || !ok {
-		return noTexture, false
+		return NoTexture, false
 	}
 	texInfo := t.(*textureInfo)
 	texInfo.setAlive()

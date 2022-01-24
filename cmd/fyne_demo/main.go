@@ -97,6 +97,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
 		otherItem,
 	)
+
 	openSettings := func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
@@ -149,7 +150,8 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	// a quit item will be appended to our first (File) menu
 	file := fyne.NewMenu("File", newItem, checkedItem, disabledItem)
-	if !fyne.CurrentDevice().IsMobile() {
+	device := fyne.CurrentDevice()
+	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
 	return fyne.NewMainMenu(
@@ -157,6 +159,10 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)
+}
+
+func unsupportedTutorial(t tutorials.Tutorial) bool {
+	return !t.SupportWeb && fyne.CurrentDevice().IsBrowser()
 }
 
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
@@ -181,9 +187,17 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				return
 			}
 			obj.(*widget.Label).SetText(t.Title)
+			if unsupportedTutorial(t) {
+				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
+			} else {
+				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
+			}
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
+				if unsupportedTutorial(t) {
+					return
+				}
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
 			}

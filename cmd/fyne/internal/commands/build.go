@@ -10,9 +10,9 @@ import (
 )
 
 type builder struct {
-	os, srcdir string
-	release    bool
-	tags       []string
+	os, srcdir, target string
+	release            bool
+	tags               []string
 }
 
 func (b *builder) build() error {
@@ -37,6 +37,10 @@ func (b *builder) build() error {
 		args = append(args, "-ldflags", "-s -w")
 	}
 
+	if b.target != "" {
+		args = append(args, "-o", b.target)
+	}
+
 	// handle build tags
 	tags := b.tags
 	if b.release {
@@ -48,9 +52,13 @@ func (b *builder) build() error {
 
 	cmd := execabs.Command("go", args...)
 	cmd.Dir = b.srcdir
-	if goos != "ios" && goos != "android" {
+	if goos != "ios" && goos != "android" && goos != "wasm" {
 		env = append(env, "GOOS="+goos)
+	} else if goos == "wasm" {
+		env = append(env, "GOARCH=wasm")
+		env = append(env, "GOOS=js")
 	}
+
 	cmd.Env = env
 
 	out, err := cmd.CombinedOutput()

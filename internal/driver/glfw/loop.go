@@ -1,7 +1,6 @@
 package glfw
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 	"time"
@@ -11,8 +10,6 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 type funcData struct {
@@ -107,23 +104,6 @@ func (d *gLDriver) drawSingleFrame() {
 	cache.CleanCanvases(refreshingCanvases)
 }
 
-func (d *gLDriver) initGLFW() {
-	initOnce.Do(func() {
-		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-			d.drawOnMainThread = true
-		}
-
-		err := glfw.Init()
-		if err != nil {
-			fyne.LogError("failed to initialise GLFW", err)
-			return
-		}
-
-		initCursors()
-		d.startDrawThread()
-	})
-}
-
 func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(time.Second / 60)
 	run.Lock()
@@ -138,7 +118,7 @@ func (d *gLDriver) runGL() {
 		case <-d.done:
 			eventTick.Stop()
 			d.drawDone <- nil // wait for draw thread to stop
-			glfw.Terminate()
+			d.Terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
 		case f := <-funcQueue:
@@ -267,16 +247,6 @@ func (d *gLDriver) startDrawThread() {
 			}
 		}
 	}()
-}
-
-func (d *gLDriver) tryPollEvents() {
-	defer func() {
-		if r := recover(); r != nil {
-			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
-		}
-	}()
-
-	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
 // refreshWindow requests that the specified window be redrawn

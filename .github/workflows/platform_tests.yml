@@ -45,3 +45,11 @@ jobs:
       with:
         path-to-profile: coverage.out
       if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' && github.event_name == 'push' }}
+
+    - name: Build WebAssembly binary
+      env:
+        GOOS: js
+        GOARCH: wasm
+      working-directory: cmd/fyne_demo
+      run: go build
+      if: ${{ matrix.go-version == '1.17' }}
