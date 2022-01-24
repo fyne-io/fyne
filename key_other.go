@@ -7,8 +7,3 @@ package fyne
 //
 // Since: 2.2
 const KeyModifierShortcutDefault = KeyModifierControl
-
-// RuneModifierSuper is the rune that represents the Super key.
-//
-// Since: 2.2
-const RuneModifierSuper = '❖'

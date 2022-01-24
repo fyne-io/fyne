@@ -10,6 +10,12 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const (
+	runeModifierAlt     = '⌥'
+	runeModifierControl = '⌃'
+	runeModifierShift   = '⇧'
+)
+
 var _ fyne.Widget = (*menuItem)(nil)
 
 // menuItem is a widget for displaying a fyne.menuItem.
@@ -326,16 +332,16 @@ func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	b := strings.Builder{}
 	mods := s.Mod()
 	if mods&fyne.KeyModifierControl != 0 {
-		b.WriteRune(fyne.RuneModifierControl)
+		b.WriteRune(runeModifierControl)
 	}
 	if mods&fyne.KeyModifierAlt != 0 {
-		b.WriteRune(fyne.RuneModifierAlt)
+		b.WriteRune(runeModifierAlt)
 	}
 	if mods&fyne.KeyModifierShift != 0 {
-		b.WriteRune(fyne.RuneModifierShift)
+		b.WriteRune(runeModifierShift)
 	}
 	if mods&fyne.KeyModifierSuper != 0 {
-		b.WriteRune(fyne.RuneModifierSuper)
+		b.WriteRune(runeModifierSuper)
 	}
 	r := keySymbols[s.Key()]
 	if r != 0 {

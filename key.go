@@ -198,18 +198,3 @@ const (
 	// Since: 2.2
 	KeyModifierSuper
 )
-
-const (
-	// RuneModifierAlt is the rune that represents the Alt key.
-	//
-	// Since: 2.2
-	RuneModifierAlt = '⌥'
-	// RuneModifierControl is the rune that represents the Control key.
-	//
-	// Since: 2.2
-	RuneModifierControl = '⌃'
-	// RuneModifierShift is the rune that represents the Shift key.
-	//
-	// Since: 2.2
-	RuneModifierShift = '⇧'
-)
