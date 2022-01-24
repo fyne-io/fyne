@@ -5,28 +5,9 @@ package async
 import (
 	"sync"
 	"sync/atomic"
-	"unsafe"
 
 	"fyne.io/fyne/v2"
 )
-
-// CanvasObjectQueue implements lock-free FIFO freelist based queue.
-//
-// Reference: https://dl.acm.org/citation.cfm?doid=248052.248106
-type CanvasObjectQueue struct {
-	head unsafe.Pointer
-	tail unsafe.Pointer
-	len  uint64
-}
-
-// NewCanvasObjectQueue returns a queue for caching values.
-func NewCanvasObjectQueue() *CanvasObjectQueue {
-	head := &itemCanvasObject{next: nil, v: nil}
-	return &CanvasObjectQueue{
-		tail: unsafe.Pointer(head),
-		head: unsafe.Pointer(head),
-	}
-}
 
 var itemCanvasObjectPool = sync.Pool{
 	New: func() interface{} { return &itemCanvasObject{next: nil, v: nil} },
@@ -85,17 +66,4 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 // Len returns the length of the queue.
 func (q *CanvasObjectQueue) Len() uint64 {
 	return atomic.LoadUint64(&q.len)
-}
-
-type itemCanvasObject struct {
-	next unsafe.Pointer
-	v    fyne.CanvasObject
-}
-
-func loadCanvasObjectItem(p *unsafe.Pointer) *itemCanvasObject {
-	return (*itemCanvasObject)(atomic.LoadPointer(p))
-}
-
-func casCanvasObjectItem(p *unsafe.Pointer, old, new *itemCanvasObject) bool {
-	return atomic.CompareAndSwapPointer(p, unsafe.Pointer(old), unsafe.Pointer(new))
 }
