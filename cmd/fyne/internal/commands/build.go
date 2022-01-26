@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	version "github.com/mcuadros/go-version"
 	"golang.org/x/sys/execabs"
 )
 
@@ -16,6 +17,8 @@ type builder struct {
 }
 
 func (b *builder) build() error {
+	var versionConstraint *version.ConstraintGroup
+
 	goos := b.os
 	if goos == "" {
 		goos = targetOS()
@@ -55,11 +58,31 @@ func (b *builder) build() error {
 	if goos != "ios" && goos != "android" && goos != "wasm" {
 		env = append(env, "GOOS="+goos)
 	} else if goos == "wasm" {
+		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
 		env = append(env, "GOARCH=wasm")
 		env = append(env, "GOOS=js")
 	}
 
 	cmd.Env = env
+
+	if versionConstraint != nil {
+		goVersion, err := execabs.Command("go", "version").Output()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
+			return err
+		}
+
+		split := strings.Split(string(goVersion), " ")
+		// We are expecting something like: `go version goX.Y OS`
+		if len(split) != 4 || split[0] != "go" || split[1] != "version" || len(split[2]) < 5 {
+			return fmt.Errorf("invalid output for `go version`: `%s`", string(goVersion))
+		}
+
+		normalized := version.Normalize(split[2][2 : len(split[2])-2])
+		if !versionConstraint.Match(normalized) {
+			return fmt.Errorf("expected go version %v got `%v`", versionConstraint.GetConstraints(), normalized)
+		}
+	}
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
