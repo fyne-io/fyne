@@ -35,7 +35,6 @@ func Serve() *cli.Command {
 			&cli.StringFlag{
 				Name:        "icon",
 				Usage:       "The name of the application icon file.",
-				Value:       "",
 				Destination: &s.icon,
 			},
 			&cli.IntFlag{
