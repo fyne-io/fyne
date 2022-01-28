@@ -170,6 +170,10 @@ func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
 func walkString(f font.Face, s string, tabWidth int, advance *fixed.Int26_6, cb func(r rune) (fixed.Int26_6, bool)) {
 	prevC := rune(-1)
 	for _, c := range s {
+		if c == '\r' {
+			prevC = rune(-1)
+			continue
+		}
 		if prevC >= 0 {
 			*advance += f.Kern(prevC, c)
 		}
