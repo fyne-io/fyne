@@ -1,5 +1,5 @@
-//go:build !android && !ios && !mobile
-// +build !android,!ios,!mobile
+//go:build !android && !ios && !mobile && !js && !wasm && !test_web_driver
+// +build !android,!ios,!mobile,!js,!wasm,!test_web_driver
 
 package app
 

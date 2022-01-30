@@ -122,7 +122,7 @@ type Packager struct {
 //
 // Deprecated: Access to the individual cli commands are being removed.
 func (p *Packager) AddFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows, wasm)")
 	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
@@ -189,6 +189,7 @@ func (p *Packager) buildPackage() error {
 	b := &builder{
 		os:      p.os,
 		srcdir:  p.srcDir,
+		target:  p.exe,
 		release: p.release,
 		tags:    tags,
 	}
@@ -233,6 +234,8 @@ func (p *Packager) doPackage() error {
 		return p.packageAndroid(p.os)
 	case "ios", "iossimulator":
 		return p.packageIOS(p.os)
+	case "wasm":
+		return p.packageWasm()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
@@ -280,7 +283,7 @@ func (p *Packager) validate() error {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" {
+	if p.name == "" || p.os == "wasm" {
 		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
@@ -318,6 +321,8 @@ func calculateExeName(sourceDir, os string) string {
 
 	if os == "windows" {
 		exeName = exeName + ".exe"
+	} else if os == "wasm" {
+		exeName = exeName + ".wasm"
 	}
 
 	return exeName
