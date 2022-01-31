@@ -1738,6 +1738,17 @@ func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
 	checkNewlineIgnored(t, entry)
 }
 
+func TestEntry_CarriageReturn(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapOff
+	entry.SetText("\r\n\r")
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(64, 64))
+	test.AssertImageMatches(t, "entry/carriage_return_empty.png", w.Canvas().Capture())
+	entry.SetText("\rH\re\rl\rl\ro\r\n\rW\ro\rr\rl\rd\r!\r")
+	test.AssertImageMatches(t, "entry/carriage_return_text.png", w.Canvas().Capture())
+}
+
 const (
 	entryOffset = 10
 
