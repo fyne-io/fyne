@@ -18,27 +18,37 @@
 				}
 			}
 
-			if (webgl_support() && WebAssembly) {
-				// WebAssembly.instantiateStreaming is not currently available in Safari
-				if (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill
-					WebAssembly.instantiateStreaming = async (resp, importObject) => {
-						const source = await (await resp).arrayBuffer();
-						return await WebAssembly.instantiate(source, importObject);
-					};
+			function download_application() {
+				var main = document.getElementById("main");
+
+				if (webgl_support()) {
+					if (WebAssembly) {
+						// WebAssembly.instantiateStreaming is not currently available in Safari
+						if (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill
+							WebAssembly.instantiateStreaming = async (resp, importObject) => {
+								const source = await (await resp).arrayBuffer();
+								return await WebAssembly.instantiate(source, importObject);
+							};
+						}
+
+						main.innerHTML = "Downloading web assembly file.";
+
+						const go = new Go();
+						WebAssembly.instantiateStreaming(fetch("{{.Name}}"), go.importObject).then((result) => {
+							main.innerHTML = "";
+							go.run(result.instance);
+						});
+					} else {
+						main.innerHTML = "WebAssembly is not supported in your browser";
+					}
+				} else {
+					main.innerHTML = "WebGL is not supported in your browser";
 				}
-
-				const go = new Go();
-				WebAssembly.instantiateStreaming(fetch("{{.Name}}"), go.importObject).then((result) => {
-					go.run(result.instance);
-				});
-			} else {
-				console.log("WebAssembly and WebGL are not supported in your browser")
-				var main = document.querySelector('#main');
-				main.innerHTML = "WebAssembly and WebGL are not supported in your browser";			}
-
+			}
 		</script>
 	</head>
-	<body>
-		<main id="wasm"></main>
+	<body onload="download_application()">
+		<div id="main"></div>
+		<noscript>Javascript need to be enable for this application to work.</noscript>
 	</body>
 </html>
