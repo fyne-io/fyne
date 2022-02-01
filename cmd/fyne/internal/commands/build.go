@@ -10,10 +10,49 @@ import (
 	"golang.org/x/sys/execabs"
 )
 
+type runner interface {
+	RunOutput(arg ...string) ([]byte, error)
+}
+
+type command string
+
+func (c command) RunOutput(arg ...string) ([]byte, error) {
+	return execabs.Command(string(c), arg...).Output()
+}
+
+func runCommandOutput(runner runner, args ...string) ([]byte, error) {
+	return runner.RunOutput(args...)
+}
+
 type builder struct {
 	os, srcdir, target string
 	release            bool
 	tags               []string
+}
+
+func checkVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
+	if versionConstraint == nil {
+		return nil
+	}
+
+	goVersion, err := runCommandOutput(runner, "version")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
+		return err
+	}
+
+	split := strings.Split(string(goVersion), " ")
+	// We are expecting something like: `go version goX.Y OS`
+	if len(split) != 4 || split[0] != "go" || split[1] != "version" || len(split[2]) < 5 || split[2][:2] != "go" {
+		return fmt.Errorf("invalid output for `go version`: `%s`", string(goVersion))
+	}
+
+	normalized := version.Normalize(split[2][2 : len(split[2])-2])
+	if !versionConstraint.Match(normalized) {
+		return fmt.Errorf("expected go version %v got `%v`", versionConstraint.GetConstraints(), normalized)
+	}
+
+	return nil
 }
 
 func (b *builder) build() error {
@@ -65,23 +104,8 @@ func (b *builder) build() error {
 
 	cmd.Env = env
 
-	if versionConstraint != nil {
-		goVersion, err := execabs.Command("go", "version").Output()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
-			return err
-		}
-
-		split := strings.Split(string(goVersion), " ")
-		// We are expecting something like: `go version goX.Y OS`
-		if len(split) != 4 || split[0] != "go" || split[1] != "version" || len(split[2]) < 5 {
-			return fmt.Errorf("invalid output for `go version`: `%s`", string(goVersion))
-		}
-
-		normalized := version.Normalize(split[2][2 : len(split[2])-2])
-		if !versionConstraint.Match(normalized) {
-			return fmt.Errorf("expected go version %v got `%v`", versionConstraint.GetConstraints(), normalized)
-		}
+	if err := checkVersion(command("go"), versionConstraint); err != nil {
+		return err
 	}
 
 	out, err := cmd.CombinedOutput()
