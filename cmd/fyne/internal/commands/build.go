@@ -9,9 +9,6 @@ import (
 	version "github.com/mcuadros/go-version"
 )
 
-type defaultRunner struct {
-}
-
 type builder struct {
 	os, srcdir, target string
 	release            bool
