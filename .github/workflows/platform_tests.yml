@@ -50,7 +50,7 @@ jobs:
     - name: Upload coverage report
       uses: actions/upload-artifact@v2
       with:
-          name: html-report
+          name: coverage-report
           path: coverage.html
       if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' }}
 
