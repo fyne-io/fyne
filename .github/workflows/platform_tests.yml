@@ -52,7 +52,7 @@ jobs:
       with:
           name: html-report
           path: coverage.html
-      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' && github.event_name == 'push' }}
+      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' }}
 
     - name: Build WebAssembly binary
       env:
