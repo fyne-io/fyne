@@ -7,44 +7,24 @@ import (
 	"strings"
 
 	version "github.com/mcuadros/go-version"
-	"golang.org/x/sys/execabs"
 )
 
-type runner interface {
-	RunOutput(arg ...string) ([]byte, error)
-}
-
-type command string
-
-func (c command) RunOutput(arg ...string) ([]byte, error) {
-	return execabs.Command(string(c), arg...).Output()
-}
-
-func runCommandOutput(runner runner, args ...string) ([]byte, error) {
-	return runner.RunOutput(args...)
+type defaultRunner struct {
 }
 
 type builder struct {
 	os, srcdir, target string
 	release            bool
 	tags               []string
+
+	runner runner
 }
 
-func checkVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
-	if versionConstraint == nil {
-		return nil
-	}
-
-	goVersion, err := runCommandOutput(runner, "version")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
-		return err
-	}
-
-	split := strings.Split(string(goVersion), " ")
+func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
+	split := strings.Split(output, " ")
 	// We are expecting something like: `go version goX.Y OS`
 	if len(split) != 4 || split[0] != "go" || split[1] != "version" || len(split[2]) < 5 || split[2][:2] != "go" {
-		return fmt.Errorf("invalid output for `go version`: `%s`", string(goVersion))
+		return fmt.Errorf("invalid output for `go version`: `%s`", output)
 	}
 
 	normalized := version.Normalize(split[2][2 : len(split[2])-2])
@@ -55,8 +35,26 @@ func checkVersion(runner runner, versionConstraint *version.ConstraintGroup) err
 	return nil
 }
 
+func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
+	if versionConstraint == nil {
+		return nil
+	}
+
+	goVersion, err := runCommandOutput(runner, "version")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
+		return err
+	}
+
+	return checkVersion(string(goVersion), versionConstraint)
+}
+
 func (b *builder) build() error {
 	var versionConstraint *version.ConstraintGroup
+
+	if b.runner == nil {
+		b.runner = newCommand("go")
+	}
 
 	goos := b.os
 	if goos == "" {
@@ -64,7 +62,12 @@ func (b *builder) build() error {
 	}
 
 	args := []string{"build"}
-	env := append(os.Environ(), "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+	env := os.Environ()
+
+	if goos != "wasm" {
+		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+	}
+
 	if goos == "darwin" {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
@@ -92,8 +95,6 @@ func (b *builder) build() error {
 		args = append(args, "-tags", strings.Join(tags, ","))
 	}
 
-	cmd := execabs.Command("go", args...)
-	cmd.Dir = b.srcdir
 	if goos != "ios" && goos != "android" && goos != "wasm" {
 		env = append(env, "GOOS="+goos)
 	} else if goos == "wasm" {
@@ -102,13 +103,13 @@ func (b *builder) build() error {
 		env = append(env, "GOOS=js")
 	}
 
-	cmd.Env = env
-
-	if err := checkVersion(command("go"), versionConstraint); err != nil {
+	if err := checkGoVersion(b.runner, versionConstraint); err != nil {
 		return err
 	}
 
-	out, err := cmd.CombinedOutput()
+	b.runner.DirSet(b.srcdir)
+	b.runner.EnvSet(env)
+	out, err := b.runner.RunOutput(args...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
