@@ -38,12 +38,20 @@ jobs:
         go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
         coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
         if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
+        go tool cover -html=coverage.out -o coverage.html
       if: ${{ runner.os == 'Linux' }}
 
     - name: Update PR Coverage
       uses: shogo82148/actions-goveralls@v1
       with:
         path-to-profile: coverage.out
+      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' && github.event_name == 'push' }}
+    
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v2
+      with:
+          name: html-report
+          path: coverage.html
       if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' && github.event_name == 'push' }}
 
     - name: Build WebAssembly binary
