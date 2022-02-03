@@ -30,7 +30,7 @@ type testCommandCall struct {
 	t     *testing.T
 }
 
-func (t *testCommandCall) RunOutput(args ...string) ([]byte, error) {
+func (t *testCommandCall) runOutput(args ...string) ([]byte, error) {
 	// Check that we have no more than the expected number of call
 	assert.Less(t.t, t.index, len(t.calls))
 	// Check that we have the expected number of parameters for this call
@@ -50,7 +50,7 @@ func (t *testCommandCall) RunOutput(args ...string) ([]byte, error) {
 	return ret, err
 }
 
-func (t *testCommandCall) DirSet(dir string) {
+func (t *testCommandCall) setDir(dir string) {
 	// Check that we have no more than the expected number of call
 	assert.Less(t.t, t.index, len(t.calls))
 
@@ -58,7 +58,7 @@ func (t *testCommandCall) DirSet(dir string) {
 	t.calls[t.index].dirSet = true
 }
 
-func (t *testCommandCall) EnvSet(env []string) {
+func (t *testCommandCall) setEnv(env []string) {
 	// Check that we have no more than the expected number of call
 	assert.Less(t.t, t.index, len(t.calls))
 
@@ -81,7 +81,7 @@ func (t *testCommandCall) EnvSet(env []string) {
 	t.calls[t.index].envSet = true
 }
 
-func (t *testCommandCall) VerifyExpectation() {
+func (t *testCommandCall) verifyExpectation() {
 	// Expected as many call as we got
 	assert.Equal(t.t, len(t.calls), t.index)
 	// Check if every call really matched our expectaction

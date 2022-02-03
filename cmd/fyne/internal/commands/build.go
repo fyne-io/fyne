@@ -37,7 +37,7 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 		return nil
 	}
 
-	goVersion, err := runCommandOutput(runner, "version")
+	goVersion, err := runner.runOutput("version")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
 		return err
@@ -104,9 +104,9 @@ func (b *builder) build() error {
 		return err
 	}
 
-	b.runner.DirSet(b.srcdir)
-	b.runner.EnvSet(env)
-	out, err := b.runner.RunOutput(args...)
+	b.runner.setDir(b.srcdir)
+	b.runner.setEnv(env)
+	out, err := b.runner.runOutput(args...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}

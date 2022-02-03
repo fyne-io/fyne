@@ -11,7 +11,7 @@ import (
 func Test_CheckGoVersionNoGo(t *testing.T) {
 	commandNil := &testCommandCall{calls: []mockRunOutputValue{}, t: t}
 	assert.Nil(t, checkGoVersion(commandNil, nil))
-	commandNil.VerifyExpectation()
+	commandNil.verifyExpectation()
 
 	commandNotNil := &testCommandCall{calls: []mockRunOutputValue{{
 		args: []string{"version"},
@@ -19,7 +19,7 @@ func Test_CheckGoVersionNoGo(t *testing.T) {
 		err:  fmt.Errorf("file not found"),
 	}}, t: t}
 	assert.NotNil(t, checkGoVersion(commandNotNil, version.NewConstrainGroupFromString(">=1.17")))
-	commandNotNil.VerifyExpectation()
+	commandNotNil.verifyExpectation()
 }
 
 func Test_CheckGoVersionValidValue(t *testing.T) {
@@ -38,12 +38,12 @@ func Test_CheckGoVersionValidValue(t *testing.T) {
 	versionOk := &testCommandCall{calls: expected, t: t}
 	assert.Nil(t, checkGoVersion(versionOk, version.NewConstrainGroupFromString(">=1.17")))
 	assert.Nil(t, checkGoVersion(versionOk, version.NewConstrainGroupFromString(">=1.17")))
-	versionOk.VerifyExpectation()
+	versionOk.verifyExpectation()
 
 	versionNotOk := &testCommandCall{calls: expected, t: t}
 	assert.NotNil(t, checkGoVersion(versionNotOk, version.NewConstrainGroupFromString("<1.17")))
 	assert.NotNil(t, checkGoVersion(versionNotOk, version.NewConstrainGroupFromString("<1.17")))
-	versionNotOk.VerifyExpectation()
+	versionNotOk.verifyExpectation()
 }
 
 func Test_CheckGoVersionInvalidValue(t *testing.T) {
@@ -76,7 +76,7 @@ func Test_CheckGoVersionInvalidValue(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			versionInvalid := &testCommandCall{calls: tc.calls, t: t}
 			assert.NotNil(t, checkGoVersion(versionInvalid, version.NewConstrainGroupFromString(">=1.17")))
-			versionInvalid.VerifyExpectation()
+			versionInvalid.verifyExpectation()
 		})
 	}
 }
@@ -126,7 +126,7 @@ func Test_BuildWasmVersion(t *testing.T) {
 	wasmBuildTest := &testCommandCall{calls: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
 	assert.Nil(t, b.build())
-	wasmBuildTest.VerifyExpectation()
+	wasmBuildTest.verifyExpectation()
 }
 
 func Test_BuildWasmReleaseVersion(t *testing.T) {
@@ -149,7 +149,7 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 	wasmBuildTest := &testCommandCall{calls: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
 	assert.Nil(t, b.build())
-	wasmBuildTest.VerifyExpectation()
+	wasmBuildTest.verifyExpectation()
 }
 
 func Test_BuildWasmOldVersion(t *testing.T) {
@@ -164,5 +164,5 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	wasmBuildTest := &testCommandCall{calls: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
 	assert.NotNil(t, b.build())
-	wasmBuildTest.VerifyExpectation()
+	wasmBuildTest.verifyExpectation()
 }

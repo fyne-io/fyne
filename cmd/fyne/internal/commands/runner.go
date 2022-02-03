@@ -5,9 +5,9 @@ import (
 )
 
 type runner interface {
-	RunOutput(arg ...string) ([]byte, error)
-	DirSet(dir string)
-	EnvSet(env []string)
+	runOutput(arg ...string) ([]byte, error)
+	setDir(dir string)
+	setEnv(env []string)
 }
 
 type command struct {
@@ -16,15 +16,15 @@ type command struct {
 	env []string
 }
 
-func (c *command) DirSet(dir string) {
+func (c *command) setDir(dir string) {
 	c.dir = &dir
 }
 
-func (c *command) EnvSet(env []string) {
+func (c *command) setEnv(env []string) {
 	c.env = env
 }
 
-func (c *command) RunOutput(arg ...string) ([]byte, error) {
+func (c *command) runOutput(arg ...string) ([]byte, error) {
 	cmd := execabs.Command(c.exe, arg...)
 	if c.dir != nil {
 		cmd.Dir = *c.dir
@@ -35,10 +35,6 @@ func (c *command) RunOutput(arg ...string) ([]byte, error) {
 		c.env = []string{}
 	}
 	return cmd.CombinedOutput()
-}
-
-func runCommandOutput(runner runner, args ...string) ([]byte, error) {
-	return runner.RunOutput(args...)
 }
 
 func newCommand(cmd string) *command {
