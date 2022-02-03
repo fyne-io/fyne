@@ -7,13 +7,14 @@ import (
 	"strings"
 
 	version "github.com/mcuadros/go-version"
-	"golang.org/x/sys/execabs"
 )
 
 type builder struct {
 	os, srcdir, target string
 	release            bool
 	tags               []string
+
+	runner runner
 }
 
 func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
@@ -31,12 +32,12 @@ func checkVersion(output string, versionConstraint *version.ConstraintGroup) err
 	return nil
 }
 
-func checkGoVersion(versionConstraint *version.ConstraintGroup) error {
+func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
 	if versionConstraint == nil {
 		return nil
 	}
 
-	goVersion, err := execabs.Command("go", "version").CombinedOutput()
+	goVersion, err := runCommandOutput(runner, "version")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
 		return err
@@ -47,6 +48,10 @@ func checkGoVersion(versionConstraint *version.ConstraintGroup) error {
 
 func (b *builder) build() error {
 	var versionConstraint *version.ConstraintGroup
+
+	if b.runner == nil {
+		b.runner = newCommand("go")
+	}
 
 	goos := b.os
 	if goos == "" {
@@ -95,15 +100,13 @@ func (b *builder) build() error {
 		env = append(env, "GOOS=js")
 	}
 
-	if err := checkGoVersion(versionConstraint); err != nil {
+	if err := checkGoVersion(b.runner, versionConstraint); err != nil {
 		return err
 	}
 
-	cmd := execabs.Command("go", args...)
-
-	cmd.Dir = b.srcdir
-	cmd.Env = env
-	out, err := cmd.CombinedOutput()
+	b.runner.DirSet(b.srcdir)
+	b.runner.EnvSet(env)
+	out, err := b.runner.RunOutput(args...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
