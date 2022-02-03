@@ -12,12 +12,12 @@ type runner interface {
 
 type command struct {
 	exe string
-	dir *string
+	dir string
 	env []string
 }
 
 func (c *command) setDir(dir string) {
-	c.dir = &dir
+	c.dir = dir
 }
 
 func (c *command) setEnv(env []string) {
@@ -26,10 +26,7 @@ func (c *command) setEnv(env []string) {
 
 func (c *command) runOutput(arg ...string) ([]byte, error) {
 	cmd := execabs.Command(c.exe, arg...)
-	if c.dir != nil {
-		cmd.Dir = *c.dir
-		c.dir = nil
-	}
+	cmd.Dir = c.dir
 	if c.env != nil {
 		cmd.Env = c.env
 		c.env = []string{}
