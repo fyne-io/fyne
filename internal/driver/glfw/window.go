@@ -498,7 +498,7 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers desktop.Modifier) {
+func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
 	w.mouseLock.RLock()
 	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
@@ -691,7 +691,7 @@ func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 	}
 }
 
-func (w *window) capturesTab(modifier desktop.Modifier) bool {
+func (w *window) capturesTab(modifier fyne.KeyModifier) bool {
 	captures := false
 
 	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok {
@@ -702,7 +702,7 @@ func (w *window) capturesTab(modifier desktop.Modifier) bool {
 		case 0:
 			w.QueueEvent(w.canvas.FocusNext)
 			return false
-		case desktop.ShiftModifier:
+		case fyne.KeyModifierShift:
 			w.QueueEvent(w.canvas.FocusPrevious)
 			return false
 		}
@@ -711,7 +711,7 @@ func (w *window) capturesTab(modifier desktop.Modifier) bool {
 	return captures
 }
 
-func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action action, keyDesktopModifier desktop.Modifier) {
+func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action action, keyDesktopModifier fyne.KeyModifier) {
 	keyEvent := &fyne.KeyEvent{Name: keyName, Physical: fyne.HardwareKey{ScanCode: scancode}}
 
 	pendingMenuToggle := w.menuTogglePending
@@ -743,7 +743,7 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
 			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
-			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == desktop.AltModifier) {
+			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == fyne.KeyModifierAlt) {
 				w.menuTogglePending = keyName
 			}
 		case fyne.KeyEscape:
@@ -810,18 +810,18 @@ func (w *window) processFocused(focus bool) {
 	}
 }
 
-func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyName, modifier desktop.Modifier) bool {
+func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyName, modifier fyne.KeyModifier) bool {
 	var shortcut fyne.Shortcut
-	ctrlMod := desktop.ControlModifier
+	ctrlMod := fyne.KeyModifierControl
 	if runtime.GOOS == "darwin" {
-		ctrlMod = desktop.SuperModifier
+		ctrlMod = fyne.KeyModifierSuper
 	}
 	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
 	// is reported as a fyne.KeyUnknown key with Control modifier. We should still consider this
 	// as a "Paste" shortcut.
 	// See https://github.com/fyne-io/fyne/pull/2587 for discussion.
 	keyName := localizedKeyName
-	resemblesShortcut := (modifier&(desktop.ControlModifier|desktop.SuperModifier) != 0)
+	resemblesShortcut := (modifier&(fyne.KeyModifierControl|fyne.KeyModifierSuper) != 0)
 	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut {
 		if key != fyne.KeyUnknown {
 			keyName = key
@@ -850,7 +850,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 		}
 	}
 
-	if modifier == desktop.ShiftModifier {
+	if modifier == fyne.KeyModifierShift {
 		switch keyName {
 		case fyne.KeyInsert:
 			// detect paste shortcut
@@ -865,7 +865,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 		}
 	}
 
-	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != desktop.ShiftModifier {
+	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != fyne.KeyModifierShift {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: modifier,

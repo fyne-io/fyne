@@ -49,6 +49,7 @@ func main() {
 		'⌫',
 		'⎋',
 		'␣',
+		'❖',
 	})
 	if err != nil {
 		fyne.LogError("symbol font creation failed", err)

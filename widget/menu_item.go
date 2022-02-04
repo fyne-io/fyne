@@ -10,6 +10,30 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const (
+	runeModifierAlt     = '⌥'
+	runeModifierControl = '⌃'
+	runeModifierShift   = '⇧'
+)
+
+var keySymbols map[fyne.KeyName]rune = map[fyne.KeyName]rune{
+	fyne.KeyBackspace: '⌫',
+	fyne.KeyDelete:    '⌦',
+	fyne.KeyDown:      '↓',
+	fyne.KeyEnd:       '↘',
+	fyne.KeyEnter:     '↩',
+	fyne.KeyEscape:    '⎋',
+	fyne.KeyHome:      '↖',
+	fyne.KeyLeft:      '←',
+	fyne.KeyPageDown:  '⇟',
+	fyne.KeyPageUp:    '⇞',
+	fyne.KeyReturn:    '↩',
+	fyne.KeyRight:     '→',
+	fyne.KeySpace:     '␣',
+	fyne.KeyTab:       '⇥',
+	fyne.KeyUp:        '↑',
+}
+
 var _ fyne.Widget = (*menuItem)(nil)
 
 // menuItem is a widget for displaying a fyne.menuItem.
@@ -304,38 +328,20 @@ func (r *menuItemRenderer) refreshText(text *canvas.Text) {
 	text.Refresh()
 }
 
-var keySymbols map[fyne.KeyName]rune = map[fyne.KeyName]rune{
-	fyne.KeyBackspace: '⌫',
-	fyne.KeyDelete:    '⌦',
-	fyne.KeyDown:      '↓',
-	fyne.KeyEnd:       '↘',
-	fyne.KeyEnter:     '↩',
-	fyne.KeyEscape:    '⎋',
-	fyne.KeyHome:      '↖',
-	fyne.KeyLeft:      '←',
-	fyne.KeyPageDown:  '⇟',
-	fyne.KeyPageUp:    '⇞',
-	fyne.KeyReturn:    '↩',
-	fyne.KeyRight:     '→',
-	fyne.KeySpace:     '␣',
-	fyne.KeyTab:       '⇥',
-	fyne.KeyUp:        '↑',
-}
-
 func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	b := strings.Builder{}
 	mods := s.Mod()
-	if mods&desktop.ControlModifier != 0 {
-		b.WriteRune('⌃')
+	if mods&fyne.KeyModifierControl != 0 {
+		b.WriteRune(runeModifierControl)
 	}
-	if mods&desktop.AltModifier != 0 {
-		b.WriteRune('⌥')
+	if mods&fyne.KeyModifierAlt != 0 {
+		b.WriteRune(runeModifierAlt)
 	}
-	if mods&desktop.ShiftModifier != 0 {
-		b.WriteRune('⇧')
+	if mods&fyne.KeyModifierShift != 0 {
+		b.WriteRune(runeModifierShift)
 	}
-	if mods&desktop.SuperModifier != 0 {
-		b.WriteRune('⌘')
+	if mods&fyne.KeyModifierSuper != 0 {
+		b.WriteRune(runeModifierSuper)
 	}
 	r := keySymbols[s.Key()]
 	if r != 0 {
