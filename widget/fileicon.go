@@ -21,6 +21,7 @@ const (
 type FileIcon struct {
 	BaseWidget
 
+	// Deprecated: Selection is now handled externally.
 	Selected bool
 	URI      fyne.URI
 
