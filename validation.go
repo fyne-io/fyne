@@ -15,3 +15,9 @@ type Validatable interface {
 //
 // Since: 1.4
 type StringValidator func(string) error
+
+// SelectionValidator is a function for requiring a specified
+// amount of selections to be made.
+//
+// Since: 2.2
+type SelectionValidator func(int) error
