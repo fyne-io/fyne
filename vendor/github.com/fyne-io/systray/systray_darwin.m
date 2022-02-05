@@ -218,7 +218,7 @@ void setInternalLoop(bool i) {
 }
 
 void registerSystray(void) {
-  if !internalLoop { // with an external loop we don't take ownership of the app
+  if (!internalLoop) { // with an external loop we don't take ownership of the app
     return;
   }
 

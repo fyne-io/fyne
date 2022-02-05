@@ -26,7 +26,7 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
-# github.com/fyne-io/systray v1.1.1-0.20220205054428-abc9e7d5d04c
+# github.com/fyne-io/systray v1.1.1-0.20220205055945-490463f77fb0
 ## explicit
 github.com/fyne-io/systray
 # github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
