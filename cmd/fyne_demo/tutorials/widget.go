@@ -297,9 +297,16 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 	password := widget.NewPasswordEntry()
 	password.SetPlaceHolder("Password")
 
-	disabled := widget.NewRadioGroup([]string{"Option 1", "Option 2"}, func(string) {})
-	disabled.Horizontal = true
-	disabled.Disable()
+	shipping := &widget.RadioGroup{Options: []string{"Fast shipping", "Slow shipping"}, Horizontal: true,
+		Validator: validation.NewSelection(1),
+	}
+
+	specifics := &widget.CheckGroup{
+		Options:    []string{"Gift", "Fragile", "Heavy", "Priority"},
+		Horizontal: true,
+		Validator:  validation.NewSelection(2),
+	}
+
 	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{
@@ -319,7 +326,14 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 		},
 	}
 	form.Append("Password", password)
-	form.Append("Disabled", disabled)
+	form.AppendItem(&widget.FormItem{
+		Text: "Shipping", Widget: shipping,
+		HintText: "Choose a shipping option.",
+	})
+	form.AppendItem(&widget.FormItem{
+		Text: "Extras", Widget: specifics,
+		HintText: "Two or more extra options are required.",
+	})
 	form.Append("Message", largeText)
 	return form
 }

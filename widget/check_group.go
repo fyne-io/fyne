@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"errors"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
@@ -18,10 +20,15 @@ type CheckGroup struct {
 	Options    []string
 	Selected   []string
 
+	Validator           fyne.SelectionValidator
+	onValidationChanged func(error)
+	validationError     error
+
 	items []*Check
 }
 
 var _ fyne.Widget = (*CheckGroup)(nil)
+var _ fyne.Validatable = (*RadioGroup)(nil)
 
 // NewCheckGroup creates a new check group widget with the set options and change handler
 //
@@ -90,6 +97,19 @@ func (r *CheckGroup) SetSelected(options []string) {
 	r.Refresh()
 }
 
+// Validate validates the required amount of selections.
+func (r *CheckGroup) Validate() error {
+	if r.Validator == nil {
+		return nil
+	}
+
+	return r.Validator(len(r.Selected))
+}
+
+func (r *CheckGroup) SetOnValidationChanged(changed func(error)) {
+	r.onValidationChanged = changed
+}
+
 func (r *CheckGroup) itemTapped(item *Check) {
 	if r.Disabled() {
 		return
@@ -148,6 +168,14 @@ func (r *CheckGroup) update() {
 		item.Checked = contains
 		item.DisableableWidget.disabled = r.disabled
 		item.Refresh()
+	}
+
+	if r.Validator != nil && r.onValidationChanged != nil {
+		new := r.Validate()
+		if !errors.Is(new, r.validationError) {
+			r.validationError = new
+			r.onValidationChanged(new)
+		}
 	}
 }
 

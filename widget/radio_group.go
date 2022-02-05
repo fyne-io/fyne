@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"errors"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
@@ -18,10 +20,15 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
+	Validator           fyne.SelectionValidator
+	onValidationChanged func(error)
+	validationError     error
+
 	items []*radioItem
 }
 
 var _ fyne.Widget = (*RadioGroup)(nil)
+var _ fyne.Validatable = (*RadioGroup)(nil)
 
 // NewRadioGroup creates a new radio group widget with the set options and change handler
 //
@@ -90,6 +97,24 @@ func (r *RadioGroup) SetSelected(option string) {
 	r.Refresh()
 }
 
+// Validate validates the required amount of selections.
+// The selection will always be zero or one.
+func (r *RadioGroup) Validate() error {
+	if r.Validator == nil {
+		return nil
+	}
+
+	if r.Selected == "" {
+		return r.Validator(0)
+	}
+
+	return r.Validator(1)
+}
+
+func (r *RadioGroup) SetOnValidationChanged(changed func(error)) {
+	r.onValidationChanged = changed
+}
+
 func (r *RadioGroup) itemTapped(item *radioItem) {
 	if r.Disabled() {
 		return
@@ -127,6 +152,14 @@ func (r *RadioGroup) update() {
 		item.Selected = item.Label == r.Selected
 		item.DisableableWidget.disabled = r.disabled
 		item.Refresh()
+	}
+
+	if r.Validator != nil && r.onValidationChanged != nil {
+		new := r.Validate()
+		if !errors.Is(new, r.validationError) {
+			r.validationError = new
+			r.onValidationChanged(new)
+		}
 	}
 }
 
