@@ -10,7 +10,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
-	github.com/fyne-io/systray v1.1.1-0.20220205010924-44b7ef210b9e
+	github.com/fyne-io/systray v1.1.1-0.20220205020734-52e449cc4dc9
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 	github.com/go-ole/go-ole v1.2.6

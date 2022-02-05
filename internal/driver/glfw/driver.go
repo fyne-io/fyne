@@ -3,12 +3,16 @@
 package glfw
 
 import (
+	"bytes"
+	"image"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 
+	"fyne.io/fyne/v2/theme"
+	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/fyne-io/systray"
 
 	"fyne.io/fyne/v2"
@@ -44,8 +48,39 @@ type gLDriver struct {
 	trayStart, trayStop func() // shut down the system tray, if used
 }
 
+func toOSIcon(icon fyne.Resource) ([]byte, error) {
+	if runtime.GOOS != "windows" {
+		return icon.Content(), nil
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(icon.Content()))
+	if err != nil {
+		return nil, err
+	}
+
+	buf := &bytes.Buffer{}
+	err = ico.Encode(buf, img)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
+		systray.SetTitle(m.Label)
+		if fyne.CurrentApp().Icon() != nil {
+			img, err := toOSIcon(fyne.CurrentApp().Icon())
+			if err == nil {
+				systray.SetIcon(img)
+			}
+		} else {
+			img, err := toOSIcon(theme.FyneLogo())
+			if err == nil {
+				systray.SetIcon(img)
+			}
+		}
+
 		for _, i := range m.Items {
 			if i.IsSeparator {
 				systray.AddSeparator()
