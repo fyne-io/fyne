@@ -68,7 +68,6 @@ func toOSIcon(icon fyne.Resource) ([]byte, error) {
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-		systray.SetTitle(m.Label)
 		if fyne.CurrentApp().Icon() != nil {
 			img, err := toOSIcon(fyne.CurrentApp().Icon())
 			if err == nil {

@@ -211,6 +211,8 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
 @end
 
 bool internalLoop = false;
+AppDelegate *owner;
+
 void setInternalLoop(bool i) {
 	internalLoop = i;
 }
@@ -220,8 +222,8 @@ void registerSystray(void) {
     return;
   }
 
-  AppDelegate *delegate = [[AppDelegate alloc] init];
-  [[NSApplication sharedApplication] setDelegate:delegate];
+  owner = [[AppDelegate alloc] init];
+  [[NSApplication sharedApplication] setDelegate:owner];
 
   // A workaround to avoid crashing on macOS versions before Catalina. Somehow
   // SIGSEGV would happen inside AppKit if [NSApp run] is called from a
@@ -243,12 +245,12 @@ int nativeLoop(void) {
 }
 
 void nativeStart(void) {
-  AppDelegate *delegate = [[AppDelegate alloc] init];
-  [delegate applicationDidFinishLaunching:NULL];
+  owner = [[AppDelegate alloc] init];
+  [owner applicationDidFinishLaunching:NULL];
 }
 
 void runInMainThread(SEL method, id object) {
-  [(AppDelegate*)[NSApp delegate]
+  [owner
     performSelectorOnMainThread:method
                      withObject:object
                   waitUntilDone: YES];
