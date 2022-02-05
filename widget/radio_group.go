@@ -111,6 +111,8 @@ func (r *RadioGroup) Validate() error {
 	return r.Validator(1)
 }
 
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (r *RadioGroup) SetOnValidationChanged(changed func(error)) {
 	r.onValidationChanged = changed
 }

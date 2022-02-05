@@ -106,6 +106,8 @@ func (r *CheckGroup) Validate() error {
 	return r.Validator(len(r.Selected))
 }
 
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (r *CheckGroup) SetOnValidationChanged(changed func(error)) {
 	r.onValidationChanged = changed
 }
