@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
@@ -71,7 +72,7 @@ func TestDrag(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	d := &draggable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(d))
+	c.SetContent(container.NewWithoutLayout(d))
 	c.Resize(fyne.NewSize(30, 30))
 	d.Resize(fyne.NewSize(20, 20))
 	d.Move(fyne.NewPos(10, 10))
@@ -93,7 +94,7 @@ func TestFocusNext(t *testing.T) {
 	f1 := &focusable{}
 	f2 := &focusable{}
 	f3 := &focusable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
+	c.SetContent(container.NewWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
 	assert.False(t, f1.focused)
@@ -130,7 +131,7 @@ func TestFocusPrevious(t *testing.T) {
 	f1 := &focusable{}
 	f2 := &focusable{}
 	f3 := &focusable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
+	c.SetContent(container.NewWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
 	assert.False(t, f1.focused)
@@ -166,7 +167,7 @@ func TestScroll(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	s := &scrollable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(s))
+	c.SetContent(container.NewWithoutLayout(s))
 	c.Resize(fyne.NewSize(30, 30))
 	s.Resize(fyne.NewSize(20, 20))
 	s.Move(fyne.NewPos(10, 10))

@@ -1,6 +1,12 @@
+//go:build (gles || arm || arm64) && !android && !ios && !mobile && !darwin && !js && !wasm && !test_web_driver
 // +build gles arm arm64
-// +build !android,!ios,!mobile
+// +build !android
+// +build !ios
+// +build !mobile
 // +build !darwin
+// +build !js
+// +build !wasm
+// +build !test_web_driver
 
 package gl
 
@@ -24,12 +30,6 @@ type Buffer uint32
 
 // Program represents a compiled GL program
 type Program uint32
-
-// Texture represents an uploaded GL texture
-type Texture uint32
-
-// NoTexture is the zero value for a Texture
-var NoTexture = Texture(0)
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 

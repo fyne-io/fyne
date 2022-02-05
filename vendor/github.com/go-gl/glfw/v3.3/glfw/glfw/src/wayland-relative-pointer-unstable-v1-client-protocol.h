@@ -73,6 +73,8 @@ struct wl_pointer;
 struct zwp_relative_pointer_manager_v1;
 struct zwp_relative_pointer_v1;
 
+#ifndef ZWP_RELATIVE_POINTER_MANAGER_V1_INTERFACE
+#define ZWP_RELATIVE_POINTER_MANAGER_V1_INTERFACE
 /**
  * @page page_iface_zwp_relative_pointer_manager_v1 zwp_relative_pointer_manager_v1
  * @section page_iface_zwp_relative_pointer_manager_v1_desc Description
@@ -89,6 +91,9 @@ struct zwp_relative_pointer_v1;
  * given pointer.
  */
 extern const struct wl_interface zwp_relative_pointer_manager_v1_interface;
+#endif
+#ifndef ZWP_RELATIVE_POINTER_V1_INTERFACE
+#define ZWP_RELATIVE_POINTER_V1_INTERFACE
 /**
  * @page page_iface_zwp_relative_pointer_v1 zwp_relative_pointer_v1
  * @section page_iface_zwp_relative_pointer_v1_desc Description
@@ -109,6 +114,7 @@ extern const struct wl_interface zwp_relative_pointer_manager_v1_interface;
  * focus.
  */
 extern const struct wl_interface zwp_relative_pointer_v1_interface;
+#endif
 
 #define ZWP_RELATIVE_POINTER_MANAGER_V1_DESTROY 0
 #define ZWP_RELATIVE_POINTER_MANAGER_V1_GET_RELATIVE_POINTER 1

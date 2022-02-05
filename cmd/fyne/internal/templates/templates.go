@@ -28,4 +28,7 @@ var (
 
 	// XCAssetsDarwin is the Contents.json file for darwin xcassets bundle
 	XCAssetsDarwin = template.Must(template.New("XCAssets").Parse(string(resourceXcassetsJSON.StaticContent)))
+
+	// IndexHTML is the index.html used to serve web package
+	IndexHTML = template.Must(template.New("index.html").Parse(string(resourceIndexHtml.StaticContent)))
 )

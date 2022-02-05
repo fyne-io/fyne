@@ -1,6 +1,8 @@
 package common
 
 import (
+	"errors"
+	"fmt"
 	"image/color"
 	"testing"
 
@@ -162,7 +164,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	leftCol.Add(leftNewObj2)
 	deleteAt(rightCol, 1)
 	thirdCol := container.NewVBox()
-	content.AddObject(thirdCol)
+	content.Add(thirdCol)
 	thirdRunBeforePainterData := []nodeInfo{}
 	thirdRunAfterPainterData := []nodeInfo{}
 
@@ -372,4 +374,51 @@ func insert(c *fyne.Container, object fyne.CanvasObject, index int) {
 func Prepend(c *fyne.Container, object fyne.CanvasObject) {
 	c.Objects = append([]fyne.CanvasObject{object}, c.Objects...)
 	c.Refresh()
+}
+
+func TestRefreshCount(t *testing.T) { // Issue 2548.
+	var (
+		c              = &Canvas{}
+		errCh          = make(chan error)
+		freed   uint64 = 0
+		refresh uint64 = 1000
+	)
+	c.Initialize(nil, func() {})
+	for i := uint64(0); i < refresh; i++ {
+		c.Refresh(canvas.NewRectangle(color.Gray16{Y: 1}))
+	}
+
+	go func() {
+		freed = c.FreeDirtyTextures()
+		if freed == 0 {
+			errCh <- errors.New("expected to free dirty textures but actually not freed")
+			return
+		}
+		errCh <- nil
+	}()
+	err := <-errCh
+	if err != nil {
+		t.Fatal(err)
+	}
+	if freed != refresh {
+		t.Fatalf("FreeDirtyTextures left refresh tasks behind in a frame, got %v, want %v", freed, refresh)
+	}
+}
+
+func BenchmarkRefresh(b *testing.B) {
+	c := &Canvas{}
+	c.Initialize(nil, func() {})
+
+	for i := uint64(1); i < 1<<15; i *= 2 {
+		b.Run(fmt.Sprintf("#%d", i), func(b *testing.B) {
+			b.ReportAllocs()
+
+			for j := 0; j < b.N; j++ {
+				for n := uint64(0); n < i; n++ {
+					c.Refresh(canvas.NewRectangle(color.Black))
+				}
+				c.FreeDirtyTextures()
+			}
+		})
+	}
 }

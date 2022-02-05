@@ -23,6 +23,7 @@ func main() {
 			commands.Package(),
 			commands.Release(),
 			commands.Version(),
+			commands.Serve(),
 
 			// Deprecated: Use "go mod vendor" instead.
 			commands.Vendor(),

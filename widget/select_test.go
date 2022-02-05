@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -84,6 +86,21 @@ func TestSelect_ClearSelected(t *testing.T) {
 	assert.Equal(t, optClear, combo.Selected)
 	assert.True(t, triggered)
 	assert.Equal(t, optClear, triggeredValue)
+}
+
+func TestSelect_ClipValue(t *testing.T) {
+	combo := widget.NewSelect([]string{"some text", "more"}, func(string) {})
+	combo.SetSelected("some text")
+	combo.Resize(fyne.NewSize(90, 38))
+
+	r := cache.Renderer(combo)
+	text := r.Objects()[3].(*widget.RichText)
+	assert.Equal(t, 1, len(text.Segments))
+	assert.Equal(t, "some text", text.Segments[0].(*widget.TextSegment).Text)
+
+	r2 := cache.Renderer(text)
+	assert.Equal(t, 1, len(r2.Objects()))
+	assert.Equal(t, "some t", r2.Objects()[0].(*canvas.Text).Text)
 }
 
 func TestSelect_Disable(t *testing.T) {

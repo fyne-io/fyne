@@ -3,7 +3,11 @@
 
 package binding
 
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 
 // Bool supports binding a bool value.
 //
@@ -93,6 +97,97 @@ func (b *boundExternalBool) Set(val bool) error {
 }
 
 func (b *boundExternalBool) Reload() error {
+	return b.Set(*b.val)
+}
+
+// Bytes supports binding a []byte value.
+//
+// Since: 2.2
+type Bytes interface {
+	DataItem
+	Get() ([]byte, error)
+	Set([]byte) error
+}
+
+// ExternalBytes supports binding a []byte value to an external value.
+//
+// Since: 2.2
+type ExternalBytes interface {
+	Bytes
+	Reload() error
+}
+
+// NewBytes returns a bindable []byte value that is managed internally.
+//
+// Since: 2.2
+func NewBytes() Bytes {
+	var blank []byte = nil
+	return &boundBytes{val: &blank}
+}
+
+// BindBytes returns a new bindable value that controls the contents of the provided []byte variable.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.2
+func BindBytes(v *[]byte) ExternalBytes {
+	if v == nil {
+		var blank []byte = nil
+		v = &blank // never allow a nil value pointer
+	}
+	b := &boundExternalBytes{}
+	b.val = v
+	b.old = *v
+	return b
+}
+
+type boundBytes struct {
+	base
+
+	val *[]byte
+}
+
+func (b *boundBytes) Get() ([]byte, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	if b.val == nil {
+		return nil, nil
+	}
+	return *b.val, nil
+}
+
+func (b *boundBytes) Set(val []byte) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if bytes.Equal(*b.val, val) {
+		return nil
+	}
+	*b.val = val
+
+	b.trigger()
+	return nil
+}
+
+type boundExternalBytes struct {
+	boundBytes
+
+	old []byte
+}
+
+func (b *boundExternalBytes) Set(val []byte) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if bytes.Equal(b.old, val) {
+		return nil
+	}
+	*b.val = val
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+func (b *boundExternalBytes) Reload() error {
 	return b.Set(*b.val)
 }
 

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build ios
+//go:build darwin && ios
+// +build darwin,ios
 
 package app
 
@@ -38,7 +38,6 @@ import (
 	"log"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 	"unsafe"
 
@@ -154,11 +153,6 @@ func updateConfig(width, height, orientation int32) {
 // It is widely reported that the iPhone can handle up to 5 simultaneous
 // touch events, while the iPad can handle 11.
 var touchIDs [11]uintptr
-
-var touchEvents struct {
-	sync.Mutex
-	pending []touch.Event
-}
 
 //export sendTouch
 func sendTouch(cTouch, cTouchType uintptr, x, y float32) {

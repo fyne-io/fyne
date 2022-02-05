@@ -1,10 +1,11 @@
+//go:build !ci
 // +build !ci
 
 package app
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Foundation -framework UserNotifications
+#cgo LDFLAGS: -framework Foundation
 
 #include <stdbool.h>
 #include <stdlib.h>

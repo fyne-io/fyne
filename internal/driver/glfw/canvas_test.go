@@ -1,5 +1,5 @@
-// +build !ci
-// +build !mobile
+//go:build !ci && !mobile
+// +build !ci,!mobile
 
 package glfw
 
@@ -144,7 +144,7 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
 	rightCol := container.NewVBox(rightObj1, rightObj2)
-	content := fyne.NewContainer(leftCol, rightCol)
+	content := container.NewWithoutLayout(leftCol, rightCol)
 	layout := &recordingLayout{}
 	content.Layout = layout
 	w.SetContent(content)

@@ -140,50 +140,42 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 
 func TestSelectEntry_MinSize(t *testing.T) {
 	smallOptions := []string{"A", "B", "C"}
-
 	largeOptions := []string{"Large Option A", "Larger Option B", "Very Large Option C"}
-	largeOptionsMinWidth := optionsMinSize(largeOptions).Width
-
 	labelHeight := NewLabel("W").MinSize().Height
 
+	// since we scroll content and don't prop window open with popup all combinations should be the same min
 	tests := map[string]struct {
 		placeholder string
 		value       string
 		options     []string
-		want        fyne.Size
 	}{
-		"empty": {
-			want: fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+2*theme.Padding(), labelHeight),
-		},
+		"empty": {},
 		"empty + small options": {
 			options: smallOptions,
-			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+2*theme.Padding(), labelHeight),
 		},
 		"empty + large options": {
 			options: largeOptions,
-			want:    fyne.NewSize(largeOptionsMinWidth, labelHeight),
 		},
 		"value": {
 			value: "foo", // in a scroller
-			want:  fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+2*theme.Padding(), labelHeight),
 		},
 		"large value + small options": {
 			value:   "large", // in a scroller
 			options: smallOptions,
-			want:    fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+2*theme.Padding(), labelHeight),
 		},
 		"small value + large options": {
 			value:   "small", // in a scroller
 			options: largeOptions,
-			want:    fyne.NewSize(largeOptionsMinWidth, labelHeight),
 		},
 	}
+
+	minSize := fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+2*theme.Padding(), labelHeight)
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			e := NewSelectEntry(tt.options)
 			e.PlaceHolder = tt.placeholder
 			e.Text = tt.value
-			assert.Equal(t, tt.want, e.MinSize())
+			assert.Equal(t, minSize, e.MinSize())
 		})
 	}
 }
@@ -234,22 +226,4 @@ func dropDownIconWidth() float32 {
 
 func emptyTextWidth() float32 {
 	return NewLabel("M").MinSize().Width
-}
-
-func optionsMinSize(options []string) fyne.Size {
-	var labels []*Label
-	for _, option := range options {
-		labels = append(labels, NewLabel(option))
-	}
-	minWidth := float32(0)
-	minHeight := float32(0)
-	for _, label := range labels {
-		if minWidth < label.MinSize().Width {
-			minWidth = label.MinSize().Width
-		}
-		minHeight += label.MinSize().Height
-	}
-	// padding between all options
-	minHeight += float32(len(labels)-1) * theme.Padding()
-	return fyne.NewSize(minWidth, minHeight)
 }

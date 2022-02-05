@@ -1,4 +1,4 @@
-// Package validation provides validation for data inside widgets
+// Package validation provides validation for data inside widgets.
 package validation
 
 import (

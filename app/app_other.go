@@ -1,4 +1,5 @@
-// +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
+//go:build ci || (!linux && !darwin && !windows && !freebsd && !openbsd && !netbsd && !js && !wasm && !test_web_driver)
+// +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd,!js,!wasm,!test_web_driver
 
 package app
 

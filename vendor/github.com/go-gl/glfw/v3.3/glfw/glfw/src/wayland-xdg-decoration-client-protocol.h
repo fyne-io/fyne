@@ -45,6 +45,8 @@ struct xdg_toplevel;
 struct zxdg_decoration_manager_v1;
 struct zxdg_toplevel_decoration_v1;
 
+#ifndef ZXDG_DECORATION_MANAGER_V1_INTERFACE
+#define ZXDG_DECORATION_MANAGER_V1_INTERFACE
 /**
  * @page page_iface_zxdg_decoration_manager_v1 zxdg_decoration_manager_v1
  * @section page_iface_zxdg_decoration_manager_v1_desc Description
@@ -101,6 +103,9 @@ struct zxdg_toplevel_decoration_v1;
  * interface version number is reset.
  */
 extern const struct wl_interface zxdg_decoration_manager_v1_interface;
+#endif
+#ifndef ZXDG_TOPLEVEL_DECORATION_V1_INTERFACE
+#define ZXDG_TOPLEVEL_DECORATION_V1_INTERFACE
 /**
  * @page page_iface_zxdg_toplevel_decoration_v1 zxdg_toplevel_decoration_v1
  * @section page_iface_zxdg_toplevel_decoration_v1_desc Description
@@ -125,6 +130,7 @@ extern const struct wl_interface zxdg_decoration_manager_v1_interface;
  * xdg_toplevel.
  */
 extern const struct wl_interface zxdg_toplevel_decoration_v1_interface;
+#endif
 
 #define ZXDG_DECORATION_MANAGER_V1_DESTROY 0
 #define ZXDG_DECORATION_MANAGER_V1_GET_TOPLEVEL_DECORATION 1

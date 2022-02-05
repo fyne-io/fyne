@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	_ "image/jpeg" // import image encodings
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
@@ -38,7 +38,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
@@ -122,7 +122,7 @@ type Packager struct {
 //
 // Deprecated: Access to the individual cli commands are being removed.
 func (p *Packager) AddFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows, wasm)")
 	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
@@ -167,7 +167,11 @@ func (p *Packager) Package() error {
 		return err
 	}
 
-	err = p.doPackage()
+	return p.packageWithoutValidate()
+}
+
+func (p *Packager) packageWithoutValidate() error {
+	err := p.doPackage()
 	if err != nil {
 		return err
 	}
@@ -185,6 +189,7 @@ func (p *Packager) buildPackage() error {
 	b := &builder{
 		os:      p.os,
 		srcdir:  p.srcDir,
+		target:  p.exe,
 		release: p.release,
 		tags:    tags,
 	}
@@ -208,7 +213,7 @@ func (p *Packager) doPackage() error {
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
 		err := p.buildPackage()
 		if err != nil {
-			return errors.Wrap(err, "Error building application")
+			return fmt.Errorf("error building application: %w", err)
 		}
 		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
@@ -227,8 +232,10 @@ func (p *Packager) doPackage() error {
 		return p.packageWindows()
 	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
 		return p.packageAndroid(p.os)
-	case "ios":
-		return p.packageIOS()
+	case "ios", "iossimulator":
+		return p.packageIOS(p.os)
+	case "wasm":
+		return p.packageWasm()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
@@ -247,7 +254,7 @@ func (p *Packager) validate() error {
 	}
 	baseDir, err := os.Getwd()
 	if err != nil {
-		return errors.Wrap(err, "Unable to get the current directory, needed to find main executable")
+		return fmt.Errorf("unable to get the current directory, needed to find main executable: %w", err)
 	}
 	if p.dir == "" {
 		p.dir = baseDir
@@ -255,8 +262,8 @@ func (p *Packager) validate() error {
 	if p.srcDir == "" {
 		p.srcDir = baseDir
 	} else if p.os == "ios" || p.os == "android" {
-		return errors.New("Parameter -sourceDir is currently not supported for mobile builds.\n" +
-			"Change directory to the main package and try again.")
+		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
+			"Change directory to the main package and try again")
 	}
 
 	data, err := metadata.LoadStandard(p.srcDir)
@@ -276,7 +283,7 @@ func (p *Packager) validate() error {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" {
+	if p.name == "" || p.os == "wasm" {
 		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
@@ -314,6 +321,8 @@ func calculateExeName(sourceDir, os string) string {
 
 	if os == "windows" {
 		exeName = exeName + ".exe"
+	} else if os == "wasm" {
+		exeName = exeName + ".wasm"
 	}
 
 	return exeName
@@ -359,7 +368,7 @@ func validateAppID(appID, os, name string, release bool) (string, error) {
 	} else if os == "ios" || util.IsAndroid(os) || (os == "windows" && release) {
 		// all mobile, and for windows when releasing, needs a unique id - usually reverse DNS style
 		if appID == "" {
-			return "", errors.New("Missing appID parameter for package")
+			return "", errors.New("missing appID parameter for package")
 		} else if !strings.Contains(appID, ".") {
 			return "", errors.New("appID must be globally unique and contain at least 1 '.'")
 		}

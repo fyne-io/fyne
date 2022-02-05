@@ -26,6 +26,8 @@
 // It is fine to use C99 in this file because it will not be built with VS
 //========================================================================
 
+#define _POSIX_C_SOURCE 200809L
+
 #include "internal.h"
 
 #include <assert.h>
@@ -102,6 +104,7 @@ static void pointerHandleEnter(void* data,
 
     window->wl.decorations.focus = focus;
     _glfw.wl.serial = serial;
+    _glfw.wl.pointerEnterSerial = serial;
     _glfw.wl.pointerFocus = window;
 
     window->wl.hovered = GLFW_TRUE;
@@ -161,7 +164,7 @@ static void setCursor(_GLFWwindow* window, const char* name)
     buffer = wl_cursor_image_get_buffer(image);
     if (!buffer)
         return;
-    wl_pointer_set_cursor(_glfw.wl.pointer, _glfw.wl.serial,
+    wl_pointer_set_cursor(_glfw.wl.pointer, _glfw.wl.pointerEnterSerial,
                           surface,
                           image->hotspot_x / scale,
                           image->hotspot_y / scale);
@@ -558,7 +561,7 @@ static GLFWbool inputChar(_GLFWwindow* window, uint32_t key)
         }
     }
 
-    return xkb_keymap_key_repeats(_glfw.wl.xkb.keymap, syms[0]);
+    return xkb_keymap_key_repeats(_glfw.wl.xkb.keymap, code);
 }
 
 static void keyboardHandleKey(void* data,

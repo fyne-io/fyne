@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build !ios
+//go:build darwin && !ios
+// +build darwin,!ios
 
 package app
 
@@ -27,7 +27,6 @@ import "C"
 import (
 	"log"
 	"runtime"
-	"sync"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
@@ -138,11 +137,6 @@ func setGeom(pixelsPerPt float32, widthPx, heightPx int) {
 		PixelsPerPt: pixelsPerPt,
 		Orientation: screenOrientation(widthPx, heightPx),
 	}
-}
-
-var touchEvents struct {
-	sync.Mutex
-	pending []touch.Event
 }
 
 func sendTouch(t touch.Type, x, y float32) {

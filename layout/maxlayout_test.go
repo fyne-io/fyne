@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
 	"github.com/stretchr/testify/assert"
@@ -29,7 +30,7 @@ func TestMaxLayoutMinSize(t *testing.T) {
 	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
-	container := fyne.NewContainer(text)
+	container := container.NewWithoutLayout(text)
 	layoutMin := layout.NewMaxLayout().MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
@@ -39,7 +40,7 @@ func TestContainerMaxLayoutMinSize(t *testing.T) {
 	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
-	container := fyne.NewContainer(text)
+	container := container.NewWithoutLayout(text)
 	container.Layout = layout.NewMaxLayout()
 	layoutMin := container.MinSize()
 

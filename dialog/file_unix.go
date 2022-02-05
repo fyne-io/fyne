@@ -1,4 +1,5 @@
-// +build !windows,!android,!ios
+//go:build !windows && !android && !ios && !wasm && !js
+// +build !windows,!android,!ios,!wasm,!js
 
 package dialog
 
@@ -11,12 +12,12 @@ import (
 )
 
 func (f *fileDialog) getPlaces() []favoriteItem {
-	lister, err := storage.ListerForURI(storage.NewURI("file:///"))
+	lister, err := storage.ListerForURI(storage.NewFileURI("/"))
 	if err != nil {
 		fyne.LogError("could not create lister for /", err)
 		return []favoriteItem{}
 	}
-	return []favoriteItem{favoriteItem{
+	return []favoriteItem{{
 		"Computer",
 		theme.ComputerIcon(),
 		lister,

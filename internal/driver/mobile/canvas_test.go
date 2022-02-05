@@ -1,3 +1,4 @@
+//go:build !windows || !ci
 // +build !windows !ci
 
 package mobile
@@ -12,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/layout"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -41,7 +41,7 @@ func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	rightObj2.SetMinSize(fyne.NewSize(100, 50))
 	rightCol := container.NewVBox(rightObj1, rightObj2)
 	content := container.NewHBox(leftCol, rightCol)
-	c.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), content))
+	c.SetContent(container.NewCenter(content))
 	c.Resize(fyne.NewSize(300, 300))
 
 	oldContentSize := fyne.NewSize(200+theme.Padding(), 100+theme.Padding())
@@ -254,7 +254,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	}
 
 	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(fyne.NewContainerWithLayout(layout.NewMaxLayout(), but))
+	c.SetContent(container.NewMax(but))
 	c.Resize(fyne.NewSize(36, 24))
 
 	simulateTap(c)

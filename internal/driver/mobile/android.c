@@ -1,3 +1,4 @@
+//go:build android
 // +build android
 
 #include <android/log.h>
@@ -389,17 +390,18 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
 	jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
 	jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
+	jmethodID getChildURI = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
 
 	char *ret = NULL;
 	int len = 0;
 	while (((jboolean)(*env)->CallBooleanMethod(env, cursor, next)) == JNI_TRUE) {
-		jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
-		jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, name);
+		jstring childDocId = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
+		jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChildURI, uri, childDocId);
 		jclass uriClass = (*env)->GetObjectClass(env, childUri);
 		jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
-		jobject s = (*env)->CallObjectMethod(env, childUri, toString);
+		jstring s = (jstring)(*env)->CallObjectMethod(env, childUri, toString);
 
-		char *uid = getString(jni_env, ctx, name);
+		char *uid = getString(jni_env, ctx, s);
 
 		// append
 		char *old = ret;

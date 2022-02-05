@@ -1,4 +1,5 @@
 [Details]
   Icon = "../../theme/icons/fyne.png"
+  Name = "Fyne Demo"
   ID = "io.fyne.demo"
   Build = 6

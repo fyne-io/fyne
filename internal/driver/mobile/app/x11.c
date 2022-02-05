@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build linux && !android
 // +build linux,!android
 
 #include "_cgo_export.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <stdio.h>
 #include <stdlib.h>
 

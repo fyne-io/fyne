@@ -3,7 +3,11 @@
 
 package binding
 
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 
 // BoolList supports binding a list of bool values.
 //
@@ -77,11 +81,12 @@ func (l *boundBoolList) Get() ([]bool, error) {
 }
 
 func (l *boundBoolList) GetValue(i int) (bool, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return false, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -147,7 +152,11 @@ func (l *boundBoolList) doReload() (retErr error) {
 }
 
 func (l *boundBoolList) SetValue(i int, v bool) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -184,6 +193,10 @@ func (b *boundBoolListItem) Get() (bool, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
+	if b.index < 0 || b.index >= len(*b.val) {
+		return false, errOutOfBounds
+	}
+
 	return (*b.val)[b.index], nil
 }
 
@@ -209,6 +222,228 @@ type boundExternalBoolListItem struct {
 
 func (b *boundExternalBoolListItem) setIfChanged(val bool) error {
 	if val == b.old {
+		return nil
+	}
+	(*b.val)[b.index] = val
+	b.old = val
+
+	b.trigger()
+	return nil
+}
+
+// BytesList supports binding a list of []byte values.
+//
+// Since: 2.2
+type BytesList interface {
+	DataList
+
+	Append(value []byte) error
+	Get() ([][]byte, error)
+	GetValue(index int) ([]byte, error)
+	Prepend(value []byte) error
+	Set(list [][]byte) error
+	SetValue(index int, value []byte) error
+}
+
+// ExternalBytesList supports binding a list of []byte values from an external variable.
+//
+// Since: 2.2
+type ExternalBytesList interface {
+	BytesList
+
+	Reload() error
+}
+
+// NewBytesList returns a bindable list of []byte values.
+//
+// Since: 2.2
+func NewBytesList() BytesList {
+	return &boundBytesList{val: &[][]byte{}}
+}
+
+// BindBytesList returns a bound list of []byte values, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.2
+func BindBytesList(v *[][]byte) ExternalBytesList {
+	if v == nil {
+		return NewBytesList().(ExternalBytesList)
+	}
+
+	b := &boundBytesList{val: v, updateExternal: true}
+
+	for i := range *v {
+		b.appendItem(bindBytesListItem(v, i, b.updateExternal))
+	}
+
+	return b
+}
+
+type boundBytesList struct {
+	listBase
+
+	updateExternal bool
+	val            *[][]byte
+}
+
+func (l *boundBytesList) Append(val []byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	*l.val = append(*l.val, val)
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Get() ([][]byte, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	return *l.val, nil
+}
+
+func (l *boundBytesList) GetValue(i int) ([]byte, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	if i < 0 || i >= l.Length() {
+		return nil, errOutOfBounds
+	}
+
+	return (*l.val)[i], nil
+}
+
+func (l *boundBytesList) Prepend(val []byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = append([][]byte{val}, *l.val...)
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Reload() error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Set(v [][]byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	*l.val = v
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) doReload() (retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		l.trigger()
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(bindBytesListItem(l.val, i, l.updateExternal))
+		}
+		l.trigger()
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		var err error
+		if l.updateExternal {
+			item.(*boundExternalBytesListItem).lock.Lock()
+			err = item.(*boundExternalBytesListItem).setIfChanged((*l.val)[i])
+			item.(*boundExternalBytesListItem).lock.Unlock()
+		} else {
+			item.(*boundBytesListItem).lock.Lock()
+			err = item.(*boundBytesListItem).doSet((*l.val)[i])
+			item.(*boundBytesListItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (l *boundBytesList) SetValue(i int, v []byte) error {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
+		return errOutOfBounds
+	}
+
+	l.lock.Lock()
+	(*l.val)[i] = v
+	l.lock.Unlock()
+
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
+	}
+	return item.(Bytes).Set(v)
+}
+
+func bindBytesListItem(v *[][]byte, i int, external bool) Bytes {
+	if external {
+		ret := &boundExternalBytesListItem{old: (*v)[i]}
+		ret.val = v
+		ret.index = i
+		return ret
+	}
+
+	return &boundBytesListItem{val: v, index: i}
+}
+
+type boundBytesListItem struct {
+	base
+
+	val   *[][]byte
+	index int
+}
+
+func (b *boundBytesListItem) Get() ([]byte, error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return nil, errOutOfBounds
+	}
+
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundBytesListItem) Set(val []byte) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	return b.doSet(val)
+}
+
+func (b *boundBytesListItem) doSet(val []byte) error {
+	(*b.val)[b.index] = val
+
+	b.trigger()
+	return nil
+}
+
+type boundExternalBytesListItem struct {
+	boundBytesListItem
+
+	old []byte
+}
+
+func (b *boundExternalBytesListItem) setIfChanged(val []byte) error {
+	if bytes.Equal(val, b.old) {
 		return nil
 	}
 	(*b.val)[b.index] = val
@@ -290,11 +525,12 @@ func (l *boundFloatList) Get() ([]float64, error) {
 }
 
 func (l *boundFloatList) GetValue(i int) (float64, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return 0.0, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -360,7 +596,11 @@ func (l *boundFloatList) doReload() (retErr error) {
 }
 
 func (l *boundFloatList) SetValue(i int, v float64) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -396,6 +636,10 @@ type boundFloatListItem struct {
 func (b *boundFloatListItem) Get() (float64, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return 0.0, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -503,11 +747,12 @@ func (l *boundIntList) Get() ([]int, error) {
 }
 
 func (l *boundIntList) GetValue(i int) (int, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return 0, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -573,7 +818,11 @@ func (l *boundIntList) doReload() (retErr error) {
 }
 
 func (l *boundIntList) SetValue(i int, v int) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -609,6 +858,10 @@ type boundIntListItem struct {
 func (b *boundIntListItem) Get() (int, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return 0, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -716,11 +969,12 @@ func (l *boundRuneList) Get() ([]rune, error) {
 }
 
 func (l *boundRuneList) GetValue(i int) (rune, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return rune(0), errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -786,7 +1040,11 @@ func (l *boundRuneList) doReload() (retErr error) {
 }
 
 func (l *boundRuneList) SetValue(i int, v rune) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -822,6 +1080,10 @@ type boundRuneListItem struct {
 func (b *boundRuneListItem) Get() (rune, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return rune(0), errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -929,11 +1191,12 @@ func (l *boundStringList) Get() ([]string, error) {
 }
 
 func (l *boundStringList) GetValue(i int) (string, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return "", errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -999,7 +1262,11 @@ func (l *boundStringList) doReload() (retErr error) {
 }
 
 func (l *boundStringList) SetValue(i int, v string) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -1035,6 +1302,10 @@ type boundStringListItem struct {
 func (b *boundStringListItem) Get() (string, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return "", errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -1142,11 +1413,12 @@ func (l *boundUntypedList) Get() ([]interface{}, error) {
 }
 
 func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return nil, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -1212,7 +1484,11 @@ func (l *boundUntypedList) doReload() (retErr error) {
 }
 
 func (l *boundUntypedList) SetValue(i int, v interface{}) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -1248,6 +1524,10 @@ type boundUntypedListItem struct {
 func (b *boundUntypedListItem) Get() (interface{}, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return nil, errOutOfBounds
+	}
 
 	return (*b.val)[b.index], nil
 }
@@ -1355,11 +1635,12 @@ func (l *boundURIList) Get() ([]fyne.URI, error) {
 }
 
 func (l *boundURIList) GetValue(i int) (fyne.URI, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return fyne.URI(nil), errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -1425,7 +1706,11 @@ func (l *boundURIList) doReload() (retErr error) {
 }
 
 func (l *boundURIList) SetValue(i int, v fyne.URI) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -1462,6 +1747,10 @@ func (b *boundURIListItem) Get() (fyne.URI, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
+	if b.index < 0 || b.index >= len(*b.val) {
+		return fyne.URI(nil), errOutOfBounds
+	}
+
 	return (*b.val)[b.index], nil
 }
 
@@ -1486,7 +1775,7 @@ type boundExternalURIListItem struct {
 }
 
 func (b *boundExternalURIListItem) setIfChanged(val fyne.URI) error {
-	if val == b.old {
+	if compareURI(val, b.old) {
 		return nil
 	}
 	(*b.val)[b.index] = val

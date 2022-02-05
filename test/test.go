@@ -265,10 +265,8 @@ func WithTestTheme(t *testing.T, f func()) {
 
 func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne.Position) {
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(fyne.Tappable)
+		return ok
 	}
 	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	return

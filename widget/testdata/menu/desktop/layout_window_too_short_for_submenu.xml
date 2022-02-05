@@ -4,21 +4,21 @@
 	</content>
 	<overlay>
 		<widget size="500x150" type="*widget.OverlayContainer">
-			<widget pos="10,10" size="70x107" type="*widget.Menu">
-				<widget size="70x107" type="*widget.Shadow">
+			<widget pos="10,10" size="70x140" type="*widget.Menu">
+				<widget size="70x140" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 					<linearGradient endColor="shadow" pos="0,-4" size="70x4"/>
 					<radialGradient centerOffset="-0.5,0.5" pos="70,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="70,0" size="4x107" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="70,107" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,107" size="70x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,107" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x107"/>
+					<linearGradient angle="270" pos="70,0" size="4x140" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="70,140" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,140" size="70x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,140" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x140"/>
 				</widget>
-				<widget size="70x107" type="*widget.Scroll">
-					<widget size="70x107" type="*widget.menuBox">
-						<rectangle fillColor="background" size="70x115"/>
-						<container pos="0,4" size="70x115">
+				<widget size="70x140" type="*widget.Scroll">
+					<widget size="70x144" type="*widget.menuBox">
+						<rectangle fillColor="background" size="70x152"/>
+						<container pos="0,4" size="70x152">
 							<widget size="70x28" type="*widget.menuItem">
 								<text pos="8,4" size="54x20">A</text>
 							</widget>
@@ -33,7 +33,22 @@
 								<text pos="8,4" size="54x20">C</text>
 								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
+							<widget pos="0,103" size="70x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="70x1"/>
+							</widget>
+							<widget pos="0,108" size="70x28" type="*widget.menuItem">
+								<text pos="8,4" size="54x20">D</text>
+								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							</widget>
 						</container>
+					</widget>
+					<widget pos="64,0" size="6x140" type="*widget.scrollBarArea">
+						<widget pos="3,0" size="3x135" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="3x135"/>
+						</widget>
+					</widget>
+					<widget pos="0,140" size="70x0" type="*widget.Shadow">
+						<linearGradient endColor="shadow" pos="0,-8" size="70x8"/>
 					</widget>
 				</widget>
 				<widget pos="70,37" size="152x102" type="*widget.Menu">

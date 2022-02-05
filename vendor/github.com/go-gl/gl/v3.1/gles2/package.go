@@ -17,11 +17,11 @@
 package gles2
 
 // #cgo !gles2,darwin        LDFLAGS: -framework OpenGL
-// #cgo gles2,darwin         LDFLAGS: -lGLESv2
+// #cgo gles2,darwin         LDFLAGS: -framework OpenGLES
 // #cgo !gles2,windows       LDFLAGS: -lopengl32
 // #cgo gles2,windows        LDFLAGS: -lGLESv2
-// #cgo !egl,linux !egl,freebsd !egl,openbsd pkg-config: gl
-// #cgo egl,linux egl,freebsd egl,openbsd    pkg-config: egl
+// #cgo !egl,linux !egl,freebsd !egl,netbsd !egl,openbsd pkg-config: gl
+// #cgo egl,linux egl,freebsd egl,netbsd egl,openbsd    pkg-config: egl
 // #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
 // #ifndef WIN32_LEAN_AND_MEAN
 // #define WIN32_LEAN_AND_MEAN 1
@@ -3479,6 +3479,9 @@ package gles2
 // }
 // static void  glowVertexAttribIPointer(GPVERTEXATTRIBIPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLsizei  stride, const void * pointer) {
 //   (*fnptr)(index, size, type, stride, pointer);
+// }
+// static void  glowVertexAttribIPointerWithOffset(GPVERTEXATTRIBIPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLsizei  stride, uintptr_t offset) {
+//   (*fnptr)(index, size, type, stride, (const void *)(offset));
 // }
 // static void  glowVertexAttribPointer(GPVERTEXATTRIBPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLboolean  normalized, GLsizei  stride, const void * pointer) {
 //   (*fnptr)(index, size, type, normalized, stride, pointer);
@@ -9806,6 +9809,9 @@ func VertexAttribIFormat(attribindex uint32, size int32, xtype uint32, relativeo
 }
 func VertexAttribIPointer(index uint32, size int32, xtype uint32, stride int32, pointer unsafe.Pointer) {
 	C.glowVertexAttribIPointer(gpVertexAttribIPointer, (C.GLuint)(index), (C.GLint)(size), (C.GLenum)(xtype), (C.GLsizei)(stride), pointer)
+}
+func VertexAttribIPointerWithOffset(index uint32, size int32, xtype uint32, stride int32, offset uintptr) {
+	C.glowVertexAttribIPointerWithOffset(gpVertexAttribIPointer, (C.GLuint)(index), (C.GLint)(size), (C.GLenum)(xtype), (C.GLsizei)(stride), (C.uintptr_t)(offset))
 }
 
 // define an array of generic vertex attribute data

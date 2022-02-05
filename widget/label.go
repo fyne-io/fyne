@@ -15,8 +15,7 @@ type Label struct {
 	TextStyle fyne.TextStyle // The style of the label text
 	provider  *RichText
 
-	textSource   binding.String
-	textListener binding.DataListener
+	binder basicBinder
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -51,10 +50,8 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 //
 // Since: 2.0
 func (l *Label) Bind(data binding.String) {
-	l.Unbind()
-	l.textSource = data
-	l.createListener()
-	data.AddListener(l.textListener)
+	l.binder.SetCallback(l.updateFromData) // This could only be done once, maybe in ExtendBaseWidget?
+	l.binder.Bind(data)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -98,6 +95,7 @@ func (l *Label) Refresh() {
 	}
 	l.syncSegments()
 	l.provider.Refresh()
+	l.BaseWidget.Refresh()
 }
 
 // Resize sets a new size for the label.
@@ -114,11 +112,7 @@ func (l *Label) Resize(s fyne.Size) {
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
-	if l.provider == nil { // not created until visible
-		return
-	}
-	l.provider.Segments[0].(*TextSegment).Text = text
-	l.provider.Refresh()
+	l.Refresh()
 }
 
 // Unbind disconnects any configured data source from this Label.
@@ -126,46 +120,31 @@ func (l *Label) SetText(text string) {
 //
 // Since: 2.0
 func (l *Label) Unbind() {
-	src := l.textSource
-	if src == nil {
-		return
-	}
-
-	src.RemoveListener(l.textListener)
-	l.textSource = nil
-}
-
-func (l *Label) createListener() {
-	if l.textListener != nil {
-		return
-	}
-
-	l.textListener = binding.NewDataListener(func() {
-		src := l.textSource
-		if src == nil {
-			return
-		}
-		val, err := src.Get()
-		if err != nil {
-			fyne.LogError("Error getting current data value", err)
-			return
-		}
-
-		l.Text = val
-		if cache.IsRendered(l) {
-			l.Refresh()
-		}
-	})
+	l.binder.Unbind()
 }
 
 func (l *Label) syncSegments() {
 	l.provider.Wrapping = l.Wrapping
-	l.provider.Segments = []RichTextSegment{&TextSegment{
-		Style: RichTextStyle{
-			Alignment: l.Alignment,
-			Inline:    true,
-			TextStyle: l.TextStyle,
-		},
-		Text: l.Text,
-	}}
+	l.provider.Segments[0].(*TextSegment).Style = RichTextStyle{
+		Alignment: l.Alignment,
+		Inline:    true,
+		TextStyle: l.TextStyle,
+	}
+	l.provider.Segments[0].(*TextSegment).Text = l.Text
+}
+
+func (l *Label) updateFromData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	textSource, ok := data.(binding.String)
+	if !ok {
+		return
+	}
+	val, err := textSource.Get()
+	if err != nil {
+		fyne.LogError("Error getting current data value", err)
+		return
+	}
+	l.SetText(val)
 }

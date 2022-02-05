@@ -33,6 +33,10 @@ func (*device) IsMobile() bool {
 	return true
 }
 
+func (*device) IsBrowser() bool {
+	return false
+}
+
 func (*device) HasKeyboard() bool {
 	return false
 }

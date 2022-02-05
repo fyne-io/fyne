@@ -1,8 +1,7 @@
 package app
 
 import (
-	"encoding/json"
-	"io"
+	"bytes"
 	"os"
 	"path/filepath"
 	"sync"
@@ -33,8 +32,7 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
-	listenerLock    sync.Mutex
-	changeListeners []chan fyne.Settings
+	changeListeners sync.Map    // map[chan fyne.Settings]bool
 	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
@@ -92,50 +90,44 @@ func (s *settings) Scale() float32 {
 }
 
 func (s *settings) AddChangeListener(listener chan fyne.Settings) {
-	s.listenerLock.Lock()
-	defer s.listenerLock.Unlock()
-	s.changeListeners = append(s.changeListeners, listener)
+	s.changeListeners.Store(listener, true) // the boolean is just a dummy value here.
 }
 
 func (s *settings) apply() {
-	s.listenerLock.Lock()
-	defer s.listenerLock.Unlock()
-
-	for _, listener := range s.changeListeners {
+	s.changeListeners.Range(func(key, _ interface{}) bool {
+		listener := key.(chan fyne.Settings)
 		select {
 		case listener <- s:
 		default:
 			l := listener
 			go func() { l <- s }()
 		}
-	}
-}
-
-func (s *settings) load() {
-	err := s.loadFromFile(s.schema.StoragePath())
-	if err != nil && err != io.EOF { // we can get an EOF in windows settings writes
-		fyne.LogError("Settings load error:", err)
-	}
-
-	s.setupTheme()
-}
-
-func (s *settings) loadFromFile(path string) error {
-	file, err := os.Open(path) // #nosec
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-	decode := json.NewDecoder(file)
-
-	return decode.Decode(&s.schema)
+		return true
+	})
 }
 
 func (s *settings) fileChanged() {
 	s.load()
 	s.apply()
+}
+
+func (s *settings) loadSystemTheme() fyne.Theme {
+	path := filepath.Join(rootConfigDir(), "theme.json")
+	data, err := fyne.LoadResourceFromPath(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Failed to load user theme file: "+path, err)
+		}
+		return theme.DefaultTheme()
+	}
+	if data != nil && data.Content() != nil {
+		th, err := theme.FromJSONReader(bytes.NewReader(data.Content()))
+		if err == nil {
+			return th
+		}
+		fyne.LogError("Failed to parse user theme file: "+path, err)
+	}
+	return theme.DefaultTheme()
 }
 
 func (s *settings) setupTheme() {
@@ -144,28 +136,16 @@ func (s *settings) setupTheme() {
 		name = env
 	}
 
-	var variant fyne.ThemeVariant
+	variant := defaultVariant()
 	effectiveTheme := s.theme
+	if !s.themeSpecified {
+		effectiveTheme = s.loadSystemTheme()
+	}
 	switch name {
 	case "light":
 		variant = theme.VariantLight
-		if !s.themeSpecified {
-			effectiveTheme = theme.LightTheme()
-		}
 	case "dark":
 		variant = theme.VariantDark
-		if !s.themeSpecified {
-			effectiveTheme = theme.DarkTheme()
-		}
-	default:
-		variant = defaultVariant()
-		if s.themeSpecified {
-			break
-		}
-		effectiveTheme = theme.DarkTheme()
-		if variant == theme.VariantLight {
-			effectiveTheme = theme.LightTheme()
-		}
 	}
 
 	s.applyTheme(effectiveTheme, variant)

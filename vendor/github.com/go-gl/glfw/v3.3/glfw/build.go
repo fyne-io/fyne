@@ -38,16 +38,16 @@ package glfw
 #cgo linux,!wayland LDFLAGS: -lX11 -lXrandr -lXxf86vm -lXi -lXcursor -lm -lXinerama -ldl -lrt
 #cgo linux,wayland LDFLAGS: -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon -lm -ldl -lrt
 
-// FreeBSD Build Tags
+// BSD Build Tags
 // ----------------
 // GLFW Options:
-#cgo freebsd pkg-config: glfw3
-#cgo freebsd CFLAGS: -D_GLFW_HAS_DLOPEN
-#cgo freebsd,!wayland CFLAGS: -D_GLFW_X11 -D_GLFW_HAS_GLXGETPROCADDRESSARB
-#cgo freebsd,wayland CFLAGS: -D_GLFW_WAYLAND
+#cgo freebsd,!wayland netbsd,!wayland openbsd pkg-config: x11 xau xcb xdmcp
+#cgo freebsd,wayland netbsd,wayland pkg-config: wayland-client wayland-cursor wayland-egl epoll-shim
+#cgo freebsd netbsd openbsd CFLAGS: -D_GLFW_HAS_DLOPEN
+#cgo freebsd,!wayland netbsd,!wayland openbsd CFLAGS: -D_GLFW_X11 -D_GLFW_HAS_GLXGETPROCADDRESSARB
+#cgo freebsd,wayland netbsd,wayland CFLAGS: -D_GLFW_WAYLAND
 
 // Linker Options:
-#cgo freebsd,!wayland LDFLAGS: -lm -lGL -lX11 -lXrandr -lXxf86vm -lXi -lXcursor -lXinerama
-#cgo freebsd,wayland LDFLAGS: -lm -lGL -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon
+#cgo freebsd netbsd openbsd LDFLAGS: -lm
 */
 import "C"

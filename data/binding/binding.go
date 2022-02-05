@@ -1,5 +1,6 @@
 //go:generate go run gen.go
 
+// Package binding provides support for binding data to widgets.
 package binding
 
 import (
@@ -56,41 +57,27 @@ func (l *listener) DataChanged() {
 }
 
 type base struct {
-	listeners []DataListener
-	lock      sync.RWMutex
+	listeners sync.Map // map[DataListener]bool
+
+	lock sync.RWMutex
 }
 
 // AddListener allows a data listener to be informed of changes to this item.
 func (b *base) AddListener(l DataListener) {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	b.listeners = append(b.listeners, l)
+	b.listeners.Store(l, true)
 	queueItem(l.DataChanged)
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
 func (b *base) RemoveListener(l DataListener) {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	for i, listen := range b.listeners {
-		if listen != l {
-			continue
-		}
-
-		if i == len(b.listeners)-1 {
-			b.listeners = b.listeners[:len(b.listeners)-1]
-		} else {
-			b.listeners = append(b.listeners[:i], b.listeners[i+1:]...)
-		}
-	}
+	b.listeners.Delete(l)
 }
 
 func (b *base) trigger() {
-	for _, listen := range b.listeners {
-		queueItem(listen.DataChanged)
-	}
+	b.listeners.Range(func(key, _ interface{}) bool {
+		queueItem(key.(DataListener).DataChanged)
+		return true
+	})
 }
 
 // Untyped supports binding a interface{} value.

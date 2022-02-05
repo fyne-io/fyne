@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -97,29 +97,41 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
 		otherItem,
 	)
-	settingsItem := fyne.NewMenuItem("Settings", func() {
+
+	openSettings := func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
 		w.Resize(fyne.NewSize(480, 480))
 		w.Show()
+	}
+	settingsItem := fyne.NewMenuItem("Settings", openSettings)
+	settingsShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyComma, Modifier: fyne.KeyModifierShortcutDefault}
+	settingsItem.Shortcut = settingsShortcut
+	w.Canvas().AddShortcut(settingsShortcut, func(shortcut fyne.Shortcut) {
+		openSettings()
 	})
 
+	cutShortcut := &fyne.ShortcutCut{Clipboard: w.Clipboard()}
 	cutItem := fyne.NewMenuItem("Cut", func() {
-		shortcutFocused(&fyne.ShortcutCut{
-			Clipboard: w.Clipboard(),
-		}, w)
+		shortcutFocused(cutShortcut, w)
 	})
+	cutItem.Shortcut = cutShortcut
+	copyShortcut := &fyne.ShortcutCopy{Clipboard: w.Clipboard()}
 	copyItem := fyne.NewMenuItem("Copy", func() {
-		shortcutFocused(&fyne.ShortcutCopy{
-			Clipboard: w.Clipboard(),
-		}, w)
+		shortcutFocused(copyShortcut, w)
 	})
+	copyItem.Shortcut = copyShortcut
+	pasteShortcut := &fyne.ShortcutPaste{Clipboard: w.Clipboard()}
 	pasteItem := fyne.NewMenuItem("Paste", func() {
-		shortcutFocused(&fyne.ShortcutPaste{
-			Clipboard: w.Clipboard(),
-		}, w)
+		shortcutFocused(pasteShortcut, w)
 	})
-	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
+	pasteItem.Shortcut = pasteShortcut
+	performFind := func() { fmt.Println("Menu Find") }
+	findItem := fyne.NewMenuItem("Find", performFind)
+	findItem.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyF, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierAlt | fyne.KeyModifierShift | fyne.KeyModifierControl | fyne.KeyModifierSuper}
+	w.Canvas().AddShortcut(findItem.Shortcut, func(shortcut fyne.Shortcut) {
+		performFind()
+	})
 
 	helpMenu := fyne.NewMenu("Help",
 		fyne.NewMenuItem("Documentation", func() {
@@ -138,7 +150,8 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	// a quit item will be appended to our first (File) menu
 	file := fyne.NewMenu("File", newItem, checkedItem, disabledItem)
-	if !fyne.CurrentDevice().IsMobile() {
+	device := fyne.CurrentDevice()
+	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
 	return fyne.NewMainMenu(
@@ -146,6 +159,10 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)
+}
+
+func unsupportedTutorial(t tutorials.Tutorial) bool {
+	return !t.SupportWeb && fyne.CurrentDevice().IsBrowser()
 }
 
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
@@ -170,9 +187,17 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				return
 			}
 			obj.(*widget.Label).SetText(t.Title)
+			if unsupportedTutorial(t) {
+				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
+			} else {
+				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
+			}
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
+				if unsupportedTutorial(t) {
+					return
+				}
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
 			}
@@ -184,7 +209,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 		tree.Select(currentPref)
 	}
 
-	themes := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+	themes := container.NewGridWithColumns(2,
 		widget.NewButton("Dark", func() {
 			a.Settings().SetTheme(theme.DarkTheme())
 		}),

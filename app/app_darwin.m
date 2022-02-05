@@ -1,11 +1,20 @@
+//go:build !ci
 // +build !ci
 
+#import <Foundation/Foundation.h>
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
 #import <UserNotifications/UserNotifications.h>
+#endif
 
 static int notifyNum = 0;
 
 extern void fallbackSend(char *cTitle, char *cBody);
 
+bool isBundled() {
+    return [[NSBundle mainBundle] bundleIdentifier] != nil;
+}
+
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
 void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSString *body) {
     UNMutableNotificationContent *content = [UNMutableNotificationContent new];
     [content autorelease];
@@ -22,10 +31,6 @@ void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSStr
             NSLog(@"Could not send notification: %@", error);
         }
     }];
-}
-
-bool isBundled() {
-    return [[NSBundle mainBundle] bundleIdentifier] != nil;
 }
 
 void sendNotification(char *cTitle, char *cBody) {
@@ -49,3 +54,8 @@ void sendNotification(char *cTitle, char *cBody) {
             }
         }];
 }
+#else
+void sendNotification(char *cTitle, char *cBody) {
+	fallbackSend(cTitle, cBody);
+}
+#endif

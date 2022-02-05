@@ -5,7 +5,7 @@ package async
 import "fyne.io/fyne/v2"
 
 // UnboundedCanvasObjectChan is a channel with an unbounded buffer for caching
-// CanvasObject objects.
+// CanvasObject objects. A channel must be closed via Close method.
 type UnboundedCanvasObjectChan struct {
 	in, out chan fyne.CanvasObject
 	close   chan struct{}

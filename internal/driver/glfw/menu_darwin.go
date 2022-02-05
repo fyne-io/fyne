@@ -1,8 +1,11 @@
+//go:build !no_native_menus
 // +build !no_native_menus
 
 package glfw
 
 import (
+	"fmt"
+	"strings"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
@@ -19,19 +22,21 @@ void        assignDarwinSubmenu(const void*, const void*);
 void        completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
-const void* insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
+const void* insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator);
 void        resetDarwinMenu();
 
 // Used for tests.
-const void* test_darwinMainMenu();
-const void* test_NSMenu_itemAtIndex(const void*, NSInteger);
-NSInteger   test_NSMenu_numberOfItems(const void*);
-void        test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
-void        test_NSMenu_removeItemAtIndex(const void* m, NSInteger i);
-const char* test_NSMenu_title(const void*);
-bool        test_NSMenuItem_isSeparatorItem(const void*);
-const void* test_NSMenuItem_submenu(const void*);
-const char* test_NSMenuItem_title(const void*);
+const void*   test_darwinMainMenu();
+const void*   test_NSMenu_itemAtIndex(const void*, NSInteger);
+NSInteger     test_NSMenu_numberOfItems(const void*);
+void          test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
+void          test_NSMenu_removeItemAtIndex(const void* m, NSInteger i);
+const char*   test_NSMenu_title(const void*);
+bool          test_NSMenuItem_isSeparatorItem(const void*);
+const char*   test_NSMenuItem_keyEquivalent(const void*);
+unsigned long test_NSMenuItem_keyEquivalentModifierMask(const void*);
+const void*   test_NSMenuItem_submenu(const void*);
+const char*   test_NSMenuItem_title(const void*);
 */
 import "C"
 
@@ -43,6 +48,36 @@ type menuCallbacks struct {
 
 var callbacks []*menuCallbacks
 var ecb func(string)
+var specialKeys = map[fyne.KeyName]string{
+	fyne.KeyBackspace: "\x08",
+	fyne.KeyDelete:    "\x7f",
+	fyne.KeyDown:      "\uf701",
+	fyne.KeyEnd:       "\uf72b",
+	fyne.KeyEnter:     "\x03",
+	fyne.KeyEscape:    "\x1b",
+	fyne.KeyF10:       "\uf70d",
+	fyne.KeyF11:       "\uf70e",
+	fyne.KeyF12:       "\uf70f",
+	fyne.KeyF1:        "\uf704",
+	fyne.KeyF2:        "\uf705",
+	fyne.KeyF3:        "\uf706",
+	fyne.KeyF4:        "\uf707",
+	fyne.KeyF5:        "\uf708",
+	fyne.KeyF6:        "\uf709",
+	fyne.KeyF7:        "\uf70a",
+	fyne.KeyF8:        "\uf70b",
+	fyne.KeyF9:        "\uf70c",
+	fyne.KeyHome:      "\uf729",
+	fyne.KeyInsert:    "\uf727",
+	fyne.KeyLeft:      "\uf702",
+	fyne.KeyPageDown:  "\uf72d",
+	fyne.KeyPageUp:    "\uf72c",
+	fyne.KeyReturn:    "\n",
+	fyne.KeyRight:     "\uf703",
+	fyne.KeySpace:     " ",
+	fyne.KeyTab:       "\t",
+	fyne.KeyUp:        "\uf700",
+}
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
 	menu, nextItemID = handleSpecialItems(w, menu, nextItemID, true)
@@ -79,6 +114,8 @@ func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointe
 		nsMenuItem := C.insertDarwinMenuItem(
 			nsMenu,
 			C.CString(item.Label),
+			C.CString(keyEquivalent(item)),
+			C.uint(keyEquivalentModifierMask(item)),
 			C.int(nextItemID),
 			C.int(-1),
 			C.bool(item.IsSeparator),
@@ -111,6 +148,8 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 			C.insertDarwinMenuItem(
 				C.darwinAppMenu(),
 				C.CString(item.Label),
+				C.CString(keyEquivalent(item)),
+				C.uint(keyEquivalentModifierMask(item)),
 				C.int(nextItemID),
 				C.int(1),
 				C.bool(false),
@@ -119,6 +158,8 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 				C.insertDarwinMenuItem(
 					C.darwinAppMenu(),
 					C.CString(""),
+					C.CString(""),
+					C.uint(0),
 					C.int(nextItemID),
 					C.int(1),
 					C.bool(true),
@@ -129,6 +170,36 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 		}
 	}
 	return menu, nextItemID
+}
+
+func keyEquivalent(item *fyne.MenuItem) (key string) {
+	if s, ok := item.Shortcut.(fyne.KeyboardShortcut); ok {
+		if key = specialKeys[s.Key()]; key == "" {
+			if len(s.Key()) > 1 {
+				fyne.LogError(fmt.Sprintf("unsupported key “%s” for menu shortcut", s.Key()), nil)
+			}
+			key = strings.ToLower(string(s.Key()))
+		}
+	}
+	return
+}
+
+func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
+	if s, ok := item.Shortcut.(fyne.KeyboardShortcut); ok {
+		if (s.Mod() & fyne.KeyModifierShift) != 0 {
+			mask |= 1 << 17 // NSEventModifierFlagShift
+		}
+		if (s.Mod() & fyne.KeyModifierAlt) != 0 {
+			mask |= 1 << 19 // NSEventModifierFlagOption
+		}
+		if (s.Mod() & fyne.KeyModifierControl) != 0 {
+			mask |= 1 << 18 // NSEventModifierFlagControl
+		}
+		if (s.Mod() & fyne.KeyModifierSuper) != 0 {
+			mask |= 1 << 20 // NSEventModifierFlagCommand
+		}
+	}
+	return
 }
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
@@ -223,6 +294,14 @@ func testNSMenuTitle(m unsafe.Pointer) string {
 
 func testNSMenuItemIsSeparatorItem(i unsafe.Pointer) bool {
 	return bool(C.test_NSMenuItem_isSeparatorItem(i))
+}
+
+func testNSMenuItemKeyEquivalent(i unsafe.Pointer) string {
+	return C.GoString(C.test_NSMenuItem_keyEquivalent(i))
+}
+
+func testNSMenuItemKeyEquivalentModifierMask(i unsafe.Pointer) uint64 {
+	return uint64(C.ulong(C.test_NSMenuItem_keyEquivalentModifierMask(i)))
 }
 
 func testNSMenuItemSubmenu(i unsafe.Pointer) unsafe.Pointer {

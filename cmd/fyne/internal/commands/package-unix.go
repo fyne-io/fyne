@@ -1,12 +1,13 @@
 package commands
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-	"github.com/pkg/errors"
 
 	"golang.org/x/sys/execabs"
 )
@@ -38,14 +39,14 @@ func (p *Packager) packageUNIX() error {
 	binName := filepath.Join(binDir, filepath.Base(p.exe))
 	err := util.CopyExeFile(p.exe, binName)
 	if err != nil {
-		return errors.Wrap(err, "Failed to copy application binary file")
+		return fmt.Errorf("failed to copy application binary file: %w", err)
 	}
 
 	iconDir := util.EnsureSubDir(shareDir, "pixmaps")
 	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
 	err = util.CopyFile(p.icon, iconPath)
 	if err != nil {
-		return errors.Wrap(err, "Failed to copy icon")
+		return fmt.Errorf("failed to copy icon: %w", err)
 	}
 
 	appsDir := util.EnsureSubDir(shareDir, "applications")
@@ -55,7 +56,7 @@ func (p *Packager) packageUNIX() error {
 	tplData := unixData{Name: p.name, Exec: filepath.Base(p.exe), Icon: p.name + filepath.Ext(p.icon), Local: local}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
-		return errors.Wrap(err, "Failed to write desktop entry string")
+		return fmt.Errorf("failed to write desktop entry string: %w", err)
 	}
 
 	if !p.install {
@@ -64,12 +65,14 @@ func (p *Packager) packageUNIX() error {
 		makefile, _ := os.Create(filepath.Join(p.dir, tempDir, "Makefile"))
 		err := templates.MakefileUNIX.Execute(makefile, tplData)
 		if err != nil {
-			return errors.Wrap(err, "Failed to write Makefile string")
+			return fmt.Errorf("failed to write Makefile string: %w", err)
 		}
 
+		var buf bytes.Buffer
 		tarCmd := execabs.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
+		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
-			return errors.Wrap(err, "Failed to create archive with tar")
+			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.String(), err)
 		}
 	}
 

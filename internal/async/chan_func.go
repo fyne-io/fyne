@@ -3,7 +3,7 @@
 package async
 
 // UnboundedFuncChan is a channel with an unbounded buffer for caching
-// Func objects.
+// Func objects. A channel must be closed via Close method.
 type UnboundedFuncChan struct {
 	in, out chan func()
 	close   chan struct{}
