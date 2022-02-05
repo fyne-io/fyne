@@ -48,6 +48,10 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 }
 
+func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
+	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
+}
+
 func rootConfigDir() string {
 	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")

@@ -37,6 +37,10 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	fallbackNotification(n.Title, n.Content)
 }
 
+func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
+	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
+}
+
 func escapeNotificationString(in string) string {
 	noSlash := strings.ReplaceAll(in, "\\", "\\\\")
 	return strings.ReplaceAll(noSlash, "\"", "\\\"")

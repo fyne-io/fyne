@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fyne-io/systray"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
@@ -38,7 +40,45 @@ type gLDriver struct {
 
 	animation *animation.Runner
 
-	drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
+	drawOnMainThread    bool   // A workaround on Apple M1, just use 1 thread until fixed upstream
+	trayStart, trayStop func() // shut down the system tray, if used
+}
+
+func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
+	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
+		for _, i := range m.Items {
+			if i.IsSeparator {
+				systray.AddSeparator()
+				continue
+			}
+
+			var item *systray.MenuItem
+			fn := i.Action
+
+			if i.Checked {
+				item = systray.AddMenuItemCheckbox(i.Label, i.Label, true)
+			} else {
+				item = systray.AddMenuItem(i.Label, i.Label)
+			}
+			if i.Disabled {
+				item.Disable()
+			}
+
+			go func() {
+				<-item.ClickedCh
+				fn()
+			}()
+		}
+
+		systray.AddSeparator()
+		quit := systray.AddMenuItem("Quit", "Quit application")
+		go func() {
+			<-quit.ClickedCh
+			d.Quit()
+		}()
+	}, func() {
+		// anything required for tear-down
+	})
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
@@ -70,6 +110,9 @@ func (d *gLDriver) Device() fyne.Device {
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
 		curWindow = nil
+		if d.trayStop != nil {
+			d.trayStop()
+		}
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
 	defer func() {
