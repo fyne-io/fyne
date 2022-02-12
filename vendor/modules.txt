@@ -68,6 +68,9 @@ github.com/josephspurrier/goversioninfo
 github.com/lucor/goinfo
 github.com/lucor/goinfo/format
 github.com/lucor/goinfo/report
+# github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
+## explicit
+github.com/mcuadros/go-version
 # github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 github.com/nfnt/resize
 # github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e

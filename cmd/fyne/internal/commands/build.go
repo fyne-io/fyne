@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	version "github.com/mcuadros/go-version"
 	"golang.org/x/sys/execabs"
 )
 
@@ -15,14 +16,50 @@ type builder struct {
 	tags               []string
 }
 
+func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
+	split := strings.Split(output, " ")
+	// We are expecting something like: `go version goX.Y OS`
+	if len(split) != 4 || split[0] != "go" || split[1] != "version" || len(split[2]) < 5 || split[2][:2] != "go" {
+		return fmt.Errorf("invalid output for `go version`: `%s`", output)
+	}
+
+	normalized := version.Normalize(split[2][2 : len(split[2])-2])
+	if !versionConstraint.Match(normalized) {
+		return fmt.Errorf("expected go version %v got `%v`", versionConstraint.GetConstraints(), normalized)
+	}
+
+	return nil
+}
+
+func checkGoVersion(versionConstraint *version.ConstraintGroup) error {
+	if versionConstraint == nil {
+		return nil
+	}
+
+	goVersion, err := execabs.Command("go", "version").CombinedOutput()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
+		return err
+	}
+
+	return checkVersion(string(goVersion), versionConstraint)
+}
+
 func (b *builder) build() error {
+	var versionConstraint *version.ConstraintGroup
+
 	goos := b.os
 	if goos == "" {
 		goos = targetOS()
 	}
 
 	args := []string{"build"}
-	env := append(os.Environ(), "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+	env := os.Environ()
+
+	if goos != "wasm" {
+		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+	}
+
 	if goos == "darwin" {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
@@ -50,17 +87,22 @@ func (b *builder) build() error {
 		args = append(args, "-tags", strings.Join(tags, ","))
 	}
 
-	cmd := execabs.Command("go", args...)
-	cmd.Dir = b.srcdir
 	if goos != "ios" && goos != "android" && goos != "wasm" {
 		env = append(env, "GOOS="+goos)
 	} else if goos == "wasm" {
+		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
 		env = append(env, "GOARCH=wasm")
 		env = append(env, "GOOS=js")
 	}
 
-	cmd.Env = env
+	if err := checkGoVersion(versionConstraint); err != nil {
+		return err
+	}
 
+	cmd := execabs.Command("go", args...)
+
+	cmd.Dir = b.srcdir
+	cmd.Env = env
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
