@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * The text on button can't be show correctly when use imported font (#2512)
 * Fix issues with DocTabs scrolling (#2709)
+* Fix possible crash for tapping extended Radio or Check item
 * Resolve lookup of relative icons in FyneApp.tolm
 
 ## 2.1.2 - 6 December 2021
