@@ -5,22 +5,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
-type indexData struct {
-	WasmFile     string
-	GopherJSFile string
-	IsReleased   bool
-	HasWasm      bool
-	HasGopherJS  bool
-}
-
-func (p *Packager) packageWasm() error {
-	appDir := util.EnsureSubDir(p.dir, "wasm")
+func (p *Packager) packageGopherJS() error {
+	appDir := util.EnsureSubDir(p.dir, "gopherjs")
 
 	index := filepath.Join(appDir, "index.html")
 	indexFile, err := os.Create(index)
@@ -28,7 +19,7 @@ func (p *Packager) packageWasm() error {
 		return err
 	}
 
-	tplData := indexData{WasmFile: p.name, IsReleased: p.release, HasWasm: true}
+	tplData := indexData{GopherJSFile: p.name, IsReleased: p.release, HasGopherJS: true}
 	err = templates.IndexHTML.Execute(indexFile, tplData)
 	if err != nil {
 		return err
@@ -36,13 +27,6 @@ func (p *Packager) packageWasm() error {
 
 	iconDst := filepath.Join(appDir, "icon.png")
 	err = util.CopyFile(p.icon, iconDst)
-	if err != nil {
-		return err
-	}
-
-	wasmExecSrc := filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js")
-	wasmExecDst := filepath.Join(appDir, "wasm_exec.js")
-	err = util.CopyFile(wasmExecSrc, wasmExecDst)
 	if err != nil {
 		return err
 	}

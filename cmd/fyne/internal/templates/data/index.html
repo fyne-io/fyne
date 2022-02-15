@@ -3,13 +3,31 @@
 	<head>
 		<meta charset="utf-8">
 		<link rel="icon" type="image/png" href="icon.png">
-		<script src="wasm_exec.js"></script>
 		{{if not .IsReleased}}
-		<script src="webgl-debug.js"></script>
+			<script src="webgl-debug.js"></script>
+		{{end}}
+		{{if .HasWasm}}
+			<script src="wasm_exec.js">var wasmBuild = true;</script>
+		{{else}}
+			<script>var wasmBuild = false;</script>
+		{{end}}
+		{{if .HasGopherJS}}
+			<script>var gopherJSBuild = true;</script>
+		{{else}}
+			<script>var gopherJSBuild = false;</script>
 		{{end}}
 		<script>
+			function async_load(file, cb) {
+				var d = document, t = 'script',
+      			o = d.createElement(t),
+      			s = d.getElementsByTagName(t)[0];
+  				o.src = file;
+  				o.addEventListener('load', function (e) { cb(e); }, false);
+  				s.parentNode.insertBefore(o, s);
+			}
+
 			function webgl_support () {
-				try {
+					try {
 					var canvas = document.createElement('canvas');
 					return !!window.WebGLRenderingContext &&
 						(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
@@ -22,7 +40,7 @@
 				var main = document.getElementById("main");
 
 				if (webgl_support()) {
-					if (WebAssembly) {
+					if (wasmBuild && WebAssembly) {
 						// WebAssembly.instantiateStreaming is not currently available in Safari
 						if (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill
 							WebAssembly.instantiateStreaming = async (resp, importObject) => {
@@ -34,9 +52,15 @@
 						main.innerHTML = "Downloading web assembly file.";
 
 						const go = new Go();
-						WebAssembly.instantiateStreaming(fetch("{{.Name}}"), go.importObject).then((result) => {
+						WebAssembly.instantiateStreaming(fetch("{{.WasmFile}}"), go.importObject).then((result) => {
 							main.innerHTML = "";
 							go.run(result.instance);
+						});
+					} else if (gopherJSBuild) {
+						main.innerHTML = "Downloading GopherJS file.";
+
+						async_load("{{.GopherJSFile}}", function(){
+							main.innerHTML = "";
 						});
 					} else {
 						main.innerHTML = "WebAssembly is not supported in your browser";

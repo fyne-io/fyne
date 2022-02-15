@@ -49,13 +49,17 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 func (b *builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
-	if b.runner == nil {
-		b.runner = newCommand("go")
-	}
-
 	goos := b.os
 	if goos == "" {
 		goos = targetOS()
+	}
+
+	if b.runner == nil {
+		if goos != "gopherjs" {
+			b.runner = newCommand("go")
+		} else {
+			b.runner = newCommand("gopherjs")
+		}
 	}
 
 	args := []string{"build"}
@@ -89,10 +93,10 @@ func (b *builder) build() error {
 		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
-		args = append(args, "-tags", strings.Join(tags, ","))
+		args = append(args, "--tags", strings.Join(tags, ","))
 	}
 
-	if goos != "ios" && goos != "android" && goos != "wasm" {
+	if goos != "ios" && goos != "android" && goos != "wasm" && goos != "gopherjs" {
 		env = append(env, "GOOS="+goos)
 	} else if goos == "wasm" {
 		versionConstraint = version.NewConstrainGroupFromString(">=1.17")

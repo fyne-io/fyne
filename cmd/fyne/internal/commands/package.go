@@ -236,6 +236,8 @@ func (p *Packager) doPackage() error {
 		return p.packageIOS(p.os)
 	case "wasm":
 		return p.packageWasm()
+	case "gopherjs":
+		return p.packageGopherJS()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
@@ -283,7 +285,7 @@ func (p *Packager) validate() error {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" || p.os == "wasm" {
+	if p.name == "" || p.os == "wasm" || p.os == "gopherjs" {
 		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
@@ -323,6 +325,8 @@ func calculateExeName(sourceDir, os string) string {
 		exeName = exeName + ".exe"
 	} else if os == "wasm" {
 		exeName = exeName + ".wasm"
+	} else if os == "gopherjs" {
+		exeName = exeName + ".js"
 	}
 
 	return exeName
