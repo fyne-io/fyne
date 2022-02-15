@@ -9,19 +9,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockRunOutputValue struct {
-	// Expected value
+type mockExpectedValue struct {
 	dir   interface{}
 	env   []string
 	osEnv bool
 	args  []string
-	// Returned value
+}
+
+type mockReturnedValue struct {
 	ret []byte
 	err error
+}
 
-	// To check if all expected call did happen
+type mockExpectedCall struct {
 	dirSet bool
 	envSet bool
+}
+
+type mockRunOutputValue struct {
+	mockExpectedValue
+	mockReturnedValue
+	mockExpectedCall
 }
 
 type testCommandCall struct {

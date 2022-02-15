@@ -14,9 +14,8 @@ func Test_CheckGoVersionNoGo(t *testing.T) {
 	commandNil.verifyExpectation()
 
 	commandNotNil := &testCommandCall{calls: []mockRunOutputValue{{
-		args: []string{"version"},
-		ret:  nil,
-		err:  fmt.Errorf("file not found"),
+		mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+		mockReturnedValue: mockReturnedValue{err: fmt.Errorf("file not found")},
 	}}, t: t}
 	assert.NotNil(t, checkGoVersion(commandNotNil, version.NewConstrainGroupFromString(">=1.17")))
 	commandNotNil.verifyExpectation()
@@ -25,14 +24,12 @@ func Test_CheckGoVersionNoGo(t *testing.T) {
 func Test_CheckGoVersionValidValue(t *testing.T) {
 	expected := []mockRunOutputValue{
 		{
-			args: []string{"version"},
-			ret:  []byte("go version go1.17.6 windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version go1.17.6 windows/amd64")},
 		},
 		{
-			args: []string{"version"},
-			ret:  []byte("go version go1.17.6 linux/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version go1.17.6 linux/amd64")},
 		}}
 
 	versionOk := &testCommandCall{calls: expected, t: t}
@@ -51,24 +48,20 @@ func Test_CheckGoVersionInvalidValue(t *testing.T) {
 		calls []mockRunOutputValue
 	}{
 		"Wrong go command output": {calls: []mockRunOutputValue{{
-			args: []string{"version"},
-			ret:  []byte("got noversion go1.17.6 windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("got noversion go1.17.6 windows/amd64")},
 		}}},
 		"Wrong go command length": {calls: []mockRunOutputValue{{
-			args: []string{"version"},
-			ret:  []byte("go version really"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version really")},
 		}}},
 		"Wrong version string": {calls: []mockRunOutputValue{{
-			args: []string{"version"},
-			ret:  []byte("go version 1.17.6 windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version 1.17.6 windows/amd64")},
 		}}},
 		"No version number": {calls: []mockRunOutputValue{{
-			args: []string{"version"},
-			ret:  []byte("go version gowrong windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version gowrong windows/amd64")},
 		}}},
 	}
 
@@ -109,17 +102,17 @@ func Test_CheckVersionTableTests(t *testing.T) {
 func Test_BuildWasmVersion(t *testing.T) {
 	expected := []mockRunOutputValue{
 		{
-			args: []string{"version"},
-			ret:  []byte("go version go1.17.6 windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version go1.17.6 windows/amd64")},
 		},
 		{
-			args:  []string{"build"},
-			ret:   []byte(""),
-			err:   nil,
-			env:   []string{"GOARCH=wasm", "GOOS=js"},
-			osEnv: true,
-			dir:   "myTest",
+			mockExpectedValue: mockExpectedValue{
+				args:  []string{"build"},
+				env:   []string{"GOARCH=wasm", "GOOS=js"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturnedValue: mockReturnedValue{ret: []byte("")},
 		},
 	}
 
@@ -132,17 +125,21 @@ func Test_BuildWasmVersion(t *testing.T) {
 func Test_BuildWasmReleaseVersion(t *testing.T) {
 	expected := []mockRunOutputValue{
 		{
-			args: []string{"version"},
-			ret:  []byte("go version go1.17.6 windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{
+				ret: []byte("go version go1.17.6 windows/amd64"),
+			},
 		},
 		{
-			args:  []string{"build", "-ldflags", "-s -w", "-tags", "release"},
-			ret:   []byte(""),
-			err:   nil,
-			env:   []string{"GOARCH=wasm", "GOOS=js"},
-			osEnv: true,
-			dir:   "myTest",
+			mockExpectedValue: mockExpectedValue{
+				args:  []string{"build", "-ldflags", "-s -w", "-tags", "release"},
+				env:   []string{"GOARCH=wasm", "GOOS=js"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturnedValue: mockReturnedValue{
+				ret: []byte(""),
+			},
 		},
 	}
 
@@ -155,9 +152,8 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 func Test_BuildWasmOldVersion(t *testing.T) {
 	expected := []mockRunOutputValue{
 		{
-			args: []string{"version"},
-			ret:  []byte("go version go1.16.0 windows/amd64"),
-			err:  nil,
+			mockExpectedValue: mockExpectedValue{args: []string{"version"}},
+			mockReturnedValue: mockReturnedValue{ret: []byte("go version go1.16.0 windows/amd64")},
 		},
 	}
 
