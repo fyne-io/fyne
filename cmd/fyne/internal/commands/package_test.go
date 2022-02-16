@@ -84,7 +84,7 @@ func Test_buildPackageWasm(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-ldflags", "-s -w", "--tags", "release"},
+				args:  []string{"build", "--tags", "release"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -98,6 +98,33 @@ func Test_buildPackageWasm(t *testing.T) {
 	p := &Packager{
 		os:      "wasm",
 		srcDir:  "myTest",
+		release: true,
+	}
+	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
+	files, err := p.buildPackage(wasmBuildTest)
+	assert.Nil(t, err)
+	assert.NotNil(t, files)
+	assert.Equal(t, 1, len(files))
+}
+
+func Test_buildPackageGopherJS(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-o", "myTest.js", "--tags", "release"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		os:      "gopherjs",
+		srcDir:  "myTest",
+		exe:     "myTest.js",
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}

@@ -32,6 +32,10 @@ func checkVersion(output string, versionConstraint *version.ConstraintGroup) err
 	return nil
 }
 
+func isWeb(goos string) bool {
+	return goos == "gopherjs" || goos == "wasm"
+}
+
 func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
 	if versionConstraint == nil {
 		return nil
@@ -65,7 +69,7 @@ func (b *builder) build() ([]string, error) {
 	args := []string{"build"}
 	env := os.Environ()
 
-	if goos != "wasm" {
+	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 	}
 
@@ -73,14 +77,16 @@ func (b *builder) build() ([]string, error) {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
-	if goos == "windows" {
-		if b.release {
-			args = append(args, "-ldflags", "-s -w -H=windowsgui")
-		} else {
-			args = append(args, "-ldflags", "-H=windowsgui")
+	if !isWeb(goos) {
+		if goos == "windows" {
+			if b.release {
+				args = append(args, "-ldflags", "-s -w -H=windowsgui")
+			} else {
+				args = append(args, "-ldflags", "-H=windowsgui")
+			}
+		} else if b.release {
+			args = append(args, "-ldflags", "-s -w")
 		}
-	} else if b.release {
-		args = append(args, "-ldflags", "-s -w")
 	}
 
 	if b.target != "" {
