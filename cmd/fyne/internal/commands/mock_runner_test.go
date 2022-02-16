@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"os"
 	"sort"
 	"testing"
@@ -39,7 +38,7 @@ type testCommandCall struct {
 }
 
 func (t *testCommandCall) runOutput(args ...string) ([]byte, error) {
-	// Check that we have no more than the expected number of call
+	// Check that we have less than the expected number of call
 	assert.Less(t.t, t.index, len(t.calls))
 	// Check that we have the expected number of parameters for this call
 	assert.Equal(t.t, len(t.calls[t.index].args), len(args))
@@ -48,8 +47,6 @@ func (t *testCommandCall) runOutput(args ...string) ([]byte, error) {
 		for index, value := range args {
 			assert.Equal(t.t, t.calls[t.index].args[index], value)
 		}
-	} else {
-		fmt.Printf("%v\n", args)
 	}
 
 	ret, err := t.calls[t.index].ret, t.calls[t.index].err
