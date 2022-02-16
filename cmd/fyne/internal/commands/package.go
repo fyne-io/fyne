@@ -184,8 +184,11 @@ func (p *Packager) packageWithoutValidate() error {
 	return metadata.SaveStandard(data, p.srcDir)
 }
 
-func (p *Packager) buildPackage() ([]string, error) {
-	tags := strings.Split(p.tags, ",")
+func (p *Packager) buildPackage(runner runner) ([]string, error) {
+	var tags []string
+	if p.tags != "" {
+		tags = strings.Split(p.tags, ",")
+	}
 	if p.os != "web" {
 		b := &builder{
 			os:      p.os,
@@ -193,6 +196,7 @@ func (p *Packager) buildPackage() ([]string, error) {
 			target:  p.exe,
 			release: p.release,
 			tags:    tags,
+			runner:  runner,
 		}
 
 		return b.build()
@@ -204,6 +208,7 @@ func (p *Packager) buildPackage() ([]string, error) {
 		target:  p.exe + ".wasm",
 		release: p.release,
 		tags:    tags,
+		runner:  runner,
 	}
 
 	fileWasm, err := bWasm.build()
@@ -217,6 +222,7 @@ func (p *Packager) buildPackage() ([]string, error) {
 		target:  p.exe + ".js",
 		release: p.release,
 		tags:    tags,
+		runner:  runner,
 	}
 
 	fileJS, err := bGopherJS.build()
@@ -241,7 +247,7 @@ func (p *Packager) doPackage() error {
 	}
 
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		files, err := p.buildPackage()
+		files, err := p.buildPackage(nil)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}

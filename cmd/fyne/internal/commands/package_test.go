@@ -73,3 +73,36 @@ func Test_validateAppID(t *testing.T) {
 	_, err = validateAppID("myApp", "android", "myApp", true)
 	assert.NotNil(t, err)
 }
+
+func Test_buildPackageWasm(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"version"}},
+			mockReturn: mockReturn{
+				ret: []byte("go version go1.17.6 windows/amd64"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-ldflags", "-s -w", "--tags", "release"},
+				env:   []string{"GOARCH=wasm", "GOOS=js"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		os:      "wasm",
+		srcDir:  "myTest",
+		release: true,
+	}
+	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
+	files, err := p.buildPackage(wasmBuildTest)
+	assert.Nil(t, err)
+	assert.NotNil(t, files)
+	assert.Equal(t, 1, len(files))
+}
