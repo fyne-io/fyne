@@ -7,7 +7,12 @@
 			<script src="webgl-debug.js"></script>
 		{{end}}
 		{{if .HasWasm}}
-			<script src="wasm_exec.js">var wasmBuild = true;</script>
+			<script>
+				var wasmBuild = true;
+				if (window.chrome) {
+					wasmBuild = false;
+				}
+			</script>
 		{{else}}
 			<script>var wasmBuild = false;</script>
 		{{end}}
@@ -41,21 +46,24 @@
 
 				if (webgl_support()) {
 					if (wasmBuild && WebAssembly) {
-						// WebAssembly.instantiateStreaming is not currently available in Safari
-						if (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill
-							WebAssembly.instantiateStreaming = async (resp, importObject) => {
-								const source = await (await resp).arrayBuffer();
-								return await WebAssembly.instantiate(source, importObject);
-							};
-						}
+						main.innerHTML = "Downloading wasm_exec.js"
+						async_load("wasm_exec.js", function(){
+							// WebAssembly.instantiateStreaming is not currently available in Safari
+							if (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill
+								WebAssembly.instantiateStreaming = async (resp, importObject) => {
+									const source = await (await resp).arrayBuffer();
+									return await WebAssembly.instantiate(source, importObject);
+								};
+							}
 
-						main.innerHTML = "Downloading web assembly file.";
+							main.innerHTML = "Downloading web assembly file.";
 
-						const go = new Go();
-						WebAssembly.instantiateStreaming(fetch("{{.WasmFile}}"), go.importObject).then((result) => {
-							main.innerHTML = "";
-							go.run(result.instance);
-						});
+							const go = new Go();
+							WebAssembly.instantiateStreaming(fetch("{{.WasmFile}}"), go.importObject).then((result) => {
+								main.innerHTML = "";
+								go.run(result.instance);
+							});
+						})
 					} else if (gopherJSBuild) {
 						main.innerHTML = "Downloading GopherJS file.";
 

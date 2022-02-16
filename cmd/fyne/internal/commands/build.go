@@ -46,7 +46,7 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
-func (b *builder) build() error {
+func (b *builder) build() ([]string, error) {
 	var versionConstraint *version.ConstraintGroup
 
 	goos := b.os
@@ -105,7 +105,7 @@ func (b *builder) build() error {
 	}
 
 	if err := checkGoVersion(b.runner, versionConstraint); err != nil {
-		return err
+		return nil, err
 	}
 
 	b.runner.setDir(b.srcdir)
@@ -114,7 +114,7 @@ func (b *builder) build() error {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
-	return err
+	return []string{b.target}, err
 }
 
 func targetOS() string {

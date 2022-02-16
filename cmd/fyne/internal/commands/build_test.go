@@ -118,7 +118,9 @@ func Test_BuildWasmVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
-	assert.Nil(t, b.build())
+	files, err := b.build()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(files))
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -132,7 +134,7 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-ldflags", "-s -w", "-tags", "release"},
+				args:  []string{"build", "-ldflags", "-s -w", "--tags", "release"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -145,7 +147,9 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
-	assert.Nil(t, b.build())
+	files, err := b.build()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(files))
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -159,6 +163,8 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
-	assert.NotNil(t, b.build())
+	files, err := b.build()
+	assert.NotNil(t, err)
+	assert.Nil(t, files)
 	wasmBuildTest.verifyExpectation()
 }

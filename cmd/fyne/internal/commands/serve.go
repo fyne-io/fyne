@@ -46,7 +46,7 @@ func Serve() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The web runtime to target (wasm, gopherjs).",
+				Usage:       "The web runtime to target (wasm, gopherjs, web).",
 				Value:       "wasm",
 				Destination: &s.os,
 			},
@@ -55,15 +55,16 @@ func Serve() *cli.Command {
 	}
 }
 
-func (s *Server) requestPackage() {
+func (s *Server) requestPackage() error {
 	p := &Packager{
 		os:     s.os,
 		srcDir: s.srcDir,
 		icon:   s.icon,
 	}
 
-	p.Run([]string{})
+	err := p.Package()
 	s.dir = p.dir
+	return err
 }
 
 func (s *Server) serve() error {
@@ -72,14 +73,12 @@ func (s *Server) serve() error {
 		return err
 	}
 
-	s.requestPackage()
-
-	var webDir string
-	if s.os == "wasm" {
-		webDir = util.EnsureSubDir(s.dir, "wasm")
-	} else {
-		webDir = util.EnsureSubDir(s.dir, "gopherjs")
+	err = s.requestPackage()
+	if err != nil {
+		return err
 	}
+
+	webDir := util.EnsureSubDir(s.dir, s.os)
 	fileServer := http.FileServer(http.Dir(webDir))
 
 	http.Handle("/", fileServer)
@@ -106,8 +105,8 @@ func (s *Server) validate() error {
 	if s.port < 0 || s.port > 65535 {
 		return fmt.Errorf("the port must be a strictly positive number and be strictly smaller than 65536 (Got %v)", s.port)
 	}
-	if s.os != "wasm" && s.os != "gopherjs" {
-		return fmt.Errorf("unsupported web runtime (only wasm and gopherjs): %v", s.os)
+	if s.os != "wasm" && s.os != "gopherjs" && s.os != "web" {
+		return fmt.Errorf("unsupported web runtime (only wasm, gopherjs and web): %v", s.os)
 	}
 	return nil
 }
