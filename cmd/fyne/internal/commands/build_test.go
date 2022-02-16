@@ -153,6 +153,28 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 	wasmBuildTest.verifyExpectation()
 }
 
+func Test_BuildGopherJSReleaseVersion(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "--tags", "release"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
+	b := &builder{os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
+	files, err := b.build()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(files))
+	gopherJSBuildTest.verifyExpectation()
+}
+
 func Test_BuildWasmOldVersion(t *testing.T) {
 	expected := []mockRunner{
 		{
