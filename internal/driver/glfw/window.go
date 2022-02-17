@@ -219,6 +219,10 @@ func (w *window) FixedSize() bool {
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 
+	if fixed && (w.requestedWidth == 0 || w.requestedHeight == 0) {
+		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
+		w.Resize(bigEnough)
+	}
 	if w.view() != nil {
 		w.runOnMainWhenCreated(w.fitContent)
 	}
@@ -501,6 +505,11 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
+	if !visible && w.fixedSize && (w.requestedWidth == 0 || w.requestedHeight == 0) {
+		bigEnough := w.canvas.canvasSize(content.MinSize())
+		w.Resize(bigEnough)
+	}
+
 	// show new canvas element
 	if content != nil {
 		content.Show()
