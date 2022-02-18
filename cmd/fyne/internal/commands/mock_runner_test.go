@@ -56,7 +56,7 @@ func (t *testCommandCall) runOutput(args ...string) ([]byte, error) {
 }
 
 func (t *testCommandCall) setDir(dir string) {
-	// Check that we have no more than the expected number of call
+	// Check that we have less than the expected number of call
 	assert.Less(t.t, t.index, len(t.calls))
 
 	assert.Equal(t.t, t.calls[t.index].dir.(string), dir)
@@ -64,7 +64,7 @@ func (t *testCommandCall) setDir(dir string) {
 }
 
 func (t *testCommandCall) setEnv(env []string) {
-	// Check that we have no more than the expected number of call
+	// Check that we have less than the expected number of call
 	assert.Less(t.t, t.index, len(t.calls))
 
 	// Prepare array for comparison
