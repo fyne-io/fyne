@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -55,21 +53,11 @@ func (p *Packager) packageWasm() error {
 
 	// Download webgl-debug.js directly from the KhronosGroup repository when needed
 	if !p.release {
-		r, err := http.Get("https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/b42e702487d02d5278814e0fe2e2888d234893e6/src/debug/webgl-debug.js")
-		if err != nil {
-			return err
-		}
-		defer r.Body.Close()
-
 		webglDebugFile := filepath.Join(appDir, "webgl-debug.js")
-		out, err := os.Create(webglDebugFile)
+		err := util.WriteFile(webglDebugFile, templates.WebGLDebugJs)
 		if err != nil {
 			return err
 		}
-		defer out.Close()
-
-		_, err = io.Copy(out, r.Body)
-		return err
 	}
 
 	return nil

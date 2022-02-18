@@ -27,6 +27,22 @@ func CopyExeFile(src, tgt string) error {
 	return copyFileMode(src, tgt, 0755)
 }
 
+// WriteFile write the content of data into a regular file, target.
+func WriteFile(target string, data []byte) error {
+	out, err := os.OpenFile(target, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if r := out.Close(); r != nil && err == nil {
+			err = r
+		}
+	}()
+
+	_, err = out.Write(data)
+	return err
+}
+
 // EnsureSubDir will make sure a named directory exists within the parent - creating it if not.
 func EnsureSubDir(parent, name string) string {
 	path := filepath.Join(parent, name)
