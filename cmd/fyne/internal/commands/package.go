@@ -18,7 +18,6 @@ import (
 	"golang.org/x/mod/module"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (
