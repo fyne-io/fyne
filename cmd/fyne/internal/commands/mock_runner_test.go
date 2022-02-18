@@ -5,6 +5,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,7 +45,7 @@ func (t *testCommandCall) runOutput(args ...string) ([]byte, error) {
 	require.Equal(t.t, len(t.calls[t.index].args), len(args))
 	// Check that each argument match our expectation
 	for index, value := range args {
-		require.Equal(t.t, t.calls[t.index].args[index], value)
+		assert.Equal(t.t, t.calls[t.index].args[index], value)
 	}
 
 	ret, err := t.calls[t.index].ret, t.calls[t.index].err
@@ -88,10 +89,10 @@ func (t *testCommandCall) verifyExpectation() {
 	// Check if every call really matched our expectaction
 	for _, value := range t.calls {
 		if value.dir != nil {
-			require.Equal(t.t, true, value.dirSet)
+			assert.Equal(t.t, true, value.dirSet)
 		}
 		if len(value.env) > 0 {
-			require.Equal(t.t, true, value.envSet)
+			assert.Equal(t.t, true, value.envSet)
 		}
 	}
 }
