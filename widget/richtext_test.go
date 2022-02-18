@@ -1,7 +1,10 @@
 package widget
 
 import (
+	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -9,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func textRenderTexts(p fyne.Widget) []*canvas.Text {
@@ -27,6 +29,20 @@ func trailingBoldErrorSegment() *TextSegment {
 		ColorName: theme.ColorNameError,
 		TextStyle: fyne.TextStyle{Bold: true},
 	}}
+}
+
+func TestRichText_Hyperlink_Endline(t *testing.T) {
+	u, _ := url.Parse("https://github.com/fyne-io/fyne")
+	r := NewRichText(
+		&TextSegment{Text: "Text", Style: RichTextStyleInline},
+		&HyperlinkSegment{Text: "Link", URL: u},
+	)
+	r.Resize(r.MinSize())
+	view := cache.Renderer(r)
+
+	assert.Equal(t, 2, len(view.Objects()))
+	assert.Equal(t, view.Objects()[0].Position().Y, view.Objects()[1].Position().Y)   // same baseline
+	assert.Greater(t, view.Objects()[1].Position().X, view.Objects()[0].Position().X) // to the right
 }
 
 func TestText_Alignment(t *testing.T) {
