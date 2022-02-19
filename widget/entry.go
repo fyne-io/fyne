@@ -907,7 +907,8 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b.begin
-			if canWrap && b.begin == pos && col == 0 && pos != 0 && row < (totalRows-1) {
+			// if this gap is at `pos` and is a line wrap, increment (safe to access boundary i-1)
+			if canWrap && b.begin == pos && pos != 0 && provider.rowBoundary(i-1).end == b.begin && row < (totalRows-1) {
 				row++
 			}
 		} else {
