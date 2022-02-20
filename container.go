@@ -168,8 +168,9 @@ func (c *Container) Visible() bool {
 }
 
 func (c *Container) layout() {
-	if c.Layout != nil {
-		c.Layout.Layout(c.Objects, c.size)
+	if c.Layout == nil {
 		return
 	}
+
+	c.Layout.Layout(c.Objects, c.size)
 }
