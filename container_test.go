@@ -18,6 +18,10 @@ func TestContainer_Add(t *testing.T) {
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(10), container.MinSize().Height)
 
+	oldLength := len(container.Objects)
+	container.Add(nil)
+	assert.Equal(t, oldLength, len(container.Objects))
+
 	box2 := new(dummyObject)
 	container.Add(box2)
 	assert.Equal(t, 2, len(container.Objects))

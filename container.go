@@ -53,6 +53,10 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 //
 // Since: 1.4
 func (c *Container) Add(add CanvasObject) {
+	if add == nil {
+		return
+	}
+
 	c.Objects = append(c.Objects, add)
 	c.layout()
 }
@@ -164,8 +168,9 @@ func (c *Container) Visible() bool {
 }
 
 func (c *Container) layout() {
-	if c.Layout != nil {
-		c.Layout.Layout(c.Objects, c.size)
+	if c.Layout == nil {
 		return
 	}
+
+	c.Layout.Layout(c.Objects, c.size)
 }
