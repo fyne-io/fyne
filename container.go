@@ -53,6 +53,10 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 //
 // Since: 1.4
 func (c *Container) Add(add CanvasObject) {
+	if add == nil {
+		return
+	}
+
 	c.Objects = append(c.Objects, add)
 	c.layout()
 }
