@@ -136,11 +136,16 @@ var vertexLineShaderSource = string(shaderLineVert.StaticContent) + "\x00"
 var fragmentLineShaderSource = string(shaderLineFrag.StaticContent) + "\x00"
 
 func (p *glPainter) Init() {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
+	p.program = Program(createProgram(vertexShaderSource, fragmentShaderSource))
+	p.lineProgram = Program(createProgram(vertexLineShaderSource, fragmentLineShaderSource))
+}
+
+func createProgram(vertexShaderSrc string, fragmentShaderSrc string) uint32 {
+	vertexShader, err := compileShader(vertexShaderSrc, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragmentShader, err := compileShader(fragmentShaderSrc, gl.FRAGMENT_SHADER)
 	if err != nil {
 		panic(err)
 	}
@@ -150,25 +155,7 @@ func (p *glPainter) Init() {
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
 	logError()
-
-	p.program = Program(prog)
-
-	vertexLineShader, err := compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-	fragmentLineShader, err := compileShader(fragmentLineShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, vertexLineShader)
-	gl.AttachShader(lineProg, fragmentLineShader)
-	gl.LinkProgram(lineProg)
-	logError()
-
-	p.lineProgram = Program(lineProg)
+	return prog
 }
 
 func (p *glPainter) glClearBuffer() {
