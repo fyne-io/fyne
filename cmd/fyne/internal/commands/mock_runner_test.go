@@ -9,85 +9,76 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockExpectedValue struct {
+type expectedValue struct {
 	dir   interface{}
 	env   []string
 	osEnv bool
 	args  []string
 }
 
-type mockReturnedValue struct {
+type mockReturn struct {
 	ret []byte
 	err error
 }
 
-type mockExpectedCall struct {
+type expectedCall struct {
 	dirSet bool
 	envSet bool
 }
 
-type mockRunOutputValue struct {
-	mockExpectedValue
-	mockReturnedValue
-	mockExpectedCall
+type mockRunner struct {
+	expectedValue
+	expectedCall
+	mockReturn
 }
 
-type testCommandCall struct {
-	calls []mockRunOutputValue
-	index int
-	t     *testing.T
+type testCommandRuns struct {
+	runs       []mockRunner
+	currentRun int
+	t          *testing.T
 }
 
-func (t *testCommandCall) runOutput(args ...string) ([]byte, error) {
-	// Check that we have less than the expected number of call
-	require.Less(t.t, t.index, len(t.calls))
-	// Check that we have the expected number of parameters for this call
-	require.Equal(t.t, len(t.calls[t.index].args), len(args))
-	// Check that each argument match our expectation
-	for index, value := range args {
-		assert.Equal(t.t, t.calls[t.index].args[index], value)
-	}
+func (t *testCommandRuns) runOutput(args ...string) ([]byte, error) {
+	require.Less(t.t, t.currentRun, len(t.runs))
+	require.Equal(t.t, len(t.runs[t.currentRun].args), len(args))
 
-	ret, err := t.calls[t.index].ret, t.calls[t.index].err
-	t.index++
+	expectedArgs := t.runs[t.currentRun].args
+	require.Equal(t.t, expectedArgs, args)
+
+	ret, err := t.runs[t.currentRun].ret, t.runs[t.currentRun].err
+	t.currentRun++
 
 	return ret, err
 }
 
-func (t *testCommandCall) setDir(dir string) {
-	// Check that we have less than the expected number of call
-	require.Less(t.t, t.index, len(t.calls))
+func (t *testCommandRuns) setDir(dir string) {
+	require.Less(t.t, t.currentRun, len(t.runs))
 
-	require.Equal(t.t, t.calls[t.index].dir.(string), dir)
-	t.calls[t.index].dirSet = true
+	require.Equal(t.t, t.runs[t.currentRun].dir.(string), dir)
+	t.runs[t.currentRun].dirSet = true
 }
 
-func (t *testCommandCall) setEnv(env []string) {
-	// Check that we have less than the expected number of call
-	require.Less(t.t, t.index, len(t.calls))
+func (t *testCommandRuns) setEnv(env []string) {
+	require.Less(t.t, t.currentRun, len(t.runs))
 
 	// Prepare array for comparison
-	expectedEnv := t.calls[t.index].env
-	if t.calls[t.index].osEnv {
+	expectedEnv := t.runs[t.currentRun].env
+	if t.runs[t.currentRun].osEnv {
 		expectedEnv = append(expectedEnv, os.Environ()...)
 	}
 	sort.Strings(expectedEnv)
 	sort.Strings(env)
 
-	// First check length of expected and passed environment are equal
 	require.Equal(t.t, len(expectedEnv), len(env))
-	// Check each independent environement variable match our expectation
-	for index, value := range env {
-		require.Equal(t.t, expectedEnv[index], value)
-	}
-	t.calls[t.index].envSet = true
+	require.Equal(t.t, expectedEnv, env)
+
+	t.runs[t.currentRun].envSet = true
 }
 
-func (t *testCommandCall) verifyExpectation() {
-	// Expected as many call as we got
-	require.Equal(t.t, len(t.calls), t.index)
-	// Check if every call really matched our expectaction
-	for _, value := range t.calls {
+func (t *testCommandRuns) verifyExpectation() {
+	require.Equal(t.t, len(t.runs), t.currentRun)
+
+	for _, value := range t.runs {
 		if value.dir != nil {
 			assert.Equal(t.t, true, value.dirSet)
 		}
