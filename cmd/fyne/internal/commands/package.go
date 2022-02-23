@@ -152,7 +152,7 @@ func (p *Packager) Run(_ []string) {
 		os.Exit(1)
 	}
 
-	err = p.doPackage()
+	err = p.doPackage(nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
@@ -170,7 +170,7 @@ func (p *Packager) Package() error {
 }
 
 func (p *Packager) packageWithoutValidate() error {
-	err := p.doPackage()
+	err := p.doPackage(nil)
 	if err != nil {
 		return err
 	}
@@ -236,7 +236,7 @@ func (p *Packager) combinedVersion() string {
 	return fmt.Sprintf("%s.%d", p.appVersion, p.appBuild)
 }
 
-func (p *Packager) doPackage() error {
+func (p *Packager) doPackage(runner runner) error {
 	// sensible defaults - validation deemed them optional
 	if p.appVersion == "" {
 		p.appVersion = defaultAppVersion
@@ -246,7 +246,7 @@ func (p *Packager) doPackage() error {
 	}
 
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		files, err := p.buildPackage(nil)
+		files, err := p.buildPackage(runner)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}
