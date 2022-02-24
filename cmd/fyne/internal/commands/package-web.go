@@ -10,6 +10,44 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
+func (p *Packager) packageWeb() error {
+	appDir := util.EnsureSubDir(p.dir, "web")
+
+	tpl := webData{
+		GopherJSFile: p.name + ".js",
+		WasmFile:     p.name + ".wasm",
+		IsReleased:   p.release,
+		HasGopherJS:  true,
+		HasWasm:      true,
+	}
+
+	return tpl.packageWebInternal(appDir, p.exe+".wasm", p.exe+".js", p.icon, p.release)
+}
+
+func (p *Packager) packageWasm() error {
+	appDir := util.EnsureSubDir(p.dir, "wasm")
+
+	tpl := webData{
+		WasmFile:   p.name,
+		IsReleased: p.release,
+		HasWasm:    true,
+	}
+
+	return tpl.packageWebInternal(appDir, p.exe, "", p.icon, p.release)
+}
+
+func (p *Packager) packageGopherJS() error {
+	appDir := util.EnsureSubDir(p.dir, "gopherjs")
+
+	tpl := webData{
+		GopherJSFile: p.name,
+		IsReleased:   p.release,
+		HasGopherJS:  true,
+	}
+
+	return tpl.packageWebInternal(appDir, "", p.exe, p.icon, p.release)
+}
+
 type webData struct {
 	WasmFile     string
 	GopherJSFile string
@@ -18,7 +56,7 @@ type webData struct {
 	HasGopherJS  bool
 }
 
-func packageWebInternal(w webData, appDir string, exeWasmSrc string, exeJSSrc string, icon string, release bool) error {
+func (w webData) packageWebInternal(appDir string, exeWasmSrc string, exeJSSrc string, icon string, release bool) error {
 	index := filepath.Join(appDir, "index.html")
 	indexFile, err := os.Create(index)
 	if err != nil {
@@ -69,42 +107,4 @@ func packageWebInternal(w webData, appDir string, exeWasmSrc string, exeJSSrc st
 	}
 
 	return nil
-}
-
-func (p *Packager) packageWeb() error {
-	appDir := util.EnsureSubDir(p.dir, "web")
-
-	tpl := webData{
-		GopherJSFile: p.name + ".js",
-		WasmFile:     p.name + ".wasm",
-		IsReleased:   p.release,
-		HasGopherJS:  true,
-		HasWasm:      true,
-	}
-
-	return packageWebInternal(tpl, appDir, p.exe+".wasm", p.exe+".js", p.icon, p.release)
-}
-
-func (p *Packager) packageWasm() error {
-	appDir := util.EnsureSubDir(p.dir, "wasm")
-
-	tpl := webData{
-		WasmFile:   p.name,
-		IsReleased: p.release,
-		HasWasm:    true,
-	}
-
-	return packageWebInternal(tpl, appDir, p.exe, "", p.icon, p.release)
-}
-
-func (p *Packager) packageGopherJS() error {
-	appDir := util.EnsureSubDir(p.dir, "gopherjs")
-
-	tpl := webData{
-		GopherJSFile: p.name,
-		IsReleased:   p.release,
-		HasGopherJS:  true,
-	}
-
-	return packageWebInternal(tpl, appDir, "", p.exe, p.icon, p.release)
 }
