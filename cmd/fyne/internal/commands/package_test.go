@@ -222,6 +222,84 @@ func Test_buildPackageGopherJS(t *testing.T) {
 	assert.Equal(t, 1, len(files))
 }
 
+func Test_PackageGopherJS(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-o", "myTest.js"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		os:     "gopherjs",
+		srcDir: "myTest",
+		dir:    "myTestTarget",
+		exe:    "myTest.js",
+		name:   "myTest.js",
+		icon:   "myTest.png",
+	}
+	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
+
+	util = mockUtil{}
+
+	utilIsMobileMock = func(_ string) bool {
+		return false
+	}
+
+	expectedEnsureSubDirRuns := mockEnsureSubDirRuns{
+		expected: []mockEnsureSubDir{
+			{"myTestTarget", "gopherjs", "myTestTarget/gopherjs"},
+		},
+	}
+	utilEnsureSubDirMock = func(parent, name string) string {
+		return expectedEnsureSubDirRuns.verifyExpectation(t, parent, name)
+	}
+
+	expectedExistRuns := mockExistRuns{
+		expected: []mockExist{
+			{"myTest.js", false},
+			{"myTest.js", true},
+		},
+	}
+	utilExistsMock = func(path string) bool {
+		return expectedExistRuns.verifyExpectation(t, path)
+	}
+
+	expectedWriteFileRuns := mockWriteFileRuns{
+		expected: []mockWriteFile{
+			{filepath.Join("myTestTarget", "gopherjs", "index.html"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "webgl-debug.js"), nil},
+		},
+	}
+	utilWriteFileMock = func(target string, _ []byte) error {
+		return expectedWriteFileRuns.verifyExpectation(t, target)
+	}
+
+	expectedCopyFileRuns := mockCopyFileRuns{
+		expected: []mockCopyFile{
+			{source: "myTest.png", target: filepath.Join("myTestTarget", "gopherjs", "icon.png")},
+			{source: "myTest.js", target: filepath.Join("myTestTarget", "gopherjs", "myTest.js")},
+		},
+	}
+	utilCopyFileMock = func(source, target string) error {
+		return expectedCopyFileRuns.verifyExpectation(t, false, source, target)
+	}
+
+	err := p.doPackage(gopherjsBuildTest)
+	assert.Nil(t, err)
+	gopherjsBuildTest.verifyExpectation()
+	expectedTotalCount(t, len(expectedEnsureSubDirRuns.expected), expectedEnsureSubDirRuns.current)
+	expectedTotalCount(t, len(expectedExistRuns.expected), expectedExistRuns.current)
+	expectedTotalCount(t, len(expectedWriteFileRuns.expected), expectedWriteFileRuns.current)
+	expectedTotalCount(t, len(expectedCopyFileRuns.expected), expectedCopyFileRuns.current)
+}
+
 func Test_BuildPackageWeb(t *testing.T) {
 	expected := []mockRunner{
 		{
