@@ -69,15 +69,13 @@ func (b *builder) build() ([]string, error) {
 	args := []string{"build"}
 	env := os.Environ()
 
-	if !isWeb(goos) {
-		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
-	}
-
 	if goos == "darwin" {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
 	if !isWeb(goos) {
+		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+
 		if goos == "windows" {
 			if b.release {
 				args = append(args, "-ldflags", "-s -w -H=windowsgui")
@@ -99,10 +97,15 @@ func (b *builder) build() ([]string, error) {
 		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
-		args = append(args, "--tags", strings.Join(tags, ","))
+		if goos == "gopherjs" {
+			args = append(args, "--tags")
+		} else {
+			args = append(args, "-tags")
+		}
+		args = append(args, strings.Join(tags, ","))
 	}
 
-	if goos != "ios" && goos != "android" && goos != "wasm" && goos != "gopherjs" {
+	if goos != "ios" && goos != "android" && !isWeb(goos) {
 		env = append(env, "GOOS="+goos)
 	} else if goos == "wasm" {
 		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
