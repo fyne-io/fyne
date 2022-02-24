@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,7 +59,7 @@ func (p *Packager) packageWeb() error {
 	// Download webgl-debug.js directly from the KhronosGroup repository when needed
 	if !p.release {
 		webglDebugFile := filepath.Join(appDir, "webgl-debug.js")
-		err := util.WriteFile(webglDebugFile, templates.WebGLDebugJs)
+		err := ioutil.WriteFile(webglDebugFile, templates.WebGLDebugJs, 0644)
 		if err != nil {
 			return err
 		}
