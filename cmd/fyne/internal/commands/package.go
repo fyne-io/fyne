@@ -199,7 +199,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 			runner:  runner,
 		}
 
-		return b.build()
+		return []string{p.exe}, b.build()
 	}
 
 	bWasm := &builder{
@@ -211,7 +211,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		runner:  runner,
 	}
 
-	fileWasm, err := bWasm.build()
+	err := bWasm.build()
 	if err != nil {
 		return nil, err
 	}
@@ -225,12 +225,12 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		runner:  runner,
 	}
 
-	fileJS, err := bGopherJS.build()
+	err = bGopherJS.build()
 	if err != nil {
 		return nil, err
 	}
 
-	return append(fileWasm, fileJS...), nil
+	return []string{bWasm.target, bGopherJS.target}, nil
 }
 
 func (p *Packager) combinedVersion() string {

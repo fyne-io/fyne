@@ -118,9 +118,8 @@ func Test_BuildWasmVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
-	files, err := b.build()
+	err := b.build()
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(files))
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -147,9 +146,8 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
-	files, err := b.build()
+	err := b.build()
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(files))
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -169,9 +167,8 @@ func Test_BuildGopherJSReleaseVersion(t *testing.T) {
 
 	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
-	files, err := b.build()
+	err := b.build()
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(files))
 	gopherJSBuildTest.verifyExpectation()
 }
 
@@ -185,8 +182,7 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
-	files, err := b.build()
+	err := b.build()
 	assert.NotNil(t, err)
-	assert.Nil(t, files)
 	wasmBuildTest.verifyExpectation()
 }
