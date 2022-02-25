@@ -166,7 +166,10 @@ func createProgram(shaderFilename string) uint32 {
 	gl.AttachShader(prog, vertexShader)
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
-	logError()
+	if glErr := gl.GetError(); glErr != 0 {
+		panic(fmt.Sprintf("failed to link GL program; error code: %x", glErr))
+	}
+
 	return prog
 }
 
