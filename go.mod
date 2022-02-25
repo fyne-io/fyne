@@ -31,4 +31,5 @@ require (
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e
 	golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )
