@@ -184,17 +184,53 @@ func (p *Packager) packageWithoutValidate() error {
 	return metadata.SaveStandard(data, p.srcDir)
 }
 
-func (p *Packager) buildPackage() error {
-	tags := strings.Split(p.tags, ",")
-	b := &builder{
-		os:      p.os,
-		srcdir:  p.srcDir,
-		target:  p.exe,
-		release: p.release,
-		tags:    tags,
+func (p *Packager) buildPackage(runner runner) ([]string, error) {
+	var tags []string
+	if p.tags != "" {
+		tags = strings.Split(p.tags, ",")
+	}
+	if p.os != "web" {
+		b := &builder{
+			os:      p.os,
+			srcdir:  p.srcDir,
+			target:  p.exe,
+			release: p.release,
+			tags:    tags,
+			runner:  runner,
+		}
+
+		return []string{p.exe}, b.build()
 	}
 
-	return b.build()
+	bWasm := &builder{
+		os:      "wasm",
+		srcdir:  p.srcDir,
+		target:  p.exe + ".wasm",
+		release: p.release,
+		tags:    tags,
+		runner:  runner,
+	}
+
+	err := bWasm.build()
+	if err != nil {
+		return nil, err
+	}
+
+	bGopherJS := &builder{
+		os:      "gopherjs",
+		srcdir:  p.srcDir,
+		target:  p.exe + ".js",
+		release: p.release,
+		tags:    tags,
+		runner:  runner,
+	}
+
+	err = bGopherJS.build()
+	if err != nil {
+		return nil, err
+	}
+
+	return []string{bWasm.target, bGopherJS.target}, nil
 }
 
 func (p *Packager) combinedVersion() string {
@@ -211,15 +247,17 @@ func (p *Packager) doPackage() error {
 	}
 
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		err := p.buildPackage()
+		files, err := p.buildPackage(nil)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}
-		if !util.Exists(p.exe) {
-			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
+		for _, file := range files {
+			if p.os != "web" && !util.Exists(file) {
+				return fmt.Errorf("unable to build directory to expected executable, %s", file)
+			}
 		}
 		if p.os != "windows" {
-			defer p.removeBuild()
+			defer p.removeBuild(files)
 		}
 	}
 
@@ -236,15 +274,21 @@ func (p *Packager) doPackage() error {
 		return p.packageIOS(p.os)
 	case "wasm":
 		return p.packageWasm()
+	case "gopherjs":
+		return p.packageGopherJS()
+	case "web":
+		return p.packageWeb()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
 }
 
-func (p *Packager) removeBuild() {
-	err := os.Remove(p.exe)
-	if err != nil {
-		log.Println("Unable to remove temporary build file", p.exe)
+func (p *Packager) removeBuild(files []string) {
+	for _, file := range files {
+		err := os.Remove(file)
+		if err != nil {
+			log.Println("Unable to remove temporary build file", p.exe)
+		}
 	}
 }
 
@@ -277,13 +321,13 @@ func (p *Packager) validate() error {
 		p.exe = filepath.Join(p.srcDir, exeName)
 
 		if util.Exists(p.exe) { // the exe was not specified, assume stale
-			p.removeBuild()
+			p.removeBuild([]string{p.exe})
 		}
 	} else if p.os == "ios" || p.os == "android" {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" || p.os == "wasm" {
+	if p.name == "" || p.os == "wasm" || p.os == "gopherjs" || p.os == "web" {
 		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
@@ -323,6 +367,8 @@ func calculateExeName(sourceDir, os string) string {
 		exeName = exeName + ".exe"
 	} else if os == "wasm" {
 		exeName = exeName + ".wasm"
+	} else if os == "gopherjs" {
+		exeName = exeName + ".js"
 	}
 
 	return exeName

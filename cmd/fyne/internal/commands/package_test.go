@@ -73,3 +73,107 @@ func Test_validateAppID(t *testing.T) {
 	_, err = validateAppID("myApp", "android", "myApp", true)
 	assert.NotNil(t, err)
 }
+
+func Test_buildPackageWasm(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"version"}},
+			mockReturn: mockReturn{
+				ret: []byte("go version go1.17.6 windows/amd64"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-tags", "release"},
+				env:   []string{"GOARCH=wasm", "GOOS=js"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		os:      "wasm",
+		srcDir:  "myTest",
+		release: true,
+	}
+	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
+	files, err := p.buildPackage(wasmBuildTest)
+	assert.Nil(t, err)
+	assert.NotNil(t, files)
+	assert.Equal(t, 1, len(files))
+}
+
+func Test_buildPackageGopherJS(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-o", "myTest.js", "--tags", "release"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		os:      "gopherjs",
+		srcDir:  "myTest",
+		exe:     "myTest.js",
+		release: true,
+	}
+	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
+	files, err := p.buildPackage(wasmBuildTest)
+	assert.Nil(t, err)
+	assert.NotNil(t, files)
+	assert.Equal(t, 1, len(files))
+}
+
+func Test_BuildPackageWeb(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"version"}},
+			mockReturn: mockReturn{
+				ret: []byte("go version go1.17.6 windows/amd64"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-o", "myTest.wasm", "-tags", "release"},
+				env:   []string{"GOARCH=wasm", "GOOS=js"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-o", "myTest.js", "--tags", "release"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		os:      "web",
+		srcDir:  "myTest",
+		release: true,
+		exe:     "myTest",
+	}
+	webBuildTest := &testCommandRuns{runs: expected, t: t}
+	files, err := p.buildPackage(webBuildTest)
+	assert.Nil(t, err)
+	assert.NotNil(t, files)
+	assert.Equal(t, 2, len(files))
+}

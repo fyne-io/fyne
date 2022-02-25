@@ -118,7 +118,8 @@ func Test_BuildWasmVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
-	assert.Nil(t, b.build())
+	err := b.build()
+	assert.Nil(t, err)
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -132,7 +133,7 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-ldflags", "-s -w", "-tags", "release"},
+				args:  []string{"build", "-tags", "release"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -145,8 +146,30 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
-	assert.Nil(t, b.build())
+	err := b.build()
+	assert.Nil(t, err)
 	wasmBuildTest.verifyExpectation()
+}
+
+func Test_BuildGopherJSReleaseVersion(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "--tags", "release"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
+	b := &builder{os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
+	err := b.build()
+	assert.Nil(t, err)
+	gopherJSBuildTest.verifyExpectation()
 }
 
 func Test_BuildWasmOldVersion(t *testing.T) {
@@ -159,6 +182,7 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
-	assert.NotNil(t, b.build())
+	err := b.build()
+	assert.NotNil(t, err)
 	wasmBuildTest.verifyExpectation()
 }

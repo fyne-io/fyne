@@ -97,7 +97,7 @@ func (p *Packager) packageWindows() error {
 		}
 	}
 
-	err = p.buildPackage()
+	_, err = p.buildPackage(nil)
 	if err != nil {
 		return fmt.Errorf("failed to rebuild after adding metadata: %w", err)
 	}

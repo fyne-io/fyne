@@ -32,6 +32,10 @@ func checkVersion(output string, versionConstraint *version.ConstraintGroup) err
 	return nil
 }
 
+func isWeb(goos string) bool {
+	return goos == "gopherjs" || goos == "wasm"
+}
+
 func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
 	if versionConstraint == nil {
 		return nil
@@ -49,34 +53,38 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 func (b *builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
-	if b.runner == nil {
-		b.runner = newCommand("go")
-	}
-
 	goos := b.os
 	if goos == "" {
 		goos = targetOS()
 	}
 
+	if b.runner == nil {
+		if goos != "gopherjs" {
+			b.runner = newCommand("go")
+		} else {
+			b.runner = newCommand("gopherjs")
+		}
+	}
+
 	args := []string{"build"}
 	env := os.Environ()
-
-	if goos != "wasm" {
-		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
-	}
 
 	if goos == "darwin" {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
-	if goos == "windows" {
-		if b.release {
-			args = append(args, "-ldflags", "-s -w -H=windowsgui")
-		} else {
-			args = append(args, "-ldflags", "-H=windowsgui")
+	if !isWeb(goos) {
+		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+
+		if goos == "windows" {
+			if b.release {
+				args = append(args, "-ldflags", "-s -w -H=windowsgui")
+			} else {
+				args = append(args, "-ldflags", "-H=windowsgui")
+			}
+		} else if b.release {
+			args = append(args, "-ldflags", "-s -w")
 		}
-	} else if b.release {
-		args = append(args, "-ldflags", "-s -w")
 	}
 
 	if b.target != "" {
@@ -89,10 +97,15 @@ func (b *builder) build() error {
 		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
-		args = append(args, "-tags", strings.Join(tags, ","))
+		if goos == "gopherjs" {
+			args = append(args, "--tags")
+		} else {
+			args = append(args, "-tags")
+		}
+		args = append(args, strings.Join(tags, ","))
 	}
 
-	if goos != "ios" && goos != "android" && goos != "wasm" {
+	if goos != "ios" && goos != "android" && !isWeb(goos) {
 		env = append(env, "GOOS="+goos)
 	} else if goos == "wasm" {
 		versionConstraint = version.NewConstrainGroupFromString(">=1.17")

@@ -53,3 +53,10 @@ jobs:
       working-directory: cmd/fyne_demo
       run: go build
       if: ${{ matrix.go-version == '1.17' }}
+
+    - name: Build GopherJS binary
+      working-directory: cmd/fyne_demo
+      run: |
+        go install github.com/gopherjs/gopherjs@latest
+        gopherjs build
+      if: ${{ matrix.go-version == '1.17' && runner.os == 'Linux' }}
