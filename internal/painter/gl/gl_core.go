@@ -153,15 +153,11 @@ func createProgram(shaderFilename string) uint32 {
 		panic("shader not found: " + shaderFilename)
 	}
 
-	return createProgramFromSource(string(vertexSrc)+"\x00", string(fragmentSrc)+"\x00")
-}
-
-func createProgramFromSource(vertexShaderSrc string, fragmentShaderSrc string) uint32 {
-	vertexShader, err := compileShader(vertexShaderSrc, gl.VERTEX_SHADER)
+	vertexShader, err := compileShader(string(vertexSrc)+"\x00", gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := compileShader(fragmentShaderSrc, gl.FRAGMENT_SHADER)
+	fragmentShader, err := compileShader(string(fragmentSrc)+"\x00", gl.FRAGMENT_SHADER)
 	if err != nil {
 		panic(err)
 	}
