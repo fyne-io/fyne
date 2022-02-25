@@ -136,11 +136,11 @@ var vertexLineShaderSource = string(shaderLineVert.StaticContent) + "\x00"
 var fragmentLineShaderSource = string(shaderLineFrag.StaticContent) + "\x00"
 
 func (p *glPainter) Init() {
-	p.program = Program(createProgram(vertexShaderSource, fragmentShaderSource))
-	p.lineProgram = Program(createProgram(vertexLineShaderSource, fragmentLineShaderSource))
+	p.program = Program(createProgramFromSource(vertexShaderSource, fragmentShaderSource))
+	p.lineProgram = Program(createProgramFromSource(vertexLineShaderSource, fragmentLineShaderSource))
 }
 
-func createProgram(vertexShaderSrc string, fragmentShaderSrc string) uint32 {
+func createProgramFromSource(vertexShaderSrc string, fragmentShaderSrc string) uint32 {
 	vertexShader, err := compileShader(vertexShaderSrc, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
