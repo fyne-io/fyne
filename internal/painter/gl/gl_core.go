@@ -169,8 +169,24 @@ func createProgram(shaderFilename string) Program {
 	gl.AttachShader(prog, vertexShader)
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
+
+	var logLength int32
+	gl.GetProgramiv(prog, gl.INFO_LOG_LENGTH, &logLength)
+	info := strings.Repeat("\x00", int(logLength+1))
+	gl.GetProgramInfoLog(prog, logLength, nil, gl.Str(info))
+
+	var status int32
+	gl.GetProgramiv(prog, gl.LINK_STATUS, &status)
+	if status == gl.FALSE {
+		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
+	}
+
+	if logLength > 0 {
+		fmt.Printf("OpenGL program linking output:\n%s\n", info)
+	}
+
 	if glErr := gl.GetError(); glErr != 0 {
-		panic(fmt.Sprintf("failed to link GL program; error code: %x", glErr))
+		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
 	}
 
 	return Program(prog)
