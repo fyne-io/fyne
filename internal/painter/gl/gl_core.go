@@ -124,7 +124,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 		info := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
 
-		return 0, fmt.Errorf("failed to compile OpenGL shader:\n>>> SHADER SOURCE\n%v\n<<< SHADER SOURCE\n%v", source, info)
+		return 0, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
 
 	return shader, nil
