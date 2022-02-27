@@ -24,79 +24,79 @@ type baseObject struct {
 }
 
 // CurrentSize returns the current size of this canvas object.
-func (r *baseObject) Size() fyne.Size {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
+func (o *baseObject) Size() fyne.Size {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	return r.size
+	return o.size
 }
 
 // Resize sets a new size for the canvas object.
-func (r *baseObject) Resize(size fyne.Size) {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) Resize(size fyne.Size) {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.size = size
+	o.size = size
 }
 
 // CurrentPosition gets the current position of this canvas object, relative to its parent.
-func (r *baseObject) Position() fyne.Position {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
+func (o *baseObject) Position() fyne.Position {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	return r.position
+	return o.position
 }
 
 // Move the object to a new position, relative to its parent.
-func (r *baseObject) Move(pos fyne.Position) {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) Move(pos fyne.Position) {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.position = pos
+	o.position = pos
 }
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
-func (r *baseObject) MinSize() fyne.Size {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
+func (o *baseObject) MinSize() fyne.Size {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	if r.min.Width == 0 && r.min.Height == 0 {
+	if o.min.Width == 0 && o.min.Height == 0 {
 		return fyne.NewSize(1, 1)
 	}
 
-	return r.min
+	return o.min
 }
 
 // SetMinSize specifies the smallest size this object should be.
-func (r *baseObject) SetMinSize(size fyne.Size) {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) SetMinSize(size fyne.Size) {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.min = size
+	o.min = size
 }
 
 // IsVisible returns true if this object is visible, false otherwise.
-func (r *baseObject) Visible() bool {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
+func (o *baseObject) Visible() bool {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	return !r.Hidden
+	return !o.Hidden
 }
 
 // Show will set this object to be visible.
-func (r *baseObject) Show() {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) Show() {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.Hidden = false
+	o.Hidden = false
 }
 
 // Hide will set this object to not be visible.
-func (r *baseObject) Hide() {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) Hide() {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.Hidden = true
+	o.Hidden = true
 }
 
 // Refresh instructs the containing canvas to refresh the specified obj.
