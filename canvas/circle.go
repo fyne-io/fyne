@@ -21,62 +21,62 @@ type Circle struct {
 }
 
 // Size returns the current size of bounding box for this circle object
-func (l *Circle) Size() fyne.Size {
-	return fyne.NewSize(l.Position2.X-l.Position1.X, l.Position2.Y-l.Position1.Y)
+func (c *Circle) Size() fyne.Size {
+	return fyne.NewSize(c.Position2.X-c.Position1.X, c.Position2.Y-c.Position1.Y)
 }
 
 // Resize sets a new bottom-right position for the circle object
 // If it has a stroke width this will cause it to Refresh.
-func (l *Circle) Resize(size fyne.Size) {
-	if size == l.Size() {
+func (c *Circle) Resize(size fyne.Size) {
+	if size == c.Size() {
 		return
 	}
 
-	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	c.Position2 = fyne.NewPos(c.Position1.X+size.Width, c.Position1.Y+size.Height)
 
-	Refresh(l)
+	Refresh(c)
 }
 
 // Position gets the current top-left position of this circle object, relative to its parent / canvas
-func (l *Circle) Position() fyne.Position {
-	return l.Position1
+func (c *Circle) Position() fyne.Position {
+	return c.Position1
 }
 
 // Move the circle object to a new position, relative to its parent / canvas
-func (l *Circle) Move(pos fyne.Position) {
-	size := l.Size()
-	l.Position1 = pos
-	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+func (c *Circle) Move(pos fyne.Position) {
+	size := c.Size()
+	c.Position1 = pos
+	c.Position2 = fyne.NewPos(c.Position1.X+size.Width, c.Position1.Y+size.Height)
 }
 
 // MinSize for a Circle simply returns Size{1, 1} as there is no
 // explicit content
-func (l *Circle) MinSize() fyne.Size {
+func (c *Circle) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
 }
 
 // Visible returns true if this circle is visible, false otherwise
-func (l *Circle) Visible() bool {
-	return !l.Hidden
+func (c *Circle) Visible() bool {
+	return !c.Hidden
 }
 
 // Show will set this circle to be visible
-func (l *Circle) Show() {
-	l.Hidden = false
+func (c *Circle) Show() {
+	c.Hidden = false
 
-	l.Refresh()
+	c.Refresh()
 }
 
 // Hide will set this circle to not be visible
-func (l *Circle) Hide() {
-	l.Hidden = true
+func (c *Circle) Hide() {
+	c.Hidden = true
 
-	l.Refresh()
+	c.Refresh()
 }
 
 // Refresh causes this object to be redrawn in it's current state
-func (l *Circle) Refresh() {
-	Refresh(l)
+func (c *Circle) Refresh() {
+	Refresh(c)
 }
 
 // NewCircle returns a new Circle instance
