@@ -19,7 +19,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
-* 
+* SendNotification does not show app name on Windows (#1940)
 
 
 ## 2.1.1 - 22 October 2021
