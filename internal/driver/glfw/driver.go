@@ -11,9 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"fyne.io/fyne/v2/theme"
 	ico "github.com/Kodeworks/golang-image-ico"
-	"github.com/fyne-io/systray"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
@@ -64,55 +62,6 @@ func toOSIcon(icon fyne.Resource) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
-}
-
-func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
-	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-		if fyne.CurrentApp().Icon() != nil {
-			img, err := toOSIcon(fyne.CurrentApp().Icon())
-			if err == nil {
-				systray.SetIcon(img)
-			}
-		} else {
-			img, err := toOSIcon(theme.FyneLogo())
-			if err == nil {
-				systray.SetIcon(img)
-			}
-		}
-
-		for _, i := range m.Items {
-			if i.IsSeparator {
-				systray.AddSeparator()
-				continue
-			}
-
-			var item *systray.MenuItem
-			fn := i.Action
-
-			if i.Checked {
-				item = systray.AddMenuItemCheckbox(i.Label, i.Label, true)
-			} else {
-				item = systray.AddMenuItem(i.Label, i.Label)
-			}
-			if i.Disabled {
-				item.Disable()
-			}
-
-			go func() {
-				<-item.ClickedCh
-				fn()
-			}()
-		}
-
-		systray.AddSeparator()
-		quit := systray.AddMenuItem("Quit", "Quit application")
-		go func() {
-			<-quit.ClickedCh
-			d.Quit()
-		}()
-	}, func() {
-		// anything required for tear-down
-	})
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
