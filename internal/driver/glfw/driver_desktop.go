@@ -43,8 +43,9 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 			}
 
 			go func() {
-				<-item.ClickedCh
-				fn()
+				for range item.ClickedCh {
+					fn()
+				}
 			}()
 		}
 
