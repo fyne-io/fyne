@@ -64,6 +64,10 @@ func (t *themedApp) Lifecycle() fyne.Lifecycle {
 	return nil
 }
 
+func (t *themedApp) Metadata() fyne.AppMetadata {
+	return fyne.AppMetadata{}
+}
+
 func (t *themedApp) PrimaryColor() string {
 	return ColorBlue
 }

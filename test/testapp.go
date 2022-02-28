@@ -86,6 +86,10 @@ func (a *testApp) Lifecycle() fyne.Lifecycle {
 	return a.lifecycle
 }
 
+func (a *testApp) Metadata() fyne.AppMetadata {
+	return fyne.AppMetadata{} // just dummy data
+}
+
 func (a *testApp) lastAppliedTheme() fyne.Theme {
 	a.propertyLock.Lock()
 	defer a.propertyLock.Unlock()
