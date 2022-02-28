@@ -271,6 +271,8 @@ func (f *Form) updateLabels() {
 			} else {
 				l.Color = theme.ForegroundColor()
 			}
+		} else {
+			l.Color = theme.ForegroundColor()
 		}
 
 		l.Text = item.Text
