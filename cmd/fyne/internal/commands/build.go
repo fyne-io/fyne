@@ -75,7 +75,7 @@ func (b *builder) generateMetaLDFlags() string {
 		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaName=%s'", b.name))
 	}
 	if b.version != "" {
-		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/aapp.MetaVersion=%s'", b.version))
+		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaVersion=%s'", b.version))
 	}
 	if b.buildNum != 0 {
 		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaBuild=%d'", b.buildNum))
