@@ -60,6 +60,11 @@ type App interface {
 
 	// Lifecycle returns a type that allows apps to hook in to lifecycle events.
 	Lifecycle() Lifecycle
+
+	// Metadata returns the application metadata that was set at compile time.
+	//
+	// Since: 2.2
+	Metadata() AppMetadata
 }
 
 var app App
@@ -82,6 +87,20 @@ func CurrentApp() App {
 		LogError("Attempt to access current Fyne app when none is started", nil)
 	}
 	return app
+}
+
+// AppMetadata captures the build metadata for an application.
+//
+// Since: 2.2
+type AppMetadata struct {
+	// ID is the unique ID of this application, used by many distribution platforms.
+	ID string
+	// Name is the human friendly name of this app.
+	Name string
+	// Version represents the version of this application, normally following semantic versioning.
+	Version string
+	// Build is the build number of this app, some times appended to the version number.
+	Build int
 }
 
 // Lifecycle represents the various phases that an app can transition through.

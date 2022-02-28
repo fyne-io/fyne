@@ -8,6 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Added
 
 * Add SetIcon method on ToolbarAction (#2475)
+* Access compiled app metadata using new `App.Metadata()` method
 
 ### Changed
 

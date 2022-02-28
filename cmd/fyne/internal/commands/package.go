@@ -187,6 +187,11 @@ func (p *Packager) buildPackage() error {
 		srcdir:  p.srcDir,
 		release: p.release,
 		tags:    tags,
+
+		id:       p.appID,
+		name:     p.name,
+		version:  p.appVersion,
+		buildNum: p.appBuild,
 	}
 
 	return b.build()

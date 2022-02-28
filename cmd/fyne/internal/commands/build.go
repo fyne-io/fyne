@@ -13,6 +13,9 @@ type builder struct {
 	os, srcdir string
 	release    bool
 	tags       []string
+
+	id, name, version string
+	buildNum          int
 }
 
 func (b *builder) build() error {
@@ -27,14 +30,17 @@ func (b *builder) build() error {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
+	meta := b.generateMetaLDFlags()
 	if goos == "windows" {
 		if b.release {
-			args = append(args, "-ldflags", "-s -w -H=windowsgui")
+			args = append(args, "-ldflags", "-s -w -H=windowsgui "+meta)
 		} else {
-			args = append(args, "-ldflags", "-H=windowsgui")
+			args = append(args, "-ldflags", "-H=windowsgui "+meta)
 		}
 	} else if b.release {
-		args = append(args, "-ldflags", "-s -w")
+		args = append(args, "-ldflags", "-s -w "+meta)
+	} else {
+		args = append(args, "-ldflags", meta)
 	}
 
 	// handle build tags
@@ -58,6 +64,24 @@ func (b *builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func (b *builder) generateMetaLDFlags() string {
+	var vars []string
+	if b.id != "" {
+		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaID=%s'", b.id))
+	}
+	if b.name != "" {
+		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaName=%s'", b.name))
+	}
+	if b.version != "" {
+		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/aapp.MetaVersion=%s'", b.version))
+	}
+	if b.buildNum != 0 {
+		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaBuild=%d'", b.buildNum))
+	}
+
+	return strings.Join(vars, " ")
 }
 
 func targetOS() string {
