@@ -26,7 +26,7 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
-# github.com/fyne-io/systray v1.1.1-0.20220205055945-490463f77fb0
+# github.com/fyne-io/systray v1.1.1-0.20220225003736-d86a31c0526f
 ## explicit
 github.com/fyne-io/systray
 # github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
@@ -53,6 +53,8 @@ github.com/go-ole/go-ole/oleutil
 # github.com/godbus/dbus/v5 v5.0.6
 ## explicit
 github.com/godbus/dbus/v5
+github.com/godbus/dbus/v5/introspect
+github.com/godbus/dbus/v5/prop
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 ## explicit
 github.com/goki/freetype

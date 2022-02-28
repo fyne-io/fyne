@@ -32,6 +32,13 @@ func onExit() {
 }
 ```
 
+### Run in another toolkit
+
+Most graphical toolkits will grab the main loop so the `Run` code above is not possible.
+For this reason there is another entry point `RunWithExternalLoop`.
+This function of the library returns a start and end function that should be called
+when the application has started and will end, to loop in appropriate features.
+
 See [full API](https://pkg.go.dev/github.com/fyne-io/systray?tab=doc) as well as [CHANGELOG](https://github.com/fyne-io/systray/tree/master/CHANGELOG.md).
 
 ## Try the example app!
@@ -55,9 +62,7 @@ The following text will then appear on the console:
 
 
 ```sh
-go: finding github.com/skratchdot/open-golang latest
 go: finding github.com/fyne-io/systray latest
-go: finding github.com/getlantern/golog latest
 ```
 
 Now look for *Awesome App* in your menu bar!

@@ -2,12 +2,8 @@
 package main
 
 import (
-	"log"
-
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -22,14 +18,6 @@ func main() {
 			hello.SetText("Welcome :)")
 		}),
 	))
-
-	if desk, ok := a.(desktop.App); ok {
-		menu := fyne.NewMenu("Hello World",
-			fyne.NewMenuItem("Hello", func() {
-				log.Println("System tray menu tapped")
-			}))
-		desk.SetSystemTrayMenu(menu)
-	}
 
 	w.ShowAndRun()
 }
