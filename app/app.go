@@ -46,6 +46,9 @@ func (a *fyneApp) UniqueID() string {
 	if a.uniqueID != "" {
 		return a.uniqueID
 	}
+	if a.Metadata().ID != "" {
+		return a.Metadata().ID
+	}
 
 	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
 	a.uniqueID = "missing-id-" + strconv.FormatInt(time.Now().Unix(), 10) // This is a fake unique - it just has to not be reused...
