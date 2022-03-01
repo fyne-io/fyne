@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/internal/painter"
-	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/stretchr/testify/require"
 
@@ -29,13 +28,7 @@ func TestAssertImageMatches(t *testing.T) {
 	f, _ := truetype.Parse(theme.TextFont().Content())
 	face := truetype.NewFace(f, &opts)
 
-	d := painter.FontDrawer{}
-	d.Dst = txtImg
-	d.Src = image.NewUniform(color.Black)
-	d.Face = face
-	d.Dot = freetype.Pt(0, 50-face.Metrics().Descent.Ceil())
-
-	d.DrawString("Hello!", 4)
+	painter.DrawString(txtImg, "Hello!", color.Black, face, 50, 4)
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}

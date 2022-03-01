@@ -45,6 +45,8 @@ struct wl_surface;
 struct wp_viewport;
 struct wp_viewporter;
 
+#ifndef WP_VIEWPORTER_INTERFACE
+#define WP_VIEWPORTER_INTERFACE
 /**
  * @page page_iface_wp_viewporter wp_viewporter
  * @section page_iface_wp_viewporter_desc Description
@@ -69,6 +71,9 @@ struct wp_viewporter;
  * surface size.
  */
 extern const struct wl_interface wp_viewporter_interface;
+#endif
+#ifndef WP_VIEWPORT_INTERFACE
+#define WP_VIEWPORT_INTERFACE
 /**
  * @page page_iface_wp_viewport wp_viewport
  * @section page_iface_wp_viewport_desc Description
@@ -203,6 +208,7 @@ extern const struct wl_interface wp_viewporter_interface;
  * on the next wl_surface.commit.
  */
 extern const struct wl_interface wp_viewport_interface;
+#endif
 
 #ifndef WP_VIEWPORTER_ERROR_ENUM
 #define WP_VIEWPORTER_ERROR_ENUM

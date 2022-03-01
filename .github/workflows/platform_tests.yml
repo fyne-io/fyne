@@ -9,37 +9,54 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: [1.14.x, 1.17.x]
+        go-version: [1.14, 1.17]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v2
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1.5.0
-      id: setup-go-faster
+    - uses: WillAbides/setup-go-faster@v1.7.0
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libwayland-dev libxkbcommon-dev bc
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
       run: go test -tags ci ./...
+
+    - name: Wayland Tests
+      run: go test -tags ci,wayland ./...
+      if: ${{ runner.os == 'Linux' }}
 
     - name: Update coverage
       run: |
         GO111MODULE=off go get github.com/mattn/goveralls
         set -e
         go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-        if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
+        coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
+        if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
       if: ${{ runner.os == 'Linux' }}
 
     - name: Update PR Coverage
       uses: shogo82148/actions-goveralls@v1
-      env:
-        GOROOT: ${{steps.setup-go-faster.outputs.GOROOT}}
       with:
         path-to-profile: coverage.out
-      if: ${{ runner.os == 'Linux' && github.event_name == 'push' }}
+      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' }}
+
+    - name: Build WebAssembly binary
+      env:
+        GOOS: js
+        GOARCH: wasm
+      working-directory: cmd/fyne_demo
+      run: go build
+      if: ${{ matrix.go-version == '1.17' }}
+
+    - name: Build GopherJS binary
+      working-directory: cmd/fyne_demo
+      run: |
+        go install github.com/gopherjs/gopherjs@latest
+        gopherjs build
+      if: ${{ matrix.go-version == '1.17' && runner.os == 'Linux' }}

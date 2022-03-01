@@ -1,12 +1,12 @@
 package gl
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"runtime"
 
 	"fyne.io/fyne/v2/theme"
-	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 
 	"fyne.io/fyne/v2"
@@ -14,6 +14,11 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 )
+
+// Texture represents an uploaded GL texture
+type Texture cache.TextureType
+
+var noTexture = Texture(cache.NoTexture)
 
 func logGLError(err uint32) {
 	if err == 0 {
@@ -27,14 +32,17 @@ func logGLError(err uint32) {
 	}
 }
 
-func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
+func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
 	texture, ok := cache.GetTexture(object)
 
 	if !ok {
 		texture = cache.TextureType(creator(object))
 		cache.SetTexture(object, texture, p.canvas)
 	}
-	return Texture(texture)
+	if !cache.IsValid(texture) {
+		return noTexture, fmt.Errorf("no texture available")
+	}
+	return Texture(texture), nil
 }
 
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
@@ -50,7 +58,7 @@ func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 		return p.newGlStrokedRectTexture(rect)
 	}
 	if rect.FillColor == nil {
-		return NoTexture
+		return noTexture
 	}
 	return p.imgToTexture(image.NewUniform(rect.FillColor), canvas.ImageScaleSmooth)
 }
@@ -80,13 +88,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	opts.DPI = float64(painter.TextDPI * p.texScale)
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
-	d := painter.FontDrawer{}
-	d.Dst = img
-	d.Src = &image.Uniform{C: color}
-	d.Face = face
-	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text, text.TextStyle.TabWidth)
-
+	painter.DrawString(img, text.Text, color, face, height, text.TextStyle.TabWidth)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 
@@ -98,7 +100,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 
 	tex := painter.PaintImage(img, p.canvas, int(width), int(height))
 	if tex == nil {
-		return NoTexture
+		return noTexture
 	}
 
 	return p.imgToTexture(tex, img.ScaleMode)

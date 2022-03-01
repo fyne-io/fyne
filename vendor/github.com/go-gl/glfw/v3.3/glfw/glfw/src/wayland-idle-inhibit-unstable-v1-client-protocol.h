@@ -45,6 +45,8 @@ struct wl_surface;
 struct zwp_idle_inhibit_manager_v1;
 struct zwp_idle_inhibitor_v1;
 
+#ifndef ZWP_IDLE_INHIBIT_MANAGER_V1_INTERFACE
+#define ZWP_IDLE_INHIBIT_MANAGER_V1_INTERFACE
 /**
  * @page page_iface_zwp_idle_inhibit_manager_v1 zwp_idle_inhibit_manager_v1
  * @section page_iface_zwp_idle_inhibit_manager_v1_desc Description
@@ -81,6 +83,9 @@ struct zwp_idle_inhibitor_v1;
  * interface version number is reset.
  */
 extern const struct wl_interface zwp_idle_inhibit_manager_v1_interface;
+#endif
+#ifndef ZWP_IDLE_INHIBITOR_V1_INTERFACE
+#define ZWP_IDLE_INHIBITOR_V1_INTERFACE
 /**
  * @page page_iface_zwp_idle_inhibitor_v1 zwp_idle_inhibitor_v1
  * @section page_iface_zwp_idle_inhibitor_v1_desc Description
@@ -117,6 +122,7 @@ extern const struct wl_interface zwp_idle_inhibit_manager_v1_interface;
  * de-idles and re-idles the inhibitor will take effect.
  */
 extern const struct wl_interface zwp_idle_inhibitor_v1_interface;
+#endif
 
 #define ZWP_IDLE_INHIBIT_MANAGER_V1_DESTROY 0
 #define ZWP_IDLE_INHIBIT_MANAGER_V1_CREATE_INHIBITOR 1

@@ -6,19 +6,21 @@ import (
 	"time"
 )
 
-var svgLock sync.RWMutex
-var svgs = make(map[string]*svgInfo)
+var svgs = &sync.Map{} // make(map[string]*svgInfo)
 
 // GetSvg gets svg image from cache if it exists.
 func GetSvg(name string, w int, h int) *image.NRGBA {
-	svgLock.RLock()
-	sinfo, ok := svgs[name]
-	svgLock.RUnlock()
-	if !ok || sinfo == nil || sinfo.w != w || sinfo.h != h {
+	sinfo, ok := svgs.Load(name)
+	if !ok || sinfo == nil {
 		return nil
 	}
-	sinfo.setAlive()
-	return sinfo.pix
+	svginfo := sinfo.(*svgInfo)
+	if svginfo.w != w || svginfo.h != h {
+		return nil
+	}
+
+	svginfo.setAlive()
+	return svginfo.pix
 }
 
 // SetSvg sets a svg into the cache map.
@@ -29,9 +31,7 @@ func SetSvg(name string, pix *image.NRGBA, w int, h int) {
 		h:   h,
 	}
 	sinfo.setAlive()
-	svgLock.Lock()
-	svgs[name] = sinfo
-	svgLock.Unlock()
+	svgs.Store(name, sinfo)
 }
 
 type svgInfo struct {
@@ -43,18 +43,15 @@ type svgInfo struct {
 // destroyExpiredSvgs destroys expired svgs cache data.
 func destroyExpiredSvgs(now time.Time) {
 	expiredSvgs := make([]string, 0, 20)
-	svgLock.RLock()
-	for s, sinfo := range svgs {
+	svgs.Range(func(key, value interface{}) bool {
+		s, sinfo := key.(string), value.(*svgInfo)
 		if sinfo.isExpired(now) {
 			expiredSvgs = append(expiredSvgs, s)
 		}
-	}
-	svgLock.RUnlock()
-	if len(expiredSvgs) > 0 {
-		svgLock.Lock()
-		for _, exp := range expiredSvgs {
-			delete(svgs, exp)
-		}
-		svgLock.Unlock()
+		return true
+	})
+
+	for _, exp := range expiredSvgs {
+		svgs.Delete(exp)
 	}
 }

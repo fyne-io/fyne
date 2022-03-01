@@ -297,7 +297,7 @@ func TestFileRepositoryParent(t *testing.T) {
 	// note the trailing slashes are significant, as they tend to belie a
 	// directory
 
-	parent, err := storage.Parent(storage.NewURI("file:///foo/bar/baz"))
+	parent, err := storage.Parent(storage.NewFileURI("/foo/bar/baz"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
@@ -305,14 +305,14 @@ func TestFileRepositoryParent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
-	parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
+	parent, err = storage.Parent(storage.NewFileURI("C:/foo/bar/baz/"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file://C:/foo/bar/", parent.String())
 
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle
 		// backslashes.
-		uri := storage.NewURI("file://C:\\foo\\bar\\baz\\")
+		uri := storage.NewFileURI("C:\\foo\\bar\\baz\\")
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
 		uri = storage.NewFileURI("C:\\foo\\bar\\baz\\")
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
@@ -322,7 +322,7 @@ func TestFileRepositoryParent(t *testing.T) {
 		assert.Equal(t, "file://C:/foo/bar/", parent.String())
 	}
 
-	_, err = storage.Parent(storage.NewURI("file:///"))
+	_, err = storage.Parent(storage.NewFileURI("/"))
 	assert.Equal(t, repository.ErrURIRoot, err)
 
 	if runtime.GOOS == "windows" {
@@ -332,12 +332,12 @@ func TestFileRepositoryParent(t *testing.T) {
 
 		// This should cause an error, since this is a Windows-style
 		// path and thus we can't get the parent of a drive letter.
-		_, err = storage.Parent(storage.NewURI("file://C:/"))
+		_, err = storage.Parent(storage.NewFileURI("C:/"))
 		assert.Equal(t, repository.ErrURIRoot, err)
 	}
 
 	// Windows supports UNIX-style paths. /C:/ is also a valid path.
-	parent, err = storage.Parent(storage.NewURI("file:///C:/"))
+	parent, err = storage.Parent(storage.NewFileURI("/C:/"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///", parent.String())
 }
@@ -347,16 +347,16 @@ func TestFileRepositoryChild(t *testing.T) {
 	f := NewFileRepository()
 	repository.Register("file", f)
 
-	p, _ := storage.Child(storage.NewURI("file:///foo/bar"), "baz")
+	p, _ := storage.Child(storage.NewFileURI("/foo/bar"), "baz")
 	assert.Equal(t, "file:///foo/bar/baz", p.String())
 
-	p, _ = storage.Child(storage.NewURI("file:///foo/bar/"), "baz")
+	p, _ = storage.Child(storage.NewFileURI("/foo/bar/"), "baz")
 	assert.Equal(t, "file:///foo/bar/baz", p.String())
 
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle
 		// backslashes.
-		uri := storage.NewURI("file://C:\\foo\\bar\\")
+		uri := storage.NewFileURI("C:\\foo\\bar\\")
 		assert.Equal(t, "file://C:/foo/bar/", uri.String())
 
 		p, _ = storage.Child(uri, "baz")

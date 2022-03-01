@@ -164,7 +164,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	leftCol.Add(leftNewObj2)
 	deleteAt(rightCol, 1)
 	thirdCol := container.NewVBox()
-	content.AddObject(thirdCol)
+	content.Add(thirdCol)
 	thirdRunBeforePainterData := []nodeInfo{}
 	thirdRunAfterPainterData := []nodeInfo{}
 

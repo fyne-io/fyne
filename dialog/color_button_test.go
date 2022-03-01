@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -33,7 +33,7 @@ func Test_colorButton_Layout(t *testing.T) {
 				color.MouseIn(nil)
 			}
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
+			window := test.NewWindow(container.NewCenter(color))
 			window.Resize(color.MinSize().Max(fyne.NewSize(50, 50)))
 
 			test.AssertImageMatches(t, "color/button_layout_"+name+".png", window.Canvas().Capture())

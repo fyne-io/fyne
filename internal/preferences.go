@@ -47,6 +47,11 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
 
+	if stored, ok := p.values[key]; ok && stored == value {
+		p.lock.Unlock()
+		return
+	}
+
 	p.values[key] = value
 	p.lock.Unlock()
 

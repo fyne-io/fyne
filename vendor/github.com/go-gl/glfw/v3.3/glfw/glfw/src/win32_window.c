@@ -1297,8 +1297,12 @@ static int createNativeWindow(_GLFWwindow* window,
         {
             float xscale, yscale;
             _glfwPlatformGetWindowContentScale(window, &xscale, &yscale);
-            rect.right = (int) (rect.right * xscale);
-            rect.bottom = (int) (rect.bottom * yscale);
+
+            if (xscale > 0.f && yscale > 0.f)
+            {
+                rect.right = (int) (rect.right * xscale);
+                rect.bottom = (int) (rect.bottom * yscale);
+            }
         }
 
         ClientToScreen(window->win32.handle, (POINT*) &rect.left);
@@ -2067,7 +2071,7 @@ const char* _glfwPlatformGetScancodeName(int scancode)
     if (scancode < 0 || scancode > (KF_EXTENDED | 0xff) ||
         _glfw.win32.keycodes[scancode] == GLFW_KEY_UNKNOWN)
     {
-        _glfwInputError(GLFW_INVALID_VALUE, "Invalid scancode");
+        _glfwInputError(GLFW_INVALID_VALUE, "Invalid scancode %i", scancode);
         return NULL;
     }
 

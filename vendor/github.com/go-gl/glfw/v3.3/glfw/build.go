@@ -41,13 +41,13 @@ package glfw
 // BSD Build Tags
 // ----------------
 // GLFW Options:
-#cgo freebsd,!wayland openbsd pkg-config: x11 xau xcb xdmcp
-#cgo freebsd,wayland pkg-config: wayland-client wayland-cursor wayland-egl epoll-shim
-#cgo freebsd openbsd CFLAGS: -D_GLFW_HAS_DLOPEN
-#cgo freebsd,!wayland openbsd CFLAGS: -D_GLFW_X11 -D_GLFW_HAS_GLXGETPROCADDRESSARB
-#cgo freebsd,wayland CFLAGS: -D_GLFW_WAYLAND
+#cgo freebsd,!wayland netbsd,!wayland openbsd pkg-config: x11 xau xcb xdmcp
+#cgo freebsd,wayland netbsd,wayland pkg-config: wayland-client wayland-cursor wayland-egl epoll-shim
+#cgo freebsd netbsd openbsd CFLAGS: -D_GLFW_HAS_DLOPEN
+#cgo freebsd,!wayland netbsd,!wayland openbsd CFLAGS: -D_GLFW_X11 -D_GLFW_HAS_GLXGETPROCADDRESSARB
+#cgo freebsd,wayland netbsd,wayland CFLAGS: -D_GLFW_WAYLAND
 
 // Linker Options:
-#cgo freebsd openbsd LDFLAGS: -lm
+#cgo freebsd netbsd openbsd LDFLAGS: -lm
 */
 import "C"

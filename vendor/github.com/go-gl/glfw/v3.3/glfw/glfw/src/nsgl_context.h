@@ -44,7 +44,6 @@ typedef struct _GLFWcontextNSGL
 {
     id                pixelFormat;
     id                object;
-
 } _GLFWcontextNSGL;
 
 // NSGL-specific global data
@@ -53,7 +52,6 @@ typedef struct _GLFWlibraryNSGL
 {
     // dlopen handle for OpenGL.framework (for glfwGetProcAddress)
     CFBundleRef     framework;
-
 } _GLFWlibraryNSGL;
 
 

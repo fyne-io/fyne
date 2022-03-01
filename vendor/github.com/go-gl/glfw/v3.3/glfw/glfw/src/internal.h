@@ -375,6 +375,7 @@ struct _GLFWwindow
     GLFWbool            focusOnShow;
     GLFWbool            shouldClose;
     void*               userPointer;
+    GLFWbool            doublebuffer;
     GLFWvidmode         videoMode;
     _GLFWmonitor*       monitor;
     _GLFWcursor*        cursor;
@@ -423,7 +424,7 @@ struct _GLFWwindow
 //
 struct _GLFWmonitor
 {
-    char*           name;
+    char            name[128];
     void*           userPointer;
 
     // Physical dimensions in millimeters.
@@ -484,7 +485,7 @@ struct _GLFWjoystick
     int             buttonCount;
     unsigned char*  hats;
     int             hatCount;
-    char*           name;
+    char            name[128];
     void*           userPointer;
     char            guid[33];
     _GLFWmapping*   mapping;
@@ -760,6 +761,7 @@ void _glfwAllocGammaArrays(GLFWgammaramp* ramp, unsigned int size);
 void _glfwFreeGammaArrays(GLFWgammaramp* ramp);
 void _glfwSplitBPP(int bpp, int* red, int* green, int* blue);
 
+void _glfwInitGamepadMappings(void);
 _GLFWjoystick* _glfwAllocJoystick(const char* name,
                                   const char* guid,
                                   int axisCount,

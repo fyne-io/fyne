@@ -17,11 +17,11 @@
 package gl
 
 // #cgo !gles2,darwin        LDFLAGS: -framework OpenGL
-// #cgo gles2,darwin         LDFLAGS: -lGLESv2
+// #cgo gles2,darwin         LDFLAGS: -framework OpenGLES
 // #cgo !gles2,windows       LDFLAGS: -lopengl32
 // #cgo gles2,windows        LDFLAGS: -lGLESv2
-// #cgo !egl,linux !egl,freebsd !egl,openbsd pkg-config: gl
-// #cgo egl,linux egl,freebsd egl,openbsd    pkg-config: egl
+// #cgo !egl,linux !egl,freebsd !egl,netbsd !egl,openbsd pkg-config: gl
+// #cgo egl,linux egl,freebsd egl,netbsd egl,openbsd    pkg-config: egl
 // #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
 // #ifndef WIN32_LEAN_AND_MEAN
 // #define WIN32_LEAN_AND_MEAN 1
@@ -2054,6 +2054,9 @@ package gl
 // }
 // static void  glowDrawElementsBaseVertex(GPDRAWELEMENTSBASEVERTEX fnptr, GLenum  mode, GLsizei  count, GLenum  type, const void * indices, GLint  basevertex) {
 //   (*fnptr)(mode, count, type, indices, basevertex);
+// }
+// static void  glowDrawElementsBaseVertexWithOffset(GPDRAWELEMENTSBASEVERTEX fnptr, GLenum  mode, GLsizei  count, GLenum  type, uintptr_t indices, GLint  basevertex) {
+//   (*fnptr)(mode, count, type, (const void *)(indices), basevertex);
 // }
 // static void  glowDrawElementsIndirect(GPDRAWELEMENTSINDIRECT fnptr, GLenum  mode, GLenum  type, const void * indirect) {
 //   (*fnptr)(mode, type, indirect);
@@ -5085,6 +5088,9 @@ package gl
 // static void  glowVertexAttribIPointer(GPVERTEXATTRIBIPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLsizei  stride, const void * pointer) {
 //   (*fnptr)(index, size, type, stride, pointer);
 // }
+// static void  glowVertexAttribIPointerWithOffset(GPVERTEXATTRIBIPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLsizei  stride, uintptr_t offset) {
+//   (*fnptr)(index, size, type, stride, (const void *)(offset));
+// }
 // static void  glowVertexAttribL1d(GPVERTEXATTRIBL1D fnptr, GLuint  index, GLdouble  x) {
 //   (*fnptr)(index, x);
 // }
@@ -5171,6 +5177,9 @@ package gl
 // }
 // static void  glowVertexAttribLPointer(GPVERTEXATTRIBLPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLsizei  stride, const void * pointer) {
 //   (*fnptr)(index, size, type, stride, pointer);
+// }
+// static void  glowVertexAttribLPointerWithOffset(GPVERTEXATTRIBLPOINTER fnptr, GLuint  index, GLint  size, GLenum  type, GLsizei  stride, uintptr_t offset) {
+//   (*fnptr)(index, size, type, stride, (const void *)(offset));
 // }
 // static void  glowVertexAttribP1ui(GPVERTEXATTRIBP1UI fnptr, GLuint  index, GLenum  type, GLboolean  normalized, GLuint  value) {
 //   (*fnptr)(index, type, normalized, value);
@@ -9612,6 +9621,9 @@ func DrawElementsWithOffset(mode uint32, count int32, xtype uint32, indices uint
 func DrawElementsBaseVertex(mode uint32, count int32, xtype uint32, indices unsafe.Pointer, basevertex int32) {
 	C.glowDrawElementsBaseVertex(gpDrawElementsBaseVertex, (C.GLenum)(mode), (C.GLsizei)(count), (C.GLenum)(xtype), indices, (C.GLint)(basevertex))
 }
+func DrawElementsBaseVertexWithOffset(mode uint32, count int32, xtype uint32, indices uintptr, basevertex int32) {
+	C.glowDrawElementsBaseVertexWithOffset(gpDrawElementsBaseVertex, (C.GLenum)(mode), (C.GLsizei)(count), (C.GLenum)(xtype), (C.uintptr_t)(indices), (C.GLint)(basevertex))
+}
 
 // render indexed primitives from array data, taking parameters from memory
 func DrawElementsIndirect(mode uint32, xtype uint32, indirect unsafe.Pointer) {
@@ -13322,6 +13334,9 @@ func VertexAttribIFormatNV(index uint32, size int32, xtype uint32, stride int32)
 func VertexAttribIPointer(index uint32, size int32, xtype uint32, stride int32, pointer unsafe.Pointer) {
 	C.glowVertexAttribIPointer(gpVertexAttribIPointer, (C.GLuint)(index), (C.GLint)(size), (C.GLenum)(xtype), (C.GLsizei)(stride), pointer)
 }
+func VertexAttribIPointerWithOffset(index uint32, size int32, xtype uint32, stride int32, offset uintptr) {
+	C.glowVertexAttribIPointerWithOffset(gpVertexAttribIPointer, (C.GLuint)(index), (C.GLint)(size), (C.GLenum)(xtype), (C.GLsizei)(stride), (C.uintptr_t)(offset))
+}
 func VertexAttribL1d(index uint32, x float64) {
 	C.glowVertexAttribL1d(gpVertexAttribL1d, (C.GLuint)(index), (C.GLdouble)(x))
 }
@@ -13408,6 +13423,9 @@ func VertexAttribLFormatNV(index uint32, size int32, xtype uint32, stride int32)
 }
 func VertexAttribLPointer(index uint32, size int32, xtype uint32, stride int32, pointer unsafe.Pointer) {
 	C.glowVertexAttribLPointer(gpVertexAttribLPointer, (C.GLuint)(index), (C.GLint)(size), (C.GLenum)(xtype), (C.GLsizei)(stride), pointer)
+}
+func VertexAttribLPointerWithOffset(index uint32, size int32, xtype uint32, stride int32, offset uintptr) {
+	C.glowVertexAttribLPointerWithOffset(gpVertexAttribLPointer, (C.GLuint)(index), (C.GLint)(size), (C.GLenum)(xtype), (C.GLsizei)(stride), (C.uintptr_t)(offset))
 }
 func VertexAttribP1ui(index uint32, xtype uint32, normalized bool, value uint32) {
 	C.glowVertexAttribP1ui(gpVertexAttribP1ui, (C.GLuint)(index), (C.GLenum)(xtype), (C.GLboolean)(boolToInt(normalized)), (C.GLuint)(value))

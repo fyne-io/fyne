@@ -166,7 +166,7 @@ func (m *Menu) getContainsCheck() bool {
 	return false
 }
 
-// Tapped catches taps on separators and the menu background. It doesn’t perform any action.
+// Tapped catches taps on separators and the menu background. It doesn't perform any action.
 //
 // Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {

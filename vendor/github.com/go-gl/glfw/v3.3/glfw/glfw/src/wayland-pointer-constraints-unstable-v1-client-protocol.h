@@ -73,6 +73,8 @@ struct zwp_confined_pointer_v1;
 struct zwp_locked_pointer_v1;
 struct zwp_pointer_constraints_v1;
 
+#ifndef ZWP_POINTER_CONSTRAINTS_V1_INTERFACE
+#define ZWP_POINTER_CONSTRAINTS_V1_INTERFACE
 /**
  * @page page_iface_zwp_pointer_constraints_v1 zwp_pointer_constraints_v1
  * @section page_iface_zwp_pointer_constraints_v1_desc Description
@@ -111,6 +113,9 @@ struct zwp_pointer_constraints_v1;
  * 'already_constrained' error will be raised.
  */
 extern const struct wl_interface zwp_pointer_constraints_v1_interface;
+#endif
+#ifndef ZWP_LOCKED_POINTER_V1_INTERFACE
+#define ZWP_LOCKED_POINTER_V1_INTERFACE
 /**
  * @page page_iface_zwp_locked_pointer_v1 zwp_locked_pointer_v1
  * @section page_iface_zwp_locked_pointer_v1_desc Description
@@ -169,6 +174,9 @@ extern const struct wl_interface zwp_pointer_constraints_v1_interface;
  * destroyed.
  */
 extern const struct wl_interface zwp_locked_pointer_v1_interface;
+#endif
+#ifndef ZWP_CONFINED_POINTER_V1_INTERFACE
+#define ZWP_CONFINED_POINTER_V1_INTERFACE
 /**
  * @page page_iface_zwp_confined_pointer_v1 zwp_confined_pointer_v1
  * @section page_iface_zwp_confined_pointer_v1_desc Description
@@ -213,6 +221,7 @@ extern const struct wl_interface zwp_locked_pointer_v1_interface;
  * be destroyed.
  */
 extern const struct wl_interface zwp_confined_pointer_v1_interface;
+#endif
 
 #ifndef ZWP_POINTER_CONSTRAINTS_V1_ERROR_ENUM
 #define ZWP_POINTER_CONSTRAINTS_V1_ERROR_ENUM

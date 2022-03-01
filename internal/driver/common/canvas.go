@@ -46,7 +46,7 @@ type Canvas struct {
 	// the refreshQueue is an unbounded queue which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.CanvasObjectQueue
-	dirty        uint64 // atomic
+	dirty        uint32 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
@@ -315,12 +315,12 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 // CheckDirtyAndClear returns true if the canvas is dirty and
 // clears the dirty state atomically.
 func (c *Canvas) CheckDirtyAndClear() bool {
-	return atomic.SwapUint64(&c.dirty, 0) != 0
+	return atomic.SwapUint32(&c.dirty, 0) != 0
 }
 
 // SetDirty sets canvas dirty flag atomically.
 func (c *Canvas) SetDirty() {
-	atomic.AddUint64(&c.dirty, 1)
+	atomic.AddUint32(&c.dirty, 1)
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.

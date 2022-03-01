@@ -1,5 +1,6 @@
-//go:build android || ios || mobile
+//go:build (android || ios || mobile) && (!js || !wasm || !test_web_driver)
 // +build android ios mobile
+// +build !js !wasm !test_web_driver
 
 package gl
 
@@ -23,12 +24,6 @@ type Buffer gl.Buffer
 
 // Program represents a compiled GL program
 type Program gl.Program
-
-// Texture represents an uploaded GL texture
-type Texture gl.Texture
-
-// NoTexture is the zero value for a Texture
-var NoTexture = Texture(gl.Texture{0})
 
 var textureFilterToGL = []int{gl.Linear, gl.Nearest}
 
@@ -78,7 +73,7 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 		return texture
 	case *image.RGBA:
 		if len(i.Pix) == 0 { // image is empty
-			return NoTexture
+			return noTexture
 		}
 
 		texture := p.newTexture(textureFilter)

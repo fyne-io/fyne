@@ -50,7 +50,7 @@ func copyFileMode(src, tgt string, perm os.FileMode) (err error) {
 	}
 	defer source.Close()
 
-	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE, perm)
+	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE|os.O_TRUNC, perm)
 	if err != nil {
 		return err
 	}

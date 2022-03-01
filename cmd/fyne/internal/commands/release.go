@@ -189,7 +189,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
-	err := r.Packager.Package()
+	err := r.Packager.packageWithoutValidate()
 	if err != nil {
 		return err
 	}

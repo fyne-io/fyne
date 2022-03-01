@@ -17,7 +17,7 @@ single codebase.
 Version 2.1 is the current release of the Fyne API, it introduced RichText
 and the DocTabs container, as well as the document storage API and FyneApp.toml
 metadata support.
-We are now working towards the next big release, codenamed 
+We are now working towards the next big release, codenamed
 [bowmore](https://github.com/fyne-io/fyne/milestone/15)
 and more news will follow in our news feeds and GitHub project.
 
@@ -60,7 +60,7 @@ And even running on a mobile device:
 
 Fyne is designed to be really easy to code with.
 If you have followed the prerequisite steps above then all you need is a
-Go IDE (or a text editor). 
+Go IDE (or a text editor).
 
 Open a new file and you're ready to write your first app!
 
@@ -114,6 +114,8 @@ There is a helpful mobile simulation mode that gives a hint of how your app woul
 
     $ go run -tags mobile main.go
 
+Another option is to use `fyne` command, see [Packaging for mobile](#packaging-for-mobile).
+
 # Installing
 
 Using `go install` will copy the executable into your go `bin` dir.
@@ -133,6 +135,14 @@ Once packaged you can install using the platform development tools or the fyne "
     $ fyne package -os android -appID my.domain.appname
     $ fyne install -os android
 
+The built Android application can run either in a real device or an Android emulator.
+However, building for iOS is slightly different.
+If the "-os" argument is "ios", it is build only for a real iOS device.
+Specify "-os" to "iossimulator" allows the application be able to run in an iOS simulator:
+
+    $ fyne package -os ios -appID my.domain.appname
+    $ fyne package -os iossimulator -appID my.domain.appname
+
 # Preparing a release
 
 Using the fyne utility "release" subcommand you can package up your app for release
@@ -142,7 +152,7 @@ Then you can execute something like the following, notice the `-os ios` paramete
 building an iOS app from macOS computer. Other combinations work as well :)
 
     $ fyne release -os ios -certificate "Apple Distribution" -profile "My App Distribution" -appID "com.example.myapp"
-    
+
 The above command will create a '.ipa' file that can then be uploaded to the iOS App Store.
 
 # Documentation

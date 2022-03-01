@@ -127,8 +127,17 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			if trimmed == "" {
 				return ast.WalkContinue, nil
 			}
-			if text, ok := m.nextSeg.(*TextSegment); ok {
-				text.Text = text.Text + trimmed
+			if t, ok := m.nextSeg.(*TextSegment); ok {
+				next := n.(*ast.Text).NextSibling()
+				if next != nil {
+					if nextText, ok := next.(*ast.Text); ok {
+						if nextText.Segment.Start > n.(*ast.Text).Segment.Stop { // detect presence of a trailing newline
+							trimmed = trimmed + " "
+						}
+					}
+				}
+
+				t.Text = t.Text + trimmed
 			}
 			if link, ok := m.nextSeg.(*HyperlinkSegment); ok {
 				link.Text = link.Text + trimmed

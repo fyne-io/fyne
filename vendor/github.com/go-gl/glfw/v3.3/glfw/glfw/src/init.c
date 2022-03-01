@@ -28,7 +28,6 @@
 //========================================================================
 
 #include "internal.h"
-#include "mappings.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -37,16 +36,15 @@
 #include <assert.h>
 
 
-// The global variables below comprise all mutable global data in GLFW
-//
-// Any other global variable is a bug
+// NOTE: The global variables below comprise all mutable global data in GLFW
+//       Any other mutable global variable is a bug
 
-// Global state shared between compilation units of GLFW
+// This contains all mutable state shared between compilation units of GLFW
 //
 _GLFWlibrary _glfw = { GLFW_FALSE };
 
 // These are outside of _glfw so they can be used before initialization and
-// after termination
+// after termination without special handling when _glfw is cleared to zero
 //
 static _GLFWerror _glfwMainThreadError;
 static GLFWerrorfun _glfwErrorCallback;
@@ -245,24 +243,12 @@ GLFWAPI int glfwInit(void)
 
     _glfwPlatformSetTls(&_glfw.errorSlot, &_glfwMainThreadError);
 
+    _glfwInitGamepadMappings();
+
     _glfw.initialized = GLFW_TRUE;
     _glfw.timer.offset = _glfwPlatformGetTimerValue();
 
     glfwDefaultWindowHints();
-
-    {
-        int i;
-
-        for (i = 0;  _glfwDefaultMappings[i];  i++)
-        {
-            if (!glfwUpdateGamepadMappings(_glfwDefaultMappings[i]))
-            {
-                terminate();
-                return GLFW_FALSE;
-            }
-        }
-    }
-
     return GLFW_TRUE;
 }
 

@@ -120,11 +120,9 @@ func (b *boundExternal{{ .Name }}) Reload() error {
 const prefTemplate = `
 type prefBound{{ .Name }} struct {
 	base
-	key string
-	p   fyne.Preferences
-
-	cacheLock sync.RWMutex
-	cache     {{ .Type }}
+	key   string
+	p     fyne.Preferences
+	cache atomic.Value // {{ .Type }}
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
@@ -150,10 +148,8 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 
 func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
 	cache := b.p.{{ .Name }}(b.key)
-	b.cacheLock.Lock()
-	b.cache = cache
-	b.cacheLock.Unlock()
-	return b.cache, nil
+	b.cache.Store(cache)
+	return cache, nil
 }
 
 func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
@@ -166,13 +162,13 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 }
 
 func (b *prefBound{{ .Name }}) checkForChange() {
-	b.cacheLock.RLock()
-	cache := b.cache
-	b.cacheLock.RUnlock()
-	if b.p.{{ .Name }}(b.key) == cache {
-		return
+	val := b.cache.Load()
+	if val != nil {
+		cache := val.({{ .Type }})
+		if b.p.{{ .Name }}(b.key) == cache {
+			return
+		}
 	}
-
 	b.trigger()
 }
 `
@@ -447,11 +443,12 @@ func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
 }
 
 func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	if i < 0 || i >= l.Length() {
 		return {{ .Default }}, errOutOfBounds
 	}
-	l.lock.RLock()
-	defer l.lock.RUnlock()
 
 	return (*l.val)[i], nil
 }
@@ -517,7 +514,11 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 }
 
 func (l *bound{{ .Name }}List) SetValue(i int, v {{ .Type }}) error {
-	if i < 0 || i >= l.Length() {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
 		return errOutOfBounds
 	}
 
@@ -554,6 +555,10 @@ func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
+	if b.index < 0 || b.index >= len(*b.val) {
+		return {{ .Default }}, errOutOfBounds
+	}
+
 	return (*b.val)[b.index], nil
 }
 
@@ -578,9 +583,15 @@ type boundExternal{{ .Name }}ListItem struct {
 }
 
 func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+	{{- if eq .Comparator "" }}
 	if val == b.old {
 		return nil
 	}
+	{{- else }}
+	if {{ .Comparator }}(val, b.old) {
+		return nil
+	}
+	{{- end }}
 	(*b.val)[b.index] = val
 	b.old = val
 
@@ -628,7 +639,11 @@ func main() {
 	}
 	defer itemFile.Close()
 	itemFile.WriteString(`
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 `)
 	convertFile, err := newFile("convert")
 	if err != nil {
@@ -649,7 +664,7 @@ import (
 	defer prefFile.Close()
 	prefFile.WriteString(`
 import (
-	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 )
@@ -663,7 +678,11 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 	}
 	defer listFile.Close()
 	listFile.WriteString(`
-import "fyne.io/fyne/v2"
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
 `)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
@@ -673,16 +692,23 @@ import "fyne.io/fyne/v2"
 	list := template.Must(template.New("list").Parse(listBindTemplate))
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
+		bindValues{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
 	for _, b := range binds {
 		if b.Since == "" {
 			b.Since = "2.0"
+		}
+
+		writeFile(listFile, list, b)
+		if b.Name == "Untyped" {
+			continue // interface{} is special, we have it in binding.go instead
 		}
 
 		writeFile(itemFile, item, b)
@@ -692,7 +718,6 @@ import "fyne.io/fyne/v2"
 		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}
-		writeFile(listFile, list, b)
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {

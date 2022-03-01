@@ -41,9 +41,14 @@ func IsAndroid(os string) bool {
 	return strings.HasPrefix(os, "android")
 }
 
+// IsIOS returns true if the given os parameter represents one of the iOS targets (ios, iossimulator)
+func IsIOS(os string) bool {
+	return strings.HasPrefix(os, "ios")
+}
+
 // IsMobile returns true if the given os parameter represents a platform handled by gomobile.
 func IsMobile(os string) bool {
-	return os == "ios" || IsAndroid(os)
+	return IsIOS(os) || IsAndroid(os)
 }
 
 // RequireAndroidSDK will return an error if it cannot establish the location of a valid Android SDK installation.

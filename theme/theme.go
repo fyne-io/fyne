@@ -1,4 +1,4 @@
-// Package theme defines how a Fyne app should look when rendered
+// Package theme defines how a Fyne app should look when rendered.
 package theme // import "fyne.io/fyne/v2/theme"
 
 import (
@@ -230,6 +230,13 @@ func DefaultTextItalicFont() fyne.Resource {
 // DefaultTextMonospaceFont returns the font resource for the built-in monospace font face.
 func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
+}
+
+// DefaultSymbolFont returns the font resource for the built-in symbol font.
+//
+// Since: 2.2
+func DefaultSymbolFont() fyne.Resource {
+	return symbol
 }
 
 // DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
@@ -516,9 +523,15 @@ func (t *builtinTheme) initFonts() {
 	font := os.Getenv("FYNE_FONT")
 	if font != "" {
 		t.regular = loadCustomFont(font, "Regular", regular)
-		t.bold = loadCustomFont(font, "Bold", bold)
-		t.italic = loadCustomFont(font, "Italic", italic)
-		t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
+		if t.regular == regular { // failed to load
+			t.bold = loadCustomFont(font, "Bold", bold)
+			t.italic = loadCustomFont(font, "Italic", italic)
+			t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
+		} else { // first custom font loaded, fall back to that
+			t.bold = loadCustomFont(font, "Bold", t.regular)
+			t.italic = loadCustomFont(font, "Italic", t.regular)
+			t.boldItalic = loadCustomFont(font, "BoldItalic", t.regular)
+		}
 	}
 	font = os.Getenv("FYNE_FONT_MONOSPACE")
 	if font != "" {

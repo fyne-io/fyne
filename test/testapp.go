@@ -1,4 +1,4 @@
-// Package test provides utility drivers for running UI tests without rendering
+// Package test provides utility drivers for running UI tests without rendering to a screen.
 package test // import "fyne.io/fyne/v2/test"
 
 import (

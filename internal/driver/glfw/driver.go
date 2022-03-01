@@ -37,6 +37,8 @@ type gLDriver struct {
 	drawDone   chan interface{}
 
 	animation *animation.Runner
+
+	drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
@@ -76,13 +78,6 @@ func (d *gLDriver) Quit() {
 	close(d.done)
 }
 
-func (d *gLDriver) Run() {
-	if goroutineID() != mainGoroutineID {
-		panic("Run() or ShowAndRun() must be called from main goroutine")
-	}
-	d.runGL()
-}
-
 func (d *gLDriver) addWindow(w *window) {
 	d.windowLock.Lock()
 	defer d.windowLock.Unlock()
@@ -120,9 +115,12 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	fyne.LogError(msg, err)
 
-	if running() {
+	run.Lock()
+	if !run.flag {
+		run.Unlock()
 		d.Quit()
 	} else {
+		run.Unlock()
 		os.Exit(1)
 	}
 }

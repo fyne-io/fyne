@@ -8,8 +8,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	col "fyne.io/fyne/v2/internal/color"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -98,9 +98,9 @@ func (p *ColorPickerDialog) updateUI() {
 		})
 		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
 
-		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
-			fyne.NewContainerWithLayout(layout.NewCenterLayout(),
-				fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+		p.dialog.content = container.NewVBox(
+			container.NewCenter(
+				container.NewVBox(
 					p.createSimplePickers()...,
 				),
 			),
@@ -115,7 +115,7 @@ func (p *ColorPickerDialog) updateUI() {
 		}
 		p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
 	} else {
-		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(), p.createSimplePickers()...)
+		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
 		p.dialog.setButtons(newButtonList(p.dialog.dismiss))
 	}
 }
@@ -148,7 +148,7 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	for _, c := range colors {
 		objects = append(objects, newColorButton(c, callback))
 	}
-	return fyne.NewContainerWithLayout(layout.NewGridLayoutWithColumns(8), objects...)
+	return container.NewGridWithColumns(8, objects...)
 }
 
 func newCheckeredBackground() *canvas.Raster {

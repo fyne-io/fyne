@@ -1,5 +1,8 @@
-//go:build !ci && (linux || openbsd || freebsd || netbsd) && !android
+//go:build !ci && !js && !wasm && !test_web_driver && (linux || openbsd || freebsd || netbsd) && !android
 // +build !ci
+// +build !js
+// +build !wasm
+// +build !test_web_driver
 // +build linux openbsd freebsd netbsd
 // +build !android
 
@@ -46,9 +49,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 }
 
 func rootConfigDir() string {
-	homeDir, _ := os.UserHomeDir()
-
-	desktopConfig := filepath.Join(homeDir, ".config")
+	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")
 }
 

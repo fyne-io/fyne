@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -8,7 +9,6 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
 )
@@ -74,7 +74,7 @@ func (g *Getter) Get(pkg string) error {
 
 	install := &Installer{srcDir: path, icon: g.icon, appID: g.appID, release: true}
 	if err := install.validate(); err != nil {
-		return errors.Wrap(err, "Failed to set up installer")
+		return fmt.Errorf("failed to set up installer: %w", err)
 	}
 
 	return install.install()
