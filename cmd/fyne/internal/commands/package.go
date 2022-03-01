@@ -198,6 +198,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 			tags:    tags,
 			runner:  runner,
 
+			icon:     p.icon,
 			id:       p.appID,
 			name:     p.name,
 			version:  p.appVersion,
@@ -215,6 +216,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		tags:    tags,
 		runner:  runner,
 
+		icon:     p.icon,
 		id:       p.appID,
 		name:     p.name,
 		version:  p.appVersion,

@@ -105,6 +105,8 @@ type AppMetadata struct {
 	Version string
 	// Build is the build number of this app, some times appended to the version number.
 	Build int
+	// Icon contains, if present, a resource of the icon that was bundled at build time.
+	Icon Resource
 }
 
 // Lifecycle represents the various phases that an app can transition through.

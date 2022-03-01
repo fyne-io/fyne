@@ -1,11 +1,13 @@
 package commands
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"runtime"
 	"strings"
 
+	"fyne.io/fyne/v2"
 	version "github.com/mcuadros/go-version"
 )
 
@@ -16,8 +18,8 @@ type builder struct {
 
 	runner runner
 
-	id, name, version string
-	buildNum          int
+	icon, id, name, version string
+	buildNum                int
 }
 
 func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
@@ -147,6 +149,22 @@ func (b *builder) generateMetaLDFlags() string {
 	}
 	if b.buildNum != 0 {
 		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaBuild=%d'", b.buildNum))
+	}
+
+	if b.icon != "" {
+		res, err := fyne.LoadResourceFromPath(b.icon)
+		if err != nil {
+			fyne.LogError("Unable to load file "+b.icon, err)
+		} else {
+
+			staticRes, ok := res.(*fyne.StaticResource)
+			if !ok {
+				fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
+			} else {
+				data := base64.StdEncoding.EncodeToString(staticRes.StaticContent)
+				vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaIcon="+data+"'"))
+			}
+		}
 	}
 
 	return strings.Join(vars, " ")
