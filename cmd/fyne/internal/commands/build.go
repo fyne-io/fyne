@@ -69,13 +69,13 @@ func (b *builder) build() error {
 func (b *builder) generateMetaLDFlags() string {
 	var vars []string
 	if b.id != "" {
-		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaID=%s'", b.id))
+		vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app.MetaID="+b.id+"'")
 	}
 	if b.name != "" {
-		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaName=%s'", b.name))
+		vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app.MetaName="+b.name+"'")
 	}
 	if b.version != "" {
-		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaVersion=%s'", b.version))
+		vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app.MetaVersion="+b.version+"'")
 	}
 	if b.buildNum != 0 {
 		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaBuild=%d'", b.buildNum))
