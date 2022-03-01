@@ -161,7 +161,7 @@ func (b *builder) generateMetaLDFlags() string {
 		{"MetaID", b.id},
 		{"MetaName", b.name},
 		{"MetaVersion", b.version},
-		{"MetaID", buildIDString},
+		{"MetaBuild", buildIDString},
 		{"MetaIcon", iconBytes},
 	}
 
