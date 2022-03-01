@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -137,33 +138,37 @@ func (b *builder) build() error {
 }
 
 func (b *builder) generateMetaLDFlags() string {
-	var vars []string
-	if b.id != "" {
-		vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app.MetaID="+b.id+"'")
+	buildIDString := ""
+	if b.buildNum > 0 {
+		buildIDString = strconv.Itoa(b.buildNum)
 	}
-	if b.name != "" {
-		vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app.MetaName="+b.name+"'")
-	}
-	if b.version != "" {
-		vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app.MetaVersion="+b.version+"'")
-	}
-	if b.buildNum != 0 {
-		vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaBuild=%d'", b.buildNum))
-	}
-
+	iconBytes := ""
 	if b.icon != "" {
 		res, err := fyne.LoadResourceFromPath(b.icon)
 		if err != nil {
 			fyne.LogError("Unable to load file "+b.icon, err)
 		} else {
-
 			staticRes, ok := res.(*fyne.StaticResource)
 			if !ok {
 				fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
 			} else {
-				data := base64.StdEncoding.EncodeToString(staticRes.StaticContent)
-				vars = append(vars, fmt.Sprintf("-X 'fyne.io/fyne/v2/internal/app.MetaIcon="+data+"'"))
+				iconBytes = base64.StdEncoding.EncodeToString(staticRes.StaticContent)
 			}
+		}
+	}
+
+	inserts := [][2]string{
+		{"MetaID", b.id},
+		{"MetaName", b.name},
+		{"MetaVersion", b.version},
+		{"MetaID", buildIDString},
+		{"MetaIcon", iconBytes},
+	}
+
+	var vars []string
+	for _, item := range inserts {
+		if item[1] != "" {
+			vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app."+item[0]+"="+item[1]+"'")
 		}
 	}
 
