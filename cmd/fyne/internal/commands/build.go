@@ -88,10 +88,10 @@ func (b *builder) build() error {
 			}
 		} else if b.release {
 			args = append(args, "-ldflags", "-s -w "+meta)
-		} else {
+		} else if meta != "" {
 			args = append(args, "-ldflags", meta)
 		}
-	} else {
+	} else if meta != "" {
 		args = append(args, "-ldflags", meta)
 	}
 
