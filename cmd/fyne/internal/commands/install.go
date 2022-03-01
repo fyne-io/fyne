@@ -10,7 +10,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
@@ -163,7 +162,7 @@ func (i *Installer) install() error {
 	}
 
 	p.dir = i.installDir
-	err := p.doPackage()
+	err := p.doPackage(nil)
 	if err != nil {
 		return err
 	}
@@ -176,7 +175,7 @@ func (i *Installer) installAndroid() error {
 
 	_, err := os.Stat(target)
 	if os.IsNotExist(err) {
-		err := i.Packager.doPackage()
+		err := i.Packager.doPackage(nil)
 		if err != nil {
 			return nil
 		}
@@ -190,7 +189,7 @@ func (i *Installer) installIOS() error {
 
 	// Always redo the package because the codesign for ios and iossimulator
 	// must be different.
-	if err := i.Packager.doPackage(); err != nil {
+	if err := i.Packager.doPackage(nil); err != nil {
 		return nil
 	}
 

@@ -59,6 +59,8 @@ type App interface {
 	Storage() Storage
 
 	// Lifecycle returns a type that allows apps to hook in to lifecycle events.
+	//
+	// Since: 2.1
 	Lifecycle() Lifecycle
 
 	// Metadata returns the application metadata that was set at compile time.
