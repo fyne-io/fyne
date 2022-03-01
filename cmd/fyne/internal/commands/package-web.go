@@ -1,13 +1,11 @@
 package commands
 
 import (
-	"io/ioutil"
-	"os"
+	"bytes"
 	"path/filepath"
 	"runtime"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 func (p *Packager) packageWeb() error {
@@ -57,13 +55,14 @@ type webData struct {
 }
 
 func (w webData) packageWebInternal(appDir string, exeWasmSrc string, exeJSSrc string, icon string, release bool) error {
-	index := filepath.Join(appDir, "index.html")
-	indexFile, err := os.Create(index)
+	var tpl bytes.Buffer
+	err := templates.IndexHTML.Execute(&tpl, w)
 	if err != nil {
 		return err
 	}
 
-	err = templates.IndexHTML.Execute(indexFile, w)
+	index := filepath.Join(appDir, "index.html")
+	err = util.WriteFile(index, tpl.Bytes())
 	if err != nil {
 		return err
 	}
@@ -100,7 +99,7 @@ func (w webData) packageWebInternal(appDir string, exeWasmSrc string, exeJSSrc s
 	// Download webgl-debug.js directly from the KhronosGroup repository when needed
 	if !release {
 		webglDebugFile := filepath.Join(appDir, "webgl-debug.js")
-		err := ioutil.WriteFile(webglDebugFile, templates.WebGLDebugJs, 0644)
+		err := util.WriteFile(webglDebugFile, templates.WebGLDebugJs)
 		if err != nil {
 			return err
 		}
