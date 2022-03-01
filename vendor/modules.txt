@@ -171,4 +171,5 @@ golang.org/x/xerrors/internal
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
 # honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
+## explicit
 honnef.co/go/js/dom
