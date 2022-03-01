@@ -42,7 +42,7 @@ func convertIcon(bytes string) fyne.Resource {
 	}
 
 	return &fyne.StaticResource{
-		StaticName: "FyneAppIcon",
+		StaticName:    "FyneAppIcon",
 		StaticContent: img,
 	}
 }
