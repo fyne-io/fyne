@@ -1,13 +1,3 @@
-#version 100
-#ifdef GL_ES
-# ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-# else
-precision mediump float;
-#endif
-precision mediump int;
-precision lowp sampler2D;
-#endif
 uniform vec4 color;
 uniform float lineWidth;
 uniform float feather;
@@ -15,8 +5,8 @@ uniform float feather;
 varying vec2 delta;
 
 void main() {
-    highp float alpha = color.a;
-    highp float distance = length(delta);
+    float alpha = color.a;
+    float distance = length(delta);
 
     if (feather == 0.0 || distance <= lineWidth - feather) {
         gl_FragColor = color;

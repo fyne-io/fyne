@@ -122,10 +122,10 @@ func (p *glPainter) compileShader(source string, shaderType gl.Enum) (gl.Shader,
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderSimplevertexGlsl.StaticContent)
-var fragmentShaderSource = string(shaderSimplefragmentGlsl.StaticContent)
-var vertexLineShaderSource = string(shaderLinevertexGlsl.StaticContent)
-var fragmentLineShaderSource = string(shaderLinefragmentGlsl.StaticContent)
+var vertexShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderSimplevertexGlsl.StaticContent)
+var fragmentShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderSimplefragmentGlsl.StaticContent)
+var vertexLineShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderLinevertexGlsl.StaticContent)
+var fragmentLineShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderLinefragmentGlsl.StaticContent)
 
 func (p *glPainter) Init() {
 	p.glctx().Disable(gl.DepthTest)

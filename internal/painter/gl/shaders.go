@@ -5,23 +5,33 @@ package gl
 
 import "fyne.io/fyne/v2"
 
+var shaderHeaderglGlsl = &fyne.StaticResource{
+	StaticName: "header_gl.glsl",
+	StaticContent: []byte(
+		"#version 110\n"),
+}
+var shaderHeaderglesGlsl = &fyne.StaticResource{
+	StaticName: "header_gl_es.glsl",
+	StaticContent: []byte(
+		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n"),
+}
 var shaderLinefragmentGlsl = &fyne.StaticResource{
 	StaticName: "line_fragment.glsl",
 	StaticContent: []byte(
-		"#version 100\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\nuniform highp vec4 color;\nuniform highp float lineWidth;\nuniform highp float feather;\n\nvarying highp vec2 delta;\n\nvoid main() {\n    highp float alpha = color.a;\n    highp float distance = length(delta);\n\n    if (feather == 0.0 || distance <= lineWidth - feather) {\n        gl_FragColor = color;\n    } else {\n        gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));\n    }\n}\n"),
+		"uniform vec4 color;\nuniform float lineWidth;\nuniform float feather;\n\nvarying vec2 delta;\n\nvoid main() {\n    float alpha = color.a;\n    float distance = length(delta);\n\n    if (feather == 0.0 || distance <= lineWidth - feather) {\n        gl_FragColor = color;\n    } else {\n        gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));\n    }\n}\n"),
 }
 var shaderLinevertexGlsl = &fyne.StaticResource{
 	StaticName: "line_vertex.glsl",
 	StaticContent: []byte(
-		"#version 100\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\nattribute vec2 vert;\nattribute vec2 normal;\n    \nuniform float lineWidth;\n\nvarying highp vec2 delta;\n\nvoid main() {\n    delta = normal * lineWidth;\n\n    gl_Position = vec4(vert + delta, 0, 1);\n}\n"),
+		"attribute vec2 vert;\nattribute vec2 normal;\n    \nuniform float lineWidth;\n\nvarying vec2 delta;\n\nvoid main() {\n    delta = normal * lineWidth;\n\n    gl_Position = vec4(vert + delta, 0, 1);\n}\n"),
 }
 var shaderSimplefragmentGlsl = &fyne.StaticResource{
 	StaticName: "simple_fragment.glsl",
 	StaticContent: []byte(
-		"#version 100\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\t\t\nuniform sampler2D tex;\n\nvarying highp vec2 fragTexCoord;\n\nvoid main() {\n    gl_FragColor = texture2D(tex, fragTexCoord);\n}\n"),
+		"uniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    gl_FragColor = texture2D(tex, fragTexCoord);\n}\n"),
 }
 var shaderSimplevertexGlsl = &fyne.StaticResource{
 	StaticName: "simple_vertex.glsl",
 	StaticContent: []byte(
-		"#version 100\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying highp vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
+		"attribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
 }
