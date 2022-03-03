@@ -116,10 +116,10 @@ func compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderSimplevertexGlsl.StaticContent)
-var fragmentShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderSimplefragmentGlsl.StaticContent)
-var vertexLineShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderLinevertexGlsl.StaticContent)
-var fragmentLineShaderSource = string(shaderHeaderglesGlsl.StaticContent) + string(shaderLinefragmentGlsl.StaticContent)
+var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
+var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent)
+var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
+var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
 
 func (p *glPainter) Init() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)

@@ -1,3 +1,5 @@
+#version 110
+
 uniform vec4 color;
 uniform float lineWidth;
 uniform float feather;
