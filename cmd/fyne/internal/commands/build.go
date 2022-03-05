@@ -7,14 +7,70 @@ import (
 	"strings"
 
 	version "github.com/mcuadros/go-version"
+	"github.com/urfave/cli/v2"
 )
 
-type builder struct {
+// Builder generate the executables.
+type Builder struct {
 	os, srcdir, target string
 	release            bool
 	tags               []string
+	tagsToParse        string
 
 	runner runner
+}
+
+// Build returns the cli command for building fyne applications
+func Build() *cli.Command {
+	b := &Builder{}
+
+	return &cli.Command{
+		Name:        "build",
+		Usage:       "Build an application.",
+		Description: "You may specify the --executable to build, but --target will define the OS it is build for indiscriminate of the extention of the executable.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "target",
+				Aliases:     []string{"os"},
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
+				Destination: &b.os,
+			},
+			&cli.StringFlag{
+				Name:        "sourceDir",
+				Aliases:     []string{"src"},
+				Usage:       "The directory to package, if executable is not set.",
+				Destination: &b.srcdir,
+			},
+			&cli.StringFlag{
+				Name:        "tags",
+				Usage:       "A comma-separated list of build tags.",
+				Destination: &b.tagsToParse,
+			},
+			&cli.BoolFlag{
+				Name:        "release",
+				Usage:       "Enable installation in release mode (disable debug etc).",
+				Destination: &b.release,
+			},
+			&cli.StringFlag{
+				Name:        "executable",
+				Aliases:     []string{"exe"},
+				Usage:       "The path to the executable, default is the current dir main binary",
+				Destination: &b.target,
+			},
+		},
+		Action: func(_ *cli.Context) error {
+			return b.Build()
+		},
+	}
+}
+
+// Build parse the tags and start building
+func (b *Builder) Build() error {
+	if b.tagsToParse != "" {
+		b.tags = strings.Split(b.tagsToParse, ",")
+	}
+
+	return b.build()
 }
 
 func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
@@ -50,7 +106,7 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
-func (b *builder) build() error {
+func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
 	goos := b.os
