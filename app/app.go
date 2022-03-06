@@ -35,7 +35,11 @@ type fyneApp struct {
 }
 
 func (a *fyneApp) Icon() fyne.Resource {
-	return a.icon
+	if a.icon != nil {
+		return a.icon
+	}
+
+	return a.Metadata().Icon
 }
 
 func (a *fyneApp) SetIcon(icon fyne.Resource) {
