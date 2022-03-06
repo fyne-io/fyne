@@ -83,8 +83,8 @@ github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe h1:A/wiwvQ0CAjPkuJyt
 github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe/go.mod h1:d4clgH0/GrRwWjRzJJQXxT/h1TyuNSfF/X64zb/3Ggg=
 github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504 h1:+31CdF/okdokeFNoy9L/2PccG3JFidQT3ev64/r4pYU=
 github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504/go.mod h1:gLRWYfYnMA9TONeppRSikMdXlHQ97xVsPojddUv3b/E=
-github.com/fyne-io/systray v1.1.1-0.20220304202243-7fae6c2c5735 h1:dYTQZQvGotEjjzbfSaf2edDsCzMcWcCtJKRB5MjiKQs=
-github.com/fyne-io/systray v1.1.1-0.20220304202243-7fae6c2c5735/go.mod h1:s+heIP7MbDGp0rLQhw1yEpMEaf0d3y3XQ75K68Esobs=
+github.com/fyne-io/systray v1.1.1-0.20220306152635-ed046166dd6b h1:7kfhvRMwRg3t/gWnBbqdi6+4OwQntdQBGRb3mMTHB9M=
+github.com/fyne-io/systray v1.1.1-0.20220306152635-ed046166dd6b/go.mod h1:s+heIP7MbDGp0rLQhw1yEpMEaf0d3y3XQ75K68Esobs=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 h1:zDw5v7qm4yH7N8C8uWd+8Ii9rROdgWxQuGoJ9WDXxfk=
 github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6/go.mod h1:9YTyiznxEY1fVinfM7RvRcjRHbw2xLBJ3AAGIT0I4Nw=

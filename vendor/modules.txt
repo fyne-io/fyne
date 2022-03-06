@@ -26,7 +26,7 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
-# github.com/fyne-io/systray v1.1.1-0.20220304202243-7fae6c2c5735
+# github.com/fyne-io/systray v1.1.1-0.20220306152635-ed046166dd6b
 ## explicit
 github.com/fyne-io/systray
 github.com/fyne-io/systray/internal/generated/menu
