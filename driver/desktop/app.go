@@ -7,4 +7,5 @@ import "fyne.io/fyne/v2"
 // Since: 2.2
 type App interface {
 	SetSystemTrayMenu(menu *fyne.Menu)
+	SetSystemTrayIcon(icon fyne.Resource)
 }

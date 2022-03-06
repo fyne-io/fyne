@@ -59,3 +59,7 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 		// anything required for tear-down
 	})
 }
+
+func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
+	systray.SetIcon(resource.Content())
+}
