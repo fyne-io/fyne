@@ -1,4 +1,4 @@
-# github.com/BurntSushi/toml v0.4.1
+# github.com/BurntSushi/toml v1.0.0
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
@@ -17,7 +17,7 @@ github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 ## explicit
 github.com/fredbi/uri
-# github.com/fsnotify/fsnotify v1.4.9
+# github.com/fsnotify/fsnotify v1.5.1
 ## explicit
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
@@ -52,7 +52,7 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
-# github.com/godbus/dbus/v5 v5.0.6
+# github.com/godbus/dbus/v5 v5.1.0
 ## explicit
 github.com/godbus/dbus/v5
 github.com/godbus/dbus/v5/introspect
@@ -75,6 +75,9 @@ github.com/josephspurrier/goversioninfo
 github.com/lucor/goinfo
 github.com/lucor/goinfo/format
 github.com/lucor/goinfo/report
+# github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
+## explicit
+github.com/mcuadros/go-version
 # github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 github.com/nfnt/resize
 # github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
@@ -175,4 +178,5 @@ golang.org/x/xerrors/internal
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
 # honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
+## explicit
 honnef.co/go/js/dom

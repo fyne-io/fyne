@@ -10,6 +10,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+func (d *gLDriver) Run() {
+	if goroutineID() != mainGoroutineID {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
+	d.runGL()
+}
+
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
 		if fyne.CurrentApp().Icon() != nil {
