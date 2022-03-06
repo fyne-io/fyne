@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidator_Selection(t *testing.T) {
-	s := validation.NewSelection(2)
+func TestValidator_SelectionCount(t *testing.T) {
+	s := validation.NewSelectionCount(2)
 
 	assert.NoError(t, s(2))
 	assert.NoError(t, s(3))
