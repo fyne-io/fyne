@@ -1,4 +1,4 @@
-# github.com/BurntSushi/toml v0.4.1
+# github.com/BurntSushi/toml v1.0.0
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
@@ -17,7 +17,7 @@ github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 ## explicit
 github.com/fredbi/uri
-# github.com/fsnotify/fsnotify v1.4.9
+# github.com/fsnotify/fsnotify v1.5.1
 ## explicit
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
@@ -47,7 +47,7 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
-# github.com/godbus/dbus/v5 v5.0.6
+# github.com/godbus/dbus/v5 v5.1.0
 ## explicit
 github.com/godbus/dbus/v5
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
