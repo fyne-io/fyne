@@ -53,12 +53,23 @@ func Build() *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:        "executable",
-				Aliases:     []string{"exe"},
+				Aliases:     []string{"exe", "o"},
 				Usage:       "The path to the executable, default is the current dir main binary",
 				Destination: &b.target,
 			},
 		},
-		Action: func(_ *cli.Context) error {
+		Action: func(ctx *cli.Context) error {
+			argCount := ctx.Args().Len()
+			if argCount > 0 {
+				if argCount != 1 {
+					return fmt.Errorf("incorrect amount of path provided")
+				}
+				if b.srcdir != "" {
+					return fmt.Errorf("the directory to package is already specified")
+				}
+				b.srcdir = ctx.Args().First()
+			}
+
 			return b.Build()
 		},
 	}
@@ -66,6 +77,15 @@ func Build() *cli.Command {
 
 // Build parse the tags and start building
 func (b *Builder) Build() error {
+	if b.srcdir != "" {
+		dirStat, err := os.Stat(b.srcdir)
+		if err != nil {
+			return err
+		}
+		if !dirStat.IsDir() {
+			return fmt.Errorf("specified source directory is not a valid directory")
+		}
+	}
 	if b.tagsToParse != "" {
 		b.tags = strings.Split(b.tagsToParse, ",")
 	}
