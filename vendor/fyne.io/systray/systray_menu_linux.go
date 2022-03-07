@@ -3,9 +3,10 @@ package systray
 import (
 	"log"
 
-	"github.com/fyne-io/systray/internal/generated/menu"
 	"github.com/godbus/dbus/v5"
 	"github.com/godbus/dbus/v5/prop"
+
+	"fyne.io/systray/internal/generated/menu"
 )
 
 // SetIcon sets the icon of a menu item. Only works on macOS and Windows.

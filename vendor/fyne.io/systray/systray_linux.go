@@ -12,11 +12,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/fyne-io/systray/internal/generated/menu"
-	"github.com/fyne-io/systray/internal/generated/notifier"
 	"github.com/godbus/dbus/v5"
 	"github.com/godbus/dbus/v5/introspect"
 	"github.com/godbus/dbus/v5/prop"
+
+	"fyne.io/systray/internal/generated/menu"
+	"fyne.io/systray/internal/generated/notifier"
 )
 
 const (
@@ -44,7 +45,7 @@ var (
 // .ico/.jpg/.png for other platforms.
 func SetTemplateIcon(templateIconBytes []byte, regularIconBytes []byte) {
 	// TODO handle the templateIconBytes?
-	iconData = regularIconBytes
+	SetIcon(regularIconBytes)
 }
 
 // SetIcon sets the systray icon.
@@ -52,6 +53,17 @@ func SetTemplateIcon(templateIconBytes []byte, regularIconBytes []byte) {
 // for other platforms.
 func SetIcon(iconBytes []byte) {
 	iconData = iconBytes
+
+	if instance != nil && instance.props != nil {
+		instance.props["org.kde.StatusNotifierItem"]["IconPixmap"].Value = []PX{convertToPixels(iconData)}
+
+		if instance.conn != nil {
+			notifier.Emit(instance.conn, &notifier.StatusNotifierItem_NewIconSignal{
+				Path: path,
+				Body: &notifier.StatusNotifierItem_NewIconSignalBody{},
+			})
+		}
+	}
 }
 
 // SetTitle sets the systray title, only available on Mac and Linux.
@@ -154,7 +166,7 @@ func nativeStart() {
 	}
 
 	obj := conn.Object("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher")
-	call := obj.Call("org.kde.StatusNotifierWatcher.RegisterStatusNotifierItem", 0, name)
+	call := obj.Call("org.kde.StatusNotifierWatcher.RegisterStatusNotifierItem", 0, path)
 	if call.Err != nil {
 		log.Printf("Failed to register our icon with the notifier watcher, maybe no tray running?")
 	}
@@ -164,6 +176,7 @@ func nativeStart() {
 type tray struct {
 	conn *dbus.Conn
 	menu *menuLayout
+	props map[string]map[string]*prop.Prop
 }
 
 // ContextMenu method is called when the user has right-clicked on our icon.
@@ -228,7 +241,7 @@ func argbForImage(img image.Image) []byte {
 }
 
 func createPropSpec() map[string]map[string]*prop.Prop {
-	return map[string]map[string]*prop.Prop{
+	instance.props = map[string]map[string]*prop.Prop{
 		"org.kde.StatusNotifierItem": {
 			"Status": {
 				"Active", // Passive, Active or NeedsAttention
@@ -279,4 +292,5 @@ func createPropSpec() map[string]map[string]*prop.Prop {
 				nil,
 			},
 		}}
+	return instance.props
 }

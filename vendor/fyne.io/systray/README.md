@@ -6,13 +6,17 @@ removing the GTK dependency and support for legacy linux system tray.
 
 ## Features
 
-* Supported on Windows, macOS (cgo-free Linux is a work in progress)
+* Supported on Windows, macOS and Linux
 * Menu items can be checked and/or disabled
 * Methods may be called from any Goroutine
 
 ## API
 
 ```go
+package main
+
+import "fyne.io/systray"
+
 func main() {
 	systray.Run(onReady, onExit)
 }
@@ -39,7 +43,7 @@ For this reason there is another entry point `RunWithExternalLoop`.
 This function of the library returns a start and end function that should be called
 when the application has started and will end, to loop in appropriate features.
 
-See [full API](https://pkg.go.dev/github.com/fyne-io/systray?tab=doc) as well as [CHANGELOG](https://github.com/fyne-io/systray/tree/master/CHANGELOG.md).
+See [full API](https://pkg.go.dev/fyne.io/systray?tab=doc) as well as [CHANGELOG](https://github.com/fyne-io/systray/tree/master/CHANGELOG.md).
 
 ## Try the example app!
 
@@ -73,7 +77,7 @@ Now look for *Awesome App* in your menu bar!
 
 ### Linux
 
-> This is a work in progress and currently broken / non-functionali
+This implementation uses DBus to communicate through the SystemNotifier/AppIndicator spec, older tray implementations may not load the icon.
 
 ### Windows
 
@@ -113,5 +117,6 @@ Consult the [Official Apple Documentation here](https://developer.apple.com/libr
 
 ## Credits
 
+- https://github.com/getlantern/systray
 - https://github.com/xilp/systray
 - https://github.com/cratonica/trayhost

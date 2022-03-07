@@ -1,3 +1,8 @@
+# fyne.io/systray v1.1.1-0.20220307102710-0121a6d9ce01
+## explicit
+fyne.io/systray
+fyne.io/systray/internal/generated/menu
+fyne.io/systray/internal/generated/notifier
 # github.com/BurntSushi/toml v1.0.0
 ## explicit
 github.com/BurntSushi/toml
@@ -26,11 +31,6 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
-# github.com/fyne-io/systray v1.1.1-0.20220306152635-ed046166dd6b
-## explicit
-github.com/fyne-io/systray
-github.com/fyne-io/systray/internal/generated/menu
-github.com/fyne-io/systray/internal/generated/notifier
 # github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 ## explicit
 github.com/go-gl/gl/v2.1/gl

@@ -4,7 +4,7 @@
 package glfw
 
 import (
-	"github.com/fyne-io/systray"
+	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"

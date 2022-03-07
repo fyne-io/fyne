@@ -3,6 +3,7 @@ module fyne.io/fyne/v2
 go 1.14
 
 require (
+	fyne.io/systray v1.1.1-0.20220307102710-0121a6d9ce01
 	github.com/BurntSushi/toml v1.0.0
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/akavel/rsrc v0.8.0 // indirect
@@ -10,7 +11,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
-	github.com/fyne-io/systray v1.1.1-0.20220306152635-ed046166dd6b
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 	github.com/go-ole/go-ole v1.2.6

@@ -50,7 +50,7 @@ type Interface struct {
 	Annotations []Annotation `xml:"annotation"`
 }
 
-// Method describes a Method on an Interface as retured by an introspection.
+// Method describes a Method on an Interface as returned by an introspection.
 type Method struct {
 	Name        string       `xml:"name,attr"`
 	Args        []Arg        `xml:"arg"`

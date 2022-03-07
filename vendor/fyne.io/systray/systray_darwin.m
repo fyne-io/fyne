@@ -246,7 +246,10 @@ int nativeLoop(void) {
 
 void nativeStart(void) {
   owner = [[AppDelegate alloc] init];
-  [owner applicationDidFinishLaunching:NULL];
+
+  NSNotification *launched = [NSNotification notificationWithName:NSApplicationDidFinishLaunchingNotification
+                                                        object:[NSApplication sharedApplication]];
+  [owner applicationDidFinishLaunching:launched];
 }
 
 void runInMainThread(SEL method, id object) {
