@@ -218,7 +218,6 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-	w.ensureFixedHasSize()
 	if w.view() != nil {
 		w.runOnMainWhenCreated(w.fitContent)
 	}
@@ -501,9 +500,6 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
-	if !visible {
-		w.ensureFixedHasSize()
-	}
 
 	// show new canvas element
 	if content != nil {
@@ -536,14 +532,6 @@ func (w *window) destroy(d *gLDriver) {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
 		go d.focusPreviousWindow()
-	}
-}
-
-// ensureFixedHasSize makes sure that if a window is fixed size it has a requested size, or is set to minimum
-func (w *window) ensureFixedHasSize() {
-	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
-		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-		w.Resize(bigEnough)
 	}
 }
 
@@ -1502,11 +1490,13 @@ func (w *window) create() {
 			fn()
 		}
 
-		w.requestedWidth, w.requestedHeight = w.width, w.height
-
-		if w.fixedSize { // as the window will not be sized later we may need to pack menus etc
-			w.canvas.Resize(w.canvas.Size())
+		if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
+			bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
+			w.width, w.height = internal.ScaleInt(w.canvas, bigEnough.Width), internal.ScaleInt(w.canvas, bigEnough.Height)
+			w.shouldWidth, w.shouldHeight = w.width, w.height
 		}
+
+		w.requestedWidth, w.requestedHeight = w.width, w.height
 		// order of operation matters so we do these last items in order
 		w.viewport.SetSize(w.shouldWidth, w.shouldHeight) // ensure we requested latest size
 	})
