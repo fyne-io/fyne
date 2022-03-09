@@ -13,6 +13,7 @@ import (
 // Builder generate the executables.
 type Builder struct {
 	os, srcdir, target string
+	goPackage          string
 	release            bool
 	tags               []string
 	tagsToParse        string
@@ -64,10 +65,7 @@ func Build() *cli.Command {
 				if argCount != 1 {
 					return fmt.Errorf("incorrect amount of path provided")
 				}
-				if b.srcdir != "" {
-					return fmt.Errorf("the directory to package is already specified")
-				}
-				b.srcdir = ctx.Args().First()
+				b.goPackage = ctx.Args().First()
 			}
 
 			return b.Build()
@@ -179,6 +177,10 @@ func (b *Builder) build() error {
 			args = append(args, "-tags")
 		}
 		args = append(args, strings.Join(tags, ","))
+	}
+
+	if b.goPackage != "" {
+		args = append(args, b.goPackage)
 	}
 
 	if goos != "ios" && goos != "android" && !isWeb(goos) {
