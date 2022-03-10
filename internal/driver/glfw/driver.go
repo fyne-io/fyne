@@ -3,11 +3,15 @@
 package glfw
 
 import (
+	"bytes"
+	"image"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+
+	ico "github.com/Kodeworks/golang-image-ico"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
@@ -38,7 +42,26 @@ type gLDriver struct {
 
 	animation *animation.Runner
 
-	drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
+	drawOnMainThread    bool   // A workaround on Apple M1, just use 1 thread until fixed upstream
+	trayStart, trayStop func() // shut down the system tray, if used
+}
+
+func toOSIcon(icon fyne.Resource) ([]byte, error) {
+	if runtime.GOOS != "windows" {
+		return icon.Content(), nil
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(icon.Content()))
+	if err != nil {
+		return nil, err
+	}
+
+	buf := &bytes.Buffer{}
+	err = ico.Encode(buf, img)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
@@ -70,6 +93,9 @@ func (d *gLDriver) Device() fyne.Device {
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
 		curWindow = nil
+		if d.trayStop != nil {
+			d.trayStop()
+		}
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
 	defer func() {

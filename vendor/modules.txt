@@ -1,3 +1,8 @@
+# fyne.io/systray v1.1.1-0.20220307102710-0121a6d9ce01
+## explicit
+fyne.io/systray
+fyne.io/systray/internal/generated/menu
+fyne.io/systray/internal/generated/notifier
 # github.com/BurntSushi/toml v1.0.0
 ## explicit
 github.com/BurntSushi/toml
@@ -50,6 +55,8 @@ github.com/go-ole/go-ole/oleutil
 # github.com/godbus/dbus/v5 v5.1.0
 ## explicit
 github.com/godbus/dbus/v5
+github.com/godbus/dbus/v5/introspect
+github.com/godbus/dbus/v5/prop
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 ## explicit
 github.com/goki/freetype
