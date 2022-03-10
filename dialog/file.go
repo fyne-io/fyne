@@ -58,14 +58,15 @@ type fileDialog struct {
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
-	save             bool
 	callback         interface{}
 	onClosedCallback func(bool)
-	filter           storage.FileFilter
 	parent           fyne.Window
 	dialog           *fileDialog
-	dismissText      string
-	desiredSize      fyne.Size
+
+	confirmText, dismissText string
+	desiredSize              fyne.Size
+	filter                   storage.FileFilter
+	save                     bool
 	// this will be applied to dialog.dir when it's loaded
 	startingLocation fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
@@ -94,6 +95,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	label := "Open"
 	if f.file.save {
 		label = "Save"
+	}
+	if f.file.confirmText != "" {
+		label = f.file.confirmText
 	}
 	f.open = widget.NewButton(label, func() {
 		if f.file.callback == nil {
@@ -590,6 +594,18 @@ func (f *FileDialog) Hide() {
 	if f.onClosedCallback != nil {
 		f.onClosedCallback(false)
 	}
+}
+
+// SetConfirmText allows custom text to be set in the confirmation button
+//
+// Since: 2.2
+func (f *FileDialog) SetConfirmText(label string) {
+	f.confirmText = label
+	if f.dialog == nil {
+		return
+	}
+	f.dialog.open.SetText(label)
+	f.dialog.win.Refresh()
 }
 
 // SetDismissText allows custom text to be set in the dismiss button
