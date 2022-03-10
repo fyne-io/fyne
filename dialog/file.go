@@ -592,7 +592,7 @@ func (f *FileDialog) Hide() {
 	}
 }
 
-// SetDismissText allows custom text to be set in the confirmation button
+// SetDismissText allows custom text to be set in the dismiss button
 func (f *FileDialog) SetDismissText(label string) {
 	if f.dialog == nil {
 		return
