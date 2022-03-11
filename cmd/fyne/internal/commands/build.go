@@ -53,8 +53,7 @@ func Build() *cli.Command {
 				Destination: &b.release,
 			},
 			&cli.StringFlag{
-				Name:        "executable",
-				Aliases:     []string{"exe", "o"},
+				Name:        "o",
 				Usage:       "The path to the executable to build, default is the current dir main binary",
 				Destination: &b.target,
 			},
