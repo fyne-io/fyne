@@ -130,14 +130,30 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderSimpleVert.StaticContent) + "\x00"
-var fragmentShaderSource = string(shaderSimpleFrag.StaticContent) + "\x00"
-var vertexLineShaderSource = string(shaderLineVert.StaticContent) + "\x00"
-var fragmentLineShaderSource = string(shaderLineFrag.StaticContent) + "\x00"
-
 func (p *glPainter) Init() {
-	p.program = Program(createProgramFromSource(vertexShaderSource, fragmentShaderSource))
-	p.lineProgram = Program(createProgramFromSource(vertexLineShaderSource, fragmentLineShaderSource))
+	p.program = Program(createProgram("simple"))
+	p.lineProgram = Program(createProgram("line"))
+}
+
+func createProgram(shaderFilename string) uint32 {
+	var vertexSrc []byte
+	var fragmentSrc []byte
+
+	// Why a switch over a filename?
+	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
+	// fyne bundle.
+	switch shaderFilename {
+	case "line":
+		vertexSrc = shaderLineVert.StaticContent
+		fragmentSrc = shaderLineFrag.StaticContent
+	case "simple":
+		vertexSrc = shaderSimpleVert.StaticContent
+		fragmentSrc = shaderSimpleFrag.StaticContent
+	default:
+		panic("shader not found: " + shaderFilename)
+	}
+
+	return createProgramFromSource(string(vertexSrc)+"\x00", string(fragmentSrc)+"\x00")
 }
 
 func createProgramFromSource(vertexShaderSrc string, fragmentShaderSrc string) uint32 {
