@@ -131,11 +131,11 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 }
 
 func (p *glPainter) Init() {
-	p.program = Program(createProgram("simple"))
-	p.lineProgram = Program(createProgram("line"))
+	p.program = createProgram("simple")
+	p.lineProgram = createProgram("line")
 }
 
-func createProgram(shaderFilename string) uint32 {
+func createProgram(shaderFilename string) Program {
 	var vertexSrc []byte
 	var fragmentSrc []byte
 
@@ -170,7 +170,7 @@ func createProgram(shaderFilename string) uint32 {
 		panic(fmt.Sprintf("failed to link GL program; error code: %x", glErr))
 	}
 
-	return prog
+	return Program(prog)
 }
 
 func (p *glPainter) glClearBuffer() {
