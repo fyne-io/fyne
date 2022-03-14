@@ -102,6 +102,16 @@ func TestContainer_Remove(t *testing.T) {
 	assert.Equal(t, float32(0), box2.Position().Y)
 }
 
+func TestContainer_RemoveAll(t *testing.T) {
+	box1 := new(dummyObject)
+	box2 := new(dummyObject)
+	container := NewContainerWithLayout(new(customLayout), box1, box2)
+	assert.Equal(t, 2, len(container.Objects))
+
+	container.RemoveAll()
+	assert.Equal(t, 0, len(container.Objects))
+}
+
 func TestContainer_Show(t *testing.T) {
 	box := new(dummyObject)
 	container := NewContainerWithoutLayout(box)
