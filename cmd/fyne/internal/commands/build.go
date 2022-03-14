@@ -28,7 +28,7 @@ func Build() *cli.Command {
 	return &cli.Command{
 		Name:        "build",
 		Usage:       "Build an application.",
-		Description: "You may specify the --executable to build, but --target will define the OS it is build for indiscriminate of the extention of the executable.",
+		Description: "You may specify the -o to build, but --target will define the OS it is build for indiscriminate of the extention of the output file.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "target",
@@ -54,7 +54,7 @@ func Build() *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:        "o",
-				Usage:       "The path to the executable to build, default is the current dir main binary",
+				Usage:       "Specify a name for the output file, default is based on the current directory.",
 				Destination: &b.target,
 			},
 		},
