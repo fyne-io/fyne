@@ -159,6 +159,7 @@ func (c *Container) Remove(rem CanvasObject) {
 }
 
 // RemoveAll updates the contents of this container to no longer include any objects.
+//
 // Since: 2.2
 func (c *Container) RemoveAll() {
 	c.Objects = nil
