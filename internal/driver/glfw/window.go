@@ -314,7 +314,12 @@ func (w *window) fitContent() {
 		w.viewLock.Unlock()
 	}
 	if w.fixedSize {
-		w.shouldWidth, w.shouldHeight = w.requestedWidth, w.requestedHeight
+		if w.shouldWidth > w.requestedWidth {
+			w.requestedWidth = w.shouldWidth
+		}
+		if w.shouldHeight > w.requestedHeight {
+			w.requestedHeight = w.shouldHeight
+		}
 		view.SetSizeLimits(w.requestedWidth, w.requestedHeight, w.requestedWidth, w.requestedHeight)
 	} else {
 		view.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
