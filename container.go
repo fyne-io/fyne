@@ -158,6 +158,12 @@ func (c *Container) Remove(rem CanvasObject) {
 	}
 }
 
+// RemoveAll updates the contents of this container to no longer include any objects.
+// Since: 2.2
+func (c *Container) RemoveAll() {
+	c.Objects = nil
+}
+
 // Visible returns true if the container is currently visible, false otherwise.
 func (c *Container) Visible() bool {
 	return !c.Hidden
