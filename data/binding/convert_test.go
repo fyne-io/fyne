@@ -44,7 +44,7 @@ func TestBoolToStringWithFormat(t *testing.T) {
 	assert.Nil(t, err)
 	v, err = s.Get()
 	assert.Nil(t, err)
-	assert.Equal(t, "truly", v)
+	assert.Equal(t, "truely", v)
 
 	err = s.Set("true") // valid bool but not valid format
 	assert.NotNil(t, err)
@@ -191,7 +191,7 @@ func TestStringToBoolWithFormat(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, false, v)
 
-	err = s.Set("truly")
+	err = s.Set("truely")
 	assert.Nil(t, err)
 	v, err = b.Get()
 	assert.Nil(t, err)
