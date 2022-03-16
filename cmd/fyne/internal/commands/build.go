@@ -7,14 +7,87 @@ import (
 	"strings"
 
 	version "github.com/mcuadros/go-version"
+	"github.com/urfave/cli/v2"
 )
 
-type builder struct {
+// Builder generate the executables.
+type Builder struct {
 	os, srcdir, target string
+	goPackage          string
 	release            bool
 	tags               []string
+	tagsToParse        string
 
 	runner runner
+}
+
+// Build returns the cli command for building fyne applications
+func Build() *cli.Command {
+	b := &Builder{}
+
+	return &cli.Command{
+		Name:        "build",
+		Usage:       "Build an application.",
+		Description: "You can specify --target to define the OS to build for. The executable file will default to an appropriate name but can be overridden using -o.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "target",
+				Aliases:     []string{"os"},
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
+				Destination: &b.os,
+			},
+			&cli.StringFlag{
+				Name:        "sourceDir",
+				Aliases:     []string{"src"},
+				Usage:       "The directory to package, if executable is not set.",
+				Destination: &b.srcdir,
+			},
+			&cli.StringFlag{
+				Name:        "tags",
+				Usage:       "A comma-separated list of build tags.",
+				Destination: &b.tagsToParse,
+			},
+			&cli.BoolFlag{
+				Name:        "release",
+				Usage:       "Enable installation in release mode (disable debug etc).",
+				Destination: &b.release,
+			},
+			&cli.StringFlag{
+				Name:        "o",
+				Usage:       "Specify a name for the output file, default is based on the current directory.",
+				Destination: &b.target,
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			argCount := ctx.Args().Len()
+			if argCount > 0 {
+				if argCount != 1 {
+					return fmt.Errorf("incorrect amount of path provided")
+				}
+				b.goPackage = ctx.Args().First()
+			}
+
+			return b.Build()
+		},
+	}
+}
+
+// Build parse the tags and start building
+func (b *Builder) Build() error {
+	if b.srcdir != "" {
+		dirStat, err := os.Stat(b.srcdir)
+		if err != nil {
+			return err
+		}
+		if !dirStat.IsDir() {
+			return fmt.Errorf("specified source directory is not a valid directory")
+		}
+	}
+	if b.tagsToParse != "" {
+		b.tags = strings.Split(b.tagsToParse, ",")
+	}
+
+	return b.build()
 }
 
 func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
@@ -50,7 +123,7 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
-func (b *builder) build() error {
+func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
 	goos := b.os
@@ -103,6 +176,10 @@ func (b *builder) build() error {
 			args = append(args, "-tags")
 		}
 		args = append(args, strings.Join(tags, ","))
+	}
+
+	if b.goPackage != "" {
+		args = append(args, b.goPackage)
 	}
 
 	if goos != "ios" && goos != "android" && !isWeb(goos) {
