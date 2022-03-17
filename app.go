@@ -1,4 +1,4 @@
-sackage fyne
+package fyne
 
 import (
 	"net/url"
