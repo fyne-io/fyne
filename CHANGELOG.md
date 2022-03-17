@@ -5,7 +5,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ## 2.1.4 - 17 March 2022
 
-* SetTheme() behaves is not fully effective for widget.Form (#2810)
+* SetTheme() is not fully effective for widget.Form (#2810)
 * FolderOpenDialog SetDismissText is ineffective (#2830)
 * window.Resize() does not work if SetFixedSize(true) is set after (#2819)
 * Container.Remove() race causes crash (#2826, #2775, #2481)
@@ -237,7 +237,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Correct initial state of entry validation
 * fix entry widget mouse drag selection when scrolled
 * List widget panic when refreshing after changing content length (#1864)
-* Fix image caching that was too agressive on resize
+* Fix image caching that was too aggressive on resize
 * Pointer and cursor misalignment in widget.Entry (#1937)
 * SIGSEGV Sometimes When Closing a Program by Clicking a Button (#1604)
 * Advanced Color Picker shows Black for custom primary color as RGBA (#1970)
