@@ -455,15 +455,15 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			i++
 			_, isText := obj.(*canvas.Text)
 			if !isText && !inline {
+				if len(rowItems) != 0 {
+					width, _ := r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
+					left += width
+				}
 				height := obj.MinSize().Height
 
 				obj.Move(fyne.NewPos(left, yPos))
 				obj.Resize(fyne.NewSize(lineWidth, height))
-				yPos += height
-
-				if !inline {
-					yPos += theme.Padding()
-				}
+				yPos += height + theme.Padding()
 				continue
 			}
 			rowItems = append(rowItems, obj)
@@ -480,7 +480,8 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
 				rowAlign = link.Alignment
 			}
-			yPos += r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
+			_, y := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
+			yPos += y
 			rowItems = nil
 		}
 
@@ -614,11 +615,12 @@ func (r *textRenderer) Refresh() {
 	canvas.Refresh(r.obj)
 }
 
-func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) float32 {
+func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
+	initialX := xPos
 	if len(texts) == 1 {
 		texts[0].Resize(fyne.NewSize(lineWidth, texts[0].MinSize().Height))
 		texts[0].Move(fyne.NewPos(xPos, yPos))
-		return texts[0].MinSize().Height
+		return texts[0].MinSize().Width, texts[0].MinSize().Height
 	}
 	height := float32(0)
 	tallestBaseline := float32(0)
@@ -700,7 +702,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		setAlign(last, fyne.TextAlignLeading)
 	}
 
-	return height
+	return xPos - initialX, height
 }
 
 // binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index
