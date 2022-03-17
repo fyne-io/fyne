@@ -512,12 +512,26 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
 
-	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
-	entry.TypedKey(key)
+	backspace := &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(backspace)
 
 	assert.Equal(t, "H", entry.Text)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
+
+	entry = widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.SetText("Line\n2b\n")
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+	entry.TypedKey(down)
+	entry.TypedKey(right)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	entry.TypedKey(backspace)
+	assert.Equal(t, "Line\nb\n", entry.Text)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
 }
 
 func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {

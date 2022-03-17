@@ -2,3 +2,5 @@ contact_links:
   - name: Ask a question
     url: https://fyne.io/support/
     about: For a toolkit question or help with your code go to our support page
+
+blank_issues_enabled: false

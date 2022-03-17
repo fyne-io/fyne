@@ -23,6 +23,7 @@ var topWindow fyne.Window
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(theme.FyneLogo())
+	makeTray(a)
 	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")
 	topWindow = w
@@ -159,6 +160,16 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)
+}
+
+func makeTray(a fyne.App) {
+	if desk, ok := a.(desktop.App); ok {
+		menu := fyne.NewMenu("Hello World",
+			fyne.NewMenuItem("Hello", func() {
+				log.Println("System tray menu tapped")
+			}))
+		desk.SetSystemTrayMenu(menu)
+	}
 }
 
 func unsupportedTutorial(t tutorials.Tutorial) bool {

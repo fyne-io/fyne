@@ -189,7 +189,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		tags = strings.Split(p.tags, ",")
 	}
 	if p.os != "web" {
-		b := &builder{
+		b := &Builder{
 			os:      p.os,
 			srcdir:  p.srcDir,
 			target:  p.exe,
@@ -201,7 +201,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		return []string{p.exe}, b.build()
 	}
 
-	bWasm := &builder{
+	bWasm := &Builder{
 		os:      "wasm",
 		srcdir:  p.srcDir,
 		target:  p.exe + ".wasm",
@@ -215,7 +215,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		return nil, err
 	}
 
-	bGopherJS := &builder{
+	bGopherJS := &Builder{
 		os:      "gopherjs",
 		srcdir:  p.srcDir,
 		target:  p.exe + ".js",
@@ -308,6 +308,7 @@ func (p *Packager) validate() error {
 		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
 			"Change directory to the main package and try again")
 	}
+	os.Chdir(p.srcDir)
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {

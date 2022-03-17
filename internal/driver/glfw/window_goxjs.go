@@ -170,7 +170,7 @@ func (w *window) refresh(_ *glfw.Window) {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
-	viewport.SetShouldClose(true)
+	viewport.SetShouldClose(false) // reset the closed flag until we check the veto in processClosed
 
 	w.processClosed()
 }

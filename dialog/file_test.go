@@ -432,6 +432,7 @@ func TestView(t *testing.T) {
 	}, win)
 
 	dlg.SetConfirmText("Yes")
+	dlg.SetDismissText("Dismiss")
 	dlg.Show()
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
@@ -474,6 +475,8 @@ func TestView(t *testing.T) {
 
 	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
+	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	assert.Equal(t, "Dismiss", dismiss.Text)
 }
 
 func TestFileFavorites(t *testing.T) {

@@ -22,12 +22,29 @@ More detailed release notes can be found on the [releases page](https://github.c
 * 
 
 
-## 2.1.3 - Ongoing
+## 2.1.4 - 17 March 2022
+
+### Fixed
+
+* SetTheme() is not fully effective for widget.Form (#2810)
+* FolderOpenDialog SetDismissText is ineffective (#2830)
+* window.Resize() does not work if SetFixedSize(true) is set after (#2819)
+* Container.Remove() race causes crash (#2826, #2775, #2481)
+* FixedSize Window improperly sized if contains image with ImageFillOriginal (#2800)
+
+
+## 2.1.3 - 24 February 2022
 
 ### Fixed
 
 * The text on button can't be show correctly when use imported font (#2512)
 * Fix issues with DocTabs scrolling (#2709)
+* Fix possible crash for tapping extended Radio or Check item
+* Resolve lookup of relative icons in FyneApp.toml
+* Window not shown when SetFixedSize is used without Resize (#2784)
+* Text and links in markdown can be rendered on top of each other (#2695)
+* Incorrect cursor movement in a multiline entry with wrapping (#2698)
+
 
 ## 2.1.2 - 6 December 2021
 
@@ -242,7 +259,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Correct initial state of entry validation
 * fix entry widget mouse drag selection when scrolled
 * List widget panic when refreshing after changing content length (#1864)
-* Fix image caching that was too agressive on resize
+* Fix image caching that was too aggressive on resize
 * Pointer and cursor misalignment in widget.Entry (#1937)
 * SIGSEGV Sometimes When Closing a Program by Clicking a Button (#1604)
 * Advanced Color Picker shows Black for custom primary color as RGBA (#1970)

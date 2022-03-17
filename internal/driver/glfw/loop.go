@@ -112,6 +112,9 @@ func (d *gLDriver) runGL() {
 	run.cond.Broadcast()
 
 	d.initGLFW()
+	if d.trayStart != nil {
+		d.trayStart()
+	}
 	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
 	for {
 		select {

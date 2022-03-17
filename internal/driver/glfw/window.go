@@ -75,7 +75,6 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-
 	if w.view() != nil {
 		w.runOnMainWhenCreated(w.fitContent)
 	}
@@ -257,6 +256,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
+
 	// show new canvas element
 	if content != nil {
 		content.Show()
