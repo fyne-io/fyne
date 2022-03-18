@@ -102,4 +102,6 @@ type Lifecycle interface {
 	SetOnStarted(func())
 	// SetOnStopped hooks into an event that says the app is no longer running.
 	SetOnStopped(func())
+	// SetOnResized provides resize and position notifications.
+	SetOnResized(func(xpos int, ypos int, width int, height int))
 }
