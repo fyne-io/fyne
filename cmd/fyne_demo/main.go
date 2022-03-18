@@ -155,11 +155,16 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
-	return fyne.NewMainMenu(
+	main := fyne.NewMainMenu(
 		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)
+	checkedItem.Action = func() {
+		checkedItem.Checked = !checkedItem.Checked
+		main.Refresh()
+	}
+	return main
 }
 
 func makeTray(a fyne.App) {

@@ -48,3 +48,15 @@ type MainMenu struct {
 func NewMainMenu(items ...*Menu) *MainMenu {
 	return &MainMenu{Items: items}
 }
+
+// Refresh will instruct any rendered menus using this struct to update their display.
+//
+// Since: 2.2
+func (m *MainMenu) Refresh() {
+	for _, w := range CurrentApp().Driver().AllWindows() {
+		menu := w.MainMenu()
+		if menu != nil && menu == m {
+			w.SetMainMenu(m)
+		}
+	}
+}
