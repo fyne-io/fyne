@@ -259,6 +259,9 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 			w.Resize(newSize)
 		}
 
+		xpos, ypos := fyne.CurrentDevice().GetPos()
+		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerResized(xpos, ypos, d.currentSize.WidthPx, d.currentSize.HeightPx)
+
 		d.paintWindow(w, newSize)
 		d.app.Publish()
 	}

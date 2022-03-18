@@ -19,3 +19,7 @@ func (*device) SystemScaleForWindow(_ fyne.Window) float32 {
 	}
 	return 1
 }
+
+func (d *device) GetPos() (int, int) {
+	return d.safeTop, d.safeLeft
+}

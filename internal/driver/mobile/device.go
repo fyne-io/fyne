@@ -52,3 +52,7 @@ func (*device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
 func (*device) HideVirtualKeyboard() {
 	hideVirtualKeyboard()
 }
+
+func (d *device) GetPos() (int, int) {
+	return d.safeTop, d.safeLeft
+}

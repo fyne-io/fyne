@@ -66,6 +66,9 @@ func (w *window) Resize(size fyne.Size) {
 		w.viewLock.Unlock()
 		w.requestedWidth, w.requestedHeight = width, height
 		w.view().SetSize(width, height)
+
+		xpos, ypos := w.view().GetPos()
+		fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(xpos, ypos, width, height)
 	})
 }
 
@@ -322,6 +325,9 @@ func (w *window) processResized(width, height int) {
 	}
 
 	w.platformResize(canvasSize)
+
+	xpos, ypos := w.view().GetPos()
+	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(xpos, ypos, width, height)
 }
 
 func (w *window) processFrameSized(width, height int) {
