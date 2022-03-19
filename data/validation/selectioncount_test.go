@@ -14,5 +14,4 @@ func TestValidator_SelectionCount(t *testing.T) {
 	assert.NoError(t, s(3))
 	errorStr := "too few selections, expected 2 or more"
 	assert.EqualError(t, s(0), errorStr)
-	assert.EqualError(t, s(1), errorStr)
 }
