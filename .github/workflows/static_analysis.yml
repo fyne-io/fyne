@@ -20,7 +20,7 @@ jobs:
     - name: Get dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install clang libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+        sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
         go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.4.0
         go install mvdan.cc/gofumpt@v0.3.0
         go install honnef.co/go/tools/cmd/staticcheck@v0.2.2
