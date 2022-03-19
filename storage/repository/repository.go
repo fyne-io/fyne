@@ -47,7 +47,6 @@ var repositoryTable map[string]Repository = map[string]Repository{}
 //
 // Since: 2.0
 type Repository interface {
-
 	// Exists will be used to implement calls to storage.Exists() for the
 	// registered scheme of this repository.
 	//

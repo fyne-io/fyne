@@ -33,7 +33,7 @@ func (c *clipboard) Content() string {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	//can't log retry as it would alos log errors for an empty clipboard
+	// can't log retry as it would alos log errors for an empty clipboard
 	return ""
 }
 

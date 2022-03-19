@@ -246,8 +246,11 @@ func (l *listRenderer) Refresh() {
 
 // Declare conformity with interfaces.
 var _ fyne.Widget = (*listItem)(nil)
-var _ fyne.Tappable = (*listItem)(nil)
-var _ desktop.Hoverable = (*listItem)(nil)
+
+var (
+	_ fyne.Tappable     = (*listItem)(nil)
+	_ desktop.Hoverable = (*listItem)(nil)
+)
 
 type listItem struct {
 	BaseWidget
@@ -387,6 +390,7 @@ func (l *listLayout) getItem() *listItem {
 	}
 	return item.(*listItem)
 }
+
 func (l *listLayout) offsetUpdated(pos fyne.Position) {
 	if l.list.offsetY == pos.Y {
 		return

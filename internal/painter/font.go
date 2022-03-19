@@ -79,7 +79,6 @@ func ClearFontCache() {
 		item := val.(*fontCacheItem)
 		for _, face := range item.faces {
 			err := face.Close()
-
 			if err != nil {
 				fyne.LogError("failed to close font face", err)
 				return false
@@ -220,7 +219,8 @@ func (c *compositeFace) Close() (err error) {
 }
 
 func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
-	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
+	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool,
+) {
 	c.Lock()
 	defer c.Unlock()
 

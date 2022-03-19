@@ -6,8 +6,10 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-var renderersLock sync.RWMutex
-var renderers = map[fyne.Widget]*rendererInfo{}
+var (
+	renderersLock sync.RWMutex
+	renderers     = map[fyne.Widget]*rendererInfo{}
+)
 
 type isBaseWidget interface {
 	ExtendBaseWidget(fyne.Widget)

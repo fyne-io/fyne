@@ -33,7 +33,6 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-
 	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
 	c.focusIndicator.Resize(focusIndicatorSize)
 	c.focusIndicator.Move(fyne.NewPos(theme.Padding()*0.5, (size.Height-focusIndicatorSize.Height)/2))

@@ -6,8 +6,10 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-var canvasesLock sync.RWMutex
-var canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
+var (
+	canvasesLock sync.RWMutex
+	canvases     = make(map[fyne.CanvasObject]*canvasInfo, 1024)
+)
 
 // GetCanvasForObject returns the canvas for the specified object.
 func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {

@@ -125,7 +125,6 @@ func (g *Getter) Run(args []string) {
 func goPath() string {
 	cmd := execabs.Command("go", "env", "GOPATH")
 	out, err := cmd.CombinedOutput()
-
 	if err != nil {
 		home, _ := os.UserHomeDir()
 		return filepath.Join(home, "go")

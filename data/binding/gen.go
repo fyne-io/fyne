@@ -691,15 +691,17 @@ import (
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	list := template.Must(template.New("list").Parse(listBindTemplate))
 	binds := []bindValues{
-		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
-		bindValues{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
-		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
-		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
-		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
-		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
-		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
-			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
+		{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
+		{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
+		{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
+		{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
+		{Name: "Rune", Type: "rune", Default: "rune(0)"},
+		{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
+		{
+			Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
+			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI",
+		},
 	}
 	for _, b := range binds {
 		if b.Since == "" {

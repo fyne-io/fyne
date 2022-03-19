@@ -284,7 +284,6 @@ func (c *glCanvas) paint(size fyne.Size) {
 				c.Painter().StartClipping(top.Rect())
 			} else {
 				c.Painter().StopClipping()
-
 			}
 		}
 	}

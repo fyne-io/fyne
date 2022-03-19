@@ -36,7 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("arsc.go", []byte(fmt.Sprintf(tmpl, strconv.Quote(string(arsc)))), 0644); err != nil {
+	if err := ioutil.WriteFile("arsc.go", []byte(fmt.Sprintf(tmpl, strconv.Quote(string(arsc)))), 0o644); err != nil {
 		log.Fatal(err)
 	}
 }

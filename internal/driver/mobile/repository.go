@@ -8,12 +8,14 @@ import (
 
 // declare conformance with repository types
 var _ repository.Repository = (*mobileFileRepo)(nil)
-var _ repository.HierarchicalRepository = (*mobileFileRepo)(nil)
-var _ repository.ListableRepository = (*mobileFileRepo)(nil)
-var _ repository.WritableRepository = (*mobileFileRepo)(nil)
 
-type mobileFileRepo struct {
-}
+var (
+	_ repository.HierarchicalRepository = (*mobileFileRepo)(nil)
+	_ repository.ListableRepository     = (*mobileFileRepo)(nil)
+	_ repository.WritableRepository     = (*mobileFileRepo)(nil)
+)
+
+type mobileFileRepo struct{}
 
 func (m *mobileFileRepo) CanList(u fyne.URI) (bool, error) {
 	return canListURI(u), nil

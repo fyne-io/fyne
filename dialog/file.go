@@ -276,7 +276,8 @@ func (f *fileDialog) loadFavorites() {
 	favoriteOrder := getFavoriteOrder()
 
 	f.favorites = []favoriteItem{
-		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]}}
+		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]},
+	}
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
 		f.favorites = append(f.favorites,
@@ -485,7 +486,6 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 				return f.startingLocation
 			}
 		}
-
 	}
 
 	// Try app storage
@@ -647,7 +647,7 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 func (f *FileDialog) SetFileName(fileName string) {
 	if f.save {
 		f.initialFileName = fileName
-		//Update entry if fileDialog has already been created
+		// Update entry if fileDialog has already been created
 		if f.dialog != nil {
 			f.dialog.fileName.SetText(fileName)
 		}

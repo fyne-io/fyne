@@ -36,8 +36,10 @@ func (p *Packager) packageDarwin() (err error) {
 		}
 	}()
 
-	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild,
-		Category: strings.ToLower(p.category)}
+	tplData := darwinData{
+		Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild,
+		Category: strings.ToLower(p.category),
+	}
 	if err := templates.InfoPlistDarwin.Execute(infoFile, tplData); err != nil {
 		return fmt.Errorf("failed to write plist template: %w", err)
 	}

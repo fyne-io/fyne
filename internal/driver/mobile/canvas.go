@@ -252,7 +252,8 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 }
 
 func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
-	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+	dragCallback func(fyne.Draggable, *fyne.DragEvent),
+) {
 	previousPos := c.lastTapDownPos[tapID]
 	deltaX := pos.X - previousPos.X
 	deltaY := pos.Y - previousPos.Y
@@ -304,8 +305,8 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
-	dragCallback func(fyne.Draggable)) {
-
+	dragCallback func(fyne.Draggable),
+) {
 	if c.dragging != nil {
 		dragCallback(c.dragging)
 

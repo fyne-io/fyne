@@ -12,9 +12,7 @@ import (
 	"os"
 )
 
-var (
-	gomobileName = "gomobile"
-)
+var gomobileName = "gomobile"
 
 const documentationHeader = `// Copyright 2015 The Go Authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style

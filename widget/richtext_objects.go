@@ -397,8 +397,7 @@ func (t *TextSegment) size() float32 {
 	return theme.TextSize()
 }
 
-type unpadTextWidgetLayout struct {
-}
+type unpadTextWidgetLayout struct{}
 
 func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
 	pad2 := theme.Padding() * -2

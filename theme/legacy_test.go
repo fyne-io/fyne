@@ -41,8 +41,7 @@ func TestLegacyWrapper_Size(t *testing.T) {
 
 var _ fyne.LegacyTheme = (*legacyTheme)(nil)
 
-type legacyTheme struct {
-}
+type legacyTheme struct{}
 
 func (t *legacyTheme) BackgroundColor() color.Color {
 	return BackgroundColor()

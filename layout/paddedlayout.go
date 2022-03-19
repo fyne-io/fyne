@@ -8,8 +8,7 @@ import (
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*paddedLayout)(nil)
 
-type paddedLayout struct {
-}
+type paddedLayout struct{}
 
 // Layout is called to pack all child objects into a specified size.
 // For PaddedLayout this sets all children to the full size passed minus padding all around.

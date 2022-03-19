@@ -137,10 +137,12 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderSimpleesVert.StaticContent) + "\x00"
-var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent) + "\x00"
-var vertexLineShaderSource = string(shaderLineesVert.StaticContent) + "\x00"
-var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent) + "\x00"
+var (
+	vertexShaderSource       = string(shaderSimpleesVert.StaticContent) + "\x00"
+	fragmentShaderSource     = string(shaderSimpleesFrag.StaticContent) + "\x00"
+	vertexLineShaderSource   = string(shaderLineesVert.StaticContent) + "\x00"
+	fragmentLineShaderSource = string(shaderLineesFrag.StaticContent) + "\x00"
+)
 
 func (p *glPainter) Init() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)

@@ -13,7 +13,7 @@ type Command interface {
 	Run(args []string)
 }
 
-//Getter is the command that can handle downloading and installing Fyne apps to the current platform.
+// Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter = commands.Getter
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.

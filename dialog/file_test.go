@@ -46,7 +46,6 @@ func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
 }
 
 func TestEffectiveStartingDir(t *testing.T) {
-
 	homeString, err := os.UserHomeDir()
 	if err != nil {
 		t.Skipf("os.Gethome() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
@@ -107,7 +106,6 @@ func TestEffectiveStartingDir(t *testing.T) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
-
 }
 
 func TestFileDialogResize(t *testing.T) {
@@ -116,7 +114,7 @@ func TestFileDialogResize(t *testing.T) {
 	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {}, win)
 	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
 
-	//Mimic the fileopen dialog
+	// Mimic the fileopen dialog
 	d := &fileDialog{file: file}
 	open := widget.NewButton("open", func() {})
 	ui := container.NewBorder(nil, nil, nil, open)
@@ -126,32 +124,32 @@ func TestFileDialogResize(t *testing.T) {
 	d.win.Resize(originalSize)
 	file.dialog = d
 
-	//Test resize - normal size scenario
-	size := fyne.NewSize(200, 180) //normal size to fit (600,400)
+	// Test resize - normal size scenario
+	size := fyne.NewSize(200, 180) // normal size to fit (600,400)
 	file.Resize(size)
 	expectedWidth := float32(200)
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
-	//Test resize - normal size scenario again
-	size = fyne.NewSize(300, 280) //normal size to fit (600,400)
+	// Test resize - normal size scenario again
+	size = fyne.NewSize(300, 280) // normal size to fit (600,400)
 	file.Resize(size)
 	expectedWidth = 300
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight = 280
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test resize - greater than max size scenario
+	// Test resize - greater than max size scenario
 	size = fyne.NewSize(800, 600)
 	file.Resize(size)
-	expectedWidth = 600                                          //since win width only 600
-	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) //max, also work
+	expectedWidth = 600                                          // since win width only 600
+	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) // max, also work
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                           //since win heigh only 400
-	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) //max, also work
+	expectedHeight = 400                                           // since win heigh only 400
+	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) // max, also work
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test again - extreme small size
+	// Test again - extreme small size
 	size = fyne.NewSize(1, 1)
 	file.Resize(size)
 	expectedWidth = file.dialog.win.Content.MinSize().Width
@@ -182,21 +180,21 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	//header
+	// header
 	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
-	//optionsbuttons
+	// optionsbuttons
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
 	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
-	//footer
+	// footer
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
-	//body
+	// body
 	breadcrumb := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Greater(t, len(breadcrumb.Objects), 0)
 
@@ -535,11 +533,9 @@ func TestSetFileNameBeforeShow(t *testing.T) {
 	dOpen.Show()
 
 	assert.NotEqual(t, "testfile.zip", dOpen.dialog.fileName.(*widget.Label).Text)
-
 }
 
 func TestSetFileNameAfterShow(t *testing.T) {
-
 	win := test.NewWindow(widget.NewLabel("Content"))
 	dSave := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
 	dSave.Show()
@@ -553,5 +549,4 @@ func TestSetFileNameAfterShow(t *testing.T) {
 	dOpen.SetFileName("testfile.zip")
 
 	assert.NotEqual(t, "testfile.zip", dOpen.dialog.fileName.(*widget.Label).Text)
-
 }

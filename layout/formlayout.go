@@ -12,8 +12,7 @@ const formLayoutCols = 2
 var _ fyne.Layout = (*formLayout)(nil)
 
 // formLayout is two column grid where each row has a label and a widget.
-type formLayout struct {
-}
+type formLayout struct{}
 
 func (f *formLayout) countRows(objects []fyne.CanvasObject) int {
 	count := 0
@@ -116,7 +115,6 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // For a FormLayout this is the width of the widest label and content items and the height is
 // the sum of all column children combined with padding between each.
 func (f *formLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-
 	table := f.tableCellsSize(objects, 0)
 
 	minSize := fyne.NewSize(0, 0)

@@ -14,6 +14,7 @@ bool isDarkMode();
 void watchTheme();
 */
 import "C"
+
 import (
 	"net/url"
 	"os"

@@ -117,7 +117,6 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		}
 
 		pixels, _, err := image.Decode(file)
-
 		if err != nil {
 			fyne.LogError("image err", err)
 

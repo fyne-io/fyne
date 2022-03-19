@@ -63,8 +63,10 @@ func TestForm_CustomButtonsText(t *testing.T) {
 	assert.Equal(t, "Submit", form.SubmitText)
 	assert.Equal(t, "Cancel", form.CancelText)
 
-	form = &Form{OnSubmit: func() {}, SubmitText: "Apply",
-		OnCancel: func() {}, CancelText: "Close"}
+	form = &Form{
+		OnSubmit: func() {}, SubmitText: "Apply",
+		OnCancel: func() {}, CancelText: "Close",
+	}
 	assert.Equal(t, "Apply", form.SubmitText)
 	assert.Equal(t, "Close", form.CancelText)
 }
@@ -105,7 +107,8 @@ func TestForm_Renderer(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 			{Text: "test2", Widget: NewEntry()},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -134,7 +137,8 @@ func TestForm_ChangeTheme(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 			{Text: "test2", Widget: NewLabel("static")},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -270,7 +274,8 @@ func TestForm_DisableEnable(t *testing.T) {
 		Items: []*FormItem{
 			{Text: "test1", Widget: NewEntry()},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 

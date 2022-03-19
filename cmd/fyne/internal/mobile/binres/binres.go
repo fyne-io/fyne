@@ -61,7 +61,7 @@ func errWrongType(have ResType, want ...ResType) error {
 	return fmt.Errorf("wrong resource type %s, want one of %v", have, want)
 }
 
-//ResType is the type of a resource
+// ResType is the type of a resource
 type ResType uint16
 
 // IsSupported returns if a type is supported

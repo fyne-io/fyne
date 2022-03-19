@@ -1,8 +1,10 @@
 package fyne
 
-var _ Vector2 = (*Delta)(nil)
-var _ Vector2 = (*Position)(nil)
-var _ Vector2 = (*Size)(nil)
+var (
+	_ Vector2 = (*Delta)(nil)
+	_ Vector2 = (*Position)(nil)
+	_ Vector2 = (*Size)(nil)
+)
 
 // Vector2 marks geometry types that can operate as a coordinate vector.
 type Vector2 interface {

@@ -70,13 +70,13 @@ func downloadDLLs() (path string, err error) {
 	}
 
 	writeDLLs := func(path string) error {
-		if err := ioutil.WriteFile(filepath.Join(path, "libglesv2.dll"), bytesGLESv2, 0755); err != nil {
+		if err := ioutil.WriteFile(filepath.Join(path, "libglesv2.dll"), bytesGLESv2, 0o755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
-		if err := ioutil.WriteFile(filepath.Join(path, "libegl.dll"), bytesEGL, 0755); err != nil {
+		if err := ioutil.WriteFile(filepath.Join(path, "libegl.dll"), bytesEGL, 0o755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
-		if err := ioutil.WriteFile(filepath.Join(path, "d3dcompiler_47.dll"), bytesD3DCompiler, 0755); err != nil {
+		if err := ioutil.WriteFile(filepath.Join(path, "d3dcompiler_47.dll"), bytesD3DCompiler, 0o755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
 		return nil
@@ -86,7 +86,7 @@ func downloadDLLs() (path string, err error) {
 	//
 	// Traditionally we would use the system32 directory, but it is
 	// no longer writable by normal programs.
-	os.MkdirAll(appdataPath(), 0775)
+	os.MkdirAll(appdataPath(), 0o775)
 	if err := writeDLLs(appdataPath()); err == nil {
 		return appdataPath(), nil
 	}
@@ -140,7 +140,7 @@ func chromePath() string {
 	// dlls are stored in:
 	//   <BASE>/<VERSION>/libglesv2.dll
 
-	var installdirs = []string{
+	installdirs := []string{
 		// Chrome User
 		filepath.Join(os.Getenv("LOCALAPPDATA"), "Google", "Chrome", "Application"),
 		// Chrome System

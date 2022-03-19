@@ -4,12 +4,11 @@
 package gl
 
 import (
+	"encoding/binary"
 	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
-
-	"encoding/binary"
 
 	gl "github.com/fyne-io/gl-js"
 	"golang.org/x/mobile/exp/f32"
@@ -29,7 +28,7 @@ type Program gl.Program
 var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
 
 func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
-	var texture = gl.CreateTexture()
+	texture := gl.CreateTexture()
 	logError()
 
 	if int(textureFilter) >= len(textureFilterToGL) {
@@ -116,10 +115,12 @@ func compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
-var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent)
-var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
-var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
+var (
+	vertexShaderSource       = string(shaderSimpleesVert.StaticContent)
+	fragmentShaderSource     = string(shaderSimpleesFrag.StaticContent)
+	vertexLineShaderSource   = string(shaderLineesVert.StaticContent)
+	fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
+)
 
 func (p *glPainter) Init() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)

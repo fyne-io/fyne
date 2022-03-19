@@ -12,9 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var (
-	dummyCanvas fyne.Canvas
-)
+var dummyCanvas fyne.Canvas
 
 // WindowlessCanvas provides functionality for a canvas to operate without a window
 type WindowlessCanvas interface {

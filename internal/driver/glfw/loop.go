@@ -31,12 +31,15 @@ type runFlag struct {
 
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
-var drawFuncQueue = make(chan drawData)
-var run *runFlag
-var initOnce = &sync.Once{}
-var donePool = &sync.Pool{New: func() interface{} {
-	return make(chan struct{})
-}}
+
+var (
+	drawFuncQueue = make(chan drawData)
+	run           *runFlag
+	initOnce      = &sync.Once{}
+	donePool      = &sync.Pool{New: func() interface{} {
+		return make(chan struct{})
+	}}
+)
 
 func newRun() *runFlag {
 	r := runFlag{}

@@ -68,7 +68,6 @@ func ParseURI(s string) (fyne.URI, error) {
 //
 // Since: 1.4
 func Parent(u fyne.URI) (fyne.URI, error) {
-
 	repo, err := repository.ForURI(u)
 	if err != nil {
 		return nil, err
@@ -182,7 +181,6 @@ func Delete(u fyne.URI) error {
 	}
 
 	return wrepo.Delete(u)
-
 }
 
 // Reader returns URIReadCloser set up to read from the resource that the

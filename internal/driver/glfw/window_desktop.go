@@ -336,7 +336,6 @@ func (w *window) setCustomCursor(rawCursor *glfw.Cursor, isCustomCursor bool) {
 	if isCustomCursor {
 		w.customCursor = rawCursor
 	}
-
 }
 
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {

@@ -89,7 +89,8 @@ func (p *ColorPickerDialog) updateUI() {
 	if w := p.win; w != nil {
 		w.Hide()
 	}
-	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
+	p.dialog.dismiss = &widget.Button{
+		Text: "Cancel", Icon: theme.CancelIcon(),
 		OnTapped: p.dialog.Hide,
 	}
 	if p.Advanced {
@@ -108,7 +109,8 @@ func (p *ColorPickerDialog) updateUI() {
 			p.advanced,
 		)
 
-		confirm := &widget.Button{Text: "Confirm", Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
+		confirm := &widget.Button{
+			Text: "Confirm", Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 			OnTapped: func() {
 				p.selectColor(p.color)
 			},

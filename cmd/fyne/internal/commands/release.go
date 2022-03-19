@@ -261,7 +261,7 @@ func (r *Releaser) packageIOSRelease() error {
 	}
 
 	payload := filepath.Join(r.dir, "Payload")
-	_ = os.Mkdir(payload, 0750)
+	_ = os.Mkdir(payload, 0o750)
 	defer os.RemoveAll(payload)
 	appName := mobile.AppOutputName(r.os, r.name)
 	payloadAppDir := filepath.Join(payload, appName)
@@ -324,7 +324,7 @@ func (r *Releaser) packageMacOSRelease() error {
 
 func (r *Releaser) packageWindowsRelease(outFile string) error {
 	payload := filepath.Join(r.dir, "Payload")
-	_ = os.Mkdir(payload, 0750)
+	_ = os.Mkdir(payload, 0o750)
 	defer os.RemoveAll(payload)
 
 	manifestPath := filepath.Join(payload, "appxmanifest.xml")

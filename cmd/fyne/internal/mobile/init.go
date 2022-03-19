@@ -15,9 +15,7 @@ import (
 	"golang.org/x/sys/execabs"
 )
 
-var (
-	goos = runtime.GOOS
-)
+var goos = runtime.GOOS
 
 func mkdir(dir string) error {
 	if buildX || buildN {
@@ -26,7 +24,7 @@ func mkdir(dir string) error {
 	if buildN {
 		return nil
 	}
-	return os.MkdirAll(dir, 0750)
+	return os.MkdirAll(dir, 0o750)
 }
 
 func removeAll(path string) error {
@@ -55,7 +53,7 @@ func resetReadOnlyFlagAll(path string) error {
 		return err
 	}
 	if !fi.IsDir() {
-		return os.Chmod(path, 0600)
+		return os.Chmod(path, 0o600)
 	}
 	fd, err := os.Open(filepath.Clean(path))
 	if err != nil {

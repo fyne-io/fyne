@@ -197,7 +197,8 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	active := canvas.NewRectangle(theme.ForegroundColor())
 	thumb := &canvas.Circle{
 		FillColor:   theme.ForegroundColor(),
-		StrokeWidth: 0}
+		StrokeWidth: 0,
+	}
 
 	objects := []fyne.CanvasObject{track, active, thumb}
 

@@ -18,8 +18,7 @@ import (
 	"github.com/fyne-io/glfw-js"
 )
 
-type Cursor struct {
-}
+type Cursor struct{}
 
 // Input modes.
 const (

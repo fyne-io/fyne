@@ -10,8 +10,8 @@ import (
 )
 
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
-
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32,
+) {
 	texture, err := p.getTexture(o, creator)
 	if err != nil {
 		return
@@ -170,7 +170,8 @@ func (p *glPainter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather
 
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
+	fill canvas.ImageFill, aspect float32, pad float32,
+) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 	size, pos = roundToPixelCoords(size, pos, p.pixScale)
 

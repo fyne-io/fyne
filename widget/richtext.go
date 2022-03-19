@@ -63,7 +63,8 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 	if t.scr == nil && t.Scroll != widget.ScrollNone {
 		t.prop = canvas.NewRectangle(color.Transparent)
 		t.scr = widget.NewScroll(&fyne.Container{Layout: layout.NewMaxLayout(), Objects: []fyne.CanvasObject{
-			t.prop, &fyne.Container{}}})
+			t.prop, &fyne.Container{},
+		}})
 	}
 
 	t.ExtendBaseWidget(t)
@@ -602,7 +603,8 @@ func (r *textRenderer) Refresh() {
 	r.obj.propertyLock.Lock()
 	if r.obj.scr != nil {
 		r.obj.scr.Content = &fyne.Container{Layout: layout.NewMaxLayout(), Objects: []fyne.CanvasObject{
-			r.obj.prop, &fyne.Container{Objects: objs}}}
+			r.obj.prop, &fyne.Container{Objects: objs},
+		}}
 		r.obj.scr.Direction = scroll
 		r.SetObjects([]fyne.CanvasObject{r.obj.scr})
 		r.obj.scr.Refresh()

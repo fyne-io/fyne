@@ -34,7 +34,6 @@ func (u *uri) Name() string {
 }
 
 func (u *uri) MimeType() string {
-
 	mimeTypeFull := mime.TypeByExtension(u.Extension())
 	if mimeTypeFull == "" {
 		mimeTypeFull = "text/plain"

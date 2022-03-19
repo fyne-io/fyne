@@ -429,8 +429,10 @@ func (t *textGridRenderer) refreshGrid() {
 				}
 
 				if r.Style != nil && r.Style.BackgroundColor() != nil {
-					whitespaceBG := &CustomTextGridStyle{FGColor: TextGridStyleWhitespace.TextColor(),
-						BGColor: r.Style.BackgroundColor()}
+					whitespaceBG := &CustomTextGridStyle{
+						FGColor: TextGridStyleWhitespace.TextColor(),
+						BGColor: r.Style.BackgroundColor(),
+					}
 					t.setCellRune(sym, x, whitespaceBG, rowStyle) // whitespace char
 				} else {
 					t.setCellRune(sym, x, TextGridStyleWhitespace, rowStyle) // whitespace char

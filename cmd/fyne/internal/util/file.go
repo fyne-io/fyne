@@ -19,12 +19,12 @@ func Exists(path string) bool {
 
 // CopyFile copies the content of a regular file, source, into target path.
 func CopyFile(source, target string) error {
-	return copyFileMode(source, target, 0644)
+	return copyFileMode(source, target, 0o644)
 }
 
 // CopyExeFile copies the content of an executable file, source, into target path.
 func CopyExeFile(src, tgt string) error {
-	return copyFileMode(src, tgt, 0755)
+	return copyFileMode(src, tgt, 0o755)
 }
 
 // EnsureSubDir will make sure a named directory exists within the parent - creating it if not.

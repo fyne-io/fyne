@@ -106,7 +106,7 @@ func runScript(name, script string) {
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
-	err := ioutil.WriteFile(tmpFilePath, []byte(script), 0600)
+	err := ioutil.WriteFile(tmpFilePath, []byte(script), 0o600)
 	if err != nil {
 		fyne.LogError("Could not write script to show notification", err)
 		return
@@ -121,6 +121,7 @@ func runScript(name, script string) {
 		fyne.LogError("Failed to launch windows notify script", err)
 	}
 }
+
 func watchTheme() {
 	// TODO monitor the Windows theme
 }

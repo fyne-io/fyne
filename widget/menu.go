@@ -8,8 +8,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Widget = (*Menu)(nil)
-var _ fyne.Tappable = (*Menu)(nil)
+var (
+	_ fyne.Widget   = (*Menu)(nil)
+	_ fyne.Tappable = (*Menu)(nil)
+)
 
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {

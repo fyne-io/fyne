@@ -8,5 +8,4 @@ import (
 var _ fyne.Clipboard = (*mobileClipboard)(nil)
 
 // mobileClipboard represents the system mobileClipboard
-type mobileClipboard struct {
-}
+type mobileClipboard struct{}

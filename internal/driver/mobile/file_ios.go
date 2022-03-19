@@ -16,6 +16,7 @@ const void* iosReadFromURL(void* url, int* len);
 const int iosWriteToURL(void* url, const void* bytes, int len);
 */
 import "C"
+
 import (
 	"errors"
 	"io"

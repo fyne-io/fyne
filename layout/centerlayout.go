@@ -5,8 +5,7 @@ import "fyne.io/fyne/v2"
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*centerLayout)(nil)
 
-type centerLayout struct {
-}
+type centerLayout struct{}
 
 // NewCenterLayout creates a new CenterLayout instance
 func NewCenterLayout() fyne.Layout {

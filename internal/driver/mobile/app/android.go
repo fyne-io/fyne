@@ -52,6 +52,7 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename);
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
 import "C"
+
 import (
 	"fmt"
 	"log"

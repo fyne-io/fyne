@@ -102,7 +102,6 @@ func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 	// assert we are using the disabled new icon
 	button.Disable()
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.SearchIcon().Name()))
-
 }
 
 func TestButton_DisabledIconChangedDirectly(t *testing.T) {
@@ -123,7 +122,6 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	// assert we are using the disabled new icon
 	button.Disable()
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.SearchIcon().Name()))
-
 }
 
 func TestButton_Focus(t *testing.T) {

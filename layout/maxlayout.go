@@ -6,8 +6,7 @@ import "fyne.io/fyne/v2"
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*maxLayout)(nil)
 
-type maxLayout struct {
-}
+type maxLayout struct{}
 
 // NewMaxLayout creates a new MaxLayout instance
 func NewMaxLayout() fyne.Layout {

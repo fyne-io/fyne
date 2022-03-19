@@ -21,6 +21,7 @@ void processEvents(void);
 void swapBuffers(void);
 */
 import "C"
+
 import (
 	"runtime"
 	"time"

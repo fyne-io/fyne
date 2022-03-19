@@ -20,7 +20,8 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 		Duration: time.Millisecond * 100,
 		Tick: func(d float32) {
 			done <- d
-		}}
+		},
+	}
 
 	run.Start(a)
 	select {
@@ -38,7 +39,8 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		Duration: time.Second * 10,
 		Tick: func(d float32) {
 			done <- d
-		}}
+		},
+	}
 
 	run.Start(a)
 	select {
@@ -75,7 +77,8 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 			Tick: func(d float32) {
 				run.Stop(b)
 				wg.Done()
-			}}
+			},
+		}
 		run.Start(b)
 	}
 

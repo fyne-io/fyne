@@ -198,8 +198,7 @@ func TestEmptyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 }
 
-type emptyTheme struct {
-}
+type emptyTheme struct{}
 
 func (e *emptyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	return nil

@@ -263,5 +263,5 @@ func writeFile(filename string, contents []byte) error {
 		return err
 	}
 	_, dirname, _, _ := runtime.Caller(0)
-	return ioutil.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
+	return ioutil.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0o644)
 }

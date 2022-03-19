@@ -24,6 +24,7 @@ void makeCurrentContext(GLintptr);
 uint64 threadID();
 */
 import "C"
+
 import (
 	"log"
 	"runtime"

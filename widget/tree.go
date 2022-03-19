@@ -661,9 +661,11 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	return
 }
 
-var _ desktop.Hoverable = (*treeNode)(nil)
-var _ fyne.CanvasObject = (*treeNode)(nil)
-var _ fyne.Tappable = (*treeNode)(nil)
+var (
+	_ desktop.Hoverable = (*treeNode)(nil)
+	_ fyne.CanvasObject = (*treeNode)(nil)
+	_ fyne.Tappable     = (*treeNode)(nil)
+)
 
 type treeNode struct {
 	BaseWidget

@@ -24,7 +24,8 @@ import (
 )
 
 func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
-	iconPath, appName, version string, build, target int, release bool) (map[string]bool, error) {
+	iconPath, appName, version string, build, target int, release bool,
+) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err

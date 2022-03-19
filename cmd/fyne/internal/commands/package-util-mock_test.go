@@ -7,18 +7,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var utilExistsMock func(path string) bool
-var utilCopyFileMock func(source string, target string) error
-var utilCopyExeFileMock func(src, tgt string) error
-var utilWriteFileMock func(target string, data []byte) error
-var utilEnsureSubDirMock func(parent, name string) string
+var (
+	utilExistsMock       func(path string) bool
+	utilCopyFileMock     func(source string, target string) error
+	utilCopyExeFileMock  func(src, tgt string) error
+	utilWriteFileMock    func(target string, data []byte) error
+	utilEnsureSubDirMock func(parent, name string) string
+)
 
-var utilRequireAndroidSDKMock func() error
-var utilAndroidBuildToolsPathMock func() string
+var (
+	utilRequireAndroidSDKMock     func() error
+	utilAndroidBuildToolsPathMock func() string
+)
 
-var utilIsAndroidMock func(os string) bool
-var utilIsIOSMock func(os string) bool
-var utilIsMobileMock func(os string) bool
+var (
+	utilIsAndroidMock func(os string) bool
+	utilIsIOSMock     func(os string) bool
+	utilIsMobileMock  func(os string) bool
+)
 
 type mockUtil struct{}
 
@@ -75,7 +81,6 @@ func (m *mockCopyFileRuns) verifyExpectation(t *testing.T, executable bool, sour
 	assert.Equal(t, m.expected[m.current].executable, executable)
 
 	return m.expected[m.current].ret
-
 }
 
 func (m mockUtil) CopyFile(source string, target string) error {

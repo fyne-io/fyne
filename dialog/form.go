@@ -46,7 +46,7 @@ func (d *formDialog) validateItems(err error) {
 //
 // Since: 2.0
 func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool), parent fyne.Window) Dialog {
-	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
+	itemObjects := make([]fyne.CanvasObject, len(items)*2)
 	for i, item := range items {
 		itemObjects[i*2] = widget.NewLabel(item.Text)
 		itemObjects[i*2+1] = item.Widget
@@ -55,10 +55,12 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 
 	d := &dialog{content: content, callback: callback, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
-	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
+	d.dismiss = &widget.Button{
+		Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	confirmBtn := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
+	confirmBtn := &widget.Button{
+		Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() { d.hideWithResponse(true) },
 	}
 	formDialog := &formDialog{

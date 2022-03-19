@@ -30,7 +30,8 @@ func Test_CheckGoVersionValidValue(t *testing.T) {
 		{
 			expectedValue: expectedValue{args: []string{"version"}},
 			mockReturn:    mockReturn{ret: []byte("go version go1.17.6 linux/amd64")},
-		}}
+		},
+	}
 
 	versionOk := &testCommandRuns{runs: expected, t: t}
 	assert.Nil(t, checkGoVersion(versionOk, version.NewConstrainGroupFromString(">=1.17")))

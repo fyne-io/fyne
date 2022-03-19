@@ -40,7 +40,7 @@ func (p *glPainter) glctx() gl.Context {
 }
 
 func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
-	var texture = p.glctx().CreateTexture()
+	texture := p.glctx().CreateTexture()
 	p.logError()
 
 	if int(textureFilter) >= len(textureFilterToGL) {
@@ -122,10 +122,12 @@ func (p *glPainter) compileShader(source string, shaderType gl.Enum) (gl.Shader,
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
-var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent)
-var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
-var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
+var (
+	vertexShaderSource       = string(shaderSimpleesVert.StaticContent)
+	fragmentShaderSource     = string(shaderSimpleesFrag.StaticContent)
+	vertexLineShaderSource   = string(shaderLineesVert.StaticContent)
+	fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
+)
 
 func (p *glPainter) Init() {
 	p.glctx().Disable(gl.DepthTest)
