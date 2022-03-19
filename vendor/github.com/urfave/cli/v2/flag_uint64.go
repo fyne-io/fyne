@@ -52,6 +52,11 @@ func (f *Uint64Flag) GetUsage() string {
 	return f.Usage
 }
 
+// IsVisible returns true if the flag is not hidden, otherwise false
+func (f *Uint64Flag) IsVisible() bool {
+	return !f.Hidden
+}
+
 // Apply populates the flag given the flag set and environment
 func (f *Uint64Flag) Apply(set *flag.FlagSet) error {
 	if val, ok := flagFromEnvOrFile(f.EnvVars, f.FilePath); ok {
@@ -86,7 +91,7 @@ func (f *Uint64Flag) GetValue() string {
 // Uint64 looks up the value of a local Uint64Flag, returns
 // 0 if not found
 func (c *Context) Uint64(name string) uint64 {
-	if fs := lookupFlagSet(name, c); fs != nil {
+	if fs := c.lookupFlagSet(name); fs != nil {
 		return lookupUint64(name, fs)
 	}
 	return 0
