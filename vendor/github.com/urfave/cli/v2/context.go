@@ -2,9 +2,7 @@ package cli
 
 import (
 	"context"
-	"errors"
 	"flag"
-	"fmt"
 	"strings"
 )
 
@@ -53,20 +51,18 @@ func (c *Context) Set(name, value string) error {
 
 // IsSet determines if the flag was actually set
 func (c *Context) IsSet(name string) bool {
-	if fs := lookupFlagSet(name, c); fs != nil {
-		if fs := lookupFlagSet(name, c); fs != nil {
-			isSet := false
-			fs.Visit(func(f *flag.Flag) {
-				if f.Name == name {
-					isSet = true
-				}
-			})
-			if isSet {
-				return true
+	if fs := c.lookupFlagSet(name); fs != nil {
+		isSet := false
+		fs.Visit(func(f *flag.Flag) {
+			if f.Name == name {
+				isSet = true
 			}
+		})
+		if isSet {
+			return true
 		}
 
-		f := lookupFlag(name, c)
+		f := c.lookupFlag(name)
 		if f == nil {
 			return false
 		}
@@ -108,7 +104,10 @@ func (c *Context) Lineage() []*Context {
 
 // Value returns the value of the flag corresponding to `name`
 func (c *Context) Value(name string) interface{} {
-	return c.flagSet.Lookup(name).Value.(flag.Getter).Get()
+	if fs := c.lookupFlagSet(name); fs != nil {
+		return fs.Lookup(name).Value.(flag.Getter).Get()
+	}
+	return nil
 }
 
 // Args returns the command line arguments associated with the context.
@@ -122,7 +121,7 @@ func (c *Context) NArg() int {
 	return c.Args().Len()
 }
 
-func lookupFlag(name string, ctx *Context) Flag {
+func (ctx *Context) lookupFlag(name string) Flag {
 	for _, c := range ctx.Lineage() {
 		if c.Command == nil {
 			continue
@@ -150,8 +149,11 @@ func lookupFlag(name string, ctx *Context) Flag {
 	return nil
 }
 
-func lookupFlagSet(name string, ctx *Context) *flag.FlagSet {
+func (ctx *Context) lookupFlagSet(name string) *flag.FlagSet {
 	for _, c := range ctx.Lineage() {
+		if c.flagSet == nil {
+			continue
+		}
 		if f := c.flagSet.Lookup(name); f != nil {
 			return c.flagSet
 		}
@@ -160,89 +162,7 @@ func lookupFlagSet(name string, ctx *Context) *flag.FlagSet {
 	return nil
 }
 
-func copyFlag(name string, ff *flag.Flag, set *flag.FlagSet) {
-	switch ff.Value.(type) {
-	case Serializer:
-		_ = set.Set(name, ff.Value.(Serializer).Serialize())
-	default:
-		_ = set.Set(name, ff.Value.String())
-	}
-}
-
-func normalizeFlags(flags []Flag, set *flag.FlagSet) error {
-	visited := make(map[string]bool)
-	set.Visit(func(f *flag.Flag) {
-		visited[f.Name] = true
-	})
-	for _, f := range flags {
-		parts := f.Names()
-		if len(parts) == 1 {
-			continue
-		}
-		var ff *flag.Flag
-		for _, name := range parts {
-			name = strings.Trim(name, " ")
-			if visited[name] {
-				if ff != nil {
-					return errors.New("Cannot use two forms of the same flag: " + name + " " + ff.Name)
-				}
-				ff = set.Lookup(name)
-			}
-		}
-		if ff == nil {
-			continue
-		}
-		for _, name := range parts {
-			name = strings.Trim(name, " ")
-			if !visited[name] {
-				copyFlag(name, ff, set)
-			}
-		}
-	}
-	return nil
-}
-
-func makeFlagNameVisitor(names *[]string) func(*flag.Flag) {
-	return func(f *flag.Flag) {
-		nameParts := strings.Split(f.Name, ",")
-		name := strings.TrimSpace(nameParts[0])
-
-		for _, part := range nameParts {
-			part = strings.TrimSpace(part)
-			if len(part) > len(name) {
-				name = part
-			}
-		}
-
-		if name != "" {
-			*names = append(*names, name)
-		}
-	}
-}
-
-type requiredFlagsErr interface {
-	error
-	getMissingFlags() []string
-}
-
-type errRequiredFlags struct {
-	missingFlags []string
-}
-
-func (e *errRequiredFlags) Error() string {
-	numberOfMissingFlags := len(e.missingFlags)
-	if numberOfMissingFlags == 1 {
-		return fmt.Sprintf("Required flag %q not set", e.missingFlags[0])
-	}
-	joinedMissingFlags := strings.Join(e.missingFlags, ", ")
-	return fmt.Sprintf("Required flags %q not set", joinedMissingFlags)
-}
-
-func (e *errRequiredFlags) getMissingFlags() []string {
-	return e.missingFlags
-}
-
-func checkRequiredFlags(flags []Flag, context *Context) requiredFlagsErr {
+func (context *Context) checkRequiredFlags(flags []Flag) requiredFlagsErr {
 	var missingFlags []string
 	for _, f := range flags {
 		if rf, ok := f.(RequiredFlag); ok && rf.IsRequired() {
@@ -270,4 +190,22 @@ func checkRequiredFlags(flags []Flag, context *Context) requiredFlagsErr {
 	}
 
 	return nil
+}
+
+func makeFlagNameVisitor(names *[]string) func(*flag.Flag) {
+	return func(f *flag.Flag) {
+		nameParts := strings.Split(f.Name, ",")
+		name := strings.TrimSpace(nameParts[0])
+
+		for _, part := range nameParts {
+			part = strings.TrimSpace(part)
+			if len(part) > len(name) {
+				name = part
+			}
+		}
+
+		if name != "" {
+			*names = append(*names, name)
+		}
+	}
 }

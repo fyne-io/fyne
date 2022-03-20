@@ -19,6 +19,16 @@ func NewInt64Slice(defaults ...int64) *Int64Slice {
 	return &Int64Slice{slice: append([]int64{}, defaults...)}
 }
 
+// clone allocate a copy of self object
+func (i *Int64Slice) clone() *Int64Slice {
+	n := &Int64Slice{
+		slice:      make([]int64, len(i.slice)),
+		hasBeenSet: i.hasBeenSet,
+	}
+	copy(n.slice, i.slice)
+	return n
+}
+
 // Set parses the value into an integer and appends it to the list of values
 func (i *Int64Slice) Set(value string) error {
 	if !i.hasBeenSet {
@@ -118,6 +128,11 @@ func (f *Int64SliceFlag) GetValue() string {
 	return ""
 }
 
+// IsVisible returns true if the flag is not hidden, otherwise false
+func (f *Int64SliceFlag) IsVisible() bool {
+	return !f.Hidden
+}
+
 // Apply populates the flag given the flag set and environment
 func (f *Int64SliceFlag) Apply(set *flag.FlagSet) error {
 	if val, ok := flagFromEnvOrFile(f.EnvVars, f.FilePath); ok {
@@ -129,14 +144,18 @@ func (f *Int64SliceFlag) Apply(set *flag.FlagSet) error {
 			}
 		}
 
+		// Set this to false so that we reset the slice if we then set values from
+		// flags that have already been set by the environment.
+		f.Value.hasBeenSet = false
 		f.HasBeenSet = true
 	}
 
+	if f.Value == nil {
+		f.Value = &Int64Slice{}
+	}
+	copyValue := f.Value.clone()
 	for _, name := range f.Names() {
-		if f.Value == nil {
-			f.Value = &Int64Slice{}
-		}
-		set.Var(f.Value, name, f.Usage)
+		set.Var(copyValue, name, f.Usage)
 	}
 
 	return nil
@@ -145,7 +164,10 @@ func (f *Int64SliceFlag) Apply(set *flag.FlagSet) error {
 // Int64Slice looks up the value of a local Int64SliceFlag, returns
 // nil if not found
 func (c *Context) Int64Slice(name string) []int64 {
-	return lookupInt64Slice(name, c.flagSet)
+	if fs := c.lookupFlagSet(name); fs != nil {
+		return lookupInt64Slice(name, fs)
+	}
+	return nil
 }
 
 func lookupInt64Slice(name string, set *flag.FlagSet) []int64 {

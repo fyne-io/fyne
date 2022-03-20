@@ -19,6 +19,16 @@ func NewIntSlice(defaults ...int) *IntSlice {
 	return &IntSlice{slice: append([]int{}, defaults...)}
 }
 
+// clone allocate a copy of self object
+func (i *IntSlice) clone() *IntSlice {
+	n := &IntSlice{
+		slice:      make([]int, len(i.slice)),
+		hasBeenSet: i.hasBeenSet,
+	}
+	copy(n.slice, i.slice)
+	return n
+}
+
 // TODO: Consistently have specific Set function for Int64 and Float64 ?
 // SetInt directly adds an integer to the list of values
 func (i *IntSlice) SetInt(value int) {
@@ -129,6 +139,11 @@ func (f *IntSliceFlag) GetValue() string {
 	return ""
 }
 
+// IsVisible returns true if the flag is not hidden, otherwise false
+func (f *IntSliceFlag) IsVisible() bool {
+	return !f.Hidden
+}
+
 // Apply populates the flag given the flag set and environment
 func (f *IntSliceFlag) Apply(set *flag.FlagSet) error {
 	if val, ok := flagFromEnvOrFile(f.EnvVars, f.FilePath); ok {
@@ -140,14 +155,18 @@ func (f *IntSliceFlag) Apply(set *flag.FlagSet) error {
 			}
 		}
 
+		// Set this to false so that we reset the slice if we then set values from
+		// flags that have already been set by the environment.
+		f.Value.hasBeenSet = false
 		f.HasBeenSet = true
 	}
 
+	if f.Value == nil {
+		f.Value = &IntSlice{}
+	}
+	copyValue := f.Value.clone()
 	for _, name := range f.Names() {
-		if f.Value == nil {
-			f.Value = &IntSlice{}
-		}
-		set.Var(f.Value, name, f.Usage)
+		set.Var(copyValue, name, f.Usage)
 	}
 
 	return nil
@@ -156,8 +175,8 @@ func (f *IntSliceFlag) Apply(set *flag.FlagSet) error {
 // IntSlice looks up the value of a local IntSliceFlag, returns
 // nil if not found
 func (c *Context) IntSlice(name string) []int {
-	if fs := lookupFlagSet(name, c); fs != nil {
-		return lookupIntSlice(name, c.flagSet)
+	if fs := c.lookupFlagSet(name); fs != nil {
+		return lookupIntSlice(name, fs)
 	}
 	return nil
 }

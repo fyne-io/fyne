@@ -55,6 +55,11 @@ func (f *StringFlag) GetValue() string {
 	return f.Value
 }
 
+// IsVisible returns true if the flag is not hidden, otherwise false
+func (f *StringFlag) IsVisible() bool {
+	return !f.Hidden
+}
+
 // Apply populates the flag given the flag set and environment
 func (f *StringFlag) Apply(set *flag.FlagSet) error {
 	if val, ok := flagFromEnvOrFile(f.EnvVars, f.FilePath); ok {
@@ -76,7 +81,7 @@ func (f *StringFlag) Apply(set *flag.FlagSet) error {
 // String looks up the value of a local StringFlag, returns
 // "" if not found
 func (c *Context) String(name string) string {
-	if fs := lookupFlagSet(name, c); fs != nil {
+	if fs := c.lookupFlagSet(name); fs != nil {
 		return lookupString(name, fs)
 	}
 	return ""
@@ -85,10 +90,7 @@ func (c *Context) String(name string) string {
 func lookupString(name string, set *flag.FlagSet) string {
 	f := set.Lookup(name)
 	if f != nil {
-		parsed, err := f.Value.String(), error(nil)
-		if err != nil {
-			return ""
-		}
+		parsed := f.Value.String()
 		return parsed
 	}
 	return ""
