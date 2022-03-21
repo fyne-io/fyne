@@ -16,7 +16,7 @@ const (
 	runeModifierShift   = '⇧'
 )
 
-var keySymbols map[fyne.KeyName]rune = map[fyne.KeyName]rune{
+var keySymbols = map[fyne.KeyName]rune{
 	fyne.KeyBackspace: '⌫',
 	fyne.KeyDelete:    '⌦',
 	fyne.KeyDown:      '↓',
