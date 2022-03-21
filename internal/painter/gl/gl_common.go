@@ -8,13 +8,13 @@ import (
 	"log"
 	"runtime"
 
-	"fyne.io/fyne/v2/theme"
 	"github.com/goki/freetype/truetype"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Texture represents an uploaded GL texture
@@ -120,8 +120,16 @@ func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.LinearGradient)
 
-	width := p.textureScale(gradient.Size().Width)
-	height := p.textureScale(gradient.Size().Height)
+	w := gradient.Size().Width
+	h := gradient.Size().Height
+	switch gradient.Angle {
+	case 90, 270:
+		h = 1
+	case 0, 180:
+		w = 1
+	}
+	width := p.textureScale(w)
+	height := p.textureScale(h)
 
 	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }
