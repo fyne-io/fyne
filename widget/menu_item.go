@@ -219,7 +219,7 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	padding := r.itemPadding()
+	padding := fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 
 	r.text.TextSize = theme.TextSize()
 	r.text.Color = theme.ForegroundColor()
@@ -256,7 +256,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().Add(r.itemPadding()).Add(fyne.NewSize(r.checkSpace(), 0))
+	minSize := r.text.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)).Add(fyne.NewSize(r.checkSpace(), 0))
 	if r.expandIcon != nil {
 		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
 	}
@@ -306,10 +306,6 @@ func (r *menuItemRenderer) checkSpace() float32 {
 		return theme.IconInlineSize()
 	}
 	return 0
-}
-
-func (r *menuItemRenderer) itemPadding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {
