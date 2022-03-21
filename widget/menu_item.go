@@ -73,10 +73,10 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
 	text.Alignment = i.alignment
 	objects := []fyne.CanvasObject{background, text}
-	var icon *canvas.Image
+	var expandIcon *canvas.Image
 	if i.Item.ChildMenu != nil {
-		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
-		objects = append(objects, icon)
+		expandIcon = canvas.NewImageFromResource(theme.MenuExpandIcon())
+		objects = append(objects, expandIcon)
 	}
 	checkIcon := canvas.NewImageFromResource(theme.ConfirmIcon())
 	if !i.Item.Checked {
@@ -94,7 +94,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	return &menuItemRenderer{
 		BaseRenderer:  widget.NewBaseRenderer(objects),
 		i:             i,
-		icon:          icon,
+		expandIcon:    expandIcon,
 		checkIcon:     checkIcon,
 		shortcutTexts: shortcutTexts,
 		text:          text,
@@ -209,13 +209,13 @@ func (i *menuItem) triggerLast() {
 type menuItemRenderer struct {
 	widget.BaseRenderer
 	i                *menuItem
-	icon             *canvas.Image
+	background       *canvas.Rectangle
 	checkIcon        *canvas.Image
+	expandIcon       *canvas.Image
 	lastThemePadding float32
 	minSize          fyne.Size
 	shortcutTexts    []*canvas.Text
 	text             *canvas.Text
-	background       *canvas.Rectangle
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
@@ -230,10 +230,10 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	r.text.Move(fyne.NewPos(padding.Width/2+r.checkSpace(), padding.Height/2))
 
 	widthWithoutIcon := size.Width
-	if r.icon != nil {
+	if r.expandIcon != nil {
 		widthWithoutIcon -= theme.IconInlineSize()
-		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		r.icon.Move(fyne.NewPos(widthWithoutIcon, (size.Height-theme.IconInlineSize())/2))
+		r.expandIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+		r.expandIcon.Move(fyne.NewPos(widthWithoutIcon, (size.Height-theme.IconInlineSize())/2))
 	}
 	{
 		offset := widthWithoutIcon - padding.Width/2
@@ -257,7 +257,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 	}
 
 	minSize := r.text.MinSize().Add(r.itemPadding()).Add(fyne.NewSize(r.checkSpace(), 0))
-	if r.icon != nil {
+	if r.expandIcon != nil {
 		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
 	}
 	if r.shortcutTexts != nil {
@@ -315,7 +315,7 @@ func (r *menuItemRenderer) itemPadding() fyne.Size {
 func (r *menuItemRenderer) minSizeUnchanged() bool {
 	return !r.minSize.IsZero() &&
 		r.text.TextSize == theme.TextSize() &&
-		(r.icon == nil || r.icon.Size().Width == theme.IconInlineSize()) &&
+		(r.expandIcon == nil || r.expandIcon.Size().Width == theme.IconInlineSize()) &&
 		r.lastThemePadding == theme.Padding()
 }
 
