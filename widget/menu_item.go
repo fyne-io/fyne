@@ -219,15 +219,13 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	padding := fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
-
 	r.text.TextSize = theme.TextSize()
 	r.text.Color = theme.ForegroundColor()
 	if r.i.Item.Disabled {
 		r.text.Color = theme.DisabledColor()
 	}
 	r.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)))
-	r.text.Move(fyne.NewPos(padding.Width/2+r.checkSpace(), padding.Height/2))
+	r.text.Move(fyne.NewPos(theme.Padding()*2+r.checkSpace(), theme.Padding()))
 
 	widthWithoutIcon := size.Width
 	if r.expandIcon != nil {
@@ -236,17 +234,17 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		r.expandIcon.Move(fyne.NewPos(widthWithoutIcon, (size.Height-theme.IconInlineSize())/2))
 	}
 	{
-		offset := widthWithoutIcon - padding.Width/2
+		offset := widthWithoutIcon - theme.Padding()*2
 		for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
 			text := r.shortcutTexts[i]
 			text.TextSize = theme.TextSize()
 			text.Resize(text.MinSize())
 			offset -= text.MinSize().Width
-			text.Move(fyne.NewPos(offset, padding.Height/2))
+			text.Move(fyne.NewPos(offset, theme.Padding()))
 		}
 	}
 	r.checkIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.checkIcon.Move(fyne.NewPos(padding.Width/4, (size.Height-theme.IconInlineSize())/2))
+	r.checkIcon.Move(fyne.NewPos(theme.Padding(), (size.Height-theme.IconInlineSize())/2))
 
 	r.background.Resize(size)
 }
