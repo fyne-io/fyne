@@ -184,9 +184,8 @@ func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) 
 }
 
 // Declare conformity with interfaces
-var _ fyne.CanvasObject = (*divider)(nil)
-
 var (
+	_ fyne.CanvasObject  = (*divider)(nil)
 	_ fyne.Draggable     = (*divider)(nil)
 	_ desktop.Cursorable = (*divider)(nil)
 	_ desktop.Hoverable  = (*divider)(nil)
