@@ -16,8 +16,7 @@ type Validatable interface {
 // Since: 1.4
 type StringValidator func(string) error
 
-// SelectionValidator is a function for requiring a specified
-// amount of selections to be made.
+// CountValidator is a function sinature for validating counts (usually selections).
 //
 // Since: 2.2
-type SelectionValidator func(int) error
+type CountValidator func(int) error

@@ -20,7 +20,7 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
-	Validator           fyne.SelectionValidator
+	Validator           fyne.CountValidator
 	onValidationChanged func(error)
 	validationError     error
 
