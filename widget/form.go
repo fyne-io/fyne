@@ -32,6 +32,8 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 	return &FormItem{Text: text, Widget: widget}
 }
 
+var _ fyne.Validatable = (*Form)(nil)
+
 // Form widget is two column grid where each row has a label and a widget (usually an input).
 // The last row of the grid will contain the appropriate form control buttons if any should be shown.
 // Setting OnSubmit will set the submit button to be visible and call back the function when tapped.
@@ -54,6 +56,9 @@ type Form struct {
 	submitButton *Button
 
 	disabled bool
+
+	onValidationChanged func(error)
+	validationError     error
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
@@ -117,6 +122,49 @@ func (f *Form) Disable() {
 // Since: 2.1
 func (f *Form) Disabled() bool {
 	return f.disabled
+}
+
+func (f *Form) Validate() error {
+	for i, item := range f.Items {
+		if w, ok := item.Widget.(fyne.Validatable); ok {
+			if err := w.Validate(); err != nil {
+				if err == errFormItemInitialState {
+					continue
+				}
+				f.Items[i].validationError = err
+				f.Items[i].invalid = err != nil
+				f.SetValidationError(err)
+				f.checkValidation(err)
+				f.updateHelperText(f.Items[i])
+				return err
+			}
+		}
+	}
+	f.SetValidationError(nil)
+	return nil
+}
+
+func (f *Form) SetValidationError(err error) {
+	if err == nil && f.validationError == nil {
+		return
+	}
+
+	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
+		err.Error() != f.validationError.Error() {
+		f.validationError = err
+
+		if f.onValidationChanged != nil {
+			f.onValidationChanged(err)
+		}
+
+		f.Refresh()
+	}
+}
+
+func (f *Form) SetOnValidationChanged(callback func(error)) {
+	if callback != nil {
+		f.onValidationChanged = callback
+	}
 }
 
 func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
@@ -225,6 +273,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		}
 		f.Items[i].validationError = err
 		f.Items[i].invalid = err != nil
+		f.SetValidationError(err)
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
