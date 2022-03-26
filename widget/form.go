@@ -144,7 +144,7 @@ func (f *Form) SetValidationError(err error) {
 	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
 		err.Error() != f.validationError.Error() {
 		f.validationError = err
-
+		f.validationErrorText.Text = err.Error()
 		if f.onValidationChanged != nil {
 			f.onValidationChanged(err)
 		}
