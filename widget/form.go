@@ -138,6 +138,7 @@ func (f *Form) SetValidationError(err error) {
 		return
 	}
 	if err == nil {
+		f.Enable()
 		f.checkValidation(nil) // make sure the form get's enabled again if no widget inside it is invalid
 	}
 	if err == nil && f.validationError == nil {
