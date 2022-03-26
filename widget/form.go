@@ -39,6 +39,7 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 // If you change OnSubmit/OnCancel after the form is created and rendered, you need to call
 // Refresh() to update the form with the correct buttons.
 // Setting OnSubmit/OnCancel to nil will remove the buttons.
+// TODO
 type Form struct {
 	BaseWidget
 
@@ -47,13 +48,17 @@ type Form struct {
 	OnCancel   func()
 	SubmitText string
 	CancelText string
+	Validator  func(*Form) error
 
-	itemGrid     *fyne.Container
-	buttonBox    *fyne.Container
-	cancelButton *Button
-	submitButton *Button
+	itemGrid            *fyne.Container
+	buttonBox           *fyne.Container
+	cancelButton        *Button
+	submitButton        *Button
+	validationErrorText *canvas.Text
+	onValidationChanged func(error)
 
-	disabled bool
+	disabled        bool
+	validationError error
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
@@ -117,6 +122,46 @@ func (f *Form) Disable() {
 // Since: 2.1
 func (f *Form) Disabled() bool {
 	return f.disabled
+}
+
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation.
+func (f *Form) SetOnValidationChanged(callback func(error)) {
+	if callback != nil {
+		f.onValidationChanged = callback
+	}
+}
+
+// SetValidationError manually updates the validation status until the next change in a child widget
+func (f *Form) SetValidationError(err error) {
+	if f.Validator == nil {
+		return
+	}
+	if err == nil && f.validationError == nil {
+		return
+	}
+
+	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
+		err.Error() != f.validationError.Error() {
+		f.validationError = err
+
+		if f.onValidationChanged != nil {
+			f.onValidationChanged(err)
+		}
+
+		f.Refresh()
+	}
+}
+
+// Validate validates the current state of the child widgets
+func (f *Form) Validate() error {
+	if f.Validator == nil {
+		return nil
+	}
+
+	err := f.Validator(f)
+	f.SetValidationError(err)
+	return err
 }
 
 func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
@@ -241,6 +286,39 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		}
 		w.SetOnValidationChanged(updateValidation)
 	}
+	// setup triggers to call f.Validate whenever the widget changes state
+	if e, ok := widget.(*Entry); ok {
+		e.OnChanged = func(string) {
+			f.Validate()
+		}
+		return
+	}
+	if c, ok := widget.(*Check); ok {
+		c.OnChanged = func(bool) {
+			f.Validate()
+		}
+		return
+	}
+	if cg, ok := widget.(*CheckGroup); ok {
+		cg.OnChanged = func([]string) {
+			f.Validate()
+		}
+	}
+	if s, ok := widget.(*Select); ok {
+		s.OnChanged = func(string) {
+			f.Validate()
+		}
+	}
+	if se, ok := widget.(*SelectEntry); ok {
+		se.OnChanged = func(string) {
+			f.Validate()
+		}
+	}
+	if s, ok := widget.(*Slider); ok {
+		s.OnChanged = func(float64) {
+			f.Validate()
+		}
+	}
 }
 
 func (f *Form) updateHelperText(item *FormItem) {
@@ -287,11 +365,16 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
 	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
+	var validationErrorText string
+	if err := f.validationError; err != nil {
+		validationErrorText = err.Error()
+	}
+	f.validationErrorText = &canvas.Text{Alignment: fyne.TextAlignLeading, Color: theme.ErrorColor(), Text: validationErrorText, TextSize: theme.TextSize(), TextStyle: fyne.TextStyle{Bold: true}}
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
-	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
+	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox, f.validationErrorText))
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
