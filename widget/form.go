@@ -379,6 +379,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.updateButtons()
 	f.updateLabels()
 	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
+	f.Validate()           // will trigger a validation check with f.Validator
 	return renderer
 }
 
