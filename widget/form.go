@@ -39,7 +39,9 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 // If you change OnSubmit/OnCancel after the form is created and rendered, you need to call
 // Refresh() to update the form with the correct buttons.
 // Setting OnSubmit/OnCancel to nil will remove the buttons.
-// TODO
+// If Validator is set it will be executed every time a child widget is changed, and if the returned error
+// is not nil the error message will be displayed to the right of the form's submit button and the form will
+// be disabled until the Validator returns nil.
 type Form struct {
 	BaseWidget
 
