@@ -377,11 +377,11 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 		validationErrorText = err.Error()
 	}
 	f.validationErrorText = &canvas.Text{Alignment: fyne.TextAlignLeading, Color: theme.ErrorColor(), Text: validationErrorText, TextSize: theme.TextSize(), TextStyle: fyne.TextStyle{Bold: true}}
-	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
+	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton, f.validationErrorText}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
-	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox, f.validationErrorText))
+	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
