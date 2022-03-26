@@ -135,8 +135,10 @@ func (f *Form) SetOnValidationChanged(callback func(error)) {
 // SetValidationError manually updates the validation status until the next change in a child widget
 func (f *Form) SetValidationError(err error) {
 	if f.Validator == nil {
-		f.checkValidation(nil) // make sure the form get's enabled again if no widget inside it is invalid
 		return
+	}
+	if err == nil {
+		f.checkValidation(nil) // make sure the form get's enabled again if no widget inside it is invalid
 	}
 	if err == nil && f.validationError == nil {
 		return
