@@ -25,6 +25,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const (
+	texture0 = gl.TEXTURE0
+)
+
 // Buffer represents a GL buffer
 type Buffer uint32
 
@@ -41,7 +45,7 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 
 	texture := p.ctx.CreateTexture()
 	p.logError()
-	gl.ActiveTexture(gl.TEXTURE0)
+	p.ctx.ActiveTexture(texture0)
 	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
 	p.logError()
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
@@ -268,7 +272,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	}
 	p.logError()
 
-	gl.ActiveTexture(gl.TEXTURE0)
+	p.ctx.ActiveTexture(texture0)
 	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
 	p.logError()
 
@@ -311,6 +315,10 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 type esContext struct{}
 
 var _ context = (*esContext)(nil)
+
+func (c *esContext) ActiveTexture(textureUnit uint32) {
+	gl.ActiveTexture(textureUnit)
+}
 
 func (c *esContext) CreateTexture() (texture Texture) {
 	var tex uint32
