@@ -20,8 +20,13 @@ import (
 )
 
 const (
-	texture0  = gl.Texture0
-	texture2D = gl.Texture2D
+	clampToEdge      = gl.ClampToEdge
+	texture0         = gl.Texture0
+	texture2D        = gl.Texture2D
+	textureMinFilter = gl.TextureMinFilter
+	textureMagFilter = gl.TextureMagFilter
+	textureWrapS     = gl.TextureWrapS
+	textureWrapT     = gl.TextureWrapT
 )
 
 // Buffer represents a GL buffer
@@ -30,7 +35,7 @@ type Buffer gl.Buffer
 // Program represents a compiled GL program
 type Program gl.Program
 
-var textureFilterToGL = []int{gl.Linear, gl.Nearest}
+var textureFilterToGL = []int32{gl.Linear, gl.Nearest}
 
 func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
@@ -47,10 +52,10 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	p.ctx.ActiveTexture(texture0)
 	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
-	p.glctx().TexParameteri(gl.Texture2D, gl.TextureMinFilter, textureFilterToGL[textureFilter])
-	p.glctx().TexParameteri(gl.Texture2D, gl.TextureMagFilter, textureFilterToGL[textureFilter])
-	p.glctx().TexParameteri(gl.Texture2D, gl.TextureWrapS, gl.ClampToEdge)
-	p.glctx().TexParameteri(gl.Texture2D, gl.TextureWrapT, gl.ClampToEdge)
+	p.ctx.TexParameteri(texture2D, textureMinFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureMagFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+	p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
 	p.logError()
 
 	return texture
@@ -351,4 +356,8 @@ func (c *mobileContext) CreateTexture() (texture Texture) {
 
 func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
+}
+
+func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
+	c.glContext.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
 }

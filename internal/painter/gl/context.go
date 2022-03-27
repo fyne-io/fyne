@@ -5,4 +5,5 @@ type context interface {
 	BindTexture(target uint32, texture Texture)
 	CreateTexture() Texture
 	GetError() uint32
+	TexParameteri(target, param uint32, value int32)
 }

@@ -20,8 +20,13 @@ import (
 )
 
 const (
-	texture0  = gl.TEXTURE0
-	texture2D = gl.TEXTURE_2D
+	clampToEdge      = gl.CLAMP_TO_EDGE
+	texture0         = gl.TEXTURE0
+	texture2D        = gl.TEXTURE_2D
+	textureMinFilter = gl.TEXTURE_MIN_FILTER
+	textureMagFilter = gl.TEXTURE_MAG_FILTER
+	textureWrapS     = gl.TEXTURE_WRAP_S
+	textureWrapT     = gl.TEXTURE_WRAP_T
 )
 
 // Buffer represents a GL buffer
@@ -30,7 +35,7 @@ type Buffer gl.Buffer
 // Program represents a compiled GL program
 type Program gl.Program
 
-var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
 func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	if int(textureFilter) >= len(textureFilterToGL) {
@@ -43,10 +48,10 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	p.ctx.ActiveTexture(texture0)
 	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	p.ctx.TexParameteri(texture2D, textureMinFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureMagFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+	p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
 	p.logError()
 
 	return texture
@@ -305,4 +310,8 @@ func (c *xjsContext) CreateTexture() (texture Texture) {
 
 func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
+	gl.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
 }

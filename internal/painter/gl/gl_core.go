@@ -19,8 +19,13 @@ import (
 )
 
 const (
-	texture0  = gl.TEXTURE0
-	texture2D = gl.TEXTURE_2D
+	clampToEdge      = gl.CLAMP_TO_EDGE
+	texture0         = gl.TEXTURE0
+	texture2D        = gl.TEXTURE_2D
+	textureMinFilter = gl.TEXTURE_MIN_FILTER
+	textureMagFilter = gl.TEXTURE_MAG_FILTER
+	textureWrapS     = gl.TEXTURE_WRAP_S
+	textureWrapT     = gl.TEXTURE_WRAP_T
 )
 
 // Buffer represents a GL buffer
@@ -42,10 +47,10 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	p.ctx.ActiveTexture(texture0)
 	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	p.ctx.TexParameteri(texture2D, textureMinFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureMagFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+	p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
 	p.logError()
 
 	return texture
@@ -348,4 +353,8 @@ func (c *coreContext) CreateTexture() (texture Texture) {
 
 func (c *coreContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *coreContext) TexParameteri(target, param uint32, value int32) {
+	gl.TexParameteri(target, param, value)
 }
