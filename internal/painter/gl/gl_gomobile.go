@@ -27,7 +27,7 @@ type Program gl.Program
 
 var textureFilterToGL = []int{gl.Linear, gl.Nearest}
 
-func (p *glPainter) logError() {
+func (p *painter) logError() {
 	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
 		return
 	}
@@ -35,11 +35,11 @@ func (p *glPainter) logError() {
 	logGLError(uint32(err))
 }
 
-func (p *glPainter) glctx() gl.Context {
+func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }
 
-func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
+func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture = p.glctx().CreateTexture()
 	p.logError()
 
@@ -60,7 +60,7 @@ func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
 	return Texture(texture)
 }
 
-func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
+func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
 		texture := p.newTexture(textureFilter)
@@ -88,12 +88,12 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 	}
 }
 
-func (p *glPainter) SetOutputSize(width, height int) {
+func (p *painter) SetOutputSize(width, height int) {
 	p.glctx().Viewport(0, 0, width, height)
 	p.logError()
 }
 
-func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
+func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	texture, ok := cache.GetTexture(obj)
 	if !ok {
 		return
@@ -104,7 +104,7 @@ func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 	cache.DeleteTexture(obj)
 }
 
-func (p *glPainter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
+func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
 	shader := p.glctx().CreateShader(shaderType)
 
 	p.glctx().ShaderSource(shader, source)
@@ -127,7 +127,7 @@ var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent)
 var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
 var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
 
-func (p *glPainter) Init() {
+func (p *painter) Init() {
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 
@@ -168,7 +168,7 @@ func (p *glPainter) Init() {
 	p.logError()
 }
 
-func (p *glPainter) glClearBuffer() {
+func (p *painter) glClearBuffer() {
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	p.glctx().ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
@@ -176,18 +176,18 @@ func (p *glPainter) glClearBuffer() {
 	p.logError()
 }
 
-func (p *glPainter) glScissorOpen(x, y, w, h int32) {
+func (p *painter) glScissorOpen(x, y, w, h int32) {
 	p.glctx().Scissor(x, y, w, h)
 	p.glctx().Enable(gl.ScissorTest)
 	p.logError()
 }
 
-func (p *glPainter) glScissorClose() {
+func (p *painter) glScissorClose() {
 	p.glctx().Disable(gl.ScissorTest)
 	p.logError()
 }
 
-func (p *glPainter) glCreateBuffer(points []float32) Buffer {
+func (p *painter) glCreateBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
 	p.glctx().UseProgram(gl.Program(p.program))
@@ -212,7 +212,7 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(buf)
 }
 
-func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
+func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
 	p.glctx().UseProgram(gl.Program(p.lineProgram))
@@ -237,7 +237,7 @@ func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
 	return Buffer(buf)
 }
 
-func (p *glPainter) glFreeBuffer(b Buffer) {
+func (p *painter) glFreeBuffer(b Buffer) {
 	ctx := p.glctx()
 
 	ctx.BindBuffer(gl.ArrayBuffer, gl.Buffer(b))
@@ -246,7 +246,7 @@ func (p *glPainter) glFreeBuffer(b Buffer) {
 	p.logError()
 }
 
-func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
+func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
 
 	p.glctx().UseProgram(gl.Program(p.program))
@@ -269,7 +269,7 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	p.logError()
 }
 
-func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) {
+func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	ctx := p.glctx()
 
 	p.glctx().UseProgram(gl.Program(p.lineProgram))
@@ -296,7 +296,7 @@ func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) 
 	p.logError()
 }
 
-func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
+func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 	p.glctx().ReadPixels(*pixels, 0, 0, int(width), int(height), gl.RGBA, gl.UnsignedByte)
 	p.logError()
 }

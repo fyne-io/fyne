@@ -32,9 +32,9 @@ type Painter interface {
 }
 
 // Declare conformity to Painter interface
-var _ Painter = (*glPainter)(nil)
+var _ Painter = (*painter)(nil)
 
-type glPainter struct {
+type painter struct {
 	canvas          fyne.Canvas
 	contextProvider driver.WithContext
 	program         Program
@@ -43,16 +43,16 @@ type glPainter struct {
 	pixScale        float32 // pre-calculate scale*texScale for each draw
 }
 
-func (p *glPainter) SetFrameBufferScale(scale float32) {
+func (p *painter) SetFrameBufferScale(scale float32) {
 	p.texScale = scale
 	p.pixScale = p.canvas.Scale() * p.texScale
 }
 
-func (p *glPainter) Clear() {
+func (p *painter) Clear() {
 	p.glClearBuffer()
 }
 
-func (p *glPainter) StartClipping(pos fyne.Position, size fyne.Size) {
+func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 	x := p.textureScale(pos.X)
 	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
 	w := p.textureScale(size.Width)
@@ -60,21 +60,21 @@ func (p *glPainter) StartClipping(pos fyne.Position, size fyne.Size) {
 	p.glScissorOpen(int32(x), int32(y), int32(w), int32(h))
 }
 
-func (p *glPainter) StopClipping() {
+func (p *painter) StopClipping() {
 	p.glScissorClose()
 }
 
-func (p *glPainter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
 	if obj.Visible() {
 		p.drawObject(obj, pos, frame)
 	}
 }
 
-func (p *glPainter) Free(obj fyne.CanvasObject) {
+func (p *painter) Free(obj fyne.CanvasObject) {
 	p.freeTexture(obj)
 }
 
-func (p *glPainter) textureScale(v float32) float32 {
+func (p *painter) textureScale(v float32) float32 {
 	if p.pixScale == 1.0 {
 		return float32(math.Round(float64(v)))
 	}
@@ -85,7 +85,7 @@ func (p *glPainter) textureScale(v float32) float32 {
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
-	p := &glPainter{canvas: c, contextProvider: ctx}
+	p := &painter{canvas: c, contextProvider: ctx}
 	p.SetFrameBufferScale(1.0)
 
 	glInit()

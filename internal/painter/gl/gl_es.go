@@ -55,7 +55,7 @@ func newTexture(textureFilter canvas.ImageScale) Texture {
 	return Texture(texture)
 }
 
-func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
+func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
 		texture := newTexture(textureFilter)
@@ -83,12 +83,12 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 	}
 }
 
-func (p *glPainter) SetOutputSize(width, height int) {
+func (p *painter) SetOutputSize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 	logError()
 }
 
-func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
+func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	texture, ok := cache.GetTexture(obj)
 	if !ok {
 		return
@@ -142,7 +142,7 @@ var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent) + "\x00"
 var vertexLineShaderSource = string(shaderLineesVert.StaticContent) + "\x00"
 var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent) + "\x00"
 
-func (p *glPainter) Init() {
+func (p *painter) Init() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -178,7 +178,7 @@ func (p *glPainter) Init() {
 	p.lineProgram = Program(lineProg)
 }
 
-func (p *glPainter) glClearBuffer() {
+func (p *painter) glClearBuffer() {
 	gl.UseProgram(uint32(p.program))
 	logError()
 
@@ -189,18 +189,18 @@ func (p *glPainter) glClearBuffer() {
 	logError()
 }
 
-func (p *glPainter) glScissorOpen(x, y, w, h int32) {
+func (p *painter) glScissorOpen(x, y, w, h int32) {
 	gl.Scissor(x, y, w, h)
 	gl.Enable(gl.SCISSOR_TEST)
 	logError()
 }
 
-func (p *glPainter) glScissorClose() {
+func (p *painter) glScissorClose() {
 	gl.Disable(gl.SCISSOR_TEST)
 	logError()
 }
 
-func (p *glPainter) glCreateBuffer(points []float32) Buffer {
+func (p *painter) glCreateBuffer(points []float32) Buffer {
 	gl.UseProgram(uint32(p.program))
 
 	var vbo uint32
@@ -224,7 +224,7 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(vbo)
 }
 
-func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
+func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	gl.UseProgram(uint32(p.lineProgram))
 
 	var vbo uint32
@@ -248,7 +248,7 @@ func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
 	return Buffer(vbo)
 }
 
-func (p *glPainter) glFreeBuffer(vbo Buffer) {
+func (p *painter) glFreeBuffer(vbo Buffer) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	logError()
 	buf := uint32(vbo)
@@ -256,7 +256,7 @@ func (p *glPainter) glFreeBuffer(vbo Buffer) {
 	logError()
 }
 
-func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
+func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	gl.UseProgram(uint32(p.program))
 
 	// here we have to choose between blending the image alpha or fading it...
@@ -277,7 +277,7 @@ func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	logError()
 }
 
-func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) {
+func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	gl.UseProgram(uint32(p.lineProgram))
 
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -302,7 +302,7 @@ func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) 
 	logError()
 }
 
-func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
+func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 	gl.ReadBuffer(gl.FRONT)
 	logError()
 	gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(*pixels))

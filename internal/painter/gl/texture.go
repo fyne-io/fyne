@@ -18,7 +18,7 @@ var noTexture = Texture(cache.NoTexture)
 // Texture represents an uploaded GL texture
 type Texture cache.TextureType
 
-func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
+func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
 	texture, ok := cache.GetTexture(object)
 
 	if !ok {
@@ -31,14 +31,14 @@ func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObje
 	return Texture(texture), nil
 }
 
-func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
 	raw := paint.DrawCircle(circle, paint.VectorPad(circle), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	img := obj.(*canvas.Image)
 
 	width := p.textureScale(img.Size().Width)
@@ -52,7 +52,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(tex, img.ScaleMode)
 }
 
-func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.LinearGradient)
 
 	w := gradient.Size().Width
@@ -69,7 +69,7 @@ func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.RadialGradient)
 
 	width := p.textureScale(gradient.Size().Width)
@@ -78,7 +78,7 @@ func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(gradient.Generate(int(width), int(height)), canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	rast := obj.(*canvas.Raster)
 
 	width := p.textureScale(rast.Size().Width)
@@ -87,7 +87,7 @@ func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(rast.Generator(int(width), int(height)), rast.ScaleMode)
 }
 
-func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
 		return p.newGlStrokedRectTexture(rect)
@@ -98,14 +98,14 @@ func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(image.NewUniform(rect.FillColor), canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
 	raw := paint.DrawRectangle(rect, paint.VectorPad(rect), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
-func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
+func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
 	color := text.Color
 	if color == nil {
