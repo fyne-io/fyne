@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	texture0 = gl.TEXTURE0
+	texture0  = gl.TEXTURE0
+	texture2D = gl.TEXTURE_2D
 )
 
 // Buffer represents a GL buffer
@@ -39,7 +40,7 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	texture := p.ctx.CreateTexture()
 	p.logError()
 	p.ctx.ActiveTexture(texture0)
-	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
+	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
@@ -287,7 +288,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	p.logError()
 
 	p.ctx.ActiveTexture(texture0)
-	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
+	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
@@ -333,6 +334,10 @@ var _ context = (*coreContext)(nil)
 
 func (c *coreContext) ActiveTexture(textureUnit uint32) {
 	gl.ActiveTexture(textureUnit)
+}
+
+func (c *coreContext) BindTexture(target uint32, texture Texture) {
+	gl.BindTexture(target, uint32(texture))
 }
 
 func (c *coreContext) CreateTexture() (texture Texture) {

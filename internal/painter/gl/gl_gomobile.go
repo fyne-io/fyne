@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	texture0 = gl.Texture0
+	texture0  = gl.Texture0
+	texture2D = gl.Texture2D
 )
 
 // Buffer represents a GL buffer
@@ -44,7 +45,7 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	texture := p.ctx.CreateTexture()
 	p.logError()
 	p.ctx.ActiveTexture(texture0)
-	p.glctx().BindTexture(gl.Texture2D, gl.Texture(texture))
+	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 	p.glctx().TexParameteri(gl.Texture2D, gl.TextureMinFilter, textureFilterToGL[textureFilter])
 	p.glctx().TexParameteri(gl.Texture2D, gl.TextureMagFilter, textureFilterToGL[textureFilter])
@@ -258,7 +259,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	p.logError()
 
 	p.ctx.ActiveTexture(texture0)
-	ctx.BindTexture(gl.Texture2D, gl.Texture(texture))
+	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 
 	ctx.DrawArrays(gl.TriangleStrip, 0, 4)
@@ -338,6 +339,10 @@ var _ context = (*mobileContext)(nil)
 
 func (c *mobileContext) ActiveTexture(textureUnit uint32) {
 	c.glContext.ActiveTexture(gl.Enum(textureUnit))
+}
+
+func (c *mobileContext) BindTexture(target uint32, texture Texture) {
+	c.glContext.BindTexture(gl.Enum(target), gl.Texture(texture))
 }
 
 func (c *mobileContext) CreateTexture() (texture Texture) {
