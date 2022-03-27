@@ -283,9 +283,6 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 }
 
 func logError() {
-	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
-		return
-	}
 	logGLError(uint32(gl.GetError()))
 }
 

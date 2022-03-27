@@ -5,9 +5,15 @@ package gl
 import (
 	"log"
 	"runtime"
+
+	"fyne.io/fyne/v2"
 )
 
 func logGLError(err uint32) {
+	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
+		return
+	}
+
 	if err == 0 {
 		return
 	}

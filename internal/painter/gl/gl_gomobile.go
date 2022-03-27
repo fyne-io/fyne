@@ -28,9 +28,6 @@ type Program gl.Program
 var textureFilterToGL = []int{gl.Linear, gl.Nearest}
 
 func (p *painter) logError() {
-	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
-		return
-	}
 	err := p.glctx().GetError()
 	logGLError(uint32(err))
 }
