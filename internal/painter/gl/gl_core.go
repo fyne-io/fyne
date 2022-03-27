@@ -33,15 +33,15 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	}
 
 	texture := p.ctx.CreateTexture()
-	logError()
+	p.logError()
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
-	logError()
+	p.logError()
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	logError()
+	p.logError()
 
 	return texture
 }
@@ -55,7 +55,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 		data := []uint8{r8, g8, b8, a8}
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
 			gl.UNSIGNED_BYTE, gl.Ptr(data))
-		logError()
+		p.logError()
 		return texture
 	case *image.RGBA:
 		if len(i.Pix) == 0 { // image is empty
@@ -65,7 +65,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 		texture := p.newTexture(textureFilter)
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
 			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(i.Pix))
-		logError()
+		p.logError()
 		return texture
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
@@ -76,7 +76,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 
 func (p *painter) SetOutputSize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
-	logError()
+	p.logError()
 }
 
 func (p *painter) freeTexture(obj fyne.CanvasObject) {
@@ -87,11 +87,11 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 
 	tex := texture
 	gl.DeleteTextures(1, &tex)
-	logError()
+	p.logError()
 	cache.DeleteTexture(obj)
 }
 
-func glInit() {
+func (p *painter) glInit() {
 	err := gl.Init()
 	if err != nil {
 		fyne.LogError("failed to initialise OpenGL", err)
@@ -100,18 +100,18 @@ func glInit() {
 
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
-	logError()
+	p.logError()
 }
 
-func compileShader(source string, shaderType uint32) (uint32, error) {
+func (p *painter) compileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 
 	csources, free := gl.Strs(source)
 	gl.ShaderSource(shader, 1, csources, nil)
-	logError()
+	p.logError()
 	free()
 	gl.CompileShader(shader)
-	logError()
+	p.logError()
 
 	var logLength int32
 	gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
@@ -133,11 +133,11 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 func (p *painter) Init() {
 	p.ctx = &coreContext{}
-	p.program = createProgram("simple")
-	p.lineProgram = createProgram("line")
+	p.program = p.createProgram("simple")
+	p.lineProgram = p.createProgram("line")
 }
 
-func createProgram(shaderFilename string) Program {
+func (p *painter) createProgram(shaderFilename string) Program {
 	var vertexSrc []byte
 	var fragmentSrc []byte
 
@@ -155,11 +155,11 @@ func createProgram(shaderFilename string) Program {
 		panic("shader not found: " + shaderFilename)
 	}
 
-	vertexShader, err := compileShader(string(vertexSrc)+"\x00", gl.VERTEX_SHADER)
+	vertexShader, err := p.compileShader(string(vertexSrc)+"\x00", gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := compileShader(string(fragmentSrc)+"\x00", gl.FRAGMENT_SHADER)
+	fragmentShader, err := p.compileShader(string(fragmentSrc)+"\x00", gl.FRAGMENT_SHADER)
 	if err != nil {
 		panic(err)
 	}
@@ -193,24 +193,24 @@ func createProgram(shaderFilename string) Program {
 
 func (p *painter) glClearBuffer() {
 	gl.UseProgram(uint32(p.program))
-	logError()
+	p.logError()
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	logError()
+	p.logError()
 }
 
 func (p *painter) glScissorOpen(x, y, w, h int32) {
 	gl.Scissor(x, y, w, h)
 	gl.Enable(gl.SCISSOR_TEST)
-	logError()
+	p.logError()
 }
 
 func (p *painter) glScissorClose() {
 	gl.Disable(gl.SCISSOR_TEST)
-	logError()
+	p.logError()
 }
 
 func (p *painter) glCreateBuffer(points []float32) Buffer {
@@ -218,21 +218,21 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
-	logError()
+	p.logError()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	logError()
+	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-	logError()
+	p.logError()
 
 	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
-	logError()
+	p.logError()
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 12)
-	logError()
+	p.logError()
 
 	return Buffer(vbo)
 }
@@ -242,31 +242,31 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
-	logError()
+	p.logError()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	logError()
+	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-	logError()
+	p.logError()
 
 	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointerWithOffset(vertAttrib, 2, gl.FLOAT, false, 4*4, 0)
-	logError()
+	p.logError()
 
 	normalAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("normal\x00")))
 	gl.EnableVertexAttribArray(normalAttrib)
 	gl.VertexAttribPointerWithOffset(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
-	logError()
+	p.logError()
 
 	return Buffer(vbo)
 }
 
 func (p *painter) glFreeBuffer(vbo Buffer) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	logError()
+	p.logError()
 	buf := uint32(vbo)
 	gl.DeleteBuffers(1, &buf)
-	logError()
+	p.logError()
 }
 
 func (p *painter) glDrawTexture(texture Texture, alpha float32) {
@@ -280,21 +280,21 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	} else {
 		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	}
-	logError()
+	p.logError()
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
-	logError()
+	p.logError()
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-	logError()
+	p.logError()
 }
 
 func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	gl.UseProgram(uint32(p.lineProgram))
 
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	logError()
+	p.logError()
 
 	colorUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("color\x00"))
 	r, g, b, a := col.RGBA()
@@ -310,20 +310,20 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 
 	featherUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("feather\x00"))
 	gl.Uniform1f(featherUniform, feather)
-	logError()
+	p.logError()
 
 	gl.DrawArrays(gl.TRIANGLES, 0, 6)
-	logError()
+	p.logError()
 }
 
 func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 	gl.ReadBuffer(gl.FRONT)
-	logError()
+	p.logError()
 	gl.ReadPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(*pixels))
-	logError()
+	p.logError()
 }
 
-func logError() {
+func (p *painter) logError() {
 	logGLError(gl.GetError())
 }
 

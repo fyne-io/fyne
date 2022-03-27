@@ -298,7 +298,7 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 	p.logError()
 }
 
-func glInit() {
+func (p *painter) glInit() {
 }
 
 // f32Bytes returns the byte representation of float32 values in the given byte

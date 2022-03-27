@@ -89,7 +89,7 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &painter{canvas: c, contextProvider: ctx}
 	p.SetFrameBufferScale(1.0)
 
-	glInit()
+	p.glInit()
 
 	return p
 }
