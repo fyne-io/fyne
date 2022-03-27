@@ -295,39 +295,6 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		}
 		w.SetOnValidationChanged(updateValidation)
 	}
-	// setup triggers to call f.Validate whenever the widget changes state
-	if e, ok := widget.(*Entry); ok {
-		e.OnChanged = func(string) {
-			f.Validate()
-		}
-		return
-	}
-	if c, ok := widget.(*Check); ok {
-		c.OnChanged = func(bool) {
-			f.Validate()
-		}
-		return
-	}
-	if cg, ok := widget.(*CheckGroup); ok {
-		cg.OnChanged = func([]string) {
-			f.Validate()
-		}
-	}
-	if s, ok := widget.(*Select); ok {
-		s.OnChanged = func(string) {
-			f.Validate()
-		}
-	}
-	if se, ok := widget.(*SelectEntry); ok {
-		se.OnChanged = func(string) {
-			f.Validate()
-		}
-	}
-	if s, ok := widget.(*Slider); ok {
-		s.OnChanged = func(float64) {
-			f.Validate()
-		}
-	}
 }
 
 func (f *Form) updateHelperText(item *FormItem) {
