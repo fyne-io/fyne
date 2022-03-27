@@ -27,17 +27,15 @@ type Program uint32
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
 func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
-	var texture uint32
-
 	if int(textureFilter) >= len(textureFilterToGL) {
 		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
 		textureFilter = canvas.ImageScaleSmooth
 	}
 
-	gl.GenTextures(1, &texture)
+	texture := p.ctx.CreateTexture()
 	logError()
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
 	logError()
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
@@ -45,7 +43,7 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	logError()
 
-	return Texture(texture)
+	return texture
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
@@ -335,3 +333,9 @@ func logError() {
 type coreContext struct{}
 
 var _ context = (*coreContext)(nil)
+
+func (c *coreContext) CreateTexture() (texture Texture) {
+	var tex uint32
+	gl.GenTextures(1, &tex)
+	return Texture(tex)
+}

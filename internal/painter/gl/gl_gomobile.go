@@ -40,16 +40,15 @@ func (p *painter) glctx() gl.Context {
 }
 
 func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
-	var texture = p.glctx().CreateTexture()
-	p.logError()
-
 	if int(textureFilter) >= len(textureFilterToGL) {
 		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
 		textureFilter = canvas.ImageScaleSmooth
 	}
 
+	texture := p.ctx.CreateTexture()
+	p.logError()
 	p.glctx().ActiveTexture(gl.Texture0)
-	p.glctx().BindTexture(gl.Texture2D, texture)
+	p.glctx().BindTexture(gl.Texture2D, gl.Texture(texture))
 	p.logError()
 	p.glctx().TexParameteri(gl.Texture2D, gl.TextureMinFilter, textureFilterToGL[textureFilter])
 	p.glctx().TexParameteri(gl.Texture2D, gl.TextureMagFilter, textureFilterToGL[textureFilter])
@@ -57,7 +56,7 @@ func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	p.glctx().TexParameteri(gl.Texture2D, gl.TextureWrapT, gl.ClampToEdge)
 	p.logError()
 
-	return Texture(texture)
+	return texture
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
@@ -340,3 +339,7 @@ type mobileContext struct {
 }
 
 var _ context = (*mobileContext)(nil)
+
+func (c *mobileContext) CreateTexture() (texture Texture) {
+	return Texture(c.glContext.CreateTexture())
+}
