@@ -40,11 +40,6 @@ func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }
 
-func (p *painter) SetOutputSize(width, height int) {
-	p.ctx.Viewport(0, 0, width, height)
-	p.logError()
-}
-
 func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	texture, ok := cache.GetTexture(obj)
 	if !ok {

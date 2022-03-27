@@ -78,6 +78,11 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	p.freeTexture(obj)
 }
 
+func (p *painter) SetOutputSize(width, height int) {
+	p.ctx.Viewport(0, 0, width, height)
+	p.logError()
+}
+
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
