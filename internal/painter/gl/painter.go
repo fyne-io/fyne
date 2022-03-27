@@ -2,10 +2,12 @@
 package gl
 
 import (
+	"fmt"
 	"image"
 	"math"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/driver"
 )
 
@@ -77,6 +79,26 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 
 func (p *painter) logError() {
 	logGLError(p.ctx.GetError())
+}
+
+func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
+	if int(textureFilter) >= len(textureFilterToGL) {
+		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
+		textureFilter = canvas.ImageScaleSmooth
+	}
+
+	texture := p.ctx.CreateTexture()
+	p.logError()
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+	p.ctx.TexParameteri(texture2D, textureMinFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureMagFilter, textureFilterToGL[textureFilter])
+	p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+	p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
+	p.logError()
+
+	return texture
 }
 
 func (p *painter) textureScale(v float32) float32 {

@@ -41,26 +41,6 @@ func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }
 
-func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
-	if int(textureFilter) >= len(textureFilterToGL) {
-		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
-		textureFilter = canvas.ImageScaleSmooth
-	}
-
-	texture := p.ctx.CreateTexture()
-	p.logError()
-	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, texture)
-	p.logError()
-	p.ctx.TexParameteri(texture2D, textureMinFilter, textureFilterToGL[textureFilter])
-	p.ctx.TexParameteri(texture2D, textureMagFilter, textureFilterToGL[textureFilter])
-	p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
-	p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
-	p.logError()
-
-	return texture
-}
-
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
