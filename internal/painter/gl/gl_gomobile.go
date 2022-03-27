@@ -36,7 +36,7 @@ func (p *glPainter) logError() {
 }
 
 func (p *glPainter) glctx() gl.Context {
-	return p.context.Context().(gl.Context)
+	return p.contextProvider.Context().(gl.Context)
 }
 
 func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {

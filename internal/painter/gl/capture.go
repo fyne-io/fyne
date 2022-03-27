@@ -30,7 +30,7 @@ func (p *glPainter) Capture(c fyne.Canvas) image.Image {
 	width, height := c.PixelCoordinateForPosition(pos)
 	pixels := make([]uint8, width*height*4)
 
-	p.context.RunWithContext(func() {
+	p.contextProvider.RunWithContext(func() {
 		p.glCapture(int32(width), int32(height), &pixels)
 	})
 

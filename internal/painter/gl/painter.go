@@ -35,12 +35,12 @@ type Painter interface {
 var _ Painter = (*glPainter)(nil)
 
 type glPainter struct {
-	canvas      fyne.Canvas
-	context     driver.WithContext
-	program     Program
-	lineProgram Program
-	texScale    float32
-	pixScale    float32 // pre-calculate scale*texScale for each draw
+	canvas          fyne.Canvas
+	contextProvider driver.WithContext
+	program         Program
+	lineProgram     Program
+	texScale        float32
+	pixScale        float32 // pre-calculate scale*texScale for each draw
 }
 
 func (p *glPainter) SetFrameBufferScale(scale float32) {
@@ -85,7 +85,7 @@ func (p *glPainter) textureScale(v float32) float32 {
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
-	p := &glPainter{canvas: c, context: ctx}
+	p := &glPainter{canvas: c, contextProvider: ctx}
 	p.SetFrameBufferScale(1.0)
 
 	glInit()
