@@ -36,6 +36,7 @@ var _ Painter = (*painter)(nil)
 
 type painter struct {
 	canvas          fyne.Canvas
+	ctx             context
 	contextProvider driver.WithContext
 	program         Program
 	lineProgram     Program

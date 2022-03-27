@@ -128,6 +128,7 @@ var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
 var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
 
 func (p *painter) Init() {
+	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 
@@ -333,3 +334,9 @@ func f32Bytes(byteOrder binary.ByteOrder, values ...float32) []byte {
 	}
 	return b
 }
+
+type mobileContext struct {
+	glContext gl.Context
+}
+
+var _ context = (*mobileContext)(nil)

@@ -134,6 +134,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 }
 
 func (p *painter) Init() {
+	p.ctx = &coreContext{}
 	p.program = createProgram("simple")
 	p.lineProgram = createProgram("line")
 }
@@ -330,3 +331,7 @@ func logError() {
 	}
 	logGLError(gl.GetError())
 }
+
+type coreContext struct{}
+
+var _ context = (*coreContext)(nil)

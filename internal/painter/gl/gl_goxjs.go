@@ -121,6 +121,7 @@ var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
 var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
 
 func (p *painter) Init() {
+	p.ctx = &xjsContext{}
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -288,3 +289,7 @@ func logError() {
 	}
 	logGLError(uint32(gl.GetError()))
 }
+
+type xjsContext struct{}
+
+var _ context = (*xjsContext)(nil)
