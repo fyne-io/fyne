@@ -26,7 +26,7 @@ type Program uint32
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
-func newTexture(textureFilter canvas.ImageScale) Texture {
+func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32
 
 	if int(textureFilter) >= len(textureFilterToGL) {
@@ -51,7 +51,7 @@ func newTexture(textureFilter canvas.ImageScale) Texture {
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
-		texture := newTexture(textureFilter)
+		texture := p.newTexture(textureFilter)
 		r, g, b, a := i.RGBA()
 		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
 		data := []uint8{r8, g8, b8, a8}
@@ -64,7 +64,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 			return 0
 		}
 
-		texture := newTexture(textureFilter)
+		texture := p.newTexture(textureFilter)
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
 			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(i.Pix))
 		logError()
