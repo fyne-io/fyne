@@ -243,7 +243,7 @@ func (f *Form) checkValidation(err error) {
 		}
 	}
 
-	if !f.disabled {
+	if !f.disabled && f.validationError == nil {
 		f.submitButton.Enable()
 	}
 }
