@@ -124,6 +124,7 @@ func (f *Form) Disabled() bool {
 	return f.disabled
 }
 
+// Validate returns the validation status of the form.
 func (f *Form) Validate() error {
 	for i, item := range f.Items {
 		if w, ok := item.Widget.(fyne.Validatable); ok {
@@ -133,18 +134,25 @@ func (f *Form) Validate() error {
 				}
 				f.Items[i].validationError = err
 				f.Items[i].invalid = err != nil
-				f.SetValidationError(err)
+				f.setValidationError(err)
 				f.checkValidation(err)
 				f.updateHelperText(f.Items[i])
 				return err
 			}
 		}
 	}
-	f.SetValidationError(nil)
+	f.setValidationError(nil)
 	return nil
 }
 
-func (f *Form) SetValidationError(err error) {
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+func (f *Form) SetOnValidationChanged(callback func(error)) {
+	if callback != nil {
+		f.onValidationChanged = callback
+	}
+}
+
+func (f *Form) setValidationError(err error) {
 	if err == nil && f.validationError == nil {
 		return
 	}
@@ -158,12 +166,6 @@ func (f *Form) SetValidationError(err error) {
 		}
 
 		f.Refresh()
-	}
-}
-
-func (f *Form) SetOnValidationChanged(callback func(error)) {
-	if callback != nil {
-		f.onValidationChanged = callback
 	}
 }
 
@@ -273,7 +275,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		}
 		f.Items[i].validationError = err
 		f.Items[i].invalid = err != nil
-		f.SetValidationError(err)
+		f.setValidationError(err)
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
