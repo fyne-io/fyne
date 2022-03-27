@@ -309,7 +309,7 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 }
 
 func (p *painter) logError() {
-	logGLError(gl.GetError())
+	logGLError(p.ctx.GetError())
 }
 
 type esContext struct{}
@@ -320,4 +320,8 @@ func (c *esContext) CreateTexture() (texture Texture) {
 	var tex uint32
 	gl.GenTextures(1, &tex)
 	return Texture(tex)
+}
+
+func (c *esContext) GetError() uint32 {
+	return gl.GetError()
 }

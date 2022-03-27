@@ -283,7 +283,7 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 }
 
 func (p *painter) logError() {
-	logGLError(uint32(gl.GetError()))
+	logGLError(p.ctx.GetError())
 }
 
 type xjsContext struct{}
@@ -292,4 +292,8 @@ var _ context = (*xjsContext)(nil)
 
 func (c *xjsContext) CreateTexture() (texture Texture) {
 	return Texture(gl.CreateTexture())
+}
+
+func (c *xjsContext) GetError() uint32 {
+	return uint32(gl.GetError())
 }

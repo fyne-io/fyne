@@ -184,7 +184,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		fmt.Printf("OpenGL program linking output:\n%s\n", info)
 	}
 
-	if glErr := gl.GetError(); glErr != 0 {
+	if glErr := p.ctx.GetError(); glErr != 0 {
 		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
 	}
 
@@ -324,7 +324,7 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 }
 
 func (p *painter) logError() {
-	logGLError(gl.GetError())
+	logGLError(p.ctx.GetError())
 }
 
 type coreContext struct{}
@@ -335,4 +335,8 @@ func (c *coreContext) CreateTexture() (texture Texture) {
 	var tex uint32
 	gl.GenTextures(1, &tex)
 	return Texture(tex)
+}
+
+func (c *coreContext) GetError() uint32 {
+	return gl.GetError()
 }

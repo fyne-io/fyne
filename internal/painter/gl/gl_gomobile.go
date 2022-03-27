@@ -28,8 +28,7 @@ type Program gl.Program
 var textureFilterToGL = []int{gl.Linear, gl.Nearest}
 
 func (p *painter) logError() {
-	err := p.glctx().GetError()
-	logGLError(uint32(err))
+	logGLError(p.ctx.GetError())
 }
 
 func (p *painter) glctx() gl.Context {
@@ -339,4 +338,8 @@ var _ context = (*mobileContext)(nil)
 
 func (c *mobileContext) CreateTexture() (texture Texture) {
 	return Texture(c.glContext.CreateTexture())
+}
+
+func (c *mobileContext) GetError() uint32 {
+	return uint32(c.glContext.GetError())
 }
