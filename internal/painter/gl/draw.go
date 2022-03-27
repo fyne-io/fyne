@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/painter"
+	paint "fyne.io/fyne/v2/internal/painter"
 )
 
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
@@ -19,7 +19,7 @@ func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(can
 
 	aspect := float32(0)
 	if img, ok := o.(*canvas.Image); ok {
-		aspect = painter.GetAspect(img)
+		aspect = paint.GetAspect(img)
 		if aspect == 0 {
 			aspect = 1 // fallback, should not occur - normally an image load error
 		}
@@ -33,7 +33,7 @@ func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(can
 
 func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
-		1.0, painter.VectorPad(circle))
+		1.0, paint.VectorPad(circle))
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
@@ -64,7 +64,7 @@ func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fra
 		return
 	}
 	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
-		1.0, painter.VectorPad(rect))
+		1.0, paint.VectorPad(rect))
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {

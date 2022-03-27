@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/painter"
+	paint "fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -33,7 +33,7 @@ func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObje
 
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
-	raw := painter.DrawCircle(circle, painter.VectorPad(circle), p.textureScale)
+	raw := paint.DrawCircle(circle, paint.VectorPad(circle), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
@@ -44,7 +44,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScale(img.Size().Width)
 	height := p.textureScale(img.Size().Height)
 
-	tex := painter.PaintImage(img, p.canvas, int(width), int(height))
+	tex := paint.PaintImage(img, p.canvas, int(width), int(height))
 	if tex == nil {
 		return noTexture
 	}
@@ -100,7 +100,7 @@ func (p *glPainter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
-	raw := painter.DrawRectangle(rect, painter.VectorPad(rect), p.textureScale)
+	raw := paint.DrawRectangle(rect, paint.VectorPad(rect), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
@@ -120,9 +120,9 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	var opts truetype.Options
 	fontSize := float64(text.TextSize) * float64(p.canvas.Scale())
 	opts.Size = fontSize
-	opts.DPI = float64(painter.TextDPI * p.texScale)
-	face := painter.CachedFontFace(text.TextStyle, &opts)
+	opts.DPI = float64(paint.TextDPI * p.texScale)
+	face := paint.CachedFontFace(text.TextStyle, &opts)
 
-	painter.DrawString(img, text.Text, color, face, height, text.TextStyle.TabWidth)
+	paint.DrawString(img, text.Text, color, face, height, text.TextStyle.TabWidth)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
