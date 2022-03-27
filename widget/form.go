@@ -124,24 +124,15 @@ func (f *Form) Disabled() bool {
 	return f.disabled
 }
 
-// Validate returns the validation status of the form.
+// Validate validates the entire form.
 func (f *Form) Validate() error {
-	for i, item := range f.Items {
+	for _, item := range f.Items {
 		if w, ok := item.Widget.(fyne.Validatable); ok {
 			if err := w.Validate(); err != nil {
-				if err == errFormItemInitialState {
-					continue
-				}
-				f.Items[i].validationError = err
-				f.Items[i].invalid = err != nil
-				f.setValidationError(err)
-				f.checkValidation(err)
-				f.updateHelperText(f.Items[i])
 				return err
 			}
 		}
 	}
-	f.setValidationError(nil)
 	return nil
 }
 
@@ -149,23 +140,6 @@ func (f *Form) Validate() error {
 func (f *Form) SetOnValidationChanged(callback func(error)) {
 	if callback != nil {
 		f.onValidationChanged = callback
-	}
-}
-
-func (f *Form) setValidationError(err error) {
-	if err == nil && f.validationError == nil {
-		return
-	}
-
-	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
-		err.Error() != f.validationError.Error() {
-		f.validationError = err
-
-		if f.onValidationChanged != nil {
-			f.onValidationChanged(err)
-		}
-
-		f.Refresh()
 	}
 }
 
@@ -266,6 +240,29 @@ func (f *Form) ensureRenderItems() {
 		off++
 	}
 	f.itemGrid.Objects = append(f.itemGrid.Objects, objects...)
+}
+
+func (f *Form) setValidationError(err error) {
+	if err == nil && f.validationError == nil {
+		return
+	}
+
+	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
+		err.Error() != f.validationError.Error() {
+		if err == nil {
+			for _, item := range f.Items {
+				if item.invalid {
+					err = item.validationError
+					break
+				}
+			}
+		}
+		f.validationError = err
+
+		if f.onValidationChanged != nil {
+			f.onValidationChanged(err)
+		}
+	}
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
