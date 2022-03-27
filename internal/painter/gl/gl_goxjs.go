@@ -282,10 +282,6 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 	p.logError()
 }
 
-func (p *painter) logError() {
-	logGLError(p.ctx.GetError())
-}
-
 type xjsContext struct{}
 
 var _ context = (*xjsContext)(nil)

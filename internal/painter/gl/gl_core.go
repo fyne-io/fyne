@@ -323,10 +323,6 @@ func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
 	p.logError()
 }
 
-func (p *painter) logError() {
-	logGLError(p.ctx.GetError())
-}
-
 type coreContext struct{}
 
 var _ context = (*coreContext)(nil)

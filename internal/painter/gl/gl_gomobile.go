@@ -27,10 +27,6 @@ type Program gl.Program
 
 var textureFilterToGL = []int{gl.Linear, gl.Nearest}
 
-func (p *painter) logError() {
-	logGLError(p.ctx.GetError())
-}
-
 func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }

@@ -75,6 +75,10 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	p.freeTexture(obj)
 }
 
+func (p *painter) logError() {
+	logGLError(p.ctx.GetError())
+}
+
 func (p *painter) textureScale(v float32) float32 {
 	if p.pixScale == 1.0 {
 		return float32(math.Round(float64(v)))
