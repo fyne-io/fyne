@@ -42,7 +42,7 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 		return
 	}
 
-	gl.DeleteTexture(gl.Texture(texture))
+	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
 }
@@ -253,6 +253,10 @@ func (c *xjsContext) BindTexture(target uint32, texture Texture) {
 
 func (c *xjsContext) CreateTexture() (texture Texture) {
 	return Texture(gl.CreateTexture())
+}
+
+func (c *xjsContext) DeleteTexture(texture Texture) {
+	gl.DeleteTexture(gl.Texture(texture))
 }
 
 func (c *xjsContext) GetError() uint32 {

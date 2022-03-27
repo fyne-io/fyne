@@ -46,7 +46,7 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 		return
 	}
 
-	p.glctx().DeleteTexture(gl.Texture(texture))
+	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
 }
@@ -298,6 +298,10 @@ func (c *mobileContext) BindTexture(target uint32, texture Texture) {
 
 func (c *mobileContext) CreateTexture() (texture Texture) {
 	return Texture(c.glContext.CreateTexture())
+}
+
+func (c *mobileContext) DeleteTexture(texture Texture) {
+	c.glContext.DeleteTexture(gl.Texture(texture))
 }
 
 func (c *mobileContext) GetError() uint32 {

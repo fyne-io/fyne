@@ -41,8 +41,7 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 		return
 	}
 
-	tex := texture
-	gl.DeleteTextures(1, &tex)
+	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
 }
@@ -295,6 +294,11 @@ func (c *coreContext) CreateTexture() (texture Texture) {
 	var tex uint32
 	gl.GenTextures(1, &tex)
 	return Texture(tex)
+}
+
+func (c *coreContext) DeleteTexture(texture Texture) {
+	tex := uint32(texture)
+	gl.DeleteTextures(1, &tex)
 }
 
 func (c *coreContext) GetError() uint32 {
