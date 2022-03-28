@@ -15,6 +15,8 @@ import (
 )
 
 const (
+	bitColorBuffer   = gl.ColorBufferBit
+	bitDepthBuffer   = gl.DepthBufferBit
 	clampToEdge      = gl.ClampToEdge
 	colorFormatRGBA  = gl.RGBA
 	texture0         = gl.Texture0
@@ -106,7 +108,7 @@ func (p *painter) Init() {
 func (p *painter) glClearBuffer() {
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	p.glctx().Clear(gl.ColorBufferBit | gl.DepthBufferBit)
+	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
 	p.logError()
 }
 
@@ -280,6 +282,10 @@ func (c *mobileContext) ActiveTexture(textureUnit uint32) {
 
 func (c *mobileContext) BindTexture(target uint32, texture Texture) {
 	c.glContext.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *mobileContext) Clear(mask uint32) {
+	c.glContext.Clear(gl.Enum(mask))
 }
 
 func (c *mobileContext) ClearColor(r, g, b, a float32) {
