@@ -105,8 +105,7 @@ func (p *painter) glClearBuffer() {
 	p.logError()
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
-	max16bit := float32(255 * 255)
-	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	p.logError()
 }
@@ -236,6 +235,10 @@ func (c *xjsContext) ActiveTexture(textureUnit uint32) {
 
 func (c *xjsContext) BindTexture(target uint32, texture Texture) {
 	gl.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *xjsContext) ClearColor(r, g, b, a float32) {
+	gl.ClearColor(r, g, b, a)
 }
 
 func (c *xjsContext) CreateTexture() (texture Texture) {

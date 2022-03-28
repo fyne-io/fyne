@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const max16bit = float32(255 * 255)
+
 func logGLError(err uint32) {
 	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
 		return
