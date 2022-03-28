@@ -10,8 +10,6 @@ import (
 	"image/color"
 	"math"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
 	"fyne.io/fyne/v2/theme"
 )
@@ -38,17 +36,6 @@ var textureFilterToGL = []int32{gl.Linear, gl.Nearest}
 
 func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
-}
-
-func (p *painter) freeTexture(obj fyne.CanvasObject) {
-	texture, ok := cache.GetTexture(obj)
-	if !ok {
-		return
-	}
-
-	p.ctx.DeleteTexture(Texture(texture))
-	p.logError()
-	cache.DeleteTexture(obj)
 }
 
 func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {

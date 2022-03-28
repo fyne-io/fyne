@@ -18,7 +18,6 @@ import (
 	gl "github.com/go-gl/gl/v3.1/gles2"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -41,17 +40,6 @@ type Buffer uint32
 type Program uint32
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
-
-func (p *painter) freeTexture(obj fyne.CanvasObject) {
-	texture, ok := cache.GetTexture(obj)
-	if !ok {
-		return
-	}
-
-	p.ctx.DeleteTexture(Texture(texture))
-	p.logError()
-	cache.DeleteTexture(obj)
-}
 
 func (p *painter) glInit() {
 	err := gl.Init()

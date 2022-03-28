@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 )
 
@@ -81,6 +82,17 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 func (p *painter) SetOutputSize(width, height int) {
 	p.ctx.Viewport(0, 0, width, height)
 	p.logError()
+}
+
+func (p *painter) freeTexture(obj fyne.CanvasObject) {
+	texture, ok := cache.GetTexture(obj)
+	if !ok {
+		return
+	}
+
+	p.ctx.DeleteTexture(Texture(texture))
+	p.logError()
+	cache.DeleteTexture(obj)
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {

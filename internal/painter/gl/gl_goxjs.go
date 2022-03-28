@@ -11,8 +11,6 @@ import (
 	"github.com/fyne-io/gl-js"
 	"golang.org/x/mobile/exp/f32"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -35,17 +33,6 @@ type Buffer gl.Buffer
 type Program gl.Program
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
-
-func (p *painter) freeTexture(obj fyne.CanvasObject) {
-	texture, ok := cache.GetTexture(obj)
-	if !ok {
-		return
-	}
-
-	p.ctx.DeleteTexture(Texture(texture))
-	p.logError()
-	cache.DeleteTexture(obj)
-}
 
 func (p *painter) glInit() {
 	gl.Disable(gl.DEPTH_TEST)
