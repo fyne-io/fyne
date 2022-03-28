@@ -12,15 +12,12 @@ package gl
 
 import (
 	"fmt"
-	"image"
 	"image/color"
-	"image/draw"
 	"strings"
 
 	gl "github.com/go-gl/gl/v3.1/gles2"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
@@ -44,48 +41,6 @@ type Buffer uint32
 type Program uint32
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
-
-func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
-	switch i := img.(type) {
-	case *image.Uniform:
-		texture := p.newTexture(textureFilter)
-		r, g, b, a := i.RGBA()
-		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
-		data := []uint8{r8, g8, b8, a8}
-		p.ctx.TexImage2D(
-			texture2D,
-			0,
-			1,
-			1,
-			colorFormatRGBA,
-			unsignedByte,
-			data,
-		)
-		p.logError()
-		return texture
-	case *image.RGBA:
-		if len(i.Pix) == 0 { // image is empty
-			return 0
-		}
-
-		texture := p.newTexture(textureFilter)
-		p.ctx.TexImage2D(
-			texture2D,
-			0,
-			i.Rect.Size().X,
-			i.Rect.Size().Y,
-			colorFormatRGBA,
-			unsignedByte,
-			i.Pix,
-		)
-		p.logError()
-		return texture
-	default:
-		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return p.imgToTexture(rgba, textureFilter)
-	}
-}
 
 func (p *painter) SetOutputSize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
