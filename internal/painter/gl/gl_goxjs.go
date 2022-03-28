@@ -37,7 +37,7 @@ type Program gl.Program
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
 func (p *painter) SetOutputSize(width, height int) {
-	gl.Viewport(0, 0, width, height)
+	p.ctx.Viewport(0, 0, width, height)
 	p.logError()
 }
 
@@ -278,4 +278,8 @@ func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFo
 
 func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 	gl.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
+}
+
+func (c *xjsContext) Viewport(x, y, width, height int) {
+	gl.Viewport(x, y, width, height)
 }

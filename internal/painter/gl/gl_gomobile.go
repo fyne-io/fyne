@@ -41,7 +41,7 @@ func (p *painter) glctx() gl.Context {
 }
 
 func (p *painter) SetOutputSize(width, height int) {
-	p.glctx().Viewport(0, 0, width, height)
+	p.ctx.Viewport(0, 0, width, height)
 	p.logError()
 }
 
@@ -324,4 +324,8 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 	c.glContext.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
+}
+
+func (c *mobileContext) Viewport(x, y, width, height int) {
+	c.glContext.Viewport(x, y, width, height)
 }
