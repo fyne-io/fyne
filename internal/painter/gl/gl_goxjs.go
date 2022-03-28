@@ -21,12 +21,14 @@ import (
 
 const (
 	clampToEdge      = gl.CLAMP_TO_EDGE
+	colorFormatRGBA  = gl.RGBA
 	texture0         = gl.TEXTURE0
 	texture2D        = gl.TEXTURE_2D
 	textureMinFilter = gl.TEXTURE_MIN_FILTER
 	textureMagFilter = gl.TEXTURE_MAG_FILTER
 	textureWrapS     = gl.TEXTURE_WRAP_S
 	textureWrapT     = gl.TEXTURE_WRAP_T
+	unsignedByte     = gl.UNSIGNED_BYTE
 )
 
 // Buffer represents a GL buffer
@@ -44,7 +46,15 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 		r, g, b, a := i.RGBA()
 		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
 		data := []uint8{r8, g8, b8, a8}
-		gl.TexImage2D(gl.TEXTURE_2D, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data)
+		p.ctx.TexImage2D(
+			texture2D,
+			0,
+			1,
+			1,
+			colorFormatRGBA,
+			unsignedByte,
+			data,
+		)
 		p.logError()
 		return texture
 	case *image.RGBA:
@@ -53,8 +63,15 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 		}
 
 		texture := p.newTexture(textureFilter)
-		gl.TexImage2D(gl.TEXTURE_2D, 0, i.Rect.Size().X, i.Rect.Size().Y,
-			gl.RGBA, gl.UNSIGNED_BYTE, i.Pix)
+		p.ctx.TexImage2D(
+			texture2D,
+			0,
+			i.Rect.Size().X,
+			i.Rect.Size().Y,
+			colorFormatRGBA,
+			unsignedByte,
+			i.Pix,
+		)
 		p.logError()
 		return texture
 	default:
@@ -290,6 +307,18 @@ func (c *xjsContext) CreateTexture() (texture Texture) {
 
 func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexImage2D(
+		gl.Enum(target),
+		level,
+		width,
+		height,
+		gl.Enum(colorFormat),
+		gl.Enum(typ),
+		data,
+	)
 }
 
 func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
