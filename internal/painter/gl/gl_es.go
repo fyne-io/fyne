@@ -121,7 +121,7 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glClearBuffer() {
-	gl.UseProgram(uint32(p.program))
+	p.ctx.UseProgram(p.program)
 	p.logError()
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -143,7 +143,7 @@ func (p *painter) glScissorClose() {
 }
 
 func (p *painter) glCreateBuffer(points []float32) Buffer {
-	gl.UseProgram(uint32(p.program))
+	p.ctx.UseProgram(p.program)
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -167,7 +167,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 }
 
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
-	gl.UseProgram(uint32(p.lineProgram))
+	p.ctx.UseProgram(p.lineProgram)
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -199,7 +199,7 @@ func (p *painter) glFreeBuffer(vbo Buffer) {
 }
 
 func (p *painter) glDrawTexture(texture Texture, alpha float32) {
-	gl.UseProgram(uint32(p.program))
+	p.ctx.UseProgram(p.program)
 
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
@@ -220,7 +220,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 }
 
 func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
-	gl.UseProgram(uint32(p.lineProgram))
+	p.ctx.UseProgram(p.lineProgram)
 
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	p.logError()
@@ -294,6 +294,10 @@ func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFor
 
 func (c *esContext) TexParameteri(target, param uint32, value int32) {
 	gl.TexParameteri(target, param, value)
+}
+
+func (c *esContext) UseProgram(program Program) {
+	gl.UseProgram(uint32(program))
 }
 
 func (c *esContext) Viewport(x, y, width, height int) {

@@ -125,7 +125,7 @@ func (p *painter) glScissorClose() {
 func (p *painter) glCreateBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
-	p.glctx().UseProgram(gl.Program(p.program))
+	p.ctx.UseProgram(p.program)
 
 	buf := ctx.CreateBuffer()
 	p.logError()
@@ -150,7 +150,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
-	p.glctx().UseProgram(gl.Program(p.lineProgram))
+	p.ctx.UseProgram(p.lineProgram)
 
 	buf := ctx.CreateBuffer()
 	p.logError()
@@ -184,7 +184,7 @@ func (p *painter) glFreeBuffer(b Buffer) {
 func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
 
-	p.glctx().UseProgram(gl.Program(p.program))
+	p.ctx.UseProgram(p.program)
 
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
@@ -207,7 +207,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	ctx := p.glctx()
 
-	p.glctx().UseProgram(gl.Program(p.lineProgram))
+	p.ctx.UseProgram(p.lineProgram)
 
 	ctx.BlendFunc(gl.SrcAlpha, gl.OneMinusSrcAlpha)
 	p.logError()
@@ -310,6 +310,10 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 	c.glContext.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
+}
+
+func (c *mobileContext) UseProgram(program Program) {
+	c.glContext.UseProgram(gl.Program(program))
 }
 
 func (c *mobileContext) Viewport(x, y, width, height int) {
