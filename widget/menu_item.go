@@ -219,11 +219,6 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.ForegroundColor()
-	if r.i.Item.Disabled {
-		r.text.Color = theme.DisabledColor()
-	}
 	r.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)))
 	r.text.Move(fyne.NewPos(theme.Padding()*2+r.checkSpace(), theme.Padding()))
 
@@ -237,7 +232,6 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		offset := widthWithoutIcon - theme.Padding()*2
 		for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
 			text := r.shortcutTexts[i]
-			text.TextSize = theme.TextSize()
 			text.Resize(text.MinSize())
 			offset -= text.MinSize().Width
 			text.Move(fyne.NewPos(offset, theme.Padding()))
@@ -314,6 +308,7 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 }
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text) {
+	text.TextSize = theme.TextSize()
 	if r.i.Item.Disabled {
 		text.Color = theme.DisabledColor()
 	} else {
