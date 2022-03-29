@@ -24,7 +24,7 @@
 							</widget>
 							<widget pos="0,37" size="60x28" type="*widget.menuItem">
 								<rectangle fillColor="focus" size="60x28"/>
-								<text pos="8,4" size="44x20">Bar</text>
+								<text pos="8,4" size="24x20">Bar</text>
 								<image pos="40,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 							<widget pos="0,70" size="60x1" type="*widget.Separator">

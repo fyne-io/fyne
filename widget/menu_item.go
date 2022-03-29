@@ -219,26 +219,29 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	r.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)))
-	r.text.Move(fyne.NewPos(theme.Padding()*2+r.checkSpace(), theme.Padding()))
+	checkSpace := r.checkSpace()
+	leftOffset := 2*theme.Padding() + checkSpace
+	rightOffset := size.Width
 
-	widthWithoutIcon := size.Width
 	if r.expandIcon != nil {
-		widthWithoutIcon -= theme.IconInlineSize()
+		rightOffset -= theme.IconInlineSize()
 		r.expandIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		r.expandIcon.Move(fyne.NewPos(widthWithoutIcon, (size.Height-theme.IconInlineSize())/2))
+		r.expandIcon.Move(fyne.NewPos(rightOffset, (size.Height-theme.IconInlineSize())/2))
 	}
-	{
-		offset := widthWithoutIcon - theme.Padding()*2
-		for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
-			text := r.shortcutTexts[i]
-			text.Resize(text.MinSize())
-			offset -= text.MinSize().Width
-			text.Move(fyne.NewPos(offset, theme.Padding()))
-		}
+
+	rightOffset -= theme.Padding() * 2
+	for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
+		text := r.shortcutTexts[i]
+		text.Resize(text.MinSize())
+		rightOffset -= text.MinSize().Width
+		text.Move(fyne.NewPos(rightOffset, theme.Padding()))
 	}
+
 	r.checkIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.checkIcon.Move(fyne.NewPos(theme.Padding(), (size.Height-theme.IconInlineSize())/2))
+
+	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
+	r.text.Move(fyne.NewPos(leftOffset, theme.Padding()))
 
 	r.background.Resize(size)
 }
