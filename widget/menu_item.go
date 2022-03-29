@@ -222,11 +222,13 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	checkSpace := r.checkSpace()
 	leftOffset := 2*theme.Padding() + checkSpace
 	rightOffset := size.Width
+	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconTopOffset := (size.Height - theme.IconInlineSize()) / 2
 
 	if r.expandIcon != nil {
 		rightOffset -= theme.IconInlineSize()
-		r.expandIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		r.expandIcon.Move(fyne.NewPos(rightOffset, (size.Height-theme.IconInlineSize())/2))
+		r.expandIcon.Resize(iconSize)
+		r.expandIcon.Move(fyne.NewPos(rightOffset, iconTopOffset))
 	}
 
 	rightOffset -= theme.Padding() * 2
@@ -237,8 +239,8 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		text.Move(fyne.NewPos(rightOffset, theme.Padding()))
 	}
 
-	r.checkIcon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.checkIcon.Move(fyne.NewPos(theme.Padding(), (size.Height-theme.IconInlineSize())/2))
+	r.checkIcon.Resize(iconSize)
+	r.checkIcon.Move(fyne.NewPos(theme.Padding(), iconTopOffset))
 
 	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
 	r.text.Move(fyne.NewPos(leftOffset, theme.Padding()))
