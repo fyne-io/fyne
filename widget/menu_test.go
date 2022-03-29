@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -23,6 +24,7 @@ func TestMenu_RefreshOptions(t *testing.T) {
 	itemFoo := fyne.NewMenuItem("Foo", nil)
 	itemBar := fyne.NewMenuItem("Bar", nil)
 	itemBar.ChildMenu = fyne.NewMenu("", fyne.NewMenuItem("Sub", nil))
+	itemBar.Icon = theme.AccountIcon()
 	itemBaz := fyne.NewMenuItem("Baz", nil)
 
 	m := widget.NewMenu(fyne.NewMenu("",

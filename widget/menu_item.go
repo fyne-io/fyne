@@ -82,6 +82,11 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	if !i.Item.Checked {
 		checkIcon.Hide()
 	}
+	var icon *canvas.Image
+	if i.Item.Icon != nil {
+		icon = canvas.NewImageFromResource(i.Item.Icon)
+		objects = append(objects, icon)
+	}
 	var shortcutTexts []*canvas.Text
 	if s, ok := i.Item.Shortcut.(fyne.KeyboardShortcut); ok {
 		shortcutTexts = textsForShortcut(s)
@@ -96,6 +101,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		i:             i,
 		expandIcon:    expandIcon,
 		checkIcon:     checkIcon,
+		icon:          icon,
 		shortcutTexts: shortcutTexts,
 		text:          text,
 		background:    background,
@@ -212,6 +218,7 @@ type menuItemRenderer struct {
 	background       *canvas.Rectangle
 	checkIcon        *canvas.Image
 	expandIcon       *canvas.Image
+	icon             *canvas.Image
 	lastThemePadding float32
 	minSize          fyne.Size
 	shortcutTexts    []*canvas.Text
@@ -242,6 +249,13 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	r.checkIcon.Resize(iconSize)
 	r.checkIcon.Move(fyne.NewPos(theme.Padding(), iconTopOffset))
 
+	if r.icon != nil {
+		r.icon.Resize(iconSize)
+		r.icon.Move(fyne.NewPos(leftOffset, iconTopOffset))
+		leftOffset += theme.IconInlineSize()
+		leftOffset += theme.Padding()
+	}
+
 	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
 	r.text.Move(fyne.NewPos(leftOffset, theme.Padding()))
 
@@ -256,6 +270,9 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 	minSize := r.text.MinSize().AddWidthHeight(theme.Padding()*4+r.checkSpace(), theme.Padding()*2)
 	if r.expandIcon != nil {
 		minSize = minSize.AddWidthHeight(theme.IconInlineSize(), 0)
+	}
+	if r.icon != nil {
+		minSize = minSize.AddWidthHeight(theme.IconInlineSize()+theme.Padding(), 0)
 	}
 	if r.shortcutTexts != nil {
 		var textWidth float32
@@ -289,10 +306,16 @@ func (r *menuItemRenderer) Refresh() {
 		if r.expandIcon != nil {
 			r.expandIcon.Resource = theme.NewDisabledResource(theme.MenuExpandIcon())
 		}
+		if r.icon != nil {
+			r.icon.Resource = theme.NewDisabledResource(r.i.Item.Icon)
+		}
 	} else {
 		r.checkIcon.Resource = theme.ConfirmIcon()
 		if r.expandIcon != nil {
 			r.expandIcon.Resource = theme.MenuExpandIcon()
+		}
+		if r.icon != nil {
+			r.icon.Resource = r.i.Item.Icon
 		}
 	}
 	if r.i.Item.Checked {
