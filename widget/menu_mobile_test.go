@@ -28,6 +28,7 @@ func TestMenu_Layout(t *testing.T) {
 	sep := fyne.NewMenuItemSeparator()
 	item3 := fyne.NewMenuItem("C", nil)
 	subItem1 := fyne.NewMenuItem("subitem A", nil)
+	subItem1.Checked = true
 	subItem2 := fyne.NewMenuItem("subitem B", nil)
 	subItem3 := fyne.NewMenuItem("subitem C (long)", nil)
 	subsubItem1 := fyne.NewMenuItem("subsubitem A (long)", nil)
