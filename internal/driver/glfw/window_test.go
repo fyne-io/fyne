@@ -78,6 +78,23 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
+func TestWindow_MinSize_Fixed(t *testing.T) {
+	w := createWindow("Test").(*window)
+	r := canvas.NewRectangle(color.White)
+	r.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(r)
+	w.SetFixedSize(true)
+
+	assert.Equal(t, float32(100)+theme.Padding()*2, w.Canvas().Size().Width)
+
+	w = createWindow("Test").(*window)
+	r.SetMinSize(fyne.NewSize(100, 100))
+	w.SetFixedSize(true)
+	w.SetContent(r)
+
+	assert.Equal(t, float32(100)+theme.Padding()*2, w.Canvas().Size().Width)
+}
+
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)

@@ -132,7 +132,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 	form := &Form{
 		Items: []*FormItem{
 			{Text: "test1", Widget: NewEntry()},
-			{Text: "test2", Widget: NewEntry()},
+			{Text: "test2", Widget: NewLabel("static")},
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)

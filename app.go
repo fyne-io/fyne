@@ -6,8 +6,8 @@ import (
 )
 
 // An App is the definition of a graphical application.
-// Apps can have multiple windows, it will exit when the first window to be
-// shown is closed. You can also cause the app to exit by calling Quit().
+// Apps can have multiple windows, by default they will exit when all windows
+// have been closed. This can be modified using SetMaster() or SetCloseIntercept().
 // To start an application you need to call Run() somewhere in your main() function.
 // Alternatively use the window.ShowAndRun() function for your main window.
 type App interface {

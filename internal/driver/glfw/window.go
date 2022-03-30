@@ -218,7 +218,6 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-
 	if w.view() != nil {
 		w.runOnMainWhenCreated(w.fitContent)
 	}
@@ -315,7 +314,12 @@ func (w *window) fitContent() {
 		w.viewLock.Unlock()
 	}
 	if w.fixedSize {
-		w.shouldWidth, w.shouldHeight = w.requestedWidth, w.requestedHeight
+		if w.shouldWidth > w.requestedWidth {
+			w.requestedWidth = w.shouldWidth
+		}
+		if w.shouldHeight > w.requestedHeight {
+			w.requestedHeight = w.shouldHeight
+		}
 		view.SetSizeLimits(w.requestedWidth, w.requestedHeight, w.requestedWidth, w.requestedHeight)
 	} else {
 		view.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
@@ -501,6 +505,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
+
 	// show new canvas element
 	if content != nil {
 		content.Show()
@@ -1490,11 +1495,13 @@ func (w *window) create() {
 			fn()
 		}
 
-		w.requestedWidth, w.requestedHeight = w.width, w.height
-
-		if w.fixedSize { // as the window will not be sized later we may need to pack menus etc
-			w.canvas.Resize(w.canvas.Size())
+		if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
+			bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
+			w.width, w.height = internal.ScaleInt(w.canvas, bigEnough.Width), internal.ScaleInt(w.canvas, bigEnough.Height)
+			w.shouldWidth, w.shouldHeight = w.width, w.height
 		}
+
+		w.requestedWidth, w.requestedHeight = w.width, w.height
 		// order of operation matters so we do these last items in order
 		w.viewport.SetSize(w.shouldWidth, w.shouldHeight) // ensure we requested latest size
 	})

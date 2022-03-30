@@ -293,9 +293,15 @@ func (t *builtinTheme) initFonts() {
 	font := os.Getenv("FYNE_FONT")
 	if font != "" {
 		t.regular = loadCustomFont(font, "Regular", regular)
-		t.bold = loadCustomFont(font, "Bold", bold)
-		t.italic = loadCustomFont(font, "Italic", italic)
-		t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
+		if t.regular == regular { // failed to load
+			t.bold = loadCustomFont(font, "Bold", bold)
+			t.italic = loadCustomFont(font, "Italic", italic)
+			t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
+		} else { // first custom font loaded, fall back to that
+			t.bold = loadCustomFont(font, "Bold", t.regular)
+			t.italic = loadCustomFont(font, "Italic", t.regular)
+			t.boldItalic = loadCustomFont(font, "BoldItalic", t.regular)
+		}
 	}
 	font = os.Getenv("FYNE_FONT_MONOSPACE")
 	if font != "" {

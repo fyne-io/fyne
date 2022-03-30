@@ -262,6 +262,7 @@ func (p *Packager) validate() error {
 		return errors.New("Parameter -sourceDir is currently not supported for mobile builds.\n" +
 			"Change directory to the main package and try again.")
 	}
+	os.Chdir(p.srcDir)
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
