@@ -34,6 +34,11 @@ type favoriteItem struct {
 	loc     fyne.URI
 }
 
+type FavoriteOrder struct {
+	ShowName string
+	Name     string
+}
+
 type fileDialog struct {
 	file             *FileDialog
 	fileName         textWidget
@@ -54,6 +59,9 @@ type fileDialog struct {
 	dir      fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+
+	favoriteIcons map[string]fyne.Resource
+	favoriteOrder []FavoriteOrder
 }
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
@@ -70,6 +78,10 @@ type FileDialog struct {
 	startingLocation fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+
+	//
+	favoriteIcons map[string]fyne.Resource
+	favoriteOrder []FavoriteOrder
 }
 
 // Declare conformity to Dialog interface
@@ -272,11 +284,22 @@ func (f *fileDialog) loadFavorites() {
 	if err != nil {
 		fyne.LogError("Getting favorite locations", err)
 	}
-	favoriteIcons := getFavoriteIcons()
-	favoriteOrder := getFavoriteOrder()
+	var favoriteIcons map[string]fyne.Resource
+	if len(f.favoriteIcons) > 0 {
+		favoriteIcons = f.favoriteIcons
+	} else {
+		favoriteIcons = getFavoriteIcons()
+	}
 
-	f.favorites = []favoriteItem{
-		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]}}
+	var favoriteOrder []FavoriteOrder
+	if len(f.favoriteOrder) > 0 {
+		favoriteOrder = f.favoriteOrder
+	} else {
+		favoriteOrder = getFavoriteOrder()
+	}
+
+	//f.favorites = []favoriteItem{
+	//	{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]}}
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
 		f.favorites = append(f.favorites,
@@ -285,13 +308,13 @@ func (f *fileDialog) loadFavorites() {
 	f.favorites = append(f.favorites, f.getPlaces()...)
 
 	for _, locName := range favoriteOrder {
-		loc, ok := favoriteLocations[locName]
+		loc, ok := favoriteLocations[locName.Name]
 		if !ok {
 			continue
 		}
-		locIcon := favoriteIcons[locName]
+		locIcon := favoriteIcons[locName.Name]
 		f.favorites = append(f.favorites,
-			favoriteItem{locName: locName, locIcon: locIcon, loc: loc})
+			favoriteItem{locName: locName.ShowName, locIcon: locIcon, loc: loc})
 	}
 }
 
@@ -526,6 +549,8 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 
 func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file, initialFileName: file.initialFileName}
+	d.SetFavoriteIcons(file.favoriteIcons)
+	d.SetFavoriteOrder(file.favoriteOrder)
 	ui := d.makeUI()
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*6))
@@ -536,6 +561,14 @@ func showFile(file *FileDialog) *fileDialog {
 	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
 	return d
+}
+
+func (f *fileDialog) SetFavoriteIcons(icons map[string]fyne.Resource) {
+	f.favoriteIcons = icons
+}
+
+func (f *fileDialog) SetFavoriteOrder(orders []FavoriteOrder) {
+	f.favoriteOrder = orders
 }
 
 // MinSize returns the size that this dialog should not shrink below
@@ -564,6 +597,16 @@ func (f *FileDialog) Show() {
 	if !f.desiredSize.IsZero() {
 		f.Resize(f.desiredSize)
 	}
+}
+
+//SetFavoriteIcons override default favorite icon
+func (f *FileDialog) SetFavoriteIcons(icons map[string]fyne.Resource) {
+	f.favoriteIcons = icons
+}
+
+//SetFavoriteOrder override default favorite order
+func (f *FileDialog) SetFavoriteOrder(orders []FavoriteOrder) {
+	f.favoriteOrder = orders
 }
 
 // Refresh causes this dialog to be updated
@@ -706,34 +749,39 @@ func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window)
 func getFavoriteIcons() map[string]fyne.Resource {
 	if runtime.GOOS == "darwin" {
 		return map[string]fyne.Resource{
+			"Home":      theme.HomeIcon(),
 			"Documents": theme.DocumentIcon(),
 			"Downloads": theme.DownloadIcon(),
 			"Music":     theme.MediaMusicIcon(),
 			"Pictures":  theme.MediaPhotoIcon(),
 			"Movies":    theme.MediaVideoIcon(),
+			"Desktop":   theme.ComputerIcon(),
 		}
 	}
 
 	return map[string]fyne.Resource{
+		"Home":      theme.HomeIcon(),
 		"Documents": theme.DocumentIcon(),
 		"Downloads": theme.DownloadIcon(),
 		"Music":     theme.MediaMusicIcon(),
 		"Pictures":  theme.MediaPhotoIcon(),
 		"Videos":    theme.MediaVideoIcon(),
+		"Desktop":   theme.ComputerIcon(),
 	}
 }
 
-func getFavoriteOrder() []string {
-	order := []string{
-		"Documents",
-		"Downloads",
-		"Music",
-		"Pictures",
-		"Videos",
-	}
-
+func getFavoriteOrder() []FavoriteOrder {
+	var order []FavoriteOrder
+	order = append(order,
+		FavoriteOrder{Name: "Documents"},
+		FavoriteOrder{Name: "Downloads"},
+		FavoriteOrder{Name: "Music"},
+		FavoriteOrder{Name: "Pictures"},
+		FavoriteOrder{Name: "Videos"},
+		FavoriteOrder{Name: "Desktop"},
+	)
 	if runtime.GOOS == "darwin" {
-		order[4] = "Movies"
+		order[4] = FavoriteOrder{Name: "Movies"}
 	}
 
 	return order
