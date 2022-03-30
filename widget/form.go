@@ -43,8 +43,8 @@ type Form struct {
 	BaseWidget
 
 	Items      []*FormItem
-	OnSubmit   func()
-	OnCancel   func()
+	OnSubmit   func() `json:"-"`
+	OnCancel   func() `json:"-"`
 	SubmitText string
 	CancelText string
 
