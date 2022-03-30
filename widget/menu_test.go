@@ -34,22 +34,22 @@ func TestMenu_RefreshOptions(t *testing.T) {
 	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
 	w.Resize(m.MinSize())
 	m.Resize(m.MinSize())
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
+	test.AssertRendersToMarkup(t, "menu/refresh_initial.xml", c)
 
 	itemBar.Disabled = true
 	m.Refresh()
 
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_disabled.xml", c)
+	test.AssertRendersToMarkup(t, "menu/refresh_disabled.xml", c)
 
 	itemBaz.Checked = true
 	m.Refresh()
 
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_checkmark.xml", c)
+	test.AssertRendersToMarkup(t, "menu/refresh_checkmark.xml", c)
 
 	itemBar.Checked = true
 	m.Refresh()
 
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_2nd_checkmark.xml", c)
+	test.AssertRendersToMarkup(t, "menu/refresh_2nd_checkmark.xml", c)
 
 	itemBar.Checked = false
 	itemBar.Disabled = false
@@ -58,7 +58,7 @@ func TestMenu_RefreshOptions(t *testing.T) {
 	itemBaz.Checked = false
 	m.Refresh()
 
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
+	test.AssertRendersToMarkup(t, "menu/refresh_initial.xml", c)
 }
 
 func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
