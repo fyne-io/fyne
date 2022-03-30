@@ -59,14 +59,14 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	}
 	for _, favName := range favoriteNames {
 		var uri fyne.URI
-		uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
+		uri, err = getFavoriteLocation(homeURI, arguments[favName.Name], favName.Name)
 
 		listURI, err1 := storage.ListerForURI(uri)
 		if err1 != nil {
 			err = err1
 			continue
 		}
-		favoriteLocations[favName] = listURI
+		favoriteLocations[favName.Name] = listURI
 	}
 
 	return favoriteLocations, err
