@@ -15,6 +15,3 @@ type Validatable interface {
 //
 // Since: 1.4
 type StringValidator func(string) error
-
-// Validator is a function signature for validating inputs
-type Validator func() error
