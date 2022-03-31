@@ -22,7 +22,10 @@ jobs:
         sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
         go install golang.org/x/tools/cmd/goimports@latest
         go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-        go install honnef.co/go/tools/cmd/staticcheck@v0.2.2
+        go install honnef.co/go/tools/cmd/staticcheck@v0.3.0
+
+    - name: Cleanup repository
+      run: rm -rf vendor/
 
     - name: Vet
       run: go vet -tags ci ./...
