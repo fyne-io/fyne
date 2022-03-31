@@ -22,6 +22,7 @@ func TestMenu_RefreshOptions(t *testing.T) {
 
 	itemFoo := fyne.NewMenuItem("Foo", nil)
 	itemBar := fyne.NewMenuItem("Bar", nil)
+	itemBar.ChildMenu = fyne.NewMenu("", fyne.NewMenuItem("Sub", nil))
 	itemBaz := fyne.NewMenuItem("Baz", nil)
 
 	m := widget.NewMenu(fyne.NewMenu("",

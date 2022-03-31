@@ -286,8 +286,14 @@ func (r *menuItemRenderer) Refresh() {
 
 	if r.i.Item.Disabled {
 		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
+		if r.expandIcon != nil {
+			r.expandIcon.Resource = theme.NewDisabledResource(theme.MenuExpandIcon())
+		}
 	} else {
 		r.checkIcon.Resource = theme.ConfirmIcon()
+		if r.expandIcon != nil {
+			r.expandIcon.Resource = theme.MenuExpandIcon()
+		}
 	}
 	if r.i.Item.Checked {
 		r.checkIcon.Show()
