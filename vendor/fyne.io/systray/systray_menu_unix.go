@@ -202,8 +202,10 @@ func showMenuItem(item *MenuItem) {
 }
 
 func refresh() {
-	menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
-		Path: menuPath,
-		Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{},
-	})
+	if instance.conn != nil {
+		menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
+			Path: menuPath,
+			Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{},
+		})
+	}
 }

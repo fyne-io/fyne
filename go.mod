@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.14
 
 require (
-	fyne.io/systray v1.9.1-0.20220318224641-d5779bfb17d1
+	fyne.io/systray v1.9.1-0.20220331100914-9177bf851614
 	github.com/BurntSushi/toml v1.0.0
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/akavel/rsrc v0.8.0 // indirect
