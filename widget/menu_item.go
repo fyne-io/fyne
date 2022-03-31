@@ -301,29 +301,14 @@ func (r *menuItemRenderer) Refresh() {
 		r.refreshText(text)
 	}
 
-	if r.i.Item.Disabled {
-		r.checkIcon.Resource = theme.NewDisabledResource(theme.ConfirmIcon())
-		if r.expandIcon != nil {
-			r.expandIcon.Resource = theme.NewDisabledResource(theme.MenuExpandIcon())
-		}
-		if r.icon != nil {
-			r.icon.Resource = theme.NewDisabledResource(r.i.Item.Icon)
-		}
-	} else {
-		r.checkIcon.Resource = theme.ConfirmIcon()
-		if r.expandIcon != nil {
-			r.expandIcon.Resource = theme.MenuExpandIcon()
-		}
-		if r.icon != nil {
-			r.icon.Resource = r.i.Item.Icon
-		}
-	}
 	if r.i.Item.Checked {
 		r.checkIcon.Show()
 	} else {
 		r.checkIcon.Hide()
 	}
-	r.checkIcon.Refresh()
+	r.refreshIcon(r.checkIcon, theme.ConfirmIcon())
+	r.refreshIcon(r.expandIcon, theme.MenuExpandIcon())
+	r.refreshIcon(r.icon, r.i.Item.Icon)
 	canvas.Refresh(r.i)
 }
 
@@ -339,6 +324,18 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 		r.text.TextSize == theme.TextSize() &&
 		(r.expandIcon == nil || r.expandIcon.Size().Width == theme.IconInlineSize()) &&
 		r.lastThemePadding == theme.Padding()
+}
+
+func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
+	if img == nil {
+		return
+	}
+	if r.i.Item.Disabled {
+		img.Resource = theme.NewDisabledResource(rsc)
+	} else {
+		img.Resource = rsc
+	}
+	img.Refresh()
 }
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text) {
