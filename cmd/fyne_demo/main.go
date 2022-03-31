@@ -89,13 +89,19 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	disabledItem := fyne.NewMenuItem("Disabled", nil)
 	disabledItem.Disabled = true
 	otherItem := fyne.NewMenuItem("Other", nil)
+	mailItem := fyne.NewMenuItem("Mail", func() { fmt.Println("Menu New->Other->Mail") })
+	mailItem.Icon = theme.MailComposeIcon()
 	otherItem.ChildMenu = fyne.NewMenu("",
 		fyne.NewMenuItem("Project", func() { fmt.Println("Menu New->Other->Project") }),
-		fyne.NewMenuItem("Mail", func() { fmt.Println("Menu New->Other->Mail") }),
+		mailItem,
 	)
+	fileItem := fyne.NewMenuItem("File", func() { fmt.Println("Menu New->File") })
+	fileItem.Icon = theme.FileIcon()
+	dirItem := fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") })
+	dirItem.Icon = theme.FolderIcon()
 	newItem.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("File", func() { fmt.Println("Menu New->File") }),
-		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
+		fileItem,
+		dirItem,
 		otherItem,
 	)
 
