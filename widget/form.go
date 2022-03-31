@@ -50,7 +50,7 @@ type Form struct {
 	OnCancel   func()
 	SubmitText string
 	CancelText string
-	Validator  fyne.Validator
+	Validator  func() error
 
 	itemGrid            *fyne.Container
 	buttonBox           *fyne.Container
