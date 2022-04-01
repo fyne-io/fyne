@@ -703,22 +703,27 @@ func NewDisabledResource(res fyne.Resource) *DisabledResource {
 }
 
 func colorizeResource(res fyne.Resource, clr color.Color) []byte {
-	rdr := bytes.NewReader(res.Content())
+	return ColorizeSVG(res.Content(), clr)
+}
+
+// ColorizeSVG creates a new SVG from a given one by replacing all fill colors by the given color.
+func ColorizeSVG(src []byte, clr color.Color) []byte {
+	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {
 		fyne.LogError("could not load SVG, falling back to static content:", err)
-		return res.Content()
+		return src
 	}
 	if err := s.replaceFillColor(clr); err != nil {
 		fyne.LogError("could not replace fill color, falling back to static content:", err)
-		return res.Content()
+		return src
 	}
-	b, err := xml.Marshal(s)
+	colorized, err := xml.Marshal(s)
 	if err != nil {
 		fyne.LogError("could not marshal svg, falling back to static content:", err)
-		return res.Content()
+		return src
 	}
-	return b
+	return colorized
 }
 
 // FyneLogo returns a resource containing the Fyne logo
