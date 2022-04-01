@@ -136,10 +136,10 @@ func Test_PackageWasm(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{},
-		os:     "wasm",
-		srcDir: "myTest",
-		dir:    "myTestTarget",
-		exe:    "myTest.wasm",
+		os:      "wasm",
+		srcDir:  "myTest",
+		dir:     "myTestTarget",
+		exe:     "myTest.wasm",
 	}
 	p.name = "myTest.wasm"
 	p.icon = "myTest.png"
@@ -246,10 +246,10 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{},
-		os:     "gopherjs",
-		srcDir: "myTest",
-		dir:    "myTestTarget",
-		exe:    "myTest.js",
+		os:      "gopherjs",
+		srcDir:  "myTest",
+		dir:     "myTestTarget",
+		exe:     "myTest.js",
 	}
 	p.name = "myTest.js"
 	p.icon = "myTest.png"
@@ -391,10 +391,10 @@ func Test_PackageWeb(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{},
-		os:     "web",
-		srcDir: "myTest",
-		dir:    "myTestTarget",
-		exe:    "myTest",
+		os:      "web",
+		srcDir:  "myTest",
+		dir:     "myTestTarget",
+		exe:     "myTest",
 	}
 	p.name = "myTest"
 	p.icon = "myTest.png"

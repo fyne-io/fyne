@@ -64,7 +64,7 @@ type Installer struct {
 	*appData
 	installDir, srcDir, os string
 	Packager               *Packager
-	release                 bool
+	release                bool
 }
 
 // AddFlags adds the flags for interacting with the Installer.
