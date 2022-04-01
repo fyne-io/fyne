@@ -589,7 +589,7 @@ func (res *ThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	return colorizeResource(res.source, ForegroundColor())
+	return ColorizeSVG(res.source.Content(), ForegroundColor())
 }
 
 // Error returns a different resource for indicating an error.
@@ -617,7 +617,7 @@ func (res *InvertedThemedResource) Name() string {
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
 	clr := BackgroundColor()
-	return colorizeResource(res.source, clr)
+	return ColorizeSVG(res.source.Content(), clr)
 }
 
 // Original returns the underlying resource that this inverted themed resource was adapted from
@@ -644,7 +644,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return colorizeResource(res.source, ErrorColor())
+	return ColorizeSVG(res.source.Content(), ErrorColor())
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -671,7 +671,7 @@ func (res *PrimaryThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return colorizeResource(res.source, PrimaryColor())
+	return ColorizeSVG(res.source.Content(), PrimaryColor())
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -692,7 +692,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return colorizeResource(res.source, DisabledColor())
+	return ColorizeSVG(res.source.Content(), DisabledColor())
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
@@ -700,10 +700,6 @@ func NewDisabledResource(res fyne.Resource) *DisabledResource {
 	return &DisabledResource{
 		source: res,
 	}
-}
-
-func colorizeResource(res fyne.Resource, clr color.Color) []byte {
-	return ColorizeSVG(res.Content(), clr)
 }
 
 // ColorizeSVG creates a new SVG from a given one by replacing all fill colors by the given color.

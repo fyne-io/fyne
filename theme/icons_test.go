@@ -287,7 +287,7 @@ func TestColorizeResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			src := helperLoadRes(t, tt.svgFile)
-			got := helperDrawSVG(t, colorizeResource(src, tt.color))
+			got := helperDrawSVG(t, ColorizeSVG(src.Content(), tt.color))
 			test.AssertImageMatches(t, tt.wantImage, got)
 		})
 	}
