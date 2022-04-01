@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -167,7 +168,7 @@ func TestDisabledResource_Content_NoGroupsFile(t *testing.T) {
 	assert.NotEqual(t, staticResource.Content(), disabledResource.Content())
 }
 
-func TestColorizeResource(t *testing.T) {
+func TestColorizeSVG(t *testing.T) {
 	tests := map[string]struct {
 		svgFile   string
 		color     color.Color
@@ -286,8 +287,9 @@ func TestColorizeResource(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			src := helperLoadRes(t, tt.svgFile)
-			got := helperDrawSVG(t, ColorizeSVG(src.Content(), tt.color))
+			bytes, err := ioutil.ReadFile(filepath.Join("testdata", tt.svgFile))
+			require.NoError(t, err)
+			got := helperDrawSVG(t, ColorizeSVG(bytes, tt.color))
 			test.AssertImageMatches(t, tt.wantImage, got)
 		})
 	}
