@@ -8,6 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Added
 
 * Add SetIcon method on ToolbarAction (#2475)
+* Access compiled app metadata using new `App.Metadata()` method
 
 ### Changed
 
@@ -19,7 +20,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
-* 
+* SendNotification does not show app name on Windows (#1940)
 
 
 ## 2.1.4 - 17 March 2022

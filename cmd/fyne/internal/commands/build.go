@@ -1,11 +1,14 @@
 package commands
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 
+	"fyne.io/fyne/v2"
 	version "github.com/mcuadros/go-version"
 	"github.com/urfave/cli/v2"
 )
@@ -19,6 +22,9 @@ type Builder struct {
 	tagsToParse        string
 
 	runner runner
+
+	icon, id, name, version string
+	buildNum                int
 }
 
 // Build returns the cli command for building fyne applications
@@ -146,18 +152,23 @@ func (b *Builder) build() error {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
+	meta := b.generateMetaLDFlags()
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
 		if goos == "windows" {
 			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui")
+				args = append(args, "-ldflags", "-s -w -H=windowsgui "+meta)
 			} else {
-				args = append(args, "-ldflags", "-H=windowsgui")
+				args = append(args, "-ldflags", "-H=windowsgui "+meta)
 			}
 		} else if b.release {
-			args = append(args, "-ldflags", "-s -w")
+			args = append(args, "-ldflags", "-s -w "+meta)
+		} else if meta != "" {
+			args = append(args, "-ldflags", meta)
 		}
+	} else if meta != "" {
+		args = append(args, "-ldflags", meta)
 	}
 
 	if b.target != "" {
@@ -201,6 +212,44 @@ func (b *Builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func (b *builder) generateMetaLDFlags() string {
+	buildIDString := ""
+	if b.buildNum > 0 {
+		buildIDString = strconv.Itoa(b.buildNum)
+	}
+	iconBytes := ""
+	if b.icon != "" {
+		res, err := fyne.LoadResourceFromPath(b.icon)
+		if err != nil {
+			fyne.LogError("Unable to load file "+b.icon, err)
+		} else {
+			staticRes, ok := res.(*fyne.StaticResource)
+			if !ok {
+				fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
+			} else {
+				iconBytes = base64.StdEncoding.EncodeToString(staticRes.StaticContent)
+			}
+		}
+	}
+
+	inserts := [][2]string{
+		{"MetaID", b.id},
+		{"MetaName", b.name},
+		{"MetaVersion", b.version},
+		{"MetaBuild", buildIDString},
+		{"MetaIcon", iconBytes},
+	}
+
+	var vars []string
+	for _, item := range inserts {
+		if item[1] != "" {
+			vars = append(vars, "-X 'fyne.io/fyne/v2/internal/app."+item[0]+"="+item[1]+"'")
+		}
+	}
+
+	return strings.Join(vars, " ")
 }
 
 func targetOS() string {

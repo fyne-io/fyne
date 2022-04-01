@@ -57,6 +57,10 @@ func (dummyApp) Lifecycle() Lifecycle {
 	return nil
 }
 
+func (dummyApp) Metadata() AppMetadata {
+	return AppMetadata{}
+}
+
 func TestSetCurrentApp(t *testing.T) {
 	a := &dummyApp{}
 	SetCurrentApp(a)

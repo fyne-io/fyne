@@ -119,7 +119,9 @@ func Test_PackageWasm(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.wasm"},
+				args: []string{"build", "-ldflags",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest.wasm' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -226,7 +228,9 @@ func Test_PackageGopherJS(t *testing.T) {
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.js"},
+				args: []string{"build", "-ldflags",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest.js' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-o", "myTest.js"},
 				osEnv: true,
 				dir:   "myTest",
 			},
@@ -354,7 +358,9 @@ func Test_PackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.wasm"},
+				args: []string{"build", "-ldflags",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -365,7 +371,9 @@ func Test_PackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.js"},
+				args: []string{"build", "-ldflags",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-o", "myTest.js"},
 				osEnv: true,
 				dir:   "myTest",
 			},
