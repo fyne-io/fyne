@@ -214,7 +214,7 @@ func (b *Builder) build() error {
 	return err
 }
 
-func (b *builder) generateMetaLDFlags() string {
+func (b *Builder) generateMetaLDFlags() string {
 	buildIDString := ""
 	if b.buildNum > 0 {
 		buildIDString = strconv.Itoa(b.buildNum)
