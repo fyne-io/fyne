@@ -9,12 +9,14 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	version "github.com/mcuadros/go-version"
 	"github.com/urfave/cli/v2"
 )
 
 // Builder generate the executables.
 type Builder struct {
+	*appData
 	os, srcdir, target string
 	goPackage          string
 	release            bool
@@ -22,14 +24,11 @@ type Builder struct {
 	tagsToParse        string
 
 	runner runner
-
-	icon, id, name, version string
-	buildNum                int
 }
 
 // Build returns the cli command for building fyne applications
 func Build() *cli.Command {
-	b := &Builder{}
+	b := &Builder{appData: &appData{}}
 
 	return &cli.Command{
 		Name:        "build",
@@ -152,6 +151,10 @@ func (b *Builder) build() error {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
+	data, err := metadata.LoadStandard(b.srcdir)
+	if err == nil {
+		mergeMetadata(b.appData, data)
+	}
 	meta := b.generateMetaLDFlags()
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
@@ -216,8 +219,8 @@ func (b *Builder) build() error {
 
 func (b *Builder) generateMetaLDFlags() string {
 	buildIDString := ""
-	if b.buildNum > 0 {
-		buildIDString = strconv.Itoa(b.buildNum)
+	if b.appBuild > 0 {
+		buildIDString = strconv.Itoa(b.appBuild)
 	}
 	iconBytes := ""
 	if b.icon != "" {
@@ -235,9 +238,9 @@ func (b *Builder) generateMetaLDFlags() string {
 	}
 
 	inserts := [][2]string{
-		{"MetaID", b.id},
+		{"MetaID", b.appID},
 		{"MetaName", b.name},
-		{"MetaVersion", b.version},
+		{"MetaVersion", b.appVersion},
 		{"MetaBuild", buildIDString},
 		{"MetaIcon", iconBytes},
 	}

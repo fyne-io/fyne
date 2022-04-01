@@ -9,13 +9,13 @@ import (
 )
 
 func TestBuildGenerateMetaLDFlags(t *testing.T) {
-	b := &builder{}
+	b := &Builder{appData: &appData{}}
 	assert.Equal(t, "", b.generateMetaLDFlags())
 
-	b.id = "com.example"
+	b.appID = "com.example"
 	assert.Equal(t, "-X 'fyne.io/fyne/v2/internal/app.MetaID=com.example'", b.generateMetaLDFlags())
 
-	b.version = "1.2.3"
+	b.appVersion = "1.2.3"
 	assert.Equal(t, "-X 'fyne.io/fyne/v2/internal/app.MetaID=com.example' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.2.3'", b.generateMetaLDFlags())
 }
 
@@ -128,7 +128,7 @@ func Test_BuildWasmVersion(t *testing.T) {
 	}
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
+	b := &Builder{appData: &appData{}, os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
 	err := b.build()
 	assert.Nil(t, err)
 	wasmBuildTest.verifyExpectation()
@@ -156,7 +156,7 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 	}
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
+	b := &Builder{appData: &appData{}, os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
 	err := b.build()
 	assert.Nil(t, err)
 	wasmBuildTest.verifyExpectation()
@@ -177,7 +177,7 @@ func Test_BuildGopherJSReleaseVersion(t *testing.T) {
 	}
 
 	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
+	b := &Builder{appData: &appData{}, os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
 	err := b.build()
 	assert.Nil(t, err)
 	gopherJSBuildTest.verifyExpectation()
@@ -192,7 +192,7 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	}
 
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
+	b := &Builder{appData: &appData{}, os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
 	err := b.build()
 	assert.NotNil(t, err)
 	wasmBuildTest.verifyExpectation()

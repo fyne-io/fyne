@@ -34,7 +34,8 @@ func Test_isValidVersion(t *testing.T) {
 }
 
 func Test_MergeMetata(t *testing.T) {
-	p := &Packager{appVersion: "v0.1"}
+	p := &Packager{appData: &appData{}}
+	p.appVersion = "v0.1"
 	data := &metadata.FyneApp{
 		Details: metadata.AppDetails{
 			Icon:    "test.png",
@@ -43,7 +44,7 @@ func Test_MergeMetata(t *testing.T) {
 		},
 	}
 
-	mergeMetadata(p, data)
+	mergeMetadata(p.appData, data)
 	assert.Equal(t, "v0.1", p.appVersion)
 	assert.Equal(t, 3, p.appBuild)
 	assert.Equal(t, "test.png", p.icon)
@@ -98,6 +99,7 @@ func Test_buildPackageWasm(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:      "wasm",
 		srcDir:  "myTest",
 		release: true,
@@ -133,13 +135,14 @@ func Test_PackageWasm(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:     "wasm",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest.wasm",
-		name:   "myTest.wasm",
-		icon:   "myTest.png",
 	}
+	p.name = "myTest.wasm"
+	p.icon = "myTest.png"
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 
 	util = mockUtil{}
@@ -212,6 +215,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:      "gopherjs",
 		srcDir:  "myTest",
 		exe:     "myTest.js",
@@ -241,13 +245,14 @@ func Test_PackageGopherJS(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:     "gopherjs",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest.js",
-		name:   "myTest.js",
-		icon:   "myTest.png",
 	}
+	p.name = "myTest.js"
+	p.icon = "myTest.png"
 	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
 
 	util = mockUtil{}
@@ -336,6 +341,7 @@ func Test_BuildPackageWeb(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:      "web",
 		srcDir:  "myTest",
 		release: true,
@@ -384,13 +390,14 @@ func Test_PackageWeb(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:     "web",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest",
-		name:   "myTest",
-		icon:   "myTest.png",
 	}
+	p.name = "myTest"
+	p.icon = "myTest.png"
 	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
 
 	util = mockUtil{}
