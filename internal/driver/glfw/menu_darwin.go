@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -178,7 +179,7 @@ func insertNativeMenuItem(nsMenu unsafe.Pointer, item *fyne.MenuItem, nextItemID
 				C.getTextColorRGBA(&r, &g, &b, &a)
 				rsc = &fyne.StaticResource{
 					StaticName:    rsc.Name(),
-					StaticContent: theme.ColorizeSVG(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}),
+					StaticContent: svg.ColorizeSVG(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}),
 				}
 			}
 			size := int(C.menuFontSize())

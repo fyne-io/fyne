@@ -1,6 +1,7 @@
-package theme
+package svg
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/xml"
 	"image/color"
@@ -8,8 +9,29 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	"fyne.io/fyne/v2"
 	col "fyne.io/fyne/v2/internal/color"
 )
+
+// ColorizeSVG creates a new SVG from a given one by replacing all fill colors by the given color.
+func ColorizeSVG(src []byte, clr color.Color) []byte {
+	rdr := bytes.NewReader(src)
+	s, err := svgFromXML(rdr)
+	if err != nil {
+		fyne.LogError("could not load SVG, falling back to static content:", err)
+		return src
+	}
+	if err := s.replaceFillColor(clr); err != nil {
+		fyne.LogError("could not replace fill color, falling back to static content:", err)
+		return src
+	}
+	colorized, err := xml.Marshal(s)
+	if err != nil {
+		fyne.LogError("could not marshal svg, falling back to static content:", err)
+		return src
+	}
+	return colorized
+}
 
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
 type svg struct {
