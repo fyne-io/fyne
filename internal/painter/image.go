@@ -41,6 +41,10 @@ func GetAspect(img *canvas.Image) float32 {
 
 // PaintImage renders a given fyne Image to a Go standard image
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
+	return paintImage(img, c, width, height)
+}
+
+func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.Image {
 	if width <= 0 || height <= 0 {
 		return nil
 	}
