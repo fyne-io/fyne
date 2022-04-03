@@ -3,6 +3,7 @@ package painter
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -41,12 +42,16 @@ func GetAspect(img *canvas.Image) float32 {
 
 // PaintImage renders a given fyne Image to a Go standard image
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
-	return paintImage(img, c, width, height)
+	dst, err := paintImage(img, c, width, height)
+	if err != nil {
+		fyne.LogError("failed to paint image", err)
+	}
+	return dst
 }
 
-func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.Image {
+func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) (dst image.Image, err error) {
 	if width <= 0 || height <= 0 {
-		return nil
+		return
 	}
 
 	switch {
@@ -62,10 +67,11 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.I
 			isSVG = IsResourceSVG(img.Resource)
 		} else {
 			name = img.File
-			handle, err := os.Open(img.File)
+			var handle *os.File
+			handle, err = os.Open(img.File)
 			if err != nil {
-				fyne.LogError("image load error", err)
-				return nil
+				err = fmt.Errorf("image load error: %w", err)
+				return
 			}
 			defer handle.Close()
 			file = handle
@@ -77,10 +83,11 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.I
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
 
-				icon, err := oksvg.ReadIconStream(file)
+				var icon *oksvg.SvgIcon
+				icon, err = oksvg.ReadIconStream(file)
 				if err != nil {
-					fyne.LogError("SVG Load error:", err)
-					return nil
+					err = fmt.Errorf("SVG Load error: %w", err)
+					return
 				}
 
 				origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
@@ -100,7 +107,7 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.I
 				// if the image specifies it should be original size we need at least that many pixels on screen
 				if img.FillMode == canvas.ImageFillOriginal {
 					if !checkImageMinSize(img, c, origW, origH) {
-						return nil
+						return
 					}
 				}
 
@@ -110,22 +117,24 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.I
 
 				err = drawSVGSafely(icon, raster)
 				if err != nil {
-					fyne.LogError("SVG Render error:", err)
-					return nil
+					err = fmt.Errorf("SVG render error: %w", err)
+					return
 				}
 
 				cache.SetSvg(name, tex, width, height)
 			}
 
-			return tex
+			dst = tex
+			return
 		}
 
-		pixels, _, err := image.Decode(file)
+		var pixels image.Image
+		pixels, _, err = image.Decode(file)
 
 		if err != nil {
-			fyne.LogError("image err", err)
+			err = fmt.Errorf("failed to decode image: %w", err)
 
-			return nil
+			return
 		}
 		origSize := pixels.Bounds().Size()
 		// this is used by our render code, so let's set it to the file aspect
@@ -133,11 +142,11 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.I
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
 			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
-				return nil
+				return
 			}
 		}
 
-		return scaleImage(pixels, width, height, img.ScaleMode)
+		dst = scaleImage(pixels, width, height, img.ScaleMode)
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
 		// this is used by our render code, so let's set it to the file aspect
@@ -145,14 +154,15 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) image.I
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
 			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
-				return nil
+				return
 			}
 		}
 
-		return scaleImage(img.Image, width, height, img.ScaleMode)
+		dst = scaleImage(img.Image, width, height, img.ScaleMode)
 	default:
-		return image.NewNRGBA(image.Rect(0, 0, 1, 1))
+		dst = image.NewNRGBA(image.Rect(0, 0, 1, 1))
 	}
+	return
 }
 
 func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {
