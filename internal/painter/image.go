@@ -42,14 +42,34 @@ func GetAspect(img *canvas.Image) float32 {
 
 // PaintImage renders a given fyne Image to a Go standard image
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
-	dst, err := paintImage(img, c, width, height)
+	var wantOrigW, wantOrigH int
+	wantOrigSize := false
+	if img.FillMode == canvas.ImageFillOriginal {
+		if c == nil {
+			fyne.LogError("PaintImage called without canvas for image that wants original size", nil)
+			return nil
+		}
+
+		wantOrigW = internal.ScaleInt(c, img.Size().Width)
+		wantOrigH = internal.ScaleInt(c, img.Size().Height)
+		wantOrigSize = true
+	}
+
+	dst, origW, origH, err := paintImage(img, width, height, wantOrigSize, wantOrigW, wantOrigH)
 	if err != nil {
 		fyne.LogError("failed to paint image", err)
+		return nil
+	}
+
+	if wantOrigSize && dst == nil {
+		dpSize := fyne.NewSize(internal.UnscaleInt(c, origW), internal.UnscaleInt(c, origH))
+		img.SetMinSize(dpSize)
+		canvas.Refresh(img) // force the initial size to be respected
 	}
 	return dst
 }
 
-func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) (dst image.Image, err error) {
+func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOrigW, wantOrigH int) (dst image.Image, origW, origH int, err error) {
 	if width <= 0 || height <= 0 {
 		return
 	}
@@ -90,26 +110,22 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) (dst im
 					return
 				}
 
-				origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
+				origW, origH = int(icon.ViewBox.W), int(icon.ViewBox.H)
 				aspect := float32(origW) / float32(origH)
-				viewAspect := float32(width) / float32(height)
+				// this is used by our render code, so let's set it to the file aspect
+				aspects[name] = aspect
+				if wantOrigSize && (wantOrigW != origW || wantOrigH != origH) {
+					return
+				}
 
+				viewAspect := float32(width) / float32(height)
 				texW, texH := width, height
 				if viewAspect > aspect {
 					texW = int(float32(height) * aspect)
 				} else if viewAspect < aspect {
 					texH = int(float32(width) / aspect)
 				}
-
 				icon.SetTarget(0, 0, float64(texW), float64(texH))
-				// this is used by our render code, so let's set it to the file aspect
-				aspects[name] = aspect
-				// if the image specifies it should be original size we need at least that many pixels on screen
-				if img.FillMode == canvas.ImageFillOriginal {
-					if !checkImageMinSize(img, c, origW, origH) {
-						return
-					}
-				}
 
 				tex = image.NewNRGBA(image.Rect(0, 0, texW, texH))
 				scanner := rasterx.NewScannerGV(origW, origH, tex, tex.Bounds())
@@ -137,25 +153,21 @@ func paintImage(img *canvas.Image, c fyne.Canvas, width int, height int) (dst im
 			return
 		}
 		origSize := pixels.Bounds().Size()
+		origW, origH = origSize.X, origSize.Y
 		// this is used by our render code, so let's set it to the file aspect
-		aspects[name] = float32(origSize.X) / float32(origSize.Y)
-		// if the image specifies it should be original size we need at least that many pixels on screen
-		if img.FillMode == canvas.ImageFillOriginal {
-			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
-				return
-			}
+		aspects[name] = float32(origW) / float32(origH)
+		if wantOrigSize && (wantOrigW != origW || wantOrigH != origH) {
+			return
 		}
 
 		dst = scaleImage(pixels, width, height, img.ScaleMode)
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
+		origW, origH = origSize.X, origSize.Y
 		// this is used by our render code, so let's set it to the file aspect
-		aspects[img] = float32(origSize.X) / float32(origSize.Y)
-		// if the image specifies it should be original size we need at least that many pixels on screen
-		if img.FillMode == canvas.ImageFillOriginal {
-			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
-				return
-			}
+		aspects[img] = float32(origW) / float32(origH)
+		if wantOrigSize && (wantOrigW != origW || wantOrigH != origH) {
+			return
 		}
 
 		dst = scaleImage(img.Image, width, height, img.ScaleMode)
@@ -197,18 +209,6 @@ func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
 	icon.Draw(raster, 1)
 
 	return err
-}
-
-func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) bool {
-	dpSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
-
-	if img.MinSize() != dpSize {
-		img.SetMinSize(dpSize)
-		canvas.Refresh(img) // force the initial size to be respected
-		return false
-	}
-
-	return true
 }
 
 func isFileSVG(path string) bool {
