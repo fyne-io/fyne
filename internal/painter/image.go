@@ -2,7 +2,6 @@ package painter
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
@@ -12,14 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/image/draw"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
-
-	"github.com/srwiley/oksvg"
-	"github.com/srwiley/rasterx"
-	"golang.org/x/image/draw"
+	"fyne.io/fyne/v2/internal/svg"
 )
 
 var aspects = make(map[interface{}]float32, 16)
@@ -121,7 +119,7 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 			tex := cache.GetSvg(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
-				tex, err = svgToImage(file, width, height, checkSize)
+				tex, err = svg.ToImage(file, width, height, checkSize)
 				if err != nil {
 					return
 				}
@@ -153,39 +151,6 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 	return
 }
 
-func svgToImage(file io.Reader, width, height int, validateSize func(origW, origH int) bool) (*image.NRGBA, error) {
-	icon, err := oksvg.ReadIconStream(file)
-	if err != nil {
-		return nil, fmt.Errorf("SVG Load error: %w", err)
-	}
-
-	origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
-	if !validateSize(origW, origH) {
-		return nil, nil
-	}
-
-	aspect := float32(origW) / float32(origH)
-	viewAspect := float32(width) / float32(height)
-	imgW, imgH := width, height
-	if viewAspect > aspect {
-		imgW = int(float32(height) * aspect)
-	} else if viewAspect < aspect {
-		imgH = int(float32(width) / aspect)
-	}
-	icon.SetTarget(0, 0, float64(imgW), float64(imgH))
-
-	img := image.NewNRGBA(image.Rect(0, 0, imgW, imgH))
-	scanner := rasterx.NewScannerGV(origW, origH, img, img.Bounds())
-	raster := rasterx.NewDasher(width, height, scanner)
-
-	err = drawSVGSafely(icon, raster)
-	if err != nil {
-		err = fmt.Errorf("SVG render error: %w", err)
-		return nil, err
-	}
-	return img, nil
-}
-
 func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {
 	if scale == canvas.ImageScaleFastest || scale == canvas.ImageScalePixels {
 		// do not perform software scaling
@@ -206,18 +171,6 @@ func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScal
 		draw.CatmullRom.Scale(tex, scaledBounds, pixels, pixels.Bounds(), draw.Over, nil)
 	}
 	return tex
-}
-
-func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
-	var err error
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("crash when rendering svg")
-		}
-	}()
-	icon.Draw(raster, 1)
-
-	return err
 }
 
 func isFileSVG(path string) bool {
