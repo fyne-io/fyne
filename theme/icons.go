@@ -586,7 +586,7 @@ func (res *ThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	return svg.ColorizeSVG(res.source.Content(), ForegroundColor())
+	return svg.Colorize(res.source.Content(), ForegroundColor())
 }
 
 // Error returns a different resource for indicating an error.
@@ -614,7 +614,7 @@ func (res *InvertedThemedResource) Name() string {
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
 	clr := BackgroundColor()
-	return svg.ColorizeSVG(res.source.Content(), clr)
+	return svg.Colorize(res.source.Content(), clr)
 }
 
 // Original returns the underlying resource that this inverted themed resource was adapted from
@@ -641,7 +641,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return svg.ColorizeSVG(res.source.Content(), ErrorColor())
+	return svg.Colorize(res.source.Content(), ErrorColor())
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -668,7 +668,7 @@ func (res *PrimaryThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return svg.ColorizeSVG(res.source.Content(), PrimaryColor())
+	return svg.Colorize(res.source.Content(), PrimaryColor())
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -689,7 +689,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return svg.ColorizeSVG(res.source.Content(), DisabledColor())
+	return svg.Colorize(res.source.Content(), DisabledColor())
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.

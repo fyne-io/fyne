@@ -19,8 +19,8 @@ import (
 	col "fyne.io/fyne/v2/internal/color"
 )
 
-// ColorizeSVG creates a new SVG from a given one by replacing all fill colors by the given color.
-func ColorizeSVG(src []byte, clr color.Color) []byte {
+// Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
+func Colorize(src []byte, clr color.Color) []byte {
 	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {

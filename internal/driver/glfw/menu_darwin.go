@@ -179,7 +179,7 @@ func insertNativeMenuItem(nsMenu unsafe.Pointer, item *fyne.MenuItem, nextItemID
 				C.getTextColorRGBA(&r, &g, &b, &a)
 				rsc = &fyne.StaticResource{
 					StaticName:    rsc.Name(),
-					StaticContent: svg.ColorizeSVG(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}),
+					StaticContent: svg.Colorize(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}),
 				}
 			}
 			size := int(C.menuFontSize())

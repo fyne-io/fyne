@@ -18,7 +18,7 @@ import (
 	"fyne.io/fyne/v2/internal/test"
 )
 
-func TestColorizeSVG(t *testing.T) {
+func TestColorize(t *testing.T) {
 	tests := map[string]struct {
 		svgFile   string
 		color     color.Color
@@ -139,7 +139,7 @@ func TestColorizeSVG(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			bytes, err := ioutil.ReadFile(filepath.Join("testdata", tt.svgFile))
 			require.NoError(t, err)
-			got := helperDrawSVG(t, ColorizeSVG(bytes, tt.color))
+			got := helperDrawSVG(t, Colorize(bytes, tt.color))
 			test.AssertImageMatches(t, tt.wantImage, got)
 		})
 	}
