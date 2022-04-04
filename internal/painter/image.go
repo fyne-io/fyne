@@ -84,6 +84,14 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 		return
 	}
 
+	var aspectCacheKey interface{} = img
+	checkSize := func(origW, origH int) bool {
+		aspect := float32(origW) / float32(origH)
+		// this is used by our render code, so let's set it to the file aspect
+		aspects[aspectCacheKey] = aspect
+		return !wantOrigSize || (wantOrigW == origW && wantOrigH == origH)
+	}
+
 	switch {
 	case img.File != "" || img.Resource != nil:
 		var (
@@ -107,18 +115,12 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 			file = handle
 			isSVG = isFileSVG(img.File)
 		}
+		aspectCacheKey = name
 
 		if isSVG {
 			tex := cache.GetSvg(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
-				checkSize := func(origW, origH int) bool {
-					aspect := float32(origW) / float32(origH)
-					// this is used by our render code, so let's set it to the file aspect
-					aspects[name] = aspect
-					return !wantOrigSize || (wantOrigW == origW && wantOrigH == origH)
-				}
-
 				tex, err = svgToImage(file, width, height, checkSize)
 				if err != nil {
 					return
@@ -126,34 +128,26 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 
 				cache.SetSvg(name, tex, width, height)
 			}
-
 			dst = tex
 			return
 		}
 
 		var pixels image.Image
 		pixels, _, err = image.Decode(file)
-
 		if err != nil {
 			err = fmt.Errorf("failed to decode image: %w", err)
-
 			return
 		}
+
 		origSize := pixels.Bounds().Size()
-		origW, origH = origSize.X, origSize.Y
-		// this is used by our render code, so let's set it to the file aspect
-		aspects[name] = float32(origW) / float32(origH)
-		if wantOrigSize && (wantOrigW != origW || wantOrigH != origH) {
+		if !checkSize(origSize.X, origSize.Y) {
 			return
 		}
 
 		dst = scaleImage(pixels, width, height, img.ScaleMode)
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
-		origW, origH = origSize.X, origSize.Y
-		// this is used by our render code, so let's set it to the file aspect
-		aspects[img] = float32(origW) / float32(origH)
-		if wantOrigSize && (wantOrigW != origW || wantOrigH != origH) {
+		if !checkSize(origSize.X, origSize.Y) {
 			return
 		}
 
