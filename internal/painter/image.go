@@ -138,19 +138,15 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 			}
 
 			origSize := pixels.Bounds().Size()
-			if !checkSize(origSize.X, origSize.Y) {
-				return
+			if checkSize(origSize.X, origSize.Y) {
+				dst = scaleImage(pixels, width, height, img.ScaleMode)
 			}
-
-			dst = scaleImage(pixels, width, height, img.ScaleMode)
 		}
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
-		if !checkSize(origSize.X, origSize.Y) {
-			return
+		if checkSize(origSize.X, origSize.Y) {
+			dst = scaleImage(img.Image, width, height, img.ScaleMode)
 		}
-
-		dst = scaleImage(img.Image, width, height, img.ScaleMode)
 	default:
 		dst = image.NewNRGBA(image.Rect(0, 0, 1, 1))
 	}
