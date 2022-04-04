@@ -191,7 +191,7 @@ func (w *window) SetIcon(icon fyne.Resource) {
 
 		var img image.Image
 		if painter.IsResourceSVG(w.icon) {
-			img = painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, windowIconSize, windowIconSize)
+			img = painter.PaintImageWithFillModeIgnored(&canvas.Image{Resource: w.icon}, windowIconSize, windowIconSize)
 		} else {
 			pix, _, err := image.Decode(bytes.NewReader(w.icon.Content()))
 			if err != nil {

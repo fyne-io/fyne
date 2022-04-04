@@ -59,7 +59,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	height := internal.ScaleInt(c, bounds.Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 
-	origImg := painter.PaintImage(img, c, width, height)
+	origImg := painter.PaintImageWithFillModeRespected(img, c, width, height)
 
 	if img.FillMode == canvas.ImageFillContain {
 		imgAspect := painter.GetAspect(img)
