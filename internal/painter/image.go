@@ -112,37 +112,15 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 			tex := cache.GetSvg(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
-				var icon *oksvg.SvgIcon
-				icon, err = oksvg.ReadIconStream(file)
+				checkSize := func(origW, origH int) bool {
+					aspect := float32(origW) / float32(origH)
+					// this is used by our render code, so let's set it to the file aspect
+					aspects[name] = aspect
+					return !wantOrigSize || (wantOrigW == origW && wantOrigH == origH)
+				}
+
+				tex, err = svgToImage(file, width, height, checkSize)
 				if err != nil {
-					err = fmt.Errorf("SVG Load error: %w", err)
-					return
-				}
-
-				origW, origH = int(icon.ViewBox.W), int(icon.ViewBox.H)
-				aspect := float32(origW) / float32(origH)
-				// this is used by our render code, so let's set it to the file aspect
-				aspects[name] = aspect
-				if wantOrigSize && (wantOrigW != origW || wantOrigH != origH) {
-					return
-				}
-
-				viewAspect := float32(width) / float32(height)
-				texW, texH := width, height
-				if viewAspect > aspect {
-					texW = int(float32(height) * aspect)
-				} else if viewAspect < aspect {
-					texH = int(float32(width) / aspect)
-				}
-				icon.SetTarget(0, 0, float64(texW), float64(texH))
-
-				tex = image.NewNRGBA(image.Rect(0, 0, texW, texH))
-				scanner := rasterx.NewScannerGV(origW, origH, tex, tex.Bounds())
-				raster := rasterx.NewDasher(width, height, scanner)
-
-				err = drawSVGSafely(icon, raster)
-				if err != nil {
-					err = fmt.Errorf("SVG render error: %w", err)
 					return
 				}
 
@@ -184,6 +162,39 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 		dst = image.NewNRGBA(image.Rect(0, 0, 1, 1))
 	}
 	return
+}
+
+func svgToImage(file io.Reader, width, height int, validateSize func(origW, origH int) bool) (*image.NRGBA, error) {
+	icon, err := oksvg.ReadIconStream(file)
+	if err != nil {
+		return nil, fmt.Errorf("SVG Load error: %w", err)
+	}
+
+	origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
+	if !validateSize(origW, origH) {
+		return nil, nil
+	}
+
+	aspect := float32(origW) / float32(origH)
+	viewAspect := float32(width) / float32(height)
+	imgW, imgH := width, height
+	if viewAspect > aspect {
+		imgW = int(float32(height) * aspect)
+	} else if viewAspect < aspect {
+		imgH = int(float32(width) / aspect)
+	}
+	icon.SetTarget(0, 0, float64(imgW), float64(imgH))
+
+	img := image.NewNRGBA(image.Rect(0, 0, imgW, imgH))
+	scanner := rasterx.NewScannerGV(origW, origH, img, img.Bounds())
+	raster := rasterx.NewDasher(width, height, scanner)
+
+	err = drawSVGSafely(icon, raster)
+	if err != nil {
+		err = fmt.Errorf("SVG render error: %w", err)
+		return nil, err
+	}
+	return img, nil
 }
 
 func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {
