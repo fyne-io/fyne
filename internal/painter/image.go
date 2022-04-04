@@ -129,22 +129,21 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 				cache.SetSvg(name, tex, width, height)
 			}
 			dst = tex
-			return
-		}
+		} else {
+			var pixels image.Image
+			pixels, _, err = image.Decode(file)
+			if err != nil {
+				err = fmt.Errorf("failed to decode image: %w", err)
+				return
+			}
 
-		var pixels image.Image
-		pixels, _, err = image.Decode(file)
-		if err != nil {
-			err = fmt.Errorf("failed to decode image: %w", err)
-			return
-		}
+			origSize := pixels.Bounds().Size()
+			if !checkSize(origSize.X, origSize.Y) {
+				return
+			}
 
-		origSize := pixels.Bounds().Size()
-		if !checkSize(origSize.X, origSize.Y) {
-			return
+			dst = scaleImage(pixels, width, height, img.ScaleMode)
 		}
-
-		dst = scaleImage(pixels, width, height, img.ScaleMode)
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
 		if !checkSize(origSize.X, origSize.Y) {
