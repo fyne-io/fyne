@@ -431,6 +431,7 @@ func TestView(t *testing.T) {
 		assert.Nil(t, reader)
 	}, win)
 
+	dlg.SetConfirmText("Yes")
 	dlg.SetDismissText("Dismiss")
 	dlg.Show()
 
@@ -472,6 +473,8 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
 
+	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Yes", confirm.Text)
 	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "Dismiss", dismiss.Text)
 }

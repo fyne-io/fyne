@@ -115,32 +115,52 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	gl.CompileShader(shader)
 	logError()
 
+	var logLength int32
+	gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
+	info := strings.Repeat("\x00", int(logLength+1))
+	gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
+
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
+		return 0, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
+	}
 
-		info := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, info)
+	if logLength > 0 {
+		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
 	return shader, nil
 }
 
-var vertexShaderSource = string(shaderSimpleVert.StaticContent) + "\x00"
-var fragmentShaderSource = string(shaderSimpleFrag.StaticContent) + "\x00"
-var vertexLineShaderSource = string(shaderLineVert.StaticContent) + "\x00"
-var fragmentLineShaderSource = string(shaderLineFrag.StaticContent) + "\x00"
-
 func (p *glPainter) Init() {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
+	p.program = createProgram("simple")
+	p.lineProgram = createProgram("line")
+}
+
+func createProgram(shaderFilename string) Program {
+	var vertexSrc []byte
+	var fragmentSrc []byte
+
+	// Why a switch over a filename?
+	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
+	// fyne bundle.
+	switch shaderFilename {
+	case "line":
+		vertexSrc = shaderLineVert.StaticContent
+		fragmentSrc = shaderLineFrag.StaticContent
+	case "simple":
+		vertexSrc = shaderSimpleVert.StaticContent
+		fragmentSrc = shaderSimpleFrag.StaticContent
+	default:
+		panic("shader not found: " + shaderFilename)
+	}
+
+	vertexShader, err := compileShader(string(vertexSrc)+"\x00", gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragmentShader, err := compileShader(string(fragmentSrc)+"\x00", gl.FRAGMENT_SHADER)
 	if err != nil {
 		panic(err)
 	}
@@ -149,26 +169,27 @@ func (p *glPainter) Init() {
 	gl.AttachShader(prog, vertexShader)
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
-	logError()
 
-	p.program = Program(prog)
+	var logLength int32
+	gl.GetProgramiv(prog, gl.INFO_LOG_LENGTH, &logLength)
+	info := strings.Repeat("\x00", int(logLength+1))
+	gl.GetProgramInfoLog(prog, logLength, nil, gl.Str(info))
 
-	vertexLineShader, err := compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
+	var status int32
+	gl.GetProgramiv(prog, gl.LINK_STATUS, &status)
+	if status == gl.FALSE {
+		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
 	}
-	fragmentLineShader, err := compileShader(fragmentLineShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
+
+	if logLength > 0 {
+		fmt.Printf("OpenGL program linking output:\n%s\n", info)
 	}
 
-	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, vertexLineShader)
-	gl.AttachShader(lineProg, fragmentLineShader)
-	gl.LinkProgram(lineProg)
-	logError()
+	if glErr := gl.GetError(); glErr != 0 {
+		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
+	}
 
-	p.lineProgram = Program(lineProg)
+	return Program(prog)
 }
 
 func (p *glPainter) glClearBuffer() {

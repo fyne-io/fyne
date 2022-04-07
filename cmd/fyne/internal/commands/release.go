@@ -29,6 +29,7 @@ var macAppStoreCategories = []string{
 // Release returns the cli command for bundling release builds of fyne applications
 func Release() *cli.Command {
 	r := &Releaser{}
+	r.appData = &appData{}
 
 	return &cli.Command{
 		Name:  "release",

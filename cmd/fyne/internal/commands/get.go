@@ -14,7 +14,7 @@ import (
 
 // Get returns the command which downloads and installs fyne applications.
 func Get() *cli.Command {
-	g := &Getter{}
+	g := &Getter{appData: &appData{}}
 	return &cli.Command{
 		Name:        "get",
 		Usage:       "Downloads and installs a Fyne application",
@@ -46,13 +46,13 @@ func Get() *cli.Command {
 
 // Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter struct {
-	icon, appID string
+	*appData
 }
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
 // It depends on a Go and C compiler installed at this stage and takes a single, package, parameter to identify the app.
 func NewGetter() *Getter {
-	return &Getter{}
+	return &Getter{appData: &appData{}}
 }
 
 // Get automates the download and install of a named GUI app package.
@@ -71,7 +71,7 @@ func (g *Getter) Get(pkg string) error {
 		return err
 	}
 
-	install := &Installer{srcDir: path, icon: g.icon, appID: g.appID, release: true}
+	install := &Installer{appData: g.appData, srcDir: path, release: true}
 	if err := install.validate(); err != nil {
 		return fmt.Errorf("failed to set up installer: %w", err)
 	}

@@ -6,7 +6,7 @@ removing the GTK dependency and support for legacy linux system tray.
 
 ## Features
 
-* Supported on Windows, macOS and Linux
+* Supported on Windows, macOS, Linux and many BSD systems
 * Menu items can be checked and/or disabled
 * Methods may be called from any Goroutine
 
@@ -75,7 +75,7 @@ Now look for *Awesome App* in your menu bar!
 
 ## Platform notes
 
-### Linux
+### Linux/BSD
 
 This implementation uses DBus to communicate through the SystemNotifier/AppIndicator spec, older tray implementations may not load the icon.
 

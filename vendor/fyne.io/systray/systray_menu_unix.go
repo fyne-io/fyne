@@ -1,3 +1,5 @@
+// +build linux freebsd openbsd netbsd
+
 package systray
 
 import (
@@ -69,7 +71,7 @@ func createMenuPropSpec() map[string]map[string]*prop.Prop {
 	return map[string]map[string]*prop.Prop{
 		"com.canonical.dbusmenu": {
 			"Version": {
-				uint32(1),
+				uint32(3),
 				false,
 				prop.EmitTrue,
 				nil,
@@ -81,7 +83,7 @@ func createMenuPropSpec() map[string]map[string]*prop.Prop {
 				nil,
 			},
 			"Status": {
-				"active",
+				"normal",
 				false,
 				prop.EmitTrue,
 				nil,
@@ -200,8 +202,10 @@ func showMenuItem(item *MenuItem) {
 }
 
 func refresh() {
-	menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
-		Path: menuPath,
-		Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{},
-	})
+	if instance.conn != nil {
+		menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
+			Path: menuPath,
+			Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{},
+		})
+	}
 }

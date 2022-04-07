@@ -224,10 +224,13 @@ func roundToPixel(v float32, pixScale float32) float32 {
 }
 
 func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fyne.Size, fyne.Position) {
-	size.Width = roundToPixel(size.Width, pixScale)
-	size.Height = roundToPixel(size.Height, pixScale)
+	end := pos.Add(size)
+	end.X = roundToPixel(end.X, pixScale)
+	end.Y = roundToPixel(end.Y, pixScale)
 	pos.X = roundToPixel(pos.X, pixScale)
 	pos.Y = roundToPixel(pos.Y, pixScale)
+	size.Width = end.X - pos.X
+	size.Height = end.Y - pos.Y
 
 	return size, pos
 }

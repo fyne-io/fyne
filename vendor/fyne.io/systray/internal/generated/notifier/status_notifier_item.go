@@ -64,6 +64,9 @@ var (
 				{Name: "org.qtproject.QtDBus.QtTypeName", Value: "KDbusImageVector"},
 			}},
 			{Name: "AttentionMovieName", Type: "s", Access: "read"},
+			{Name: "ToolTip", Type: "(sa(iiay)ss)", Access: "read", Annotations: []introspect.Annotation{
+				{Name: "org.qtproject.QtDBus.QtTypeName", Value: "KDbusToolTipStruct"},
+			}},
 		},
 		Annotations: []introspect.Annotation{},
 	}
@@ -368,6 +371,24 @@ func (o *StatusNotifierItem) GetAttentionIconPixmap(ctx context.Context) (attent
 // GetAttentionMovieName gets org.kde.StatusNotifierItem.AttentionMovieName property.
 func (o *StatusNotifierItem) GetAttentionMovieName(ctx context.Context) (attentionMovieName string, err error) {
 	err = o.object.CallWithContext(ctx, "org.freedesktop.DBus.Properties.Get", 0, InterfaceStatusNotifierItem, "AttentionMovieName").Store(&attentionMovieName)
+	return
+}
+
+// GetToolTip gets org.kde.StatusNotifierItem.ToolTip property.
+//
+// Annotations:
+//   @org.qtproject.QtDBus.QtTypeName = KDbusToolTipStruct
+func (o *StatusNotifierItem) GetToolTip(ctx context.Context) (toolTip struct {
+	V0 string
+	V1 []struct {
+		V0 int32
+		V1 int32
+		V2 []byte
+	}
+	V2 string
+	V3 string
+}, err error) {
+	err = o.object.CallWithContext(ctx, "org.freedesktop.DBus.Properties.Get", 0, InterfaceStatusNotifierItem, "ToolTip").Store(&toolTip)
 	return
 }
 

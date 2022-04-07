@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -118,6 +119,14 @@ type DocGenerationFlag interface {
 	GetValue() string
 }
 
+// VisibleFlag is an interface that allows to check if a flag is visible
+type VisibleFlag interface {
+	Flag
+
+	// IsVisible returns true if the flag is not hidden, otherwise false
+	IsVisible() bool
+}
+
 func flagSet(name string, flags []Flag) (*flag.FlagSet, error) {
 	set := flag.NewFlagSet(name, flag.ContinueOnError)
 
@@ -130,11 +139,52 @@ func flagSet(name string, flags []Flag) (*flag.FlagSet, error) {
 	return set, nil
 }
 
+func copyFlag(name string, ff *flag.Flag, set *flag.FlagSet) {
+	switch ff.Value.(type) {
+	case Serializer:
+		_ = set.Set(name, ff.Value.(Serializer).Serialize())
+	default:
+		_ = set.Set(name, ff.Value.String())
+	}
+}
+
+func normalizeFlags(flags []Flag, set *flag.FlagSet) error {
+	visited := make(map[string]bool)
+	set.Visit(func(f *flag.Flag) {
+		visited[f.Name] = true
+	})
+	for _, f := range flags {
+		parts := f.Names()
+		if len(parts) == 1 {
+			continue
+		}
+		var ff *flag.Flag
+		for _, name := range parts {
+			name = strings.Trim(name, " ")
+			if visited[name] {
+				if ff != nil {
+					return errors.New("Cannot use two forms of the same flag: " + name + " " + ff.Name)
+				}
+				ff = set.Lookup(name)
+			}
+		}
+		if ff == nil {
+			continue
+		}
+		for _, name := range parts {
+			name = strings.Trim(name, " ")
+			if !visited[name] {
+				copyFlag(name, ff, set)
+			}
+		}
+	}
+	return nil
+}
+
 func visibleFlags(fl []Flag) []Flag {
 	var visible []Flag
 	for _, f := range fl {
-		field := flagValue(f).FieldByName("Hidden")
-		if !field.IsValid() || !field.Bool() {
+		if vf, ok := f.(VisibleFlag); ok && vf.IsVisible() {
 			visible = append(visible, f)
 		}
 	}
@@ -359,7 +409,11 @@ func stringifySliceFlag(usage string, names, defaultVals []string) string {
 	}
 
 	usageWithDefault := strings.TrimSpace(fmt.Sprintf("%s%s", usage, defaultVal))
-	return fmt.Sprintf("%s\t%s", prefixedNames(names, placeholder), usageWithDefault)
+	multiInputString := "(accepts multiple inputs)"
+	if usageWithDefault != "" {
+		multiInputString = "\t" + multiInputString
+	}
+	return fmt.Sprintf("%s\t%s%s", prefixedNames(names, placeholder), usageWithDefault, multiInputString)
 }
 
 func hasFlag(flags []Flag, fl Flag) bool {
@@ -380,8 +434,10 @@ func flagFromEnvOrFile(envVars []string, filePath string) (val string, ok bool) 
 		}
 	}
 	for _, fileVar := range strings.Split(filePath, ",") {
-		if data, err := ioutil.ReadFile(fileVar); err == nil {
-			return string(data), true
+		if fileVar != "" {
+			if data, err := ioutil.ReadFile(fileVar); err == nil {
+				return string(data), true
+			}
 		}
 	}
 	return "", false
