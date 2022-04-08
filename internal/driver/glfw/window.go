@@ -296,6 +296,8 @@ func (w *window) processMoved(x, y int) {
 	if !w.fullScreen { // don't save the move to top left when changing to fullscreen
 		// save coordinates
 		w.xpos, w.ypos = x, y
+		fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(w.xpos, w.ypos, w.width, w.height)
+
 	}
 
 	if w.canvas.detectedScale == w.detectScale() {

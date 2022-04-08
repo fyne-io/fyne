@@ -119,6 +119,21 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	}
 }
 
+func Test_gLDriver_Lifecycle(t *testing.T) {
+	w := createWindow("Test").(*window)
+
+	fyne.CurrentApp().Lifecycle().SetOnResized(func(xpos int, ypos int, width int, height int) {
+		assert.Equal(t, xpos, 0)
+		assert.Equal(t, ypos, 0)
+		assert.Equal(t, width, 200)
+		assert.Equal(t, height, 199)
+	})
+
+	w.Resize(fyne.NewSize(200, 199))
+
+	repaintWindow(w)
+}
+
 var mainRoutineID int
 
 func init() {
