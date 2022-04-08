@@ -16,7 +16,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/jackmordaunt/icns/v2 v2.2.0
+	github.com/jackmordaunt/icns/v2 v2.2.1
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
