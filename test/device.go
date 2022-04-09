@@ -36,6 +36,6 @@ func (*device) GetPos() (int, int) {
 	return 0, 0
 }
 
-func (*device) GetFrameSize() (int, int, int, int) {
+func (*device) GetFrameSize() (left, top, right, bottom int) {
 	return 0, 0, 0, 0
 }
