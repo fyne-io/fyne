@@ -6,6 +6,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDeepItems(t *testing.T) {
+	type DeepItem struct {
+		name     string
+		subArray []string
+	}
+	deepItemArray := []DeepItem{
+		{
+			name:     "first",
+			subArray: []string{"sub-item-1"},
+		}, {
+			name:     "second",
+			subArray: []string{"sub-item-2"},
+		},
+	}
+	interfaceArray := make([]interface{}, 2)
+	for index, deepItem := range deepItemArray {
+		interfaceArray[index] = deepItem
+	}
+	untypedList := BindUntypedList(&interfaceArray)
+	untypedList.Append(DeepItem{name: "third", subArray: []string{"sub-item-3"}})
+	assert.Equal(t, 3, untypedList.Length())
+}
+
 func TestBindFloatList(t *testing.T) {
 	l := []float64{1.0, 5.0, 2.3}
 	f := BindFloatList(&l)

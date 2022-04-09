@@ -1,10 +1,10 @@
 // auto-generated
 // **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
-
 package binding
 
 import (
 	"bytes"
+	"reflect"
 
 	"fyne.io/fyne/v2"
 )
@@ -1553,7 +1553,7 @@ type boundExternalUntypedListItem struct {
 }
 
 func (b *boundExternalUntypedListItem) setIfChanged(val interface{}) error {
-	if val == b.old {
+	if reflect.DeepEqual(val, b.old) {
 		return nil
 	}
 	(*b.val)[b.index] = val
