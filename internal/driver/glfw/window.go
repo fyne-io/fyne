@@ -68,7 +68,11 @@ func (w *window) Resize(size fyne.Size) {
 		w.view().SetSize(width, height)
 
 		xpos, ypos := w.view().GetPos()
-		fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(xpos, ypos, width, height)
+
+		// Also grab the yoffset.
+		_, yoffset, _, _ := w.view().GetFrameSize()
+
+		fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(xpos, ypos, yoffset, width, height)
 	})
 }
 
@@ -164,6 +168,9 @@ func (w *window) doShow() {
 
 		// save coordinates
 		w.xpos, w.ypos = w.view().GetPos()
+
+		// Also grab the yoffset.
+		_, w.yoffset, _, _ = w.view().GetFrameSize()
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			go func() {
@@ -296,7 +303,7 @@ func (w *window) processMoved(x, y int) {
 	if !w.fullScreen { // don't save the move to top left when changing to fullscreen
 		// save coordinates
 		w.xpos, w.ypos = x, y
-		fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(w.xpos, w.ypos, w.width, w.height)
+		fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(w.xpos, w.ypos, w.yoffset, w.width, w.height)
 
 	}
 
@@ -329,7 +336,11 @@ func (w *window) processResized(width, height int) {
 	w.platformResize(canvasSize)
 
 	xpos, ypos := w.view().GetPos()
-	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(xpos, ypos, width, height)
+
+	// Also grab the yoffset.
+	_, yoffset, _, _ := w.view().GetFrameSize()
+
+	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerResized(xpos, ypos, yoffset, width, height)
 }
 
 func (w *window) processFrameSized(width, height int) {

@@ -42,7 +42,7 @@ func (l *Lifecycle) SetOnStopped(f func()) {
 }
 
 // SetOnResized hooks into an event that says the window has been resized.
-func (l *Lifecycle) SetOnResized(f func(xpos int, ypos int, width int, height int)) {
+func (l *Lifecycle) SetOnResized(f func(xpos int, ypos int, yoffset int, width int, height int)) {
 	l.onResized.Store(f)
 }
 
@@ -79,9 +79,9 @@ func (l *Lifecycle) TriggerStopped() {
 }
 
 // TriggerResized will call the resized hook, if one is registered.
-func (l *Lifecycle) TriggerResized(xpos int, ypos int, width int, height int) {
+func (l *Lifecycle) TriggerResized(xpos int, ypos int, yoffset int, width int, height int) {
 	f := l.onResized.Load()
-	if ff, ok := f.(func(xpos int, ypos int, width int, height int)); ok && ff != nil {
-		ff(xpos, ypos, width, height)
+	if ff, ok := f.(func(xpos int, ypos int, yoffset int, width int, height int)); ok && ff != nil {
+		ff(xpos, ypos, yoffset, width, height)
 	}
 }

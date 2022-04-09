@@ -104,6 +104,7 @@ type window struct {
 	menuDeactivationPending fyne.KeyName
 
 	xpos, ypos                      int
+	yoffset                         int
 	width, height                   int
 	requestedWidth, requestedHeight int
 	shouldWidth, shouldHeight       int
