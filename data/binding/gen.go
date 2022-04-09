@@ -584,7 +584,7 @@ type boundExternal{{ .Name }}ListItem struct {
 
 func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 	{{- if eq .Comparator "" }}
-	if val == b.old {
+	if reflect.DeepEqual(val, b.old) {
 		return nil
 	}
 	{{- else }}
@@ -680,6 +680,7 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 	listFile.WriteString(`
 import (
 	"bytes"
+	"reflect"
 
 	"fyne.io/fyne/v2"
 )
