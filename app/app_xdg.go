@@ -37,7 +37,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 
 	appName := fyne.CurrentApp().UniqueID()
-	appIcon := ""       // TODO in the future extract icon from app to cache and pass path
+	appIcon := a.cachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
@@ -46,6 +46,37 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	if call.Err != nil {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
+}
+
+func (a *fyneApp) cachedIconPath() string {
+	metadata := a.Metadata()
+	if metadata.Icon == nil || len(metadata.Icon.Content()) == 0 {
+		return ""
+	}
+
+	dirPath := filepath.Join(rootCacheDir(), a.uniqueID)
+	err := os.MkdirAll(dirPath, 0700)
+	if err != nil {
+		fyne.LogError("Unable to create application cache directory", err)
+		return ""
+	}
+
+	filepath := filepath.Join(dirPath, "icon.png")
+	file, err := os.Create(filepath)
+	if err != nil {
+		fyne.LogError("Unable to create icon file", err)
+		return ""
+	}
+
+	defer file.Close()
+
+	_, err = file.Write(meta.Icon.Content())
+	if err != nil {
+		fyne.LogError("Unable to write icon contents", err)
+		return ""
+	}
+
+	return filepath
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
@@ -63,6 +94,11 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 func rootConfigDir() string {
 	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")
+}
+
+func rootCacheDir() string {
+	desktopCache, _ := os.UserCacheDir()
+	return filepath.Join(desktopCache, "fyne")
 }
 
 func watchTheme() {
