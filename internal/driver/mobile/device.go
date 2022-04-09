@@ -56,3 +56,7 @@ func (*device) HideVirtualKeyboard() {
 func (d *device) GetPos() (int, int) {
 	return d.safeTop, d.safeLeft
 }
+
+func (d *device) GetFrameSize() (int, int, int, int) {
+	return 0, 0, 0, 0
+}

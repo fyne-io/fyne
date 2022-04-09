@@ -27,3 +27,7 @@ func (*glDevice) IsBrowser() bool {
 func (d *glDevice) GetPos() (int, int) {
 	return 0, 0
 }
+
+func (d *glDevice) GetFrameSize() (left, top, right, bottom int) {
+	return 0, 0, 0, 0
+}
