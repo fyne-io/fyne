@@ -35,3 +35,7 @@ func (*device) IsBrowser() bool {
 func (*device) GetPos() (int, int) {
 	return 0, 0
 }
+
+func (*device) GetFrameSize() (int, int, int, int) {
+	return 0, 0, 0, 0
+}
