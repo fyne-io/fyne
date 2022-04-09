@@ -465,6 +465,11 @@ func (w *Window) GetPos() (x, y int) {
 	return
 }
 
+func (w *Window) GetFrameSize() (int, int, int, int) {
+	// Not implemented.
+	return
+}
+
 func (w *Window) ShouldClose() bool {
 	return false
 }
