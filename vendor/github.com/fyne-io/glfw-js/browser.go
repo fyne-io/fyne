@@ -465,7 +465,7 @@ func (w *Window) GetPos() (x, y int) {
 	return
 }
 
-func (w *Window) GetFrameSize() (int, int, int, int) {
+func (w *Window) GetFrameSize() (left, top, right, bottom int) {
 	// Not implemented.
 	return
 }
