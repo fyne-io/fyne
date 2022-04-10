@@ -39,15 +39,13 @@ func GetAspect(img *canvas.Image) float32 {
 }
 
 // PaintImage renders a given fyne Image to a Go standard image
+// If a fyne.Canvas is given and the image’s fill mode is “fill original” the image’s min size has
+// to fit its original size. If it doesn’t, PaintImage does not paint the image but adjusts its min size.
+// The image will then be painted on the next frame because of the min size change.
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
 	var wantOrigW, wantOrigH int
 	wantOrigSize := false
-	if img.FillMode == canvas.ImageFillOriginal {
-		if c == nil {
-			fyne.LogError("PaintImage called without canvas for image that wants original size", nil)
-			return nil
-		}
-
+	if img.FillMode == canvas.ImageFillOriginal && c != nil {
 		wantOrigW = internal.ScaleInt(c, img.Size().Width)
 		wantOrigH = internal.ScaleInt(c, img.Size().Height)
 		wantOrigSize = true
