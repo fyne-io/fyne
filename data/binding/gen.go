@@ -584,7 +584,7 @@ type boundExternal{{ .Name }}ListItem struct {
 
 func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 	{{- if eq .Comparator "" }}
-	if reflect.DeepEqual(val, b.old) {
+	if val == b.old {
 		return nil
 	}
 	{{- else }}
@@ -698,7 +698,7 @@ import (
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1", Comparator: "reflect.DeepEqual"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}

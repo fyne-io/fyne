@@ -222,7 +222,7 @@ type boundExternalBoolListItem struct {
 }
 
 func (b *boundExternalBoolListItem) setIfChanged(val bool) error {
-	if reflect.DeepEqual(val, b.old) {
+	if val == b.old {
 		return nil
 	}
 	(*b.val)[b.index] = val
@@ -666,7 +666,7 @@ type boundExternalFloatListItem struct {
 }
 
 func (b *boundExternalFloatListItem) setIfChanged(val float64) error {
-	if reflect.DeepEqual(val, b.old) {
+	if val == b.old {
 		return nil
 	}
 	(*b.val)[b.index] = val
@@ -888,7 +888,7 @@ type boundExternalIntListItem struct {
 }
 
 func (b *boundExternalIntListItem) setIfChanged(val int) error {
-	if reflect.DeepEqual(val, b.old) {
+	if val == b.old {
 		return nil
 	}
 	(*b.val)[b.index] = val
@@ -1110,7 +1110,7 @@ type boundExternalRuneListItem struct {
 }
 
 func (b *boundExternalRuneListItem) setIfChanged(val rune) error {
-	if reflect.DeepEqual(val, b.old) {
+	if val == b.old {
 		return nil
 	}
 	(*b.val)[b.index] = val
@@ -1332,7 +1332,7 @@ type boundExternalStringListItem struct {
 }
 
 func (b *boundExternalStringListItem) setIfChanged(val string) error {
-	if reflect.DeepEqual(val, b.old) {
+	if val == b.old {
 		return nil
 	}
 	(*b.val)[b.index] = val
