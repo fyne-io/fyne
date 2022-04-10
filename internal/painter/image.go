@@ -38,14 +38,16 @@ func GetAspect(img *canvas.Image) float32 {
 	return aspect
 }
 
-// PaintImageWithFillModeRespected renders a given fyne Image to a Go standard image.
-// If the image’s fill mode is “fill original” but its min size does not match the original image size,
-// it does not paint the image but adjusts the image’s min size.
-// The image will then be painted on the next frame because of the min size change.
-func PaintImageWithFillModeRespected(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
+// PaintImage renders a given fyne Image to a Go standard image
+func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
 	var wantOrigW, wantOrigH int
 	wantOrigSize := false
 	if img.FillMode == canvas.ImageFillOriginal {
+		if c == nil {
+			fyne.LogError("PaintImage called without canvas for image that wants original size", nil)
+			return nil
+		}
+
 		wantOrigW = internal.ScaleInt(c, img.Size().Width)
 		wantOrigH = internal.ScaleInt(c, img.Size().Height)
 		wantOrigSize = true
@@ -62,18 +64,6 @@ func PaintImageWithFillModeRespected(img *canvas.Image, c fyne.Canvas, width, he
 		img.SetMinSize(dpSize)
 		canvas.Refresh(img) // force the initial size to be respected
 	}
-	return dst
-}
-
-// PaintImageWithFillModeIgnored renders a given fyne Image to a Go standard image.
-// The image’s fill mode is ignored.
-func PaintImageWithFillModeIgnored(img *canvas.Image, width, height int) image.Image {
-	dst, _, _, err := paintImage(img, width, height, false, 0, 0)
-	if err != nil {
-		fyne.LogError("failed to paint image", err)
-		return nil
-	}
-
 	return dst
 }
 

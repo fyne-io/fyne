@@ -183,7 +183,7 @@ func insertNativeMenuItem(nsMenu unsafe.Pointer, item *fyne.MenuItem, nextItemID
 				}
 			}
 			size := int(C.menuFontSize())
-			img := painter.PaintImageWithFillModeIgnored(&canvas.Image{Resource: rsc}, size, size)
+			img := painter.PaintImage(&canvas.Image{Resource: rsc}, nil, size, size)
 			var buf bytes.Buffer
 			if err := png.Encode(&buf, img); err != nil {
 				fyne.LogError("failed to render menu icon", err)

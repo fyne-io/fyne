@@ -100,7 +100,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScale(img.Size().Width)
 	height := p.textureScale(img.Size().Height)
 
-	tex := painter.PaintImageWithFillModeRespected(img, p.canvas, int(width), int(height))
+	tex := painter.PaintImage(img, p.canvas, int(width), int(height))
 	if tex == nil {
 		return noTexture
 	}
