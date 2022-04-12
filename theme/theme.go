@@ -133,6 +133,12 @@ const (
 	// Since: 2.0
 	SizeNamePadding fyne.ThemeSizeName = "padding"
 
+	// SizeNameParagraphPadding is the name of theme lookup for paragraph
+	// padding size.
+	//
+	// Since: 2.2
+	SizeNameParagraphPadding fyne.ThemeSizeName = "paragraphPadding"
+
 	// SizeNameScrollBar is the name of theme lookup for the scrollbar size.
 	//
 	// Since: 2.0
@@ -319,6 +325,13 @@ func LightTheme() fyne.Theme {
 // Padding is the standard gap between elements and the border around interface elements.
 func Padding() float32 {
 	return current().Size(SizeNamePadding)
+}
+
+// ParagraphPadding is the standard gap between paragraphs with rich text.
+//
+// Since: 2.2
+func ParagraphPadding() float32 {
+	return current().Size(SizeNameParagraphPadding)
 }
 
 // PlaceHolderColor returns the theme's standard text color.
@@ -586,6 +599,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 20
 	case SizeNamePadding:
 		return 4
+	case SizeNameParagraphPadding:
+		return 10
 	case SizeNameScrollBar:
 		return 16
 	case SizeNameScrollBarSmall:

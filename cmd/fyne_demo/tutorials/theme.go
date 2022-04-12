@@ -46,6 +46,8 @@ func (customTheme) Size(s fyne.ThemeSizeName) float32 {
 	switch s {
 	case theme.SizeNamePadding:
 		return 8
+	case theme.SizeNameParagraphPadding:
+		return 20
 	case theme.SizeNameInlineIcon:
 		return 20
 	case theme.SizeNameScrollBar:

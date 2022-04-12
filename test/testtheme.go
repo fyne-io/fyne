@@ -43,6 +43,7 @@ func NewTheme() fyne.Theme {
 		sizes: map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
 			theme.SizeNamePadding:            float32(10),
+			theme.SizeNameParagraphPadding:   float32(25),
 			theme.SizeNameScrollBar:          float32(10),
 			theme.SizeNameScrollBarSmall:     float32(2),
 			theme.SizeNameSeparatorThickness: float32(1),

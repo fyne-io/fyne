@@ -78,7 +78,7 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 		case "Link":
 			link, _ := url.Parse(string(n.(*ast.Link).Destination))
 			m.nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, "", link}
-		case "Paragraph":
+		case "Paragraph", "TextBlock":
 			m.nextSeg = &TextSegment{
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
 			}
@@ -171,7 +171,7 @@ func (m *markdownRenderer) handleExitNode(n ast.Node) error {
 		m.segs = append(m.segs, &ParagraphSegment{Texts: itemSegs})
 	} else if !m.blockquote && !m.heading {
 		if len(m.segs) > 0 {
-			if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
+			if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && (n.Kind().String() == "Paragraph" || n.Kind().String() == "TextBlock") {
 				text.Style = RichTextStyleParagraph
 			}
 		}

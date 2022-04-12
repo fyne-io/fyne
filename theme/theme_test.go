@@ -139,6 +139,11 @@ func Test_Padding(t *testing.T) {
 	assert.Equal(t, DarkTheme().Size(SizeNamePadding), Padding(), "wrong padding")
 }
 
+func Test_ParagraphPadding(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	assert.Equal(t, DarkTheme().Size(SizeNameParagraphPadding), ParagraphPadding(), "wrong paragraph padding")
+}
+
 func Test_IconInlineSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	assert.Equal(t, DarkTheme().Size(SizeNameInlineIcon), IconInlineSize(), "wrong inline icon size")
