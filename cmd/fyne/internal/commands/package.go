@@ -106,6 +106,18 @@ func Package() *cli.Command {
 				Usage:       "Enable installation in release mode (disable debug etc).",
 				Destination: &p.release,
 			},
+			&cli.StringFlag{
+				Name:        "iosVersion",
+				Usage:       "The minimal version of the iOS SDK to compile against",
+				Destination: &p.iosVersion,
+				Value:       "7.0",
+			},
+			&cli.IntFlag{
+				Name:        "androidAPI",
+				Usage:       "The Android API version to compile against",
+				Destination: &p.androidAPI,
+				Value:       15,
+			},
 		},
 		Action: func(_ *cli.Context) error {
 			return p.Package()
@@ -120,6 +132,8 @@ type Packager struct {
 	install, release     bool
 	certificate, profile string // optional flags for releasing
 	tags, category       string
+	iosVersion                   string
+	androidAPI                   int
 }
 
 // AddFlags adds the flags for interacting with the package command.
