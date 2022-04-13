@@ -265,20 +265,82 @@ var (
 	buildTags       stringsFlag // -tags
 )
 
+type BuildOption func()
+
+func WithTarget(v string) BuildOption {
+	return func() {
+		buildTarget = v
+	}
+}
+
+func WithBundleID(v string) BuildOption {
+	return func() {
+		buildBundleID = v
+	}
+}
+
+func WithRelease(v bool) BuildOption {
+	return func() {
+		buildRelease = v
+	}
+}
+
+func WithIcon(v string) BuildOption {
+	return func() {
+		cmdBuild.IconPath = v
+	}
+}
+
+func WithName(v string) BuildOption {
+	return func() {
+		cmdBuild.AppName = v
+	}
+}
+
+func WithVersion(v string) BuildOption {
+	return func() {
+		cmdBuild.Version = v
+	}
+}
+
+func WithBuild(v int) BuildOption {
+	return func() {
+		cmdBuild.Build = v
+	}
+}
+
+func WithCert(v string) BuildOption {
+	return func() {
+		cmdBuild.Cert = v
+	}
+}
+
+func WithProfile(v string) BuildOption {
+	return func() {
+		cmdBuild.Profile = v
+	}
+}
+
+func WithIOSVersion(v string) BuildOption {
+	return func() {
+		buildIOSVersion = v
+	}
+}
+
+func WithAndroidAPI(v int) BuildOption {
+	return func() {
+		buildAndroidAPI = v
+	}
+}
+
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name, version string, build int, release bool, cert, profile string) error {
-	buildTarget = target
-	buildBundleID = appID
-	buildRelease = release
+func RunNewBuild(opts ...BuildOption) error {
+	for _, v := range opts {
+		v()
+	}
 
 	cmd := cmdBuild
 	cmd.Flag = flag.FlagSet{}
-	cmd.IconPath = icon
-	cmd.AppName = name
-	cmd.Version = version
-	cmd.Build = build
-	cmd.Cert = cert
-	cmd.Profile = profile
 	return runBuild(cmd)
 }
 
