@@ -132,8 +132,8 @@ type Packager struct {
 	install, release     bool
 	certificate, profile string // optional flags for releasing
 	tags, category       string
-	iosVersion                   string
-	androidAPI                   int
+	iosVersion           string
+	androidAPI           int
 }
 
 // AddFlags adds the flags for interacting with the package command.
