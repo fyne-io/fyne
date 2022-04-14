@@ -1506,6 +1506,24 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
 }
 
+func TestWindow_CaptureTypedShortcutWithoutModifier(t *testing.T) {
+	w := createWindow("Test").(*window)
+	content := &typedShortcutable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.Canvas().Focus(content)
+
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Press, 0)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Release, 0)
+
+	w.WaitForEvents()
+
+	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Equal(t, "CustomDesktop:+F", content.capturedShortcuts[0].ShortcutName())
+}
+
 func TestWindow_ManualFocus(t *testing.T) {
 	w := createWindow("Test").(*window)
 	content := &focusable{}

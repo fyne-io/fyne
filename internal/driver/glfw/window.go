@@ -865,7 +865,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 		}
 	}
 
-	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != fyne.KeyModifierShift {
+	if shortcut == nil && !isKeyModifier(keyName) && modifier != fyne.KeyModifierShift {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: modifier,
