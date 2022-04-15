@@ -5,7 +5,6 @@ package binding
 
 import (
 	"bytes"
-	"reflect"
 
 	"fyne.io/fyne/v2"
 )
@@ -27,6 +26,7 @@ type BoolList interface {
 // ExternalBoolList supports binding a list of bool values from an external variable.
 //
 // Since: 2.0
+
 type ExternalBoolList interface {
 	BoolList
 
@@ -220,7 +220,6 @@ type boundExternalBoolListItem struct {
 
 	old bool
 }
-
 func (b *boundExternalBoolListItem) setIfChanged(val bool) error {
 	if val == b.old {
 		return nil
@@ -249,6 +248,7 @@ type BytesList interface {
 // ExternalBytesList supports binding a list of []byte values from an external variable.
 //
 // Since: 2.2
+
 type ExternalBytesList interface {
 	BytesList
 
@@ -442,7 +442,6 @@ type boundExternalBytesListItem struct {
 
 	old []byte
 }
-
 func (b *boundExternalBytesListItem) setIfChanged(val []byte) error {
 	if bytes.Equal(val, b.old) {
 		return nil
@@ -471,6 +470,7 @@ type FloatList interface {
 // ExternalFloatList supports binding a list of float64 values from an external variable.
 //
 // Since: 2.0
+
 type ExternalFloatList interface {
 	FloatList
 
@@ -664,7 +664,6 @@ type boundExternalFloatListItem struct {
 
 	old float64
 }
-
 func (b *boundExternalFloatListItem) setIfChanged(val float64) error {
 	if val == b.old {
 		return nil
@@ -693,6 +692,7 @@ type IntList interface {
 // ExternalIntList supports binding a list of int values from an external variable.
 //
 // Since: 2.0
+
 type ExternalIntList interface {
 	IntList
 
@@ -886,7 +886,6 @@ type boundExternalIntListItem struct {
 
 	old int
 }
-
 func (b *boundExternalIntListItem) setIfChanged(val int) error {
 	if val == b.old {
 		return nil
@@ -915,6 +914,7 @@ type RuneList interface {
 // ExternalRuneList supports binding a list of rune values from an external variable.
 //
 // Since: 2.0
+
 type ExternalRuneList interface {
 	RuneList
 
@@ -1108,7 +1108,6 @@ type boundExternalRuneListItem struct {
 
 	old rune
 }
-
 func (b *boundExternalRuneListItem) setIfChanged(val rune) error {
 	if val == b.old {
 		return nil
@@ -1137,6 +1136,7 @@ type StringList interface {
 // ExternalStringList supports binding a list of string values from an external variable.
 //
 // Since: 2.0
+
 type ExternalStringList interface {
 	StringList
 
@@ -1330,7 +1330,6 @@ type boundExternalStringListItem struct {
 
 	old string
 }
-
 func (b *boundExternalStringListItem) setIfChanged(val string) error {
 	if val == b.old {
 		return nil
@@ -1359,10 +1358,13 @@ type UntypedList interface {
 // ExternalUntypedList supports binding a list of interface{} values from an external variable.
 //
 // Since: 2.1
+type UntypedItemComparator func(a interface{}, b interface{}) bool
+
 type ExternalUntypedList interface {
 	UntypedList
 
 	Reload() error
+	SetItemComparator(comparator UntypedItemComparator)
 }
 
 // NewUntypedList returns a bindable list of interface{} values.
@@ -1395,6 +1397,7 @@ type boundUntypedList struct {
 
 	updateExternal bool
 	val            *[]interface{}
+	comparator UntypedItemComparator
 }
 
 func (l *boundUntypedList) Append(val interface{}) error {
@@ -1447,6 +1450,13 @@ func (l *boundUntypedList) Set(v []interface{}) error {
 	return l.doReload()
 }
 
+// Sets the internal function to use when comparing items in the list. This comparison occurs e.g. on Append.
+//
+// Since: 2.1
+func (l *boundUntypedList) SetItemComparator(comparator UntypedItemComparator) {
+	l.comparator = comparator
+}
+
 func (l *boundUntypedList) doReload() (retErr error) {
 	oldLen := len(l.items)
 	newLen := len(*l.val)
@@ -1470,7 +1480,7 @@ func (l *boundUntypedList) doReload() (retErr error) {
 		var err error
 		if l.updateExternal {
 			item.(*boundExternalUntypedListItem).lock.Lock()
-			err = item.(*boundExternalUntypedListItem).setIfChanged((*l.val)[i])
+			err = item.(*boundExternalUntypedListItem).setIfChanged((*l.val)[i], l.comparator)
 			item.(*boundExternalUntypedListItem).lock.Unlock()
 		} else {
 			item.(*boundUntypedListItem).lock.Lock()
@@ -1552,10 +1562,15 @@ type boundExternalUntypedListItem struct {
 
 	old interface{}
 }
-
-func (b *boundExternalUntypedListItem) setIfChanged(val interface{}) error {
-	if reflect.DeepEqual(val, b.old) {
-		return nil
+func (b *boundExternalUntypedListItem) setIfChanged(val interface{}, comparator UntypedItemComparator) error {
+	if comparator == nil {
+		if val == b.old {
+			return nil
+		}
+	} else {
+		if comparator(val, b.old) {
+			return nil
+		}
 	}
 	(*b.val)[b.index] = val
 	b.old = val
@@ -1581,6 +1596,7 @@ type URIList interface {
 // ExternalURIList supports binding a list of fyne.URI values from an external variable.
 //
 // Since: 2.1
+
 type ExternalURIList interface {
 	URIList
 
@@ -1774,7 +1790,6 @@ type boundExternalURIListItem struct {
 
 	old fyne.URI
 }
-
 func (b *boundExternalURIListItem) setIfChanged(val fyne.URI) error {
 	if compareURI(val, b.old) {
 		return nil

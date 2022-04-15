@@ -1,16 +1,18 @@
 package binding
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeepItems(t *testing.T) {
-	type DeepItem struct {
-		name     string
-		subArray []string
-	}
+type DeepItem struct {
+	name     string
+	subArray []string
+}
+
+func setupDeepItemArray() ExternalUntypedList {
 	deepItemArray := []DeepItem{
 		{
 			name:     "first",
@@ -24,7 +26,21 @@ func TestDeepItems(t *testing.T) {
 	for index, deepItem := range deepItemArray {
 		interfaceArray[index] = deepItem
 	}
-	untypedList := BindUntypedList(&interfaceArray)
+	return BindUntypedList(&interfaceArray)
+}
+
+func TestDeepItemsWithPanic(t *testing.T) {
+	untypedList := setupDeepItemArray()
+	defer func() {
+		recover()
+	}()
+	untypedList.Append(DeepItem{name: "third", subArray: []string{"sub-item-3"}})
+	t.Errorf("should have panicked")
+}
+
+func TestDeepItemsWithDeepEqual(t *testing.T) {
+	untypedList := setupDeepItemArray()
+	untypedList.SetItemComparator(reflect.DeepEqual)
 	untypedList.Append(DeepItem{name: "third", subArray: []string{"sub-item-3"}})
 	assert.Equal(t, 3, untypedList.Length())
 }

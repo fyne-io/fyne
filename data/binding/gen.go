@@ -388,10 +388,17 @@ type {{ .Name }}List interface {
 // External{{ .Name }}List supports binding a list of {{ .Type }} values from an external variable.
 //
 // Since: {{ .Since }}
+{{- if eq .Name "Untyped" }}
+type UntypedItemComparator func(a interface{}, b interface{}) bool
+{{- end }}
+
 type External{{ .Name }}List interface {
 	{{ .Name }}List
 
 	Reload() error
+	{{- if eq .Name "Untyped" }}
+	SetItemComparator(comparator UntypedItemComparator)
+	{{- end }}
 }
 
 // New{{ .Name }}List returns a bindable list of {{ .Type }} values.
@@ -424,6 +431,9 @@ type bound{{ .Name }}List struct {
 
 	updateExternal bool
 	val            *[]{{ .Type }}
+{{- if eq .Name "Untyped" }}
+	comparator UntypedItemComparator
+{{- end }}
 }
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
@@ -476,6 +486,16 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 	return l.doReload()
 }
 
+{{- if eq .Name "Untyped" }}
+
+// Sets the internal function to use when comparing items in the list. This comparison occurs e.g. on Append.
+//
+// Since: {{ .Since }}
+func (l *bound{{ .Name }}List) SetItemComparator(comparator UntypedItemComparator) {
+	l.comparator = comparator
+}
+{{- end }}
+
 func (l *bound{{ .Name }}List) doReload() (retErr error) {
 	oldLen := len(l.items)
 	newLen := len(*l.val)
@@ -499,7 +519,11 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 		var err error
 		if l.updateExternal {
 			item.(*boundExternal{{ .Name }}ListItem).lock.Lock()
+			{{- if eq .Name "Untyped" }}
+			err = item.(*boundExternal{{ .Name }}ListItem).setIfChanged((*l.val)[i], l.comparator)
+			{{- else }}
 			err = item.(*boundExternal{{ .Name }}ListItem).setIfChanged((*l.val)[i])
+			{{- end }}
 			item.(*boundExternal{{ .Name }}ListItem).lock.Unlock()
 		} else {
 			item.(*bound{{ .Name }}ListItem).lock.Lock()
@@ -582,7 +606,28 @@ type boundExternal{{ .Name }}ListItem struct {
 	old {{ .Type }}
 }
 
+{{- if eq .Name "Untyped" }}
+func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}, comparator UntypedItemComparator) error {
+{{- else }}
 func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+{{- end }}
+{{- if eq .Name "Untyped" }}
+	if comparator == nil {
+		{{- if eq .Comparator "" }}
+		if val == b.old {
+			return nil
+		}
+		{{- else }}
+		if {{ .Comparator }}(val, b.old) {
+			return nil
+		}
+		{{- end }}
+	} else {
+		if comparator(val, b.old) {
+			return nil
+		}
+	}
+{{- else }}
 	{{- if eq .Comparator "" }}
 	if val == b.old {
 		return nil
@@ -592,6 +637,7 @@ func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 		return nil
 	}
 	{{- end }}
+{{- end }}
 	(*b.val)[b.index] = val
 	b.old = val
 
@@ -680,7 +726,6 @@ const keyTypeMismatchError = "A previous preference binding exists with differen
 	listFile.WriteString(`
 import (
 	"bytes"
-	"reflect"
 
 	"fyne.io/fyne/v2"
 )
@@ -698,7 +743,7 @@ import (
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1", Comparator: "reflect.DeepEqual"},
+		bindValues{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
 		bindValues{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
