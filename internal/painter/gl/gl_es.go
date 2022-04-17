@@ -123,9 +123,6 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glClearBuffer() {
-	p.ctx.UseProgram(p.program)
-	p.logError()
-
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
