@@ -55,7 +55,10 @@ func (p *painter) SetFrameBufferScale(scale float32) {
 }
 
 func (p *painter) Clear() {
-	p.glClearBuffer()
+	r, g, b, a := theme.BackgroundColor().RGBA()
+	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
+	p.logError()
 }
 
 func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
@@ -94,13 +97,6 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
-}
-
-func (p *painter) glClearBuffer() {
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
-	p.logError()
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
