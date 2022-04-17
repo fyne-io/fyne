@@ -487,7 +487,6 @@ func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 }
 
 {{- if eq .Name "Untyped" }}
-
 // Sets the internal function to use when comparing items in the list. This comparison occurs e.g. on Append.
 //
 // Since: {{ .Since }}
