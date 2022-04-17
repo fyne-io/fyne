@@ -332,7 +332,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	return color.Transparent
 }
 
-// TextFont returns the font resource for the regular font style
+// Font returns the font resource for the regular font style
 func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	if style.Monospace {
 		return t.monospace
