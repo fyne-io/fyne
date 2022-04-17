@@ -11,7 +11,6 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
-	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -102,13 +101,6 @@ func (p *painter) Init() {
 	p.logError()
 
 	p.lineProgram = Program(lineProg)
-	p.logError()
-}
-
-func (p *painter) glClearBuffer() {
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
 	p.logError()
 }
 

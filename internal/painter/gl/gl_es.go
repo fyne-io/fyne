@@ -18,7 +18,6 @@ import (
 	gl "github.com/go-gl/gl/v3.1/gles2"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -120,13 +119,6 @@ func (p *painter) Init() {
 	p.logError()
 
 	p.lineProgram = Program(lineProg)
-}
-
-func (p *painter) glClearBuffer() {
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
-	p.logError()
 }
 
 func (p *painter) glScissorOpen(x, y, w, h int32) {

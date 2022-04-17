@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Painter defines the functionality of our OpenGL based renderer
@@ -93,6 +94,13 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
+}
+
+func (p *painter) glClearBuffer() {
+	r, g, b, a := theme.BackgroundColor().RGBA()
+	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
+	p.logError()
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
