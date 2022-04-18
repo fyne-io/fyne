@@ -105,12 +105,6 @@ func (p *painter) Init() {
 	p.logError()
 }
 
-func (p *painter) glScissorOpen(x, y, w, h int32) {
-	p.ctx.Scissor(x, y, w, h)
-	p.ctx.Enable(scissorTest)
-	p.logError()
-}
-
 func (p *painter) glScissorClose() {
 	p.glctx().Disable(gl.ScissorTest)
 	p.logError()

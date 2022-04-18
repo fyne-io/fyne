@@ -136,12 +136,6 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	return Program(prog)
 }
 
-func (p *painter) glScissorOpen(x, y, w, h int32) {
-	p.ctx.Scissor(x, y, w, h)
-	p.ctx.Enable(scissorTest)
-	p.logError()
-}
-
 func (p *painter) glScissorClose() {
 	gl.Disable(gl.SCISSOR_TEST)
 	p.logError()
