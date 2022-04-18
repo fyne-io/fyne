@@ -5,6 +5,7 @@ type context interface {
 	BindTexture(target uint32, texture Texture)
 	Clear(mask uint32)
 	ClearColor(r, g, b, a float32)
+	CreateBuffer() Buffer
 	CreateTexture() Texture
 	DeleteTexture(texture Texture)
 	Disable(capability uint32)

@@ -110,9 +110,9 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	p.ctx.UseProgram(p.program)
 
-	buf := ctx.CreateBuffer()
+	buf := p.ctx.CreateBuffer()
 	p.logError()
-	ctx.BindBuffer(gl.ArrayBuffer, buf)
+	ctx.BindBuffer(gl.ArrayBuffer, gl.Buffer(buf))
 	p.logError()
 	ctx.BufferData(gl.ArrayBuffer, f32Bytes(binary.LittleEndian, points...), gl.DynamicDraw)
 	p.logError()
@@ -127,7 +127,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	ctx.VertexAttribPointer(texCoordAttrib, 2, gl.Float, false, 5*4, 3*4)
 	p.logError()
 
-	return Buffer(buf)
+	return buf
 }
 
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
@@ -135,9 +135,9 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	p.ctx.UseProgram(p.lineProgram)
 
-	buf := ctx.CreateBuffer()
+	buf := p.ctx.CreateBuffer()
 	p.logError()
-	ctx.BindBuffer(gl.ArrayBuffer, buf)
+	ctx.BindBuffer(gl.ArrayBuffer, gl.Buffer(buf))
 	p.logError()
 	ctx.BufferData(gl.ArrayBuffer, f32Bytes(binary.LittleEndian, points...), gl.DynamicDraw)
 	p.logError()
@@ -152,7 +152,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	ctx.VertexAttribPointer(normalAttrib, 2, gl.Float, false, 4*4, 2*4)
 	p.logError()
 
-	return Buffer(buf)
+	return buf
 }
 
 func (p *painter) glFreeBuffer(b Buffer) {
@@ -272,6 +272,10 @@ func (c *mobileContext) Clear(mask uint32) {
 
 func (c *mobileContext) ClearColor(r, g, b, a float32) {
 	c.glContext.ClearColor(r, g, b, a)
+}
+
+func (c *mobileContext) CreateBuffer() Buffer {
+	return Buffer(c.glContext.CreateBuffer())
 }
 
 func (c *mobileContext) CreateTexture() (texture Texture) {

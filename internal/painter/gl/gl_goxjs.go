@@ -104,9 +104,9 @@ func (p *painter) Init() {
 func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.program)
 
-	vbo := gl.CreateBuffer()
+	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer(vbo))
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
 	p.logError()
@@ -121,15 +121,15 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
 	p.logError()
 
-	return Buffer(vbo)
+	return vbo
 }
 
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.lineProgram)
 
-	vbo := gl.CreateBuffer()
+	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer(vbo))
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
 	p.logError()
@@ -144,7 +144,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	gl.VertexAttribPointer(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
 	p.logError()
 
-	return Buffer(vbo)
+	return vbo
 }
 
 func (p *painter) glFreeBuffer(vbo Buffer) {
@@ -223,6 +223,10 @@ func (c *xjsContext) Clear(mask uint32) {
 
 func (c *xjsContext) ClearColor(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
+}
+
+func (c *xjsContext) CreateBuffer() Buffer {
+	return Buffer(gl.CreateBuffer())
 }
 
 func (c *xjsContext) CreateTexture() (texture Texture) {

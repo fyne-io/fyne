@@ -139,10 +139,9 @@ func (p *painter) createProgram(shaderFilename string) Program {
 func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.program)
 
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
+	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, uint32(vbo))
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 	p.logError()
@@ -157,16 +156,15 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 12)
 	p.logError()
 
-	return Buffer(vbo)
+	return vbo
 }
 
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.lineProgram)
 
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
+	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, uint32(vbo))
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 	p.logError()
@@ -181,7 +179,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	gl.VertexAttribPointerWithOffset(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
 	p.logError()
 
-	return Buffer(vbo)
+	return vbo
 }
 
 func (p *painter) glFreeBuffer(vbo Buffer) {
@@ -264,6 +262,12 @@ func (c *coreContext) Clear(mask uint32) {
 
 func (c *coreContext) ClearColor(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
+}
+
+func (c *coreContext) CreateBuffer() Buffer {
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	return Buffer(vbo)
 }
 
 func (c *coreContext) CreateTexture() (texture Texture) {
