@@ -17,6 +17,7 @@ const (
 	bitDepthBuffer   = gl.DEPTH_BUFFER_BIT
 	clampToEdge      = gl.CLAMP_TO_EDGE
 	colorFormatRGBA  = gl.RGBA
+	scissorTest      = gl.SCISSOR_TEST
 	texture0         = gl.TEXTURE0
 	texture2D        = gl.TEXTURE_2D
 	textureMinFilter = gl.TEXTURE_MIN_FILTER
@@ -102,7 +103,7 @@ func (p *painter) Init() {
 
 func (p *painter) glScissorOpen(x, y, w, h int32) {
 	p.ctx.Scissor(x, y, w, h)
-	gl.Enable(gl.SCISSOR_TEST)
+	p.ctx.Enable(scissorTest)
 	p.logError()
 }
 
@@ -241,6 +242,10 @@ func (c *xjsContext) CreateTexture() (texture Texture) {
 
 func (c *xjsContext) DeleteTexture(texture Texture) {
 	gl.DeleteTexture(gl.Texture(texture))
+}
+
+func (c *xjsContext) Enable(capability uint32) {
+	gl.Enable(gl.Enum(capability))
 }
 
 func (c *xjsContext) GetError() uint32 {
