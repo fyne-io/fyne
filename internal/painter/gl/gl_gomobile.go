@@ -105,11 +105,6 @@ func (p *painter) Init() {
 	p.logError()
 }
 
-func (p *painter) glScissorClose() {
-	p.ctx.Disable(scissorTest)
-	p.logError()
-}
-
 func (p *painter) glCreateBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 

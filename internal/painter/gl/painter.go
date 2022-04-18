@@ -101,6 +101,11 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	cache.DeleteTexture(obj)
 }
 
+func (p *painter) glScissorClose() {
+	p.ctx.Disable(scissorTest)
+	p.logError()
+}
+
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:

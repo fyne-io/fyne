@@ -136,11 +136,6 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	return Program(prog)
 }
 
-func (p *painter) glScissorClose() {
-	p.ctx.Disable(scissorTest)
-	p.logError()
-}
-
 func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.program)
 
