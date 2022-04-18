@@ -74,9 +74,9 @@ var scriptNum = 0
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
-	appID := a.UniqueID() // TODO once we have an app name compiled in this could be improved
+	appID := a.UniqueID()
 	if appID == "" || strings.Index(appID, "missing-id") == 0 {
-		appID = "Fyne app"
+		appID = a.Metadata().Name
 	}
 
 	script := fmt.Sprintf(notificationTemplate, title, content, appID)

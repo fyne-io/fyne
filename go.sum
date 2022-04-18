@@ -37,8 +37,8 @@ cloud.google.com/go/storage v1.6.0/go.mod h1:N7U0C8pVQ/+NIKOBQyamJIeKQKkZ+mxpohl
 cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RXyy7KQOVs=
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-fyne.io/systray v1.9.1-0.20220318224641-d5779bfb17d1 h1:+WSQpU5D3NIpeWKzbIn0D7+OtVbOz7A2e92ezFWacmc=
-fyne.io/systray v1.9.1-0.20220318224641-d5779bfb17d1/go.mod h1:N4ZU0i34X+n8soFRlBNkmJTunw9wD+9jIP19fSZpjSI=
+fyne.io/systray v1.9.1-0.20220331100914-9177bf851614 h1:DD3KJHolqoDHxZI0T7Tln+S6PChowLoD1TYd4wcpaZg=
+fyne.io/systray v1.9.1-0.20220331100914-9177bf851614/go.mod h1:N4ZU0i34X+n8soFRlBNkmJTunw9wD+9jIP19fSZpjSI=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.0.0 h1:dtDWrepsVPfW9H/4y7dDgFc2MBUSeJhlaDtK13CxFlU=
 github.com/BurntSushi/toml v1.0.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
@@ -196,6 +196,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jackmordaunt/icns/v2 v2.2.0 h1:Q+V+6c09VNTfRK1cQpBHC4qBkoLiHkxGXOKAQQSLGSw=
 github.com/jackmordaunt/icns/v2 v2.2.0/go.mod h1:6aYIB9eSzyfHHMKqDf17Xrs1zetQPReAkiUSHzdw4cI=
+github.com/jackmordaunt/icns/v2 v2.2.1 h1:MGklwYP2yohKn2Bw7XxlF69LZe98S1vUfl5OvAulPwg=
+github.com/jackmordaunt/icns/v2 v2.2.1/go.mod h1:6aYIB9eSzyfHHMKqDf17Xrs1zetQPReAkiUSHzdw4cI=
 github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca h1:ozPUX9TKQZVek4lZWYRsQo7uS8vJ+q4OOHvRhHiCLfU=
 github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca h1:ozPUX9TKQZVek4lZWYRsQo7uS8vJ+q4OOHvRhHiCLfU=
 github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca/go.mod h1:eJTEwMjXb7kZ633hO3Ln9mBUCOjX2+FlTljvpl9SYdE=

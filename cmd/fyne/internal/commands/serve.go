@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,13 +12,14 @@ import (
 
 // Server serve fyne wasm application over http
 type Server struct {
-	port                  int
-	srcDir, icon, dir, os string
+	*appData
+	port            int
+	srcDir, dir, os string
 }
 
 // Serve return the cli command for serving fyne wasm application over http
 func Serve() *cli.Command {
-	s := &Server{}
+	s := &Server{appData: &appData{}}
 
 	return &cli.Command{
 		Name:        "serve",
@@ -57,7 +59,8 @@ func (s *Server) requestPackage() error {
 	p := &Packager{
 		os:     s.os,
 		srcDir: s.srcDir,
-		icon:   s.icon,
+
+		appData: s.appData,
 	}
 
 	err := p.Package()
@@ -81,6 +84,7 @@ func (s *Server) serve() error {
 
 	http.Handle("/", fileServer)
 
+	log.Println("AppData", s.appData)
 	fmt.Printf("Serving %s on HTTP port: %v\n", webDir, s.port)
 	err = http.ListenAndServe(":"+strconv.Itoa(s.port), nil)
 
