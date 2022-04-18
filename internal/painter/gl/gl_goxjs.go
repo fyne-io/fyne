@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	arrayBuffer      = gl.ARRAY_BUFFER
 	bitColorBuffer   = gl.COLOR_BUFFER_BIT
 	bitDepthBuffer   = gl.DEPTH_BUFFER_BIT
 	clampToEdge      = gl.CLAMP_TO_EDGE
@@ -33,6 +34,7 @@ type Buffer gl.Buffer
 // Program represents a compiled GL program
 type Program gl.Program
 
+var noBuffer = Buffer(gl.NoBuffer)
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
 func (p *painter) glInit() {
@@ -106,7 +108,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer(vbo))
+	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
 	p.logError()
@@ -129,7 +131,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer(vbo))
+	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
 	p.logError()
@@ -148,7 +150,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 }
 
 func (p *painter) glFreeBuffer(vbo Buffer) {
-	gl.BindBuffer(gl.ARRAY_BUFFER, gl.NoBuffer)
+	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
 	gl.DeleteBuffer(gl.Buffer(vbo))
 	p.logError()
@@ -211,6 +213,10 @@ var _ context = (*xjsContext)(nil)
 
 func (c *xjsContext) ActiveTexture(textureUnit uint32) {
 	gl.ActiveTexture(gl.Enum(textureUnit))
+}
+
+func (c *xjsContext) BindBuffer(target uint32, buf Buffer) {
+	gl.BindBuffer(gl.Enum(target), gl.Buffer(buf))
 }
 
 func (c *xjsContext) BindTexture(target uint32, texture Texture) {

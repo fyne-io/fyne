@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	arrayBuffer      = gl.ArrayBuffer
 	bitColorBuffer   = gl.ColorBufferBit
 	bitDepthBuffer   = gl.DepthBufferBit
 	clampToEdge      = gl.ClampToEdge
@@ -34,6 +35,7 @@ type Buffer gl.Buffer
 // Program represents a compiled GL program
 type Program gl.Program
 
+var noBuffer = Buffer{}
 var textureFilterToGL = []int32{gl.Linear, gl.Nearest}
 
 func (p *painter) glctx() gl.Context {
@@ -112,7 +114,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	buf := p.ctx.CreateBuffer()
 	p.logError()
-	ctx.BindBuffer(gl.ArrayBuffer, gl.Buffer(buf))
+	p.ctx.BindBuffer(arrayBuffer, buf)
 	p.logError()
 	ctx.BufferData(gl.ArrayBuffer, f32Bytes(binary.LittleEndian, points...), gl.DynamicDraw)
 	p.logError()
@@ -137,7 +139,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	buf := p.ctx.CreateBuffer()
 	p.logError()
-	ctx.BindBuffer(gl.ArrayBuffer, gl.Buffer(buf))
+	p.ctx.BindBuffer(arrayBuffer, buf)
 	p.logError()
 	ctx.BufferData(gl.ArrayBuffer, f32Bytes(binary.LittleEndian, points...), gl.DynamicDraw)
 	p.logError()
@@ -158,7 +160,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 func (p *painter) glFreeBuffer(b Buffer) {
 	ctx := p.glctx()
 
-	ctx.BindBuffer(gl.ArrayBuffer, gl.Buffer(b))
+	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
 	ctx.DeleteBuffer(gl.Buffer(b))
 	p.logError()
@@ -260,6 +262,10 @@ var _ context = (*mobileContext)(nil)
 
 func (c *mobileContext) ActiveTexture(textureUnit uint32) {
 	c.glContext.ActiveTexture(gl.Enum(textureUnit))
+}
+
+func (c *mobileContext) BindBuffer(target uint32, buf Buffer) {
+	c.glContext.BindBuffer(gl.Enum(target), gl.Buffer(buf))
 }
 
 func (c *mobileContext) BindTexture(target uint32, texture Texture) {

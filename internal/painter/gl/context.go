@@ -2,6 +2,7 @@ package gl
 
 type context interface {
 	ActiveTexture(textureUnit uint32)
+	BindBuffer(target uint32, buf Buffer)
 	BindTexture(target uint32, texture Texture)
 	Clear(mask uint32)
 	ClearColor(r, g, b, a float32)

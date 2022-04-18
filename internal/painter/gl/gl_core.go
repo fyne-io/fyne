@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	arrayBuffer      = gl.ARRAY_BUFFER
 	bitColorBuffer   = gl.COLOR_BUFFER_BIT
 	bitDepthBuffer   = gl.DEPTH_BUFFER_BIT
 	clampToEdge      = gl.CLAMP_TO_EDGE
@@ -27,6 +28,8 @@ const (
 	textureWrapT     = gl.TEXTURE_WRAP_T
 	unsignedByte     = gl.UNSIGNED_BYTE
 )
+
+const noBuffer = Buffer(0)
 
 // Buffer represents a GL buffer
 type Buffer uint32
@@ -141,7 +144,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, uint32(vbo))
+	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 	p.logError()
@@ -164,7 +167,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	vbo := p.ctx.CreateBuffer()
 	p.logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, uint32(vbo))
+	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 	p.logError()
@@ -183,7 +186,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 }
 
 func (p *painter) glFreeBuffer(vbo Buffer) {
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
 	buf := uint32(vbo)
 	gl.DeleteBuffers(1, &buf)
@@ -250,6 +253,10 @@ var _ context = (*coreContext)(nil)
 
 func (c *coreContext) ActiveTexture(textureUnit uint32) {
 	gl.ActiveTexture(textureUnit)
+}
+
+func (c *coreContext) BindBuffer(target uint32, buf Buffer) {
+	gl.BindBuffer(target, uint32(buf))
 }
 
 func (c *coreContext) BindTexture(target uint32, texture Texture) {
