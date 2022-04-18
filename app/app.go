@@ -35,7 +35,11 @@ type fyneApp struct {
 }
 
 func (a *fyneApp) Icon() fyne.Resource {
-	return a.icon
+	if a.icon != nil {
+		return a.icon
+	}
+
+	return a.Metadata().Icon
 }
 
 func (a *fyneApp) SetIcon(icon fyne.Resource) {
@@ -45,6 +49,9 @@ func (a *fyneApp) SetIcon(icon fyne.Resource) {
 func (a *fyneApp) UniqueID() string {
 	if a.uniqueID != "" {
 		return a.uniqueID
+	}
+	if a.Metadata().ID != "" {
+		return a.Metadata().ID
 	}
 
 	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)

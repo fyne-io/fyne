@@ -1,4 +1,4 @@
-# fyne.io/systray v1.9.1-0.20220318224641-d5779bfb17d1
+# fyne.io/systray v1.9.1-0.20220331100914-9177bf851614
 ## explicit
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
@@ -64,7 +64,7 @@ github.com/goki/freetype/raster
 github.com/goki/freetype/truetype
 # github.com/gopherjs/gopherjs v0.0.0-20211219123610-ec9572f70e60
 github.com/gopherjs/gopherjs/js
-# github.com/jackmordaunt/icns/v2 v2.2.0
+# github.com/jackmordaunt/icns/v2 v2.2.1
 ## explicit
 github.com/jackmordaunt/icns/v2
 # github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca

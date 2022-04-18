@@ -157,10 +157,7 @@ var osTypes = []OsType{
 	{ID: "ic08", Size: uint(256)},
 	{ID: "ic07", Size: uint(128)},
 	{ID: "ic12", Size: uint(64)},
-	{ID: "icp6", Size: uint(64)},
 	{ID: "ic11", Size: uint(32)},
-	{ID: "icp5", Size: uint(32)},
-	{ID: "icp4", Size: uint(16)},
 }
 
 // getTypesFromSize returns the types for the given icon size (in px).
