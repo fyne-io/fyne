@@ -66,7 +66,9 @@ func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
 	w := p.textureScale(size.Width)
 	h := p.textureScale(size.Height)
-	p.glScissorOpen(int32(x), int32(y), int32(w), int32(h))
+	p.ctx.Scissor(int32(x), int32(y), int32(w), int32(h))
+	p.ctx.Enable(scissorTest)
+	p.logError()
 }
 
 func (p *painter) StopClipping() {
@@ -97,12 +99,6 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
-}
-
-func (p *painter) glScissorOpen(x, y, w, h int32) {
-	p.ctx.Scissor(x, y, w, h)
-	p.ctx.Enable(scissorTest)
-	p.logError()
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
