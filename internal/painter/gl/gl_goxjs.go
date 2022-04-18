@@ -102,7 +102,7 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glScissorClose() {
-	gl.Disable(gl.SCISSOR_TEST)
+	p.ctx.Disable(scissorTest)
 	p.logError()
 }
 
@@ -236,6 +236,10 @@ func (c *xjsContext) CreateTexture() (texture Texture) {
 
 func (c *xjsContext) DeleteTexture(texture Texture) {
 	gl.DeleteTexture(gl.Texture(texture))
+}
+
+func (c *xjsContext) Disable(capability uint32) {
+	gl.Disable(gl.Enum(capability))
 }
 
 func (c *xjsContext) Enable(capability uint32) {

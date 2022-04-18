@@ -137,7 +137,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 }
 
 func (p *painter) glScissorClose() {
-	gl.Disable(gl.SCISSOR_TEST)
+	p.ctx.Disable(scissorTest)
 	p.logError()
 }
 
@@ -280,6 +280,10 @@ func (c *coreContext) CreateTexture() (texture Texture) {
 func (c *coreContext) DeleteTexture(texture Texture) {
 	tex := uint32(texture)
 	gl.DeleteTextures(1, &tex)
+}
+
+func (c *coreContext) Disable(capability uint32) {
+	gl.Disable(capability)
 }
 
 func (c *coreContext) Enable(capability uint32) {

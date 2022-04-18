@@ -7,6 +7,7 @@ type context interface {
 	ClearColor(r, g, b, a float32)
 	CreateTexture() Texture
 	DeleteTexture(texture Texture)
+	Disable(capability uint32)
 	Enable(capability uint32)
 	GetError() uint32
 	Scissor(x, y, w, h int32)

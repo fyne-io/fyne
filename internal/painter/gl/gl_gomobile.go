@@ -106,7 +106,7 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glScissorClose() {
-	p.glctx().Disable(gl.ScissorTest)
+	p.ctx.Disable(scissorTest)
 	p.logError()
 }
 
@@ -285,6 +285,10 @@ func (c *mobileContext) CreateTexture() (texture Texture) {
 
 func (c *mobileContext) DeleteTexture(texture Texture) {
 	c.glContext.DeleteTexture(gl.Texture(texture))
+}
+
+func (c *mobileContext) Disable(capability uint32) {
+	c.glContext.Disable(gl.Enum(capability))
 }
 
 func (c *mobileContext) Enable(capability uint32) {
