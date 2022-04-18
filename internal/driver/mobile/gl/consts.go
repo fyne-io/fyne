@@ -59,6 +59,7 @@ const (
 	OneMinusConstantAlpha    = 0x8004
 	ClampToEdge              = 0x812F
 	Texture0                 = 0x84C0
+	StaticDraw               = 0x88E4
 	DynamicDraw              = 0x88E8
 	FragmentShader           = 0x8B30
 	VertexShader             = 0x8B31

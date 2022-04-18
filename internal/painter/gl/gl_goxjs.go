@@ -19,6 +19,7 @@ const (
 	clampToEdge      = gl.CLAMP_TO_EDGE
 	colorFormatRGBA  = gl.RGBA
 	scissorTest      = gl.SCISSOR_TEST
+	staticDraw       = gl.STATIC_DRAW
 	texture0         = gl.TEXTURE0
 	texture2D        = gl.TEXTURE_2D
 	textureMinFilter = gl.TEXTURE_MIN_FILTER
@@ -110,7 +111,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.logError()
 	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
-	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
 	vertAttrib := gl.GetAttribLocation(gl.Program(p.program), "vert")
@@ -133,7 +134,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.logError()
 	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
-	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
 	vertAttrib := gl.GetAttribLocation(gl.Program(p.lineProgram), "vert")
@@ -221,6 +222,10 @@ func (c *xjsContext) BindBuffer(target uint32, buf Buffer) {
 
 func (c *xjsContext) BindTexture(target uint32, texture Texture) {
 	gl.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *xjsContext) BufferData(target uint32, points []float32, usage uint32) {
+	gl.BufferData(gl.Enum(target), f32.Bytes(binary.LittleEndian, points...), gl.Enum(usage))
 }
 
 func (c *xjsContext) Clear(mask uint32) {

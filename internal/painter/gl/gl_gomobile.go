@@ -20,6 +20,7 @@ const (
 	clampToEdge      = gl.ClampToEdge
 	colorFormatRGBA  = gl.RGBA
 	scissorTest      = gl.ScissorTest
+	staticDraw       = gl.StaticDraw
 	texture0         = gl.Texture0
 	texture2D        = gl.Texture2D
 	textureMinFilter = gl.TextureMinFilter
@@ -116,7 +117,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.logError()
 	p.ctx.BindBuffer(arrayBuffer, buf)
 	p.logError()
-	ctx.BufferData(gl.ArrayBuffer, f32Bytes(binary.LittleEndian, points...), gl.DynamicDraw)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
 	vertAttrib := ctx.GetAttribLocation(gl.Program(p.program), "vert")
@@ -141,7 +142,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.logError()
 	p.ctx.BindBuffer(arrayBuffer, buf)
 	p.logError()
-	ctx.BufferData(gl.ArrayBuffer, f32Bytes(binary.LittleEndian, points...), gl.DynamicDraw)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
 	vertAttrib := ctx.GetAttribLocation(gl.Program(p.lineProgram), "vert")
@@ -270,6 +271,11 @@ func (c *mobileContext) BindBuffer(target uint32, buf Buffer) {
 
 func (c *mobileContext) BindTexture(target uint32, texture Texture) {
 	c.glContext.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *mobileContext) BufferData(target uint32, points []float32, usage uint32) {
+	data := f32Bytes(binary.LittleEndian, points...)
+	c.glContext.BufferData(gl.Enum(target), data, gl.Enum(usage))
 }
 
 func (c *mobileContext) Clear(mask uint32) {

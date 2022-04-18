@@ -27,6 +27,7 @@ const (
 	clampToEdge      = gl.CLAMP_TO_EDGE
 	colorFormatRGBA  = gl.RGBA
 	scissorTest      = gl.SCISSOR_TEST
+	staticDraw       = gl.STATIC_DRAW
 	texture0         = gl.TEXTURE0
 	texture2D        = gl.TEXTURE_2D
 	textureMinFilter = gl.TEXTURE_MIN_FILTER
@@ -132,7 +133,7 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.logError()
 	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
 	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vert\x00")))
@@ -155,7 +156,7 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.logError()
 	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
 	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("vert\x00")))
@@ -246,6 +247,10 @@ func (c *esContext) BindBuffer(target uint32, buf Buffer) {
 
 func (c *esContext) BindTexture(target uint32, texture Texture) {
 	gl.BindTexture(target, uint32(texture))
+}
+
+func (c *esContext) BufferData(target uint32, points []float32, usage uint32) {
+	gl.BufferData(target, 4*len(points), gl.Ptr(points), usage)
 }
 
 func (c *esContext) Clear(mask uint32) {
