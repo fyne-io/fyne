@@ -93,8 +93,8 @@ func (p *painter) Init() {
 	}
 
 	prog := p.ctx.CreateProgram()
-	gl.AttachShader(uint32(prog), uint32(vertexShader))
-	gl.AttachShader(uint32(prog), uint32(fragmentShader))
+	p.ctx.AttachShader(prog, vertexShader)
+	p.ctx.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(uint32(prog))
 	p.logError()
 
@@ -110,8 +110,8 @@ func (p *painter) Init() {
 	}
 
 	lineProg := p.ctx.CreateProgram()
-	gl.AttachShader(uint32(lineProg), uint32(vertexLineShader))
-	gl.AttachShader(uint32(lineProg), uint32(fragmentLineShader))
+	p.ctx.AttachShader(lineProg, vertexLineShader)
+	p.ctx.AttachShader(lineProg, fragmentLineShader)
 	gl.LinkProgram(uint32(lineProg))
 	p.logError()
 
@@ -124,6 +124,10 @@ var _ context = (*esContext)(nil)
 
 func (c *esContext) ActiveTexture(textureUnit uint32) {
 	gl.ActiveTexture(textureUnit)
+}
+
+func (c *esContext) AttachShader(program Program, shader Shader) {
+	gl.AttachShader(uint32(program), uint32(shader))
 }
 
 func (c *esContext) BindBuffer(target uint32, buf Buffer) {

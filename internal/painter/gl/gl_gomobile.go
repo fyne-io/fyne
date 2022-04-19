@@ -81,8 +81,8 @@ func (p *painter) Init() {
 	}
 
 	prog := p.ctx.CreateProgram()
-	p.glctx().AttachShader(gl.Program(prog), gl.Shader(vertexShader))
-	p.glctx().AttachShader(gl.Program(prog), gl.Shader(fragmentShader))
+	p.ctx.AttachShader(prog, vertexShader)
+	p.ctx.AttachShader(prog, fragmentShader)
 	p.glctx().LinkProgram(gl.Program(prog))
 	p.logError()
 
@@ -99,8 +99,8 @@ func (p *painter) Init() {
 	}
 
 	lineProg := p.ctx.CreateProgram()
-	p.glctx().AttachShader(gl.Program(lineProg), gl.Shader(vertexLineShader))
-	p.glctx().AttachShader(gl.Program(lineProg), gl.Shader(fragmentLineShader))
+	p.ctx.AttachShader(lineProg, vertexLineShader)
+	p.ctx.AttachShader(lineProg, fragmentLineShader)
 	p.glctx().LinkProgram(gl.Program(lineProg))
 	p.logError()
 
@@ -149,6 +149,10 @@ var _ context = (*mobileContext)(nil)
 
 func (c *mobileContext) ActiveTexture(textureUnit uint32) {
 	c.glContext.ActiveTexture(gl.Enum(textureUnit))
+}
+
+func (c *mobileContext) AttachShader(program Program, shader Shader) {
+	c.glContext.AttachShader(gl.Program(program), gl.Shader(shader))
 }
 
 func (c *mobileContext) BindBuffer(target uint32, buf Buffer) {

@@ -2,6 +2,7 @@ package gl
 
 type context interface {
 	ActiveTexture(textureUnit uint32)
+	AttachShader(program Program, shader Shader)
 	BindBuffer(target uint32, buf Buffer)
 	BindTexture(target uint32, texture Texture)
 	BlendColor(r, g, b, a float32)

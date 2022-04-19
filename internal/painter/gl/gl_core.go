@@ -104,8 +104,8 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	prog := p.ctx.CreateProgram()
-	gl.AttachShader(uint32(prog), uint32(vertexShader))
-	gl.AttachShader(uint32(prog), uint32(fragmentShader))
+	p.ctx.AttachShader(prog, vertexShader)
+	p.ctx.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(uint32(prog))
 
 	var logLength int32
@@ -136,6 +136,10 @@ var _ context = (*coreContext)(nil)
 
 func (c *coreContext) ActiveTexture(textureUnit uint32) {
 	gl.ActiveTexture(textureUnit)
+}
+
+func (c *coreContext) AttachShader(program Program, shader Shader) {
+	gl.AttachShader(uint32(program), uint32(shader))
 }
 
 func (c *coreContext) BindBuffer(target uint32, buf Buffer) {
