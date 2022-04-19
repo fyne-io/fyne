@@ -50,8 +50,10 @@ type painter struct {
 }
 
 var shaderSources = map[string][2][]byte{
-	"line":   {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
-	"simple": {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
+	"line":      {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
+	"line_es":   {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
+	"simple":    {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
+	"simple_es": {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
 }
 
 func (p *painter) SetFrameBufferScale(scale float32) {
