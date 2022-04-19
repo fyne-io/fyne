@@ -12,6 +12,7 @@ type context interface {
 	DeleteTexture(texture Texture)
 	Disable(capability uint32)
 	Enable(capability uint32)
+	EnableVertexAttribArray(attribute Attribute)
 	GetAttribLocation(program Program, name string) Attribute
 	GetError() uint32
 	Scissor(x, y, w, h int32)
