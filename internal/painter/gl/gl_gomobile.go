@@ -33,6 +33,8 @@ const (
 	textureMagFilter      = gl.TextureMagFilter
 	textureWrapS          = gl.TextureWrapS
 	textureWrapT          = gl.TextureWrapT
+	triangles             = gl.Triangles
+	triangleStrip         = gl.TriangleStrip
 	unsignedByte          = gl.UnsignedByte
 )
 
@@ -118,8 +120,6 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glDrawTexture(texture Texture, alpha float32) {
-	ctx := p.glctx()
-
 	p.ctx.UseProgram(p.program)
 
 	// here we have to choose between blending the image alpha or fading it...
@@ -136,7 +136,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 
-	ctx.DrawArrays(gl.TriangleStrip, 0, 4)
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 }
 
@@ -163,7 +163,7 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	featherUniform := ctx.GetUniformLocation(gl.Program(p.lineProgram), "feather")
 	ctx.Uniform1f(featherUniform, feather)
 
-	ctx.DrawArrays(gl.Triangles, 0, 6)
+	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 }
 
@@ -262,6 +262,10 @@ func (c *mobileContext) DeleteTexture(texture Texture) {
 
 func (c *mobileContext) Disable(capability uint32) {
 	c.glContext.Disable(gl.Enum(capability))
+}
+
+func (c *mobileContext) DrawArrays(mode uint32, first, count int) {
+	c.glContext.DrawArrays(gl.Enum(mode), first, count)
 }
 
 func (c *mobileContext) Enable(capability uint32) {

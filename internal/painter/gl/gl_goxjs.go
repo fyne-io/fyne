@@ -32,6 +32,8 @@ const (
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
 	textureWrapS          = gl.TEXTURE_WRAP_S
 	textureWrapT          = gl.TEXTURE_WRAP_T
+	triangles             = gl.TRIANGLES
+	triangleStrip         = gl.TRIANGLE_STRIP
 	unsignedByte          = gl.UNSIGNED_BYTE
 )
 
@@ -130,7 +132,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 }
 
@@ -155,7 +157,7 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	featherUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "feather")
 	gl.Uniform1f(featherUniform, feather)
 
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 }
 
@@ -218,6 +220,10 @@ func (c *xjsContext) DeleteTexture(texture Texture) {
 
 func (c *xjsContext) Disable(capability uint32) {
 	gl.Disable(gl.Enum(capability))
+}
+
+func (c *xjsContext) DrawArrays(mode uint32, first, count int) {
+	gl.DrawArrays(gl.Enum(mode), first, count)
 }
 
 func (c *xjsContext) Enable(capability uint32) {

@@ -40,6 +40,8 @@ const (
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
 	textureWrapS          = gl.TEXTURE_WRAP_S
 	textureWrapT          = gl.TEXTURE_WRAP_T
+	triangles             = gl.TRIANGLES
+	triangleStrip         = gl.TRIANGLE_STRIP
 	unsignedByte          = gl.UNSIGNED_BYTE
 )
 
@@ -152,7 +154,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	p.ctx.BindTexture(texture2D, texture)
 	p.logError()
 
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 }
 
@@ -177,7 +179,7 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	featherUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("feather\x00"))
 	gl.Uniform1f(featherUniform, feather)
 
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 }
 
@@ -247,6 +249,10 @@ func (c *esContext) DeleteTexture(texture Texture) {
 
 func (c *esContext) Disable(capability uint32) {
 	gl.Disable(capability)
+}
+
+func (c *esContext) DrawArrays(mode uint32, first, count int) {
+	gl.DrawArrays(mode, int32(first), int32(count))
 }
 
 func (c *esContext) Enable(capability uint32) {
