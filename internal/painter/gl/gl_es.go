@@ -11,7 +11,6 @@
 package gl
 
 import (
-	"fmt"
 	"strings"
 
 	gl "github.com/go-gl/gl/v3.1/gles2"
@@ -75,26 +74,6 @@ func (p *painter) glInit() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-}
-
-func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
-	shader := p.ctx.CreateShader(shaderType)
-
-	p.ctx.ShaderSource(shader, source)
-	p.logError()
-	p.ctx.CompileShader(shader)
-	p.logError()
-
-	info := p.ctx.GetShaderInfoLog(shader)
-	if p.ctx.GetShaderi(shader, compileStatus) == glFalse {
-		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
-	}
-
-	if len(info) > 0 {
-		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
-	}
-
-	return shader, nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent) + "\x00"
