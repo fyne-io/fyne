@@ -30,7 +30,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.defineVertexArray("vert", 3, 5*4, 0)
 	p.defineVertexArray("vertTexCoord", 2, 5*4, 12)
 	p.glDrawTexture(texture, alpha)
-	p.glFreeBuffer(vbo)
+	p.freeBuffer(vbo)
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
@@ -49,7 +49,7 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.defineVertexArray("vert", 2, 4*4, 0)
 	p.defineVertexArray("normal", 2, 4*4, 2*4)
 	p.glDrawLine(halfWidth, line.StrokeColor, feather)
-	p.glFreeBuffer(vbo)
+	p.freeBuffer(vbo)
 }
 
 func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {

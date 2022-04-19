@@ -108,6 +108,13 @@ func (p *painter) defineVertexArray(name string, size, stride, offset int) {
 	p.logError()
 }
 
+func (p *painter) freeBuffer(vbo Buffer) {
+	p.ctx.BindBuffer(arrayBuffer, noBuffer)
+	p.logError()
+	p.ctx.DeleteBuffer(vbo)
+	p.logError()
+}
+
 func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	texture, ok := cache.GetTexture(obj)
 	if !ok {
@@ -117,13 +124,6 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	p.ctx.DeleteTexture(Texture(texture))
 	p.logError()
 	cache.DeleteTexture(obj)
-}
-
-func (p *painter) glFreeBuffer(vbo Buffer) {
-	p.ctx.BindBuffer(arrayBuffer, noBuffer)
-	p.logError()
-	p.ctx.DeleteBuffer(vbo)
-	p.logError()
 }
 
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
