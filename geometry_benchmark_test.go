@@ -31,12 +31,16 @@ func BenchmarkSize_Subtract(b *testing.B) {
 	b.Run("SubtractWidthHeight()", benchmarkSizeSubtractWidthHeight)
 }
 
+func nsPerOpPrecise(b testing.BenchmarkResult) float64 {
+	return float64(b.T.Nanoseconds())/float64(b.N)
+}
+
 // This test prevents Position.Add to be simplified to `return p.AddXY(v.Components())`
 // because this slows down the speed by factor 10.
 func TestPosition_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkPositionAdd)
 	addXY := testing.Benchmark(benchmarkPositionAddXY)
-	assert.Less(t, add.NsPerOp()/addXY.NsPerOp(), int64(5))
+	assert.Less(t, nsPerOpPrecise(add), nsPerOpPrecise(addXY)*5)
 }
 
 // This test prevents Position.Subtract to be simplified to `return p.SubtractXY(v.Components())`
@@ -44,7 +48,7 @@ func TestPosition_Add_Speed(t *testing.T) {
 func TestPosition_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkPositionSubtract)
 	subtractXY := testing.Benchmark(benchmarkPositionSubtractXY)
-	assert.Less(t, subtract.NsPerOp()/subtractXY.NsPerOp(), int64(5))
+	assert.Less(t, nsPerOpPrecise(subtract), nsPerOpPrecise(subtractXY)*5)
 }
 
 // This test prevents Size.Add to be simplified to `return s.AddWidthHeight(v.Components())`
@@ -52,7 +56,7 @@ func TestPosition_Subtract_Speed(t *testing.T) {
 func TestSize_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkSizeAdd)
 	addWidthHeight := testing.Benchmark(benchmarkSizeAddWidthHeight)
-	assert.Less(t, add.NsPerOp()/addWidthHeight.NsPerOp(), int64(5))
+	assert.Less(t, nsPerOpPrecise(add), nsPerOpPrecise(addWidthHeight)*5)
 }
 
 // This test prevents Size.Subtract to be simplified to `return s.SubtractWidthHeight(v.Components())`
@@ -60,7 +64,7 @@ func TestSize_Add_Speed(t *testing.T) {
 func TestSize_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkSizeSubtract)
 	subtractWidthHeight := testing.Benchmark(benchmarkSizeSubtractWidthHeight)
-	assert.Less(t, subtract.NsPerOp()/subtractWidthHeight.NsPerOp(), int64(5))
+	assert.Less(t, nsPerOpPrecise(subtract), nsPerOpPrecise(subtractWidthHeight)*5)
 }
 
 var benchmarkResult interface{}
