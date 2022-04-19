@@ -25,8 +25,10 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 		}
 	}
 	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
-	vbo := p.glCreateBuffer(points)
-
+	p.ctx.UseProgram(p.program)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray("vert", 3, 5*4, 0)
+	p.defineVertexArray("vertTexCoord", 2, 5*4, 12)
 	p.glDrawTexture(texture, alpha)
 	p.glFreeBuffer(vbo)
 }
@@ -42,7 +44,10 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	}
 
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
-	vbo := p.glCreateLineBuffer(points)
+	p.ctx.UseProgram(p.lineProgram)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray("vert", 2, 4*4, 0)
+	p.defineVertexArray("normal", 2, 4*4, 2*4)
 	p.glDrawLine(halfWidth, line.StrokeColor, feather)
 	p.glFreeBuffer(vbo)
 }

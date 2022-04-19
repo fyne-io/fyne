@@ -119,22 +119,6 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	cache.DeleteTexture(obj)
 }
 
-func (p *painter) glCreateBuffer(points []float32) Buffer {
-	p.ctx.UseProgram(p.program)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray("vert", 3, 5*4, 0)
-	p.defineVertexArray("vertTexCoord", 2, 5*4, 12)
-	return vbo
-}
-
-func (p *painter) glCreateLineBuffer(points []float32) Buffer {
-	p.ctx.UseProgram(p.lineProgram)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray("vert", 2, 4*4, 0)
-	p.defineVertexArray("normal", 2, 4*4, 2*4)
-	return vbo
-}
-
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
