@@ -236,6 +236,10 @@ func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
 }
 
+func (c *mobileContext) GetProgramInfoLog(program Program) string {
+	return c.glContext.GetProgramInfoLog(gl.Program(program))
+}
+
 func (c *mobileContext) GetShaderi(shader Shader, param uint32) int {
 	return c.glContext.GetShaderi(gl.Shader(shader), gl.Enum(param))
 }

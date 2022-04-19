@@ -209,6 +209,14 @@ var glfnMap = map[glfn]func(c call) (ret uintptr){
 		ret, _, _ = syscall.Syscall(glGetError.Addr(), 0, 0, 0, 0)
 		return ret
 	},
+	glfnGetProgramInfoLog: func(c call) (ret uintptr) {
+		syscall.Syscall6(glGetProgramInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
+		return
+	},
+	glfnGetProgramiv: func(c call) (ret uintptr) {
+		syscall.Syscall(glGetProgramiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return
+	},
 	glfnGetShaderInfoLog: func(c call) (ret uintptr) {
 		syscall.Syscall6(glGetShaderInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
 		return
@@ -329,6 +337,8 @@ var (
 	glGenVertexArrays         = libGLESv2.NewProc("glGenVertexArrays")
 	glGetAttribLocation       = libGLESv2.NewProc("glGetAttribLocation")
 	glGetError                = libGLESv2.NewProc("glGetError")
+	glGetProgramInfoLog       = libGLESv2.NewProc("glGetProgramInfoLog")
+	glGetProgramiv            = libGLESv2.NewProc("glGetProgramiv")
 	glGetShaderInfoLog        = libGLESv2.NewProc("glGetShaderInfoLog")
 	glGetShaderSource         = libGLESv2.NewProc("glGetShaderSource")
 	glGetShaderiv             = libGLESv2.NewProc("glGetShaderiv")

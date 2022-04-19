@@ -142,6 +142,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetError.xhtml
 	GetError() Enum
 
+	// GetProgramInfoLog returns the information log for a shader.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetProgramInfoLog.xhtml
+	GetProgramInfoLog(p Program) string
+
 	// GetShaderi returns a parameter value for a shader.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetShaderiv.xhtml

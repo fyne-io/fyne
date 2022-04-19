@@ -23,6 +23,7 @@ type context interface {
 	EnableVertexAttribArray(attribute Attribute)
 	GetAttribLocation(program Program, name string) Attribute
 	GetError() uint32
+	GetProgramInfoLog(program Program) string
 	GetShaderi(shader Shader, param uint32) int
 	GetShaderInfoLog(shader Shader) string
 	GetUniformLocation(program Program, name string) Uniform

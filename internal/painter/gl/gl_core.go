@@ -108,18 +108,14 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	p.ctx.AttachShader(prog, fragmentShader)
 	p.ctx.LinkProgram(prog)
 
-	var logLength int32
-	gl.GetProgramiv(uint32(prog), gl.INFO_LOG_LENGTH, &logLength)
-	info := strings.Repeat("\x00", int(logLength+1))
-	gl.GetProgramInfoLog(uint32(prog), logLength, nil, gl.Str(info))
-
+	info := p.ctx.GetProgramInfoLog(prog)
 	var status int32
 	gl.GetProgramiv(uint32(prog), gl.LINK_STATUS, &status)
 	if status == gl.FALSE {
 		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
 	}
 
-	if logLength > 0 {
+	if len(info) > 0 {
 		fmt.Printf("OpenGL program linking output:\n%s\n", info)
 	}
 
@@ -225,6 +221,14 @@ func (c *coreContext) GetAttribLocation(program Program, name string) Attribute 
 
 func (c *coreContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *coreContext) GetProgramInfoLog(program Program) string {
+	var logLength int32
+	gl.GetProgramiv(uint32(program), gl.INFO_LOG_LENGTH, &logLength)
+	info := strings.Repeat("\x00", int(logLength+1))
+	gl.GetProgramInfoLog(uint32(program), logLength, nil, gl.Str(info))
+	return info
 }
 
 func (c *coreContext) GetShaderi(shader Shader, param uint32) int {

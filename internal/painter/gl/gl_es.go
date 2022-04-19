@@ -215,6 +215,14 @@ func (c *esContext) GetError() uint32 {
 	return gl.GetError()
 }
 
+func (c *esContext) GetProgramInfoLog(program Program) string {
+	var logLength int32
+	gl.GetProgramiv(uint32(program), gl.INFO_LOG_LENGTH, &logLength)
+	info := strings.Repeat("\x00", int(logLength+1))
+	gl.GetProgramInfoLog(uint32(program), logLength, nil, gl.Str(info))
+	return info
+}
+
 func (c *esContext) GetShaderi(shader Shader, param uint32) int {
 	var value int32
 	gl.GetShaderiv(uint32(shader), param, &value)

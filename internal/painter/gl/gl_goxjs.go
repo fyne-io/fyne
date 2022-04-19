@@ -195,6 +195,10 @@ func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
 }
 
+func (c *xjsContext) GetProgramInfoLog(program Program) string {
+	return gl.GetProgramInfoLog(gl.Program(program))
+}
+
 func (c *xjsContext) GetShaderi(shader Shader, param uint32) int {
 	return gl.GetShaderi(gl.Shader(shader), gl.Enum(param))
 }

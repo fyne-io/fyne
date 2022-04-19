@@ -267,6 +267,37 @@ func (ctx *context) GetError() Enum {
 	}))
 }
 
+func (ctx *context) GetProgrami(p Program, pname Enum) int {
+	return int(ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnGetProgramiv,
+			a0: p.c(),
+			a1: pname.c(),
+		},
+		blocking: true,
+	}))
+}
+
+func (ctx *context) GetProgramInfoLog(p Program) string {
+	infoLen := ctx.GetProgrami(p, InfoLogLength)
+	if infoLen == 0 {
+		return ""
+	}
+	buf := make([]byte, infoLen)
+
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnGetProgramInfoLog,
+			a0: p.c(),
+			a1: uintptr(infoLen),
+		},
+		parg:     unsafe.Pointer(&buf[0]),
+		blocking: true,
+	})
+
+	return goString(buf)
+}
+
 func (ctx *context) GetShaderi(s Shader, pname Enum) int {
 	return int(ctx.enqueue(call{
 		args: fnargs{
