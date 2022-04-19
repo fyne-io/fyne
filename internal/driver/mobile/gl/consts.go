@@ -40,6 +40,7 @@ const (
 	TriangleStrip    = 0x0005
 	SrcAlpha         = 0x0302
 	OneMinusSrcAlpha = 0x0303
+	Front            = 0x0404
 	DepthTest        = 0x0B71
 	Blend            = 0x0BE2
 	ScissorTest      = 0x0C11

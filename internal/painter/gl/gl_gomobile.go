@@ -20,6 +20,7 @@ const (
 	colorFormatRGBA       = gl.RGBA
 	constantAlpha         = gl.ConstantAlpha
 	float                 = gl.Float
+	front                 = gl.Front
 	one                   = gl.One
 	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
 	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
@@ -121,7 +122,9 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
-	p.glctx().ReadPixels(*pixels, 0, 0, int(width), int(height), gl.RGBA, gl.UnsignedByte)
+	p.ctx.ReadBuffer(front)
+	p.logError()
+	p.ctx.ReadPixels(0, 0, int(width), int(height), colorFormatRGBA, unsignedByte, *pixels)
 	p.logError()
 }
 
@@ -239,6 +242,13 @@ func (c *mobileContext) GetError() uint32 {
 
 func (c *mobileContext) GetUniformLocation(program Program, name string) Uniform {
 	return Uniform(c.glContext.GetUniformLocation(gl.Program(program), name))
+}
+
+func (c *mobileContext) ReadBuffer(_ uint32) {
+}
+
+func (c *mobileContext) ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8) {
+	c.glContext.ReadPixels(pixels, x, y, width, height, gl.Enum(colorFormat), gl.Enum(typ))
 }
 
 func (c *mobileContext) Scissor(x, y, w, h int32) {

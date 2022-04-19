@@ -20,6 +20,8 @@ type context interface {
 	GetAttribLocation(program Program, name string) Attribute
 	GetError() uint32
 	GetUniformLocation(program Program, name string) Uniform
+	ReadBuffer(src uint32)
+	ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8)
 	Scissor(x, y, w, h int32)
 	TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8)
 	TexParameteri(target, param uint32, value int32)

@@ -27,6 +27,7 @@ const (
 	colorFormatRGBA       = gl.RGBA
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
+	front                 = gl.FRONT
 	one                   = gl.ONE
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
@@ -139,9 +140,9 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
-	gl.ReadBuffer(gl.FRONT)
+	p.ctx.ReadBuffer(front)
 	p.logError()
-	gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(*pixels))
+	p.ctx.ReadPixels(0, 0, int(width), int(height), colorFormatRGBA, unsignedByte, *pixels)
 	p.logError()
 }
 
@@ -228,6 +229,14 @@ func (c *esContext) GetError() uint32 {
 
 func (c *esContext) GetUniformLocation(program Program, name string) Uniform {
 	return Uniform(gl.GetUniformLocation(uint32(program), gl.Str(name+"\x00")))
+}
+
+func (c *esContext) ReadBuffer(src uint32) {
+	gl.ReadBuffer(src)
+}
+
+func (c *esContext) ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8) {
+	gl.ReadPixels(int32(x), int32(y), int32(width), int32(height), colorFormat, typ, gl.Ptr(pixels))
 }
 
 func (c *esContext) Scissor(x, y, w, h int32) {
