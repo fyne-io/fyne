@@ -64,51 +64,12 @@ func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }
 
-var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
-var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent)
-var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
-var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
-
 func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
-
-	vertShader, err := p.compileShader(vertexShaderSource, vertexShader)
-	if err != nil {
-		panic(err)
-	}
-	fragShader, err := p.compileShader(fragmentShaderSource, fragmentShader)
-	if err != nil {
-		panic(err)
-	}
-
-	prog := p.ctx.CreateProgram()
-	p.ctx.AttachShader(prog, vertShader)
-	p.ctx.AttachShader(prog, fragShader)
-	p.ctx.LinkProgram(prog)
-	p.logError()
-
-	p.program = prog
-	p.logError()
-
-	vertexLineShader, err := p.compileShader(vertexLineShaderSource, vertexShader)
-	if err != nil {
-		panic(err)
-	}
-	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, fragmentShader)
-	if err != nil {
-		panic(err)
-	}
-
-	lineProg := p.ctx.CreateProgram()
-	p.ctx.AttachShader(lineProg, vertexLineShader)
-	p.ctx.AttachShader(lineProg, fragmentLineShader)
-	p.ctx.LinkProgram(lineProg)
-	p.logError()
-
-	p.lineProgram = lineProg
-	p.logError()
+	p.program = p.createProgram("simple_es")
+	p.lineProgram = p.createProgram("line_es")
 }
 
 func (p *painter) glInit() {

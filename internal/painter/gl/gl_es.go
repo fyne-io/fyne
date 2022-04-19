@@ -79,46 +79,10 @@ func (p *painter) glInit() {
 	p.logError()
 }
 
-var vertexShaderSource = string(shaderSimpleesVert.StaticContent) + "\x00"
-var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent) + "\x00"
-var vertexLineShaderSource = string(shaderLineesVert.StaticContent) + "\x00"
-var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent) + "\x00"
-
 func (p *painter) Init() {
 	p.ctx = &esContext{}
-	vertShader, err := p.compileShader(vertexShaderSource, vertexShader)
-	if err != nil {
-		panic(err)
-	}
-	fragShader, err := p.compileShader(fragmentShaderSource, fragmentShader)
-	if err != nil {
-		panic(err)
-	}
-
-	prog := p.ctx.CreateProgram()
-	p.ctx.AttachShader(prog, vertShader)
-	p.ctx.AttachShader(prog, fragShader)
-	p.ctx.LinkProgram(prog)
-	p.logError()
-
-	p.program = prog
-
-	vertexLineShader, err := p.compileShader(vertexLineShaderSource, vertexShader)
-	if err != nil {
-		panic(err)
-	}
-	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, fragmentShader)
-	if err != nil {
-		panic(err)
-	}
-
-	lineProg := p.ctx.CreateProgram()
-	p.ctx.AttachShader(lineProg, vertexLineShader)
-	p.ctx.AttachShader(lineProg, fragmentLineShader)
-	p.ctx.LinkProgram(lineProg)
-	p.logError()
-
-	p.lineProgram = lineProg
+	p.program = p.createProgram("simple_es")
+	p.lineProgram = p.createProgram("line_es")
 }
 
 type esContext struct{}
