@@ -60,6 +60,10 @@ type (
 )
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
+var shaderSources = map[string][2][]byte{
+	"line":   {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
+	"simple": {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
+}
 
 func (p *painter) glInit() {
 	err := gl.Init()
@@ -80,23 +84,14 @@ func (p *painter) Init() {
 }
 
 func (p *painter) createProgram(shaderFilename string) Program {
-	var vertexSrc []byte
-	var fragmentSrc []byte
-
 	// Why a switch over a filename?
 	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
 	// fyne bundle.
-	switch shaderFilename {
-	case "line":
-		vertexSrc = shaderLineVert.StaticContent
-		fragmentSrc = shaderLineFrag.StaticContent
-	case "simple":
-		vertexSrc = shaderSimpleVert.StaticContent
-		fragmentSrc = shaderSimpleFrag.StaticContent
-	default:
+	sources := shaderSources[shaderFilename]
+	vertexSrc, fragmentSrc := sources[0], sources[1]
+	if vertexSrc == nil {
 		panic("shader not found: " + shaderFilename)
 	}
-
 	vertShader, err := p.compileShader(string(vertexSrc)+"\x00", vertexShader)
 	if err != nil {
 		panic(err)
