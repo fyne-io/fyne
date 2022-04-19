@@ -18,9 +18,11 @@ const (
 	bitDepthBuffer        = gl.DepthBufferBit
 	clampToEdge           = gl.ClampToEdge
 	colorFormatRGBA       = gl.RGBA
+	compileStatus         = gl.CompileStatus
 	constantAlpha         = gl.ConstantAlpha
 	float                 = gl.Float
 	front                 = gl.Front
+	glFalse               = gl.False
 	one                   = gl.One
 	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
 	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
@@ -68,8 +70,7 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 	p.logError()
 
 	info := p.ctx.GetShaderInfoLog(shader)
-	status := p.glctx().GetShaderi(gl.Shader(shader), gl.CompileStatus)
-	if status == gl.False {
+	if p.ctx.GetShaderi(shader, compileStatus) == glFalse {
 		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
 
@@ -245,6 +246,10 @@ func (c *mobileContext) GetAttribLocation(program Program, name string) Attribut
 
 func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
+}
+
+func (c *mobileContext) GetShaderi(shader Shader, param uint32) int {
+	return c.glContext.GetShaderi(gl.Shader(shader), gl.Enum(param))
 }
 
 func (c *mobileContext) GetShaderInfoLog(shader Shader) string {
