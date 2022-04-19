@@ -10,6 +10,7 @@ type context interface {
 	Clear(mask uint32)
 	ClearColor(r, g, b, a float32)
 	CreateBuffer() Buffer
+	CreateShader(typ uint32) Shader
 	CreateTexture() Texture
 	DeleteBuffer(buffer Buffer)
 	DeleteTexture(texture Texture)

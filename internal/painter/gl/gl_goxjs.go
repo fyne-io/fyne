@@ -60,16 +60,16 @@ func (p *painter) glInit() {
 	p.logError()
 }
 
-func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, error) {
-	shader := gl.CreateShader(shaderType)
+func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
+	shader := p.ctx.CreateShader(shaderType)
 
-	gl.ShaderSource(shader, source)
+	gl.ShaderSource(gl.Shader(shader), source)
 	p.logError()
-	gl.CompileShader(shader)
+	gl.CompileShader(gl.Shader(shader))
 	p.logError()
 
-	info := p.ctx.GetShaderInfoLog(Shader(shader))
-	status := gl.GetShaderi(shader, gl.COMPILE_STATUS)
+	info := p.ctx.GetShaderInfoLog(shader)
+	status := gl.GetShaderi(gl.Shader(shader), gl.COMPILE_STATUS)
 	if status == gl.FALSE {
 		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
@@ -78,7 +78,7 @@ func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, erro
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
-	return Shader(shader), nil
+	return shader, nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
@@ -161,6 +161,10 @@ func (c *xjsContext) ClearColor(r, g, b, a float32) {
 
 func (c *xjsContext) CreateBuffer() Buffer {
 	return Buffer(gl.CreateBuffer())
+}
+
+func (c *xjsContext) CreateShader(typ uint32) Shader {
+	return Shader(gl.CreateShader(gl.Enum(typ)))
 }
 
 func (c *xjsContext) CreateTexture() (texture Texture) {

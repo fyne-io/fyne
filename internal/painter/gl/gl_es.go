@@ -76,18 +76,18 @@ func (p *painter) glInit() {
 }
 
 func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
-	shader := gl.CreateShader(shaderType)
+	shader := p.ctx.CreateShader(shaderType)
 
 	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
+	gl.ShaderSource(uint32(shader), 1, csources, nil)
 	p.logError()
 	free()
-	gl.CompileShader(shader)
+	gl.CompileShader(uint32(shader))
 	p.logError()
 
-	info := p.ctx.GetShaderInfoLog(Shader(shader))
+	info := p.ctx.GetShaderInfoLog(shader)
 	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
+	gl.GetShaderiv(uint32(shader), gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
 		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
@@ -96,7 +96,7 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
-	return Shader(shader), nil
+	return shader, nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent) + "\x00"
@@ -181,6 +181,10 @@ func (c *esContext) CreateBuffer() Buffer {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	return Buffer(vbo)
+}
+
+func (c *esContext) CreateShader(typ uint32) Shader {
+	return Shader(gl.CreateShader(typ))
 }
 
 func (c *esContext) CreateTexture() (texture Texture) {

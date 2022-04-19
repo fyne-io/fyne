@@ -59,16 +59,16 @@ func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }
 
-func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, error) {
-	shader := p.glctx().CreateShader(shaderType)
+func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
+	shader := p.ctx.CreateShader(shaderType)
 
-	p.glctx().ShaderSource(shader, source)
+	p.glctx().ShaderSource(gl.Shader(shader), source)
 	p.logError()
-	p.glctx().CompileShader(shader)
+	p.glctx().CompileShader(gl.Shader(shader))
 	p.logError()
 
-	info := p.ctx.GetShaderInfoLog(Shader(shader))
-	status := p.glctx().GetShaderi(shader, gl.CompileStatus)
+	info := p.ctx.GetShaderInfoLog(shader)
+	status := p.glctx().GetShaderi(gl.Shader(shader), gl.CompileStatus)
 	if status == gl.False {
 		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
@@ -77,7 +77,7 @@ func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, erro
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
-	return Shader(shader), nil
+	return shader, nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
@@ -201,6 +201,10 @@ func (c *mobileContext) ClearColor(r, g, b, a float32) {
 
 func (c *mobileContext) CreateBuffer() Buffer {
 	return Buffer(c.glContext.CreateBuffer())
+}
+
+func (c *mobileContext) CreateShader(typ uint32) Shader {
+	return Shader(c.glContext.CreateShader(gl.Enum(typ)))
 }
 
 func (c *mobileContext) CreateTexture() (texture Texture) {
