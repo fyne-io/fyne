@@ -37,14 +37,16 @@ const (
 	unsignedByte          = gl.UNSIGNED_BYTE
 )
 
-// Attribute represents a GL attribute.
-type Attribute gl.Attrib
-
-// Buffer represents a GL buffer
-type Buffer gl.Buffer
-
-// Program represents a compiled GL program
-type Program gl.Program
+type (
+	// Attribute represents a GL attribute
+	Attribute gl.Attrib
+	// Buffer represents a GL buffer
+	Buffer gl.Buffer
+	// Program represents a compiled GL program
+	Program gl.Program
+	// Uniform represents a GL uniform
+	Uniform gl.Uniform
+)
 
 var noBuffer = Buffer(gl.NoBuffer)
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
@@ -121,20 +123,20 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 
-	colorUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "color")
+	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
 	r, g, b, a := col.RGBA()
 	if a == 0 {
-		gl.Uniform4f(colorUniform, 0, 0, 0, 0)
+		gl.Uniform4f(gl.Uniform(colorUniform), 0, 0, 0, 0)
 	} else {
 		alpha := float32(a)
 		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
-		gl.Uniform4fv(colorUniform, col)
+		gl.Uniform4fv(gl.Uniform(colorUniform), col)
 	}
-	lineWidthUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "lineWidth")
-	gl.Uniform1f(lineWidthUniform, width)
+	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
+	gl.Uniform1f(gl.Uniform(lineWidthUniform), width)
 
-	featherUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "feather")
-	gl.Uniform1f(featherUniform, feather)
+	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
+	gl.Uniform1f(gl.Uniform(featherUniform), feather)
 
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
@@ -219,6 +221,10 @@ func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
 
 func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) GetUniformLocation(program Program, name string) Uniform {
+	return Uniform(gl.GetUniformLocation(gl.Program(program), name))
 }
 
 func (c *xjsContext) Scissor(x, y, w, h int32) {

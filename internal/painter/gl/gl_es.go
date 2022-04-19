@@ -47,14 +47,16 @@ const (
 
 const noBuffer = Buffer(0)
 
-// Attribute represents a GL attribute.
-type Attribute uint32
-
-// Buffer represents a GL buffer
-type Buffer uint32
-
-// Program represents a compiled GL program
-type Program uint32
+type (
+	// Attribute represents a GL attribute
+	Attribute int32
+	// Buffer represents a GL buffer
+	Buffer uint32
+	// Program represents a compiled GL program
+	Program uint32
+	// Uniform represents a GL uniform
+	Uniform int32
+)
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
@@ -143,20 +145,20 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 
-	colorUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("color\x00"))
+	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
 	r, g, b, a := col.RGBA()
 	if a == 0 {
-		gl.Uniform4f(colorUniform, 0, 0, 0, 0)
+		gl.Uniform4f(int32(colorUniform), 0, 0, 0, 0)
 	} else {
 		alpha := float32(a)
 		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
-		gl.Uniform4fv(colorUniform, 1, &col[0])
+		gl.Uniform4fv(int32(colorUniform), 1, &col[0])
 	}
-	lineWidthUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("lineWidth\x00"))
-	gl.Uniform1f(lineWidthUniform, width)
+	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
+	gl.Uniform1f(int32(lineWidthUniform), width)
 
-	featherUniform := gl.GetUniformLocation(uint32(p.lineProgram), gl.Str("feather\x00"))
-	gl.Uniform1f(featherUniform, feather)
+	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
+	gl.Uniform1f(int32(featherUniform), feather)
 
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
@@ -248,6 +250,10 @@ func (c *esContext) GetAttribLocation(program Program, name string) Attribute {
 
 func (c *esContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *esContext) GetUniformLocation(program Program, name string) Uniform {
+	return Uniform(gl.GetUniformLocation(uint32(program), gl.Str(name+"\x00")))
 }
 
 func (c *esContext) Scissor(x, y, w, h int32) {
