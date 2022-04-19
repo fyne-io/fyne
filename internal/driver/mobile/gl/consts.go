@@ -70,6 +70,7 @@ const (
 	ActiveAttributeMaxLength = 0x8B8A
 	ArrayBuffer              = 0x8892
 	CompileStatus            = 0x8B81
+	LinkStatus               = 0x8B82
 	InfoLogLength            = 0x8B84
 	ShaderSourceLength       = 0x8B88
 

@@ -21,6 +21,7 @@ const (
 	float                 = gl.FLOAT
 	front                 = gl.FRONT
 	glFalse               = gl.FALSE
+	linkStatus            = gl.LINK_STATUS
 	one                   = gl.ONE
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
@@ -193,6 +194,10 @@ func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
 
 func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) GetProgrami(program Program, param uint32) int {
+	return gl.GetProgrami(gl.Program(program), gl.Enum(param))
 }
 
 func (c *xjsContext) GetProgramInfoLog(program Program) string {

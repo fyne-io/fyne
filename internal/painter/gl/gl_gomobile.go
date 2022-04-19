@@ -23,6 +23,7 @@ const (
 	float                 = gl.Float
 	front                 = gl.Front
 	glFalse               = gl.False
+	linkStatus            = gl.LinkStatus
 	one                   = gl.One
 	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
 	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
@@ -234,6 +235,10 @@ func (c *mobileContext) GetAttribLocation(program Program, name string) Attribut
 
 func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
+}
+
+func (c *mobileContext) GetProgrami(program Program, param uint32) int {
+	return c.glContext.GetProgrami(gl.Program(program), gl.Enum(param))
 }
 
 func (c *mobileContext) GetProgramInfoLog(program Program) string {

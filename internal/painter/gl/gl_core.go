@@ -23,6 +23,7 @@ const (
 	float                 = gl.FLOAT
 	front                 = gl.FRONT
 	glFalse               = gl.FALSE
+	linkStatus            = gl.LINK_STATUS
 	one                   = gl.ONE
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
@@ -109,9 +110,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	p.ctx.LinkProgram(prog)
 
 	info := p.ctx.GetProgramInfoLog(prog)
-	var status int32
-	gl.GetProgramiv(uint32(prog), gl.LINK_STATUS, &status)
-	if status == gl.FALSE {
+	if p.ctx.GetProgrami(prog, linkStatus) == glFalse {
 		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
 	}
 
@@ -221,6 +220,12 @@ func (c *coreContext) GetAttribLocation(program Program, name string) Attribute 
 
 func (c *coreContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *coreContext) GetProgrami(program Program, param uint32) int {
+	var value int32
+	gl.GetProgramiv(uint32(program), param, &value)
+	return int(value)
 }
 
 func (c *coreContext) GetProgramInfoLog(program Program) string {

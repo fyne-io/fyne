@@ -29,6 +29,7 @@ const (
 	float                 = gl.FLOAT
 	front                 = gl.FRONT
 	glFalse               = gl.FALSE
+	linkStatus            = gl.LINK_STATUS
 	one                   = gl.ONE
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
@@ -213,6 +214,12 @@ func (c *esContext) GetAttribLocation(program Program, name string) Attribute {
 
 func (c *esContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *esContext) GetProgrami(program Program, param uint32) int {
+	var value int32
+	gl.GetProgramiv(uint32(program), param, &value)
+	return int(value)
 }
 
 func (c *esContext) GetProgramInfoLog(program Program) string {
