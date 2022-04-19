@@ -21,6 +21,7 @@ const (
 	compileStatus         = gl.CompileStatus
 	constantAlpha         = gl.ConstantAlpha
 	float                 = gl.Float
+	fragmentShader        = gl.FragmentShader
 	front                 = gl.Front
 	glFalse               = gl.False
 	linkStatus            = gl.LinkStatus
@@ -39,6 +40,7 @@ const (
 	triangles             = gl.Triangles
 	triangleStrip         = gl.TriangleStrip
 	unsignedByte          = gl.UnsignedByte
+	vertexShader          = gl.VertexShader
 )
 
 type (
@@ -72,29 +74,29 @@ func (p *painter) Init() {
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 
-	vertexShader, err := p.compileShader(vertexShaderSource, gl.VertexShader)
+	vertShader, err := p.compileShader(vertexShaderSource, vertexShader)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := p.compileShader(fragmentShaderSource, gl.FragmentShader)
+	fragShader, err := p.compileShader(fragmentShaderSource, fragmentShader)
 	if err != nil {
 		panic(err)
 	}
 
 	prog := p.ctx.CreateProgram()
-	p.ctx.AttachShader(prog, vertexShader)
-	p.ctx.AttachShader(prog, fragmentShader)
+	p.ctx.AttachShader(prog, vertShader)
+	p.ctx.AttachShader(prog, fragShader)
 	p.ctx.LinkProgram(prog)
 	p.logError()
 
 	p.program = prog
 	p.logError()
 
-	vertexLineShader, err := p.compileShader(vertexLineShaderSource, gl.VertexShader)
+	vertexLineShader, err := p.compileShader(vertexLineShaderSource, vertexShader)
 	if err != nil {
 		panic(err)
 	}
-	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, gl.FragmentShader)
+	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, fragmentShader)
 	if err != nil {
 		panic(err)
 	}

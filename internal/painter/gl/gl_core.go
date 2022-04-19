@@ -21,6 +21,7 @@ const (
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
+	fragmentShader        = gl.FRAGMENT_SHADER
 	front                 = gl.FRONT
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
@@ -39,6 +40,7 @@ const (
 	triangles             = gl.TRIANGLES
 	triangleStrip         = gl.TRIANGLE_STRIP
 	unsignedByte          = gl.UNSIGNED_BYTE
+	vertexShader          = gl.VERTEX_SHADER
 )
 
 const noBuffer = Buffer(0)
@@ -95,18 +97,18 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		panic("shader not found: " + shaderFilename)
 	}
 
-	vertexShader, err := p.compileShader(string(vertexSrc)+"\x00", gl.VERTEX_SHADER)
+	vertShader, err := p.compileShader(string(vertexSrc)+"\x00", vertexShader)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := p.compileShader(string(fragmentSrc)+"\x00", gl.FRAGMENT_SHADER)
+	fragShader, err := p.compileShader(string(fragmentSrc)+"\x00", fragmentShader)
 	if err != nil {
 		panic(err)
 	}
 
 	prog := p.ctx.CreateProgram()
-	p.ctx.AttachShader(prog, vertexShader)
-	p.ctx.AttachShader(prog, fragmentShader)
+	p.ctx.AttachShader(prog, vertShader)
+	p.ctx.AttachShader(prog, fragShader)
 	p.ctx.LinkProgram(prog)
 
 	info := p.ctx.GetProgramInfoLog(prog)

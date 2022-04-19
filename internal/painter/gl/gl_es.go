@@ -27,6 +27,7 @@ const (
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
+	fragmentShader        = gl.FRAGMENT_SHADER
 	front                 = gl.FRONT
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
@@ -45,6 +46,7 @@ const (
 	triangles             = gl.TRIANGLES
 	triangleStrip         = gl.TRIANGLE_STRIP
 	unsignedByte          = gl.UNSIGNED_BYTE
+	vertexShader          = gl.VERTEX_SHADER
 )
 
 const noBuffer = Buffer(0)
@@ -84,28 +86,28 @@ var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent) + "\x00"
 
 func (p *painter) Init() {
 	p.ctx = &esContext{}
-	vertexShader, err := p.compileShader(vertexShaderSource, gl.VERTEX_SHADER)
+	vertShader, err := p.compileShader(vertexShaderSource, vertexShader)
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := p.compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragShader, err := p.compileShader(fragmentShaderSource, fragmentShader)
 	if err != nil {
 		panic(err)
 	}
 
 	prog := p.ctx.CreateProgram()
-	p.ctx.AttachShader(prog, vertexShader)
-	p.ctx.AttachShader(prog, fragmentShader)
+	p.ctx.AttachShader(prog, vertShader)
+	p.ctx.AttachShader(prog, fragShader)
 	p.ctx.LinkProgram(prog)
 	p.logError()
 
 	p.program = prog
 
-	vertexLineShader, err := p.compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
+	vertexLineShader, err := p.compileShader(vertexLineShaderSource, vertexShader)
 	if err != nil {
 		panic(err)
 	}
-	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, gl.FRAGMENT_SHADER)
+	fragmentLineShader, err := p.compileShader(fragmentLineShaderSource, fragmentShader)
 	if err != nil {
 		panic(err)
 	}
