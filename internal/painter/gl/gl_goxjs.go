@@ -29,6 +29,9 @@ const (
 	unsignedByte     = gl.UNSIGNED_BYTE
 )
 
+// Attribute represents a GL attribute.
+type Attribute gl.Attrib
+
 // Buffer represents a GL buffer
 type Buffer gl.Buffer
 
@@ -114,14 +117,14 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
-	vertAttrib := gl.GetAttribLocation(gl.Program(p.program), "vert")
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
+	vertAttrib := p.ctx.GetAttribLocation(p.program, "vert")
+	gl.EnableVertexAttribArray(gl.Attrib(vertAttrib))
+	gl.VertexAttribPointer(gl.Attrib(vertAttrib), 3, gl.FLOAT, false, 5*4, 0)
 	p.logError()
 
-	texCoordAttrib := gl.GetAttribLocation(gl.Program(p.program), "vertTexCoord")
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
+	texCoordAttrib := p.ctx.GetAttribLocation(p.program, "vertTexCoord")
+	gl.EnableVertexAttribArray(gl.Attrib(texCoordAttrib))
+	gl.VertexAttribPointer(gl.Attrib(texCoordAttrib), 2, gl.FLOAT, false, 5*4, 3*4)
 	p.logError()
 
 	return vbo
@@ -137,14 +140,14 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
-	vertAttrib := gl.GetAttribLocation(gl.Program(p.lineProgram), "vert")
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 2, gl.FLOAT, false, 4*4, 0)
+	vertAttrib := p.ctx.GetAttribLocation(p.lineProgram, "vert")
+	gl.EnableVertexAttribArray(gl.Attrib(vertAttrib))
+	gl.VertexAttribPointer(gl.Attrib(vertAttrib), 2, gl.FLOAT, false, 4*4, 0)
 	p.logError()
 
-	normalAttrib := gl.GetAttribLocation(gl.Program(p.lineProgram), "normal")
-	gl.EnableVertexAttribArray(normalAttrib)
-	gl.VertexAttribPointer(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
+	normalAttrib := p.ctx.GetAttribLocation(p.lineProgram, "normal")
+	gl.EnableVertexAttribArray(gl.Attrib(normalAttrib))
+	gl.VertexAttribPointer(gl.Attrib(normalAttrib), 2, gl.FLOAT, false, 4*4, 2*4)
 	p.logError()
 
 	return vbo
@@ -254,6 +257,10 @@ func (c *xjsContext) Disable(capability uint32) {
 
 func (c *xjsContext) Enable(capability uint32) {
 	gl.Enable(gl.Enum(capability))
+}
+
+func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
+	return Attribute(gl.GetAttribLocation(gl.Program(program), name))
 }
 
 func (c *xjsContext) GetError() uint32 {

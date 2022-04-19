@@ -30,6 +30,9 @@ const (
 	unsignedByte     = gl.UnsignedByte
 )
 
+// Attribute represents a GL attribute.
+type Attribute gl.Attrib
+
 // Buffer represents a GL buffer
 type Buffer gl.Buffer
 
@@ -120,14 +123,14 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
-	vertAttrib := ctx.GetAttribLocation(gl.Program(p.program), "vert")
-	ctx.EnableVertexAttribArray(vertAttrib)
-	ctx.VertexAttribPointer(vertAttrib, 3, gl.Float, false, 5*4, 0)
+	vertAttrib := p.ctx.GetAttribLocation(p.program, "vert")
+	ctx.EnableVertexAttribArray(gl.Attrib(vertAttrib))
+	ctx.VertexAttribPointer(gl.Attrib(vertAttrib), 3, gl.Float, false, 5*4, 0)
 	p.logError()
 
-	texCoordAttrib := ctx.GetAttribLocation(gl.Program(p.program), "vertTexCoord")
-	ctx.EnableVertexAttribArray(texCoordAttrib)
-	ctx.VertexAttribPointer(texCoordAttrib, 2, gl.Float, false, 5*4, 3*4)
+	texCoordAttrib := p.ctx.GetAttribLocation(p.program, "vertTexCoord")
+	ctx.EnableVertexAttribArray(gl.Attrib(texCoordAttrib))
+	ctx.VertexAttribPointer(gl.Attrib(texCoordAttrib), 2, gl.Float, false, 5*4, 3*4)
 	p.logError()
 
 	return buf
@@ -145,14 +148,14 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
-	vertAttrib := ctx.GetAttribLocation(gl.Program(p.lineProgram), "vert")
-	ctx.EnableVertexAttribArray(vertAttrib)
-	ctx.VertexAttribPointer(vertAttrib, 2, gl.Float, false, 4*4, 0)
+	vertAttrib := p.ctx.GetAttribLocation(p.lineProgram, "vert")
+	ctx.EnableVertexAttribArray(gl.Attrib(vertAttrib))
+	ctx.VertexAttribPointer(gl.Attrib(vertAttrib), 2, gl.Float, false, 4*4, 0)
 	p.logError()
 
-	normalAttrib := ctx.GetAttribLocation(gl.Program(p.lineProgram), "normal")
-	ctx.EnableVertexAttribArray(normalAttrib)
-	ctx.VertexAttribPointer(normalAttrib, 2, gl.Float, false, 4*4, 2*4)
+	normalAttrib := p.ctx.GetAttribLocation(p.lineProgram, "normal")
+	ctx.EnableVertexAttribArray(gl.Attrib(normalAttrib))
+	ctx.VertexAttribPointer(gl.Attrib(normalAttrib), 2, gl.Float, false, 4*4, 2*4)
 	p.logError()
 
 	return buf
@@ -304,6 +307,10 @@ func (c *mobileContext) Disable(capability uint32) {
 
 func (c *mobileContext) Enable(capability uint32) {
 	c.glContext.Enable(gl.Enum(capability))
+}
+
+func (c *mobileContext) GetAttribLocation(program Program, name string) Attribute {
+	return Attribute(c.glContext.GetAttribLocation(gl.Program(program), name))
 }
 
 func (c *mobileContext) GetError() uint32 {

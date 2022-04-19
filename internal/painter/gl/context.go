@@ -12,6 +12,7 @@ type context interface {
 	DeleteTexture(texture Texture)
 	Disable(capability uint32)
 	Enable(capability uint32)
+	GetAttribLocation(program Program, name string) Attribute
 	GetError() uint32
 	Scissor(x, y, w, h int32)
 	TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8)

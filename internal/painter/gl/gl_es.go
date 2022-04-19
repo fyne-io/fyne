@@ -39,6 +39,9 @@ const (
 
 const noBuffer = Buffer(0)
 
+// Attribute represents a GL attribute.
+type Attribute uint32
+
 // Buffer represents a GL buffer
 type Buffer uint32
 
@@ -136,14 +139,14 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
-	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vert\x00")))
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
+	vertAttrib := p.ctx.GetAttribLocation(p.program, "vert")
+	gl.EnableVertexAttribArray(uint32(vertAttrib))
+	gl.VertexAttribPointerWithOffset(uint32(vertAttrib), 3, gl.FLOAT, false, 5*4, 0)
 	p.logError()
 
-	texCoordAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vertTexCoord\x00")))
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
+	texCoordAttrib := p.ctx.GetAttribLocation(p.program, "vertTexCoord")
+	gl.EnableVertexAttribArray(uint32(texCoordAttrib))
+	gl.VertexAttribPointerWithOffset(uint32(texCoordAttrib), 2, gl.FLOAT, false, 5*4, 3*4)
 	p.logError()
 
 	return vbo
@@ -159,14 +162,14 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 
-	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("vert\x00")))
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointerWithOffset(vertAttrib, 2, gl.FLOAT, false, 4*4, 0)
+	vertAttrib := p.ctx.GetAttribLocation(p.lineProgram, "vert")
+	gl.EnableVertexAttribArray(uint32(vertAttrib))
+	gl.VertexAttribPointerWithOffset(uint32(vertAttrib), 2, gl.FLOAT, false, 4*4, 0)
 	p.logError()
 
-	normalAttrib := uint32(gl.GetAttribLocation(uint32(p.lineProgram), gl.Str("normal\x00")))
-	gl.EnableVertexAttribArray(normalAttrib)
-	gl.VertexAttribPointerWithOffset(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
+	normalAttrib := p.ctx.GetAttribLocation(p.lineProgram, "normal")
+	gl.EnableVertexAttribArray(uint32(normalAttrib))
+	gl.VertexAttribPointerWithOffset(uint32(normalAttrib), 2, gl.FLOAT, false, 4*4, 2*4)
 	p.logError()
 
 	return vbo
@@ -284,6 +287,10 @@ func (c *esContext) Disable(capability uint32) {
 
 func (c *esContext) Enable(capability uint32) {
 	gl.Enable(capability)
+}
+
+func (c *esContext) GetAttribLocation(program Program, name string) Attribute {
+	return Attribute(gl.GetAttribLocation(uint32(program), gl.Str(name+"\x00")))
 }
 
 func (c *esContext) GetError() uint32 {
