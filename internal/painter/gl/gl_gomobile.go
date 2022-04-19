@@ -112,13 +112,6 @@ func (p *painter) Init() {
 	p.logError()
 }
 
-func (p *painter) glFreeBuffer(b Buffer) {
-	p.ctx.BindBuffer(arrayBuffer, noBuffer)
-	p.logError()
-	p.ctx.DeleteBuffer(b)
-	p.logError()
-}
-
 func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
 

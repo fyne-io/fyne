@@ -130,13 +130,6 @@ func (p *painter) Init() {
 	p.lineProgram = Program(lineProg)
 }
 
-func (p *painter) glFreeBuffer(vbo Buffer) {
-	p.ctx.BindBuffer(arrayBuffer, noBuffer)
-	p.logError()
-	p.ctx.DeleteBuffer(vbo)
-	p.logError()
-}
-
 func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	p.ctx.UseProgram(p.program)
 
