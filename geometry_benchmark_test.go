@@ -31,10 +31,6 @@ func BenchmarkSize_Subtract(b *testing.B) {
 	b.Run("SubtractWidthHeight()", benchmarkSizeSubtractWidthHeight)
 }
 
-func nsPerOpPrecise(b testing.BenchmarkResult) float64 {
-	return float64(b.T.Nanoseconds())/float64(b.N)
-}
-
 // This test prevents Position.Add to be simplified to `return p.AddXY(v.Components())`
 // because this slows down the speed by factor 10.
 func TestPosition_Add_Speed(t *testing.T) {
@@ -131,4 +127,8 @@ func benchmarkSizeSubtractWidthHeight(b *testing.B) {
 		size = size.SubtractWidthHeight(float32(n), float32(n))
 	}
 	benchmarkResult = size
+}
+
+func nsPerOpPrecise(b testing.BenchmarkResult) float64 {
+	return float64(b.T.Nanoseconds()) / float64(b.N)
 }
