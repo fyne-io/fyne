@@ -35,6 +35,7 @@ format, which is covered by the license:
 const (
 	False            = 0
 	True             = 1
+	One              = 1
 	Triangles        = 0x0004
 	TriangleStrip    = 0x0005
 	SrcAlpha         = 0x0302

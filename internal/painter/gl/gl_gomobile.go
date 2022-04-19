@@ -14,21 +14,26 @@ import (
 )
 
 const (
-	arrayBuffer      = gl.ArrayBuffer
-	bitColorBuffer   = gl.ColorBufferBit
-	bitDepthBuffer   = gl.DepthBufferBit
-	clampToEdge      = gl.ClampToEdge
-	colorFormatRGBA  = gl.RGBA
-	float            = gl.Float
-	scissorTest      = gl.ScissorTest
-	staticDraw       = gl.StaticDraw
-	texture0         = gl.Texture0
-	texture2D        = gl.Texture2D
-	textureMinFilter = gl.TextureMinFilter
-	textureMagFilter = gl.TextureMagFilter
-	textureWrapS     = gl.TextureWrapS
-	textureWrapT     = gl.TextureWrapT
-	unsignedByte     = gl.UnsignedByte
+	arrayBuffer           = gl.ArrayBuffer
+	bitColorBuffer        = gl.ColorBufferBit
+	bitDepthBuffer        = gl.DepthBufferBit
+	clampToEdge           = gl.ClampToEdge
+	colorFormatRGBA       = gl.RGBA
+	constantAlpha         = gl.ConstantAlpha
+	float                 = gl.Float
+	one                   = gl.One
+	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
+	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
+	scissorTest           = gl.ScissorTest
+	srcAlpha              = gl.SrcAlpha
+	staticDraw            = gl.StaticDraw
+	texture0              = gl.Texture0
+	texture2D             = gl.Texture2D
+	textureMinFilter      = gl.TextureMinFilter
+	textureMagFilter      = gl.TextureMagFilter
+	textureWrapS          = gl.TextureWrapS
+	textureWrapT          = gl.TextureWrapT
+	unsignedByte          = gl.UnsignedByte
 )
 
 // Attribute represents a GL attribute.
@@ -121,9 +126,9 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	// TODO find a way to support both
 	if alpha != 1.0 {
 		p.ctx.BlendColor(0, 0, 0, alpha)
-		ctx.BlendFunc(gl.ConstantAlpha, gl.OneMinusConstantAlpha)
+		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
 	} else {
-		ctx.BlendFunc(1, gl.OneMinusSrcAlpha)
+		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	}
 	p.logError()
 
@@ -140,7 +145,7 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 
 	p.ctx.UseProgram(p.lineProgram)
 
-	ctx.BlendFunc(gl.SrcAlpha, gl.OneMinusSrcAlpha)
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 
 	colorUniform := ctx.GetUniformLocation(gl.Program(p.lineProgram), "color")
@@ -220,6 +225,10 @@ func (c *mobileContext) BindTexture(target uint32, texture Texture) {
 
 func (c *mobileContext) BlendColor(r, g, b, a float32) {
 	c.glContext.BlendColor(r, g, b, a)
+}
+
+func (c *mobileContext) BlendFunc(srcFactor, destFactor uint32) {
+	c.glContext.BlendFunc(gl.Enum(srcFactor), gl.Enum(destFactor))
 }
 
 func (c *mobileContext) BufferData(target uint32, points []float32, usage uint32) {

@@ -13,21 +13,26 @@ import (
 )
 
 const (
-	arrayBuffer      = gl.ARRAY_BUFFER
-	bitColorBuffer   = gl.COLOR_BUFFER_BIT
-	bitDepthBuffer   = gl.DEPTH_BUFFER_BIT
-	clampToEdge      = gl.CLAMP_TO_EDGE
-	colorFormatRGBA  = gl.RGBA
-	float            = gl.FLOAT
-	scissorTest      = gl.SCISSOR_TEST
-	staticDraw       = gl.STATIC_DRAW
-	texture0         = gl.TEXTURE0
-	texture2D        = gl.TEXTURE_2D
-	textureMinFilter = gl.TEXTURE_MIN_FILTER
-	textureMagFilter = gl.TEXTURE_MAG_FILTER
-	textureWrapS     = gl.TEXTURE_WRAP_S
-	textureWrapT     = gl.TEXTURE_WRAP_T
-	unsignedByte     = gl.UNSIGNED_BYTE
+	arrayBuffer           = gl.ARRAY_BUFFER
+	bitColorBuffer        = gl.COLOR_BUFFER_BIT
+	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
+	clampToEdge           = gl.CLAMP_TO_EDGE
+	colorFormatRGBA       = gl.RGBA
+	constantAlpha         = gl.CONSTANT_ALPHA
+	float                 = gl.FLOAT
+	one                   = gl.ONE
+	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
+	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
+	scissorTest           = gl.SCISSOR_TEST
+	srcAlpha              = gl.SRC_ALPHA
+	staticDraw            = gl.STATIC_DRAW
+	texture0              = gl.TEXTURE0
+	texture2D             = gl.TEXTURE_2D
+	textureMinFilter      = gl.TEXTURE_MIN_FILTER
+	textureMagFilter      = gl.TEXTURE_MAG_FILTER
+	textureWrapS          = gl.TEXTURE_WRAP_S
+	textureWrapT          = gl.TEXTURE_WRAP_T
+	unsignedByte          = gl.UNSIGNED_BYTE
 )
 
 // Attribute represents a GL attribute.
@@ -115,9 +120,9 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	// TODO find a way to support both
 	if alpha != 1.0 {
 		p.ctx.BlendColor(0, 0, 0, alpha)
-		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
+		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
 	} else {
-		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	}
 	p.logError()
 
@@ -132,7 +137,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	p.ctx.UseProgram(p.lineProgram)
 
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 
 	colorUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "color")
@@ -177,6 +182,10 @@ func (c *xjsContext) BindTexture(target uint32, texture Texture) {
 
 func (c *xjsContext) BlendColor(r, g, b, a float32) {
 	gl.BlendColor(r, g, b, a)
+}
+
+func (c *xjsContext) BlendFunc(srcFactor, destFactor uint32) {
+	gl.BlendFunc(gl.Enum(srcFactor), gl.Enum(destFactor))
 }
 
 func (c *xjsContext) BufferData(target uint32, points []float32, usage uint32) {
