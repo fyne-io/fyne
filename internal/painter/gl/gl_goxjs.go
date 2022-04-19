@@ -80,7 +80,7 @@ func (p *painter) Init() {
 	prog := p.ctx.CreateProgram()
 	p.ctx.AttachShader(prog, vertexShader)
 	p.ctx.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(gl.Program(prog))
+	p.ctx.LinkProgram(prog)
 	p.logError()
 
 	p.program = prog
@@ -97,7 +97,7 @@ func (p *painter) Init() {
 	lineProg := p.ctx.CreateProgram()
 	p.ctx.AttachShader(lineProg, vertexLineShader)
 	p.ctx.AttachShader(lineProg, fragmentLineShader)
-	gl.LinkProgram(gl.Program(lineProg))
+	p.ctx.LinkProgram(lineProg)
 	p.logError()
 
 	p.lineProgram = lineProg
@@ -205,6 +205,10 @@ func (c *xjsContext) GetShaderInfoLog(shader Shader) string {
 
 func (c *xjsContext) GetUniformLocation(program Program, name string) Uniform {
 	return Uniform(gl.GetUniformLocation(gl.Program(program), name))
+}
+
+func (c *xjsContext) LinkProgram(program Program) {
+	gl.LinkProgram(gl.Program(program))
 }
 
 func (c *xjsContext) ReadBuffer(_ uint32) {

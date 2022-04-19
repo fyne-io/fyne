@@ -106,7 +106,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	prog := p.ctx.CreateProgram()
 	p.ctx.AttachShader(prog, vertexShader)
 	p.ctx.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(uint32(prog))
+	p.ctx.LinkProgram(prog)
 
 	var logLength int32
 	gl.GetProgramiv(uint32(prog), gl.INFO_LOG_LENGTH, &logLength)
@@ -243,6 +243,10 @@ func (c *coreContext) GetShaderInfoLog(shader Shader) string {
 
 func (c *coreContext) GetUniformLocation(program Program, name string) Uniform {
 	return Uniform(gl.GetUniformLocation(uint32(program), gl.Str(name+"\x00")))
+}
+
+func (c *coreContext) LinkProgram(program Program) {
+	gl.LinkProgram(uint32(program))
 }
 
 func (c *coreContext) ReadBuffer(src uint32) {
