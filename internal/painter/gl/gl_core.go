@@ -5,7 +5,6 @@ package gl
 
 import (
 	"fmt"
-	"image/color"
 	"strings"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -151,31 +150,6 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	return Program(prog)
-}
-
-func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
-	p.ctx.UseProgram(p.lineProgram)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-
-	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
-	r, g, b, a := col.RGBA()
-	if a == 0 {
-		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
-	} else {
-		alpha := float32(a)
-		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
-	}
-	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
-	p.ctx.Uniform1f(lineWidthUniform, width)
-
-	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
-	p.ctx.Uniform1f(featherUniform, feather)
-	p.logError()
-
-	p.ctx.DrawArrays(triangles, 0, 6)
-	p.logError()
 }
 
 func (p *painter) glCapture(width, height int32, pixels *[]uint8) {

@@ -7,7 +7,6 @@ package gl
 import (
 	"encoding/binary"
 	"fmt"
-	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
@@ -118,30 +117,6 @@ func (p *painter) Init() {
 	p.logError()
 
 	p.lineProgram = Program(lineProg)
-	p.logError()
-}
-
-func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
-	p.ctx.UseProgram(p.lineProgram)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-
-	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
-	r, g, b, a := col.RGBA()
-	if a == 0 {
-		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
-	} else {
-		alpha := float32(a)
-		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
-	}
-	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
-	p.ctx.Uniform1f(lineWidthUniform, width)
-
-	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
-	p.ctx.Uniform1f(featherUniform, feather)
-
-	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 }
 
