@@ -103,18 +103,18 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		panic(err)
 	}
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, uint32(vertexShader))
-	gl.AttachShader(prog, uint32(fragmentShader))
-	gl.LinkProgram(prog)
+	prog := p.ctx.CreateProgram()
+	gl.AttachShader(uint32(prog), uint32(vertexShader))
+	gl.AttachShader(uint32(prog), uint32(fragmentShader))
+	gl.LinkProgram(uint32(prog))
 
 	var logLength int32
-	gl.GetProgramiv(prog, gl.INFO_LOG_LENGTH, &logLength)
+	gl.GetProgramiv(uint32(prog), gl.INFO_LOG_LENGTH, &logLength)
 	info := strings.Repeat("\x00", int(logLength+1))
-	gl.GetProgramInfoLog(prog, logLength, nil, gl.Str(info))
+	gl.GetProgramInfoLog(uint32(prog), logLength, nil, gl.Str(info))
 
 	var status int32
-	gl.GetProgramiv(prog, gl.LINK_STATUS, &status)
+	gl.GetProgramiv(uint32(prog), gl.LINK_STATUS, &status)
 	if status == gl.FALSE {
 		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
 	}
@@ -127,7 +127,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
 	}
 
-	return Program(prog)
+	return prog
 }
 
 type coreContext struct{}
@@ -174,6 +174,10 @@ func (c *coreContext) CreateBuffer() Buffer {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	return Buffer(vbo)
+}
+
+func (c *coreContext) CreateProgram() Program {
+	return Program(gl.CreateProgram())
 }
 
 func (c *coreContext) CreateShader(typ uint32) Shader {

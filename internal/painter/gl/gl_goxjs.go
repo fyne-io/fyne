@@ -77,13 +77,13 @@ func (p *painter) Init() {
 		panic(err)
 	}
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, gl.Shader(vertexShader))
-	gl.AttachShader(prog, gl.Shader(fragmentShader))
-	gl.LinkProgram(prog)
+	prog := p.ctx.CreateProgram()
+	gl.AttachShader(gl.Program(prog), gl.Shader(vertexShader))
+	gl.AttachShader(gl.Program(prog), gl.Shader(fragmentShader))
+	gl.LinkProgram(gl.Program(prog))
 	p.logError()
 
-	p.program = Program(prog)
+	p.program = prog
 
 	vertexLineShader, err := p.compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
@@ -94,13 +94,13 @@ func (p *painter) Init() {
 		panic(err)
 	}
 
-	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, gl.Shader(vertexLineShader))
-	gl.AttachShader(lineProg, gl.Shader(fragmentLineShader))
-	gl.LinkProgram(lineProg)
+	lineProg := p.ctx.CreateProgram()
+	gl.AttachShader(gl.Program(lineProg), gl.Shader(vertexLineShader))
+	gl.AttachShader(gl.Program(lineProg), gl.Shader(fragmentLineShader))
+	gl.LinkProgram(gl.Program(lineProg))
 	p.logError()
 
-	p.lineProgram = Program(lineProg)
+	p.lineProgram = lineProg
 }
 
 type xjsContext struct{}
@@ -145,6 +145,10 @@ func (c *xjsContext) CompileShader(shader Shader) {
 
 func (c *xjsContext) CreateBuffer() Buffer {
 	return Buffer(gl.CreateBuffer())
+}
+
+func (c *xjsContext) CreateProgram() Program {
+	return Program(gl.CreateProgram())
 }
 
 func (c *xjsContext) CreateShader(typ uint32) Shader {

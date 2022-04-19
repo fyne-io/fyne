@@ -92,13 +92,13 @@ func (p *painter) Init() {
 		panic(err)
 	}
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, uint32(vertexShader))
-	gl.AttachShader(prog, uint32(fragmentShader))
-	gl.LinkProgram(prog)
+	prog := p.ctx.CreateProgram()
+	gl.AttachShader(uint32(prog), uint32(vertexShader))
+	gl.AttachShader(uint32(prog), uint32(fragmentShader))
+	gl.LinkProgram(uint32(prog))
 	p.logError()
 
-	p.program = Program(prog)
+	p.program = prog
 
 	vertexLineShader, err := p.compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
@@ -109,13 +109,13 @@ func (p *painter) Init() {
 		panic(err)
 	}
 
-	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, uint32(vertexLineShader))
-	gl.AttachShader(lineProg, uint32(fragmentLineShader))
-	gl.LinkProgram(lineProg)
+	lineProg := p.ctx.CreateProgram()
+	gl.AttachShader(uint32(lineProg), uint32(vertexLineShader))
+	gl.AttachShader(uint32(lineProg), uint32(fragmentLineShader))
+	gl.LinkProgram(uint32(lineProg))
 	p.logError()
 
-	p.lineProgram = Program(lineProg)
+	p.lineProgram = lineProg
 }
 
 type esContext struct{}
@@ -162,6 +162,10 @@ func (c *esContext) CreateBuffer() Buffer {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	return Buffer(vbo)
+}
+
+func (c *esContext) CreateProgram() Program {
+	return Program(gl.CreateProgram())
 }
 
 func (c *esContext) CreateShader(typ uint32) Shader {

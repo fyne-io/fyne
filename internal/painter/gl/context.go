@@ -11,6 +11,7 @@ type context interface {
 	ClearColor(r, g, b, a float32)
 	CompileShader(shader Shader)
 	CreateBuffer() Buffer
+	CreateProgram() Program
 	CreateShader(typ uint32) Shader
 	CreateTexture() Texture
 	DeleteBuffer(buffer Buffer)

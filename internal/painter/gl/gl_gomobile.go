@@ -80,13 +80,13 @@ func (p *painter) Init() {
 		panic(err)
 	}
 
-	prog := p.glctx().CreateProgram()
-	p.glctx().AttachShader(prog, gl.Shader(vertexShader))
-	p.glctx().AttachShader(prog, gl.Shader(fragmentShader))
-	p.glctx().LinkProgram(prog)
+	prog := p.ctx.CreateProgram()
+	p.glctx().AttachShader(gl.Program(prog), gl.Shader(vertexShader))
+	p.glctx().AttachShader(gl.Program(prog), gl.Shader(fragmentShader))
+	p.glctx().LinkProgram(gl.Program(prog))
 	p.logError()
 
-	p.program = Program(prog)
+	p.program = prog
 	p.logError()
 
 	vertexLineShader, err := p.compileShader(vertexLineShaderSource, gl.VertexShader)
@@ -98,13 +98,13 @@ func (p *painter) Init() {
 		panic(err)
 	}
 
-	lineProg := p.glctx().CreateProgram()
-	p.glctx().AttachShader(lineProg, gl.Shader(vertexLineShader))
-	p.glctx().AttachShader(lineProg, gl.Shader(fragmentLineShader))
-	p.glctx().LinkProgram(lineProg)
+	lineProg := p.ctx.CreateProgram()
+	p.glctx().AttachShader(gl.Program(lineProg), gl.Shader(vertexLineShader))
+	p.glctx().AttachShader(gl.Program(lineProg), gl.Shader(fragmentLineShader))
+	p.glctx().LinkProgram(gl.Program(lineProg))
 	p.logError()
 
-	p.lineProgram = Program(lineProg)
+	p.lineProgram = lineProg
 	p.logError()
 }
 
@@ -186,6 +186,10 @@ func (c *mobileContext) CompileShader(shader Shader) {
 
 func (c *mobileContext) CreateBuffer() Buffer {
 	return Buffer(c.glContext.CreateBuffer())
+}
+
+func (c *mobileContext) CreateProgram() Program {
+	return Program(c.glContext.CreateProgram())
 }
 
 func (c *mobileContext) CreateShader(typ uint32) Shader {
