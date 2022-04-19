@@ -19,5 +19,6 @@ type context interface {
 	TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8)
 	TexParameteri(target, param uint32, value int32)
 	UseProgram(program Program)
+	VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int)
 	Viewport(x, y, width, height int)
 }

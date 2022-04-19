@@ -18,6 +18,7 @@ const (
 	bitDepthBuffer   = gl.DEPTH_BUFFER_BIT
 	clampToEdge      = gl.CLAMP_TO_EDGE
 	colorFormatRGBA  = gl.RGBA
+	float            = gl.FLOAT
 	scissorTest      = gl.SCISSOR_TEST
 	staticDraw       = gl.STATIC_DRAW
 	texture0         = gl.TEXTURE0
@@ -119,12 +120,12 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	vertAttrib := p.ctx.GetAttribLocation(p.program, "vert")
 	p.ctx.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(gl.Attrib(vertAttrib), 3, gl.FLOAT, false, 5*4, 0)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, 3, float, false, 5*4, 0)
 	p.logError()
 
 	texCoordAttrib := p.ctx.GetAttribLocation(p.program, "vertTexCoord")
 	p.ctx.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(gl.Attrib(texCoordAttrib), 2, gl.FLOAT, false, 5*4, 3*4)
+	p.ctx.VertexAttribPointerWithOffset(texCoordAttrib, 2, float, false, 5*4, 3*4)
 	p.logError()
 
 	return vbo
@@ -142,12 +143,12 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	vertAttrib := p.ctx.GetAttribLocation(p.lineProgram, "vert")
 	p.ctx.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(gl.Attrib(vertAttrib), 2, gl.FLOAT, false, 4*4, 0)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, 2, float, false, 4*4, 0)
 	p.logError()
 
 	normalAttrib := p.ctx.GetAttribLocation(p.lineProgram, "normal")
 	p.ctx.EnableVertexAttribArray(normalAttrib)
-	gl.VertexAttribPointer(gl.Attrib(normalAttrib), 2, gl.FLOAT, false, 4*4, 2*4)
+	p.ctx.VertexAttribPointerWithOffset(normalAttrib, 2, float, false, 4*4, 2*4)
 	p.logError()
 
 	return vbo
@@ -293,6 +294,10 @@ func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *xjsContext) UseProgram(program Program) {
 	gl.UseProgram(gl.Program(program))
+}
+
+func (c *xjsContext) VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int) {
+	gl.VertexAttribPointer(gl.Attrib(attribute), size, gl.Enum(typ), normalized, stride, offset)
 }
 
 func (c *xjsContext) Viewport(x, y, width, height int) {

@@ -19,6 +19,7 @@ const (
 	bitDepthBuffer   = gl.DepthBufferBit
 	clampToEdge      = gl.ClampToEdge
 	colorFormatRGBA  = gl.RGBA
+	float            = gl.Float
 	scissorTest      = gl.ScissorTest
 	staticDraw       = gl.StaticDraw
 	texture0         = gl.Texture0
@@ -112,8 +113,6 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glCreateBuffer(points []float32) Buffer {
-	ctx := p.glctx()
-
 	p.ctx.UseProgram(p.program)
 
 	buf := p.ctx.CreateBuffer()
@@ -125,20 +124,18 @@ func (p *painter) glCreateBuffer(points []float32) Buffer {
 
 	vertAttrib := p.ctx.GetAttribLocation(p.program, "vert")
 	p.ctx.EnableVertexAttribArray(vertAttrib)
-	ctx.VertexAttribPointer(gl.Attrib(vertAttrib), 3, gl.Float, false, 5*4, 0)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, 3, float, false, 5*4, 0)
 	p.logError()
 
 	texCoordAttrib := p.ctx.GetAttribLocation(p.program, "vertTexCoord")
 	p.ctx.EnableVertexAttribArray(texCoordAttrib)
-	ctx.VertexAttribPointer(gl.Attrib(texCoordAttrib), 2, gl.Float, false, 5*4, 3*4)
+	p.ctx.VertexAttribPointerWithOffset(texCoordAttrib, 2, float, false, 5*4, 3*4)
 	p.logError()
 
 	return buf
 }
 
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
-	ctx := p.glctx()
-
 	p.ctx.UseProgram(p.lineProgram)
 
 	buf := p.ctx.CreateBuffer()
@@ -150,12 +147,12 @@ func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 
 	vertAttrib := p.ctx.GetAttribLocation(p.lineProgram, "vert")
 	p.ctx.EnableVertexAttribArray(vertAttrib)
-	ctx.VertexAttribPointer(gl.Attrib(vertAttrib), 2, gl.Float, false, 4*4, 0)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, 2, float, false, 4*4, 0)
 	p.logError()
 
 	normalAttrib := p.ctx.GetAttribLocation(p.lineProgram, "normal")
 	p.ctx.EnableVertexAttribArray(normalAttrib)
-	ctx.VertexAttribPointer(gl.Attrib(normalAttrib), 2, gl.Float, false, 4*4, 2*4)
+	p.ctx.VertexAttribPointerWithOffset(normalAttrib, 2, float, false, 4*4, 2*4)
 	p.logError()
 
 	return buf
@@ -344,6 +341,10 @@ func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *mobileContext) UseProgram(program Program) {
 	c.glContext.UseProgram(gl.Program(program))
+}
+
+func (c *mobileContext) VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int) {
+	c.glContext.VertexAttribPointer(gl.Attrib(attribute), size, gl.Enum(typ), normalized, stride, offset)
 }
 
 func (c *mobileContext) Viewport(x, y, width, height int) {
