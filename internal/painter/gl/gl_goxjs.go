@@ -126,17 +126,16 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
 	r, g, b, a := col.RGBA()
 	if a == 0 {
-		gl.Uniform4f(gl.Uniform(colorUniform), 0, 0, 0, 0)
+		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
 	} else {
 		alpha := float32(a)
-		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
-		gl.Uniform4fv(gl.Uniform(colorUniform), col)
+		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
 	}
 	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
-	gl.Uniform1f(gl.Uniform(lineWidthUniform), width)
+	p.ctx.Uniform1f(lineWidthUniform, width)
 
 	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
-	gl.Uniform1f(gl.Uniform(featherUniform), feather)
+	p.ctx.Uniform1f(featherUniform, feather)
 
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
@@ -245,6 +244,14 @@ func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFo
 
 func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 	gl.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
+}
+
+func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
+	gl.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *xjsContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {
+	gl.Uniform4f(gl.Uniform(uniform), v0, v1, v2, v3)
 }
 
 func (c *xjsContext) UseProgram(program Program) {

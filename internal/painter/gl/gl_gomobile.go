@@ -122,8 +122,6 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
-	ctx := p.glctx()
-
 	p.ctx.UseProgram(p.lineProgram)
 
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
@@ -132,17 +130,16 @@ func (p *painter) glDrawLine(width float32, col color.Color, feather float32) {
 	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
 	r, g, b, a := col.RGBA()
 	if a == 0 {
-		ctx.Uniform4f(gl.Uniform(colorUniform), 0, 0, 0, 0)
+		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
 	} else {
 		alpha := float32(a)
-		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
-		ctx.Uniform4fv(gl.Uniform(colorUniform), col)
+		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
 	}
 	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
-	ctx.Uniform1f(gl.Uniform(lineWidthUniform), width)
+	p.ctx.Uniform1f(lineWidthUniform, width)
 
 	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
-	ctx.Uniform1f(gl.Uniform(featherUniform), feather)
+	p.ctx.Uniform1f(featherUniform, feather)
 
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
@@ -288,6 +285,14 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 	c.glContext.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
+}
+
+func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
+	c.glContext.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {
+	c.glContext.Uniform4f(gl.Uniform(uniform), v0, v1, v2, v3)
 }
 
 func (c *mobileContext) UseProgram(program Program) {
