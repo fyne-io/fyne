@@ -29,7 +29,23 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	vbo := p.createBuffer(points)
 	p.defineVertexArray("vert", 3, 5*4, 0)
 	p.defineVertexArray("vertTexCoord", 2, 5*4, 12)
-	p.glDrawTexture(texture, alpha)
+
+	// here we have to choose between blending the image alpha or fading it...
+	// TODO find a way to support both
+	if alpha != 1.0 {
+		p.ctx.BlendColor(0, 0, 0, alpha)
+		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
+	} else {
+		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	}
+	p.logError()
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
 	p.freeBuffer(vbo)
 }
 

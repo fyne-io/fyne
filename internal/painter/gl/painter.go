@@ -126,27 +126,6 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	cache.DeleteTexture(obj)
 }
 
-func (p *painter) glDrawTexture(texture Texture, alpha float32) {
-	p.ctx.UseProgram(p.program)
-
-	// here we have to choose between blending the image alpha or fading it...
-	// TODO find a way to support both
-	if alpha != 1.0 {
-		p.ctx.BlendColor(0, 0, 0, alpha)
-		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
-	} else {
-		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
-	}
-	p.logError()
-
-	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, texture)
-	p.logError()
-
-	p.ctx.DrawArrays(triangleStrip, 0, 4)
-	p.logError()
-}
-
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
