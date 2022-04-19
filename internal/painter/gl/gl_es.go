@@ -82,16 +82,19 @@ func (p *painter) compileShader(source string, shaderType uint32) (uint32, error
 	gl.CompileShader(shader)
 	p.logError()
 
+	var logLength int32
+	gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
+	info := strings.Repeat("\x00", int(logLength+1))
+	gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
+
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
+		return 0, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
+	}
 
-		info := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, info)
+	if logLength > 0 {
+		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
 	return shader, nil

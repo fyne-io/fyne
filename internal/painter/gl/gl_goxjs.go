@@ -65,11 +65,14 @@ func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, e
 	gl.CompileShader(shader)
 	p.logError()
 
+	info := gl.GetShaderInfoLog(shader)
 	status := gl.GetShaderi(shader, gl.COMPILE_STATUS)
 	if status == gl.FALSE {
-		info := gl.GetShaderInfoLog(shader)
+		return gl.NoShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
+	}
 
-		return gl.NoShader, fmt.Errorf("failed to compile %v: %v", source, info)
+	if len(info) > 0 {
+		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
 	return shader, nil
