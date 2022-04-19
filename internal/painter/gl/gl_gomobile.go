@@ -120,7 +120,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
 	if alpha != 1.0 {
-		ctx.BlendColor(0, 0, 0, alpha)
+		p.ctx.BlendColor(0, 0, 0, alpha)
 		ctx.BlendFunc(gl.ConstantAlpha, gl.OneMinusConstantAlpha)
 	} else {
 		ctx.BlendFunc(1, gl.OneMinusSrcAlpha)
@@ -216,6 +216,10 @@ func (c *mobileContext) BindBuffer(target uint32, buf Buffer) {
 
 func (c *mobileContext) BindTexture(target uint32, texture Texture) {
 	c.glContext.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *mobileContext) BlendColor(r, g, b, a float32) {
+	c.glContext.BlendColor(r, g, b, a)
 }
 
 func (c *mobileContext) BufferData(target uint32, points []float32, usage uint32) {

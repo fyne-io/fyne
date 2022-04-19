@@ -4,6 +4,7 @@ type context interface {
 	ActiveTexture(textureUnit uint32)
 	BindBuffer(target uint32, buf Buffer)
 	BindTexture(target uint32, texture Texture)
+	BlendColor(r, g, b, a float32)
 	BufferData(target uint32, points []float32, usage uint32)
 	Clear(mask uint32)
 	ClearColor(r, g, b, a float32)

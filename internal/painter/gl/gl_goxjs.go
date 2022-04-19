@@ -114,7 +114,7 @@ func (p *painter) glDrawTexture(texture Texture, alpha float32) {
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
 	if alpha != 1.0 {
-		gl.BlendColor(0, 0, 0, alpha)
+		p.ctx.BlendColor(0, 0, 0, alpha)
 		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
 	} else {
 		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
@@ -173,6 +173,10 @@ func (c *xjsContext) BindBuffer(target uint32, buf Buffer) {
 
 func (c *xjsContext) BindTexture(target uint32, texture Texture) {
 	gl.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *xjsContext) BlendColor(r, g, b, a float32) {
+	gl.BlendColor(r, g, b, a)
 }
 
 func (c *xjsContext) BufferData(target uint32, points []float32, usage uint32) {
