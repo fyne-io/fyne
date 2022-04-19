@@ -62,9 +62,9 @@ func (p *painter) glctx() gl.Context {
 func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
 	shader := p.ctx.CreateShader(shaderType)
 
-	p.glctx().ShaderSource(gl.Shader(shader), source)
+	p.ctx.ShaderSource(shader, source)
 	p.logError()
-	p.glctx().CompileShader(gl.Shader(shader))
+	p.ctx.CompileShader(shader)
 	p.logError()
 
 	info := p.ctx.GetShaderInfoLog(shader)
@@ -199,6 +199,10 @@ func (c *mobileContext) ClearColor(r, g, b, a float32) {
 	c.glContext.ClearColor(r, g, b, a)
 }
 
+func (c *mobileContext) CompileShader(shader Shader) {
+	c.glContext.CompileShader(gl.Shader(shader))
+}
+
 func (c *mobileContext) CreateBuffer() Buffer {
 	return Buffer(c.glContext.CreateBuffer())
 }
@@ -260,6 +264,10 @@ func (c *mobileContext) ReadPixels(x, y, width, height int, colorFormat, typ uin
 
 func (c *mobileContext) Scissor(x, y, w, h int32) {
 	c.glContext.Scissor(x, y, w, h)
+}
+
+func (c *mobileContext) ShaderSource(shader Shader, source string) {
+	c.glContext.ShaderSource(gl.Shader(shader), source)
 }
 
 func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {

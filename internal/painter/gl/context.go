@@ -9,6 +9,7 @@ type context interface {
 	BufferData(target uint32, points []float32, usage uint32)
 	Clear(mask uint32)
 	ClearColor(r, g, b, a float32)
+	CompileShader(shader Shader)
 	CreateBuffer() Buffer
 	CreateShader(typ uint32) Shader
 	CreateTexture() Texture
@@ -25,6 +26,7 @@ type context interface {
 	ReadBuffer(src uint32)
 	ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8)
 	Scissor(x, y, w, h int32)
+	ShaderSource(shader Shader, source string)
 	TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8)
 	TexParameteri(target, param uint32, value int32)
 	Uniform1f(uniform Uniform, v float32)

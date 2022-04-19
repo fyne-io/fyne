@@ -63,9 +63,9 @@ func (p *painter) glInit() {
 func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
 	shader := p.ctx.CreateShader(shaderType)
 
-	gl.ShaderSource(gl.Shader(shader), source)
+	p.ctx.ShaderSource(shader, source)
 	p.logError()
-	gl.CompileShader(gl.Shader(shader))
+	p.ctx.CompileShader(shader)
 	p.logError()
 
 	info := p.ctx.GetShaderInfoLog(shader)
@@ -159,6 +159,10 @@ func (c *xjsContext) ClearColor(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
 }
 
+func (c *xjsContext) CompileShader(shader Shader) {
+	gl.CompileShader(gl.Shader(shader))
+}
+
 func (c *xjsContext) CreateBuffer() Buffer {
 	return Buffer(gl.CreateBuffer())
 }
@@ -216,6 +220,10 @@ func (c *xjsContext) ReadBuffer(_ uint32) {
 
 func (c *xjsContext) ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8) {
 	gl.ReadPixels(pixels, x, y, width, height, gl.Enum(colorFormat), gl.Enum(typ))
+}
+
+func (c *xjsContext) ShaderSource(shader Shader, source string) {
+	gl.ShaderSource(gl.Shader(shader), source)
 }
 
 func (c *xjsContext) Scissor(x, y, w, h int32) {

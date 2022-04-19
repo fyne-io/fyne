@@ -71,11 +71,9 @@ func (p *painter) glInit() {
 func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
 	shader := p.ctx.CreateShader(shaderType)
 
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(uint32(shader), 1, csources, nil)
+	p.ctx.ShaderSource(shader, source)
 	p.logError()
-	free()
-	gl.CompileShader(uint32(shader))
+	p.ctx.CompileShader(shader)
 	p.logError()
 
 	info := p.ctx.GetShaderInfoLog(shader)
@@ -188,6 +186,10 @@ func (c *coreContext) ClearColor(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
 }
 
+func (c *coreContext) CompileShader(shader Shader) {
+	gl.CompileShader(uint32(shader))
+}
+
 func (c *coreContext) CreateBuffer() Buffer {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -259,6 +261,12 @@ func (c *coreContext) ReadPixels(x, y, width, height int, colorFormat, typ uint3
 
 func (c *coreContext) Scissor(x, y, w, h int32) {
 	gl.Scissor(x, y, w, h)
+}
+
+func (c *coreContext) ShaderSource(shader Shader, source string) {
+	csources, free := gl.Strs(source)
+	defer free()
+	gl.ShaderSource(uint32(shader), 1, csources, nil)
 }
 
 func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
