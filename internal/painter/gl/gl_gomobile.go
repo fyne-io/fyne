@@ -67,7 +67,7 @@ func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, erro
 	p.glctx().CompileShader(shader)
 	p.logError()
 
-	info := p.glctx().GetShaderInfoLog(shader)
+	info := p.ctx.GetShaderInfoLog(Shader(shader))
 	status := p.glctx().GetShaderi(shader, gl.CompileStatus)
 	if status == gl.False {
 		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
@@ -237,6 +237,10 @@ func (c *mobileContext) GetAttribLocation(program Program, name string) Attribut
 
 func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
+}
+
+func (c *mobileContext) GetShaderInfoLog(shader Shader) string {
+	return c.glContext.GetShaderInfoLog(gl.Shader(shader))
 }
 
 func (c *mobileContext) GetUniformLocation(program Program, name string) Uniform {

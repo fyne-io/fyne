@@ -19,6 +19,7 @@ type context interface {
 	EnableVertexAttribArray(attribute Attribute)
 	GetAttribLocation(program Program, name string) Attribute
 	GetError() uint32
+	GetShaderInfoLog(shader Shader) string
 	GetUniformLocation(program Program, name string) Uniform
 	ReadBuffer(src uint32)
 	ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8)
