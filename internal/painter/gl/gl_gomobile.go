@@ -45,18 +45,21 @@ type (
 	Buffer gl.Buffer
 	// Program represents a compiled GL program
 	Program gl.Program
+	// Shader represents a GL shader
+	Shader gl.Shader
 	// Uniform represents a GL uniform
 	Uniform gl.Uniform
 )
 
 var noBuffer = Buffer{}
+var noShader = Shader{}
 var textureFilterToGL = []int32{gl.Linear, gl.Nearest}
 
 func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
 }
 
-func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
+func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, error) {
 	shader := p.glctx().CreateShader(shaderType)
 
 	p.glctx().ShaderSource(shader, source)
@@ -67,14 +70,14 @@ func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, e
 	info := p.glctx().GetShaderInfoLog(shader)
 	status := p.glctx().GetShaderi(shader, gl.CompileStatus)
 	if status == gl.False {
-		return shader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
+		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
 
 	if len(info) > 0 {
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
-	return shader, nil
+	return Shader(shader), nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
@@ -97,8 +100,8 @@ func (p *painter) Init() {
 	}
 
 	prog := p.glctx().CreateProgram()
-	p.glctx().AttachShader(prog, vertexShader)
-	p.glctx().AttachShader(prog, fragmentShader)
+	p.glctx().AttachShader(prog, gl.Shader(vertexShader))
+	p.glctx().AttachShader(prog, gl.Shader(fragmentShader))
 	p.glctx().LinkProgram(prog)
 	p.logError()
 
@@ -115,8 +118,8 @@ func (p *painter) Init() {
 	}
 
 	lineProg := p.glctx().CreateProgram()
-	p.glctx().AttachShader(lineProg, vertexLineShader)
-	p.glctx().AttachShader(lineProg, fragmentLineShader)
+	p.glctx().AttachShader(lineProg, gl.Shader(vertexLineShader))
+	p.glctx().AttachShader(lineProg, gl.Shader(fragmentLineShader))
 	p.glctx().LinkProgram(lineProg)
 	p.logError()
 

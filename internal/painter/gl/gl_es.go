@@ -46,6 +46,7 @@ const (
 )
 
 const noBuffer = Buffer(0)
+const noShader = Shader(0)
 
 type (
 	// Attribute represents a GL attribute
@@ -54,6 +55,8 @@ type (
 	Buffer uint32
 	// Program represents a compiled GL program
 	Program uint32
+	// Shader represents a GL shader
+	Shader uint32
 	// Uniform represents a GL uniform
 	Uniform int32
 )
@@ -72,7 +75,7 @@ func (p *painter) glInit() {
 	p.logError()
 }
 
-func (p *painter) compileShader(source string, shaderType uint32) (uint32, error) {
+func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
 	shader := gl.CreateShader(shaderType)
 
 	csources, free := gl.Strs(source)
@@ -90,14 +93,14 @@ func (p *painter) compileShader(source string, shaderType uint32) (uint32, error
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
-		return 0, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
+		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
 
 	if logLength > 0 {
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
-	return shader, nil
+	return Shader(shader), nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent) + "\x00"
@@ -117,8 +120,8 @@ func (p *painter) Init() {
 	}
 
 	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
+	gl.AttachShader(prog, uint32(vertexShader))
+	gl.AttachShader(prog, uint32(fragmentShader))
 	gl.LinkProgram(prog)
 	p.logError()
 
@@ -134,8 +137,8 @@ func (p *painter) Init() {
 	}
 
 	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, vertexLineShader)
-	gl.AttachShader(lineProg, fragmentLineShader)
+	gl.AttachShader(lineProg, uint32(vertexLineShader))
+	gl.AttachShader(lineProg, uint32(fragmentLineShader))
 	gl.LinkProgram(lineProg)
 	p.logError()
 

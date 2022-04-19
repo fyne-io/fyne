@@ -44,11 +44,14 @@ type (
 	Buffer gl.Buffer
 	// Program represents a compiled GL program
 	Program gl.Program
+	// Shader represents a GL shader
+	Shader gl.Shader
 	// Uniform represents a GL uniform
 	Uniform gl.Uniform
 )
 
 var noBuffer = Buffer(gl.NoBuffer)
+var noShader = Shader(gl.NoShader)
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
 func (p *painter) glInit() {
@@ -57,7 +60,7 @@ func (p *painter) glInit() {
 	p.logError()
 }
 
-func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
+func (p *painter) compileShader(source string, shaderType gl.Enum) (Shader, error) {
 	shader := gl.CreateShader(shaderType)
 
 	gl.ShaderSource(shader, source)
@@ -68,14 +71,14 @@ func (p *painter) compileShader(source string, shaderType gl.Enum) (gl.Shader, e
 	info := gl.GetShaderInfoLog(shader)
 	status := gl.GetShaderi(shader, gl.COMPILE_STATUS)
 	if status == gl.FALSE {
-		return gl.NoShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
+		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
 
 	if len(info) > 0 {
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
-	return shader, nil
+	return Shader(shader), nil
 }
 
 var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
@@ -95,8 +98,8 @@ func (p *painter) Init() {
 	}
 
 	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
+	gl.AttachShader(prog, gl.Shader(vertexShader))
+	gl.AttachShader(prog, gl.Shader(fragmentShader))
 	gl.LinkProgram(prog)
 	p.logError()
 
@@ -112,8 +115,8 @@ func (p *painter) Init() {
 	}
 
 	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, vertexLineShader)
-	gl.AttachShader(lineProg, fragmentLineShader)
+	gl.AttachShader(lineProg, gl.Shader(vertexLineShader))
+	gl.AttachShader(lineProg, gl.Shader(fragmentLineShader))
 	gl.LinkProgram(lineProg)
 	p.logError()
 
