@@ -126,6 +126,13 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	cache.DeleteTexture(obj)
 }
 
+func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
+	p.ctx.ReadBuffer(front)
+	p.logError()
+	p.ctx.ReadPixels(0, 0, int(width), int(height), colorFormatRGBA, unsignedByte, *pixels)
+	p.logError()
+}
+
 func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:

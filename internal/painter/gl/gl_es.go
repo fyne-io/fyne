@@ -139,13 +139,6 @@ func (p *painter) Init() {
 	p.lineProgram = Program(lineProg)
 }
 
-func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
-	p.ctx.ReadBuffer(front)
-	p.logError()
-	p.ctx.ReadPixels(0, 0, int(width), int(height), colorFormatRGBA, unsignedByte, *pixels)
-	p.logError()
-}
-
 type esContext struct{}
 
 var _ context = (*esContext)(nil)

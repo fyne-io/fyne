@@ -121,13 +121,6 @@ func (p *painter) Init() {
 	p.logError()
 }
 
-func (p *painter) glCapture(width, height int32, pixels *[]uint8) {
-	p.ctx.ReadBuffer(front)
-	p.logError()
-	p.ctx.ReadPixels(0, 0, int(width), int(height), colorFormatRGBA, unsignedByte, *pixels)
-	p.logError()
-}
-
 func (p *painter) glInit() {
 }
 
