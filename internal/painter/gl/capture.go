@@ -31,7 +31,10 @@ func (p *painter) Capture(c fyne.Canvas) image.Image {
 	pixels := make([]uint8, width*height*4)
 
 	p.contextProvider.RunWithContext(func() {
-		p.glCapture(int32(width), int32(height), &pixels)
+		p.ctx.ReadBuffer(front)
+		p.logError()
+		p.ctx.ReadPixels(0, 0, width, height, colorFormatRGBA, unsignedByte, pixels)
+		p.logError()
 	})
 
 	return &captureImage{
