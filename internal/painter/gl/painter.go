@@ -91,6 +91,23 @@ func (p *painter) SetOutputSize(width, height int) {
 	p.logError()
 }
 
+func (p *painter) createBuffer(points []float32) Buffer {
+	vbo := p.ctx.CreateBuffer()
+	p.logError()
+	p.ctx.BindBuffer(arrayBuffer, vbo)
+	p.logError()
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
+	p.logError()
+	return vbo
+}
+
+func (p *painter) defineVertexArray(name string, size, stride, offset int) {
+	vertAttrib := p.ctx.GetAttribLocation(p.program, name)
+	p.ctx.EnableVertexAttribArray(vertAttrib)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride, offset)
+	p.logError()
+}
+
 func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	texture, ok := cache.GetTexture(obj)
 	if !ok {
@@ -104,47 +121,17 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 
 func (p *painter) glCreateBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.program)
-
-	vbo := p.ctx.CreateBuffer()
-	p.logError()
-	p.ctx.BindBuffer(arrayBuffer, vbo)
-	p.logError()
-	p.ctx.BufferData(arrayBuffer, points, staticDraw)
-	p.logError()
-
-	vertAttrib := p.ctx.GetAttribLocation(p.program, "vert")
-	p.ctx.EnableVertexAttribArray(vertAttrib)
-	p.ctx.VertexAttribPointerWithOffset(vertAttrib, 3, float, false, 5*4, 0)
-	p.logError()
-
-	texCoordAttrib := p.ctx.GetAttribLocation(p.program, "vertTexCoord")
-	p.ctx.EnableVertexAttribArray(texCoordAttrib)
-	p.ctx.VertexAttribPointerWithOffset(texCoordAttrib, 2, float, false, 5*4, 12)
-	p.logError()
-
+	vbo := p.createBuffer(points)
+	p.defineVertexArray("vert", 3, 5*4, 0)
+	p.defineVertexArray("vertTexCoord", 2, 5*4, 12)
 	return vbo
 }
 
 func (p *painter) glCreateLineBuffer(points []float32) Buffer {
 	p.ctx.UseProgram(p.lineProgram)
-
-	vbo := p.ctx.CreateBuffer()
-	p.logError()
-	p.ctx.BindBuffer(arrayBuffer, vbo)
-	p.logError()
-	p.ctx.BufferData(arrayBuffer, points, staticDraw)
-	p.logError()
-
-	vertAttrib := p.ctx.GetAttribLocation(p.lineProgram, "vert")
-	p.ctx.EnableVertexAttribArray(vertAttrib)
-	p.ctx.VertexAttribPointerWithOffset(vertAttrib, 2, float, false, 4*4, 0)
-	p.logError()
-
-	normalAttrib := p.ctx.GetAttribLocation(p.lineProgram, "normal")
-	p.ctx.EnableVertexAttribArray(normalAttrib)
-	p.ctx.VertexAttribPointerWithOffset(normalAttrib, 2, float, false, 4*4, 2*4)
-	p.logError()
-
+	vbo := p.createBuffer(points)
+	p.defineVertexArray("vert", 2, 4*4, 0)
+	p.defineVertexArray("normal", 2, 4*4, 2*4)
 	return vbo
 }
 
