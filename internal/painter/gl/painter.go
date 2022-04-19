@@ -49,6 +49,11 @@ type painter struct {
 	pixScale        float32 // pre-calculate scale*texScale for each draw
 }
 
+var shaderSources = map[string][2][]byte{
+	"line":   {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
+	"simple": {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
+}
+
 func (p *painter) SetFrameBufferScale(scale float32) {
 	p.texScale = scale
 	p.pixScale = p.canvas.Scale() * p.texScale
@@ -119,6 +124,45 @@ func (p *painter) createBuffer(points []float32) Buffer {
 	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
 	return vbo
+}
+
+func (p *painter) createProgram(shaderFilename string) Program {
+	// Why a switch over a filename?
+	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
+	// fyne bundle.
+	sources := shaderSources[shaderFilename]
+	vertexSrc, fragmentSrc := sources[0], sources[1]
+	if vertexSrc == nil {
+		panic("shader not found: " + shaderFilename)
+	}
+	vertShader, err := p.compileShader(string(vertexSrc)+"\x00", vertexShader)
+	if err != nil {
+		panic(err)
+	}
+	fragShader, err := p.compileShader(string(fragmentSrc)+"\x00", fragmentShader)
+	if err != nil {
+		panic(err)
+	}
+
+	prog := p.ctx.CreateProgram()
+	p.ctx.AttachShader(prog, vertShader)
+	p.ctx.AttachShader(prog, fragShader)
+	p.ctx.LinkProgram(prog)
+
+	info := p.ctx.GetProgramInfoLog(prog)
+	if p.ctx.GetProgrami(prog, linkStatus) == glFalse {
+		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
+	}
+
+	if len(info) > 0 {
+		fmt.Printf("OpenGL program linking output:\n%s\n", info)
+	}
+
+	if glErr := p.ctx.GetError(); glErr != 0 {
+		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
+	}
+
+	return prog
 }
 
 func (p *painter) defineVertexArray(name string, size, stride, offset int) {
