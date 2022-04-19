@@ -133,8 +133,7 @@ func (p *painter) Init() {
 func (p *painter) glFreeBuffer(vbo Buffer) {
 	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
-	buf := uint32(vbo)
-	gl.DeleteBuffers(1, &buf)
+	p.ctx.DeleteBuffer(vbo)
 	p.logError()
 }
 
@@ -229,6 +228,10 @@ func (c *esContext) CreateTexture() (texture Texture) {
 	var tex uint32
 	gl.GenTextures(1, &tex)
 	return Texture(tex)
+}
+
+func (c *esContext) DeleteBuffer(buffer Buffer) {
+	gl.DeleteBuffers(1, (*uint32)(&buffer))
 }
 
 func (c *esContext) DeleteTexture(texture Texture) {

@@ -111,7 +111,7 @@ func (p *painter) Init() {
 func (p *painter) glFreeBuffer(vbo Buffer) {
 	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
-	gl.DeleteBuffer(gl.Buffer(vbo))
+	p.ctx.DeleteBuffer(vbo)
 	p.logError()
 }
 
@@ -200,6 +200,10 @@ func (c *xjsContext) CreateBuffer() Buffer {
 
 func (c *xjsContext) CreateTexture() (texture Texture) {
 	return Texture(gl.CreateTexture())
+}
+
+func (c *xjsContext) DeleteBuffer(buffer Buffer) {
+	gl.DeleteBuffer(gl.Buffer(buffer))
 }
 
 func (c *xjsContext) DeleteTexture(texture Texture) {

@@ -113,11 +113,9 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glFreeBuffer(b Buffer) {
-	ctx := p.glctx()
-
 	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
-	ctx.DeleteBuffer(gl.Buffer(b))
+	p.ctx.DeleteBuffer(b)
 	p.logError()
 }
 
@@ -246,6 +244,10 @@ func (c *mobileContext) CreateBuffer() Buffer {
 
 func (c *mobileContext) CreateTexture() (texture Texture) {
 	return Texture(c.glContext.CreateTexture())
+}
+
+func (c *mobileContext) DeleteBuffer(buffer Buffer) {
+	c.glContext.DeleteBuffer(gl.Buffer(buffer))
 }
 
 func (c *mobileContext) DeleteTexture(texture Texture) {

@@ -147,8 +147,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 func (p *painter) glFreeBuffer(vbo Buffer) {
 	p.ctx.BindBuffer(arrayBuffer, noBuffer)
 	p.logError()
-	buf := uint32(vbo)
-	gl.DeleteBuffers(1, &buf)
+	p.ctx.DeleteBuffer(vbo)
 	p.logError()
 }
 
@@ -244,6 +243,10 @@ func (c *coreContext) CreateTexture() (texture Texture) {
 	var tex uint32
 	gl.GenTextures(1, &tex)
 	return Texture(tex)
+}
+
+func (c *coreContext) DeleteBuffer(buffer Buffer) {
+	gl.DeleteBuffers(1, (*uint32)(&buffer))
 }
 
 func (c *coreContext) DeleteTexture(texture Texture) {

@@ -9,6 +9,7 @@ type context interface {
 	ClearColor(r, g, b, a float32)
 	CreateBuffer() Buffer
 	CreateTexture() Texture
+	DeleteBuffer(buffer Buffer)
 	DeleteTexture(texture Texture)
 	Disable(capability uint32)
 	Enable(capability uint32)
