@@ -234,17 +234,17 @@ func ndkRoot() (string, error) {
 		return "$NDK_PATH", nil
 	}
 
-	androidHome := os.Getenv("ANDROID_HOME")
-	if androidHome != "" {
-		ndkRoot := filepath.Join(androidHome, "ndk-bundle")
+	ndkRoot := os.Getenv("ANDROID_NDK_HOME")
+	if ndkRoot != "" {
 		_, err := os.Stat(ndkRoot)
 		if err == nil {
 			return ndkRoot, nil
 		}
 	}
 
-	ndkRoot := os.Getenv("ANDROID_NDK_HOME")
-	if ndkRoot != "" {
+	androidHome := os.Getenv("ANDROID_HOME")
+	if androidHome != "" {
+		ndkRoot := filepath.Join(androidHome, "ndk-bundle")
 		_, err := os.Stat(ndkRoot)
 		if err == nil {
 			return ndkRoot, nil
