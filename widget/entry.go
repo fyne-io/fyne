@@ -1611,10 +1611,15 @@ func (r *entryContentRenderer) buildSelection() {
 }
 
 func (r *entryContentRenderer) ensureCursorVisible() {
-	cx1 := r.cursor.Position().X
-	cy1 := r.cursor.Position().Y
-	cx2 := cx1 + r.cursor.Size().Width
-	cy2 := cy1 + r.cursor.Size().Height
+	letter := fyne.MeasureText("e", theme.TextSize(), r.content.entry.TextStyle)
+	padX := letter.Width*2 + theme.Padding()
+	padY := letter.Height - theme.Padding()
+	cx := r.cursor.Position().X
+	cy := r.cursor.Position().Y
+	cx1 := cx - padX
+	cy1 := cy - padY
+	cx2 := cx + r.cursor.Size().Width + padX
+	cy2 := cy + r.cursor.Size().Height + padY
 	offset := r.content.scroll.Offset
 	size := r.content.scroll.Size()
 
