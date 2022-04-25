@@ -111,7 +111,9 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 		return noShader, fmt.Errorf("failed to compile OpenGL shader:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE", info, source)
 	}
 
-	if len(info) > 0 {
+	// The info is probably a null terminated string.
+	// An empty info has been seen as "\x00".
+	if len(info) > 0 && info != "\x00" {
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
@@ -156,7 +158,9 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
 	}
 
-	if len(info) > 0 {
+	// The info is probably a null terminated string.
+	// An empty info has been seen as "\x00".
+	if len(info) > 0 && info != "\x00" {
 		fmt.Printf("OpenGL program linking output:\n%s\n", info)
 	}
 
