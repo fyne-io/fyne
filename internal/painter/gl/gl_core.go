@@ -60,7 +60,8 @@ type (
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
-func (p *painter) glInit() {
+func (p *painter) Init() {
+	p.ctx = &coreContext{}
 	err := gl.Init()
 	if err != nil {
 		fyne.LogError("failed to initialise OpenGL", err)
@@ -70,10 +71,6 @@ func (p *painter) glInit() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-}
-
-func (p *painter) Init() {
-	p.ctx = &coreContext{}
 	p.program = p.createProgram("simple")
 	p.lineProgram = p.createProgram("line")
 }

@@ -72,9 +72,6 @@ func (p *painter) Init() {
 	p.lineProgram = p.createProgram("line_es")
 }
 
-func (p *painter) glInit() {
-}
-
 // f32Bytes returns the byte representation of float32 values in the given byte
 // order. byteOrder must be either binary.BigEndian or binary.LittleEndian.
 func f32Bytes(byteOrder binary.ByteOrder, values ...float32) []byte {

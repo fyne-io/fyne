@@ -275,8 +275,5 @@ func (p *painter) textureScale(v float32) float32 {
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &painter{canvas: c, contextProvider: ctx}
 	p.SetFrameBufferScale(1.0)
-
-	p.glInit()
-
 	return p
 }

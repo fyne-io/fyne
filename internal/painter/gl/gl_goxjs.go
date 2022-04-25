@@ -58,14 +58,11 @@ var noBuffer = Buffer(gl.NoBuffer)
 var noShader = Shader(gl.NoShader)
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
-func (p *painter) glInit() {
+func (p *painter) Init() {
+	p.ctx = &xjsContext{}
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-}
-
-func (p *painter) Init() {
-	p.ctx = &xjsContext{}
 	p.program = p.createProgram("simple_es")
 	p.lineProgram = p.createProgram("line_es")
 }
