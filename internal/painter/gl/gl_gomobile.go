@@ -105,7 +105,7 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glScissorOpen(x, y, w, h int32) {
-	p.glctx().Scissor(x, y, w, h)
+	p.ctx.Scissor(x, y, w, h)
 	p.glctx().Enable(gl.ScissorTest)
 	p.logError()
 }
@@ -294,6 +294,10 @@ func (c *mobileContext) DeleteTexture(texture Texture) {
 
 func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
+}
+
+func (c *mobileContext) Scissor(x, y, w, h int32) {
+	c.glContext.Scissor(x, y, w, h)
 }
 
 func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {

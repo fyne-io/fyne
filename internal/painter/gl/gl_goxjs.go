@@ -101,7 +101,7 @@ func (p *painter) Init() {
 }
 
 func (p *painter) glScissorOpen(x, y, w, h int32) {
-	gl.Scissor(x, y, w, h)
+	p.ctx.Scissor(x, y, w, h)
 	gl.Enable(gl.SCISSOR_TEST)
 	p.logError()
 }
@@ -245,6 +245,10 @@ func (c *xjsContext) DeleteTexture(texture Texture) {
 
 func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) Scissor(x, y, w, h int32) {
+	gl.Scissor(x, y, w, h)
 }
 
 func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {

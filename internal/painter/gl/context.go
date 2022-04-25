@@ -8,6 +8,7 @@ type context interface {
 	CreateTexture() Texture
 	DeleteTexture(texture Texture)
 	GetError() uint32
+	Scissor(x, y, w, h int32)
 	TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8)
 	TexParameteri(target, param uint32, value int32)
 	UseProgram(program Program)

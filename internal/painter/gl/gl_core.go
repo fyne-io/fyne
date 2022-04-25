@@ -136,7 +136,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 }
 
 func (p *painter) glScissorOpen(x, y, w, h int32) {
-	gl.Scissor(x, y, w, h)
+	p.ctx.Scissor(x, y, w, h)
 	gl.Enable(gl.SCISSOR_TEST)
 	p.logError()
 }
@@ -289,6 +289,10 @@ func (c *coreContext) DeleteTexture(texture Texture) {
 
 func (c *coreContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *coreContext) Scissor(x, y, w, h int32) {
+	gl.Scissor(x, y, w, h)
 }
 
 func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
