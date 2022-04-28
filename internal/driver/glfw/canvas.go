@@ -277,9 +277,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 			c.Painter().StartClipping(inner.Rect())
 		}
 
-		if visible_area := clips.Top(); visible_area != nil {
-			_, paint_area := visible_area.Intersect(pos, size).Rect()
-			if paint_area.Width <= 0 || paint_area.Height <= 0 {
+		if visibleArea := clips.Top(); visibleArea != nil {
+			_, paintArea := visibleArea.Intersect(pos, size).Rect()
+			if paintArea.Width <= 0 || paintArea.Height <= 0 {
 				return
 			}
 		}
