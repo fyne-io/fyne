@@ -170,8 +170,6 @@ func (b *Builder) build() error {
 		} else if meta != "" {
 			args = append(args, "-ldflags", meta)
 		}
-	} else if meta != "" {
-		args = append(args, "-ldflags", meta)
 	}
 
 	if b.target != "" {
