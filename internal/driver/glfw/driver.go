@@ -7,8 +7,6 @@ import (
 	"image"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 	"sync"
 
 	ico "github.com/Kodeworks/golang-image-ico"
@@ -151,14 +149,11 @@ func (d *gLDriver) initFailed(msg string, err error) {
 	}
 }
 
-func goroutineID() int {
-	b := make([]byte, 64)
-	b = b[:runtime.Stack(b, false)]
-	// string format expects "goroutine X [running..."
-	id := strings.Split(strings.TrimSpace(string(b)), " ")[1]
-
-	num, _ := strconv.Atoi(id)
-	return num
+func (d *gLDriver) Run() {
+	if goroutineID() != mainGoroutineID {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
+	d.runGL()
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.

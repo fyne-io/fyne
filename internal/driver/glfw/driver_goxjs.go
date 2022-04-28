@@ -3,6 +3,6 @@
 
 package glfw
 
-func (d *gLDriver) Run() {
-	d.runGL()
+func goroutineID() int {
+	return mainGoroutineID
 }
