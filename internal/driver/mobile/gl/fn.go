@@ -56,6 +56,8 @@ const (
 	glfnGenVertexArray
 	glfnGetAttribLocation
 	glfnGetError
+	glfnGetProgramInfoLog
+	glfnGetProgramiv
 	glfnGetShaderInfoLog
 	glfnGetShaderSource
 	glfnGetShaderiv
