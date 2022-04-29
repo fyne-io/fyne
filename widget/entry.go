@@ -819,7 +819,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 		row = 0
 	} else if row >= e.textProvider().rows() {
 		row = e.textProvider().rows() - 1
-		col = 0
+		col = e.textProvider().rowLength(row)
 	} else {
 		col = e.cursorColAt(e.textProvider().row(row), p.Add(e.scroll.Offset))
 	}
