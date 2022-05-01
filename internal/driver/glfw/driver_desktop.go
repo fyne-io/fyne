@@ -5,8 +5,6 @@ package glfw
 
 import (
 	"runtime"
-	"strconv"
-	"strings"
 
 	"fyne.io/systray"
 
@@ -14,14 +12,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func goroutineID() int {
-	b := make([]byte, 64)
-	b = b[:runtime.Stack(b, false)]
-	// string format expects "goroutine X [running..."
-	id := strings.Split(strings.TrimSpace(string(b)), " ")[1]
-
-	num, _ := strconv.Atoi(id)
-	return num
+func goroutineID() (id uint64) {
+	var buf [30]byte
+	runtime.Stack(buf[:], false)
+	for i := 10; buf[i] != ' '; i++ {
+		id = id*10 + uint64(buf[i]&15)
+	}
+	return id
 }
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {

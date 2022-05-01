@@ -3,6 +3,6 @@
 
 package glfw
 
-func goroutineID() int {
+func goroutineID() uint64 {
 	return mainGoroutineID
 }
