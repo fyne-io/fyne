@@ -47,6 +47,7 @@ func newRun() *runFlag {
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
+	mainGoroutineID = goroutineID()
 
 	run = newRun()
 }
