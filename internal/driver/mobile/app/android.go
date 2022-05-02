@@ -57,6 +57,7 @@ import (
 	"log"
 	"mime"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 	"unsafe"
@@ -268,6 +269,7 @@ func onConfigurationChanged(activity *C.ANativeActivity) {
 
 //export onLowMemory
 func onLowMemory(activity *C.ANativeActivity) {
+	debug.FreeOSMemory()
 }
 
 var (
