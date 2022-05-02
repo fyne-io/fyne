@@ -102,7 +102,7 @@ func checkVersion(output string, versionConstraint *version.ConstraintGroup) err
 		return fmt.Errorf("invalid output for `go version`: `%s`", output)
 	}
 
-	normalized := version.Normalize(split[2][2 : len(split[2])-2])
+	normalized := version.Normalize(split[2][2:len(split[2])])
 	if !versionConstraint.Match(normalized) {
 		return fmt.Errorf("expected go version %v got `%v`", versionConstraint.GetConstraints(), normalized)
 	}
@@ -170,7 +170,7 @@ func (b *Builder) build() error {
 		} else if meta != "" {
 			args = append(args, "-ldflags", meta)
 		}
-	} else if meta != "" {
+	} else if meta != "" && goos != "gopherjs" {
 		args = append(args, "-ldflags", meta)
 	}
 
