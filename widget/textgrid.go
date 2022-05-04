@@ -269,7 +269,7 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 	}
 
 	// possible middle rows
-	for rowNum := startRow + 1; rowNum < endRow-1; rowNum++ {
+	for rowNum := startRow + 1; rowNum < endRow; rowNum++ {
 		for col := 0; col < len(t.Rows[rowNum].Cells); col++ {
 			t.SetStyle(rowNum, col, style)
 		}
