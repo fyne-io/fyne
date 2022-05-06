@@ -274,7 +274,7 @@ func (f *Form) setValidationError(err error) {
 	}
 
 	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
-		err.Error() != f.validationError.Error() {
+		!errors.Is(err, f.validationError) {
 		if err == nil {
 			for _, item := range f.Items {
 				if item.invalid {
