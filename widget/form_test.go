@@ -402,11 +402,7 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 	validationError := false
 
 	form.SetOnValidationChanged(func(err error) {
-		if err != nil {
-			validationError = true
-		} else {
-			validationError = false
-		}
+		validationError = err != nil
 	})
 
 	form.CreateRenderer()

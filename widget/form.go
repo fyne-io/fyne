@@ -131,7 +131,7 @@ func (f *Form) SetOnValidationChanged(callback func(error)) {
 	}
 }
 
-// Validate validates the entire form.
+// Validate validates the entire form and returns the first error that is encountered.
 func (f *Form) Validate() error {
 	for _, item := range f.Items {
 		if w, ok := item.Widget.(fyne.Validatable); ok {
