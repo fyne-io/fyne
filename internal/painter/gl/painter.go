@@ -171,8 +171,8 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	return prog
 }
 
-func (p *painter) defineVertexArray(name string, size, stride, offset int) {
-	vertAttrib := p.ctx.GetAttribLocation(p.program, name)
+func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
+	vertAttrib := p.ctx.GetAttribLocation(prog, name)
 	p.ctx.EnableVertexAttribArray(vertAttrib)
 	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride, offset)
 	p.logError()
