@@ -6,10 +6,10 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-// NewSelectionCount returns a fyne.CountValidator that requires
-// the given count to be within the set min/max range. Setting
+// NewRange returns a fyne.IntValidator that requires
+// the given number to be within the set min/max range. Setting
 // a negative max value will allow any number larger than min.
-func NewSelectionCount(min, max int) fyne.CountValidator {
+func NewRange(min, max int) fyne.IntValidator {
 	var err error
 	if min == max {
 		err = fmt.Errorf("incorrect number of selections, expected %d", min)
