@@ -12,12 +12,15 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/godbus/dbus/v5"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
+
+var once sync.Once
 
 func defaultVariant() fyne.ThemeVariant {
 	return theme.VariantDark
@@ -48,24 +51,17 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 }
 
-func (a *fyneApp) cachedIconPath() string {
-	metadata := a.Metadata()
-	if metadata.Icon == nil || len(metadata.Icon.Content()) == 0 {
-		return ""
-	}
-
-	dirPath := filepath.Join(rootCacheDir(), a.uniqueID)
+func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
 	err := os.MkdirAll(dirPath, 0700)
 	if err != nil {
 		fyne.LogError("Unable to create application cache directory", err)
-		return ""
+		return err
 	}
 
-	filepath := filepath.Join(dirPath, "icon.png")
-	file, err := os.Create(filepath)
+	file, err := os.Create(filePath)
 	if err != nil {
 		fyne.LogError("Unable to create icon file", err)
-		return ""
+		return err
 	}
 
 	defer file.Close()
@@ -73,10 +69,28 @@ func (a *fyneApp) cachedIconPath() string {
 	_, err = file.Write(meta.Icon.Content())
 	if err != nil {
 		fyne.LogError("Unable to write icon contents", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *fyneApp) cachedIconPath() string {
+	if a.Icon() == nil {
 		return ""
 	}
 
-	return filepath
+	dirPath := filepath.Join(rootCacheDir(), a.UniqueID())
+	filePath := filepath.Join(dirPath, "icon.png")
+	once.Do(func() {
+		err := a.saveIconToCache(dirPath, filePath)
+		if err != nil {
+			filePath = ""
+		}
+	})
+
+	return filePath
+
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
