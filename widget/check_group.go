@@ -21,7 +21,7 @@ type CheckGroup struct {
 	Options    []string
 	Selected   []string
 
-	SelectionValidator  fyne.IntValidator
+	Validator           fyne.IntValidator
 	onValidationChanged func(error)
 	validationError     error
 
@@ -123,11 +123,11 @@ func (r *CheckGroup) SetSelected(options []string) {
 //
 // Since: 2.2
 func (r *CheckGroup) Validate() error {
-	if r.SelectionValidator == nil {
+	if r.Validator == nil {
 		return nil
 	}
 
-	return r.SelectionValidator(len(r.Selected))
+	return r.Validator(len(r.Selected))
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
@@ -198,7 +198,7 @@ func (r *CheckGroup) update() {
 		item.Refresh()
 	}
 
-	if r.SelectionValidator != nil && r.onValidationChanged != nil {
+	if r.Validator != nil && r.onValidationChanged != nil {
 		newErr := r.Validate()
 		if !errors.Is(newErr, r.validationError) {
 			r.validationError = newErr

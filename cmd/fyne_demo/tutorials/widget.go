@@ -316,13 +316,13 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 	password.SetPlaceHolder("Password")
 
 	shipping := &widget.RadioGroup{Options: []string{"Fast shipping", "Slow shipping"}, Horizontal: true,
-		SelectionValidator: validation.NewRange(1, 1),
+		Validator: validation.NewRange(1, 1),
 	}
 
 	specifics := &widget.CheckGroup{
-		Options:            []string{"Gift", "Fragile", "Heavy", "Priority"},
-		Horizontal:         true,
-		SelectionValidator: validation.NewRange(2, -1),
+		Options:    []string{"Gift", "Fragile", "Heavy", "Priority"},
+		Horizontal: true,
+		Validator:  validation.NewRange(2, -1),
 	}
 
 	largeText := widget.NewMultiLineEntry()

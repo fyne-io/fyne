@@ -20,7 +20,7 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
-	SelectionValidator  fyne.IntValidator
+	Validator           fyne.IntValidator
 	onValidationChanged func(error)
 	validationError     error
 
@@ -102,15 +102,15 @@ func (r *RadioGroup) SetSelected(option string) {
 //
 // Since: 2.2
 func (r *RadioGroup) Validate() error {
-	if r.SelectionValidator == nil {
+	if r.Validator == nil {
 		return nil
 	}
 
 	if r.Selected == "" {
-		return r.SelectionValidator(0)
+		return r.Validator(0)
 	}
 
-	return r.SelectionValidator(1)
+	return r.Validator(1)
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
@@ -160,7 +160,7 @@ func (r *RadioGroup) update() {
 		item.Refresh()
 	}
 
-	if r.SelectionValidator != nil && r.onValidationChanged != nil {
+	if r.Validator != nil && r.onValidationChanged != nil {
 		newErr := r.Validate()
 		if !errors.Is(newErr, r.validationError) {
 			r.validationError = newErr
