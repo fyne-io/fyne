@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"errors"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
@@ -36,8 +38,7 @@ func (e *Entry) SetValidationError(err error) {
 		return
 	}
 
-	if (err == nil && e.validationError != nil) || (e.validationError == nil && err != nil) ||
-		err.Error() != e.validationError.Error() {
+	if !errors.Is(err, e.validationError) {
 		e.validationError = err
 
 		if e.onValidationChanged != nil {
