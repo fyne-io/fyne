@@ -24,9 +24,7 @@ func (e *Entry) Validate() error {
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (e *Entry) SetOnValidationChanged(callback func(error)) {
-	if callback != nil {
-		e.onValidationChanged = callback
-	}
+	e.onValidationChanged = callback
 }
 
 // SetValidationError manually updates the validation status until the next input change
