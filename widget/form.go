@@ -39,6 +39,9 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 // If you change OnSubmit/OnCancel after the form is created and rendered, you need to call
 // Refresh() to update the form with the correct buttons.
 // Setting OnSubmit/OnCancel to nil will remove the buttons.
+// If Validator is set it will be executed every time a child widget is changed, and if the returned error
+// is not nil the error message will be displayed to the right of the form's submit button and the form will
+// be disabled until the Validator returns nil.
 type Form struct {
 	BaseWidget
 
@@ -47,13 +50,17 @@ type Form struct {
 	OnCancel   func() `json:"-"`
 	SubmitText string
 	CancelText string
+	Validator  func() error
 
-	itemGrid     *fyne.Container
-	buttonBox    *fyne.Container
-	cancelButton *Button
-	submitButton *Button
+	itemGrid            *fyne.Container
+	buttonBox           *fyne.Container
+	cancelButton        *Button
+	submitButton        *Button
+	validationErrorText *canvas.Text
+	onValidationChanged func(error)
 
-	disabled bool
+	disabled        bool
+	validationError error
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
@@ -117,6 +124,53 @@ func (f *Form) Disable() {
 // Since: 2.1
 func (f *Form) Disabled() bool {
 	return f.disabled
+}
+
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation.
+func (f *Form) SetOnValidationChanged(callback func(error)) {
+	if callback != nil {
+		f.onValidationChanged = callback
+	}
+}
+
+// SetValidationError manually updates the validation status until the next change in a child widget
+func (f *Form) SetValidationError(err error) {
+	if f.Validator == nil {
+		return
+	}
+	if err == nil {
+		f.submitButton.Enable()
+		f.checkValidation(nil) // make sure the form get's enabled again if no widget inside it is invalid
+	}
+	if err == nil && f.validationError == nil {
+		return
+	}
+
+	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
+		err.Error() != f.validationError.Error() {
+		f.validationError = err
+		var errorText string
+		if err != nil {
+			errorText = err.Error()
+		}
+		f.validationErrorText.Text = errorText
+		if f.onValidationChanged != nil {
+			f.onValidationChanged(err)
+		}
+		f.submitButton.Disable()
+	}
+}
+
+// Validate validates the current state of the child widgets
+func (f *Form) Validate() error {
+	if f.Validator == nil {
+		return nil
+	}
+
+	err := f.Validator()
+	f.SetValidationError(err)
+	return err
 }
 
 func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
@@ -189,7 +243,7 @@ func (f *Form) checkValidation(err error) {
 		}
 	}
 
-	if !f.disabled {
+	if !f.disabled && f.validationError == nil {
 		f.submitButton.Enable()
 	}
 }
@@ -287,7 +341,12 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
 	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
-	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
+	var validationErrorText string
+	if err := f.validationError; err != nil {
+		validationErrorText = err.Error()
+	}
+	f.validationErrorText = &canvas.Text{Alignment: fyne.TextAlignLeading, Color: theme.ErrorColor(), Text: validationErrorText, TextSize: theme.TextSize(), TextStyle: fyne.TextStyle{Bold: true}}
+	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton, f.validationErrorText}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
@@ -296,6 +355,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.updateButtons()
 	f.updateLabels()
 	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
+	f.Validate()           // will trigger a validation check with f.Validator
 	return renderer
 }
 
