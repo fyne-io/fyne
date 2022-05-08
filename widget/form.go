@@ -273,8 +273,7 @@ func (f *Form) setValidationError(err error) {
 		return
 	}
 
-	if (err == nil && f.validationError != nil) || (f.validationError == nil && err != nil) ||
-		!errors.Is(err, f.validationError) {
+	if !errors.Is(err, f.validationError) {
 		if err == nil {
 			for _, item := range f.Items {
 				if item.invalid {
