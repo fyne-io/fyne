@@ -7,25 +7,27 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/driver/common/copy"
 )
 
 func TestQueue(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
-		q := async.NewCanvasObjectQueue()
+		q := async.NewCopyCanvasObjectQueue()
 		if q.Out() != nil {
 			t.Fatalf("dequeue empty queue returns non-nil")
 		}
 	})
 
 	t.Run("length", func(t *testing.T) {
-		q := async.NewCanvasObjectQueue()
+		q := async.NewCopyCanvasObjectQueue()
 		if q.Len() != 0 {
 			t.Fatalf("empty queue has non-zero length")
 		}
 
 		obj := canvas.NewRectangle(color.Black)
+		copy := copy.NewCopyRectangle(obj)
 
-		q.In(obj)
+		q.In(copy)
 		if q.Len() != 1 {
 			t.Fatalf("count of enqueue wrong, want %d, got %d.", 1, q.Len())
 		}
@@ -37,16 +39,17 @@ func TestQueue(t *testing.T) {
 	})
 
 	t.Run("in-out", func(t *testing.T) {
-		q := async.NewCanvasObjectQueue()
+		q := async.NewCopyCanvasObjectQueue()
 
-		want := []fyne.CanvasObject{
+		want := []*canvas.Rectangle{
 			canvas.NewRectangle(color.Black),
 			canvas.NewRectangle(color.Black),
 			canvas.NewRectangle(color.Black),
 		}
 
 		for i := 0; i < len(want); i++ {
-			q.In(want[i])
+			copy := copy.NewCopyRectangle(want[i])
+			q.In(copy)
 		}
 
 		var x []fyne.CanvasObject

@@ -6,32 +6,32 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common/copy"
 )
 
-var itemCanvasObjectPool = sync.Pool{
-	New: func() interface{} { return &itemCanvasObject{next: nil, v: nil} },
+var itemCopyCanvasObjectPool = sync.Pool{
+	New: func() interface{} { return &itemCopyCanvasObject{next: nil, v: nil} },
 }
 
 // In puts the given value at the tail of the queue.
-func (q *CanvasObjectQueue) In(v fyne.CanvasObject) {
-	i := itemCanvasObjectPool.Get().(*itemCanvasObject)
+func (q *CopyCanvasObjectQueue) In(v copy.CopyCanvasObject) {
+	i := itemCopyCanvasObjectPool.Get().(*itemCopyCanvasObject)
 	i.next = nil
 	i.v = v
 
-	var last, lastnext *itemCanvasObject
+	var last, lastnext *itemCopyCanvasObject
 	for {
-		last = loadCanvasObjectItem(&q.tail)
-		lastnext = loadCanvasObjectItem(&last.next)
-		if loadCanvasObjectItem(&q.tail) == last {
+		last = loadCopyCanvasObjectItem(&q.tail)
+		lastnext = loadCopyCanvasObjectItem(&last.next)
+		if loadCopyCanvasObjectItem(&q.tail) == last {
 			if lastnext == nil {
-				if casCanvasObjectItem(&last.next, lastnext, i) {
-					casCanvasObjectItem(&q.tail, last, i)
+				if casCopyCanvasObjectItem(&last.next, lastnext, i) {
+					casCopyCanvasObjectItem(&q.tail, last, i)
 					atomic.AddUint64(&q.len, 1)
 					return
 				}
 			} else {
-				casCanvasObjectItem(&q.tail, last, lastnext)
+				casCopyCanvasObjectItem(&q.tail, last, lastnext)
 			}
 		}
 	}
@@ -39,23 +39,23 @@ func (q *CanvasObjectQueue) In(v fyne.CanvasObject) {
 
 // Out removes and returns the value at the head of the queue.
 // It returns nil if the queue is empty.
-func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
-	var first, last, firstnext *itemCanvasObject
+func (q *CopyCanvasObjectQueue) Out() copy.CopyCanvasObject {
+	var first, last, firstnext *itemCopyCanvasObject
 	for {
-		first = loadCanvasObjectItem(&q.head)
-		last = loadCanvasObjectItem(&q.tail)
-		firstnext = loadCanvasObjectItem(&first.next)
-		if first == loadCanvasObjectItem(&q.head) {
+		first = loadCopyCanvasObjectItem(&q.head)
+		last = loadCopyCanvasObjectItem(&q.tail)
+		firstnext = loadCopyCanvasObjectItem(&first.next)
+		if first == loadCopyCanvasObjectItem(&q.head) {
 			if first == last {
 				if firstnext == nil {
 					return nil
 				}
-				casCanvasObjectItem(&q.tail, last, firstnext)
+				casCopyCanvasObjectItem(&q.tail, last, firstnext)
 			} else {
 				v := firstnext.v
-				if casCanvasObjectItem(&q.head, first, firstnext) {
+				if casCopyCanvasObjectItem(&q.head, first, firstnext) {
 					atomic.AddUint64(&q.len, ^uint64(0))
-					itemCanvasObjectPool.Put(first)
+					itemCopyCanvasObjectPool.Put(first)
 					return v
 				}
 			}
@@ -64,6 +64,6 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 }
 
 // Len returns the length of the queue.
-func (q *CanvasObjectQueue) Len() uint64 {
+func (q *CopyCanvasObjectQueue) Len() uint64 {
 	return atomic.LoadUint64(&q.len)
 }

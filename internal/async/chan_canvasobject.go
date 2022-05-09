@@ -2,23 +2,23 @@
 
 package async
 
-import "fyne.io/fyne/v2"
+import "fyne.io/fyne/v2/internal/driver/common/copy"
 
-// UnboundedCanvasObjectChan is a channel with an unbounded buffer for caching
-// CanvasObject objects. A channel must be closed via Close method.
-type UnboundedCanvasObjectChan struct {
-	in, out chan fyne.CanvasObject
+// UnboundedCopyCanvasObjectChan is a channel with an unbounded buffer for caching
+// CopyCanvasObject objects. A channel must be closed via Close method.
+type UnboundedCopyCanvasObjectChan struct {
+	in, out chan copy.CopyCanvasObject
 	close   chan struct{}
-	q       []fyne.CanvasObject
+	q       []copy.CopyCanvasObject
 }
 
-// NewUnboundedCanvasObjectChan returns a unbounded channel with unlimited capacity.
-func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
-	ch := &UnboundedCanvasObjectChan{
-		// The size of CanvasObject is less than 16 bytes, we use 16 to fit
+// NewUnboundedCopyCanvasObjectChan returns a unbounded channel with unlimited capacity.
+func NewUnboundedCopyCanvasObjectChan() *UnboundedCopyCanvasObjectChan {
+	ch := &UnboundedCopyCanvasObjectChan{
+		// The size of CopyCanvasObject is less than 16 bytes, we use 16 to fit
 		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
-		in:    make(chan fyne.CanvasObject, 16),
-		out:   make(chan fyne.CanvasObject, 16),
+		in:    make(chan copy.CopyCanvasObject, 16),
+		out:   make(chan copy.CopyCanvasObject, 16),
 		close: make(chan struct{}),
 	}
 	go ch.processing()
@@ -27,22 +27,22 @@ func NewUnboundedCanvasObjectChan() *UnboundedCanvasObjectChan {
 
 // In returns the send channel of the given channel, which can be used to
 // send values to the channel.
-func (ch *UnboundedCanvasObjectChan) In() chan<- fyne.CanvasObject { return ch.in }
+func (ch *UnboundedCopyCanvasObjectChan) In() chan<- copy.CopyCanvasObject { return ch.in }
 
 // Out returns the receive channel of the given channel, which can be used
 // to receive values from the channel.
-func (ch *UnboundedCanvasObjectChan) Out() <-chan fyne.CanvasObject { return ch.out }
+func (ch *UnboundedCopyCanvasObjectChan) Out() <-chan copy.CopyCanvasObject { return ch.out }
 
 // Close closes the channel.
-func (ch *UnboundedCanvasObjectChan) Close() { ch.close <- struct{}{} }
+func (ch *UnboundedCopyCanvasObjectChan) Close() { ch.close <- struct{}{} }
 
-func (ch *UnboundedCanvasObjectChan) processing() {
+func (ch *UnboundedCopyCanvasObjectChan) processing() {
 	// This is a preallocation of the internal unbounded buffer.
 	// The size is randomly picked. But if one changes the size, the
 	// reallocation size at the subsequent for loop should also be
 	// changed too. Furthermore, there is no memory leak since the
 	// queue is garbage collected.
-	ch.q = make([]fyne.CanvasObject, 0, 1<<10)
+	ch.q = make([]copy.CopyCanvasObject, 0, 1<<10)
 	for {
 		select {
 		case e, ok := <-ch.in:
@@ -78,12 +78,12 @@ func (ch *UnboundedCanvasObjectChan) processing() {
 		// If the remaining capacity is too small, we prefer to
 		// reallocate the entire buffer.
 		if cap(ch.q) < 1<<5 {
-			ch.q = make([]fyne.CanvasObject, 0, 1<<10)
+			ch.q = make([]copy.CopyCanvasObject, 0, 1<<10)
 		}
 	}
 }
 
-func (ch *UnboundedCanvasObjectChan) closed() {
+func (ch *UnboundedCopyCanvasObjectChan) closed() {
 	close(ch.in)
 	for e := range ch.in {
 		ch.q = append(ch.q, e)

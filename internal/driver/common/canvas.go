@@ -1,15 +1,19 @@
 package common
 
 import (
+	"log"
+	"reflect"
 	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/common/copy"
 	"fyne.io/fyne/v2/internal/painter/gl"
 )
 
@@ -45,7 +49,7 @@ type Canvas struct {
 	// disappear or blink from the view at any frames. As of this reason,
 	// the refreshQueue is an unbounded queue which is bale to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
-	refreshQueue *async.CanvasObjectQueue
+	refreshQueue *async.CopyCanvasObjectQueue
 	dirty        uint32 // atomic
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
@@ -244,7 +248,7 @@ func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 // Initialize initializes the canvas.
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
-	c.refreshQueue = async.NewCanvasObjectQueue()
+	c.refreshQueue = async.NewCopyCanvasObjectQueue()
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
@@ -288,7 +292,34 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	c.refreshQueue.In(obj)
+	var objCopy copy.CopyCanvasObject
+	switch co := obj.(type) {
+	case *canvas.Circle:
+		objCopy = copy.NewCopyCircle(co)
+	case *fyne.Container:
+		objCopy = copy.NewCopyContainer(co)
+	case *canvas.Image:
+		objCopy = copy.NewCopyImage(co)
+	case *canvas.Line:
+		objCopy = copy.NewCopyLine(co)
+	case *canvas.LinearGradient:
+		objCopy = copy.NewCopyLinearGradient(co)
+	case *canvas.RadialGradient:
+		objCopy = copy.NewCopyRadialGradient(co)
+	case *canvas.Raster:
+		objCopy = copy.NewCopyRaster(co)
+	case *canvas.Rectangle:
+		objCopy = copy.NewCopyRectangle(co)
+	case *canvas.Text:
+		objCopy = copy.NewCopyText(co)
+	}
+
+	if objCopy == nil {
+		log.Println("Type", reflect.TypeOf(obj), "is not handled yet by Refresh")
+		return
+	}
+
+	c.refreshQueue.In(objCopy)
 	c.SetDirty()
 }
 

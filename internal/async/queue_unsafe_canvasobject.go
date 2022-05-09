@@ -8,36 +8,36 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common/copy"
 )
 
-// CanvasObjectQueue implements lock-free FIFO freelist based queue.
+// CopyCanvasObjectQueue implements lock-free FIFO freelist based queue.
 //
 // Reference: https://dl.acm.org/citation.cfm?doid=248052.248106
-type CanvasObjectQueue struct {
+type CopyCanvasObjectQueue struct {
 	head unsafe.Pointer
 	tail unsafe.Pointer
 	len  uint64
 }
 
-// NewCanvasObjectQueue returns a queue for caching values.
-func NewCanvasObjectQueue() *CanvasObjectQueue {
-	head := &itemCanvasObject{next: nil, v: nil}
-	return &CanvasObjectQueue{
+// NewCopyCanvasObjectQueue returns a queue for caching values.
+func NewCopyCanvasObjectQueue() *CopyCanvasObjectQueue {
+	head := &itemCopyCanvasObject{next: nil, v: nil}
+	return &CopyCanvasObjectQueue{
 		tail: unsafe.Pointer(head),
 		head: unsafe.Pointer(head),
 	}
 }
 
-type itemCanvasObject struct {
+type itemCopyCanvasObject struct {
 	next unsafe.Pointer
-	v    fyne.CanvasObject
+	v    copy.CopyCanvasObject
 }
 
-func loadCanvasObjectItem(p *unsafe.Pointer) *itemCanvasObject {
-	return (*itemCanvasObject)(atomic.LoadPointer(p))
+func loadCopyCanvasObjectItem(p *unsafe.Pointer) *itemCopyCanvasObject {
+	return (*itemCopyCanvasObject)(atomic.LoadPointer(p))
 }
 
-func casCanvasObjectItem(p *unsafe.Pointer, old, new *itemCanvasObject) bool {
+func casCopyCanvasObjectItem(p *unsafe.Pointer, old, new *itemCopyCanvasObject) bool {
 	return atomic.CompareAndSwapPointer(p, unsafe.Pointer(old), unsafe.Pointer(new))
 }

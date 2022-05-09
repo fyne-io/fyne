@@ -30,9 +30,9 @@ func main() {
 	codes := map[*template.Template]map[string]data{
 		chanImpl: {
 			"chan_canvasobject.go": {
-				Type:    "fyne.CanvasObject",
-				Name:    "CanvasObject",
-				Imports: `import "fyne.io/fyne/v2"`,
+				Type:    "copy.CopyCanvasObject",
+				Name:    "CopyCanvasObject",
+				Imports: `import "fyne.io/fyne/v2/internal/driver/common/copy"`,
 			},
 			"chan_func.go": {
 				Type:    "func()",
@@ -47,34 +47,34 @@ func main() {
 		},
 		queueImpl: {
 			"queue_canvasobject.go": {
-				Type: "fyne.CanvasObject",
-				Name: "CanvasObject",
+				Type: "copy.CopyCanvasObject",
+				Name: "CopyCanvasObject",
 				Imports: `import (
 					"sync"
 					"sync/atomic"
 
-					"fyne.io/fyne/v2"
+					"fyne.io/fyne/v2/internal/driver/common/copy"
 				)`,
 			},
 		},
 		queueUnsafeStructImpl: {
 			"queue_unsafe_canvasobject.go": {
-				Type: "fyne.CanvasObject",
-				Name: "CanvasObject",
+				Type: "copy.CopyCanvasObject",
+				Name: "CopyCanvasObject",
 				Imports: `import (
 					"sync/atomic"
 					"unsafe"
 
-					"fyne.io/fyne/v2"
+					"fyne.io/fyne/v2/internal/driver/common/copy"
 				)`,
 			},
 		},
 		queuePureStructImpl: {
 			"queue_pure_canvasobject.go": {
-				Type: "fyne.CanvasObject",
-				Name: "CanvasObject",
+				Type: "copy.CopyCanvasObject",
+				Name: "CopyCanvasObject",
 				Imports: `import (
-					"fyne.io/fyne/v2"
+					"fyne.io/fyne/v2/internal/driver/common/copy"
 				)`,
 			},
 		},

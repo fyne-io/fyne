@@ -5,37 +5,37 @@
 package async
 
 import (
-	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common/copy"
 )
 
-// CanvasObjectQueue implements lock-free FIFO freelist based queue.
+// CopyCanvasObjectQueue implements lock-free FIFO freelist based queue.
 //
 // Reference: https://dl.acm.org/citation.cfm?doid=248052.248106
-type CanvasObjectQueue struct {
-	head *itemCanvasObject
-	tail *itemCanvasObject
+type CopyCanvasObjectQueue struct {
+	head *itemCopyCanvasObject
+	tail *itemCopyCanvasObject
 	len  uint64
 }
 
-// NewCanvasObjectQueue returns a queue for caching values.
-func NewCanvasObjectQueue() *CanvasObjectQueue {
-	head := &itemCanvasObject{next: nil, v: nil}
-	return &CanvasObjectQueue{
+// NewCopyCanvasObjectQueue returns a queue for caching values.
+func NewCopyCanvasObjectQueue() *CopyCanvasObjectQueue {
+	head := &itemCopyCanvasObject{next: nil, v: nil}
+	return &CopyCanvasObjectQueue{
 		tail: head,
 		head: head,
 	}
 }
 
-type itemCanvasObject struct {
-	next *itemCanvasObject
-	v    fyne.CanvasObject
+type itemCopyCanvasObject struct {
+	next *itemCopyCanvasObject
+	v    copy.CopyCanvasObject
 }
 
-func loadCanvasObjectItem(p **itemCanvasObject) *itemCanvasObject {
+func loadCopyCanvasObjectItem(p **itemCopyCanvasObject) *itemCopyCanvasObject {
 	return *p
 }
 
-func casCanvasObjectItem(p **itemCanvasObject, _, new *itemCanvasObject) bool {
+func casCopyCanvasObjectItem(p **itemCopyCanvasObject, _, new *itemCopyCanvasObject) bool {
 	*p = new
 	return true
 }
