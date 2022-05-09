@@ -80,7 +80,9 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 			"-buildmode=c-shared",
 			"-o", libAbsPath,
 		}
-		if release && buildLdflags == "" {
+		if release && buildLdflags == "" { 
+			// if user want to release version the debug and DWARF is not nessery (useless), 
+			// but if user define ldflags, it will not duplicate (rewrite) 
 			arguments = append(arguments, "-ldflags", "-w -s")
 		}
 		err = goBuild(
