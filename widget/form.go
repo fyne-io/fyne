@@ -125,10 +125,9 @@ func (f *Form) Disabled() bool {
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form)
 func (f *Form) SetOnValidationChanged(callback func(error)) {
-	if callback != nil {
-		f.onValidationChanged = callback
-	}
+	f.onValidationChanged = callback
 }
 
 // Validate validates the entire form and returns the first error that is encountered.
