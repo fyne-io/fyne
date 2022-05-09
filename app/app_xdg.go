@@ -12,12 +12,15 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/godbus/dbus/v5"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
+
+var once sync.Once
 
 func defaultVariant() fyne.ThemeVariant {
 	return theme.VariantDark
@@ -37,7 +40,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 
 	appName := fyne.CurrentApp().UniqueID()
-	appIcon := ""       // TODO in the future extract icon from app to cache and pass path
+	appIcon := a.cachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
@@ -46,6 +49,48 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	if call.Err != nil {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
+}
+
+func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
+	err := os.MkdirAll(dirPath, 0700)
+	if err != nil {
+		fyne.LogError("Unable to create application cache directory", err)
+		return err
+	}
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		fyne.LogError("Unable to create icon file", err)
+		return err
+	}
+
+	defer file.Close()
+
+	_, err = file.Write(meta.Icon.Content())
+	if err != nil {
+		fyne.LogError("Unable to write icon contents", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *fyneApp) cachedIconPath() string {
+	if a.Icon() == nil {
+		return ""
+	}
+
+	dirPath := filepath.Join(rootCacheDir(), a.UniqueID())
+	filePath := filepath.Join(dirPath, "icon.png")
+	once.Do(func() {
+		err := a.saveIconToCache(dirPath, filePath)
+		if err != nil {
+			filePath = ""
+		}
+	})
+
+	return filePath
+
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
@@ -63,6 +108,11 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 func rootConfigDir() string {
 	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")
+}
+
+func rootCacheDir() string {
+	desktopCache, _ := os.UserCacheDir()
+	return filepath.Join(desktopCache, "fyne")
 }
 
 func watchTheme() {
