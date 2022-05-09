@@ -76,11 +76,17 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
+		arguments := []string{
+			"-buildmode=c-shared",
+			"-o", libAbsPath,
+		}
+		if release && buildLdflags == "" {
+			arguments = append(arguments, "-ldflags", "-w -s")
+		}
 		err = goBuild(
 			pkg.PkgPath,
 			androidEnv[arch],
-			"-buildmode=c-shared",
-			"-o", libAbsPath,
+			arguments...,
 		)
 		if err != nil {
 			return nil, err
