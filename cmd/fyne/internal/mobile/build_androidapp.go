@@ -76,19 +76,16 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
-		arguments := []string{
-			"-buildmode=c-shared",
-			"-o", libAbsPath,
-		}
-		if release && buildLdflags == "" { 
+		if release && buildLdflags == "" {
 			// if user want to release version the debug and DWARF is not nessery (useless), 
 			// but if user define ldflags, it will not duplicate (rewrite) 
-			arguments = append(arguments, "-ldflags", "-w -s")
+			buildLdflags = "-w -s"
 		}
 		err = goBuild(
 			pkg.PkgPath,
 			androidEnv[arch],
-			arguments...,
+			"-buildmode=c-shared",
+			"-o", libAbsPath,
 		)
 		if err != nil {
 			return nil, err
