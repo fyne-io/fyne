@@ -76,10 +76,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
-		/*
-			if user want to release version the debug and DWARF is not nessery (useless),
-			but if user define ldflags, it will not duplicate (rewrite)
-		*/
+		// If building release and no ldflags are set then remove the useless debug and DWARF build options
 		if release && buildLdflags == "" {
 			buildLdflags = "-s -w"
 		}
