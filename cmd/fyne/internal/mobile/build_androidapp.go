@@ -76,6 +76,10 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
+		// If building release and no ldflags are set then remove the useless debug and DWARF build options
+		if release && buildLdflags == "" {
+			buildLdflags = "-s -w"
+		}
 		err = goBuild(
 			pkg.PkgPath,
 			androidEnv[arch],
