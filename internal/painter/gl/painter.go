@@ -10,6 +10,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var shaderSources = map[string][2][]byte{
+	"line":      {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
+	"line_es":   {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
+	"simple":    {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
+	"simple_es": {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
+}
+
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
 	// Init tell a new painter to initialise, usually called after a context is available
@@ -32,8 +39,13 @@ type Painter interface {
 	StopClipping()
 }
 
-// Declare conformity to Painter interface
-var _ Painter = (*painter)(nil)
+// NewPainter creates a new GL based renderer for the provided canvas.
+// If it is a master painter it will also initialise OpenGL
+func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
+	p := &painter{canvas: c, contextProvider: ctx}
+	p.SetFrameBufferScale(1.0)
+	return p
+}
 
 type painter struct {
 	canvas          fyne.Canvas
@@ -45,11 +57,24 @@ type painter struct {
 	pixScale        float32 // pre-calculate scale*texScale for each draw
 }
 
-var shaderSources = map[string][2][]byte{
-	"line":      {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
-	"line_es":   {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
-	"simple":    {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
-	"simple_es": {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
+// Declare conformity to Painter interface
+var _ Painter = (*painter)(nil)
+
+func (p *painter) Clear() {
+	r, g, b, a := theme.BackgroundColor().RGBA()
+	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
+	p.logError()
+}
+
+func (p *painter) Free(obj fyne.CanvasObject) {
+	p.freeTexture(obj)
+}
+
+func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+	if obj.Visible() {
+		p.drawObject(obj, pos, frame)
+	}
 }
 
 func (p *painter) SetFrameBufferScale(scale float32) {
@@ -57,10 +82,8 @@ func (p *painter) SetFrameBufferScale(scale float32) {
 	p.pixScale = p.canvas.Scale() * p.texScale
 }
 
-func (p *painter) Clear() {
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
+func (p *painter) SetOutputSize(width, height int) {
+	p.ctx.Viewport(0, 0, width, height)
 	p.logError()
 }
 
@@ -76,21 +99,6 @@ func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 
 func (p *painter) StopClipping() {
 	p.ctx.Disable(scissorTest)
-	p.logError()
-}
-
-func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if obj.Visible() {
-		p.drawObject(obj, pos, frame)
-	}
-}
-
-func (p *painter) Free(obj fyne.CanvasObject) {
-	p.freeTexture(obj)
-}
-
-func (p *painter) SetOutputSize(width, height int) {
-	p.ctx.Viewport(0, 0, width, height)
 	p.logError()
 }
 
@@ -160,12 +168,4 @@ func (p *painter) createProgram(shaderFilename string) Program {
 
 func (p *painter) logError() {
 	logGLError(p.ctx.GetError())
-}
-
-// NewPainter creates a new GL based renderer for the provided canvas.
-// If it is a master painter it will also initialise OpenGL
-func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
-	p := &painter{canvas: c, contextProvider: ctx}
-	p.SetFrameBufferScale(1.0)
-	return p
 }
