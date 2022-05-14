@@ -9,6 +9,109 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
+func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
+	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
+		1.0, paint.VectorPad(circle))
+}
+
+func (p *painter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) Texture, pos fyne.Position, frame fyne.Size) {
+	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
+}
+
+func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
+	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
+}
+
+func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
+	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
+		return
+	}
+
+	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
+	p.ctx.UseProgram(p.lineProgram)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.lineProgram, "vert", 2, 4, 0)
+	p.defineVertexArray(p.lineProgram, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+
+	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
+	r, g, b, a := line.StrokeColor.RGBA()
+	if a == 0 {
+		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
+	} else {
+		alpha := float32(a)
+		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
+	}
+	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
+	p.ctx.Uniform1f(lineWidthUniform, halfWidth)
+
+	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
+	p.ctx.Uniform1f(featherUniform, feather)
+
+	p.ctx.DrawArrays(triangles, 0, 6)
+	p.logError()
+	p.freeBuffer(vbo)
+}
+
+func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+	if !o.Visible() {
+		return
+	}
+	switch obj := o.(type) {
+	case *canvas.Circle:
+		p.drawCircle(obj, pos, frame)
+	case *canvas.Line:
+		p.drawLine(obj, pos, frame)
+	case *canvas.Image:
+		p.drawImage(obj, pos, frame)
+	case *canvas.Raster:
+		p.drawRaster(obj, pos, frame)
+	case *canvas.Rectangle:
+		p.drawRectangle(obj, pos, frame)
+	case *canvas.Text:
+		p.drawText(obj, pos, frame)
+	case *canvas.LinearGradient:
+		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
+	case *canvas.RadialGradient:
+		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
+	}
+}
+
+func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
+	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
+}
+
+func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.StrokeColor == nil || rect.StrokeWidth == 0) {
+		return
+	}
+	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
+		1.0, paint.VectorPad(rect))
+}
+
+func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
+	if text.Text == "" || text.Text == " " {
+		return
+	}
+
+	size := text.MinSize()
+	containerSize := text.Size()
+	switch text.Alignment {
+	case fyne.TextAlignTrailing:
+		pos = fyne.NewPos(pos.X+containerSize.Width-size.Width, pos.Y)
+	case fyne.TextAlignCenter:
+		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
+	}
+
+	if containerSize.Height > size.Height {
+		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
+	}
+
+	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+}
+
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
 	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
 
@@ -47,109 +150,6 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 	p.freeBuffer(vbo)
-}
-
-func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
-		1.0, paint.VectorPad(circle))
-}
-
-func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
-	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
-		return
-	}
-
-	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
-	p.ctx.UseProgram(p.lineProgram)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.lineProgram, "vert", 2, 4, 0)
-	p.defineVertexArray(p.lineProgram, "normal", 2, 4, 2)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-
-	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
-	r, g, b, a := line.StrokeColor.RGBA()
-	if a == 0 {
-		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
-	} else {
-		alpha := float32(a)
-		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
-	}
-	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
-	p.ctx.Uniform1f(lineWidthUniform, halfWidth)
-
-	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
-	p.ctx.Uniform1f(featherUniform, feather)
-
-	p.ctx.DrawArrays(triangles, 0, 6)
-	p.logError()
-	p.freeBuffer(vbo)
-}
-
-func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
-}
-
-func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
-}
-
-func (p *painter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) Texture, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
-}
-
-func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.StrokeColor == nil || rect.StrokeWidth == 0) {
-		return
-	}
-	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
-		1.0, paint.VectorPad(rect))
-}
-
-func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if text.Text == "" || text.Text == " " {
-		return
-	}
-
-	size := text.MinSize()
-	containerSize := text.Size()
-	switch text.Alignment {
-	case fyne.TextAlignTrailing:
-		pos = fyne.NewPos(pos.X+containerSize.Width-size.Width, pos.Y)
-	case fyne.TextAlignCenter:
-		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
-	}
-
-	if containerSize.Height > size.Height {
-		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
-	}
-
-	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
-}
-
-func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if !o.Visible() {
-		return
-	}
-	switch obj := o.(type) {
-	case *canvas.Circle:
-		p.drawCircle(obj, pos, frame)
-	case *canvas.Line:
-		p.drawLine(obj, pos, frame)
-	case *canvas.Image:
-		p.drawImage(obj, pos, frame)
-	case *canvas.Raster:
-		p.drawRaster(obj, pos, frame)
-	case *canvas.Rectangle:
-		p.drawRectangle(obj, pos, frame)
-	case *canvas.Text:
-		p.drawText(obj, pos, frame)
-	case *canvas.LinearGradient:
-		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
-	case *canvas.RadialGradient:
-		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
-	}
 }
 
 func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {
