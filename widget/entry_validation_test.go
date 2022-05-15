@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -86,22 +85,22 @@ func TestEntry_NotEmptyValidator(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/validator_not_empty_unfocused.xml", w.Canvas())
 }
 
-func TestEntry_SetValidationError(t *testing.T) {
-	entry, window := setupImageTest(t, false)
-	test.ApplyTheme(t, theme.LightTheme())
-	defer teardownImageTest(window)
-	c := window.Canvas()
-
-	entry.Validator = validator
-
-	entry.SetText("2020-30-30")
-	entry.SetValidationError(errors.New("set invalid"))
-	test.AssertImageMatches(t, "entry/validation_set_invalid.png", c.Capture())
-
-	entry.SetText("set valid")
-	entry.SetValidationError(nil)
-	test.AssertImageMatches(t, "entry/validation_set_valid.png", c.Capture())
-}
+//func TestEntry_SetValidationError(t *testing.T) {
+//	entry, window := setupImageTest(t, false)
+//	test.ApplyTheme(t, theme.LightTheme())
+//	defer teardownImageTest(window)
+//	c := window.Canvas()
+//
+//	entry.Validator = validator
+//
+//	entry.SetText("2020-30-30")
+//	entry.setValidationError(errors.New("set invalid"))
+//	test.AssertImageMatches(t, "entry/validation_set_invalid.png", c.Capture())
+//
+//	entry.SetText("set valid")
+//	entry.setValidationError(nil)
+//	test.AssertImageMatches(t, "entry/validation_set_valid.png", c.Capture())
+//}
 
 func TestEntry_SetOnValidationChanged(t *testing.T) {
 	entry := widget.NewEntry()

@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
@@ -15,7 +16,10 @@ func (e *Entry) Validate() error {
 	}
 
 	err := e.Validator(e.Text)
-	e.SetValidationError(err)
+	if e.Disabled() {
+		err = nil
+	}
+	e.setValidationError(err)
 	return err
 }
 
@@ -27,8 +31,8 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 	}
 }
 
-// SetValidationError manually updates the validation status until the next input change
-func (e *Entry) SetValidationError(err error) {
+// setValidationError manually updates the validation status until the next input change
+func (e *Entry) setValidationError(err error) {
 	if e.Validator == nil {
 		return
 	}
@@ -36,14 +40,14 @@ func (e *Entry) SetValidationError(err error) {
 		return
 	}
 
-	if (err == nil && e.validationError != nil) || (e.validationError == nil && err != nil) ||
-		err.Error() != e.validationError.Error() {
-		e.validationError = err
+	oldErr := e.validationError
+	e.validationError = err
 
-		if e.onValidationChanged != nil {
-			e.onValidationChanged(err)
-		}
+	if e.onValidationChanged != nil {
+		e.onValidationChanged(err)
+	}
 
+	if !errors.Is(err, oldErr) {
 		e.Refresh()
 	}
 }

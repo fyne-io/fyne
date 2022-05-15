@@ -67,10 +67,6 @@ type Entry struct {
 	content     *entryContent
 	scroll      *widget.Scroll
 
-	// useful for Form validation (as the error text should only be shown when
-	// the entry is unfocused)
-	onFocusChanged func(bool)
-
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
 	// position may occur before or after the select start position in the text.
@@ -203,6 +199,7 @@ func (e *Entry) Cursor() desktop.Cursor {
 // Implements: fyne.Disableable
 func (e *Entry) Disable() {
 	e.DisableableWidget.Disable()
+	e.Validate()
 }
 
 // Disabled returns whether the entry is disabled or read-only.
@@ -270,6 +267,7 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 // Implements: fyne.Disableable
 func (e *Entry) Enable() {
 	e.DisableableWidget.Enable()
+	e.Validate()
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -293,9 +291,6 @@ func (e *Entry) FocusGained() {
 		e.dirty = true
 		e.focused = true
 	})
-	if e.onFocusChanged != nil {
-		e.onFocusChanged(true)
-	}
 }
 
 // FocusLost is called when the Entry has had focus removed.
@@ -306,9 +301,6 @@ func (e *Entry) FocusLost() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
-	if e.onFocusChanged != nil {
-		e.onFocusChanged(false)
-	}
 }
 
 // Hide hides the entry.

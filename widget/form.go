@@ -1,18 +1,12 @@
 package widget
 
 import (
-	"errors"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
-
-// errFormItemInitialState defines the error if the initial validation for a FormItem result
-// in an error
-var errFormItemInitialState = errors.New("widget.FormItem initial state error")
 
 // FormItem provides the details for a row in a form
 type FormItem struct {
@@ -243,9 +237,6 @@ func (f *Form) ensureRenderItems() {
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	updateValidation := func(err error) {
-		if err == errFormItemInitialState {
-			return
-		}
 		f.Items[i].validationError = err
 		f.Items[i].invalid = err != nil
 		f.setValidationError(err)
@@ -254,38 +245,23 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	}
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok {
-			e.onFocusChanged = func(bool) {
-				updateValidation(e.validationError)
-			}
-			if e.Validator != nil && f.Items[i].invalid {
-				// set initial state error to guarantee next error (if triggers) is always different
-				e.SetValidationError(errFormItemInitialState)
-			}
-		}
 		w.SetOnValidationChanged(updateValidation)
 	}
 }
 
 func (f *Form) setValidationError(err error) {
-	if err == nil && f.validationError == nil {
-		return
-	}
-
-	if !errors.Is(err, f.validationError) {
-		if err == nil {
-			for _, item := range f.Items {
-				if item.invalid {
-					err = item.validationError
-					break
-				}
+	if err == nil {
+		for _, item := range f.Items {
+			if item.invalid {
+				err = item.validationError
+				break
 			}
 		}
-		f.validationError = err
+	}
+	f.validationError = err
 
-		if f.onValidationChanged != nil {
-			f.onValidationChanged(err)
-		}
+	if f.onValidationChanged != nil {
+		f.onValidationChanged(err)
 	}
 }
 
@@ -293,11 +269,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 	if item.helperOutput == nil {
 		return // testing probably, either way not rendered yet
 	}
-	showHintIfError := false
-	if e, ok := item.Widget.(*Entry); ok && (!e.dirty || e.focused) {
-		showHintIfError = true
-	}
-	if item.validationError == nil || showHintIfError {
+	if item.validationError == nil {
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = theme.PlaceHolderColor()
 	} else {
@@ -335,7 +307,6 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
-	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
 	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
