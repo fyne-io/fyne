@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
@@ -19,6 +20,8 @@ type FormItem struct {
 	validationError error
 	invalid         bool
 	helperOutput    *canvas.Text
+
+	changedAfterRender bool
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
@@ -53,6 +56,8 @@ type Form struct {
 
 	onValidationChanged func(error)
 	validationError     error
+
+	rendered bool
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
@@ -239,6 +244,9 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	updateValidation := func(err error) {
 		f.Items[i].validationError = err
 		f.Items[i].invalid = err != nil
+		if f.rendered {
+			f.Items[i].changedAfterRender = true
+		}
 		f.setValidationError(err)
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
@@ -255,6 +263,9 @@ func (f *Form) setValidationError(err error) {
 	if err == nil {
 		for _, item := range f.Items {
 			if item.invalid {
+				if item.validationError == nil {
+					item.validationError = errors.New("")
+				}
 				err = item.validationError
 				break
 			}
@@ -271,7 +282,8 @@ func (f *Form) updateHelperText(item *FormItem) {
 	if item.helperOutput == nil {
 		return // testing probably, either way not rendered yet
 	}
-	if item.validationError == nil {
+
+	if item.validationError == nil || !item.changedAfterRender {
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = theme.PlaceHolderColor()
 	} else {
@@ -316,6 +328,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.updateButtons()
 	f.updateLabels()
 	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
+	f.rendered = true
 	return renderer
 }
 
