@@ -244,7 +244,9 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		f.updateHelperText(f.Items[i])
 	}
 	if w, ok := widget.(fyne.Validatable); ok {
-		f.Items[i].invalid = w.Validate() != nil
+		err := w.Validate()
+		f.Items[i].invalid = err != nil
+		f.Items[i].validationError = err
 		w.SetOnValidationChanged(updateValidation)
 	}
 }
