@@ -111,7 +111,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 	var out io.Writer
 	if !buildN {
-		f, err := os.Create(buildO[:len(buildO)-3]+"apk")
+		f, err := os.Create(buildO[:len(buildO)-3] + "apk")
 		if err != nil {
 			return nil, err
 		}
@@ -362,8 +362,8 @@ func androidPkgName(name string) string {
 }
 
 func convertAPKToAAB(aabPath string) error {
-	apkPath := buildO[:len(aabPath)-3]+"apk"
-	apkProtoPath := buildO[:len(aabPath)-3]+"apk-proto"
+	apkPath := buildO[:len(aabPath)-3] + "apk"
+	apkProtoPath := buildO[:len(aabPath)-3] + "apk-proto"
 	tmpPath := filepath.Join(filepath.Dir(aabPath), "tmpbundle")
 	err := os.MkdirAll(tmpPath, 0755)
 	if err != nil {
@@ -405,7 +405,7 @@ func convertAPKToAAB(aabPath string) error {
 	}
 	defer os.Remove(filepath.Join(filepath.Dir(aabPath), "base.zip"))
 
-// TODO bundletool is not an exe, but a jar file...
+	// TODO bundletool is not an exe, but a jar file...
 	cmd = execabs.Command("java", "-jar", "bundletool.jar", "build-bundle", "--output", aabPath, "--modules", "base.zip")
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
