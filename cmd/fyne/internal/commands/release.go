@@ -371,7 +371,7 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 
 func (r *Releaser) signAndroid(path string) error {
 	signer := "jarsigner"
-	args := []string{}
+	var args []string
 	if r.release {
 		args = []string{"-keystore", r.keyStore}
 	} else {
