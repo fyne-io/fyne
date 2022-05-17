@@ -141,7 +141,7 @@ func (d *gLDriver) windowList() []fyne.Window {
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
-	fyne.LogError(msg, err)
+	logError(msg, err)
 
 	run.Lock()
 	if !run.flag {
