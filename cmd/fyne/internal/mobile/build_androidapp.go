@@ -369,7 +369,7 @@ func convertAPKToAAB(aabPath string) error {
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmpPath)
+	defer removeAll(tmpPath)
 
 	aapt2 := filepath.Join(util.AndroidBuildToolsPath(), "aapt2")
 	cmd := execabs.Command(aapt2, "convert", "--output-format", "proto", "-o", apkProtoPath, apkPath)
