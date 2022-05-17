@@ -80,7 +80,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		}
 		// If building release and no ldflags are set then remove the useless debug and DWARF build options
 		if release && buildLdflags == "" {
-			buildLdflags = "-s -w"
+			buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
 		}
 		err = goBuild(
 			pkg.PkgPath,
