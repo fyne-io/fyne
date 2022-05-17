@@ -140,6 +140,12 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		}
 	}
 	if release {
+		_, err := execabs.LookPath("bundletool")
+		if err != nil {
+			_, _ = fmt.Fprint(os.Stderr, "Required command 'bundletool' not found when building Android for release.\n")
+			_, _ = fmt.Fprint(os.Stderr, "For more information see https://g.co/androidappbundle.\n")
+			return nil, fmt.Errorf("bundletool: command not found")
+		}
 		err = convertAPKToAAB(buildO)
 		if err != nil {
 			return nil, err
@@ -405,8 +411,7 @@ func convertAPKToAAB(aabPath string) error {
 	}
 	defer os.Remove(filepath.Join(filepath.Dir(aabPath), "base.zip"))
 
-	// TODO bundletool is not an exe, but a jar file...
-	cmd = execabs.Command("java", "-jar", "bundletool.jar", "build-bundle", "--output", aabPath, "--modules", "base.zip")
+	cmd = execabs.Command("bundletool", "build-bundle", "--output", aabPath, "--modules", "base.zip")
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
