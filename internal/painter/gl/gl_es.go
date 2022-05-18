@@ -78,8 +78,8 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = p.createProgram("simple_es")
-	p.lineProgram = p.createProgram("line_es")
+	p.program = p.createProgram("simple_es", true)
+	p.lineProgram = p.createProgram("line_es", true)
 }
 
 type esContext struct{}
