@@ -173,6 +173,10 @@ func Test_PackageWasm(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "wasm", "index.html"), nil},
+			{filepath.Join("myTestTarget", "wasm", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "wasm", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "wasm", "light.css"), nil},
+			{filepath.Join("myTestTarget", "wasm", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "wasm", "webgl-debug.js"), nil},
 		},
 	}
@@ -282,6 +286,10 @@ func Test_PackageGopherJS(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "gopherjs", "index.html"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "light.css"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "gopherjs", "webgl-debug.js"), nil},
 		},
 	}
@@ -425,6 +433,10 @@ func Test_PackageWeb(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "web", "index.html"), nil},
+			{filepath.Join("myTestTarget", "web", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "web", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "web", "light.css"), nil},
+			{filepath.Join("myTestTarget", "web", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "web", "webgl-debug.js"), nil},
 		},
 	}
