@@ -68,8 +68,8 @@ func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
-	p.program = p.createProgram("simple_es")
-	p.lineProgram = p.createProgram("line_es")
+	p.program = p.createProgram("simple_es", false)
+	p.lineProgram = p.createProgram("line_es", false)
 }
 
 // f32Bytes returns the byte representation of float32 values in the given byte

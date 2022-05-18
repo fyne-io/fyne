@@ -71,8 +71,8 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = p.createProgram("simple")
-	p.lineProgram = p.createProgram("line")
+	p.program = p.createProgram("simple", true)
+	p.lineProgram = p.createProgram("line", true)
 }
 
 type coreContext struct{}
