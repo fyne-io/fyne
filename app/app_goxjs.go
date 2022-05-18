@@ -7,12 +7,7 @@ package app
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
-
-func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantDark
-}
 
 func (app *fyneApp) SendNotification(_ *fyne.Notification) {
 	// TODO #2735
@@ -21,8 +16,4 @@ func (app *fyneApp) SendNotification(_ *fyne.Notification) {
 
 func rootConfigDir() string {
 	return "/data/"
-}
-
-func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
 }

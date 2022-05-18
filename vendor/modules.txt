@@ -62,7 +62,8 @@ github.com/godbus/dbus/v5/prop
 github.com/goki/freetype
 github.com/goki/freetype/raster
 github.com/goki/freetype/truetype
-# github.com/gopherjs/gopherjs v0.0.0-20211219123610-ec9572f70e60
+# github.com/gopherjs/gopherjs v1.17.2
+## explicit
 github.com/gopherjs/gopherjs/js
 # github.com/jackmordaunt/icns/v2 v2.2.1
 ## explicit

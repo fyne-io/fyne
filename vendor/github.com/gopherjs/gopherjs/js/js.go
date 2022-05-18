@@ -1,6 +1,6 @@
 // Package js provides functions for interacting with native JavaScript APIs. Calls to these functions are treated specially by GopherJS and translated directly to their corresponding JavaScript syntax.
 //
-// Use MakeWrapper to expose methods to JavaScript. When passing values directly, the following type conversions are performed:
+// Use MakeWrapper to expose methods to JavaScript. Use MakeFullWrapper to expose methods AND fields to JavaScript. When passing values directly, the following type conversions are performed:
 //
 //  | Go type               | JavaScript type       | Conversions back to interface{} |
 //  | --------------------- | --------------------- | ------------------------------- |
@@ -97,7 +97,13 @@ func (err *Error) Stack() string {
 // Global gives JavaScript's global object ("window" for browsers and "GLOBAL" for Node.js).
 var Global *Object
 
-// Module gives the value of the "module" variable set by Node.js. Hint: Set a module export with 'js.Module.Get("exports").Set("exportName", ...)'.
+// Module gives the value of the "module" variable set by Node.js. Hint: Set a
+// module export with 'js.Module.Get("exports").Set("exportName", ...)'.
+//
+// Note that js.Module is only defined in runtimes which support CommonJS
+// modules (https://nodejs.org/api/modules.html). NodeJS supports it natively,
+// but in browsers it can only be used if GopherJS output is passed through a
+// bundler which implements CommonJS (for example, webpack or esbuild).
 var Module *Object
 
 // Undefined gives the JavaScript value "undefined".
@@ -147,6 +153,99 @@ func MakeWrapper(i interface{}) *Object {
 	return o
 }
 
+// MakeFullWrapper creates a JavaScript object which has wrappers for the exported
+// methods of i, and, where i is a (pointer to a) struct value, wrapped getters
+// and setters
+// (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)
+// for the non-embedded exported fields of i. Values accessed via these methods
+// and getters are themsevles wrapped when accessed, but an important point to
+// note is that a new wrapped value is created on each access.
+func MakeFullWrapper(i interface{}) *Object {
+	internalObj := InternalObject(i)
+	constructor := internalObj.Get("constructor")
+
+	wrapperObj := Global.Get("Object").New()
+
+	defineProperty := func(key string, descriptor M) {
+		Global.Get("Object").Call("defineProperty", wrapperObj, key, descriptor)
+	}
+
+	defineProperty("__internal_object__", M{
+		"value": internalObj,
+	})
+
+	{
+		// Calculate a sensible type string.
+
+		// We don't want to import any packages in this package,
+		// so we do some string operations by hand.
+
+		typ := constructor.Get("string").String()
+		pkg := constructor.Get("pkg").String()
+
+		ptr := ""
+		if typ[0] == '*' {
+			ptr = "*"
+		}
+
+		for i := 0; i < len(typ); i++ {
+			if typ[i] == '.' {
+				typ = typ[i+1:]
+				break
+			}
+		}
+
+		pkgTyp := pkg + "." + ptr + typ
+		defineProperty("$type", M{
+			"value": pkgTyp,
+		})
+	}
+
+	var fields *Object
+	methods := Global.Get("Array").New()
+	if ms := constructor.Get("methods"); ms != Undefined {
+		methods = methods.Call("concat", ms)
+	}
+	// If we are a pointer value then add fields from element,
+	// else the constructor itself will have them.
+	if e := constructor.Get("elem"); e != Undefined {
+		fields = e.Get("fields")
+		methods = methods.Call("concat", e.Get("methods"))
+	} else {
+		fields = constructor.Get("fields")
+	}
+	for i := 0; i < methods.Length(); i++ {
+		m := methods.Index(i)
+		if m.Get("pkg").String() != "" { // not exported
+			continue
+		}
+		defineProperty(m.Get("prop").String(), M{
+			"value": func(args ...*Object) *Object {
+				return Global.Call("$externalizeFunction", internalObj.Get(m.Get("prop").String()), m.Get("typ"), true, InternalObject(MakeFullWrapper)).Call("apply", internalObj, args)
+			},
+		})
+	}
+	if fields != Undefined {
+		for i := 0; i < fields.Length(); i++ {
+			f := fields.Index(i)
+			if !f.Get("exported").Bool() {
+				continue
+			}
+			defineProperty(f.Get("prop").String(), M{
+				"get": func() *Object {
+					vc := Global.Call("$copyIfRequired", internalObj.Get("$val").Get(f.Get("prop").String()), f.Get("typ"))
+					return Global.Call("$externalize", vc, f.Get("typ"), InternalObject(MakeFullWrapper))
+				},
+				"set": func(jv *Object) {
+					gv := Global.Call("$internalize", jv, f.Get("typ"), InternalObject(MakeFullWrapper))
+					internalObj.Get("$val").Set(f.Get("prop").String(), gv)
+				},
+			})
+		}
+	}
+	return wrapperObj
+}
+
 // NewArrayBuffer creates a JavaScript ArrayBuffer from a byte slice.
 func NewArrayBuffer(b []byte) *Object {
 	slice := InternalObject(b)
@@ -162,7 +261,7 @@ type M map[string]interface{}
 type S []interface{}
 
 func init() {
-	// avoid dead code elimination
+	// Avoid dead code elimination.
 	e := Error{}
 	_ = e
 }
