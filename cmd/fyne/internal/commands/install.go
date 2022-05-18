@@ -172,7 +172,7 @@ func (i *Installer) install() error {
 }
 
 func (i *Installer) installAndroid() error {
-	target := mobile.AppOutputName(i.os, i.Packager.name)
+	target := mobile.AppOutputName(i.os, i.Packager.name, i.release)
 
 	_, err := os.Stat(target)
 	if os.IsNotExist(err) {
@@ -186,7 +186,7 @@ func (i *Installer) installAndroid() error {
 }
 
 func (i *Installer) installIOS() error {
-	target := mobile.AppOutputName(i.os, i.Packager.name)
+	target := mobile.AppOutputName(i.os, i.Packager.name, i.release)
 
 	// Always redo the package because the codesign for ios and iossimulator
 	// must be different.

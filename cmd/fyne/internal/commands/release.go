@@ -52,6 +52,11 @@ func Release() *cli.Command {
 				Destination: &r.keyStorePass,
 			},
 			&cli.StringFlag{
+				Name:        "keyName",
+				Usage:       "Android: alias for the signer's private key, which is needed when reading a .keystore file",
+				Destination: &r.keyName,
+			},
+			&cli.StringFlag{
 				Name:        "keyPass",
 				Usage:       "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin",
 				Destination: &r.keyStorePass,
@@ -127,6 +132,7 @@ type Releaser struct {
 
 	keyStore     string
 	keyStorePass string
+	keyName      string
 	keyPass      string
 	developer    string
 	password     string
@@ -144,6 +150,7 @@ func (r *Releaser) AddFlags() {
 	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
 	flag.StringVar(&r.keyStorePass, "keyStorePass", "", "Android: password for the .keystore file, default take the password from stdin")
+	flag.StringVar(&r.keyName, "keyName", "", "Android: alias for the signer's private key, which is needed when reading a .keystore file")
 	flag.StringVar(&r.keyPass, "keyPass", "", "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin")
 	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
@@ -204,7 +211,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 
 func (r *Releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
-		target := mobile.AppOutputName(r.os, r.Packager.name)
+		target := mobile.AppOutputName(r.os, r.Packager.name, r.release)
 		apk := filepath.Join(r.dir, target)
 		if err := r.zipAlign(apk); err != nil {
 			return err
@@ -264,7 +271,7 @@ func (r *Releaser) packageIOSRelease() error {
 	payload := filepath.Join(r.dir, "Payload")
 	_ = os.Mkdir(payload, 0750)
 	defer os.RemoveAll(payload)
-	appName := mobile.AppOutputName(r.os, r.name)
+	appName := mobile.AppOutputName(r.os, r.name, r.release)
 	payloadAppDir := filepath.Join(payload, appName)
 	if err := os.Rename(filepath.Join(r.dir, appName), payloadAppDir); err != nil {
 		return err
@@ -363,16 +370,36 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 }
 
 func (r *Releaser) signAndroid(path string) error {
-	signer := filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
+	signer := "jarsigner"
+	var args []string
+	if r.release {
+		args = []string{"-keystore", r.keyStore}
+	} else {
+		signer = filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
+		args = []string{"sign", "--ks", r.keyStore}
+	}
 
-	args := []string{"sign", "--ks", r.keyStore}
 	if r.keyStorePass != "" {
-		args = append(args, "--ks-pass", "pass:"+r.keyStorePass)
+		if r.release {
+			args = append(args, "-storepass", r.keyStorePass)
+		} else {
+			args = append(args, "--ks-pass", "pass:"+r.keyStorePass)
+		}
 	}
 	if r.keyPass != "" {
-		args = append(args, "--key-pass", "pass:"+r.keyPass)
+		if r.release {
+			args = append(args, "-keypass", r.keyPass)
+		} else {
+			args = append(args, "--key-pass", "pass:"+r.keyPass)
+		}
 	}
 	args = append(args, path)
+	if r.release {
+		if r.keyName == "" { // Required to sign Google Play .aab
+			return errors.New("missing required -keyName (alias) parameter")
+		}
+		args = append(args, r.keyName)
+	}
 
 	cmd := execabs.Command(signer, args...)
 	cmd.Stdout = os.Stdout
