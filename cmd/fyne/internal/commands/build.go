@@ -202,6 +202,12 @@ func (b *Builder) build() error {
 		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
 		env = append(env, "GOARCH=wasm")
 		env = append(env, "GOOS=js")
+	} else if goos == "gopherjs" {
+		_, err := b.runner.runOutput("version")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Can not execute `gopherjs version`. Please do `go install github.com/gopherjs/gopherjs@latest`.\n")
+			return err
+		}
 	}
 
 	if err := checkGoVersion(b.runner, versionConstraint); err != nil {

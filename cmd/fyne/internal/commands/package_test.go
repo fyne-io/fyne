@@ -204,6 +204,16 @@ func Test_buildPackageGopherJS(t *testing.T) {
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{
+				args:  []string{"version"},
+				osEnv: true,
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+				err: nil,
+			},
+		},
+		{
+			expectedValue: expectedValue{
 				args:  []string{"build", "-o", "myTest.js", "--tags", "release"},
 				osEnv: true,
 				dir:   "myTest",
@@ -230,6 +240,16 @@ func Test_buildPackageGopherJS(t *testing.T) {
 
 func Test_PackageGopherJS(t *testing.T) {
 	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{
+				args:  []string{"version"},
+				osEnv: true,
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+				err: nil,
+			},
+		},
 		{
 			expectedValue: expectedValue{
 				args: []string{"build",
@@ -329,6 +349,16 @@ func Test_BuildPackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
+				args:  []string{"version"},
+				osEnv: true,
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+				err: nil,
+			},
+		},
+		{
+			expectedValue: expectedValue{
 				args:  []string{"build", "-o", "myTest.js", "--tags", "release"},
 				osEnv: true,
 				dir:   "myTest",
@@ -372,6 +402,16 @@ func Test_PackageWeb(t *testing.T) {
 			},
 			mockReturn: mockReturn{
 				ret: []byte(""),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"version"},
+				osEnv: true,
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+				err: nil,
 			},
 		},
 		{

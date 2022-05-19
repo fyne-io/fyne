@@ -166,6 +166,16 @@ func Test_BuildGopherJSReleaseVersion(t *testing.T) {
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{
+				args:  []string{"version"},
+				osEnv: true,
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+				err: nil,
+			},
+		},
+		{
+			expectedValue: expectedValue{
 				args:  []string{"build", "--tags", "release"},
 				osEnv: true,
 				dir:   "myTest",
