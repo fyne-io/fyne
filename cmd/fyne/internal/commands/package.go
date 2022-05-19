@@ -338,16 +338,8 @@ func (p *Packager) validate() error {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.os == "wasm" || p.os == "gopherjs" || p.os == "web" {
-		if p.name == "" {
-			p.name = exeName
-		}
-		switch p.os {
-		case "wasm":
-			p.exe = p.exe + ".wasm"
-		case "gopherjs":
-			p.exe = p.exe + ".js"
-		}
+	if p.name == "" {
+		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
 		p.icon = filepath.Join(p.srcDir, "Icon.png")

@@ -30,7 +30,7 @@ func (p *Packager) packageWasm() error {
 	tpl := webData{
 		AppName:    p.name,
 		AppVersion: p.appVersion,
-		WasmFile:   p.exe,
+		WasmFile:   p.name + ".wasm",
 		IsReleased: p.release,
 		HasWasm:    true,
 	}
@@ -44,7 +44,7 @@ func (p *Packager) packageGopherJS() error {
 	tpl := webData{
 		AppName:      p.name,
 		AppVersion:   p.appVersion,
-		GopherJSFile: p.exe,
+		GopherJSFile: p.name + ".js",
 		IsReleased:   p.release,
 		HasGopherJS:  true,
 	}
