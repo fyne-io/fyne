@@ -338,7 +338,7 @@ func (p *Packager) validate() error {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" || p.os == "wasm" || p.os == "gopherjs" || p.os == "web" {
+	if p.name == "" {
 		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
@@ -376,10 +376,6 @@ func calculateExeName(sourceDir, os string) string {
 
 	if os == "windows" {
 		exeName = exeName + ".exe"
-	} else if os == "wasm" {
-		exeName = exeName + ".wasm"
-	} else if os == "gopherjs" {
-		exeName = exeName + ".js"
 	}
 
 	return exeName

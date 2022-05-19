@@ -122,7 +122,7 @@ func Test_PackageWasm(t *testing.T) {
 		{
 			expectedValue: expectedValue{
 				args: []string{"build", "-ldflags",
-					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest.wasm' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
 					"-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
@@ -135,14 +135,15 @@ func Test_PackageWasm(t *testing.T) {
 	}
 
 	p := &Packager{
-		appData: &appData{},
-		os:      "wasm",
-		srcDir:  "myTest",
-		dir:     "myTestTarget",
-		exe:     "myTest.wasm",
+		appData: &appData{
+			name: "myTest",
+			icon: "myTest.png",
+		},
+		os:     "wasm",
+		srcDir: "myTest",
+		dir:    "myTestTarget",
+		exe:    "myTest.wasm",
 	}
-	p.name = "myTest.wasm"
-	p.icon = "myTest.png"
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 
 	util = mockUtil{}
@@ -173,6 +174,10 @@ func Test_PackageWasm(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "wasm", "index.html"), nil},
+			{filepath.Join("myTestTarget", "wasm", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "wasm", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "wasm", "light.css"), nil},
+			{filepath.Join("myTestTarget", "wasm", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "wasm", "webgl-debug.js"), nil},
 		},
 	}
@@ -244,14 +249,15 @@ func Test_PackageGopherJS(t *testing.T) {
 	}
 
 	p := &Packager{
-		appData: &appData{},
-		os:      "gopherjs",
-		srcDir:  "myTest",
-		dir:     "myTestTarget",
-		exe:     "myTest.js",
+		appData: &appData{
+			name: "myTest",
+			icon: "myTest.png",
+		},
+		os:     "gopherjs",
+		srcDir: "myTest",
+		dir:    "myTestTarget",
+		exe:    "myTest.js",
 	}
-	p.name = "myTest.js"
-	p.icon = "myTest.png"
 	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
 
 	util = mockUtil{}
@@ -282,6 +288,10 @@ func Test_PackageGopherJS(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "gopherjs", "index.html"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "light.css"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "gopherjs", "webgl-debug.js"), nil},
 		},
 	}
@@ -425,6 +435,10 @@ func Test_PackageWeb(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "web", "index.html"), nil},
+			{filepath.Join("myTestTarget", "web", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "web", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "web", "light.css"), nil},
+			{filepath.Join("myTestTarget", "web", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "web", "webgl-debug.js"), nil},
 		},
 	}
