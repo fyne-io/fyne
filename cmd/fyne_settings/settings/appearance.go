@@ -31,6 +31,8 @@ type Settings struct {
 
 	preview *canvas.Image
 	colors  []fyne.CanvasObject
+
+	userTheme fyne.Theme
 }
 
 // NewSettings returns a new settings instance with the current configuration loaded
@@ -50,6 +52,11 @@ func (s *Settings) AppearanceIcon() fyne.Resource {
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
 func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
+	s.userTheme = fyne.CurrentApp().Settings().Theme()
+	if s.userTheme == nil {
+		s.userTheme = theme.DefaultTheme()
+	}
+
 	s.preview = canvas.NewImageFromImage(s.createPreview())
 	s.preview.FillMode = canvas.ImageFillContain
 
@@ -111,15 +118,13 @@ func (s *Settings) createPreview() image.Image {
 	oldTheme := fyne.CurrentApp().Settings().Theme()
 	oldColor := fyne.CurrentApp().Settings().PrimaryColor()
 
-	th := oldTheme
+	variant := theme.VariantDark
 	if s.fyneSettings.ThemeName == "light" {
-		th = theme.LightTheme()
-	} else if s.fyneSettings.ThemeName == "dark" {
-		th = theme.DarkTheme()
+		variant = theme.VariantLight
 	}
 
 	cache.ResetThemeCaches() // reset icon cache
-	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
+	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(&previewTheme{s.userTheme, variant}, s.fyneSettings.PrimaryColor)
 
 	empty := widget.NewLabel("")
 	tabs := container.NewAppTabs(
@@ -248,6 +253,27 @@ func (c *colorRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (c *colorRenderer) Destroy() {
+}
+
+type previewTheme struct {
+	t fyne.Theme
+	v fyne.ThemeVariant
+}
+
+func (p *previewTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	return p.t.Color(n, p.v)
+}
+
+func (p *previewTheme) Font(s fyne.TextStyle) fyne.Resource {
+	return p.t.Font(s)
+}
+
+func (p *previewTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return p.t.Icon(n)
+}
+
+func (p *previewTheme) Size(n fyne.ThemeSizeName) float32 {
+	return p.t.Size(n)
 }
 
 func showOverlay(c fyne.Canvas) {
