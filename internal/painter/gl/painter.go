@@ -130,7 +130,7 @@ func (p *painter) createBuffer(points []float32) Buffer {
 	return vbo
 }
 
-func (p *painter) createProgram(shaderFilename string, nullTerminated bool) Program {
+func (p *painter) createProgram(shaderFilename string) Program {
 	// Why a switch over a filename?
 	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
 	// fyne bundle.
@@ -140,16 +140,11 @@ func (p *painter) createProgram(shaderFilename string, nullTerminated bool) Prog
 		panic("shader not found: " + shaderFilename)
 	}
 
-	endChar := ""
-	if nullTerminated {
-		endChar = "\x00"
-	}
-
-	vertShader, err := p.compileShader(string(vertexSrc)+endChar, vertexShader)
+	vertShader, err := p.compileShader(string(vertexSrc), vertexShader)
 	if err != nil {
 		panic(err)
 	}
-	fragShader, err := p.compileShader(string(fragmentSrc)+endChar, fragmentShader)
+	fragShader, err := p.compileShader(string(fragmentSrc), fragmentShader)
 	if err != nil {
 		panic(err)
 	}
