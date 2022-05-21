@@ -120,16 +120,6 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 	return shader, nil
 }
 
-func (p *painter) createBuffer(points []float32) Buffer {
-	vbo := p.ctx.CreateBuffer()
-	p.logError()
-	p.ctx.BindBuffer(arrayBuffer, vbo)
-	p.logError()
-	p.ctx.BufferData(arrayBuffer, points, staticDraw)
-	p.logError()
-	return vbo
-}
-
 func (p *painter) createProgram(shaderFilename string) Program {
 	// Why a switch over a filename?
 	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
@@ -170,20 +160,6 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	return prog
-}
-
-func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
-	vertAttrib := p.ctx.GetAttribLocation(prog, name)
-	p.ctx.EnableVertexAttribArray(vertAttrib)
-	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
-	p.logError()
-}
-
-func (p *painter) freeBuffer(vbo Buffer) {
-	p.ctx.BindBuffer(arrayBuffer, noBuffer)
-	p.logError()
-	p.ctx.DeleteBuffer(vbo)
-	p.logError()
 }
 
 func (p *painter) freeTexture(obj fyne.CanvasObject) {

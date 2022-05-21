@@ -9,6 +9,23 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
+func (p *painter) createBuffer(points []float32) Buffer {
+	vbo := p.ctx.CreateBuffer()
+	p.logError()
+	p.ctx.BindBuffer(arrayBuffer, vbo)
+	p.logError()
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
+	p.logError()
+	return vbo
+}
+
+func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
+	vertAttrib := p.ctx.GetAttribLocation(prog, name)
+	p.ctx.EnableVertexAttribArray(vertAttrib)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
+	p.logError()
+}
+
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
 		1.0, paint.VectorPad(circle))
@@ -150,6 +167,13 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 	p.freeBuffer(vbo)
+}
+
+func (p *painter) freeBuffer(vbo Buffer) {
+	p.ctx.BindBuffer(arrayBuffer, noBuffer)
+	p.logError()
+	p.ctx.DeleteBuffer(vbo)
+	p.logError()
 }
 
 func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {
