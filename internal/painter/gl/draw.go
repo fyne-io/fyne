@@ -73,9 +73,6 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 }
 
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if !o.Visible() {
-		return
-	}
 	switch obj := o.(type) {
 	case *canvas.Circle:
 		p.drawCircle(obj, pos, frame)
