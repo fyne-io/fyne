@@ -205,8 +205,7 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
 
 - (void) reset_menu
 {
-  NSMenu *theMenu = self->menu;
-  [NSApp removeAllItems];
+  [self->menu removeAllItems];
 }
 
 - (void) quit
