@@ -127,7 +127,7 @@ func (c *Command) Run(ctx *Context) (err error) {
 		return nil
 	}
 
-	cerr := checkRequiredFlags(c.Flags, context)
+	cerr := context.checkRequiredFlags(c.Flags)
 	if cerr != nil {
 		_ = ShowCommandHelp(context, c.Name)
 		return cerr
@@ -227,6 +227,7 @@ func (c *Command) startApp(ctx *Context) error {
 	}
 
 	app.Usage = c.Usage
+	app.UsageText = c.UsageText
 	app.Description = c.Description
 	app.ArgsUsage = c.ArgsUsage
 
@@ -243,6 +244,7 @@ func (c *Command) startApp(ctx *Context) error {
 	app.Version = ctx.App.Version
 	app.HideVersion = true
 	app.Compiled = ctx.App.Compiled
+	app.Reader = ctx.App.Reader
 	app.Writer = ctx.App.Writer
 	app.ErrWriter = ctx.App.ErrWriter
 	app.ExitErrHandler = ctx.App.ExitErrHandler

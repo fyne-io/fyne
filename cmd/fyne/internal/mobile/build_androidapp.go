@@ -20,6 +20,8 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile/binres"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -76,6 +78,10 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
+		// If building release and no ldflags are set then remove the useless debug and DWARF build options
+		if release && buildLdflags == "" {
+			buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
+		}
 		err = goBuild(
 			pkg.PkgPath,
 			androidEnv[arch],
@@ -92,16 +98,20 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		libFiles = append(libFiles, libPath)
 	}
 
-	if buildO == "" {
-		buildO = androidPkgName(appName) + ".apk"
+	ext := ".apk"
+	if release {
+		ext = ".aab"
 	}
-	if !strings.HasSuffix(buildO, ".apk") {
-		return nil, fmt.Errorf("output file name %q does not end in '.apk'", buildO)
+	if buildO == "" {
+		buildO = androidPkgName(appName) + ext
+	}
+	if !strings.HasSuffix(buildO, ext) {
+		return nil, fmt.Errorf("output file name %q does not end in '%s", buildO, ext)
 	}
 
 	var out io.Writer
 	if !buildN {
-		f, err := os.Create(buildO)
+		f, err := os.Create(buildO[:len(buildO)-3] + "apk")
 		if err != nil {
 			return nil, err
 		}
@@ -126,6 +136,18 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 	if !buildN {
 		if err := apkw.Close(); err != nil {
+			return nil, err
+		}
+	}
+	if release {
+		_, err := execabs.LookPath("bundletool")
+		if err != nil {
+			_, _ = fmt.Fprint(os.Stderr, "Required command 'bundletool' not found when building Android for release.\n")
+			_, _ = fmt.Fprint(os.Stderr, "For more information see https://g.co/androidappbundle.\n")
+			return nil, fmt.Errorf("bundletool: command not found")
+		}
+		err = convertAPKToAAB(buildO)
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -343,6 +365,56 @@ func androidPkgName(name string) string {
 		s += "_"
 	}
 	return s
+}
+
+func convertAPKToAAB(aabPath string) error {
+	apkPath := buildO[:len(aabPath)-3] + "apk"
+	apkProtoPath := buildO[:len(aabPath)-3] + "apk-proto"
+	tmpPath := filepath.Join(filepath.Dir(aabPath), "tmpbundle")
+	err := os.MkdirAll(tmpPath, 0755)
+	if err != nil {
+		return err
+	}
+	defer removeAll(tmpPath)
+
+	aapt2 := filepath.Join(util.AndroidBuildToolsPath(), "aapt2")
+	cmd := execabs.Command(aapt2, "convert", "--output-format", "proto", "-o", apkProtoPath, apkPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	_ = os.Remove(apkPath)
+
+	cmd = execabs.Command("unzip", apkProtoPath, "-x", "META-INF/*", "-d", tmpPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	_ = os.Remove(apkProtoPath)
+
+	_ = os.MkdirAll(filepath.Join(tmpPath, "dex"), 0755)
+	_ = os.MkdirAll(filepath.Join(tmpPath, "manifest"), 0755)
+	_ = os.Rename(filepath.Join(tmpPath, "AndroidManifest.xml"), filepath.Join(tmpPath, "manifest", "AndroidManifest.xml"))
+	_ = os.Rename(filepath.Join(tmpPath, "classes.dex"), filepath.Join(tmpPath, "dex", "classes.dex"))
+
+	cmd = execabs.Command("zip", "../base.zip", "-r", ".")
+	cmd.Dir = tmpPath
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(filepath.Join(filepath.Dir(aabPath), "base.zip"))
+
+	cmd = execabs.Command("bundletool", "build-bundle", "--output", aabPath, "--modules", "base.zip")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 // A random uninteresting private key.

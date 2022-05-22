@@ -1,0 +1,22 @@
+name: Check license of dependencies
+on: [push, pull_request]
+permissions:
+  contents: read
+
+jobs:
+  licenses:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - uses: WillAbides/setup-go-faster@v1.7.0
+      with:      
+        go-version: '1.18.x'
+
+    - name: Install lian
+      run: go install lucor.dev/lian@latest
+
+    - name: Check license of dependencies against go.mod
+      run: lian -d --allowed="Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT"
+

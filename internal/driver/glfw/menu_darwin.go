@@ -4,11 +4,18 @@
 package glfw
 
 import (
+	"bytes"
 	"fmt"
+	"image/color"
+	"image/png"
 	"strings"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/theme"
 )
 
 /*
@@ -22,7 +29,9 @@ void        assignDarwinSubmenu(const void*, const void*);
 void        completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
-const void* insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator);
+void        getTextColorRGBA(int* r, int* g, int* b, int* a);
+const void* insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator, const void *imageData, unsigned int imageDataLength);
+int         menuFontSize();
 void        resetDarwinMenu();
 
 // Used for tests.
@@ -111,15 +120,7 @@ func clearNativeMenu() {
 func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
 	nsMenu := C.createDarwinMenu(C.CString(menu.Label))
 	for _, item := range menu.Items {
-		nsMenuItem := C.insertDarwinMenuItem(
-			nsMenu,
-			C.CString(item.Label),
-			C.CString(keyEquivalent(item)),
-			C.uint(keyEquivalentModifierMask(item)),
-			C.int(nextItemID),
-			C.int(-1),
-			C.bool(item.IsSeparator),
-		)
+		nsMenuItem := insertNativeMenuItem(nsMenu, item, nextItemID, -1)
 		nextItemID = registerCallback(w, item, nextItemID)
 		if item.ChildMenu != nil {
 			nextItemID = addNativeSubmenu(w, nsMenuItem, item.ChildMenu, nextItemID)
@@ -145,15 +146,7 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 			items = append(items, menu.Items[i+1:]...)
 			menu, nextItemID = handleSpecialItems(w, fyne.NewMenu(menu.Label, items...), nextItemID, false)
 
-			C.insertDarwinMenuItem(
-				C.darwinAppMenu(),
-				C.CString(item.Label),
-				C.CString(keyEquivalent(item)),
-				C.uint(keyEquivalentModifierMask(item)),
-				C.int(nextItemID),
-				C.int(1),
-				C.bool(false),
-			)
+			insertNativeMenuItem(C.darwinAppMenu(), item, nextItemID, 1)
 			if addSeparator {
 				C.insertDarwinMenuItem(
 					C.darwinAppMenu(),
@@ -163,6 +156,8 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 					C.int(nextItemID),
 					C.int(1),
 					C.bool(true),
+					unsafe.Pointer(nil),
+					C.uint(0),
 				)
 			}
 			nextItemID = registerCallback(w, item, nextItemID)
@@ -170,6 +165,48 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 		}
 	}
 	return menu, nextItemID
+}
+
+// TODO: theme change support, see NSSystemColorsDidChangeNotification
+func insertNativeMenuItem(nsMenu unsafe.Pointer, item *fyne.MenuItem, nextItemID, index int) unsafe.Pointer {
+	var imgData unsafe.Pointer
+	var imgDataLength uint
+	if item.Icon != nil {
+		if painter.IsResourceSVG(item.Icon) {
+			rsc := item.Icon
+			if _, isThemed := rsc.(*theme.ThemedResource); isThemed {
+				var r, g, b, a C.int
+				C.getTextColorRGBA(&r, &g, &b, &a)
+				rsc = &fyne.StaticResource{
+					StaticName:    rsc.Name(),
+					StaticContent: svg.Colorize(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}),
+				}
+			}
+			size := int(C.menuFontSize())
+			img := painter.PaintImage(&canvas.Image{Resource: rsc}, nil, size, size)
+			var buf bytes.Buffer
+			if err := png.Encode(&buf, img); err != nil {
+				fyne.LogError("failed to render menu icon", err)
+			} else {
+				imgData = unsafe.Pointer(&buf.Bytes()[0])
+				imgDataLength = uint(buf.Len())
+			}
+		} else {
+			imgData = unsafe.Pointer(&item.Icon.Content()[0])
+			imgDataLength = uint(len(item.Icon.Content()))
+		}
+	}
+	return C.insertDarwinMenuItem(
+		nsMenu,
+		C.CString(item.Label),
+		C.CString(keyEquivalent(item)),
+		C.uint(keyEquivalentModifierMask(item)),
+		C.int(nextItemID),
+		C.int(index),
+		C.bool(item.IsSeparator),
+		imgData,
+		C.uint(imgDataLength),
+	)
 }
 
 func keyEquivalent(item *fyne.MenuItem) (key string) {

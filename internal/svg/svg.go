@@ -1,15 +1,79 @@
-package theme
+package svg
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/xml"
+	"errors"
+	"fmt"
+	"image"
 	"image/color"
 	"io"
 	"io/ioutil"
 	"strconv"
 
+	"github.com/srwiley/oksvg"
+	"github.com/srwiley/rasterx"
+
+	"fyne.io/fyne/v2"
 	col "fyne.io/fyne/v2/internal/color"
 )
+
+// Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
+func Colorize(src []byte, clr color.Color) []byte {
+	rdr := bytes.NewReader(src)
+	s, err := svgFromXML(rdr)
+	if err != nil {
+		fyne.LogError("could not load SVG, falling back to static content:", err)
+		return src
+	}
+	if err := s.replaceFillColor(clr); err != nil {
+		fyne.LogError("could not replace fill color, falling back to static content:", err)
+		return src
+	}
+	colorized, err := xml.Marshal(s)
+	if err != nil {
+		fyne.LogError("could not marshal svg, falling back to static content:", err)
+		return src
+	}
+	return colorized
+}
+
+// ToImage reads an SVG from an io.Reader and renders it into an image.NRGBA using the requested width and height.
+// The optional `validateSize` callback can be used to cancel the rendering depending on the SVG’s original size.
+// In this case `nil` is returned.
+func ToImage(file io.Reader, width, height int, validateSize func(origW, origH int) bool) (*image.NRGBA, error) {
+	icon, err := oksvg.ReadIconStream(file)
+	if err != nil {
+		return nil, fmt.Errorf("SVG Load error: %w", err)
+	}
+
+	origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
+	if validateSize != nil && !validateSize(origW, origH) {
+		return nil, nil
+	}
+
+	aspect := float32(origW) / float32(origH)
+	viewAspect := float32(width) / float32(height)
+	imgW, imgH := width, height
+	if viewAspect > aspect {
+		imgW = int(float32(height) * aspect)
+	} else if viewAspect < aspect {
+		imgH = int(float32(width) / aspect)
+	}
+	icon.SetTarget(0, 0, float64(imgW), float64(imgH))
+
+	img := image.NewNRGBA(image.Rect(0, 0, imgW, imgH))
+	scanner := rasterx.NewScannerGV(origW, origH, img, img.Bounds())
+	raster := rasterx.NewDasher(width, height, scanner)
+
+	err = drawSVGSafely(icon, raster)
+	if err != nil {
+		err = fmt.Errorf("SVG render error: %w", err)
+		return nil, err
+	}
+	return img, nil
+}
 
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
 type svg struct {
@@ -197,4 +261,16 @@ func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
 	cBytes := []byte{byte(r), byte(g), byte(b)}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
 	return
+}
+
+func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("crash when rendering svg")
+		}
+	}()
+	icon.Draw(raster, 1)
+
+	return err
 }

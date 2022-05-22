@@ -16,7 +16,8 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/jackmordaunt/icns/v2 v2.1.3
+	github.com/gopherjs/gopherjs v1.17.2
+	github.com/jackmordaunt/icns/v2 v2.2.1
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
@@ -24,7 +25,7 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/stretchr/testify v1.7.0
-	github.com/urfave/cli/v2 v2.3.0
+	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.4.0
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee

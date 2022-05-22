@@ -402,11 +402,11 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
+	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
+
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-
-	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
 // MouseUp called on mouse release
@@ -819,7 +819,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 		row = 0
 	} else if row >= e.textProvider().rows() {
 		row = e.textProvider().rows() - 1
-		col = 0
+		col = e.textProvider().rowLength(row)
 	} else {
 		col = e.cursorColAt(e.textProvider().row(row), p.Add(e.scroll.Offset))
 	}
@@ -1611,10 +1611,15 @@ func (r *entryContentRenderer) buildSelection() {
 }
 
 func (r *entryContentRenderer) ensureCursorVisible() {
-	cx1 := r.cursor.Position().X
-	cy1 := r.cursor.Position().Y
-	cx2 := cx1 + r.cursor.Size().Width
-	cy2 := cy1 + r.cursor.Size().Height
+	letter := fyne.MeasureText("e", theme.TextSize(), r.content.entry.TextStyle)
+	padX := letter.Width*2 + theme.Padding()
+	padY := letter.Height - theme.Padding()
+	cx := r.cursor.Position().X
+	cy := r.cursor.Position().Y
+	cx1 := cx - padX
+	cy1 := cy - padY
+	cx2 := cx + r.cursor.Size().Width + padX
+	cy2 := cy + r.cursor.Size().Height + padY
 	offset := r.content.scroll.Offset
 	size := r.content.scroll.Size()
 

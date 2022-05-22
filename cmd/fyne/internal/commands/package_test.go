@@ -34,7 +34,8 @@ func Test_isValidVersion(t *testing.T) {
 }
 
 func Test_MergeMetata(t *testing.T) {
-	p := &Packager{appVersion: "v0.1"}
+	p := &Packager{appData: &appData{}}
+	p.appVersion = "v0.1"
 	data := &metadata.FyneApp{
 		Details: metadata.AppDetails{
 			Icon:    "test.png",
@@ -43,7 +44,7 @@ func Test_MergeMetata(t *testing.T) {
 		},
 	}
 
-	mergeMetadata(p, data)
+	mergeMetadata(p.appData, data)
 	assert.Equal(t, "v0.1", p.appVersion)
 	assert.Equal(t, 3, p.appBuild)
 	assert.Equal(t, "test.png", p.icon)
@@ -98,6 +99,7 @@ func Test_buildPackageWasm(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:      "wasm",
 		srcDir:  "myTest",
 		release: true,
@@ -119,7 +121,9 @@ func Test_PackageWasm(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.wasm"},
+				args: []string{"build", "-ldflags",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -131,12 +135,14 @@ func Test_PackageWasm(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{
+			name: "myTest",
+			icon: "myTest.png",
+		},
 		os:     "wasm",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest.wasm",
-		name:   "myTest.wasm",
-		icon:   "myTest.png",
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 
@@ -168,6 +174,10 @@ func Test_PackageWasm(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "wasm", "index.html"), nil},
+			{filepath.Join("myTestTarget", "wasm", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "wasm", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "wasm", "light.css"), nil},
+			{filepath.Join("myTestTarget", "wasm", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "wasm", "webgl-debug.js"), nil},
 		},
 	}
@@ -210,6 +220,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:      "gopherjs",
 		srcDir:  "myTest",
 		exe:     "myTest.js",
@@ -226,7 +237,8 @@ func Test_PackageGopherJS(t *testing.T) {
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.js"},
+				args: []string{"build",
+					"-o", "myTest.js"},
 				osEnv: true,
 				dir:   "myTest",
 			},
@@ -237,12 +249,14 @@ func Test_PackageGopherJS(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{
+			name: "myTest",
+			icon: "myTest.png",
+		},
 		os:     "gopherjs",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest.js",
-		name:   "myTest.js",
-		icon:   "myTest.png",
 	}
 	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
 
@@ -274,6 +288,10 @@ func Test_PackageGopherJS(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "gopherjs", "index.html"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "light.css"), nil},
+			{filepath.Join("myTestTarget", "gopherjs", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "gopherjs", "webgl-debug.js"), nil},
 		},
 	}
@@ -332,6 +350,7 @@ func Test_BuildPackageWeb(t *testing.T) {
 	}
 
 	p := &Packager{
+		appData: &appData{},
 		os:      "web",
 		srcDir:  "myTest",
 		release: true,
@@ -354,7 +373,9 @@ func Test_PackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.wasm"},
+				args: []string{"build", "-ldflags",
+					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
+					"-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -365,7 +386,8 @@ func Test_PackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-o", "myTest.js"},
+				args: []string{"build",
+					"-o", "myTest.js"},
 				osEnv: true,
 				dir:   "myTest",
 			},
@@ -376,13 +398,14 @@ func Test_PackageWeb(t *testing.T) {
 	}
 
 	p := &Packager{
-		os:     "web",
-		srcDir: "myTest",
-		dir:    "myTestTarget",
-		exe:    "myTest",
-		name:   "myTest",
-		icon:   "myTest.png",
+		appData: &appData{},
+		os:      "web",
+		srcDir:  "myTest",
+		dir:     "myTestTarget",
+		exe:     "myTest",
 	}
+	p.name = "myTest"
+	p.icon = "myTest.png"
 	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
 
 	util = mockUtil{}
@@ -412,6 +435,10 @@ func Test_PackageWeb(t *testing.T) {
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
 			{filepath.Join("myTestTarget", "web", "index.html"), nil},
+			{filepath.Join("myTestTarget", "web", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "web", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "web", "light.css"), nil},
+			{filepath.Join("myTestTarget", "web", "dark.css"), nil},
 			{filepath.Join("myTestTarget", "web", "webgl-debug.js"), nil},
 		},
 	}

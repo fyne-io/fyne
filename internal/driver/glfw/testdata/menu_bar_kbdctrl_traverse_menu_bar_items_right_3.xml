@@ -52,7 +52,7 @@
 									<text pos="8,4" size="68x20">Open</text>
 								</widget>
 								<widget pos="0,65" size="84x28" type="*widget.menuItem">
-									<text pos="8,4" size="68x20">Recent</text>
+									<text pos="8,4" size="48x20">Recent</text>
 									<image pos="64,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
 							</container>

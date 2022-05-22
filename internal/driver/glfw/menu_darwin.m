@@ -70,11 +70,21 @@ const void* darwinAppMenu() {
     return [[nativeMainMenu() itemAtIndex:0] submenu];
 }
 
+void getTextColorRGBA(int* r, int* g, int* b, int* a) {
+  CGFloat fr, fg, fb, fa;
+  NSColor *c = [[NSColor selectedMenuItemTextColor] colorUsingColorSpace: [NSColorSpace sRGBColorSpace]];
+  [c getRed: &fr green: &fg blue: &fb alpha: &fa];
+  *r = fr*255.0;
+  *g = fg*255.0;
+  *b = fb*255.0;
+  *a = fa*255.0;
+}
+
 void handleException(const char* m, id e) {
     exceptionCallback([[NSString stringWithFormat:@"%s failed: %@", m, e] UTF8String]);
 }
 
-const void* insertDarwinMenuItem(const void* m, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator) {
+const void* insertDarwinMenuItem(const void* m, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator, const void *imageData, unsigned int imageDataLength) {
     NSMenu* menu = (NSMenu*)m;
     NSMenuItem* item;
 
@@ -90,6 +100,14 @@ const void* insertDarwinMenuItem(const void* m, const char* label, const char* k
         }
         [item setTarget:[FyneMenuHandler class]];
         [item setTag:id+menuTagMin];
+        if (imageData) {
+        char *x = (char *)imageData;
+            NSData *data = [[NSData alloc] initWithBytes: imageData length: imageDataLength];
+            NSImage *image = [[NSImage alloc] initWithData: data];
+            [item setImage: image];
+            [data release];
+            [image release];
+        }
     }
 
     if (index > -1) {
@@ -99,6 +117,10 @@ const void* insertDarwinMenuItem(const void* m, const char* label, const char* k
     }
     [item release]; // retained by the menu
     return item;
+}
+
+int menuFontSize() {
+  return ceil([[NSFont menuFontOfSize: 0] pointSize]);
 }
 
 NSMenu* nativeMainMenu() {

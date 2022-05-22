@@ -30,11 +30,12 @@ type testCanvas struct {
 	size  fyne.Size
 	scale float32
 
-	content  fyne.CanvasObject
-	overlays *internal.OverlayStack
-	focusMgr *app.FocusManager
-	hovered  desktop.Hoverable
-	padded   bool
+	content     fyne.CanvasObject
+	overlays    *internal.OverlayStack
+	focusMgr    *app.FocusManager
+	hovered     desktop.Hoverable
+	padded      bool
+	transparent bool
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -74,10 +75,23 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 	return canvas
 }
 
+// NewTransparentCanvasWithPainter allows creation of an in-memory canvas with a specific painter without a background color.
+// The painter will be used to render in the Capture() call.
+//
+// Since: 2.2
+func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+	canvas := NewCanvasWithPainter(painter).(*testCanvas)
+	canvas.transparent = true
+
+	return canvas
+}
+
 func (c *testCanvas) Capture() image.Image {
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
-	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
+	if !c.transparent {
+		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
+	}
 
 	if c.painter != nil {
 		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)

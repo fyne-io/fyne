@@ -408,9 +408,9 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	background := canvas.NewRectangle(theme.HoverColor())
 	background.Hide()
-	var icon *canvas.Image
-	if b.icon != nil {
-		icon = canvas.NewImageFromResource(b.icon)
+	icon := canvas.NewImageFromResource(b.icon)
+	if b.icon == nil {
+		icon.Hide()
 	}
 
 	label := canvas.NewText(b.text, theme.ForegroundColor())
@@ -427,11 +427,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	close.ExtendBaseWidget(close)
 	close.Hide()
 
-	objects := []fyne.CanvasObject{background, label, close}
-	if icon != nil {
-		objects = append(objects, icon)
-	}
-
+	objects := []fyne.CanvasObject{background, label, close, icon}
 	r := &tabButtonRenderer{
 		button:     b,
 		background: background,
@@ -484,7 +480,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	innerSize := size.Subtract(padding)
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
 	labelShift := float32(0)
-	if r.icon != nil {
+	if r.icon.Visible() {
 		var iconOffset fyne.Position
 		if r.button.iconPosition == buttonIconTop {
 			iconOffset = fyne.NewPos((innerSize.Width-r.iconSize())/2, 0)
@@ -517,22 +513,22 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	textSize := r.label.MinSize()
 	if r.button.iconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, r.iconSize())
-		if r.icon != nil {
+		if r.icon.Visible() {
 			contentHeight += r.iconSize()
 		}
 		if r.label.Text != "" {
-			if r.icon != nil {
+			if r.icon.Visible() {
 				contentHeight += theme.Padding()
 			}
 			contentHeight += textSize.Height
 		}
 	} else {
 		contentHeight = fyne.Max(textSize.Height, r.iconSize())
-		if r.icon != nil {
+		if r.icon.Visible() {
 			contentWidth += r.iconSize()
 		}
 		if r.label.Text != "" {
-			if r.icon != nil {
+			if r.icon.Visible() {
 				contentWidth += theme.Padding()
 			}
 			contentWidth += textSize.Width
@@ -572,7 +568,9 @@ func (r *tabButtonRenderer) Refresh() {
 		r.label.Show()
 	}
 
-	if r.icon != nil && r.icon.Resource != nil {
+	r.icon.Resource = r.button.icon
+	if r.icon.Resource != nil {
+		r.icon.Show()
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
 			if r.button.importance == widget.HighImportance {
@@ -585,6 +583,8 @@ func (r *tabButtonRenderer) Refresh() {
 				r.icon.Refresh()
 			}
 		}
+	} else {
+		r.icon.Hide()
 	}
 
 	if d := fyne.CurrentDevice(); r.button.onClosed != nil && (d.IsMobile() || r.button.hovered || r.close.hovered) {

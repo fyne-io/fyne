@@ -7,8 +7,6 @@ import (
 	"image"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 	"sync"
 
 	ico "github.com/Kodeworks/golang-image-ico"
@@ -23,7 +21,11 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-const mainGoroutineID = 1
+// mainGoroutineID stores the main goroutine ID.
+// This ID must be initialized in main.init because
+// a main goroutine may not equal to 1 due to the
+// influence of a garbage collector.
+var mainGoroutineID uint64
 
 var (
 	curWindow *window
@@ -140,7 +142,7 @@ func (d *gLDriver) windowList() []fyne.Window {
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
-	fyne.LogError(msg, err)
+	logError(msg, err)
 
 	run.Lock()
 	if !run.flag {
@@ -152,14 +154,11 @@ func (d *gLDriver) initFailed(msg string, err error) {
 	}
 }
 
-func goroutineID() int {
-	b := make([]byte, 64)
-	b = b[:runtime.Stack(b, false)]
-	// string format expects "goroutine X [running..."
-	id := strings.Split(strings.TrimSpace(string(b)), " ")[1]
-
-	num, _ := strconv.Atoi(id)
-	return num
+func (d *gLDriver) Run() {
+	if goroutineID() != mainGoroutineID {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
+	d.runGL()
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.

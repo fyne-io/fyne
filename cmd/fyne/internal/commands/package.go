@@ -25,9 +25,15 @@ const (
 	defaultAppVersion = "1.0.0"
 )
 
+type appData struct {
+	icon, name        string
+	appID, appVersion string
+	appBuild          int
+}
+
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
-	p := &Packager{}
+	p := &Packager{appData: &appData{}}
 
 	return &cli.Command{
 		Name:        "package",
@@ -109,12 +115,11 @@ func Package() *cli.Command {
 
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
-	name, srcDir, dir, exe, icon string
-	os, appID, appVersion        string
-	appBuild                     int
-	install, release             bool
-	certificate, profile         string // optional flags for releasing
-	tags, category               string
+	*appData
+	srcDir, dir, exe, os string
+	install, release     bool
+	certificate, profile string // optional flags for releasing
+	tags, category       string
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -196,6 +201,8 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 			release: p.release,
 			tags:    tags,
 			runner:  runner,
+
+			appData: p.appData,
 		}
 
 		return []string{p.exe}, b.build()
@@ -208,6 +215,8 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		release: p.release,
 		tags:    tags,
 		runner:  runner,
+
+		appData: p.appData,
 	}
 
 	err := bWasm.build()
@@ -222,6 +231,8 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		release: p.release,
 		tags:    tags,
 		runner:  runner,
+
+		appData: p.appData,
 	}
 
 	err = bGopherJS.build()
@@ -312,7 +323,7 @@ func (p *Packager) validate() error {
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
-		mergeMetadata(p, data)
+		mergeMetadata(p.appData, data)
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -327,7 +338,7 @@ func (p *Packager) validate() error {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" || p.os == "wasm" || p.os == "gopherjs" || p.os == "web" {
+	if p.name == "" {
 		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
@@ -365,10 +376,6 @@ func calculateExeName(sourceDir, os string) string {
 
 	if os == "windows" {
 		exeName = exeName + ".exe"
-	} else if os == "wasm" {
-		exeName = exeName + ".wasm"
-	} else if os == "gopherjs" {
-		exeName = exeName + ".js"
 	}
 
 	return exeName
@@ -387,7 +394,7 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
-func mergeMetadata(p *Packager, data *metadata.FyneApp) {
+func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	if p.icon == "" {
 		p.icon = data.Details.Icon
 	}

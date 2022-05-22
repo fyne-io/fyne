@@ -40,7 +40,9 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
 // By default this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
-	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
+	if desk, ok := a.Driver().(systrayDriver); ok {
+		desk.SetSystemTrayMenu(menu)
+	}
 }
 
 // SetSystemTrayIcon sets a custom image for the system tray icon.

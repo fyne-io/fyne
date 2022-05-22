@@ -54,6 +54,8 @@ type MenuItem struct {
 	// Since: 2.1
 	Checked bool
 	// Since: 2.2
+	Icon Resource
+	// Since: 2.2
 	Shortcut Shortcut
 }
 

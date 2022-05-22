@@ -32,6 +32,8 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 	return &FormItem{Text: text, Widget: widget}
 }
 
+var _ fyne.Validatable = (*Form)(nil)
+
 // Form widget is two column grid where each row has a label and a widget (usually an input).
 // The last row of the grid will contain the appropriate form control buttons if any should be shown.
 // Setting OnSubmit will set the submit button to be visible and call back the function when tapped.
@@ -43,8 +45,8 @@ type Form struct {
 	BaseWidget
 
 	Items      []*FormItem
-	OnSubmit   func()
-	OnCancel   func()
+	OnSubmit   func() `json:"-"`
+	OnCancel   func() `json:"-"`
 	SubmitText string
 	CancelText string
 
@@ -54,6 +56,9 @@ type Form struct {
 	submitButton *Button
 
 	disabled bool
+
+	onValidationChanged func(error)
+	validationError     error
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
@@ -117,6 +122,24 @@ func (f *Form) Disable() {
 // Since: 2.1
 func (f *Form) Disabled() bool {
 	return f.disabled
+}
+
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form)
+func (f *Form) SetOnValidationChanged(callback func(error)) {
+	f.onValidationChanged = callback
+}
+
+// Validate validates the entire form and returns the first error that is encountered.
+func (f *Form) Validate() error {
+	for _, item := range f.Items {
+		if w, ok := item.Widget.(fyne.Validatable); ok {
+			if err := w.Validate(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
@@ -225,6 +248,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		}
 		f.Items[i].validationError = err
 		f.Items[i].invalid = err != nil
+		f.setValidationError(err)
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
@@ -240,6 +264,28 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 			}
 		}
 		w.SetOnValidationChanged(updateValidation)
+	}
+}
+
+func (f *Form) setValidationError(err error) {
+	if err == nil && f.validationError == nil {
+		return
+	}
+
+	if !errors.Is(err, f.validationError) {
+		if err == nil {
+			for _, item := range f.Items {
+				if item.invalid {
+					err = item.validationError
+					break
+				}
+			}
+		}
+		f.validationError = err
+
+		if f.onValidationChanged != nil {
+			f.onValidationChanged(err)
+		}
 	}
 }
 
@@ -289,6 +335,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
+	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
 	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))

@@ -12,6 +12,8 @@ func (p *Packager) packageWeb() error {
 	appDir := util.EnsureSubDir(p.dir, "web")
 
 	tpl := webData{
+		AppName:      p.name,
+		AppVersion:   p.appVersion,
 		GopherJSFile: p.name + ".js",
 		WasmFile:     p.name + ".wasm",
 		IsReleased:   p.release,
@@ -26,7 +28,9 @@ func (p *Packager) packageWasm() error {
 	appDir := util.EnsureSubDir(p.dir, "wasm")
 
 	tpl := webData{
-		WasmFile:   p.name,
+		AppName:    p.name,
+		AppVersion: p.appVersion,
+		WasmFile:   p.name + ".wasm",
 		IsReleased: p.release,
 		HasWasm:    true,
 	}
@@ -38,7 +42,9 @@ func (p *Packager) packageGopherJS() error {
 	appDir := util.EnsureSubDir(p.dir, "gopherjs")
 
 	tpl := webData{
-		GopherJSFile: p.name,
+		AppName:      p.name,
+		AppVersion:   p.appVersion,
+		GopherJSFile: p.name + ".js",
 		IsReleased:   p.release,
 		HasGopherJS:  true,
 	}
@@ -47,6 +53,8 @@ func (p *Packager) packageGopherJS() error {
 }
 
 type webData struct {
+	AppName      string
+	AppVersion   string
 	WasmFile     string
 	GopherJSFile string
 	IsReleased   bool
@@ -69,6 +77,30 @@ func (w webData) packageWebInternal(appDir string, exeWasmSrc string, exeJSSrc s
 
 	iconDst := filepath.Join(appDir, "icon.png")
 	err = util.CopyFile(icon, iconDst)
+	if err != nil {
+		return err
+	}
+
+	spinnerLightFile := filepath.Join(appDir, "spinner_light.gif")
+	err = util.WriteFile(spinnerLightFile, templates.SpinnerLight)
+	if err != nil {
+		return err
+	}
+
+	spinnerDarkFile := filepath.Join(appDir, "spinner_dark.gif")
+	err = util.WriteFile(spinnerDarkFile, templates.SpinnerDark)
+	if err != nil {
+		return err
+	}
+
+	lightCSSFile := filepath.Join(appDir, "light.css")
+	err = util.WriteFile(lightCSSFile, templates.CSSLight)
+	if err != nil {
+		return err
+	}
+
+	darkCSSFile := filepath.Join(appDir, "dark.css")
+	err = util.WriteFile(darkCSSFile, templates.CSSDark)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@
 package glfw
 
 import (
+	"runtime"
 	"sync"
 
 	"fyne.io/systray"
@@ -14,11 +15,13 @@ import (
 
 var setup sync.Once
 
-func (d *gLDriver) Run() {
-	if goroutineID() != mainGoroutineID {
-		panic("Run() or ShowAndRun() must be called from main goroutine")
+func goroutineID() (id uint64) {
+	var buf [30]byte
+	runtime.Stack(buf[:], false)
+	for i := 10; buf[i] != ' '; i++ {
+		id = id*10 + uint64(buf[i]&15)
 	}
-	d.runGL()
+	return id
 }
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {

@@ -19,6 +19,16 @@ func NewFloat64Slice(defaults ...float64) *Float64Slice {
 	return &Float64Slice{slice: append([]float64{}, defaults...)}
 }
 
+// clone allocate a copy of self object
+func (f *Float64Slice) clone() *Float64Slice {
+	n := &Float64Slice{
+		slice:      make([]float64, len(f.slice)),
+		hasBeenSet: f.hasBeenSet,
+	}
+	copy(n.slice, f.slice)
+	return n
+}
+
 // Set parses the value into a float64 and appends it to the list of values
 func (f *Float64Slice) Set(value string) error {
 	if !f.hasBeenSet {
@@ -117,6 +127,11 @@ func (f *Float64SliceFlag) GetValue() string {
 	return ""
 }
 
+// IsVisible returns true if the flag is not hidden, otherwise false
+func (f *Float64SliceFlag) IsVisible() bool {
+	return !f.Hidden
+}
+
 // Apply populates the flag given the flag set and environment
 func (f *Float64SliceFlag) Apply(set *flag.FlagSet) error {
 	if val, ok := flagFromEnvOrFile(f.EnvVars, f.FilePath); ok {
@@ -129,15 +144,19 @@ func (f *Float64SliceFlag) Apply(set *flag.FlagSet) error {
 				}
 			}
 
+			// Set this to false so that we reset the slice if we then set values from
+			// flags that have already been set by the environment.
+			f.Value.hasBeenSet = false
 			f.HasBeenSet = true
 		}
 	}
 
+	if f.Value == nil {
+		f.Value = &Float64Slice{}
+	}
+	copyValue := f.Value.clone()
 	for _, name := range f.Names() {
-		if f.Value == nil {
-			f.Value = &Float64Slice{}
-		}
-		set.Var(f.Value, name, f.Usage)
+		set.Var(copyValue, name, f.Usage)
 	}
 
 	return nil
@@ -146,7 +165,7 @@ func (f *Float64SliceFlag) Apply(set *flag.FlagSet) error {
 // Float64Slice looks up the value of a local Float64SliceFlag, returns
 // nil if not found
 func (c *Context) Float64Slice(name string) []float64 {
-	if fs := lookupFlagSet(name, c); fs != nil {
+	if fs := c.lookupFlagSet(name); fs != nil {
 		return lookupFloat64Slice(name, fs)
 	}
 	return nil

@@ -4,288 +4,232 @@
 package gl
 
 import (
-	"fmt"
-	"image"
-	"image/color"
-	"image/draw"
-
 	"encoding/binary"
 
-	gl "github.com/fyne-io/gl-js"
+	"github.com/fyne-io/gl-js"
 	"golang.org/x/mobile/exp/f32"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/theme"
 )
 
-// Buffer represents a GL buffer
-type Buffer gl.Buffer
+const (
+	arrayBuffer           = gl.ARRAY_BUFFER
+	bitColorBuffer        = gl.COLOR_BUFFER_BIT
+	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
+	clampToEdge           = gl.CLAMP_TO_EDGE
+	colorFormatRGBA       = gl.RGBA
+	compileStatus         = gl.COMPILE_STATUS
+	constantAlpha         = gl.CONSTANT_ALPHA
+	float                 = gl.FLOAT
+	fragmentShader        = gl.FRAGMENT_SHADER
+	front                 = gl.FRONT
+	glFalse               = gl.FALSE
+	linkStatus            = gl.LINK_STATUS
+	one                   = gl.ONE
+	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
+	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
+	scissorTest           = gl.SCISSOR_TEST
+	srcAlpha              = gl.SRC_ALPHA
+	staticDraw            = gl.STATIC_DRAW
+	texture0              = gl.TEXTURE0
+	texture2D             = gl.TEXTURE_2D
+	textureMinFilter      = gl.TEXTURE_MIN_FILTER
+	textureMagFilter      = gl.TEXTURE_MAG_FILTER
+	textureWrapS          = gl.TEXTURE_WRAP_S
+	textureWrapT          = gl.TEXTURE_WRAP_T
+	triangles             = gl.TRIANGLES
+	triangleStrip         = gl.TRIANGLE_STRIP
+	unsignedByte          = gl.UNSIGNED_BYTE
+	vertexShader          = gl.VERTEX_SHADER
+)
 
-// Program represents a compiled GL program
-type Program gl.Program
+type (
+	// Attribute represents a GL attribute
+	Attribute gl.Attrib
+	// Buffer represents a GL buffer
+	Buffer gl.Buffer
+	// Program represents a compiled GL program
+	Program gl.Program
+	// Shader represents a GL shader
+	Shader gl.Shader
+	// Uniform represents a GL uniform
+	Uniform gl.Uniform
+)
 
-var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
+var noBuffer = Buffer(gl.NoBuffer)
+var noShader = Shader(gl.NoShader)
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
-func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
-	var texture = gl.CreateTexture()
-	logError()
-
-	if int(textureFilter) >= len(textureFilterToGL) {
-		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
-		textureFilter = canvas.ImageScaleSmooth
-	}
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-	logError()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	logError()
-
-	return Texture(texture)
-}
-
-func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
-	switch i := img.(type) {
-	case *image.Uniform:
-		texture := p.newTexture(textureFilter)
-		r, g, b, a := i.RGBA()
-		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
-		data := []uint8{r8, g8, b8, a8}
-		gl.TexImage2D(gl.TEXTURE_2D, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data)
-		logError()
-		return texture
-	case *image.RGBA:
-		if len(i.Pix) == 0 { // image is empty
-			return noTexture
-		}
-
-		texture := p.newTexture(textureFilter)
-		gl.TexImage2D(gl.TEXTURE_2D, 0, i.Rect.Size().X, i.Rect.Size().Y,
-			gl.RGBA, gl.UNSIGNED_BYTE, i.Pix)
-		logError()
-		return texture
-	default:
-		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return p.imgToTexture(rgba, textureFilter)
-	}
-}
-
-func (p *glPainter) SetOutputSize(width, height int) {
-	gl.Viewport(0, 0, width, height)
-	logError()
-}
-
-func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
-	texture, ok := cache.GetTexture(obj)
-	if !ok {
-		return
-	}
-
-	gl.DeleteTexture(gl.Texture(texture))
-	logError()
-	cache.DeleteTexture(obj)
-}
-
-func glInit() {
+func (p *painter) Init() {
+	p.ctx = &xjsContext{}
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
-	logError()
+	p.logError()
+	p.program = p.createProgram("simple_es", false)
+	p.lineProgram = p.createProgram("line_es", false)
 }
 
-func compileShader(source string, shaderType gl.Enum) (gl.Shader, error) {
-	shader := gl.CreateShader(shaderType)
+type xjsContext struct{}
 
-	gl.ShaderSource(shader, source)
-	logError()
-	gl.CompileShader(shader)
-	logError()
+var _ context = (*xjsContext)(nil)
 
-	status := gl.GetShaderi(shader, gl.COMPILE_STATUS)
-	if status == gl.FALSE {
-		info := gl.GetShaderInfoLog(shader)
-
-		return gl.NoShader, fmt.Errorf("failed to compile %v: %v", source, info)
-	}
-
-	return shader, nil
+func (c *xjsContext) ActiveTexture(textureUnit uint32) {
+	gl.ActiveTexture(gl.Enum(textureUnit))
 }
 
-var vertexShaderSource = string(shaderSimpleesVert.StaticContent)
-var fragmentShaderSource = string(shaderSimpleesFrag.StaticContent)
-var vertexLineShaderSource = string(shaderLineesVert.StaticContent)
-var fragmentLineShaderSource = string(shaderLineesFrag.StaticContent)
-
-func (p *glPainter) Init() {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-	logError()
-
-	p.program = Program(prog)
-
-	vertexLineShader, err := compileShader(vertexLineShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-	fragmentLineShader, err := compileShader(fragmentLineShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	lineProg := gl.CreateProgram()
-	gl.AttachShader(lineProg, vertexLineShader)
-	gl.AttachShader(lineProg, fragmentLineShader)
-	gl.LinkProgram(lineProg)
-	logError()
-
-	p.lineProgram = Program(lineProg)
+func (c *xjsContext) AttachShader(program Program, shader Shader) {
+	gl.AttachShader(gl.Program(program), gl.Shader(shader))
 }
 
-func (p *glPainter) glClearBuffer() {
-	gl.UseProgram(gl.Program(p.program))
-	logError()
-
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	max16bit := float32(255 * 255)
-	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	logError()
+func (c *xjsContext) BindBuffer(target uint32, buf Buffer) {
+	gl.BindBuffer(gl.Enum(target), gl.Buffer(buf))
 }
 
-func (p *glPainter) glScissorOpen(x, y, w, h int32) {
+func (c *xjsContext) BindTexture(target uint32, texture Texture) {
+	gl.BindTexture(gl.Enum(target), gl.Texture(texture))
+}
+
+func (c *xjsContext) BlendColor(r, g, b, a float32) {
+	gl.BlendColor(r, g, b, a)
+}
+
+func (c *xjsContext) BlendFunc(srcFactor, destFactor uint32) {
+	gl.BlendFunc(gl.Enum(srcFactor), gl.Enum(destFactor))
+}
+
+func (c *xjsContext) BufferData(target uint32, points []float32, usage uint32) {
+	gl.BufferData(gl.Enum(target), f32.Bytes(binary.LittleEndian, points...), gl.Enum(usage))
+}
+
+func (c *xjsContext) Clear(mask uint32) {
+	gl.Clear(gl.Enum(mask))
+}
+
+func (c *xjsContext) ClearColor(r, g, b, a float32) {
+	gl.ClearColor(r, g, b, a)
+}
+
+func (c *xjsContext) CompileShader(shader Shader) {
+	gl.CompileShader(gl.Shader(shader))
+}
+
+func (c *xjsContext) CreateBuffer() Buffer {
+	return Buffer(gl.CreateBuffer())
+}
+
+func (c *xjsContext) CreateProgram() Program {
+	return Program(gl.CreateProgram())
+}
+
+func (c *xjsContext) CreateShader(typ uint32) Shader {
+	return Shader(gl.CreateShader(gl.Enum(typ)))
+}
+
+func (c *xjsContext) CreateTexture() (texture Texture) {
+	return Texture(gl.CreateTexture())
+}
+
+func (c *xjsContext) DeleteBuffer(buffer Buffer) {
+	gl.DeleteBuffer(gl.Buffer(buffer))
+}
+
+func (c *xjsContext) DeleteTexture(texture Texture) {
+	gl.DeleteTexture(gl.Texture(texture))
+}
+
+func (c *xjsContext) Disable(capability uint32) {
+	gl.Disable(gl.Enum(capability))
+}
+
+func (c *xjsContext) DrawArrays(mode uint32, first, count int) {
+	gl.DrawArrays(gl.Enum(mode), first, count)
+}
+
+func (c *xjsContext) Enable(capability uint32) {
+	gl.Enable(gl.Enum(capability))
+}
+
+func (c *xjsContext) EnableVertexAttribArray(attribute Attribute) {
+	gl.EnableVertexAttribArray(gl.Attrib(attribute))
+}
+
+func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
+	return Attribute(gl.GetAttribLocation(gl.Program(program), name))
+}
+
+func (c *xjsContext) GetError() uint32 {
+	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) GetProgrami(program Program, param uint32) int {
+	return gl.GetProgrami(gl.Program(program), gl.Enum(param))
+}
+
+func (c *xjsContext) GetProgramInfoLog(program Program) string {
+	return gl.GetProgramInfoLog(gl.Program(program))
+}
+
+func (c *xjsContext) GetShaderi(shader Shader, param uint32) int {
+	return gl.GetShaderi(gl.Shader(shader), gl.Enum(param))
+}
+
+func (c *xjsContext) GetShaderInfoLog(shader Shader) string {
+	return gl.GetShaderInfoLog(gl.Shader(shader))
+}
+
+func (c *xjsContext) GetUniformLocation(program Program, name string) Uniform {
+	return Uniform(gl.GetUniformLocation(gl.Program(program), name))
+}
+
+func (c *xjsContext) LinkProgram(program Program) {
+	gl.LinkProgram(gl.Program(program))
+}
+
+func (c *xjsContext) ReadBuffer(_ uint32) {
+}
+
+func (c *xjsContext) ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8) {
+	gl.ReadPixels(pixels, x, y, width, height, gl.Enum(colorFormat), gl.Enum(typ))
+}
+
+func (c *xjsContext) ShaderSource(shader Shader, source string) {
+	gl.ShaderSource(gl.Shader(shader), source)
+}
+
+func (c *xjsContext) Scissor(x, y, w, h int32) {
 	gl.Scissor(x, y, w, h)
-	gl.Enable(gl.SCISSOR_TEST)
-	logError()
 }
 
-func (p *glPainter) glScissorClose() {
-	gl.Disable(gl.SCISSOR_TEST)
-	logError()
+func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexImage2D(
+		gl.Enum(target),
+		level,
+		width,
+		height,
+		gl.Enum(colorFormat),
+		gl.Enum(typ),
+		data,
+	)
 }
 
-func (p *glPainter) glCreateBuffer(points []float32) Buffer {
-	gl.UseProgram(gl.Program(p.program))
-
-	vbo := gl.CreateBuffer()
-	logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	logError()
-	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
-	logError()
-
-	vertAttrib := gl.GetAttribLocation(gl.Program(p.program), "vert")
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
-	logError()
-
-	texCoordAttrib := gl.GetAttribLocation(gl.Program(p.program), "vertTexCoord")
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
-	logError()
-
-	return Buffer(vbo)
+func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
+	gl.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
 }
 
-func (p *glPainter) glCreateLineBuffer(points []float32) Buffer {
-	gl.UseProgram(gl.Program(p.lineProgram))
-
-	vbo := gl.CreateBuffer()
-	logError()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	logError()
-	gl.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
-	logError()
-
-	vertAttrib := gl.GetAttribLocation(gl.Program(p.lineProgram), "vert")
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 2, gl.FLOAT, false, 4*4, 0)
-	logError()
-
-	normalAttrib := gl.GetAttribLocation(gl.Program(p.lineProgram), "normal")
-	gl.EnableVertexAttribArray(normalAttrib)
-	gl.VertexAttribPointer(normalAttrib, 2, gl.FLOAT, false, 4*4, 2*4)
-	logError()
-
-	return Buffer(vbo)
+func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
+	gl.Uniform1f(gl.Uniform(uniform), v)
 }
 
-func (p *glPainter) glFreeBuffer(vbo Buffer) {
-	gl.BindBuffer(gl.ARRAY_BUFFER, gl.NoBuffer)
-	logError()
-	gl.DeleteBuffer(gl.Buffer(vbo))
-	logError()
+func (c *xjsContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {
+	gl.Uniform4f(gl.Uniform(uniform), v0, v1, v2, v3)
 }
 
-func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
-	gl.UseProgram(gl.Program(p.program))
-
-	// here we have to choose between blending the image alpha or fading it...
-	// TODO find a way to support both
-	if alpha != 1.0 {
-		gl.BlendColor(0, 0, 0, alpha)
-		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
-	} else {
-		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	}
-	logError()
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, gl.Texture(texture))
-	logError()
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-	logError()
+func (c *xjsContext) UseProgram(program Program) {
+	gl.UseProgram(gl.Program(program))
 }
 
-func (p *glPainter) glDrawLine(width float32, col color.Color, feather float32) {
-	gl.UseProgram(gl.Program(p.lineProgram))
-
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	logError()
-
-	colorUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "color")
-	r, g, b, a := col.RGBA()
-	if a == 0 {
-		gl.Uniform4f(colorUniform, 0, 0, 0, 0)
-	} else {
-		alpha := float32(a)
-		col := []float32{float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff}
-		gl.Uniform4fv(colorUniform, col)
-	}
-	lineWidthUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "lineWidth")
-	gl.Uniform1f(lineWidthUniform, width)
-
-	featherUniform := gl.GetUniformLocation(gl.Program(p.lineProgram), "feather")
-	gl.Uniform1f(featherUniform, feather)
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
-	logError()
+func (c *xjsContext) VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int) {
+	gl.VertexAttribPointer(gl.Attrib(attribute), size, gl.Enum(typ), normalized, stride, offset)
 }
 
-func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
-	gl.ReadPixels(*pixels, 0, 0, int(width), int(height), gl.RGBA, gl.UNSIGNED_BYTE)
-	logError()
-}
-
-func logError() {
-	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
-		return
-	}
-	logGLError(uint32(gl.GetError()))
+func (c *xjsContext) Viewport(x, y, width, height int) {
+	gl.Viewport(x, y, width, height)
 }

@@ -202,6 +202,11 @@ func (w *window) Close() {
 		return
 	}
 
+	// trigger callbacks - early so window still exists
+	if w.onClosed != nil {
+		w.QueueEvent(w.onClosed)
+	}
+
 	// set w.closing flag inside draw thread to ensure we can free textures
 	runOnDraw(w, func() {
 		w.viewLock.Lock()
@@ -218,11 +223,6 @@ func (w *window) Close() {
 			cache.DestroyRenderer(wid)
 		}
 	})
-
-	// trigger callbacks
-	if w.onClosed != nil {
-		w.QueueEvent(w.onClosed)
-	}
 }
 
 func (w *window) ShowAndRun() {
