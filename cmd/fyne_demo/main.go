@@ -169,10 +169,13 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 func makeTray(a fyne.App) {
 	if desk, ok := a.(desktop.App); ok {
-		menu := fyne.NewMenu("Hello World",
-			fyne.NewMenuItem("Hello", func() {
-				log.Println("System tray menu tapped")
-			}))
+		h := fyne.NewMenuItem("Hello", func() {})
+		menu := fyne.NewMenu("Hello World", h)
+		h.Action = func() {
+			log.Println("System tray menu tapped")
+			h.Label = "Welcome"
+			menu.Refresh()
+		}
 		desk.SetSystemTrayMenu(menu)
 	}
 }

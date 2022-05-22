@@ -1,3 +1,5 @@
+// +build linux freebsd openbsd netbsd
+
 package systray
 
 import (
@@ -15,7 +17,7 @@ func (item *MenuItem) SetIcon(iconBytes []byte) {
 }
 
 func (t *tray) GetLayout(parentId int32, recursionDepth int32, propertyNames []string) (revision uint32, layout menuLayout, err *dbus.Error) {
-	return 1, *instance.menu, nil
+	return instance.menuVersion, *instance.menu, nil
 }
 
 // GetGroupProperties is com.canonical.dbusmenu.GetGroupProperties method.
@@ -23,11 +25,27 @@ func (t *tray) GetGroupProperties(ids []int32, propertyNames []string) (properti
 	V0 int32
 	V1 map[string]dbus.Variant
 }, err *dbus.Error) {
+	for _, id := range ids {
+		if m, ok := findLayout(id); ok {
+			properties = append(properties, struct{
+				V0 int32
+				V1 map[string]dbus.Variant
+			}{
+				V0: m.V0,
+				V1: m.V1,
+			})
+		}
+	}
 	return
 }
 
 // GetProperty is com.canonical.dbusmenu.GetProperty method.
 func (t *tray) GetProperty(id int32, name string) (value dbus.Variant, err *dbus.Error) {
+	if m, ok := findLayout(id); ok {
+		if p, ok := m.V1[name]; ok {
+			return p, nil
+		}
+	}
 	return
 }
 
@@ -36,7 +54,7 @@ func (t *tray) Event(id int32, eventId string, data dbus.Variant, timestamp uint
 	if eventId == "clicked" {
 		item, ok := menuItems[uint32(id)]
 		if !ok {
-			log.Printf("Failed to look up clicked menu item")
+			log.Printf("systray error: failed to look up clicked menu item with ID %d\n", id)
 			return
 		}
 
@@ -52,6 +70,17 @@ func (t *tray) EventGroup(events []struct {
 	V2 dbus.Variant
 	V3 uint32
 }) (idErrors []int32, err *dbus.Error) {
+	for _, event := range events {
+		if event.V1 == "clicked" {
+			item, ok := menuItems[uint32(event.V0)]
+			if !ok {
+				log.Printf("systray error: failed to look up clicked menu item with ID %d\n", event.V0)
+				return
+			}
+
+			item.ClickedCh <- struct{}{}
+		}
+	}
 	return
 }
 
@@ -69,28 +98,28 @@ func createMenuPropSpec() map[string]map[string]*prop.Prop {
 	return map[string]map[string]*prop.Prop{
 		"com.canonical.dbusmenu": {
 			"Version": {
-				uint32(1),
-				false,
-				prop.EmitTrue,
-				nil,
+				Value:    instance.menuVersion,
+				Writable: true,
+				Emit:     prop.EmitTrue,
+				Callback: nil,
 			},
 			"TextDirection": {
-				"ltr",
-				false,
-				prop.EmitTrue,
-				nil,
+				Value:    "ltr",
+				Writable: false,
+				Emit:     prop.EmitTrue,
+				Callback: nil,
 			},
 			"Status": {
-				"active",
-				false,
-				prop.EmitTrue,
-				nil,
+				Value:    "normal",
+				Writable: false,
+				Emit:     prop.EmitTrue,
+				Callback: nil,
 			},
 			"IconThemePath": {
-				[]string{},
-				false,
-				prop.EmitTrue,
-				nil,
+				Value:    []string{},
+				Writable: false,
+				Emit:     prop.EmitTrue,
+				Callback: nil,
 			},
 		},
 	}
@@ -200,8 +229,29 @@ func showMenuItem(item *MenuItem) {
 }
 
 func refresh() {
-	menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
-		Path: menuPath,
-		Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{},
-	})
+	if instance.conn != nil {
+		instance.menuVersion++
+		dbusErr := instance.menuProps.Set("com.canonical.dbusmenu", "Version",
+			dbus.MakeVariant(instance.menuVersion))
+		if dbusErr != nil {
+			log.Printf("systray error: failed to update menu version: %s\n", dbusErr)
+			return
+		}
+
+		err := menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
+			Path: menuPath,
+			Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{
+				Revision: instance.menuVersion,
+			},
+		})
+		if err != nil {
+			log.Printf("systray error: failed to emit layout updated signal: %s\n", err)
+		}
+	}
+}
+
+func resetMenu() {
+	instance.menu = &menuLayout{}
+	instance.menuVersion++
+	refresh()
 }

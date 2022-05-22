@@ -1,5 +1,11 @@
 package fyne
 
+type systemTrayDriver interface {
+	Driver
+	SetSystemTrayMenu(*Menu)
+	SystemTrayMenu() *Menu
+}
+
 // Menu stores the information required for a standard menu.
 // A menu can pop down from a MainMenu or could be a pop out menu.
 type Menu struct {
@@ -10,6 +16,29 @@ type Menu struct {
 // NewMenu creates a new menu given the specified label (to show in a MainMenu) and list of items to display.
 func NewMenu(label string, items ...*MenuItem) *Menu {
 	return &Menu{Label: label, Items: items}
+}
+
+// Refresh will instruct this menu to update its display.
+//
+// Since: 2.2
+func (m *Menu) Refresh() {
+	for _, w := range CurrentApp().Driver().AllWindows() {
+		main := w.MainMenu()
+		if main != nil {
+			for _, menu := range main.Items {
+				if menu == m {
+					w.SetMainMenu(main)
+					break
+				}
+			}
+		}
+	}
+
+	if d, ok := CurrentApp().Driver().(systemTrayDriver); ok {
+		if m == d.SystemTrayMenu() {
+			d.SetSystemTrayMenu(m)
+		}
+	}
 }
 
 // MenuItem is a single item within any menu, it contains a display Label and Action function that is called when tapped.
