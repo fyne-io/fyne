@@ -6,7 +6,7 @@ LOCAL ?= $(shell test -d $(DESTDIR)/usr/local && echo "/local" || echo "")
 PREFIX ?= /usr$(LOCAL)
 
 default:
-	# Install for simple user
+	# User install
 	# Run "make user-install" to install in ~/.local/
 	# Run "make user-uninstall" to uninstall from ~/.local/
 	#
