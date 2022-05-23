@@ -134,7 +134,7 @@ func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip i
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	bounds := text.MinSize()
-	width := internal.ScaleInt(c, bounds.Width)
+	width := internal.ScaleInt(c, bounds.Width+painter.VectorPad(text))
 	height := internal.ScaleInt(c, bounds.Height)
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
