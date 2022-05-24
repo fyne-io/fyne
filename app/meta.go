@@ -34,6 +34,9 @@ func (a *fyneApp) Metadata() fyne.AppMetadata {
 }
 
 func convertIcon(bytes string) fyne.Resource {
+	if bytes == "" {
+		return nil
+	}
 	data := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bytes))
 	img, err := ioutil.ReadAll(data)
 	if err != nil {
