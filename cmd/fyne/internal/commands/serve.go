@@ -47,7 +47,7 @@ func Serve() *cli.Command {
 				Name:        "target",
 				Aliases:     []string{"os"},
 				Usage:       "The web runtime to target (wasm, gopherjs, web).",
-				Value:       "wasm",
+				Value:       "web",
 				Destination: &s.os,
 			},
 		},
