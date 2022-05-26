@@ -8,7 +8,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	ico "github.com/Kodeworks/golang-image-ico"
+	ico "github.com/biessek/golang-ico"
 	"github.com/josephspurrier/goversioninfo"
 	"golang.org/x/sys/execabs"
 )

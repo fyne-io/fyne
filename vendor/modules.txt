@@ -7,14 +7,14 @@ fyne.io/systray/internal/generated/notifier
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
-# github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
-## explicit
-github.com/Kodeworks/golang-image-ico
 # github.com/akavel/rsrc v0.8.0
 ## explicit
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
+# github.com/biessek/golang-ico v0.0.0-20180326222316-d348d9ea4670
+## explicit
+github.com/biessek/golang-ico
 # github.com/cpuguy83/go-md2man/v2 v2.0.1
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
@@ -71,6 +71,9 @@ github.com/jackmordaunt/icns/v2
 # github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 ## explicit
 github.com/josephspurrier/goversioninfo
+# github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e
+## explicit
+github.com/jsummers/gobmp
 # github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 ## explicit
 github.com/lucor/goinfo

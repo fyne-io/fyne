@@ -4,8 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image"
 	_ "image/jpeg" // import image encodings
-	_ "image/png"  // import image encodings
+	"image/png"
+	_ "image/png" // import image encodings
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/biessek/golang-ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
@@ -347,6 +350,13 @@ func (p *Packager) validate() error {
 	if !util.Exists(p.icon) {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
+	if strings.ToLower(filepath.Ext(p.icon)) != ".png" {
+		tmp, err := normaliseIcon(p.icon)
+		if err != nil {
+			return err
+		}
+		p.icon = tmp
+	}
 
 	p.appID, err = validateAppID(p.appID, p.os, p.name, p.release)
 	if err != nil {
@@ -410,6 +420,34 @@ func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	if p.appBuild == 0 {
 		p.appBuild = data.Details.Build
 	}
+}
+
+// normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
+// Successful conversion will return a path to the new file.
+// Any errors that occur will be returned with an empty string for new path.
+func normaliseIcon(path string) (string, error) {
+	// convert icon
+	img, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open source image: %w", err)
+	}
+	defer img.Close()
+	srcImg, _, err := image.Decode(img)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode source image: %w", err)
+	}
+
+	out, err := os.CreateTemp("", "fyne-ico-tmp-*.png")
+	if err != nil {
+		return "", fmt.Errorf("failed to open image output file: %w", err)
+	}
+
+	err = png.Encode(out, srcImg)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode icon: %w", err)
+	}
+
+	return out.Name(), out.Close()
 }
 
 func validateAppID(appID, os, name string, release bool) (string, error) {
