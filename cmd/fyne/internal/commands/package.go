@@ -437,7 +437,8 @@ func normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	out, err := os.CreateTemp("", "fyne-ico-tmp-*.png")
+	tmpPath := filepath.Join(os.TempDir(), "fyne-ico-tmp.png")
+	out, err := os.Create(tmpPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open image output file: %w", err)
 	}
@@ -447,7 +448,7 @@ func normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to encode icon: %w", err)
 	}
 
-	return out.Name(), out.Close()
+	return tmpPath, out.Close()
 }
 
 func validateAppID(appID, os, name string, release bool) (string, error) {
