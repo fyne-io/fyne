@@ -2,7 +2,7 @@ package templates
 
 import "text/template"
 
-//go:generate fyne bundle -package templates -o bundled.go data
+//go:generate go run ../.. bundle -package templates -o bundled.go data
 
 var (
 	// MakefileUNIX is the template for the makefile on UNIX systems like Linux and BSD

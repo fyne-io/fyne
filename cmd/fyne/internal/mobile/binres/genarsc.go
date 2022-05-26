@@ -10,7 +10,7 @@
 //
 // Requires ANDROID_HOME be set to the path of the Android SDK and the
 // current sdk platform installed that matches MinSDK.
-package binres
+package main
 
 import (
 	"fmt"
