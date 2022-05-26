@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"image"
 	_ "image/jpeg" // import image encodings
-	"image/png"
-	_ "image/png" // import image encodings
+	"image/png"    // import image encodings
 	"io/ioutil"
 	"log"
 	"os"
