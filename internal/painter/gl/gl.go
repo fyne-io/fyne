@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const floatSize = 4
 const max16bit = float32(255 * 255)
 
 func logGLError(err uint32) {
