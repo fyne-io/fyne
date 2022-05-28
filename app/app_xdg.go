@@ -66,7 +66,7 @@ func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
 
 	defer file.Close()
 
-	if icon := a.GetIcon(); icon != nil {
+	if icon := a.Icon(); icon != nil {
 		_, err = file.Write(icon)
 		if err != nil {
 			fyne.LogError("Unable to write icon contents", err)
