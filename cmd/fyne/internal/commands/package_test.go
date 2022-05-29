@@ -35,7 +35,7 @@ func Test_isValidVersion(t *testing.T) {
 
 func Test_MergeMetata(t *testing.T) {
 	p := &Packager{appData: &appData{}}
-	p.appVersion = "v0.1"
+	p.AppVersion = "v0.1"
 	data := &metadata.FyneApp{
 		Details: metadata.AppDetails{
 			Icon:    "test.png",
@@ -45,8 +45,8 @@ func Test_MergeMetata(t *testing.T) {
 	}
 
 	mergeMetadata(p.appData, data)
-	assert.Equal(t, "v0.1", p.appVersion)
-	assert.Equal(t, 3, p.appBuild)
+	assert.Equal(t, "v0.1", p.AppVersion)
+	assert.Equal(t, 3, p.AppBuild)
 	assert.Equal(t, "test.png", p.icon)
 }
 
@@ -121,9 +121,7 @@ func Test_PackageWasm(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args: []string{"build", "-ldflags",
-					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
-					"-o", "myTest.wasm"},
+				args: []string{"build", "-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -136,7 +134,7 @@ func Test_PackageWasm(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{
-			name: "myTest",
+			Name: "myTest",
 			icon: "myTest.png",
 		},
 		os:     "wasm",
@@ -270,7 +268,7 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{
-			name: "myTest",
+			Name: "myTest",
 			icon: "myTest.png",
 		},
 		os:     "gopherjs",
@@ -403,9 +401,7 @@ func Test_PackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args: []string{"build", "-ldflags",
-					"-X 'fyne.io/fyne/v2/internal/app.MetaName=myTest' -X 'fyne.io/fyne/v2/internal/app.MetaVersion=1.0.0' -X 'fyne.io/fyne/v2/internal/app.MetaBuild=1'",
-					"-o", "myTest.wasm"},
+				args: []string{"build", "-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -444,7 +440,7 @@ func Test_PackageWeb(t *testing.T) {
 		dir:     "myTestTarget",
 		exe:     "myTest",
 	}
-	p.name = "myTest"
+	p.Name = "myTest"
 	p.icon = "myTest.png"
 	gopherjsBuildTest := &testCommandRuns{runs: expected, t: t}
 

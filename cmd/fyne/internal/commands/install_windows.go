@@ -36,10 +36,10 @@ func linkToStartMenu(path, name string) error {
 
 func postInstall(i *Installer) error {
 	p := i.Packager
-	appName := p.name
-	appExe := p.name
-	if filepath.Ext(p.name) == ".exe" {
-		appName = p.name[:len(p.name)-4]
+	appName := p.Name
+	appExe := p.Name
+	if filepath.Ext(p.Name) == ".exe" {
+		appName = p.Name[:len(p.Name)-4]
 	} else {
 		appExe = appExe + ".exe"
 	}

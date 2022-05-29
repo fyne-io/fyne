@@ -3,30 +3,20 @@ package app
 import (
 	"encoding/base64"
 	"io/ioutil"
-	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	intapp "fyne.io/fyne/v2/internal/app"
 )
 
-var (
-	meta fyne.AppMetadata
-)
+var meta = fyne.AppMetadata{
+	ID: "com.example",
+	Name: "Fyne App",
+	Version: "1.0.0",
+	Build: 1,
+}
 
-func init() {
-	build, err := strconv.Atoi(intapp.MetaBuild)
-	if err != nil {
-		build = 1
-	}
-
-	meta = fyne.AppMetadata{
-		Icon:    convertIcon(intapp.MetaIcon),
-		ID:      intapp.MetaID,
-		Name:    intapp.MetaName,
-		Version: intapp.MetaVersion,
-		Build:   build,
-	}
+func SetMetadata(m fyne.AppMetadata) {
+	meta = m
 }
 
 func (a *fyneApp) Metadata() fyne.AppMetadata {

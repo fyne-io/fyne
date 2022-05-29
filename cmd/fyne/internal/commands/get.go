@@ -30,7 +30,7 @@ func Get() *cli.Command {
 				Name:        "appID",
 				Aliases:     []string{"id"},
 				Usage:       "For darwin and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &g.appID,
+				Destination: &g.AppID,
 			},
 		},
 		Action: func(ctx *cli.Context) error {
@@ -83,7 +83,7 @@ func (g *Getter) Get(pkg string) error {
 //
 // Since: 2.1
 func (g *Getter) SetAppID(id string) {
-	g.appID = id
+	g.AppID = id
 }
 
 // SetIcon allows you to set the app icon path that will be used for the next Get operation.

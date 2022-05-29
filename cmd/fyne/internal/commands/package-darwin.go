@@ -21,7 +21,7 @@ type darwinData struct {
 }
 
 func (p *Packager) packageDarwin() (err error) {
-	appDir := util.EnsureSubDir(p.dir, p.name+".app")
+	appDir := util.EnsureSubDir(p.dir, p.Name+".app")
 	exeName := filepath.Base(p.exe)
 
 	contentsDir := util.EnsureSubDir(appDir, "Contents")
@@ -36,7 +36,7 @@ func (p *Packager) packageDarwin() (err error) {
 		}
 	}()
 
-	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild,
+	tplData := darwinData{Name: p.Name, ExeName: exeName, AppID: p.AppID, Version: p.AppVersion, Build: p.AppBuild,
 		Category: strings.ToLower(p.category)}
 	if err := templates.InfoPlistDarwin.Execute(infoFile, tplData); err != nil {
 		return fmt.Errorf("failed to write plist template: %w", err)
