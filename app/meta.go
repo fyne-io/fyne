@@ -1,10 +1,6 @@
 package app
 
 import (
-	"encoding/base64"
-	"io/ioutil"
-	"strings"
-
 	"fyne.io/fyne/v2"
 )
 
@@ -23,21 +19,4 @@ func SetMetadata(m fyne.AppMetadata) {
 
 func (a *fyneApp) Metadata() fyne.AppMetadata {
 	return meta
-}
-
-func convertIcon(bytes string) fyne.Resource {
-	if bytes == "" {
-		return nil
-	}
-	data := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bytes))
-	img, err := ioutil.ReadAll(data)
-	if err != nil {
-		fyne.LogError("Failed to decode icon from embedded data", err)
-		return nil
-	}
-
-	return &fyne.StaticResource{
-		StaticName:    "FyneAppIcon",
-		StaticContent: img,
-	}
 }
