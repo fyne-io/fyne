@@ -121,7 +121,7 @@ func Test_PackageWasm(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args: []string{"build", "-o", "myTest.wasm"},
+				args:  []string{"build", "-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
@@ -401,7 +401,7 @@ func Test_PackageWeb(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args: []string{"build", "-o", "myTest.wasm"},
+				args:  []string{"build", "-o", "myTest.wasm"},
 				env:   []string{"GOARCH=wasm", "GOOS=js"},
 				osEnv: true,
 				dir:   "myTest",
