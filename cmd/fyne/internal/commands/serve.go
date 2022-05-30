@@ -3,7 +3,6 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -84,7 +83,6 @@ func (s *Server) serve() error {
 
 	http.Handle("/", fileServer)
 
-	log.Println("AppData", s.appData)
 	fmt.Printf("Serving %s on HTTP port: %v\n", webDir, s.port)
 	err = http.ListenAndServe(":"+strconv.Itoa(s.port), nil)
 

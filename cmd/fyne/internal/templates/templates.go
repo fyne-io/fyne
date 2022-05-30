@@ -17,6 +17,9 @@ var (
 	// EntitlementsDarwinMobile is a plist file that lists build entitlements for iOS releases
 	EntitlementsDarwinMobile = template.Must(template.New("EntitlementsMobile").Parse(string(resourceEntitlementsIosPlist.StaticContent)))
 
+	// FyneMetadataInit is the metadata injecting file for fyne metadata
+	FyneMetadataInit = template.Must(template.New("fyne_metadata_init.got").Parse(string(resourceFynemetadatainitGot.StaticContent)))
+
 	// ManifestWindows is the manifest file for windows packaging
 	ManifestWindows = template.Must(template.New("Manifest").Parse(string(resourceAppManifest.StaticContent)))
 

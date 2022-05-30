@@ -1,0 +1,17 @@
+package main
+
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+)
+
+func init() {
+	app.SetMetadata(fyne.AppMetadata{
+		ID: "{{.AppID}}",
+		Name: "{{.Name}}",
+		Version: "{{.AppVersion}}",
+		Build: {{.AppBuild}},
+		Icon: fyneMetadataIcon,
+	})
+}
+
