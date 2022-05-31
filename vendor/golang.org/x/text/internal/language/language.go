@@ -251,13 +251,6 @@ func (t Tag) Parent() Tag {
 
 // ParseExtension parses s as an extension and returns it on success.
 func ParseExtension(s string) (ext string, err error) {
-	defer func() {
-		if recover() != nil {
-			ext = ""
-			err = ErrSyntax
-		}
-	}()
-
 	scan := makeScannerString(s)
 	var end int
 	if n := len(scan.token); n != 1 {
@@ -468,14 +461,7 @@ func (t Tag) findTypeForKey(key string) (start, sep, end int, hasExt bool) {
 // ParseBase parses a 2- or 3-letter ISO 639 code.
 // It returns a ValueError if s is a well-formed but unknown language identifier
 // or another error if another error occurred.
-func ParseBase(s string) (l Language, err error) {
-	defer func() {
-		if recover() != nil {
-			l = 0
-			err = ErrSyntax
-		}
-	}()
-
+func ParseBase(s string) (Language, error) {
 	if n := len(s); n < 2 || 3 < n {
 		return 0, ErrSyntax
 	}
@@ -486,14 +472,7 @@ func ParseBase(s string) (l Language, err error) {
 // ParseScript parses a 4-letter ISO 15924 code.
 // It returns a ValueError if s is a well-formed but unknown script identifier
 // or another error if another error occurred.
-func ParseScript(s string) (scr Script, err error) {
-	defer func() {
-		if recover() != nil {
-			scr = 0
-			err = ErrSyntax
-		}
-	}()
-
+func ParseScript(s string) (Script, error) {
 	if len(s) != 4 {
 		return 0, ErrSyntax
 	}
@@ -510,14 +489,7 @@ func EncodeM49(r int) (Region, error) {
 // ParseRegion parses a 2- or 3-letter ISO 3166-1 or a UN M.49 code.
 // It returns a ValueError if s is a well-formed but unknown region identifier
 // or another error if another error occurred.
-func ParseRegion(s string) (r Region, err error) {
-	defer func() {
-		if recover() != nil {
-			r = 0
-			err = ErrSyntax
-		}
-	}()
-
+func ParseRegion(s string) (Region, error) {
 	if n := len(s); n < 2 || 3 < n {
 		return 0, ErrSyntax
 	}
@@ -606,14 +578,7 @@ type Variant struct {
 
 // ParseVariant parses and returns a Variant. An error is returned if s is not
 // a valid variant.
-func ParseVariant(s string) (v Variant, err error) {
-	defer func() {
-		if recover() != nil {
-			v = Variant{}
-			err = ErrSyntax
-		}
-	}()
-
+func ParseVariant(s string) (Variant, error) {
 	s = strings.ToLower(s)
 	if id, ok := variantIndex[s]; ok {
 		return Variant{id, s}, nil
