@@ -11,7 +11,7 @@ import (
 )
 
 type icondir struct {
-	reserved  uint16
+	reserved  uint16 //lint:ignore U1000 in spec but not used
 	imageType uint16
 	numImages uint16
 }
@@ -19,8 +19,8 @@ type icondir struct {
 type icondirentry struct {
 	imageWidth   uint8
 	imageHeight  uint8
-	numColors    uint8
-	reserved     uint8
+	numColors    uint8 //lint:ignore U1000 in spec but not used
+	reserved     uint8 //lint:ignore U1000 in spec but not used
 	colorPlanes  uint16
 	bitsPerPixel uint16
 	sizeInBytes  uint32

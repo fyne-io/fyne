@@ -28,7 +28,7 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
-# github.com/fyne-io/image v0.0.0-20220531171308-72565cc91489
+# github.com/fyne-io/image v0.0.0-20220531212756-622191ec705c
 ## explicit
 github.com/fyne-io/image/ico
 # github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
