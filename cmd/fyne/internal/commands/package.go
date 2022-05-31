@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/biessek/golang-ico" // import image encodings
+	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
