@@ -307,7 +307,7 @@ func (p *Packager) removeBuild(files []string) {
 }
 
 func (p *Packager) validate() (err error) {
-	p.tempDir, err = os.MkdirTemp("", "fyne-package-*")
+	p.tempDir, err = ioutil.TempDir("", "fyne-package-*")
 	defer func() {
 		if err != nil {
 			_ = os.RemoveAll(p.tempDir)
@@ -445,7 +445,7 @@ func (p *Packager) normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	out, err := os.CreateTemp(p.tempDir, "fyne-ico-*.png")
+	out, err := ioutil.TempFile(p.tempDir, "fyne-ico-*.png")
 	if err != nil {
 		return "", fmt.Errorf("failed to open image output file: %w", err)
 	}
