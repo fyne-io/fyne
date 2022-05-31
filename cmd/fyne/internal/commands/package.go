@@ -122,6 +122,7 @@ type Packager struct {
 	install, release     bool
 	certificate, profile string // optional flags for releasing
 	tags, category       string
+	tempDir              string
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -257,6 +258,7 @@ func (p *Packager) doPackage(runner runner) error {
 	if p.appBuild <= 0 {
 		p.appBuild = defaultAppBuild
 	}
+	defer os.RemoveAll(p.tempDir)
 
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
 		files, err := p.buildPackage(runner)
@@ -304,7 +306,14 @@ func (p *Packager) removeBuild(files []string) {
 	}
 }
 
-func (p *Packager) validate() error {
+func (p *Packager) validate() (err error) {
+	p.tempDir, err = os.MkdirTemp("", "fyne-package-*")
+	defer func() {
+		if err != nil {
+			_ = os.RemoveAll(p.tempDir)
+		}
+	}()
+
 	if p.os == "" {
 		p.os = targetOS()
 	}
@@ -350,7 +359,7 @@ func (p *Packager) validate() error {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
 	if strings.ToLower(filepath.Ext(p.icon)) != ".png" {
-		tmp, err := normaliseIcon(p.icon)
+		tmp, err := p.normaliseIcon(p.icon)
 		if err != nil {
 			return err
 		}
@@ -424,7 +433,7 @@ func mergeMetadata(p *appData, data *metadata.FyneApp) {
 // normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
 // Successful conversion will return a path to the new file.
 // Any errors that occur will be returned with an empty string for new path.
-func normaliseIcon(path string) (string, error) {
+func (p *Packager) normaliseIcon(path string) (string, error) {
 	// convert icon
 	img, err := os.Open(path)
 	if err != nil {
@@ -436,7 +445,7 @@ func normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	out, err := os.CreateTemp("", "fyne-ico-*.png")
+	out, err := os.CreateTemp(p.tempDir, "fyne-ico-*.png")
 	if err != nil {
 		return "", fmt.Errorf("failed to open image output file: %w", err)
 	}
