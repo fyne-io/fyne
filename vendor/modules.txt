@@ -3,15 +3,14 @@
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/BurntSushi/toml v1.0.0
+# github.com/BurntSushi/toml v1.1.0
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
 # github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 ## explicit
 github.com/Kodeworks/golang-image-ico
-# github.com/akavel/rsrc v0.8.0
-## explicit
+# github.com/akavel/rsrc v0.10.2
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
@@ -22,7 +21,7 @@ github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 ## explicit
 github.com/fredbi/uri
-# github.com/fsnotify/fsnotify v1.5.1
+# github.com/fsnotify/fsnotify v1.5.4
 ## explicit
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
@@ -68,7 +67,7 @@ github.com/gopherjs/gopherjs/js
 # github.com/jackmordaunt/icns/v2 v2.2.1
 ## explicit
 github.com/jackmordaunt/icns/v2
-# github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
+# github.com/josephspurrier/goversioninfo v1.4.0
 ## explicit
 github.com/josephspurrier/goversioninfo
 # github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
@@ -126,18 +125,19 @@ golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+# golang.org/x/net v0.0.0-20220526153639-5463443f8c37
+## explicit
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e
+# golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
 ## explicit
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
-# golang.org/x/text v0.3.6
+# golang.org/x/text v0.3.7
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
