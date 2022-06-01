@@ -384,6 +384,19 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
+func TestEntryMultiline_SetMinRowsVisible(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	min := entry.MinSize()
+	entry.SetText("Hello")
+	assert.Equal(t, entry.MinSize().Height, min.Height)
+
+	entry.SetMinRowsVisible(2)
+	assert.Less(t, entry.MinSize().Height, min.Height)
+
+	entry.SetMinRowsVisible(5)
+	assert.Greater(t, entry.MinSize().Height, min.Height)
+}
+
 func TestEntry_MultilineSelect(t *testing.T) {
 	e, window := setupSelection(t, false)
 	defer teardownImageTest(window)

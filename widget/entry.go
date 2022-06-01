@@ -88,6 +88,7 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
+	multiLineRows   int // override global default number of visible lines
 }
 
 // NewEntry creates a new single line entry widget.
@@ -439,6 +440,14 @@ func (e *Entry) SelectedText() string {
 	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
 	return string(r[start:stop])
+}
+
+// SetMinRowsVisible forces a multi-line entry to show `count` number of rows without scrolling.
+// This is not a validation or requirement, it just impacts the minimum visible size.
+// Use this carefully as Fyne apps can run on small screens so you may wish to add a scroll container if
+// this number is high. Default is 3.
+func (e *Entry) SetMinRowsVisible(count int) {
+	e.multiLineRows = count
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
@@ -1306,9 +1315,13 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	minSize := charMin.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if r.entry.MultiLine {
+		count := r.entry.multiLineRows
+		if count == 0 {
+			count = multiLineRows
+		}
 		// ensure multiline height is at least charMinSize * multilineRows
-		rowHeight := charMin.Height * multiLineRows
-		minSize.Height = fyne.Max(minSize.Height, rowHeight+(multiLineRows-1)*theme.Padding())
+		rowHeight := charMin.Height * float32(count)
+		minSize.Height = fyne.Max(minSize.Height, rowHeight+float32(count-1)*theme.Padding())
 	}
 
 	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))

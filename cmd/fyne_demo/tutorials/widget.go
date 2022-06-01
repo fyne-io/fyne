@@ -110,6 +110,7 @@ func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
 	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
+	entryMultiLine.SetMinRowsVisible(4)
 
 	return container.NewVBox(
 		entry,
