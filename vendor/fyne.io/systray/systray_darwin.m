@@ -203,6 +203,11 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   }
 }
 
+- (void) reset_menu
+{
+  [self->menu removeAllItems];
+}
+
 - (void) quit
 {
   [NSApp terminate:self];
@@ -310,6 +315,10 @@ void hide_menu_item(int menuId) {
 void show_menu_item(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(show_menu_item:), (id)mId);
+}
+
+void reset_menu() {
+  runInMainThread(@selector(reset_menu), nil);
 }
 
 void quit() {

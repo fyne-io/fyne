@@ -276,14 +276,6 @@ func (c *glCanvas) paint(size fyne.Size) {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
-
-		if visibleArea := clips.Top(); visibleArea != nil {
-			_, paintArea := visibleArea.Intersect(pos, size).Rect()
-			if paintArea.Width <= 0 || paintArea.Height <= 0 {
-				return
-			}
-		}
-
 		c.Painter().Paint(obj, pos, size)
 	}
 	afterPaint := func(node *common.RenderCacheNode) {
@@ -293,11 +285,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 				c.Painter().StartClipping(top.Rect())
 			} else {
 				c.Painter().StopClipping()
-
 			}
 		}
 	}
-
 	c.WalkTrees(paint, afterPaint)
 }
 

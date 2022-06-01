@@ -249,3 +249,9 @@ func refresh() {
 		}
 	}
 }
+
+func resetMenu() {
+	instance.menu = &menuLayout{}
+	instance.menuVersion++
+	refresh()
+}

@@ -12,10 +12,10 @@ func (p *Packager) packageWeb() error {
 	appDir := util.EnsureSubDir(p.dir, "web")
 
 	tpl := webData{
-		AppName:      p.name,
-		AppVersion:   p.appVersion,
-		GopherJSFile: p.name + ".js",
-		WasmFile:     p.name + ".wasm",
+		AppName:      p.Name,
+		AppVersion:   p.AppVersion,
+		GopherJSFile: p.Name + ".js",
+		WasmFile:     p.Name + ".wasm",
 		IsReleased:   p.release,
 		HasGopherJS:  true,
 		HasWasm:      true,
@@ -28,9 +28,9 @@ func (p *Packager) packageWasm() error {
 	appDir := util.EnsureSubDir(p.dir, "wasm")
 
 	tpl := webData{
-		AppName:    p.name,
-		AppVersion: p.appVersion,
-		WasmFile:   p.name + ".wasm",
+		AppName:    p.Name,
+		AppVersion: p.AppVersion,
+		WasmFile:   p.Name + ".wasm",
 		IsReleased: p.release,
 		HasWasm:    true,
 	}
@@ -42,9 +42,9 @@ func (p *Packager) packageGopherJS() error {
 	appDir := util.EnsureSubDir(p.dir, "gopherjs")
 
 	tpl := webData{
-		AppName:      p.name,
-		AppVersion:   p.appVersion,
-		GopherJSFile: p.name + ".js",
+		AppName:      p.Name,
+		AppVersion:   p.AppVersion,
+		GopherJSFile: p.Name + ".js",
 		IsReleased:   p.release,
 		HasGopherJS:  true,
 	}

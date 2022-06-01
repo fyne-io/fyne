@@ -1,14 +1,13 @@
-# fyne.io/systray v1.9.1-0.20220515191230-b479fb2893c9
+# fyne.io/systray v1.9.1-0.20220523202515-bb6f1d955cff
 ## explicit
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
 fyne.io/systray/internal/generated/notifier
-# github.com/BurntSushi/toml v1.0.0
+# github.com/BurntSushi/toml v1.1.0
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
-# github.com/akavel/rsrc v0.8.0
-## explicit
+# github.com/akavel/rsrc v0.10.2
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
@@ -19,7 +18,7 @@ github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 ## explicit
 github.com/fredbi/uri
-# github.com/fsnotify/fsnotify v1.5.1
+# github.com/fsnotify/fsnotify v1.5.4
 ## explicit
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
@@ -68,7 +67,7 @@ github.com/gopherjs/gopherjs/js
 # github.com/jackmordaunt/icns/v2 v2.2.1
 ## explicit
 github.com/jackmordaunt/icns/v2
-# github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
+# github.com/josephspurrier/goversioninfo v1.4.0
 ## explicit
 github.com/josephspurrier/goversioninfo
 # github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e
@@ -132,7 +131,7 @@ golang.org/x/mod/semver
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e
+# golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 ## explicit
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader

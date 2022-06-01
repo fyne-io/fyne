@@ -42,17 +42,17 @@ func (p *Packager) packageUNIX() error {
 	}
 
 	iconDir := util.EnsureSubDir(shareDir, "pixmaps")
-	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
+	iconPath := filepath.Join(iconDir, p.Name+filepath.Ext(p.icon))
 	err = util.CopyFile(p.icon, iconPath)
 	if err != nil {
 		return fmt.Errorf("failed to copy icon: %w", err)
 	}
 
 	appsDir := util.EnsureSubDir(shareDir, "applications")
-	desktop := filepath.Join(appsDir, p.name+".desktop")
+	desktop := filepath.Join(appsDir, p.Name+".desktop")
 	deskFile, _ := os.Create(desktop)
 
-	tplData := unixData{Name: p.name, Exec: filepath.Base(p.exe), Icon: p.name + filepath.Ext(p.icon), Local: local}
+	tplData := unixData{Name: p.Name, Exec: filepath.Base(p.exe), Icon: p.Name + filepath.Ext(p.icon), Local: local}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
 		return fmt.Errorf("failed to write desktop entry string: %w", err)
@@ -68,7 +68,7 @@ func (p *Packager) packageUNIX() error {
 		}
 
 		var buf bytes.Buffer
-		tarCmd := execabs.Command("tar", "-Jcf", p.name+".tar.xz", "-C", tempDir, "usr", "Makefile")
+		tarCmd := execabs.Command("tar", "-Jcf", p.Name+".tar.xz", "-C", tempDir, "usr", "Makefile")
 		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
 			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.String(), err)

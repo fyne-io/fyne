@@ -78,8 +78,8 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = p.createProgram("simple_es", true)
-	p.lineProgram = p.createProgram("line_es", true)
+	p.program = p.createProgram("simple_es")
+	p.lineProgram = p.createProgram("line_es")
 }
 
 type esContext struct{}
@@ -228,7 +228,7 @@ func (c *esContext) Scissor(x, y, w, h int32) {
 }
 
 func (c *esContext) ShaderSource(shader Shader, source string) {
-	csources, free := gl.Strs(source)
+	csources, free := gl.Strs(source + "\x00")
 	defer free()
 	gl.ShaderSource(uint32(shader), 1, csources, nil)
 }

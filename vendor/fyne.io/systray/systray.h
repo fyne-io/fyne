@@ -16,4 +16,5 @@ void add_or_update_menu_item(int menuId, int parentMenuId, char* title, char* to
 void add_separator(int menuId);
 void hide_menu_item(int menuId);
 void show_menu_item(int menuId);
+void reset_menu();
 void quit();

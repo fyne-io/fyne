@@ -161,19 +161,27 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
-	return fyne.NewMainMenu(
+	main := fyne.NewMainMenu(
 		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
 		helpMenu,
 	)
+	checkedItem.Action = func() {
+		checkedItem.Checked = !checkedItem.Checked
+		main.Refresh()
+	}
+	return main
 }
 
 func makeTray(a fyne.App) {
 	if desk, ok := a.(desktop.App); ok {
-		menu := fyne.NewMenu("Hello World",
-			fyne.NewMenuItem("Hello", func() {
-				log.Println("System tray menu tapped")
-			}))
+		h := fyne.NewMenuItem("Hello", func() {})
+		menu := fyne.NewMenu("Hello World", h)
+		h.Action = func() {
+			log.Println("System tray menu tapped")
+			h.Label = "Welcome"
+			menu.Refresh()
+		}
 		desk.SetSystemTrayMenu(menu)
 	}
 }

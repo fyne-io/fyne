@@ -45,6 +45,11 @@ var resourceEntitlementsIosPlist = &fyne.StaticResource{
 	StaticContent: []byte(
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>application-identifier</key>\n    <string>{{.TeamID}}.{{.AppID}}</string>\n</dict>\n</plist>"),
 }
+var resourceFynemetadatainitGot = &fyne.StaticResource{
+	StaticName: "fyne_metadata_init.got",
+	StaticContent: []byte(
+		"package main\n\nimport (\n\t\"fyne.io/fyne/v2\"\n\t\"fyne.io/fyne/v2/app\"\n)\n\nfunc init() {\n\tapp.SetMetadata(fyne.AppMetadata{\n\t\tID: \"{{.AppID}}\",\n\t\tName: \"{{.Name}}\",\n\t\tVersion: \"{{.AppVersion}}\",\n\t\tBuild: {{.AppBuild}},\n\t\tIcon: fyneMetadataIcon,\n\t})\n}\n\n"),
+}
 var resourceIndexHtml = &fyne.StaticResource{
 	StaticName: "index.html",
 	StaticContent: []byte(

@@ -9,49 +9,34 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
-func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
-
-	texture, err := p.getTexture(o, creator)
-	if err != nil {
-		return
-	}
-
-	aspect := float32(0)
-	if img, ok := o.(*canvas.Image); ok {
-		aspect = paint.GetAspect(img)
-		if aspect == 0 {
-			aspect = 1 // fallback, should not occur - normally an image load error
-		}
-	}
-	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
-	p.ctx.UseProgram(p.program)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.program, "vert", 3, 5*4, 0)
-	p.defineVertexArray(p.program, "vertTexCoord", 2, 5*4, 12)
-
-	// here we have to choose between blending the image alpha or fading it...
-	// TODO find a way to support both
-	if alpha != 1.0 {
-		p.ctx.BlendColor(0, 0, 0, alpha)
-		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
-	} else {
-		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
-	}
+func (p *painter) createBuffer(points []float32) Buffer {
+	vbo := p.ctx.CreateBuffer()
 	p.logError()
-
-	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, texture)
+	p.ctx.BindBuffer(arrayBuffer, vbo)
 	p.logError()
-
-	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
 	p.logError()
-	p.freeBuffer(vbo)
+	return vbo
+}
+
+func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
+	vertAttrib := p.ctx.GetAttribLocation(prog, name)
+	p.ctx.EnableVertexAttribArray(vertAttrib)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
+	p.logError()
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
 		1.0, paint.VectorPad(circle))
+}
+
+func (p *painter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) Texture, pos fyne.Position, frame fyne.Size) {
+	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
+}
+
+func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
+	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
 }
 
 func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
@@ -62,8 +47,8 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
 	p.ctx.UseProgram(p.lineProgram)
 	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.lineProgram, "vert", 2, 4*4, 0)
-	p.defineVertexArray(p.lineProgram, "normal", 2, 4*4, 2*4)
+	p.defineVertexArray(p.lineProgram, "vert", 2, 4, 0)
+	p.defineVertexArray(p.lineProgram, "normal", 2, 4, 2)
 
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
@@ -87,16 +72,29 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.freeBuffer(vbo)
 }
 
-func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
+func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+	switch obj := o.(type) {
+	case *canvas.Circle:
+		p.drawCircle(obj, pos, frame)
+	case *canvas.Line:
+		p.drawLine(obj, pos, frame)
+	case *canvas.Image:
+		p.drawImage(obj, pos, frame)
+	case *canvas.Raster:
+		p.drawRaster(obj, pos, frame)
+	case *canvas.Rectangle:
+		p.drawRectangle(obj, pos, frame)
+	case *canvas.Text:
+		p.drawText(obj, pos, frame)
+	case *canvas.LinearGradient:
+		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
+	case *canvas.RadialGradient:
+		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
+	}
 }
 
 func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
-}
-
-func (p *painter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) Texture, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0)
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
@@ -128,28 +126,51 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 }
 
-func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if !o.Visible() {
+func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
+
+	texture, err := p.getTexture(o, creator)
+	if err != nil {
 		return
 	}
-	switch obj := o.(type) {
-	case *canvas.Circle:
-		p.drawCircle(obj, pos, frame)
-	case *canvas.Line:
-		p.drawLine(obj, pos, frame)
-	case *canvas.Image:
-		p.drawImage(obj, pos, frame)
-	case *canvas.Raster:
-		p.drawRaster(obj, pos, frame)
-	case *canvas.Rectangle:
-		p.drawRectangle(obj, pos, frame)
-	case *canvas.Text:
-		p.drawText(obj, pos, frame)
-	case *canvas.LinearGradient:
-		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
-	case *canvas.RadialGradient:
-		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
+
+	aspect := float32(0)
+	if img, ok := o.(*canvas.Image); ok {
+		aspect = paint.GetAspect(img)
+		if aspect == 0 {
+			aspect = 1 // fallback, should not occur - normally an image load error
+		}
 	}
+	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
+	p.ctx.UseProgram(p.program)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.program, "vert", 3, 5, 0)
+	p.defineVertexArray(p.program, "vertTexCoord", 2, 5, 3)
+
+	// here we have to choose between blending the image alpha or fading it...
+	// TODO find a way to support both
+	if alpha != 1.0 {
+		p.ctx.BlendColor(0, 0, 0, alpha)
+		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
+	} else {
+		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	}
+	p.logError()
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+	p.freeBuffer(vbo)
+}
+
+func (p *painter) freeBuffer(vbo Buffer) {
+	p.ctx.BindBuffer(arrayBuffer, noBuffer)
+	p.logError()
+	p.ctx.DeleteBuffer(vbo)
+	p.logError()
 }
 
 func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {

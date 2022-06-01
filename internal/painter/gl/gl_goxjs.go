@@ -63,8 +63,8 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = p.createProgram("simple_es", false)
-	p.lineProgram = p.createProgram("line_es", false)
+	p.program = p.createProgram("simple_es")
+	p.lineProgram = p.createProgram("line_es")
 }
 
 type xjsContext struct{}
