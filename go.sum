@@ -84,8 +84,8 @@ github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe h1:A/wiwvQ0CAjPkuJyt
 github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe/go.mod h1:d4clgH0/GrRwWjRzJJQXxT/h1TyuNSfF/X64zb/3Ggg=
 github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504 h1:+31CdF/okdokeFNoy9L/2PccG3JFidQT3ev64/r4pYU=
 github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504/go.mod h1:gLRWYfYnMA9TONeppRSikMdXlHQ97xVsPojddUv3b/E=
-github.com/fyne-io/image v0.0.0-20220531212756-622191ec705c h1:cRZzkSsnhSra2bDnhbxMdNyKRwOHXy5zeDQ8mlhVvJ4=
-github.com/fyne-io/image v0.0.0-20220531212756-622191ec705c/go.mod h1:f0k+x4tzV85cn3CiiMbydIfc9UrAJYVe11Htt5FSPEY=
+github.com/fyne-io/image v0.0.0-20220601192234-cf0c0847e24d h1:01kvTqDlj2pZAWS0v9r/ZNOoVdp8LuKbsam9fxDJf48=
+github.com/fyne-io/image v0.0.0-20220601192234-cf0c0847e24d/go.mod h1:jcskXEXXX7/RUeErPdRBPSUeaEVTfAhpcSysNRR2DHA=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 h1:zDw5v7qm4yH7N8C8uWd+8Ii9rROdgWxQuGoJ9WDXxfk=
 github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6/go.mod h1:9YTyiznxEY1fVinfM7RvRcjRHbw2xLBJ3AAGIT0I4Nw=
