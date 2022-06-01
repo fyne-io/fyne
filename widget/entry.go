@@ -1318,7 +1318,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 
 	if r.entry.MultiLine {
 		count := r.entry.multiLineRows
-		if count == 0 {
+		if count <= 0 {
 			count = multiLineRows
 		}
 		// ensure multiline height is at least charMinSize * multilineRows
