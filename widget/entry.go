@@ -446,6 +446,8 @@ func (e *Entry) SelectedText() string {
 // This is not a validation or requirement, it just impacts the minimum visible size.
 // Use this carefully as Fyne apps can run on small screens so you may wish to add a scroll container if
 // this number is high. Default is 3.
+//
+// Since: 2.2
 func (e *Entry) SetMinRowsVisible(count int) {
 	e.multiLineRows = count
 }
