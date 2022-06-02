@@ -5,6 +5,7 @@ package widget_test
 
 import (
 	"image/color"
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -32,9 +34,14 @@ func TestMenu_Layout(t *testing.T) {
 	sep := fyne.NewMenuItemSeparator()
 	item3 := fyne.NewMenuItem("C", nil)
 	subItem1 := fyne.NewMenuItem("subitem A", nil)
+	subItem1.Checked = true
 	subItem2 := fyne.NewMenuItem("subitem B", nil)
+	subItem2.Checked = true
+	subItem2.Icon = theme.InfoIcon()
 	subItem3 := fyne.NewMenuItem("subitem C (long)", nil)
+	subItem3.Icon = theme.MenuIcon()
 	subsubItem1 := fyne.NewMenuItem("subsubitem A (long)", nil)
+	subsubItem1.Icon = theme.FileIcon()
 	subsubItem2 := fyne.NewMenuItem("subsubitem B", nil)
 	subItem3.ChildMenu = fyne.NewMenu("", subsubItem1, subsubItem2)
 	item3.ChildMenu = fyne.NewMenu("", subItem1, subItem2, subItem3)
@@ -76,6 +83,13 @@ func TestMenu_Layout(t *testing.T) {
 	item4.ChildMenu = fyne.NewMenu("", subItem4a, subItem4b, subItem4c, subItem4d, subItem4e, subItem4f, subItem4g, subItem4h, subItem4i, subItem4j, subItem4k, subItem4l, subItem4m, subItem4n, subItem4o, subItem4p, subItem4q)
 
 	menu := fyne.NewMenu("", item1, sep, item2, item3, sep, item4)
+
+	var shortcutsMasterPrefixPath string
+	if runtime.GOOS == "darwin" {
+		shortcutsMasterPrefixPath = "menu/desktop/layout_shortcuts_darwin"
+	} else {
+		shortcutsMasterPrefixPath = "menu/desktop/layout_shortcuts_other"
+	}
 
 	for name, tt := range map[string]struct {
 		windowSize         fyne.Size
@@ -155,9 +169,9 @@ func TestMenu_Layout(t *testing.T) {
 			mousePositions: []fyne.Position{
 				fyne.NewPos(30, 150), // open submenu
 			},
-			want:               "menu/desktop/layout_shortcuts.xml",
-			wantImage:          "menu/desktop/layout_shortcuts.png",
-			wantTestThemeImage: "menu/desktop/layout_shortcuts_theme_changed.png",
+			want:               shortcutsMasterPrefixPath + ".xml",
+			wantImage:          shortcutsMasterPrefixPath + ".png",
+			wantTestThemeImage: shortcutsMasterPrefixPath + "_theme_changed.png",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -302,56 +316,6 @@ func TestMenu_TraverseMenu(t *testing.T) {
 
 	assert.False(t, m.DeactivateLastSubmenu())
 	test.AssertRendersToMarkup(t, "menu/desktop/traverse_second_active.xml", c, "does nothing if there is no submenu opened")
-}
-
-func TestMenu_RefreshOptions(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-
-	w := fyne.CurrentApp().NewWindow("")
-	defer w.Close()
-	w.SetPadded(false)
-	c := w.Canvas()
-
-	itemFoo := fyne.NewMenuItem("Foo", nil)
-	itemBar := fyne.NewMenuItem("Bar", nil)
-	itemBaz := fyne.NewMenuItem("Baz", nil)
-
-	m := widget.NewMenu(fyne.NewMenu("",
-		itemFoo,
-		fyne.NewMenuItemSeparator(),
-		itemBar,
-		fyne.NewMenuItemSeparator(),
-		itemBaz,
-	))
-	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
-	w.Resize(m.MinSize())
-	m.Resize(m.MinSize())
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
-
-	itemBar.Disabled = true
-	m.Refresh()
-
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_disabled.xml", c)
-
-	itemBaz.Checked = true
-	m.Refresh()
-
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_checkmark.xml", c)
-
-	itemBar.Checked = true
-	m.Refresh()
-
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_2nd_checkmark.xml", c)
-
-	itemBar.Checked = false
-	itemBar.Disabled = false
-	m.Refresh()
-
-	itemBaz.Checked = false
-	m.Refresh()
-
-	test.AssertRendersToMarkup(t, "menu/desktop/refresh_initial.xml", c)
 }
 
 func TestMenu_TriggerTraversedMenu(t *testing.T) {

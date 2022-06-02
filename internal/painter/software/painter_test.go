@@ -349,3 +349,18 @@ func TestPainter_paintText_clipped(t *testing.T) {
 
 	test.AssertImageMatches(t, "draw_text_clipped.png", p.Paint(c))
 }
+
+func TestPainter_paintText_boldItalicClip(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	text := canvas.NewText("Dd", theme.ForegroundColor())
+	text.TextStyle.Bold = true
+	text.TextStyle.Italic = true
+	text.TextSize = 42
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(text)
+	c.Resize(fyne.NewSize(70, text.MinSize().Height))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Paint(c))
+}

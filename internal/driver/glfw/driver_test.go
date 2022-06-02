@@ -119,7 +119,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	}
 }
 
-var mainRoutineID int
+var mainRoutineID uint64
 
 func init() {
 	mainRoutineID = goroutineID()
@@ -128,7 +128,7 @@ func init() {
 func TestGoroutineID(t *testing.T) {
 	assert.Equal(t, 1, mainRoutineID)
 
-	var childID1, childID2 int
+	var childID1, childID2 uint64
 	testID1 := goroutineID()
 	var wg sync.WaitGroup
 	wg.Add(2)

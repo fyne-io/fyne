@@ -101,6 +101,12 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnGetError:
 		ret = glGetError();
 		break;
+	case glfnGetProgramiv:
+		glGetProgramiv((GLint)args->a0, (GLenum)args->a1, (GLint*)&ret);
+		break;
+	case glfnGetProgramInfoLog:
+		glGetProgramInfoLog((GLuint)args->a0, (GLsizei)args->a1, 0, (GLchar*)parg);
+		break;
 	case glfnGetShaderiv:
 		glGetShaderiv((GLint)args->a0, (GLenum)args->a1, (GLint*)&ret);
 		break;

@@ -15,7 +15,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
 
-	glfw "github.com/fyne-io/glfw-js"
+	"github.com/fyne-io/glfw-js"
 )
 
 type Cursor struct {
@@ -170,7 +170,7 @@ func (w *window) refresh(_ *glfw.Window) {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
-	viewport.SetShouldClose(true)
+	viewport.SetShouldClose(false) // reset the closed flag until we check the veto in processClosed
 
 	w.processClosed()
 }
@@ -206,18 +206,18 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 	w.processMouseScrolled(xoff, yoff)
 }
 
-func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, desktop.Modifier) {
+func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
 	var button desktop.MouseButton
 	rightClick := false
 	if runtime.GOOS == "darwin" {
-		if modifier&desktop.ControlModifier != 0 {
+		if modifier&fyne.KeyModifierControl != 0 {
 			rightClick = true
-			modifier &^= desktop.ControlModifier
+			modifier &^= fyne.KeyModifierControl
 		}
-		if modifier&desktop.SuperModifier != 0 {
-			modifier |= desktop.ControlModifier
-			modifier &^= desktop.SuperModifier
+		if modifier&fyne.KeyModifierSuper != 0 {
+			modifier |= fyne.KeyModifierControl
+			modifier &^= fyne.KeyModifierSuper
 		}
 	}
 	switch btn {
@@ -425,19 +425,19 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
 }
 
-func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
-	var m desktop.Modifier
+func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
+	var m fyne.KeyModifier
 	if (mods & glfw.ModShift) != 0 {
-		m |= desktop.ShiftModifier
+		m |= fyne.KeyModifierShift
 	}
 	if (mods & glfw.ModControl) != 0 {
-		m |= desktop.ControlModifier
+		m |= fyne.KeyModifierControl
 	}
 	if (mods & glfw.ModAlt) != 0 {
-		m |= desktop.AltModifier
+		m |= fyne.KeyModifierAlt
 	}
 	if (mods & glfw.ModSuper) != 0 {
-		m |= desktop.SuperModifier
+		m |= fyne.KeyModifierSuper
 	}
 	return m
 }

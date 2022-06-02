@@ -4,8 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image"
 	_ "image/jpeg" // import image encodings
-	_ "image/png"  // import image encodings
+	"image/png"    // import image encodings
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,12 +14,12 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 const (
@@ -26,9 +27,15 @@ const (
 	defaultAppVersion = "1.0.0"
 )
 
+type appData struct {
+	icon, Name        string
+	AppID, AppVersion string
+	AppBuild          int
+}
+
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
-	p := &Packager{}
+	p := &Packager{appData: &appData{}}
 
 	return &cli.Command{
 		Name:        "package",
@@ -50,7 +57,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "name",
 				Usage:       "The name of the application, default is the executable file name",
-				Destination: &p.name,
+				Destination: &p.Name,
 			},
 			&cli.StringFlag{
 				Name:        "tags",
@@ -60,12 +67,12 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "appVersion",
 				Usage:       "Version number in the form x, x.y or x.y.z semantic version",
-				Destination: &p.appVersion,
+				Destination: &p.AppVersion,
 			},
 			&cli.IntFlag{
 				Name:        "appBuild",
 				Usage:       "Build number, should be greater than 0 and incremented for each build",
-				Destination: &p.appBuild,
+				Destination: &p.AppBuild,
 			},
 			&cli.StringFlag{
 				Name:        "sourceDir",
@@ -83,7 +90,7 @@ func Package() *cli.Command {
 				Name:        "appID",
 				Aliases:     []string{"id"},
 				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &p.appID,
+				Destination: &p.AppID,
 			},
 			&cli.StringFlag{
 				Name:        "certificate",
@@ -110,12 +117,12 @@ func Package() *cli.Command {
 
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
-	name, srcDir, dir, exe, icon string
-	os, appID, appVersion        string
-	appBuild                     int
-	install, release             bool
-	certificate, profile         string // optional flags for releasing
-	tags, category               string
+	*appData
+	srcDir, dir, exe, os string
+	install, release     bool
+	certificate, profile string // optional flags for releasing
+	tags, category       string
+	tempDir              string
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -125,11 +132,11 @@ func (p *Packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows, wasm)")
 	flag.StringVar(&p.exe, "executable", "", "Specify an existing binary instead of building before package")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
-	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
+	flag.StringVar(&p.Name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "", "The name of the application icon file")
-	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
-	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
+	flag.StringVar(&p.AppID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.StringVar(&p.AppVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
+	flag.IntVar(&p.AppBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
 	flag.StringVar(&p.tags, "tags", "", "A comma-separated list of build tags")
 }
@@ -153,7 +160,7 @@ func (p *Packager) Run(_ []string) {
 		os.Exit(1)
 	}
 
-	err = p.doPackage()
+	err = p.doPackage(nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
@@ -171,7 +178,7 @@ func (p *Packager) Package() error {
 }
 
 func (p *Packager) packageWithoutValidate() error {
-	err := p.doPackage()
+	err := p.doPackage(nil)
 	if err != nil {
 		return err
 	}
@@ -184,42 +191,87 @@ func (p *Packager) packageWithoutValidate() error {
 	return metadata.SaveStandard(data, p.srcDir)
 }
 
-func (p *Packager) buildPackage() error {
-	tags := strings.Split(p.tags, ",")
-	b := &builder{
-		os:      p.os,
-		srcdir:  p.srcDir,
-		target:  p.exe,
-		release: p.release,
-		tags:    tags,
+func (p *Packager) buildPackage(runner runner) ([]string, error) {
+	var tags []string
+	if p.tags != "" {
+		tags = strings.Split(p.tags, ",")
+	}
+	if p.os != "web" {
+		b := &Builder{
+			os:      p.os,
+			srcdir:  p.srcDir,
+			target:  p.exe,
+			release: p.release,
+			tags:    tags,
+			runner:  runner,
+
+			appData: p.appData,
+		}
+
+		return []string{p.exe}, b.build()
 	}
 
-	return b.build()
+	bWasm := &Builder{
+		os:      "wasm",
+		srcdir:  p.srcDir,
+		target:  p.exe + ".wasm",
+		release: p.release,
+		tags:    tags,
+		runner:  runner,
+
+		appData: p.appData,
+	}
+
+	err := bWasm.build()
+	if err != nil {
+		return nil, err
+	}
+
+	bGopherJS := &Builder{
+		os:      "gopherjs",
+		srcdir:  p.srcDir,
+		target:  p.exe + ".js",
+		release: p.release,
+		tags:    tags,
+		runner:  runner,
+
+		appData: p.appData,
+	}
+
+	err = bGopherJS.build()
+	if err != nil {
+		return nil, err
+	}
+
+	return []string{bWasm.target, bGopherJS.target}, nil
 }
 
 func (p *Packager) combinedVersion() string {
-	return fmt.Sprintf("%s.%d", p.appVersion, p.appBuild)
+	return fmt.Sprintf("%s.%d", p.AppVersion, p.AppBuild)
 }
 
-func (p *Packager) doPackage() error {
+func (p *Packager) doPackage(runner runner) error {
 	// sensible defaults - validation deemed them optional
-	if p.appVersion == "" {
-		p.appVersion = defaultAppVersion
+	if p.AppVersion == "" {
+		p.AppVersion = defaultAppVersion
 	}
-	if p.appBuild <= 0 {
-		p.appBuild = defaultAppBuild
+	if p.AppBuild <= 0 {
+		p.AppBuild = defaultAppBuild
 	}
+	defer os.RemoveAll(p.tempDir)
 
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		err := p.buildPackage()
+		files, err := p.buildPackage(runner)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}
-		if !util.Exists(p.exe) {
-			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
+		for _, file := range files {
+			if p.os != "web" && !util.Exists(file) {
+				return fmt.Errorf("unable to build directory to expected executable, %s", file)
+			}
 		}
 		if p.os != "windows" {
-			defer p.removeBuild()
+			defer p.removeBuild(files)
 		}
 	}
 
@@ -236,19 +288,32 @@ func (p *Packager) doPackage() error {
 		return p.packageIOS(p.os)
 	case "wasm":
 		return p.packageWasm()
+	case "gopherjs":
+		return p.packageGopherJS()
+	case "web":
+		return p.packageWeb()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
 }
 
-func (p *Packager) removeBuild() {
-	err := os.Remove(p.exe)
-	if err != nil {
-		log.Println("Unable to remove temporary build file", p.exe)
+func (p *Packager) removeBuild(files []string) {
+	for _, file := range files {
+		err := os.Remove(file)
+		if err != nil {
+			log.Println("Unable to remove temporary build file", p.exe)
+		}
 	}
 }
 
-func (p *Packager) validate() error {
+func (p *Packager) validate() (err error) {
+	p.tempDir, err = ioutil.TempDir("", "fyne-package-*")
+	defer func() {
+		if err != nil {
+			_ = os.RemoveAll(p.tempDir)
+		}
+	}()
+
 	if p.os == "" {
 		p.os = targetOS()
 	}
@@ -265,10 +330,11 @@ func (p *Packager) validate() error {
 		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
 			"Change directory to the main package and try again")
 	}
+	os.Chdir(p.srcDir)
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
-		mergeMetadata(p, data)
+		mergeMetadata(p.appData, data)
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -277,14 +343,14 @@ func (p *Packager) validate() error {
 		p.exe = filepath.Join(p.srcDir, exeName)
 
 		if util.Exists(p.exe) { // the exe was not specified, assume stale
-			p.removeBuild()
+			p.removeBuild([]string{p.exe})
 		}
 	} else if p.os == "ios" || p.os == "android" {
 		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
-	if p.name == "" || p.os == "wasm" {
-		p.name = exeName
+	if p.Name == "" {
+		p.Name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
 		p.icon = filepath.Join(p.srcDir, "Icon.png")
@@ -292,12 +358,19 @@ func (p *Packager) validate() error {
 	if !util.Exists(p.icon) {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
+	if strings.ToLower(filepath.Ext(p.icon)) != ".png" {
+		tmp, err := p.normaliseIcon(p.icon)
+		if err != nil {
+			return err
+		}
+		p.icon = tmp
+	}
 
-	p.appID, err = validateAppID(p.appID, p.os, p.name, p.release)
+	p.AppID, err = validateAppID(p.AppID, p.os, p.Name, p.release)
 	if err != nil {
 		return err
 	}
-	if p.appVersion != "" && !isValidVersion(p.appVersion) {
+	if p.AppVersion != "" && !isValidVersion(p.AppVersion) {
 		return errors.New("invalid -appVersion parameter, integer and '.' characters only up to x.y.z")
 	}
 
@@ -321,8 +394,6 @@ func calculateExeName(sourceDir, os string) string {
 
 	if os == "windows" {
 		exeName = exeName + ".exe"
-	} else if os == "wasm" {
-		exeName = exeName + ".wasm"
 	}
 
 	return exeName
@@ -341,22 +412,48 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
-func mergeMetadata(p *Packager, data *metadata.FyneApp) {
+func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	if p.icon == "" {
 		p.icon = data.Details.Icon
 	}
-	if p.name == "" {
-		p.name = data.Details.Name
+	if p.Name == "" {
+		p.Name = data.Details.Name
 	}
-	if p.appID == "" {
-		p.appID = data.Details.ID
+	if p.AppID == "" {
+		p.AppID = data.Details.ID
 	}
-	if p.appVersion == "" {
-		p.appVersion = data.Details.Version
+	if p.AppVersion == "" {
+		p.AppVersion = data.Details.Version
 	}
-	if p.appBuild == 0 {
-		p.appBuild = data.Details.Build
+	if p.AppBuild == 0 {
+		p.AppBuild = data.Details.Build
 	}
+}
+
+// normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
+// Successful conversion will return a path to the new file.
+// Any errors that occur will be returned with an empty string for new path.
+func (p *Packager) normaliseIcon(path string) (string, error) {
+	// convert icon
+	img, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open source image: %w", err)
+	}
+	defer img.Close()
+	srcImg, _, err := image.Decode(img)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode source image: %w", err)
+	}
+
+	out, err := ioutil.TempFile(p.tempDir, "fyne-ico-*.png")
+	if err != nil {
+		return "", fmt.Errorf("failed to open image output file: %w", err)
+	}
+	tmpPath := out.Name()
+	defer out.Close()
+
+	err = png.Encode(out, srcImg)
+	return tmpPath, err
 }
 
 func validateAppID(appID, os, name string, release bool) (string, error) {

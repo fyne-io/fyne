@@ -18,7 +18,8 @@ type Encoder struct {
 // NewEncoder initialises an encoder.
 func NewEncoder(wr io.Writer) *Encoder {
 	return &Encoder{
-		Wr: wr,
+		Wr:        wr,
+		Algorithm: MitchellNetravali,
 	}
 }
 
@@ -64,28 +65,31 @@ func NewIconSet(img image.Image, interp InterpolationFunction) (*IconSet, error)
 	}
 	icons := make([]*Icon, len(osTypes))
 	work := sync.WaitGroup{}
-	for ii, size := range sizesFrom(biggest) {
-		t, ok := getTypeFromSize(size)
+	var iconIdx int
+	for _, size := range sizesFrom(biggest) {
+		osTypes, ok := getTypesFromSize(size)
 		if !ok {
 			continue
 		}
-		ii := ii
 		size := size
-		work.Add(1)
-		go func() {
-			iconImg := resize.Resize(size, size, img, interp)
-			icons[ii] = &Icon{
-				Type:  t,
-				Image: iconImg,
-			}
-			work.Done()
-		}()
+		for _, osType := range osTypes {
+			work.Add(1)
+			go func(iconIdx int, osType OsType, size uint) {
+				iconImg := resize.Resize(size, size, img, interp)
+				icons[iconIdx] = &Icon{
+					Type:  osType,
+					Image: iconImg,
+				}
+				work.Done()
+			}(iconIdx, osType, size)
+			iconIdx += 1
+		}
 	}
 	work.Wait()
-	iconset := &IconSet{
+	iconSet := &IconSet{
 		Icons: icons,
 	}
-	return iconset, nil
+	return iconSet, nil
 }
 
 // Big-endian.
@@ -104,6 +108,7 @@ var sizes = []uint{
 	128,
 	64,
 	32,
+	16,
 }
 
 // findNearestSize finds the biggest icon size we can use for this image.
@@ -155,15 +160,16 @@ var osTypes = []OsType{
 	{ID: "ic11", Size: uint(32)},
 }
 
-// getTypeFromSize returns the type for the given icon size (in px).
-// The boolean indicates whether the type exists.
-func getTypeFromSize(size uint) (OsType, bool) {
+// getTypesFromSize returns the types for the given icon size (in px).
+// The boolean indicates whether the types exist.
+func getTypesFromSize(size uint) ([]OsType, bool) {
+	var retOsTypes []OsType
 	for _, t := range osTypes {
 		if t.Size == size {
-			return t, true
+			retOsTypes = append(retOsTypes, t)
 		}
 	}
-	return OsType{}, false
+	return retOsTypes, len(retOsTypes) != 0
 }
 
 func getTypeFromID(ID string) (OsType, bool) {

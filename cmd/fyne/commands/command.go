@@ -6,7 +6,7 @@ import "fyne.io/fyne/v2/cmd/fyne/internal/commands"
 // Command defines the required functionality to provide a subcommand to the "fyne" tool.
 //
 // Deprecated: Access to the internal cli commands are being removed.
-// Better versions of bundler, installer, packager and releaser will be avaliable in the future.
+// Better versions of bundler, installer, packager and releaser will be available in the future.
 type Command interface {
 	AddFlags()
 	PrintHelp(string)

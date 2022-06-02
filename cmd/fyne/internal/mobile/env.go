@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -97,7 +96,7 @@ func envInit() (err error) {
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
 
-	ver, err := exec.Command("go", "version").Output()
+	ver, err := execabs.Command("go", "version").Output()
 	if err == nil && string(ver) != "" {
 		fields := strings.Split(string(ver), " ")
 		if len(fields) >= 3 {
@@ -235,17 +234,17 @@ func ndkRoot() (string, error) {
 		return "$NDK_PATH", nil
 	}
 
-	androidHome := os.Getenv("ANDROID_HOME")
-	if androidHome != "" {
-		ndkRoot := filepath.Join(androidHome, "ndk-bundle")
+	ndkRoot := os.Getenv("ANDROID_NDK_HOME")
+	if ndkRoot != "" {
 		_, err := os.Stat(ndkRoot)
 		if err == nil {
 			return ndkRoot, nil
 		}
 	}
 
-	ndkRoot := os.Getenv("ANDROID_NDK_HOME")
-	if ndkRoot != "" {
+	androidHome := os.Getenv("ANDROID_HOME")
+	if androidHome != "" {
+		ndkRoot := filepath.Join(androidHome, "ndk-bundle")
 		_, err := os.Stat(ndkRoot)
 		if err == nil {
 			return ndkRoot, nil

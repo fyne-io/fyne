@@ -119,4 +119,9 @@ func TestEntry_SetOnValidationChanged(t *testing.T) {
 	modified = false
 	test.Type(entry, "-01-01")
 	assert.True(t, modified)
+
+	modified = false
+	entry.SetOnValidationChanged(nil)
+	test.Type(entry, "invalid")
+	assert.False(t, modified)
 }

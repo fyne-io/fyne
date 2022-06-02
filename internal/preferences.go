@@ -75,9 +75,10 @@ func (p *InMemoryPreferences) remove(key string) {
 
 func (p *InMemoryPreferences) fireChange() {
 	p.lock.RLock()
-	defer p.lock.RUnlock()
+	listeners := p.changeListeners
+	p.lock.RUnlock()
 
-	for _, l := range p.changeListeners {
+	for _, l := range listeners {
 		p.wg.Add(1)
 		go func(listener func()) {
 			defer p.wg.Done()

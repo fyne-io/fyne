@@ -176,13 +176,11 @@ type colorWheelRenderer struct {
 }
 
 func (r *colorWheelRenderer) Layout(size fyne.Size) {
-	if f := r.area.selection; f != nil {
-		x, y := f(size.Width, size.Height)
-		r.x.Position1 = fyne.NewPos(0, y)
-		r.x.Position2 = fyne.NewPos(size.Width, y)
-		r.y.Position1 = fyne.NewPos(x, 0)
-		r.y.Position2 = fyne.NewPos(x, size.Height)
-	}
+	x, y := r.area.selection(size.Width, size.Height)
+	r.x.Position1 = fyne.NewPos(0, y)
+	r.x.Position2 = fyne.NewPos(size.Width, y)
+	r.y.Position1 = fyne.NewPos(x, 0)
+	r.y.Position2 = fyne.NewPos(x, size.Height)
 	r.raster.Move(fyne.NewPos(0, 0))
 	r.raster.Resize(size)
 }

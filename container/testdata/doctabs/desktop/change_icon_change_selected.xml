@@ -5,7 +5,7 @@
 				<widget size="110x36" type="*widget.Scroll">
 					<container size="110x36">
 						<widget size="52x36" type="*container.tabButton">
-							<image pos="4,8" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
+							<image pos="4,8" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
 						</widget>
 						<widget pos="56,0" size="52x36" type="*container.tabButton">
 							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize"/>

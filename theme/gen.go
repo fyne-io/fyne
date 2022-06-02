@@ -10,13 +10,13 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"golang.org/x/sys/execabs"
 )
 
 const fontFace = "NotoSans"
@@ -49,6 +49,7 @@ func main() {
 		'⌫',
 		'⎋',
 		'␣',
+		'❖',
 	})
 	if err != nil {
 		fyne.LogError("symbol font creation failed", err)
@@ -225,7 +226,7 @@ func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
 	for _, r := range runes {
 		unicodes = append(unicodes, fmt.Sprintf(`%04X`, r))
 	}
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"pyftsubset",
 		fontPath(fontFile),
 		"--output-file="+fontPath(newFontFile),

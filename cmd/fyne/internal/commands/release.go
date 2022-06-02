@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
 )
@@ -29,6 +29,7 @@ var macAppStoreCategories = []string{
 // Release returns the cli command for bundling release builds of fyne applications
 func Release() *cli.Command {
 	r := &Releaser{}
+	r.appData = &appData{}
 
 	return &cli.Command{
 		Name:  "release",
@@ -51,6 +52,11 @@ func Release() *cli.Command {
 				Destination: &r.keyStorePass,
 			},
 			&cli.StringFlag{
+				Name:        "keyName",
+				Usage:       "Android: alias for the signer's private key, which is needed when reading a .keystore file",
+				Destination: &r.keyName,
+			},
+			&cli.StringFlag{
 				Name:        "keyPass",
 				Usage:       "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin",
 				Destination: &r.keyStorePass,
@@ -58,7 +64,7 @@ func Release() *cli.Command {
 			&cli.StringFlag{
 				Name:        "name",
 				Usage:       "The name of the application, default is the executable file name",
-				Destination: &r.name,
+				Destination: &r.Name,
 			},
 			&cli.StringFlag{
 				Name:        "tags",
@@ -68,18 +74,18 @@ func Release() *cli.Command {
 			&cli.StringFlag{
 				Name:        "appVersion",
 				Usage:       "Version number in the form x, x.y or x.y.z semantic version",
-				Destination: &r.appVersion,
+				Destination: &r.AppVersion,
 			},
 			&cli.IntFlag{
 				Name:        "appBuild",
 				Usage:       "Build number, should be greater than 0 and incremented for each build",
-				Destination: &r.appBuild,
+				Destination: &r.AppBuild,
 			},
 			&cli.StringFlag{
 				Name:        "appID",
 				Aliases:     []string{"id"},
 				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &r.appID,
+				Destination: &r.AppID,
 			},
 			&cli.StringFlag{
 				Name:        "certificate",
@@ -126,6 +132,7 @@ type Releaser struct {
 
 	keyStore     string
 	keyStorePass string
+	keyName      string
 	keyPass      string
 	developer    string
 	password     string
@@ -136,13 +143,14 @@ type Releaser struct {
 // Deprecated: Access to the individual cli commands are being removed.
 func (r *Releaser) AddFlags() {
 	flag.StringVar(&r.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
-	flag.StringVar(&r.name, "name", "", "The name of the application, default is the executable file name")
+	flag.StringVar(&r.Name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&r.icon, "icon", "", "The name of the application icon file")
-	flag.StringVar(&r.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
-	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
+	flag.StringVar(&r.AppID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.StringVar(&r.AppVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
+	flag.IntVar(&r.AppBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
 	flag.StringVar(&r.keyStorePass, "keyStorePass", "", "Android: password for the .keystore file, default take the password from stdin")
+	flag.StringVar(&r.keyName, "keyName", "", "Android: alias for the signer's private key, which is needed when reading a .keystore file")
 	flag.StringVar(&r.keyPass, "keyPass", "", "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin")
 	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
@@ -203,7 +211,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 
 func (r *Releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
-		target := mobile.AppOutputName(r.os, r.Packager.name)
+		target := mobile.AppOutputName(r.os, r.Packager.Name, r.release)
 		apk := filepath.Join(r.dir, target)
 		if err := r.zipAlign(apk); err != nil {
 			return err
@@ -217,9 +225,9 @@ func (r *Releaser) afterPackage() error {
 		return r.packageIOSRelease()
 	}
 	if r.os == "windows" {
-		outName := r.name + ".appx"
-		if pos := strings.LastIndex(r.name, ".exe"); pos > 0 {
-			outName = r.name[:pos] + ".appx"
+		outName := r.Name + ".appx"
+		if pos := strings.LastIndex(r.Name, ".exe"); pos > 0 {
+			outName = r.Name[:pos] + ".appx"
 		}
 
 		outPath := filepath.Join(r.dir, outName)
@@ -263,7 +271,7 @@ func (r *Releaser) packageIOSRelease() error {
 	payload := filepath.Join(r.dir, "Payload")
 	_ = os.Mkdir(payload, 0750)
 	defer os.RemoveAll(payload)
-	appName := mobile.AppOutputName(r.os, r.name)
+	appName := mobile.AppOutputName(r.os, r.Name, r.release)
 	payloadAppDir := filepath.Join(payload, appName)
 	if err := os.Rename(filepath.Join(r.dir, appName), payloadAppDir); err != nil {
 		return err
@@ -271,7 +279,7 @@ func (r *Releaser) packageIOSRelease() error {
 
 	cleanup, err := r.writeEntitlements(templates.EntitlementsDarwinMobile, struct{ TeamID, AppID string }{
 		TeamID: team,
-		AppID:  r.appID,
+		AppID:  r.AppID,
 	})
 	if err != nil {
 		return errors.New("failed to write entitlements plist template")
@@ -292,9 +300,9 @@ func (r *Releaser) packageMacOSRelease() error {
 	// try to derive two certificates from one name (they will be consistent)
 	appCert := strings.Replace(r.certificate, "Installer", "Application", 1)
 	installCert := strings.Replace(r.certificate, "Application", "Installer", 1)
-	unsignedPath := r.name + "-unsigned.pkg"
+	unsignedPath := r.Name + "-unsigned.pkg"
 
-	defer os.RemoveAll(r.name + ".app") // this was the output of package and it can get in the way of future builds
+	defer os.RemoveAll(r.Name + ".app") // this was the output of package and it can get in the way of future builds
 
 	cleanup, err := r.writeEntitlements(templates.EntitlementsDarwin, nil)
 	if err != nil {
@@ -302,15 +310,15 @@ func (r *Releaser) packageMacOSRelease() error {
 	}
 	defer cleanup()
 
-	cmd := execabs.Command("codesign", "-vfs", appCert, "--entitlement", "entitlements.plist", r.name+".app")
+	cmd := execabs.Command("codesign", "-vfs", appCert, "--entitlement", "entitlements.plist", r.Name+".app")
 	err = cmd.Run()
 	if err != nil {
 		fyne.LogError("Codesign failed", err)
 		return errors.New("unable to codesign application bundle")
 	}
 
-	cmd = execabs.Command("productbuild", "--component", r.name+".app", "/Applications/",
-		"--product", r.name+".app/Contents/Info.plist", unsignedPath)
+	cmd = execabs.Command("productbuild", "--component", r.Name+".app", "/Applications/",
+		"--product", r.Name+".app/Contents/Info.plist", unsignedPath)
 	err = cmd.Run()
 	if err != nil {
 		fyne.LogError("Product build failed", err)
@@ -318,7 +326,7 @@ func (r *Releaser) packageMacOSRelease() error {
 	}
 	defer os.Remove(unsignedPath)
 
-	cmd = execabs.Command("productsign", "--sign", installCert, unsignedPath, r.name+".pkg")
+	cmd = execabs.Command("productsign", "--sign", installCert, unsignedPath, r.Name+".pkg")
 	return cmd.Run()
 }
 
@@ -333,11 +341,11 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 		return err
 	}
 	manifestData := struct{ AppID, Developer, DeveloperName, Name, Version string }{
-		AppID: r.appID,
+		AppID: r.AppID,
 		// TODO read this info
 		Developer:     r.developer,
 		DeveloperName: r.nameFromCertInfo(r.developer),
-		Name:          r.name,
+		Name:          r.Name,
 		Version:       r.combinedVersion(),
 	}
 	err = templates.AppxManifestWindows.Execute(manifest, manifestData)
@@ -347,7 +355,7 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 	}
 
 	util.CopyFile(r.icon, filepath.Join(payload, "Icon.png"))
-	util.CopyFile(r.name, filepath.Join(payload, r.name))
+	util.CopyFile(r.Name, filepath.Join(payload, r.Name))
 
 	binDir, err := findWindowsSDKBin()
 	if err != nil {
@@ -362,16 +370,36 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 }
 
 func (r *Releaser) signAndroid(path string) error {
-	signer := filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
+	signer := "jarsigner"
+	var args []string
+	if r.release {
+		args = []string{"-keystore", r.keyStore}
+	} else {
+		signer = filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
+		args = []string{"sign", "--ks", r.keyStore}
+	}
 
-	args := []string{"sign", "--ks", r.keyStore}
 	if r.keyStorePass != "" {
-		args = append(args, "--ks-pass", "pass:"+r.keyStorePass)
+		if r.release {
+			args = append(args, "-storepass", r.keyStorePass)
+		} else {
+			args = append(args, "--ks-pass", "pass:"+r.keyStorePass)
+		}
 	}
 	if r.keyPass != "" {
-		args = append(args, "--key-pass", "pass:"+r.keyPass)
+		if r.release {
+			args = append(args, "-keypass", r.keyPass)
+		} else {
+			args = append(args, "--key-pass", "pass:"+r.keyPass)
+		}
 	}
 	args = append(args, path)
+	if r.release {
+		if r.keyName == "" { // Required to sign Google Play .aab
+			return errors.New("missing required -keyName (alias) parameter")
+		}
+		args = append(args, r.keyName)
+	}
 
 	cmd := execabs.Command(signer, args...)
 	cmd.Stdout = os.Stdout
@@ -404,10 +432,10 @@ func (r *Releaser) validate() error {
 	}
 
 	if util.IsMobile(r.os) || r.os == "windows" {
-		if r.appVersion == "" { // Here it is required, if provided then package validate will check format
+		if r.AppVersion == "" { // Here it is required, if provided then package validate will check format
 			return errors.New("missing required -appVersion parameter")
 		}
-		if r.appBuild <= 0 {
+		if r.AppBuild <= 0 {
 			return errors.New("missing required -appBuild parameter")
 		}
 	}

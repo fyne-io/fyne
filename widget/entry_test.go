@@ -384,6 +384,19 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
+func TestEntryMultiline_SetMinRowsVisible(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	min := entry.MinSize()
+	entry.SetText("Hello")
+	assert.Equal(t, entry.MinSize().Height, min.Height)
+
+	entry.SetMinRowsVisible(2)
+	assert.Less(t, entry.MinSize().Height, min.Height)
+
+	entry.SetMinRowsVisible(5)
+	assert.Greater(t, entry.MinSize().Height, min.Height)
+}
+
 func TestEntry_MultilineSelect(t *testing.T) {
 	e, window := setupSelection(t, false)
 	defer teardownImageTest(window)
@@ -512,12 +525,26 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
 
-	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
-	entry.TypedKey(key)
+	backspace := &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(backspace)
 
 	assert.Equal(t, "H", entry.Text)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
+
+	entry = widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapWord
+	entry.SetText("Line\n2b\n")
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+	entry.TypedKey(down)
+	entry.TypedKey(right)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	entry.TypedKey(backspace)
+	assert.Equal(t, "Line\nb\n", entry.Text)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
 }
 
 func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
@@ -1736,6 +1763,17 @@ func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
 	entry.SetText("test")
 
 	checkNewlineIgnored(t, entry)
+}
+
+func TestEntry_CarriageReturn(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.Wrapping = fyne.TextWrapOff
+	entry.SetText("\r\n\r")
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(64, 64))
+	test.AssertImageMatches(t, "entry/carriage_return_empty.png", w.Canvas().Capture())
+	entry.SetText("\rH\re\rl\rl\ro\r\n\rW\ro\rr\rl\rd\r!\r")
+	test.AssertImageMatches(t, "entry/carriage_return_text.png", w.Canvas().Capture())
 }
 
 const (

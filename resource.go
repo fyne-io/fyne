@@ -37,8 +37,7 @@ func (r *StaticResource) Content() []byte {
 
 // NewStaticResource returns a new static resource object with the specified
 // name and content. Creating a new static resource in memory results in
-// sharable binary data that may be serialised to the location returned by
-// CachePath().
+// sharable binary data that may be serialised to the system cache location.
 func NewStaticResource(name string, content []byte) *StaticResource {
 	return &StaticResource{
 		StaticName:    name,

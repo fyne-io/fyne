@@ -6,8 +6,8 @@ import (
 )
 
 // An App is the definition of a graphical application.
-// Apps can have multiple windows, it will exit when the first window to be
-// shown is closed. You can also cause the app to exit by calling Quit().
+// Apps can have multiple windows, by default they will exit when all windows
+// have been closed. This can be modified using SetMaster() or SetCloseIntercept().
 // To start an application you need to call Run() somewhere in your main() function.
 // Alternatively use the window.ShowAndRun() function for your main window.
 type App interface {
@@ -59,7 +59,14 @@ type App interface {
 	Storage() Storage
 
 	// Lifecycle returns a type that allows apps to hook in to lifecycle events.
+	//
+	// Since: 2.1
 	Lifecycle() Lifecycle
+
+	// Metadata returns the application metadata that was set at compile time.
+	//
+	// Since: 2.2
+	Metadata() AppMetadata
 }
 
 // app contains an App variable, but due to atomic.Value restrictions on
@@ -86,6 +93,22 @@ func CurrentApp() App {
 		return nil
 	}
 	return (val).(appContainer).current
+}
+
+// AppMetadata captures the build metadata for an application.
+//
+// Since: 2.2
+type AppMetadata struct {
+	// ID is the unique ID of this application, used by many distribution platforms.
+	ID string
+	// Name is the human friendly name of this app.
+	Name string
+	// Version represents the version of this application, normally following semantic versioning.
+	Version string
+	// Build is the build number of this app, some times appended to the version number.
+	Build int
+	// Icon contains, if present, a resource of the icon that was bundled at build time.
+	Icon Resource
 }
 
 // Lifecycle represents the various phases that an app can transition through.

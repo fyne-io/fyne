@@ -19,9 +19,10 @@ func NewRegexp(regexpstr, reason string) fyne.StringValidator {
 		return nil
 	}
 
+	err = errors.New(reason)
 	return func(text string) error {
 		if expression != nil && !expression.MatchString(text) {
-			return errors.New(reason)
+			return err
 		}
 
 		return nil // Nothing to validate with, same as having no validator.

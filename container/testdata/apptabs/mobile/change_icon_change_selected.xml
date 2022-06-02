@@ -4,7 +4,7 @@
 			<container size="150x56">
 				<container size="150x56">
 					<widget size="73x56" type="*container.tabButton">
-						<image pos="16,8" rsc="cancelIcon" size="40x40" themed="primary"/>
+						<image pos="16,8" rsc="infoIcon" size="40x40" themed="primary"/>
 					</widget>
 					<widget pos="77,0" size="73x56" type="*container.tabButton">
 						<image pos="16,8" rsc="confirmIcon" size="40x40"/>

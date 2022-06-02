@@ -24,7 +24,7 @@
 							</widget>
 							<widget pos="0,32" size="98x28" type="*widget.menuItem">
 								<rectangle fillColor="focus" size="98x28"/>
-								<text pos="8,4" size="82x20">Option B</text>
+								<text pos="8,4" size="62x20">Option B</text>
 								<image pos="78,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
@@ -50,7 +50,7 @@
 									<text pos="8,4" size="113x20">Sub Option A</text>
 								</widget>
 								<widget pos="0,32" size="129x28" type="*widget.menuItem">
-									<text pos="8,4" size="113x20">Sub Option B</text>
+									<text pos="8,4" size="93x20">Sub Option B</text>
 									<image pos="109,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 								</widget>
 							</container>

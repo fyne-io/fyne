@@ -88,6 +88,7 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
+	multiLineRows   int // override global default number of visible lines
 }
 
 // NewEntry creates a new single line entry widget.
@@ -402,11 +403,11 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	}
 	e.propertyLock.Unlock()
 
+	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
+
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-
-	e.updateMousePointer(m.Position, m.Button == desktop.MouseButtonSecondary)
 }
 
 // MouseUp called on mouse release
@@ -439,6 +440,16 @@ func (e *Entry) SelectedText() string {
 	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
 	return string(r[start:stop])
+}
+
+// SetMinRowsVisible forces a multi-line entry to show `count` number of rows without scrolling.
+// This is not a validation or requirement, it just impacts the minimum visible size.
+// Use this carefully as Fyne apps can run on small screens so you may wish to add a scroll container if
+// this number is high. Default is 3.
+//
+// Since: 2.2
+func (e *Entry) SetMinRowsVisible(count int) {
+	e.multiLineRows = count
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
@@ -819,7 +830,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 		row = 0
 	} else if row >= e.textProvider().rows() {
 		row = e.textProvider().rows() - 1
-		col = 0
+		col = e.textProvider().rowLength(row)
 	} else {
 		col = e.cursorColAt(e.textProvider().row(row), p.Add(e.scroll.Offset))
 	}
@@ -907,7 +918,8 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b.begin
-			if canWrap && b.begin == pos && col == 0 && pos != 0 && row < (totalRows-1) {
+			// if this gap is at `pos` and is a line wrap, increment (safe to access boundary i-1)
+			if canWrap && b.begin == pos && pos != 0 && provider.rowBoundary(i-1).end == b.begin && row < (totalRows-1) {
 				row++
 			}
 		} else {
@@ -1305,9 +1317,13 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	minSize := charMin.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if r.entry.MultiLine {
+		count := r.entry.multiLineRows
+		if count <= 0 {
+			count = multiLineRows
+		}
 		// ensure multiline height is at least charMinSize * multilineRows
-		rowHeight := charMin.Height * multiLineRows
-		minSize.Height = fyne.Max(minSize.Height, rowHeight+(multiLineRows-1)*theme.Padding())
+		rowHeight := charMin.Height * float32(count)
+		minSize.Height = fyne.Max(minSize.Height, rowHeight+float32(count-1)*theme.Padding())
 	}
 
 	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
@@ -1610,10 +1626,15 @@ func (r *entryContentRenderer) buildSelection() {
 }
 
 func (r *entryContentRenderer) ensureCursorVisible() {
-	cx1 := r.cursor.Position().X
-	cy1 := r.cursor.Position().Y
-	cx2 := cx1 + r.cursor.Size().Width
-	cy2 := cy1 + r.cursor.Size().Height
+	letter := fyne.MeasureText("e", theme.TextSize(), r.content.entry.TextStyle)
+	padX := letter.Width*2 + theme.Padding()
+	padY := letter.Height - theme.Padding()
+	cx := r.cursor.Position().X
+	cy := r.cursor.Position().Y
+	cx1 := cx - padX
+	cy1 := cy - padY
+	cx2 := cx + r.cursor.Size().Width + padX
+	cy2 := cy + r.cursor.Size().Height + padY
 	offset := r.content.scroll.Offset
 	size := r.content.scroll.Size()
 

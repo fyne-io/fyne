@@ -8,7 +8,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	ico "github.com/Kodeworks/golang-image-ico"
+	"github.com/fyne-io/image/ico"
 	"github.com/josephspurrier/goversioninfo"
 	"golang.org/x/sys/execabs"
 )
@@ -32,7 +32,7 @@ func (p *Packager) packageWindows() error {
 		return fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	icoPath := filepath.Join(exePath, p.name+".ico")
+	icoPath := filepath.Join(exePath, p.Name+".ico")
 	file, err := os.Create(icoPath)
 	if err != nil {
 		return fmt.Errorf("failed to open image file: %w", err)
@@ -56,7 +56,7 @@ func (p *Packager) packageWindows() error {
 		manifestFile, _ := os.Create(manifest)
 
 		tplData := windowsData{
-			Name:            p.name,
+			Name:            p.Name,
 			CombinedVersion: p.combinedVersion(),
 		}
 		err := templates.ManifestWindows.Execute(manifestFile, tplData)
@@ -69,7 +69,7 @@ func (p *Packager) packageWindows() error {
 	outPath := filepath.Join(exePath, "fyne.syso")
 
 	vi := &goversioninfo.VersionInfo{}
-	vi.ProductName = p.name
+	vi.ProductName = p.Name
 	vi.IconPath = icoPath
 	vi.ManifestPath = manifest
 
@@ -97,16 +97,16 @@ func (p *Packager) packageWindows() error {
 		}
 	}
 
-	err = p.buildPackage()
+	_, err = p.buildPackage(nil)
 	if err != nil {
 		return fmt.Errorf("failed to rebuild after adding metadata: %w", err)
 	}
 
 	appPath := p.exe
 	appName := filepath.Base(p.exe)
-	if filepath.Base(p.exe) != p.name {
-		appName = p.name
-		if filepath.Ext(p.name) != ".exe" {
+	if filepath.Base(p.exe) != p.Name {
+		appName = p.Name
+		if filepath.Ext(p.Name) != ".exe" {
 			appName = appName + ".exe"
 		}
 		appPath = filepath.Join(filepath.Dir(p.exe), appName)

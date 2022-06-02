@@ -17,7 +17,7 @@ type ActionFunc func(*Context) error
 // CommandNotFoundFunc is executed if the proper command cannot be found
 type CommandNotFoundFunc func(*Context, string)
 
-// OnUsageErrorFunc is executed if an usage error occurs. This is useful for displaying
+// OnUsageErrorFunc is executed if a usage error occurs. This is useful for displaying
 // customized usage error messages.  This function is able to replace the
 // original error messages.  If this function is not set, the "Incorrect usage"
 // is displayed and the execution is interrupted.

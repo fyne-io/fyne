@@ -132,7 +132,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 	form := &Form{
 		Items: []*FormItem{
 			{Text: "test1", Widget: NewEntry()},
-			{Text: "test2", Widget: NewEntry()},
+			{Text: "test2", Widget: NewLabel("static")},
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)
@@ -354,4 +354,65 @@ func TestForm_HintsRendered(t *testing.T) {
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/hints_rendered.png", w.Canvas().Capture())
+}
+
+func TestForm_Validate(t *testing.T) {
+	entry1 := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid 1"), Text: "15-true"}
+	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid 2"), Text: "wrong"}
+
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "First", Widget: entry1},
+			{Text: "Second", Widget: entry2},
+		},
+	}
+
+	err := form.Validate()
+	if assert.Error(t, err) {
+		assert.Equal(t, "Input is not valid 2", err.Error())
+	}
+
+	entry1.SetText("incorrect")
+	err = form.Validate()
+	if assert.Error(t, err) {
+		assert.Equal(t, "Input is not valid 1", err.Error())
+	}
+
+	entry1.SetText("15-true")
+	err = form.Validate()
+	if assert.Error(t, err) {
+		assert.Equal(t, "Input is not valid 2", err.Error())
+	}
+
+	entry2.SetText("not-wrong")
+	err = form.Validate()
+	assert.NoError(t, err)
+
+}
+
+func TestForm_SetOnValidationChanged(t *testing.T) {
+	entry1 := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "15-true"}
+
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "First", Widget: entry1},
+		},
+	}
+
+	validationError := false
+
+	form.SetOnValidationChanged(func(err error) {
+		validationError = err != nil
+	})
+
+	form.CreateRenderer()
+
+	entry1.SetText("incorrect")
+	assert.Error(t, form.Validate())
+	assert.True(t, validationError)
+
+	entry1.SetText("15-true")
+	assert.NoError(t, form.Validate())
+	assert.False(t, validationError)
+
 }

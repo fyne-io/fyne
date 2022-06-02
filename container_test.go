@@ -18,6 +18,10 @@ func TestContainer_Add(t *testing.T) {
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(10), container.MinSize().Height)
 
+	oldLength := len(container.Objects)
+	container.Add(nil)
+	assert.Equal(t, oldLength, len(container.Objects))
+
 	box2 := new(dummyObject)
 	container.Add(box2)
 	assert.Equal(t, 2, len(container.Objects))
@@ -147,37 +151,37 @@ type dummyObject struct {
 	hidden bool
 }
 
-func (d *dummyObject) Size() Size {
-	return d.size
-}
-
-func (d *dummyObject) Resize(size Size) {
-	d.size = size
-}
-
-func (d *dummyObject) Position() Position {
-	return d.pos
-}
-
-func (d *dummyObject) Move(pos Position) {
-	d.pos = pos
+func (d *dummyObject) Hide() {
+	d.hidden = true
 }
 
 func (d *dummyObject) MinSize() Size {
 	return NewSize(5, 5)
 }
 
-func (d *dummyObject) Visible() bool {
-	return !d.hidden
+func (d *dummyObject) Move(pos Position) {
+	d.pos = pos
+}
+
+func (d *dummyObject) Position() Position {
+	return d.pos
+}
+
+func (d *dummyObject) Refresh() {
+}
+
+func (d *dummyObject) Resize(size Size) {
+	d.size = size
 }
 
 func (d *dummyObject) Show() {
 	d.hidden = false
 }
 
-func (d *dummyObject) Hide() {
-	d.hidden = true
+func (d *dummyObject) Size() Size {
+	return d.size
 }
 
-func (d *dummyObject) Refresh() {
+func (d *dummyObject) Visible() bool {
+	return !d.hidden
 }

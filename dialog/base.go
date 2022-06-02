@@ -130,7 +130,7 @@ func (d *dialog) Resize(size fyne.Size) {
 	d.win.Resize(size)
 }
 
-// SetDismissText allows custom text to be set in the confirmation button
+// SetDismissText allows custom text to be set in the dismiss button
 func (d *dialog) SetDismissText(label string) {
 	d.dismiss.SetText(label)
 	d.win.Refresh()

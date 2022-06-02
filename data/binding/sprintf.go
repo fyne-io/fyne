@@ -21,12 +21,14 @@ type sprintfString struct {
 //
 // Since: 2.2
 func NewSprintf(format string, b ...DataItem) (String, error) {
-	ret := &sprintfString{String: NewString(), format: format, source: make([]DataItem, 0, len(b))}
+	ret := &sprintfString{
+		String: NewString(),
+		format: format,
+		source: append(make([]DataItem, 0, len(b)), b...),
+	}
 
 	for _, value := range b {
 		value.AddListener(ret)
-
-		ret.source = append(ret.source, value)
 	}
 
 	return ret, nil

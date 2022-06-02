@@ -44,7 +44,7 @@ jobs:
       uses: shogo82148/actions-goveralls@v1
       with:
         path-to-profile: coverage.out
-      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' && github.event_name == 'push' }}
+      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' }}
 
     - name: Build WebAssembly binary
       env:
@@ -53,3 +53,10 @@ jobs:
       working-directory: cmd/fyne_demo
       run: go build
       if: ${{ matrix.go-version == '1.17' }}
+
+    - name: Build GopherJS and Wasm full website
+      run: |
+        go install github.com/gopherjs/gopherjs@latest
+        go install ./cmd/fyne
+        cd cmd/fyne_demo && fyne package --target=web
+      if: ${{ matrix.go-version == '1.17' && runner.os == 'Linux' }}

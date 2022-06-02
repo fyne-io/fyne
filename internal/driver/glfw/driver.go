@@ -3,11 +3,13 @@
 package glfw
 
 import (
+	"bytes"
+	"image"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 	"sync"
+
+	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
@@ -19,7 +21,11 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-const mainGoroutineID = 1
+// mainGoroutineID stores the main goroutine ID.
+// This ID must be initialized in main.init because
+// a main goroutine may not equal to 1 due to the
+// influence of a garbage collector.
+var mainGoroutineID uint64
 
 var (
 	curWindow *window
@@ -38,7 +44,27 @@ type gLDriver struct {
 
 	animation *animation.Runner
 
-	drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
+	drawOnMainThread    bool       // A workaround on Apple M1, just use 1 thread until fixed upstream
+	trayStart, trayStop func()     // shut down the system tray, if used
+	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
+}
+
+func toOSIcon(icon fyne.Resource) ([]byte, error) {
+	if runtime.GOOS != "windows" {
+		return icon.Content(), nil
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(icon.Content()))
+	if err != nil {
+		return nil, err
+	}
+
+	buf := &bytes.Buffer{}
+	err = ico.Encode(buf, img)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
@@ -70,19 +96,15 @@ func (d *gLDriver) Device() fyne.Device {
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
 		curWindow = nil
+		if d.trayStop != nil {
+			d.trayStop()
+		}
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
 	defer func() {
 		recover() // we could be called twice - no safe way to check if d.done is closed
 	}()
 	close(d.done)
-}
-
-func (d *gLDriver) Run() {
-	if goroutineID() != mainGoroutineID {
-		panic("Run() or ShowAndRun() must be called from main goroutine")
-	}
-	d.runGL()
 }
 
 func (d *gLDriver) addWindow(w *window) {
@@ -120,7 +142,7 @@ func (d *gLDriver) windowList() []fyne.Window {
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
-	fyne.LogError(msg, err)
+	logError(msg, err)
 
 	run.Lock()
 	if !run.flag {
@@ -132,14 +154,11 @@ func (d *gLDriver) initFailed(msg string, err error) {
 	}
 }
 
-func goroutineID() int {
-	b := make([]byte, 64)
-	b = b[:runtime.Stack(b, false)]
-	// string format expects "goroutine X [running..."
-	id := strings.Split(strings.TrimSpace(string(b)), " ")[1]
-
-	num, _ := strconv.Atoi(id)
-	return num
+func (d *gLDriver) Run() {
+	if goroutineID() != mainGoroutineID {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
+	d.runGL()
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.

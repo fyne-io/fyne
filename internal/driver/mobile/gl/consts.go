@@ -35,10 +35,12 @@ format, which is covered by the license:
 const (
 	False            = 0
 	True             = 1
+	One              = 1
 	Triangles        = 0x0004
 	TriangleStrip    = 0x0005
 	SrcAlpha         = 0x0302
 	OneMinusSrcAlpha = 0x0303
+	Front            = 0x0404
 	DepthTest        = 0x0B71
 	Blend            = 0x0BE2
 	ScissorTest      = 0x0C11
@@ -59,6 +61,7 @@ const (
 	OneMinusConstantAlpha    = 0x8004
 	ClampToEdge              = 0x812F
 	Texture0                 = 0x84C0
+	StaticDraw               = 0x88E4
 	DynamicDraw              = 0x88E8
 	FragmentShader           = 0x8B30
 	VertexShader             = 0x8B31
@@ -67,6 +70,7 @@ const (
 	ActiveAttributeMaxLength = 0x8B8A
 	ArrayBuffer              = 0x8892
 	CompileStatus            = 0x8B81
+	LinkStatus               = 0x8B82
 	InfoLogLength            = 0x8B84
 	ShaderSourceLength       = 0x8B88
 

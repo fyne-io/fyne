@@ -71,6 +71,7 @@ type TimestampFlag struct {
 	Value       *Timestamp
 	DefaultText string
 	HasBeenSet  bool
+	Destination *Timestamp
 }
 
 // IsSet returns whether or not the flag has been set through env or file
@@ -113,6 +114,11 @@ func (f *TimestampFlag) GetValue() string {
 	return ""
 }
 
+// IsVisible returns true if the flag is not hidden, otherwise false
+func (f *TimestampFlag) IsVisible() bool {
+	return !f.Hidden
+}
+
 // Apply populates the flag given the flag set and environment
 func (f *TimestampFlag) Apply(set *flag.FlagSet) error {
 	if f.Layout == "" {
@@ -123,6 +129,10 @@ func (f *TimestampFlag) Apply(set *flag.FlagSet) error {
 	}
 	f.Value.SetLayout(f.Layout)
 
+	if f.Destination != nil {
+		f.Destination.SetLayout(f.Layout)
+	}
+
 	if val, ok := flagFromEnvOrFile(f.EnvVars, f.FilePath); ok {
 		if err := f.Value.Set(val); err != nil {
 			return fmt.Errorf("could not parse %q as timestamp value for flag %s: %s", val, f.Name, err)
@@ -131,6 +141,11 @@ func (f *TimestampFlag) Apply(set *flag.FlagSet) error {
 	}
 
 	for _, name := range f.Names() {
+		if f.Destination != nil {
+			set.Var(f.Destination, name, f.Usage)
+			continue
+		}
+
 		set.Var(f.Value, name, f.Usage)
 	}
 	return nil
@@ -138,7 +153,7 @@ func (f *TimestampFlag) Apply(set *flag.FlagSet) error {
 
 // Timestamp gets the timestamp from a flag name
 func (c *Context) Timestamp(name string) *time.Time {
-	if fs := lookupFlagSet(name, c); fs != nil {
+	if fs := c.lookupFlagSet(name); fs != nil {
 		return lookupTimestamp(name, fs)
 	}
 	return nil

@@ -23,7 +23,7 @@
 								<text pos="8,4" size="82x20">Option A</text>
 							</widget>
 							<widget pos="0,32" size="98x28" type="*widget.menuItem">
-								<text pos="8,4" size="82x20">Option B</text>
+								<text pos="8,4" size="62x20">Option B</text>
 								<image pos="78,4" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>

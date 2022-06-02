@@ -7,19 +7,18 @@ import (
 	"strconv"
 
 	"github.com/urfave/cli/v2"
-
-	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
 
 // Server serve fyne wasm application over http
 type Server struct {
-	port              int
-	srcDir, icon, dir string
+	*appData
+	port            int
+	srcDir, dir, os string
 }
 
 // Serve return the cli command for serving fyne wasm application over http
 func Serve() *cli.Command {
-	s := &Server{}
+	s := &Server{appData: &appData{}}
 
 	return &cli.Command{
 		Name:        "serve",
@@ -35,7 +34,6 @@ func Serve() *cli.Command {
 			&cli.StringFlag{
 				Name:        "icon",
 				Usage:       "The name of the application icon file.",
-				Value:       "Icon.png",
 				Destination: &s.icon,
 			},
 			&cli.IntFlag{
@@ -44,20 +42,29 @@ func Serve() *cli.Command {
 				Value:       8080,
 				Destination: &s.port,
 			},
+			&cli.StringFlag{
+				Name:        "target",
+				Aliases:     []string{"os"},
+				Usage:       "The web runtime to target (wasm, gopherjs, web).",
+				Value:       "web",
+				Destination: &s.os,
+			},
 		},
 		Action: s.Server,
 	}
 }
 
-func (s *Server) requestPackage() {
+func (s *Server) requestPackage() error {
 	p := &Packager{
-		os:     "wasm",
+		os:     s.os,
 		srcDir: s.srcDir,
-		icon:   s.icon,
+
+		appData: s.appData,
 	}
 
-	p.Run([]string{})
+	err := p.Package()
 	s.dir = p.dir
+	return err
 }
 
 func (s *Server) serve() error {
@@ -66,9 +73,12 @@ func (s *Server) serve() error {
 		return err
 	}
 
-	s.requestPackage()
+	err = s.requestPackage()
+	if err != nil {
+		return err
+	}
 
-	webDir := util.EnsureSubDir(s.dir, "wasm")
+	webDir := util.EnsureSubDir(s.dir, s.os)
 	fileServer := http.FileServer(http.Dir(webDir))
 
 	http.Handle("/", fileServer)
@@ -94,6 +104,9 @@ func (s *Server) validate() error {
 	}
 	if s.port < 0 || s.port > 65535 {
 		return fmt.Errorf("the port must be a strictly positive number and be strictly smaller than 65536 (Got %v)", s.port)
+	}
+	if s.os != "wasm" && s.os != "gopherjs" && s.os != "web" {
+		return fmt.Errorf("unsupported web runtime (only wasm, gopherjs and web): %v", s.os)
 	}
 	return nil
 }

@@ -66,6 +66,9 @@ func listURI(uri fyne.URI) ([]fyne.URI, error) {
 	parts := strings.Split(C.GoString(str), "|")
 	var list []fyne.URI
 	for _, part := range parts {
+		if len(part) == 0 {
+			continue
+		}
 		list = append(list, storage.NewURI(part))
 	}
 	return list, nil

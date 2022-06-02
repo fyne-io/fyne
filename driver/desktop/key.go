@@ -39,12 +39,20 @@ type Modifier = fyne.KeyModifier
 
 const (
 	// ShiftModifier represents a shift key being held
+	//
+	// Deprecated: Use fyne.KeyModifierShift instead.
 	ShiftModifier = fyne.KeyModifierShift
 	// ControlModifier represents the ctrl key being held
+	//
+	// Deprecated: Use fyne.KeyModifierControl instead.
 	ControlModifier = fyne.KeyModifierControl
 	// AltModifier represents either alt keys being held
+	//
+	// Deprecated: Use fyne.KeyModifierAlt instead.
 	AltModifier = fyne.KeyModifierAlt
 	// SuperModifier represents either super keys being held
+	//
+	// Deprecated: Use fyne.KeyModifierSuper instead.
 	SuperModifier = fyne.KeyModifierSuper
 )
 
