@@ -27,7 +27,7 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
-# github.com/fyne-io/image v0.0.0-20220601192234-cf0c0847e24d
+# github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
 ## explicit
 github.com/fyne-io/image/ico
 # github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
@@ -110,7 +110,7 @@ github.com/yuin/goldmark/renderer
 github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
-# golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
+# golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
 ## explicit
 golang.org/x/image/colornames
 golang.org/x/image/draw
@@ -138,7 +138,7 @@ golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
-# golang.org/x/text v0.3.6
+# golang.org/x/text v0.3.7
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
