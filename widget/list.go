@@ -111,6 +111,7 @@ func (l *List) scrollTo(id ListItemID) {
 // Resize is called when this list should change size. We refresh to ensure invisible items are drawn.
 func (l *List) Resize(s fyne.Size) {
 	l.BaseWidget.Resize(s)
+	l.offsetUpdated(l.scroller.Offset)
 	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(true)
 }
 
