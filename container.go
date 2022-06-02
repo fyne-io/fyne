@@ -120,7 +120,7 @@ func (c *Container) Refresh() {
 
 // Remove updates the contents of this container to no longer include the specified object.
 // This method is not intended to be used inside a loop, to remove all the elements.
-// It is much more efficient to just set .Objects to nil instead.
+// It is much more efficient to call RemoveAll() instead.
 func (c *Container) Remove(rem CanvasObject) {
 	if len(c.Objects) == 0 {
 		return
@@ -139,6 +139,14 @@ func (c *Container) Remove(rem CanvasObject) {
 		c.layout()
 		return
 	}
+}
+
+// RemoveAll updates the contents of this container to no longer include any objects.
+//
+// Since: 2.2
+func (c *Container) RemoveAll() {
+	c.Objects = nil
+	c.layout()
 }
 
 // Resize sets a new size for the Container.
