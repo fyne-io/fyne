@@ -107,7 +107,7 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 }
 
 func TestNewStringWithFormat(t *testing.T) {
-	var s string = "this is a string"
+	var s = "this is a string"
 	bs := BindString(&s)
 
 	format := "String %s"
@@ -118,23 +118,24 @@ func TestNewStringWithFormat(t *testing.T) {
 	waitForItems()
 
 	sGenerated, err := sp.Get()
-
 	assert.Nil(t, err)
 	assert.NotNil(t, sGenerated)
 	assert.Equal(t, expected, sGenerated)
 
 	err = sp.Set("String nospacestring")
-
 	assert.Nil(t, err)
 
 	waitForItems()
 
 	assert.Equal(t, s, "nospacestring")
 	expectedChange := fmt.Sprintf(format, s)
-
 	sChange, err := sp.Get()
 	assert.Nil(t, err)
 	assert.NotNil(t, sChange)
 	assert.Equal(t, expectedChange, sChange)
 	assert.NotEqual(t, sGenerated, sChange)
+
+	emptyFormat := "%s"
+	wrapped := StringToStringWithFormat(bs, emptyFormat)
+	assert.Equal(t, bs, wrapped)
 }
