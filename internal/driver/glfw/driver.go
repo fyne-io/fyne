@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"sync"
 
-	ico "github.com/Kodeworks/golang-image-ico"
+	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"

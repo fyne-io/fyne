@@ -4,8 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image"
 	_ "image/jpeg" // import image encodings
-	_ "image/png"  // import image encodings
+	"image/png"    // import image encodings
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
@@ -120,6 +122,7 @@ type Packager struct {
 	install, release     bool
 	certificate, profile string // optional flags for releasing
 	tags, category       string
+	tempDir              string
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -255,6 +258,7 @@ func (p *Packager) doPackage(runner runner) error {
 	if p.AppBuild <= 0 {
 		p.AppBuild = defaultAppBuild
 	}
+	defer os.RemoveAll(p.tempDir)
 
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
 		files, err := p.buildPackage(runner)
@@ -302,7 +306,14 @@ func (p *Packager) removeBuild(files []string) {
 	}
 }
 
-func (p *Packager) validate() error {
+func (p *Packager) validate() (err error) {
+	p.tempDir, err = ioutil.TempDir("", "fyne-package-*")
+	defer func() {
+		if err != nil {
+			_ = os.RemoveAll(p.tempDir)
+		}
+	}()
+
 	if p.os == "" {
 		p.os = targetOS()
 	}
@@ -346,6 +357,13 @@ func (p *Packager) validate() error {
 	}
 	if !util.Exists(p.icon) {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
+	}
+	if strings.ToLower(filepath.Ext(p.icon)) != ".png" {
+		tmp, err := p.normaliseIcon(p.icon)
+		if err != nil {
+			return err
+		}
+		p.icon = tmp
 	}
 
 	p.AppID, err = validateAppID(p.AppID, p.os, p.Name, p.release)
@@ -410,6 +428,32 @@ func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	if p.AppBuild == 0 {
 		p.AppBuild = data.Details.Build
 	}
+}
+
+// normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
+// Successful conversion will return a path to the new file.
+// Any errors that occur will be returned with an empty string for new path.
+func (p *Packager) normaliseIcon(path string) (string, error) {
+	// convert icon
+	img, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open source image: %w", err)
+	}
+	defer img.Close()
+	srcImg, _, err := image.Decode(img)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode source image: %w", err)
+	}
+
+	out, err := ioutil.TempFile(p.tempDir, "fyne-ico-*.png")
+	if err != nil {
+		return "", fmt.Errorf("failed to open image output file: %w", err)
+	}
+	tmpPath := out.Name()
+	defer out.Close()
+
+	err = png.Encode(out, srcImg)
+	return tmpPath, err
 }
 
 func validateAppID(appID, os, name string, release bool) (string, error) {

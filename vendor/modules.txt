@@ -7,9 +7,6 @@ fyne.io/systray/internal/generated/notifier
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
-# github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
-## explicit
-github.com/Kodeworks/golang-image-ico
 # github.com/akavel/rsrc v0.10.2
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
@@ -30,6 +27,9 @@ github.com/fyne-io/gl-js
 # github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 ## explicit
 github.com/fyne-io/glfw-js
+# github.com/fyne-io/image v0.0.0-20220601192234-cf0c0847e24d
+## explicit
+github.com/fyne-io/image/ico
 # github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 ## explicit
 github.com/go-gl/gl/v2.1/gl
@@ -70,6 +70,8 @@ github.com/jackmordaunt/icns/v2
 # github.com/josephspurrier/goversioninfo v1.4.0
 ## explicit
 github.com/josephspurrier/goversioninfo
+# github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e
+github.com/jsummers/gobmp
 # github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 ## explicit
 github.com/lucor/goinfo
@@ -92,7 +94,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 ## explicit
 github.com/srwiley/rasterx
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.7.1
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
@@ -108,7 +110,7 @@ github.com/yuin/goldmark/renderer
 github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
-# golang.org/x/image v0.0.0-20200430140353-33d19683fad8
+# golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
 ## explicit
 golang.org/x/image/colornames
 golang.org/x/image/draw

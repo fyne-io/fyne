@@ -5,11 +5,11 @@ go 1.14
 require (
 	fyne.io/systray v1.9.1-0.20220523202515-bb6f1d955cff
 	github.com/BurntSushi/toml v1.1.0
-	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
+	github.com/fyne-io/image v0.0.0-20220601192234-cf0c0847e24d
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 	github.com/go-ole/go-ole v1.2.6
@@ -23,10 +23,10 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.4.0
-	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
+	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
 	golang.org/x/mod v0.4.2
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
