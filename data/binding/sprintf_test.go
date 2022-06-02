@@ -25,10 +25,8 @@ func TestSprintfConversionRead(t *testing.T) {
 	bu := BindURI(&u)
 
 	format := "Bool %v, Float %f, Int %i, Rune %v, String '%s', URI '%s'"
-	sp, err := NewSprintf(format, bb, bf, bi, br, bs, bu)
+	sp := NewSprintf(format, bb, bf, bi, br, bs, bu)
 	expected := fmt.Sprintf(format, b, f, i, r, s, u)
-
-	assert.Nil(t, err)
 	assert.NotNil(t, sp)
 
 	waitForItems()
@@ -73,10 +71,8 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	bu := BindURI(&u)
 
 	format := "Bool %v , Float %f , Int %v , Rune %v , String %s , URI %s"
-	sp, err := NewSprintf(format, bb, bf, bi, br, bs, bu)
+	sp := NewSprintf(format, bb, bf, bi, br, bs, bu)
 	expected := fmt.Sprintf(format, b, f, i, r, s, u)
-
-	assert.Nil(t, err)
 	assert.NotNil(t, sp)
 
 	waitForItems()
@@ -108,4 +104,38 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	assert.NotNil(t, sChange)
 	assert.Equal(t, expectedChange, sChange)
 	assert.NotEqual(t, sGenerated, sChange)
+}
+
+func TestNewStringWithFormat(t *testing.T) {
+	var s = "this is a string"
+	bs := BindString(&s)
+
+	format := "String %s"
+	sp := StringToStringWithFormat(bs, format)
+	expected := fmt.Sprintf(format, s)
+	assert.NotNil(t, sp)
+
+	waitForItems()
+
+	sGenerated, err := sp.Get()
+	assert.Nil(t, err)
+	assert.NotNil(t, sGenerated)
+	assert.Equal(t, expected, sGenerated)
+
+	err = sp.Set("String nospacestring")
+	assert.Nil(t, err)
+
+	waitForItems()
+
+	assert.Equal(t, s, "nospacestring")
+	expectedChange := fmt.Sprintf(format, s)
+	sChange, err := sp.Get()
+	assert.Nil(t, err)
+	assert.NotNil(t, sChange)
+	assert.Equal(t, expectedChange, sChange)
+	assert.NotEqual(t, sGenerated, sChange)
+
+	emptyFormat := "%s"
+	wrapped := StringToStringWithFormat(bs, emptyFormat)
+	assert.Equal(t, bs, wrapped)
 }

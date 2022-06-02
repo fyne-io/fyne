@@ -20,7 +20,7 @@ type sprintfString struct {
 // and will have all the same limitation as those function.
 //
 // Since: 2.2
-func NewSprintf(format string, b ...DataItem) (String, error) {
+func NewSprintf(format string, b ...DataItem) String {
 	ret := &sprintfString{
 		String: NewString(),
 		format: format,
@@ -31,7 +31,7 @@ func NewSprintf(format string, b ...DataItem) (String, error) {
 		value.AddListener(ret)
 	}
 
-	return ret, nil
+	return ret
 }
 
 func (s *sprintfString) DataChanged() {
@@ -202,4 +202,17 @@ func (s *sprintfString) Set(str string) error {
 	}
 
 	return nil
+}
+
+// StringToStringWithFormat creates a binding that converts a string to another string using the specified format.
+// Changes to the returned String will be pushed to the passed in String and setting a new string value will parse and
+// set the underlying String if it matches the format and the parse was successful.
+//
+// Since: 2.2
+func StringToStringWithFormat(str String, format string) String {
+	if format == "%s" { // Same as not using custom formatting.
+		return str
+	}
+
+	return NewSprintf(format, str)
 }
