@@ -34,6 +34,13 @@ func NewSprintf(format string, b ...DataItem) (String, error) {
 	return ret, nil
 }
 
+// NewStringWithFormat is a wrapper over NewSprintf a String binding that format
+// its content using the format string and the provide additional parameter that
+// must be other data bindings.
+func NewStringWithFormat(format string, b ...DataItem) (String, error) {
+	return NewSprintf(format, b...)
+}
+
 func (s *sprintfString) DataChanged() {
 	data := make([]interface{}, 0, len(s.source))
 
