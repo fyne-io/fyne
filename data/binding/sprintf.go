@@ -20,7 +20,7 @@ type sprintfString struct {
 // and will have all the same limitation as those function.
 //
 // Since: 2.2
-func NewSprintf(format string, b ...DataItem) (String, error) {
+func NewSprintf(format string, b ...DataItem) String {
 	ret := &sprintfString{
 		String: NewString(),
 		format: format,
@@ -31,14 +31,7 @@ func NewSprintf(format string, b ...DataItem) (String, error) {
 		value.AddListener(ret)
 	}
 
-	return ret, nil
-}
-
-// NewStringWithFormat is a wrapper over NewSprintf a String binding that format
-// its content using the format string and the provide additional parameter that
-// must be other data bindings.
-func NewStringWithFormat(format string, b ...DataItem) (String, error) {
-	return NewSprintf(format, b...)
+	return ret
 }
 
 func (s *sprintfString) DataChanged() {

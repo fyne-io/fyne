@@ -25,10 +25,8 @@ func TestSprintfConversionRead(t *testing.T) {
 	bu := BindURI(&u)
 
 	format := "Bool %v, Float %f, Int %i, Rune %v, String '%s', URI '%s'"
-	sp, err := NewSprintf(format, bb, bf, bi, br, bs, bu)
+	sp := NewSprintf(format, bb, bf, bi, br, bs, bu)
 	expected := fmt.Sprintf(format, b, f, i, r, s, u)
-
-	assert.Nil(t, err)
 	assert.NotNil(t, sp)
 
 	waitForItems()
@@ -73,10 +71,8 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	bu := BindURI(&u)
 
 	format := "Bool %v , Float %f , Int %v , Rune %v , String %s , URI %s"
-	sp, err := NewSprintf(format, bb, bf, bi, br, bs, bu)
+	sp := NewSprintf(format, bb, bf, bi, br, bs, bu)
 	expected := fmt.Sprintf(format, b, f, i, r, s, u)
-
-	assert.Nil(t, err)
 	assert.NotNil(t, sp)
 
 	waitForItems()
