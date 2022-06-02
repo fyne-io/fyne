@@ -23,6 +23,11 @@ type Hyperlink struct {
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 
+	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
+	//
+	// Since: 2.2
+	OnTapped func() `json:"-"`
+
 	focused, hovered bool
 	provider         *RichText
 }
@@ -152,6 +157,11 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
+	if hl.OnTapped != nil {
+		hl.OnTapped()
+		return
+	}
+
 	hl.openURL()
 }
 

@@ -80,6 +80,19 @@ func TestHyperlink_Focus(t *testing.T) {
 	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
 }
 
+func TestHyperlink_OnTapped(t *testing.T) {
+	tapped := 0
+	link := &Hyperlink{Text: "Test"}
+	test.Tap(link)
+	assert.Equal(t, 0, tapped)
+
+	link.OnTapped = func() {
+		tapped++
+	}
+	test.Tap(link)
+	assert.Equal(t, 1, tapped)
+}
+
 func TestHyperlink_Resize(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test"}
 	hyperlink.CreateRenderer()
