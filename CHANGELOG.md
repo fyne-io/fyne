@@ -3,12 +3,23 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## Bowmore - Ongoing
+## 2.2.0 - 7 June 2022
 
 ### Added
 
 * Add SetIcon method on ToolbarAction (#2475)
 * Access compiled app metadata using new `App.Metadata()` method
+* Add support for System tray icon and menu (#283)
+* Support for Android Application Bundle (.aab) (#2663)
+* Add keyboard shortcuts to menu (#682)
+* Add technical preview of web driver and `fyne serve` command
+* Added `iossimulator` build target (#1917)
+* Allow dynamic themes via JSON templates (#211)
+* custom hyperlink callback (#2979)
+* Add support for ico file when compiling for windows (#2412)
+* Add binding.NewStringWithFormat (#2890)
+* Add Entry.SetMinRowsVisible
+* Add Menu.Refresh() and MainMenu.Refresh() (#2853)
 
 ### Changed
 
@@ -17,10 +28,22 @@ More detailed release notes can be found on the [releases page](https://github.c
 * ProgressBar widget height is now consistent with other widgets
 * Include check in DocTabs menu to show current tab
 * Don't call OnScrolled if offset did not change (#2646)
+* Prefer ANDROID_NDK_HOME over the ANDROID_HOME ndk-bundle location (#2920)
+* Support serialisation / deserialisation of the widget tree (#5)
+* Better error reporting / handling when OpenGL is not available (#2689)
 
 ### Fixed
 
 * SendNotification does not show app name on Windows (#1940)
+* Copy-paste via keyboard don't work translated keyboard mappings on Windows (#1220)
+* OnScrolled triggered when offset hasn't changed (#1868)
+* Carriage Return (\r) is rendered as space (#2456)
+* storage.List() returns list with nil elements for empty directories (#2858)
+* Entry widget, position of cursor when clicking empty space (#2877)
+* SelectEntry cause UI hang (#2925)
+* Font cutoff with bold italics (#3001)
+* Fyne error: Preferences load error (#2936, 3015)
+* Scrolled List bad redraw when window is maximized (#3013)
 
 
 ## 2.1.4 - 17 March 2022
