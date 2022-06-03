@@ -384,6 +384,40 @@ func TestList_ScrollThenShrink(t *testing.T) {
 	assert.Equal(t, "Data 0", visibles[0].(*listItem).child.(*Label).Text)
 }
 
+func TestList_ScrollThenResizeWindow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	data := make([]string, 0, 20)
+	for i := 0; i < 20; i++ {
+		data = append(data, fmt.Sprintf("Data %d", i))
+	}
+
+	list := NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("TEMPLATE")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*Label).SetText(data[id])
+		},
+	)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(300, 300))
+
+	list.scroller.ScrollToBottom()
+
+	// increase window size enough so that all elements are visible
+	w.Resize(fyne.NewSize(300, 1000))
+
+	visibles := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	visibleCount := len(visibles)
+	assert.Equal(t, 20, visibleCount)
+	assert.Equal(t, "Data 0", visibles[0].(*listItem).child.(*Label).Text)
+}
+
 func TestList_NoFunctionsSet(t *testing.T) {
 	list := &List{}
 	w := test.NewWindow(list)
