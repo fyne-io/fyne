@@ -50,10 +50,15 @@ func TestFileItem_FolderName(t *testing.T) {
 	assert.Equal(t, "foldername", item.name)
 
 	item = f.newFileItem(storage.NewFileURI("/path/to/myapp.app/"), true)
-	assert.Equal(t, "myapp.app", item.name)
+	assert.Equal(t, "myapp", item.name)
 
 	item = f.newFileItem(storage.NewFileURI("/path/to/.maybeHidden/"), true)
 	assert.Equal(t, ".maybeHidden", item.name)
+
+	// Test that the extension remains for the list view.
+	f.view = listView
+	item = f.newFileItem(storage.NewFileURI("/path/to/myapp.app/"), true)
+	assert.Equal(t, "myapp.app", item.name)
 }
 
 func TestNewFileItem(t *testing.T) {
