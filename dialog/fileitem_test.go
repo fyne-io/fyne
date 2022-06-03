@@ -22,6 +22,24 @@ func TestFileItem_Name(t *testing.T) {
 
 	item = f.newFileItem(storage.NewFileURI("/path/to/.maybeHidden.txt"), false)
 	assert.Equal(t, ".maybeHidden", item.name)
+
+	item = f.newFileItem(storage.NewFileURI("/path/to/noext"), false)
+	assert.Equal(t, "noext", item.name)
+
+	// Test that the extension remains for the list view.
+	f.view = listView
+
+	item = f.newFileItem(storage.NewFileURI("/path/to/filename.txt"), false)
+	assert.Equal(t, "filename.txt", item.name)
+
+	item = f.newFileItem(storage.NewFileURI("/path/to/MyFile.jpeg"), false)
+	assert.Equal(t, "MyFile.jpeg", item.name)
+
+	item = f.newFileItem(storage.NewFileURI("/path/to/.maybeHidden.txt"), false)
+	assert.Equal(t, ".maybeHidden.txt", item.name)
+
+	item = f.newFileItem(storage.NewFileURI("/path/to/noext"), false)
+	assert.Equal(t, "noext", item.name)
 }
 
 func TestFileItem_FolderName(t *testing.T) {
