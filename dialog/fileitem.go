@@ -63,15 +63,6 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func fileName(path fyne.URI) (name string) {
-	pathstr := path.String()[len(path.Scheme())+3:]
-	name = filepath.Base(pathstr)
-	ext := filepath.Ext(name[1:])
-	name = name[:len(name)-len(ext)]
-
-	return
-}
-
 func (i *fileDialogItem) isDirectory() bool {
 	return i.dir
 }
@@ -80,13 +71,13 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
 	item := &fileDialogItem{
 		picker:   f,
 		location: location,
+		name:     location.Name(),
 		dir:      dir,
 	}
 
-	if dir {
-		item.name = location.Name()
-	} else {
-		item.name = fileName(location)
+	if f.view == gridView {
+		ext := filepath.Ext(item.name[1:])
+		item.name = item.name[:len(item.name)-len(ext)]
 	}
 
 	item.ExtendBaseWidget(item)
