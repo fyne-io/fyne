@@ -512,7 +512,13 @@ func (c *tableCells) Resize(s fyne.Size) {
 	if s == c.size {
 		return
 	}
+	cSizeBeforeResize := c.size
 	c.BaseWidget.Resize(s)
+	if c.size.Height > cSizeBeforeResize.Height {
+		// table height has increased.
+		// call ScrollToTop() otherwise empty rows will appear at the top of the table.
+		c.t.ScrollToTop()
+	}
 	c.Refresh() // trigger a redraw
 }
 
