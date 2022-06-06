@@ -94,7 +94,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 ## explicit
 github.com/srwiley/rasterx
-# github.com/stretchr/testify v1.7.1
+# github.com/stretchr/testify v1.7.2
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
@@ -177,7 +177,7 @@ golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
 ## explicit
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.1
 gopkg.in/yaml.v3
 # honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 ## explicit
