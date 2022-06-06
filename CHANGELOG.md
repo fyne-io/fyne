@@ -11,15 +11,19 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Access compiled app metadata using new `App.Metadata()` method
 * Add support for System tray icon and menu (#283)
 * Support for Android Application Bundle (.aab) (#2663)
+* Initial support for OpenBSD and NetBSD
 * Add keyboard shortcuts to menu (#682)
 * Add technical preview of web driver and `fyne serve` command
 * Added `iossimulator` build target (#1917)
 * Allow dynamic themes via JSON templates (#211)
-* custom hyperlink callback (#2979)
-* Add support for ico file when compiling for windows (#2412)
+* Custom hyperlink callback (#2979)
+* Add support for `.ico` file when compiling for windows (#2412)
 * Add binding.NewStringWithFormat (#2890)
 * Add Entry.SetMinRowsVisible
 * Add Menu.Refresh() and MainMenu.Refresh() (#2853)
+* Packages for Linux and BSD now support installing into the home directory
+* Add `.RemoveAll()` to containers
+* Add an AllString validator for chaining together string validators
 
 ### Changed
 
@@ -31,6 +35,12 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Prefer ANDROID_NDK_HOME over the ANDROID_HOME ndk-bundle location (#2920)
 * Support serialisation / deserialisation of the widget tree (#5)
 * Better error reporting / handling when OpenGL is not available (#2689)
+* Memory is now better reclaimed on Android when the OS requests it
+* Notifications on Linux and BSD now show the application icon
+* Change listeners for preferences no longer run when setting the same value
+* The file dialog now shows extensions in the list view for better readability
+* Many optimisations and widget performance enhancements
+* Updated various dependencies to their latest versions
 
 ### Fixed
 
@@ -44,6 +54,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Font cutoff with bold italics (#3001)
 * Fyne error: Preferences load error (#2936, 3015)
 * Scrolled List bad redraw when window is maximized (#3013)
+* Linux and BSD packages not being installable if the name contained spaces
 
 
 ## 2.1.4 - 17 March 2022
