@@ -39,8 +39,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Notifications on Linux and BSD now show the application icon
 * Change listeners for preferences no longer run when setting the same value
 * The file dialog now shows extensions in the list view for better readability
-* Updated various dependencies to their latest versions
 * Many optimisations and widget performance enhancements
+* Updated various dependencies to their latest versions
 
 ### Fixed
 
