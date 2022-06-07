@@ -216,3 +216,18 @@ func BenchmarkUnboundedChann(b *testing.B) {
 		})
 	})
 }
+
+func TestUnboundedChannCloseStatus(t *testing.T) {
+	ch := async.NewUnboundedStructChan()
+	for i := 0; i < 100; i++ {
+		ch.In() <- struct{}{}
+	}
+	ch.Close()
+
+	// Theoretically, this is not a dead loop. If the channel
+	// is closed, this loop will terminate soon. Otherwise, we will meet
+	// timeout in the test which indicates a failure and a potential bug.
+	for !async.IsClosed(ch) {
+		t.Log("unbounded channel is still not entirely closed")
+	}
+}

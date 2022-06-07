@@ -191,10 +191,13 @@ func (ch *Unbounded{{.Name}}Chan) closed() {
 	for len(ch.q) > 0 {
 		select {
 		case ch.out <- ch.q[0]:
-			ch.q[0] = nil // de-reference earlier to help GC
-			ch.q = ch.q[1:]
+		// The default branch exists because we need guarantee
+		// the loop can terminate. If there is a receiver, the
+		// first case will ways be selected.
 		default:
 		}
+		ch.q[0] = nil // de-reference earlier to help GC
+		ch.q = ch.q[1:]
 	}
 	close(ch.out)
 	close(ch.close)
