@@ -194,6 +194,12 @@ func (t *Table) ScrollTo(id TableCellID) {
 		scrollPos.Y = cellY + cellHeight - t.scroll.Size().Height
 	}
 
+	if scrollPos.X < 0 {
+		scrollPos.X = 0
+	}
+	if scrollPos.Y < 0 {
+		scrollPos.Y = 0
+	}
 	t.scroll.Offset = scrollPos
 	t.offset = scrollPos
 	t.finishScroll()
@@ -211,6 +217,9 @@ func (t *Table) ScrollToBottom() {
 	cellY, cellHeight := t.findY(rows - 1)
 	y := cellY + cellHeight - t.scroll.Size().Height
 
+	if y < 0 {
+		y = 0
+	}
 	t.scroll.Offset.Y = y
 	t.offset.Y = y
 	t.finishScroll()
@@ -254,6 +263,9 @@ func (t *Table) ScrollToTrailing() {
 	cellX, cellWidth := t.findX(cols - 1)
 	scrollX := cellX + cellWidth - t.scroll.Size().Width
 
+	if scrollX < 0 {
+		scrollX = 0
+	}
 	t.scroll.Offset.X = scrollX
 	t.offset.X = scrollX
 	t.finishScroll()
