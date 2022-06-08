@@ -572,3 +572,58 @@ func (t *separatorThicknessZeroTheme) Size(n fyne.ThemeSizeName) float32 {
 	}
 	return t.Theme.Size(n)
 }
+
+func TestTable_ScrollToBottomThenResize(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	const (
+		maxRows int     = 10
+		maxCols int     = 10
+		width   float32 = 10
+		height  float32 = 10
+	)
+
+	const labelText = "a"
+
+	data := make([][]string, 0)
+	for i := 0; i < maxRows; i++ {
+		row := []string{}
+		for j := 0; j < maxCols; j++ {
+			row = append(row, labelText)
+		}
+		data = append(data, row)
+	}
+
+	createdLabels := make([]*Label, 0)
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject {
+			l := NewLabel("")
+			createdLabels = append(createdLabels, l)
+			return l
+		},
+		func(cellID TableCellID, o fyne.CanvasObject) {
+			o.(*Label).SetText(data[cellID.Row][cellID.Col])
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	// choose a size small enough that there is vertical scroll
+	w.Resize(fyne.NewSize(100, 50))
+	table.ScrollToBottom()
+	table.Select(TableCellID{Row: maxRows - 1, Col: 1})
+	// increase size big enough that there is no scroll
+	w.Resize(fyne.NewSize(1000, 1000))
+	var visibleCount int
+	for _, l := range createdLabels {
+		if l.Text == labelText {
+			visibleCount++
+		}
+	}
+	// all cells should be visible
+	assert.Equal(t, maxRows*maxCols, visibleCount)
+}
