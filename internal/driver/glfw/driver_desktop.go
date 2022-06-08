@@ -38,6 +38,9 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 					systray.SetIcon(img)
 				}
 			}
+
+			// it must be refreshed after init, so an earlier call would have been ineffective
+			d.refreshSystray(m)
 		}, func() {
 			// anything required for tear-down
 		})
