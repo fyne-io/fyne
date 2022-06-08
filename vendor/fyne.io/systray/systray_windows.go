@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package systray
@@ -5,6 +6,7 @@ package systray
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,6 +16,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/tevino/abool"
 	"golang.org/x/sys/windows"
 )
 
@@ -63,6 +66,9 @@ var (
 	pTranslateMessage      = u32.NewProc("TranslateMessage")
 	pUnregisterClass       = u32.NewProc("UnregisterClassW")
 	pUpdateWindow          = u32.NewProc("UpdateWindow")
+
+	// ErrTrayNotReadyYet is returned by functions when they are called before the tray has been initialized.
+	ErrTrayNotReadyYet = errors.New("tray not ready yet")
 )
 
 // Contains window class information.
@@ -204,11 +210,22 @@ type winTray struct {
 
 	wmSystrayMessage,
 	wmTaskbarCreated uint32
+
+	initialized *abool.AtomicBool
+}
+
+// isReady checks if the tray as already been initialized. It is not goroutine safe with in regard to the initialization function, but prevents a panic when functions are called too early.
+func (t *winTray) isReady() bool {
+	return t.initialized.IsSet()
 }
 
 // Loads an image from file and shows it in tray.
 // Shell_NotifyIcon: https://msdn.microsoft.com/en-us/library/windows/desktop/bb762159(v=vs.85).aspx
 func (t *winTray) setIcon(src string) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
 	const NIF_ICON = 0x00000002
 
 	h, err := t.loadIconFrom(src)
@@ -228,6 +245,10 @@ func (t *winTray) setIcon(src string) error {
 // Sets tooltip on icon.
 // Shell_NotifyIcon: https://msdn.microsoft.com/en-us/library/windows/desktop/bb762159(v=vs.85).aspx
 func (t *winTray) setTooltip(src string) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
 	const NIF_TIP = 0x00000004
 	b, err := windows.UTF16FromString(src)
 	if err != nil {
@@ -243,7 +264,9 @@ func (t *winTray) setTooltip(src string) error {
 	return t.nid.modify()
 }
 
-var wt winTray
+var wt = winTray{
+	initialized: abool.New(),
+}
 
 // WindowProc callback function that processes messages sent to a window.
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms633573(v=vs.85).aspx
@@ -259,6 +282,7 @@ func (t *winTray) wndProc(hWnd windows.Handle, message uint32, wParam, lParam ui
 	)
 	switch message {
 	case WM_CREATE:
+		t.initialized.Set()
 		systrayReady()
 	case WM_COMMAND:
 		menuItemId := int32(wParam)
@@ -494,6 +518,10 @@ func (t *winTray) convertToSubMenu(menuItemId uint32) (windows.Handle, error) {
 }
 
 func (t *winTray) addOrUpdateMenuItem(menuItemId uint32, parentId uint32, title string, disabled, checked bool) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms647578(v=vs.85).aspx
 	const (
 		MIIM_FTYPE   = 0x00000100
@@ -579,6 +607,10 @@ func (t *winTray) addOrUpdateMenuItem(menuItemId uint32, parentId uint32, title 
 }
 
 func (t *winTray) addSeparatorMenuItem(menuItemId, parentId uint32) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms647578(v=vs.85).aspx
 	const (
 		MIIM_FTYPE = 0x00000100
@@ -614,6 +646,10 @@ func (t *winTray) addSeparatorMenuItem(menuItemId, parentId uint32) error {
 }
 
 func (t *winTray) hideMenuItem(menuItemId, parentId uint32) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms647629(v=vs.85).aspx
 	const MF_BYCOMMAND = 0x00000000
 	const ERROR_SUCCESS syscall.Errno = 0
@@ -635,6 +671,10 @@ func (t *winTray) hideMenuItem(menuItemId, parentId uint32) error {
 }
 
 func (t *winTray) showMenu() error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
 	const (
 		TPM_BOTTOMALIGN = 0x0020
 		TPM_LEFTALIGN   = 0x0000
@@ -700,6 +740,10 @@ func (t *winTray) getVisibleItemIndex(parent, val uint32) int {
 // Loads an image from file to be shown in tray or menu item.
 // LoadImage: https://msdn.microsoft.com/en-us/library/windows/desktop/ms648045(v=vs.85).aspx
 func (t *winTray) loadIconFrom(src string) (windows.Handle, error) {
+	if !wt.isReady() {
+		return 0, ErrTrayNotReadyYet
+	}
+
 	const IMAGE_ICON = 1               // Loads an icon
 	const LR_LOADFROMFILE = 0x00000010 // Loads the stand-alone image from the file
 	const LR_DEFAULTSIZE = 0x00000040  // Loads default-size icon for windows(SM_CXICON x SM_CYICON) if cx, cy are set to zero

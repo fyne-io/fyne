@@ -1,4 +1,4 @@
-# fyne.io/systray v1.9.1-0.20220523202515-bb6f1d955cff
+# fyne.io/systray v1.10.0
 ## explicit
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
@@ -98,6 +98,8 @@ github.com/srwiley/rasterx
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/tevino/abool v1.2.0
+github.com/tevino/abool
 # github.com/urfave/cli/v2 v2.4.0
 ## explicit
 github.com/urfave/cli/v2

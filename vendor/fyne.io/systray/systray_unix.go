@@ -1,3 +1,4 @@
+//go:build linux || freebsd || openbsd || netbsd
 // +build linux freebsd openbsd netbsd
 
 //Note that you need to have github.com/knightpp/dbus-codegen-go installed from "custom" branch
@@ -10,9 +11,10 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	_ "image/png"
+	_ "image/png" // used only here
 	"log"
 	"os"
+	"sync"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/godbus/dbus/v5/introspect"
@@ -48,23 +50,27 @@ func SetTemplateIcon(templateIconBytes []byte, regularIconBytes []byte) {
 // iconBytes should be the content of .ico for windows and .ico/.jpg/.png
 // for other platforms.
 func SetIcon(iconBytes []byte) {
+	instance.lock.Lock()
 	instance.iconData = iconBytes
+	props := instance.props
+	conn := instance.conn
+	defer instance.lock.Unlock()
 
-	if instance.props == nil {
+	if props == nil {
 		return
 	}
 
-	dbusErr := instance.props.Set("org.kde.StatusNotifierItem", "IconPixmap",
+	dbusErr := props.Set("org.kde.StatusNotifierItem", "IconPixmap",
 		dbus.MakeVariant([]PX{convertToPixels(iconBytes)}))
 	if dbusErr != nil {
 		log.Printf("systray error: failed to set IconPixmap prop: %s\n", dbusErr)
 		return
 	}
-	if instance.conn == nil {
+	if conn == nil {
 		return
 	}
 
-	err := notifier.Emit(instance.conn, &notifier.StatusNotifierItem_NewIconSignal{
+	err := notifier.Emit(conn, &notifier.StatusNotifierItem_NewIconSignal{
 		Path: path,
 		Body: &notifier.StatusNotifierItem_NewIconSignalBody{},
 	})
@@ -76,23 +82,27 @@ func SetIcon(iconBytes []byte) {
 
 // SetTitle sets the systray title, only available on Mac and Linux.
 func SetTitle(t string) {
+	instance.lock.Lock()
 	instance.title = t
+	props := instance.props
+	conn := instance.conn
+	defer instance.lock.Unlock()
 
-	if instance.props == nil {
+	if props == nil {
 		return
 	}
-	dbusErr := instance.props.Set("org.kde.StatusNotifierItem", "Title",
+	dbusErr := props.Set("org.kde.StatusNotifierItem", "Title",
 		dbus.MakeVariant(t))
 	if dbusErr != nil {
 		log.Printf("systray error: failed to set Title prop: %s\n", dbusErr)
 		return
 	}
 
-	if instance.conn == nil {
+	if conn == nil {
 		return
 	}
 
-	err := notifier.Emit(instance.conn, &notifier.StatusNotifierItem_NewTitleSignal{
+	err := notifier.Emit(conn, &notifier.StatusNotifierItem_NewTitleSignal{
 		Path: path,
 		Body: &notifier.StatusNotifierItem_NewTitleSignalBody{},
 	})
@@ -104,14 +114,17 @@ func SetTitle(t string) {
 
 // SetTooltip sets the systray tooltip to display on mouse hover of the tray icon,
 // only available on Mac and Windows.
-func SetTooltip(tooltip string) {
-	instance.tooltipTitle = tooltip
+func SetTooltip(tooltipTitle string) {
+	instance.lock.Lock()
+	instance.tooltipTitle = tooltipTitle
+	props := instance.props
+	defer instance.lock.Unlock()
 
-	if instance.props == nil {
+	if props == nil {
 		return
 	}
-	dbusErr := instance.props.Set("org.kde.StatusNotifierItem", "ToolTip",
-		dbus.MakeVariant(tooltip))
+	dbusErr := props.Set("org.kde.StatusNotifierItem", "ToolTip",
+		dbus.MakeVariant(tooltip{V2: tooltipTitle}))
 	if dbusErr != nil {
 		log.Printf("systray error: failed to set ToolTip prop: %s\n", dbusErr)
 		return
@@ -150,9 +163,7 @@ func quit() {
 
 func nativeStart() {
 	systrayReady()
-
 	conn, _ := dbus.ConnectSessionBus()
-	instance.conn = conn
 	err := notifier.ExportStatusNotifierItem(conn, path, &notifier.UnimplementedStatusNotifierItem{})
 	if err != nil {
 		log.Printf("systray error: failed to export status notifier item: %s\n", err)
@@ -166,16 +177,14 @@ func nativeStart() {
 	_, err = conn.RequestName(name, dbus.NameFlagDoNotQueue)
 	if err != nil {
 		log.Printf("systray error: failed to request name: %s\n", err)
-		// fall back to existing name
-		name = conn.Names()[0] //nolint:ineffassign,staticcheck // TODO: Name is not used anymore.
+		// it's not critical error: continue
 	}
-
-	instance.props, err = prop.Export(conn, path, instance.createPropSpec())
+	props, err := prop.Export(conn, path, instance.createPropSpec())
 	if err != nil {
 		log.Printf("systray error: failed to export notifier item properties to bus: %s\n", err)
 		return
 	}
-	instance.menuProps, err = prop.Export(conn, menuPath, createMenuPropSpec())
+	menuProps, err := prop.Export(conn, menuPath, createMenuPropSpec())
 	if err != nil {
 		log.Printf("systray error: failed to export notifier menu properties to bus: %s\n", err)
 		return
@@ -210,6 +219,12 @@ func nativeStart() {
 		return
 	}
 
+	instance.lock.Lock()
+	instance.conn = conn
+	instance.props = props
+	instance.menuProps = menuProps
+	instance.lock.Unlock()
+
 	obj := conn.Object("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher")
 	call := obj.Call("org.kde.StatusNotifierWatcher.RegisterStatusNotifierItem", 0, path)
 	if call.Err != nil {
@@ -227,12 +242,19 @@ type tray struct {
 	// title and tooltip state
 	title, tooltipTitle string
 
+	lock             sync.RWMutex
 	menu             *menuLayout
+	menuLock         sync.RWMutex
 	props, menuProps *prop.Properties
 	menuVersion      uint32
 }
 
 func (t *tray) createPropSpec() map[string]map[string]*prop.Prop {
+	t.lock.RLock()
+	title := t.title
+	tooltipTitle := t.tooltipTitle
+	iconData := t.iconData
+	t.lock.RUnlock()
 	return map[string]map[string]*prop.Prop{
 		"org.kde.StatusNotifierItem": {
 			"Status": {
@@ -242,7 +264,7 @@ func (t *tray) createPropSpec() map[string]map[string]*prop.Prop {
 				Callback: nil,
 			},
 			"Title": {
-				Value:    t.title,
+				Value:    title,
 				Writable: true,
 				Emit:     prop.EmitTrue,
 				Callback: nil,
@@ -266,7 +288,7 @@ func (t *tray) createPropSpec() map[string]map[string]*prop.Prop {
 				Callback: nil,
 			},
 			"IconPixmap": {
-				Value:    []PX{convertToPixels(t.iconData)},
+				Value:    []PX{convertToPixels(iconData)},
 				Writable: true,
 				Emit:     prop.EmitTrue,
 				Callback: nil,
@@ -285,12 +307,12 @@ func (t *tray) createPropSpec() map[string]map[string]*prop.Prop {
 			},
 			"Menu": {
 				Value:    dbus.ObjectPath(menuPath),
-				Writable: false,
+				Writable: true,
 				Emit:     prop.EmitTrue,
 				Callback: nil,
 			},
 			"ToolTip": {
-				Value:    tooltip{V2: t.tooltipTitle},
+				Value:    tooltip{V2: tooltipTitle},
 				Writable: true,
 				Emit:     prop.EmitTrue,
 				Callback: nil,
@@ -298,6 +320,7 @@ func (t *tray) createPropSpec() map[string]map[string]*prop.Prop {
 		}}
 }
 
+// PX is picture pix map structure with width and high
 type PX struct {
 	W, H int
 	Pix  []byte
