@@ -3,6 +3,13 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.2.1 - Ongoing
+
+### Fixed
+
+* Resolve issue where macOS systray menu may not appear
+
+
 ## 2.2.0 - 7 June 2022
 
 ### Added
