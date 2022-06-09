@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Fix various race conditions and compatibility issues with System tray menus
 * Resolve issue where macOS systray menu may not appear
+* Updated yaml dependency to fix CVE-2022-28948
 
 
 ## 2.2.0 - 7 June 2022
