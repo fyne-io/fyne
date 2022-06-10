@@ -11,6 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Resolve issue where macOS systray menu may not appear
 * Updated yaml dependency to fix CVE-2022-28948
 * Tab buttons stop working after removing a tab (#3050)
+* os.SetEnv("FYNE_FONT") doesn't work in v2.2.0 (#3056)
 
 
 ## 2.2.0 - 7 June 2022
