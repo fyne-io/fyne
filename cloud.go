@@ -2,6 +2,8 @@ package fyne
 
 // CloudProvider specifies the identifying information of a cloud provider.
 // This information is mostly used by the `fyne.io/cloud ShowSettings' user flow.
+//
+// Since: 2.3
 type CloudProvider interface {
 	// ProviderDescription returns a more detailed description of this cloud provider.
 	ProviderDescription() string
@@ -16,6 +18,8 @@ type CloudProvider interface {
 
 // CloudProviderPreferences interface defines the functionality that a cloud provider will include if it is capable
 // of synchronizing user preferences.
+//
+// Since: 2.3
 type CloudProviderPreferences interface {
 	// CloudPreferences returns a preference provider that will sync values to the cloud this provider uses.
 	CloudPreferences(App) Preferences
