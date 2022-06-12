@@ -243,6 +243,10 @@ func DefaultSymbolFont() fyne.Resource {
 //
 // Since: 2.0
 func DefaultTheme() fyne.Theme {
+	if defaultTheme == nil {
+		defaultTheme = setupDefaultTheme()
+	}
+
 	return defaultTheme
 }
 
@@ -442,7 +446,7 @@ func TextSubHeadingSize() float32 {
 }
 
 var (
-	defaultTheme = setupDefaultTheme()
+	defaultTheme fyne.Theme
 
 	errorColor  = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
 	focusColors = map[string]color.Color{

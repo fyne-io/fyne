@@ -3,12 +3,15 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.2.1 - Ongoing
+## 2.2.1 - 12 June 2022
 
 ### Fixed
 
 * Fix various race conditions and compatibility issues with System tray menus
 * Resolve issue where macOS systray menu may not appear
+* Updated yaml dependency to fix CVE-2022-28948
+* Tab buttons stop working after removing a tab (#3050)
+* os.SetEnv("FYNE_FONT") doesn't work in v2.2.0 (#3056)
 
 
 ## 2.2.0 - 7 June 2022
