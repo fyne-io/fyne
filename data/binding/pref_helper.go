@@ -80,25 +80,25 @@ func (m *preferencesMap) preferencesChanged(p fyne.Preferences) {
 	}
 }
 
-func (m *preferencesMap) migratePreferences(p1, p2 fyne.Preferences) {
-	old, loaded := m.prefs.Load(p1)
+func (m *preferencesMap) migratePreferences(src, dst fyne.Preferences) {
+	old, loaded := m.prefs.Load(src)
 	if !loaded {
 		return
 	}
 
-	m.prefs.Store(p2, old)
-	m.prefs.Delete(p1)
-	m.appPrefs = p2
+	m.prefs.Store(dst, old)
+	m.prefs.Delete(src)
+	m.appPrefs = dst
 
-	binds := m.getBindings(p2)
+	binds := m.getBindings(dst)
 	if binds == nil {
 		return
 	}
 	for _, b := range binds.list() {
 		if backed, ok := b.(interface{ replaceProvider(fyne.Preferences) }); ok {
-			backed.replaceProvider(p2)
+			backed.replaceProvider(dst)
 		}
 	}
 
-	m.preferencesChanged(p2)
+	m.preferencesChanged(dst)
 }
