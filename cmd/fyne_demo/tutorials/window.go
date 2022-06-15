@@ -48,8 +48,10 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 			if visibilityWindow == nil {
 				visibilityWindow = fyne.CurrentApp().NewWindow("Hello")
 				visibilityWindow.SetContent(widget.NewLabel("Hello World!"))
+				visibilityWindow.Show()
 				visibilityWindow.SetOnClosed(func() {
 					visibilityWindow = nil
+					visibilityState = !visibilityState
 				})
 			}
 			if visibilityState {
