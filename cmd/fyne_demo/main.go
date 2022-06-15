@@ -176,6 +176,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 func makeTray(a fyne.App) {
 	if desk, ok := a.(desktop.App); ok {
 		h := fyne.NewMenuItem("Hello", func() {})
+		h.Icon = theme.HomeIcon()
 		menu := fyne.NewMenu("Hello World", h)
 		h.Action = func() {
 			log.Println("System tray menu tapped")

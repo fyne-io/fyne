@@ -3,6 +3,7 @@ package systray
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -227,4 +228,19 @@ func (item *MenuItem) update() {
 	menuItems[item.id] = item
 	menuItemsLock.Unlock()
 	addOrUpdateMenuItem(item)
+}
+
+func systrayMenuItemSelected(id uint32) {
+	menuItemsLock.RLock()
+	item, ok := menuItems[id]
+	menuItemsLock.RUnlock()
+	if !ok {
+		log.Printf("systray error: no menu item with ID %d\n", id)
+		return
+	}
+	select {
+	case item.ClickedCh <- struct{}{}:
+	// in case no one waiting for the channel
+	default:
+	}
 }
