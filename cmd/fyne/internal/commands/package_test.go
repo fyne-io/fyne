@@ -80,6 +80,12 @@ func Test_validateAppID(t *testing.T) {
 func Test_buildPackageWasm(t *testing.T) {
 	expected := []mockRunner{
 		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
 			expectedValue: expectedValue{args: []string{"version"}},
 			mockReturn: mockReturn{
 				ret: []byte("go version go1.17.6 windows/amd64"),
@@ -113,6 +119,12 @@ func Test_buildPackageWasm(t *testing.T) {
 
 func Test_PackageWasm(t *testing.T) {
 	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
 		{
 			expectedValue: expectedValue{args: []string{"version"}},
 			mockReturn: mockReturn{
@@ -206,6 +218,12 @@ func Test_PackageWasm(t *testing.T) {
 func Test_buildPackageGopherJS(t *testing.T) {
 	expected := []mockRunner{
 		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
 			expectedValue: expectedValue{
 				args:  []string{"version"},
 				osEnv: true,
@@ -243,6 +261,12 @@ func Test_buildPackageGopherJS(t *testing.T) {
 
 func Test_PackageGopherJS(t *testing.T) {
 	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
 		{
 			expectedValue: expectedValue{
 				args:  []string{"version"},
@@ -339,6 +363,12 @@ func Test_PackageGopherJS(t *testing.T) {
 func Test_BuildPackageWeb(t *testing.T) {
 	expected := []mockRunner{
 		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
 			expectedValue: expectedValue{args: []string{"version"}},
 			mockReturn: mockReturn{
 				ret: []byte("go version go1.17.6 windows/amd64"),
@@ -353,6 +383,12 @@ func Test_BuildPackageWeb(t *testing.T) {
 			},
 			mockReturn: mockReturn{
 				ret: []byte(""),
+			},
+		},
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
 			},
 		},
 		{
@@ -394,6 +430,12 @@ func Test_BuildPackageWeb(t *testing.T) {
 func Test_PackageWeb(t *testing.T) {
 	expected := []mockRunner{
 		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
 			expectedValue: expectedValue{args: []string{"version"}},
 			mockReturn: mockReturn{
 				ret: []byte("go version go1.17.6 windows/amd64"),
@@ -408,6 +450,12 @@ func Test_PackageWeb(t *testing.T) {
 			},
 			mockReturn: mockReturn{
 				ret: []byte(""),
+			},
+		},
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
 			},
 		},
 		{
