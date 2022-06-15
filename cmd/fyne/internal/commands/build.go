@@ -173,7 +173,9 @@ func (b *Builder) build() error {
 		goos = targetOS()
 	}
 
+	fyneGoModRunner := b.runner
 	if b.runner == nil {
+		fyneGoModRunner = newCommand("go")
 		if goos != "gopherjs" {
 			b.runner = newCommand("go")
 		} else {
@@ -188,7 +190,7 @@ func (b *Builder) build() error {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
-	if fyneGoModVersion, err := getFyneGoModVersion(b.runner); err == nil {
+	if fyneGoModVersion, err := getFyneGoModVersion(fyneGoModRunner); err == nil {
 		fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
 		fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
 		if fyneGoModVersion == "master" || fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
