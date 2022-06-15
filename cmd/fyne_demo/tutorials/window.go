@@ -51,6 +51,7 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 				visibilityWindow.Show()
 				visibilityWindow.SetOnClosed(func() {
 					visibilityWindow = nil
+					visibilityState = !visibilityState
 				})
 			}
 			if visibilityState {
