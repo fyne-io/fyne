@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -128,6 +130,41 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
+type GoModEdit struct {
+	Module struct {
+		Path string
+	}
+	Require []struct {
+		Path    string
+		Version string
+	}
+}
+
+func getFyneGoModVersion(runner runner) (string, error) {
+	dependenciesOutput, err := runner.runOutput("mod", "edit", "-json")
+	if err != nil {
+		return "", err
+	}
+
+	var goModEdit GoModEdit
+	err = json.Unmarshal(dependenciesOutput, &goModEdit)
+	if err != nil {
+		return "", err
+	}
+
+	if goModEdit.Module.Path == "fyne.io/fyne/v2" {
+		return "master", nil
+	}
+
+	for _, dep := range goModEdit.Require {
+		if dep.Path == "fyne.io/fyne/v2" {
+			return dep.Version, nil
+		}
+	}
+
+	return "", fmt.Errorf("fyne version not found")
+}
+
 func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
@@ -151,27 +188,36 @@ func (b *Builder) build() error {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
 
-	data, err := metadata.LoadStandard(b.srcdir)
-	if err == nil {
-		mergeMetadata(b.appData, data)
-	}
+	if fyneGoModVersion, err := getFyneGoModVersion(b.runner); err == nil {
+		fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+		fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+		if fyneGoModVersion == "master" || fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
 
-	metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
-	metadataInitFile, err := os.Create(metadataInitFilePath)
-	if err != nil {
-		fyne.LogError("Failed to make metadata init file, omitting metadata", err)
-	}
-	defer os.Remove(metadataInitFilePath)
+			data, err := metadata.LoadStandard(b.srcdir)
+			if err == nil {
+				mergeMetadata(b.appData, data)
+			}
 
-	err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
-	if err != nil {
-		fyne.LogError("Failed to generate metadata init, omitting metadata", err)
-	} else {
-		if b.icon != "" {
-			writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
+			metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
+			metadataInitFile, err := os.Create(metadataInitFilePath)
+			if err != nil {
+				fyne.LogError("Failed to make metadata init file, omitting metadata", err)
+			}
+			defer os.Remove(metadataInitFilePath)
+
+			err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
+			if err != nil {
+				fyne.LogError("Failed to generate metadata init, omitting metadata", err)
+			} else {
+				if b.icon != "" {
+					writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
+				}
+			}
+			metadataInitFile.Close()
+		} else {
+			log.Println("It is recommended to use the same version of Fyne as the fyne command line.")
 		}
 	}
-	metadataInitFile.Close()
 
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
