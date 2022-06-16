@@ -165,6 +165,46 @@ func getFyneGoModVersion(runner runner) (string, error) {
 	return "", fmt.Errorf("fyne version not found")
 }
 
+func (b *Builder) createMetadataInitFile() (func(), error) {
+	data, err := metadata.LoadStandard(b.srcdir)
+	if err == nil {
+		mergeMetadata(b.appData, data)
+	}
+
+	metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
+	metadataInitFile, err := os.Create(metadataInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer metadataInitFile.Close()
+
+	err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
+	if err == nil {
+		if b.icon != "" {
+			writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
+		}
+	}
+
+	return func() { os.Remove(metadataInitFilePath) }, err
+}
+
+func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile func() (func(), error)) func() {
+	if fyneGoModVersion, err := getFyneGoModVersion(runner); err == nil {
+		fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+		fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+		if fyneGoModVersion == "master" || fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+			close, err := createMetadataInitFile()
+			if err != nil {
+				fyne.LogError("Failed to make metadata init file, omitting metadata", err)
+			}
+			return close
+		} else {
+			log.Println("It is recommended to use the same version of Fyne as the fyne command line.")
+		}
+	}
+	return func() {}
+}
+
 func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
@@ -183,42 +223,14 @@ func (b *Builder) build() error {
 		}
 	}
 
+	close := b.injectMetadataIfPossible(fyneGoModRunner, b.createMetadataInitFile)
+	defer close()
+
 	args := []string{"build"}
 	env := os.Environ()
 
 	if goos == "darwin" {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
-	}
-
-	if fyneGoModVersion, err := getFyneGoModVersion(fyneGoModRunner); err == nil {
-		fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
-		fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
-		if fyneGoModVersion == "master" || fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
-
-			data, err := metadata.LoadStandard(b.srcdir)
-			if err == nil {
-				mergeMetadata(b.appData, data)
-			}
-
-			metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
-			metadataInitFile, err := os.Create(metadataInitFilePath)
-			if err != nil {
-				fyne.LogError("Failed to make metadata init file, omitting metadata", err)
-			}
-			defer os.Remove(metadataInitFilePath)
-
-			err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
-			if err != nil {
-				fyne.LogError("Failed to generate metadata init, omitting metadata", err)
-			} else {
-				if b.icon != "" {
-					writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
-				}
-			}
-			metadataInitFile.Close()
-		} else {
-			log.Println("It is recommended to use the same version of Fyne as the fyne command line.")
-		}
 	}
 
 	if !isWeb(goos) {
