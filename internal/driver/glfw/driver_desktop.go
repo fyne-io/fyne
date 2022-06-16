@@ -4,9 +4,13 @@
 package glfw
 
 import (
+	"bytes"
+	"image/png"
 	"runtime"
 	"sync"
 
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
@@ -68,6 +72,20 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 		}
 		if i.Disabled {
 			item.Disable()
+		}
+		if i.Icon != nil {
+			data := i.Icon.Content()
+			if painter.IsResourceSVG(i.Icon) {
+				b := &bytes.Buffer{}
+				img := painter.PaintImage(canvas.NewImageFromResource(i.Icon), nil, 64, 64)
+				err := png.Encode(b, img)
+				if err != nil {
+					fyne.LogError("Failed to encode SVG icon for menu", err)
+				} else {
+					data = b.Bytes()
+				}
+			}
+			item.SetIcon(data)
 		}
 
 		go func() {
