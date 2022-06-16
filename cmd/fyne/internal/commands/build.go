@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -130,7 +129,7 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
-type GoModEdit struct {
+type goModEdit struct {
 	Module struct {
 		Path string
 	}
@@ -146,17 +145,17 @@ func getFyneGoModVersion(runner runner) (string, error) {
 		return "", err
 	}
 
-	var goModEdit GoModEdit
-	err = json.Unmarshal(dependenciesOutput, &goModEdit)
+	var parsed goModEdit
+	err = json.Unmarshal(dependenciesOutput, &parsed)
 	if err != nil {
 		return "", err
 	}
 
-	if goModEdit.Module.Path == "fyne.io/fyne/v2" {
+	if parsed.Module.Path == "fyne.io/fyne/v2" {
 		return "master", nil
 	}
 
-	for _, dep := range goModEdit.Require {
+	for _, dep := range parsed.Require {
 		if dep.Path == "fyne.io/fyne/v2" {
 			return dep.Version, nil
 		}
@@ -188,21 +187,18 @@ func (b *Builder) createMetadataInitFile() (func(), error) {
 	return func() { os.Remove(metadataInitFilePath) }, err
 }
 
-func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile func() (func(), error)) func() {
-	if fyneGoModVersion, err := getFyneGoModVersion(runner); err == nil {
+func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile func() (func(), error)) (func(), error) {
+	fyneGoModVersion, err := getFyneGoModVersion(runner)
+	if err == nil {
 		fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
 		fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
 		if fyneGoModVersion == "master" || fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
-			close, err := createMetadataInitFile()
-			if err != nil {
-				fyne.LogError("Failed to make metadata init file, omitting metadata", err)
-			}
-			return close
+			return createMetadataInitFile()
 		} else {
-			log.Println("It is recommended to use the same version of Fyne as the fyne command line.")
+			return nil, fmt.Errorf("fyne command line version is more recent than the version used in go.mod")
 		}
 	}
-	return func() {}
+	return nil, err
 }
 
 func (b *Builder) build() error {
@@ -223,8 +219,12 @@ func (b *Builder) build() error {
 		}
 	}
 
-	close := b.injectMetadataIfPossible(fyneGoModRunner, b.createMetadataInitFile)
-	defer close()
+	close, err := b.injectMetadataIfPossible(fyneGoModRunner, b.createMetadataInitFile)
+	if err != nil {
+		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
+	} else {
+		defer close()
+	}
 
 	args := []string{"build"}
 	env := os.Environ()
