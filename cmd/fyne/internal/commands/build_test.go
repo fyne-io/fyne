@@ -220,3 +220,36 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	assert.NotNil(t, err)
 	wasmBuildTest.verifyExpectation()
 }
+
+type jsonTest struct {
+	expected bool
+	json     []byte
+}
+
+func Test_FyneGoMod(t *testing.T) {
+	jsonTests := []jsonTest{
+		{false, []byte(`{"Module": {"Path": "github.com/fyne-io/calculator"},"Go": "1.14",	"Require": [ { "Path": "fyne.io/fyne/v2","Version": "v2.1.4"} ] }`)},
+		{true, []byte(`{ "Module": {"Path": "fyne.io/fyne/v2"},"Require": [{ "Path": "test","Version": "v2.1.4"} ] }`)},
+		{true, []byte(`{"Module": {"Path": "github.com/fyne-io/calculator"},"Go": "1.14",	"Require": [ { "Path": "fyne.io/fyne/v2","Version": "v2.2.0"} ] }`)},
+	}
+
+	for _, j := range jsonTests {
+		expected := []mockRunner{
+			{
+				expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+				mockReturn:    mockReturn{ret: j.json},
+			},
+		}
+
+		called := false
+
+		fyneGoModTest := &testCommandRuns{runs: expected, t: t}
+		b := &Builder{appData: &appData{}, os: "wasm", srcdir: "myTest", runner: fyneGoModTest}
+		b.injectMetadataIfPossible(fyneGoModTest, func() (func(), error) {
+			called = true
+			return func() {}, nil
+		})
+
+		assert.Equal(t, j.expected, called)
+	}
+}
