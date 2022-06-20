@@ -196,7 +196,7 @@ func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile
 	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
 	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
 	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
-		return nil, fmt.Errorf("fyne command line version is more recent than the version used in go.mod")
+		return nil, nil
 	}
 
 	return createMetadataInitFile()
