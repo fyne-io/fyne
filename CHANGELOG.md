@@ -8,6 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Fixed
 
 * Windows missing version metadata when packaged (#3046)
+* Fyne package would not build apps using old Fyne versions
 
 
 ## 2.2.1 - 12 June 2022
