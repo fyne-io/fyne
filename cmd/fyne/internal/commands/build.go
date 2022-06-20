@@ -189,16 +189,17 @@ func (b *Builder) createMetadataInitFile() (func(), error) {
 
 func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile func() (func(), error)) (func(), error) {
 	fyneGoModVersion, err := getFyneGoModVersion(runner)
-	if err == nil {
-		fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
-		fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
-		if fyneGoModVersion == "master" || fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
-			return createMetadataInitFile()
-		} else {
-			return nil, fmt.Errorf("fyne command line version is more recent than the version used in go.mod")
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+
+	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+		return nil, fmt.Errorf("fyne command line version is more recent than the version used in go.mod")
+	}
+
+	return createMetadataInitFile()
 }
 
 func (b *Builder) build() error {
