@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/josephspurrier/goversioninfo"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
@@ -19,6 +20,23 @@ func Test_calculateExeName(t *testing.T) {
 
 	nonModulesApp := calculateExeName("testdata", "linux")
 	assert.Equal(t, "testdata", nonModulesApp)
+}
+
+func Test_fixedVersionInfo(t *testing.T) {
+	tests := []struct {
+		ver   string
+		fixed goversioninfo.FileVersion
+	}{
+		{"", goversioninfo.FileVersion{0, 0, 0, 1}},
+		{"1.1.1.1", goversioninfo.FileVersion{1, 1, 1, 1}},
+		{"2.2.2", goversioninfo.FileVersion{2, 2, 2, 1}},
+		{"3.3.3.3.3", goversioninfo.FileVersion{3, 3, 3, 3}},
+	}
+
+	for _, tt := range tests {
+		parsed := fixedVersionInfo(tt.ver)
+		assert.Equal(t, tt.fixed, parsed)
+	}
 }
 
 func Test_isValidVersion(t *testing.T) {
