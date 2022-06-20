@@ -274,8 +274,6 @@ func showMenuItem(item *MenuItem) {
 }
 
 func refresh() {
-	instance.menuLock.Lock()
-	defer instance.menuLock.Unlock()
 	if instance.conn == nil || instance.menuProps == nil {
 		return
 	}
@@ -299,6 +297,8 @@ func refresh() {
 }
 
 func resetMenu() {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	instance.menu = &menuLayout{}
 	instance.menuVersion++
 	refresh()
