@@ -1,4 +1,4 @@
-# fyne.io/systray v1.10.0
+# fyne.io/systray v1.10.1-0.20220621085403-9a2652634e93
 ## explicit
 fyne.io/systray
 fyne.io/systray/internal/generated/menu

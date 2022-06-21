@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Windows missing version metadata when packaged (#3046)
 * Fyne package would not build apps using old Fyne versions
+* System tray icon may not be removed on app exit in Windows
 
 
 ## 2.2.1 - 12 June 2022
