@@ -81,7 +81,7 @@ func (a *fyneApp) SetCloudProvider(p fyne.CloudProvider) {
 		return
 	}
 
-	go a.transitionCloud(p)
+	a.transitionCloud(p)
 }
 
 func (a *fyneApp) transitionCloud(p fyne.CloudProvider) {
