@@ -73,6 +73,11 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 		if i.Disabled {
 			item.Disable()
 		}
+		if i.Visible {
+			item.Show()
+		} else {
+			item.Hide()
+		}
 		if i.Icon != nil {
 			data := i.Icon.Content()
 			if painter.IsResourceSVG(i.Icon) {
