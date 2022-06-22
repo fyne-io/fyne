@@ -11,6 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fyne package would not build apps using old Fyne versions
 * System tray icon may not be removed on app exit in Windows
 * Emphasis in Markdown gives erroneous output in RichText (#2974)
+* When last visible window is closed, hidden window is set visi le (#3059)
 
 
 ## 2.2.1 - 12 June 2022
