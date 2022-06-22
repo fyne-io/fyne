@@ -181,7 +181,7 @@ func (d *gLDriver) runGL() {
 				d.windows = newWindows
 				d.windowLock.Unlock()
 
-				if len(newWindows) == 0 {
+				if d.systrayMenu == nil && len(newWindows) == 0 {
 					d.Quit()
 				}
 			}
