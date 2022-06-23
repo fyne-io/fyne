@@ -58,12 +58,12 @@ type MenuItem struct {
 	// Since: 2.2
 	Shortcut Shortcut
 	// Since: 2.2.2
-	Visible bool
+	Hidden bool
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.
 func NewMenuItem(label string, action func()) *MenuItem {
-	return &MenuItem{Label: label, Action: action, Visible: true}
+	return &MenuItem{Label: label, Action: action}
 }
 
 // NewMenuItemSeparator creates a menu item that is to be used as a separator.

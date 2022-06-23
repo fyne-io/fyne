@@ -73,7 +73,7 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 		if i.Disabled {
 			item.Disable()
 		}
-		if i.Visible {
+		if !i.Hidden {
 			item.Show()
 		} else {
 			item.Hide()
