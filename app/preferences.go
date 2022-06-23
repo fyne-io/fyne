@@ -129,6 +129,9 @@ func newPreferences(app *fyneApp) *preferences {
 	}
 
 	p.AddChangeListener(func() {
+		if p != app.prefs {
+			return
+		}
 		p.prefLock.Lock()
 		shouldIgnoreChange := p.savedRecently || p.loadingInProgress
 		if p.savedRecently && !p.loadingInProgress {

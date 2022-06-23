@@ -24,10 +24,15 @@ type testApp struct {
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
 	lifecycle    fyne.Lifecycle
+	cloud        fyne.CloudProvider
 
 	// user action variables
 	appliedTheme     fyne.Theme
 	lastNotification *fyne.Notification
+}
+
+func (a *testApp) CloudProvider() fyne.CloudProvider {
+	return a.cloud
 }
 
 func (a *testApp) Icon() fyne.Resource {
@@ -68,6 +73,10 @@ func (a *testApp) SendNotification(notify *fyne.Notification) {
 	defer a.propertyLock.Unlock()
 
 	a.lastNotification = notify
+}
+
+func (a *testApp) SetCloudProvider(p fyne.CloudProvider) {
+	a.cloud = p
 }
 
 func (a *testApp) Settings() fyne.Settings {

@@ -37,6 +37,8 @@ func (b *preferenceBindings) setItem(key string, item preferenceItem) {
 
 type preferencesMap struct {
 	prefs sync.Map // map[fyne.Preferences]*preferenceBindings
+
+	appPrefs fyne.Preferences // the main application prefs, to check if it changed...
 }
 
 func newPreferencesMap() *preferencesMap {
@@ -49,11 +51,18 @@ func (m *preferencesMap) ensurePreferencesAttached(p fyne.Preferences) *preferen
 		return binds.(*preferenceBindings)
 	}
 
-	p.AddChangeListener(func() { m.preferencesChanged(p) })
+	p.AddChangeListener(func() { m.preferencesChanged(fyne.CurrentApp().Preferences()) })
 	return binds.(*preferenceBindings)
 }
 
 func (m *preferencesMap) getBindings(p fyne.Preferences) *preferenceBindings {
+	if p == fyne.CurrentApp().Preferences() {
+		if m.appPrefs == nil {
+			m.appPrefs = p
+		} else if m.appPrefs != p {
+			m.migratePreferences(m.appPrefs, p)
+		}
+	}
 	binds, loaded := m.prefs.Load(p)
 	if !loaded {
 		return nil
@@ -69,4 +78,27 @@ func (m *preferencesMap) preferencesChanged(p fyne.Preferences) {
 	for _, item := range binds.list() {
 		item.checkForChange()
 	}
+}
+
+func (m *preferencesMap) migratePreferences(src, dst fyne.Preferences) {
+	old, loaded := m.prefs.Load(src)
+	if !loaded {
+		return
+	}
+
+	m.prefs.Store(dst, old)
+	m.prefs.Delete(src)
+	m.appPrefs = dst
+
+	binds := m.getBindings(dst)
+	if binds == nil {
+		return
+	}
+	for _, b := range binds.list() {
+		if backed, ok := b.(interface{ replaceProvider(fyne.Preferences) }); ok {
+			backed.replaceProvider(dst)
+		}
+	}
+
+	m.preferencesChanged(dst)
 }

@@ -171,6 +171,10 @@ func (b *prefBound{{ .Name }}) checkForChange() {
 	}
 	b.trigger()
 }
+
+func (b *prefBound{{ .Name }}) replaceProvider(p fyne.Preferences) {
+	b.p = p
+}
 `
 
 const toStringTemplate = `

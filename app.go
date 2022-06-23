@@ -67,6 +67,18 @@ type App interface {
 	//
 	// Since: 2.2
 	Metadata() AppMetadata
+
+	// CloudProvider returns the current app cloud provider,
+	// if one has been registered by the developer or chosen by the user.
+	//
+	// Since: 2.3
+	CloudProvider() CloudProvider // get the (if any) configured provider
+
+	// SetCloudProvider allows developers to specify how this application should integrate with cloud services.
+	// See `fyne.io/cloud` package for implementation details.
+	//
+	// Since: 2.3
+	SetCloudProvider(CloudProvider) // configure cloud for this app
 }
 
 // app contains an App variable, but due to atomic.Value restrictions on

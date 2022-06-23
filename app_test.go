@@ -9,6 +9,10 @@ import (
 
 type dummyApp struct{}
 
+func (dummyApp) CloudProvider() CloudProvider {
+	return nil
+}
+
 func (dummyApp) NewWindow(title string) Window {
 	return nil
 }
@@ -39,6 +43,9 @@ func (dummyApp) UniqueID() string {
 }
 
 func (dummyApp) SendNotification(*Notification) {
+}
+
+func (dummyApp) SetCloudProvider(CloudProvider) {
 }
 
 func (dummyApp) Settings() Settings {

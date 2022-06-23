@@ -65,6 +65,10 @@ func (b *prefBoundBool) checkForChange() {
 	b.trigger()
 }
 
+func (b *prefBoundBool) replaceProvider(p fyne.Preferences) {
+	b.p = p
+}
+
 type prefBoundFloat struct {
 	base
 	key   string
@@ -117,6 +121,10 @@ func (b *prefBoundFloat) checkForChange() {
 		}
 	}
 	b.trigger()
+}
+
+func (b *prefBoundFloat) replaceProvider(p fyne.Preferences) {
+	b.p = p
 }
 
 type prefBoundInt struct {
@@ -173,6 +181,10 @@ func (b *prefBoundInt) checkForChange() {
 	b.trigger()
 }
 
+func (b *prefBoundInt) replaceProvider(p fyne.Preferences) {
+	b.p = p
+}
+
 type prefBoundString struct {
 	base
 	key   string
@@ -225,4 +237,8 @@ func (b *prefBoundString) checkForChange() {
 		}
 	}
 	b.trigger()
+}
+
+func (b *prefBoundString) replaceProvider(p fyne.Preferences) {
+	b.p = p
 }
