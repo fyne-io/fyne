@@ -93,6 +93,9 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 
 	containsItems := false
 	for _, item := range menu.Items {
+		if item.Hidden {
+			continue
+		}
 		if !item.IsSeparator {
 			containsItems = true
 			break
@@ -120,6 +123,9 @@ func clearNativeMenu() {
 func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
 	nsMenu := C.createDarwinMenu(C.CString(menu.Label))
 	for _, item := range menu.Items {
+		if item.Hidden {
+			continue
+		}
 		nsMenuItem := insertNativeMenuItem(nsMenu, item, nextItemID, -1)
 		nextItemID = registerCallback(w, item, nextItemID)
 		if item.ChildMenu != nil {
@@ -140,6 +146,9 @@ func exceptionCallback(e *C.char) {
 
 func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator bool) (*fyne.Menu, int) {
 	for i, item := range menu.Items {
+		if item.Hidden {
+			continue
+		}
 		if item.Label == "Settings" || item.Label == "Settings…" || item.Label == "Preferences" || item.Label == "Preferences…" {
 			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
 			items = append(items, menu.Items[:i]...)

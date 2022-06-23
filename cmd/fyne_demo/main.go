@@ -88,6 +88,8 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	checkedItem.Checked = true
 	disabledItem := fyne.NewMenuItem("Disabled", nil)
 	disabledItem.Disabled = true
+	visibleItem := fyne.NewMenuItem("Now you see me...", func() {})
+	hideShowItem := fyne.NewMenuItem("Hide", func() {})
 	otherItem := fyne.NewMenuItem("Other", nil)
 	mailItem := fyne.NewMenuItem("Mail", func() { fmt.Println("Menu New->Other->Mail") })
 	mailItem.Icon = theme.MailComposeIcon()
@@ -156,7 +158,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		}))
 
 	// a quit item will be appended to our first (File) menu
-	file := fyne.NewMenu("File", newItem, checkedItem, disabledItem)
+	file := fyne.NewMenu("File", newItem, checkedItem, disabledItem, visibleItem, hideShowItem)
 	device := fyne.CurrentDevice()
 	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
@@ -168,6 +170,15 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	)
 	checkedItem.Action = func() {
 		checkedItem.Checked = !checkedItem.Checked
+		main.Refresh()
+	}
+	hideShowItem.Action = func() {
+		visibleItem.Hidden = !visibleItem.Hidden
+		if visibleItem.Hidden {
+			hideShowItem.Label = "Show"
+		} else {
+			hideShowItem.Label = "Hide"
+		}
 		main.Refresh()
 	}
 	return main

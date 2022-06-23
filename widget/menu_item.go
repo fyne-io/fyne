@@ -55,7 +55,7 @@ func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
 }
 
 func (i *menuItem) Child() *Menu {
-	if i.Item.ChildMenu != nil && i.child == nil {
+	if i.Item.ChildMenu != nil && (i.child == nil || i.Item.Hidden) {
 		child := NewMenu(i.Item.ChildMenu)
 		child.Hide()
 		child.OnDismiss = i.Parent.Dismiss
@@ -286,6 +286,11 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuItemRenderer) Refresh() {
+	if r.i.Item.Hidden {
+		r.i.Hide()
+	} else {
+		r.i.Show()
+	}
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {
