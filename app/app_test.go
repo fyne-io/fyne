@@ -92,7 +92,7 @@ func (c *mockCloud) ProviderName() string {
 	return "mock"
 }
 
-func (c *mockCloud) Setup() error {
+func (c *mockCloud) Setup(fyne.App) error {
 	c.configured = true
 	return nil
 }

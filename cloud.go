@@ -13,7 +13,7 @@ type CloudProvider interface {
 	ProviderName() string
 	// Setup is called when this provider is being used for the first time.
 	// Returning an error will exit the cloud setup process, though it can be retried.
-	Setup() error
+	Setup(App) error
 }
 
 // CloudProviderPreferences interface defines the functionality that a cloud provider will include if it is capable
