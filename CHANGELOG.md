@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.2.2 - Ongoing
+## 2.2.2 - 28 June 2022
 
 ### Fixed
 
@@ -12,6 +12,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * System tray icon may not be removed on app exit in Windows
 * Emphasis in Markdown gives erroneous output in RichText (#2974)
 * When last visible window is closed, hidden window is set visi le (#3059)
+* Do not close app when last window is closed but systrayMenu exists (#3092)
 
 
 ## 2.2.1 - 12 June 2022
