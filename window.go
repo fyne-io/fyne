@@ -77,7 +77,7 @@ type Window interface {
 	Hide()
 	// Close the window.
 	// If it is the only open window and no menu is set via [desktop.App]
-	// SetSystemTrayMenu, or if it is the "master" window the app will Quit.
+	// SetSystemTrayMenu the app will Quit.
 	Close()
 
 	// ShowAndRun is a shortcut to show the window and then run the application.
