@@ -8,11 +8,12 @@ import (
 	"runtime"
 	"strings"
 
+	version "github.com/mcuadros/go-version"
+	"github.com/urfave/cli/v2"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	version "github.com/mcuadros/go-version"
-	"github.com/urfave/cli/v2"
 )
 
 // Builder generate the executables.
@@ -223,7 +224,7 @@ func (b *Builder) build() error {
 	close, err := b.injectMetadataIfPossible(fyneGoModRunner, b.createMetadataInitFile)
 	if err != nil {
 		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
-	} else {
+	} else if close != nil {
 		defer close()
 	}
 
