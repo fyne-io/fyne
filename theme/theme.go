@@ -118,6 +118,11 @@ const (
 	// Since: 2.0
 	ColorNameShadow fyne.ThemeColorName = "shadow"
 
+	// ColorNameSuccess is the name of theme lookup for foreground success color.
+	//
+	// Since: 2.3
+	ColorNameSuccess fyne.ThemeColorName = "success"
+
 	// SizeNameCaptionText is the name of theme lookup for helper text size, normally smaller than regular text size.
 	//
 	// Since: 2.0
@@ -394,6 +399,13 @@ func ShadowColor() color.Color {
 	return safeColorLookup(ColorNameShadow, currentVariant())
 }
 
+// SuccessColor returns the theme's success text color.
+//
+// Since: 2.3
+func SuccessColor() color.Color {
+	return safeColorLookup(ColorNameSuccess, currentVariant())
+}
+
 // TextBoldFont returns the font resource for the bold font style.
 func TextBoldFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Bold: true})
@@ -448,8 +460,9 @@ func TextSubHeadingSize() float32 {
 var (
 	defaultTheme fyne.Theme
 
-	errorColor  = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	focusColors = map[string]color.Color{
+	errorColor   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	successColor = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	focusColors  = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
 		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f},
@@ -493,6 +506,7 @@ var (
 		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
 		ColorNameShadow:          color.NRGBA{A: 0x66},
+		ColorNameSuccess:         successColor,
 	}
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
@@ -508,6 +522,7 @@ var (
 		ColorNamePressed:         color.NRGBA{A: 0x19},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
 		ColorNameShadow:          color.NRGBA{A: 0x33},
+		ColorNameSuccess:         successColor,
 	}
 )
 
