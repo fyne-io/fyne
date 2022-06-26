@@ -569,12 +569,12 @@ func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 // ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for the currently selected theme.
 type ThemedResource struct {
+	source fyne.Resource
+
 	// ColorName specifies which theme colour should be used to theme the resource
 	//
 	// Since: 2.3
 	ColorName fyne.ThemeColorName
-
-	source fyne.Resource
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
