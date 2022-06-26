@@ -569,6 +569,11 @@ func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 // ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for the currently selected theme.
 type ThemedResource struct {
+	// ColorName specifies which theme colour should be used to theme the resource
+	//
+	// Since: 2.3
+	ColorName fyne.ThemeColorName
+
 	source fyne.Resource
 }
 
@@ -581,12 +586,22 @@ func NewThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	return res.source.Name()
+	prefix := res.ColorName
+	if prefix != "" {
+		prefix += "_"
+	}
+
+	return string(prefix) + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), ForegroundColor())
+	name := res.ColorName
+	if name == "" {
+		name = ColorNameForeground
+	}
+
+	return svg.Colorize(res.source.Content(), safeColorLookup(name, currentVariant()))
 }
 
 // Error returns a different resource for indicating an error.
