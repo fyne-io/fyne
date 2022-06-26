@@ -469,7 +469,6 @@ func WarningColor() color.Color {
 	return safeColorLookup(ColorNameWarning, currentVariant())
 }
 
-
 var (
 	defaultTheme fyne.Theme
 
