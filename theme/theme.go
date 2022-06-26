@@ -123,6 +123,11 @@ const (
 	// Since: 2.3
 	ColorNameSuccess fyne.ThemeColorName = "success"
 
+	// ColorNameWarning is the name of theme lookup for foreground warning color.
+	//
+	// Since: 2.3
+	ColorNameWarning fyne.ThemeColorName = "warning"
+
 	// SizeNameCaptionText is the name of theme lookup for helper text size, normally smaller than regular text size.
 	//
 	// Since: 2.0
@@ -274,7 +279,7 @@ func DisabledTextColor() color.Color {
 	return DisabledColor()
 }
 
-// ErrorColor returns the theme's error text color.
+// ErrorColor returns the theme's error foreground color.
 //
 // Since: 2.0
 func ErrorColor() color.Color {
@@ -399,7 +404,7 @@ func ShadowColor() color.Color {
 	return safeColorLookup(ColorNameShadow, currentVariant())
 }
 
-// SuccessColor returns the theme's success text color.
+// SuccessColor returns the theme's success foreground color.
 //
 // Since: 2.3
 func SuccessColor() color.Color {
@@ -457,11 +462,20 @@ func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
 }
 
+// WarningColor returns the theme's warning foreground color.
+//
+// Since: 2.3
+func WarningColor() color.Color {
+	return safeColorLookup(ColorNameWarning, currentVariant())
+}
+
+
 var (
 	defaultTheme fyne.Theme
 
 	errorColor   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
 	successColor = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	warningColor = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 	focusColors  = map[string]color.Color{
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
@@ -507,6 +521,7 @@ var (
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
 		ColorNameShadow:          color.NRGBA{A: 0x66},
 		ColorNameSuccess:         successColor,
+		ColorNameWarning:         warningColor,
 	}
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
@@ -523,6 +538,7 @@ var (
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
 		ColorNameShadow:          color.NRGBA{A: 0x33},
 		ColorNameSuccess:         successColor,
+		ColorNameWarning:         warningColor,
 	}
 )
 
