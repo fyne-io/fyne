@@ -46,8 +46,8 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 	var wantOrigW, wantOrigH int
 	wantOrigSize := false
 	if img.FillMode == canvas.ImageFillOriginal && c != nil {
-		wantOrigW = internal.ScaleInt(c, img.Size().Width)
-		wantOrigH = internal.ScaleInt(c, img.Size().Height)
+		wantOrigW = internal.ScaleInt(c, img.MinSize().Width)
+		wantOrigH = internal.ScaleInt(c, img.MinSize().Height)
 		wantOrigSize = true
 	}
 
@@ -124,12 +124,14 @@ func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOri
 			}
 
 			origSize := pixels.Bounds().Size()
+			origW, origH = origSize.X, origSize.Y
 			if checkSize(origSize.X, origSize.Y) {
 				dst = scaleImage(pixels, width, height, img.ScaleMode)
 			}
 		}
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
+		origW, origH = origSize.X, origSize.Y
 		if checkSize(origSize.X, origSize.Y) {
 			dst = scaleImage(img.Image, width, height, img.ScaleMode)
 		}
