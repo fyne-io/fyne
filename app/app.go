@@ -54,7 +54,7 @@ func (a *fyneApp) UniqueID() string {
 		return a.Metadata().ID
 	}
 
-	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
+	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
 	a.uniqueID = "missing-id-" + strconv.FormatInt(time.Now().Unix(), 10) // This is a fake unique - it just has to not be reused...
 	return a.uniqueID
 }
@@ -94,8 +94,8 @@ func (a *fyneApp) Storage() fyne.Storage {
 }
 
 func (a *fyneApp) Preferences() fyne.Preferences {
-	if a.uniqueID == "" {
-		fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
+	if a.UniqueID() == "" {
+		fyne.LogError("Preferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
 	}
 	return a.prefs
 }
@@ -104,10 +104,12 @@ func (a *fyneApp) Lifecycle() fyne.Lifecycle {
 	return a.lifecycle
 }
 
-// New returns a new application instance with the default driver and no unique ID
+// New returns a new application instance with the default driver and no unique ID (unless specified in FyneApp.toml)
 func New() fyne.App {
-	internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
-	return NewWithID("")
+	if meta.ID == "" {
+		internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
+	}
+	return NewWithID(meta.ID)
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {

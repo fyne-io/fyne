@@ -29,6 +29,11 @@ func TestFyneApp_UniqueID(t *testing.T) {
 	app := NewWithID(appID)
 
 	assert.Equal(t, appID, app.UniqueID())
+
+	meta.ID = "fakedInject"
+	app = New()
+
+	assert.Equal(t, meta.ID, app.UniqueID())
 }
 
 func TestFyneApp_OpenURL(t *testing.T) {
