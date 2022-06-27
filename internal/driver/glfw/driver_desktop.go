@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	iconSet fyne.Resource
-	setup   sync.Once
+	systrayIcon fyne.Resource
+	setup       sync.Once
 )
 
 func goroutineID() (id uint64) {
@@ -30,8 +30,8 @@ func goroutineID() (id uint64) {
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	setup.Do(func() {
 		d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-			if iconSet != nil {
-				d.SetSystemTrayIcon(iconSet)
+			if systrayIcon != nil {
+				d.SetSystemTrayIcon(systrayIcon)
 			} else if fyne.CurrentApp().Icon() != nil {
 				d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
 			} else {
@@ -85,7 +85,7 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 }
 
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
-	iconSet = resource // in case we need it later
+	systrayIcon = resource // in case we need it later
 
 	img, err := toOSIcon(resource)
 	if err != nil {
