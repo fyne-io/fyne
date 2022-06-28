@@ -793,7 +793,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 				} else {
 					newHigh := binarySearch(checker, low, high)
 					if newHigh <= low {
-						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low+1})
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1})
 						reuse++
 						low++
 					} else {
@@ -820,10 +820,10 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 					fallback := binarySearch(checker, low, last) - low
 
 					if fallback < 1 { // even a character won't fit
-						sub = text[low:low+1]
-						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low+1})
+						sub = text[low : low+1]
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1})
 						low++
-						high = low+1
+						high = low + 1
 						reuse++
 
 						if high > l.end {
