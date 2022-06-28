@@ -1,5 +1,5 @@
-//go:build !no_native_menus
-// +build !no_native_menus
+//go:build !no_native_menus && !js && !wasm && !test_web_driver
+// +build !no_native_menus,!js,!wasm,!test_web_driver
 
 package glfw
 
