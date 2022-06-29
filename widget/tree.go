@@ -22,14 +22,20 @@ type Tree struct {
 	BaseWidget
 	Root TreeNodeID
 
-	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     `json:"-"` // Return a sorted slice of Children TreeNodeIDs for the given Node TreeNodeID
-	CreateNode     func(branch bool) (o fyne.CanvasObject)                   `json:"-"` // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
-	IsBranch       func(uid TreeNodeID) (ok bool)                            `json:"-"` // Return true if the given TreeNodeID represents a Branch
-	OnBranchClosed func(uid TreeNodeID)                                      `json:"-"` // Called when a Branch is closed
-	OnBranchOpened func(uid TreeNodeID)                                      `json:"-"` // Called when a Branch is opened
-	OnSelected     func(uid TreeNodeID)                                      `json:"-"` // Called when the Node with the given TreeNodeID is selected.
-	OnUnselected   func(uid TreeNodeID)                                      `json:"-"` // Called when the Node with the given TreeNodeID is unselected.
-	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
+	ChildUIDs         func(uid TreeNodeID) (c []TreeNodeID)                            `json:"-"` // Return a sorted slice of Children TreeNodeIDs for the given Node TreeNodeID
+	CreateNode        func(branch bool) (o fyne.CanvasObject)                          `json:"-"` // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
+	IsBranch          func(uid TreeNodeID) (ok bool)                                   `json:"-"` // Return true if the given TreeNodeID represents a Branch
+	OnBranchClosed    func(uid TreeNodeID)                                             `json:"-"` // Called when a Branch is closed
+	OnBranchOpened    func(uid TreeNodeID)                                             `json:"-"` // Called when a Branch is opened
+	OnSelected        func(uid TreeNodeID)                                             `json:"-"` // Called when the Node with the given TreeNodeID is selected.
+	OnUnselected      func(uid TreeNodeID)                                             `json:"-"` // Called when the Node with the given TreeNodeID is unselected.
+	UpdateNode        func(uid TreeNodeID, branch bool, node fyne.CanvasObject)        `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
+	OnTappedSecondary func(uid TreeNodeID, pe *fyne.PointEvent)                        `json:"-"` // Called when the Node with the given ID is TappedSecondary (eg mouse right click)
+	OnMouseIn         func(uid TreeNodeID, me *desktop.MouseEvent)                     `json:"-"` // Called when the mouse cursor enters Node with the given ID.
+	OnMouseOut        func(uid TreeNodeID)                                             `json:"-"` // Called when the mouse cursor leaves the Node with the given ID.
+	OnMouseMoved      func(uid TreeNodeID, me *desktop.MouseEvent, nodeSize fyne.Size) `json:"-"` // Called when the mouse moves in the node with the given ID.
+	OnDragStart       func(uid TreeNodeID, de *fyne.DragEvent)                         `json:"-"` // Called when the Node with the given ID is being dragged.
+	OnDragEnd         func(uid TreeNodeID)                                             `json:"-"` // Called when the Node with the given ID stops being dragged.
 
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size
@@ -695,23 +701,51 @@ func (n *treeNode) Indent() float32 {
 }
 
 // MouseIn is called when a desktop pointer enters the widget
-func (n *treeNode) MouseIn(*desktop.MouseEvent) {
+func (n *treeNode) MouseIn(e *desktop.MouseEvent) {
 	n.hovered = true
 	n.partialRefresh()
+	if n.tree.OnMouseIn != nil {
+		n.tree.OnMouseIn(n.uid, e)
+	}
+}
+
+func (n *treeNode) Dragged(e *fyne.DragEvent) {
+	if n.tree.OnDragStart != nil {
+		n.tree.OnDragStart(n.uid, e)
+	}
+}
+
+func (n *treeNode) DragEnd() {
+	if n.tree.OnDragEnd != nil {
+		n.tree.OnDragEnd(n.uid)
+	}
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (n *treeNode) MouseMoved(*desktop.MouseEvent) {
+func (n *treeNode) MouseMoved(e *desktop.MouseEvent) {
+	if n.tree.OnMouseMoved != nil {
+		n.tree.OnMouseMoved(n.uid, e, n.Size())
+	}
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (n *treeNode) MouseOut() {
 	n.hovered = false
 	n.partialRefresh()
+
+	if n.tree.OnMouseOut != nil {
+		n.tree.OnMouseOut(n.uid)
+	}
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.Select(n.uid)
+}
+
+func (n *treeNode) TappedSecondary(pe *fyne.PointEvent) {
+	if n.tree.OnTappedSecondary != nil {
+		n.tree.OnTappedSecondary(n.uid, pe)
+	}
 }
 
 func (n *treeNode) partialRefresh() {
@@ -875,3 +909,4 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 	l.ExtendBaseWidget(l)
 	return
 }
+
