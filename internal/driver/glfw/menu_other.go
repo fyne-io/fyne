@@ -1,5 +1,5 @@
-//go:build !darwin || no_native_menus
-// +build !darwin no_native_menus
+//go:build !darwin || js || wasm || test_web_driver || no_native_menus
+// +build !darwin js wasm test_web_driver no_native_menus
 
 package glfw
 

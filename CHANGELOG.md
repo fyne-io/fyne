@@ -7,7 +7,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Wrappable RichText in a Split container causes crash (#3003, #2961)
 
-## 2.2.2 - 28 June 2022
+
+## 2.2.2 - 30 June 2022
 
 ### Fixed
 
