@@ -5,9 +5,9 @@ import (
 )
 
 var meta = fyne.AppMetadata{
-	ID:      "com.example",
-	Name:    "Fyne App",
-	Version: "1.0.0",
+	ID:      "",
+	Name:    "",
+	Version: "0.0.1",
 	Build:   1,
 }
 

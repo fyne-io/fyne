@@ -1,17 +1,19 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	version "github.com/mcuadros/go-version"
+	"github.com/urfave/cli/v2"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	version "github.com/mcuadros/go-version"
-	"github.com/urfave/cli/v2"
 )
 
 // Builder generate the executables.
@@ -128,29 +130,42 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
-func (b *Builder) build() error {
-	var versionConstraint *version.ConstraintGroup
+type goModEdit struct {
+	Module struct {
+		Path string
+	}
+	Require []struct {
+		Path    string
+		Version string
+	}
+}
 
-	goos := b.os
-	if goos == "" {
-		goos = targetOS()
+func getFyneGoModVersion(runner runner) (string, error) {
+	dependenciesOutput, err := runner.runOutput("mod", "edit", "-json")
+	if err != nil {
+		return "", err
 	}
 
-	if b.runner == nil {
-		if goos != "gopherjs" {
-			b.runner = newCommand("go")
-		} else {
-			b.runner = newCommand("gopherjs")
+	var parsed goModEdit
+	err = json.Unmarshal(dependenciesOutput, &parsed)
+	if err != nil {
+		return "", err
+	}
+
+	if parsed.Module.Path == "fyne.io/fyne/v2" {
+		return "master", nil
+	}
+
+	for _, dep := range parsed.Require {
+		if dep.Path == "fyne.io/fyne/v2" {
+			return dep.Version, nil
 		}
 	}
 
-	args := []string{"build"}
-	env := os.Environ()
+	return "", fmt.Errorf("fyne version not found")
+}
 
-	if goos == "darwin" {
-		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
-	}
-
+func (b *Builder) createMetadataInitFile() (func(), error) {
 	data, err := metadata.LoadStandard(b.srcdir)
 	if err == nil {
 		mergeMetadata(b.appData, data)
@@ -159,19 +174,66 @@ func (b *Builder) build() error {
 	metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
 	metadataInitFile, err := os.Create(metadataInitFilePath)
 	if err != nil {
-		fyne.LogError("Failed to make metadata init file, omitting metadata", err)
+		return func() {}, err
 	}
-	defer os.Remove(metadataInitFilePath)
+	defer metadataInitFile.Close()
 
 	err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
-	if err != nil {
-		fyne.LogError("Failed to generate metadata init, omitting metadata", err)
-	} else {
+	if err == nil {
 		if b.icon != "" {
 			writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
 		}
 	}
-	metadataInitFile.Close()
+
+	return func() { os.Remove(metadataInitFilePath) }, err
+}
+
+func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile func() (func(), error)) (func(), error) {
+	fyneGoModVersion, err := getFyneGoModVersion(runner)
+	if err != nil {
+		return nil, err
+	}
+
+	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+		return nil, nil
+	}
+
+	return createMetadataInitFile()
+}
+
+func (b *Builder) build() error {
+	var versionConstraint *version.ConstraintGroup
+
+	goos := b.os
+	if goos == "" {
+		goos = targetOS()
+	}
+
+	fyneGoModRunner := b.runner
+	if b.runner == nil {
+		fyneGoModRunner = newCommand("go")
+		if goos != "gopherjs" {
+			b.runner = newCommand("go")
+		} else {
+			b.runner = newCommand("gopherjs")
+		}
+	}
+
+	close, err := b.injectMetadataIfPossible(fyneGoModRunner, b.createMetadataInitFile)
+	if err != nil {
+		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
+	} else if close != nil {
+		defer close()
+	}
+
+	args := []string{"build"}
+	env := os.Environ()
+
+	if goos == "darwin" {
+		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
+	}
 
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...

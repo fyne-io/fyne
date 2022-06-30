@@ -13,7 +13,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var setup sync.Once
+var (
+	systrayIcon fyne.Resource
+	setup       sync.Once
+)
 
 func goroutineID() (id uint64) {
 	var buf [30]byte
@@ -27,16 +30,12 @@ func goroutineID() (id uint64) {
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	setup.Do(func() {
 		d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-			if fyne.CurrentApp().Icon() != nil {
-				img, err := toOSIcon(fyne.CurrentApp().Icon())
-				if err == nil {
-					systray.SetIcon(img)
-				}
+			if systrayIcon != nil {
+				d.SetSystemTrayIcon(systrayIcon)
+			} else if fyne.CurrentApp().Icon() != nil {
+				d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
 			} else {
-				img, err := toOSIcon(theme.FyneLogo())
-				if err == nil {
-					systray.SetIcon(img)
-				}
+				d.SetSystemTrayIcon(theme.FyneLogo())
 			}
 
 			// it must be refreshed after init, so an earlier call would have been ineffective
@@ -86,7 +85,15 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 }
 
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
-	systray.SetIcon(resource.Content())
+	systrayIcon = resource // in case we need it later
+
+	img, err := toOSIcon(resource)
+	if err != nil {
+		fyne.LogError("Failed to convert systray icon", err)
+		return
+	}
+
+	systray.SetIcon(img)
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {

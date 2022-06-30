@@ -79,10 +79,10 @@ func (p *preferences) saveToFile(path string) error {
 }
 
 func (p *preferences) load() {
-	err := p.loadFromFile(p.storagePath())
-	if err != nil {
-		fyne.LogError("Preferences load error:", err)
-	}
+	//	err := p.loadFromFile(p.storagePath())
+	//	if err != nil {
+	//		fyne.LogError("Preferences load error:", err)
+	//	}
 }
 
 func (p *preferences) loadFromFile(path string) (err error) {
@@ -124,7 +124,7 @@ func newPreferences(app *fyneApp) *preferences {
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
 	// don't load or watch if not setup
-	if app.uniqueID == "" {
+	if app.uniqueID == "" && app.Metadata().ID == "" {
 		return p
 	}
 
