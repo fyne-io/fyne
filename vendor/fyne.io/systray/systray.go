@@ -80,7 +80,10 @@ func Run(onReady, onExit func()) {
 func RunWithExternalLoop(onReady, onExit func()) (start, end func()) {
 	Register(onReady, onExit)
 
-	return nativeStart, nativeEnd
+	return nativeStart, func() {
+		nativeEnd()
+		Quit()
+	}
 }
 
 // Register initializes GUI and registers the callbacks but relies on the

@@ -172,7 +172,7 @@ func (m *markdownRenderer) handleExitNode(n ast.Node) error {
 	} else if !m.blockquote && !m.heading {
 		if len(m.segs) > 0 {
 			if text, ok := m.segs[len(m.segs)-1].(*TextSegment); ok && n.Kind().String() == "Paragraph" {
-				text.Style = RichTextStyleParagraph
+				text.Style.Inline = false
 			}
 		}
 		m.nextSeg = &TextSegment{

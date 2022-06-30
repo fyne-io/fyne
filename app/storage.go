@@ -14,7 +14,7 @@ type store struct {
 }
 
 func (s *store) RootURI() fyne.URI {
-	if s.a.uniqueID == "" {
+	if s.a.UniqueID() == "" {
 		fyne.LogError("Storage API requires a unique ID, use app.NewWithID()", nil)
 		return storage.NewFileURI(os.TempDir())
 	}
