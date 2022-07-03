@@ -45,3 +45,15 @@ var shaderSimpleesVert = &fyne.StaticResource{
 	StaticContent: []byte(
 		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
 }
+
+var shaderRectangleFrag = &fyne.StaticResource{
+	StaticName: "rectangle.frag",
+	StaticContent: []byte(
+		"#version 110\r\n\r\nuniform vec4 fill_color;\r\nuniform vec4 stroke_color;\r\n\r\nvarying vec2 delta;\r\nvarying float switch_var;\r\nvarying float lineWidth_var;\r\nvarying float feather_var;\r\nvec4 color;\r\n\r\nvoid main() {\r\n    if ( switch_var == 1.0 ){\r\n        color = fill_color;\r\n    }; \r\n    if ( switch_var == 2.0 ){\t\r\n        color = stroke_color;\r\n    };\r\n    if ( switch_var > 50.0 ){\t\r\n        color = vec4(stroke_color.r, stroke_color.g, stroke_color.b, stroke_color.a * switch_var / 100.0 );\r\n    };\r\n    if ( switch_var >= 10.0 && switch_var <= 50.0 ){\t\r\n        color = vec4(fill_color.r, fill_color.g, fill_color.b, fill_color.a * switch_var / 100.0 );\r\n    };\r\n    if ( delta != vec2(0.0, 0.0) ){\r\n        float distance = length(delta);\r\n\r\n        if (distance <= lineWidth_var - feather_var) {\r\n            gl_FragColor = color;\r\n        } else {\r\n            gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth_var - feather_var)) / feather_var));\r\n        }\r\n    } else {\r\n        gl_FragColor = color;\r\n    }\r\n}"),
+}
+
+var shaderRectangleVert = &fyne.StaticResource{
+	StaticName: "rectangle.vert",
+	StaticContent: []byte(
+		"#version 110\r\n\r\nattribute vec2 vert;\r\nattribute vec2 normal;\r\nattribute float colorSwitch;\r\nattribute float lineWidth;\r\nattribute float feather;\r\n\r\nvarying vec2 delta;\r\nvarying float switch_var;\r\nvarying float lineWidth_var;\r\nvarying float feather_var;\r\n\r\nvoid main() {\r\n    switch_var = colorSwitch;\r\n    lineWidth_var = lineWidth;\r\n    feather_var = feather;\r\n    if ( normal == vec2(0.0, 0.0) ) {\r\n        gl_Position = vec4(vert, 0, 1);\r\n    } else {\r\n        delta = normal * lineWidth_var;\r\n        gl_Position = vec4(vert + delta, 0, 1);\r\n    }\r\n}"),
+}

@@ -73,6 +73,7 @@ func (p *painter) Init() {
 	p.logError()
 	p.program = p.createProgram("simple")
 	p.lineProgram = p.createProgram("line")
+	p.rectangleProgram = p.createProgram("rectangle")
 }
 
 type coreContext struct{}

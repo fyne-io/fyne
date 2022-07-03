@@ -15,6 +15,7 @@ var shaderSources = map[string][2][]byte{
 	"line_es":   {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
 	"simple":    {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
 	"simple_es": {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
+	"rectangle": {shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent},
 }
 
 // Painter defines the functionality of our OpenGL based renderer
@@ -48,13 +49,14 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas          fyne.Canvas
-	ctx             context
-	contextProvider driver.WithContext
-	program         Program
-	lineProgram     Program
-	texScale        float32
-	pixScale        float32 // pre-calculate scale*texScale for each draw
+	canvas           fyne.Canvas
+	ctx              context
+	contextProvider  driver.WithContext
+	program          Program
+	lineProgram      Program
+	rectangleProgram Program
+	texScale         float32
+	pixScale         float32 // pre-calculate scale*texScale for each draw
 }
 
 // Declare conformity to Painter interface
