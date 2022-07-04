@@ -34,7 +34,7 @@ struct utsname sysInfo;
     if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
 		scale = (int)[UIScreen mainScreen].scale; // either 1.0, 2.0, or 3.0.
 	}
-    CGSize size = [UIScreen mainScreen].nativeBounds.size;
+    CGSize size = [UIScreen mainScreen].bounds.size;
     setDisplayMetrics((int)size.width, (int)size.height, scale);
 
 	lifecycleAlive();
@@ -149,7 +149,7 @@ struct utsname sysInfo;
 		// TODO(crawshaw): come up with a plan to handle animations.
 	} completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-		CGSize size = [UIScreen mainScreen].nativeBounds.size;
+		CGSize size = [UIScreen mainScreen].bounds.size;
 		updateConfig((int)size.width, (int)size.height, orientation);
 	}];
 }
@@ -194,7 +194,7 @@ static void sendTouches(int change, NSSet* touches) {
     [super traitCollectionDidChange: previousTraitCollection];
 
 	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	CGSize size = [UIScreen mainScreen].nativeBounds.size;
+	CGSize size = [UIScreen mainScreen].bounds.size;
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
 @end
