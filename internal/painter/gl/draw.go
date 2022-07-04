@@ -278,7 +278,7 @@ func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather f
 }
 
 func (p *painter) flexLineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32,
-	frame fyne.Size, lineOut bool) []float32 {
+	frame fyne.Size, lineOut bool, strokeWidth float32) []float32 {
 	if lineWidth <= 1 {
 		offset := float32(0.5)                  // adjust location for lines < 1pt on regular display
 		if lineWidth <= 0.5 && p.pixScale > 1 { // and for 1px drawing on HiDPI (width 0.5)
@@ -318,26 +318,32 @@ func (p *painter) flexLineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feath
 	halfWidth := (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
 	featherWidth := feather / widthMultiplier
 	//println(halfWidth, featherWidth)
+	var colorType float32
+	if strokeWidth == 0.0 {
+		colorType = 1.0 // fillColor
+	} else {
+		colorType = 2.0 // strokeColor
+	}
 
 	if lineOut == true {
 		return []float32{
-			// coord x, y normal x, y, strokeColor
-			x1, y1, normalX, normalY, 2.0, halfWidth, featherWidth,
-			x2, y2, normalX, normalY, 2.0, halfWidth, featherWidth,
-			x2, y2, 0.0, 0.0, 2.0, halfWidth, featherWidth,
-			x2, y2, 0.0, 0.0, 2.0, halfWidth, featherWidth,
-			x1, y1, normalX, normalY, 2.0, halfWidth, featherWidth,
-			x1, y1, 0.0, 0.0, 2.0, halfWidth, featherWidth,
+			// coord x, y normal x, y, (fillColor or strokeColor)
+			x1, y1, normalX, normalY, colorType, halfWidth, featherWidth,
+			x2, y2, normalX, normalY, colorType, halfWidth, featherWidth,
+			x2, y2, 0.0, 0.0, colorType, halfWidth, featherWidth,
+			x2, y2, 0.0, 0.0, colorType, halfWidth, featherWidth,
+			x1, y1, normalX, normalY, colorType, halfWidth, featherWidth,
+			x1, y1, 0.0, 0.0, colorType, halfWidth, featherWidth,
 		}
 	} else {
 		return []float32{
 			// coord x, y normal x, y, strokeColor
-			x1, y1, 0.0, 0.0, 2.0, halfWidth, featherWidth,
-			x2, y2, 0.0, 0.0, 2.0, halfWidth, featherWidth,
-			x2, y2, -normalX, -normalY, 2.0, halfWidth, featherWidth,
-			x2, y2, -normalX, -normalY, 2.0, halfWidth, featherWidth,
-			x1, y1, 0.0, 0.0, 2.0, halfWidth, featherWidth,
-			x1, y1, -normalX, -normalY, 2.0, halfWidth, featherWidth,
+			x1, y1, 0.0, 0.0, colorType, halfWidth, featherWidth,
+			x2, y2, 0.0, 0.0, colorType, halfWidth, featherWidth,
+			x2, y2, -normalX, -normalY, colorType, halfWidth, featherWidth,
+			x2, y2, -normalX, -normalY, colorType, halfWidth, featherWidth,
+			x1, y1, 0.0, 0.0, colorType, halfWidth, featherWidth,
+			x1, y1, -normalX, -normalY, colorType, halfWidth, featherWidth,
 		}
 	}
 }
@@ -770,14 +776,14 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 					pos2LOut.Y = cy3PosInn
 				}
 				if radius.LeftSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
 				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
 				}
 				coords = append(coords, linePoints...)
 				pos1LOut = pos2LOut
 				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false)
+					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
 					coords = append(coords, linePoints...)
 					pos1LInn = pos2LInn
 				}
@@ -884,14 +890,14 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 					pos2LOut.Y = cy3PosInn
 				}
 				if radius.LeftSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
 				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
 				}
 				coords = append(coords, linePoints...)
 				pos1LOut = pos2LOut
 				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false)
+					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
 					coords = append(coords, linePoints...)
 					pos1LInn = pos2LInn
 				}
@@ -1000,14 +1006,14 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 					pos2LOut.Y = cy3PosInn
 				}
 				if radius.RightSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
 				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
 				}
 				coords = append(coords, linePoints...)
 				pos1LOut = pos2LOut
 				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false)
+					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
 					coords = append(coords, linePoints...)
 					pos1LInn = pos2LInn
 				}
@@ -1114,14 +1120,14 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 					pos2LOut.Y = cy3PosInn
 				}
 				if radius.RightSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
 				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true)
+					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
 				}
 				coords = append(coords, linePoints...)
 				pos1LOut = pos2LOut
 				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false)
+					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
 					coords = append(coords, linePoints...)
 					pos1LInn = pos2LInn
 				}

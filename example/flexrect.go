@@ -150,7 +150,7 @@ func main() {
 		&rr5,
 		// >> composition
 		&rr6,
-		//&rr7,
+		&rr7,
 		txt1,
 		// >>
 		&rr9,
