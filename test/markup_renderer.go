@@ -137,7 +137,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	}
 
 	var variant string
-	switch rsc.(type) {
+	switch t := rsc.(type) {
 	case *theme.DisabledResource:
 		variant = "disabled"
 	case *theme.ErrorThemedResource:
@@ -147,7 +147,10 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.PrimaryThemedResource:
 		variant = "primary"
 	case *theme.ThemedResource:
-		variant = "default"
+		variant = string(t.ColorName)
+		if variant == "" {
+			variant = "default"
+		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
