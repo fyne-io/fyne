@@ -129,6 +129,26 @@ func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
+func TestThemedResource_Success(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewThemedResource(source)
+	custom.ColorName = ColorNameSuccess
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("success_%v", source.Name()))
+}
+
+func TestThemedResource_Warning(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewThemedResource(source)
+	custom.ColorName = ColorNameWarning
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("warning_%v", source.Name()))
+}
+
 func TestDisabledResource_Name(t *testing.T) {
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	disabledResource := &DisabledResource{
