@@ -14,6 +14,15 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Fixed
 
 
+## 2.2.3 - Ongoing
+
+### Fixed
+
+* Regression: Preferences are not parsed at program start (#3125)
+* meta.Version is always 1.0.0 on android & ios (#3109)
+* Iphone / IOS incorrect screen size / incorrect click coordinates (#3122)
+
+
 ## 2.2.2 - 30 June 2022
 
 ### Fixed
