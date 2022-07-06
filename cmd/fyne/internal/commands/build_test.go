@@ -245,10 +245,10 @@ func Test_FyneGoMod(t *testing.T) {
 
 		fyneGoModTest := &testCommandRuns{runs: expected, t: t}
 		injectMetadataIfPossible(fyneGoModTest, "myTest", &appData{}, "",
-		func(string, *appData, string) (func(), error) {
-			called = true
-			return func() {}, nil
-		})
+			func(string, *appData, string) (func(), error) {
+				called = true
+				return func() {}, nil
+			})
 
 		assert.Equal(t, j.expected, called)
 	}
