@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"fyne.io/fyne/v2"
 	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
@@ -24,7 +25,7 @@ import (
 
 const (
 	defaultAppBuild   = 1
-	defaultAppVersion = "1.0.0"
+	defaultAppVersion = "0.0.1"
 )
 
 type appData struct {
@@ -272,6 +273,14 @@ func (p *Packager) doPackage(runner runner) error {
 		}
 		if p.os != "windows" {
 			defer p.removeBuild(files)
+		}
+	}
+	if util.IsMobile(p.os) { // we don't use the normal build command for mobile so inject before gomobile...
+		close, err := injectMetadataIfPossible(newCommand("go"), p.dir, p.appData, p.icon, createMetadataInitFile)
+		if err != nil {
+			fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
+		} else if close != nil {
+			defer close()
 		}
 	}
 
