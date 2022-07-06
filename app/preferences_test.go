@@ -38,6 +38,10 @@ func TestPreferences_Save(t *testing.T) {
 		assert.Fail(t, "Failed to load, %v", err)
 	}
 	assert.JSONEq(t, string(expected), string(content))
+
+	// check it reads the saved output
+	p = loadPreferences("dummy")
+	assert.Equal(t, "value", p.String("keyString"))
 }
 
 func TestPreferences_Save_OverwriteFast(t *testing.T) {
