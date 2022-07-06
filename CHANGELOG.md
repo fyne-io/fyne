@@ -3,9 +3,12 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-### 2.2.3 - Ongoing
+## 2.2.3 - Ongoing
+
+### Fixed
 
 * Wrappable RichText in a Split container causes crash (#3003, #2961)
+* meta.Version is always 1.0.0 on android & ios (3109)
 
 
 ## 2.2.2 - 30 June 2022
