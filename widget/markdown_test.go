@@ -58,12 +58,12 @@ func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {
 }
 
 func TestRichTextMarkdown_Emphasis(t *testing.T) {
-	r := NewRichTextFromMarkdown("*a*.")
+	r := NewRichTextFromMarkdown("*a*")
 
-	assert.Equal(t, 2, len(r.Segments))
+	assert.Equal(t, 1, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "a", text.Text)
-		assert.Equal(t, RichTextStyleEmphasis, text.Style)
+		assert.True(t, text.Style.TextStyle.Italic)
 	} else {
 		t.Error("Segment should be text")
 	}
@@ -73,7 +73,7 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "b", text.Text)
-		assert.Equal(t, RichTextStyleStrong, text.Style)
+		assert.True(t, text.Style.TextStyle.Bold)
 	} else {
 		t.Error("Segment should be text")
 	}

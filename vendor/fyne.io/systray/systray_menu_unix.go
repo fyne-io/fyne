@@ -5,7 +5,6 @@ package systray
 
 import (
 	"log"
-	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/godbus/dbus/v5/prop"
@@ -13,9 +12,16 @@ import (
 	"fyne.io/systray/internal/generated/menu"
 )
 
-// SetIcon sets the icon of a menu item. Only works on macOS and Windows.
+// SetIcon sets the icon of a menu item.
 // iconBytes should be the content of .ico/.jpg/.png
 func (item *MenuItem) SetIcon(iconBytes []byte) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
+	m, exists := findLayout(int32(item.id))
+	if exists {
+		m.V1["icon-data"] = dbus.MakeVariant(iconBytes)
+		refresh()
+	}
 }
 
 // copyLayout makes full copy of layout
@@ -39,12 +45,13 @@ func copyLayout(in *menuLayout, depth int32) *menuLayout {
 	return &out
 }
 
+// GetLayout is com.canonical.dbusmenu.GetLayout method.
 func (t *tray) GetLayout(parentID int32, recursionDepth int32, propertyNames []string) (revision uint32, layout menuLayout, err *dbus.Error) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	if m, ok := findLayout(parentID); ok {
-		instance.menuLock.RLock()
-		defer instance.menuLock.RUnlock()
 		// return copy of menu layout to prevent panic from cuncurrent access to layout
-		return atomic.LoadUint32(&instance.menuVersion), *copyLayout(m, recursionDepth), nil
+		return instance.menuVersion, *copyLayout(m, recursionDepth), nil
 	}
 	return
 }
@@ -54,6 +61,8 @@ func (t *tray) GetGroupProperties(ids []int32, propertyNames []string) (properti
 	V0 int32
 	V1 map[string]dbus.Variant
 }, err *dbus.Error) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	for _, id := range ids {
 		if m, ok := findLayout(id); ok {
 			p := struct {
@@ -63,11 +72,9 @@ func (t *tray) GetGroupProperties(ids []int32, propertyNames []string) (properti
 				V0: m.V0,
 				V1: make(map[string]dbus.Variant, len(m.V1)),
 			}
-			instance.menuLock.RLock()
 			for k, v := range m.V1 {
 				p.V1[k] = v
 			}
-			instance.menuLock.RUnlock()
 			properties = append(properties, p)
 		}
 	}
@@ -76,9 +83,9 @@ func (t *tray) GetGroupProperties(ids []int32, propertyNames []string) (properti
 
 // GetProperty is com.canonical.dbusmenu.GetProperty method.
 func (t *tray) GetProperty(id int32, name string) (value dbus.Variant, err *dbus.Error) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	if m, ok := findLayout(id); ok {
-		instance.menuLock.RLock()
-		defer instance.menuLock.RUnlock()
 		if p, ok := m.V1[name]; ok {
 			return p, nil
 		}
@@ -89,15 +96,7 @@ func (t *tray) GetProperty(id int32, name string) (value dbus.Variant, err *dbus
 // Event is com.canonical.dbusmenu.Event method.
 func (t *tray) Event(id int32, eventID string, data dbus.Variant, timestamp uint32) (err *dbus.Error) {
 	if eventID == "clicked" {
-		menuItemsLock.RLock()
-		item, ok := menuItems[uint32(id)]
-		menuItemsLock.RUnlock()
-		if !ok {
-			log.Printf("systray error: failed to look up clicked menu item with ID %d\n", id)
-			return
-		}
-
-		item.ClickedCh <- struct{}{}
+		systrayMenuItemSelected(uint32(id))
 	}
 	return
 }
@@ -111,15 +110,7 @@ func (t *tray) EventGroup(events []struct {
 }) (idErrors []int32, err *dbus.Error) {
 	for _, event := range events {
 		if event.V1 == "clicked" {
-			menuItemsLock.RLock()
-			item, ok := menuItems[uint32(event.V0)]
-			menuItemsLock.RUnlock()
-			if !ok {
-				log.Printf("systray error: failed to look up clicked menu item with ID %d\n", event.V0)
-				return
-			}
-
-			item.ClickedCh <- struct{}{}
+			systrayMenuItemSelected(uint32(event.V0))
 		}
 	}
 	return
@@ -136,10 +127,12 @@ func (t *tray) AboutToShowGroup(ids []int32) (updatesNeeded []int32, idErrors []
 }
 
 func createMenuPropSpec() map[string]map[string]*prop.Prop {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	return map[string]map[string]*prop.Prop{
 		"com.canonical.dbusmenu": {
 			"Version": {
-				Value:    atomic.LoadUint32(&instance.menuVersion),
+				Value:    instance.menuVersion,
 				Writable: true,
 				Emit:     prop.EmitTrue,
 				Callback: nil,
@@ -175,8 +168,9 @@ type menuLayout = struct {
 
 func addOrUpdateMenuItem(item *MenuItem) {
 	var layout *menuLayout
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	m, exists := findLayout(int32(item.id))
-
 	if exists {
 		layout = m
 	} else {
@@ -191,14 +185,10 @@ func addOrUpdateMenuItem(item *MenuItem) {
 			m, ok := findLayout(int32(item.parent.id))
 			if ok {
 				parent = m
-				instance.menuLock.Lock()
 				parent.V1["children-display"] = dbus.MakeVariant("submenu")
-				instance.menuLock.Unlock()
 			}
 		}
-		instance.menuLock.Lock()
 		parent.V2 = append(parent.V2, dbus.MakeVariant(layout))
-		instance.menuLock.Unlock()
 	}
 
 	applyItemToLayout(item, layout)
@@ -208,6 +198,8 @@ func addOrUpdateMenuItem(item *MenuItem) {
 }
 
 func addSeparator(id uint32) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	layout := &menuLayout{
 		V0: int32(id),
 		V1: map[string]dbus.Variant{
@@ -215,15 +207,11 @@ func addSeparator(id uint32) {
 		},
 		V2: []dbus.Variant{},
 	}
-	instance.menuLock.Lock()
 	instance.menu.V2 = append(instance.menu.V2, dbus.MakeVariant(layout))
-	instance.menuLock.Unlock()
+	refresh()
 }
 
 func applyItemToLayout(in *MenuItem, out *menuLayout) {
-	instance.menuLock.Lock()
-	defer instance.menuLock.Unlock()
-	out.V1["type"] = dbus.MakeVariant("standard")
 	out.V1["enabled"] = dbus.MakeVariant(!in.disabled)
 	out.V1["label"] = dbus.MakeVariant(in.title)
 
@@ -244,8 +232,6 @@ func findLayout(id int32) (*menuLayout, bool) {
 	if id == 0 {
 		return instance.menu, true
 	}
-	instance.menuLock.RLock()
-	defer instance.menuLock.RUnlock()
 	return findSubLayout(id, instance.menu.V2)
 }
 
@@ -268,52 +254,51 @@ func findSubLayout(id int32, vals []dbus.Variant) (*menuLayout, bool) {
 }
 
 func hideMenuItem(item *MenuItem) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	m, exists := findLayout(int32(item.id))
 	if exists {
-		instance.menuLock.Lock()
 		m.V1["visible"] = dbus.MakeVariant(false)
-		instance.menuLock.Unlock()
 		refresh()
 	}
 }
 
 func showMenuItem(item *MenuItem) {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	m, exists := findLayout(int32(item.id))
 	if exists {
-		instance.menuLock.Lock()
 		m.V1["visible"] = dbus.MakeVariant(true)
-		instance.menuLock.Unlock()
 		refresh()
 	}
 }
 
 func refresh() {
-	instance.lock.RLock()
-	conn := instance.conn
-	menuProps := instance.menuProps
-	instance.lock.RUnlock()
-	if conn != nil && menuProps != nil {
-		version := atomic.AddUint32(&instance.menuVersion, 1)
-		dbusErr := menuProps.Set("com.canonical.dbusmenu", "Version",
-			dbus.MakeVariant(version))
-		if dbusErr != nil {
-			log.Printf("systray error: failed to update menu version: %s\n", dbusErr)
-			return
-		}
-
-		err := menu.Emit(conn, &menu.Dbusmenu_LayoutUpdatedSignal{
-			Path: menuPath,
-			Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{
-				Revision: version,
-			},
-		})
-		if err != nil {
-			log.Printf("systray error: failed to emit layout updated signal: %s\n", err)
-		}
+	if instance.conn == nil || instance.menuProps == nil {
+		return
 	}
+	instance.menuVersion++
+	dbusErr := instance.menuProps.Set("com.canonical.dbusmenu", "Version",
+		dbus.MakeVariant(instance.menuVersion))
+	if dbusErr != nil {
+		log.Printf("systray error: failed to update menu version: %s\n", dbusErr)
+		return
+	}
+	err := menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
+		Path: menuPath,
+		Body: &menu.Dbusmenu_LayoutUpdatedSignalBody{
+			Revision: instance.menuVersion,
+		},
+	})
+	if err != nil {
+		log.Printf("systray error: failed to emit layout updated signal: %s\n", err)
+	}
+
 }
 
 func resetMenu() {
+	instance.menuLock.Lock()
+	defer instance.menuLock.Unlock()
 	instance.menu = &menuLayout{}
 	instance.menuVersion++
 	refresh()

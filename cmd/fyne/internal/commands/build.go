@@ -1,17 +1,19 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	version "github.com/mcuadros/go-version"
+	"github.com/urfave/cli/v2"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	version "github.com/mcuadros/go-version"
-	"github.com/urfave/cli/v2"
 )
 
 // Builder generate the executables.
@@ -128,6 +130,41 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
+type goModEdit struct {
+	Module struct {
+		Path string
+	}
+	Require []struct {
+		Path    string
+		Version string
+	}
+}
+
+func getFyneGoModVersion(runner runner) (string, error) {
+	dependenciesOutput, err := runner.runOutput("mod", "edit", "-json")
+	if err != nil {
+		return "", err
+	}
+
+	var parsed goModEdit
+	err = json.Unmarshal(dependenciesOutput, &parsed)
+	if err != nil {
+		return "", err
+	}
+
+	if parsed.Module.Path == "fyne.io/fyne/v2" {
+		return "master", nil
+	}
+
+	for _, dep := range parsed.Require {
+		if dep.Path == "fyne.io/fyne/v2" {
+			return dep.Version, nil
+		}
+	}
+
+	return "", fmt.Errorf("fyne version not found")
+}
+
 func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
@@ -136,12 +173,21 @@ func (b *Builder) build() error {
 		goos = targetOS()
 	}
 
+	fyneGoModRunner := b.runner
 	if b.runner == nil {
+		fyneGoModRunner = newCommand("go")
 		if goos != "gopherjs" {
 			b.runner = newCommand("go")
 		} else {
 			b.runner = newCommand("gopherjs")
 		}
+	}
+
+	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, b.icon, createMetadataInitFile)
+	if err != nil {
+		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
+	} else if close != nil {
+		defer close()
 	}
 
 	args := []string{"build"}
@@ -150,28 +196,6 @@ func (b *Builder) build() error {
 	if goos == "darwin" {
 		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
 	}
-
-	data, err := metadata.LoadStandard(b.srcdir)
-	if err == nil {
-		mergeMetadata(b.appData, data)
-	}
-
-	metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
-	metadataInitFile, err := os.Create(metadataInitFilePath)
-	if err != nil {
-		fyne.LogError("Failed to make metadata init file, omitting metadata", err)
-	}
-	defer os.Remove(metadataInitFilePath)
-
-	err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
-	if err != nil {
-		fyne.LogError("Failed to generate metadata init, omitting metadata", err)
-	} else {
-		if b.icon != "" {
-			writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
-		}
-	}
-	metadataInitFile.Close()
 
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
@@ -234,6 +258,45 @@ func (b *Builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func createMetadataInitFile(srcdir string, app *appData, icon string) (func(), error) {
+	data, err := metadata.LoadStandard(srcdir)
+	if err == nil {
+		mergeMetadata(app, data)
+	}
+
+	metadataInitFilePath := filepath.Join(srcdir, "fyne_metadata_init.go")
+	metadataInitFile, err := os.Create(metadataInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer metadataInitFile.Close()
+
+	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
+	if err == nil {
+		if icon != "" {
+			writeResource(icon, "fyneMetadataIcon", metadataInitFile)
+		}
+	}
+
+	return func() { os.Remove(metadataInitFilePath) }, err
+}
+
+func injectMetadataIfPossible(runner runner, srcdir string, app *appData, icon string,
+	createMetadataInitFile func(srcdir string, app *appData, icon string) (func(), error)) (func(), error) {
+	fyneGoModVersion, err := getFyneGoModVersion(runner)
+	if err != nil {
+		return nil, err
+	}
+
+	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+		return nil, nil
+	}
+
+	return createMetadataInitFile(srcdir, app, icon)
 }
 
 func targetOS() string {

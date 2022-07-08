@@ -123,6 +123,9 @@ func (d *gLDriver) focusPreviousWindow() {
 
 	var chosen fyne.Window
 	for _, w := range wins {
+		if !w.(*window).visible {
+			continue
+		}
 		chosen = w
 		if w.(*window).master {
 			break

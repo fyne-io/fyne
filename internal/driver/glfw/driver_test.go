@@ -126,7 +126,7 @@ func init() {
 }
 
 func TestGoroutineID(t *testing.T) {
-	assert.Equal(t, 1, mainRoutineID)
+	assert.Equal(t, uint64(1), mainRoutineID)
 
 	var childID1, childID2 uint64
 	testID1 := goroutineID()
@@ -144,8 +144,8 @@ func TestGoroutineID(t *testing.T) {
 	testID2 := goroutineID()
 
 	assert.Equal(t, testID1, testID2)
-	assert.Greater(t, childID1, 0)
+	assert.Greater(t, childID1, uint64(0))
 	assert.NotEqual(t, testID1, childID1)
-	assert.Greater(t, childID2, 0)
+	assert.Greater(t, childID2, uint64(0))
 	assert.NotEqual(t, childID1, childID2)
 }
