@@ -37,7 +37,23 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 		&canvas.Rectangle{FillColor: color.NRGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.NRGBA{0xff, 0xff, 0xff, 0xff},
 			StrokeWidth: 1},
+		&canvas.Rectangle{
+			FillColor:   color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+			StrokeColor: color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+			StrokeWidth: 5,
+			Radius:      fyne.RectangleRadius{Left: 20.0, LeftSegments: 16, Right: 20.0, RightSegments: 16},
+		},
+		&canvas.Rectangle{
+			FillColor: color.NRGBA{R: 150, G: 0, B: 205, A: 200},
+			Radius:    fyne.RectangleRadius{Left: 45.0, Right: 45.0, RightSegments: 1},
+		},
 		&canvas.Line{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
+		&canvas.Rectangle{
+			FillColor:   color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+			StrokeColor: color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+			StrokeWidth: 2,
+			Radius:      fyne.RectangleRadius{Right: 45.0, RightSegments: 24},
+		},
 		&canvas.Circle{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff},
 			FillColor:   color.NRGBA{0x30, 0x30, 0x30, 0x60},
 			StrokeWidth: 2},
