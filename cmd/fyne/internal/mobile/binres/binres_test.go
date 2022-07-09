@@ -445,7 +445,7 @@ func TestTableMarshal(t *testing.T) {
 	err = xtbl.UnmarshalBinary(bin)
 	r.NoError(err)
 
-	r.Equal(len(tbl.pool.strings), xtbl.pool.strings)
+	r.Equal(len(tbl.pool.strings), len(xtbl.pool.strings))
 	r.Equal(len(tbl.pkgs), len(xtbl.pkgs))
 
 	pkg, xpkg := tbl.pkgs[0], xtbl.pkgs[0]

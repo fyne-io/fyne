@@ -165,44 +165,6 @@ func getFyneGoModVersion(runner runner) (string, error) {
 	return "", fmt.Errorf("fyne version not found")
 }
 
-func (b *Builder) createMetadataInitFile() (func(), error) {
-	data, err := metadata.LoadStandard(b.srcdir)
-	if err == nil {
-		mergeMetadata(b.appData, data)
-	}
-
-	metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
-	metadataInitFile, err := os.Create(metadataInitFilePath)
-	if err != nil {
-		return func() {}, err
-	}
-	defer metadataInitFile.Close()
-
-	err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
-	if err == nil {
-		if b.icon != "" {
-			writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
-		}
-	}
-
-	return func() { os.Remove(metadataInitFilePath) }, err
-}
-
-func (b *Builder) injectMetadataIfPossible(runner runner, createMetadataInitFile func() (func(), error)) (func(), error) {
-	fyneGoModVersion, err := getFyneGoModVersion(runner)
-	if err != nil {
-		return nil, err
-	}
-
-	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
-	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
-	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
-		return nil, nil
-	}
-
-	return createMetadataInitFile()
-}
-
 func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
@@ -221,7 +183,7 @@ func (b *Builder) build() error {
 		}
 	}
 
-	close, err := b.injectMetadataIfPossible(fyneGoModRunner, b.createMetadataInitFile)
+	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, b.icon, createMetadataInitFile)
 	if err != nil {
 		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 	} else if close != nil {
@@ -296,6 +258,45 @@ func (b *Builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func createMetadataInitFile(srcdir string, app *appData, icon string) (func(), error) {
+	data, err := metadata.LoadStandard(srcdir)
+	if err == nil {
+		mergeMetadata(app, data)
+	}
+
+	metadataInitFilePath := filepath.Join(srcdir, "fyne_metadata_init.go")
+	metadataInitFile, err := os.Create(metadataInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer metadataInitFile.Close()
+
+	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
+	if err == nil {
+		if icon != "" {
+			writeResource(icon, "fyneMetadataIcon", metadataInitFile)
+		}
+	}
+
+	return func() { os.Remove(metadataInitFilePath) }, err
+}
+
+func injectMetadataIfPossible(runner runner, srcdir string, app *appData, icon string,
+	createMetadataInitFile func(srcdir string, app *appData, icon string) (func(), error)) (func(), error) {
+	fyneGoModVersion, err := getFyneGoModVersion(runner)
+	if err != nil {
+		return nil, err
+	}
+
+	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+		return nil, nil
+	}
+
+	return createMetadataInitFile(srcdir, app, icon)
 }
 
 func targetOS() string {
