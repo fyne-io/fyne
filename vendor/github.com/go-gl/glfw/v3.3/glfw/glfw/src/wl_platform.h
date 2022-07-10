@@ -26,9 +26,7 @@
 
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
-#ifdef HAVE_XKBCOMMON_COMPOSE_H
 #include <xkbcommon/xkbcommon-compose.h>
-#endif
 #include <dlfcn.h>
 
 typedef VkFlags VkWaylandSurfaceCreateFlagsKHR;
@@ -112,24 +110,27 @@ typedef struct xkb_keymap* (* PFN_xkb_keymap_new_from_string)(struct xkb_context
 typedef void (* PFN_xkb_keymap_unref)(struct xkb_keymap*);
 typedef xkb_mod_index_t (* PFN_xkb_keymap_mod_get_index)(struct xkb_keymap*, const char*);
 typedef int (* PFN_xkb_keymap_key_repeats)(struct xkb_keymap*, xkb_keycode_t);
+typedef int (* PFN_xkb_keymap_key_get_syms_by_level)(struct xkb_keymap*,xkb_keycode_t,xkb_layout_index_t,xkb_level_index_t,const xkb_keysym_t**);
 typedef struct xkb_state* (* PFN_xkb_state_new)(struct xkb_keymap*);
 typedef void (* PFN_xkb_state_unref)(struct xkb_state*);
 typedef int (* PFN_xkb_state_key_get_syms)(struct xkb_state*, xkb_keycode_t, const xkb_keysym_t**);
 typedef enum xkb_state_component (* PFN_xkb_state_update_mask)(struct xkb_state*, xkb_mod_mask_t, xkb_mod_mask_t, xkb_mod_mask_t, xkb_layout_index_t, xkb_layout_index_t, xkb_layout_index_t);
 typedef xkb_mod_mask_t (* PFN_xkb_state_serialize_mods)(struct xkb_state*, enum xkb_state_component);
+typedef xkb_layout_index_t (* PFN_xkb_state_key_get_layout)(struct xkb_state*,xkb_keycode_t);
 #define xkb_context_new _glfw.wl.xkb.context_new
 #define xkb_context_unref _glfw.wl.xkb.context_unref
 #define xkb_keymap_new_from_string _glfw.wl.xkb.keymap_new_from_string
 #define xkb_keymap_unref _glfw.wl.xkb.keymap_unref
 #define xkb_keymap_mod_get_index _glfw.wl.xkb.keymap_mod_get_index
 #define xkb_keymap_key_repeats _glfw.wl.xkb.keymap_key_repeats
+#define xkb_keymap_key_get_syms_by_level _glfw.wl.xkb.keymap_key_get_syms_by_level
 #define xkb_state_new _glfw.wl.xkb.state_new
 #define xkb_state_unref _glfw.wl.xkb.state_unref
 #define xkb_state_key_get_syms _glfw.wl.xkb.state_key_get_syms
 #define xkb_state_update_mask _glfw.wl.xkb.state_update_mask
 #define xkb_state_serialize_mods _glfw.wl.xkb.state_serialize_mods
+#define xkb_state_key_get_layout _glfw.wl.xkb.state_key_get_layout
 
-#ifdef HAVE_XKBCOMMON_COMPOSE_H
 typedef struct xkb_compose_table* (* PFN_xkb_compose_table_new_from_locale)(struct xkb_context*, const char*, enum xkb_compose_compile_flags);
 typedef void (* PFN_xkb_compose_table_unref)(struct xkb_compose_table*);
 typedef struct xkb_compose_state* (* PFN_xkb_compose_state_new)(struct xkb_compose_table*, enum xkb_compose_state_flags);
@@ -144,7 +145,6 @@ typedef xkb_keysym_t (* PFN_xkb_compose_state_get_one_sym)(struct xkb_compose_st
 #define xkb_compose_state_feed _glfw.wl.xkb.compose_state_feed
 #define xkb_compose_state_get_status _glfw.wl.xkb.compose_state_get_status
 #define xkb_compose_state_get_one_sym _glfw.wl.xkb.compose_state_get_one_sym
-#endif
 
 #define _GLFW_DECORATION_WIDTH 4
 #define _GLFW_DECORATION_TOP 24
@@ -262,16 +262,14 @@ typedef struct _GLFWlibraryWayland
     int                         timerfd;
     short int                   keycodes[256];
     short int                   scancodes[GLFW_KEY_LAST + 1];
+    char                        keynames[GLFW_KEY_LAST + 1][5];
 
     struct {
         void*                   handle;
         struct xkb_context*     context;
         struct xkb_keymap*      keymap;
         struct xkb_state*       state;
-
-#ifdef HAVE_XKBCOMMON_COMPOSE_H
         struct xkb_compose_state* composeState;
-#endif
 
         xkb_mod_mask_t          controlMask;
         xkb_mod_mask_t          altMask;
@@ -287,13 +285,14 @@ typedef struct _GLFWlibraryWayland
         PFN_xkb_keymap_unref keymap_unref;
         PFN_xkb_keymap_mod_get_index keymap_mod_get_index;
         PFN_xkb_keymap_key_repeats keymap_key_repeats;
+        PFN_xkb_keymap_key_get_syms_by_level keymap_key_get_syms_by_level;
         PFN_xkb_state_new state_new;
         PFN_xkb_state_unref state_unref;
         PFN_xkb_state_key_get_syms state_key_get_syms;
         PFN_xkb_state_update_mask state_update_mask;
         PFN_xkb_state_serialize_mods state_serialize_mods;
+        PFN_xkb_state_key_get_layout state_key_get_layout;
 
-#ifdef HAVE_XKBCOMMON_COMPOSE_H
         PFN_xkb_compose_table_new_from_locale compose_table_new_from_locale;
         PFN_xkb_compose_table_unref compose_table_unref;
         PFN_xkb_compose_state_new compose_state_new;
@@ -301,7 +300,6 @@ typedef struct _GLFWlibraryWayland
         PFN_xkb_compose_state_feed compose_state_feed;
         PFN_xkb_compose_state_get_status compose_state_get_status;
         PFN_xkb_compose_state_get_one_sym compose_state_get_one_sym;
-#endif
     } xkb;
 
     _GLFWwindow*                pointerFocus;
@@ -352,4 +350,5 @@ typedef struct _GLFWcursorWayland
 
 
 void _glfwAddOutputWayland(uint32_t name, uint32_t version);
+GLFWbool _glfwInputTextWayland(_GLFWwindow* window, uint32_t scancode);
 

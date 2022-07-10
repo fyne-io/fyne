@@ -39,7 +39,8 @@
 #include <sys/mman.h>
 #include <sys/timerfd.h>
 #include <poll.h>
-
+#include <signal.h>
+#include <time.h>
 
 static void shellSurfaceHandlePing(void* data,
                                    struct wl_shell_surface* shellSurface,
@@ -248,6 +249,53 @@ static struct wl_buffer* createShmBuffer(const GLFWimage* image)
     return buffer;
 }
 
+// Wait for data to arrive on any of the specified file descriptors
+//
+static GLFWbool waitForData(struct pollfd* fds, nfds_t count, double* timeout)
+{
+    for (;;)
+    {
+        if (timeout)
+        {
+            const uint64_t base = _glfwPlatformGetTimerValue();
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__)
+            const time_t seconds = (time_t) *timeout;
+            const long nanoseconds = (long) ((*timeout - seconds) * 1e9);
+            const struct timespec ts = { seconds, nanoseconds };
+            const int result = ppoll(fds, count, &ts, NULL);
+#elif defined(__NetBSD__)
+            const time_t seconds = (time_t) *timeout;
+            const long nanoseconds = (long) ((*timeout - seconds) * 1e9);
+            const struct timespec ts = { seconds, nanoseconds };
+            const int result = pollts(fds, count, &ts, NULL);
+#else
+            const int milliseconds = (int) (*timeout * 1e3);
+            const int result = poll(fds, count, milliseconds);
+#endif
+            const int error = errno; // clock_gettime may overwrite our error
+
+            *timeout -= (_glfwPlatformGetTimerValue() - base) /
+                (double) _glfwPlatformGetTimerFrequency();
+
+            if (result > 0)
+                return GLFW_TRUE;
+            else if (result == -1 && error != EINTR && error != EAGAIN)
+                return GLFW_FALSE;
+            else if (*timeout <= 0.0)
+                return GLFW_FALSE;
+        }
+        else
+        {
+            const int result = poll(fds, count, -1);
+            if (result > 0)
+                return GLFW_TRUE;
+            else if (result == -1 && errno != EINTR && errno != EAGAIN)
+                return GLFW_FALSE;
+        }
+    }
+}
+
 static void createDecoration(_GLFWdecorationWayland* decoration,
                              struct wl_surface* parent,
                              struct wl_buffer* buffer, GLFWbool opaque,
@@ -404,27 +452,25 @@ static void resizeWindow(_GLFWwindow* window)
 
 static void checkScaleChange(_GLFWwindow* window)
 {
-    int scale = 1;
-    int i;
-    int monitorScale;
-
     // Check if we will be able to set the buffer scale or not.
     if (_glfw.wl.compositorVersion < 3)
         return;
 
     // Get the scale factor from the highest scale monitor.
-    for (i = 0; i < window->wl.monitorsCount; ++i)
+    int maxScale = 1;
+
+    for (int i = 0; i < window->wl.monitorsCount; i++)
     {
-        monitorScale = window->wl.monitors[i]->wl.scale;
-        if (scale < monitorScale)
-            scale = monitorScale;
+        const int scale = window->wl.monitors[i]->wl.scale;
+        if (maxScale < scale)
+            maxScale = scale;
     }
 
     // Only change the framebuffer size if the scale changed.
-    if (scale != window->wl.scale)
+    if (window->wl.scale != maxScale)
     {
-        window->wl.scale = scale;
-        wl_surface_set_buffer_scale(window->wl.surface, scale);
+        window->wl.scale = maxScale;
+        wl_surface_set_buffer_scale(window->wl.surface, maxScale);
         resizeWindow(window);
     }
 }
@@ -491,35 +537,6 @@ static void setIdleInhibitor(_GLFWwindow* window, GLFWbool enable)
         zwp_idle_inhibitor_v1_destroy(window->wl.idleInhibitor);
         window->wl.idleInhibitor = NULL;
     }
-}
-
-static GLFWbool createSurface(_GLFWwindow* window,
-                              const _GLFWwndconfig* wndconfig)
-{
-    window->wl.surface = wl_compositor_create_surface(_glfw.wl.compositor);
-    if (!window->wl.surface)
-        return GLFW_FALSE;
-
-    wl_surface_add_listener(window->wl.surface,
-                            &surfaceListener,
-                            window);
-
-    wl_surface_set_user_data(window->wl.surface, window);
-
-    window->wl.native = wl_egl_window_create(window->wl.surface,
-                                             wndconfig->width,
-                                             wndconfig->height);
-    if (!window->wl.native)
-        return GLFW_FALSE;
-
-    window->wl.width = wndconfig->width;
-    window->wl.height = wndconfig->height;
-    window->wl.scale = 1;
-
-    if (!window->wl.transparent)
-        setOpaqueRegion(window);
-
-    return GLFW_TRUE;
 }
 
 static void setFullscreen(_GLFWwindow* window, _GLFWmonitor* monitor,
@@ -653,7 +670,6 @@ static void xdgToplevelHandleConfigure(void* data,
     }
     if (fullscreen && activated)
         window->wl.wasFullscreen = GLFW_TRUE;
-    _glfwInputWindowFocus(window, activated);
 }
 
 static void xdgToplevelHandleClose(void* data,
@@ -761,6 +777,46 @@ static GLFWbool createXdgSurface(_GLFWwindow* window)
     return GLFW_TRUE;
 }
 
+static GLFWbool createSurface(_GLFWwindow* window,
+                              const _GLFWwndconfig* wndconfig,
+                              const _GLFWfbconfig* fbconfig)
+{
+    window->wl.surface = wl_compositor_create_surface(_glfw.wl.compositor);
+    if (!window->wl.surface)
+        return GLFW_FALSE;
+
+    wl_surface_add_listener(window->wl.surface,
+                            &surfaceListener,
+                            window);
+
+    wl_surface_set_user_data(window->wl.surface, window);
+
+    window->wl.native = wl_egl_window_create(window->wl.surface,
+                                             wndconfig->width,
+                                             wndconfig->height);
+    if (!window->wl.native)
+        return GLFW_FALSE;
+
+    window->wl.width = wndconfig->width;
+    window->wl.height = wndconfig->height;
+    window->wl.scale = 1;
+    window->wl.title = _glfw_strdup(wndconfig->title);
+
+    window->wl.transparent = fbconfig->transparent;
+    if (!window->wl.transparent)
+        setOpaqueRegion(window);
+
+    if (window->monitor || wndconfig->visible)
+    {
+        if (!createXdgSurface(window))
+            return GLFW_FALSE;
+
+        window->wl.visible = GLFW_TRUE;
+    }
+
+    return GLFW_TRUE;
+}
+
 static void setCursorImage(_GLFWwindow* window,
                            _GLFWcursorWayland* cursorWayland)
 {
@@ -823,78 +879,102 @@ static void incrementCursorImage(_GLFWwindow* window)
     }
 }
 
-static void handleEvents(int timeout)
+static GLFWbool flushDisplay(void)
 {
-    struct wl_display* display = _glfw.wl.display;
-    struct pollfd fds[] = {
-        { wl_display_get_fd(display), POLLIN },
+    while (wl_display_flush(_glfw.wl.display) == -1)
+    {
+        if (errno != EAGAIN)
+            return GLFW_FALSE;
+
+        struct pollfd fd = { wl_display_get_fd(_glfw.wl.display), POLLOUT };
+
+        while (poll(&fd, 1, -1) == -1)
+        {
+            if (errno != EINTR && errno != EAGAIN)
+                return GLFW_FALSE;
+        }
+    }
+
+    return GLFW_TRUE;
+}
+
+static void handleEvents(double* timeout)
+{
+    GLFWbool event = GLFW_FALSE;
+    struct pollfd fds[] =
+    {
+        { wl_display_get_fd(_glfw.wl.display), POLLIN },
         { _glfw.wl.timerfd, POLLIN },
         { _glfw.wl.cursorTimerfd, POLLIN },
     };
-    ssize_t read_ret;
-    uint64_t repeats, i;
 
-    while (wl_display_prepare_read(display) != 0)
-        wl_display_dispatch_pending(display);
-
-    // If an error different from EAGAIN happens, we have likely been
-    // disconnected from the Wayland session, try to handle that the best we
-    // can.
-    if (wl_display_flush(display) < 0 && errno != EAGAIN)
+    while (!event)
     {
-        _GLFWwindow* window = _glfw.windowListHead;
-        while (window)
+        while (wl_display_prepare_read(_glfw.wl.display) != 0)
+            wl_display_dispatch_pending(_glfw.wl.display);
+
+        // If an error other than EAGAIN happens, we have likely been disconnected
+        // from the Wayland session; try to handle that the best we can.
+        if (!flushDisplay())
         {
-            _glfwInputWindowCloseRequest(window);
-            window = window->next;
-        }
-        wl_display_cancel_read(display);
-        return;
-    }
+            wl_display_cancel_read(_glfw.wl.display);
 
-    if (poll(fds, 3, timeout) > 0)
-    {
+            _GLFWwindow* window = _glfw.windowListHead;
+            while (window)
+            {
+                _glfwInputWindowCloseRequest(window);
+                window = window->next;
+            }
+
+            return;
+        }
+
+        if (!waitForData(fds, 3, timeout))
+        {
+            wl_display_cancel_read(_glfw.wl.display);
+            return;
+        }
+
         if (fds[0].revents & POLLIN)
         {
-            wl_display_read_events(display);
-            wl_display_dispatch_pending(display);
+            wl_display_read_events(_glfw.wl.display);
+            if (wl_display_dispatch_pending(_glfw.wl.display) > 0)
+                event = GLFW_TRUE;
         }
         else
-        {
-            wl_display_cancel_read(display);
-        }
+            wl_display_cancel_read(_glfw.wl.display);
 
         if (fds[1].revents & POLLIN)
         {
-            read_ret = read(_glfw.wl.timerfd, &repeats, sizeof(repeats));
-            if (read_ret != 8)
-                return;
+            uint64_t repeats;
 
-            if (_glfw.wl.keyboardFocus)
+            if (read(_glfw.wl.timerfd, &repeats, sizeof(repeats)) == 8)
             {
-                for (i = 0; i < repeats; ++i)
+                for (uint64_t i = 0; i < repeats; i++)
                 {
                     _glfwInputKey(_glfw.wl.keyboardFocus,
                                   _glfw.wl.keyboardLastKey,
                                   _glfw.wl.keyboardLastScancode,
-                                  GLFW_REPEAT,
+                                  GLFW_PRESS,
                                   _glfw.wl.xkb.modifiers);
+                    _glfwInputTextWayland(_glfw.wl.keyboardFocus,
+                                          _glfw.wl.keyboardLastScancode);
                 }
+
+                event = GLFW_TRUE;
             }
         }
 
         if (fds[2].revents & POLLIN)
         {
-            read_ret = read(_glfw.wl.cursorTimerfd, &repeats, sizeof(repeats));
-            if (read_ret != 8)
-                return;
+            uint64_t repeats;
 
-            incrementCursorImage(_glfw.wl.pointerFocus);
+            if (read(_glfw.wl.cursorTimerfd, &repeats, sizeof(repeats)) == 8)
+            {
+                incrementCursorImage(_glfw.wl.pointerFocus);
+                event = GLFW_TRUE;
+            }
         }
-    }
-    else
-    {
-        wl_display_cancel_read(display);
     }
 }
 
@@ -929,9 +1009,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
                               const _GLFWctxconfig* ctxconfig,
                               const _GLFWfbconfig* fbconfig)
 {
-    window->wl.transparent = fbconfig->transparent;
-
-    if (!createSurface(window, wndconfig))
+    if (!createSurface(window, wndconfig, fbconfig))
         return GLFW_FALSE;
 
     if (ctxconfig->client != GLFW_NO_API)
@@ -952,38 +1030,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
                 return GLFW_FALSE;
         }
     }
-
-    if (wndconfig->title)
-        window->wl.title = _glfw_strdup(wndconfig->title);
-
-    if (wndconfig->visible)
-    {
-        if (_glfw.wl.wmBase)
-        {
-            if (!createXdgSurface(window))
-                return GLFW_FALSE;
-        }
-        else
-        {
-            if (!createShellSurface(window))
-                return GLFW_FALSE;
-        }
-
-        window->wl.visible = GLFW_TRUE;
-    }
-    else
-    {
-        window->wl.xdg.surface = NULL;
-        window->wl.xdg.toplevel = NULL;
-        window->wl.shellSurface = NULL;
-        window->wl.visible = GLFW_FALSE;
-    }
-
-    window->wl.currentCursor = NULL;
-
-    window->wl.monitors = calloc(1, sizeof(_GLFWmonitor*));
-    window->wl.monitorsCount = 0;
-    window->wl.monitorsSize = 1;
 
     return GLFW_TRUE;
 }
@@ -1202,29 +1248,29 @@ void _glfwPlatformShowWindow(_GLFWwindow* window)
 {
     if (!window->wl.visible)
     {
+        // NOTE: The XDG/shell surface is created here so command-line applications
+        //       with off-screen windows do not appear in for example the Unity dock
         if (_glfw.wl.wmBase)
-            createXdgSurface(window);
+        {
+            if (!window->wl.xdg.toplevel)
+                createXdgSurface(window);
+        }
         else if (!window->wl.shellSurface)
             createShellSurface(window);
+
         window->wl.visible = GLFW_TRUE;
+        _glfwInputWindowDamage(window);
     }
 }
 
 void _glfwPlatformHideWindow(_GLFWwindow* window)
 {
-    if (window->wl.xdg.toplevel)
+    if (window->wl.visible)
     {
-        xdg_toplevel_destroy(window->wl.xdg.toplevel);
-        xdg_surface_destroy(window->wl.xdg.surface);
-        window->wl.xdg.toplevel = NULL;
-        window->wl.xdg.surface = NULL;
+        window->wl.visible = GLFW_FALSE;
+        wl_surface_attach(window->wl.surface, NULL, 0, 0);
+        wl_surface_commit(window->wl.surface);
     }
-    else if (window->wl.shellSurface)
-    {
-        wl_shell_surface_destroy(window->wl.shellSurface);
-        window->wl.shellSurface = NULL;
-    }
-    window->wl.visible = GLFW_FALSE;
 }
 
 void _glfwPlatformRequestWindowAttention(_GLFWwindow* window)
@@ -1341,22 +1387,24 @@ GLFWbool _glfwPlatformRawMouseMotionSupported(void)
 
 void _glfwPlatformPollEvents(void)
 {
-    handleEvents(0);
+    double timeout = 0.0;
+    handleEvents(&timeout);
 }
 
 void _glfwPlatformWaitEvents(void)
 {
-    handleEvents(-1);
+    handleEvents(NULL);
 }
 
 void _glfwPlatformWaitEventsTimeout(double timeout)
 {
-    handleEvents((int) (timeout * 1e3));
+    handleEvents(&timeout);
 }
 
 void _glfwPlatformPostEmptyEvent(void)
 {
     wl_display_sync(_glfw.wl.display);
+    flushDisplay();
 }
 
 void _glfwPlatformGetCursorPos(_GLFWwindow* window, double* xpos, double* ypos)
@@ -1387,8 +1435,57 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
 
 const char* _glfwPlatformGetScancodeName(int scancode)
 {
-    // TODO
-    return NULL;
+    if (scancode < 0 || scancode > 255 ||
+        _glfw.wl.keycodes[scancode] == GLFW_KEY_UNKNOWN)
+    {
+        _glfwInputError(GLFW_INVALID_VALUE,
+                        "Wayland: Invalid scancode %i",
+                        scancode);
+        return NULL;
+    }
+
+    const int key = _glfw.wl.keycodes[scancode];
+    const xkb_keycode_t keycode = scancode + 8;
+    const xkb_layout_index_t layout =
+        xkb_state_key_get_layout(_glfw.wl.xkb.state, keycode);
+    if (layout == XKB_LAYOUT_INVALID)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Wayland: Failed to retrieve layout for key name");
+        return NULL;
+    }
+
+    const xkb_keysym_t* keysyms = NULL;
+    xkb_keymap_key_get_syms_by_level(_glfw.wl.xkb.keymap,
+                                     keycode,
+                                     layout,
+                                     0,
+                                     &keysyms);
+    if (keysyms == NULL)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Wayland: Failed to retrieve keysym for key name");
+        return NULL;
+    }
+
+    const uint32_t codepoint = _glfwKeySym2Unicode(keysyms[0]);
+    if (codepoint == GLFW_INVALID_CODEPOINT)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Wayland: Failed to retrieve codepoint for key name");
+        return NULL;
+    }
+
+    const size_t count = _glfwEncodeUTF8(_glfw.wl.keynames[key],  codepoint);
+    if (count == 0)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Wayland: Failed to encode codepoint for key name");
+        return NULL;
+    }
+
+    _glfw.wl.keynames[key][count] = '\0';
+    return _glfw.wl.keynames[key];
 }
 
 int _glfwPlatformGetKeyScancode(int key)
@@ -1744,7 +1841,7 @@ static GLFWbool growClipboardString(void)
     clipboard = realloc(clipboard, _glfw.wl.clipboardSize * 2);
     if (!clipboard)
     {
-        _glfwInputError(GLFW_PLATFORM_ERROR,
+        _glfwInputError(GLFW_OUT_OF_MEMORY,
                         "Wayland: Impossible to grow clipboard string");
         return GLFW_FALSE;
     }
@@ -1779,9 +1876,9 @@ const char* _glfwPlatformGetClipboardString(void)
     close(fds[1]);
 
     // XXX: this is a huge hack, this function shouldn’t be synchronous!
-    handleEvents(-1);
+    handleEvents(NULL);
 
-    while (1)
+    for (;;)
     {
         // Grow the clipboard if we need to paste something bigger, there is no
         // shrink operation yet.

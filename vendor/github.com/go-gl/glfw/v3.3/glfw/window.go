@@ -171,7 +171,7 @@ type Window struct {
 	fSizeHolder            func(w *Window, width int, height int)
 	fFramebufferSizeHolder func(w *Window, width int, height int)
 	fCloseHolder           func(w *Window)
-	fMaximizeHolder        func(w *Window, iconified bool)
+	fMaximizeHolder        func(w *Window, maximized bool)
 	fContentScaleHolder    func(w *Window, x float32, y float32)
 	fRefreshHolder         func(w *Window)
 	fFocusHolder           func(w *Window, focused bool)
@@ -226,9 +226,9 @@ func goWindowCloseCB(window unsafe.Pointer) {
 }
 
 //export goWindowMaximizeCB
-func goWindowMaximizeCB(window unsafe.Pointer, iconified C.int) {
+func goWindowMaximizeCB(window unsafe.Pointer, maximized C.int) {
 	w := windows.get((*C.GLFWwindow)(window))
-	w.fMaximizeHolder(w, glfwbool(iconified))
+	w.fMaximizeHolder(w, glfwbool(maximized))
 }
 
 //export goWindowRefreshCB
@@ -309,7 +309,7 @@ func WindowHintString(hint Hint, value string) {
 // as not all parameters and hints are hard constraints. This includes the size
 // of the window, especially for full screen windows. To retrieve the actual
 // attributes of the created window and context, use queries like
-// GetWindowAttrib and GetWindowSize.
+// Window.GetAttrib and Window.GetSize.
 //
 // To create the window at a specific position, make it initially invisible using
 // the Visible window hint, set its position and then show it.
@@ -809,7 +809,7 @@ func (w *Window) SetCloseCallback(cbfun CloseCallback) (previous CloseCallback) 
 
 // MaximizeCallback is the function signature for window maximize callback
 // functions.
-type MaximizeCallback func(w *Window, iconified bool)
+type MaximizeCallback func(w *Window, maximized bool)
 
 // SetMaximizeCallback sets the maximization callback of the specified window,
 // which is called when the window is maximized or restored.

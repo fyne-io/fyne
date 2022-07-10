@@ -174,10 +174,8 @@ zxdg_decoration_manager_v1_get_version(struct zxdg_decoration_manager_v1 *zxdg_d
 static inline void
 zxdg_decoration_manager_v1_destroy(struct zxdg_decoration_manager_v1 *zxdg_decoration_manager_v1)
 {
-	wl_proxy_marshal((struct wl_proxy *) zxdg_decoration_manager_v1,
-			 ZXDG_DECORATION_MANAGER_V1_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) zxdg_decoration_manager_v1);
+	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_decoration_manager_v1,
+			 ZXDG_DECORATION_MANAGER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_decoration_manager_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -196,8 +194,8 @@ zxdg_decoration_manager_v1_get_toplevel_decoration(struct zxdg_decoration_manage
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) zxdg_decoration_manager_v1,
-			 ZXDG_DECORATION_MANAGER_V1_GET_TOPLEVEL_DECORATION, &zxdg_toplevel_decoration_v1_interface, NULL, toplevel);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) zxdg_decoration_manager_v1,
+			 ZXDG_DECORATION_MANAGER_V1_GET_TOPLEVEL_DECORATION, &zxdg_toplevel_decoration_v1_interface, wl_proxy_get_version((struct wl_proxy *) zxdg_decoration_manager_v1), 0, NULL, toplevel);
 
 	return (struct zxdg_toplevel_decoration_v1 *) id;
 }
@@ -325,10 +323,8 @@ zxdg_toplevel_decoration_v1_get_version(struct zxdg_toplevel_decoration_v1 *zxdg
 static inline void
 zxdg_toplevel_decoration_v1_destroy(struct zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1)
 {
-	wl_proxy_marshal((struct wl_proxy *) zxdg_toplevel_decoration_v1,
-			 ZXDG_TOPLEVEL_DECORATION_V1_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) zxdg_toplevel_decoration_v1);
+	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_toplevel_decoration_v1,
+			 ZXDG_TOPLEVEL_DECORATION_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_toplevel_decoration_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -356,8 +352,8 @@ zxdg_toplevel_decoration_v1_destroy(struct zxdg_toplevel_decoration_v1 *zxdg_top
 static inline void
 zxdg_toplevel_decoration_v1_set_mode(struct zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1, uint32_t mode)
 {
-	wl_proxy_marshal((struct wl_proxy *) zxdg_toplevel_decoration_v1,
-			 ZXDG_TOPLEVEL_DECORATION_V1_SET_MODE, mode);
+	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_toplevel_decoration_v1,
+			 ZXDG_TOPLEVEL_DECORATION_V1_SET_MODE, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_toplevel_decoration_v1), 0, mode);
 }
 
 /**
@@ -371,8 +367,8 @@ zxdg_toplevel_decoration_v1_set_mode(struct zxdg_toplevel_decoration_v1 *zxdg_to
 static inline void
 zxdg_toplevel_decoration_v1_unset_mode(struct zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1)
 {
-	wl_proxy_marshal((struct wl_proxy *) zxdg_toplevel_decoration_v1,
-			 ZXDG_TOPLEVEL_DECORATION_V1_UNSET_MODE);
+	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_toplevel_decoration_v1,
+			 ZXDG_TOPLEVEL_DECORATION_V1_UNSET_MODE, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_toplevel_decoration_v1), 0);
 }
 
 #ifdef  __cplusplus

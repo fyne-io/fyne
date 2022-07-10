@@ -481,10 +481,8 @@ xdg_wm_base_get_version(struct xdg_wm_base *xdg_wm_base)
 static inline void
 xdg_wm_base_destroy(struct xdg_wm_base *xdg_wm_base)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_wm_base,
-			 XDG_WM_BASE_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) xdg_wm_base);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_wm_base,
+			 XDG_WM_BASE_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_wm_base), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -499,8 +497,8 @@ xdg_wm_base_create_positioner(struct xdg_wm_base *xdg_wm_base)
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) xdg_wm_base,
-			 XDG_WM_BASE_CREATE_POSITIONER, &xdg_positioner_interface, NULL);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) xdg_wm_base,
+			 XDG_WM_BASE_CREATE_POSITIONER, &xdg_positioner_interface, wl_proxy_get_version((struct wl_proxy *) xdg_wm_base), 0, NULL);
 
 	return (struct xdg_positioner *) id;
 }
@@ -527,8 +525,8 @@ xdg_wm_base_get_xdg_surface(struct xdg_wm_base *xdg_wm_base, struct wl_surface *
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) xdg_wm_base,
-			 XDG_WM_BASE_GET_XDG_SURFACE, &xdg_surface_interface, NULL, surface);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) xdg_wm_base,
+			 XDG_WM_BASE_GET_XDG_SURFACE, &xdg_surface_interface, wl_proxy_get_version((struct wl_proxy *) xdg_wm_base), 0, NULL, surface);
 
 	return (struct xdg_surface *) id;
 }
@@ -542,8 +540,8 @@ xdg_wm_base_get_xdg_surface(struct xdg_wm_base *xdg_wm_base, struct wl_surface *
 static inline void
 xdg_wm_base_pong(struct xdg_wm_base *xdg_wm_base, uint32_t serial)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_wm_base,
-			 XDG_WM_BASE_PONG, serial);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_wm_base,
+			 XDG_WM_BASE_PONG, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_wm_base), 0, serial);
 }
 
 #ifndef XDG_POSITIONER_ERROR_ENUM
@@ -590,17 +588,106 @@ enum xdg_positioner_gravity {
 #define XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_ENUM
 /**
  * @ingroup iface_xdg_positioner
- * vertically resize the surface
+ * constraint adjustments
  *
- * Resize the surface vertically so that it is completely unconstrained.
+ * The constraint adjustment value define ways the compositor will adjust
+ * the position of the surface, if the unadjusted position would result
+ * in the surface being partly constrained.
+ *
+ * Whether a surface is considered 'constrained' is left to the compositor
+ * to determine. For example, the surface may be partly outside the
+ * compositor's defined 'work area', thus necessitating the child surface's
+ * position be adjusted until it is entirely inside the work area.
+ *
+ * The adjustments can be combined, according to a defined precedence: 1)
+ * Flip, 2) Slide, 3) Resize.
  */
 enum xdg_positioner_constraint_adjustment {
+	/**
+	 * don't move the child surface when constrained
+	 *
+	 * Don't alter the surface position even if it is constrained on
+	 * some axis, for example partially outside the edge of an output.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_NONE = 0,
+	/**
+	 * move along the x axis until unconstrained
+	 *
+	 * Slide the surface along the x axis until it is no longer
+	 * constrained.
+	 *
+	 * First try to slide towards the direction of the gravity on the x
+	 * axis until either the edge in the opposite direction of the
+	 * gravity is unconstrained or the edge in the direction of the
+	 * gravity is constrained.
+	 *
+	 * Then try to slide towards the opposite direction of the gravity
+	 * on the x axis until either the edge in the direction of the
+	 * gravity is unconstrained or the edge in the opposite direction
+	 * of the gravity is constrained.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X = 1,
+	/**
+	 * move along the y axis until unconstrained
+	 *
+	 * Slide the surface along the y axis until it is no longer
+	 * constrained.
+	 *
+	 * First try to slide towards the direction of the gravity on the y
+	 * axis until either the edge in the opposite direction of the
+	 * gravity is unconstrained or the edge in the direction of the
+	 * gravity is constrained.
+	 *
+	 * Then try to slide towards the opposite direction of the gravity
+	 * on the y axis until either the edge in the direction of the
+	 * gravity is unconstrained or the edge in the opposite direction
+	 * of the gravity is constrained.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_Y = 2,
+	/**
+	 * invert the anchor and gravity on the x axis
+	 *
+	 * Invert the anchor and gravity on the x axis if the surface is
+	 * constrained on the x axis. For example, if the left edge of the
+	 * surface is constrained, the gravity is 'left' and the anchor is
+	 * 'left', change the gravity to 'right' and the anchor to 'right'.
+	 *
+	 * If the adjusted position also ends up being constrained, the
+	 * resulting position of the flip_x adjustment will be the one
+	 * before the adjustment.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_X = 4,
+	/**
+	 * invert the anchor and gravity on the y axis
+	 *
+	 * Invert the anchor and gravity on the y axis if the surface is
+	 * constrained on the y axis. For example, if the bottom edge of
+	 * the surface is constrained, the gravity is 'bottom' and the
+	 * anchor is 'bottom', change the gravity to 'top' and the anchor
+	 * to 'top'.
+	 *
+	 * The adjusted position is calculated given the original anchor
+	 * rectangle and offset, but with the new flipped anchor and
+	 * gravity values.
+	 *
+	 * If the adjusted position also ends up being constrained, the
+	 * resulting position of the flip_y adjustment will be the one
+	 * before the adjustment.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_Y = 8,
+	/**
+	 * horizontally resize the surface
+	 *
+	 * Resize the surface horizontally so that it is completely
+	 * unconstrained.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_RESIZE_X = 16,
+	/**
+	 * vertically resize the surface
+	 *
+	 * Resize the surface vertically so that it is completely
+	 * unconstrained.
+	 */
 	XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_RESIZE_Y = 32,
 };
 #endif /* XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_ENUM */
@@ -686,10 +773,8 @@ xdg_positioner_get_version(struct xdg_positioner *xdg_positioner)
 static inline void
 xdg_positioner_destroy(struct xdg_positioner *xdg_positioner)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) xdg_positioner);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -704,8 +789,8 @@ xdg_positioner_destroy(struct xdg_positioner *xdg_positioner)
 static inline void
 xdg_positioner_set_size(struct xdg_positioner *xdg_positioner, int32_t width, int32_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_SIZE, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_SIZE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, width, height);
 }
 
 /**
@@ -725,8 +810,8 @@ xdg_positioner_set_size(struct xdg_positioner *xdg_positioner, int32_t width, in
 static inline void
 xdg_positioner_set_anchor_rect(struct xdg_positioner *xdg_positioner, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_ANCHOR_RECT, x, y, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_ANCHOR_RECT, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, x, y, width, height);
 }
 
 /**
@@ -742,8 +827,8 @@ xdg_positioner_set_anchor_rect(struct xdg_positioner *xdg_positioner, int32_t x,
 static inline void
 xdg_positioner_set_anchor(struct xdg_positioner *xdg_positioner, uint32_t anchor)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_ANCHOR, anchor);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_ANCHOR, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, anchor);
 }
 
 /**
@@ -759,8 +844,8 @@ xdg_positioner_set_anchor(struct xdg_positioner *xdg_positioner, uint32_t anchor
 static inline void
 xdg_positioner_set_gravity(struct xdg_positioner *xdg_positioner, uint32_t gravity)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_GRAVITY, gravity);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_GRAVITY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, gravity);
 }
 
 /**
@@ -783,8 +868,8 @@ xdg_positioner_set_gravity(struct xdg_positioner *xdg_positioner, uint32_t gravi
 static inline void
 xdg_positioner_set_constraint_adjustment(struct xdg_positioner *xdg_positioner, uint32_t constraint_adjustment)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_CONSTRAINT_ADJUSTMENT, constraint_adjustment);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_CONSTRAINT_ADJUSTMENT, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, constraint_adjustment);
 }
 
 /**
@@ -805,8 +890,8 @@ xdg_positioner_set_constraint_adjustment(struct xdg_positioner *xdg_positioner, 
 static inline void
 xdg_positioner_set_offset(struct xdg_positioner *xdg_positioner, int32_t x, int32_t y)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_OFFSET, x, y);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_OFFSET, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, x, y);
 }
 
 /**
@@ -822,8 +907,8 @@ xdg_positioner_set_offset(struct xdg_positioner *xdg_positioner, int32_t x, int3
 static inline void
 xdg_positioner_set_reactive(struct xdg_positioner *xdg_positioner)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_REACTIVE);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_REACTIVE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0);
 }
 
 /**
@@ -840,8 +925,8 @@ xdg_positioner_set_reactive(struct xdg_positioner *xdg_positioner)
 static inline void
 xdg_positioner_set_parent_size(struct xdg_positioner *xdg_positioner, int32_t parent_width, int32_t parent_height)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_PARENT_SIZE, parent_width, parent_height);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_PARENT_SIZE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, parent_width, parent_height);
 }
 
 /**
@@ -855,8 +940,8 @@ xdg_positioner_set_parent_size(struct xdg_positioner *xdg_positioner, int32_t pa
 static inline void
 xdg_positioner_set_parent_configure(struct xdg_positioner *xdg_positioner, uint32_t serial)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_positioner,
-			 XDG_POSITIONER_SET_PARENT_CONFIGURE, serial);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_positioner,
+			 XDG_POSITIONER_SET_PARENT_CONFIGURE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_positioner), 0, serial);
 }
 
 #ifndef XDG_SURFACE_ERROR_ENUM
@@ -974,10 +1059,8 @@ xdg_surface_get_version(struct xdg_surface *xdg_surface)
 static inline void
 xdg_surface_destroy(struct xdg_surface *xdg_surface)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_surface,
-			 XDG_SURFACE_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) xdg_surface);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_surface,
+			 XDG_SURFACE_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_surface), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -994,8 +1077,8 @@ xdg_surface_get_toplevel(struct xdg_surface *xdg_surface)
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) xdg_surface,
-			 XDG_SURFACE_GET_TOPLEVEL, &xdg_toplevel_interface, NULL);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) xdg_surface,
+			 XDG_SURFACE_GET_TOPLEVEL, &xdg_toplevel_interface, wl_proxy_get_version((struct wl_proxy *) xdg_surface), 0, NULL);
 
 	return (struct xdg_toplevel *) id;
 }
@@ -1017,8 +1100,8 @@ xdg_surface_get_popup(struct xdg_surface *xdg_surface, struct xdg_surface *paren
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) xdg_surface,
-			 XDG_SURFACE_GET_POPUP, &xdg_popup_interface, NULL, parent, positioner);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) xdg_surface,
+			 XDG_SURFACE_GET_POPUP, &xdg_popup_interface, wl_proxy_get_version((struct wl_proxy *) xdg_surface), 0, NULL, parent, positioner);
 
 	return (struct xdg_popup *) id;
 }
@@ -1059,8 +1142,8 @@ xdg_surface_get_popup(struct xdg_surface *xdg_surface, struct xdg_surface *paren
 static inline void
 xdg_surface_set_window_geometry(struct xdg_surface *xdg_surface, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_surface,
-			 XDG_SURFACE_SET_WINDOW_GEOMETRY, x, y, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_surface,
+			 XDG_SURFACE_SET_WINDOW_GEOMETRY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_surface), 0, x, y, width, height);
 }
 
 /**
@@ -1089,9 +1172,19 @@ xdg_surface_set_window_geometry(struct xdg_surface *xdg_surface, int32_t x, int3
 static inline void
 xdg_surface_ack_configure(struct xdg_surface *xdg_surface, uint32_t serial)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_surface,
-			 XDG_SURFACE_ACK_CONFIGURE, serial);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_surface,
+			 XDG_SURFACE_ACK_CONFIGURE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_surface), 0, serial);
 }
+
+#ifndef XDG_TOPLEVEL_ERROR_ENUM
+#define XDG_TOPLEVEL_ERROR_ENUM
+enum xdg_toplevel_error {
+	/**
+	 * provided value is         not a valid variant of the resize_edge enum
+	 */
+	XDG_TOPLEVEL_ERROR_INVALID_RESIZE_EDGE = 0,
+};
+#endif /* XDG_TOPLEVEL_ERROR_ENUM */
 
 #ifndef XDG_TOPLEVEL_RESIZE_EDGE_ENUM
 #define XDG_TOPLEVEL_RESIZE_EDGE_ENUM
@@ -1119,41 +1212,87 @@ enum xdg_toplevel_resize_edge {
 #define XDG_TOPLEVEL_STATE_ENUM
 /**
  * @ingroup iface_xdg_toplevel
- * the surface’s bottom edge is tiled
+ * types of state on the surface
  *
- * The window is currently in a tiled layout and the bottom edge is
- * considered to be adjacent to another part of the tiling grid.
+ * The different state values used on the surface. This is designed for
+ * state values like maximized, fullscreen. It is paired with the
+ * configure event to ensure that both the client and the compositor
+ * setting the state can be synchronized.
+ *
+ * States set in this way are double-buffered. They will get applied on
+ * the next commit.
  */
 enum xdg_toplevel_state {
 	/**
 	 * the surface is maximized
+	 * the surface is maximized
+	 *
+	 * The surface is maximized. The window geometry specified in the
+	 * configure event must be obeyed by the client.
+	 *
+	 * The client should draw without shadow or other decoration
+	 * outside of the window geometry.
 	 */
 	XDG_TOPLEVEL_STATE_MAXIMIZED = 1,
 	/**
 	 * the surface is fullscreen
+	 * the surface is fullscreen
+	 *
+	 * The surface is fullscreen. The window geometry specified in
+	 * the configure event is a maximum; the client cannot resize
+	 * beyond it. For a surface to cover the whole fullscreened area,
+	 * the geometry dimensions must be obeyed by the client. For more
+	 * details, see xdg_toplevel.set_fullscreen.
 	 */
 	XDG_TOPLEVEL_STATE_FULLSCREEN = 2,
 	/**
 	 * the surface is being resized
+	 * the surface is being resized
+	 *
+	 * The surface is being resized. The window geometry specified in
+	 * the configure event is a maximum; the client cannot resize
+	 * beyond it. Clients that have aspect ratio or cell sizing
+	 * configuration can use a smaller size, however.
 	 */
 	XDG_TOPLEVEL_STATE_RESIZING = 3,
 	/**
 	 * the surface is now activated
+	 * the surface is now activated
+	 *
+	 * Client window decorations should be painted as if the window
+	 * is active. Do not assume this means that the window actually has
+	 * keyboard or pointer focus.
 	 */
 	XDG_TOPLEVEL_STATE_ACTIVATED = 4,
 	/**
+	 * the surface’s left edge is tiled
+	 *
+	 * The window is currently in a tiled layout and the left edge is
+	 * considered to be adjacent to another part of the tiling grid.
 	 * @since 2
 	 */
 	XDG_TOPLEVEL_STATE_TILED_LEFT = 5,
 	/**
+	 * the surface’s right edge is tiled
+	 *
+	 * The window is currently in a tiled layout and the right edge
+	 * is considered to be adjacent to another part of the tiling grid.
 	 * @since 2
 	 */
 	XDG_TOPLEVEL_STATE_TILED_RIGHT = 6,
 	/**
+	 * the surface’s top edge is tiled
+	 *
+	 * The window is currently in a tiled layout and the top edge is
+	 * considered to be adjacent to another part of the tiling grid.
 	 * @since 2
 	 */
 	XDG_TOPLEVEL_STATE_TILED_TOP = 7,
 	/**
+	 * the surface’s bottom edge is tiled
+	 *
+	 * The window is currently in a tiled layout and the bottom edge
+	 * is considered to be adjacent to another part of the tiling grid.
 	 * @since 2
 	 */
 	XDG_TOPLEVEL_STATE_TILED_BOTTOM = 8,
@@ -1225,6 +1364,31 @@ struct xdg_toplevel_listener {
 	 */
 	void (*close)(void *data,
 		      struct xdg_toplevel *xdg_toplevel);
+	/**
+	 * recommended window geometry bounds
+	 *
+	 * The configure_bounds event may be sent prior to a
+	 * xdg_toplevel.configure event to communicate the bounds a window
+	 * geometry size is recommended to constrain to.
+	 *
+	 * The passed width and height are in surface coordinate space. If
+	 * width and height are 0, it means bounds is unknown and
+	 * equivalent to as if no configure_bounds event was ever sent for
+	 * this surface.
+	 *
+	 * The bounds can for example correspond to the size of a monitor
+	 * excluding any panels or other shell components, so that a
+	 * surface isn't created in a way that it cannot fit.
+	 *
+	 * The bounds may change at any point, and in such a case, a new
+	 * xdg_toplevel.configure_bounds will be sent, followed by
+	 * xdg_toplevel.configure and xdg_surface.configure.
+	 * @since 4
+	 */
+	void (*configure_bounds)(void *data,
+				 struct xdg_toplevel *xdg_toplevel,
+				 int32_t width,
+				 int32_t height);
 };
 
 /**
@@ -1261,6 +1425,10 @@ xdg_toplevel_add_listener(struct xdg_toplevel *xdg_toplevel,
  * @ingroup iface_xdg_toplevel
  */
 #define XDG_TOPLEVEL_CLOSE_SINCE_VERSION 1
+/**
+ * @ingroup iface_xdg_toplevel
+ */
+#define XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION 4
 
 /**
  * @ingroup iface_xdg_toplevel
@@ -1348,10 +1516,8 @@ xdg_toplevel_get_version(struct xdg_toplevel *xdg_toplevel)
 static inline void
 xdg_toplevel_destroy(struct xdg_toplevel *xdg_toplevel)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) xdg_toplevel);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -1360,25 +1526,25 @@ xdg_toplevel_destroy(struct xdg_toplevel *xdg_toplevel)
  * Set the "parent" of this surface. This surface should be stacked
  * above the parent surface and all other ancestor surfaces.
  *
- * Parent windows should be set on dialogs, toolboxes, or other
+ * Parent surfaces should be set on dialogs, toolboxes, or other
  * "auxiliary" surfaces, so that the parent is raised when the dialog
  * is raised.
  *
- * Setting a null parent for a child window removes any parent-child
- * relationship for the child. Setting a null parent for a window which
- * currently has no parent is a no-op.
+ * Setting a null parent for a child surface unsets its parent. Setting
+ * a null parent for a surface which currently has no parent is a no-op.
  *
- * If the parent is unmapped then its children are managed as
- * though the parent of the now-unmapped parent has become the
- * parent of this surface. If no parent exists for the now-unmapped
- * parent then the children are managed as though they have no
- * parent surface.
+ * Only mapped surfaces can have child surfaces. Setting a parent which
+ * is not mapped is equivalent to setting a null parent. If a surface
+ * becomes unmapped, its children's parent is set to the parent of
+ * the now-unmapped surface. If the now-unmapped surface has no parent,
+ * its children's parent is unset. If the now-unmapped surface becomes
+ * mapped again, its parent-child relationship is not restored.
  */
 static inline void
 xdg_toplevel_set_parent(struct xdg_toplevel *xdg_toplevel, struct xdg_toplevel *parent)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_PARENT, parent);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_PARENT, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, parent);
 }
 
 /**
@@ -1395,8 +1561,8 @@ xdg_toplevel_set_parent(struct xdg_toplevel *xdg_toplevel, struct xdg_toplevel *
 static inline void
 xdg_toplevel_set_title(struct xdg_toplevel *xdg_toplevel, const char *title)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_TITLE, title);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_TITLE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, title);
 }
 
 /**
@@ -1429,8 +1595,8 @@ xdg_toplevel_set_title(struct xdg_toplevel *xdg_toplevel, const char *title)
 static inline void
 xdg_toplevel_set_app_id(struct xdg_toplevel *xdg_toplevel, const char *app_id)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_APP_ID, app_id);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_APP_ID, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, app_id);
 }
 
 /**
@@ -1451,8 +1617,8 @@ xdg_toplevel_set_app_id(struct xdg_toplevel *xdg_toplevel, const char *app_id)
 static inline void
 xdg_toplevel_show_window_menu(struct xdg_toplevel *xdg_toplevel, struct wl_seat *seat, uint32_t serial, int32_t x, int32_t y)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SHOW_WINDOW_MENU, seat, serial, x, y);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SHOW_WINDOW_MENU, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, seat, serial, x, y);
 }
 
 /**
@@ -1478,8 +1644,8 @@ xdg_toplevel_show_window_menu(struct xdg_toplevel *xdg_toplevel, struct wl_seat 
 static inline void
 xdg_toplevel_move(struct xdg_toplevel *xdg_toplevel, struct wl_seat *seat, uint32_t serial)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_MOVE, seat, serial);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_MOVE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, seat, serial);
 }
 
 /**
@@ -1509,18 +1675,19 @@ xdg_toplevel_move(struct xdg_toplevel *xdg_toplevel, struct wl_seat *seat, uint3
  * guarantee that the device focus will return when the resize is
  * completed.
  *
- * The edges parameter specifies how the surface should be resized,
- * and is one of the values of the resize_edge enum. The compositor
- * may use this information to update the surface position for
- * example when dragging the top left corner. The compositor may also
- * use this information to adapt its behavior, e.g. choose an
- * appropriate cursor image.
+ * The edges parameter specifies how the surface should be resized, and
+ * is one of the values of the resize_edge enum. Values not matching
+ * a variant of the enum will cause a protocol error. The compositor
+ * may use this information to update the surface position for example
+ * when dragging the top left corner. The compositor may also use
+ * this information to adapt its behavior, e.g. choose an appropriate
+ * cursor image.
  */
 static inline void
 xdg_toplevel_resize(struct xdg_toplevel *xdg_toplevel, struct wl_seat *seat, uint32_t serial, uint32_t edges)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_RESIZE, seat, serial, edges);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_RESIZE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, seat, serial, edges);
 }
 
 /**
@@ -1564,8 +1731,8 @@ xdg_toplevel_resize(struct xdg_toplevel *xdg_toplevel, struct wl_seat *seat, uin
 static inline void
 xdg_toplevel_set_max_size(struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_MAX_SIZE, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_MAX_SIZE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, width, height);
 }
 
 /**
@@ -1609,8 +1776,8 @@ xdg_toplevel_set_max_size(struct xdg_toplevel *xdg_toplevel, int32_t width, int3
 static inline void
 xdg_toplevel_set_min_size(struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_MIN_SIZE, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_MIN_SIZE, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, width, height);
 }
 
 /**
@@ -1639,8 +1806,8 @@ xdg_toplevel_set_min_size(struct xdg_toplevel *xdg_toplevel, int32_t width, int3
 static inline void
 xdg_toplevel_set_maximized(struct xdg_toplevel *xdg_toplevel)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_MAXIMIZED);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_MAXIMIZED, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0);
 }
 
 /**
@@ -1671,8 +1838,8 @@ xdg_toplevel_set_maximized(struct xdg_toplevel *xdg_toplevel)
 static inline void
 xdg_toplevel_unset_maximized(struct xdg_toplevel *xdg_toplevel)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_UNSET_MAXIMIZED);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_UNSET_MAXIMIZED, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0);
 }
 
 /**
@@ -1705,8 +1872,8 @@ xdg_toplevel_unset_maximized(struct xdg_toplevel *xdg_toplevel)
 static inline void
 xdg_toplevel_set_fullscreen(struct xdg_toplevel *xdg_toplevel, struct wl_output *output)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_FULLSCREEN, output);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_FULLSCREEN, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0, output);
 }
 
 /**
@@ -1733,8 +1900,8 @@ xdg_toplevel_set_fullscreen(struct xdg_toplevel *xdg_toplevel, struct wl_output 
 static inline void
 xdg_toplevel_unset_fullscreen(struct xdg_toplevel *xdg_toplevel)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_UNSET_FULLSCREEN);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_UNSET_FULLSCREEN, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0);
 }
 
 /**
@@ -1752,8 +1919,8 @@ xdg_toplevel_unset_fullscreen(struct xdg_toplevel *xdg_toplevel)
 static inline void
 xdg_toplevel_set_minimized(struct xdg_toplevel *xdg_toplevel)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_toplevel,
-			 XDG_TOPLEVEL_SET_MINIMIZED);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_toplevel,
+			 XDG_TOPLEVEL_SET_MINIMIZED, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_toplevel), 0);
 }
 
 #ifndef XDG_POPUP_ERROR_ENUM
@@ -1908,10 +2075,8 @@ xdg_popup_get_version(struct xdg_popup *xdg_popup)
 static inline void
 xdg_popup_destroy(struct xdg_popup *xdg_popup)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_popup,
-			 XDG_POPUP_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) xdg_popup);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_popup,
+			 XDG_POPUP_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_popup), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -1962,8 +2127,8 @@ xdg_popup_destroy(struct xdg_popup *xdg_popup)
 static inline void
 xdg_popup_grab(struct xdg_popup *xdg_popup, struct wl_seat *seat, uint32_t serial)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_popup,
-			 XDG_POPUP_GRAB, seat, serial);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_popup,
+			 XDG_POPUP_GRAB, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_popup), 0, seat, serial);
 }
 
 /**
@@ -1996,8 +2161,8 @@ xdg_popup_grab(struct xdg_popup *xdg_popup, struct wl_seat *seat, uint32_t seria
 static inline void
 xdg_popup_reposition(struct xdg_popup *xdg_popup, struct xdg_positioner *positioner, uint32_t token)
 {
-	wl_proxy_marshal((struct wl_proxy *) xdg_popup,
-			 XDG_POPUP_REPOSITION, positioner, token);
+	wl_proxy_marshal_flags((struct wl_proxy *) xdg_popup,
+			 XDG_POPUP_REPOSITION, NULL, wl_proxy_get_version((struct wl_proxy *) xdg_popup), 0, positioner, token);
 }
 
 #ifdef  __cplusplus

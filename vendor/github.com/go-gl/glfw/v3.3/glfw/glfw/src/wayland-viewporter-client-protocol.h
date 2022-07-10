@@ -263,10 +263,8 @@ wp_viewporter_get_version(struct wp_viewporter *wp_viewporter)
 static inline void
 wp_viewporter_destroy(struct wp_viewporter *wp_viewporter)
 {
-	wl_proxy_marshal((struct wl_proxy *) wp_viewporter,
-			 WP_VIEWPORTER_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) wp_viewporter);
+	wl_proxy_marshal_flags((struct wl_proxy *) wp_viewporter,
+			 WP_VIEWPORTER_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_viewporter), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -282,8 +280,8 @@ wp_viewporter_get_viewport(struct wp_viewporter *wp_viewporter, struct wl_surfac
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) wp_viewporter,
-			 WP_VIEWPORTER_GET_VIEWPORT, &wp_viewport_interface, NULL, surface);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) wp_viewporter,
+			 WP_VIEWPORTER_GET_VIEWPORT, &wp_viewport_interface, wl_proxy_get_version((struct wl_proxy *) wp_viewporter), 0, NULL, surface);
 
 	return (struct wp_viewport *) id;
 }
@@ -357,10 +355,8 @@ wp_viewport_get_version(struct wp_viewport *wp_viewport)
 static inline void
 wp_viewport_destroy(struct wp_viewport *wp_viewport)
 {
-	wl_proxy_marshal((struct wl_proxy *) wp_viewport,
-			 WP_VIEWPORT_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) wp_viewport);
+	wl_proxy_marshal_flags((struct wl_proxy *) wp_viewport,
+			 WP_VIEWPORT_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_viewport), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -381,8 +377,8 @@ wp_viewport_destroy(struct wp_viewport *wp_viewport)
 static inline void
 wp_viewport_set_source(struct wp_viewport *wp_viewport, wl_fixed_t x, wl_fixed_t y, wl_fixed_t width, wl_fixed_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) wp_viewport,
-			 WP_VIEWPORT_SET_SOURCE, x, y, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) wp_viewport,
+			 WP_VIEWPORT_SET_SOURCE, NULL, wl_proxy_get_version((struct wl_proxy *) wp_viewport), 0, x, y, width, height);
 }
 
 /**
@@ -403,8 +399,8 @@ wp_viewport_set_source(struct wp_viewport *wp_viewport, wl_fixed_t x, wl_fixed_t
 static inline void
 wp_viewport_set_destination(struct wp_viewport *wp_viewport, int32_t width, int32_t height)
 {
-	wl_proxy_marshal((struct wl_proxy *) wp_viewport,
-			 WP_VIEWPORT_SET_DESTINATION, width, height);
+	wl_proxy_marshal_flags((struct wl_proxy *) wp_viewport,
+			 WP_VIEWPORT_SET_DESTINATION, NULL, wl_proxy_get_version((struct wl_proxy *) wp_viewport), 0, width, height);
 }
 
 #ifdef  __cplusplus

@@ -158,10 +158,8 @@ zwp_relative_pointer_manager_v1_get_version(struct zwp_relative_pointer_manager_
 static inline void
 zwp_relative_pointer_manager_v1_destroy(struct zwp_relative_pointer_manager_v1 *zwp_relative_pointer_manager_v1)
 {
-	wl_proxy_marshal((struct wl_proxy *) zwp_relative_pointer_manager_v1,
-			 ZWP_RELATIVE_POINTER_MANAGER_V1_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) zwp_relative_pointer_manager_v1);
+	wl_proxy_marshal_flags((struct wl_proxy *) zwp_relative_pointer_manager_v1,
+			 ZWP_RELATIVE_POINTER_MANAGER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zwp_relative_pointer_manager_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -175,8 +173,8 @@ zwp_relative_pointer_manager_v1_get_relative_pointer(struct zwp_relative_pointer
 {
 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_constructor((struct wl_proxy *) zwp_relative_pointer_manager_v1,
-			 ZWP_RELATIVE_POINTER_MANAGER_V1_GET_RELATIVE_POINTER, &zwp_relative_pointer_v1_interface, NULL, pointer);
+	id = wl_proxy_marshal_flags((struct wl_proxy *) zwp_relative_pointer_manager_v1,
+			 ZWP_RELATIVE_POINTER_MANAGER_V1_GET_RELATIVE_POINTER, &zwp_relative_pointer_v1_interface, wl_proxy_get_version((struct wl_proxy *) zwp_relative_pointer_manager_v1), 0, NULL, pointer);
 
 	return (struct zwp_relative_pointer_v1 *) id;
 }
@@ -288,10 +286,8 @@ zwp_relative_pointer_v1_get_version(struct zwp_relative_pointer_v1 *zwp_relative
 static inline void
 zwp_relative_pointer_v1_destroy(struct zwp_relative_pointer_v1 *zwp_relative_pointer_v1)
 {
-	wl_proxy_marshal((struct wl_proxy *) zwp_relative_pointer_v1,
-			 ZWP_RELATIVE_POINTER_V1_DESTROY);
-
-	wl_proxy_destroy((struct wl_proxy *) zwp_relative_pointer_v1);
+	wl_proxy_marshal_flags((struct wl_proxy *) zwp_relative_pointer_v1,
+			 ZWP_RELATIVE_POINTER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zwp_relative_pointer_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 #ifdef  __cplusplus

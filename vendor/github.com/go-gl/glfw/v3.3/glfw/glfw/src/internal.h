@@ -718,7 +718,7 @@ void _glfwInputWindowMonitor(_GLFWwindow* window, _GLFWmonitor* monitor);
 void _glfwInputKey(_GLFWwindow* window,
                    int key, int scancode, int action, int mods);
 void _glfwInputChar(_GLFWwindow* window,
-                    unsigned int codepoint, int mods, GLFWbool plain);
+                    uint32_t codepoint, int mods, GLFWbool plain);
 void _glfwInputScroll(_GLFWwindow* window, double xoffset, double yoffset);
 void _glfwInputMouseClick(_GLFWwindow* window, int button, int action, int mods);
 void _glfwInputCursorPos(_GLFWwindow* window, double xpos, double ypos);
@@ -773,6 +773,8 @@ void _glfwCenterCursorInContentArea(_GLFWwindow* window);
 GLFWbool _glfwInitVulkan(int mode);
 void _glfwTerminateVulkan(void);
 const char* _glfwGetVulkanResultString(VkResult result);
+
+size_t _glfwEncodeUTF8(char* s, uint32_t codepoint);
 
 char* _glfw_strdup(const char* source);
 float _glfw_fminf(float a, float b);
