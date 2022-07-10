@@ -21,8 +21,7 @@ body:
 - type: textarea
   attributes:
     label: Is it possible to construct a solution with the existing API?
-    description: |
-    If this is an enhancement have you been able to create something similar, or is your desired outcome not possible at this time?
+    description: If this is an enhancement have you been able to create something similar, or is your desired outcome not possible at this time?
   validations:
     required: false
 - type: textarea
