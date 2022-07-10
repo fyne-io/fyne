@@ -25,9 +25,10 @@ func TestPreferences_Save(t *testing.T) {
 		val["keyBool"] = true
 	})
 
-	path := filepath.Join(os.TempDir(), "fynePrefs.json")
+	path := p.storagePath()
 	defer os.Remove(path)
-	p.saveToFile(path)
+	err := p.saveToFile(path)
+	assert.Nil(t, err)
 
 	expected, err := ioutil.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {
