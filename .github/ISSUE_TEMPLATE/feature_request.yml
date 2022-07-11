@@ -6,11 +6,9 @@ body:
     label: Checklist
     description: Please make sure you have read the following.
     options:
-      - label: I agree to follow the [Code of Conduct](https://github.com/fyne-io/fyne/blob/master/CODE_OF_CONDUCT.md) that this project adheres to.
-        required: true
       - label: I have searched the [issue tracker](https://github.com/fyne-io/fyne/issues) for open issues that relate to the same feature, before opening a new one.
         required: true
-      - label: This issue only relates to a single feature. I will open new issues for any other suggestions.
+      - label: This issue only relates to a single feature. I will open new issues for any other features.
         required: true        
 - type: textarea
   attributes:
