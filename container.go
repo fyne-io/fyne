@@ -1,8 +1,6 @@
 package fyne
 
-import (
-	"sync"
-)
+import "sync"
 
 // Declare conformity to CanvasObject
 var _ CanvasObject = (*Container)(nil)
@@ -15,7 +13,7 @@ type Container struct {
 	Hidden   bool     // Is this Container hidden
 
 	Layout      Layout // The Layout algorithm for arranging child CanvasObjects
-	objectsLock *sync.Mutex
+	objectsLock sync.Mutex
 	Objects     []CanvasObject // The set of CanvasObjects this container holds
 }
 
@@ -32,8 +30,7 @@ func NewContainer(objects ...CanvasObject) *Container {
 // Deprecated: Use container.NewWithoutLayout() instead
 func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 	ret := &Container{
-		Objects:     objects,
-		objectsLock: &sync.Mutex{},
+		Objects: objects,
 	}
 
 	ret.size = ret.MinSize()
@@ -46,9 +43,8 @@ func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 // Deprecated: Use container.New() instead
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	ret := &Container{
-		Objects:     objects,
-		objectsLock: &sync.Mutex{},
-		Layout:      layout,
+		Objects: objects,
+		Layout:  layout,
 	}
 
 	ret.size = layout.MinSize(objects)
