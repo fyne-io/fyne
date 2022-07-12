@@ -1,5 +1,9 @@
 package fyne
 
+import (
+	"sync"
+)
+
 // Declare conformity to CanvasObject
 var _ CanvasObject = (*Container)(nil)
 
@@ -10,8 +14,9 @@ type Container struct {
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
 
-	Layout  Layout         // The Layout algorithm for arranging child CanvasObjects
-	Objects []CanvasObject // The set of CanvasObjects this container holds
+	Layout      Layout // The Layout algorithm for arranging child CanvasObjects
+	objectsLock *sync.Mutex
+	Objects     []CanvasObject // The set of CanvasObjects this container holds
 }
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects.
@@ -27,7 +32,8 @@ func NewContainer(objects ...CanvasObject) *Container {
 // Deprecated: Use container.NewWithoutLayout() instead
 func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 	ret := &Container{
-		Objects: objects,
+		Objects:     objects,
+		objectsLock: &sync.Mutex{},
 	}
 
 	ret.size = ret.MinSize()
@@ -40,8 +46,9 @@ func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 // Deprecated: Use container.New() instead
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	ret := &Container{
-		Objects: objects,
-		Layout:  layout,
+		Objects:     objects,
+		objectsLock: &sync.Mutex{},
+		Layout:      layout,
 	}
 
 	ret.size = layout.MinSize(objects)
@@ -126,6 +133,8 @@ func (c *Container) Remove(rem CanvasObject) {
 		return
 	}
 
+	c.objectsLock.Lock()
+	defer c.objectsLock.Unlock()
 	for i, o := range c.Objects {
 		if o != rem {
 			continue
