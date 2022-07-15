@@ -128,6 +128,20 @@ func TestContainer_Remove_Race(t *testing.T) {
 	assert.Equal(t, 0, len(container.Objects))
 }
 
+func TestContainer_Add_Race(t *testing.T) {
+	container := NewContainerWithLayout(new(customLayout))
+	wg := &sync.WaitGroup{}
+	wg.Add(100)
+	for i := 0; i < 100; i++ {
+		go func() {
+			container.Add(new(dummyObject))
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	assert.Equal(t, 100, len(container.Objects))
+}
+
 func TestContainer_RemoveAll(t *testing.T) {
 	box1 := new(dummyObject)
 	box2 := new(dummyObject)

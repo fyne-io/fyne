@@ -60,6 +60,8 @@ func (c *Container) Add(add CanvasObject) {
 		return
 	}
 
+	c.objectsLock.Lock()
+	defer c.objectsLock.Unlock()
 	c.Objects = append(c.Objects, add)
 	c.layout()
 }
