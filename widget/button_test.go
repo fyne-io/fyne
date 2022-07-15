@@ -121,6 +121,20 @@ func TestButton_Disabled(t *testing.T) {
 	assert.False(t, button.Disabled())
 }
 
+func TestButton_LowImportance(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	b := &widget.Button{Text: "Text", Icon: theme.HomeIcon(), Importance: widget.LowImportance}
+	w := test.NewWindow(b)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "button/low_importance.png", w.Canvas().Capture())
+
+	b.Disable()
+	test.AssertImageMatches(t, "button/low_importance_disabled.png", w.Canvas().Capture())
+}
+
 func TestButton_Hover(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
