@@ -61,13 +61,17 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 	}
 
 	comp := val.(*fontCacheItem)
+	comp.facesMutex.RLock()
 	face := comp.faces[*opts]
+	comp.facesMutex.RUnlock()
 	if face == nil {
 		f1 := truetype.NewFace(comp.font, opts)
 		f2 := truetype.NewFace(comp.fallback, opts)
 		face = newFontWithFallback(f1, f2, comp.font, comp.fallback)
 
+		comp.facesMutex.Lock()
 		comp.faces[*opts] = face
+		comp.facesMutex.Unlock()
 	}
 
 	return face
@@ -294,6 +298,7 @@ type ttfFont interface {
 type fontCacheItem struct {
 	font, fallback *truetype.Font
 	faces          map[truetype.Options]font.Face
+	facesMutex     sync.RWMutex
 }
 
 var fontCache = &sync.Map{} // map[fyne.TextStyle]*fontCacheItem
