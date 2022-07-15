@@ -12,7 +12,7 @@ type Container struct {
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
 
-	Layout      Layout // The Layout algorithm for arranging child CanvasObjects
+	Layout  Layout // The Layout algorithm for arranging child CanvasObjects
 	lock    sync.Mutex
 	Objects []CanvasObject // The set of CanvasObjects this container holds
 }
