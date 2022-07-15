@@ -13,8 +13,8 @@ type Container struct {
 	Hidden   bool     // Is this Container hidden
 
 	Layout      Layout // The Layout algorithm for arranging child CanvasObjects
-	objectsLock sync.Mutex
-	Objects     []CanvasObject // The set of CanvasObjects this container holds
+	lock    sync.Mutex
+	Objects []CanvasObject // The set of CanvasObjects this container holds
 }
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects.
@@ -60,8 +60,8 @@ func (c *Container) Add(add CanvasObject) {
 		return
 	}
 
-	c.objectsLock.Lock()
-	defer c.objectsLock.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.Objects = append(c.Objects, add)
 	c.layout()
 }
@@ -131,8 +131,8 @@ func (c *Container) Remove(rem CanvasObject) {
 		return
 	}
 
-	c.objectsLock.Lock()
-	defer c.objectsLock.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	for i, o := range c.Objects {
 		if o != rem {
 			continue
