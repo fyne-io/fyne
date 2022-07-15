@@ -7,7 +7,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Added
 
-* Add menu icon support to system tray menus
+* Add menu icon and submenu support to system tray menus
 
 ### Changed
 
