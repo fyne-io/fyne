@@ -756,7 +756,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
-	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
+	if wrap == fyne.TextWrapOff {
 		return lines
 	}
 
@@ -791,13 +791,21 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 					high = l.end
 					measureWidth = maxWidth
 				} else {
-					high = binarySearch(checker, low, high)
+					newHigh := binarySearch(checker, low, high)
+					if newHigh <= low {
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1})
+						reuse++
+						low++
+					} else {
+						high = newHigh
+					}
 				}
 			}
 		case fyne.TextWrapWord:
 			for low < high {
 				sub := text[low:high]
-				if measurer(sub) <= measureWidth {
+				subWidth := measurer(sub)
+				if subWidth <= measureWidth {
 					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
 					reuse++
 					low = high
@@ -810,8 +818,20 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 					oldHigh := high
 					last := low + len(sub) - 1
 					fallback := binarySearch(checker, low, last) - low
-					high = low + findSpaceIndex(sub, fallback)
-					if high == fallback && measurer(sub) <= maxWidth { // add a newline as there is more space on next
+
+					if fallback < 1 { // even a character won't fit
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1})
+						low++
+						high = low + 1
+						reuse++
+
+						if high > l.end {
+							return bounds
+						}
+					} else {
+						high = low + findSpaceIndex(sub, fallback)
+					}
+					if high == fallback && subWidth <= maxWidth { // add a newline as there is more space on next
 						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low})
 						reuse++
 						high = oldHigh

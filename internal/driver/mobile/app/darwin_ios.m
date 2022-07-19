@@ -167,7 +167,7 @@ struct utsname sysInfo;
 #define TOUCH_TYPE_END   2 // touch.TypeEnd
 
 static void sendTouches(int change, NSSet* touches) {
-	CGFloat scale = [UIScreen mainScreen].scale;
+	CGFloat scale = [UIScreen mainScreen].nativeScale;
 	for (UITouch* touch in touches) {
 		CGPoint p = [touch locationInView:touch.view];
 		sendTouch((GoUintptr)touch, (GoUintptr)change, p.x*scale, p.y*scale);

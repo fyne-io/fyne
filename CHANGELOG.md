@@ -7,11 +7,20 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Added
 
-* Add menu icon support to system tray menus
+* Add menu icon and submenu support to system tray menus
 
 ### Changed
 
 ### Fixed
+
+
+## 2.2.3 - 8 July 2022
+
+### Fixed
+
+* Regression: Preferences are not parsed at program start (#3125)
+* Wrappable RichText in a Split container causes crash (#3003, #2961)
+* meta.Version is always 1.0.0 on android & ios (#3109)
 
 
 ## 2.2.2 - 30 June 2022
