@@ -460,13 +460,7 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 	strokeWidth := rect.StrokeWidth
 
 	var coords []float32
-	var x1Pos, x1, y1Pos, y1, x2Pos, x2, y2Pos, y2 float32
-	var leftRadius, rightRadius, leftRadiusInn, rightRadiusInn, theta, xxInn, yyInn, xxOut, yyOut float32
-	// Preparations for LineCoords/Antializing
-	var pos1LOut, pos2LOut fyne.Position
-	var pos1LInn, pos2LInn fyne.Position
-	var linePoints []float32
-	//var rightRadiusInn float32
+	var leftRadius, rightRadius float32
 
 	leftRadius = radius.Left
 	rightRadius = radius.Right
@@ -524,6 +518,54 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 		    ---------------------
 	*/
 	// Slice #2 #5 #8 with stroke
+	coords = append(coords, p.flexSlice258Coords(pos1, size, frame, leftRadius, rightRadius, strokeWidth, aLine)...)
+	// Slice #4
+	coords = append(coords, p.flexSlice4Coords(pos1, size, frame, leftRadius, strokeWidth, aLine)...)
+	// Slice #6
+	coords = append(coords, p.flexSlice6Coords(pos1, size, frame, rightRadius, strokeWidth, aLine)...)
+
+	if leftRadius != 0.0 {
+		leftSeg4 := int32(radius.LeftSegments)
+		lb_beg := int32(leftSeg4)
+		lb_end := int32(lb_beg + leftSeg4)
+		lt_beg := int32(lb_end)
+		lt_end := int32(lt_beg + leftSeg4)
+		// Slice #1
+		coords = append(coords, p.flexSlice1Coords(pos, pos1, size, frame,
+			leftRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw,
+			feather, radius.LeftSegments, lt_beg, lt_end)...)
+		// Slice #7
+		coords = append(coords, p.flexSlice7Coords(pos, pos1, size, frame,
+			leftRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw,
+			feather, radius.LeftSegments, lb_beg, lb_end)...)
+
+	}
+
+	if rightRadius != 0.0 {
+		rightSeg4 := int32(radius.RightSegments)
+		rb_beg := int32(0)
+		rb_end := int32(rightSeg4)
+		rt_beg := int32(3 * rightSeg4)
+		rt_end := int32(4 * rightSeg4)
+		// Slice #3
+		coords = append(coords, p.flexSlice3Coords(pos, pos1, size, frame,
+			rightRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw,
+			feather, radius.RightSegments, rt_beg, rt_end)...)
+		// Slice #9
+		coords = append(coords, p.flexSlice9Coords(pos, pos1, size, frame,
+			rightRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw,
+			feather, radius.RightSegments, rb_beg, rb_end)...)
+	}
+
+	return coords
+}
+
+func (p *painter) flexSlice258Coords(pos1 fyne.Position, size, frame fyne.Size,
+	leftRadius, rightRadius, strokeWidth, aLine float32) []float32 {
+
+	var coords []float32
+	var x1Pos, x1, y1Pos, y1, x2Pos, x2, y2Pos, y2 float32
+
 	if leftRadius == 0.0 {
 		x1Pos = (pos1.X + strokeWidth) / frame.Width
 		x1 = -1 + x1Pos*2
@@ -576,8 +618,16 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 			x2, y1, 0.0, 0.0, 2.0, 0.0, 0.0,
 			x2, y2, 0.0, 0.0, 2.0, 0.0, 0.0)
 	}
+	return coords
 
-	// Slice #4
+}
+
+func (p *painter) flexSlice4Coords(pos1 fyne.Position, size, frame fyne.Size,
+	leftRadius, strokeWidth, aLine float32) []float32 {
+
+	var coords []float32
+	var x1Pos, x1, y1Pos, y1, x2Pos, x2, y2Pos, y2 float32
+
 	if leftRadius < size.Height*0.5 {
 		x1Pos = (pos1.X + aLine + strokeWidth + aLine) / frame.Width
 		x1 = -1 + x1Pos*2
@@ -611,9 +661,17 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 		}
 	}
 
-	// Slice #6
+	return coords
+}
+
+func (p *painter) flexSlice6Coords(pos1 fyne.Position, size, frame fyne.Size,
+	rightRadius, strokeWidth, aLine float32) []float32 {
+
+	var coords []float32
+	var x1Pos, x1, y1Pos, y1, x2Pos, x2, y2Pos, y2 float32
+
 	if rightRadius < size.Height*0.5 {
-		x1Pos := (pos1.X + size.Width - rightRadius) / frame.Width
+		x1Pos = (pos1.X + size.Width - rightRadius) / frame.Width
 		x1 = -1 + x1Pos*2
 		y1Pos = (pos1.Y + rightRadius) / frame.Height
 		y1 = 1 - y1Pos*2
@@ -645,494 +703,562 @@ func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feat
 		}
 	}
 
-	// Preparations for round corners
-	leftCircleSeg := float32(radius.LeftSegments) * 4
-	leftSeg4 := int32(radius.LeftSegments)
-	rightCircleSeg := float32(radius.RightSegments) * 4
-	rightSeg4 := int32(radius.RightSegments)
-	rb_beg := int32(0)
-	rb_end := int32(rightSeg4)
-	lb_beg := int32(leftSeg4)
-	lb_end := int32(lb_beg + leftSeg4)
-	lt_beg := int32(lb_end)
-	lt_end := int32(lt_beg + leftSeg4)
-	rt_beg := int32(3 * rightSeg4)
-	rt_end := int32(4 * rightSeg4)
+	return coords
+}
 
-	if strokeWidth >= 1.0 {
-		leftRadiusInn = leftRadius - aLine - strokeWidth - aLine
-		rightRadiusInn = rightRadius - aLine - strokeWidth - aLine
-	} else {
-		leftRadiusInn = leftRadius - aLine
-		rightRadiusInn = rightRadius - aLine
-	}
+func (p *painter) flexSlice1Coords(pos, pos1 fyne.Position, size, frame fyne.Size,
+	leftRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw, feather float32,
+	leftSegments, lt_beg, lt_end int32) []float32 {
 
+	leftCircleSeg := float32(leftSegments) * 4
+
+	var coords []float32
 	var cx1Pos, cx1, cy1Pos, cy1 float32
 	var x1PosInn, y1PosInn, x1Inn, y1Inn, x1PosOut, y1PosOut, x1Out, y1Out float32
 	var cx2Inn, cy2Inn, cx3PosInn, cx3Inn, cy3PosInn, cy3Inn float32
 	var cx2Out, cy2Out, cx3PosOut, cx3Out, cy3PosOut, cy3Out float32
+	var leftRadiusInn, theta, xxInn, yyInn, xxOut, yyOut float32
+	// Variables for LineCoords/Antializing
+	var pos1LOut, pos2LOut fyne.Position
+	var pos1LInn, pos2LInn fyne.Position
+	var linePoints []float32
+	if strokeWidth >= 1.0 {
+		leftRadiusInn = leftRadius - aLine - strokeWidth - aLine
+	} else {
+		leftRadiusInn = leftRadius - aLine
+	}
 
-	if leftRadius != 0.0 {
-		// Slice #1
-		// center x/y of circle
-		cx1Pos = (pos1.X + leftRadius)
-		cx1 = -1 + cx1Pos/frame.Width*2
-		cy1Pos = (pos1.Y + leftRadius)
-		cy1 = 1 - cy1Pos/frame.Height*2
-		// first x/y on circle
-		if strokeWidth >= 1.0 {
-			// Innner
-			x1PosInn = pos1.X + aLine + strokeWidth + aLine
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = pos1.Y + leftRadius
-			y1Inn = 1 - y1PosInn/frame.Height*2
-			// Outer
-			x1PosOut = pos1.X + aLine
-			x1Out = -1 + x1PosOut/frame.Width*2
-			y1PosOut = pos1.Y + leftRadius
-			y1Out = 1 - y1PosOut/frame.Height*2
-		} else {
-			// Innner
-			x1PosInn = pos1.X + aLine
-			if radius.LeftSegments == 1 {
-				x1PosInn += aLineOneSegRaw
-			}
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = pos1.Y + leftRadius
-			y1Inn = 1 - y1PosInn/frame.Height*2
+	// center x/y of circle
+	cx1Pos = (pos1.X + leftRadius)
+	cx1 = -1 + cx1Pos/frame.Width*2
+	cy1Pos = (pos1.Y + leftRadius)
+	cy1 = 1 - cy1Pos/frame.Height*2
+	// first x/y on circle
+	if strokeWidth >= 1.0 {
+		// Innner
+		x1PosInn = pos1.X + aLine + strokeWidth + aLine
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = pos1.Y + leftRadius
+		y1Inn = 1 - y1PosInn/frame.Height*2
+		// Outer
+		x1PosOut = pos1.X + aLine
+		x1Out = -1 + x1PosOut/frame.Width*2
+		y1PosOut = pos1.Y + leftRadius
+		y1Out = 1 - y1PosOut/frame.Height*2
+	} else {
+		// Innner
+		x1PosInn = pos1.X + aLine
+		if leftSegments == 1 {
+			x1PosInn += aLineOneSegRaw
 		}
-		for i := lt_beg; i < lt_end+1; i++ {
-			if i == lt_beg {
-				cx2Inn = x1Inn
-				cy2Inn = y1Inn
-				if strokeWidth >= 1.0 {
-					// Outer out
-					cx2Out = x1Out
-					cy2Out = y1Out
-				}
-				// BEG: Line Antializing 1. x/y
-				if strokeWidth >= 1.0 {
-					pos1LOut.X = x1PosOut
-					pos1LOut.Y = y1PosOut
-					pos1LInn.X = x1PosInn
-					pos1LInn.Y = y1PosInn
-				} else {
-					pos1LOut.X = x1PosInn
-					pos1LOut.Y = y1PosInn
-				}
-				// END: Line Antializing 1. x/y
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = pos1.Y + leftRadius
+		y1Inn = 1 - y1PosInn/frame.Height*2
+	}
+	for i := lt_beg; i < lt_end+1; i++ {
+		if i == lt_beg {
+			cx2Inn = x1Inn
+			cy2Inn = y1Inn
+			if strokeWidth >= 1.0 {
+				// Outer out
+				cx2Out = x1Out
+				cy2Out = y1Out
+			}
+			// BEG: Line Antializing 1. x/y
+			if strokeWidth >= 1.0 {
+				pos1LOut.X = x1PosOut
+				pos1LOut.Y = y1PosOut
+				pos1LInn.X = x1PosInn
+				pos1LInn.Y = y1PosInn
 			} else {
-				theta = 2 * float32(math.Pi) * float32(i) / leftCircleSeg
-				if radius.LeftSegments == 1 {
-					xxInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
-					yyInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
-				} else {
-					xxInn = (leftRadiusInn) * float32(math.Cos(float64(theta)))
-					yyInn = (leftRadiusInn) * float32(math.Sin(float64(theta)))
-				}
-				cx3PosInn = xxInn + cx1Pos
-				cx3Inn = -1 + cx3PosInn/frame.Width*2
-				cy3PosInn = yyInn + cy1Pos
-				cy3Inn = 1 - cy3PosInn/frame.Height*2
-				//if i%2 == 0 {
-				coords = append(coords,
-					// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
-					cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
-					cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
-					cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
-				//}
-				if strokeWidth >= 1.0 {
-					// Outer
-					xxOut = (leftRadius - aLine) * float32(math.Cos(float64(theta)))
-					yyOut = (leftRadius - aLine) * float32(math.Sin(float64(theta)))
-					cx3PosOut = xxOut + cx1Pos
-					cx3Out = -1 + cx3PosOut/frame.Width*2
-					cy3PosOut = yyOut + cy1Pos
-					cy3Out = 1 - cy3PosOut/frame.Height*2
-					coords = append(coords,
-						// 1. Triangle of stroke-segment
-						cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						// 2. Triangle of stroke-segment
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-					)
-					cx2Out = cx3Out
-					cy2Out = cy3Out
-				}
-				cx2Inn = cx3Inn
-				cy2Inn = cy3Inn
-
-				// BEG: Line Antializing 2. x/y
-				if strokeWidth >= 1.0 {
-					pos2LOut.X = cx3PosOut
-					pos2LOut.Y = cy3PosOut
-					pos2LInn.X = cx3PosInn
-					pos2LInn.Y = cy3PosInn
-				} else {
-					pos2LOut.X = cx3PosInn
-					pos2LOut.Y = cy3PosInn
-				}
-				if radius.LeftSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
-				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
-				}
-				coords = append(coords, linePoints...)
-				pos1LOut = pos2LOut
-				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
-					coords = append(coords, linePoints...)
-					pos1LInn = pos2LInn
-				}
-				// END:
+				pos1LOut.X = x1PosInn
+				pos1LOut.Y = y1PosInn
 			}
-		}
-
-		// Slice #7
-		// center x/y of circle
-		cx1Pos = (pos1.X + leftRadius)
-		cx1 = -1 + cx1Pos/frame.Width*2
-		cy1Pos = (pos1.Y + size.Height - leftRadius)
-		cy1 = 1 - cy1Pos/frame.Height*2
-		// first x/y on circle
-		if strokeWidth >= 1.0 {
-			// Innner
-			x1PosInn = (pos1.X + leftRadius)
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = (pos1.Y + size.Height - aLine - strokeWidth - aLine)
-			y1Inn = 1 - y1PosInn/frame.Height*2
-			// Outer
-			x1PosOut = (pos1.X + leftRadius)
-			x1Out = -1 + x1PosOut/frame.Width*2
-			y1PosOut = (pos1.Y + size.Height - aLine)
-			y1Out = 1 - y1PosOut/frame.Height*2
+			// END: Line Antializing 1. x/y
 		} else {
-			// Innner
-			x1PosInn = (pos1.X + leftRadius)
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = (pos1.Y + size.Height - aLine)
-			if radius.LeftSegments == 1 {
-				y1PosInn -= aLineOneSegRaw
-			}
-			y1Inn = 1 - y1PosInn/frame.Height*2
-		}
-		for i := lb_beg; i < lb_end+1; i++ {
-			if i == lb_beg {
-				cx2Inn = x1Inn
-				cy2Inn = y1Inn
-				if strokeWidth >= 1.0 {
-					cx2Out = x1Out
-					cy2Out = y1Out
-				}
-				// BEG: Line Antializing 1. x/y
-				if strokeWidth >= 1.0 {
-					pos1LOut.X = x1PosOut
-					pos1LOut.Y = y1PosOut
-					pos1LInn.X = x1PosInn
-					pos1LInn.Y = y1PosInn
-				} else {
-					pos1LOut.X = x1PosInn
-					pos1LOut.Y = y1PosInn
-				}
-				// END: Line Antializing 1. x/y
+			theta = 2 * float32(math.Pi) * float32(i) / leftCircleSeg
+			if leftSegments == 1 {
+				xxInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
+				yyInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
 			} else {
-				theta = 2 * float32(math.Pi) * float32(i) / leftCircleSeg
-				if radius.LeftSegments == 1 {
-					xxInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
-					yyInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
-				} else {
-					xxInn = (leftRadiusInn) * float32(math.Cos(float64(theta)))
-					yyInn = (leftRadiusInn) * float32(math.Sin(float64(theta)))
-				}
-				cx3PosInn = xxInn + cx1Pos
-				cx3Inn = -1 + cx3PosInn/frame.Width*2
-				cy3PosInn = yyInn + cy1Pos
-				cy3Inn = 1 - cy3PosInn/frame.Height*2
-				coords = append(coords,
-					// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
-					cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
-					cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
-					cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
-				if strokeWidth >= 1.0 {
-					xxOut = (leftRadius - aLine) * float32(math.Cos(float64(theta)))
-					yyOut = (leftRadius - aLine) * float32(math.Sin(float64(theta)))
-					cx3PosOut = xxOut + cx1Pos
-					cx3Out = -1 + cx3PosOut/frame.Width*2
-					cy3PosOut = yyOut + cy1Pos
-					cy3Out = 1 - cy3PosOut/frame.Height*2
-					coords = append(coords,
-						// 1. Triangle of stroke-segment
-						cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						// 2. Triangle of stroke-segment
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-					)
-					cx2Out = cx3Out
-					cy2Out = cy3Out
-				}
-				cx2Inn = cx3Inn
-				cy2Inn = cy3Inn
-
-				// BEG: Line Antializing 2. x/y
-				if strokeWidth >= 1.0 {
-					pos2LOut.X = cx3PosOut
-					pos2LOut.Y = cy3PosOut
-					pos2LInn.X = cx3PosInn
-					pos2LInn.Y = cy3PosInn
-				} else {
-					pos2LOut.X = cx3PosInn
-					pos2LOut.Y = cy3PosInn
-				}
-				if radius.LeftSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
-				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
-				}
-				coords = append(coords, linePoints...)
-				pos1LOut = pos2LOut
-				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
-					coords = append(coords, linePoints...)
-					pos1LInn = pos2LInn
-				}
-				// END:
+				xxInn = (leftRadiusInn) * float32(math.Cos(float64(theta)))
+				yyInn = (leftRadiusInn) * float32(math.Sin(float64(theta)))
 			}
+			cx3PosInn = xxInn + cx1Pos
+			cx3Inn = -1 + cx3PosInn/frame.Width*2
+			cy3PosInn = yyInn + cy1Pos
+			cy3Inn = 1 - cy3PosInn/frame.Height*2
+			//if i%2 == 0 {
+			coords = append(coords,
+				// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
+				cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
+				cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
+				cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
+			//}
+			if strokeWidth >= 1.0 {
+				// Outer
+				xxOut = (leftRadius - aLine) * float32(math.Cos(float64(theta)))
+				yyOut = (leftRadius - aLine) * float32(math.Sin(float64(theta)))
+				cx3PosOut = xxOut + cx1Pos
+				cx3Out = -1 + cx3PosOut/frame.Width*2
+				cy3PosOut = yyOut + cy1Pos
+				cy3Out = 1 - cy3PosOut/frame.Height*2
+				coords = append(coords,
+					// 1. Triangle of stroke-segment
+					cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					// 2. Triangle of stroke-segment
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+				)
+				cx2Out = cx3Out
+				cy2Out = cy3Out
+			}
+			cx2Inn = cx3Inn
+			cy2Inn = cy3Inn
+
+			// BEG: Line Antializing 2. x/y
+			if strokeWidth >= 1.0 {
+				pos2LOut.X = cx3PosOut
+				pos2LOut.Y = cy3PosOut
+				pos2LInn.X = cx3PosInn
+				pos2LInn.Y = cy3PosInn
+			} else {
+				pos2LOut.X = cx3PosInn
+				pos2LOut.Y = cy3PosInn
+			}
+			if leftSegments == 1 {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
+			} else {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
+			}
+			coords = append(coords, linePoints...)
+			pos1LOut = pos2LOut
+			if strokeWidth >= 1.0 {
+				linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
+				coords = append(coords, linePoints...)
+				pos1LInn = pos2LInn
+			}
+			// END:
 		}
 	}
 
-	if rightRadius != 0.0 {
-		// Slice #3
-		// center x/y of circle
-		cx1Pos = (pos1.X + size.Width - rightRadius)
-		cx1 = -1 + cx1Pos/frame.Width*2
-		cy1Pos = (pos1.Y + rightRadius)
-		cy1 = 1 - cy1Pos/frame.Height*2
-		// first x/y on circle
-		if strokeWidth >= 1.0 {
-			// Innner
-			x1PosInn = (pos1.X + size.Width - rightRadius)
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = (pos1.Y + aLine + strokeWidth + aLine)
-			y1Inn = 1 - y1PosInn/frame.Height*2
-			// Outer
-			x1PosOut = (pos1.X + size.Width - rightRadius)
-			x1Out = -1 + x1PosOut/frame.Width*2
-			y1PosOut = (pos1.Y + aLine)
-			y1Out = 1 - y1PosOut/frame.Height*2
-		} else {
-			// Innner
-			x1PosInn = (pos1.X + size.Width - rightRadius)
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = (pos1.Y + aLine)
-			if radius.RightSegments == 1 {
-				y1PosInn += aLineOneSegRaw
-			}
-			y1Inn = 1 - y1PosInn/frame.Height*2
+	return coords
+}
+
+func (p *painter) flexSlice7Coords(pos, pos1 fyne.Position, size, frame fyne.Size,
+	leftRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw, feather float32,
+	leftSegments, lb_beg, lb_end int32) []float32 {
+
+	leftCircleSeg := float32(leftSegments) * 4
+
+	var coords []float32
+	var cx1Pos, cx1, cy1Pos, cy1 float32
+	var x1PosInn, y1PosInn, x1Inn, y1Inn, x1PosOut, y1PosOut, x1Out, y1Out float32
+	var cx2Inn, cy2Inn, cx3PosInn, cx3Inn, cy3PosInn, cy3Inn float32
+	var cx2Out, cy2Out, cx3PosOut, cx3Out, cy3PosOut, cy3Out float32
+	var leftRadiusInn, theta, xxInn, yyInn, xxOut, yyOut float32
+	// Variables for LineCoords/Antializing
+	var pos1LOut, pos2LOut fyne.Position
+	var pos1LInn, pos2LInn fyne.Position
+	var linePoints []float32
+	// Preparations for round corners
+	if strokeWidth >= 1.0 {
+		leftRadiusInn = leftRadius - aLine - strokeWidth - aLine
+	} else {
+		leftRadiusInn = leftRadius - aLine
+	}
+
+	// center x/y of circle
+	cx1Pos = (pos1.X + leftRadius)
+	cx1 = -1 + cx1Pos/frame.Width*2
+	cy1Pos = (pos1.Y + size.Height - leftRadius)
+	cy1 = 1 - cy1Pos/frame.Height*2
+	// first x/y on circle
+	if strokeWidth >= 1.0 {
+		// Innner
+		x1PosInn = (pos1.X + leftRadius)
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = (pos1.Y + size.Height - aLine - strokeWidth - aLine)
+		y1Inn = 1 - y1PosInn/frame.Height*2
+		// Outer
+		x1PosOut = (pos1.X + leftRadius)
+		x1Out = -1 + x1PosOut/frame.Width*2
+		y1PosOut = (pos1.Y + size.Height - aLine)
+		y1Out = 1 - y1PosOut/frame.Height*2
+	} else {
+		// Innner
+		x1PosInn = (pos1.X + leftRadius)
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = (pos1.Y + size.Height - aLine)
+		if leftSegments == 1 {
+			y1PosInn -= aLineOneSegRaw
 		}
-		for i := rt_beg; i < rt_end+1; i++ {
-			if i == rt_beg {
-				cx2Inn = x1Inn
-				cy2Inn = y1Inn
-				if strokeWidth >= 1.0 {
-					cx2Out = x1Out
-					cy2Out = y1Out
-				}
-				// BEG: Line Antializing 1. x/y
-				if strokeWidth >= 1.0 {
-					pos1LOut.X = x1PosOut
-					pos1LOut.Y = y1PosOut
-					pos1LInn.X = x1PosInn
-					pos1LInn.Y = y1PosInn
-				} else {
-					pos1LOut.X = x1PosInn
-					pos1LOut.Y = y1PosInn
-				}
-				// END: Line Antializing 1. x/y
+		y1Inn = 1 - y1PosInn/frame.Height*2
+	}
+	for i := lb_beg; i < lb_end+1; i++ {
+		if i == lb_beg {
+			cx2Inn = x1Inn
+			cy2Inn = y1Inn
+			if strokeWidth >= 1.0 {
+				cx2Out = x1Out
+				cy2Out = y1Out
+			}
+			// BEG: Line Antializing 1. x/y
+			if strokeWidth >= 1.0 {
+				pos1LOut.X = x1PosOut
+				pos1LOut.Y = y1PosOut
+				pos1LInn.X = x1PosInn
+				pos1LInn.Y = y1PosInn
 			} else {
-				theta = 2 * float32(math.Pi) * float32(i) / rightCircleSeg
-				if radius.RightSegments == 1 {
-					xxInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
-					yyInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
-				} else {
-					xxInn = (rightRadiusInn) * float32(math.Cos(float64(theta)))
-					yyInn = (rightRadiusInn) * float32(math.Sin(float64(theta)))
-				}
-				cx3PosInn = xxInn + cx1Pos
-				cx3Inn = -1 + cx3PosInn/frame.Width*2
-				cy3PosInn = yyInn + cy1Pos
-				cy3Inn = 1 - cy3PosInn/frame.Height*2
-				coords = append(coords,
-					// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
-					cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
-					cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
-					cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
-				if strokeWidth >= 1.0 {
-					xxOut = (rightRadius - aLine) * float32(math.Cos(float64(theta)))
-					yyOut = (rightRadius - aLine) * float32(math.Sin(float64(theta)))
-					cx3PosOut = xxOut + cx1Pos
-					cx3Out = -1 + cx3PosOut/frame.Width*2
-					cy3PosOut = yyOut + cy1Pos
-					cy3Out = 1 - cy3PosOut/frame.Height*2
-					coords = append(coords,
-						// 1. Triangle of stroke-segment
-						cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						// 2. Triangle of stroke-segment
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-					)
-					cx2Out = cx3Out
-					cy2Out = cy3Out
-				}
-				cx2Inn = cx3Inn
-				cy2Inn = cy3Inn
-
-				// BEG: Line Antializing 2. x/y
-				if strokeWidth >= 1.0 {
-					pos2LOut.X = cx3PosOut
-					pos2LOut.Y = cy3PosOut
-					pos2LInn.X = cx3PosInn
-					pos2LInn.Y = cy3PosInn
-				} else {
-					pos2LOut.X = cx3PosInn
-					pos2LOut.Y = cy3PosInn
-				}
-				if radius.RightSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
-				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
-				}
-				coords = append(coords, linePoints...)
-				pos1LOut = pos2LOut
-				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
-					coords = append(coords, linePoints...)
-					pos1LInn = pos2LInn
-				}
-				// END:
+				pos1LOut.X = x1PosInn
+				pos1LOut.Y = y1PosInn
 			}
-		}
-
-		// Slice #9
-		// center x/y of circle
-		cx1Pos = (pos1.X + size.Width - rightRadius)
-		cx1 = -1 + cx1Pos/frame.Width*2
-		cy1Pos = (pos1.Y + size.Height - rightRadius)
-		cy1 = 1 - cy1Pos/frame.Height*2
-		// first x/y on circle
-		if strokeWidth >= 1.0 {
-			// Innner
-			x1PosInn = (pos1.X + size.Width - aLine - strokeWidth - aLine)
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = (pos1.Y + size.Height - rightRadius)
-			y1Inn = 1 - y1PosInn/frame.Height*2
-			// Outer
-			x1PosOut = (pos1.X + size.Width - aLine)
-			x1Out = -1 + x1PosOut/frame.Width*2
-			y1PosOut = (pos1.Y + size.Height - rightRadius)
-			y1Out = 1 - y1PosOut/frame.Height*2
+			// END: Line Antializing 1. x/y
 		} else {
-			// Innner
-			x1PosInn = (pos1.X + size.Width - aLine)
-			if radius.RightSegments == 1 {
-				x1PosInn -= aLineOneSegRaw
-			}
-			x1Inn = -1 + x1PosInn/frame.Width*2
-			y1PosInn = (pos1.Y + size.Height - rightRadius)
-			y1Inn = 1 - y1PosInn/frame.Height*2
-		}
-		for i := rb_beg; i < rb_end+1; i++ {
-			if i == rb_beg {
-				cx2Inn = x1Inn
-				cy2Inn = y1Inn
-				if strokeWidth >= 1.0 {
-					cx2Out = x1Out
-					cy2Out = y1Out
-				}
-				// BEG: Line Antializing 1. x/y
-				if strokeWidth >= 1.0 {
-					pos1LOut.X = x1PosOut
-					pos1LOut.Y = y1PosOut
-					pos1LInn.X = x1PosInn
-					pos1LInn.Y = y1PosInn
-				} else {
-					pos1LOut.X = x1PosInn
-					pos1LOut.Y = y1PosInn
-				}
-				// END: Line Antializing 1. x/y
+			theta = 2 * float32(math.Pi) * float32(i) / leftCircleSeg
+			if leftSegments == 1 {
+				xxInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
+				yyInn = (leftRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
 			} else {
-				theta = 2 * float32(math.Pi) * float32(i) / rightCircleSeg
-				if radius.RightSegments == 1 {
-					xxInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
-					yyInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
-				} else {
-					xxInn = (rightRadiusInn) * float32(math.Cos(float64(theta)))
-					yyInn = (rightRadiusInn) * float32(math.Sin(float64(theta)))
-				}
-				cx3PosInn = xxInn + cx1Pos
-				cx3Inn = -1 + cx3PosInn/frame.Width*2
-				cy3PosInn = yyInn + cy1Pos
-				cy3Inn = 1 - cy3PosInn/frame.Height*2
-				coords = append(coords,
-					// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
-					cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
-					cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
-					cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
-				if strokeWidth >= 1.0 {
-					xxOut = (rightRadius - aLine) * float32(math.Cos(float64(theta)))
-					yyOut = (rightRadius - aLine) * float32(math.Sin(float64(theta)))
-					cx3PosOut = xxOut + cx1Pos
-					cx3Out = -1 + cx3PosOut/frame.Width*2
-					cy3PosOut = yyOut + cy1Pos
-					cy3Out = 1 - cy3PosOut/frame.Height*2
-					coords = append(coords,
-						// 1. Triangle of stroke-segment
-						cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						// 2. Triangle of stroke-segment
-						cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-						cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
-					)
-					cx2Out = cx3Out
-					cy2Out = cy3Out
-				}
-				cx2Inn = cx3Inn
-				cy2Inn = cy3Inn
-
-				// BEG: Line Antializing 2. x/y
-				if strokeWidth >= 1.0 {
-					pos2LOut.X = cx3PosOut
-					pos2LOut.Y = cy3PosOut
-					pos2LInn.X = cx3PosInn
-					pos2LInn.Y = cy3PosInn
-				} else {
-					pos2LOut.X = cx3PosInn
-					pos2LOut.Y = cy3PosInn
-				}
-				if radius.RightSegments == 1 {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
-				} else {
-					linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
-				}
-				coords = append(coords, linePoints...)
-				pos1LOut = pos2LOut
-				if strokeWidth >= 1.0 {
-					linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
-					coords = append(coords, linePoints...)
-					pos1LInn = pos2LInn
-				}
-				// END:
+				xxInn = (leftRadiusInn) * float32(math.Cos(float64(theta)))
+				yyInn = (leftRadiusInn) * float32(math.Sin(float64(theta)))
 			}
+			cx3PosInn = xxInn + cx1Pos
+			cx3Inn = -1 + cx3PosInn/frame.Width*2
+			cy3PosInn = yyInn + cy1Pos
+			cy3Inn = 1 - cy3PosInn/frame.Height*2
+			coords = append(coords,
+				// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
+				cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
+				cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
+				cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
+			if strokeWidth >= 1.0 {
+				xxOut = (leftRadius - aLine) * float32(math.Cos(float64(theta)))
+				yyOut = (leftRadius - aLine) * float32(math.Sin(float64(theta)))
+				cx3PosOut = xxOut + cx1Pos
+				cx3Out = -1 + cx3PosOut/frame.Width*2
+				cy3PosOut = yyOut + cy1Pos
+				cy3Out = 1 - cy3PosOut/frame.Height*2
+				coords = append(coords,
+					// 1. Triangle of stroke-segment
+					cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					// 2. Triangle of stroke-segment
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+				)
+				cx2Out = cx3Out
+				cy2Out = cy3Out
+			}
+			cx2Inn = cx3Inn
+			cy2Inn = cy3Inn
+
+			// BEG: Line Antializing 2. x/y
+			if strokeWidth >= 1.0 {
+				pos2LOut.X = cx3PosOut
+				pos2LOut.Y = cy3PosOut
+				pos2LInn.X = cx3PosInn
+				pos2LInn.Y = cy3PosInn
+			} else {
+				pos2LOut.X = cx3PosInn
+				pos2LOut.Y = cy3PosInn
+			}
+			if leftSegments == 1 {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
+			} else {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
+			}
+			coords = append(coords, linePoints...)
+			pos1LOut = pos2LOut
+			if strokeWidth >= 1.0 {
+				linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
+				coords = append(coords, linePoints...)
+				pos1LInn = pos2LInn
+			}
+			// END:
+		}
+	}
+
+	return coords
+
+}
+
+func (p *painter) flexSlice3Coords(pos, pos1 fyne.Position, size, frame fyne.Size,
+	rightRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw, feather float32,
+	rightSegments, rt_beg, rt_end int32) []float32 {
+
+	rightCircleSeg := float32(rightSegments) * 4
+
+	var coords []float32
+	var cx1Pos, cx1, cy1Pos, cy1 float32
+	var x1PosInn, y1PosInn, x1Inn, y1Inn, x1PosOut, y1PosOut, x1Out, y1Out float32
+	var cx2Inn, cy2Inn, cx3PosInn, cx3Inn, cy3PosInn, cy3Inn float32
+	var cx2Out, cy2Out, cx3PosOut, cx3Out, cy3PosOut, cy3Out float32
+	var rightRadiusInn, theta, xxInn, yyInn, xxOut, yyOut float32
+	// Variables for LineCoords/Antializing
+	var pos1LOut, pos2LOut fyne.Position
+	var pos1LInn, pos2LInn fyne.Position
+	var linePoints []float32
+	// Preparations for round corners
+	if strokeWidth >= 1.0 {
+		rightRadiusInn = rightRadius - aLine - strokeWidth - aLine
+	} else {
+		rightRadiusInn = rightRadius - aLine
+	}
+
+	// center x/y of circle
+	cx1Pos = (pos1.X + size.Width - rightRadius)
+	cx1 = -1 + cx1Pos/frame.Width*2
+	cy1Pos = (pos1.Y + rightRadius)
+	cy1 = 1 - cy1Pos/frame.Height*2
+	// first x/y on circle
+	if strokeWidth >= 1.0 {
+		// Innner
+		x1PosInn = (pos1.X + size.Width - rightRadius)
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = (pos1.Y + aLine + strokeWidth + aLine)
+		y1Inn = 1 - y1PosInn/frame.Height*2
+		// Outer
+		x1PosOut = (pos1.X + size.Width - rightRadius)
+		x1Out = -1 + x1PosOut/frame.Width*2
+		y1PosOut = (pos1.Y + aLine)
+		y1Out = 1 - y1PosOut/frame.Height*2
+	} else {
+		// Innner
+		x1PosInn = (pos1.X + size.Width - rightRadius)
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = (pos1.Y + aLine)
+		if rightSegments == 1 {
+			y1PosInn += aLineOneSegRaw
+		}
+		y1Inn = 1 - y1PosInn/frame.Height*2
+	}
+	for i := rt_beg; i < rt_end+1; i++ {
+		if i == rt_beg {
+			cx2Inn = x1Inn
+			cy2Inn = y1Inn
+			if strokeWidth >= 1.0 {
+				cx2Out = x1Out
+				cy2Out = y1Out
+			}
+			// BEG: Line Antializing 1. x/y
+			if strokeWidth >= 1.0 {
+				pos1LOut.X = x1PosOut
+				pos1LOut.Y = y1PosOut
+				pos1LInn.X = x1PosInn
+				pos1LInn.Y = y1PosInn
+			} else {
+				pos1LOut.X = x1PosInn
+				pos1LOut.Y = y1PosInn
+			}
+			// END: Line Antializing 1. x/y
+		} else {
+			theta = 2 * float32(math.Pi) * float32(i) / rightCircleSeg
+			if rightSegments == 1 {
+				xxInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
+				yyInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
+			} else {
+				xxInn = (rightRadiusInn) * float32(math.Cos(float64(theta)))
+				yyInn = (rightRadiusInn) * float32(math.Sin(float64(theta)))
+			}
+			cx3PosInn = xxInn + cx1Pos
+			cx3Inn = -1 + cx3PosInn/frame.Width*2
+			cy3PosInn = yyInn + cy1Pos
+			cy3Inn = 1 - cy3PosInn/frame.Height*2
+			coords = append(coords,
+				// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
+				cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
+				cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
+				cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
+			if strokeWidth >= 1.0 {
+				xxOut = (rightRadius - aLine) * float32(math.Cos(float64(theta)))
+				yyOut = (rightRadius - aLine) * float32(math.Sin(float64(theta)))
+				cx3PosOut = xxOut + cx1Pos
+				cx3Out = -1 + cx3PosOut/frame.Width*2
+				cy3PosOut = yyOut + cy1Pos
+				cy3Out = 1 - cy3PosOut/frame.Height*2
+				coords = append(coords,
+					// 1. Triangle of stroke-segment
+					cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					// 2. Triangle of stroke-segment
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+				)
+				cx2Out = cx3Out
+				cy2Out = cy3Out
+			}
+			cx2Inn = cx3Inn
+			cy2Inn = cy3Inn
+
+			// BEG: Line Antializing 2. x/y
+			if strokeWidth >= 1.0 {
+				pos2LOut.X = cx3PosOut
+				pos2LOut.Y = cy3PosOut
+				pos2LInn.X = cx3PosInn
+				pos2LInn.Y = cy3PosInn
+			} else {
+				pos2LOut.X = cx3PosInn
+				pos2LOut.Y = cy3PosInn
+			}
+			if rightSegments == 1 {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
+			} else {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
+			}
+			coords = append(coords, linePoints...)
+			pos1LOut = pos2LOut
+			if strokeWidth >= 1.0 {
+				linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
+				coords = append(coords, linePoints...)
+				pos1LInn = pos2LInn
+			}
+			// END:
+		}
+	}
+
+	return coords
+}
+
+func (p *painter) flexSlice9Coords(pos, pos1 fyne.Position, size, frame fyne.Size,
+	rightRadius, strokeWidth, aLine, aLineRaw, aLineOneSeg, aLineOneSegRaw, feather float32,
+	rightSegments, rb_beg, rb_end int32) []float32 {
+
+	rightCircleSeg := float32(rightSegments) * 4
+
+	var coords []float32
+	var cx1Pos, cx1, cy1Pos, cy1 float32
+	var x1PosInn, y1PosInn, x1Inn, y1Inn, x1PosOut, y1PosOut, x1Out, y1Out float32
+	var cx2Inn, cy2Inn, cx3PosInn, cx3Inn, cy3PosInn, cy3Inn float32
+	var cx2Out, cy2Out, cx3PosOut, cx3Out, cy3PosOut, cy3Out float32
+	var rightRadiusInn, theta, xxInn, yyInn, xxOut, yyOut float32
+	// Variables for LineCoords/Antializing
+	var pos1LOut, pos2LOut fyne.Position
+	var pos1LInn, pos2LInn fyne.Position
+	var linePoints []float32
+	// Preparations for round corners
+	if strokeWidth >= 1.0 {
+		rightRadiusInn = rightRadius - aLine - strokeWidth - aLine
+	} else {
+		rightRadiusInn = rightRadius - aLine
+	}
+	// center x/y of circle
+	cx1Pos = (pos1.X + size.Width - rightRadius)
+	cx1 = -1 + cx1Pos/frame.Width*2
+	cy1Pos = (pos1.Y + size.Height - rightRadius)
+	cy1 = 1 - cy1Pos/frame.Height*2
+	// first x/y on circle
+	if strokeWidth >= 1.0 {
+		// Innner
+		x1PosInn = (pos1.X + size.Width - aLine - strokeWidth - aLine)
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = (pos1.Y + size.Height - rightRadius)
+		y1Inn = 1 - y1PosInn/frame.Height*2
+		// Outer
+		x1PosOut = (pos1.X + size.Width - aLine)
+		x1Out = -1 + x1PosOut/frame.Width*2
+		y1PosOut = (pos1.Y + size.Height - rightRadius)
+		y1Out = 1 - y1PosOut/frame.Height*2
+	} else {
+		// Innner
+		x1PosInn = (pos1.X + size.Width - aLine)
+		if rightSegments == 1 {
+			x1PosInn -= aLineOneSegRaw
+		}
+		x1Inn = -1 + x1PosInn/frame.Width*2
+		y1PosInn = (pos1.Y + size.Height - rightRadius)
+		y1Inn = 1 - y1PosInn/frame.Height*2
+	}
+	for i := rb_beg; i < rb_end+1; i++ {
+		if i == rb_beg {
+			cx2Inn = x1Inn
+			cy2Inn = y1Inn
+			if strokeWidth >= 1.0 {
+				cx2Out = x1Out
+				cy2Out = y1Out
+			}
+			// BEG: Line Antializing 1. x/y
+			if strokeWidth >= 1.0 {
+				pos1LOut.X = x1PosOut
+				pos1LOut.Y = y1PosOut
+				pos1LInn.X = x1PosInn
+				pos1LInn.Y = y1PosInn
+			} else {
+				pos1LOut.X = x1PosInn
+				pos1LOut.Y = y1PosInn
+			}
+			// END: Line Antializing 1. x/y
+		} else {
+			theta = 2 * float32(math.Pi) * float32(i) / rightCircleSeg
+			if rightSegments == 1 {
+				xxInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Cos(float64(theta)))
+				yyInn = (rightRadiusInn - aLineOneSegRaw) * float32(math.Sin(float64(theta)))
+			} else {
+				xxInn = (rightRadiusInn) * float32(math.Cos(float64(theta)))
+				yyInn = (rightRadiusInn) * float32(math.Sin(float64(theta)))
+			}
+			cx3PosInn = xxInn + cx1Pos
+			cx3Inn = -1 + cx3PosInn/frame.Width*2
+			cy3PosInn = yyInn + cy1Pos
+			cy3Inn = 1 - cy3PosInn/frame.Height*2
+			coords = append(coords,
+				// segPx, segPy, lineNormX, lineNormY, color (1.0 = Inner/FillColor, 2.0 = Outer/StrokeColor)
+				cx1, cy1, 0.0, 0.0, 1.0, 0.0, 0.0, // center x/y = const
+				cx2Inn, cy2Inn, 0.0, 0.0, 1.0, 0.0, 0.0, // 1. x/y on circle
+				cx3Inn, cy3Inn, 0.0, 0.0, 1.0, 0.0, 0.0) // 2. x/y on circle
+			if strokeWidth >= 1.0 {
+				xxOut = (rightRadius - aLine) * float32(math.Cos(float64(theta)))
+				yyOut = (rightRadius - aLine) * float32(math.Sin(float64(theta)))
+				cx3PosOut = xxOut + cx1Pos
+				cx3Out = -1 + cx3PosOut/frame.Width*2
+				cy3PosOut = yyOut + cy1Pos
+				cy3Out = 1 - cy3PosOut/frame.Height*2
+				coords = append(coords,
+					// 1. Triangle of stroke-segment
+					cx2Out, cy2Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					// 2. Triangle of stroke-segment
+					cx3Out, cy3Out, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx2Inn, cy2Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+					cx3Inn, cy3Inn, 0.0, 0.0, 2.0, 0.0, 0.0,
+				)
+				cx2Out = cx3Out
+				cy2Out = cy3Out
+			}
+			cx2Inn = cx3Inn
+			cy2Inn = cy3Inn
+
+			// BEG: Line Antializing 2. x/y
+			if strokeWidth >= 1.0 {
+				pos2LOut.X = cx3PosOut
+				pos2LOut.Y = cy3PosOut
+				pos2LInn.X = cx3PosInn
+				pos2LInn.Y = cy3PosInn
+			} else {
+				pos2LOut.X = cx3PosInn
+				pos2LOut.Y = cy3PosInn
+			}
+			if rightSegments == 1 {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineOneSeg, aLineOneSeg, frame, true, strokeWidth)
+			} else {
+				linePoints = p.flexLineCoords(pos, pos1LOut, pos2LOut, aLineRaw, feather, frame, true, strokeWidth)
+			}
+			coords = append(coords, linePoints...)
+			pos1LOut = pos2LOut
+			if strokeWidth >= 1.0 {
+				linePoints = p.flexLineCoords(pos, pos1LInn, pos2LInn, aLineRaw, feather, frame, false, strokeWidth)
+				coords = append(coords, linePoints...)
+				pos1LInn = pos2LInn
+			}
+			// END:
 		}
 	}
 

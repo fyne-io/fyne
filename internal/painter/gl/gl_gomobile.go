@@ -70,6 +70,7 @@ func (p *painter) Init() {
 	p.glctx().Enable(gl.Blend)
 	p.program = p.createProgram("simple_es")
 	p.lineProgram = p.createProgram("line_es")
+	p.rectangleProgram = p.createProgram("rectangle_es")
 }
 
 // f32Bytes returns the byte representation of float32 values in the given byte

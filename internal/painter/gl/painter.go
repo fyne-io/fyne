@@ -11,11 +11,12 @@ import (
 )
 
 var shaderSources = map[string][2][]byte{
-	"line":      {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
-	"line_es":   {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
-	"simple":    {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
-	"simple_es": {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
-	"rectangle": {shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent},
+	"line":         {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
+	"line_es":      {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
+	"simple":       {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
+	"simple_es":    {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
+	"rectangle":    {shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent},
+	"rectangle_es": {shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent},
 }
 
 // Painter defines the functionality of our OpenGL based renderer
