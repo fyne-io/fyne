@@ -38,7 +38,7 @@ body:
   attributes:
     label: Example code
     description: |
-      If applicable, add a short code snippet to help explain and simplify reproduction of the problem.
+      Add a short code snippet to help explain and simplify reproduction of the problem.
       Please refrain from adding screenshots of code, links to other projects or very long code examples.
       A good code example should be runnable and contain no more code than is necessary to reproduce the bug.
     placeholder: |
@@ -47,7 +47,7 @@ body:
       Write your code here.
       ```
   validations:
-    required: false
+    required: true
 - type: input
   attributes:
     label: Fyne version
