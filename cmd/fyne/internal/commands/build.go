@@ -275,8 +275,15 @@ func createMetadataInitFile(srcdir string, app *appData, icon string) (func(), e
 
 	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
 	if err == nil {
+		iconResName := "fyneMetadataIcon"
 		if icon != "" {
-			writeResource(icon, "fyneMetadataIcon", metadataInitFile)
+			writeResource(icon, iconResName, metadataInitFile)
+		} else {
+			v := fmt.Sprintf("var %s = (fyne.Resource)(nil)\n", iconResName)
+			_, err = metadataInitFile.Write([]byte(v))
+			if err != nil {
+				fyne.LogError("Error writing icon placeholder", err)
+			}
 		}
 	}
 
