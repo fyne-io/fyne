@@ -450,8 +450,8 @@ func Test_BuildPackageWeb(t *testing.T) {
 		},
 	}
 	if runtime.GOOS == "windows" {
-		expectedExistRuns.expected[0].path = "myText\\Icon.png"
-		expectedExistRuns.expected[1].path = "myText\\Icon.png"
+		expectedExistRuns.expected[0].path = "myTest\\Icon.png"
+		expectedExistRuns.expected[1].path = "myTest\\Icon.png"
 	}
 	utilExistsMock = func(path string) bool {
 		return expectedExistRuns.verifyExpectation(t, path)
