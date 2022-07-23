@@ -263,6 +263,17 @@ func Test_buildPackageGopherJS(t *testing.T) {
 		},
 	}
 
+	expectedExistRuns := mockExistRuns{
+		expected: []mockExist{
+			{"myTest/Icon.png", false},
+			{"myTest.wasm", false},
+			{"myTest.wasm", true},
+		},
+	}
+	utilExistsMock = func(path string) bool {
+		return expectedExistRuns.verifyExpectation(t, path)
+	}
+
 	p := &Packager{
 		appData: &appData{},
 		os:      "gopherjs",
@@ -429,6 +440,17 @@ func Test_BuildPackageWeb(t *testing.T) {
 				ret: []byte(""),
 			},
 		},
+	}
+
+	expectedExistRuns := mockExistRuns{
+		expected: []mockExist{
+			{"myTest/Icon.png", false},
+			{"myTest/Icon.png", false},
+			{"myTest", false},
+		},
+	}
+	utilExistsMock = func(path string) bool {
+		return expectedExistRuns.verifyExpectation(t, path)
 	}
 
 	p := &Packager{
