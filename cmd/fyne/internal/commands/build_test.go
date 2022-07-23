@@ -244,8 +244,8 @@ func Test_FyneGoMod(t *testing.T) {
 		called := false
 
 		fyneGoModTest := &testCommandRuns{runs: expected, t: t}
-		injectMetadataIfPossible(fyneGoModTest, "myTest", &appData{}, "",
-			func(string, *appData, string) (func(), error) {
+		injectMetadataIfPossible(fyneGoModTest, "myTest", &appData{},
+			func(string, *appData) (func(), error) {
 				called = true
 				return func() {}, nil
 			})
