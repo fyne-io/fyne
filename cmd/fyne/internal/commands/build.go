@@ -183,7 +183,14 @@ func (b *Builder) build() error {
 		}
 	}
 
-	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, b.icon, createMetadataInitFile)
+	if b.icon == "" {
+		defaultIcon := filepath.Join(b.srcdir, "Icon.png")
+		if util.Exists(defaultIcon) {
+			b.icon = defaultIcon
+		}
+	}
+
+	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, createMetadataInitFile)
 	if err != nil {
 		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 	} else if close != nil {
@@ -260,7 +267,7 @@ func (b *Builder) build() error {
 	return err
 }
 
-func createMetadataInitFile(srcdir string, app *appData, icon string) (func(), error) {
+func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	data, err := metadata.LoadStandard(srcdir)
 	if err == nil {
 		mergeMetadata(app, data)
@@ -275,16 +282,23 @@ func createMetadataInitFile(srcdir string, app *appData, icon string) (func(), e
 
 	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
 	if err == nil {
-		if icon != "" {
-			writeResource(icon, "fyneMetadataIcon", metadataInitFile)
+		iconResName := "fyneMetadataIcon"
+		if app.icon != "" {
+			writeResource(app.icon, iconResName, metadataInitFile)
+		} else {
+			v := fmt.Sprintf("var %s = (fyne.Resource)(nil)\n", iconResName)
+			_, err = metadataInitFile.Write([]byte(v))
+			if err != nil {
+				fyne.LogError("Error writing icon placeholder", err)
+			}
 		}
 	}
 
 	return func() { os.Remove(metadataInitFilePath) }, err
 }
 
-func injectMetadataIfPossible(runner runner, srcdir string, app *appData, icon string,
-	createMetadataInitFile func(srcdir string, app *appData, icon string) (func(), error)) (func(), error) {
+func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
+	createMetadataInitFile func(srcdir string, app *appData) (func(), error)) (func(), error) {
 	fyneGoModVersion, err := getFyneGoModVersion(runner)
 	if err != nil {
 		return nil, err
@@ -296,7 +310,7 @@ func injectMetadataIfPossible(runner runner, srcdir string, app *appData, icon s
 		return nil, nil
 	}
 
-	return createMetadataInitFile(srcdir, app, icon)
+	return createMetadataInitFile(srcdir, app)
 }
 
 func targetOS() string {
