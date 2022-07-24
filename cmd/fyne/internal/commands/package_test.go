@@ -270,6 +270,9 @@ func Test_buildPackageGopherJS(t *testing.T) {
 			{"myTest.wasm", true},
 		},
 	}
+	if runtime.GOOS == "windows" {
+		expectedExistRuns.expected[0].path = "myTest\\Icon.png"
+	}
 	utilExistsMock = func(path string) bool {
 		return expectedExistRuns.verifyExpectation(t, path)
 	}
