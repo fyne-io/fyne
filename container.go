@@ -1,5 +1,7 @@
 package fyne
 
+import "sync"
+
 // Declare conformity to CanvasObject
 var _ CanvasObject = (*Container)(nil)
 
@@ -10,7 +12,8 @@ type Container struct {
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
 
-	Layout  Layout         // The Layout algorithm for arranging child CanvasObjects
+	Layout  Layout // The Layout algorithm for arranging child CanvasObjects
+	lock    sync.Mutex
 	Objects []CanvasObject // The set of CanvasObjects this container holds
 }
 
@@ -57,6 +60,8 @@ func (c *Container) Add(add CanvasObject) {
 		return
 	}
 
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.Objects = append(c.Objects, add)
 	c.layout()
 }
@@ -126,6 +131,8 @@ func (c *Container) Remove(rem CanvasObject) {
 		return
 	}
 
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	for i, o := range c.Objects {
 		if o != rem {
 			continue

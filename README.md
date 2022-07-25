@@ -14,11 +14,10 @@
 It is designed to build applications that run on desktop and mobile devices with a
 single codebase.
 
-Version 2.1 is the current release of the Fyne API, it introduced RichText
-and the DocTabs container, as well as the document storage API and FyneApp.toml
-metadata support.
+Version 2.2 is the current release of the Fyne API, it added system tray support,
+`App.Metadata` as well as richer menus and support for building WASM apps.
 We are now working towards the next big release, codenamed
-[bowmore](https://github.com/fyne-io/fyne/milestone/15)
+[cragganmore](https://github.com/fyne-io/fyne/milestone/17)
 and more news will follow in our news feeds and GitHub project.
 
 # Prerequisites
