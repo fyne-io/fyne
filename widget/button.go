@@ -337,6 +337,9 @@ func (r *buttonRenderer) applyTheme() {
 func (r *buttonRenderer) buttonColor() color.Color {
 	switch {
 	case r.button.Disabled():
+		if r.button.Importance == LowImportance {
+			return color.Transparent
+		}
 		return theme.DisabledButtonColor()
 	case r.button.focused:
 		return blendColor(theme.ButtonColor(), theme.FocusColor())
