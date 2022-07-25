@@ -372,16 +372,18 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 		if a := r.action; a != nil {
 			selectedPos = a.Position()
 			selectedSize = a.Size()
-			if a.MinSize().Width > selectedSize.Width {
-				selectedSize = a.MinSize()
+			minSize := a.MinSize()
+			if minSize.Width > selectedSize.Width {
+				selectedSize = minSize
 			}
 		}
 	} else {
 		selected := buttons[r.docTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()
-		if selected.MinSize().Width > selectedSize.Width {
-			selectedSize = selected.MinSize()
+		minSize := selected.MinSize()
+		if minSize.Width > selectedSize.Width {
+			selectedSize = minSize
 		}
 	}
 
