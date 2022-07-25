@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Iphone incorrect click coordinates in zoomed screen view (#3122)
 * CachedFontFace seems to be causing crash (#3134)
+* Fix possible compile error if "fyne build" is used without icon metadata
 
 
 ## 2.2.3 - 8 July 2022
