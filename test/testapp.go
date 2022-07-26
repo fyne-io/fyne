@@ -19,7 +19,7 @@ func init() {
 
 type testApp struct {
 	driver       *testDriver
-	settings     fyne.Settings
+	settings     *testSettings
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
@@ -76,7 +76,12 @@ func (a *testApp) SendNotification(notify *fyne.Notification) {
 }
 
 func (a *testApp) SetCloudProvider(p fyne.CloudProvider) {
-	a.cloud = p
+	if p == nil {
+		a.cloud = nil
+		return
+	}
+
+	a.transitionCloud(p)
 }
 
 func (a *testApp) Settings() fyne.Settings {
@@ -104,6 +109,30 @@ func (a *testApp) lastAppliedTheme() fyne.Theme {
 	defer a.propertyLock.Unlock()
 
 	return a.appliedTheme
+}
+
+func (a *testApp) transitionCloud(p fyne.CloudProvider) {
+	err := p.Setup(a)
+	if err != nil {
+		fyne.LogError("Failed to set up cloud provider "+p.ProviderName(), err)
+		return
+	}
+	a.cloud = p
+
+	listeners := a.prefs.ChangeListeners()
+	if pp, ok := p.(fyne.CloudProviderPreferences); ok {
+		a.prefs = pp.CloudPreferences(a)
+	} else {
+		a.prefs = internal.NewInMemoryPreferences()
+	}
+
+	for _, l := range listeners {
+		a.prefs.AddChangeListener(l)
+		l() // assume that preferences have changed because we replaced the provider
+	}
+
+	// after transition ensure settings listener is fired
+	a.settings.apply() //just a test - "cedric"
 }
 
 // NewApp returns a new dummy app used for testing.
@@ -193,6 +222,11 @@ func (s *testSettings) apply() {
 	s.propertyLock.RUnlock()
 
 	for _, listener := range listeners {
-		listener <- s
+		select {
+		case listener <- s:
+		default:
+			l := listener
+			go func() { l <- s }()
+		}
 	}
 }
