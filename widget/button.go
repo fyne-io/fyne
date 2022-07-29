@@ -49,6 +49,11 @@ const (
 	HighImportance
 	// LowImportance applies a subtle appearance.
 	LowImportance
+
+	// ErrorImportance applies an error theme to the button.
+	ErrorImportance
+	// WarningImportance applies an error theme to the button.
+	WarningImportance
 )
 
 var _ fyne.Focusable = (*Button)(nil)
@@ -302,6 +307,12 @@ func (r *buttonRenderer) applyTheme() {
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	case r.button.Importance == HighImportance:
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
+	case r.button.Importance == LowImportance:
+		r.background.FillColor = color.Transparent
+	case r.button.Importance == ErrorImportance:
+		r.background.FillColor = theme.ErrorColor()
+	case r.button.Importance == WarningImportance:
+		r.background.FillColor = theme.WarningColor()
 	}
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
@@ -411,8 +422,8 @@ func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation 
 	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
 		mid := (w.Size().Width - theme.Padding()) / 2
 		size := mid * done
-		bg.Resize(fyne.NewSize(size*2, w.Size().Height-theme.Padding()))
-		bg.Move(fyne.NewPos(mid-size, theme.Padding()/2))
+		bg.Resize(fyne.NewSize(size*2, w.Size().Height))
+		bg.Move(fyne.NewPos(mid-size, 0))
 
 		r, g, bb, a := col.ToNRGBA(theme.PressedColor())
 		aa := uint8(a)
