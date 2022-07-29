@@ -305,14 +305,8 @@ func (r *buttonRenderer) applyTheme() {
 	switch {
 	case r.button.disabled:
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance:
+	case r.button.Importance == HighImportance || r.button.Importance == ErrorImportance || r.button.Importance == WarningImportance:
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
-	case r.button.Importance == LowImportance:
-		r.background.FillColor = color.Transparent
-	case r.button.Importance == ErrorImportance:
-		r.background.FillColor = theme.ErrorColor()
-	case r.button.Importance == WarningImportance:
-		r.background.FillColor = theme.WarningColor()
 	}
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
@@ -344,6 +338,10 @@ func (r *buttonRenderer) buttonColor() color.Color {
 		bg := theme.ButtonColor()
 		if r.button.Importance == HighImportance {
 			bg = theme.PrimaryColor()
+		} else if r.button.Importance == ErrorImportance {
+			bg = theme.ErrorColor()
+		} else if r.button.Importance == WarningImportance {
+			bg = theme.WarningColor()
 		}
 
 		return blendColor(bg, theme.HoverColor())
@@ -351,6 +349,10 @@ func (r *buttonRenderer) buttonColor() color.Color {
 		return theme.PrimaryColor()
 	case r.button.Importance == LowImportance:
 		return color.Transparent
+	case r.button.Importance == ErrorImportance:
+		return theme.ErrorColor()
+	case r.button.Importance == WarningImportance:
+		return theme.WarningColor()
 	default:
 		return theme.ButtonColor()
 	}
