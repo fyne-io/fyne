@@ -111,17 +111,13 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		tapBG,
 		text,
 	}
-	shadowLevel := widget.ButtonLevel
-	if b.Importance == LowImportance {
-		shadowLevel = widget.BaseLevel
-	}
 	r := &buttonRenderer{
-		ShadowingRenderer: widget.NewShadowingRenderer(objects, shadowLevel),
-		background:        background,
-		tapBG:             tapBG,
-		button:            b,
-		label:             text,
-		layout:            layout.NewHBoxLayout(),
+		BaseRenderer: widget.NewBaseRenderer(objects),
+		background:   background,
+		tapBG:        tapBG,
+		button:       b,
+		label:        text,
+		layout:       layout.NewHBoxLayout(),
 	}
 	r.updateIconAndText()
 	r.applyTheme()
@@ -215,7 +211,7 @@ func (b *Button) tapAnimation() {
 }
 
 type buttonRenderer struct {
-	*widget.ShadowingRenderer
+	widget.BaseRenderer
 
 	icon       *canvas.Image
 	label      *RichText
@@ -227,16 +223,7 @@ type buttonRenderer struct {
 
 // Layout the components of the button widget
 func (r *buttonRenderer) Layout(size fyne.Size) {
-	var inset fyne.Position
-	bgSize := size
-	if r.button.Importance != LowImportance {
-		inset = fyne.NewPos(theme.Padding()/2, theme.Padding()/2)
-		bgSize = size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding()))
-	}
-	r.LayoutShadow(bgSize, inset)
-
-	r.background.Move(inset)
-	r.background.Resize(bgSize)
+	r.background.Resize(size)
 
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
@@ -331,7 +318,6 @@ func (r *buttonRenderer) applyTheme() {
 			}
 		}
 	}
-	r.ShadowingRenderer.RefreshShadow()
 }
 
 func (r *buttonRenderer) buttonColor() color.Color {
