@@ -132,7 +132,7 @@ func (a *testApp) transitionCloud(p fyne.CloudProvider) {
 	}
 
 	// after transition ensure settings listener is fired
-	a.settings.apply() //just a test - "cedric"
+	a.settings.apply()
 }
 
 // NewApp returns a new dummy app used for testing.
