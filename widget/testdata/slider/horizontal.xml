@@ -3,7 +3,7 @@
 		<widget pos="6,6" size="208x38" type="*widget.Slider">
 			<rectangle fillColor="shadow" pos="18,19" size="172x6"/>
 			<rectangle fillColor="foreground" pos="18,19" size="0x6"/>
-			<circle fillColor="foreground" pos="9,10" size="24x24"/>
+			<circle fillColor="foreground" pos="6,10" size="24x24"/>
 		</widget>
 	</content>
 </canvas>
