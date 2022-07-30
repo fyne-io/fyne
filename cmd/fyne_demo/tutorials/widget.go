@@ -89,9 +89,9 @@ func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 			OnTapped:   func() { fmt.Println("high importance button") },
 		},
 		&widget.Button{
-			Text:       "Error button",
-			Importance: widget.ErrorImportance,
-			OnTapped:   func() { fmt.Println("tapped error button") },
+			Text:       "Danger button",
+			Importance: widget.DangerImportance,
+			OnTapped:   func() { fmt.Println("tapped danger button") },
 		},
 		&widget.Button{
 			Text:       "Warning button",
