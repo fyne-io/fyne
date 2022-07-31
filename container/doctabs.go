@@ -372,11 +372,19 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 		if a := r.action; a != nil {
 			selectedPos = a.Position()
 			selectedSize = a.Size()
+			minSize := a.MinSize()
+			if minSize.Width > selectedSize.Width {
+				selectedSize = minSize
+			}
 		}
 	} else {
 		selected := buttons[r.docTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()
+		minSize := selected.MinSize()
+		if minSize.Width > selectedSize.Width {
+			selectedSize = minSize
+		}
 	}
 
 	scrollOffset := r.scroller.Offset
