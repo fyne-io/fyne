@@ -121,8 +121,8 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 
-	//println("drawRect: ", rect)
-	triangleXYPoints := len(points) / 4
+	triangleXYPoints := len(points) / 7
+	println("drawRectangle: ", len(points), triangleXYPoints)
 
 	var col color.Color
 	if rect.StrokeColor == col {
