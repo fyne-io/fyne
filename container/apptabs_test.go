@@ -131,3 +131,53 @@ func TestAppTabs_RemoveIndex(t *testing.T) {
 	tabs.RemoveIndex(0)
 	assert.Equal(t, -1, tabs.SelectedIndex()) // check deselected and no panic
 }
+
+func TestAppTabs_Enable(t *testing.T) {
+	tab1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")}
+	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
+	tabs := container.NewAppTabs(tab1, tab2)
+	tabs.Disable(tab1)
+
+	assert.True(t, tab1.Disabled())
+
+	tabs.Enable(tab1)
+	assert.False(t, tab1.Disabled())
+}
+
+func TestAppTabs_EnableIndex(t *testing.T) {
+	tab1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")}
+	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
+	tabs := container.NewAppTabs(tab1, tab2)
+	tabs.Disable(tab1)
+
+	assert.True(t, tab1.Disabled())
+
+	tabs.EnableIndex(0)
+	assert.False(t, tab1.Disabled())
+}
+
+func TestAppTabs_Disable(t *testing.T) {
+	tab1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")}
+	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
+	tabs := container.NewAppTabs(tab1, tab2)
+
+	assert.False(t, tab1.Disabled())
+
+	tabs.Disable(tab1)
+	assert.True(t, tab1.Disabled())
+
+	assert.Equal(t, 1, tabs.SelectedIndex())
+}
+
+func TestAppTabs_DisableIndex(t *testing.T) {
+	tab1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")}
+	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
+	tabs := container.NewAppTabs(tab1, tab2)
+
+	assert.False(t, tab1.Disabled())
+
+	tabs.DisableIndex(0)
+	assert.True(t, tab1.Disabled())
+
+	assert.Equal(t, 1, tabs.SelectedIndex())
+}
