@@ -29,6 +29,9 @@ func (ti *TabItem) enable() {
 	}
 }
 
+// Disabled returns whether or not the TabItem is disabled.
+//
+// Since: 2.2
 func (ti *TabItem) Disabled() bool {
 	if ti.button != nil {
 		return ti.button.Disabled()
