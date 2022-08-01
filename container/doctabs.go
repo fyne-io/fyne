@@ -58,10 +58,9 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
-			bar:         &fyne.Container{},
-			divider:     canvas.NewRectangle(theme.ShadowColor()),
-			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
-			buttonCache: make(map[*TabItem]*tabButton),
+			bar:       &fyne.Container{},
+			divider:   canvas.NewRectangle(theme.ShadowColor()),
+			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
 		docTabs:  t,
 		scroller: NewScroll(&fyne.Container{}),
@@ -78,6 +77,26 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.updateIndicator(false)
 	r.applyTheme(t)
 	return r
+}
+
+// Enable enables the specified tab item.
+func (t *DocTabs) Enable(item *TabItem) {
+	enableItem(t, item)
+}
+
+// EnableIndex enables the tab item at the specified index.
+func (t *DocTabs) EnableIndex(i int) {
+	enableIndex(t, i)
+}
+
+// Disable disables the specified tab item.
+func (t *DocTabs) Disable(item *TabItem) {
+	disableItem(t, item)
+}
+
+// DisableIndex disables the tab item at the specified index.
+func (t *DocTabs) DisableIndex(i int) {
+	disableIndex(t, i)
 }
 
 // Hide hides the widget.
@@ -309,15 +328,13 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 
 	for i := 0; i < count; i++ {
 		item := r.docTabs.Items[i]
-		button, ok := r.buttonCache[item]
-		if !ok {
-			button = &tabButton{
+		if item.button == nil {
+			item.button = &tabButton{
 				onTapped: func() { r.docTabs.Select(item) },
 				onClosed: func() { r.docTabs.close(item) },
 			}
-			r.buttonCache[item] = button
 		}
-
+		button := item.button
 		button.icon = item.Icon
 		button.iconPosition = iconPos
 		if i == r.docTabs.current {
