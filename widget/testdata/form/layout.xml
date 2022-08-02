@@ -37,17 +37,7 @@
 				<container pos="0,81" size="212x36">
 					<container pos="4,0" size="208x36">
 						<widget size="102x37" type="*widget.Button">
-							<widget pos="2,2" size="98x33" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="98x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="98,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="98,0" size="2x33" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="98,33" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,33" size="98x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
-							</widget>
-							<rectangle fillColor="button" pos="2,2" size="98x33"/>
+							<rectangle fillColor="button" size="102x37"/>
 							<rectangle size="0x0"/>
 							<widget pos="37,8" size="50x20" type="*widget.RichText">
 								<text alignment="center" bold size="50x20">Cancel</text>
@@ -55,17 +45,7 @@
 							<image fillMode="contain" pos="13,8" rsc="cancelIcon" size="20x20"/>
 						</widget>
 						<widget pos="106,0" size="102x37" type="*widget.Button">
-							<widget pos="2,2" size="98x33" type="*widget.Shadow">
-								<radialGradient centerOffset="0.5,0.5" pos="-2,-2" size="2x2" startColor="shadow"/>
-								<linearGradient endColor="shadow" pos="0,-2" size="98x2"/>
-								<radialGradient centerOffset="-0.5,0.5" pos="98,-2" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" pos="98,0" size="2x33" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="98,33" size="2x2" startColor="shadow"/>
-								<linearGradient pos="0,33" size="98x2" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
-							</widget>
-							<rectangle fillColor="primary" pos="2,2" size="98x33"/>
+							<rectangle fillColor="primary" size="102x37"/>
 							<rectangle size="0x0"/>
 							<widget pos="35,8" size="54x20" type="*widget.RichText">
 								<text alignment="center" bold color="background" size="54x20">Submit</text>
