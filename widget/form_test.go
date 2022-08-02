@@ -3,7 +3,6 @@ package widget
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -161,7 +160,7 @@ func TestForm_Disabled(t *testing.T) {
 
 	w := test.NewWindow(f)
 	defer w.Close()
-	time.Sleep(time.Second)
+
 	test.AssertImageMatches(t, "form/disabled.png", w.Canvas().Capture())
 }
 
