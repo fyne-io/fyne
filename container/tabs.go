@@ -29,20 +29,20 @@ func (ti *TabItem) enable() {
 	}
 }
 
+func (ti *TabItem) disable() {
+	if ti.button != nil {
+		ti.button.Disable()
+	}
+}
+
 // Disabled returns whether or not the TabItem is disabled.
 //
-// Since: 2.2
+// Since: 2.3
 func (ti *TabItem) Disabled() bool {
 	if ti.button != nil {
 		return ti.button.Disabled()
 	}
 	return false
-}
-
-func (ti *TabItem) disable() {
-	if ti.button != nil {
-		ti.button.Disable()
-	}
 }
 
 // TabLocation is the location where the tabs of a tab container should be rendered
@@ -236,9 +236,7 @@ func enableIndex(t baseTabs, index int) {
 	}
 
 	item := items[index]
-	if item.button != nil {
-		item.enable()
-	}
+	item.enable()
 }
 
 func enableItem(t baseTabs, item *TabItem) {
@@ -257,15 +255,13 @@ func disableIndex(t baseTabs, index int) {
 	}
 
 	item := items[index]
-	if item.button != nil {
-		item.button.Disable()
-	}
+	item.disable()
 
 	if selected(t) == item {
 		// the disabled tab is currently selected, so select the first enabled tab
-		for _, it := range items {
+		for i, it := range items {
 			if !it.Disabled() {
-				selectItem(t, it)
+				selectIndex(t, i)
 				break
 			}
 		}

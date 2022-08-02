@@ -88,30 +88,30 @@ func (t *AppTabs) CurrentTabIndex() int {
 	return t.current
 }
 
-// Enable enables the specified TabItem.
+// EnableItem enables the specified TabItem.
 //
-// Since: 2.2
-func (t *AppTabs) Enable(item *TabItem) {
+// Since: 2.3
+func (t *AppTabs) EnableItem(item *TabItem) {
 	enableItem(t, item)
 }
 
 // EnableIndex enables the TabItem at the specified index.
 //
-// Since: 2.2
+// Since: 2.3
 func (t *AppTabs) EnableIndex(i int) {
 	enableIndex(t, i)
 }
 
-// Disable disables the specified TabItem.
+// DisableItem disables the specified TabItem.
 //
-// Since: 2.2
-func (t *AppTabs) Disable(item *TabItem) {
+// Since: 2.3
+func (t *AppTabs) DisableItem(item *TabItem) {
 	disableItem(t, item)
 }
 
 // DisableIndex disables the TabItem at the specified index.
 //
-// Since: 2.2
+// Since: 2.3
 func (t *AppTabs) DisableIndex(i int) {
 	disableIndex(t, i)
 }
