@@ -85,6 +85,10 @@ func (a *fyneApp) SetCloudProvider(p fyne.CloudProvider) {
 }
 
 func (a *fyneApp) transitionCloud(p fyne.CloudProvider) {
+	if a.cloud != nil {
+		a.cloud.Cleanup(a)
+	}
+
 	err := p.Setup(a)
 	if err != nil {
 		fyne.LogError("Failed to set up cloud provider "+p.ProviderName(), err)
