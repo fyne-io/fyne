@@ -22,6 +22,26 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+// Input modes.
+const (
+	CursorMode             glfw.InputMode = glfw.CursorMode
+	StickyKeysMode         glfw.InputMode = glfw.StickyKeysMode
+	StickyMouseButtonsMode glfw.InputMode = glfw.StickyMouseButtonsMode
+	LockKeyMods            glfw.InputMode = glfw.LockKeyMods
+	RawMouseMotion         glfw.InputMode = glfw.RawMouseMotion
+)
+
+// Cursor mode values.
+const (
+	CursorNormal   int = glfw.CursorNormal
+	CursorHidden   int = glfw.CursorHidden
+	CursorDisabled int = glfw.CursorDisabled
+)
+
+const defaultTitle = "Fyne Application"
+
+var cursorMap map[desktop.StandardCursor]*glfw.Cursor
+
 func initCursors() {
 	cursorMap = map[desktop.StandardCursor]*glfw.Cursor{
 		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),

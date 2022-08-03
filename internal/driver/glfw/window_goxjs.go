@@ -21,6 +21,26 @@ import (
 type Cursor struct {
 }
 
+// Input modes.
+const (
+	CursorMode             glfw.InputMode = glfw.CursorMode
+	StickyKeysMode         glfw.InputMode = glfw.StickyKeysMode
+	StickyMouseButtonsMode glfw.InputMode = glfw.StickyMouseButtonsMode
+	LockKeyMods            glfw.InputMode = glfw.LockKeyMods
+	RawMouseMotion         glfw.InputMode = glfw.RawMouseMotion
+)
+
+// Cursor mode values.
+const (
+	CursorNormal   int = glfw.CursorNormal
+	CursorHidden   int = glfw.CursorHidden
+	CursorDisabled int = glfw.CursorDisabled
+)
+
+const defaultTitle = "Fyne Application"
+
+var cursorMap map[desktop.Cursor]*Cursor
+
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
 
