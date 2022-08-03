@@ -37,10 +37,9 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-var (
-	cursorMap    map[desktop.Cursor]*Cursor
-	defaultTitle = "Fyne Application"
-)
+const defaultTitle = "Fyne Application"
+
+var cursorMap map[desktop.Cursor]*Cursor
 
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
