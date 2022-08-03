@@ -32,7 +32,11 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 	if !ok {
 		rinfo = &rendererInfo{renderer: wid.CreateRenderer()}
 		renderersLock.Lock()
-		renderers[wid] = rinfo
+		if erinfo, ok := renderers[wid]; ok {
+			rinfo = erinfo
+		} else {
+			renderers[wid] = rinfo
+		}
 		renderersLock.Unlock()
 	}
 
