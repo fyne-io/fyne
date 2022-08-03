@@ -388,121 +388,6 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 	return button, modifier
 }
 
-var keyCodeMap = map[glfw.Key]fyne.KeyName{
-	// non-printable
-	glfw.KeyEscape:    fyne.KeyEscape,
-	glfw.KeyEnter:     fyne.KeyReturn,
-	glfw.KeyTab:       fyne.KeyTab,
-	glfw.KeyBackspace: fyne.KeyBackspace,
-	glfw.KeyInsert:    fyne.KeyInsert,
-	glfw.KeyDelete:    fyne.KeyDelete,
-	glfw.KeyRight:     fyne.KeyRight,
-	glfw.KeyLeft:      fyne.KeyLeft,
-	glfw.KeyDown:      fyne.KeyDown,
-	glfw.KeyUp:        fyne.KeyUp,
-	glfw.KeyPageUp:    fyne.KeyPageUp,
-	glfw.KeyPageDown:  fyne.KeyPageDown,
-	glfw.KeyHome:      fyne.KeyHome,
-	glfw.KeyEnd:       fyne.KeyEnd,
-
-	glfw.KeySpace:   fyne.KeySpace,
-	glfw.KeyKPEnter: fyne.KeyEnter,
-
-	// functions
-	glfw.KeyF1:  fyne.KeyF1,
-	glfw.KeyF2:  fyne.KeyF2,
-	glfw.KeyF3:  fyne.KeyF3,
-	glfw.KeyF4:  fyne.KeyF4,
-	glfw.KeyF5:  fyne.KeyF5,
-	glfw.KeyF6:  fyne.KeyF6,
-	glfw.KeyF7:  fyne.KeyF7,
-	glfw.KeyF8:  fyne.KeyF8,
-	glfw.KeyF9:  fyne.KeyF9,
-	glfw.KeyF10: fyne.KeyF10,
-	glfw.KeyF11: fyne.KeyF11,
-	glfw.KeyF12: fyne.KeyF12,
-
-	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	glfw.Key0:   fyne.Key0,
-	glfw.KeyKP0: fyne.Key0,
-	glfw.Key1:   fyne.Key1,
-	glfw.KeyKP1: fyne.Key1,
-	glfw.Key2:   fyne.Key2,
-	glfw.KeyKP2: fyne.Key2,
-	glfw.Key3:   fyne.Key3,
-	glfw.KeyKP3: fyne.Key3,
-	glfw.Key4:   fyne.Key4,
-	glfw.KeyKP4: fyne.Key4,
-	glfw.Key5:   fyne.Key5,
-	glfw.KeyKP5: fyne.Key5,
-	glfw.Key6:   fyne.Key6,
-	glfw.KeyKP6: fyne.Key6,
-	glfw.Key7:   fyne.Key7,
-	glfw.KeyKP7: fyne.Key7,
-	glfw.Key8:   fyne.Key8,
-	glfw.KeyKP8: fyne.Key8,
-	glfw.Key9:   fyne.Key9,
-	glfw.KeyKP9: fyne.Key9,
-
-	// desktop
-	glfw.KeyLeftShift:    desktop.KeyShiftLeft,
-	glfw.KeyRightShift:   desktop.KeyShiftRight,
-	glfw.KeyLeftControl:  desktop.KeyControlLeft,
-	glfw.KeyRightControl: desktop.KeyControlRight,
-	glfw.KeyLeftAlt:      desktop.KeyAltLeft,
-	glfw.KeyRightAlt:     desktop.KeyAltRight,
-	glfw.KeyLeftSuper:    desktop.KeySuperLeft,
-	glfw.KeyRightSuper:   desktop.KeySuperRight,
-	glfw.KeyMenu:         desktop.KeyMenu,
-	glfw.KeyPrintScreen:  desktop.KeyPrintScreen,
-	glfw.KeyCapsLock:     desktop.KeyCapsLock,
-}
-
-var keyNameMap = map[string]fyne.KeyName{
-	"'": fyne.KeyApostrophe,
-	",": fyne.KeyComma,
-	"-": fyne.KeyMinus,
-	".": fyne.KeyPeriod,
-	"/": fyne.KeySlash,
-	"*": fyne.KeyAsterisk,
-	"`": fyne.KeyBackTick,
-
-	";": fyne.KeySemicolon,
-	"+": fyne.KeyPlus,
-	"=": fyne.KeyEqual,
-
-	"a": fyne.KeyA,
-	"b": fyne.KeyB,
-	"c": fyne.KeyC,
-	"d": fyne.KeyD,
-	"e": fyne.KeyE,
-	"f": fyne.KeyF,
-	"g": fyne.KeyG,
-	"h": fyne.KeyH,
-	"i": fyne.KeyI,
-	"j": fyne.KeyJ,
-	"k": fyne.KeyK,
-	"l": fyne.KeyL,
-	"m": fyne.KeyM,
-	"n": fyne.KeyN,
-	"o": fyne.KeyO,
-	"p": fyne.KeyP,
-	"q": fyne.KeyQ,
-	"r": fyne.KeyR,
-	"s": fyne.KeyS,
-	"t": fyne.KeyT,
-	"u": fyne.KeyU,
-	"v": fyne.KeyV,
-	"w": fyne.KeyW,
-	"x": fyne.KeyX,
-	"y": fyne.KeyY,
-	"z": fyne.KeyZ,
-
-	"[":  fyne.KeyLeftBracket,
-	"\\": fyne.KeyBackslash,
-	"]":  fyne.KeyRightBracket,
-}
-
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	if runtime.GOOS == "darwin" && scancode == 0x69 { // TODO remove once fixed upstream glfw/glfw#1786
 		code = glfw.KeyPrintScreen
@@ -514,8 +399,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	}
 
 	keyName := glfw.GetKeyName(code, scancode)
-	ret, ok = keyNameMap[keyName]
-	if !ok {
+	if unknownKey(keyName) {
 		return fyne.KeyUnknown
 	}
 
@@ -532,15 +416,6 @@ func convertAction(action glfw.Action) action {
 		return repeat
 	}
 	panic("Could not convert glfw.Action.")
-}
-
-func convertASCII(key glfw.Key) fyne.KeyName {
-	keyRune := rune('A' + key - glfw.KeyA)
-	if keyRune < 'A' || keyRune > 'Z' {
-		return fyne.KeyUnknown
-	}
-
-	return fyne.KeyName(keyRune)
 }
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
