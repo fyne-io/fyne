@@ -6,6 +6,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+const defaultTitle = "Fyne Application"
+
 var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	// non-printable
 	glfw.KeyEscape:    fyne.KeyEscape,

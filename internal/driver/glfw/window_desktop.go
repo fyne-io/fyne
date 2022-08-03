@@ -38,8 +38,6 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-const defaultTitle = "Fyne Application"
-
 var cursorMap map[desktop.StandardCursor]*glfw.Cursor
 
 func initCursors() {
