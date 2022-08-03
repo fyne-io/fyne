@@ -330,6 +330,15 @@ func convertAction(action glfw.Action) action {
 	panic("Could not convert glfw.Action.")
 }
 
+func convertASCII(key glfw.Key) fyne.KeyName {
+	keyRune := rune('A' + key - glfw.KeyA)
+	if keyRune < 'A' || keyRune > 'Z' {
+		return fyne.KeyUnknown
+	}
+
+	return fyne.KeyName(keyRune)
+}
+
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
 	keyDesktopModifier := desktopModifier(mods)

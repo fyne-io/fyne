@@ -1,10 +1,5 @@
 package glfw
 
-import (
-	"fyne.io/fyne/v2"
-	"github.com/go-gl/glfw/v3.3/glfw"
-)
-
 const defaultTitle = "Fyne Application"
 
 func unknownKey(key string) bool {
@@ -38,13 +33,4 @@ var keyKnownRuneMap = map[byte]struct{}{
 	'[':  {},
 	'\\': {},
 	']':  {},
-}
-
-func convertASCII(key glfw.Key) fyne.KeyName {
-	keyRune := rune('A' + key - glfw.KeyA)
-	if keyRune < 'A' || keyRune > 'Z' {
-		return fyne.KeyUnknown
-	}
-
-	return fyne.KeyName(keyRune)
 }
