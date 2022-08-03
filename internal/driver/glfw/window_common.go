@@ -6,6 +6,26 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+// Cursor mode values.
+const (
+	CursorNormal   int = glfw.CursorNormal
+	CursorHidden   int = glfw.CursorHidden
+	CursorDisabled int = glfw.CursorDisabled
+)
+
+var cursorMap map[desktop.StandardCursor]*glfw.Cursor
+
+// Input modes.
+const (
+	CursorMode             glfw.InputMode = glfw.CursorMode
+	StickyKeysMode         glfw.InputMode = glfw.StickyKeysMode
+	StickyMouseButtonsMode glfw.InputMode = glfw.StickyMouseButtonsMode
+	LockKeyMods            glfw.InputMode = glfw.LockKeyMods
+	RawMouseMotion         glfw.InputMode = glfw.RawMouseMotion
+)
+
+const defaultTitle = "Fyne Application"
+
 var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	// non-printable
 	glfw.KeyEscape:    fyne.KeyEscape,
