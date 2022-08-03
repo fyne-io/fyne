@@ -458,35 +458,6 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
-var keyCodeMapASCII = map[glfw.Key]fyne.KeyName{
-	glfw.KeyA: fyne.KeyA,
-	glfw.KeyB: fyne.KeyB,
-	glfw.KeyC: fyne.KeyC,
-	glfw.KeyD: fyne.KeyD,
-	glfw.KeyE: fyne.KeyE,
-	glfw.KeyF: fyne.KeyF,
-	glfw.KeyG: fyne.KeyG,
-	glfw.KeyH: fyne.KeyH,
-	glfw.KeyI: fyne.KeyI,
-	glfw.KeyJ: fyne.KeyJ,
-	glfw.KeyK: fyne.KeyK,
-	glfw.KeyL: fyne.KeyL,
-	glfw.KeyM: fyne.KeyM,
-	glfw.KeyN: fyne.KeyN,
-	glfw.KeyO: fyne.KeyO,
-	glfw.KeyP: fyne.KeyP,
-	glfw.KeyQ: fyne.KeyQ,
-	glfw.KeyR: fyne.KeyR,
-	glfw.KeyS: fyne.KeyS,
-	glfw.KeyT: fyne.KeyT,
-	glfw.KeyU: fyne.KeyU,
-	glfw.KeyV: fyne.KeyV,
-	glfw.KeyW: fyne.KeyW,
-	glfw.KeyX: fyne.KeyX,
-	glfw.KeyY: fyne.KeyY,
-	glfw.KeyZ: fyne.KeyZ,
-}
-
 var keyNameMap = map[string]fyne.KeyName{
 	"'": fyne.KeyApostrophe,
 	",": fyne.KeyComma,
@@ -564,11 +535,12 @@ func convertAction(action glfw.Action) action {
 }
 
 func convertASCII(key glfw.Key) fyne.KeyName {
-	ret, ok := keyCodeMapASCII[key]
-	if !ok {
+	keyRune := rune('A' + key - glfw.KeyA)
+	if keyRune < 'A' || keyRune > 'Z' {
 		return fyne.KeyUnknown
 	}
-	return ret
+
+	return fyne.KeyName(keyRune)
 }
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
