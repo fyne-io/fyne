@@ -233,9 +233,30 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 
+	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
+		newFolderEntry := widget.NewEntry()
+		ShowForm("New Folder", "Create Folder", "Cancel", []*widget.FormItem{
+			{
+				Text:   "Name",
+				Widget: newFolderEntry,
+			},
+		}, func(s bool) {
+			if !s || newFolderEntry.Text == "" {
+				return
+			}
+
+			createFolderErr := os.MkdirAll(filepath.Join(f.dir.Path(), newFolderEntry.Text), 0700)
+			if createFolderErr != nil {
+				ShowInformation("Error", "Folder cannot be created", f.file.parent)
+			}
+			f.refreshDir(f.dir)
+		}, f.file.parent)
+	})
+
 	optionsbuttons := container.NewHBox(
 		toggleViewButton,
 		optionsButton,
+		newFolderButton,
 	)
 
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
