@@ -122,10 +122,10 @@ func (p *ColorPickerDialog) updateUI() {
 
 func clamp(value, min, max int) int {
 	if value < min {
-		value = min
+		return min
 	}
 	if value > max {
-		value = max
+		return max
 	}
 	return value
 }

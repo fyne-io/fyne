@@ -90,6 +90,7 @@ func (f *Form) MinSize() fyne.Size {
 
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
+	f.ExtendBaseWidget(f)
 	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
 	f.ensureRenderItems()
 	f.updateButtons()

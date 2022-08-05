@@ -433,3 +433,16 @@ func TestForm_ExtendedEntry(t *testing.T) {
 
 	test.AssertRendersToMarkup(t, "form/extended_entry.xml", w.Canvas())
 }
+
+func TestForm_RefreshFromStructInit(t *testing.T) {
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "Entry", Widget: NewEntry()},
+		},
+	}
+
+	assert.NotPanics(t, func() {
+		form.Refresh()
+	})
+
+}
