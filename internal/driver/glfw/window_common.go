@@ -8,29 +8,19 @@ func unknownKey(key string) bool {
 	}
 
 	keyRune := key[0]
-	if keyRune >= 'a' || keyRune <= 'z' {
+	if keyRune >= 'a' && keyRune <= 'z' {
 		return false
 	}
 
-	_, ok := keyKnownRuneMap[keyRune]
-	return !ok
-}
+	// This catches [ \ ] per ASCII table.
+	if keyRune >= '[' && keyRune <= ']' {
+		return false
+	}
 
-// keyKnownRuneMap does not contain 'a' to 'z'. They are handled outside.
-var keyKnownRuneMap = map[byte]struct{}{
-	'\'': {},
-	',':  {},
-	'-':  {},
-	'.':  {},
-	'/':  {},
-	'*':  {},
-	'`':  {},
+	// This catches * + , - . / per ASCII table.
+	if keyRune >= '*' && keyRune <= '/' {
+		return false
+	}
 
-	';': {},
-	'+': {},
-	'=': {},
-
-	'[':  {},
-	'\\': {},
-	']':  {},
+	return keyRune == '\'' || keyRune == '`'
 }
