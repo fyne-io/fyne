@@ -22,5 +22,5 @@ func unknownKey(key string) bool {
 		return false
 	}
 
-	return keyRune == '\'' || keyRune == '`'
+	return keyRune != '\'' && keyRune != '`'
 }
