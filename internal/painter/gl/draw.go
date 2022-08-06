@@ -152,7 +152,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "colorSwitch"))
 	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "lineWidth"))
 	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "feather"))
-	
+
 	p.logError()
 	p.freeBuffer(vbo)
 }
