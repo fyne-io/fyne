@@ -152,6 +152,10 @@ func (c *xjsContext) EnableVertexAttribArray(attribute Attribute) {
 	gl.EnableVertexAttribArray(gl.Attrib(attribute))
 }
 
+func (c *xjsContext) DisableVertexAttribArray(attribute Attribute) {
+	gl.DisableVertexAttribArray(gl.Attrib(attribute))
+}
+
 func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(gl.GetAttribLocation(gl.Program(program), name))
 }

@@ -66,7 +66,7 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 
 	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
 	p.ctx.Uniform1f(featherUniform, feather)
-
+	println("drawLine: 24 6")
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 	p.freeBuffer(vbo)
@@ -108,8 +108,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 */
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	var points []float32
-	points = p.flexRectCoords(pos, rect, 0.5, frame)
+	points := p.flexRectCoords(pos, rect, 0.5, frame)
 	p.ctx.UseProgram(p.rectangleProgram)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.rectangleProgram, "vert", 2, 7, 0)
@@ -122,7 +121,6 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.logError()
 
 	triangleXYPoints := len(points) / 7
-	println("drawRectangle: ", len(points), triangleXYPoints)
 
 	var col color.Color
 	if rect.StrokeColor == col {
@@ -148,7 +146,13 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	}
 	p.logError()
 
+	println("drawRectangle: ", len(points), triangleXYPoints)
 	p.ctx.DrawArrays(triangles, 0, triangleXYPoints)
+
+	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "colorSwitch"))
+	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "lineWidth"))
+	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "feather"))
+	
 	p.logError()
 	p.freeBuffer(vbo)
 }
@@ -325,7 +329,7 @@ func (p *painter) flexLineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feath
 		colorType = 2.0 // strokeColor
 	}
 
-	if lineOut == true {
+	if lineOut {
 		return []float32{
 			// coord x, y normal x, y, (fillColor or strokeColor)
 			x1, y1, normalX, normalY, colorType, halfWidth, featherWidth,
@@ -348,6 +352,7 @@ func (p *painter) flexLineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feath
 	}
 }
 
+/*
 func (p *painter) flexLineCoordsNew(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {
 	if lineWidth <= 1 {
 		offset := float32(0.5)                  // adjust location for lines < 1pt on regular display
@@ -405,6 +410,7 @@ func (p *painter) flexLineCoordsNew(pos, pos1, pos2 fyne.Position, lineWidth, fe
 		x1, y1, -normalX, -normalY,
 	}, 0.0, 0.0
 }
+*/
 
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,

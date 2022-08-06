@@ -165,6 +165,10 @@ func (c *coreContext) EnableVertexAttribArray(attribute Attribute) {
 	gl.EnableVertexAttribArray(uint32(attribute))
 }
 
+func (c *coreContext) DisableVertexAttribArray(attribute Attribute) {
+	//gl.DisableVertexAttribArray(uint32(attribute))
+}
+
 func (c *coreContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(gl.GetAttribLocation(uint32(program), gl.Str(name+"\x00")))
 }

@@ -143,8 +143,8 @@ func main() {
 	txt2.Move(fyne.NewPos(70, 380))
 
 	cont := container.NewWithoutLayout(
-		//line,
 		&rr2,
+		line,
 		&rr1,
 		&rr3,
 		&rr4,
@@ -152,15 +152,15 @@ func main() {
 		// >> composition
 		&rr6,
 		&rr7,
-		//txt1,
+		txt1,
 		// >>
 		&rr9,
-		//txt2,
+		txt2,
 		&rr8,
 
 		&cir1,
-		// cir2,
-		// btn1,
+		//&cir2,
+		btn1,
 	)
 	myWindow.SetContent(cont)
 	myWindow.Resize(fyne.NewSize(900, 600))
