@@ -7,9 +7,13 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Added
 
+* Shiny new theme that was designed for us
 * Add menu icon and submenu support to system tray menus
+* More button importance levels `ErrorImportance`, `WarningImportance`
 
 ### Changed
+
+* The buttons on the default theme are no longer transparent, but we added more button importance types
 
 ### Fixed
 

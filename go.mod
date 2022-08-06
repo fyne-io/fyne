@@ -21,8 +21,8 @@ require (
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
-	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
+	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76
+	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 	github.com/stretchr/testify v1.7.2
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.4.0

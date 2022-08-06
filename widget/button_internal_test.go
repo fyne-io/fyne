@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
-	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -180,30 +179,6 @@ func TestButtonRenderer_Layout_NoText(t *testing.T) {
 
 	assert.Equal(t, 50-theme.IconInlineSize()/2, render.icon.Position().X)
 	assert.Equal(t, 50-theme.IconInlineSize()/2, render.icon.Position().Y)
-}
-
-func TestButton_Shadow(t *testing.T) {
-	{
-		button := NewButton("Test", func() {})
-		shadowFound := false
-		for _, o := range test.LaidOutObjects(button) {
-			if _, ok := o.(*widget.Shadow); ok {
-				shadowFound = true
-			}
-		}
-		if !shadowFound {
-			assert.Fail(t, "button should cast a shadow")
-		}
-	}
-	{
-		button := NewButton("Test", func() {})
-		button.Importance = LowImportance
-		for _, o := range test.LaidOutObjects(button) {
-			if _, ok := o.(*widget.Shadow); ok {
-				assert.Fail(t, "button with LowImportance should not create a shadow")
-			}
-		}
-	}
 }
 
 func TestButtonRenderer_ApplyTheme(t *testing.T) {
