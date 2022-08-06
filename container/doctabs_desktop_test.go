@@ -105,6 +105,12 @@ func TestDocTabs_ChangeItemText(t *testing.T) {
 	item2.Text = "New 2"
 	tabs.Refresh()
 	test.AssertRendersToMarkup(t, "doctabs/desktop/change_label_change_unselected.xml", c)
+
+	// use bigger window to have indicator be based on tab size
+	w.Resize(fyne.NewSize(500, 150))
+	item1.Text = "New longer text 1"
+	tabs.Refresh()
+	test.AssertRendersToMarkup(t, "doctabs/desktop/change_label_to_longer_text_selected.xml", c)
 }
 
 func TestDocTabs_DynamicTabs(t *testing.T) {
