@@ -1674,8 +1674,8 @@ func (r *entryContentRenderer) moveCursor() {
 
 	r.content.entry.propertyLock.Lock()
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
-	r.cursor.Resize(fyne.NewSize(2, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-1, yPos+theme.Padding()*2-theme.InputBorderSize()))
+	r.cursor.Resize(fyne.NewSize(theme.InputBorderSize(), lineHeight))
+	r.cursor.Move(fyne.NewPos(xPos-(theme.InputBorderSize()/2), yPos+theme.Padding()*2-theme.InputBorderSize()))
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()

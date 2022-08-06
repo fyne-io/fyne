@@ -4,7 +4,7 @@
 			<widget pos="28,52" size="134x36" type="*widget.Select">
 				<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="134x32"/>
 				<rectangle fillColor="shadow" pos="0,34" size="134x2"/>
-				<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="130x32"/>
+				<rectangle fillColor="rgba(0,0,0,0)" size="130x36"/>
 				<widget pos="4,4" size="102x28" type="*widget.RichText">
 					<text alignment="trailing" pos="4,4" size="94x20">(Select one)</text>
 				</widget>

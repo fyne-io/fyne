@@ -416,3 +416,15 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 	assert.False(t, validationError)
 
 }
+
+func TestForm_RefreshFromStructInit(t *testing.T) {
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "Entry", Widget: NewEntry()},
+		},
+	}
+
+	assert.NotPanics(t, func() {
+		form.Refresh()
+	})
+}
