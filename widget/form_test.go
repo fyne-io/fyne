@@ -417,6 +417,23 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 
 }
 
+func TestForm_ExtendedEntry(t *testing.T) {
+	extendedEntry := NewSelectEntry([]string{""})
+
+	test.NewApp()
+	defer test.NewApp()
+
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "Extended entry", Widget: extendedEntry},
+		},
+	}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertRendersToMarkup(t, "form/extended_entry.xml", w.Canvas())
+}
+
 func TestForm_RefreshFromStructInit(t *testing.T) {
 	form := &Form{
 		Items: []*FormItem{
@@ -427,4 +444,5 @@ func TestForm_RefreshFromStructInit(t *testing.T) {
 	assert.NotPanics(t, func() {
 		form.Refresh()
 	})
+
 }
