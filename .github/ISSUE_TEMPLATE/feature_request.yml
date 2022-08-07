@@ -1,0 +1,30 @@
+name:  Feature Request
+description: Suggest an idea for this project.
+body:
+- type: checkboxes
+  attributes:
+    label: Checklist
+    description: Please make sure you have read the following.
+    options:
+      - label: I have searched the [issue tracker](https://github.com/fyne-io/fyne/issues) for open issues that relate to the same feature, before opening a new one.
+        required: true
+      - label: This issue only relates to a single feature. I will open new issues for any other features.
+        required: true        
+- type: textarea
+  attributes:
+    label: Is your feature request related to a problem?
+    description: A clear and concise description of what the problem is. Ex. I'm always frustrated when...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Is it possible to construct a solution with the existing API?
+    description: If this is an enhancement have you been able to create something similar, or is your desired outcome not possible at this time?
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Describe the solution you'd like to see.
+    description: A clear and concise description of what you want to happen.
+  validations:
+    required: true
