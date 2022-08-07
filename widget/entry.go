@@ -162,7 +162,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.placeholderProvider()
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
-	line := canvas.NewRectangle(theme.ShadowColor())
+	line := canvas.NewRectangle(color.Transparent)
+	line.StrokeWidth = theme.InputBorderSize()
+	line.StrokeColor = theme.ForegroundColor()
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
@@ -1265,8 +1267,9 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
-	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
+	r.line.Resize(fyne.NewSize(size.Width, size.Height))
+	r.line.StrokeWidth = theme.InputBorderSize()
+	r.line.Move(fyne.NewPos(0, 0))
 	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.InputBorderSize()*2)))
 	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
@@ -1382,12 +1385,12 @@ func (r *entryRenderer) Refresh() {
 
 	r.box.FillColor = theme.InputBackgroundColor()
 	if focusedAppearance {
-		r.line.FillColor = theme.PrimaryColor()
+		r.line.StrokeColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
-			r.line.FillColor = theme.DisabledColor()
+			r.line.StrokeColor = theme.DisabledColor()
 		} else {
-			r.line.FillColor = theme.ShadowColor()
+			r.line.StrokeColor = theme.ForegroundColor()
 		}
 	}
 	if r.entry.ActionItem != nil {
@@ -1396,7 +1399,7 @@ func (r *entryRenderer) Refresh() {
 
 	if r.entry.Validator != nil {
 		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
-			r.line.FillColor = theme.ErrorColor()
+			r.line.StrokeColor = theme.ErrorColor()
 		}
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()

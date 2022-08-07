@@ -36,13 +36,15 @@ type radioItem struct {
 // Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
-	icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
+	icon := canvas.NewImageFromResource(theme.NewPrimaryThemedResource(theme.RadioButtonCheckedIcon()))
+	over := canvas.NewImageFromResource(theme.RadioButtonIcon())
 	label := canvas.NewText(i.Label, theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignLeading
 	r := &radioItemRenderer{
-		BaseRenderer:   widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, label}),
+		BaseRenderer:   widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, over, label}),
 		focusIndicator: focusIndicator,
 		icon:           icon,
+		over:           over,
 		item:           i,
 		label:          label,
 	}
@@ -147,7 +149,7 @@ type radioItemRenderer struct {
 	widget.BaseRenderer
 
 	focusIndicator *canvas.Circle
-	icon           *canvas.Image
+	icon, over     *canvas.Image
 	item           *radioItem
 	label          *canvas.Text
 }
@@ -164,6 +166,8 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos(theme.Padding()*1.5, (labelSize.Height-theme.IconInlineSize())/2))
+	r.over.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	r.over.Move(fyne.NewPos(theme.Padding()*1.5, (labelSize.Height-theme.IconInlineSize())/2))
 }
 
 func (r *radioItemRenderer) MinSize() fyne.Size {
@@ -187,16 +191,19 @@ func (r *radioItemRenderer) update() {
 		r.label.Color = theme.DisabledColor()
 	}
 
-	res := theme.RadioButtonIcon()
+	out := theme.RadioButtonIcon()
+	in := theme.RadioButtonCheckedIcon()
+	r.icon.Hidden = true
 	if r.item.Selected {
-		res = theme.RadioButtonCheckedIcon()
+		in = theme.NewPrimaryThemedResource(in)
+		r.icon.Hidden = false
 	}
 	if r.item.Disabled() {
-		res = theme.NewDisabledResource(res)
-	} else if r.item.Selected {
-		res = theme.NewPrimaryThemedResource(res)
+		out = theme.NewDisabledResource(out)
+		in = theme.NewDisabledResource(theme.RadioButtonCheckedIcon())
 	}
-	r.icon.Resource = res
+	r.icon.Resource = in
+	r.over.Resource = out
 
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = theme.BackgroundColor()
