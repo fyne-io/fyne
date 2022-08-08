@@ -61,7 +61,7 @@ func NewToolbarSpacer() *ToolbarSpacer {
 type ToolbarSeparator struct {
 }
 
-// ToolbarObject gets the visible line object for this ToolbarSeparator
+// ToolbarObject gets the visible border object for this ToolbarSeparator
 func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
 	return canvas.NewRectangle(theme.ForegroundColor())
 }

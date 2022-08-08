@@ -409,7 +409,7 @@ func (t *textGridRenderer) refreshGrid() {
 				x++
 			}
 			for c := 0; c < len(lineStr); c++ {
-				t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // line numbers
+				t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // border numbers
 				i++
 				x++
 			}

@@ -91,7 +91,7 @@ type Entry struct {
 	multiLineRows   int // override global default number of visible lines
 }
 
-// NewEntry creates a new single line entry widget.
+// NewEntry creates a new single border entry widget.
 func NewEntry() *Entry {
 	e := &Entry{Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
@@ -162,16 +162,16 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.placeholderProvider()
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
-	line := canvas.NewRectangle(color.Transparent)
-	line.StrokeWidth = theme.InputBorderSize()
-	line.StrokeColor = theme.ForegroundColor()
+	border := canvas.NewRectangle(color.Transparent)
+	border.StrokeWidth = theme.InputBorderSize()
+	border.StrokeColor = theme.ForegroundColor()
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
 	e.scroll = widget.NewScroll(nil)
-	objects := []fyne.CanvasObject{box, line}
+	objects := []fyne.CanvasObject{box, border}
 	if e.Wrapping != fyne.TextWrapOff {
 		e.scroll.Content = e.content
 		objects = append(objects, e.scroll)
@@ -191,7 +191,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{box, line, e.scroll, objects, e}
+	return &entryRenderer{box, border, e.scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -444,7 +444,7 @@ func (e *Entry) SelectedText() string {
 	return string(r[start:stop])
 }
 
-// SetMinRowsVisible forces a multi-line entry to show `count` number of rows without scrolling.
+// SetMinRowsVisible forces a multi-border entry to show `count` number of rows without scrolling.
 // This is not a validation or requirement, it just impacts the minimum visible size.
 // Use this carefully as Fyne apps can run on small screens so you may wish to add a scroll container if
 // this number is high. Default is 3.
@@ -848,7 +848,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 	text := clipboard.Content()
 	if !e.MultiLine {
-		// format clipboard content to be compatible with single line entry
+		// format clipboard content to be compatible with single border entry
 		text = strings.Replace(text, "\n", " ", -1)
 	}
 	provider := e.textProvider()
@@ -920,7 +920,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b.begin
-			// if this gap is at `pos` and is a line wrap, increment (safe to access boundary i-1)
+			// if this gap is at `pos` and is a border wrap, increment (safe to access boundary i-1)
 			if canWrap && b.begin == pos && pos != 0 && provider.rowBoundary(i-1).end == b.begin && row < (totalRows-1) {
 				row++
 			}
@@ -1106,7 +1106,7 @@ func (e *Entry) textWrap() fyne.TextWrap {
 	}
 
 	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
-		fyne.LogError("Entry cannot wrap single line", nil)
+		fyne.LogError("Entry cannot wrap single border", nil)
 		e.Wrapping = fyne.TextTruncate
 	}
 	return e.Wrapping
@@ -1217,7 +1217,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.propertyLock.RUnlock()
 
 	if !multiLine {
-		// Single line doesn't support newline.
+		// Single border doesn't support newline.
 		// Call submitted callback, if any.
 		if onSubmitted != nil {
 			onSubmitted(text)
@@ -1238,8 +1238,8 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
-	box, line *canvas.Rectangle
-	scroll    *widget.Scroll
+	box, border *canvas.Rectangle
+	scroll      *widget.Scroll
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1267,9 +1267,9 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	r.line.Resize(fyne.NewSize(size.Width, size.Height))
-	r.line.StrokeWidth = theme.InputBorderSize()
-	r.line.Move(fyne.NewPos(0, 0))
+	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize(), size.Height-theme.InputBorderSize()))
+	r.border.StrokeWidth = theme.InputBorderSize()
+	r.border.Move(fyne.NewPos(theme.InputBorderSize()/2, theme.InputBorderSize()/2))
 	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.InputBorderSize()*2)))
 	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
@@ -1385,12 +1385,12 @@ func (r *entryRenderer) Refresh() {
 
 	r.box.FillColor = theme.InputBackgroundColor()
 	if focusedAppearance {
-		r.line.StrokeColor = theme.PrimaryColor()
+		r.border.StrokeColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
-			r.line.StrokeColor = theme.DisabledColor()
+			r.border.StrokeColor = theme.DisabledColor()
 		} else {
-			r.line.StrokeColor = theme.ForegroundColor()
+			r.border.StrokeColor = theme.ForegroundColor()
 		}
 	}
 	if r.entry.ActionItem != nil {
@@ -1399,7 +1399,7 @@ func (r *entryRenderer) Refresh() {
 
 	if r.entry.Validator != nil {
 		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
-			r.line.StrokeColor = theme.ErrorColor()
+			r.border.StrokeColor = theme.ErrorColor()
 		}
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()

@@ -235,7 +235,7 @@ func (t *RichText) len() int {
 	return ret
 }
 
-// lineSizeToColumn returns the rendered size for the line specified by row up to the col position
+// lineSizeToColumn returns the rendered size for the border specified by row up to the col position
 func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 	bound := t.rowBoundary(row)
 	total := fyne.NewSize(0, 0)
@@ -706,7 +706,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 }
 
 // binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index
-// binarySearch returns the index of rune located as close to the maximum line width as possible
+// binarySearch returns the index of rune located as close to the maximum border width as possible
 func binarySearch(lessMaxWidth func(int, int) bool, low int, maxHigh int) int {
 	if low >= maxHigh {
 		return low
@@ -752,8 +752,8 @@ func findSpaceIndex(text []rune, fallback int) int {
 	return curIndex
 }
 
-// lineBounds accepts a slice of Segments, a wrapping mode, a maximum line width and a function to measure line width.
-// lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
+// lineBounds accepts a slice of Segments, a wrapping mode, a maximum border width and a function to measure border width.
+// lineBounds returns a slice containing the boundary metadata of each border with the given wrapping applied.
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
 	if wrap == fyne.TextWrapOff {
@@ -860,7 +860,7 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 }
 
 // splitLines accepts a text segment and returns a slice of boundary metadata denoting the
-// start and end indices of each line delimited by the newline character.
+// start and end indices of each border delimited by the newline character.
 func splitLines(seg *TextSegment) []rowBoundary {
 	var low, high int
 	var lines []rowBoundary

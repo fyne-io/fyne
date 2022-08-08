@@ -6,7 +6,7 @@
 					<text alignment="trailing" bold pos="8,8" size="38x20">test1</text>
 					<widget pos="58,0" size="153x36" type="*widget.Entry">
 						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="153x32"/>
-						<rectangle size="153x36" strokeColor="foreground" strokeWidth="2"/>
+						<rectangle pos="1,1" size="151x34" strokeColor="foreground" strokeWidth="2"/>
 						<widget pos="0,2" size="153x32" type="*widget.Scroll">
 							<widget size="153x32" type="*widget.entryContent">
 								<widget size="153x32" type="*widget.RichText">
@@ -21,7 +21,7 @@
 					<text alignment="trailing" bold pos="8,48" size="38x20">test2</text>
 					<widget pos="58,40" size="153x36" type="*widget.Entry">
 						<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="153x32"/>
-						<rectangle size="153x36" strokeColor="foreground" strokeWidth="2"/>
+						<rectangle pos="1,1" size="151x34" strokeColor="foreground" strokeWidth="2"/>
 						<widget pos="0,2" size="153x32" type="*widget.Scroll">
 							<widget size="153x32" type="*widget.entryContent">
 								<widget size="153x32" type="*widget.RichText">
