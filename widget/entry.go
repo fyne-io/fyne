@@ -91,7 +91,7 @@ type Entry struct {
 	multiLineRows   int // override global default number of visible lines
 }
 
-// NewEntry creates a new single border entry widget.
+// NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
@@ -444,7 +444,7 @@ func (e *Entry) SelectedText() string {
 	return string(r[start:stop])
 }
 
-// SetMinRowsVisible forces a multi-border entry to show `count` number of rows without scrolling.
+// SetMinRowsVisible forces a multi-line entry to show `count` number of rows without scrolling.
 // This is not a validation or requirement, it just impacts the minimum visible size.
 // Use this carefully as Fyne apps can run on small screens so you may wish to add a scroll container if
 // this number is high. Default is 3.
@@ -848,7 +848,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 	text := clipboard.Content()
 	if !e.MultiLine {
-		// format clipboard content to be compatible with single border entry
+		// format clipboard content to be compatible with single line entry
 		text = strings.Replace(text, "\n", " ", -1)
 	}
 	provider := e.textProvider()
@@ -920,7 +920,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 				row++
 			}
 			col = pos - b.begin
-			// if this gap is at `pos` and is a border wrap, increment (safe to access boundary i-1)
+			// if this gap is at `pos` and is a line wrap, increment (safe to access boundary i-1)
 			if canWrap && b.begin == pos && pos != 0 && provider.rowBoundary(i-1).end == b.begin && row < (totalRows-1) {
 				row++
 			}
@@ -1106,7 +1106,7 @@ func (e *Entry) textWrap() fyne.TextWrap {
 	}
 
 	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
-		fyne.LogError("Entry cannot wrap single border", nil)
+		fyne.LogError("Entry cannot wrap single line", nil)
 		e.Wrapping = fyne.TextTruncate
 	}
 	return e.Wrapping
@@ -1217,7 +1217,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.propertyLock.RUnlock()
 
 	if !multiLine {
-		// Single border doesn't support newline.
+		// Single line doesn't support newline.
 		// Call submitted callback, if any.
 		if onSubmitted != nil {
 			onSubmitted(text)
