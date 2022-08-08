@@ -74,12 +74,10 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 func TestRadioGroup_DisableWhenNotSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
-	resName := render.icon.Resource.Name()
-
 	assert.True(t, render.icon.Hidden)
 
 	radio.Disable()
-	resName = render.over.Resource.Name()
+	resName := render.over.Resource.Name()
 	assert.Equal(t, resName, fmt.Sprintf("disabled_%v", theme.RadioButtonIcon().Name()))
 }
 
