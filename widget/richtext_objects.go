@@ -47,7 +47,7 @@ var (
 		SizeName:  theme.SizeNameText,
 		TextStyle: fyne.TextStyle{Italic: true},
 	}
-	// RichTextStyleHeading represents a heading text that stands on its own border.
+	// RichTextStyleHeading represents a heading text that stands on its own line.
 	//
 	// Since: 2.1
 	RichTextStyleHeading = RichTextStyle{
@@ -90,7 +90,7 @@ var (
 		SizeName:  theme.SizeNameText,
 		TextStyle: fyne.TextStyle{Bold: true},
 	}
-	// RichTextStyleSubHeading represents a sub-heading text that stands on its own border.
+	// RichTextStyleSubHeading represents a sub-heading text that stands on its own line.
 	//
 	// Since: 2.1
 	RichTextStyleSubHeading = RichTextStyle{
