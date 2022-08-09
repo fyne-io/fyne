@@ -23,18 +23,6 @@ type TabItem struct {
 	button *tabButton
 }
 
-func (ti *TabItem) enable() {
-	if ti.button != nil {
-		ti.button.Enable()
-	}
-}
-
-func (ti *TabItem) disable() {
-	if ti.button != nil {
-		ti.button.Disable()
-	}
-}
-
 // Disabled returns whether or not the TabItem is disabled.
 //
 // Since: 2.3
@@ -43,6 +31,18 @@ func (ti *TabItem) Disabled() bool {
 		return ti.button.Disabled()
 	}
 	return false
+}
+
+func (ti *TabItem) disable() {
+	if ti.button != nil {
+		ti.button.Disable()
+	}
+}
+
+func (ti *TabItem) enable() {
+	if ti.button != nil {
+		ti.button.Enable()
+	}
 }
 
 // TabLocation is the location where the tabs of a tab container should be rendered
@@ -229,25 +229,6 @@ func setItems(t baseTabs, items []*TabItem) {
 	}
 }
 
-func enableIndex(t baseTabs, index int) {
-	items := t.items()
-	if index < 0 || index >= len(items) {
-		return
-	}
-
-	item := items[index]
-	item.enable()
-}
-
-func enableItem(t baseTabs, item *TabItem) {
-	for i, it := range t.items() {
-		if it == item {
-			enableIndex(t, i)
-			return
-		}
-	}
-}
-
 func disableIndex(t baseTabs, index int) {
 	items := t.items()
 	if index < 0 || index >= len(items) {
@@ -276,6 +257,25 @@ func disableItem(t baseTabs, item *TabItem) {
 	for i, it := range t.items() {
 		if it == item {
 			disableIndex(t, i)
+			return
+		}
+	}
+}
+
+func enableIndex(t baseTabs, index int) {
+	items := t.items()
+	if index < 0 || index >= len(items) {
+		return
+	}
+
+	item := items[index]
+	item.enable()
+}
+
+func enableItem(t baseTabs, item *TabItem) {
+	for i, it := range t.items() {
+		if it == item {
+			enableIndex(t, i)
 			return
 		}
 	}

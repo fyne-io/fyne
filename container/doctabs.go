@@ -79,18 +79,11 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// EnableItem enables the specified TabItem.
+// DisableIndex disables the TabItem at the specified index.
 //
 // Since: 2.3
-func (t *DocTabs) EnableItem(item *TabItem) {
-	enableItem(t, item)
-}
-
-// EnableIndex enables the TabItem at the specified index.
-//
-// Since: 2.3
-func (t *DocTabs) EnableIndex(i int) {
-	enableIndex(t, i)
+func (t *DocTabs) DisableIndex(i int) {
+	disableIndex(t, i)
 }
 
 // DisableItem disables the specified TabItem.
@@ -100,11 +93,18 @@ func (t *DocTabs) DisableItem(item *TabItem) {
 	disableItem(t, item)
 }
 
-// DisableIndex disables the TabItem at the specified index.
+// EnableIndex enables the TabItem at the specified index.
 //
 // Since: 2.3
-func (t *DocTabs) DisableIndex(i int) {
-	disableIndex(t, i)
+func (t *DocTabs) EnableIndex(i int) {
+	enableIndex(t, i)
+}
+
+// EnableItem enables the specified TabItem.
+//
+// Since: 2.3
+func (t *DocTabs) EnableItem(item *TabItem) {
+	enableItem(t, item)
 }
 
 // Hide hides the widget.
