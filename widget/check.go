@@ -54,10 +54,11 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.bg.FillColor = theme.ForegroundColor()
+	c.bg.FillColor = theme.BackgroundColor()
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.disabled {
+		c.bg.FillColor = theme.InputBackgroundColor()
 		c.label.Color = theme.DisabledColor()
 	}
 }
@@ -77,19 +78,20 @@ func (c *checkRenderer) updateLabel() {
 }
 
 func (c *checkRenderer) updateResource() {
-	res := theme.CheckButtonIcon()
+	res := theme.NewThemedResource(theme.CheckButtonIcon())
+	res.ColorName = theme.ColorNameInputBorder
+	c.bg.FillColor = theme.InputBackgroundColor()
 	if c.check.Checked {
-		res = theme.NewPrimaryThemedResource(theme.CheckButtonCheckedIcon())
-		c.bg.Show()
-	} else {
-		c.bg.Hide()
+		res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
+		res.ColorName = theme.ColorNamePrimary
+		c.bg.FillColor = theme.ForegroundColor()
 	}
 	if c.check.Disabled() {
 		if c.check.Checked {
-			res = theme.NewDisabledResource(theme.CheckButtonCheckedIcon())
-		} else {
-			res = theme.NewDisabledResource(res)
+			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
+		res.ColorName = theme.ColorNameDisabled
+		c.bg.FillColor = theme.BackgroundColor()
 	}
 	c.icon.Resource = res
 }
@@ -207,8 +209,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
-	bg := canvas.NewRectangle(theme.ForegroundColor())
-	bg.Hide()
+	bg := canvas.NewRectangle(theme.InputBackgroundColor())
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.ForegroundColor())

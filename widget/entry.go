@@ -164,7 +164,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
 	border := canvas.NewRectangle(color.Transparent)
 	border.StrokeWidth = theme.InputBorderSize()
-	border.StrokeColor = theme.ForegroundColor()
+	border.StrokeColor = theme.InputBorderColor()
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
@@ -1390,7 +1390,7 @@ func (r *entryRenderer) Refresh() {
 		if r.entry.Disabled() {
 			r.border.StrokeColor = theme.DisabledColor()
 		} else {
-			r.border.StrokeColor = theme.ForegroundColor()
+			r.border.StrokeColor = theme.InputBorderColor()
 		}
 	}
 	if r.entry.ActionItem != nil {
