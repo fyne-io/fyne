@@ -186,10 +186,13 @@ func TestShowFileOpen(t *testing.T) {
 	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
 	//optionsbuttons
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	assert.Equal(t, "", createNewFolderButton.Text)
+	assert.Equal(t, theme.FolderNewIcon(), createNewFolderButton.Icon)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
-	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
 	//footer
@@ -266,10 +269,10 @@ func TestHiddenFiles(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
-	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
 
@@ -440,7 +443,7 @@ func TestView(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	listLayout := layout.NewVBoxLayout()
