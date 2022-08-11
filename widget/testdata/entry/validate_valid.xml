@@ -2,7 +2,7 @@
 	<content>
 		<widget pos="10,10" size="120x36" type="*widget.Entry">
 			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="120x32"/>
-			<rectangle fillColor="primary" pos="0,34" size="120x2"/>
+			<rectangle pos="1,1" size="118x34" strokeColor="primary" strokeWidth="2"/>
 			<widget pos="0,2" size="92x32" type="*widget.entryContent">
 				<widget size="92x32" type="*widget.RichText">
 					<text pos="8,6" size="76x20">2020-02-12</text>
