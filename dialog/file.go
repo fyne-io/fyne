@@ -254,9 +254,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	})
 
 	optionsbuttons := container.NewHBox(
+		newFolderButton,
 		toggleViewButton,
 		optionsButton,
-		newFolderButton,
 	)
 
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
