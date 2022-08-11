@@ -245,9 +245,14 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				return
 			}
 
-			createFolderErr := os.MkdirAll(filepath.Join(f.dir.Path(), newFolderEntry.Text), 0700)
+			newFolderPath := filepath.Join(f.dir.Path(), newFolderEntry.Text)
+			createFolderErr := os.MkdirAll(newFolderPath, 0000)
 			if createFolderErr != nil {
-				ShowInformation("Error", "Folder cannot be created", f.file.parent)
+				fyne.LogError(
+					fmt.Sprintf("Failed to create folder with path %s", newFolderPath),
+					createFolderErr,
+				)
+				ShowError(errors.New("folder cannot be created"), f.file.parent)
 			}
 			f.refreshDir(f.dir)
 		}, f.file.parent)
