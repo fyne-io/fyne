@@ -148,9 +148,9 @@ func TestForm_ChangeTheme(t *testing.T) {
 }
 
 func TestForm_Disabled(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	disabled := NewEntry()
 	disabled.Disable()
