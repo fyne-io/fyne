@@ -386,7 +386,7 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 	return button, modifier
 }
 
-//gocyclo:ignore We need to map glfw keys to fyne keys.
+//gocyclo:ignore
 func glfwToFyneKey(key glfw.Key) fyne.KeyName {
 	switch key {
 	case glfw.KeyEscape:
