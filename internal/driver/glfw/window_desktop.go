@@ -460,7 +460,6 @@ func glfwToFyneKey(key glfw.Key) fyne.KeyName {
 		return fyne.Key4
 	case glfw.Key5, glfw.KeyKP5:
 		return fyne.Key5
-		return fyne.Key5
 	case glfw.Key6, glfw.KeyKP6:
 		return fyne.Key6
 	case glfw.Key7, glfw.KeyKP7:
