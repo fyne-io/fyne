@@ -623,7 +623,7 @@ func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *InvertedThemedResource) Name() string {
-	return "inverted-" + res.source.Name()
+	return "inverted_" + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
@@ -678,7 +678,7 @@ func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *PrimaryThemedResource) Name() string {
-	return "primary-" + res.source.Name()
+	return "primary_" + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
