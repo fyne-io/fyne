@@ -51,14 +51,14 @@ func (d *Docs) List() []string {
 		return nil
 	}
 
-	var ret []string
 	uris, err := storage.List(d.RootDocURI)
 	if err != nil {
-		return ret
+		return nil
 	}
 
-	for _, u := range uris {
-		ret = append(ret, u.Name())
+	ret := make([]string, len(uris))
+	for i, u := range uris {
+		ret[i] = u.Name()
 	}
 
 	return ret

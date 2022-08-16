@@ -436,7 +436,7 @@ func (l *listLayout) updateList(refresh bool) {
 
 	wasVisible := l.visible
 	l.visible = make(map[ListItemID]*listItem)
-	var cells []fyne.CanvasObject
+	cells := []fyne.CanvasObject{}
 	y := offY
 	size := fyne.NewSize(width, l.list.itemMin.Height)
 	for row := minRow; row < maxRow; row++ {

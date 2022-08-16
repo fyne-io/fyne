@@ -28,6 +28,16 @@ func TestPaintImage_MinSize(t *testing.T) {
 	assert.Equal(t, float32(240), img.MinSize().Height)
 }
 
+func TestPaintImageWithBadSVGElement(t *testing.T) {
+	img := canvas.NewImageFromFile("testdata/stroke-bad-element-data.svg")
+	c := test.NewCanvasWithPainter(software.NewPainter())
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(480, 240))
+	img.Refresh()
+
+	test.AssertImageMatches(t, "svg-stroke-default.png", c.Capture())
+}
+
 func TestPaintImage_SVG(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()

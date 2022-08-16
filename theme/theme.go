@@ -88,6 +88,11 @@ const (
 	// Since: 2.0
 	ColorNameInputBackground fyne.ThemeColorName = "inputBackground"
 
+	// ColorNameInputBorder is the name of theme lookup for border color of an input field.
+	//
+	// Since: 2.3
+	ColorNameInputBorder fyne.ThemeColorName = "inputBorder"
+
 	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
 	//
 	// Since: 2.0
@@ -313,6 +318,13 @@ func InputBackgroundColor() color.Color {
 	return current().Color(ColorNameInputBackground, currentVariant())
 }
 
+// InputBorderColor returns the color used to draw underneath input elements.
+//
+// Since: 2.3
+func InputBorderColor() color.Color {
+	return current().Color(ColorNameInputBorder, currentVariant())
+}
+
 // InputBorderSize returns the input border size (or underline size for an entry).
 //
 // Since: 2.0
@@ -480,7 +492,7 @@ var (
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
 		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f},
 		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x7f},
+		ColorBlue:   color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a},
 		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f},
 		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f},
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f},
@@ -490,7 +502,7 @@ var (
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
 		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
 		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
+		ColorBlue:   color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff},
 		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
 		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
@@ -500,21 +512,22 @@ var (
 		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f},
 		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f},
 		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x3f},
+		ColorBlue:   color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a},
 		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f},
 		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f},
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
 	}
 
 	darkPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{R: 0x30, G: 0x30, B: 0x30, A: 0xff},
-		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x42},
+		ColorNameBackground:      color.NRGBA{R: 0x14, G: 0x14, B: 0x15, A: 0xff},
+		ColorNameButton:          color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff},
+		ColorNameDisabled:        color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff},
 		ColorNameDisabledButton:  color.NRGBA{R: 0x26, G: 0x26, B: 0x26, A: 0xff},
 		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
+		ColorNameForeground:      color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff},
 		ColorNameHover:           color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f},
-		ColorNameInputBackground: color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x19},
+		ColorNameInputBackground: color.NRGBA{R: 0x24, G: 0x25, B: 0x29, A: 0xff},
+		ColorNameInputBorder:     color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff},
 		ColorNamePlaceHolder:     color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff},
 		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
@@ -525,13 +538,14 @@ var (
 
 	lightPalette = map[fyne.ThemeColorName]color.Color{
 		ColorNameBackground:      color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
-		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{A: 0x42},
+		ColorNameButton:          color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff},
+		ColorNameDisabled:        color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff},
 		ColorNameDisabledButton:  color.NRGBA{R: 0xe5, G: 0xe5, B: 0xe5, A: 0xff},
 		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xff},
+		ColorNameForeground:      color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff},
 		ColorNameHover:           color.NRGBA{A: 0x0f},
-		ColorNameInputBackground: color.NRGBA{A: 0x19},
+		ColorNameInputBackground: color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff},
+		ColorNameInputBorder:     color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff},
 		ColorNamePlaceHolder:     color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 		ColorNamePressed:         color.NRGBA{A: 0x19},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
@@ -619,13 +633,13 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameInlineIcon:
 		return 20
 	case SizeNamePadding:
-		return 4
+		return 6
 	case SizeNameScrollBar:
 		return 16
 	case SizeNameScrollBarSmall:
 		return 3
 	case SizeNameText:
-		return 14
+		return 13
 	case SizeNameHeadingText:
 		return 24
 	case SizeNameSubHeadingText:
@@ -633,7 +647,7 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameCaptionText:
 		return 11
 	case SizeNameInputBorder:
-		return 2
+		return 1
 	default:
 		return 0
 	}

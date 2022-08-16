@@ -75,7 +75,7 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 			validatable.SetOnValidationChanged(formDialog.validateItems)
 		}
 	}
-	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
+	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
 	return formDialog
 }
 

@@ -113,19 +113,19 @@ func (p *ColorPickerDialog) updateUI() {
 				p.selectColor(p.color)
 			},
 		}
-		p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
+		p.dialog.create(newButtonList(p.dialog.dismiss, confirm))
 	} else {
 		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
-		p.dialog.setButtons(newButtonList(p.dialog.dismiss))
+		p.dialog.create(newButtonList(p.dialog.dismiss))
 	}
 }
 
 func clamp(value, min, max int) int {
 	if value < min {
-		value = min
+		return min
 	}
 	if value > max {
-		value = max
+		return max
 	}
 	return value
 }

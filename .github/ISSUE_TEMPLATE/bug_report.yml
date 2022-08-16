@@ -1,0 +1,93 @@
+name: Bug Report
+description: Create a bug report to help us improve.
+labels: "unverified"
+body:
+- type: checkboxes
+  attributes:
+    label: Checklist
+    description: Please make sure you have read the following.
+    options:
+      - label: I have searched the [issue tracker](https://github.com/fyne-io/fyne/issues) for open issues that relate to the same problem, before opening a new one.
+        required: true
+      - label: This issue only relates to a single bug. I will open new issues for any other problems.
+        required: true        
+- type: textarea
+  attributes:
+    label: Describe the bug
+    description: A clear and concise description about the bug. Please include the stack trace in the case of a crash.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: How to reproduce
+    description: A clear description of how to reproduce the problem.
+    placeholder: |
+      1. Go to `...`
+      2. Click on `...`
+      3. Scroll down to `...`
+      4. See error
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Screenshots
+    description: If applicable, add screenshots or gifs to help explain your problem.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Example code
+    description: |
+      Add a short code snippet to help explain and simplify reproduction of the problem.
+      Please refrain from adding screenshots of code, links to other projects or very long code examples.
+      A good code example should be runnable and contain no more code than is necessary to reproduce the bug.
+    placeholder: |
+      Please write the code inside a code block with Go syntax highlighting enabled, like this:
+      ```go
+      Write your code here.
+      ```
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Fyne version
+    description: Clarify the version of Fyne that you are using.
+    placeholder: "e.g. 2.2.3 or git SHA"
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Go compiler version
+    description: Clarify the version of the Go compiler that you are using.
+    placeholder: "e.g. 1.14.8 or 1.18.3"
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Operating system
+    description: What operating system are you running the code on?
+    options:
+      - Android
+      - FreeBSD
+      - iOS
+      - Linux
+      - macOS
+      - NetBSD
+      - OpenBSD
+      - Windows
+      - Other (specify below)
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Operating system version
+    description: Clarify the version of the operating system you are using.
+    placeholder: "e.g. Windows 10, 10.13 High Sierra or Ubuntu 18.04"
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional Information
+    description: If your problem needs further explanation, please add more information here.
+  validations:
+    required: false

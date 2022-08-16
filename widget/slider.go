@@ -259,7 +259,7 @@ func (s *Slider) Unbind() {
 
 const (
 	standardScale = float32(4)
-	minLongSide   = float32(50)
+	minLongSide   = float32(34) // added to button diameter
 )
 
 type sliderRenderer struct {
@@ -310,13 +310,13 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset+endPad)
 
 		thumbPos = fyne.NewPos(
-			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
+			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-(diameter/2))
 	case Horizontal:
 		activePos = trackPos
 		activeSize = fyne.NewSize(activeOffset-endPad, trackWidth)
 
 		thumbPos = fyne.NewPos(
-			activeOffset-((diameter-theme.Padding())/2), trackPos.Y-(diameter-trackSize.Height)/2)
+			activeOffset-(diameter/2), trackPos.Y-(diameter-trackSize.Height)/2)
 	}
 
 	s.active.Move(activePos)
@@ -328,7 +328,8 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 // MinSize calculates the minimum size of a widget.
 func (s *sliderRenderer) MinSize() fyne.Size {
-	s1, s2 := minLongSide, s.slider.buttonDiameter()
+	dia := s.slider.buttonDiameter()
+	s1, s2 := minLongSide+dia, dia
 
 	switch s.slider.Orientation {
 	case Vertical:
