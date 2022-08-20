@@ -50,10 +50,9 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.BaseWidget.ExtendBaseWidget(t)
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
-			bar:         &fyne.Container{},
-			divider:     canvas.NewRectangle(theme.ShadowColor()),
-			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
-			buttonCache: make(map[*TabItem]*tabButton),
+			bar:       &fyne.Container{},
+			divider:   canvas.NewRectangle(theme.ShadowColor()),
+			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
 		appTabs: t,
 	}
@@ -87,6 +86,34 @@ func (t *AppTabs) CurrentTab() *TabItem {
 // Deprecated: Use `AppTabs.SelectedIndex() int` instead.
 func (t *AppTabs) CurrentTabIndex() int {
 	return t.current
+}
+
+// DisableIndex disables the TabItem at the specified index.
+//
+// Since: 2.3
+func (t *AppTabs) DisableIndex(i int) {
+	disableIndex(t, i)
+}
+
+// DisableItem disables the specified TabItem.
+//
+// Since: 2.3
+func (t *AppTabs) DisableItem(item *TabItem) {
+	disableItem(t, item)
+}
+
+// EnableIndex enables the TabItem at the specified index.
+//
+// Since: 2.3
+func (t *AppTabs) EnableIndex(i int) {
+	enableIndex(t, i)
+}
+
+// EnableItem enables the specified TabItem.
+//
+// Since: 2.3
+func (t *AppTabs) EnableItem(item *TabItem) {
+	enableItem(t, item)
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -339,13 +366,12 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 
 	for i := 0; i < count; i++ {
 		item := r.appTabs.Items[i]
-		button, ok := r.buttonCache[item]
-		if !ok {
-			button = &tabButton{
+		if item.button == nil {
+			item.button = &tabButton{
 				onTapped: func() { r.appTabs.Select(item) },
 			}
-			r.buttonCache[item] = button
 		}
+		button := item.button
 		button.icon = item.Icon
 		button.iconPosition = iconPos
 		if i == r.appTabs.current {
