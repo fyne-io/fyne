@@ -128,7 +128,6 @@ func (b *Bundler) Run(args []string) {
 	case os.IsNotExist(err):
 		fyne.LogError("Specified file could not be found", err)
 	case stat.IsDir():
-		b.noheader = false
 		b.dirBundle(args[0], outFile)
 	case b.name != "":
 		b.prefix = ""
@@ -163,7 +162,6 @@ func (b *Bundler) bundleAction(ctx *cli.Context) (err error) {
 		fyne.LogError("Specified file could not be found", err)
 		return err
 	case stat.IsDir():
-		b.noheader = false
 		return b.dirBundle(arg, outFile)
 	case b.name != "":
 		b.prefix = ""
