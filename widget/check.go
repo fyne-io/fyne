@@ -126,7 +126,7 @@ func (c *Check) Bind(data binding.Bool) {
 	}
 }
 
-// SetChecked sets the the checked state and refreshes widget
+// SetChecked sets the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
 	if checked == c.Checked {
 		return
@@ -135,6 +135,7 @@ func (c *Check) SetChecked(checked bool) {
 	c.Checked = checked
 
 	if c.OnChanged != nil {
+		c.binder.CallWithData(c.writeData)
 		c.OnChanged(c.Checked)
 	}
 
