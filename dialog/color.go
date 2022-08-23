@@ -82,7 +82,7 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
 	p.dialog.Hide()
-	writeRecentColor(colorToString(p.color))
+	writeRecentColor(colorToString(c))
 	if f := p.callback; f != nil {
 		f(c)
 	}
