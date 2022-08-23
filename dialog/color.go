@@ -86,6 +86,7 @@ func (p *ColorPickerDialog) selectColor(c color.Color) {
 	if f := p.callback; f != nil {
 		f(c)
 	}
+	p.updateUI()
 }
 
 func (p *ColorPickerDialog) updateUI() {
@@ -99,7 +100,12 @@ func (p *ColorPickerDialog) updateUI() {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
 			p.color = c
 		})
-		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
+
+		advancedItem := widget.NewAccordionItem("Advanced", p.picker)
+		if p.advanced != nil {
+			advancedItem.Open = p.advanced.Items[0].Open
+		}
+		p.advanced = widget.NewAccordion(advancedItem)
 
 		p.dialog.content = container.NewVBox(
 			container.NewCenter(
