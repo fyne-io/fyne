@@ -57,6 +57,9 @@ func (p *ColorPickerDialog) Refresh() {
 
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
+	if p.picker == nil && p.Advanced {
+		p.updateUI()
+	}
 	p.picker.SetColor(c)
 }
 
