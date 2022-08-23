@@ -59,7 +59,7 @@ func (p *ColorPickerDialog) Refresh() {
 func (p *ColorPickerDialog) SetColor(c color.Color) {
 	if p.picker == nil && p.Advanced {
 		p.updateUI()
-	} else {
+	} else if !p.Advanced {
 		panic("Advanced mode needs to be enabled to use set color")
 	}
 	p.picker.SetColor(c)
