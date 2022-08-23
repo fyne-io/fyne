@@ -147,7 +147,7 @@ func Test_recent_color(t *testing.T) {
 	t.Run("Limit", func(t *testing.T) {
 		test.NewApp()
 		defer test.NewApp()
-		// Max recents is 8
+		// Max recents is 7
 		writeRecentColor("#000000") // Black
 		writeRecentColor("#bbbbbb") // Dark Grey
 		writeRecentColor("#444444") // Light Grey
@@ -159,7 +159,7 @@ func Test_recent_color(t *testing.T) {
 		writeRecentColor("#00ffff") // Cyan
 		writeRecentColor("#ff00ff") // Magenta
 		colors := readRecentColors()
-		assert.Equal(t, 8, len(colors))
+		assert.Equal(t, 7, len(colors))
 		assert.Equal(t, "#ff00ff", colors[0]) // Magenta
 		assert.Equal(t, "#00ffff", colors[1]) // Cyan
 		assert.Equal(t, "#ffff00", colors[2]) // Yellow
@@ -167,7 +167,6 @@ func Test_recent_color(t *testing.T) {
 		assert.Equal(t, "#00ff00", colors[4]) // Green
 		assert.Equal(t, "#ff0000", colors[5]) // Red
 		assert.Equal(t, "#ffffff", colors[6]) // White
-		assert.Equal(t, "#444444", colors[7]) // Light Grey
 	})
 }
 
