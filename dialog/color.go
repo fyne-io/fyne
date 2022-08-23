@@ -174,7 +174,7 @@ func newCheckeredBackground() *canvas.Raster {
 
 const (
 	preferenceRecents    = "color_recents"
-	preferenceMaxRecents = 8
+	preferenceMaxRecents = 7
 )
 
 func readRecentColors() (recents []string) {
