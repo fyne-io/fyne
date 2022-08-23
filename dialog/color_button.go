@@ -79,7 +79,6 @@ func (b *colorButton) SetColor(color color.Color) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (b *colorButton) Tapped(*fyne.PointEvent) {
-	writeRecentColor(colorToString(b.color))
 	if f := b.onTap; f != nil {
 		f(b.color)
 	}
