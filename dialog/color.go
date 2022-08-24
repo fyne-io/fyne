@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"math/cmplx"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -166,16 +167,27 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	return container.NewGridWithColumns(8, objects...)
 }
 
-func newCheckeredBackground() *canvas.Raster {
-	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 10
-
+func newCheckeredBackground(radial bool) *canvas.Raster {
+	const boxSize = 10
+	rect := func(x, y, _, _ int) color.Color {
 		if (x/boxSize)%2 == (y/boxSize)%2 {
 			return color.Gray{Y: 58}
 		}
 
 		return color.Gray{Y: 84}
-	})
+	}
+	f := rect
+	if radial {
+		const numberOfRings = 12 * boxSize
+		f = func(x, y, w, h int) color.Color {
+			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
+			x = int((t + math.Pi) / (2 * math.Pi) * numberOfRings)
+			y = int(r)
+			return rect(x, y, 0, 0)
+		}
+	}
+
+	return canvas.NewRasterWithPixels(f)
 }
 
 const (

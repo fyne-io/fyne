@@ -26,7 +26,7 @@ func newColorPreview(previousColor color.Color) *colorPreview {
 func (p *colorPreview) CreateRenderer() fyne.WidgetRenderer {
 	oldC := canvas.NewRectangle(p.previous)
 	newC := canvas.NewRectangle(p.current)
-	background := newCheckeredBackground()
+	background := newCheckeredBackground(false)
 	return &colorPreviewRenderer{
 		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{background, oldC, newC}),
 		preview:      p,
@@ -36,6 +36,7 @@ func (p *colorPreview) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// SetColor updates the current color for the preview
 func (p *colorPreview) SetColor(c color.Color) {
 	p.current = c
 	p.Refresh()

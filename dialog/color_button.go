@@ -35,7 +35,7 @@ func newColorButton(color color.Color, onTap func(color.Color)) *colorButton {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *colorButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	background := newCheckeredBackground()
+	background := newCheckeredBackground(false)
 	rectangle := &canvas.Rectangle{
 		FillColor: b.color,
 	}
