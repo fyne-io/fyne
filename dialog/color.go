@@ -60,7 +60,8 @@ func (p *ColorPickerDialog) SetColor(c color.Color) {
 	if p.picker == nil && p.Advanced {
 		p.updateUI()
 	} else if !p.Advanced {
-		panic("Advanced mode needs to be enabled to use set color")
+		fyne.LogError("Advanced mode needs to be enabled to use SetColor", nil)
+		return
 	}
 	p.picker.SetColor(c)
 }
