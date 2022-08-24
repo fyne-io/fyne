@@ -88,6 +88,10 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 		openFolder.Disable()
 	}
 
+	advancedPicker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+		colorPicked(c, win)
+	}, win)
+	advancedPicker.Advanced = true
 	return container.NewVScroll(container.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
@@ -112,11 +116,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			picker.Show()
 		}),
 		widget.NewButton("Advanced Color Picker", func() {
-			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
-				colorPicked(c, win)
-			}, win)
-			picker.Advanced = true
-			picker.Show()
+			advancedPicker.Show()
 		}),
 		widget.NewButton("Form Dialog (Login Form)", func() {
 			username := widget.NewEntry()
