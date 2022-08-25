@@ -66,6 +66,21 @@ func TestFyneApp_SetCloudProvider(t *testing.T) {
 	assert.True(t, p.configured)
 }
 
+func TestFyneApp_SetCloudProvider_Cleanup(t *testing.T) {
+	a := NewWithID("io.fyne.test")
+	p1 := &mockCloud{}
+	p2 := &mockCloud{}
+	a.SetCloudProvider(p1)
+
+	assert.True(t, p1.configured)
+	assert.False(t, p1.cleaned)
+
+	a.SetCloudProvider(p2)
+
+	assert.True(t, p1.cleaned)
+	assert.True(t, p2.configured)
+}
+
 func TestFyneApp_transitionCloud(t *testing.T) {
 	a := NewWithID("io.fyne.test")
 	p := &mockCloud{}
@@ -82,7 +97,11 @@ func TestFyneApp_transitionCloud(t *testing.T) {
 }
 
 type mockCloud struct {
-	configured bool
+	configured, cleaned bool
+}
+
+func (c *mockCloud) Cleanup(_ fyne.App) {
+	c.cleaned = true
 }
 
 func (c *mockCloud) ProviderDescription() string {
@@ -97,7 +116,7 @@ func (c *mockCloud) ProviderName() string {
 	return "mock"
 }
 
-func (c *mockCloud) Setup(fyne.App) error {
+func (c *mockCloud) Setup(_ fyne.App) error {
 	c.configured = true
 	return nil
 }
