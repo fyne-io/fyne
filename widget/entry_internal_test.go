@@ -225,7 +225,7 @@ func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
 }
 
 func TestEntry_EraseSelection(t *testing.T) {
-	// Selects "sti" on line 2 of a new multiline
+	// Selects "sti" on border 2 of a new multiline
 	// T e s t i n g
 	// T e[s t i]n g
 	// T e s t i n g

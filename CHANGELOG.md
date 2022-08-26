@@ -17,6 +17,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
+* Fyne bundle does not support appending when parameter is a directory
+
 
 ## 2.2.4 - Ongoing
 
