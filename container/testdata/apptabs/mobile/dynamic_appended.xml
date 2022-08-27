@@ -3,10 +3,10 @@
 		<widget size="300x150" type="*container.AppTabs">
 			<container size="300x36">
 				<container size="300x36">
-					<widget size="148x37" type="*container.tabButton">
+					<widget size="148x36" type="*container.tabButton">
 						<text alignment="center" bold color="primary" pos="4,8" size="140x20">Test1</text>
 					</widget>
-					<widget pos="152,0" size="148x37" type="*container.tabButton">
+					<widget pos="152,0" size="148x36" type="*container.tabButton">
 						<text alignment="center" bold size="0x0">Test2</text>
 					</widget>
 				</container>

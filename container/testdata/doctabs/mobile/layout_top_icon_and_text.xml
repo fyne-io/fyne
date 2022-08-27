@@ -4,7 +4,7 @@
 			<container size="150x80">
 				<widget size="110x80" type="*widget.Scroll">
 					<container size="110x80">
-						<widget size="110x81" type="*container.tabButton">
+						<widget size="110x80" type="*container.tabButton">
 							<text bold color="primary" pos="4,52" size="102x20">Text1</text>
 							<widget pos="86,30" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
