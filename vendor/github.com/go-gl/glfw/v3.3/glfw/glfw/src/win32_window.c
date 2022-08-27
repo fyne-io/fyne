@@ -504,10 +504,8 @@ static void maximizeWindowManually(_GLFWwindow* window)
 
     if (window->maxwidth != GLFW_DONT_CARE && window->maxheight != GLFW_DONT_CARE)
     {
-        if (rect.right - rect.left > window->maxwidth)
-            rect.right = rect.left + window->maxwidth;
-        if (rect.bottom - rect.top > window->maxheight)
-            rect.bottom = rect.top + window->maxheight;
+        rect.right = _glfw_min(rect.right, rect.left + window->maxwidth);
+        rect.bottom = _glfw_min(rect.bottom, rect.top + window->maxheight);
     }
 
     style = GetWindowLongW(window->win32.handle, GWL_STYLE);
@@ -530,8 +528,7 @@ static void maximizeWindowManually(_GLFWwindow* window)
             OffsetRect(&rect, 0, GetSystemMetrics(SM_CYCAPTION));
         }
 
-        if (rect.bottom > mi.rcWork.bottom)
-            rect.bottom = mi.rcWork.bottom;
+        rect.bottom = _glfw_min(rect.bottom, mi.rcWork.bottom);
     }
 
     SetWindowPos(window->win32.handle, HWND_TOP,
@@ -750,6 +747,18 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
                 // HACK: Map the virtual key back to a usable scancode
                 scancode = MapVirtualKeyW((UINT) wParam, MAPVK_VK_TO_VSC);
             }
+
+            // HACK: Alt+PrtSc has a different scancode than just PrtSc
+            if (scancode == 0x54)
+                scancode = 0x137;
+
+            // HACK: Ctrl+Pause has a different scancode than just Pause
+            if (scancode == 0x146)
+                scancode = 0x45;
+
+            // HACK: CJK IME sets the extended bit for right Shift
+            if (scancode == 0x136)
+                scancode = 0x36;
 
             key = _glfw.win32.keycodes[scancode];
 
@@ -1275,15 +1284,16 @@ static int createNativeWindow(_GLFWwindow* window,
 
     if (window->monitor)
     {
-        GLFWvidmode mode;
+        MONITORINFO mi = { sizeof(mi) };
+        GetMonitorInfoW(window->monitor->win32.handle, &mi);
 
         // NOTE: This window placement is temporary and approximate, as the
         //       correct position and size cannot be known until the monitor
         //       video mode has been picked in _glfwSetVideoModeWin32
-        _glfwPlatformGetMonitorPos(window->monitor, &xpos, &ypos);
-        _glfwPlatformGetVideoMode(window->monitor, &mode);
-        fullWidth  = mode.width;
-        fullHeight = mode.height;
+        xpos = mi.rcMonitor.left;
+        ypos = mi.rcMonitor.top;
+        fullWidth  = mi.rcMonitor.right - mi.rcMonitor.left;
+        fullHeight = mi.rcMonitor.bottom - mi.rcMonitor.top;
     }
     else
     {
@@ -1312,7 +1322,7 @@ static int createNativeWindow(_GLFWwindow* window,
                                            fullWidth, fullHeight,
                                            NULL, // No parent window
                                            NULL, // No window menu
-                                           GetModuleHandleW(NULL),
+                                           _glfw.win32.instance,
                                            (LPVOID) wndconfig);
 
     free(wideTitle);
@@ -1423,8 +1433,8 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
     ZeroMemory(&wc, sizeof(wc));
     wc.cbSize        = sizeof(wc);
     wc.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.lpfnWndProc   = (WNDPROC) windowProc;
-    wc.hInstance     = GetModuleHandleW(NULL);
+    wc.lpfnWndProc   = windowProc;
+    wc.hInstance     = _glfw.win32.instance;
     wc.hCursor       = LoadCursorW(NULL, IDC_ARROW);
     wc.lpszClassName = _GLFW_WNDCLASSNAME;
 
@@ -1454,7 +1464,7 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
 //
 void _glfwUnregisterWindowClassWin32(void)
 {
-    UnregisterClassW(_GLFW_WNDCLASSNAME, GetModuleHandleW(NULL));
+    UnregisterClassW(_GLFW_WNDCLASSNAME, _glfw.win32.instance);
 }
 
 
@@ -1493,6 +1503,9 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
             if (!_glfwCreateContextOSMesa(window, ctxconfig, fbconfig))
                 return GLFW_FALSE;
         }
+
+        if (!_glfwRefreshContextAttribs(window, ctxconfig))
+            return GLFW_FALSE;
     }
 
     if (window->monitor)
@@ -1501,6 +1514,18 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
         _glfwPlatformFocusWindow(window);
         acquireMonitor(window);
         fitToMonitor(window);
+
+        if (wndconfig->centerCursor)
+            _glfwCenterCursorInContentArea(window);
+    }
+    else
+    {
+        if (wndconfig->visible)
+        {
+            _glfwPlatformShowWindow(window);
+            if (wndconfig->focused)
+                _glfwPlatformFocusWindow(window);
+        }
     }
 
     return GLFW_TRUE;
@@ -2343,7 +2368,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
 
     memset(&sci, 0, sizeof(sci));
     sci.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    sci.hinstance = GetModuleHandleW(NULL);
+    sci.hinstance = _glfw.win32.instance;
     sci.hwnd = window->win32.handle;
 
     err = vkCreateWin32SurfaceKHR(instance, &sci, allocator, surface);

@@ -334,6 +334,7 @@ typedef struct _GLFWwindowWin32
 //
 typedef struct _GLFWlibraryWin32
 {
+    HINSTANCE           instance;
     HWND                helperWindowHandle;
     HDEVNOTIFY          deviceNotificationHandle;
     DWORD               foregroundLockTimeout;
