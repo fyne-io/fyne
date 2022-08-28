@@ -43,7 +43,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 	c.label.Resize(labelSize)
 	c.label.Move(fyne.NewPos(xOff, 0))
 
-	iconPos := fyne.NewPos(theme.InnerPadding()/2 + theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
+	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	c.bg.Move(iconPos.AddXY(4, 4))
 	c.bg.Resize(iconSize.SubtractWidthHeight(8, 8))

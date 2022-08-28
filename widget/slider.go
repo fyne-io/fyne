@@ -258,7 +258,7 @@ func (s *Slider) Unbind() {
 }
 
 const (
-	minLongSide   = float32(34) // added to button diameter
+	minLongSide = float32(34) // added to button diameter
 )
 
 type sliderRenderer struct {
@@ -282,7 +282,7 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the widget.
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	trackWidth := theme.InputBorderSize()*2
+	trackWidth := theme.InputBorderSize() * 2
 	diameter := s.slider.buttonDiameter()
 	endPad := s.slider.endOffset()
 

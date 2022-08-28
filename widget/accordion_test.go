@@ -219,10 +219,10 @@ func TestAccordion_Layout(t *testing.T) {
 
 func TestAccordion_MinSize(t *testing.T) {
 	minSizeA := fyne.MeasureText("A", theme.TextSize(), fyne.TextStyle{})
-	minSizeA.Width += theme.IconInlineSize() + theme.InnerPadding()*3+theme.Padding()
+	minSizeA.Width += theme.IconInlineSize() + theme.InnerPadding()*3 + theme.Padding()
 	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.InnerPadding()
 	minSizeB := fyne.MeasureText("B", theme.TextSize(), fyne.TextStyle{})
-	minSizeB.Width += theme.IconInlineSize() + theme.InnerPadding()*3+theme.Padding()
+	minSizeB.Width += theme.IconInlineSize() + theme.InnerPadding()*3 + theme.Padding()
 	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.InnerPadding()
 	minSize1 := fyne.MeasureText("111111", theme.TextSize(), fyne.TextStyle{})
 	minSize1.Width += theme.Padding() * 4

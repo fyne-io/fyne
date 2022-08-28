@@ -165,7 +165,7 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 	r.label.Resize(labelSize)
 	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+theme.Padding(), 0))
 
-	iconPos := fyne.NewPos(theme.InnerPadding()/2 + theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
+	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	r.bg.Resize(iconSize)
 	r.bg.Move(iconPos)
