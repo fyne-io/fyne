@@ -98,6 +98,7 @@ func TestTable_Filled(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
+	w.Content().Refresh()
 	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
 }
 
