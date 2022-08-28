@@ -98,11 +98,11 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 }
 
 func (s *Slider) buttonDiameter() float32 {
-	return theme.Padding() * standardScale
+	return theme.IconInlineSize() - 3.5 // match radio icons
 }
 
 func (s *Slider) endOffset() float32 {
-	return s.buttonDiameter()/2 + theme.Padding()
+	return s.buttonDiameter()/2 + theme.InnerPadding() - 1.5 // align with radio icons
 }
 
 func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
@@ -258,7 +258,6 @@ func (s *Slider) Unbind() {
 }
 
 const (
-	standardScale = float32(4)
 	minLongSide   = float32(34) // added to button diameter
 )
 
@@ -283,7 +282,7 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the widget.
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	trackWidth := theme.Padding()
+	trackWidth := theme.InputBorderSize()*2
 	diameter := s.slider.buttonDiameter()
 	endPad := s.slider.endOffset()
 
@@ -293,11 +292,11 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	// some calculations are relative to trackSize, so we must update that first
 	switch s.slider.Orientation {
 	case Vertical:
-		trackPos = fyne.NewPos(size.Width/2, endPad)
+		trackPos = fyne.NewPos(size.Width/2-theme.InputBorderSize(), endPad)
 		trackSize = fyne.NewSize(trackWidth, size.Height-endPad*2)
 
 	case Horizontal:
-		trackPos = fyne.NewPos(endPad, size.Height/2)
+		trackPos = fyne.NewPos(endPad, size.Height/2-theme.InputBorderSize())
 		trackSize = fyne.NewSize(size.Width-endPad*2, trackWidth)
 	}
 	s.track.Move(trackPos)
