@@ -11,18 +11,12 @@
 							<image fillMode="contain" rsc="moveDownIcon" size="20x36"/>
 						</widget>
 					</widget>
-					<widget pos="0,36" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
-					</widget>
-					<widget pos="0,37" size="209x36" type="*widget.leaf">
+					<widget pos="0,40" size="209x36" type="*widget.leaf">
 						<widget pos="52,0" size="157x36" type="*widget.Label">
 							<text pos="8,8" size="141x20">11111</text>
 						</widget>
 					</widget>
-					<widget pos="0,74" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
-					</widget>
-					<widget pos="0,75" size="209x36" type="*widget.branch">
+					<widget pos="0,81" size="209x36" type="*widget.branch">
 						<rectangle fillColor="selection" size="209x36"/>
 						<widget pos="28,0" size="181x36" type="*widget.Label">
 							<text pos="8,8" size="165x20">B</text>
@@ -31,18 +25,12 @@
 							<image fillMode="contain" rsc="moveDownIcon" size="20x36"/>
 						</widget>
 					</widget>
-					<widget pos="0,112" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
-					</widget>
-					<widget pos="0,113" size="209x36" type="*widget.leaf">
+					<widget pos="0,122" size="209x36" type="*widget.leaf">
 						<widget pos="52,0" size="157x36" type="*widget.Label">
 							<text pos="8,8" size="141x20">2222222222</text>
 						</widget>
 					</widget>
-					<widget pos="0,149" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
-					</widget>
-					<widget pos="0,150" size="209x36" type="*widget.branch">
+					<widget pos="0,162" size="209x36" type="*widget.branch">
 						<widget pos="52,0" size="157x36" type="*widget.Label">
 							<text pos="8,8" size="141x20">C</text>
 						</widget>
@@ -50,10 +38,7 @@
 							<image fillMode="contain" rsc="moveDownIcon" size="20x36"/>
 						</widget>
 					</widget>
-					<widget pos="0,187" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
-					</widget>
-					<widget pos="0,188" size="209x36" type="*widget.leaf">
+					<widget pos="0,203" size="209x36" type="*widget.leaf">
 						<widget pos="76,0" size="133x36" type="*widget.Label">
 							<text pos="8,8" size="117x20">333333333333333</text>
 						</widget>

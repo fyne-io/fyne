@@ -10,7 +10,7 @@
 					</widget>
 					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="20x20"/>
 				</widget>
-				<widget pos="0,40" size="59x36" type="*widget.Label">
+				<widget pos="0,36" size="59x36" type="*widget.Label">
 					<text pos="8,8" size="43x20">11111</text>
 				</widget>
 			</widget>

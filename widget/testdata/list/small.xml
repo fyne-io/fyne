@@ -13,7 +13,7 @@
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,37" size="192x36" type="*widget.listItem">
+					<widget pos="0,40" size="192x36" type="*widget.listItem">
 						<container size="192x36">
 							<widget size="20x36" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x36"/>
@@ -22,12 +22,6 @@
 								<text pos="8,8" size="117x20">Test Item 1</text>
 							</widget>
 						</container>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
-					</widget>
-					<widget pos="0,36" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>
 			</widget>

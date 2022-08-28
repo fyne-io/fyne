@@ -292,7 +292,7 @@ func (t *Tree) ensureOpenMap() {
 }
 
 func (t *Tree) findBottom() (y float32, size fyne.Size) {
-	sep := theme.SeparatorThicknessSize()
+	sep := theme.Padding()
 	t.walkAll(func(id TreeNodeID, branch bool, _ int) {
 		size = t.leafMinSize
 		if branch {
@@ -335,7 +335,7 @@ func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found b
 			}
 			// If this is not the first item, add a separator
 			if y > 0 {
-				y += theme.SeparatorThicknessSize()
+				y += theme.Padding()
 			}
 
 			y += m.Height
@@ -463,7 +463,6 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 type treeContentRenderer struct {
 	widget.BaseRenderer
 	treeContent *treeContent
-	separators  []fyne.CanvasObject
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
@@ -482,9 +481,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
-	separatorCount := 0
-	separatorThickness := theme.SeparatorThicknessSize()
-	separatorSize := fyne.NewSize(width, separatorThickness)
+	separatorThickness := theme.Padding()
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
@@ -499,19 +496,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 
 		// If this is not the first item, add a separator
 		if y > 0 {
-			var separator fyne.CanvasObject
-			if separatorCount < len(r.separators) {
-				separator = r.separators[separatorCount]
-			} else {
-				separator = NewSeparator()
-				r.separators = append(r.separators, separator)
-			}
-			separator.Move(fyne.NewPos(0, y))
-			separator.Resize(separatorSize)
-			separator.Show()
-			r.objects = append(r.objects, separator)
 			y += separatorThickness
-			separatorCount++
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -558,11 +543,6 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		y += m.Height
 	})
 
-	// Hide any separators that haven't been reused
-	for ; separatorCount < len(r.separators); separatorCount++ {
-		r.separators[separatorCount].Hide()
-	}
-
 	// Release any nodes that haven't been reused
 	for uid, b := range r.branches {
 		if _, ok := branches[uid]; !ok {
@@ -597,7 +577,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a separator
 		if min.Height > 0 {
-			min.Height += theme.SeparatorThicknessSize()
+			min.Height += theme.Padding()
 		}
 
 		m := r.treeContent.tree.leafMinSize

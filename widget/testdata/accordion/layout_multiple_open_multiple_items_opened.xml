@@ -10,7 +10,7 @@
 					</widget>
 					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="20x20"/>
 				</widget>
-				<widget pos="0,78" size="102x36" type="*widget.Button">
+				<widget pos="0,77" size="102x36" type="*widget.Button">
 					<rectangle size="102x36"/>
 					<rectangle size="0x0"/>
 					<widget pos="32,8" size="10x20" type="*widget.RichText">
@@ -18,14 +18,11 @@
 					</widget>
 					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="20x20"/>
 				</widget>
-				<widget pos="0,40" size="102x36" type="*widget.Label">
+				<widget pos="0,36" size="102x36" type="*widget.Label">
 					<text pos="8,8" size="86x20">11111</text>
 				</widget>
-				<widget pos="0,119" size="102x36" type="*widget.Label">
+				<widget pos="0,114" size="102x36" type="*widget.Label">
 					<text pos="8,8" size="86x20">2222222222</text>
-				</widget>
-				<widget pos="0,77" size="102x1" type="*widget.Separator">
-					<rectangle fillColor="disabled" size="102x1"/>
 				</widget>
 			</widget>
 		</container>

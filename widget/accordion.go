@@ -116,32 +116,26 @@ type accordionRenderer struct {
 	widget.BaseRenderer
 	container *Accordion
 	headers   []*Button
-	dividers  []fyne.CanvasObject
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
 	x := float32(0)
 	y := float32(0)
 	for i, ai := range r.container.Items {
-		if i != 0 {
-			div := r.dividers[i-1]
-			div.Move(fyne.NewPos(x, y))
-			div.Resize(fyne.NewSize(size.Width, accordionDividerHeight))
-			y += accordionDividerHeight
-		}
-
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
 		min := h.MinSize().Height
 		h.Resize(fyne.NewSize(size.Width, min))
 		y += min
 		if ai.Open {
-			y += theme.Padding()
 			d := ai.Detail
 			d.Move(fyne.NewPos(x, y))
 			min := d.MinSize().Height
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
+		}
+		if i < len(r.container.Items)-1 {
+			y += theme.Padding()
 		}
 	}
 }
@@ -173,7 +167,6 @@ func (r *accordionRenderer) Refresh() {
 func (r *accordionRenderer) updateObjects() {
 	is := len(r.container.Items)
 	hs := len(r.headers)
-	ds := len(r.dividers)
 	i := 0
 	for ; i < is; i++ {
 		ai := r.container.Items[i]
@@ -213,27 +206,12 @@ func (r *accordionRenderer) updateObjects() {
 		r.headers[i].Hide()
 	}
 	// Set objects
-	objects := make([]fyne.CanvasObject, hs+is+ds)
+	objects := make([]fyne.CanvasObject, hs+is)
 	for i, header := range r.headers {
 		objects[i] = header
 	}
 	for i, item := range r.container.Items {
 		objects[hs+i] = item.Detail
-	}
-	// add dividers
-	for i = 0; i < ds; i++ {
-		if i < len(r.container.Items)-1 {
-			r.dividers[i].Show()
-		} else {
-			r.dividers[i].Hide()
-		}
-		objects[hs+is+i] = r.dividers[i]
-	}
-	// make new dividers
-	for ; i < is-1; i++ {
-		div := NewSeparator()
-		r.dividers = append(r.dividers, div)
-		objects = append(objects, div)
 	}
 	r.SetObjects(objects)
 }
