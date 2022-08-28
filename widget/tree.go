@@ -757,7 +757,7 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	if r.treeNode.content != nil {
 		min = r.treeNode.content.MinSize()
 	}
-	min.Width += theme.Padding()*2 + r.treeNode.Indent() + theme.IconInlineSize()
+	min.Width += theme.InnerPadding() + r.treeNode.Indent() + theme.IconInlineSize()
 	min.Height = fyne.Max(min.Height, theme.IconInlineSize())
 	return
 }

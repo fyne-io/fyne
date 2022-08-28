@@ -49,7 +49,7 @@ func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")
 	minA := label.MinSize()
 
-	assert.Less(t, theme.Padding()*2, minA.Width)
+	assert.Less(t, theme.InnerPadding(), minA.Width)
 
 	label.SetText("Longer")
 	minB := label.MinSize()

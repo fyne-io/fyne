@@ -159,7 +159,7 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			aih := ar.headers[0].MinSize()
 			aid := ai.Detail.MinSize()
 			assert.Equal(t, fyne.Max(aih.Width, aid.Width), min.Width)
-			assert.Equal(t, aih.Height+aid.Height+theme.Padding()*1, min.Height)
+			assert.Equal(t, aih.Height+aid.Height+theme.Padding(), min.Height)
 		})
 		t.Run("Closed", func(t *testing.T) {
 			ac := NewAccordion()

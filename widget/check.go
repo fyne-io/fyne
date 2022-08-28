@@ -34,17 +34,16 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
+	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
 	c.focusIndicator.Resize(focusIndicatorSize)
-	c.focusIndicator.Move(fyne.NewPos(theme.Padding()*0.5, (size.Height-focusIndicatorSize.Height)/2))
+	c.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
 
-	offset := fyne.NewSize(focusIndicatorSize.Width, 0)
-
-	labelSize := size.Subtract(offset)
+	xOff := focusIndicatorSize.Width + theme.InputBorderSize()*2
+	labelSize := size.SubtractWidthHeight(xOff, 0)
 	c.label.Resize(labelSize)
-	c.label.Move(fyne.NewPos(offset.Width+theme.Padding(), 0))
+	c.label.Move(fyne.NewPos(xOff, 0))
 
-	iconPos := fyne.NewPos(theme.Padding()*1.5, (size.Height-theme.IconInlineSize())/2)
+	iconPos := fyne.NewPos(theme.InnerPadding()/2 + theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	c.bg.Move(iconPos.AddXY(4, 4))
 	c.bg.Resize(iconSize.SubtractWidthHeight(8, 8))

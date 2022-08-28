@@ -3,7 +3,7 @@
 		<widget pos="4,4" size="142x192" type="*widget.Button">
 			<rectangle fillColor="button" size="142x192"/>
 			<rectangle size="0x0"/>
-			<widget pos="12,85" size="31x20" type="*widget.RichText">
+			<widget pos="8,85" size="31x20" type="*widget.RichText">
 				<text alignment="center" bold size="31x20">Test</text>
 			</widget>
 		</widget>
