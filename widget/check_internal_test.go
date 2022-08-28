@@ -45,7 +45,7 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check.SetChecked(true)
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
-	assert.Equal(t, "primary-"+theme.CheckButtonCheckedIcon().Name(), render.icon.Resource.Name())
+	assert.Equal(t, fmt.Sprintf("primary_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
 
 	check.Disable()
 	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
@@ -54,10 +54,10 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	render := test.WidgetRenderer(check).(*checkRenderer)
-	assert.Equal(t, render.icon.Resource.Name(), theme.CheckButtonIcon().Name())
+	assert.Equal(t, fmt.Sprintf("inputBorder_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
 
 	check.Disable()
-	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.CheckButtonIcon().Name()))
+	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
 }
 
 func TestCheckIsDisabledByDefault(t *testing.T) {

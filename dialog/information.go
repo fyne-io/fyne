@@ -12,7 +12,7 @@ func createTextDialog(title, message string, icon fyne.Resource, parent fyne.Win
 	d.dismiss = &widget.Button{Text: "OK",
 		OnTapped: d.Hide,
 	}
-	d.setButtons(newButtonList(d.dismiss))
+	d.create(newButtonList(d.dismiss))
 
 	return d
 }

@@ -162,14 +162,16 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.placeholderProvider()
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
-	line := canvas.NewRectangle(theme.ShadowColor())
+	border := canvas.NewRectangle(color.Transparent)
+	border.StrokeWidth = theme.InputBorderSize()
+	border.StrokeColor = theme.InputBorderColor()
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
 	e.scroll = widget.NewScroll(nil)
-	objects := []fyne.CanvasObject{box, line}
+	objects := []fyne.CanvasObject{box, border}
 	if e.Wrapping != fyne.TextWrapOff {
 		e.scroll.Content = e.content
 		objects = append(objects, e.scroll)
@@ -189,7 +191,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{box, line, e.scroll, objects, e}
+	return &entryRenderer{box, border, e.scroll, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -1236,8 +1238,8 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
-	box, line *canvas.Rectangle
-	scroll    *widget.Scroll
+	box, border *canvas.Rectangle
+	scroll      *widget.Scroll
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1265,8 +1267,9 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	r.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
-	r.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
+	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize(), size.Height-theme.InputBorderSize()))
+	r.border.StrokeWidth = theme.InputBorderSize()
+	r.border.Move(fyne.NewPos(theme.InputBorderSize()/2, theme.InputBorderSize()/2))
 	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.InputBorderSize()*2)))
 	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
 
@@ -1382,12 +1385,12 @@ func (r *entryRenderer) Refresh() {
 
 	r.box.FillColor = theme.InputBackgroundColor()
 	if focusedAppearance {
-		r.line.FillColor = theme.PrimaryColor()
+		r.border.StrokeColor = theme.PrimaryColor()
 	} else {
 		if r.entry.Disabled() {
-			r.line.FillColor = theme.DisabledColor()
+			r.border.StrokeColor = theme.DisabledColor()
 		} else {
-			r.line.FillColor = theme.ShadowColor()
+			r.border.StrokeColor = theme.InputBorderColor()
 		}
 	}
 	if r.entry.ActionItem != nil {
@@ -1396,7 +1399,7 @@ func (r *entryRenderer) Refresh() {
 
 	if r.entry.Validator != nil {
 		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
-			r.line.FillColor = theme.ErrorColor()
+			r.border.StrokeColor = theme.ErrorColor()
 		}
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()
