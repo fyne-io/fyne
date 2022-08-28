@@ -191,7 +191,6 @@ func (c *mobileContext) EnableVertexAttribArray(attribute Attribute) {
 }
 
 func (c *mobileContext) DisableVertexAttribArray(attribute Attribute) {
-	c.glContext.DisableVertexAttribArray(gl.Attrib(attribute))
 }
 
 func (c *mobileContext) GetAttribLocation(program Program, name string) Attribute {
