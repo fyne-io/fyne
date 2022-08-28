@@ -96,12 +96,12 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 		"an overlay item": {
 			object: ovli2,
-			wantX:  94,
+			wantX:  95,
 			wantY:  77,
 		},
 		"the overlay content": {
 			object: ovlContent,
-			wantX:  94,
+			wantX:  95,
 			wantY:  28,
 		},
 		"the overlay": {

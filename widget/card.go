@@ -228,4 +228,7 @@ func (c *cardRenderer) applyTheme() {
 		c.subHeader.TextSize = theme.TextSize()
 		c.subHeader.Color = theme.ForegroundColor()
 	}
+	if c.card.Content != nil {
+		c.card.Content.Refresh()
+	}
 }
