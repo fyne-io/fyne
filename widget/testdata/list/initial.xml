@@ -160,13 +160,13 @@
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>
+				<widget pos="0,392" size="192x0" type="*widget.Shadow">
+					<linearGradient endColor="shadow" pos="0,-8" size="192x8"/>
+				</widget>
 				<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
 					<widget pos="3,0" size="3x16" type="*widget.scrollBar">
 						<rectangle fillColor="scrollbar" size="3x16"/>
 					</widget>
-				</widget>
-				<widget pos="0,392" size="192x0" type="*widget.Shadow">
-					<linearGradient endColor="shadow" pos="0,-8" size="192x8"/>
 				</widget>
 			</widget>
 		</widget>
