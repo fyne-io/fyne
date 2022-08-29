@@ -157,7 +157,7 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 
 	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
 	text.TextSize = theme.CaptionTextSize()
-	text.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()*-0.5))
+	text.Move(fyne.NewPos(theme.InnerPadding(), theme.InputBorderSize()))
 	item.helperOutput = text
 	f.updateHelperText(item)
 	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
