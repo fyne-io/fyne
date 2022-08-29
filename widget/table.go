@@ -467,7 +467,7 @@ func (c *tableCells) MouseOut() {
 }
 
 func (c *tableCells) Resize(s fyne.Size) {
-	if s == c.t.size && c.t.size.Width > 0 && c.t.size.Height > 0 {
+	if s == c.t.size {
 		return
 	}
 	c.BaseWidget.Resize(s)
