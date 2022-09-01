@@ -94,19 +94,21 @@ type colorButtonRenderer struct {
 func (r *colorButtonRenderer) Layout(size fyne.Size) {
 	r.rectangle.Move(fyne.NewPos(0, 0))
 	r.rectangle.Resize(size)
+	r.background.Resize(size)
 }
 
 func (r *colorButtonRenderer) MinSize() fyne.Size {
-	return r.rectangle.MinSize().Max(fyne.NewSize(32, 32))
+	return r.rectangle.MinSize().Max(fyne.NewSize(30, 30))
 }
 
 func (r *colorButtonRenderer) Refresh() {
 	if r.button.hovered {
 		r.rectangle.StrokeColor = theme.HoverColor()
-		r.rectangle.StrokeWidth = float32(theme.Padding())
+		r.rectangle.StrokeWidth = theme.Padding()
 	} else {
 		r.rectangle.StrokeWidth = 0
 	}
 	r.rectangle.FillColor = r.button.color
+	r.background.Refresh()
 	canvas.Refresh(r.button)
 }
