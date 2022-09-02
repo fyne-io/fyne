@@ -156,11 +156,11 @@ type popUpBaseRenderer struct {
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	return fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 }
 
 func (r *popUpBaseRenderer) offset() fyne.Position {
-	return fyne.NewPos(theme.Padding(), theme.Padding())
+	return fyne.NewPos(theme.InnerPadding()/2, theme.InnerPadding()/2)
 }
 
 type popUpRenderer struct {

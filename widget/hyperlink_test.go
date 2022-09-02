@@ -22,7 +22,7 @@ func TestHyperlink_MinSize(t *testing.T) {
 	hyperlink.provider.CreateRenderer()
 	minA := hyperlink.MinSize()
 
-	assert.Less(t, theme.Padding()*2, minA.Width)
+	assert.Less(t, theme.InnerPadding(), minA.Width)
 
 	hyperlink.SetText("Longer")
 	minB := hyperlink.MinSize()

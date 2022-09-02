@@ -18,8 +18,8 @@ func TestRadioGroup_MinSize(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	min := radio.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 
 	radio2 := NewRadioGroup([]string{"Hi", "H"}, nil)
 	min2 := radio2.MinSize()

@@ -109,7 +109,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
-	text.inset = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	text.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 
 	background := canvas.NewRectangle(theme.ButtonColor())
 	tapBG := canvas.NewRectangle(color.Transparent)
@@ -293,7 +293,7 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 }
 
 func (r *buttonRenderer) Refresh() {
-	r.label.inset = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	r.label.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
 	r.applyTheme()
@@ -363,10 +363,7 @@ func (r *buttonRenderer) buttonColor() color.Color {
 }
 
 func (r *buttonRenderer) padding() fyne.Size {
-	if r.button.Text == "" {
-		return fyne.NewSize(theme.Padding()*4, theme.Padding()*4)
-	}
-	return fyne.NewSize(theme.Padding()*6, theme.Padding()*4)
+	return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2)
 }
 
 func (r *buttonRenderer) updateIconAndText() {

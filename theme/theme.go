@@ -143,6 +143,16 @@ const (
 	// Since: 2.0
 	SizeNameInlineIcon fyne.ThemeSizeName = "iconInline"
 
+	// SizeNameInnerPadding is the name of theme lookup for internal widget padding size.
+	//
+	// Since: 2.3
+	SizeNameInnerPadding fyne.ThemeSizeName = "innerPadding"
+
+	// SizeNameLineSpacing is the name of theme lookup for between text line spacing.
+	//
+	// Since: 2.3
+	SizeNameLineSpacing fyne.ThemeSizeName = "lineSpacing"
+
 	// SizeNamePadding is the name of theme lookup for padding size.
 	//
 	// Since: 2.0
@@ -313,6 +323,13 @@ func IconInlineSize() float32 {
 	return current().Size(SizeNameInlineIcon)
 }
 
+// InnerPadding is the standard gap between element content and the outside edge of a widget.
+//
+// Since: 2.3
+func InnerPadding() float32 {
+	return current().Size(SizeNameInnerPadding)
+}
+
 // InputBackgroundColor returns the color used to draw underneath input elements.
 func InputBackgroundColor() color.Color {
 	return current().Color(ColorNameInputBackground, currentVariant())
@@ -340,6 +357,13 @@ func LightTheme() fyne.Theme {
 
 	theme.initFonts()
 	return theme
+}
+
+// LineSpacing is the default gap between multiple lines of text.
+//
+// Since: 2.3
+func LineSpacing() float32 {
+	return current().Size(SizeNameLineSpacing)
 }
 
 // Padding is the standard gap between elements and the border around interface elements.
@@ -632,6 +656,10 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 1
 	case SizeNameInlineIcon:
 		return 20
+	case SizeNameInnerPadding:
+		return 8
+	case SizeNameLineSpacing:
+		return 4
 	case SizeNamePadding:
 		return 6
 	case SizeNameScrollBar:
