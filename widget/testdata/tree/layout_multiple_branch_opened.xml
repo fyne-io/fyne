@@ -58,13 +58,13 @@
 						</widget>
 					</widget>
 				</widget>
+				<widget pos="192,0" size="0x292" type="*widget.Shadow">
+					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x292"/>
+				</widget>
 				<widget pos="0,286" size="192x6" type="*widget.scrollBarArea">
 					<widget pos="0,3" size="176x3" type="*widget.scrollBar">
 						<rectangle fillColor="scrollbar" size="176x3"/>
 					</widget>
-				</widget>
-				<widget pos="192,0" size="0x292" type="*widget.Shadow">
-					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x292"/>
 				</widget>
 			</widget>
 		</widget>

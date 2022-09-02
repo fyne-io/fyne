@@ -17,13 +17,13 @@
 							</widget>
 						</widget>
 					</container>
+					<widget pos="108,0" size="0x44" type="*widget.Shadow">
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x44"/>
+					</widget>
 					<widget pos="0,38" size="108x6" type="*widget.scrollBarArea">
 						<widget pos="0,3" size="72x3" type="*widget.scrollBar">
 							<rectangle fillColor="scrollbar" size="72x3"/>
 						</widget>
-					</widget>
-					<widget pos="108,0" size="0x44" type="*widget.Shadow">
-						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x44"/>
 					</widget>
 				</widget>
 				<container pos="114,0" size="36x44">

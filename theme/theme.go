@@ -566,7 +566,7 @@ var (
 		ColorNameInputBorder:     color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff},
 		ColorNamePlaceHolder:     color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff},
 		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
-		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameScrollBar:       color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99},
 		ColorNameSeparator:       color.NRGBA{R: 0x0, G: 0x0, B: 0x0, A: 0xff},
 		ColorNameShadow:          color.NRGBA{A: 0x66},
 		ColorNameSuccess:         successColor,
