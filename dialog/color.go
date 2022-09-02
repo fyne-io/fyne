@@ -168,8 +168,8 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 }
 
 const (
-	boxSize = 8
-    numberOfRings = 12
+	boxSize       = 8
+	numberOfRings = 12
 )
 
 func newCheckeredBackground(radial ...bool) *canvas.Raster {
