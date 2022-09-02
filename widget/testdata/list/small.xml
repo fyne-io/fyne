@@ -23,6 +23,12 @@
 							</widget>
 						</container>
 					</widget>
+					<widget size="0x0" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="0x0"/>
+					</widget>
+					<widget pos="0,38" size="192x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="192x1"/>
+					</widget>
 				</container>
 			</widget>
 		</widget>

@@ -1,7 +1,7 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="19,18" size="102x155" type="*widget.Accordion">
+			<widget pos="19,16" size="102x158" type="*widget.Accordion">
 				<widget size="102x36" type="*widget.Button">
 					<rectangle size="102x36"/>
 					<rectangle size="0x0"/>
@@ -23,6 +23,9 @@
 				</widget>
 				<widget pos="0,114" size="102x36" type="*widget.Label">
 					<text pos="8,8" size="86x20">2222222222</text>
+				</widget>
+				<widget pos="0,74" size="102x1" type="*widget.Separator">
+					<rectangle fillColor="disabled" size="102x1"/>
 				</widget>
 			</widget>
 		</container>

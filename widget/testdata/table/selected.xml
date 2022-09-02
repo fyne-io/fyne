@@ -52,6 +52,21 @@
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x172"/>
 				</widget>
 			</widget>
+			<widget pos="101,0" size="1x172" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="1x172"/>
+			</widget>
+			<widget pos="0,38" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
+			<widget pos="0,78" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
+			<widget pos="0,119" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
+			<widget pos="0,160" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
 		</widget>
 	</content>
 </canvas>

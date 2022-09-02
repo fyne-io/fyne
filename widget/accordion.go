@@ -7,8 +7,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const accordionDividerHeight = 1
-
 var _ fyne.Widget = (*Accordion)(nil)
 
 // Accordion displays a list of AccordionItems.
@@ -116,12 +114,20 @@ type accordionRenderer struct {
 	widget.BaseRenderer
 	container *Accordion
 	headers   []*Button
+	dividers  []fyne.CanvasObject
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
+	dividerOff := (theme.Padding() + theme.SeparatorThicknessSize()) / 2
 	x := float32(0)
 	y := float32(0)
 	for i, ai := range r.container.Items {
+		if i != 0 {
+			div := r.dividers[i-1]
+			div.Move(fyne.NewPos(x, y-dividerOff))
+			div.Resize(fyne.NewSize(size.Width, theme.SeparatorThicknessSize()))
+		}
+
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
 		min := h.MinSize().Height
@@ -143,7 +149,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			size.Height += accordionDividerHeight
+			size.Height += theme.Padding()
 		}
 		min := r.headers[i].MinSize()
 		size.Width = fyne.Max(size.Width, min.Width)
@@ -167,6 +173,7 @@ func (r *accordionRenderer) Refresh() {
 func (r *accordionRenderer) updateObjects() {
 	is := len(r.container.Items)
 	hs := len(r.headers)
+	ds := len(r.dividers)
 	i := 0
 	for ; i < is; i++ {
 		ai := r.container.Items[i]
@@ -206,17 +213,33 @@ func (r *accordionRenderer) updateObjects() {
 		r.headers[i].Hide()
 	}
 	// Set objects
-	objects := make([]fyne.CanvasObject, hs+is)
+	objects := make([]fyne.CanvasObject, hs+is+ds)
 	for i, header := range r.headers {
 		objects[i] = header
 	}
 	for i, item := range r.container.Items {
 		objects[hs+i] = item.Detail
 	}
+	// add dividers
+	for i = 0; i < ds; i++ {
+		if i < len(r.container.Items)-1 {
+			r.dividers[i].Show()
+		} else {
+			r.dividers[i].Hide()
+		}
+		objects[hs+is+i] = r.dividers[i]
+	}
+	// make new dividers
+	for ; i < is-1; i++ {
+		div := NewSeparator()
+		r.dividers = append(r.dividers, div)
+		objects = append(objects, div)
+	}
+
 	r.SetObjects(objects)
 }
 
-// AccordionItem represents a single item in an Accordion.
+// AccordionItem represents a single item in an Acc rdion.
 type AccordionItem struct {
 	Title  string
 	Detail fyne.CanvasObject

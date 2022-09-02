@@ -463,6 +463,7 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 type treeContentRenderer struct {
 	widget.BaseRenderer
 	treeContent *treeContent
+	separators  []fyne.CanvasObject
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
@@ -481,7 +482,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
-	separatorThickness := theme.Padding()
+	separatorCount := 0
+	separatorThickness := theme.SeparatorThicknessSize()
+	separatorSize := fyne.NewSize(width, separatorThickness)
+	separatorOff := (theme.Padding() - separatorThickness) / 2
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
@@ -496,7 +500,19 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 
 		// If this is not the first item, add a separator
 		if y > 0 {
-			y += separatorThickness
+			var separator fyne.CanvasObject
+			if separatorCount < len(r.separators) {
+				separator = r.separators[separatorCount]
+			} else {
+				separator = NewSeparator()
+				r.separators = append(r.separators, separator)
+			}
+			separator.Move(fyne.NewPos(0, y+separatorOff))
+			separator.Resize(separatorSize)
+			separator.Show()
+			r.objects = append(r.objects, separator)
+			y += theme.Padding()
+			separatorCount++
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -542,6 +558,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		}
 		y += m.Height
 	})
+
+	// Hide any separators that haven't been reused
+	for ; separatorCount < len(r.separators); separatorCount++ {
+		r.separators[separatorCount].Hide()
+	}
 
 	// Release any nodes that haven't been reused
 	for uid, b := range r.branches {

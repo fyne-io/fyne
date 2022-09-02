@@ -195,8 +195,8 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
-			height += aid0.Height + 1
-			height += aih1.Height + 1
+			height += aid0.Height + theme.Padding()
+			height += aih1.Height + theme.Padding()
 			height += aih2.Height
 			height += theme.Padding()
 			assert.Equal(t, height, min.Height)
@@ -222,10 +222,10 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, fyne.Max(aih2.Width, aid2.Width))
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
-			height += aid0.Height + 1
+			height += aid0.Height + theme.Padding()
 			height += aih1.Height
 			height += theme.Padding()
-			height += aid1.Height + 1
+			height += aid1.Height + theme.Padding()
 			height += aih2.Height
 			height += theme.Padding()
 			height += aid2.Height
@@ -254,10 +254,10 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
-			height += aid0.Height + 1
+			height += aid0.Height + theme.Padding()
 			height += aih1.Height
 			height += theme.Padding()
-			height += aid1.Height + 1
+			height += aid1.Height + theme.Padding()
 			height += aih2.Height
 			height += theme.Padding()
 			assert.Equal(t, height, min.Height)
@@ -277,8 +277,8 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, aih1.Width)
 			width = fyne.Max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
-			height := aih0.Height + 1
-			height += aih1.Height + 1
+			height := aih0.Height + theme.Padding()
+			height += aih1.Height + theme.Padding()
 			height += aih2.Height
 			assert.Equal(t, height, min.Height)
 		})
@@ -294,13 +294,17 @@ func TestAccordionRenderer_AddRemove(t *testing.T) {
 
 	assert.Equal(t, 3, len(ac.Items))
 	assert.Equal(t, 3, len(ar.headers))
+	assert.Equal(t, 2, len(ar.dividers))
 	assert.True(t, ar.headers[2].Visible())
+	assert.True(t, ar.dividers[1].Visible())
 
 	ac.RemoveIndex(2)
 	assert.Equal(t, 2, len(ac.Items))
 	assert.False(t, ar.headers[2].Visible())
+	assert.False(t, ar.dividers[1].Visible())
 
 	ac.Append(NewAccordionItem("foo3", NewLabel("foobar3")))
 	assert.Equal(t, 3, len(ac.Items))
 	assert.True(t, ar.headers[2].Visible())
+	assert.True(t, ar.dividers[1].Visible())
 }

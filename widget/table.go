@@ -346,6 +346,7 @@ type tableRenderer struct {
 
 	scroll        *widget.Scroll
 	hover, marker *canvas.Rectangle
+	dividers      []fyne.CanvasObject
 
 	cellSize fyne.Size
 }
@@ -373,11 +374,13 @@ func (t *tableRenderer) Refresh() {
 }
 
 func (t *tableRenderer) moveIndicators() {
-	cols := 0
+	rows, cols := 0, 0
 	if f := t.t.Length; f != nil {
-		_, cols = t.t.Length()
+		rows, cols = t.t.Length()
 	}
-	visibleColWidths, offX, minCol, _ := t.t.visibleColumnWidths(t.cellSize.Width, cols)
+	visibleColWidths, offX, minCol, maxCol := t.t.visibleColumnWidths(t.cellSize.Width, cols)
+	separatorThickness := theme.SeparatorThicknessSize()
+	dividerOff := (theme.Padding() - separatorThickness) / 2
 
 	if t.t.selectedCell == nil {
 		t.moveMarker(t.marker, -1, -1, offX, minCol, visibleColWidths)
@@ -390,6 +393,46 @@ func (t *tableRenderer) moveIndicators() {
 		t.moveMarker(t.hover, t.t.hoveredCell.Row, t.t.hoveredCell.Col, offX, minCol, visibleColWidths)
 	}
 
+	colDivs := maxCol - minCol - 1
+	rowDivs := int(math.Ceil(float64(t.t.size.Height+theme.Padding()) / float64(t.cellSize.Height+1)))
+
+	if len(t.dividers) < colDivs+rowDivs {
+		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
+			t.dividers = append(t.dividers, NewSeparator())
+		}
+
+		obj := []fyne.CanvasObject{t.marker, t.hover, t.scroll}
+		t.SetObjects(append(obj, t.dividers...))
+	}
+
+	divs := 0
+	i := minCol
+	for x := offX + visibleColWidths[i]; i < minCol+colDivs && divs < len(t.dividers); x += visibleColWidths[i] + theme.Padding() {
+		i++
+
+		t.dividers[divs].Move(fyne.NewPos(x-t.scroll.Offset.X+dividerOff, 0))
+		t.dividers[divs].Resize(fyne.NewSize(separatorThickness, t.t.size.Height))
+		t.dividers[divs].Show()
+		divs++
+	}
+
+	i = 0
+	count := float32(math.Mod(float64(t.scroll.Offset.Y), float64(t.cellSize.Height+theme.Padding())))
+	for y := t.scroll.Offset.Y - count - theme.Padding(); y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1 && divs < len(t.dividers); y += t.cellSize.Height + theme.Padding() {
+		if y < t.scroll.Offset.Y {
+			continue
+		}
+		i++
+
+		t.dividers[divs].Move(fyne.NewPos(0, y-t.scroll.Offset.Y+dividerOff))
+		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width, separatorThickness))
+		t.dividers[divs].Show()
+		divs++
+	}
+
+	for i := divs; i < len(t.dividers); i++ {
+		t.dividers[i].Hide()
+	}
 	canvas.Refresh(t.t)
 }
 

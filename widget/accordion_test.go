@@ -273,7 +273,7 @@ func TestAccordion_MinSize(t *testing.T) {
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.InnerPadding()*2+1),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.InnerPadding()*2+theme.Padding()),
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
@@ -287,7 +287,7 @@ func TestAccordion_MinSize(t *testing.T) {
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.InnerPadding()*2+theme.Padding()+1),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.InnerPadding()*2+theme.Padding()*2),
 		},
 		"multiple_open_one_item": {
 			multiOpen: true,
@@ -322,7 +322,7 @@ func TestAccordion_MinSize(t *testing.T) {
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.InnerPadding()*2+1),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.InnerPadding()*2+theme.Padding()),
 		},
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
@@ -337,7 +337,7 @@ func TestAccordion_MinSize(t *testing.T) {
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.InnerPadding()*3+1),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.InnerPadding()*3+theme.Padding()),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
