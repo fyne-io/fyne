@@ -36,7 +36,7 @@ func TestGridLayout(t *testing.T) {
 }
 
 func TestGridLayoutRounding(t *testing.T) {
-	gridSize := fyne.NewSize(100+theme.Padding()*2, 50)
+	gridSize := fyne.NewSize(99+theme.Padding()*2, 50)
 
 	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
@@ -52,8 +52,8 @@ func TestGridLayoutRounding(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
 	assert.Equal(t, fyne.NewSize(33, 50), obj1.Size())
 	assert.Equal(t, fyne.NewPos(33+theme.Padding(), 0), obj2.Position())
-	assert.Equal(t, fyne.NewSize(34, 50), obj2.Size())
-	assert.Equal(t, fyne.NewPos(67+theme.Padding()*2, 0), obj3.Position())
+	assert.Equal(t, fyne.NewSize(33, 50), obj2.Size())
+	assert.Equal(t, fyne.NewPos(66+theme.Padding()*2, 0), obj3.Position())
 	assert.Equal(t, fyne.NewSize(33, 50), obj3.Size())
 }
 

@@ -125,6 +125,17 @@ func TestCard_MinSize(t *testing.T) {
 	assert.Equal(t, content.MinSize(), inner)
 }
 
+func TestCard_Refresh(t *testing.T) {
+	text := widget.NewLabel("Test")
+	card := widget.NewCard("", "", text)
+	w := test.NewWindow(card)
+	test.AssertRendersToMarkup(t, "card/content_label.xml", w.Canvas())
+
+	text.Text = "Changed"
+	card.Refresh()
+	test.AssertRendersToMarkup(t, "card/content_label_changed.xml", w.Canvas())
+}
+
 func newContentRect() *canvas.Rectangle {
 	rect := canvas.NewRectangle(color.Gray{0x66})
 	rect.StrokeColor = color.Black
