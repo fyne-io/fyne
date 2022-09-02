@@ -7,9 +7,10 @@ varying vec2 delta;
 varying float switch_var;
 varying float lineWidth_var;
 varying float feather_var;
-vec4 color;
 
 void main() {
+    vec4 color = vec4(1.0, 0.0, 0.0, 0.0);
+
     if ( switch_var == 1.0 ){
         color = fill_color;
     }; 
