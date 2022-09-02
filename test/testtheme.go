@@ -31,6 +31,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNamePressed:         blue,
 			theme.ColorNamePrimary:         green,
 			theme.ColorNameScrollBar:       blue,
+			theme.ColorNameSeparator:       color.Black,
 			theme.ColorNameSelection:       color.RGBA{red.R, red.G, red.B, 44},
 			theme.ColorNameShadow:          blue,
 		},

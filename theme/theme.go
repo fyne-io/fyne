@@ -118,6 +118,11 @@ const (
 	// Since: 2.1
 	ColorNameSelection fyne.ThemeColorName = "selection"
 
+	// ColorNameSeparator is the name of theme lookup for separator bars.
+	//
+	// Since: 2.3
+	ColorNameSeparator fyne.ThemeColorName = "separator"
+
 	// ColorNameShadow is the name of theme lookup for shadow color.
 	//
 	// Since: 2.0
@@ -428,6 +433,13 @@ func SelectionColor() color.Color {
 	return safeColorLookup(ColorNameSelection, currentVariant())
 }
 
+// SeparatorColor returns the color for the separator element.
+//
+// Since: 2.3
+func SeparatorColor() color.Color {
+	return safeColorLookup(ColorNameSeparator, currentVariant())
+}
+
 // SeparatorThicknessSize is the standard thickness of the separator widget.
 //
 // Since: 2.0
@@ -555,6 +567,7 @@ var (
 		ColorNamePlaceHolder:     color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff},
 		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameSeparator:       color.NRGBA{R: 0x0, G: 0x0, B: 0x0, A: 0xff},
 		ColorNameShadow:          color.NRGBA{A: 0x66},
 		ColorNameSuccess:         successColor,
 		ColorNameWarning:         warningColor,
@@ -573,6 +586,7 @@ var (
 		ColorNamePlaceHolder:     color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 		ColorNamePressed:         color.NRGBA{A: 0x19},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameSeparator:       color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff},
 		ColorNameShadow:          color.NRGBA{A: 0x33},
 		ColorNameSuccess:         successColor,
 		ColorNameWarning:         warningColor,
