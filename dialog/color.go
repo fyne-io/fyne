@@ -58,6 +58,12 @@ func (p *ColorPickerDialog) Refresh() {
 
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
+	if p.picker == nil && p.Advanced {
+		p.updateUI()
+	} else if !p.Advanced {
+		fyne.LogError("Advanced mode needs to be enabled to use SetColor", nil)
+		return
+	}
 	p.picker.SetColor(c)
 }
 
@@ -80,10 +86,14 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
 	p.dialog.Hide()
-	writeRecentColor(colorToString(p.color))
+	writeRecentColor(colorToString(c))
+	if p.picker != nil {
+		p.picker.SetColor(c)
+	}
 	if f := p.callback; f != nil {
 		f(c)
 	}
+	p.updateUI()
 }
 
 func (p *ColorPickerDialog) updateUI() {
@@ -97,7 +107,12 @@ func (p *ColorPickerDialog) updateUI() {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
 			p.color = c
 		})
-		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
+
+		advancedItem := widget.NewAccordionItem("Advanced", p.picker)
+		if p.advanced != nil {
+			advancedItem.Open = p.advanced.Items[0].Open
+		}
+		p.advanced = widget.NewAccordion(advancedItem)
 
 		p.dialog.content = container.NewVBox(
 			container.NewCenter(
@@ -152,8 +167,12 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	return container.NewGridWithColumns(8, objects...)
 }
 
+const (
+	boxSize = 8
+    numberOfRings = 12
+)
+
 func newCheckeredBackground(radial ...bool) *canvas.Raster {
-	const boxSize = 10
 	rect := func(x, y, _, _ int) color.Color {
 		if (x/boxSize)%2 == (y/boxSize)%2 {
 			return color.Gray{Y: 58}
@@ -163,10 +182,9 @@ func newCheckeredBackground(radial ...bool) *canvas.Raster {
 	}
 	f := rect
 	if len(radial) > 0 && radial[0] {
-		const numberOfRings = 12 * boxSize
 		f = func(x, y, w, h int) color.Color {
 			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
-			x = int((t + math.Pi) / (2 * math.Pi) * numberOfRings)
+			x = int((t + math.Pi) / (2 * math.Pi) * numberOfRings * boxSize)
 			y = int(r)
 			return rect(x, y, 0, 0)
 		}
@@ -177,7 +195,7 @@ func newCheckeredBackground(radial ...bool) *canvas.Raster {
 
 const (
 	preferenceRecents    = "color_recents"
-	preferenceMaxRecents = 8
+	preferenceMaxRecents = 7
 )
 
 func readRecentColors() (recents []string) {

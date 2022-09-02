@@ -20,6 +20,7 @@ func newColorBasicPicker(callback func(color.Color)) fyne.CanvasObject {
 		theme.PrimaryColorNamed(theme.ColorBlue),
 		theme.PrimaryColorNamed(theme.ColorPurple),
 		theme.PrimaryColorNamed(theme.ColorBrown),
+		// theme.PrimaryColorNamed(theme.ColorGray),
 	}, theme.ColorChromaticIcon(), callback)
 }
 
@@ -29,7 +30,7 @@ func newColorGreyscalePicker(callback func(color.Color)) fyne.CanvasObject {
 		"#ffffff",
 		"#cccccc",
 		"#aaaaaa",
-		"#888888",
+		"#808080",
 		"#555555",
 		"#333333",
 		"#000000",
