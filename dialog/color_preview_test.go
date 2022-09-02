@@ -1,11 +1,12 @@
 package dialog
 
 import (
+	"image/color"
+	"testing"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"image/color"
-	"testing"
 )
 
 func Test_colorPreview_Color(t *testing.T) {
@@ -16,7 +17,7 @@ func Test_colorPreview_Color(t *testing.T) {
 	preview.SetColor(color.RGBA{90, 206, 80, 180})
 	window := test.NewWindow(preview)
 	padding := theme.Padding() * 2
-	window.Resize(fyne.NewSize(100+padding, 40+padding))
+	window.Resize(fyne.NewSize(128+padding, 64+padding))
 
 	test.AssertImageMatches(t, "color/preview_color.png", window.Canvas().Capture())
 
