@@ -98,7 +98,7 @@ func (r *colorButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *colorButtonRenderer) MinSize() fyne.Size {
-	return r.rectangle.MinSize().Max(fyne.NewSize(30, 30))
+	return r.rectangle.MinSize().Max(fyne.NewSize(32, 32))
 }
 
 func (r *colorButtonRenderer) Refresh() {

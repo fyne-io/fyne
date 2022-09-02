@@ -168,7 +168,7 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 
 func newCheckeredBackground() *canvas.Raster {
 	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 10
+		const boxSize = 8
 
 		if (x/boxSize)%2 == (y/boxSize)%2 {
 			return color.Gray{Y: 58}
