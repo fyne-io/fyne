@@ -27,7 +27,7 @@ func newColorPreview(previousColor color.Color) *colorPreview {
 func (p *colorPreview) CreateRenderer() fyne.WidgetRenderer {
 	oldC := canvas.NewRectangle(p.previous)
 	newC := canvas.NewRectangle(p.current)
-	background := newCheckeredBackground()
+	background := newCheckeredBackground(false)
 	return &colorPreviewRenderer{
 		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{background, oldC, newC}),
 		preview:      p,

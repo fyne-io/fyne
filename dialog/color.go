@@ -172,7 +172,7 @@ const (
 	numberOfRings = 12
 )
 
-func newCheckeredBackground(radial ...bool) *canvas.Raster {
+func newCheckeredBackground(radial bool) *canvas.Raster {
 	rect := func(x, y, _, _ int) color.Color {
 		if (x/boxSize)%2 == (y/boxSize)%2 {
 			return color.Gray{Y: 58}
@@ -181,7 +181,7 @@ func newCheckeredBackground(radial ...bool) *canvas.Raster {
 		return color.Gray{Y: 84}
 	}
 	f := rect
-	if len(radial) > 0 && radial[0] {
+	if radial {
 		f = func(x, y, w, h int) color.Color {
 			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
 			x = int((t + math.Pi) / (2 * math.Pi) * numberOfRings * boxSize)
