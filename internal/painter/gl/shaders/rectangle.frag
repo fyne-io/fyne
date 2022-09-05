@@ -9,7 +9,7 @@ varying float lineWidth_var;
 varying float feather_var;
 
 void main() {
-    vec4 color = vec4(1.0, 0.0, 0.0, 0.0);
+    vec4 color = vec4(1.0, 0.0, 0.0, 255.0);
 
     if ( switch_var == 1.0 ){
         color = fill_color;
