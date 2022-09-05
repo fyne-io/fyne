@@ -639,7 +639,7 @@ func currentVariant() fyne.ThemeVariant {
 	return fyne.CurrentApp().Settings().ThemeVariant()
 }
 
-func primaryColorNamed(name string) color.Color {
+func primaryColorNamed(name string) color.NRGBA {
 	switch name {
 	case ColorRed:
 		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
@@ -662,7 +662,7 @@ func primaryColorNamed(name string) color.Color {
 	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
 }
 
-func focusColorNamed(name string) color.Color {
+func focusColorNamed(name string) color.NRGBA {
 	switch name {
 	case ColorRed:
 		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f}
@@ -685,7 +685,7 @@ func focusColorNamed(name string) color.Color {
 	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
 }
 
-func selectionColorNamed(name string) color.Color {
+func selectionColorNamed(name string) color.NRGBA {
 	switch name {
 	case ColorRed:
 		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f}
