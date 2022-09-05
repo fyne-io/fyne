@@ -57,6 +57,12 @@ func (p *ColorPickerDialog) Refresh() {
 
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
+	if p.picker == nil && p.Advanced {
+		p.updateUI()
+	} else if !p.Advanced {
+		fyne.LogError("Advanced mode needs to be enabled to use SetColor", nil)
+		return
+	}
 	p.picker.SetColor(c)
 }
 
@@ -79,10 +85,14 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
 	p.dialog.Hide()
-	writeRecentColor(colorToString(p.color))
+	writeRecentColor(colorToString(c))
+	if p.picker != nil {
+		p.picker.SetColor(c)
+	}
 	if f := p.callback; f != nil {
 		f(c)
 	}
+	p.updateUI()
 }
 
 func (p *ColorPickerDialog) updateUI() {
@@ -96,7 +106,12 @@ func (p *ColorPickerDialog) updateUI() {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
 			p.color = c
 		})
-		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
+
+		advancedItem := widget.NewAccordionItem("Advanced", p.picker)
+		if p.advanced != nil {
+			advancedItem.Open = p.advanced.Items[0].Open
+		}
+		p.advanced = widget.NewAccordion(advancedItem)
 
 		p.dialog.content = container.NewVBox(
 			container.NewCenter(
@@ -153,7 +168,7 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 
 func newCheckeredBackground() *canvas.Raster {
 	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 10
+		const boxSize = 8
 
 		if (x/boxSize)%2 == (y/boxSize)%2 {
 			return color.Gray{Y: 58}
@@ -165,7 +180,7 @@ func newCheckeredBackground() *canvas.Raster {
 
 const (
 	preferenceRecents    = "color_recents"
-	preferenceMaxRecents = 8
+	preferenceMaxRecents = 7
 )
 
 func readRecentColors() (recents []string) {
