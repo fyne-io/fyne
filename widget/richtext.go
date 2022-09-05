@@ -273,7 +273,7 @@ func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 			break
 		}
 	}
-	return total.Add(fyne.NewSize(theme.Padding()*2-t.inset.Width, 0))
+	return total.Add(fyne.NewSize(theme.InnerPadding()-t.inset.Width, 0))
 }
 
 // Row returns the characters in the row specified.
@@ -328,7 +328,7 @@ func (t *RichText) rows() int {
 func (t *RichText) updateRowBounds() {
 	t.propertyLock.RLock()
 	var bounds []rowBoundary
-	maxWidth := t.size.Width - 4*theme.Padding() + 2*t.inset.Width
+	maxWidth := t.size.Width - 2*theme.InnerPadding() + 2*t.inset.Width
 	wrapWidth := maxWidth
 
 	var iterateSegments func(segList []RichTextSegment)
@@ -364,7 +364,7 @@ func (t *RichText) updateRowBounds() {
 
 			leftPad := float32(0)
 			if textSeg.Style == RichTextStyleBlockquote {
-				leftPad = theme.Padding() * 4
+				leftPad = theme.InnerPadding() * 2
 			}
 			retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
 				return fyne.MeasureText(string(text), textSize, textStyle).Width
@@ -439,8 +439,8 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	}
 	r.obj.propertyLock.RUnlock()
 
-	left := theme.Padding()*2 - r.obj.inset.Width
-	yPos := theme.Padding()*2 - r.obj.inset.Height
+	left := theme.InnerPadding() - r.obj.inset.Width
+	yPos := theme.InnerPadding() - r.obj.inset.Height
 	lineWidth := size.Width - left*2
 	var rowItems []fyne.CanvasObject
 	rowAlign := fyne.TextAlignLeading
@@ -463,7 +463,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 				obj.Move(fyne.NewPos(left, yPos))
 				obj.Resize(fyne.NewSize(lineWidth, height))
-				yPos += height + theme.Padding()
+				yPos += height + theme.LineSpacing()
 				continue
 			}
 			rowItems = append(rowItems, obj)
@@ -475,7 +475,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			if text, ok := bound.segments[0].(*TextSegment); ok {
 				rowAlign = text.Style.Alignment
 				if text.Style == RichTextStyleBlockquote {
-					leftPad = theme.Padding() * 4
+					leftPad = theme.LineSpacing() * 4
 				}
 			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
 				rowAlign = link.Alignment
@@ -487,7 +487,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 
 		lastSeg := bound.segments[len(bound.segments)-1]
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
-			yPos += theme.Padding()
+			yPos += theme.LineSpacing()
 		}
 	}
 }
@@ -533,7 +533,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 
 		lastSeg := bound.segments[len(bound.segments)-1]
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
-			height += theme.Padding()
+			height += theme.LineSpacing()
 		}
 	}
 
@@ -542,7 +542,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height = charMinSize.Height
 	}
 	min := fyne.NewSize(width, height).
-		Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*4).Subtract(r.obj.inset).Subtract(r.obj.inset))
+		Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2).Subtract(r.obj.inset).Subtract(r.obj.inset))
 
 	if r.obj.scr != nil {
 		r.obj.prop.SetMinSize(min)

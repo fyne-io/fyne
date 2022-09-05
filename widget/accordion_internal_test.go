@@ -49,11 +49,11 @@ func TestAccordionRenderer_Layout(t *testing.T) {
 		assert.Equal(t, min.Width, aih0.Size().Width)
 		assert.Equal(t, aih0.MinSize().Height, aih0.Size().Height)
 		assert.Equal(t, float32(0), aih1.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+1, aih1.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+theme.Padding(), aih1.Position().Y)
 		assert.Equal(t, min.Width, aih1.Size().Width)
 		assert.Equal(t, aih1.MinSize().Height, aih1.Size().Height)
 		assert.Equal(t, float32(0), aih2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+2, aih2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+2*theme.Padding(), aih2.Position().Y)
 		assert.Equal(t, min.Width, aih2.Size().Width)
 		assert.Equal(t, aih2.MinSize().Height, aih2.Size().Height)
 	})
@@ -69,19 +69,19 @@ func TestAccordionRenderer_Layout(t *testing.T) {
 		assert.Equal(t, min.Width, aih0.Size().Width)
 		assert.Equal(t, aih0.MinSize().Height, aih0.Size().Height)
 		assert.Equal(t, float32(0), aih1.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+1, aih1.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+theme.Padding(), aih1.Position().Y)
 		assert.Equal(t, min.Width, aih1.Size().Width)
 		assert.Equal(t, aih1.MinSize().Height, aih1.Size().Height)
 		assert.Equal(t, float32(0), aih2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+theme.Padding()+2, aih2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+2*theme.Padding(), aih2.Position().Y)
 		assert.Equal(t, min.Width, aih2.Size().Width)
 		assert.Equal(t, aih2.MinSize().Height, aih2.Size().Height)
 		assert.Equal(t, float32(0), aid1.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+theme.Padding()+1, aid1.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+theme.Padding(), aid1.Position().Y)
 		assert.Equal(t, min.Width, aid1.Size().Width)
 		assert.Equal(t, aid1.MinSize().Height, aid1.Size().Height)
 		assert.Equal(t, float32(0), aid2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+aih2.MinSize().Height+2*theme.Padding()+2, aid2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+aih2.MinSize().Height+2*theme.Padding(), aid2.Position().Y)
 		assert.Equal(t, min.Width, aid2.Size().Width)
 		assert.Equal(t, aid2.MinSize().Height, aid2.Size().Height)
 	})
@@ -96,15 +96,15 @@ func TestAccordionRenderer_Layout(t *testing.T) {
 		assert.Equal(t, min.Width, aih0.Size().Width)
 		assert.Equal(t, aih0.MinSize().Height, aih0.Size().Height)
 		assert.Equal(t, float32(0), aih1.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+1, aih1.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+theme.Padding(), aih1.Position().Y)
 		assert.Equal(t, min.Width, aih1.Size().Width)
 		assert.Equal(t, aih1.MinSize().Height, aih1.Size().Height)
 		assert.Equal(t, float32(0), aih2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+2, aih2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+2*theme.Padding(), aih2.Position().Y)
 		assert.Equal(t, min.Width, aih2.Size().Width)
 		assert.Equal(t, aih2.MinSize().Height, aih2.Size().Height)
 		assert.Equal(t, float32(0), aid2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+aih2.MinSize().Height+theme.Padding()+2, aid2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aih1.MinSize().Height+aih2.MinSize().Height+2*theme.Padding(), aid2.Position().Y)
 		assert.Equal(t, min.Width, aid2.Size().Width)
 		assert.Equal(t, aid2.MinSize().Height, aid2.Size().Height)
 	})
@@ -118,23 +118,23 @@ func TestAccordionRenderer_Layout(t *testing.T) {
 		assert.Equal(t, min.Width, aih0.Size().Width)
 		assert.Equal(t, aih0.MinSize().Height, aih0.Size().Height)
 		assert.Equal(t, float32(0), aih1.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+theme.Padding()+1, aih1.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+theme.Padding(), aih1.Position().Y)
 		assert.Equal(t, min.Width, aih1.Size().Width)
 		assert.Equal(t, aih1.MinSize().Height, aih1.Size().Height)
 		assert.Equal(t, float32(0), aih2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+2*theme.Padding()+2, aih2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+2*theme.Padding(), aih2.Position().Y)
 		assert.Equal(t, min.Width, aih2.Size().Width)
 		assert.Equal(t, aih2.MinSize().Height, aih2.Size().Height)
 		assert.Equal(t, float32(0), aid0.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+theme.Padding(), aid0.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height, aid0.Position().Y)
 		assert.Equal(t, min.Width, aid0.Size().Width)
 		assert.Equal(t, aid0.MinSize().Height, aid0.Size().Height)
 		assert.Equal(t, float32(0), aid1.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+aih1.MinSize().Height+2*theme.Padding()+1, aid1.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+aih1.MinSize().Height+theme.Padding(), aid1.Position().Y)
 		assert.Equal(t, min.Width, aid1.Size().Width)
 		assert.Equal(t, aid1.MinSize().Height, aid1.Size().Height)
 		assert.Equal(t, float32(0), aid2.Position().X)
-		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+aih2.MinSize().Height+3*theme.Padding()+2, aid2.Position().Y)
+		assert.Equal(t, aih0.MinSize().Height+aid0.MinSize().Height+aih1.MinSize().Height+aid1.MinSize().Height+aih2.MinSize().Height+2*theme.Padding(), aid2.Position().Y)
 		assert.Equal(t, min.Width, aid2.Size().Width)
 		assert.Equal(t, aid2.MinSize().Height, aid2.Size().Height)
 	})
@@ -159,7 +159,7 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			aih := ar.headers[0].MinSize()
 			aid := ai.Detail.MinSize()
 			assert.Equal(t, fyne.Max(aih.Width, aid.Width), min.Width)
-			assert.Equal(t, aih.Height+aid.Height+theme.Padding()*1, min.Height)
+			assert.Equal(t, aih.Height+aid.Height+theme.Padding(), min.Height)
 		})
 		t.Run("Closed", func(t *testing.T) {
 			ac := NewAccordion()
@@ -195,8 +195,8 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
-			height += aid0.Height + 1
-			height += aih1.Height + 1
+			height += aid0.Height + theme.Padding()
+			height += aih1.Height + theme.Padding()
 			height += aih2.Height
 			height += theme.Padding()
 			assert.Equal(t, height, min.Height)
@@ -222,10 +222,10 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, fyne.Max(aih2.Width, aid2.Width))
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
-			height += aid0.Height + 1
+			height += aid0.Height + theme.Padding()
 			height += aih1.Height
 			height += theme.Padding()
-			height += aid1.Height + 1
+			height += aid1.Height + theme.Padding()
 			height += aih2.Height
 			height += theme.Padding()
 			height += aid2.Height
@@ -254,10 +254,10 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
-			height += aid0.Height + 1
+			height += aid0.Height + theme.Padding()
 			height += aih1.Height
 			height += theme.Padding()
-			height += aid1.Height + 1
+			height += aid1.Height + theme.Padding()
 			height += aih2.Height
 			height += theme.Padding()
 			assert.Equal(t, height, min.Height)
@@ -277,8 +277,8 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			width = fyne.Max(width, aih1.Width)
 			width = fyne.Max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
-			height := aih0.Height + 1
-			height += aih1.Height + 1
+			height := aih0.Height + theme.Padding()
+			height += aih1.Height + theme.Padding()
 			height += aih2.Height
 			assert.Equal(t, height, min.Height)
 		})

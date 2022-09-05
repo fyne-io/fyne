@@ -349,8 +349,8 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Refresh()
@@ -368,8 +368,8 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Refresh()
@@ -1730,7 +1730,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
-		tapPos := fyne.NewPos(140-theme.Padding()*2-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
+		tapPos := fyne.NewPos(140-theme.InnerPadding()-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
 		test.TapCanvas(c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)

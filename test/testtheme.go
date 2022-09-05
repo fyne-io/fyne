@@ -31,6 +31,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNamePressed:         blue,
 			theme.ColorNamePrimary:         green,
 			theme.ColorNameScrollBar:       blue,
+			theme.ColorNameSeparator:       color.Black,
 			theme.ColorNameSelection:       color.RGBA{red.R, red.G, red.B, 44},
 			theme.ColorNameShadow:          blue,
 		},
@@ -43,6 +44,8 @@ func NewTheme() fyne.Theme {
 		},
 		sizes: map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
+			theme.SizeNameInnerPadding:       float32(20),
+			theme.SizeNameLineSpacing:        float32(6),
 			theme.SizeNamePadding:            float32(10),
 			theme.SizeNameScrollBar:          float32(10),
 			theme.SizeNameScrollBarSmall:     float32(2),

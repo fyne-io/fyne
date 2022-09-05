@@ -73,9 +73,10 @@ func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
 
 func (p *InMemoryPreferences) remove(key string) {
 	p.lock.Lock()
-	defer p.lock.Unlock()
-
 	delete(p.values, key)
+	p.lock.Unlock()
+
+	p.fireChange()
 }
 
 func (p *InMemoryPreferences) fireChange() {

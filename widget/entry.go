@@ -260,7 +260,7 @@ func (e *Entry) DragEnd() {
 //
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
-	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InputBorderSize()-theme.Padding()))
+	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InnerPadding()-theme.InputBorderSize()))
 	if !e.selecting {
 		e.selectRow, e.selectColumn = e.getRowCol(pos)
 		e.selecting = true
@@ -382,10 +382,10 @@ func (e *Entry) MinSize() fyne.Size {
 
 	min := e.BaseWidget.MinSize()
 	if e.ActionItem != nil {
-		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
 	}
 	if e.Validator != nil {
-		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
 	}
 
 	return min
@@ -777,7 +777,7 @@ func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 		str := string(text[0:i])
 		wid := fyne.MeasureText(str, theme.TextSize(), e.TextStyle).Width
 		charWid := fyne.MeasureText(string(text[i]), theme.TextSize(), e.TextStyle).Width
-		if pos.X < theme.Padding()*2+wid+(charWid/2) {
+		if pos.X < theme.InnerPadding()+wid+(charWid/2) {
 			return i
 		}
 	}
@@ -826,7 +826,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 	defer e.propertyLock.RUnlock()
 
 	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle).Height
-	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-theme.Padding()) / float64(rowHeight)))
+	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-theme.LineSpacing()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
 		row = 0
@@ -1252,14 +1252,14 @@ func (r *entryRenderer) trailingInset() float32 {
 	xInset := float32(0)
 
 	if r.entry.ActionItem != nil {
-		xInset = theme.IconInlineSize() + 2*theme.Padding()
+		xInset = theme.IconInlineSize() + theme.LineSpacing()
 	}
 
 	if r.entry.Validator != nil {
 		if r.entry.ActionItem == nil {
-			xInset = theme.IconInlineSize() + 2*theme.Padding()
+			xInset = theme.IconInlineSize() + theme.LineSpacing()
 		} else {
-			xInset += theme.IconInlineSize() + theme.Padding()
+			xInset += theme.IconInlineSize() + theme.LineSpacing()
 		}
 	}
 
@@ -1278,7 +1278,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 
 		r.entry.ActionItem.Resize(actionIconSize)
-		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.InnerPadding(), theme.InnerPadding()))
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
@@ -1289,9 +1289,9 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		r.entry.validationStatus.Resize(validatorIconSize)
 
 		if r.entry.ActionItem == nil {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-theme.InnerPadding(), theme.InnerPadding()))
 		} else {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-3*theme.Padding(), theme.Padding()*2))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-theme.InnerPadding()-theme.LineSpacing(), theme.InnerPadding()))
 		}
 	}
 
@@ -1317,7 +1317,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	}
 
 	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle)
-	minSize := charMin.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	minSize := charMin.Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding()))
 
 	if r.entry.MultiLine {
 		count := r.entry.multiLineRows
@@ -1326,10 +1326,10 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		}
 		// ensure multiline height is at least charMinSize * multilineRows
 		rowHeight := charMin.Height * float32(count)
-		minSize.Height = fyne.Max(minSize.Height, rowHeight+float32(count-1)*theme.Padding())
+		minSize.Height = fyne.Max(minSize.Height, rowHeight+float32(count-1)*theme.LineSpacing())
 	}
 
-	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+	return minSize.Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()))
 }
 
 func (r *entryRenderer) Objects() []fyne.CanvasObject {
@@ -1570,7 +1570,7 @@ func (r *entryContentRenderer) buildSelection() {
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width, sz.Height*float32(row) - theme.InputBorderSize() + theme.Padding()*2
+		return sz.Width, sz.Height*float32(row) - theme.InputBorderSize() + theme.InnerPadding()
 	}
 
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
@@ -1630,8 +1630,8 @@ func (r *entryContentRenderer) buildSelection() {
 
 func (r *entryContentRenderer) ensureCursorVisible() {
 	letter := fyne.MeasureText("e", theme.TextSize(), r.content.entry.TextStyle)
-	padX := letter.Width*2 + theme.Padding()
-	padY := letter.Height - theme.Padding()
+	padX := letter.Width*2 + theme.LineSpacing()
+	padY := letter.Height - theme.LineSpacing()
 	cx := r.cursor.Position().X
 	cy := r.cursor.Position().Y
 	cx1 := cx - padX
@@ -1678,7 +1678,7 @@ func (r *entryContentRenderer) moveCursor() {
 	r.content.entry.propertyLock.Lock()
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
 	r.cursor.Resize(fyne.NewSize(theme.InputBorderSize(), lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-(theme.InputBorderSize()/2), yPos+theme.Padding()*2-theme.InputBorderSize()))
+	r.cursor.Move(fyne.NewPos(xPos-(theme.InputBorderSize()/2), yPos+theme.InnerPadding()-theme.InputBorderSize()))
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()

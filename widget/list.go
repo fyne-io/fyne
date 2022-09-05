@@ -99,7 +99,7 @@ func (l *List) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.Padding())
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -372,7 +372,7 @@ func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	if f := l.list.Length; f != nil {
-		separatorThickness := theme.SeparatorThicknessSize()
+		separatorThickness := theme.Padding()
 		return fyne.NewSize(l.list.itemMin.Width,
 			(l.list.itemMin.Height+separatorThickness)*float32(f())-separatorThickness)
 	}
@@ -419,13 +419,13 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 func (l *listLayout) updateList(refresh bool) {
 	l.renderLock.Lock()
 	defer l.renderLock.Unlock()
-	separatorThickness := theme.SeparatorThicknessSize()
+	separatorThickness := theme.Padding()
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {
 		length = f()
 	}
-	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+theme.SeparatorThicknessSize()))) + 1
+	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+separatorThickness))) + 1
 	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+separatorThickness)))
 	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
 	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
@@ -469,6 +469,7 @@ func (l *listLayout) updateList(refresh bool) {
 		}
 	}
 	l.children = cells
+
 	l.updateSeparators()
 
 	objects := l.children
@@ -490,11 +491,12 @@ func (l *listLayout) updateSeparators() {
 	}
 
 	separatorThickness := theme.SeparatorThicknessSize()
+	dividerOff := (theme.Padding() + separatorThickness) / 2
 	for i, child := range l.children {
 		if i == 0 {
 			continue
 		}
-		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-separatorThickness))
+		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-dividerOff))
 		l.separators[i].Resize(fyne.NewSize(l.list.Size().Width, separatorThickness))
 		l.separators[i].Show()
 	}

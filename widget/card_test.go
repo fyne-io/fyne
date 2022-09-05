@@ -106,7 +106,7 @@ func TestCard_Layout(t *testing.T) {
 
 			window := test.NewWindow(card)
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
-			window.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+			window.Resize(size.Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 			if tt.content != nil {
 				assert.Equal(t, float32(10), tt.content.Size().Height)
 			}
@@ -121,7 +121,7 @@ func TestCard_MinSize(t *testing.T) {
 	content := widget.NewLabel("simple")
 	card := &widget.Card{Content: content}
 
-	inner := card.MinSize().Subtract(fyne.NewSize(theme.Padding()*3, theme.Padding()*3)) // shadow + content pad
+	inner := card.MinSize().Subtract(fyne.NewSize(theme.InnerPadding()+theme.Padding(), theme.InnerPadding()+theme.Padding())) // shadow + content pad
 	assert.Equal(t, content.MinSize(), inner)
 }
 

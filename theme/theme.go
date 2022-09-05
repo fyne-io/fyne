@@ -118,6 +118,11 @@ const (
 	// Since: 2.1
 	ColorNameSelection fyne.ThemeColorName = "selection"
 
+	// ColorNameSeparator is the name of theme lookup for separator bars.
+	//
+	// Since: 2.3
+	ColorNameSeparator fyne.ThemeColorName = "separator"
+
 	// ColorNameShadow is the name of theme lookup for shadow color.
 	//
 	// Since: 2.0
@@ -142,6 +147,16 @@ const (
 	//
 	// Since: 2.0
 	SizeNameInlineIcon fyne.ThemeSizeName = "iconInline"
+
+	// SizeNameInnerPadding is the name of theme lookup for internal widget padding size.
+	//
+	// Since: 2.3
+	SizeNameInnerPadding fyne.ThemeSizeName = "innerPadding"
+
+	// SizeNameLineSpacing is the name of theme lookup for between text line spacing.
+	//
+	// Since: 2.3
+	SizeNameLineSpacing fyne.ThemeSizeName = "lineSpacing"
 
 	// SizeNamePadding is the name of theme lookup for padding size.
 	//
@@ -313,6 +328,13 @@ func IconInlineSize() float32 {
 	return current().Size(SizeNameInlineIcon)
 }
 
+// InnerPadding is the standard gap between element content and the outside edge of a widget.
+//
+// Since: 2.3
+func InnerPadding() float32 {
+	return current().Size(SizeNameInnerPadding)
+}
+
 // InputBackgroundColor returns the color used to draw underneath input elements.
 func InputBackgroundColor() color.Color {
 	return current().Color(ColorNameInputBackground, currentVariant())
@@ -340,6 +362,13 @@ func LightTheme() fyne.Theme {
 
 	theme.initFonts()
 	return theme
+}
+
+// LineSpacing is the default gap between multiple lines of text.
+//
+// Since: 2.3
+func LineSpacing() float32 {
+	return current().Size(SizeNameLineSpacing)
 }
 
 // Padding is the standard gap between elements and the border around interface elements.
@@ -402,6 +431,13 @@ func ScrollBarSmallSize() float32 {
 // Since: 2.1
 func SelectionColor() color.Color {
 	return safeColorLookup(ColorNameSelection, currentVariant())
+}
+
+// SeparatorColor returns the color for the separator element.
+//
+// Since: 2.3
+func SeparatorColor() color.Color {
+	return safeColorLookup(ColorNameSeparator, currentVariant())
 }
 
 // SeparatorThicknessSize is the standard thickness of the separator widget.
@@ -530,7 +566,8 @@ var (
 		ColorNameInputBorder:     color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff},
 		ColorNamePlaceHolder:     color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff},
 		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
-		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameScrollBar:       color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99},
+		ColorNameSeparator:       color.NRGBA{R: 0x0, G: 0x0, B: 0x0, A: 0xff},
 		ColorNameShadow:          color.NRGBA{A: 0x66},
 		ColorNameSuccess:         successColor,
 		ColorNameWarning:         warningColor,
@@ -549,6 +586,7 @@ var (
 		ColorNamePlaceHolder:     color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 		ColorNamePressed:         color.NRGBA{A: 0x19},
 		ColorNameScrollBar:       color.NRGBA{A: 0x99},
+		ColorNameSeparator:       color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff},
 		ColorNameShadow:          color.NRGBA{A: 0x33},
 		ColorNameSuccess:         successColor,
 		ColorNameWarning:         warningColor,
@@ -632,6 +670,10 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 1
 	case SizeNameInlineIcon:
 		return 20
+	case SizeNameInnerPadding:
+		return 8
+	case SizeNameLineSpacing:
+		return 4
 	case SizeNamePadding:
 		return 6
 	case SizeNameScrollBar:
