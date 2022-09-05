@@ -558,12 +558,13 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 		v = t.variant
 	}
 
+	primary := fyne.CurrentApp().Settings().PrimaryColor()
 	if n == ColorNamePrimary {
-		return primaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+		return primaryColorNamed(primary)
 	} else if n == ColorNameFocus {
-		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {
-		return selectionColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+		return selectionColorNamed(primary)
 	}
 
 	if v == VariantLight {
