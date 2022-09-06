@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"math/cmplx"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +13,14 @@ import (
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+)
+
+const (
+	checkeredBoxSize       = 8
+	checkeredNumberOfRings = 12
+
+	preferenceRecents    = "color_recents"
+	preferenceMaxRecents = 7
 )
 
 // ColorPickerDialog is a simple dialog window that displays a color picker.
@@ -166,22 +175,27 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	return container.NewGridWithColumns(8, objects...)
 }
 
-func newCheckeredBackground() *canvas.Raster {
-	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 8
-
-		if (x/boxSize)%2 == (y/boxSize)%2 {
+func newCheckeredBackground(radial bool) *canvas.Raster {
+	f := func(x, y, _, _ int) color.Color {
+		if (x/checkeredBoxSize)%2 == (y/checkeredBoxSize)%2 {
 			return color.Gray{Y: 58}
 		}
 
 		return color.Gray{Y: 84}
-	})
-}
+	}
 
-const (
-	preferenceRecents    = "color_recents"
-	preferenceMaxRecents = 7
-)
+	if radial {
+		rect := f
+		f = func(x, y, w, h int) color.Color {
+			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
+			x = int((t + math.Pi) / (2 * math.Pi) * checkeredNumberOfRings * checkeredBoxSize)
+			y = int(r)
+			return rect(x, y, 0, 0)
+		}
+	}
+
+	return canvas.NewRasterWithPixels(f)
+}
 
 func readRecentColors() (recents []string) {
 	for _, r := range strings.Split(fyne.CurrentApp().Preferences().String(preferenceRecents), ",") {
