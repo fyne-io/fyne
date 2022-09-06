@@ -176,15 +176,16 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 }
 
 func newCheckeredBackground(radial bool) *canvas.Raster {
-	rect := func(x, y, _, _ int) color.Color {
+	f := func(x, y, _, _ int) color.Color {
 		if (x/checkeredBoxSize)%2 == (y/checkeredBoxSize)%2 {
 			return color.Gray{Y: 58}
 		}
 
 		return color.Gray{Y: 84}
 	}
-	f := rect
+
 	if radial {
+		rect := f
 		f = func(x, y, w, h int) color.Color {
 			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
 			x = int((t + math.Pi) / (2 * math.Pi) * checkeredNumberOfRings * checkeredBoxSize)
