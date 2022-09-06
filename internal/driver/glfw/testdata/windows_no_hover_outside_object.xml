@@ -1,35 +1,35 @@
-<canvas size="200x300">
+<canvas size="49x48">
 	<content>
-		<widget pos="6,6" size="188x288" type="*widget.List">
-			<widget size="188x288" type="*widget.Scroll">
-				<container size="188x288">
-					<widget size="188x43" type="*widget.listItem">
-						<widget size="188x43" type="*widget.Entry">
-							<rectangle fillColor="button" pos="0,1" size="188x41"/>
-							<rectangle fillColor="shadow" pos="0,42" size="188x1"/>
-							<widget pos="0,1" size="188x41" type="*widget.Scroll">
-								<widget size="188x41" type="*widget.entryContent">
-									<widget size="188x41" type="*widget.RichText">
-										<text color="placeholder" pos="12,11" size="164x19"></text>
+		<widget pos="6,6" size="37x36" type="*widget.List">
+			<widget size="37x36" type="*widget.Scroll">
+				<container size="37x71">
+					<widget size="37x35" type="*widget.listItem">
+						<widget size="37x35" type="*widget.Entry">
+							<rectangle fillColor="rgba(36,37,41,255)" pos="0,1" size="37x33"/>
+							<rectangle size="36x34" strokeColor="disabled" strokeWidth="1"/>
+							<widget pos="0,1" size="37x33" type="*widget.Scroll">
+								<widget size="37x33" type="*widget.entryContent">
+									<widget size="37x33" type="*widget.RichText">
+										<text color="placeholder" pos="8,7" size="21x19"></text>
 									</widget>
-									<widget size="188x41" type="*widget.RichText">
-										<text pos="12,11" size="164x19"></text>
+									<widget size="37x33" type="*widget.RichText">
+										<text pos="8,7" size="21x19"></text>
 									</widget>
 								</widget>
 							</widget>
 						</widget>
 					</widget>
-					<widget pos="0,44" size="188x43" type="*widget.listItem">
-						<widget size="188x43" type="*widget.Entry">
-							<rectangle fillColor="button" pos="0,1" size="188x41"/>
-							<rectangle fillColor="shadow" pos="0,42" size="188x1"/>
-							<widget pos="0,1" size="188x41" type="*widget.Scroll">
-								<widget size="188x41" type="*widget.entryContent">
-									<widget size="188x41" type="*widget.RichText">
-										<text color="placeholder" pos="12,11" size="164x19"></text>
+					<widget pos="0,36" size="37x35" type="*widget.listItem">
+						<widget size="37x35" type="*widget.Entry">
+							<rectangle fillColor="rgba(36,37,41,255)" pos="0,1" size="37x33"/>
+							<rectangle size="36x34" strokeColor="disabled" strokeWidth="1"/>
+							<widget pos="0,1" size="37x33" type="*widget.Scroll">
+								<widget size="37x33" type="*widget.entryContent">
+									<widget size="37x33" type="*widget.RichText">
+										<text color="placeholder" pos="8,7" size="21x19"></text>
 									</widget>
-									<widget size="188x41" type="*widget.RichText">
-										<text pos="12,11" size="164x19"></text>
+									<widget size="37x33" type="*widget.RichText">
+										<text pos="8,7" size="21x19"></text>
 									</widget>
 								</widget>
 							</widget>
@@ -38,10 +38,18 @@
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
-					<widget pos="0,43" size="188x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="188x1"/>
+					<widget pos="0,35" size="37x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="37x1"/>
 					</widget>
 				</container>
+				<widget pos="0,36" size="37x0" type="*widget.Shadow">
+					<linearGradient endColor="shadow" pos="0,-8" size="37x8"/>
+				</widget>
+				<widget pos="31,0" size="6x36" type="*widget.scrollBarArea">
+					<widget pos="3,0" size="3x18" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="3x18"/>
+					</widget>
+				</widget>
 			</widget>
 		</widget>
 	</content>
