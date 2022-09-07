@@ -142,6 +142,7 @@ func (p *painter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(rast.Generator(int(width), int(height)), rast.ScaleMode)
 }
 
+/*
 func (p *painter) newGlRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
@@ -159,6 +160,7 @@ func (p *painter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
+*/
 
 func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
