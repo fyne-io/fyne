@@ -639,75 +639,6 @@ func currentVariant() fyne.ThemeVariant {
 	return fyne.CurrentApp().Settings().ThemeVariant()
 }
 
-func primaryColorNamed(name string) color.NRGBA {
-	switch name {
-	case ColorRed:
-		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	case ColorOrange:
-		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
-	case ColorYellow:
-		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
-	case ColorGreen:
-		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
-	case ColorPurple:
-		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
-	case ColorBrown:
-		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
-	case ColorGray:
-		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
-	}
-
-	// We return the value for ColorBlue for every other value.
-	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
-}
-
-func focusColorNamed(name string) color.NRGBA {
-	switch name {
-	case ColorRed:
-		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f}
-	case ColorOrange:
-		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f}
-	case ColorYellow:
-		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f}
-	case ColorGreen:
-		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f}
-	case ColorPurple:
-		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f}
-	case ColorBrown:
-		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f}
-	case ColorGray:
-		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f}
-	}
-
-	// We return the value for ColorBlue for every other value.
-	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
-}
-
-func selectionColorNamed(name string) color.NRGBA {
-	switch name {
-	case ColorRed:
-		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f}
-	case ColorOrange:
-		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f}
-	case ColorYellow:
-		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f}
-	case ColorGreen:
-		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f}
-	case ColorPurple:
-		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f}
-	case ColorBrown:
-		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f}
-	case ColorGray:
-		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f}
-	}
-
-	// We return the value for ColorBlue for every other value.
-	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
-}
-
 func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
@@ -745,6 +676,29 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	}
 
 	return color.Transparent
+}
+
+func focusColorNamed(name string) color.NRGBA {
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f}
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
 }
 
 func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
@@ -798,6 +752,29 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	return res
 }
 
+func primaryColorNamed(name string) color.NRGBA {
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
+}
+
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	col := current().Color(n, v)
 	if col == nil {
@@ -828,6 +805,29 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	}
 
 	return DefaultTextFont()
+}
+
+func selectionColorNamed(name string) color.NRGBA {
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f}
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
 }
 
 func setupDefaultTheme() fyne.Theme {
