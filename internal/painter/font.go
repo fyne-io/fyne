@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"log"
 	"math"
 	"sync"
 
@@ -28,6 +27,8 @@ const (
 
 	// TextDPI is a global constant that determines how text scales to interface sizes
 	TextDPI = 78
+
+	fontTabSpaceSize = 8
 )
 
 // CachedFontFace returns a font face held in memory. These are loaded from the current theme.
@@ -189,17 +190,7 @@ func newFontWithFallback(chosen, fallback font.Face, chosenFont, fallbackFont tt
 	return &compositeFace{chosen: chosen, fallback: fallback, chosenFont: chosenFont, fallbackFont: fallbackFont}
 }
 
-func tabStop(f font.Face, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
-	spacew, ok := f.GlyphAdvance(' ')
-	if !ok {
-		log.Print("Failed to find space width for tab")
-		return x
-	}
-
-	return tabStopForSpaceWidth(spacew, x, tabWidth)
-}
-
-func tabStopForSpaceWidth(spacew fixed.Int26_6, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
+func tabStop(spacew, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
 	if tabWidth <= 0 {
 		tabWidth = DefaultTabWidth
 	}
@@ -220,7 +211,7 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 		Size:      textSize,
 	}
 	out, _ := shaping.Shape(in)
-	spacew := out.Advance
+	spacew := float32ToFixed266(scale) * fontTabSpaceSize
 
 	in.Text = runes
 	in.RunStart = 0
@@ -232,7 +223,7 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 			continue
 		}
 		if c == '\t' {
-			*advance += tabStopForSpaceWidth(spacew, *advance, tabWidth)
+			*advance = tabStop(spacew, *advance, tabWidth)
 		} else {
 			cb(c)
 			*advance += float32ToFixed266(fixed266ToFloat32(out.Glyphs[i].XAdvance) * scale)
