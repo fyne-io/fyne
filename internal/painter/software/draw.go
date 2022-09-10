@@ -147,9 +147,9 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	fontSize := text.TextSize * c.Scale()
 	opts.Size = float64(fontSize)
 	opts.DPI = painter.TextDPI
-	face := painter.CachedFontFace(text.TextStyle, &opts)
+	face, measureFace := painter.CachedFontFace(text.TextStyle, &opts)
 
-	painter.DrawString(txtImg, text.Text, color, face, height, text.TextStyle.TabWidth)
+	painter.DrawString(txtImg, text.Text, color, face, measureFace, fontSize, c.Scale(), height, text.TextStyle.TabWidth)
 
 	size := text.Size()
 	offsetX := float32(0)

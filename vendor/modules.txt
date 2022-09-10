@@ -11,6 +11,18 @@ github.com/BurntSushi/toml/internal
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
+# github.com/benoitkugler/textlayout v0.0.5
+github.com/benoitkugler/textlayout/fonts
+github.com/benoitkugler/textlayout/fonts/binaryreader
+github.com/benoitkugler/textlayout/fonts/glyphsnames
+github.com/benoitkugler/textlayout/fonts/psinterpreter
+github.com/benoitkugler/textlayout/fonts/simpleencodings
+github.com/benoitkugler/textlayout/fonts/truetype
+github.com/benoitkugler/textlayout/fonts/type1C
+github.com/benoitkugler/textlayout/graphite
+github.com/benoitkugler/textlayout/harfbuzz
+github.com/benoitkugler/textlayout/language
+github.com/benoitkugler/textlayout/unicodedata
 # github.com/cpuguy83/go-md2man/v2 v2.0.1
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
@@ -51,6 +63,12 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
+# github.com/go-text/typesetting v0.0.0-20220411150340-35994bc27a7b
+## explicit
+github.com/go-text/typesetting/di
+github.com/go-text/typesetting/font
+github.com/go-text/typesetting/language
+github.com/go-text/typesetting/shaping
 # github.com/godbus/dbus/v5 v5.1.0
 ## explicit
 github.com/godbus/dbus/v5
@@ -114,11 +132,14 @@ github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
 # golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
 ## explicit
+golang.org/x/image/ccitt
 golang.org/x/image/colornames
 golang.org/x/image/draw
 golang.org/x/image/font
 golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
+golang.org/x/image/tiff
+golang.org/x/image/tiff/lzw
 golang.org/x/image/vector
 # golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
 ## explicit

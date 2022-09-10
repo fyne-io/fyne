@@ -13,6 +13,7 @@ require (
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 	github.com/go-ole/go-ole v1.2.6
+	github.com/go-text/typesetting v0.0.0-20220411150340-35994bc27a7b
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/gopherjs/gopherjs v1.17.2
