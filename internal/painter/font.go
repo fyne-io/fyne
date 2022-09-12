@@ -32,7 +32,8 @@ const (
 )
 
 // CachedFontFace returns a font face held in memory. These are loaded from the current theme.
-func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) (font.Face, gotext.Face) {
+func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) (font.Face, gotext.Face) {
+	key := faceCacheKey{float32ToFixed266(fontDP), float32ToFixed266(texScale)}
 	val, ok := fontCache.Load(style)
 	if !ok {
 		var f1, f2 *truetype.Font
@@ -61,19 +62,23 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) (font.Face, go
 		if f1 == nil {
 			f1 = f2
 		}
-		val = &fontCacheItem{font: f1, fallback: f2, faces: make(map[truetype.Options]font.Face),
-			measureFaces: make(map[truetype.Options]gotext.Face)}
+		val = &fontCacheItem{font: f1, fallback: f2, faces: make(map[faceCacheKey]font.Face),
+			measureFaces: make(map[faceCacheKey]gotext.Face)}
 		fontCache.Store(style, val)
 	}
 
 	comp := val.(*fontCacheItem)
 	comp.facesMutex.RLock()
-	face := comp.faces[*opts]
-	measureFace := comp.measureFaces[*opts]
+	face := comp.faces[key]
+	measureFace := comp.measureFaces[key]
 	comp.facesMutex.RUnlock()
 	if face == nil {
-		f1 := truetype.NewFace(comp.font, opts)
-		f2 := truetype.NewFace(comp.fallback, opts)
+		var opts truetype.Options
+		opts.Size = float64(fontDP)
+		opts.DPI = float64(TextDPI * texScale)
+
+		f1 := truetype.NewFace(comp.font, &opts)
+		f2 := truetype.NewFace(comp.fallback, &opts)
 		face = newFontWithFallback(f1, f2, comp.font, comp.fallback)
 
 		switch {
@@ -92,8 +97,8 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) (font.Face, go
 		}
 
 		comp.facesMutex.Lock()
-		comp.faces[*opts] = face
-		comp.measureFaces[*opts] = measureFace
+		comp.faces[key] = face
+		comp.measureFaces[key] = measureFace
 		comp.facesMutex.Unlock()
 	}
 
@@ -142,8 +147,8 @@ func loadMeasureFont(data fyne.Resource) gotext.Face {
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
-func MeasureString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int) (size fyne.Size, advance fixed.Int26_6) {
-	return walkString(f, s, textSize, tabWidth, &advance, 1, func(r rune) {})
+func MeasureString(f gotext.Face, s string, textSize float32, tabWidth int) (size fyne.Size, advance fixed.Int26_6) {
+	return walkString(f, s, float32ToFixed266(textSize), tabWidth, &advance, 1, func(r rune) {})
 }
 
 // RenderedTextSize looks up how big a string would be if drawn on screen.
@@ -154,7 +159,7 @@ func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle) (size
 		return size, base
 	}
 
-	size, base = measureText(text, float32ToFixed266(fontSize), style)
+	size, base = measureText(text, fontSize, style)
 	cache.SetFontMetrics(text, fontSize, style, size, base)
 	return size, base
 }
@@ -176,12 +181,8 @@ func loadFont(data fyne.Resource) *truetype.Font {
 	return loaded
 }
 
-func measureText(text string, fontSize fixed.Int26_6, style fyne.TextStyle) (fyne.Size, float32) {
-	var opts truetype.Options
-	opts.Size = float64(fontSize)
-	opts.DPI = TextDPI
-
-	_, face := CachedFontFace(style, &opts)
+func measureText(text string, fontSize float32, style fyne.TextStyle) (fyne.Size, float32) {
+	_, face := CachedFontFace(style, fontSize, 1)
 	size, base := MeasureString(face, text, fontSize, style.TabWidth)
 	return size, fixed266ToFloat32(base)
 }
@@ -329,10 +330,14 @@ type ttfFont interface {
 	Index(rune) truetype.Index
 }
 
+type faceCacheKey struct {
+	size, scale fixed.Int26_6
+}
+
 type fontCacheItem struct {
 	font, fallback *truetype.Font
-	faces          map[truetype.Options]font.Face
-	measureFaces   map[truetype.Options]gotext.Face
+	faces          map[faceCacheKey]font.Face
+	measureFaces   map[faceCacheKey]gotext.Face
 	facesMutex     sync.RWMutex
 }
 

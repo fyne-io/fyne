@@ -6,8 +6,6 @@ import (
 	"image/draw"
 	"math"
 
-	"github.com/goki/freetype/truetype"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
@@ -172,13 +170,8 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	height := int(p.textureScale(bounds.Height))
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
-	var opts truetype.Options
-	fontSize := float64(text.TextSize)
-	opts.Size = fontSize
-	opts.DPI = float64(paint.TextDPI * p.texScale)
-	face, measureFace := paint.CachedFontFace(text.TextStyle, &opts)
-
-	paint.DrawString(img, text.Text, color, face, measureFace, float32(fontSize), p.pixScale, height, text.TextStyle.TabWidth)
+	face, measureFace := paint.CachedFontFace(text.TextStyle, text.TextSize, p.texScale)
+	paint.DrawString(img, text.Text, color, face, measureFace, text.TextSize, p.pixScale, height, text.TextStyle.TabWidth)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 
