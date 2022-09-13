@@ -6,11 +6,11 @@
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
 					<widget size="120x96" type="*widget.RichText">
-						<text pos="8,6" size="104x20">First Row</text>
-						<text pos="8,26" size="104x20">Second Row</text>
-						<text pos="8,47" size="104x20">Third Row</text>
+						<text pos="8,6" size="104x19">First Row</text>
+						<text pos="8,25" size="104x19">Second Row</text>
+						<text pos="8,44" size="104x19">Third Row</text>
 					</widget>
-					<rectangle fillColor="primary" pos="7,6" size="2x20"/>
+					<rectangle fillColor="primary" pos="7,6" size="2x19"/>
 				</widget>
 			</widget>
 		</widget>

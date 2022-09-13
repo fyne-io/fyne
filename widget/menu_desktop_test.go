@@ -167,7 +167,7 @@ func TestMenu_Layout(t *testing.T) {
 			windowSize: fyne.NewSize(300, 800),
 			menuPos:    fyne.NewPos(10, 10),
 			mousePositions: []fyne.Position{
-				fyne.NewPos(30, 150), // open submenu
+				fyne.NewPos(30, 140), // open submenu
 			},
 			want:               shortcutsMasterPrefixPath + ".xml",
 			wantImage:          shortcutsMasterPrefixPath + ".png",

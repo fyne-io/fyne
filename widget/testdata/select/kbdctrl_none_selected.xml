@@ -1,14 +1,14 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="3,77" size="134x36" type="*widget.Select">
-				<rectangle fillColor="focus" pos="0,2" size="134x32"/>
-				<rectangle fillColor="primary" pos="0,34" size="134x2"/>
+			<widget pos="7,78" size="127x35" type="*widget.Select">
+				<rectangle fillColor="focus" pos="0,2" size="127x31"/>
+				<rectangle fillColor="primary" pos="0,33" size="127x2"/>
 				<rectangle size="0x0"/>
-				<widget pos="4,4" size="102x28" type="*widget.RichText">
-					<text pos="4,4" size="94x20">(Select one)</text>
+				<widget pos="4,4" size="95x27" type="*widget.RichText">
+					<text pos="4,4" size="87x19">(Select one)</text>
 				</widget>
-				<widget pos="106,8" size="20x20" type="*widget.Icon">
+				<widget pos="99,7" size="20x20" type="*widget.Icon">
 					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 				</widget>
 			</widget>

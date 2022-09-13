@@ -3,10 +3,10 @@
 		<widget pos="4,4" size="142x192" type="*widget.Button">
 			<rectangle fillColor="button" size="142x192"/>
 			<rectangle size="0x0"/>
-			<widget pos="78,85" size="31x20" type="*widget.RichText">
-				<text alignment="center" bold size="31x20">Test</text>
+			<widget pos="81,86" size="28x20" type="*widget.RichText">
+				<text alignment="center" bold size="28x19">Test</text>
 			</widget>
-			<image fillMode="contain" pos="114,85" rsc="cancelIcon" size="20x20"/>
+			<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize"/>
 		</widget>
 	</content>
 </canvas>

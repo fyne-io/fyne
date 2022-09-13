@@ -28,7 +28,7 @@ const (
 	// TextDPI is a global constant that determines how text scales to interface sizes
 	TextDPI = 78
 
-	fontTabSpaceSize = 8
+	fontTabSpaceSize = 10
 )
 
 // CachedFontFace returns a font face held in memory. These are loaded from the current theme.

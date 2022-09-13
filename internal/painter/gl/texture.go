@@ -166,8 +166,8 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	}
 
 	bounds := text.MinSize()
-	width := int(p.textureScale(bounds.Width + paint.VectorPad(text))) // potentially italic overspill
-	height := int(p.textureScale(bounds.Height))
+	width := int(math.Ceil(float64(p.textureScale(bounds.Width + paint.VectorPad(text))))) // potentially italic overspill
+	height := int(math.Ceil(float64(p.textureScale(bounds.Height))))
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	face, measureFace := paint.CachedFontFace(text.TextStyle, text.TextSize, p.texScale)
