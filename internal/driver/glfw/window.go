@@ -780,8 +780,14 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 func (w *window) processCharInput(char rune) {
 	if focused := w.canvas.Focused(); focused != nil {
 		w.QueueEvent(func() { focused.TypedRune(char) })
-	} else if w.canvas.onTypedRune != nil {
-		w.QueueEvent(func() { w.canvas.onTypedRune(char) })
+	} else {
+		if w.canvas.onTypedRune != nil {
+			w.QueueEvent(func() { w.canvas.onTypedRune(char) })
+		}
+		if w.canvas.onTypedRuneEvent != nil {
+			runeEvent := fyne.NewRuneEvent(char)
+			w.QueueEvent(func() { w.canvas.onTypedRuneEvent(runeEvent) })
+		}
 	}
 }
 

@@ -502,8 +502,13 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 		if keyName != "" && canvas.onTypedKey != nil {
 			canvas.onTypedKey(keyEvent)
 		}
-		if r > 0 && canvas.onTypedRune != nil {
-			canvas.onTypedRune(r)
+		if r > 0 {
+			if canvas.onTypedRune != nil {
+				canvas.onTypedRune(r)
+			}
+			if canvas.onTypedRuneEvent != nil {
+				canvas.onTypedRuneEvent(r)
+			}
 		}
 	}
 }

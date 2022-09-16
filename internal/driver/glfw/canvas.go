@@ -25,10 +25,11 @@ type glCanvas struct {
 	padded  bool
 	size    fyne.Size
 
-	onTypedRune func(rune)
-	onTypedKey  func(*fyne.KeyEvent)
-	onKeyDown   func(*fyne.KeyEvent)
-	onKeyUp     func(*fyne.KeyEvent)
+	onTypedRune      func(rune)
+	onTypedRuneEvent func(*fyne.RuneEvent)
+	onTypedKey       func(*fyne.KeyEvent)
+	onKeyDown        func(*fyne.KeyEvent)
+	onKeyUp          func(*fyne.KeyEvent)
 	// shortcut    fyne.ShortcutHandler
 
 	scale, detectedScale, texScale float32
@@ -164,6 +165,10 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 
 func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
+}
+
+func (c *glCanvas) SetOnTypedRuneEvent(typed func(*fyne.RuneEvent)) {
+	c.onTypedRuneEvent = typed
 }
 
 func (c *glCanvas) SetPadded(padded bool) {

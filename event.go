@@ -1,5 +1,7 @@
 package fyne
 
+import "time"
+
 // HardwareKey contains information associated with physical key events
 // Most applications should use KeyName for cross-platform compatibility.
 type HardwareKey struct {
@@ -34,4 +36,24 @@ type ScrollEvent struct {
 type DragEvent struct {
 	PointEvent
 	Dragged Delta
+}
+
+func NewRuneEvent(char rune) *RuneEvent {
+	return &RuneEvent{
+		char:      char,
+		eventTime: time.Now(),
+	}
+}
+
+type RuneEvent struct {
+	char      rune
+	eventTime time.Time
+}
+
+func (r *RuneEvent) Rune() rune {
+	return r.char
+}
+
+func (r *RuneEvent) When() time.Time {
+	return r.eventTime
 }

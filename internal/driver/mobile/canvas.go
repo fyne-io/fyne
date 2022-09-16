@@ -32,8 +32,9 @@ type mobileCanvas struct {
 	touched map[int]mobile.Touchable
 	padded  bool
 
-	onTypedRune func(rune)
-	onTypedKey  func(event *fyne.KeyEvent)
+	onTypedRune      func(rune)
+	onTypedRuneEvent func(*fyne.RuneEvent)
+	onTypedKey       func(event *fyne.KeyEvent)
 
 	inited                bool
 	lastTapDown           map[int]time.Time
@@ -108,6 +109,10 @@ func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 
 func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
+}
+
+func (c *mobileCanvas) SetOnTypedRuneEvent(typed func(*fyne.RuneEvent)) {
+	c.onTypedRuneEvent = typed
 }
 
 func (c *mobileCanvas) Size() fyne.Size {

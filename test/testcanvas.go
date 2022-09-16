@@ -37,8 +37,9 @@ type testCanvas struct {
 	padded      bool
 	transparent bool
 
-	onTypedRune func(rune)
-	onTypedKey  func(*fyne.KeyEvent)
+	onTypedRune      func(rune)
+	onTypedRuneEvent func(*fyne.RuneEvent)
+	onTypedKey       func(*fyne.KeyEvent)
 
 	fyne.ShortcutHandler
 	painter      SoftwarePainter
@@ -234,6 +235,13 @@ func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
 	defer c.propertyLock.Unlock()
 
 	c.onTypedRune = handler
+}
+
+func (c *testCanvas) SetOnTypedRuneEvent(handler func(*fyne.RuneEvent)) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
+	c.onTypedRuneEvent = handler
 }
 
 func (c *testCanvas) SetPadded(padded bool) {
