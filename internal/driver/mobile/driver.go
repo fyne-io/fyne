@@ -507,7 +507,8 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 				canvas.onTypedRune(r)
 			}
 			if canvas.onTypedRuneEvent != nil {
-				canvas.onTypedRuneEvent(r)
+				runeEvent := fyne.NewRuneEvent(char)
+				canvas.onTypedRuneEvent(runeEvent)
 			}
 		}
 	}
