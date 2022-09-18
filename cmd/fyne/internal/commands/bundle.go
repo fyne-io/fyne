@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -253,20 +252,18 @@ func writeHeader(pkg string, out *os.File) {
 	out.WriteString("\nimport \"fyne.io/fyne/v2\"\n")
 }
 
-func writeResource(file, name string, f io.Writer) {
+func writeResource(file, name string, f *os.File) {
 	res, err := fyne.LoadResourceFromPath(file)
 	if err != nil {
 		fyne.LogError("Unable to load file "+file, err)
 		return
 	}
 
-	staticRes, ok := res.(*fyne.StaticResource)
-	if !ok {
-		fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
-		return
-	}
+	// fyne.LoadResourceFromPath always returns a *fyne.StaticResource.
+	staticRes := res.(*fyne.StaticResource)
 
-	_, err = fmt.Fprintf(f, "var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(\n\t\t%q),\n}\n", name, staticRes.StaticName, staticRes.StaticContent)
+	const format = "var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(\n\t\t%q),\n}\n"
+	_, err = fmt.Fprintf(f, format, name, staticRes.StaticName, staticRes.StaticContent)
 	if err != nil {
 		fyne.LogError("Unable to write to bundled file", err)
 	}
