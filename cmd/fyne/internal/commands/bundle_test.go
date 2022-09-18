@@ -62,3 +62,19 @@ func TestWriteResource(t *testing.T) {
 
 	assert.Equal(t, expected, string(content))
 }
+
+func BenchmarkWriteResource(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		f, _ := ioutil.TempFile("", "*.go")
+		b.StartTimer()
+
+		writeHeader("test", f)
+		writeResource("testdata/bundle/content.txt", "contentTxt", f)
+
+		b.StopTimer()
+		f.Close()
+		os.Remove(f.Name())
+		b.StartTimer()
+	}
+}
