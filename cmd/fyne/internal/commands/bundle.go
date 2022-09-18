@@ -259,11 +259,8 @@ func writeResource(file, name string, f *os.File) {
 		return
 	}
 
-	// fyne.LoadResourceFromPath always returns a *fyne.StaticResource.
-	staticRes := res.(*fyne.StaticResource)
-
 	const format = "var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(\n\t\t%q),\n}\n"
-	_, err = fmt.Fprintf(f, format, name, staticRes.StaticName, staticRes.StaticContent)
+	_, err = fmt.Fprintf(f, format, name, res.Name(), res.Content())
 	if err != nil {
 		fyne.LogError("Unable to write to bundled file", err)
 	}
