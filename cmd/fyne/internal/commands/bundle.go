@@ -247,9 +247,9 @@ func sanitiseName(file, prefix string) string {
 
 func writeHeader(pkg string, out *os.File) {
 	out.WriteString(fileHeader)
-	out.WriteString("\npackage ")
+	out.WriteString("\n\npackage ")
 	out.WriteString(pkg)
-	out.WriteString("\nimport \"fyne.io/fyne/v2\"\n")
+	out.WriteString("\n\nimport \"fyne.io/fyne/v2\"\n\n")
 }
 
 func writeResource(file, name string, f *os.File) {

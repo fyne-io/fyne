@@ -1,6 +1,9 @@
 package commands
 
 import (
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,4 +28,37 @@ func TestSanitiseName_Special(t *testing.T) {
 	prefix := "file"
 
 	assert.Equal(t, "fileALongerNameWithSymsPng", sanitiseName(file, prefix))
+}
+
+func TestWriteResource(t *testing.T) {
+	f, err := ioutil.TempFile("", "*.go")
+	if err != nil {
+		t.Fatal("Unable to create temp file:", err)
+	}
+	defer func() {
+		f.Close()
+		os.Remove(f.Name())
+	}()
+
+	writeHeader("test", f)
+	writeResource("testdata/bundle/content.txt", "contentTxt", f)
+
+	const header = fileHeader + "\n\npackage test\n\nimport \"fyne.io/fyne/v2\"\n\n"
+	const expected = header + `var contentTxt = &fyne.StaticResource{
+		StaticName:    "content.txt",
+		StaticContent: []byte("I am bundled :)"),
+	}`
+
+	// Seek file to start so we can read the written data.
+	_, err = f.Seek(0, io.SeekStart)
+	if err != nil {
+		t.Fatal("Unable to seek temp file:", err)
+	}
+
+	content, err := ioutil.ReadAll(f)
+	if err != nil {
+		t.Fatal("Unable to read temp file:", err)
+	}
+
+	assert.Equal(t, expected, string(content))
 }
