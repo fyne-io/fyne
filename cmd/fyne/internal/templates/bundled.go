@@ -48,7 +48,7 @@ var resourceEntitlementsIosPlist = &fyne.StaticResource{
 var resourceFynemetadatainitGot = &fyne.StaticResource{
 	StaticName: "fyne_metadata_init.got",
 	StaticContent: []byte(
-		"package main\n\nimport (\n\t\"fyne.io/fyne/v2\"\n\t\"fyne.io/fyne/v2/app\"\n)\n\nfunc init() {\n\tapp.SetMetadata(fyne.AppMetadata{\n\t\tID: \"{{.AppID}}\",\n\t\tName: \"{{.Name}}\",\n\t\tVersion: \"{{.AppVersion}}\",\n\t\tBuild: {{.AppBuild}},\n\t\tIcon: fyneMetadataIcon,\n\t})\n}\n\n"),
+		"package main\n\nimport (\n\t\"fyne.io/fyne/v2\"\n\t\"fyne.io/fyne/v2/app\"\n)\n\nfunc init() {\n\tapp.SetMetadata(fyne.AppMetadata{\n\t\tID: \"{{.AppID}}\",\n\t\tName: \"{{.Name}}\",\n\t\tVersion: \"{{.AppVersion}}\",\n\t\tBuild: {{.AppBuild}},\n\t\tIcon: {{.ResGoString}},\n\t})\n}\n\n"),
 }
 var resourceIndexHtml = &fyne.StaticResource{
 	StaticName: "index.html",
@@ -58,7 +58,7 @@ var resourceIndexHtml = &fyne.StaticResource{
 var resourceLightCss = &fyne.StaticResource{
 	StaticName: "light.css",
 	StaticContent: []byte(
-		"body {\n    background-color: white;\n}\n.application-name {\n    color: #141415;\n    font-size: 18px;\n}\n.application-version {\n    color: #616161;\n    font-size: 12px;\n}\n.action {\n    color: #2196f3;\n}\n.action-error {\n    color: red;\n}"),
+		"body {\n    background-color: white;\n}\n.application-name {\n    color: #141415;\n    font-size: 18px;\n}\n.application-version {\n    color: #616161;\n    font-size: 12px;\n}\n.action {\n    color: #2196f3;\n}\n.action-error {\n    color: red;\n}\n"),
 }
 var resourceSpinnerdarkGif = &fyne.StaticResource{
 	StaticName: "spinner_dark.gif",
