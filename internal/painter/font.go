@@ -61,13 +61,18 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 	}
 
 	comp := val.(*fontCacheItem)
+	lock := sync.RWMutex{}
+	lock.RLock()
 	face := comp.faces[*opts]
+	lock.RUnlock()
 	if face == nil {
 		f1 := truetype.NewFace(comp.font, opts)
 		f2 := truetype.NewFace(comp.fallback, opts)
 		face = newFontWithFallback(f1, f2, comp.font, comp.fallback)
 
+		lock.Lock()
 		comp.faces[*opts] = face
+		lock.Unlock()
 	}
 
 	return face
