@@ -289,8 +289,16 @@ type compositeGlyphData struct {
 type compositeGlyphPart struct {
 	flags      uint16
 	glyphIndex GID
-	arg1, arg2 uint16     // before interpretation
-	scale      [4]float32 // x, 01, 10, y ; default to identity
+
+	// raw value before interpretation:
+	// arg1 and arg2 may be either :
+	//	- unsigned, when used as indices into the contour point list
+	//    (see argsAsIndices)
+	//  - signed, when used as translation in the transformation matrix
+	//	  (see argsAsTranslation)
+	arg1, arg2 uint16
+
+	scale [4]float32 // x, 01, 10, y ; default to identity
 }
 
 func (c *compositeGlyphPart) hasUseMyMetrics() bool {
@@ -313,13 +321,30 @@ func (c *compositeGlyphPart) isScaledOffsets() bool {
 	return c.flags&(scaledComponentOffset|unscaledComponentOffset) == scaledComponentOffset
 }
 
-func (c *compositeGlyphPart) transformPoints(points []contourPoint) {
-	transX, transY := float32(int16(c.arg1)), float32(int16(c.arg2))
-	if c.isAnchored() {
-		transX, transY = 0, 0
-	}
-	scale := c.scale
+const arg1And2AreWords = 1
 
+func (c *compositeGlyphPart) argsAsTranslation() (int16, int16) {
+	// arg1 and arg2 are interpreted as signed integers here
+	// the conversion depends on the original size (8 or 16 bits)
+	if c.flags&arg1And2AreWords != 0 {
+		return int16(c.arg1), int16(c.arg2)
+	}
+	return int16(int8(uint8(c.arg1))), int16(int8(uint8(c.arg2)))
+}
+
+func (c *compositeGlyphPart) argsAsIndices() (int, int) {
+	// arg1 and arg2 are interpreted as unsigned integers here
+	return int(c.arg1), int(c.arg2)
+}
+
+func (c *compositeGlyphPart) transformPoints(points []contourPoint) {
+	var transX, transY float32
+	if !c.isAnchored() {
+		arg1, arg2 := c.argsAsTranslation()
+		transX, transY = float32(arg1), float32(arg2)
+	}
+
+	scale := c.scale
 	// shortcut identity transform
 	if transX == 0 && transY == 0 && scale == [4]float32{1, 0, 0, 1} {
 		return
@@ -341,7 +366,7 @@ func (c *compositeGlyphPart) transformPoints(points []contourPoint) {
 // data starts after the glyph header
 func parseCompositeGlyphData(data []byte) (out compositeGlyphData, err error) {
 	const (
-		arg1And2AreWords = 1 << iota
+		_ = 1 << iota
 		_
 		_
 		weHaveAScale

@@ -9,6 +9,8 @@ import (
 	"io"
 )
 
+// Reader holds a byte slice and provide convenient methods
+// to interpret its content.
 type Reader struct {
 	data []byte
 	pos  int

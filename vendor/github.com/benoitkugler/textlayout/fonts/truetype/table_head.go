@@ -57,6 +57,13 @@ func (table *TableHead) ExpectedChecksum() uint32 {
 	return 0xB1B0AFBA - table.checkSumAdjustment
 }
 
+func (head *TableHead) Upem() uint16 {
+	if head.UnitsPerEm < 16 || head.UnitsPerEm > 16384 {
+		return 1000
+	}
+	return head.UnitsPerEm
+}
+
 // type TableHead struct {
 // 	VersionNumber      fixed
 // 	FontRevision       uint32

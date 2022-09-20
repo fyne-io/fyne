@@ -259,7 +259,7 @@ func (f *Font) getPointsForGlyph(gid GID, currentDepth int, allPoints *[]contour
 			}
 
 			if item.isAnchored() {
-				p1, p2 := int(item.arg1), int(item.arg2)
+				p1, p2 := item.argsAsIndices()
 				if p1 < len(*allPoints) && p2 < LC {
 					tx, ty := (*allPoints)[p1].X-compPoints[p2].X, (*allPoints)[p1].Y-compPoints[p2].Y
 					for i := range compPoints {

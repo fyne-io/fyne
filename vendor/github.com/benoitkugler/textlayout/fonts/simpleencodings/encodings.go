@@ -8,6 +8,7 @@ import (
 	"github.com/benoitkugler/textlayout/fonts/glyphsnames"
 )
 
+// Encoding maps a one byte code to a glyph name.
 type Encoding [256]string
 
 // RuneToByte returns a rune to byte map

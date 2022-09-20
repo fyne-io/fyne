@@ -5,6 +5,8 @@
 // It does not currently support CIDType1 fonts.
 package fonts
 
+import "math"
+
 // Resource is a combination of io.Reader, io.Seeker and io.ReaderAt.
 // This interface is satisfied by most things that you'd want
 // to parse, for example *os.File, io.SectionReader or *bytes.Reader.
@@ -82,14 +84,16 @@ type Faces = []Face
 // of a font file. Some font format support to store several
 // fonts inside one file. For the other formats, the returned slice will
 // have length 1.
-type FontLoader interface {
-	Load(file Resource) (Faces, error)
-}
+type FontLoader = func(file Resource) (Faces, error)
 
 // GID is used to identify glyphs in a font.
 // It is mostly internal to the font and should not be confused with
 // Unicode code points.
 type GID uint32
+
+// EmptyGlyph represents an invisible glyph, which should not be drawn,
+// but whose advance and offsets should still be accounted for when rendering.
+const EmptyGlyph GID = math.MaxUint32
 
 type CmapEncoding uint8
 
@@ -380,4 +384,91 @@ type FaceID struct {
 	// For variable fonts, stores 1 + the instance index.
 	// (0 to ignore variations).
 	Instance uint16
+}
+
+// FaceDescription is a summary of a font file.
+type FaceDescription struct {
+	Family string
+
+	// TODO: more fields will be added
+}
+
+// Style (also called slant) allows italic or oblique faces to be selected.
+type Style uint8
+
+const (
+	// A face that is neither italic not obliqued.
+	StyleNormal Style = iota + 1
+	// A form that is generally cursive in nature.
+	StyleItalic
+	// A typically-sloped version of the regular face.
+	StyleOblique
+)
+
+// Weight is the degree of blackness or stroke thickness of a font.
+// This value ranges from 100.0 to 900.0, with 400.0 as normal.
+type Weight float32
+
+const (
+	// Thin weight (100), the thinnest value.
+	WeightThin Weight = 100
+	// Extra light weight (200).
+	WeightExtraLight Weight = 200
+	// Light weight (300).
+	WeightLight Weight = 300
+	// Normal (400).
+	WeightNormal Weight = 400
+	// Medium weight (500, higher than normal).
+	WeightMedium Weight = 500
+	// Semibold weight (600).
+	WeightSemibold Weight = 600
+	// Bold weight (700).
+	WeightBold Weight = 700
+	// Extra-bold weight (800).
+	WeightExtraBold Weight = 800
+	// Black weight (900), the thickest value.
+	WeightBlack Weight = 900
+)
+
+// Stretch is the width of a font as an approximate fraction of the normal width.
+// Widths range from 0.5 to 2.0 inclusive, with 1.0 as the normal width.
+type Stretch float32
+
+const (
+	// Ultra-condensed width (50%), the narrowest possible.
+	StretchUltraCondensed Stretch = 0.5
+	// Extra-condensed width (62.5%).
+	StretchExtraCondensed Stretch = 0.625
+	// Condensed width (75%).
+	StretchCondensed Stretch = 0.75
+	// Semi-condensed width (87.5%).
+	StretchSemiCondensed Stretch = 0.875
+	// Normal width (100%).
+	StretchNormal Stretch = 1.0
+	// Semi-expanded width (112.5%).
+	StretchSemiExpanded Stretch = 1.125
+	// Expanded width (125%).
+	StretchExpanded Stretch = 1.25
+	// Extra-expanded width (150%).
+	StretchExtraExpanded Stretch = 1.5
+	// Ultra-expanded width (200%), the widest possible.
+	StretchUltraExpanded Stretch = 2.0
+)
+
+// FontDescriptor is a handle on a font, able to efficiently query
+// some global information.
+type FontDescriptor interface {
+	// Family queries the font family name.
+	Family() string
+
+	// Aspect queries the visual properties of the font.
+	// If not found, zero values should be returned.
+	Aspect() (Style, Weight, Stretch)
+
+	// AdditionalStyle returns a description of the style of the font,
+	// including information not found by Aspect()
+	AdditionalStyle() string
+
+	// Cmap returns the Unicode to Glyph mapping
+	LoadCmap() (Cmap, error)
 }

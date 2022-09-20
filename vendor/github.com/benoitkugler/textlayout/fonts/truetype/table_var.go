@@ -6,17 +6,6 @@ import (
 	"fmt"
 )
 
-type fvarHeader struct {
-	majorVersion    uint16 // Major version number of the font variations table — set to 1.
-	minorVersion    uint16 // Minor version number of the font variations table — set to 0.
-	axesArrayOffset uint16 // Offset in bytes from the beginning of the table to the start of the VariationAxisRecord array.
-	reserved        uint16 // This field is permanently reserved. Set to 2.
-	axisCount       uint16 // The number of variation axes in the font (the number of records in the axes array).
-	axisSize        uint16 // The size in bytes of each VariationAxisRecord — set to 20 (0x0014) for this version.
-	instanceCount   uint16 // The number of named instances defined in the font (the number of records in the instances array).
-	instanceSize    uint16 // The size in bytes of each InstanceRecord — set to either axisCount * sizeof(Fixed) + 4, or to axisCount * sizeof(Fixed) + 6.
-}
-
 func fixed1616ToFloat(fi uint32) float32 {
 	// value are actually signed integers
 	return float32(int32(fi)) / (1 << 16)
@@ -28,25 +17,17 @@ func fixed214ToFloat(fi uint16) float32 {
 }
 
 func parseTableFvar(table []byte, names TableName) (out TableFvar, err error) {
-	const headerSize = 8 * 2
-	if len(table) < headerSize {
-		return out, errors.New("invalid 'fvar' table header")
+	hd, err := parseFvarHeader(table)
+	if err != nil {
+		return out, fmt.Errorf("invalid 'fvar' table header: %s", err)
 	}
-	// majorVersion := binary.BigEndian.Uint16(table)
-	// minorVersion := binary.BigEndian.Uint16(table[2:])
-	axesArrayOffset := binary.BigEndian.Uint16(table[4:])
-	// reserved := binary.BigEndian.Uint16(table[6:])
-	axisCount := binary.BigEndian.Uint16(table[8:])
-	axisSize := binary.BigEndian.Uint16(table[10:])
-	instanceCount := binary.BigEndian.Uint16(table[12:])
-	instanceSize := binary.BigEndian.Uint16(table[14:])
 
-	axis, instanceOffset, err := parseVarAxis(table, int(axesArrayOffset), int(axisSize), axisCount)
+	axis, instanceOffset, err := parseVarAxisList(table, int(hd.axesArrayOffset), int(hd.axisSize), hd.axisCount)
 	if err != nil {
 		return out, err
 	}
 	// the instance offset is at the end of the axis
-	instances, err := parseVarInstance(table, instanceOffset, int(instanceSize), instanceCount, axisCount)
+	instances, err := parseVarInstance(table, instanceOffset, int(hd.instanceSize), hd.instanceCount, hd.axisCount)
 	if err != nil {
 		return out, err
 	}
@@ -56,7 +37,7 @@ func parseTableFvar(table []byte, names TableName) (out TableFvar, err error) {
 	return out, nil
 }
 
-func parseVarAxis(table []byte, offset, size int, count uint16) ([]VarAxis, int, error) {
+func parseVarAxisList(table []byte, offset, size int, count uint16) ([]VarAxis, int, error) {
 	// we need at least 20 byte per axis ....
 	if size < 20 {
 		return nil, 0, errors.New("invalid 'fvar' table axis")
@@ -68,28 +49,12 @@ func parseVarAxis(table []byte, offset, size int, count uint16) ([]VarAxis, int,
 		return nil, 0, errors.New("invalid 'fvar' table axis")
 	}
 
-	out := make([]VarAxis, count) // limited by 16 bit type
+	out := make([]VarAxis, count) // guarded by previous check
 	for i := range out {
-		out[i] = parseOneVarAxis(table[offset+i*size:])
+		out[i].mustParse(table[offset+i*size:])
 	}
 
 	return out, end, nil
-}
-
-// do not check the size of data
-func parseOneVarAxis(axis []byte) VarAxis {
-	var out VarAxis
-	out.Tag = Tag(binary.BigEndian.Uint32(axis))
-
-	// convert from 16.16 to float64
-	out.Minimum = fixed1616ToFloat(binary.BigEndian.Uint32(axis[4:]))
-	out.Default = fixed1616ToFloat(binary.BigEndian.Uint32(axis[8:]))
-	out.Maximum = fixed1616ToFloat(binary.BigEndian.Uint32(axis[12:]))
-
-	out.flags = binary.BigEndian.Uint16(axis[16:])
-	out.strid = NameID(binary.BigEndian.Uint16(axis[18:]))
-
-	return out
 }
 
 func parseVarInstance(table []byte, offset, size int, count, axisCount uint16) ([]VarInstance, error) {

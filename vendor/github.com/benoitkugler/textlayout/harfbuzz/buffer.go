@@ -175,21 +175,20 @@ func (b *Buffer) AddRunes(text []rune, itemOffset, itemLength int) {
 }
 
 // GuessSegmentProperties fills unset buffer segment properties based on buffer Unicode
-// contents.
+// contents and can be used when no other information is available.
 //
-// If buffer script is zero, it
+// If buffer `Props.Script` is zero, it
 // will be set to the Unicode script of the first character in
 // the buffer that has a script other than Common,
 // Inherited, and Unknown.
 //
-// Next, if buffer direction is zero,
+// Next, if buffer `Props.Direction` is zero,
 // it will be set to the natural horizontal direction of the
-// buffer script, defaulting to LeftToRight.
+// buffer script, defaulting to `LeftToRight`.
 //
-// Finally, if buffer language is empty,
+// Finally, if buffer Props.Language is empty,
 // it will be set to the process's default language.
-// This may change in the future by taking buffer script into consideration when choosing a language.
-func (b *Buffer) guessSegmentProperties() {
+func (b *Buffer) GuessSegmentProperties() {
 	/* If script is not set, guess from buffer contents */
 	if b.Props.Script == 0 {
 		for _, info := range b.Info {
@@ -465,7 +464,8 @@ func findMinCluster(infos []GlyphInfo, start, end, cluster int) int {
 }
 
 func (b *Buffer) unsafeToBreakSetMask(infos []GlyphInfo,
-	start, end, cluster int) {
+	start, end, cluster int,
+) {
 	for i := start; i < end; i++ {
 		if cluster != infos[i].Cluster {
 			b.scratchFlags |= bsfHasUnsafeToBreak

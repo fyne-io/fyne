@@ -11,7 +11,7 @@ github.com/BurntSushi/toml/internal
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
-# github.com/benoitkugler/textlayout v0.0.5
+# github.com/benoitkugler/textlayout v0.1.3
 github.com/benoitkugler/textlayout/fonts
 github.com/benoitkugler/textlayout/fonts/binaryreader
 github.com/benoitkugler/textlayout/fonts/glyphsnames
@@ -63,7 +63,7 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
-# github.com/go-text/typesetting v0.0.0-20220411150340-35994bc27a7b
+# github.com/go-text/typesetting v0.0.0-20220919164209-53347960f378
 ## explicit
 github.com/go-text/typesetting/di
 github.com/go-text/typesetting/font

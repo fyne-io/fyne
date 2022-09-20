@@ -57,15 +57,6 @@ type Variation struct {
 	Value float32 // in design units
 }
 
-type VarAxis struct {
-	Tag     Tag     // Tag identifying the design variation for the axis.
-	Minimum float32 // mininum value on the variation axis that the font covers
-	Default float32 // default position on the axis
-	Maximum float32 // maximum value on the variation axis that the font covers
-	flags   uint16  // Axis qualifiers — see details below.
-	strid   NameID  // name entry in the font's ‘name’ table
-}
-
 type VarInstance struct {
 	Coords    []float32 // in design units; length: number of axis
 	Subfamily NameID

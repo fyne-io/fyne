@@ -11,11 +11,7 @@ import (
 	type1c "github.com/benoitkugler/textlayout/fonts/type1C"
 )
 
-var Loader fonts.FontLoader = loader{}
-
 var _ fonts.Face = (*Font)(nil)
-
-type loader struct{}
 
 type fixed struct {
 	Major int16
@@ -63,8 +59,7 @@ type Font struct {
 
 	// Optionnal, only present in variable fonts
 
-	varCoords []float32 // coordinates in usage, may be nil
-
+	varCoords  []float32   // coordinates in usage, may be nil
 	hvar, vvar *tableHVvar // optional
 	avar       tableAvar
 	mvar       TableMvar
