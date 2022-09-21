@@ -130,6 +130,9 @@ func DrawString(dst draw.Image, s string, color color.Color, f font.Face, face g
 	dot := freetype.Pt(0, height-f.Metrics().Descent.Ceil())
 	walkString(face, s, float32ToFixed266(fontSize), tabWidth, &dot.X, scale, func(r rune) {
 		dr, mask, maskp, _, ok := f.Glyph(dot, r)
+		if !ok {
+			dr, mask, maskp, _, ok = f.Glyph(dot, 0xfffd)
+		}
 		if ok {
 			draw.DrawMask(dst, dr, src, image.Point{}, mask, maskp, draw.Over)
 		}
