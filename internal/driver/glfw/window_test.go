@@ -1494,16 +1494,16 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w.Canvas().Focus(content)
 
 	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyF, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyF, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModControl|glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Press, glfw.ModControl|glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyF, 0, glfw.Release, glfw.ModControl|glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, 0)
 
 	w.WaitForEvents()
 
 	assert.Equal(t, 1, len(content.capturedShortcuts))
-	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
+	assert.Equal(t, "CustomDesktop:Shift+Control+f", content.capturedShortcuts[0].ShortcutName())
 }
 
 func TestWindow_ManualFocus(t *testing.T) {
