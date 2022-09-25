@@ -11,6 +11,9 @@ jobs:
       matrix:
         go-version: ['1.17.x', '1.20.x']
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            runner: xvfb-run
 
     steps:
     - uses: actions/checkout@v3
@@ -35,7 +38,7 @@ jobs:
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
-      run: go test ./...
+      run: ${{ matrix.runner }} go test ./...
 
     - name: Wayland Tests
       run: go test -tags ci,wayland ./...
