@@ -26,7 +26,7 @@ jobs:
         go install github.com/mattn/goveralls@latest
 
     - name: Vet
-      run: go vet -tags ci ./...
+      run: go vet ./...
 
     - name: Goimports
       run: test -z "$(goimports -e -d . | tee /dev/stderr)"
