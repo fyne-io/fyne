@@ -31,6 +31,7 @@ jobs:
         libx11-dev
         libxkbcommon-dev
         xorg-dev
+        xvfb
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests

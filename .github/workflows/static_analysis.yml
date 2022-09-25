@@ -27,6 +27,7 @@ jobs:
         libgles2-mesa-dev
         libx11-dev
         xorg-dev
+        xvfb
 
     - name: Install analysis tools
       run: |
