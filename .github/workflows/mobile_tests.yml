@@ -23,5 +23,4 @@ jobs:
       run: sudo apt-get update && sudo apt-get install gcc libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
     - name: Tests
-      run: go test -tags "ci mobile" ./...
-
+      run: go test -test.benchtime 10ms -tags "ci mobile" ./...
