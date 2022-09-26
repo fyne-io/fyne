@@ -35,32 +35,32 @@ func BenchmarkSize_Subtract(b *testing.B) {
 // because this slows down the speed by factor 10.
 func TestPosition_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkPositionAdd)
-	addXY := testing.Benchmark(benchmarkPositionAddXY)
-	assert.Less(t, nsPerOpPrecise(add), nsPerOpPrecise(addXY)*5)
+	slowAdd := testing.Benchmark(benchmarkSlowPositionAdd)
+	assert.Less(t, nsPerOpPrecise(add)*2, nsPerOpPrecise(slowAdd))
 }
 
 // This test prevents Position.Subtract to be simplified to `return p.SubtractXY(v.Components())`
 // because this slows down the speed by factor 10.
 func TestPosition_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkPositionSubtract)
-	subtractXY := testing.Benchmark(benchmarkPositionSubtractXY)
-	assert.Less(t, nsPerOpPrecise(subtract), nsPerOpPrecise(subtractXY)*5)
+	slowSubtract := testing.Benchmark(benchmarkSlowPositionSubtract)
+	assert.Less(t, nsPerOpPrecise(subtract)*2, nsPerOpPrecise(slowSubtract))
 }
 
 // This test prevents Size.Add to be simplified to `return s.AddWidthHeight(v.Components())`
 // because this slows down the speed by factor 10.
 func TestSize_Add_Speed(t *testing.T) {
 	add := testing.Benchmark(benchmarkSizeAdd)
-	addWidthHeight := testing.Benchmark(benchmarkSizeAddWidthHeight)
-	assert.Less(t, nsPerOpPrecise(add), nsPerOpPrecise(addWidthHeight)*5)
+	slowAdd := testing.Benchmark(benchmarkSlowSizeAdd)
+	assert.Less(t, nsPerOpPrecise(add)*2, nsPerOpPrecise(slowAdd))
 }
 
 // This test prevents Size.Subtract to be simplified to `return s.SubtractWidthHeight(v.Components())`
 // because this slows down the speed by factor 10.
 func TestSize_Subtract_Speed(t *testing.T) {
 	subtract := testing.Benchmark(benchmarkSizeSubtract)
-	subtractWidthHeight := testing.Benchmark(benchmarkSizeSubtractWidthHeight)
-	assert.Less(t, nsPerOpPrecise(subtract), nsPerOpPrecise(subtractWidthHeight)*5)
+	slowSubtract := testing.Benchmark(benchmarkSlowSizeSubtract)
+	assert.Less(t, nsPerOpPrecise(subtract)*2, nsPerOpPrecise(slowSubtract))
 }
 
 var benchmarkResult interface{}
@@ -129,6 +129,58 @@ func benchmarkSizeSubtractWidthHeight(b *testing.B) {
 	benchmarkResult = size
 }
 
+func benchmarkSlowPositionAdd(b *testing.B) {
+	pos := fyne.NewPos(10, 10)
+	for n := 0; n < b.N; n++ {
+		pos = slowPositionAdd(pos, fyne.NewPos(float32(n), float32(n)))
+	}
+	benchmarkResult = pos
+}
+
+func benchmarkSlowPositionSubtract(b *testing.B) {
+	pos := fyne.NewPos(10, 10)
+	for n := 0; n < b.N; n++ {
+		pos = slowPositionSubtract(pos, fyne.NewPos(float32(n), float32(n)))
+	}
+	benchmarkResult = pos
+}
+
+func benchmarkSlowSizeAdd(b *testing.B) {
+	size := fyne.NewSize(10, 10)
+	for n := 0; n < b.N; n++ {
+		size = slowSizeAdd(size, fyne.NewSize(float32(n), float32(n)))
+	}
+	benchmarkResult = size
+}
+
+func benchmarkSlowSizeSubtract(b *testing.B) {
+	size := fyne.NewSize(10, 10)
+	for n := 0; n < b.N; n++ {
+		size = slowSizeSubtract(size, fyne.NewSize(float32(n), float32(n)))
+	}
+	benchmarkResult = size
+}
+
 func nsPerOpPrecise(b testing.BenchmarkResult) float64 {
 	return float64(b.T.Nanoseconds()) / float64(b.N)
+}
+
+func slowPositionAdd(p fyne.Position, v fyne.Vector2) fyne.Position {
+	x, y := v.Components()
+	return p.AddXY(x, y)
+}
+
+func slowPositionSubtract(p fyne.Position, v fyne.Vector2) fyne.Position {
+	x, y := v.Components()
+	return p.SubtractXY(x, y)
+}
+
+func slowSizeAdd(s fyne.Size, v fyne.Vector2) fyne.Size {
+	w, h := v.Components()
+	return s.AddWidthHeight(w, h)
+}
+
+func slowSizeSubtract(s fyne.Size, v fyne.Vector2) fyne.Size {
+	w, h := v.Components()
+	return s.SubtractWidthHeight(w, h)
 }
