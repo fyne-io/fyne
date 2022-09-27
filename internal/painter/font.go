@@ -110,6 +110,9 @@ func ClearFontCache() {
 	fontCache.Range(func(_, val interface{}) bool {
 		item := val.(*fontCacheItem)
 		for _, face := range item.faces {
+			if face == nil {
+				continue
+			}
 			err := face.Close()
 
 			if err != nil {
@@ -220,17 +223,30 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 	in.Text = runes
 	in.RunStart = 0
 	in.RunEnd = len(runes)
-	out, _ = shaping.Shape(in)
 
-	for i, c := range runes {
-		if c == '\r' {
-			continue
-		}
-		if c == '\t' {
-			*advance = tabStop(spacew, *advance, tabWidth)
-		} else {
-			cb(c)
-			*advance += float32ToFixed266(fixed266ToFloat32(out.Glyphs[i].XAdvance) * scale)
+	ins := shaping.SplitByFontGlyphs(in, []gotext.Face{f}) // TODO provide fallback...
+	for _, in := range ins {
+		out, _ = shaping.Shape(in)
+
+		var c rune
+		nextRuneIndex := 0
+		last := -1
+		for _, g := range out.Glyphs {
+			if g.ClusterIndex != last {
+				c = in.Text[nextRuneIndex]
+				nextRuneIndex += g.RuneCount
+				last = g.ClusterIndex
+			}
+
+			if c == '\r' {
+				continue
+			}
+			if c == '\t' {
+				*advance = tabStop(spacew, *advance, tabWidth)
+			} else {
+				cb(c)
+				*advance += float32ToFixed266(fixed266ToFloat32(g.XAdvance) * scale)
+			}
 		}
 	}
 
