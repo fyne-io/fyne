@@ -11,7 +11,7 @@ func init() {
 		Name: "{{.Name}}",
 		Version: "{{.AppVersion}}",
 		Build: {{.AppBuild}},
-		Icon: fyneMetadataIcon,
+		Icon: {{.ResGoString}},
 	})
 }
 

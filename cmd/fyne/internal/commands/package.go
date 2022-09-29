@@ -32,6 +32,7 @@ type appData struct {
 	icon, Name        string
 	AppID, AppVersion string
 	AppBuild          int
+	ResGoString       string
 }
 
 // Package returns the cli command for packaging fyne applications
