@@ -45,7 +45,7 @@ func isDark() bool {
 
 func (w *window) computeCanvasSize(width, height int) fyne.Size {
 	if w.fixedSize {
-		return fyne.NewSize(internal.UnscaleInt(w.canvas, w.width), internal.UnscaleInt(w.canvas, w.height))
+		return fyne.NewSize(scale.UnscaleInt(w.canvas, w.width), scale.UnscaleInt(w.canvas, w.height))
 	}
-	return fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height))
+	return fyne.NewSize(scale.UnscaleInt(w.canvas, width), scale.UnscaleInt(w.canvas, height))
 }

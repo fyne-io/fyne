@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/scale"
 )
 
 type funcData struct {
@@ -263,8 +263,8 @@ func updateGLContext(w *window) {
 	size := canvas.Size()
 
 	// w.width and w.height are not correct if we are maximised, so figure from canvas
-	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
-	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
+	winWidth := float32(scale.ScaleInt(canvas, size.Width)) * canvas.texScale
+	winHeight := float32(scale.ScaleInt(canvas, size.Height)) * canvas.texScale
 
 	canvas.Painter().SetFrameBufferScale(canvas.texScale)
 	w.canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))

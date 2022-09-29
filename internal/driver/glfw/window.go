@@ -9,11 +9,11 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/scale"
 )
 
 const (
@@ -49,7 +49,7 @@ func (w *window) minSizeOnScreen() (int, int) {
 
 // screenSize computes the actual output size of the given content size in screen pixels
 func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
-	return internal.ScaleInt(w.canvas, canvasSize.Width), internal.ScaleInt(w.canvas, canvasSize.Height)
+	return scale.ScaleInt(w.canvas, canvasSize.Width), scale.ScaleInt(w.canvas, canvasSize.Height)
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -58,7 +58,7 @@ func (w *window) Resize(size fyne.Size) {
 	w.runOnMainWhenCreated(func() {
 		w.viewLock.Lock()
 
-		width, height := internal.ScaleInt(w.canvas, bigEnough.Width), internal.ScaleInt(w.canvas, bigEnough.Height)
+		width, height := scale.ScaleInt(w.canvas, bigEnough.Width), scale.ScaleInt(w.canvas, bigEnough.Height)
 		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
 			w.shouldWidth, w.shouldHeight = width, height
 			w.width, w.height = width, height
@@ -306,8 +306,8 @@ func (w *window) processMoved(x, y int) {
 func (w *window) processResized(width, height int) {
 	canvasSize := w.computeCanvasSize(width, height)
 	if !w.fullScreen {
-		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
-		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
+		w.width = scale.ScaleInt(w.canvas, canvasSize.Width)
+		w.height = scale.ScaleInt(w.canvas, canvasSize.Height)
 	}
 
 	if !w.visible { // don't redraw if hidden
@@ -353,7 +353,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	w.mouseLock.Lock()
 	previousPos := w.mousePos
-	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
+	w.mousePos = fyne.NewPos(scale.UnscaleInt(w.canvas, int(xpos)), scale.UnscaleInt(w.canvas, int(ypos)))
 	mousePos := w.mousePos
 	mouseButton := w.mouseButton
 	mouseDragPos := w.mouseDragPos
@@ -507,7 +507,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	if mousePos.IsZero() { // window may not be focused (darwin mostly) and so position callbacks not happening
 		xpos, ypos := w.view().GetCursorPos()
 		w.mouseLock.Lock()
-		w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
+		w.mousePos = fyne.NewPos(scale.UnscaleInt(w.canvas, int(xpos)), scale.UnscaleInt(w.canvas, int(ypos)))
 		mousePos = w.mousePos
 		w.mouseLock.Unlock()
 	}

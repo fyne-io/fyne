@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -87,7 +88,7 @@ func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 }
 
 func (c *testCanvas) Capture() image.Image {
-	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
+	bounds := image.Rect(0, 0, scale.ScaleInt(c, c.Size().Width), scale.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
 	if !c.transparent {
 		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)

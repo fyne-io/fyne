@@ -432,8 +432,8 @@ func (w *window) rescaleOnMain() {
 	//	if w.fullScreen {
 	w.width, w.height = w.viewport.GetSize()
 	scaledFull := fyne.NewSize(
-		internal.UnscaleInt(w.canvas, w.width),
-		internal.UnscaleInt(w.canvas, w.height))
+		scale.UnscaleInt(w.canvas, w.width),
+		scale.UnscaleInt(w.canvas, w.height))
 	w.canvas.Resize(scaledFull)
 	return
 	//	}

@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
@@ -77,7 +78,7 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	}
 	if i.Icon != nil {
 		data := i.Icon.Content()
-		if painter.IsResourceSVG(i.Icon) {
+		if svg.IsResourceSVG(i.Icon) {
 			b := &bytes.Buffer{}
 			img := painter.PaintImage(canvas.NewImageFromResource(i.Icon), nil, 64, 64)
 			err := png.Encode(b, img)
