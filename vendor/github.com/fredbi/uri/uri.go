@@ -1,3 +1,15 @@
+// Package uri is meant to be an RFC 3986 compliant URI builder and parser.
+//
+// This is based on the work from ttacon/uri (credits: Trey Tacon).
+//
+// This fork concentrates on RFC 3986 strictness for URI parsing and validation.
+//
+// Reference: https://tools.ietf.org/html/rfc3986
+//
+// Tests have been augmented with test suites of URI validators in other languages:
+// perl, python, scala, .Net.
+//
+// Extra features like MySQL URIs present in the original repo have been removed.
 package uri
 
 import (
@@ -24,51 +36,84 @@ var (
 	ErrMissingHost      = errors.New("missing host in URI")
 )
 
-// SchemesWithDNSHost provides a list of schemes for which the host validation
-// does not follow RFC3986 (which is quite generic), but assume a valid
+// UsesDNSHostValidation returns true if the provided scheme has host validation
+// that does not follow RFC3986 (which is quite generic), but assume a valid
 // DNS hostname instead.
 //
 // See: https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
-//
-var SchemesWithDNSHost map[string]bool
-
-func init() {
-	SchemesWithDNSHost = map[string]bool{
-		"dns":      true,
-		"dntp":     true,
-		"finger":   true,
-		"ftp":      true,
-		"git":      true,
-		"http":     true,
-		"https":    true,
-		"imap":     true,
-		"irc":      true,
-		"jms":      true,
-		"mailto":   true,
-		"nfs":      true,
-		"nntp":     true,
-		"ntp":      true,
-		"postgres": true,
-		"redis":    true,
-		"rmi":      true,
-		"rtsp":     true,
-		"rsync":    true,
-		"sftp":     true,
-		"skype":    true,
-		"smtp":     true,
-		"snmp":     true,
-		"soap":     true,
-		"ssh":      true,
-		"steam":    true,
-		"svn":      true,
-		"tcp":      true,
-		"telnet":   true,
-		"udp":      true,
-		"vnc":      true,
-		"wais":     true,
-		"ws":       true,
-		"wss":      true,
+func UsesDNSHostValidation(scheme string) bool {
+	switch scheme {
+	case "dns":
+		return true
+	case "dntp":
+		return true
+	case "finger":
+		return true
+	case "ftp":
+		return true
+	case "git":
+		return true
+	case "http":
+		return true
+	case "https":
+		return true
+	case "imap":
+		return true
+	case "irc":
+		return true
+	case "jms":
+		return true
+	case "mailto":
+		return true
+	case "nfs":
+		return true
+	case "nntp":
+		return true
+	case "ntp":
+		return true
+	case "postgres":
+		return true
+	case "redis":
+		return true
+	case "rmi":
+		return true
+	case "rtsp":
+		return true
+	case "rsync":
+		return true
+	case "sftp":
+		return true
+	case "skype":
+		return true
+	case "smtp":
+		return true
+	case "snmp":
+		return true
+	case "soap":
+		return true
+	case "ssh":
+		return true
+	case "steam":
+		return true
+	case "svn":
+		return true
+	case "tcp":
+		return true
+	case "telnet":
+		return true
+	case "udp":
+		return true
+	case "vnc":
+		return true
+	case "wais":
+		return true
+	case "ws":
+		return true
+	case "wss":
+		return true
 	}
+
+	return false
 }
 
 // URI represents a general RFC3986 specified URI.
@@ -124,21 +169,21 @@ type Builder interface {
 }
 
 const (
-	// string literals
-	colonMark       = ":"
-	questionMark    = "?"
-	fragmentMark    = "#"
-	percentMark     = "%"
-	atHost          = "@"
+	// char and string literals
+	colonMark       = ':'
+	questionMark    = '?'
+	fragmentMark    = '#'
+	percentMark     = '%'
+	atHost          = '@'
 	authorityPrefix = "//"
 )
 
 var (
 	// byte literals
-	atBytes       = []byte(atHost)
-	colonBytes    = []byte(colonMark)
-	queryBytes    = []byte(questionMark)
-	fragmentBytes = []byte(fragmentMark)
+	atBytes       = []byte{atHost}
+	colonBytes    = []byte{colonMark}
+	queryBytes    = []byte{questionMark}
+	fragmentBytes = []byte{fragmentMark}
 )
 
 // IsURI tells if a URI is valid according to RFC3986/RFC397
@@ -167,9 +212,9 @@ func ParseReference(raw string) (URI, error) {
 
 func parse(raw string, withURIReference bool) (URI, error) {
 	var (
-		schemeEnd   = strings.Index(raw, colonMark)
-		hierPartEnd = strings.Index(raw, questionMark)
-		queryEnd    = strings.Index(raw, fragmentMark)
+		schemeEnd   = strings.IndexByte(raw, colonMark)
+		hierPartEnd = strings.IndexByte(raw, questionMark)
+		queryEnd    = strings.IndexByte(raw, fragmentMark)
 		scheme      string
 
 		curr int
@@ -362,10 +407,7 @@ func (u *uri) Validate() error {
 	}
 	if u.hierPart != "" {
 		if u.authority != nil {
-			a := u.Authority()
-			if a != nil {
-				return a.Validate(u.scheme)
-			}
+			return u.Authority().Validate(u.scheme)
 		}
 	}
 	// empty hierpart case
@@ -391,7 +433,7 @@ func (a authorityInfo) String() string {
 	if len(a.userinfo) > 0 {
 		buf.Write(atBytes)
 	}
-	if strings.Index(a.host, colonMark) > 0 {
+	if strings.IndexByte(a.host, colonMark) > 0 {
 		// ipv6 address host
 		buf.WriteString("[" + a.host + "]")
 	} else {
@@ -418,7 +460,7 @@ func (a authorityInfo) Validate(schemes ...string) error {
 	if a.host != "" {
 		var isIP bool
 		if ok := rexIPv6Zone.MatchString(a.host); ok {
-			z := strings.Index(a.host, percentMark)
+			z := strings.IndexByte(a.host, percentMark)
 			isIP = net.ParseIP(a.host[0:z]) != nil
 		} else {
 			isIP = net.ParseIP(a.host) != nil
@@ -430,7 +472,7 @@ func (a authorityInfo) Validate(schemes ...string) error {
 				return ErrInvalidHost
 			}
 			for _, scheme := range schemes {
-				if SchemesWithDNSHost[scheme] {
+				if UsesDNSHostValidation(scheme) {
 					// DNS name
 					isHost = rexHostname.MatchString(unescapedHost)
 				} else {
@@ -485,7 +527,7 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 		}
 
 		host = hier
-		if at := strings.Index(host, atHost); at > 0 {
+		if at := strings.IndexByte(host, atHost); at > 0 {
 			userinfo = host[:at]
 			if at+1 < len(host) {
 				host = host[at+1:]
@@ -502,13 +544,13 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 			} else {
 				return nil, ErrInvalidURI
 			}
-			if colon := strings.Index(rawHost, colonMark); colon >= 0 {
+			if colon := strings.IndexByte(rawHost, colonMark); colon >= 0 {
 				if colon+1 < len(rawHost) {
 					port = rawHost[colon+1:]
 				}
 			}
 		} else {
-			if colon := strings.Index(host, colonMark); colon >= 0 {
+			if colon := strings.IndexByte(host, colonMark); colon >= 0 {
 				if colon+1 < len(host) {
 					port = host[colon+1:]
 				}

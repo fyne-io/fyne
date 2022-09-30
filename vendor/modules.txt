@@ -15,7 +15,7 @@ github.com/akavel/rsrc/ico
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
+# github.com/fredbi/uri v0.0.0-20220929122239-d445bfaa03f1
 ## explicit
 github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.5.4
@@ -94,7 +94,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 ## explicit
 github.com/srwiley/rasterx
-# github.com/stretchr/testify v1.7.2
+# github.com/stretchr/testify v1.8.0
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
