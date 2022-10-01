@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -44,13 +45,19 @@ func NewFileURI(path string) fyne.URI {
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
 	scheme := ""
+	validScheme := false
 	for i := 0; i < len(s); i++ {
 		if s[i] == ':' {
+			validScheme = true
 			break
 		}
 		scheme += string(s[i])
 	}
 	scheme = strings.ToLower(scheme)
+
+	if !validScheme {
+		return nil, errors.New("invalid URI, scheme must be present")
+	}
 
 	if scheme == "file" {
 		// Does this really deserve to be special? In principle, the
