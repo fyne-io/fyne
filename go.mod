@@ -5,7 +5,7 @@ go 1.14
 require (
 	fyne.io/systray v1.10.1-0.20220621085403-9a2652634e93
 	github.com/BurntSushi/toml v1.1.0
-	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
+	github.com/fredbi/uri v0.0.0-20220929122239-d445bfaa03f1
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
@@ -23,7 +23,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.4.0
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
