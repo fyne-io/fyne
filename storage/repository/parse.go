@@ -44,20 +44,12 @@ func NewFileURI(path string) fyne.URI {
 // Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
-	scheme := ""
-	validScheme := false
-	for i := 0; i < len(s); i++ {
-		if s[i] == ':' {
-			validScheme = true
-			break
-		}
-		scheme += string(s[i])
-	}
-	scheme = strings.ToLower(scheme)
-
-	if !validScheme {
+	colonIndex := strings.Index(s, ":")
+	if colonIndex == -1 {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
+
+	scheme := strings.ToLower(s[:colonIndex])
 
 	if scheme == "file" {
 		// Does this really deserve to be special? In principle, the
