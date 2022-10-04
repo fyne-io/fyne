@@ -10,19 +10,19 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func shaderSourceNamed(fileName string) [2][]byte {
+func shaderSourceNamed(fileName string) ([]byte, []byte) {
 	switch fileName {
 	case "line":
-		return [2][]byte{shaderLineVert.StaticContent, shaderLineFrag.StaticContent}
+		return shaderLineVert.StaticContent, shaderLineFrag.StaticContent
 	case "line_es":
-		return [2][]byte{shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent}
+		return shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent
 	case "simple":
-		return [2][]byte{shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent}
+		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
 	case "simple_es":
-		return [2][]byte{shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent}
+		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
 	}
 
-	return [2][]byte{}
+	return nil, nil
 }
 
 // Painter defines the functionality of our OpenGL based renderer
@@ -136,8 +136,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	// Why a switch over a filename?
 	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
 	// fyne bundle.
-	sources := shaderSourceNamed(shaderFilename)
-	vertexSrc, fragmentSrc := sources[0], sources[1]
+	vertexSrc, fragmentSrc := shaderSourceNamed(shaderFilename)
 	if vertexSrc == nil {
 		panic("shader not found: " + shaderFilename)
 	}
