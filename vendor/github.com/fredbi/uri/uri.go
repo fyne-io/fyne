@@ -13,7 +13,6 @@
 package uri
 
 import (
-	"bytes"
 	"errors"
 	"net"
 	"net/url"
@@ -176,14 +175,6 @@ const (
 	percentMark     = '%'
 	atHost          = '@'
 	authorityPrefix = "//"
-)
-
-var (
-	// byte literals
-	atBytes       = []byte{atHost}
-	colonBytes    = []byte{colonMark}
-	queryBytes    = []byte{questionMark}
-	fragmentBytes = []byte{fragmentMark}
 )
 
 // IsURI tells if a URI is valid according to RFC3986/RFC397
@@ -385,8 +376,13 @@ var (
 	rexUserInfo = regexp.MustCompile(`^([\p{L}\d\-\._~\:!\$\&'\(\)\*\+,;=\?/]|(%[[:xdigit:]]{2})+)+$`)
 
 	rexIPv6Zone = regexp.MustCompile(`:[^%:]+%25(([\p{L}\d\-\._~\:@!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2}))+)?$`)
-	rexPort     = regexp.MustCompile(`^\d+$`)
 )
+
+func isNumerical(input string) bool {
+	return strings.IndexFunc(input,
+		func(r rune) bool { return r < '0' || r > '9' },
+	) == -1
+}
 
 // Validate checks that all parts of a URI abide by allowed characters
 func (u *uri) Validate() error {
@@ -427,11 +423,11 @@ func (a authorityInfo) Host() string     { return a.host }
 func (a authorityInfo) Port() string     { return a.port }
 func (a authorityInfo) Path() string     { return a.path }
 func (a authorityInfo) String() string {
-	buf := bytes.NewBuffer(nil)
+	buf := strings.Builder{}
 	buf.WriteString(a.prefix)
 	buf.WriteString(a.userinfo)
 	if len(a.userinfo) > 0 {
-		buf.Write(atBytes)
+		buf.WriteByte(atHost)
 	}
 	if strings.IndexByte(a.host, colonMark) > 0 {
 		// ipv6 address host
@@ -440,7 +436,7 @@ func (a authorityInfo) String() string {
 		buf.WriteString(a.host)
 	}
 	if len(a.port) > 0 {
-		buf.Write(colonBytes)
+		buf.WriteByte(colonMark)
 	}
 	buf.WriteString(a.port)
 	buf.WriteString(a.path)
@@ -487,7 +483,7 @@ func (a authorityInfo) Validate(schemes ...string) error {
 	}
 
 	if a.port != "" {
-		if ok := rexPort.MatchString(a.port); !ok {
+		if !isNumerical(a.port) {
 			return ErrInvalidPort
 		}
 		if a.host == "" {
@@ -518,7 +514,7 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 		path = hier
 	} else {
 		// authority   = [ userinfo "@" ] host [ ":" port ]
-		slashEnd := strings.Index(hier, "/")
+		slashEnd := strings.IndexByte(hier, '/')
 		if slashEnd > 0 {
 			if slashEnd < len(hier) {
 				path = hier[slashEnd:]
@@ -534,10 +530,10 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 			}
 		}
 
-		if bracket := strings.Index(host, "["); bracket >= 0 {
+		if bracket := strings.IndexByte(host, '['); bracket >= 0 {
 			// ipv6 addresses: "[" xx:yy:zz "]":port
 			rawHost := host
-			closingbracket := strings.Index(host, "]")
+			closingbracket := strings.IndexByte(host, ']')
 			if closingbracket > 0 {
 				host = host[bracket+1 : closingbracket-bracket]
 				rawHost = rawHost[closingbracket+1:]
@@ -624,21 +620,21 @@ func (u *uri) Builder() Builder {
 }
 
 func (u *uri) String() string {
-	buf := bytes.NewBuffer(nil)
+	buf := strings.Builder{}
 	if len(u.scheme) > 0 {
 		buf.WriteString(u.scheme)
-		buf.Write(colonBytes)
+		buf.WriteByte(colonMark)
 	}
 
 	buf.WriteString(u.authority.String())
 
 	if len(u.query) > 0 {
-		buf.Write(queryBytes)
+		buf.WriteByte(questionMark)
 		buf.WriteString(u.query)
 	}
 
 	if len(u.fragment) > 0 {
-		buf.Write(fragmentBytes)
+		buf.WriteByte(fragmentMark)
 		buf.WriteString(u.fragment)
 	}
 
