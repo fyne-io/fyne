@@ -44,8 +44,8 @@ func NewFileURI(path string) fyne.URI {
 // Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
-	colonIndex := strings.Index(s, ":")
-	if colonIndex == -1 {
+	colonIndex := strings.IndexByte(s, ':')
+	if colonIndex <= 0 {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
 
