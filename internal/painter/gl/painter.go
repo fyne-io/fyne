@@ -10,8 +10,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func shaderSourceNamed(fileName string) ([]byte, []byte) {
-	switch fileName {
+func shaderSourceNamed(name string) ([]byte, []byte) {
+	switch name {
 	case "line":
 		return shaderLineVert.StaticContent, shaderLineFrag.StaticContent
 	case "line_es":
