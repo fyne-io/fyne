@@ -28,6 +28,26 @@ func TestFromJSON(t *testing.T) {
 	assert.Equal(t, float32(5), th.Size(SizeNameInlineIcon))
 	assert.Equal(t, "NotoMono-Regular.ttf", th.Font(fyne.TextStyle{Monospace: true}).Name())
 	assert.Equal(t, "cancel_Paths.svg", th.Icon(IconNameCancel).Name())
+
+	th, err = FromJSON(`{
+"Fonts":{"monospace":"file"}
+    }0000{
+"Fonts":{"monospace":"file"}
+    }0000{
+"Fonts":{"monospace":"file"}
+    }0000{
+"Fonts":{"monospace":"file"}
+    }0000{
+"Fonts":{"monospace":"file"}
+    }0000{
+"Fonts":{"monospace":"file"}
+    }0000{
+"Fonts":{"monospace":"file"}
+    }0000{
+"F
+  `)
+	assert.Nil(t, err)
+	th.Font(fyne.TextStyle{Monospace: true}).Name()
 }
 
 func TestFromTOML_Resource(t *testing.T) {

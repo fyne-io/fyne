@@ -59,13 +59,16 @@ func ParseURI(s string) (fyne.URI, error) {
 		// we should punt this to whoever generated the URI in the
 		// first place?
 
-		path := s[5:] // everything after file:
-		if len(path) > 2 && path[:2] == "//" {
-			path = path[2:]
-		}
+		if len(s) > 5 {
+			path := s[5:] // everything after file:
+			if len(path) > 2 && path[:2] == "//" {
+				path = path[2:]
+			}
 
-		// Windows files can break authority checks, so just return the parsed file URI
-		return NewFileURI(path), nil
+			// Windows files can break authority checks, so just return the parsed file URI
+			return NewFileURI(path), nil
+		}
+		return nil, errors.New("not a valid URI")
 	}
 
 	repo, err := ForScheme(scheme)
