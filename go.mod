@@ -5,7 +5,7 @@ go 1.14
 require (
 	fyne.io/systray v1.10.1-0.20220621085403-9a2652634e93
 	github.com/BurntSushi/toml v1.1.0
-	github.com/fredbi/uri v0.0.0-20220929122239-d445bfaa03f1
+	github.com/fredbi/uri v0.0.0-20221002085739-62643c0df0c8
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504

@@ -15,7 +15,7 @@ github.com/akavel/rsrc/ico
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/fredbi/uri v0.0.0-20220929122239-d445bfaa03f1
+# github.com/fredbi/uri v0.0.0-20221002085739-62643c0df0c8
 ## explicit
 github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.5.4
