@@ -36,10 +36,6 @@ func TestInMemoryRepositoryRegistration(t *testing.T) {
 func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
 	m := NewInMemoryRepository("000")
 	repository.Register("dht", m)
-	m.Data["/foo"] = []byte{1, 2, 3}
-	m.Data["/foo/bar"] = []byte{1, 2, 3}
-	m.Data["/foo/baz/"] = []byte{1, 2, 3}
-	m.Data["/foo/baz/quux"] = []byte{1, 2, 3}
 
 	foo, err := storage.ParseURI("dht:?00000")
 	assert.Nil(t, err)
