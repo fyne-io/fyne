@@ -59,7 +59,7 @@ which provides a workable but loose implementation of the RFC.
 
 This package concentrates on RFC 3986 strictness for URI validation. 
 At the moment, there is no attempt to normalize or auto-escape strings. 
-For url normalization, see github.com/PuertokitoBio/purell.
+For url normalization, see github.com/PuerkitoBio/purell.
 
 ## Disclaimer
 
