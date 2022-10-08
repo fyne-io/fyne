@@ -34,6 +34,14 @@ func TestParseInvalidURI(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, uri)
 
+	uri, err = ParseURI("file:")
+	assert.NotNil(t, err)
+	assert.Nil(t, uri)
+
+	uri, err = ParseURI("file://")
+	assert.NotNil(t, err)
+	assert.Nil(t, uri)
+
 	uri, err = ParseURI(":foo")
 	assert.NotNil(t, err)
 	assert.Nil(t, uri)
