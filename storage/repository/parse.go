@@ -59,7 +59,7 @@ func ParseURI(s string) (fyne.URI, error) {
 		// we should punt this to whoever generated the URI in the
 		// first place?
 
-		if len(s) < 6 {
+		if len(s) <= 7 {
 			return nil, errors.New("not a valid URI")
 		}
 		path := s[5:] // everything after file:
