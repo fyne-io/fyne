@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
+	"strings"
 )
 
 // CheckGroup widget has a list of text labels and checkbox icons next to each.
@@ -42,6 +43,24 @@ func (r *CheckGroup) Append(option string) {
 	r.Options = append(r.Options, option)
 
 	r.Refresh()
+}
+
+// Remove removes the first specified option found from a CheckGroup widget.
+//
+// Since: 2.3
+func (r *CheckGroup) Remove(s string) bool {
+	found := -1
+	for i, o := range r.Options {
+		if strings.EqualFold(s, o) {
+			found = i
+			continue
+		}
+	}
+	if found == -1 {
+		return false
+	}
+	r.Options = append(r.Options[:found], r.Options[found+1:]...)
+	return true
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
