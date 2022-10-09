@@ -216,13 +216,7 @@ func (b *mapBase) doReload() (retErr error) {
 	changed := false
 	// add new
 	for key := range *b.val {
-		found := false
-		for newKey := range b.items {
-			if newKey == key {
-				found = true
-			}
-		}
-
+		_, found := b.items[key]
 		if !found {
 			b.setItem(key, bindUntypedMapValue(b.val, key, b.updateExternal))
 			changed = true
@@ -231,13 +225,7 @@ func (b *mapBase) doReload() (retErr error) {
 
 	// remove old
 	for key := range b.items {
-		found := false
-		for newKey := range *b.val {
-			if newKey == key {
-				found = true
-				break
-			}
-		}
+		_, found := (*b.val)[key]
 		if !found {
 			delete(b.items, key)
 			changed = true
