@@ -110,7 +110,9 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 		fn := i.Action
 		go func() {
 			for range item.ClickedCh {
-				fn()
+				if fn != nil {
+					fn()
+				}
 			}
 		}()
 	}
