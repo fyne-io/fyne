@@ -109,7 +109,7 @@ func (d *Docs) Save(name string) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 	if !exists {
-		return nil, errors.New("document with name " + name + " does not exist")
+		return nil, storage.ErrNotExists
 	}
 
 	return storage.Writer(u)

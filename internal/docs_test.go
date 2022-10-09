@@ -65,3 +65,12 @@ func TestDocs_Save(t *testing.T) {
 	err = w.Close()
 	assert.Nil(t, err)
 }
+
+func TestDocs_Save_errNotExists(t *testing.T) {
+	r := intRepo.NewInMemoryRepository("file")
+	repository.Register("file", r)
+	docs := &Docs{storage.NewFileURI("/tmp/docs/save")}
+
+	_, err := docs.Save("save.txt")
+	assert.Equal(t, storage.ErrNotExists, err)
+}

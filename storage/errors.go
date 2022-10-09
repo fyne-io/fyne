@@ -1,0 +1,10 @@
+package storage
+
+import "errors"
+
+var (
+	// ErrNotExists may be thrown by docs. E.g., save an unknown document.
+	//
+	// Since: 2.2.2
+	ErrNotExists = errors.New("document does not exist")
+)
