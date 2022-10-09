@@ -26,6 +26,21 @@ func TestDocs_Create(t *testing.T) {
 	assert.True(t, exist)
 }
 
+func TestDocs_Create_ErrAlreadyExists(t *testing.T) {
+	repository.Register("file", intRepo.NewInMemoryRepository("file"))
+	docs := &Docs{storage.NewFileURI("/tmp/docs/create")}
+	exist, err := storage.Exists(docs.RootDocURI)
+	assert.Nil(t, err)
+	assert.False(t, exist)
+
+	w, err := docs.Create("test")
+	assert.Nil(t, err)
+	_, _ = w.Write([]byte{})
+	_ = w.Close()
+	_, err = docs.Create("test")
+	assert.Equal(t, storage.ErrAlreadyExists, err)
+}
+
 func TestDocs_List(t *testing.T) {
 	repository.Register("file", intRepo.NewInMemoryRepository("file"))
 	docs := &Docs{storage.NewFileURI("/tmp/docs/list")}

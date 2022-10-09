@@ -38,7 +38,7 @@ func (d *Docs) Create(name string) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 	if exists {
-		return nil, errors.New("document with name " + name + " already exists")
+		return nil, storage.ErrAlreadyExists
 	}
 
 	return storage.Writer(u)
