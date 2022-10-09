@@ -81,7 +81,7 @@ func TestDocs_Save(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestDocs_Save_errNotExists(t *testing.T) {
+func TestDocs_Save_ErrNotExists(t *testing.T) {
 	r := intRepo.NewInMemoryRepository("file")
 	repository.Register("file", r)
 	docs := &Docs{storage.NewFileURI("/tmp/docs/save")}
