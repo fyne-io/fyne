@@ -46,7 +46,7 @@ func (r *CheckGroup) Append(option string) {
 	r.Refresh()
 }
 
-// Remove removes the first specified option found from a CheckGroup widget.
+// Remove removes the first occurrence of the specified option found from a CheckGroup widget.
 //
 // Since: 2.3
 func (r *CheckGroup) Remove(option string) bool {
