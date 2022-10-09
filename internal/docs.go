@@ -17,7 +17,7 @@ type Docs struct {
 
 // Create will create a new document ready for writing, you must write something and close the returned writer
 // for the create process to complete.
-// If the document for this app with that name already exists an error will be returned.
+// If the document for this app with that name already exists a storage.ErrAlreadyExists error will be returned.
 func (d *Docs) Create(name string) (fyne.URIWriteCloser, error) {
 	if d.RootDocURI == nil {
 		return nil, errNoAppID
@@ -93,7 +93,7 @@ func (d *Docs) Remove(name string) error {
 }
 
 // Save will open a document ready for writing, you close the returned writer for the save to complete.
-// If the document for this app with that name does not exist an error will be returned.
+// If the document for this app with that name does not exist a storage.ErrNotExists error will be returned.
 func (d *Docs) Save(name string) (fyne.URIWriteCloser, error) {
 	if d.RootDocURI == nil {
 		return nil, errNoAppID
