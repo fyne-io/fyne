@@ -50,18 +50,13 @@ func (r *CheckGroup) Append(option string) {
 //
 // Since: 2.3
 func (r *CheckGroup) Remove(s string) bool {
-	found := -1
 	for i, o := range r.Options {
 		if strings.EqualFold(s, o) {
-			found = i
-			continue
+			r.Options = append(r.Options[:i], r.Options[i+1:]...)
+			return true
 		}
 	}
-	if found == -1 {
-		return false
-	}
-	r.Options = append(r.Options[:found], r.Options[found+1:]...)
-	return true
+	return false
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
