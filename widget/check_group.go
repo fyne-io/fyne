@@ -49,9 +49,9 @@ func (r *CheckGroup) Append(option string) {
 // Remove removes the first specified option found from a CheckGroup widget.
 //
 // Since: 2.3
-func (r *CheckGroup) Remove(s string) bool {
+func (r *CheckGroup) Remove(option string) bool {
 	for i, o := range r.Options {
-		if strings.EqualFold(s, o) {
+		if strings.EqualFold(option, o) {
 			r.Options = append(r.Options[:i], r.Options[i+1:]...)
 			return true
 		}
