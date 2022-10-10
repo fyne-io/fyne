@@ -7,7 +7,10 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-var errNoAppID = errors.New("storage API requires a unique ID, use app.NewWithID()")
+var (
+	errNoAppID   = errors.New("storage API requires a unique ID, use app.NewWithID()")
+	ErrNotExists = errors.New("document name does not exist")
+)
 
 // Docs is an internal implementation of the document features of the Storage interface.
 // It is based on top of the current `file` repository and is rooted at RootDocURI.
@@ -109,7 +112,7 @@ func (d *Docs) Save(name string) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 	if !exists {
-		return nil, errors.New("document with name " + name + " does not exist")
+		return nil, ErrNotExists
 	}
 
 	return storage.Writer(u)
