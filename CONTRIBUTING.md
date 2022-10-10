@@ -48,6 +48,12 @@ To manage this we have various checks and processes in place that everyone shoul
 * Imports should be ordered according to the GoImports spec - you can use the `goimports` tool instead of `gofmt`.
 * Everything should have a unit test attached (as much as possible, to keep our coverage up)
 
+## Coding style
+
+* Methods are grouped after the struct and in the alphabetical order.
+* API docs are on 2 digits. E.g., `Since` comment is 2.2, 2.3, etc.
+* Comment the return value if needed.
+
 # Decision Process
 
 The following points apply to our decision making process:
