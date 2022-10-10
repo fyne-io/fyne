@@ -47,6 +47,7 @@ func (r *CheckGroup) Append(option string) {
 }
 
 // Remove removes the first occurrence of the specified option found from a CheckGroup widget.
+// Return true if an option was removed.
 //
 // Since: 2.3
 func (r *CheckGroup) Remove(option string) bool {
