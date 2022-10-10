@@ -46,21 +46,6 @@ func (r *CheckGroup) Append(option string) {
 	r.Refresh()
 }
 
-// Remove removes the first occurrence of the specified option found from a CheckGroup widget.
-// Return true if an option was removed.
-//
-// Since: 2.3
-func (r *CheckGroup) Remove(option string) bool {
-	for i, o := range r.Options {
-		if strings.EqualFold(option, o) {
-			r.Options = append(r.Options[:i], r.Options[i+1:]...)
-			r.Refresh()
-			return true
-		}
-	}
-	return false
-}
-
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *CheckGroup) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
@@ -90,6 +75,21 @@ func (r *CheckGroup) Refresh() {
 	r.update()
 	r.propertyLock.Unlock()
 	r.BaseWidget.Refresh()
+}
+
+// Remove removes the first occurrence of the specified option found from a CheckGroup widget.
+// Return true if an option was removed.
+//
+// Since: 2.3
+func (r *CheckGroup) Remove(option string) bool {
+	for i, o := range r.Options {
+		if strings.EqualFold(option, o) {
+			r.Options = append(r.Options[:i], r.Options[i+1:]...)
+			r.Refresh()
+			return true
+		}
+	}
+	return false
 }
 
 // SetSelected sets the checked options, it can be used to set a default option.
