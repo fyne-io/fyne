@@ -53,6 +53,7 @@ func (r *CheckGroup) Remove(option string) bool {
 	for i, o := range r.Options {
 		if strings.EqualFold(option, o) {
 			r.Options = append(r.Options[:i], r.Options[i+1:]...)
+			r.Refresh()
 			return true
 		}
 	}
