@@ -85,6 +85,12 @@ func (r *CheckGroup) Remove(option string) bool {
 	for i, o := range r.Options {
 		if strings.EqualFold(option, o) {
 			r.Options = append(r.Options[:i], r.Options[i+1:]...)
+			for j, s := range r.Selected {
+				if strings.EqualFold(option, s) {
+					r.Selected = append(r.Selected[:j], r.Selected[j+1:]...)
+					break
+				}
+			}
 			r.Refresh()
 			return true
 		}

@@ -204,6 +204,8 @@ func TestCheckGroup_ManipulateOptions(t *testing.T) {
 
 	check.Append("test1")
 	assert.Equal(t, 1, len(check.Options))
+	check.SetSelected([]string{"test1"})
+	assert.Equal(t, 1, len(check.Selected))
 
 	check.Append("test2")
 	assert.Equal(t, 2, len(check.Options))
@@ -215,4 +217,5 @@ func TestCheckGroup_ManipulateOptions(t *testing.T) {
 	removed = check.Remove("test1")
 	assert.Equal(t, true, removed)
 	assert.Equal(t, 1, len(check.Options))
+	assert.Equal(t, 0, len(check.Selected))
 }
