@@ -234,6 +234,9 @@ func Test_PackageWasm(t *testing.T) {
 }
 
 func Test_buildPackageGopherJS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -292,6 +295,9 @@ func Test_buildPackageGopherJS(t *testing.T) {
 }
 
 func Test_PackageGopherJS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -499,33 +505,38 @@ func Test_PackageWeb(t *testing.T) {
 				ret: []byte(""),
 			},
 		},
-		{
-			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
-			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+	}
+
+	if runtime.GOOS != "windows" {
+		expected = append(expected, []mockRunner{
+			{
+				expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+				mockReturn: mockReturn{
+					ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"version"},
-				osEnv: true,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"version"},
+					osEnv: true,
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+					err: nil,
+				},
 			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-				err: nil,
+			{
+				expectedValue: expectedValue{
+					args: []string{"build",
+						"-o", "myTest.js"},
+					osEnv: true,
+					dir:   "myTest",
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args: []string{"build",
-					"-o", "myTest.js"},
-				osEnv: true,
-				dir:   "myTest",
-			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-			},
-		},
+		}...)
 	}
 
 	p := &Packager{
