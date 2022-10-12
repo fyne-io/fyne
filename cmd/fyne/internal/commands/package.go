@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -227,6 +228,10 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 	err := bWasm.build()
 	if err != nil {
 		return nil, err
+	}
+
+	if runtime.GOOS == "windows" {
+		return []string{bWasm.target}, nil
 	}
 
 	bGopherJS := &Builder{
