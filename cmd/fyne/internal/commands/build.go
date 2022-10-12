@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -171,6 +172,10 @@ func (b *Builder) build() error {
 	goos := b.os
 	if goos == "" {
 		goos = targetOS()
+	}
+
+	if goos == "gopherjs" && runtime.GOOS == "windows" {
+		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
 	}
 
 	fyneGoModRunner := b.runner
