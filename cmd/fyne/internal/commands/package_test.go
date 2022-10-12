@@ -477,7 +477,11 @@ func Test_BuildPackageWeb(t *testing.T) {
 	files, err := p.buildPackage(webBuildTest)
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
-	assert.Equal(t, 2, len(files))
+	expectedFiles := 2
+	if runtime.GOOS == "windows" {
+		expectedFiles = 1
+	}
+	assert.Equal(t, expectedFiles, len(files))
 }
 
 func Test_PackageWeb(t *testing.T) {
