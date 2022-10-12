@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
@@ -19,6 +20,11 @@ type Server struct {
 // Serve return the cli command for serving fyne wasm application over http
 func Serve() *cli.Command {
 	s := &Server{appData: &appData{}}
+
+	target := "web"
+	if runtime.GOOS == "windows" {
+		target = "wasm"
+	}
 
 	return &cli.Command{
 		Name:        "serve",
@@ -46,7 +52,7 @@ func Serve() *cli.Command {
 				Name:        "target",
 				Aliases:     []string{"os"},
 				Usage:       "The web runtime to target (wasm, gopherjs, web).",
-				Value:       "web",
+				Value:       target,
 				Destination: &s.os,
 			},
 		},

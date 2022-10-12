@@ -47,7 +47,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, gopherjs, web).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
