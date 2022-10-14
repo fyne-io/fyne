@@ -26,6 +26,8 @@ type Builder struct {
 	tags               []string
 	tagsToParse        string
 
+	customMetadata keyValueFlag
+
 	runner runner
 }
 
@@ -65,6 +67,11 @@ func Build() *cli.Command {
 				Usage:       "Specify a name for the output file, default is based on the current directory.",
 				Destination: &b.target,
 			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &b.customMetadata,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			argCount := ctx.Args().Len()
@@ -73,6 +80,10 @@ func Build() *cli.Command {
 					return fmt.Errorf("incorrect amount of path provided")
 				}
 				b.goPackage = ctx.Args().First()
+			}
+
+			if b.customMetadata.m == nil {
+				b.customMetadata.m = map[string]string{}
 			}
 
 			return b.Build()
@@ -94,6 +105,8 @@ func (b *Builder) Build() error {
 	if b.tagsToParse != "" {
 		b.tags = strings.Split(b.tagsToParse, ",")
 	}
+	b.appData.Release = b.release
+	b.appData.CustomMetadata = b.customMetadata.m
 
 	return b.build()
 }

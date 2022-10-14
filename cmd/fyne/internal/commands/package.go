@@ -34,6 +34,8 @@ type appData struct {
 	AppID, AppVersion string
 	AppBuild          int
 	ResGoString       string
+	Release           bool
+	CustomMetadata    map[string]string
 }
 
 // Package returns the cli command for packaging fyne applications
@@ -111,8 +113,17 @@ func Package() *cli.Command {
 				Usage:       "Enable installation in release mode (disable debug etc).",
 				Destination: &p.release,
 			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &p.customMetadata,
+			},
 		},
 		Action: func(_ *cli.Context) error {
+			if p.customMetadata.m == nil {
+				p.customMetadata.m = map[string]string{}
+			}
+
 			return p.Package()
 		},
 	}
@@ -126,6 +137,8 @@ type Packager struct {
 	certificate, profile string // optional flags for releasing
 	tags, category       string
 	tempDir              string
+
+	customMetadata keyValueFlag
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -347,8 +360,11 @@ func (p *Packager) validate() (err error) {
 	}
 	os.Chdir(p.srcDir)
 
+	p.appData.CustomMetadata = p.customMetadata.m
+
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
+		p.appData.Release = p.release
 		mergeMetadata(p.appData, data)
 	}
 
@@ -427,6 +443,16 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
+func appendCustomMetadata(customMetadata *map[string]string, fromFile map[string]string) {
+	for key, value := range fromFile {
+		_, ok := (*customMetadata)[key]
+		if ok {
+			continue
+		}
+		(*customMetadata)[key] = value
+	}
+}
+
 func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	if p.icon == "" {
 		p.icon = data.Details.Icon
@@ -442,6 +468,11 @@ func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	}
 	if p.AppBuild == 0 {
 		p.AppBuild = data.Details.Build
+	}
+	if p.Release {
+		appendCustomMetadata(&p.CustomMetadata, data.Release)
+	} else {
+		appendCustomMetadata(&p.CustomMetadata, data.Development)
 	}
 }
 

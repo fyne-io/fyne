@@ -79,6 +79,14 @@ type App interface {
 	//
 	// Since: 2.3
 	SetCloudProvider(CloudProvider) // configure cloud for this app
+
+	// CustomMetadata allow you to get metadata specified at compile time
+	// It will contain the Release section if the binary was compiled in Release mode, the Development section otherwise
+	// The value can also be injected on the command line during compilation if you do not want to store them in your
+	// source repository
+	//
+	// Since: 2.3
+	CustomMetadata(name string) (custom string, exist bool)
 }
 
 // app contains an App variable, but due to atomic.Value restrictions on
@@ -121,6 +129,9 @@ type AppMetadata struct {
 	Build int
 	// Icon contains, if present, a resource of the icon that was bundled at build time.
 	Icon Resource
+	// Release if true this binary was build in release mode
+	// Since 2.3
+	Release bool
 }
 
 // Lifecycle represents the various phases that an app can transition through.
