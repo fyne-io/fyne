@@ -129,6 +129,11 @@ func (a *testApp) transitionCloud(p fyne.CloudProvider) {
 	} else {
 		a.prefs = internal.NewInMemoryPreferences()
 	}
+	if store, ok := p.(fyne.CloudProviderStorage); ok {
+		a.storage = store.CloudStorage(a)
+	} else {
+		a.storage = &testStorage{}
+	}
 
 	for _, l := range listeners {
 		a.prefs.AddChangeListener(l)

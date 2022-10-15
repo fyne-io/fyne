@@ -28,7 +28,7 @@ type fyneApp struct {
 	cloud     fyne.CloudProvider
 	lifecycle fyne.Lifecycle
 	settings  *settings
-	storage   *store
+	storage   fyne.Storage
 	prefs     fyne.Preferences
 
 	running uint32 // atomic, 1 == running, 0 == stopped
@@ -102,6 +102,13 @@ func (a *fyneApp) transitionCloud(p fyne.CloudProvider) {
 	} else {
 		a.prefs = a.newDefaultPreferences()
 	}
+	if cloud, ok := p.(fyne.CloudProviderStorage); ok {
+		a.storage = cloud.CloudStorage(a)
+	} else {
+		store := &store{a: a}
+		store.Docs = makeStoreDocs(a.uniqueID, a.prefs, store)
+		a.storage = store
+	}
 
 	for _, l := range listeners {
 		a.prefs.AddChangeListener(l)
@@ -162,23 +169,28 @@ func New() fyne.App {
 	return NewWithID(meta.ID)
 }
 
+func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
+	if id != "" {
+		if pref, ok := p.(interface{ load() }); ok {
+			pref.load()
+		}
+
+		root, _ := s.docRootURI()
+		return &internal.Docs{RootDocURI: root}
+	} else {
+		return &internal.Docs{} // an empty impl to avoid crashes
+	}
+}
+
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
 	newApp.settings = loadSettings()
-	newApp.storage = &store{a: newApp}
-	if id != "" {
-		if pref, ok := newApp.prefs.(interface{ load() }); ok {
-			pref.load()
-		}
-
-		root, _ := newApp.storage.docRootURI()
-		newApp.storage.Docs = &internal.Docs{RootDocURI: root}
-	} else {
-		newApp.storage.Docs = &internal.Docs{} // an empty impl to avoid crashes
-	}
+	store := &store{a: newApp}
+	store.Docs = makeStoreDocs(id, newApp.prefs, store)
+	newApp.storage = store
 
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
