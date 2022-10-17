@@ -13,8 +13,7 @@ import (
 // If the encoding fails an error will be returned.
 func Save(f *FyneApp, w io.Writer) error {
 	var buf bytes.Buffer
-	e := toml.NewEncoder(&buf)
-	err := e.Encode(f)
+	err := toml.NewEncoder(&buf).Encode(f)
 	if err != nil {
 		return err
 	}

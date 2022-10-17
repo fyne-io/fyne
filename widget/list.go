@@ -246,6 +246,7 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
+var _ fyne.Focusable = (*listItem)(nil)
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
@@ -281,6 +282,22 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
 
+// FocusGained is called after this listItem has gained focus.
+//
+// Implements: fyne.Focusable
+func (li *listItem) FocusGained() {
+	li.hovered = true
+	li.Refresh()
+}
+
+// FocusLost is called after this listItem has lost focus.
+//
+// Implements: fyne.Focusable
+func (li *listItem) FocusLost() {
+	li.hovered = false
+	li.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below.
 func (li *listItem) MinSize() fyne.Size {
 	li.ExtendBaseWidget(li)
@@ -310,6 +327,27 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.Refresh()
 		li.onTapped()
 	}
+}
+
+// TypedKey is called if a key event happens while this listItem is focused.
+//
+// Implements: fyne.Focusable
+func (li *listItem) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace:
+		li.selected = true
+		li.Refresh()
+		if li.onTapped != nil {
+			li.onTapped()
+		}
+	}
+}
+
+// TypedRune is called if a text event happens while this listItem is focused.
+//
+// Implements: fyne.Focusable
+func (li *listItem) TypedRune(_ rune) {
+	// intentionally left blank
 }
 
 // Declare conformity with the WidgetRenderer interface.

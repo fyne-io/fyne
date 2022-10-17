@@ -425,6 +425,52 @@ func TestList_NoFunctionsSet(t *testing.T) {
 	list.Refresh()
 }
 
+func TestList_Focus(t *testing.T) {
+	defer test.NewApp()
+	list := createList(10)
+	window := test.NewWindow(list)
+	defer window.Close()
+	window.Resize(list.MinSize().Max(fyne.NewSize(150, 200)))
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	assert.Nil(t, canvas.Focused())
+
+	canvas.FocusNext()
+	assert.NotNil(t, canvas.Focused())
+	assert.True(t, canvas.Focused().(*listItem).hovered)
+	assert.False(t, canvas.Focused().(*listItem).selected)
+
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.True(t, children[0].(*listItem).hovered)
+	assert.False(t, children[1].(*listItem).hovered)
+	assert.False(t, children[2].(*listItem).hovered)
+	assert.Equal(t, children[0].(*listItem), canvas.Focused().(*listItem))
+
+	canvas.FocusNext()
+	assert.NotNil(t, canvas.Focused())
+	assert.True(t, canvas.Focused().(*listItem).hovered)
+	assert.False(t, canvas.Focused().(*listItem).selected)
+	assert.False(t, children[0].(*listItem).hovered)
+	assert.True(t, children[1].(*listItem).hovered)
+	assert.False(t, children[2].(*listItem).hovered)
+	assert.NotEqual(t, children[0].(*listItem), canvas.Focused().(*listItem))
+	assert.Equal(t, children[1].(*listItem), canvas.Focused().(*listItem))
+
+	canvas.FocusPrevious()
+	assert.NotNil(t, canvas.Focused())
+	assert.True(t, canvas.Focused().(*listItem).hovered)
+	assert.False(t, canvas.Focused().(*listItem).selected)
+	assert.True(t, children[0].(*listItem).hovered)
+	assert.False(t, children[1].(*listItem).hovered)
+	assert.False(t, children[2].(*listItem).hovered)
+	assert.Equal(t, children[0].(*listItem), canvas.Focused().(*listItem))
+	assert.NotEqual(t, children[1].(*listItem), canvas.Focused().(*listItem))
+
+	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.True(t, canvas.Focused().(*listItem).selected)
+	assert.True(t, canvas.Focused().(*listItem).hovered)
+}
+
 func createList(items int) *List {
 	var data []string
 	for i := 0; i < items; i++ {

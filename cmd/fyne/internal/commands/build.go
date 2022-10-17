@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -173,6 +174,10 @@ func (b *Builder) build() error {
 		goos = targetOS()
 	}
 
+	if goos == "gopherjs" && runtime.GOOS == "windows" {
+		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
+	}
+
 	fyneGoModRunner := b.runner
 	if b.runner == nil {
 		fyneGoModRunner = newCommand("go")
@@ -280,18 +285,21 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	}
 	defer metadataInitFile.Close()
 
-	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
-	if err == nil {
-		iconResName := "fyneMetadataIcon"
-		if app.icon != "" {
-			writeResource(app.icon, iconResName, metadataInitFile)
-		} else {
-			v := fmt.Sprintf("var %s = (fyne.Resource)(nil)\n", iconResName)
-			_, err = metadataInitFile.Write([]byte(v))
-			if err != nil {
-				fyne.LogError("Error writing icon placeholder", err)
-			}
+	app.ResGoString = "nil"
+	if app.icon != "" {
+		res, err := fyne.LoadResourceFromPath(app.icon)
+		if err != nil {
+			fyne.LogError("Unable to load medadata icon file "+app.icon, err)
+			return func() { os.Remove(metadataInitFilePath) }, err
 		}
+
+		// The return type of fyne.LoadResourceFromPath is always a *fyne.StaticResource.
+		app.ResGoString = res.(*fyne.StaticResource).GoString()
+	}
+
+	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
+	if err != nil {
+		fyne.LogError("Error executing metadata template", err)
 	}
 
 	return func() { os.Remove(metadataInitFilePath) }, err

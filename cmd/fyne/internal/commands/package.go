@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -32,6 +33,7 @@ type appData struct {
 	icon, Name        string
 	AppID, AppVersion string
 	AppBuild          int
+	ResGoString       string
 }
 
 // Package returns the cli command for packaging fyne applications
@@ -46,7 +48,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, gopherjs, web).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
@@ -226,6 +228,10 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 	err := bWasm.build()
 	if err != nil {
 		return nil, err
+	}
+
+	if runtime.GOOS == "windows" {
+		return []string{bWasm.target}, nil
 	}
 
 	bGopherJS := &Builder{

@@ -264,7 +264,7 @@ func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 
 			size = label.MinSize()
 		} else {
-			size = t.cachedSegmentVisual(seg, bound.firstSegmentReuse).MinSize()
+			size = t.cachedSegmentVisual(seg, 0).MinSize()
 		}
 
 		total.Width += size.Width
@@ -576,7 +576,11 @@ func (r *textRenderer) Refresh() {
 				continue
 			}
 
-			obj := r.obj.cachedSegmentVisual(seg, bound.firstSegmentReuse)
+			reuse := 0
+			if i == 0 {
+				reuse = bound.firstSegmentReuse
+			}
+			obj := r.obj.cachedSegmentVisual(seg, reuse)
 			seg.Update(obj)
 			txt := obj.(*canvas.Text)
 			textSeg := seg.(*TextSegment)
