@@ -217,7 +217,8 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 		Face:      f,
 		Size:      textSize,
 	}
-	out, _ := shaping.Shape(in)
+	shaper := &shaping.HarfbuzzShaper{}
+	out := shaper.Shape(in)
 	spacew := float32ToFixed266(scale) * fontTabSpaceSize
 
 	in.Text = runes
@@ -226,7 +227,7 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 
 	ins := shaping.SplitByFontGlyphs(in, []gotext.Face{f}) // TODO provide fallback...
 	for _, in := range ins {
-		out, _ = shaping.Shape(in)
+		out = shaper.Shape(in)
 
 		var c rune
 		nextRuneIndex := 0

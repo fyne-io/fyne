@@ -3,8 +3,6 @@
 package shaping
 
 import (
-	"fmt"
-
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
 	"golang.org/x/image/math/fixed"
@@ -55,18 +53,18 @@ func (g Glyph) RightSideBearing() fixed.Int26_6 {
 //
 // For horizontal text:
 //
-//     - Ascent      GLYPH
+//   - Ascent      GLYPH
 //     |             GLYPH
 //     |             GLYPH
 //     |             GLYPH
 //     |             GLYPH
-//     - Baseline    GLYPH
+//   - Baseline    GLYPH
 //     |             GLYPH
 //     |             GLYPH
 //     |             GLYPH
-//     - Descent     GLYPH
+//   - Descent     GLYPH
 //     |
-//     - Gap
+//   - Gap
 type Bounds struct {
 	// Ascent is the maximum ascent away from the baseline. This value is typically
 	// positive in coordiate systems that grow up.
@@ -101,17 +99,14 @@ type Output struct {
 	// Direction is the direction used to shape the text,
 	// as provided in the Input.
 	Direction di.Direction
-}
 
-// UnimplementedDirectionError is returned when a function does not support the
-// provided layout direction yet.
-type UnimplementedDirectionError struct {
-	Direction di.Direction
-}
+	// Runes describes the runes this output represents from the input text.
+	Runes Range
 
-// Error formats the error into a string message.
-func (u UnimplementedDirectionError) Error() string {
-	return fmt.Sprintf("support for text direction %v is not implemented yet", u.Direction)
+	// Face is the font face that this output is rendered in. This is needed in
+	// the output in order to render each run in a multi-font sequence in the
+	// correct font.
+	Face font.Face
 }
 
 // RecomputeAdvance updates only the Advance field based on the current
@@ -135,7 +130,7 @@ func (o *Output) RecomputeAdvance() {
 // to match the current contents of the Glyphs field.
 // This method will fail with UnimplementedDirectionError if the Output
 // direction is unimplemented.
-func (o *Output) RecalculateAll() error {
+func (o *Output) RecalculateAll() {
 	var (
 		advance fixed.Int26_6
 		tallest fixed.Int26_6
@@ -143,7 +138,18 @@ func (o *Output) RecalculateAll() error {
 	)
 
 	if o.Direction.IsVertical() {
-		return UnimplementedDirectionError{Direction: o.Direction}
+		for i := range o.Glyphs {
+			g := &o.Glyphs[i]
+			advance += g.YAdvance
+			height := g.XBearing + g.XOffset
+			if height > tallest {
+				tallest = height
+			}
+			depth := height + g.Width
+			if depth < lowest {
+				lowest = depth
+			}
+		}
 	} else { // horizontal
 		for i := range o.Glyphs {
 			g := &o.Glyphs[i]
@@ -163,6 +169,4 @@ func (o *Output) RecalculateAll() error {
 		Ascent:  tallest,
 		Descent: lowest,
 	}
-
-	return nil
 }
