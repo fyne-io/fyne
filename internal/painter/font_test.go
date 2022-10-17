@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/image/math/fixed"
 )
 
 func TestCachedFontFace(t *testing.T) {
@@ -87,34 +86,34 @@ func TestMeasureString(t *testing.T) {
 		size     float32
 		string   string
 		tabWidth int
-		want     fixed.Int26_6
+		want     float32
 	}{
 		"regular": {
 			style:    fyne.TextStyle{},
 			size:     40,
 			string:   "Hello\tworld!",
 			tabWidth: 7,
-			want:     18263, // 285.359375
+			want:     257.82812,
 		},
 		"bold italic": {
 			style:    fyne.TextStyle{Bold: true, Italic: true},
 			size:     27.42,
 			string:   "Hello\tworld!",
 			tabWidth: 3,
-			want:     11576, // 180.875
+			want:     173.17188,
 		},
 		"missing glyph": {
 			style:    fyne.TextStyle{},
 			size:     40,
 			string:   "Missing: ↩",
 			tabWidth: 4,
-			want:     14257, // 222.765625
+			want:     189.65625,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			var _, face = painter.CachedFontFace(tt.style, tt.size, 1)
-			_, got := painter.MeasureString(face, tt.string, tt.size, tt.tabWidth)
-			assert.Equal(t, tt.want, got)
+			_, face := painter.CachedFontFace(tt.style, tt.size, 1)
+			got, _ := painter.MeasureString(face, tt.string, tt.size, tt.tabWidth)
+			assert.Equal(t, tt.want, got.Width)
 		})
 	}
 }

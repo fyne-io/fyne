@@ -167,8 +167,7 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	assert.Equal(t, theme.IconInlineSize(), render.icon.Size().Width, "icon width")
 	assert.Equal(t, minIconHeight, render.icon.Size().Height, "icon height")
 	assert.Equal(t, 50+theme.InnerPadding()+theme.Padding()+theme.IconInlineSize(), render.label.Position().X, "label x")
-	assert.Equal(t, 50+theme.InnerPadding(), render.label.Position().Y, "label y")
-	assert.Equal(t, render.label.MinSize(), render.label.Size(), "label size")
+	assert.Equal(t, render.label.MinSize().Width, render.label.Size().Width, "label size")
 }
 
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
@@ -199,15 +198,13 @@ func TestButtonRenderer_ApplyTheme(t *testing.T) {
 func TestButtonRenderer_TapAnimation(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
 
 	button := NewButton("Hi", func() {})
 	w := test.NewWindow(button)
 	defer w.Close()
-	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(10, 10)))
+	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(20, 20)))
 	button.Resize(fyne.NewSize(50, 50))
-
-	test.ApplyTheme(t, test.NewTheme())
-	button.Refresh()
 
 	render1 := test.WidgetRenderer(button).(*buttonRenderer)
 	test.Tap(button)

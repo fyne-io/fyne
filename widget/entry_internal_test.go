@@ -90,6 +90,7 @@ func TestEntry_DragSelect(t *testing.T) {
 	// get position after the letter 'z' on the second row
 	ev2 := getClickPosition("over the laz", 1)
 	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
+	ev1.Position.X += 2
 	ev2.Position.X += 2
 
 	// mouse down and drag from 'r' to 'z'
