@@ -69,7 +69,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
-	buildStatus, ok := fyne.CurrentApp().CustomMetadata("HelperText")
+	buildStatus, ok := fyne.CurrentApp().Metadata().Custom["HelperText"]
 	if !ok {
 		buildStatus = "No helper text provided at compile time."
 	}

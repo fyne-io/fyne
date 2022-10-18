@@ -30,12 +30,13 @@ const (
 )
 
 type appData struct {
-	icon, Name        string
-	AppID, AppVersion string
-	AppBuild          int
-	ResGoString       string
-	Release           bool
-	CustomMetadata    map[string]string
+	icon, Name          string
+	AppID, AppVersion   string
+	AppBuild            int
+	ResGoString         string
+	Release             bool
+	CustomMetadata      map[string]string
+	VersionOlderThan203 bool
 }
 
 // Package returns the cli command for packaging fyne applications

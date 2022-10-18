@@ -79,14 +79,6 @@ type App interface {
 	//
 	// Since: 2.3
 	SetCloudProvider(CloudProvider) // configure cloud for this app
-
-	// CustomMetadata allow you to get metadata specified at compile time
-	// It will contain the Release section if the binary was compiled in Release mode, the Development section otherwise
-	// The value can also be injected on the command line during compilation if you do not want to store them in your
-	// source repository
-	//
-	// Since: 2.3
-	CustomMetadata(name string) (custom string, exist bool)
 }
 
 // app contains an App variable, but due to atomic.Value restrictions on
@@ -132,6 +124,9 @@ type AppMetadata struct {
 	// Release if true this binary was build in release mode
 	// Since 2.3
 	Release bool
+	// Custom contain the custom metadata defined either in FyneApp.toml or on the compile command line
+	// Since 2.3
+	Custom map[string]string
 }
 
 // Lifecycle represents the various phases that an app can transition through.

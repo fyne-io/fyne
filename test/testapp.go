@@ -104,10 +104,6 @@ func (a *testApp) Metadata() fyne.AppMetadata {
 	return fyne.AppMetadata{} // just dummy data
 }
 
-func (a *testApp) CustomMetadata(string) (string, bool) {
-	return "dummy", true
-}
-
 func (a *testApp) lastAppliedTheme() fyne.Theme {
 	a.propertyLock.Lock()
 	defer a.propertyLock.Unlock()

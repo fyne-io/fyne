@@ -68,10 +68,6 @@ func (dummyApp) Metadata() AppMetadata {
 	return AppMetadata{}
 }
 
-func (dummyApp) CustomMetadata(string) (string, bool) {
-	return "dummy", true
-}
-
 func TestSetCurrentApp(t *testing.T) {
 	a := &dummyApp{}
 	SetCurrentApp(a)

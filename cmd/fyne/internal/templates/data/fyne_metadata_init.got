@@ -12,16 +12,14 @@ func init() {
 		Version: "{{.AppVersion}}",
 		Build: {{.AppBuild}},
 		Icon: {{.ResGoString}},
+		{{if .VersionOlderThan203}}
 		Release: {{.Release}},
-	})
-
-	customMetadata := map[string]string{
-		{{range $key, $value := .CustomMetadata}}
-		"{{$key}}": "{{$value}}",
+		Custom: map[string]string{
+			{{range $key, $value := .CustomMetadata}}
+			"{{$key}}": "{{$value}}",
+			{{end}}
+		},
 		{{end}}
-	}
-	if !app.SetCustomMetadata(customMetadata) {
-		fyne.LogError("Unable to set custom metadata.", nil)
-	}
+	})
 }
 

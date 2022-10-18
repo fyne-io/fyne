@@ -72,10 +72,6 @@ func (t *themedApp) Metadata() fyne.AppMetadata {
 	return fyne.AppMetadata{}
 }
 
-func (t *themedApp) CustomMetadata(string) (string, bool) {
-	return "themed", true
-}
-
 func (t *themedApp) PrimaryColor() string {
 	return ColorBlue
 }
