@@ -1,6 +1,8 @@
 //go:build !ci
 // +build !ci
 
+#define NS_FORMAT_ARGUMENT(A)
+
 #import <Foundation/Foundation.h>
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
 #import <UserNotifications/UserNotifications.h>

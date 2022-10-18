@@ -7,6 +7,8 @@ package app
 #cgo CFLAGS: -x objective-c
 #cgo LDFLAGS: -framework Foundation
 
+#define NS_FORMAT_ARGUMENT(A)
+
 #include <AppKit/AppKit.h>
 
 bool isBundled();

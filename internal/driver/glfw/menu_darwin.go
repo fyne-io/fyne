@@ -22,6 +22,7 @@ import (
 #cgo CFLAGS: -x objective-c
 #cgo LDFLAGS: -framework Foundation -framework AppKit
 
+#define NS_FORMAT_ARGUMENT(A)
 #include <AppKit/AppKit.h>
 
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.

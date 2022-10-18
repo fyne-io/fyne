@@ -3,6 +3,8 @@
 
 extern void themeChanged();
 
+#define NS_FORMAT_ARGUMENT(A)
+
 #import <Foundation/Foundation.h>
 
 bool isDarkMode() {

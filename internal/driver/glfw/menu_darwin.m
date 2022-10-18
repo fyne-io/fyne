@@ -1,6 +1,8 @@
 //go:build !no_native_menus
 // +build !no_native_menus
 
+#define NS_FORMAT_ARGUMENT(A)
+
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
