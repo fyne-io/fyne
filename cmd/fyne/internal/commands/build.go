@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -336,7 +335,6 @@ func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
 	if fyneGoModVersionConstraintOlderThan203.Match(fyneGoModVersionNormalized) {
 		app.VersionOlderThan203 = true
 	}
-	log.Println("fyne version:", fyneGoModVersionNormalized)
 
 	return createMetadataInitFile(srcdir, app)
 }
