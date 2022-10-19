@@ -24,9 +24,9 @@ import (
 // 195c05df9925c7c4a4982a286ef9c416b2cde3af
 
 // debugMode is only used in test:
-// 	0 : nothing
-//  1 : only the main steps are printed
-// 	2 : details informations are printed
+//   - 0 : nothing
+//   - 1 : only the main steps are printed
+//   - 2 : details informations are printed
 const debugMode = 0
 
 // Direction is the text direction.
@@ -395,40 +395,40 @@ func (p *parser) parseOneFeature() (feature Feature, err error) {
 
 // ParseFeature parses one feature string (usually coming from a comma-separated list of font features).
 //
-//     Features can be enabled or disabled, either globally or limited to
-//     specific character ranges.  The format for specifying feature settings
-//     follows.  All valid CSS font-feature-settings values other than 'normal'
-//     and the global values are also accepted, though not documented below.
-//     CSS string escapes are not supported.
+//	Features can be enabled or disabled, either globally or limited to
+//	specific character ranges.  The format for specifying feature settings
+//	follows.  All valid CSS font-feature-settings values other than 'normal'
+//	and the global values are also accepted, though not documented below.
+//	CSS string escapes are not supported.
 //
-//     The range indices refer to the positions between Unicode characters,
-//     unless the --utf8-clusters is provided, in which case range indices
-//     refer to UTF-8 byte indices. The position before the first character
-//     is always 0.
+//	The range indices refer to the positions between Unicode characters,
+//	unless the --utf8-clusters is provided, in which case range indices
+//	refer to UTF-8 byte indices. The position before the first character
+//	is always 0.
 //
-//     The format is Python-esque.  Here is how it all works:
+//	The format is Python-esque.  Here is how it all works:
 //
-//       Syntax:       Value:    Start:    End:
+//	  Syntax:       Value:    Start:    End:
 //
-//     Setting value:
-//       "kern"        1         0         ∞         // Turn feature on
-//       "+kern"       1         0         ∞         // Turn feature on
-//       "-kern"       0         0         ∞         // Turn feature off
-//       "kern=0"      0         0         ∞         // Turn feature off
-//       "kern=1"      1         0         ∞         // Turn feature on
-//       "aalt=2"      2         0         ∞         // Choose 2nd alternate
+//	Setting value:
+//	  "kern"        1         0         ∞         // Turn feature on
+//	  "+kern"       1         0         ∞         // Turn feature on
+//	  "-kern"       0         0         ∞         // Turn feature off
+//	  "kern=0"      0         0         ∞         // Turn feature off
+//	  "kern=1"      1         0         ∞         // Turn feature on
+//	  "aalt=2"      2         0         ∞         // Choose 2nd alternate
 //
-//     Setting index:
-//       "kern[]"      1         0         ∞         // Turn feature on
-//       "kern[:]"     1         0         ∞         // Turn feature on
-//       "kern[5:]"    1         5         ∞         // Turn feature on, partial
-//       "kern[:5]"    1         0         5         // Turn feature on, partial
-//       "kern[3:5]"   1         3         5         // Turn feature on, range
-//       "kern[3]"     1         3         3+1       // Turn feature on, single char
+//	Setting index:
+//	  "kern[]"      1         0         ∞         // Turn feature on
+//	  "kern[:]"     1         0         ∞         // Turn feature on
+//	  "kern[5:]"    1         5         ∞         // Turn feature on, partial
+//	  "kern[:5]"    1         0         5         // Turn feature on, partial
+//	  "kern[3:5]"   1         3         5         // Turn feature on, range
+//	  "kern[3]"     1         3         3+1       // Turn feature on, single char
 //
-//     Mixing it all:
+//	Mixing it all:
 //
-//       "aalt[3:5]=2" 2         3         5         // Turn 2nd alternate on for range
+//	  "aalt[3:5]=2" 2         3         5         // Turn 2nd alternate on for range
 func ParseFeature(feature string) (Feature, error) {
 	pr := parser{data: []byte(feature)}
 	return pr.parseOneFeature()

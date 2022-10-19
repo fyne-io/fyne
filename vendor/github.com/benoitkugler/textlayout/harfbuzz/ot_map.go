@@ -106,7 +106,7 @@ func (mb *otMapBuilder) addFeatureExt(tag tt.Tag, flags otMapFeatureFlags, value
 	mb.featureInfos = append(mb.featureInfos, info)
 }
 
-type pauseFunc = func(plan *otShapePlan, font *Font, buffer *Buffer)
+type pauseFunc func(plan *otShapePlan, font *Font, buffer *Buffer)
 
 func (mb *otMapBuilder) addPause(tableIndex int, fn pauseFunc) {
 	s := stageInfo{

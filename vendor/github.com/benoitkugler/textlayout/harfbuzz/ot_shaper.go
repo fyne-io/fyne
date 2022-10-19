@@ -794,10 +794,14 @@ func (sp *shaperOpentype) shape(font *Font, buffer *Buffer, features []Feature) 
 	}
 	c.plan.shaper.preprocessText(c.plan, c.buffer, c.font)
 	if debugMode >= 1 {
-		fmt.Println("PREPROCESS text end")
+		fmt.Println("PREPROCESS text end:", c.buffer.Info)
 	}
 
 	c.substituteBeforePosition() // apply GSUB
+
+	if debugMode >= 2 {
+		fmt.Println("AFTER SUBSTITUTE", c.buffer.Info)
+	}
 
 	c.position()
 

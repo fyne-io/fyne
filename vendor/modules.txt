@@ -11,7 +11,7 @@ github.com/BurntSushi/toml/internal
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
-# github.com/benoitkugler/textlayout v0.2.0
+# github.com/benoitkugler/textlayout v0.2.0 => github.com/benoitkugler/textlayout v0.2.1
 github.com/benoitkugler/textlayout/fonts
 github.com/benoitkugler/textlayout/fonts/binaryreader
 github.com/benoitkugler/textlayout/fonts/glyphsnames
