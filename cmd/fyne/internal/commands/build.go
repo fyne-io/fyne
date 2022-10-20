@@ -331,8 +331,8 @@ func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
 		return nil, nil
 	}
 
-	fyneGoModVersionConstraintOlderThan203 := version.NewConstrainGroupFromString(">=2.3")
-	if fyneGoModVersionConstraintOlderThan203.Match(fyneGoModVersionNormalized) {
+	fyneGoModVersionConstraintAtLeast203 := version.NewConstrainGroupFromString(">=2.3")
+	if fyneGoModVersionConstraintAtLeast203.Match(fyneGoModVersionNormalized) {
 		app.VersionOlderThan203 = true
 	}
 
