@@ -28,7 +28,7 @@ type fyneApp struct {
 	cloud     fyne.CloudProvider
 	lifecycle fyne.Lifecycle
 	settings  *settings
-	storage   *store
+	storage   fyne.Storage
 	prefs     fyne.Preferences
 
 	running uint32 // atomic, 1 == running, 0 == stopped
@@ -73,43 +73,6 @@ func (a *fyneApp) Run() {
 		a.driver.Run()
 		return
 	}
-}
-
-func (a *fyneApp) SetCloudProvider(p fyne.CloudProvider) {
-	if p == nil {
-		a.cloud = nil
-		return
-	}
-
-	a.transitionCloud(p)
-}
-
-func (a *fyneApp) transitionCloud(p fyne.CloudProvider) {
-	if a.cloud != nil {
-		a.cloud.Cleanup(a)
-	}
-
-	err := p.Setup(a)
-	if err != nil {
-		fyne.LogError("Failed to set up cloud provider "+p.ProviderName(), err)
-		return
-	}
-	a.cloud = p
-
-	listeners := a.prefs.ChangeListeners()
-	if pp, ok := p.(fyne.CloudProviderPreferences); ok {
-		a.prefs = pp.CloudPreferences(a)
-	} else {
-		a.prefs = a.newDefaultPreferences()
-	}
-
-	for _, l := range listeners {
-		a.prefs.AddChangeListener(l)
-		l() // assume that preferences have changed because we replaced the provider
-	}
-
-	// after transition ensure settings listener is fired
-	a.settings.apply()
 }
 
 func (a *fyneApp) Quit() {
@@ -162,23 +125,28 @@ func New() fyne.App {
 	return NewWithID(meta.ID)
 }
 
+func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
+	if id != "" {
+		if pref, ok := p.(interface{ load() }); ok {
+			pref.load()
+		}
+
+		root, _ := s.docRootURI()
+		return &internal.Docs{RootDocURI: root}
+	} else {
+		return &internal.Docs{} // an empty impl to avoid crashes
+	}
+}
+
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
 	newApp.settings = loadSettings()
-	newApp.storage = &store{a: newApp}
-	if id != "" {
-		if pref, ok := newApp.prefs.(interface{ load() }); ok {
-			pref.load()
-		}
-
-		root, _ := newApp.storage.docRootURI()
-		newApp.storage.Docs = &internal.Docs{RootDocURI: root}
-	} else {
-		newApp.storage.Docs = &internal.Docs{} // an empty impl to avoid crashes
-	}
+	store := &store{a: newApp}
+	store.Docs = makeStoreDocs(id, newApp.prefs, store)
+	newApp.storage = store
 
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
