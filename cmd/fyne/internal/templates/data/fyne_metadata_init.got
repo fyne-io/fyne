@@ -12,7 +12,7 @@ func init() {
 		Version: "{{.AppVersion}}",
 		Build: {{.AppBuild}},
 		Icon: {{.ResGoString}},
-		{{if .VersionOlderThan203}}
+		{{if .VersionAtLeast2_3}}
 		Release: {{.Release}},
 		Custom: map[string]string{
 			{{range $key, $value := .CustomMetadata}}
