@@ -175,6 +175,8 @@ func (r *Releaser) Run(params []string) {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
 	}
+
+	r.Packager.distribution = true
 	r.Packager.release = true
 
 	if err := r.beforePackage(); err != nil {
@@ -192,13 +194,14 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
+	r.Packager.distribution = true
 	r.Packager.release = true
+
 	if err := r.beforePackage(); err != nil {
 		return err
 	}
 
-	err := r.Packager.packageWithoutValidate()
-	if err != nil {
+	if err := r.Packager.packageWithoutValidate(); err != nil {
 		return err
 	}
 
