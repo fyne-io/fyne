@@ -728,7 +728,10 @@ func (e *Entry) TypedRune(r rune) {
 
 	// if we've typed a character and we're selecting then replace the selection with the character
 	if selecting {
+		cb := e.OnChanged
+		e.OnChanged = nil // don't propagate this change to binding etc
 		e.eraseSelection()
+		e.OnChanged = cb // the change later will then trigger callback
 	}
 
 	e.propertyLock.Lock()

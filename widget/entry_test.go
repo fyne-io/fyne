@@ -42,6 +42,21 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "Typed", entry.Text)
 }
 
+func TestEntry_Binding_Replace(t *testing.T) {
+	entry := widget.NewEntry()
+	str := binding.NewString()
+	_ = str.Set("Content")
+	entry.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "Content", entry.Text)
+
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "nt", entry.SelectedText())
+
+	test.Type(entry, "g")
+	assert.Equal(t, "Cogent", entry.Text)
+}
+
 func TestEntry_Clicked(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
