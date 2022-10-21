@@ -219,7 +219,8 @@ func (b *Builder) build() error {
 	env := os.Environ()
 
 	if goos == "darwin" {
-		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
+		appendEnv(&env, "CGO_CFLAGS", "-mmacosx-version-min=10.11")
+		appendEnv(&env, "CGO_LDFLAGS", "-mmacosx-version-min=10.11")
 	}
 
 	if !isWeb(goos) {
@@ -346,4 +347,17 @@ func targetOS() string {
 	}
 
 	return runtime.GOOS
+}
+
+func appendEnv(env *[]string, varName, value string) {
+	for i := range *env {
+		keyValue := strings.SplitN((*env)[i], "=", 2)
+
+		if keyValue[0] == varName {
+			(*env)[i] += " " + value
+			return
+		}
+	}
+
+	*env = append(*env, varName+"="+value)
 }

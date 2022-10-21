@@ -262,3 +262,22 @@ func Test_FyneGoMod(t *testing.T) {
 		assert.Equal(t, j.expected, called)
 	}
 }
+
+func Test_AppendEnv(t *testing.T) {
+	env := []string{
+		"foo=bar",
+		"bar=baz",
+		"foo1=bar=baz",
+	}
+
+	appendEnv(&env, "foo2", "baz2")
+	appendEnv(&env, "foo", "baz")
+	appendEnv(&env, "foo1", "-bar")
+
+	if assert.Len(t, env, 4) {
+		assert.Equal(t, "foo=bar baz", env[0])
+		assert.Equal(t, "bar=baz", env[1])
+		assert.Equal(t, "foo1=bar=baz -bar", env[2])
+		assert.Equal(t, "foo2=baz2", env[3])
+	}
+}
