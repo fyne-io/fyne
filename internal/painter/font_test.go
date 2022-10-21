@@ -8,10 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
-	"github.com/goki/freetype/truetype"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 )
 
 func TestCachedFontFace(t *testing.T) {
@@ -27,7 +24,7 @@ func TestCachedFontFace(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := painter.CachedFontFace(tt.style, &truetype.Options{})
+			got, _ := painter.CachedFontFace(tt.style, 14, 1)
 			for _, r := range tt.wantGlyphs {
 				_, ok := got.GlyphAdvance(r)
 				assert.True(t, ok, "symbol font should include: %c", r)
@@ -39,7 +36,8 @@ func TestCachedFontFace(t *testing.T) {
 func TestDrawString(t *testing.T) {
 	for name, tt := range map[string]struct {
 		color    color.Color
-		face     font.Face
+		style    fyne.TextStyle
+		size     float32
 		height   int
 		string   string
 		tabWidth int
@@ -47,7 +45,8 @@ func TestDrawString(t *testing.T) {
 	}{
 		"regular": {
 			color:    color.Black,
-			face:     regular,
+			style:    fyne.TextStyle{},
+			size:     40,
 			height:   50,
 			string:   "Hello\tworld!",
 			tabWidth: 7,
@@ -55,7 +54,8 @@ func TestDrawString(t *testing.T) {
 		},
 		"bold italic": {
 			color:    color.NRGBA{R: 255, A: 255},
-			face:     boldItalic,
+			style:    fyne.TextStyle{Bold: true, Italic: true},
+			size:     27.42,
 			height:   42,
 			string:   "Hello\tworld!",
 			tabWidth: 3,
@@ -63,7 +63,8 @@ func TestDrawString(t *testing.T) {
 		},
 		"missing glyphs": {
 			color:    color.Black,
-			face:     regular,
+			style:    fyne.TextStyle{},
+			size:     40,
 			height:   50,
 			string:   "Missing: ↩",
 			tabWidth: 4,
@@ -72,7 +73,8 @@ func TestDrawString(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
-			painter.DrawString(img, tt.string, tt.color, tt.face, tt.height, tt.tabWidth)
+			f, face := painter.CachedFontFace(tt.style, tt.size, 1)
+			painter.DrawString(img, tt.string, tt.color, f, face, tt.size, 1, tt.height, tt.tabWidth)
 			test.AssertImageMatches(t, "font/"+tt.want, img)
 		})
 	}
@@ -80,33 +82,38 @@ func TestDrawString(t *testing.T) {
 
 func TestMeasureString(t *testing.T) {
 	for name, tt := range map[string]struct {
-		face     font.Face
+		style    fyne.TextStyle
+		size     float32
 		string   string
 		tabWidth int
-		want     fixed.Int26_6
+		want     float32
 	}{
 		"regular": {
-			face:     regular,
+			style:    fyne.TextStyle{},
+			size:     40,
 			string:   "Hello\tworld!",
 			tabWidth: 7,
-			want:     18263, // 285.359375
+			want:     257.82812,
 		},
 		"bold italic": {
-			face:     boldItalic,
+			style:    fyne.TextStyle{Bold: true, Italic: true},
+			size:     27.42,
 			string:   "Hello\tworld!",
 			tabWidth: 3,
-			want:     11576, // 180.875
+			want:     173.17188,
 		},
 		"missing glyph": {
-			face:     regular,
+			style:    fyne.TextStyle{},
+			size:     40,
 			string:   "Missing: ↩",
 			tabWidth: 4,
-			want:     14257, // 222.765625
+			want:     189.65625,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := painter.MeasureString(tt.face, tt.string, tt.tabWidth)
-			assert.Equal(t, tt.want, got)
+			_, face := painter.CachedFontFace(tt.style, tt.size, 1)
+			got, _ := painter.MeasureString(face, tt.string, tt.size, tt.tabWidth)
+			assert.Equal(t, tt.want, got.Width)
 		})
 	}
 }
@@ -114,26 +121,7 @@ func TestMeasureString(t *testing.T) {
 func TestRenderedTextSize(t *testing.T) {
 	size1, baseline1 := painter.RenderedTextSize("Hello World!", 20, fyne.TextStyle{})
 	size2, baseline2 := painter.RenderedTextSize("\rH\re\rl\rl\ro\r \rW\ro\rr\rl\rd\r!\r", 20, fyne.TextStyle{})
-	assert.Equal(t, size1.Width, size2.Width)
+	assert.Equal(t, int(size1.Width), int(size2.Width))
 	assert.Equal(t, size1.Height, size2.Height)
 	assert.Equal(t, baseline1, baseline2)
 }
-
-var regular = painter.CachedFontFace(
-	fyne.TextStyle{},
-	&truetype.Options{
-		Size: 40.0,
-		DPI:  painter.TextDPI,
-	},
-)
-
-var boldItalic = painter.CachedFontFace(
-	fyne.TextStyle{
-		Bold:   true,
-		Italic: true,
-	},
-	&truetype.Options{
-		Size: 27.42,
-		DPI:  painter.TextDPI,
-	},
-)

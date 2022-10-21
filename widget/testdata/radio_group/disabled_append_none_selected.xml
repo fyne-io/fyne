@@ -1,24 +1,24 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="19,59" size="102x73" type="*widget.RadioGroup">
-				<widget size="102x36" type="*widget.radioItem">
-					<circle fillColor="background" pos="2,4" size="28x28"/>
-					<circle fillColor="background" pos="6,8" size="20x20"/>
-					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,0" size="102x36">Option A</text>
+			<widget pos="21,60" size="98x70" type="*widget.RadioGroup">
+				<widget size="98x35" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,3" size="28x28"/>
+					<circle fillColor="background" pos="6,7" size="20x20"/>
+					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<text color="disabled" pos="32,0" size="98x35">Option A</text>
 				</widget>
-				<widget pos="0,36" size="102x36" type="*widget.radioItem">
-					<circle fillColor="background" pos="2,4" size="28x28"/>
-					<circle fillColor="background" pos="6,8" size="20x20"/>
-					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,0" size="102x36">Option B</text>
+				<widget pos="0,35" size="98x35" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,3" size="28x28"/>
+					<circle fillColor="background" pos="6,7" size="20x20"/>
+					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<text color="disabled" pos="32,0" size="98x35">Option B</text>
 				</widget>
-				<widget pos="0,73" size="102x36" type="*widget.radioItem">
-					<circle fillColor="background" pos="2,4" size="28x28"/>
-					<circle fillColor="background" pos="6,8" size="20x20"/>
-					<image pos="6,8" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,0" size="102x36">Option C</text>
+				<widget pos="0,70" size="98x35" type="*widget.radioItem">
+					<circle fillColor="background" pos="2,3" size="28x28"/>
+					<circle fillColor="background" pos="6,7" size="20x20"/>
+					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<text color="disabled" pos="32,0" size="98x35">Option C</text>
 				</widget>
 			</widget>
 		</container>

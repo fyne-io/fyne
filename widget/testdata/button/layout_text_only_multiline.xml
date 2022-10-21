@@ -3,9 +3,9 @@
 		<widget pos="4,4" size="142x192" type="*widget.Button">
 			<rectangle fillColor="button" size="142x192"/>
 			<rectangle size="0x0"/>
-			<widget pos="50,75" size="40x41" type="*widget.RichText">
-				<text alignment="center" bold size="40x20">Test</text>
-				<text alignment="center" bold pos="0,20" size="40x20">Line2</text>
+			<widget pos="52,76" size="37x38" type="*widget.RichText">
+				<text alignment="center" bold size="37x19">Test</text>
+				<text alignment="center" bold pos="0,19" size="37x19">Line2</text>
 			</widget>
 		</widget>
 	</content>

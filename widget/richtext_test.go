@@ -810,7 +810,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 50, 50, measurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 46, 46, measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -820,7 +820,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 }
 
 func TestText_binarySearch(t *testing.T) {
-	maxWidth := float32(50)
+	maxWidth := float32(46)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
 	measurer := func(text []rune) float32 {

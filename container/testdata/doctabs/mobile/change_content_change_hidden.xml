@@ -3,15 +3,15 @@
 		<widget size="150x150" type="*container.DocTabs">
 			<container size="150x36">
 				<widget size="110x36" type="*widget.Scroll">
-					<container size="149x36">
+					<container size="148x36">
 						<widget size="72x36" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="64x20">Test1</text>
+							<text bold color="primary" pos="4,8" size="64x19">Test1</text>
 							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 						<widget pos="76,0" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x20">Test2</text>
+							<text bold pos="4,8" size="64x19">Test2</text>
 							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
@@ -36,8 +36,8 @@
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
 			<rectangle fillColor="primary" pos="0,36" size="72x4"/>
-			<widget pos="0,40" size="150x109" type="*widget.Label">
-				<text pos="8,8" size="134x20">Text3</text>
+			<widget pos="0,40" size="150x110" type="*widget.Label">
+				<text pos="8,8" size="134x19">Text3</text>
 			</widget>
 		</widget>
 	</content>

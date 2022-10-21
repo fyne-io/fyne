@@ -3,19 +3,19 @@
 		<widget size="150x150" type="*container.AppTabs">
 			<container size="150x36">
 				<container size="150x36">
-					<widget size="56x36" type="*container.tabButton">
-						<rectangle fillColor="hover" size="56x36"/>
-						<text alignment="center" bold color="primary" pos="8,8" size="40x20">Test1</text>
+					<widget size="52x36" type="*container.tabButton">
+						<rectangle fillColor="hover" size="52x36"/>
+						<text alignment="center" bold color="primary" pos="8,8" size="36x20">Test1</text>
 					</widget>
-					<widget pos="60,0" size="56x36" type="*container.tabButton">
-						<text alignment="center" bold pos="8,8" size="40x20">Test2</text>
+					<widget pos="56,0" size="52x36" type="*container.tabButton">
+						<text alignment="center" bold pos="8,8" size="36x20">Test2</text>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="56x4"/>
-			<widget pos="0,40" size="150x109" type="*widget.Label">
-				<text pos="8,8" size="134x20">Text1</text>
+			<rectangle fillColor="primary" pos="0,36" size="52x4"/>
+			<widget pos="0,40" size="150x110" type="*widget.Label">
+				<text pos="8,8" size="134x19">Text1</text>
 			</widget>
 		</widget>
 	</content>
