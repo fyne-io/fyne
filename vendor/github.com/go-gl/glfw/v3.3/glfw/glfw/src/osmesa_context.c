@@ -124,6 +124,8 @@ GLFWbool _glfwInitOSMesa(void)
         "libOSMesa.8.dylib",
 #elif defined(__CYGWIN__)
         "libOSMesa-8.so",
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
+        "libOSMesa.so",
 #else
         "libOSMesa.so.8",
         "libOSMesa.so.6",
