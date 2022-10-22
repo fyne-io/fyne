@@ -197,3 +197,25 @@ func TestCheckGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
 	test.Type(canvas.Focused(), " ")
 	assert.Equal(t, []string{"Option B"}, check.Selected, "cannot unselect required check")
 }
+
+func TestCheckGroup_ManipulateOptions(t *testing.T) {
+	check := &widget.CheckGroup{Options: []string{}}
+	assert.Equal(t, 0, len(check.Options))
+
+	check.Append("test1")
+	assert.Equal(t, 1, len(check.Options))
+	check.SetSelected([]string{"test1"})
+	assert.Equal(t, 1, len(check.Selected))
+
+	check.Append("test2")
+	assert.Equal(t, 2, len(check.Options))
+
+	removed := check.Remove("nope")
+	assert.Equal(t, false, removed)
+	assert.Equal(t, 2, len(check.Options))
+
+	removed = check.Remove("test1")
+	assert.Equal(t, true, removed)
+	assert.Equal(t, 1, len(check.Options))
+	assert.Equal(t, 0, len(check.Selected))
+}
