@@ -228,12 +228,12 @@ func (b *Builder) build() error {
 
 		if goos == "windows" {
 			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui ")
+				args = append(args, "-ldflags", "-s -w -H=windowsgui", "-trimpath")
 			} else {
 				args = append(args, "-ldflags", "-H=windowsgui ")
 			}
 		} else if b.release {
-			args = append(args, "-ldflags", "-s -w ")
+			args = append(args, "-ldflags", "-s -w", "-trimpath")
 		}
 	}
 
