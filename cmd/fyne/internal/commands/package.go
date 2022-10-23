@@ -119,11 +119,11 @@ func Package() *cli.Command {
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
 	*appData
-	srcDir, dir, exe, os string
-	install, release     bool
-	certificate, profile string // optional flags for releasing
-	tags, category       string
-	tempDir              string
+	srcDir, dir, exe, os           string
+	install, release, distribution bool
+	certificate, profile           string // optional flags for releasing
+	tags, category                 string
+	tempDir                        string
 }
 
 // AddFlags adds the flags for interacting with the package command.

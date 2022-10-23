@@ -273,10 +273,14 @@ var (
 )
 
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name, version string, build int, release bool, cert, profile string) error {
+func RunNewBuild(target, appID, icon, name, version string, build int, release, distribution bool, cert, profile string) error {
 	buildTarget = target
 	buildBundleID = appID
-	buildRelease = release
+	buildRelease = distribution
+	if release {
+		buildLdflags = "-w"
+		buildTrimpath = true
+	}
 
 	cmd := cmdBuild
 	cmd.Flag = flag.FlagSet{}
