@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	cli "github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2"
 
 	"golang.org/x/sys/execabs"
 )
@@ -106,6 +106,7 @@ func Release() *cli.Command {
 			},
 			&cli.BoolFlag{
 				Name:        "verbose",
+				Aliases:     []string{"v"},
 				Usage:       "verbose output of used commands",
 				Destination: &r.verbose,
 			},
@@ -183,9 +184,7 @@ func (r *Releaser) Run(params []string) {
 		return
 	}
 
-	if r.verbose {
-		mobile.Verbose = true
-	}
+	mobile.Verbose = r.verbose
 	r.Packager.distribution = true
 	r.Packager.release = true
 
@@ -204,9 +203,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
-	if r.verbose {
-		mobile.Verbose = true
-	}
+	mobile.Verbose = r.verbose
 	r.Packager.distribution = true
 	r.Packager.release = true
 
