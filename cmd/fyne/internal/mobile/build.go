@@ -254,6 +254,7 @@ func printcmd(format string, args ...interface{}) {
 
 // "Build flags", used by multiple commands.
 var (
+	Verbose         bool        // can be set to show commands in release mode
 	buildA          bool        // -a
 	buildI          bool        // -i
 	buildN          bool        // -n

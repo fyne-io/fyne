@@ -12,8 +12,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
+	cli "github.com/urfave/cli/v2"
 
-	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
 )
 
@@ -104,6 +104,11 @@ func Release() *cli.Command {
 				Usage:       "Windows: the developer identity for your Microsoft store account",
 				Destination: &r.developer,
 			},
+			&cli.BoolFlag{
+				Name:        "verbose",
+				Usage:       "verbose output of used commands",
+				Destination: &r.verbose,
+			},
 			&cli.StringFlag{
 				Name:        "password",
 				Aliases:     []string{"passw"},
@@ -136,6 +141,7 @@ type Releaser struct {
 	keyPass      string
 	developer    string
 	password     string
+	verbose      bool
 }
 
 // AddFlags adds the flags for interacting with the release command.
@@ -155,6 +161,7 @@ func (r *Releaser) AddFlags() {
 	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
+	flag.BoolVar(&r.verbose, "verbose", false, "verbose output of used commands")
 	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
 	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
 	flag.StringVar(&r.category, "category", "", "macOS: category of the app for store listing")
@@ -176,6 +183,9 @@ func (r *Releaser) Run(params []string) {
 		return
 	}
 
+	if r.verbose {
+		mobile.Verbose = true
+	}
 	r.Packager.distribution = true
 	r.Packager.release = true
 
@@ -194,6 +204,9 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
+	if r.verbose {
+		mobile.Verbose = true
+	}
 	r.Packager.distribution = true
 	r.Packager.release = true
 
