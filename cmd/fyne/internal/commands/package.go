@@ -515,6 +515,24 @@ func validateAppID(appID, os, name string, release bool) (string, error) {
 			return "", errors.New("missing appID parameter for package")
 		} else if !strings.Contains(appID, ".") {
 			return "", errors.New("appID must be globally unique and contain at least 1 '.'")
+		} else if util.IsAndroid(os) {
+			if strings.Contains(appID, "-") {
+				return "", errors.New("appID can not contain '-'")
+			}
+
+			// appID package names can not start with '_' or a number
+			packageNames := strings.Split(appID, ".")
+			for _, name := range packageNames {
+				if len(name) == 0 {
+					continue
+				}
+
+				if name[0] == '_' {
+					return "", fmt.Errorf("appID package names can not start with '_' (%s)", name)
+				} else if name[0] >= '0' && name[0] <= '9' {
+					return "", fmt.Errorf("appID package names can not start with a number (%s)", name)
+				}
+			}
 		}
 	}
 

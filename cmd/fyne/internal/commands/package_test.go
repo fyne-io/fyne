@@ -93,6 +93,21 @@ func Test_validateAppID(t *testing.T) {
 
 	_, err = validateAppID("myApp", "android", "myApp", true)
 	assert.NotNil(t, err)
+
+	_, err = validateAppID("com._server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("com.5server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("0com.server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("......", "android", "myApp", true)
+	assert.Nil(t, err)
+
+	_, err = validateAppID(".....myApp", "android", "myApp", true)
+	assert.Nil(t, err)
 }
 
 func Test_buildPackageWasm(t *testing.T) {
