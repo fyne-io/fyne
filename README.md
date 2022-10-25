@@ -35,8 +35,8 @@ Using the standard go tools you can install Fyne's core library using:
 
 To run a showcase of the features of Fyne execute the following:
 
-    go install fyne.io/fyne/v2/cmd/fyne_demo@latest
-    fyne_demo
+    $ go install fyne.io/fyne/v2/cmd/fyne_demo@latest
+    $ fyne_demo
 
 (For Go versions earlier than v1.16 use `go get fyne.io/fyne/v2/cmd/fyne_demo`)
 
@@ -124,8 +124,15 @@ Using `go install` will copy the executable into your go `bin` dir.
 To install the application with icons etc into your operating system's standard
 application location you can use the fyne utility and the "install" subcommand.
 
+<<<<<<< HEAD
     go install fyne.io/fyne/v2/cmd/fyne@latest
     fyne install
+
+(for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
+=======
+    $ go install fyne.io/fyne/v2/cmd/fyne@latest
+    $ fyne install
+>>>>>>> 42fa9008 (Fix README for go 1.18 removal)
 
 (for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
 
