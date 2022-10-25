@@ -34,8 +34,10 @@ Using the standard go tools you can install Fyne's core library using:
 
 To run a showcase of the features of Fyne execute the following:
 
-    $ go get fyne.io/fyne/v2/cmd/fyne_demo/
+    $ go install fyne.io/fyne/v2/cmd/fyne_demo@latest
     $ fyne_demo
+
+(For Go versions earlier than v1.16 use `go get fyne.io/fyne/v2/cmd/fyne_demo`)
 
 And you should see something like this (after you click a few buttons):
 
@@ -121,8 +123,10 @@ Using `go install` will copy the executable into your go `bin` dir.
 To install the application with icons etc into your operating system's standard
 application location you can use the fyne utility and the "install" subcommand.
 
-    $ go get fyne.io/fyne/v2/cmd/fyne
+    $ go install fyne.io/fyne/v2/cmd/fyne@latest
     $ fyne install
+
+(for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
 
 # Packaging for mobile
 
@@ -172,7 +176,7 @@ However, if looking to support Fyne in a bigger way on your operating system the
 
 It is recommended that you install the following additional apps:
 
-| app | go get | description |
+| app | go install | description |
 | --- | ------ | ----------- |
 | fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings` | A GUI for managing your global Fyne settings like theme and scaling |
 | apps | `github.com/fyne-io/apps` | A graphical installer for the Fyne apps listed at https://apps.fyne.io |
