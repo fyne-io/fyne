@@ -25,7 +25,7 @@ func runClean(cmd *command) (err error) {
 		return fmt.Errorf("GOPATH is not set")
 	}
 	gomobilepath = filepath.Join(gopaths[0], "pkg/gomobile")
-	if buildX {
+	if BuildX {
 		fmt.Fprintln(xout, "GOMOBILE="+gomobilepath)
 	}
 	return removeAll(gomobilepath)

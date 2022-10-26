@@ -184,7 +184,7 @@ func (r *Releaser) Run(params []string) {
 		return
 	}
 
-	mobile.Verbose = r.verbose
+	mobile.BuildX = r.verbose
 	r.Packager.distribution = true
 	r.Packager.release = true
 
@@ -203,7 +203,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
-	mobile.Verbose = r.verbose
+	mobile.BuildX = r.verbose
 	r.Packager.distribution = true
 	r.Packager.release = true
 

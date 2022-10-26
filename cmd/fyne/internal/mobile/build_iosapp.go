@@ -72,7 +72,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		if err := mkdir(filepath.Dir(file.name)); err != nil {
 			return nil, err
 		}
-		if buildX || Verbose {
+		if BuildX {
 			printcmd("echo \"%s\" > %s", file.contents, file.name)
 		}
 		if !buildN {
@@ -88,7 +88,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		"-o", filepath.Join(tmpdir, "main/main"),
 		"-create",
 	)
-	if buildX || Verbose {
+	if BuildX {
 		printcmd("xcrun lipo -o %s -create", filepath.Join(tmpdir, "main/main"))
 	}
 	var nmpkgs map[string]bool
@@ -127,7 +127,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	}
 
 	cmd = execabs.Command("xcrun", cmdStrings...)
-	if buildX || Verbose {
+	if BuildX {
 		printcmd("### xcrun %s", strings.Join(cmdStrings, " "))
 	}
 	if err := runCmd(cmd); err != nil {
@@ -148,7 +148,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		n = path.Base(n)
 		buildO = n + ".app"
 	}
-	if buildX || Verbose {
+	if BuildX {
 		printcmd("mv %s %s", tmpdir+"/build/Release-iphoneos/main.app", buildO)
 	}
 	if !buildN {

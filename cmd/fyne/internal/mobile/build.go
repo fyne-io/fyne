@@ -254,12 +254,11 @@ func printcmd(format string, args ...interface{}) {
 
 // "Build flags", used by multiple commands.
 var (
-	Verbose         bool        // can be set to show commands in release mode
 	buildA          bool        // -a
 	buildI          bool        // -i
 	buildN          bool        // -n
 	buildV          bool        // -v
-	buildX          bool        // -x
+	BuildX          bool        // -x, or -verbose in release
 	buildO          string      // -o
 	buildGcflags    string      // -gcflags
 	buildLdflags    string      // -ldflags
@@ -312,7 +311,7 @@ func addBuildFlags(cmd *command) {
 func addBuildFlagsNVXWork(cmd *command) {
 	cmd.Flag.BoolVar(&buildN, "n", false, "")
 	cmd.Flag.BoolVar(&buildV, "v", false, "")
-	cmd.Flag.BoolVar(&buildX, "x", false, "")
+	cmd.Flag.BoolVar(&BuildX, "x", false, "")
 	cmd.Flag.BoolVar(&buildWork, "work", false, "")
 }
 
@@ -353,7 +352,7 @@ func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...stri
 	if subcmd != "install" && buildI {
 		cmd.Args = append(cmd.Args, "-i")
 	}
-	if buildX {
+	if BuildX {
 		cmd.Args = append(cmd.Args, "-x")
 	}
 	if buildGcflags != "" {
