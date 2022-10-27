@@ -134,7 +134,7 @@ func Package() *cli.Command {
 type Packager struct {
 	*appData
 	srcDir, dir, exe, os           string
-	install, release, distribution bool
+	install, release, distribution, verbose bool
 	certificate, profile           string // optional flags for releasing
 	tags, category                 string
 	tempDir                        string

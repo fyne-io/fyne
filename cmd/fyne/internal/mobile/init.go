@@ -20,7 +20,7 @@ var (
 )
 
 func mkdir(dir string) error {
-	if BuildX || buildN {
+	if buildX || buildN {
 		printcmd("mkdir -p %s", dir)
 	}
 	if buildN {
@@ -30,7 +30,7 @@ func mkdir(dir string) error {
 }
 
 func removeAll(path string) error {
-	if BuildX || buildN {
+	if buildX || buildN {
 		printcmd(`rm -r -f "%s"`, path)
 	}
 	if buildN {
@@ -85,7 +85,7 @@ func goEnv(name string) string {
 }
 
 func runCmd(cmd *execabs.Cmd) error {
-	if BuildX || buildN {
+	if buildX || buildN {
 		dir := ""
 		if cmd.Dir != "" {
 			dir = "PWD=" + cmd.Dir + " "

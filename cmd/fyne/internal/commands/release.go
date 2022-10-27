@@ -108,7 +108,7 @@ func Release() *cli.Command {
 				Name:        "verbose",
 				Aliases:     []string{"v"},
 				Usage:       "verbose output of used commands",
-				Destination: &r.verbose,
+				Destination: &r.Packager.verbose,
 			},
 			&cli.StringFlag{
 				Name:        "password",
@@ -142,7 +142,6 @@ type Releaser struct {
 	keyPass      string
 	developer    string
 	password     string
-	verbose      bool
 }
 
 // AddFlags adds the flags for interacting with the release command.
@@ -184,7 +183,6 @@ func (r *Releaser) Run(params []string) {
 		return
 	}
 
-	mobile.BuildX = r.verbose
 	r.Packager.distribution = true
 	r.Packager.release = true
 
@@ -203,7 +201,6 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
-	mobile.BuildX = r.verbose
 	r.Packager.distribution = true
 	r.Packager.release = true
 

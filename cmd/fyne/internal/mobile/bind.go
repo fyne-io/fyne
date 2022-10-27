@@ -18,7 +18,7 @@ import (
 // pkg, tmpdir in build.go
 
 func copyFile(dst, src string) error {
-	if BuildX {
+	if buildX {
 		printcmd("cp %s %s", src, dst)
 	}
 	return writeFile(dst, func(w io.Writer) error {

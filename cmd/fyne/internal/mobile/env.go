@@ -45,7 +45,7 @@ func buildEnvInit() (cleanup func(), err error) {
 		}
 	}
 
-	if BuildX {
+	if buildX {
 		fmt.Fprintln(xout, "GOMOBILE="+gomobilepath)
 	}
 
@@ -74,7 +74,7 @@ func buildEnvInit() (cleanup func(), err error) {
 			return nil, err
 		}
 	}
-	if BuildX {
+	if buildX {
 		fmt.Fprintln(xout, "WORK="+tmpdir)
 	}
 

@@ -258,7 +258,7 @@ var (
 	buildI          bool        // -i
 	buildN          bool        // -n
 	buildV          bool        // -v
-	BuildX          bool        // -x, or -verbose in release
+	buildX          bool        // -x, or -verbose in release
 	buildO          string      // -o
 	buildGcflags    string      // -gcflags
 	buildLdflags    string      // -ldflags
@@ -273,7 +273,8 @@ var (
 )
 
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name, version string, build int, release, distribution bool, cert, profile string) error {
+func RunNewBuild(target, appID, icon, name, version string, build int, release, distribution bool, cert, profile string, verbose bool) error {
+	buildX = verbose
 	buildTarget = target
 	buildBundleID = appID
 	buildRelease = distribution
@@ -311,7 +312,7 @@ func addBuildFlags(cmd *command) {
 func addBuildFlagsNVXWork(cmd *command) {
 	cmd.Flag.BoolVar(&buildN, "n", false, "")
 	cmd.Flag.BoolVar(&buildV, "v", false, "")
-	cmd.Flag.BoolVar(&BuildX, "x", false, "")
+	cmd.Flag.BoolVar(&buildX, "x", false, "")
 	cmd.Flag.BoolVar(&buildWork, "work", false, "")
 }
 
@@ -352,7 +353,7 @@ func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...stri
 	if subcmd != "install" && buildI {
 		cmd.Args = append(cmd.Args, "-i")
 	}
-	if BuildX {
+	if buildX {
 		cmd.Args = append(cmd.Args, "-x")
 	}
 	if buildGcflags != "" {
