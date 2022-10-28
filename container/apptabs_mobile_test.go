@@ -28,10 +28,10 @@ func TestAppTabs_ApplyTheme(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "apptabs/mobile/theme_default.png", c.Capture())
+	test.AssertRendersToImage(t, "apptabs/mobile/theme_default.png", c)
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "apptabs/mobile/theme_ugly.png", c.Capture())
+	test.AssertRendersToImage(t, "apptabs/mobile/theme_ugly.png", c)
 }
 
 func TestAppTabs_ChangeItemContent(t *testing.T) {
