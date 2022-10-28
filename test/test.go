@@ -45,8 +45,7 @@ func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.Canv
 	c.SetContent(o)
 	c.Resize(size) // ensure we are large enough for current size
 
-	img := c.Capture()
-	return test.AssertImageMatches(t, masterFilename, img, msgAndArgs...)
+	return AssertRendersToImage(t, masterFilename, c, msgAndArgs...)
 }
 
 // AssertObjectRendersToMarkup asserts that the given `CanvasObject` renders the same markup as the one stored in the master file.
