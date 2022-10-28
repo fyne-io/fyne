@@ -56,15 +56,16 @@ func TestAssertRendersToImage(t *testing.T) {
 		tt := &testing.T{}
 		assert.False(t, test.AssertRendersToImage(tt, "non_existing_master.png", c), "non existing master is not equal to rendered image")
 		assert.True(t, tt.Failed(), "test failed")
-		_, err := os.Stat("testdata/failed/non_existing_master.xml")
-		exists := os.IsNotExist(err)
-		assert.True(t, exists)
+		_, err := os.Stat("testdata/failed/non_existing_master.png")
+		assert.Nil(t, err)
 	})
 
 	t.Run("matching master", func(t *testing.T) {
 		tt := &testing.T{}
 		assert.True(t, test.AssertRendersToImage(tt, "image_master.png", c), "existing master is equal to rendered image")
 		assert.False(t, tt.Failed(), "test should not fail")
+		_, err := os.Stat("testdata/failed/image_master.png")
+		assert.True(t, os.IsNotExist(err))
 	})
 
 	t.Run("diffing master", func(t *testing.T) {
@@ -73,13 +74,12 @@ func TestAssertRendersToImage(t *testing.T) {
 		tt := &testing.T{}
 		assert.False(t, test.AssertRendersToImage(tt, "image_diffing_master.png", c), "existing master is not equal to rendered image")
 		assert.True(t, tt.Failed(), "test should fail")
-		_, err := os.Stat("testdata/failed/non_existing_master.xml")
-		exists := os.IsNotExist(err)
-		assert.True(t, exists)
+		_, err := os.Stat("testdata/failed/image_diffing_master.png")
+		assert.Nil(t, err)
 	})
 
 	if !t.Failed() {
-		os.RemoveAll("testdata/failed")
+		_ = os.RemoveAll("testdata/failed")
 	}
 }
 
