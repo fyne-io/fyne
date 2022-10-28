@@ -38,7 +38,7 @@ func Test_colorChannel_Layout(t *testing.T) {
 
 			window := test.NewWindow(color)
 
-			test.AssertImageMatches(t, "color/channel_layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToImage(t, "color/channel_layout_"+name+".png", window.Canvas())
 
 			window.Close()
 		})

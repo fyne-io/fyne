@@ -29,10 +29,10 @@ func TestDocTabs_ApplyTheme(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "doctabs/desktop/single_initial.png", c.Capture())
+	test.AssertRendersToImage(t, "doctabs/desktop/single_initial.png", c)
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "doctabs/desktop/single_custom_theme.png", c.Capture())
+	test.AssertRendersToImage(t, "doctabs/desktop/single_custom_theme.png", c)
 }
 
 func TestDocTabs_ChangeItemContent(t *testing.T) {
