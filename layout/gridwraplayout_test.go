@@ -91,6 +91,17 @@ func TestGridLWrapLayout_MinSize(t *testing.T) {
 	layout.Layout(container.Objects, minSize)
 	layoutMin = layout.MinSize(container.Objects)
 	assert.Equal(t, minSize, layoutMin)
+
+	// vertical 2 items
+	container.Add(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
+	layout.Layout(container.Objects, fyne.NewSize(minSize.Width, minSize.Height*2.5))
+	layoutMin = layout.MinSize(container.Objects)
+	assert.Equal(t, minSize.Height*2+theme.Padding(), layoutMin.Height)
+
+	// horizontal 2 items
+	layout.Layout(container.Objects, fyne.NewSize(minSize.Width*2.5, minSize.Height))
+	layoutMin = layout.MinSize(container.Objects)
+	assert.Equal(t, minSize.Height, layoutMin.Height)
 }
 
 func TestGridLWrapLayout_MinSize_Hidden(t *testing.T) {
