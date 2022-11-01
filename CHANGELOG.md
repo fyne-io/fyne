@@ -3,13 +3,15 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.2.4 - Ongoing
+## 2.2.4 - 1 November 2022
 
 ### Fixes
 
 * Iphone incorrect click coordinates in zoomed screen view (#3122)
 * CachedFontFace seems to be causing crash (#3134)
 * Fix possible compile error if "fyne build" is used without icon metadata
+* Detect and use recent Android NDK toolchain
+* Handle fyne package -release and fyne release properly for Android and iOS
 
 
 ## 2.2.3 - 8 July 2022
