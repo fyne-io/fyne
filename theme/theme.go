@@ -93,6 +93,11 @@ const (
 	// Since: 2.3
 	ColorNameInputBorder fyne.ThemeColorName = "inputBorder"
 
+	// ColorNameMenuBackground is the name of theme lookup for background color of menus.
+	//
+	// Since: 2.3
+	ColorNameMenuBackground fyne.ThemeColorName = "menuBackground"
+
 	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
 	//
 	// Since: 2.0
@@ -369,6 +374,13 @@ func LightTheme() fyne.Theme {
 // Since: 2.3
 func LineSpacing() float32 {
 	return current().Size(SizeNameLineSpacing)
+}
+
+// MenuBackgroundColor returns the theme's background color for menus.
+//
+// Since: 2.3
+func MenuBackgroundColor() color.Color {
+	return safeColorLookup(ColorNameMenuBackground, currentVariant())
 }
 
 // Padding is the standard gap between elements and the border around interface elements.
@@ -659,6 +671,8 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0x24, G: 0x25, B: 0x29, A: 0xff}
 	case ColorNameInputBorder:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+	case ColorNameMenuBackground:
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNamePlaceHolder:
 		return color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff}
 	case ColorNamePressed:
@@ -721,6 +735,8 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameInputBorder:
 		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+	case ColorNameMenuBackground:
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNamePlaceHolder:
 		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	case ColorNamePressed:
