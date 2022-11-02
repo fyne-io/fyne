@@ -672,7 +672,7 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabled:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	case ColorNameDisabledButton:
-		return color.NRGBA{R: 0x26, G: 0x26, B: 0x26, A: 0xff}
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNameError:
 		return errorColor
 	case ColorNameForeground:
@@ -738,7 +738,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabled:
 		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	case ColorNameDisabledButton:
-		return color.NRGBA{R: 0xe5, G: 0xe5, B: 0xe5, A: 0xff}
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameError:
 		return errorColor
 	case ColorNameForeground:
