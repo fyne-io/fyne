@@ -22,7 +22,7 @@
 					<text pos="8,8" size="80x19">2222222222</text>
 				</widget>
 				<widget pos="0,37" size="96x1" type="*widget.Separator">
-					<rectangle fillColor="disabled" size="96x1"/>
+					<rectangle fillColor="inputBorder" size="96x1"/>
 				</widget>
 			</widget>
 		</container>

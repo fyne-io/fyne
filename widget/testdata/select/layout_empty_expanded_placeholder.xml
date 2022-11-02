@@ -29,7 +29,7 @@
 				</widget>
 				<widget size="98x8" type="*widget.Scroll">
 					<widget size="98x8" type="*widget.menuBox">
-						<rectangle fillColor="background" size="98x16"/>
+						<rectangle fillColor="rgba(102,102,102,255)" size="98x16"/>
 						<container pos="0,4" size="98x16">
 						</container>
 					</widget>

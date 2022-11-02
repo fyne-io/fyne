@@ -17,8 +17,8 @@
 				</widget>
 				<widget size="0x0" type="*glfw.menuBarUnderlay">
 				</widget>
-				<rectangle fillColor="button" size="300x27"/>
-				<container pos="4,0" size="292x27">
+				<rectangle fillColor="background" size="300x27"/>
+				<container pos="8,0" size="284x27">
 					<widget size="38x27" type="*glfw.menuBarItem">
 						<text pos="8,4" size="22x19">File</text>
 					</widget>

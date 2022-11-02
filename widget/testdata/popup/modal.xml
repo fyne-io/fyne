@@ -15,7 +15,7 @@
 				<linearGradient angle="270" endColor="shadow" pos="-24,0" size="24x43"/>
 			</widget>
 			<rectangle fillColor="shadow" size="200x199"/>
-			<rectangle fillColor="background" pos="81,77" size="37x43"/>
+			<rectangle fillColor="disabled button" pos="81,77" size="37x43"/>
 			<widget pos="85,81" size="29x35" type="*widget.Label">
 				<text pos="8,8" size="13x19">Hi</text>
 			</widget>

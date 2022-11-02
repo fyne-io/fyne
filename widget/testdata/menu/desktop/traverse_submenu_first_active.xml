@@ -14,7 +14,7 @@
 				</widget>
 				<widget size="58x107" type="*widget.Scroll">
 					<widget size="58x107" type="*widget.menuBox">
-						<rectangle fillColor="background" size="58x115"/>
+						<rectangle fillColor="rgba(102,102,102,255)" size="58x115"/>
 						<container pos="0,4" size="58x115">
 							<widget size="58x27" type="*widget.menuItem">
 								<text pos="8,4" size="42x19">Foo</text>
@@ -49,7 +49,7 @@
 					</widget>
 					<widget size="50x66" type="*widget.Scroll">
 						<widget size="50x66" type="*widget.menuBox">
-							<rectangle fillColor="background" size="50x74"/>
+							<rectangle fillColor="rgba(102,102,102,255)" size="50x74"/>
 							<container pos="0,4" size="50x74">
 								<widget size="50x27" type="*widget.menuItem">
 									<rectangle fillColor="focus" size="50x27"/>
