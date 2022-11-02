@@ -39,7 +39,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 // Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := container.NewHBox(b.Items...)
-	background := canvas.NewRectangle(theme.ButtonColor())
+	background := canvas.NewRectangle(theme.BackgroundColor())
 	underlay := &menuBarUnderlay{action: b.deactivate}
 	underlay.ExtendBaseWidget(underlay)
 	objects := []fyne.CanvasObject{underlay, background, cont}
@@ -142,24 +142,24 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 	} else {
 		r.underlay.Resize(fyne.NewSize(0, 0))
 	}
-	r.cont.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height))
-	r.cont.Move(fyne.NewPos(theme.Padding(), 0))
+	r.cont.Resize(fyne.NewSize(size.Width-2*theme.InnerPadding(), size.Height))
+	r.cont.Move(fyne.NewPos(theme.InnerPadding(), 0))
 	if item := r.b.activeItem; item != nil {
 		if item.Child().Size().IsZero() {
 			item.Child().Resize(item.Child().MinSize())
 		}
-		item.Child().Move(fyne.NewPos(item.Position().X+theme.Padding(), item.Size().Height))
+		item.Child().Move(fyne.NewPos(item.Position().X+theme.InnerPadding(), item.Size().Height))
 	}
 	r.background.Resize(size)
 }
 
 func (r *menuBarRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize().Add(fyne.NewSize(theme.Padding()*2, 0))
+	return r.cont.MinSize().Add(fyne.NewSize(theme.InnerPadding()*2, 0))
 }
 
 func (r *menuBarRenderer) Refresh() {
 	r.Layout(r.b.Size())
-	r.background.FillColor = theme.ButtonColor()
+	r.background.FillColor = theme.BackgroundColor()
 	r.background.Refresh()
 	r.ShadowingRenderer.RefreshShadow()
 	canvas.Refresh(r.b)
