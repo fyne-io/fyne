@@ -21,6 +21,8 @@ import (
 type Cursor struct {
 }
 
+const defaultTitle = "Fyne Application"
+
 // Input modes.
 const (
 	CursorMode             glfw.InputMode = glfw.CursorMode
@@ -37,10 +39,7 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-var (
-	cursorMap    map[desktop.Cursor]*Cursor
-	defaultTitle = "Fyne Application"
-)
+var cursorMap map[desktop.Cursor]*Cursor
 
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
