@@ -37,7 +37,7 @@
 					</widget>
 					<widget size="51x66" type="*widget.Scroll">
 						<widget size="51x66" type="*widget.menuBox">
-							<rectangle fillColor="rgba(102,102,102,255)" size="51x74"/>
+							<rectangle fillColor="menuBackground" size="51x74"/>
 							<container pos="0,4" size="51x74">
 								<widget size="51x27" type="*widget.menuItem">
 									<text pos="8,4" size="35x19">Copy</text>
