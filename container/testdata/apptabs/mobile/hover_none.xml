@@ -1,19 +1,19 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.AppTabs">
-			<container size="150x41">
-				<container size="150x41">
-					<widget size="72x41" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="6,12" size="60x17">Test1</text>
+			<container size="150x33">
+				<container size="150x33">
+					<widget size="72x33" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="4,8" size="64x17">Test1</text>
 					</widget>
-					<widget pos="78,0" size="72x41" type="*container.tabButton">
-						<text alignment="center" bold pos="6,12" size="60x17">Test2</text>
+					<widget pos="78,0" size="72x33" type="*container.tabButton">
+						<text alignment="center" bold pos="4,8" size="64x17">Test2</text>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,41" size="150x6"/>
-			<rectangle fillColor="primary" pos="0,41" size="72x6"/>
-			<widget pos="0,47" size="150x102" type="*widget.Label">
+			<rectangle fillColor="shadow" pos="0,33" size="150x6"/>
+			<rectangle fillColor="primary" pos="0,33" size="72x6"/>
+			<widget pos="0,39" size="150x110" type="*widget.Label">
 				<text pos="8,8" size="134x17">Text1</text>
 			</widget>
 		</widget>
