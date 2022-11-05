@@ -92,7 +92,7 @@ func (p *PopUp) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	background := canvas.NewRectangle(theme.BackgroundColor())
+	background := canvas.NewRectangle(theme.OverlayBackgroundColor())
 	if p.modal {
 		underlay := canvas.NewRectangle(theme.ShadowColor())
 		objects := []fyne.CanvasObject{underlay, background, p.Content}
@@ -197,7 +197,7 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *popUpRenderer) Refresh() {
-	r.background.FillColor = theme.BackgroundColor()
+	r.background.FillColor = theme.OverlayBackgroundColor()
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
@@ -243,7 +243,7 @@ func (r *modalPopUpRenderer) MinSize() fyne.Size {
 
 func (r *modalPopUpRenderer) Refresh() {
 	r.underlay.FillColor = theme.ShadowColor()
-	r.background.FillColor = theme.BackgroundColor()
+	r.background.FillColor = theme.OverlayBackgroundColor()
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldLayout := r.popUp.Content.Size() != expectedContentSize
 

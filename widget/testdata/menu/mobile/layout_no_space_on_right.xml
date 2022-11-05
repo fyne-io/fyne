@@ -17,7 +17,7 @@
 				</widget>
 				<widget size="66x102" type="*widget.Scroll">
 					<widget size="66x102" type="*widget.menuBox">
-						<rectangle fillColor="background" size="66x110"/>
+						<rectangle fillColor="menuBackground" size="66x110"/>
 						<container pos="0,4" size="66x110">
 							<widget size="66x27" type="*widget.menuItem">
 								<text pos="8,4" size="50x19">A</text>
@@ -48,7 +48,7 @@
 					</widget>
 					<widget size="187x97" type="*widget.Scroll">
 						<widget size="187x97" type="*widget.menuBox">
-							<rectangle fillColor="background" size="187x105"/>
+							<rectangle fillColor="menuBackground" size="187x105"/>
 							<container pos="0,4" size="187x105">
 								<widget size="187x27" type="*widget.menuItem">
 									<text pos="28,4" size="151x19">subitem A</text>
@@ -80,7 +80,7 @@
 						</widget>
 						<widget size="171x66" type="*widget.Scroll">
 							<widget size="171x66" type="*widget.menuBox">
-								<rectangle fillColor="background" size="171x74"/>
+								<rectangle fillColor="menuBackground" size="171x74"/>
 								<container pos="0,4" size="171x74">
 									<widget size="171x27" type="*widget.menuItem">
 										<text pos="32,4" size="131x19">subsubitem A (long)</text>
