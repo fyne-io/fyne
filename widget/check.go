@@ -85,7 +85,7 @@ func (c *checkRenderer) updateResource() {
 		res.ColorName = theme.ColorNamePrimary
 		c.bg.FillColor = theme.ForegroundColor()
 	}
-	if c.check.Disabled() {
+	if c.check.disabled {
 		if c.check.Checked {
 			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
