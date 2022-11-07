@@ -11,4 +11,4 @@ type AndroidContext struct {
 // UnknownContext is passed to the `RunNative` callback when it is executed on devices without special native context.
 //
 // Since: 2.3
-type UnknownContext struct {}
+type UnknownContext struct{}
