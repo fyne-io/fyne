@@ -27,12 +27,12 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
 
 	d.Show()
-	test.AssertImageMatches(t, "dialog-custom-default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-custom-default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
 	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
 	d.Resize(d.MinSize()) // TODO remove once #707 is resolved
-	test.AssertImageMatches(t, "dialog-custom-ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-custom-ugly.png", w.Canvas())
 }
 
 func TestShowCustom_Resize(t *testing.T) {
@@ -61,17 +61,17 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
-	test.AssertImageMatches(t, "dialog-onshow-theme-default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-onshow-theme-default.png", w.Canvas())
 	d.Hide()
 
 	test.ApplyTheme(t, test.NewTheme())
 	d.Show()
-	test.AssertImageMatches(t, "dialog-onshow-theme-changed.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-onshow-theme-changed.png", w.Canvas())
 	d.Hide()
 
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
-	test.AssertImageMatches(t, "dialog-onshow-theme-default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-onshow-theme-default.png", w.Canvas())
 	d.Hide()
 }
 

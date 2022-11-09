@@ -22,6 +22,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+const defaultTitle = "Fyne Application"
+
 // Input modes.
 const (
 	CursorMode             glfw.InputMode = glfw.CursorMode
@@ -38,10 +40,7 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-var (
-	cursorMap    map[desktop.StandardCursor]*glfw.Cursor
-	defaultTitle = "Fyne Application"
-)
+var cursorMap map[desktop.StandardCursor]*glfw.Cursor
 
 func initCursors() {
 	cursorMap = map[desktop.StandardCursor]*glfw.Cursor{
@@ -158,8 +157,8 @@ func (w *window) doCenterOnScreen() {
 	monX, monY := monitor.GetPos()
 
 	// math them to the middle
-	newX := (monMode.Width / 2) - (viewWidth / 2) + monX
-	newY := (monMode.Height / 2) - (viewHeight / 2) + monY
+	newX := (monMode.Width-viewWidth)/2 + monX
+	newY := (monMode.Height-viewHeight)/2 + monY
 
 	// set new window coordinates
 	w.viewport.SetPos(newX, newY)

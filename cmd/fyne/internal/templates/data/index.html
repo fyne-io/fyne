@@ -43,9 +43,17 @@
 		{{end}}
 		{{if .HasWasm}}
 			<script>
+				function getChromeVersion() {
+					var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+
+					return raw ? parseInt(raw[2], 10) : 0;
+				}
+
 				var wasmBuild = true;
 				if (window.chrome) {
-					wasmBuild = false;
+					if (getChromeVersion() < 106) {
+						wasmBuild = false;
+					}
 				}
 			</script>
 		{{else}}
@@ -67,7 +75,7 @@
 			}
 
 			function webgl_support () {
-					try {
+				try {
 					var canvas = document.createElement('canvas');
 					return !!window.WebGLRenderingContext &&
 						(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
@@ -117,7 +125,7 @@
 			}
 		</script>
 	</head>
-	<body onload="download_application()">
+	<body scroll="no" style="overflow: hidden" onload="download_application()">
 		<div id="main">
 			<div class="centered-container">
 			<table class="center">

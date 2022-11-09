@@ -46,16 +46,16 @@ func listDrives() []string {
 }
 
 func (f *fileDialog) getPlaces() []favoriteItem {
-	var places []favoriteItem
-
-	for _, drive := range listDrives() {
+	drives := listDrives()
+	places := make([]favoriteItem, len(drives))
+	for i, drive := range drives {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
 		driveRootURI, _ := storage.ListerForURI(storage.NewURI("file://" + driveRoot))
-		places = append(places, favoriteItem{
+		places[i] = favoriteItem{
 			drive,
 			theme.StorageIcon(),
 			driveRootURI,
-		})
+		}
 	}
 	return places
 }

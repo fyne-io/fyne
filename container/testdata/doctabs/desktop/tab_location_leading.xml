@@ -1,26 +1,26 @@
-<canvas size="135x36">
+<canvas size="130x35">
 	<content>
-		<widget size="135x36" type="*container.DocTabs">
-			<container size="72x36">
+		<widget size="130x35" type="*container.DocTabs">
+			<container size="72x35">
 				<widget size="72x-4" type="*widget.Scroll">
-					<container size="72x118">
+					<container size="72x116">
 						<widget size="72x36" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="64x20">Test1</text>
+							<text bold color="primary" pos="4,8" size="64x19">Test1</text>
 						</widget>
 						<widget pos="0,40" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x20">Test2</text>
+							<text bold pos="4,8" size="64x19">Test2</text>
 						</widget>
-						<widget pos="0,81" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x20">Test3</text>
+						<widget pos="0,80" size="72x36" type="*container.tabButton">
+							<text bold pos="4,8" size="64x19">Test3</text>
 						</widget>
 					</container>
+					<widget pos="0,-4" size="72x0" type="*widget.Shadow">
+						<linearGradient endColor="shadow" pos="0,-8" size="72x8"/>
+					</widget>
 					<widget pos="66,0" size="6x-4" type="*widget.scrollBarArea">
 						<widget pos="3,0" size="3x16" type="*widget.scrollBar">
 							<rectangle fillColor="scrollbar" size="3x16"/>
 						</widget>
-					</widget>
-					<widget pos="0,-4" size="72x0" type="*widget.Shadow">
-						<linearGradient endColor="shadow" pos="0,-8" size="72x8"/>
 					</widget>
 				</widget>
 				<container size="72x36">
@@ -31,10 +31,10 @@
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="72,0" size="4x36"/>
-			<rectangle pos="72,0" size="4x36"/>
-			<widget pos="76,0" size="59x36" type="*widget.Label">
-				<text pos="8,8" size="43x20">Text 1</text>
+			<rectangle fillColor="shadow" pos="72,0" size="4x35"/>
+			<rectangle pos="72,0" size="4x35"/>
+			<widget pos="76,0" size="54x35" type="*widget.Label">
+				<text pos="8,8" size="38x19">Text 1</text>
 			</widget>
 		</widget>
 	</content>

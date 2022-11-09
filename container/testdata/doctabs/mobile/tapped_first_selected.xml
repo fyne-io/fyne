@@ -1,38 +1,30 @@
-<canvas size="300x100">
+<canvas size="380x100">
 	<content>
-		<widget size="300x100" type="*container.DocTabs">
-			<container size="300x36">
-				<widget size="220x36" type="*widget.Scroll">
-					<container size="225x36">
-						<widget size="73x37" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="65x20">Test1</text>
-							<widget pos="49,8" size="20x20" type="*container.tabCloseButton">
+		<widget size="380x100" type="*container.DocTabs">
+			<container size="380x36">
+				<widget size="300x36" type="*widget.Scroll">
+					<container size="300x36">
+						<widget size="97x36" type="*container.tabButton">
+							<text bold color="primary" pos="4,8" size="89x19">Test1</text>
+							<widget pos="73,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
-						<widget pos="77,0" size="72x37" type="*container.tabButton">
-							<text bold pos="4,8" size="64x20">Test2</text>
-							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="101,0" size="97x36" type="*container.tabButton">
+							<text bold pos="4,8" size="89x19">Test2</text>
+							<widget pos="73,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
-						<widget pos="153,0" size="73x37" type="*container.tabButton">
-							<text bold pos="4,8" size="65x20">Test3</text>
-							<widget pos="49,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="202,0" size="97x36" type="*container.tabButton">
+							<text bold pos="4,8" size="89x19">Test3</text>
+							<widget pos="73,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 					</container>
-					<widget pos="0,30" size="220x6" type="*widget.scrollBarArea">
-						<widget pos="0,3" size="214x3" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="214x3"/>
-						</widget>
-					</widget>
-					<widget pos="220,0" size="0x36" type="*widget.Shadow">
-						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x36"/>
-					</widget>
 				</widget>
-				<container pos="224,0" size="76x36">
+				<container pos="304,0" size="76x36">
 					<widget size="36x36" type="*widget.Button">
 						<rectangle size="36x36"/>
 						<rectangle size="0x0"/>
@@ -45,10 +37,10 @@
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,36" size="300x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="73x4"/>
-			<widget pos="0,40" size="300x59" type="*widget.Label">
-				<text pos="8,8" size="284x20">Text 1</text>
+			<rectangle fillColor="shadow" pos="0,36" size="380x4"/>
+			<rectangle fillColor="primary" pos="0,36" size="97x4"/>
+			<widget pos="0,40" size="380x60" type="*widget.Label">
+				<text pos="8,8" size="364x19">Text 1</text>
 			</widget>
 		</widget>
 	</content>

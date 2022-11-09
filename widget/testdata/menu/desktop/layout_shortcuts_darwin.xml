@@ -4,129 +4,129 @@
 	</content>
 	<overlay>
 		<widget size="300x800" type="*widget.OverlayContainer">
-			<widget pos="10,10" size="70x144" type="*widget.Menu">
-				<widget size="70x144" type="*widget.Shadow">
+			<widget pos="10,10" size="66x138" type="*widget.Menu">
+				<widget size="66x138" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="70x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="70,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="70,0" size="4x144" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="70,144" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,144" size="70x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,144" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x144"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="66x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="66,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="66,0" size="4x138" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="66,138" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,138" size="66x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,138" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x138"/>
 				</widget>
-				<widget size="70x144" type="*widget.Scroll">
-					<widget size="70x144" type="*widget.menuBox">
-						<rectangle fillColor="background" size="70x152"/>
-						<container pos="0,4" size="70x152">
-							<widget size="70x28" type="*widget.menuItem">
-								<text pos="8,4" size="54x20">A</text>
+				<widget size="66x138" type="*widget.Scroll">
+					<widget size="66x138" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="66x146"/>
+						<container pos="0,4" size="66x146">
+							<widget size="66x27" type="*widget.menuItem">
+								<text pos="8,4" size="50x19">A</text>
 							</widget>
-							<widget pos="0,32" size="70x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="70x1"/>
+							<widget pos="0,31" size="66x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="66x1"/>
 							</widget>
-							<widget pos="0,37" size="70x28" type="*widget.menuItem">
-								<text pos="8,4" size="54x20">B (long)</text>
+							<widget pos="0,36" size="66x27" type="*widget.menuItem">
+								<text pos="8,4" size="50x19">B (long)</text>
 							</widget>
-							<widget pos="0,70" size="70x28" type="*widget.menuItem">
-								<text pos="8,4" size="34x20">C</text>
-								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							<widget pos="0,67" size="66x27" type="*widget.menuItem">
+								<text pos="8,4" size="30x19">C</text>
+								<image pos="46,3" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
-							<widget pos="0,103" size="70x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="70x1"/>
+							<widget pos="0,98" size="66x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="66x1"/>
 							</widget>
-							<widget pos="0,108" size="70x28" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="70x28"/>
-								<text pos="8,4" size="34x20">D</text>
-								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							<widget pos="0,103" size="66x27" type="*widget.menuItem">
+								<rectangle fillColor="focus" size="66x27"/>
+								<text pos="8,4" size="30x19">D</text>
+								<image pos="46,3" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
 					</widget>
 				</widget>
-				<widget pos="70,108" size="102x559" type="*widget.Menu">
-					<widget size="102x559" type="*widget.Shadow">
+				<widget pos="66,103" size="74x532" type="*widget.Menu">
+					<widget size="74x532" type="*widget.Shadow">
 						<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-4" size="102x4"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="102,-4" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" pos="102,0" size="4x559" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="102,559" size="4x4" startColor="shadow"/>
-						<linearGradient pos="0,559" size="102x4" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-4,559" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x559"/>
+						<linearGradient endColor="shadow" pos="0,-4" size="74x4"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="74,-4" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" pos="74,0" size="4x532" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="74,532" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,532" size="74x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-4,532" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x532"/>
 					</widget>
-					<widget size="102x559" type="*widget.Scroll">
-						<widget size="102x559" type="*widget.menuBox">
-							<rectangle fillColor="background" size="102x567"/>
-							<container pos="0,4" size="102x567">
-								<widget size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="64x20">a</text>
-									<text pos="72,4" size="12x18">⌃</text>
-									<text pos="84,4" size="9x20">A</text>
+					<widget size="74x532" type="*widget.Scroll">
+						<widget size="74x532" type="*widget.menuBox">
+							<rectangle fillColor="menuBackground" size="74x540"/>
+							<container pos="0,4" size="74x540">
+								<widget size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="41x19">a</text>
+									<text pos="49,4" size="8x19">⌃</text>
+									<text pos="57,4" size="8x19">A</text>
 								</widget>
-								<widget pos="0,32" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="52x20">b</text>
-									<text pos="60,4" size="33x18">⌥⌫</text>
+								<widget pos="0,31" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="41x19">b</text>
+									<text pos="49,4" size="16x19">⌥⌫</text>
 								</widget>
-								<widget pos="0,65" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="52x20">c</text>
-									<text pos="60,4" size="33x18">⌘⌦</text>
+								<widget pos="0,62" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="41x19">c</text>
+									<text pos="49,4" size="16x19">⌘⌦</text>
 								</widget>
-								<widget pos="0,98" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="56x20">d</text>
-									<text pos="64,4" size="30x18">⇧↓</text>
+								<widget pos="0,93" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="41x19">d</text>
+									<text pos="49,4" size="16x19">⇧↓</text>
 								</widget>
-								<widget pos="0,130" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="44x20">e</text>
-									<text pos="52,4" size="42x18">⌃⌥↘</text>
+								<widget pos="0,124" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="33x19">e</text>
+									<text pos="41,4" size="25x19">⌃⌥↘</text>
 								</widget>
-								<widget pos="0,163" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="42x20">f</text>
-									<text pos="50,4" size="44x18">⌃⌘↩</text>
+								<widget pos="0,155" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="33x19">f</text>
+									<text pos="41,4" size="25x19">⌃⌘↩</text>
 								</widget>
-								<widget pos="0,196" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="44x20">g</text>
-									<text pos="52,4" size="42x18">⌃⇧⎋</text>
+								<widget pos="0,186" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="33x19">g</text>
+									<text pos="41,4" size="25x19">⌃⇧⎋</text>
 								</widget>
-								<widget pos="0,228" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="41x20">h</text>
-									<text pos="49,4" size="45x18">⌥⌘↖</text>
+								<widget pos="0,217" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="33x19">h</text>
+									<text pos="41,4" size="25x19">⌥⌘↖</text>
 								</widget>
-								<widget pos="0,261" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="41x20">i</text>
-									<text pos="49,4" size="45x18">⌥⇧←</text>
+								<widget pos="0,248" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="33x19">i</text>
+									<text pos="41,4" size="25x19">⌥⇧←</text>
 								</widget>
-								<widget pos="0,294" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="46x20">j</text>
-									<text pos="54,4" size="39x18">⇧⌘⇟</text>
+								<widget pos="0,279" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="33x19">j</text>
+									<text pos="41,4" size="25x19">⇧⌘⇟</text>
 								</widget>
-								<widget pos="0,326" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="34x20">k</text>
-									<text pos="42,4" size="51x18">⌃⌥⌘⇞</text>
+								<widget pos="0,310" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="25x19">k</text>
+									<text pos="33,4" size="33x19">⌃⌥⌘⇞</text>
 								</widget>
-								<widget pos="0,359" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="26x20">l</text>
-									<text pos="34,4" size="60x18">⌃⌥⇧↩</text>
+								<widget pos="0,341" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="25x19">l</text>
+									<text pos="33,4" size="33x19">⌃⌥⇧↩</text>
 								</widget>
-								<widget pos="0,392" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="29x20">m</text>
-									<text pos="37,4" size="57x18">⌃⇧⌘→</text>
+								<widget pos="0,372" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="25x19">m</text>
+									<text pos="33,4" size="33x19">⌃⇧⌘→</text>
 								</widget>
-								<widget pos="0,424" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="17x20">n</text>
-									<text pos="25,4" size="69x18">⌃⌥⇧⌘␣</text>
+								<widget pos="0,404" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="16x19">n</text>
+									<text pos="24,4" size="42x19">⌃⌥⇧⌘␣</text>
 								</widget>
-								<widget pos="0,457" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="59x20">o</text>
-									<text pos="67,4" size="27x18">⌃⇥</text>
+								<widget pos="0,435" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="41x19">o</text>
+									<text pos="49,4" size="16x19">⌃⇥</text>
 								</widget>
-								<widget pos="0,490" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="60x20">p</text>
-									<text pos="68,4" size="26x18">⌃↑</text>
+								<widget pos="0,466" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="41x19">p</text>
+									<text pos="49,4" size="16x19">⌃↑</text>
 								</widget>
-								<widget pos="0,522" size="102x28" type="*widget.menuItem">
-									<text pos="8,4" size="70x20">q</text>
-									<text pos="78,4" size="0x18"></text>
-									<text pos="78,4" size="16x20">F6</text>
+								<widget pos="0,497" size="74x27" type="*widget.menuItem">
+									<text pos="8,4" size="43x19">q</text>
+									<text pos="51,4" size="0x19"></text>
+									<text pos="51,4" size="15x19">F6</text>
 								</widget>
 							</container>
 						</widget>

@@ -28,6 +28,7 @@ func (s *settings) loadFromFile(path string) error {
 		}
 		return err
 	}
+	defer file.Close()
 	decode := json.NewDecoder(file)
 
 	return decode.Decode(&s.schema)

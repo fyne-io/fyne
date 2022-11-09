@@ -4,26 +4,26 @@
 	</content>
 	<overlay>
 		<widget size="200x200" type="*widget.OverlayContainer">
-			<widget pos="121,10" size="78x69" type="*widget.PopUpMenu">
-				<widget size="78x69" type="*widget.Shadow">
+			<widget pos="125,10" size="74x66" type="*widget.PopUpMenu">
+				<widget size="74x66" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="78x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="78,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="78,0" size="4x69" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="78,69" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,69" size="78x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,69" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x69"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="74x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="74,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="74,0" size="4x66" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="74,66" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,66" size="74x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,66" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x66"/>
 				</widget>
-				<widget size="78x69" type="*widget.Scroll">
-					<widget size="78x69" type="*widget.menuBox">
-						<rectangle fillColor="background" size="78x77"/>
-						<container pos="0,4" size="78x77">
-							<widget size="78x28" type="*widget.menuItem">
-								<text pos="8,4" size="62x20">Option A</text>
+				<widget size="74x66" type="*widget.Scroll">
+					<widget size="74x66" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="74x74"/>
+						<container pos="0,4" size="74x74">
+							<widget size="74x27" type="*widget.menuItem">
+								<text pos="8,4" size="58x19">Option A</text>
 							</widget>
-							<widget pos="0,32" size="78x28" type="*widget.menuItem">
-								<text pos="8,4" size="62x20">Option B</text>
+							<widget pos="0,31" size="74x27" type="*widget.menuItem">
+								<text pos="8,4" size="58x19">Option B</text>
 							</widget>
 						</container>
 					</widget>

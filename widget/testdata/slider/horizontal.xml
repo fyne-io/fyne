@@ -1,9 +1,9 @@
 <canvas padded size="220x50">
 	<content>
-		<widget pos="4,4" size="212x42" type="*widget.Slider">
-			<rectangle fillColor="shadow" pos="12,21" size="188x4"/>
-			<rectangle fillColor="foreground" pos="12,21" size="0x4"/>
-			<circle fillColor="foreground" pos="6,15" size="16x16"/>
+		<widget pos="6,6" size="208x38" type="*widget.Slider">
+			<rectangle fillColor="inputBackground" pos="14,18" size="178x2"/>
+			<rectangle fillColor="foreground" pos="14,18" size="0x2"/>
+			<circle fillColor="foreground" pos="6,10" size="16x16"/>
 		</widget>
 	</content>
 </canvas>

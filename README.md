@@ -28,14 +28,16 @@ If you're not sure if that's all installed or you don't know how then check out 
 
 Using the standard go tools you can install Fyne's core library using:
 
-    $ go get fyne.io/fyne/v2
+    go get fyne.io/fyne/v2
 
 # Widget demo
 
 To run a showcase of the features of Fyne execute the following:
 
-    $ go install fyne.io/fyne/v2/cmd/fyne_demo@latest
-    $ fyne_demo
+    go install fyne.io/fyne/v2/cmd/fyne_demo@latest
+    fyne_demo
+
+(For Go versions earlier than v1.16 use `go get fyne.io/fyne/v2/cmd/fyne_demo`)
 
 (For Go versions earlier than v1.16 use `go get fyne.io/fyne/v2/cmd/fyne_demo`)
 
@@ -92,7 +94,7 @@ func main() {
 
 And you can run that simply as:
 
-    $ go run main.go
+    go run main.go
 
 It should look like this:
 
@@ -113,7 +115,7 @@ It should look like this:
 
 There is a helpful mobile simulation mode that gives a hint of how your app would work on a mobile device:
 
-    $ go run -tags mobile main.go
+    go run -tags mobile main.go
 
 Another option is to use `fyne` command, see [Packaging for mobile](#packaging-for-mobile).
 
@@ -123,8 +125,10 @@ Using `go install` will copy the executable into your go `bin` dir.
 To install the application with icons etc into your operating system's standard
 application location you can use the fyne utility and the "install" subcommand.
 
-    $ go install fyne.io/fyne/v2/cmd/fyne@latest
-    $ fyne install
+    go install fyne.io/fyne/v2/cmd/fyne@latest
+    fyne install
+
+(for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
 
 (for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
 
@@ -135,16 +139,16 @@ To do this we can use the fyne utility "package" subcommand.
 You will need to add appropriate parameters as prompted, but the basic command is shown below.
 Once packaged you can install using the platform development tools or the fyne "install" subcommand.
 
-    $ fyne package -os android -appID my.domain.appname
-    $ fyne install -os android
+    fyne package -os android -appID my.domain.appname
+    fyne install -os android
 
 The built Android application can run either in a real device or an Android emulator.
 However, building for iOS is slightly different.
 If the "-os" argument is "ios", it is build only for a real iOS device.
 Specify "-os" to "iossimulator" allows the application be able to run in an iOS simulator:
 
-    $ fyne package -os ios -appID my.domain.appname
-    $ fyne package -os iossimulator -appID my.domain.appname
+    fyne package -os ios -appID my.domain.appname
+    fyne package -os iossimulator -appID my.domain.appname
 
 # Preparing a release
 

@@ -1,38 +1,38 @@
-<canvas size="84x112">
+<canvas size="82x107">
 	<content>
-		<widget size="84x112" type="*widget.OverlayContainer">
-			<widget size="84x112" type="*widget.Menu">
-				<widget size="84x112" type="*widget.Shadow">
+		<widget size="82x107" type="*widget.OverlayContainer">
+			<widget size="82x107" type="*widget.Menu">
+				<widget size="82x107" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="84x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="84,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="84,0" size="4x112" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="84,112" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,112" size="84x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,112" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x112"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="82x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="82,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="82,0" size="4x107" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="82,107" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,107" size="82x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,107" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x107"/>
 				</widget>
-				<widget size="84x112" type="*widget.Scroll">
-					<widget size="84x112" type="*widget.menuBox">
-						<rectangle fillColor="background" size="84x120"/>
-						<container pos="0,4" size="84x120">
-							<widget size="84x28" type="*widget.menuItem">
-								<text pos="8,4" size="68x20">Foo</text>
+				<widget size="82x107" type="*widget.Scroll">
+					<widget size="82x107" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="82x115"/>
+						<container pos="0,4" size="82x115">
+							<widget size="82x27" type="*widget.menuItem">
+								<text pos="8,4" size="66x19">Foo</text>
 							</widget>
-							<widget pos="0,32" size="84x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="84x1"/>
+							<widget pos="0,31" size="82x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="82x1"/>
 							</widget>
-							<widget pos="0,37" size="84x28" type="*widget.menuItem">
-								<text color="disabled" pos="32,4" size="24x20">Bar</text>
-								<image pos="64,4" rsc="menuExpandIcon" size="iconInlineSize" themed="disabled"/>
-								<image pos="8,4" rsc="account.svg" size="iconInlineSize" themed="disabled"/>
+							<widget pos="0,36" size="82x27" type="*widget.menuItem">
+								<text color="disabled" pos="32,4" size="22x19">Bar</text>
+								<image pos="62,3" rsc="menuExpandIcon" size="iconInlineSize" themed="disabled"/>
+								<image pos="8,3" rsc="account.svg" size="iconInlineSize" themed="disabled"/>
 							</widget>
-							<widget pos="0,70" size="84x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="84x1"/>
+							<widget pos="0,67" size="82x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="82x1"/>
 							</widget>
-							<widget pos="0,75" size="84x28" type="*widget.menuItem">
-								<text pos="8,4" size="68x20">Baz</text>
-								<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
+							<widget pos="0,72" size="82x27" type="*widget.menuItem">
+								<text pos="8,4" size="66x19">Baz</text>
+								<image pos="4,3" rsc="confirmIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
 					</widget>

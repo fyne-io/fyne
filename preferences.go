@@ -35,4 +35,9 @@ type Preferences interface {
 
 	// AddChangeListener allows code to be notified when some preferences change. This will fire on any update.
 	AddChangeListener(func())
+
+	// ChangeListeners returns a list of the known change listeners for this preference set.
+	//
+	// Since: 2.3
+	ChangeListeners() []func()
 }

@@ -2,70 +2,70 @@
 	<content>
 		<widget pos="4,4" size="192x292" type="*widget.Tree">
 			<widget size="192x292" type="*widget.Scroll">
-				<widget size="209x292" type="*widget.treeContent">
-					<widget size="209x36" type="*widget.branch">
-						<widget pos="28,0" size="181x36" type="*widget.Label">
-							<text pos="8,8" size="165x20">A</text>
+				<widget size="199x292" type="*widget.treeContent">
+					<widget size="199x35" type="*widget.branch">
+						<widget pos="28,0" size="171x35" type="*widget.Label">
+							<text pos="8,8" size="155x19">A</text>
 						</widget>
-						<widget pos="4,0" size="20x36" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x36"/>
-						</widget>
-					</widget>
-					<widget pos="0,36" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
-					</widget>
-					<widget pos="0,37" size="209x36" type="*widget.leaf">
-						<widget pos="52,0" size="157x36" type="*widget.Label">
-							<text pos="8,8" size="141x20">11111</text>
+						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
 						</widget>
 					</widget>
-					<widget pos="0,74" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
+					<widget pos="0,36" size="199x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="199x1"/>
 					</widget>
-					<widget pos="0,75" size="209x36" type="*widget.branch">
-						<rectangle fillColor="selection" size="209x36"/>
-						<widget pos="28,0" size="181x36" type="*widget.Label">
-							<text pos="8,8" size="165x20">B</text>
-						</widget>
-						<widget pos="4,0" size="20x36" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x36"/>
+					<widget pos="0,39" size="199x35" type="*widget.leaf">
+						<widget pos="52,0" size="147x35" type="*widget.Label">
+							<text pos="8,8" size="131x19">11111</text>
 						</widget>
 					</widget>
-					<widget pos="0,112" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
+					<widget pos="0,75" size="199x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="199x1"/>
 					</widget>
-					<widget pos="0,113" size="209x36" type="*widget.leaf">
-						<widget pos="52,0" size="157x36" type="*widget.Label">
-							<text pos="8,8" size="141x20">2222222222</text>
+					<widget pos="0,78" size="199x35" type="*widget.branch">
+						<rectangle fillColor="selection" size="199x35"/>
+						<widget pos="28,0" size="171x35" type="*widget.Label">
+							<text pos="8,8" size="155x19">B</text>
+						</widget>
+						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
 						</widget>
 					</widget>
-					<widget pos="0,149" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
+					<widget pos="0,114" size="199x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="199x1"/>
 					</widget>
-					<widget pos="0,150" size="209x36" type="*widget.branch">
-						<widget pos="52,0" size="157x36" type="*widget.Label">
-							<text pos="8,8" size="141x20">C</text>
-						</widget>
-						<widget pos="28,0" size="20x36" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x36"/>
+					<widget pos="0,117" size="199x35" type="*widget.leaf">
+						<widget pos="52,0" size="147x35" type="*widget.Label">
+							<text pos="8,8" size="131x19">2222222222</text>
 						</widget>
 					</widget>
-					<widget pos="0,187" size="209x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="209x1"/>
+					<widget pos="0,153" size="199x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="199x1"/>
 					</widget>
-					<widget pos="0,188" size="209x36" type="*widget.leaf">
-						<widget pos="76,0" size="133x36" type="*widget.Label">
-							<text pos="8,8" size="117x20">333333333333333</text>
+					<widget pos="0,156" size="199x35" type="*widget.branch">
+						<widget pos="52,0" size="147x35" type="*widget.Label">
+							<text pos="8,8" size="131x19">C</text>
+						</widget>
+						<widget pos="28,0" size="20x35" type="*widget.branchIcon">
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
 						</widget>
 					</widget>
-				</widget>
-				<widget pos="0,286" size="192x6" type="*widget.scrollBarArea">
-					<widget pos="0,3" size="176x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" size="176x3"/>
+					<widget pos="0,192" size="199x1" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="199x1"/>
+					</widget>
+					<widget pos="0,195" size="199x35" type="*widget.leaf">
+						<widget pos="76,0" size="123x35" type="*widget.Label">
+							<text pos="8,8" size="107x19">333333333333333</text>
+						</widget>
 					</widget>
 				</widget>
 				<widget pos="192,0" size="0x292" type="*widget.Shadow">
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x292"/>
+				</widget>
+				<widget pos="0,286" size="192x6" type="*widget.scrollBarArea">
+					<widget pos="0,3" size="184x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="184x3"/>
+					</widget>
 				</widget>
 			</widget>
 		</widget>

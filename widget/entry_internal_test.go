@@ -42,8 +42,6 @@ func TestEntry_DoubleTapped(t *testing.T) {
 
 	// select the whitespace after 'quick'
 	ev = getClickPosition("The quick", 0)
-	// add half a ' ' character
-	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
 	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
@@ -89,8 +87,6 @@ func TestEntry_DragSelect(t *testing.T) {
 	ev1 := getClickPosition("ove", 1)
 	// get position after the letter 'z' on the second row
 	ev2 := getClickPosition("over the laz", 1)
-	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
-	ev2.Position.X += 2
 
 	// mouse down and drag from 'r' to 'z'
 	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
@@ -225,7 +221,7 @@ func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
 }
 
 func TestEntry_EraseSelection(t *testing.T) {
-	// Selects "sti" on line 2 of a new multiline
+	// Selects "sti" on border 2 of a new multiline
 	// T e s t i n g
 	// T e[s t i]n g
 	// T e s t i n g
@@ -389,6 +385,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
 	y := float32(row)*rowHeight + rowHeight/2
 
-	pos := fyne.NewPos(x, y)
+	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
+	pos := fyne.NewPos(x+2, y)
 	return &fyne.PointEvent{Position: pos}
 }

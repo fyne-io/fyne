@@ -30,7 +30,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 		tsize = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 	}
 
-	return fyne.NewSize(tsize.Width+theme.Padding()*4, tsize.Height+theme.Padding()*4)
+	return fyne.NewSize(tsize.Width+theme.InnerPadding()*2, tsize.Height+theme.InnerPadding()*2)
 }
 
 func (p *progressRenderer) updateBar() {

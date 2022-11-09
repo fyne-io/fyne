@@ -58,10 +58,9 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
-			bar:         &fyne.Container{},
-			divider:     canvas.NewRectangle(theme.ShadowColor()),
-			indicator:   canvas.NewRectangle(theme.PrimaryColor()),
-			buttonCache: make(map[*TabItem]*tabButton),
+			bar:       &fyne.Container{},
+			divider:   canvas.NewRectangle(theme.ShadowColor()),
+			indicator: canvas.NewRectangle(theme.PrimaryColor()),
 		},
 		docTabs:  t,
 		scroller: NewScroll(&fyne.Container{}),
@@ -78,6 +77,34 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.updateIndicator(false)
 	r.applyTheme(t)
 	return r
+}
+
+// DisableIndex disables the TabItem at the specified index.
+//
+// Since: 2.3
+func (t *DocTabs) DisableIndex(i int) {
+	disableIndex(t, i)
+}
+
+// DisableItem disables the specified TabItem.
+//
+// Since: 2.3
+func (t *DocTabs) DisableItem(item *TabItem) {
+	disableItem(t, item)
+}
+
+// EnableIndex enables the TabItem at the specified index.
+//
+// Since: 2.3
+func (t *DocTabs) EnableIndex(i int) {
+	enableIndex(t, i)
+}
+
+// EnableItem enables the specified TabItem.
+//
+// Since: 2.3
+func (t *DocTabs) EnableItem(item *TabItem) {
+	enableItem(t, item)
 }
 
 // Hide hides the widget.
@@ -309,15 +336,13 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 
 	for i := 0; i < count; i++ {
 		item := r.docTabs.Items[i]
-		button, ok := r.buttonCache[item]
-		if !ok {
-			button = &tabButton{
+		if item.button == nil {
+			item.button = &tabButton{
 				onTapped: func() { r.docTabs.Select(item) },
 				onClosed: func() { r.docTabs.close(item) },
 			}
-			r.buttonCache[item] = button
 		}
-
+		button := item.button
 		button.icon = item.Icon
 		button.iconPosition = iconPos
 		if i == r.docTabs.current {
@@ -372,11 +397,19 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 		if a := r.action; a != nil {
 			selectedPos = a.Position()
 			selectedSize = a.Size()
+			minSize := a.MinSize()
+			if minSize.Width > selectedSize.Width {
+				selectedSize = minSize
+			}
 		}
 	} else {
 		selected := buttons[r.docTabs.current]
 		selectedPos = selected.Position()
 		selectedSize = selected.Size()
+		minSize := selected.MinSize()
+		if minSize.Width > selectedSize.Width {
+			selectedSize = minSize
+		}
 	}
 
 	scrollOffset := r.scroller.Offset

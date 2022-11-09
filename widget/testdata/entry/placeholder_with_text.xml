@@ -1,11 +1,11 @@
-<canvas padded size="45x44">
+<canvas padded size="44x43">
 	<content>
-		<widget pos="4,4" size="37x36" type="*widget.Entry">
-			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="37x32"/>
-			<rectangle fillColor="shadow" pos="0,34" size="37x2"/>
-			<widget pos="0,2" size="37x32" type="*widget.entryContent">
-				<widget size="37x32" type="*widget.RichText">
-					<text pos="8,6" size="21x20">Text</text>
+		<widget pos="4,4" size="36x35" type="*widget.Entry">
+			<rectangle fillColor="inputBackground" pos="0,2" size="36x31"/>
+			<rectangle pos="1,1" size="34x33" strokeColor="inputBorder" strokeWidth="2"/>
+			<widget pos="0,2" size="36x31" type="*widget.entryContent">
+				<widget size="36x31" type="*widget.RichText">
+					<text pos="8,6" size="20x19">Text</text>
 				</widget>
 			</widget>
 		</widget>

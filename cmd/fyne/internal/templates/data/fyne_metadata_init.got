@@ -11,7 +11,15 @@ func init() {
 		Name: "{{.Name}}",
 		Version: "{{.AppVersion}}",
 		Build: {{.AppBuild}},
-		Icon: fyneMetadataIcon,
+		Icon: {{.ResGoString}},
+		{{if .VersionAtLeast2_3}}
+		Release: {{.Release}},
+		Custom: map[string]string{
+			{{range $key, $value := .CustomMetadata}}
+			"{{$key}}": "{{$value}}",
+			{{end}}
+		},
+		{{end}}
 	})
 }
 

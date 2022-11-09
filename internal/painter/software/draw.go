@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 
-	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/draw"
 )
 
@@ -143,13 +142,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 		color = theme.ForegroundColor()
 	}
 
-	var opts truetype.Options
-	fontSize := text.TextSize * c.Scale()
-	opts.Size = float64(fontSize)
-	opts.DPI = painter.TextDPI
-	face := painter.CachedFontFace(text.TextStyle, &opts)
-
-	painter.DrawString(txtImg, text.Text, color, face, height, text.TextStyle.TabWidth)
+	face, measureFace := painter.CachedFontFace(text.TextStyle, text.TextSize, 1)
+	painter.DrawString(txtImg, text.Text, color, face, measureFace, text.TextSize, c.Scale(), height, text.TextStyle.TabWidth)
 
 	size := text.Size()
 	offsetX := float32(0)

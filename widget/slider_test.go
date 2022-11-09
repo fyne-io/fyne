@@ -60,18 +60,17 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	slider.Resize(fyne.NewSize(100, 10))
 
 	render := test.WidgetRenderer(slider).(*sliderRenderer)
-	diameter := slider.buttonDiameter()
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
 
 	assert.Greater(t, wSize.Width, wSize.Height)
 
-	assert.Equal(t, wSize.Width-diameter-theme.Padding()*2, tSize.Width)
-	assert.Equal(t, theme.Padding(), tSize.Height)
+	assert.Equal(t, wSize.Width-slider.endOffset()*2, tSize.Width)
+	assert.Equal(t, theme.InputBorderSize()*2, tSize.Height)
 
 	assert.Greater(t, wSize.Width, aSize.Width)
-	assert.Equal(t, theme.Padding(), aSize.Height)
+	assert.Equal(t, theme.InputBorderSize()*2, aSize.Height)
 
 	w := test.NewWindow(slider)
 	defer w.Close()
@@ -97,18 +96,17 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	slider.Resize(fyne.NewSize(10, 100))
 
 	render := test.WidgetRenderer(slider).(*sliderRenderer)
-	diameter := slider.buttonDiameter()
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
 
 	assert.Greater(t, wSize.Height, wSize.Width)
 
-	assert.Equal(t, wSize.Height-diameter-theme.Padding()*2, tSize.Height)
-	assert.Equal(t, theme.Padding(), tSize.Width)
+	assert.Equal(t, wSize.Height-slider.endOffset()*2, tSize.Height)
+	assert.Equal(t, theme.InputBorderSize()*2, tSize.Width)
 
 	assert.Greater(t, wSize.Height, aSize.Height)
-	assert.Equal(t, theme.Padding(), aSize.Width)
+	assert.Equal(t, theme.InputBorderSize()*2, aSize.Width)
 
 	w := test.NewWindow(slider)
 	defer w.Close()

@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
@@ -73,6 +75,27 @@ func (r *CheckGroup) Refresh() {
 	r.update()
 	r.propertyLock.Unlock()
 	r.BaseWidget.Refresh()
+}
+
+// Remove removes the first occurrence of the specified option found from a CheckGroup widget.
+// Return true if an option was removed.
+//
+// Since: 2.3
+func (r *CheckGroup) Remove(option string) bool {
+	for i, o := range r.Options {
+		if strings.EqualFold(option, o) {
+			r.Options = append(r.Options[:i], r.Options[i+1:]...)
+			for j, s := range r.Selected {
+				if strings.EqualFold(option, s) {
+					r.Selected = append(r.Selected[:j], r.Selected[j+1:]...)
+					break
+				}
+			}
+			r.Refresh()
+			return true
+		}
+	}
+	return false
 }
 
 // SetSelected sets the checked options, it can be used to set a default option.

@@ -21,9 +21,9 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="300x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="0x4"/>
-			<widget pos="0,40" size="300x109" type="*widget.Label">
-				<text pos="8,8" size="284x20">Text 2</text>
+			<rectangle fillColor="primary" pos="0,36" size="72x4"/>
+			<widget pos="0,40" size="300x110" type="*widget.Label">
+				<text pos="8,8" size="284x19">Text 2</text>
 			</widget>
 		</widget>
 	</content>

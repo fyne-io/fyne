@@ -1,0 +1,30 @@
+<canvas padded size="195x43">
+	<content>
+		<widget pos="4,4" size="187x35" type="*widget.Form">
+			<container size="187x35">
+				<container size="187x35">
+					<text alignment="trailing" bold pos="8,8" size="107x19">Extended entry</text>
+					<widget pos="127,0" size="60x35" type="*widget.SelectEntry">
+						<rectangle fillColor="inputBackground" pos="0,2" size="60x31"/>
+						<rectangle pos="1,1" size="58x33" strokeColor="inputBorder" strokeWidth="2"/>
+						<widget pos="0,2" size="36x31" type="*widget.Scroll">
+							<widget size="36x31" type="*widget.entryContent">
+								<widget size="36x31" type="*widget.RichText">
+									<text color="placeholder" pos="8,6" size="20x19"></text>
+								</widget>
+								<widget size="36x31" type="*widget.RichText">
+									<text pos="8,6" size="20x19"></text>
+								</widget>
+							</widget>
+						</widget>
+						<widget pos="32,8" size="20x20" type="*widget.Button">
+							<rectangle size="20x20"/>
+							<rectangle size="0x0"/>
+							<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+						</widget>
+					</widget>
+				</container>
+			</container>
+		</widget>
+	</content>
+</canvas>

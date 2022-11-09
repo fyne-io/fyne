@@ -383,8 +383,8 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 	scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
 	scr.leftShadow = NewShadow(ShadowRight, SubmergedContentLevel)
 	scr.rightShadow = NewShadow(ShadowLeft, SubmergedContentLevel)
-	scr.SetObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow, scr.horizArea,
-		scr.leftShadow, scr.rightShadow))
+	scr.SetObjects(append(scr.Objects(), scr.topShadow, scr.bottomShadow, scr.leftShadow, scr.rightShadow,
+		scr.vertArea, scr.horizArea))
 	scr.updatePosition()
 
 	return scr

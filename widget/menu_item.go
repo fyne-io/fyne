@@ -267,7 +267,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().AddWidthHeight(theme.Padding()*4+r.checkSpace(), theme.Padding()*2)
+	minSize := r.text.MinSize().AddWidthHeight(theme.InnerPadding()*2+r.checkSpace(), theme.InnerPadding())
 	if r.expandIcon != nil {
 		minSize = minSize.AddWidthHeight(theme.IconInlineSize(), 0)
 	}
@@ -279,7 +279,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		for _, text := range r.shortcutTexts {
 			textWidth += text.MinSize().Width
 		}
-		minSize = minSize.AddWidthHeight(textWidth+theme.Padding()*2, 0)
+		minSize = minSize.AddWidthHeight(textWidth+theme.InnerPadding(), 0)
 	}
 	r.minSize = minSize
 	return r.minSize

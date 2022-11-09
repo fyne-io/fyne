@@ -17,13 +17,13 @@
 							<image pos="16,8" rsc="confirmIcon" size="40x40"/>
 						</widget>
 					</container>
+					<widget pos="110,0" size="0x56" type="*widget.Shadow">
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x56"/>
+					</widget>
 					<widget pos="0,50" size="110x6" type="*widget.scrollBarArea">
 						<widget pos="0,3" size="81x3" type="*widget.scrollBar">
 							<rectangle fillColor="scrollbar" size="81x3"/>
 						</widget>
-					</widget>
-					<widget pos="110,0" size="0x56" type="*widget.Shadow">
-						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x56"/>
 					</widget>
 				</widget>
 				<container pos="114,0" size="36x56">
@@ -37,7 +37,7 @@
 			<rectangle fillColor="shadow" pos="0,56" size="150x4"/>
 			<rectangle fillColor="primary" pos="0,56" size="72x4"/>
 			<widget pos="0,60" size="150x90" type="*widget.Label">
-				<text pos="8,8" size="134x20">Text1</text>
+				<text pos="8,8" size="134x19">Text1</text>
 			</widget>
 		</widget>
 	</content>

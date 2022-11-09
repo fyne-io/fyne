@@ -1,11 +1,11 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.DocTabs">
-			<container pos="0,113" size="150x36">
+			<container pos="0,114" size="150x36">
 				<widget size="110x36" type="*widget.Scroll">
 					<container size="110x36">
-						<widget size="81x36" type="*container.tabButton">
-							<text bold color="primary" pos="8,8" size="65x20">Text2</text>
+						<widget size="77x36" type="*container.tabButton">
+							<text bold color="primary" pos="8,8" size="61x20">Text2</text>
 						</widget>
 					</container>
 				</widget>
@@ -17,9 +17,9 @@
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,109" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,109" size="81x4"/>
-			<circle fillColor="background" size="150x109"/>
+			<rectangle fillColor="shadow" pos="0,110" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,110" size="77x4"/>
+			<circle fillColor="background" size="150x110"/>
 		</widget>
 	</content>
 </canvas>

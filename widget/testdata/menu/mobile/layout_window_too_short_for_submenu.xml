@@ -4,90 +4,90 @@
 	</content>
 	<overlay>
 		<widget size="500x150" type="*widget.OverlayContainer">
-			<widget pos="10,10" size="70x107" type="*widget.Menu">
-				<widget size="70x107" type="*widget.Shadow">
+			<widget pos="10,10" size="66x102" type="*widget.Menu">
+				<widget size="66x102" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="70x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="70,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="70,0" size="4x107" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="70,107" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,107" size="70x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,107" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x107"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="66x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="66,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="66,0" size="4x102" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="66,102" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,102" size="66x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,102" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x102"/>
 				</widget>
-				<widget size="70x107" type="*widget.Scroll">
-					<widget size="70x107" type="*widget.menuBox">
-						<rectangle fillColor="background" size="70x115"/>
-						<container pos="0,4" size="70x115">
-							<widget size="70x28" type="*widget.menuItem">
-								<text pos="8,4" size="54x20">A</text>
+				<widget size="66x102" type="*widget.Scroll">
+					<widget size="66x102" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="66x110"/>
+						<container pos="0,4" size="66x110">
+							<widget size="66x27" type="*widget.menuItem">
+								<text pos="8,4" size="50x19">A</text>
 							</widget>
-							<widget pos="0,32" size="70x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="70x1"/>
+							<widget pos="0,31" size="66x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="66x1"/>
 							</widget>
-							<widget pos="0,37" size="70x28" type="*widget.menuItem">
-								<text pos="8,4" size="54x20">B (long)</text>
+							<widget pos="0,36" size="66x27" type="*widget.menuItem">
+								<text pos="8,4" size="50x19">B (long)</text>
 							</widget>
-							<widget pos="0,70" size="70x28" type="*widget.menuItem">
-								<text pos="8,4" size="34x20">C</text>
-								<image pos="50,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+							<widget pos="0,67" size="66x27" type="*widget.menuItem">
+								<text pos="8,4" size="30x19">C</text>
+								<image pos="46,3" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
 					</widget>
 				</widget>
-				<widget pos="70,37" size="196x102" type="*widget.Menu">
-					<widget size="196x102" type="*widget.Shadow">
+				<widget pos="66,42" size="187x97" type="*widget.Menu">
+					<widget size="187x97" type="*widget.Shadow">
 						<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-4" size="196x4"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="196,-4" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" pos="196,0" size="4x102" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="196,102" size="4x4" startColor="shadow"/>
-						<linearGradient pos="0,102" size="196x4" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-4,102" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x102"/>
+						<linearGradient endColor="shadow" pos="0,-4" size="187x4"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="187,-4" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" pos="187,0" size="4x97" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="187,97" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,97" size="187x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-4,97" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x97"/>
 					</widget>
-					<widget size="196x102" type="*widget.Scroll">
-						<widget size="196x102" type="*widget.menuBox">
-							<rectangle fillColor="background" size="196x110"/>
-							<container pos="0,4" size="196x110">
-								<widget size="196x28" type="*widget.menuItem">
-									<text pos="28,4" size="160x20">subitem A</text>
-									<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
+					<widget size="187x97" type="*widget.Scroll">
+						<widget size="187x97" type="*widget.menuBox">
+							<rectangle fillColor="menuBackground" size="187x105"/>
+							<container pos="0,4" size="187x105">
+								<widget size="187x27" type="*widget.menuItem">
+									<text pos="28,4" size="151x19">subitem A</text>
+									<image pos="4,3" rsc="confirmIcon" size="iconInlineSize"/>
 								</widget>
-								<widget pos="0,32" size="196x28" type="*widget.menuItem">
-									<text pos="52,4" size="136x20">subitem B</text>
-									<image pos="28,4" rsc="infoIcon" size="iconInlineSize"/>
-									<image pos="4,4" rsc="confirmIcon" size="iconInlineSize"/>
+								<widget pos="0,31" size="187x27" type="*widget.menuItem">
+									<text pos="52,4" size="127x19">subitem B</text>
+									<image pos="28,3" rsc="infoIcon" size="iconInlineSize"/>
+									<image pos="4,3" rsc="confirmIcon" size="iconInlineSize"/>
 								</widget>
-								<widget pos="0,65" size="196x28" type="*widget.menuItem">
-									<text pos="52,4" size="116x20">subitem C (long)</text>
-									<image pos="176,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-									<image pos="28,4" rsc="menuIcon" size="iconInlineSize"/>
+								<widget pos="0,62" size="187x27" type="*widget.menuItem">
+									<text pos="52,4" size="107x19">subitem C (long)</text>
+									<image pos="167,3" rsc="menuExpandIcon" size="iconInlineSize"/>
+									<image pos="28,3" rsc="menuIcon" size="iconInlineSize"/>
 								</widget>
 							</container>
 						</widget>
 					</widget>
-					<widget pos="196,32" size="182x69" type="*widget.Menu">
-						<widget size="182x69" type="*widget.Shadow">
+					<widget pos="187,31" size="171x66" type="*widget.Menu">
+						<widget size="171x66" type="*widget.Shadow">
 							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-							<linearGradient endColor="shadow" pos="0,-4" size="182x4"/>
-							<radialGradient centerOffset="-0.5,0.5" pos="182,-4" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" pos="182,0" size="4x69" startColor="shadow"/>
-							<radialGradient centerOffset="-0.5,-0.5" pos="182,69" size="4x4" startColor="shadow"/>
-							<linearGradient pos="0,69" size="182x4" startColor="shadow"/>
-							<radialGradient centerOffset="0.5,-0.5" pos="-4,69" size="4x4" startColor="shadow"/>
-							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x69"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="171x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="171,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="171,0" size="4x66" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="171,66" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,66" size="171x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,66" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x66"/>
 						</widget>
-						<widget size="182x69" type="*widget.Scroll">
-							<widget size="182x69" type="*widget.menuBox">
-								<rectangle fillColor="background" size="182x77"/>
-								<container pos="0,4" size="182x77">
-									<widget size="182x28" type="*widget.menuItem">
-										<text pos="32,4" size="142x20">subsubitem A (long)</text>
-										<image pos="8,4" rsc="fileIcon" size="iconInlineSize"/>
+						<widget size="171x66" type="*widget.Scroll">
+							<widget size="171x66" type="*widget.menuBox">
+								<rectangle fillColor="menuBackground" size="171x74"/>
+								<container pos="0,4" size="171x74">
+									<widget size="171x27" type="*widget.menuItem">
+										<text pos="32,4" size="131x19">subsubitem A (long)</text>
+										<image pos="8,3" rsc="fileIcon" size="iconInlineSize"/>
 									</widget>
-									<widget pos="0,32" size="182x28" type="*widget.menuItem">
-										<text pos="8,4" size="166x20">subsubitem B</text>
+									<widget pos="0,31" size="171x27" type="*widget.menuItem">
+										<text pos="8,4" size="155x19">subsubitem B</text>
 									</widget>
 								</container>
 							</widget>

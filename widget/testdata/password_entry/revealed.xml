@@ -1,14 +1,14 @@
 <canvas padded size="150x100">
 	<content>
-		<widget pos="10,10" size="130x36" type="*widget.Entry">
-			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="130x32"/>
-			<rectangle fillColor="primary" pos="0,34" size="130x2"/>
-			<widget pos="0,2" size="102x32" type="*widget.Scroll">
-				<widget size="102x32" type="*widget.entryContent">
-					<widget size="102x32" type="*widget.RichText">
-						<text pos="8,6" size="86x20">Hié™שרה</text>
+		<widget pos="10,10" size="130x35" type="*widget.Entry">
+			<rectangle fillColor="inputBackground" pos="0,2" size="130x31"/>
+			<rectangle pos="1,1" size="128x33" strokeColor="primary" strokeWidth="2"/>
+			<widget pos="0,2" size="106x31" type="*widget.Scroll">
+				<widget size="106x31" type="*widget.entryContent">
+					<widget size="106x31" type="*widget.RichText">
+						<text pos="8,6" size="90x19">Hié™שרה</text>
 					</widget>
-					<rectangle fillColor="primary" pos="87,6" size="2x20"/>
+					<rectangle fillColor="primary" pos="64,6" size="2x19"/>
 				</widget>
 			</widget>
 			<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">

@@ -69,18 +69,18 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	}{
 		"a cell": {
 			object: cr1c3,
-			wantX:  197,
-			wantY:  32,
+			wantX:  180,
+			wantY:  35,
 		},
 		"a row": {
 			object: cr2,
-			wantX:  4,
-			wantY:  73,
+			wantX:  6,
+			wantY:  75,
 		},
 		"the window content": {
 			object: content,
-			wantX:  4,
-			wantY:  32,
+			wantX:  6,
+			wantY:  35,
 		},
 		"a hidden element": {
 			object: cr2c2,
@@ -90,19 +90,19 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 		"a menu": {
 			object: m2,
-			wantX:  77,
+			wantX:  84,
 			wantY:  0,
 		},
 
 		"an overlay item": {
 			object: ovli2,
-			wantX:  87,
-			wantY:  81,
+			wantX:  81,
+			wantY:  60,
 		},
 		"the overlay content": {
 			object: ovlContent,
-			wantX:  87,
-			wantY:  40,
+			wantX:  81,
+			wantY:  28,
 		},
 		"the overlay": {
 			object: ovl,

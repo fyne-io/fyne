@@ -17,13 +17,13 @@
 				</widget>
 				<widget size="210x200" type="*widget.Scroll">
 					<widget size="210x200" type="*widget.menuBox">
-						<rectangle fillColor="background" size="210x208"/>
+						<rectangle fillColor="menuBackground" size="210x208"/>
 						<container pos="0,4" size="210x208">
-							<widget size="210x28" type="*widget.menuItem">
-								<text pos="8,4" size="194x20">Option A</text>
+							<widget size="210x27" type="*widget.menuItem">
+								<text pos="8,4" size="194x19">Option A</text>
 							</widget>
-							<widget pos="0,32" size="210x28" type="*widget.menuItem">
-								<text pos="8,4" size="194x20">Option B</text>
+							<widget pos="0,31" size="210x27" type="*widget.menuItem">
+								<text pos="8,4" size="194x19">Option B</text>
 							</widget>
 						</container>
 					</widget>

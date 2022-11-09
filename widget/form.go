@@ -2,6 +2,7 @@ package widget
 
 import (
 	"errors"
+	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -89,6 +90,7 @@ func (f *Form) MinSize() fyne.Size {
 
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
+	f.ExtendBaseWidget(f)
 	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
 	f.ensureRenderItems()
 	f.updateButtons()
@@ -148,17 +150,30 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 		if !ok {
 			return item.Widget
 		}
-		if e, ok := item.Widget.(*Entry); ok && e.Validator == nil { // we don't have validation
+		if !f.itemWidgetHasValidator(item.Widget) { // we don't have validation
 			return item.Widget
 		}
 	}
 
 	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
 	text.TextSize = theme.CaptionTextSize()
-	text.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()*-0.5))
+	text.Move(fyne.NewPos(theme.InnerPadding(), theme.InputBorderSize()))
 	item.helperOutput = text
 	f.updateHelperText(item)
 	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
+}
+
+func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
+	value := reflect.ValueOf(w).Elem()
+	validatorField := value.FieldByName("Validator")
+	if validatorField == (reflect.Value{}) {
+		return false
+	}
+	validator, ok := validatorField.Interface().(fyne.StringValidator)
+	if !ok {
+		return false
+	}
+	return validator != nil
 }
 
 func (f *Form) createLabel(text string) *canvas.Text {

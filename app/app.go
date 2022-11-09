@@ -25,13 +25,18 @@ type fyneApp struct {
 	icon     fyne.Resource
 	uniqueID string
 
+	cloud     fyne.CloudProvider
 	lifecycle fyne.Lifecycle
 	settings  *settings
-	storage   *store
+	storage   fyne.Storage
 	prefs     fyne.Preferences
 
 	running uint32 // atomic, 1 == running, 0 == stopped
 	exec    func(name string, arg ...string) *execabs.Cmd
+}
+
+func (a *fyneApp) CloudProvider() fyne.CloudProvider {
+	return a.cloud
 }
 
 func (a *fyneApp) Icon() fyne.Resource {
@@ -104,6 +109,14 @@ func (a *fyneApp) Lifecycle() fyne.Lifecycle {
 	return a.lifecycle
 }
 
+func (a *fyneApp) newDefaultPreferences() fyne.Preferences {
+	p := fyne.Preferences(newPreferences(a))
+	if pref, ok := p.(interface{ load() }); ok && a.uniqueID != "" {
+		pref.load()
+	}
+	return p
+}
+
 // New returns a new application instance with the default driver and no unique ID (unless specified in FyneApp.toml)
 func New() fyne.App {
 	if meta.ID == "" {
@@ -112,23 +125,28 @@ func New() fyne.App {
 	return NewWithID(meta.ID)
 }
 
-func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
-	fyne.SetCurrentApp(newApp)
-	newApp.settings = loadSettings()
-
-	newApp.prefs = newPreferences(newApp)
-	newApp.storage = &store{a: newApp}
+func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
 	if id != "" {
-		if pref, ok := newApp.prefs.(interface{ load() }); ok {
+		if pref, ok := p.(interface{ load() }); ok {
 			pref.load()
 		}
 
-		root, _ := newApp.storage.docRootURI()
-		newApp.storage.Docs = &internal.Docs{RootDocURI: root}
+		root, _ := s.docRootURI()
+		return &internal.Docs{RootDocURI: root}
 	} else {
-		newApp.storage.Docs = &internal.Docs{} // an empty impl to avoid crashes
+		return &internal.Docs{} // an empty impl to avoid crashes
 	}
+}
+
+func newAppWithDriver(d fyne.Driver, id string) fyne.App {
+	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
+	fyne.SetCurrentApp(newApp)
+
+	newApp.prefs = newApp.newDefaultPreferences()
+	newApp.settings = loadSettings()
+	store := &store{a: newApp}
+	store.Docs = makeStoreDocs(id, newApp.prefs, store)
+	newApp.storage = store
 
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()

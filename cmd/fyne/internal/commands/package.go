@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -32,6 +33,10 @@ type appData struct {
 	icon, Name        string
 	AppID, AppVersion string
 	AppBuild          int
+	ResGoString       string
+	Release           bool
+	CustomMetadata    map[string]string
+	VersionAtLeast2_3 bool
 }
 
 // Package returns the cli command for packaging fyne applications
@@ -46,7 +51,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, gopherjs, web).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
@@ -109,8 +114,17 @@ func Package() *cli.Command {
 				Usage:       "Enable installation in release mode (disable debug etc).",
 				Destination: &p.release,
 			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &p.customMetadata,
+			},
 		},
 		Action: func(_ *cli.Context) error {
+			if p.customMetadata.m == nil {
+				p.customMetadata.m = map[string]string{}
+			}
+
 			return p.Package()
 		},
 	}
@@ -119,11 +133,13 @@ func Package() *cli.Command {
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
 	*appData
-	srcDir, dir, exe, os string
-	install, release     bool
-	certificate, profile string // optional flags for releasing
-	tags, category       string
-	tempDir              string
+	srcDir, dir, exe, os           string
+	install, release, distribution bool
+	certificate, profile           string // optional flags for releasing
+	tags, category                 string
+	tempDir                        string
+
+	customMetadata keyValueFlag
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -228,6 +244,10 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		return nil, err
 	}
 
+	if runtime.GOOS == "windows" {
+		return []string{bWasm.target}, nil
+	}
+
 	bGopherJS := &Builder{
 		os:      "gopherjs",
 		srcdir:  p.srcDir,
@@ -276,7 +296,7 @@ func (p *Packager) doPackage(runner runner) error {
 		}
 	}
 	if util.IsMobile(p.os) { // we don't use the normal build command for mobile so inject before gomobile...
-		close, err := injectMetadataIfPossible(newCommand("go"), p.dir, p.appData, p.icon, createMetadataInitFile)
+		close, err := injectMetadataIfPossible(newCommand("go"), p.dir, p.appData, createMetadataInitFile)
 		if err != nil {
 			fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 		} else if close != nil {
@@ -341,8 +361,11 @@ func (p *Packager) validate() (err error) {
 	}
 	os.Chdir(p.srcDir)
 
+	p.appData.CustomMetadata = p.customMetadata.m
+
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
+		p.appData.Release = p.release
 		mergeMetadata(p.appData, data)
 	}
 
@@ -421,6 +444,16 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
+func appendCustomMetadata(customMetadata *map[string]string, fromFile map[string]string) {
+	for key, value := range fromFile {
+		_, ok := (*customMetadata)[key]
+		if ok {
+			continue
+		}
+		(*customMetadata)[key] = value
+	}
+}
+
 func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	if p.icon == "" {
 		p.icon = data.Details.Icon
@@ -436,6 +469,11 @@ func mergeMetadata(p *appData, data *metadata.FyneApp) {
 	}
 	if p.AppBuild == 0 {
 		p.AppBuild = data.Details.Build
+	}
+	if p.Release {
+		appendCustomMetadata(&p.CustomMetadata, data.Release)
+	} else {
+		appendCustomMetadata(&p.CustomMetadata, data.Development)
 	}
 }
 
@@ -477,6 +515,24 @@ func validateAppID(appID, os, name string, release bool) (string, error) {
 			return "", errors.New("missing appID parameter for package")
 		} else if !strings.Contains(appID, ".") {
 			return "", errors.New("appID must be globally unique and contain at least 1 '.'")
+		} else if util.IsAndroid(os) {
+			if strings.Contains(appID, "-") {
+				return "", errors.New("appID can not contain '-'")
+			}
+
+			// appID package names can not start with '_' or a number
+			packageNames := strings.Split(appID, ".")
+			for _, name := range packageNames {
+				if len(name) == 0 {
+					continue
+				}
+
+				if name[0] == '_' {
+					return "", fmt.Errorf("appID package names can not start with '_' (%s)", name)
+				} else if name[0] >= '0' && name[0] <= '9' {
+					return "", fmt.Errorf("appID package names can not start with a number (%s)", name)
+				}
+			}
 		}
 	}
 

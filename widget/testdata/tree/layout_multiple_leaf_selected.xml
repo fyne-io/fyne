@@ -3,34 +3,34 @@
 		<widget pos="4,4" size="192x292" type="*widget.Tree">
 			<widget size="192x292" type="*widget.Scroll">
 				<widget size="192x292" type="*widget.treeContent">
-					<widget size="192x36" type="*widget.leaf">
-						<widget pos="28,0" size="164x36" type="*widget.Label">
-							<text pos="8,8" size="148x20">11111</text>
+					<widget size="192x35" type="*widget.leaf">
+						<widget pos="28,0" size="164x35" type="*widget.Label">
+							<text pos="8,8" size="148x19">11111</text>
 						</widget>
 					</widget>
 					<widget pos="0,36" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,37" size="192x36" type="*widget.leaf">
-						<rectangle fillColor="selection" size="192x36"/>
-						<widget pos="28,0" size="164x36" type="*widget.Label">
-							<text pos="8,8" size="148x20">2222222222</text>
+					<widget pos="0,39" size="192x35" type="*widget.leaf">
+						<rectangle fillColor="selection" size="192x35"/>
+						<widget pos="28,0" size="164x35" type="*widget.Label">
+							<text pos="8,8" size="148x19">2222222222</text>
 						</widget>
 					</widget>
-					<widget pos="0,74" size="192x1" type="*widget.Separator">
+					<widget pos="0,75" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,75" size="192x36" type="*widget.leaf">
-						<widget pos="28,0" size="164x36" type="*widget.Label">
-							<text pos="8,8" size="148x20">333333333333333</text>
+					<widget pos="0,78" size="192x35" type="*widget.leaf">
+						<widget pos="28,0" size="164x35" type="*widget.Label">
+							<text pos="8,8" size="148x19">333333333333333</text>
 						</widget>
 					</widget>
-					<widget pos="0,112" size="192x1" type="*widget.Separator">
+					<widget pos="0,114" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
-					<widget pos="0,113" size="192x36" type="*widget.leaf">
-						<widget pos="28,0" size="164x36" type="*widget.Label">
-							<text pos="8,8" size="148x20">44444444444444444444</text>
+					<widget pos="0,117" size="192x35" type="*widget.leaf">
+						<widget pos="28,0" size="164x35" type="*widget.Label">
+							<text pos="8,8" size="148x19">44444444444444444444</text>
 						</widget>
 					</widget>
 				</widget>

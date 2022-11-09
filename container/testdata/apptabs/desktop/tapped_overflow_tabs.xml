@@ -3,48 +3,48 @@
 		<widget size="200x100" type="*container.AppTabs">
 			<container size="200x36">
 				<container size="160x36">
-					<widget size="56x36" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="8,8" size="40x20">Test1</text>
+					<widget size="52x36" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="8,8" size="36x20">Test1</text>
 					</widget>
-					<widget pos="60,0" size="56x36" type="*container.tabButton">
-						<text alignment="center" bold pos="8,8" size="40x20">Test2</text>
+					<widget pos="56,0" size="52x36" type="*container.tabButton">
+						<text alignment="center" bold pos="8,8" size="36x20">Test2</text>
 					</widget>
 				</container>
 				<widget pos="164,0" size="36x36" type="*widget.Button">
 					<rectangle size="36x36"/>
-					<rectangle fillColor="rgba(0,0,0,0)" pos="0,2" size="32x32"/>
+					<rectangle fillColor="rgba(0,0,0,0)" size="32x36"/>
 					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 				</widget>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="200x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="56x4"/>
-			<widget pos="0,40" size="200x59" type="*widget.Label">
-				<text pos="8,8" size="184x20">Text 1</text>
+			<rectangle fillColor="primary" pos="0,36" size="52x4"/>
+			<widget pos="0,40" size="200x60" type="*widget.Label">
+				<text pos="8,8" size="184x19">Text 1</text>
 			</widget>
 		</widget>
 	</content>
 	<overlay>
 		<widget size="200x100" type="*widget.OverlayContainer">
-			<widget pos="145,30" size="54x69" type="*widget.PopUpMenu">
-				<widget size="54x69" type="*widget.Shadow">
+			<widget pos="149,33" size="50x66" type="*widget.PopUpMenu">
+				<widget size="50x66" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="54x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="54,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="54,0" size="4x69" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="54,69" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,69" size="54x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,69" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x69"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="50x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="50,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="50,0" size="4x66" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="50,66" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,66" size="50x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,66" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x66"/>
 				</widget>
-				<widget size="54x69" type="*widget.Scroll">
-					<widget size="54x69" type="*widget.menuBox">
-						<rectangle fillColor="background" size="54x77"/>
-						<container pos="0,4" size="54x77">
-							<widget size="54x28" type="*widget.menuItem">
-								<text pos="8,4" size="38x20">Test3</text>
+				<widget size="50x66" type="*widget.Scroll">
+					<widget size="50x66" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="50x74"/>
+						<container pos="0,4" size="50x74">
+							<widget size="50x27" type="*widget.menuItem">
+								<text pos="8,4" size="34x19">Test3</text>
 							</widget>
-							<widget pos="0,32" size="54x28" type="*widget.menuItem">
-								<text pos="8,4" size="38x20">Test4</text>
+							<widget pos="0,31" size="50x27" type="*widget.menuItem">
+								<text pos="8,4" size="34x19">Test4</text>
 							</widget>
 						</container>
 					</widget>

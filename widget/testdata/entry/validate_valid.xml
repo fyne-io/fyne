@@ -1,13 +1,13 @@
 <canvas padded size="150x200">
 	<content>
-		<widget pos="10,10" size="120x36" type="*widget.Entry">
-			<rectangle fillColor="rgba(102,102,102,255)" pos="0,2" size="120x32"/>
-			<rectangle fillColor="primary" pos="0,34" size="120x2"/>
-			<widget pos="0,2" size="92x32" type="*widget.entryContent">
-				<widget size="92x32" type="*widget.RichText">
-					<text pos="8,6" size="76x20">2020-02-12</text>
+		<widget pos="10,10" size="120x35" type="*widget.Entry">
+			<rectangle fillColor="inputBackground" pos="0,2" size="120x31"/>
+			<rectangle pos="1,1" size="118x33" strokeColor="primary" strokeWidth="2"/>
+			<widget pos="0,2" size="96x31" type="*widget.entryContent">
+				<widget size="96x31" type="*widget.RichText">
+					<text pos="8,6" size="80x19">2020-02-12</text>
 				</widget>
-				<rectangle fillColor="primary" pos="86,6" size="2x20"/>
+				<rectangle fillColor="primary" pos="80,6" size="2x19"/>
 			</widget>
 			<widget pos="92,8" size="20x20" type="*widget.validationStatus">
 				<image rsc="confirmIcon" size="iconInlineSize"/>

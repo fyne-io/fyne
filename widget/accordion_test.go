@@ -41,12 +41,12 @@ func TestAccordion_ChangeTheme(t *testing.T) {
 
 	w := test.NewWindow(ac)
 	defer w.Close()
-	w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	w.Resize(ac.MinSize().Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 
 	test.AssertImageMatches(t, "accordion/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
-		w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		w.Resize(ac.MinSize().Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 		ac.Refresh()
 		time.Sleep(100 * time.Millisecond)
 		test.AssertImageMatches(t, "accordion/theme_changed.png", w.Canvas().Capture())
@@ -219,11 +219,11 @@ func TestAccordion_Layout(t *testing.T) {
 
 func TestAccordion_MinSize(t *testing.T) {
 	minSizeA := fyne.MeasureText("A", theme.TextSize(), fyne.TextStyle{})
-	minSizeA.Width += theme.IconInlineSize() + theme.Padding()*7
-	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.Padding()*2
+	minSizeA.Width += theme.IconInlineSize() + theme.InnerPadding()*3 + theme.Padding()
+	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.InnerPadding()
 	minSizeB := fyne.MeasureText("B", theme.TextSize(), fyne.TextStyle{})
-	minSizeB.Width += theme.IconInlineSize() + theme.Padding()*7
-	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.Padding()*2
+	minSizeB.Width += theme.IconInlineSize() + theme.InnerPadding()*3 + theme.Padding()
+	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.InnerPadding()
 	minSize1 := fyne.MeasureText("111111", theme.TextSize(), fyne.TextStyle{})
 	minSize1.Width += theme.Padding() * 4
 	minSize1.Height += theme.Padding() * 4
@@ -250,7 +250,7 @@ func TestAccordion_MinSize(t *testing.T) {
 					Detail: widget.NewLabel("111111"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1, minSizeA.Height+theme.Padding()*2),
+			want: fyne.NewSize(minWidthA1, minSizeA.Height+theme.InnerPadding()),
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
@@ -260,7 +260,7 @@ func TestAccordion_MinSize(t *testing.T) {
 				},
 			},
 			opened: []int{0},
-			want:   fyne.NewSize(minWidthA1, minHeightA1+theme.Padding()*2),
+			want:   fyne.NewSize(minWidthA1, minHeightA1+theme.InnerPadding()),
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
@@ -273,7 +273,7 @@ func TestAccordion_MinSize(t *testing.T) {
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()*4+1),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.InnerPadding()*2+theme.Padding()),
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
@@ -287,7 +287,7 @@ func TestAccordion_MinSize(t *testing.T) {
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.Padding()*5+1),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.InnerPadding()*2+theme.Padding()*2),
 		},
 		"multiple_open_one_item": {
 			multiOpen: true,
@@ -297,7 +297,7 @@ func TestAccordion_MinSize(t *testing.T) {
 					Detail: widget.NewLabel("111111"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1, minSizeA.Height+theme.Padding()*2),
+			want: fyne.NewSize(minWidthA1, minSizeA.Height+theme.InnerPadding()),
 		},
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
@@ -308,7 +308,7 @@ func TestAccordion_MinSize(t *testing.T) {
 				},
 			},
 			opened: []int{0},
-			want:   fyne.NewSize(minWidthA1, minHeightA1+theme.Padding()*2),
+			want:   fyne.NewSize(minWidthA1, minHeightA1+theme.InnerPadding()),
 		},
 		"multiple_open_multiple_items": {
 			multiOpen: true,
@@ -322,7 +322,7 @@ func TestAccordion_MinSize(t *testing.T) {
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()*4+1),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.InnerPadding()*2+theme.Padding()),
 		},
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
@@ -337,7 +337,7 @@ func TestAccordion_MinSize(t *testing.T) {
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.Padding()*6+1),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.InnerPadding()*3+theme.Padding()),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

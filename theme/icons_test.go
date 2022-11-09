@@ -72,7 +72,7 @@ func TestNewDisabledResource(t *testing.T) {
 func TestThemedResource_Invert(t *testing.T) {
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	inverted := NewInvertedThemedResource(staticResource)
-	assert.Equal(t, "inverted-"+staticResource.Name(), inverted.Name())
+	assert.Equal(t, "inverted_"+staticResource.Name(), inverted.Name())
 }
 
 func TestThemedResource_Name(t *testing.T) {
@@ -127,6 +127,26 @@ func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
+}
+
+func TestThemedResource_Success(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewThemedResource(source)
+	custom.ColorName = ColorNameSuccess
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("success_%v", source.Name()))
+}
+
+func TestThemedResource_Warning(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewThemedResource(source)
+	custom.ColorName = ColorNameWarning
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("warning_%v", source.Name()))
 }
 
 func TestDisabledResource_Name(t *testing.T) {

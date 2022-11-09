@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 
 	"github.com/mcuadros/go-version"
@@ -104,7 +105,7 @@ func Test_BuildWasmVersion(t *testing.T) {
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
 			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"}"),
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
 			},
 		},
 		{
@@ -134,7 +135,7 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
 			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"}"),
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
 			},
 		},
 		{
@@ -164,39 +165,47 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 }
 
 func Test_BuildGopherJSReleaseVersion(t *testing.T) {
-	expected := []mockRunner{
-		{
-			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
-			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"}"),
+	expected := []mockRunner{}
+
+	if runtime.GOOS != "windows" {
+		expected = []mockRunner{
+			{
+				expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+				mockReturn: mockReturn{
+					ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"version"},
-				osEnv: true,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"version"},
+					osEnv: true,
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+					err: nil,
+				},
 			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-				err: nil,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"build", "--tags", "release"},
+					osEnv: true,
+					dir:   "myTest",
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"build", "--tags", "release"},
-				osEnv: true,
-				dir:   "myTest",
-			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-			},
-		},
+		}
 	}
 
 	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &Builder{appData: &appData{}, os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
 	err := b.build()
-	assert.Nil(t, err)
+	if runtime.GOOS == "windows" {
+		assert.NotNil(t, err)
+	} else {
+		assert.Nil(t, err)
+	}
 	gopherJSBuildTest.verifyExpectation()
 }
 
@@ -205,7 +214,7 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
 			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"}"),
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
 			},
 		},
 		{
@@ -244,12 +253,31 @@ func Test_FyneGoMod(t *testing.T) {
 		called := false
 
 		fyneGoModTest := &testCommandRuns{runs: expected, t: t}
-		injectMetadataIfPossible(fyneGoModTest, "myTest", &appData{}, "",
-			func(string, *appData, string) (func(), error) {
+		injectMetadataIfPossible(fyneGoModTest, "myTest", &appData{},
+			func(string, *appData) (func(), error) {
 				called = true
 				return func() {}, nil
 			})
 
 		assert.Equal(t, j.expected, called)
+	}
+}
+
+func Test_AppendEnv(t *testing.T) {
+	env := []string{
+		"foo=bar",
+		"bar=baz",
+		"foo1=bar=baz",
+	}
+
+	appendEnv(&env, "foo2", "baz2")
+	appendEnv(&env, "foo", "baz")
+	appendEnv(&env, "foo1", "-bar")
+
+	if assert.Len(t, env, 4) {
+		assert.Equal(t, "foo=bar baz", env[0])
+		assert.Equal(t, "bar=baz", env[1])
+		assert.Equal(t, "foo1=bar=baz -bar", env[2])
+		assert.Equal(t, "foo2=baz2", env[3])
 	}
 }

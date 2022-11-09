@@ -521,6 +521,8 @@ GLFWAPI void glfwSetGammaRamp(GLFWmonitor* handle, const GLFWgammaramp* ramp)
     assert(ramp->green != NULL);
     assert(ramp->blue != NULL);
 
+    _GLFW_REQUIRE_INIT();
+
     if (ramp->size <= 0)
     {
         _glfwInputError(GLFW_INVALID_VALUE,
@@ -528,8 +530,6 @@ GLFWAPI void glfwSetGammaRamp(GLFWmonitor* handle, const GLFWgammaramp* ramp)
                         ramp->size);
         return;
     }
-
-    _GLFW_REQUIRE_INIT();
 
     if (!monitor->originalRamp.size)
     {

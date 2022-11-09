@@ -35,7 +35,7 @@ func newColorButton(color color.Color, onTap func(color.Color)) *colorButton {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *colorButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	background := newCheckeredBackground()
+	background := newCheckeredBackground(false)
 	rectangle := &canvas.Rectangle{
 		FillColor: b.color,
 	}
@@ -79,7 +79,6 @@ func (b *colorButton) SetColor(color color.Color) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (b *colorButton) Tapped(*fyne.PointEvent) {
-	writeRecentColor(colorToString(b.color))
 	if f := b.onTap; f != nil {
 		f(b.color)
 	}
@@ -95,6 +94,7 @@ type colorButtonRenderer struct {
 func (r *colorButtonRenderer) Layout(size fyne.Size) {
 	r.rectangle.Move(fyne.NewPos(0, 0))
 	r.rectangle.Resize(size)
+	r.background.Resize(size)
 }
 
 func (r *colorButtonRenderer) MinSize() fyne.Size {
@@ -104,10 +104,11 @@ func (r *colorButtonRenderer) MinSize() fyne.Size {
 func (r *colorButtonRenderer) Refresh() {
 	if r.button.hovered {
 		r.rectangle.StrokeColor = theme.HoverColor()
-		r.rectangle.StrokeWidth = float32(theme.Padding())
+		r.rectangle.StrokeWidth = theme.Padding()
 	} else {
 		r.rectangle.StrokeWidth = 0
 	}
 	r.rectangle.FillColor = r.button.color
+	r.background.Refresh()
 	canvas.Refresh(r.button)
 }

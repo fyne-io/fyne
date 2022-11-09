@@ -99,7 +99,7 @@ func (l *List) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.SeparatorThicknessSize())
+	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.Padding())
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -246,6 +246,7 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
+var _ fyne.Focusable = (*listItem)(nil)
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
@@ -281,6 +282,22 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
 
+// FocusGained is called after this listItem has gained focus.
+//
+// Implements: fyne.Focusable
+func (li *listItem) FocusGained() {
+	li.hovered = true
+	li.Refresh()
+}
+
+// FocusLost is called after this listItem has lost focus.
+//
+// Implements: fyne.Focusable
+func (li *listItem) FocusLost() {
+	li.hovered = false
+	li.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below.
 func (li *listItem) MinSize() fyne.Size {
 	li.ExtendBaseWidget(li)
@@ -310,6 +327,27 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.Refresh()
 		li.onTapped()
 	}
+}
+
+// TypedKey is called if a key event happens while this listItem is focused.
+//
+// Implements: fyne.Focusable
+func (li *listItem) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace:
+		li.selected = true
+		li.Refresh()
+		if li.onTapped != nil {
+			li.onTapped()
+		}
+	}
+}
+
+// TypedRune is called if a text event happens while this listItem is focused.
+//
+// Implements: fyne.Focusable
+func (li *listItem) TypedRune(_ rune) {
+	// intentionally left blank
 }
 
 // Declare conformity with the WidgetRenderer interface.
@@ -372,7 +410,7 @@ func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	if f := l.list.Length; f != nil {
-		separatorThickness := theme.SeparatorThicknessSize()
+		separatorThickness := theme.Padding()
 		return fyne.NewSize(l.list.itemMin.Width,
 			(l.list.itemMin.Height+separatorThickness)*float32(f())-separatorThickness)
 	}
@@ -419,13 +457,13 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 func (l *listLayout) updateList(refresh bool) {
 	l.renderLock.Lock()
 	defer l.renderLock.Unlock()
-	separatorThickness := theme.SeparatorThicknessSize()
+	separatorThickness := theme.Padding()
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {
 		length = f()
 	}
-	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+theme.SeparatorThicknessSize()))) + 1
+	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+separatorThickness))) + 1
 	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+separatorThickness)))
 	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
 	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
@@ -436,7 +474,7 @@ func (l *listLayout) updateList(refresh bool) {
 
 	wasVisible := l.visible
 	l.visible = make(map[ListItemID]*listItem)
-	var cells []fyne.CanvasObject
+	cells := []fyne.CanvasObject{}
 	y := offY
 	size := fyne.NewSize(width, l.list.itemMin.Height)
 	for row := minRow; row < maxRow; row++ {
@@ -469,6 +507,7 @@ func (l *listLayout) updateList(refresh bool) {
 		}
 	}
 	l.children = cells
+
 	l.updateSeparators()
 
 	objects := l.children
@@ -490,11 +529,12 @@ func (l *listLayout) updateSeparators() {
 	}
 
 	separatorThickness := theme.SeparatorThicknessSize()
+	dividerOff := (theme.Padding() + separatorThickness) / 2
 	for i, child := range l.children {
 		if i == 0 {
 			continue
 		}
-		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-separatorThickness))
+		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-dividerOff))
 		l.separators[i].Resize(fyne.NewSize(l.list.Size().Width, separatorThickness))
 		l.separators[i].Show()
 	}

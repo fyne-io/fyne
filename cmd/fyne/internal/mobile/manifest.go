@@ -8,7 +8,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"html/template"
 )
 
 type manifestXML struct {
@@ -47,37 +46,3 @@ func manifestLibName(data []byte) (string, error) {
 	}
 	return libName, nil
 }
-
-type manifestTmplData struct {
-	JavaPkgPath string
-	Name        string
-	Debug       bool
-	LibName     string
-	Version     string
-	Build       int
-}
-
-var manifestTmpl = template.Must(template.New("manifest").Parse(`
-<manifest
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	package="{{.JavaPkgPath}}"
-	android:versionCode="{{.Build}}"
-	android:versionName="{{.Version}}">
-
-	<application android:label="{{.Name}}" android:debuggable="{{.Debug}}">
-	<activity android:name="org.golang.app.GoNativeActivity"
-		android:label="{{.Name}}"
-		android:configChanges="orientation|keyboardHidden|uiMode"
-		android:theme="@android:style/Theme">
-		<meta-data android:name="android.app.lib_name" android:value="{{.LibName}}" />
-		<intent-filter>
-			<action android:name="android.intent.action.MAIN" />
-			<category android:name="android.intent.category.LAUNCHER" />
-		</intent-filter>
-	</activity>
-	</application>
-
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.INTERNET" />
-</manifest>`))

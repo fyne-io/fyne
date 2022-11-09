@@ -93,6 +93,21 @@ func Test_validateAppID(t *testing.T) {
 
 	_, err = validateAppID("myApp", "android", "myApp", true)
 	assert.NotNil(t, err)
+
+	_, err = validateAppID("com._server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("com.5server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("0com.server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("......", "android", "myApp", true)
+	assert.Nil(t, err)
+
+	_, err = validateAppID(".....myApp", "android", "myApp", true)
+	assert.Nil(t, err)
 }
 
 func Test_buildPackageWasm(t *testing.T) {
@@ -234,6 +249,9 @@ func Test_PackageWasm(t *testing.T) {
 }
 
 func Test_buildPackageGopherJS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -263,6 +281,20 @@ func Test_buildPackageGopherJS(t *testing.T) {
 		},
 	}
 
+	expectedExistRuns := mockExistRuns{
+		expected: []mockExist{
+			{"myTest/Icon.png", false},
+			{"myTest.wasm", false},
+			{"myTest.wasm", true},
+		},
+	}
+	if runtime.GOOS == "windows" {
+		expectedExistRuns.expected[0].path = "myTest\\Icon.png"
+	}
+	utilExistsMock = func(path string) bool {
+		return expectedExistRuns.verifyExpectation(t, path)
+	}
+
 	p := &Packager{
 		appData: &appData{},
 		os:      "gopherjs",
@@ -278,6 +310,9 @@ func Test_buildPackageGopherJS(t *testing.T) {
 }
 
 func Test_PackageGopherJS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -431,6 +466,21 @@ func Test_BuildPackageWeb(t *testing.T) {
 		},
 	}
 
+	expectedExistRuns := mockExistRuns{
+		expected: []mockExist{
+			{"myTest/Icon.png", false},
+			{"myTest/Icon.png", false},
+			{"myTest", false},
+		},
+	}
+	if runtime.GOOS == "windows" {
+		expectedExistRuns.expected[0].path = "myTest\\Icon.png"
+		expectedExistRuns.expected[1].path = "myTest\\Icon.png"
+	}
+	utilExistsMock = func(path string) bool {
+		return expectedExistRuns.verifyExpectation(t, path)
+	}
+
 	p := &Packager{
 		appData: &appData{},
 		os:      "web",
@@ -442,7 +492,11 @@ func Test_BuildPackageWeb(t *testing.T) {
 	files, err := p.buildPackage(webBuildTest)
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
-	assert.Equal(t, 2, len(files))
+	expectedFiles := 2
+	if runtime.GOOS == "windows" {
+		expectedFiles = 1
+	}
+	assert.Equal(t, expectedFiles, len(files))
 }
 
 func Test_PackageWeb(t *testing.T) {
@@ -470,33 +524,38 @@ func Test_PackageWeb(t *testing.T) {
 				ret: []byte(""),
 			},
 		},
-		{
-			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
-			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+	}
+
+	if runtime.GOOS != "windows" {
+		expected = append(expected, []mockRunner{
+			{
+				expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+				mockReturn: mockReturn{
+					ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"version"},
-				osEnv: true,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"version"},
+					osEnv: true,
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+					err: nil,
+				},
 			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-				err: nil,
+			{
+				expectedValue: expectedValue{
+					args: []string{"build",
+						"-o", "myTest.js"},
+					osEnv: true,
+					dir:   "myTest",
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args: []string{"build",
-					"-o", "myTest.js"},
-				osEnv: true,
-				dir:   "myTest",
-			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-			},
-		},
+		}...)
 	}
 
 	p := &Packager{

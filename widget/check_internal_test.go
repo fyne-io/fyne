@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCheckSize(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	min := check.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 }
 
 func TestCheckChecked(t *testing.T) {
@@ -45,7 +46,7 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check.SetChecked(true)
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
-	assert.Equal(t, "primary-"+theme.CheckButtonCheckedIcon().Name(), render.icon.Resource.Name())
+	assert.Equal(t, fmt.Sprintf("primary_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
 
 	check.Disable()
 	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
@@ -54,10 +55,10 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	render := test.WidgetRenderer(check).(*checkRenderer)
-	assert.Equal(t, render.icon.Resource.Name(), theme.CheckButtonIcon().Name())
+	assert.Equal(t, fmt.Sprintf("inputBorder_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
 
 	check.Disable()
-	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.CheckButtonIcon().Name()))
+	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
 }
 
 func TestCheckIsDisabledByDefault(t *testing.T) {

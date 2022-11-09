@@ -1,0 +1,21 @@
+<canvas padded size="62x55">
+	<content>
+		<widget pos="4,4" size="54x47" type="*widget.Card">
+			<widget pos="2,2" size="50x43" type="*widget.Shadow">
+				<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="0,-1" size="50x1"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="50,-1" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" pos="50,0" size="1x43" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="50,43" size="1x1" startColor="shadow"/>
+				<linearGradient pos="0,43" size="50x1" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-1,43" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x43"/>
+			</widget>
+			<text bold size="0x0" textSize="23"></text>
+			<text size="0x0"></text>
+			<widget pos="6,6" size="42x35" type="*widget.Label">
+				<text pos="8,8" size="26x19">Changed</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>

@@ -292,7 +292,7 @@ func (t *Tree) ensureOpenMap() {
 }
 
 func (t *Tree) findBottom() (y float32, size fyne.Size) {
-	sep := theme.SeparatorThicknessSize()
+	sep := theme.Padding()
 	t.walkAll(func(id TreeNodeID, branch bool, _ int) {
 		size = t.leafMinSize
 		if branch {
@@ -335,7 +335,7 @@ func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found b
 			}
 			// If this is not the first item, add a separator
 			if y > 0 {
-				y += theme.SeparatorThicknessSize()
+				y += theme.Padding()
 			}
 
 			y += m.Height
@@ -485,6 +485,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	separatorCount := 0
 	separatorThickness := theme.SeparatorThicknessSize()
 	separatorSize := fyne.NewSize(width, separatorThickness)
+	separatorOff := (theme.Padding() - separatorThickness) / 2
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
@@ -506,11 +507,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				separator = NewSeparator()
 				r.separators = append(r.separators, separator)
 			}
-			separator.Move(fyne.NewPos(0, y))
+			separator.Move(fyne.NewPos(0, y+separatorOff))
 			separator.Resize(separatorSize)
 			separator.Show()
 			r.objects = append(r.objects, separator)
-			y += separatorThickness
+			y += theme.Padding()
 			separatorCount++
 		}
 
@@ -597,7 +598,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a separator
 		if min.Height > 0 {
-			min.Height += theme.SeparatorThicknessSize()
+			min.Height += theme.Padding()
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -757,7 +758,7 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	if r.treeNode.content != nil {
 		min = r.treeNode.content.MinSize()
 	}
-	min.Width += theme.Padding()*2 + r.treeNode.Indent() + theme.IconInlineSize()
+	min.Width += theme.InnerPadding() + r.treeNode.Indent() + theme.IconInlineSize()
 	min.Height = fyne.Max(min.Height, theme.IconInlineSize())
 	return
 }
