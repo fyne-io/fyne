@@ -171,11 +171,18 @@ func (r *radioGroupRenderer) Layout(_ fyne.Size) {
 func (r *radioGroupRenderer) MinSize() fyne.Size {
 	width := float32(0)
 	height := float32(0)
+	maxMinWidth := float32(0)
+	if r.radio.Horizontal {
+		for _, item := range r.items {
+			itemMin := item.MinSize()
+			maxMinWidth = fyne.Max(maxMinWidth, itemMin.Width)
+		}
+	}
 	for _, item := range r.items {
 		itemMin := item.MinSize()
 		if r.radio.Horizontal {
 			height = fyne.Max(height, itemMin.Height)
-			width += itemMin.Width
+			width += maxMinWidth
 		} else {
 			width = fyne.Max(width, itemMin.Width)
 			height += itemMin.Height
