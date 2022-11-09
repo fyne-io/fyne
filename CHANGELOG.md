@@ -12,6 +12,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix possible compile error if "fyne build" is used without icon metadata
 * Detect and use recent Android NDK toolchain
 * Handle fyne package -release and fyne release properly for Android and iOS
+* Fix issue with mobile simulation when systray used
+* Fix incorrect size and position for radio focus indicator (#3137)
 
 
 ## 2.2.3 - 8 July 2022
