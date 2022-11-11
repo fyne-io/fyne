@@ -111,7 +111,7 @@ type HyperlinkSegment struct {
 
 	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
 	//
-	// Since 2.4
+	// Since: 2.4
 	OnTapped func()
 }
 
