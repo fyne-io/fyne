@@ -359,7 +359,7 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 
 	char := code[0]
 	if char >= 'a' && char <= 'z' {
-		// The fyne keys are all upper case characters.
+		// Our alphabetical keys are all upper case characters.
 		return fyne.KeyName('A' + char - 'a')
 	}
 
