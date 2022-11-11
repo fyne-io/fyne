@@ -470,49 +470,18 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
-var keyNameMap = map[string]fyne.KeyName{
-	"'": fyne.KeyApostrophe,
-	",": fyne.KeyComma,
-	"-": fyne.KeyMinus,
-	".": fyne.KeyPeriod,
-	"/": fyne.KeySlash,
-	"*": fyne.KeyAsterisk,
-	"`": fyne.KeyBackTick,
+func keyCodeToKeyName(code string) fyne.KeyName {
+	if len(code) != 1 {
+		return fyne.KeyUnknown
+	}
 
-	";": fyne.KeySemicolon,
-	"+": fyne.KeyPlus,
-	"=": fyne.KeyEqual,
+	char := code[0]
+	if char >= 'a' && char <= 'z' {
+		// The fyne keys are all upper case characters.
+		return fyne.KeyName('A' + char - 'a')
+	}
 
-	"a": fyne.KeyA,
-	"b": fyne.KeyB,
-	"c": fyne.KeyC,
-	"d": fyne.KeyD,
-	"e": fyne.KeyE,
-	"f": fyne.KeyF,
-	"g": fyne.KeyG,
-	"h": fyne.KeyH,
-	"i": fyne.KeyI,
-	"j": fyne.KeyJ,
-	"k": fyne.KeyK,
-	"l": fyne.KeyL,
-	"m": fyne.KeyM,
-	"n": fyne.KeyN,
-	"o": fyne.KeyO,
-	"p": fyne.KeyP,
-	"q": fyne.KeyQ,
-	"r": fyne.KeyR,
-	"s": fyne.KeyS,
-	"t": fyne.KeyT,
-	"u": fyne.KeyU,
-	"v": fyne.KeyV,
-	"w": fyne.KeyW,
-	"x": fyne.KeyX,
-	"y": fyne.KeyY,
-	"z": fyne.KeyZ,
-
-	"[":  fyne.KeyLeftBracket,
-	"\\": fyne.KeyBackslash,
-	"]":  fyne.KeyRightBracket,
+	return fyne.KeyName(char)
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
@@ -526,12 +495,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	}
 
 	keyName := glfw.GetKeyName(code, scancode)
-	ret, ok = keyNameMap[keyName]
-	if !ok {
-		return fyne.KeyUnknown
-	}
-
-	return ret
+	return keyCodeToKeyName(keyName)
 }
 
 func convertAction(action glfw.Action) action {
