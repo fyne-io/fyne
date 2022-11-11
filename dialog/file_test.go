@@ -597,10 +597,10 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	folderNameInputTitle := folderNameInputUi.Objects[4].(*widget.Label)
 	assert.Equal(t, "New Folder", folderNameInputTitle.Text)
 
-	folderNameInputLabel := folderNameInputUi.Objects[2].(*fyne.Container).Objects[0].(*widget.Label)
-	assert.Equal(t, "Name", folderNameInputLabel.Text)
+	folderNameInputLabel := folderNameInputUi.Objects[2].(*widget.Form).Items[0].Text
+	assert.Equal(t, "Name", folderNameInputLabel)
 
-	folderNameInputEntry := folderNameInputUi.Objects[2].(*fyne.Container).Objects[1].(*widget.Entry)
+	folderNameInputEntry := folderNameInputUi.Objects[2].(*widget.Form).Items[0].Widget.(*widget.Entry)
 	assert.Equal(t, "", folderNameInputEntry.Text)
 
 	folderNameInputCancel := folderNameInputUi.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
