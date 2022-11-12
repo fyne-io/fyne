@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -53,7 +54,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.bg.FillColor = theme.BackgroundColor()
+	c.bg.FillColor = color.Transparent
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.disabled {
@@ -90,20 +91,20 @@ func (c *checkRenderer) updateResource() {
 			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
 		res.ColorName = theme.ColorNameDisabled
-		c.bg.FillColor = theme.BackgroundColor()
+		c.bg.FillColor = color.Transparent
 	}
 	c.icon.Resource = res
 }
 
 func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
-		c.focusIndicator.FillColor = theme.BackgroundColor()
+		c.focusIndicator.FillColor = color.Transparent
 	} else if c.check.focused {
 		c.focusIndicator.FillColor = theme.FocusColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
-		c.focusIndicator.FillColor = theme.BackgroundColor()
+		c.focusIndicator.FillColor = color.Transparent
 	}
 }
 
