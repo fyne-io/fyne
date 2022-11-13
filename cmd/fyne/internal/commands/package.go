@@ -119,11 +119,11 @@ func Package() *cli.Command {
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
 	*appData
-	srcDir, dir, exe, os string
-	install, release     bool
-	certificate, profile string // optional flags for releasing
-	tags, category       string
-	tempDir              string
+	srcDir, dir, exe, os           string
+	install, release, distribution bool
+	certificate, profile           string // optional flags for releasing
+	tags, category                 string
+	tempDir                        string
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -276,7 +276,7 @@ func (p *Packager) doPackage(runner runner) error {
 		}
 	}
 	if util.IsMobile(p.os) { // we don't use the normal build command for mobile so inject before gomobile...
-		close, err := injectMetadataIfPossible(newCommand("go"), p.dir, p.appData, p.icon, createMetadataInitFile)
+		close, err := injectMetadataIfPossible(newCommand("go"), p.dir, p.appData, createMetadataInitFile)
 		if err != nil {
 			fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 		} else if close != nil {

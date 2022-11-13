@@ -98,12 +98,10 @@ func (i *radioItem) MouseOut() {
 
 // SetSelected sets whether this radio item is selected or not.
 func (i *radioItem) SetSelected(selected bool) {
-	if i.Disabled() {
+	if i.Disabled() || i.Selected == selected {
 		return
 	}
-	if i.Selected == selected {
-		return
-	}
+
 	i.Selected = selected
 	i.Refresh()
 }
@@ -138,10 +136,7 @@ func (i *radioItem) TypedRune(r rune) {
 }
 
 func (i *radioItem) toggle() {
-	if i.Disabled() {
-		return
-	}
-	if i.onTap == nil {
+	if i.Disabled() || i.onTap == nil {
 		return
 	}
 
@@ -158,12 +153,12 @@ type radioItemRenderer struct {
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
-	labelSize := fyne.NewSize(size.Width, size.Height)
-	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding())
-
+	pad2 := 2 * theme.Padding()
+	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+pad2, theme.IconInlineSize()+pad2)
 	r.focusIndicator.Resize(focusIndicatorSize)
-	r.focusIndicator.Move(fyne.NewPos(theme.Padding()*0.5, (size.Height-focusIndicatorSize.Height)/2))
+	r.focusIndicator.Move(fyne.NewPos(theme.Padding()/2, (size.Height-focusIndicatorSize.Height)/2))
 
+	labelSize := fyne.NewSize(size.Width, size.Height)
 	r.label.Resize(labelSize)
 	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+theme.Padding(), 0))
 
