@@ -15,11 +15,12 @@ import (
 	"strconv"
 	"strings"
 
-	"fyne.io/fyne/v2"
 	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
+
+	"fyne.io/fyne/v2"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 )

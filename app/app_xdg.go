@@ -98,13 +98,17 @@ func (a *fyneApp) cachedIconPath() string {
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
 // By default this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
-	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
+	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
+		desk.SetSystemTrayMenu(menu)
+	}
 }
 
 // SetSystemTrayIcon sets a custom image for the system tray icon.
 // You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
 func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
-	a.Driver().(systrayDriver).SetSystemTrayIcon(icon)
+	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
+		desk.SetSystemTrayIcon(icon)
+	}
 }
 
 func rootConfigDir() string {
