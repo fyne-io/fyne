@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -35,7 +37,7 @@ type radioItem struct {
 //
 // Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
-	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
+	focusIndicator := canvas.NewCircle(color.Transparent)
 	bg := canvas.NewCircle(theme.InputBackgroundColor())
 	icon := canvas.NewImageFromResource(theme.NewPrimaryThemedResource(theme.RadioButtonCheckedIcon()))
 	over := canvas.NewImageFromResource(theme.NewThemedResource(theme.RadioButtonIcon()))
@@ -215,12 +217,12 @@ func (r *radioItemRenderer) update() {
 	r.over.Resource = out
 
 	if r.item.Disabled() {
-		r.focusIndicator.FillColor = theme.BackgroundColor()
+		r.focusIndicator.FillColor = color.Transparent
 	} else if r.item.focused {
 		r.focusIndicator.FillColor = theme.FocusColor()
 	} else if r.item.hovered {
 		r.focusIndicator.FillColor = theme.HoverColor()
 	} else {
-		r.focusIndicator.FillColor = theme.BackgroundColor()
+		r.focusIndicator.FillColor = color.Transparent
 	}
 }
