@@ -10,6 +10,7 @@ import (
 	"github.com/yuin/goldmark/renderer"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // NewRichTextFromMarkdown configures a RichText widget by parsing the provided markdown content.
@@ -148,6 +149,13 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			}
 		case "Blockquote":
 			m.blockquote = true
+		case "Image":
+			dest := string(n.(*ast.Image).Destination)
+			u, err := storage.ParseURI(dest)
+			if err != nil {
+				u = storage.NewFileURI(dest)
+			}
+			m.nextSeg = &ImageSegment{Source: u, Title: string(n.(*ast.Image).Title)}
 		}
 
 		return ast.WalkContinue, nil

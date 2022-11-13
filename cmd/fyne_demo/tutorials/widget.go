@@ -178,6 +178,8 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 
 ## A Sub Heading
 
+![title](/home/andy/Code/Fyne/fyne/theme/icons/fyne.png)
+
 ---
 
 * Item1 in _three_ segments
