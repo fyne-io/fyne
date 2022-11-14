@@ -530,6 +530,46 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	test.AssertImageMatches(t, "table/col_size.png", w.Canvas().Capture())
 }
 
+func TestTable_SetRowHeight(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("place\nholder")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+			if id.Row == 0 {
+				obj.(*Label).Text = "p"
+			} else {
+				obj.(*Label).Text = "place\nholder"
+			}
+			obj.Refresh()
+		})
+	table.SetRowHeight(0, 48)
+	table.Resize(fyne.NewSize(120, 120))
+	table.Select(TableCellID{0, 1})
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer.Refresh()
+	assert.Equal(t, 6, len(cellRenderer.Objects()))
+	assert.Equal(t, float32(48), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
+	cell1Offset := theme.Padding()
+	assert.Equal(t, float32(48)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
+
+	table.SetRowHeight(0, 32)
+	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
+	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
+	test.AssertImageMatches(t, "table/row_size.png", w.Canvas().Capture())
+}
+
 func TestTable_ShowVisible(t *testing.T) {
 	table := NewTable(
 		func() (int, int) { return 50, 50 },

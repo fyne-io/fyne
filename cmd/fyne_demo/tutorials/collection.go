@@ -74,6 +74,7 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 		})
 	t.SetColumnWidth(0, 34)
 	t.SetColumnWidth(1, 102)
+	t.SetRowHeight(2, 50)
 	return t
 }
 
