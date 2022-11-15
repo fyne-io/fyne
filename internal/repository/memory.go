@@ -278,7 +278,8 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	// solves the edge case where you have say '/foo/bar' and
 	// '/foo/barbaz'.
 	prefix := u.Path()
-	if prefix[len(prefix)-1] != '/' {
+
+	if len(prefix) > 0 && prefix[len(prefix)-1] != '/' {
 		prefix = prefix + "/"
 	}
 
