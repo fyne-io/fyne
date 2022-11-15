@@ -10,6 +10,7 @@ import (
 	"github.com/yuin/goldmark/renderer"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // NewRichTextFromMarkdown configures a RichText widget by parsing the provided markdown content.
@@ -76,8 +77,7 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 		case "HorizontalRule", "ThematicBreak":
 			m.segs = append(m.segs, &SeparatorSegment{})
 		case "Link":
-			link, _ := url.Parse(string(n.(*ast.Link).Destination))
-			m.nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, "", link}
+			m.nextSeg = makeLink(n.(*ast.Link))
 		case "Paragraph":
 			m.nextSeg = &TextSegment{
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
@@ -148,6 +148,8 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			}
 		case "Blockquote":
 			m.blockquote = true
+		case "Image":
+			m.nextSeg = makeImage(n.(*ast.Image))
 		}
 
 		return ast.WalkContinue, nil
@@ -180,6 +182,20 @@ func (m *markdownRenderer) handleExitNode(n ast.Node) error {
 		}
 	}
 	return nil
+}
+
+func makeImage(n *ast.Image) *ImageSegment {
+	dest := string(n.Destination)
+	u, err := storage.ParseURI(dest)
+	if err != nil {
+		u = storage.NewFileURI(dest)
+	}
+	return &ImageSegment{Source: u, Title: string(n.Title)}
+}
+
+func makeLink(n *ast.Link) *HyperlinkSegment {
+	link, _ := url.Parse(string(n.Destination))
+	return &HyperlinkSegment{fyne.TextAlignLeading, "", link}
 }
 
 func parseMarkdown(content string) []RichTextSegment {

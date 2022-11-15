@@ -520,6 +520,12 @@ func (r *textRenderer) MinSize() fyne.Size {
 			i++
 
 			min := obj.MinSize()
+			if img, ok := obj.(*richImage); ok {
+				if !img.MinSize().Subtract(img.oldMin).IsZero() {
+					img.oldMin = img.MinSize()
+					r.Refresh() // TODO resolve this in a similar way to #2991
+				}
+			}
 			rowHeight = fyne.Max(rowHeight, min.Height)
 			rowWidth += min.Width
 		}

@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -149,6 +150,57 @@ func (h *HyperlinkSegment) SelectedText() string {
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
 func (h *HyperlinkSegment) Unselect() {
+	// no-op: this will be added when we progress to editor
+}
+
+// ImageSegment represents an image within a rich text widget.
+//
+// Since: 2.3
+type ImageSegment struct {
+	Source fyne.URI
+	Title  string
+}
+
+// Inline returns false as images in rich text are blocks.
+func (i *ImageSegment) Inline() bool {
+	return false
+}
+
+// Textual returns the content of this segment rendered to plain text.
+func (i *ImageSegment) Textual() string {
+	return "Image " + i.Title
+}
+
+// Visual returns the image widget required to render this segment.
+func (i *ImageSegment) Visual() fyne.CanvasObject {
+	return newRichImage(i.Source)
+}
+
+// Update applies the current state of this image segment to an existing visual.
+func (i *ImageSegment) Update(o fyne.CanvasObject) {
+	newer := canvas.NewImageFromURI(i.Source)
+	img := o.(*richImage)
+
+	// one of the following will be used
+	img.img.File = newer.File
+	img.img.Resource = newer.Resource
+
+	img.Refresh()
+}
+
+// Select tells the segment that the user is selecting the content between the two positions.
+func (i *ImageSegment) Select(begin, end fyne.Position) {
+	// no-op: this will be added when we progress to editor
+}
+
+// SelectedText should return the text representation of any content currently selected through the Select call.
+func (i *ImageSegment) SelectedText() string {
+	// no-op: images have no text rendering
+	return ""
+}
+
+// Unselect tells the segment that the user is has cancelled the previous selection.
+func (i *ImageSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 
@@ -395,6 +447,38 @@ func (t *TextSegment) size() float32 {
 	}
 
 	return theme.TextSize()
+}
+
+type richImage struct {
+	BaseWidget
+	img    *canvas.Image
+	oldMin fyne.Size
+}
+
+func newRichImage(u fyne.URI) *richImage {
+	img := canvas.NewImageFromURI(u)
+	img.FillMode = canvas.ImageFillOriginal
+	i := &richImage{img: img}
+	i.ExtendBaseWidget(i)
+	return i
+}
+
+func (r *richImage) CreateRenderer() fyne.WidgetRenderer {
+	return NewSimpleRenderer(r.img)
+}
+
+func (r *richImage) MinSize() fyne.Size {
+	orig := r.img.MinSize()
+	c := fyne.CurrentApp().Driver().CanvasForObject(r)
+	if c == nil {
+		return r.oldMin // not yet rendered
+	}
+
+	// unscale the image so it is not varying based on canvas
+	w := internal.ScaleInt(c, orig.Width)
+	h := internal.ScaleInt(c, orig.Height)
+	// we return size / 2 as this assumes a HiDPI / 2x image scaling
+	return fyne.NewSize(float32(w)/2, float32(h)/2)
 }
 
 type unpadTextWidgetLayout struct {

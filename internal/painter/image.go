@@ -66,7 +66,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 }
 
 func paintImage(img *canvas.Image, width, height int, wantOrigSize bool, wantOrigW, wantOrigH int) (dst image.Image, origW, origH int, err error) {
-	if width <= 0 || height <= 0 {
+	if (width <= 0 || height <= 0) && !wantOrigSize {
 		return
 	}
 
