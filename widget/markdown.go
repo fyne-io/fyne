@@ -77,7 +77,7 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 			m.segs = append(m.segs, &SeparatorSegment{})
 		case "Link":
 			link, _ := url.Parse(string(n.(*ast.Link).Destination))
-			m.nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, "", link}
+			m.nextSeg = &HyperlinkSegment{fyne.TextAlignLeading, "", link, nil}
 		case "Paragraph":
 			m.nextSeg = &TextSegment{
 				Style: RichTextStyleInline, // we make it a paragraph at the end if there are no more elements
