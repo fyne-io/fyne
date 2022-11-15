@@ -113,16 +113,6 @@
 							</widget>
 						</container>
 					</widget>
-					<widget pos="0,429" size="192x35" type="*widget.listItem">
-						<container size="192x35">
-							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35"/>
-							</widget>
-							<widget pos="24,0" size="168x35" type="*widget.Label">
-								<text pos="8,8" size="152x19">l</text>
-							</widget>
-						</container>
-					</widget>
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="0x0"/>
 					</widget>
@@ -154,9 +144,6 @@
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 					<widget pos="0,388" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
-					</widget>
-					<widget pos="0,427" size="192x1" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 				</container>

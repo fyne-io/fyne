@@ -332,8 +332,7 @@ func TestList_ClearList(t *testing.T) {
 
 	visibleCount := len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
 
-	assert.Equal(t, visibleCount, 0)
-
+	assert.Equal(t, 0, visibleCount)
 	test.AssertRendersToMarkup(t, "list/cleared.xml", w.Canvas())
 }
 
@@ -393,7 +392,7 @@ func TestList_ScrollThenShrink(t *testing.T) {
 
 	visibles := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	visibleCount := len(visibles)
-	assert.Equal(t, visibleCount, 9)
+	assert.Equal(t, visibleCount, 8)
 
 	list.scroller.ScrollToBottom()
 	visibles = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children

@@ -537,7 +537,7 @@ func (l *listLayout) updateList(refresh bool) {
 	cells := []fyne.CanvasObject{}
 
 	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
-	if len(visibleRowHeights) == 0 { // we can't show anything until we have some dimensions
+	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		return
 	}
 

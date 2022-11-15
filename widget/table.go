@@ -631,7 +631,7 @@ func (c *tableCells) hoverAt(pos fyne.Position) {
 	if f := c.t.Length; f != nil {
 		rows, cols = c.t.Length()
 	}
-	if c.t.hoveredCell.Col >= cols || c.t.hoveredCell.Row >= rows {
+	if c.t.hoveredCell.Col >= cols || c.t.hoveredCell.Row >= rows || c.t.hoveredCell.Col < 0 || c.t.hoveredCell.Row < 0 {
 		c.hoverOut()
 		return
 	}
