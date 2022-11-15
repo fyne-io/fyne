@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fmt"
-	"math"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -36,6 +35,7 @@ type List struct {
 	scroller      *widget.Scroll
 	selected      []ListItemID
 	itemMin       fyne.Size
+	itemHeights   map[ListItemID]float32
 	offsetY       float32
 	offsetUpdated func(fyne.Position)
 }
@@ -93,6 +93,19 @@ func (l *List) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 
 	return l.BaseWidget.MinSize()
+}
+
+// SetItemHeight supports changing the height of the specified list item. Items normally take the height of the template
+// returned from the CreateItem callback. The height parameter uses the same units as a fyne.Size type and refers
+// to the internal content height not including the divider size.
+//
+// Since: 2.3
+func (l *List) SetItemHeight(id ListItemID, height float32) {
+	if l.itemHeights == nil {
+		l.itemHeights = make(map[ListItemID]float32)
+	}
+	l.itemHeights[id] = height
+	l.Refresh()
 }
 
 func (l *List) scrollTo(id ListItemID) {
@@ -208,6 +221,43 @@ func (l *List) UnselectAll() {
 			f(id)
 		}
 	}
+}
+
+func (l *List) visibleItemHeights(itemHeight float32, length int) (visible map[int]float32, offY float32, minRow, maxRow int) {
+	maxRow = length
+	rowOffset := float32(0)
+	isVisible := false
+	visible = make(map[int]float32)
+
+	if l.scroller.Size().Height <= 0 {
+		return
+	}
+
+	for i := 0; i < length; i++ {
+		height := itemHeight
+		if h, ok := l.itemHeights[i]; ok {
+			height = h
+		}
+
+		if rowOffset <= l.offsetY-height-theme.Padding() {
+			// before scroll
+		} else if rowOffset <= l.offsetY {
+			minRow = i
+			offY = rowOffset
+			isVisible = true
+		}
+		if rowOffset < l.offsetY+l.scroller.Size().Height {
+			maxRow = i + 1
+		} else {
+			break
+		}
+
+		rowOffset += height + theme.Padding()
+		if isVisible {
+			visible[i] = height
+		}
+	}
+	return
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -409,12 +459,26 @@ func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 }
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
-	if f := l.list.Length; f != nil {
-		separatorThickness := theme.Padding()
-		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+separatorThickness)*float32(f())-separatorThickness)
+	items := 0
+	if f := l.list.Length; f == nil {
+		return fyne.NewSize(0, 0)
+	} else {
+		items = f()
 	}
-	return fyne.NewSize(0, 0)
+
+	height := float32(0)
+	templateHeight := l.list.itemMin.Height
+	for item := 0; item < items; item++ {
+		itemHeight, ok := l.list.itemHeights[item]
+		if ok {
+			height += itemHeight
+		} else {
+			height += templateHeight
+		}
+	}
+
+	separatorThickness := theme.Padding()
+	return fyne.NewSize(l.list.itemMin.Width, height+separatorThickness*float32(items-1))
 }
 
 func (l *listLayout) getItem() *listItem {
@@ -426,6 +490,7 @@ func (l *listLayout) getItem() *listItem {
 	}
 	return item.(*listItem)
 }
+
 func (l *listLayout) offsetUpdated(pos fyne.Position) {
 	if l.list.offsetY == pos.Y {
 		return
@@ -463,11 +528,6 @@ func (l *listLayout) updateList(refresh bool) {
 	if f := l.list.Length; f != nil {
 		length = f()
 	}
-	visibleItemCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+separatorThickness))) + 1
-	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+separatorThickness)))
-	minRow := ListItemID(offY / (l.list.itemMin.Height + separatorThickness))
-	maxRow := ListItemID(fyne.Min(float32(minRow+visibleItemCount), float32(length)))
-
 	if l.list.UpdateItem == nil {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
@@ -475,9 +535,17 @@ func (l *listLayout) updateList(refresh bool) {
 	wasVisible := l.visible
 	l.visible = make(map[ListItemID]*listItem)
 	cells := []fyne.CanvasObject{}
+
+	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
+	if len(visibleRowHeights) == 0 { // we can't show anything until we have some dimensions
+		return
+	}
+
 	y := offY
-	size := fyne.NewSize(width, l.list.itemMin.Height)
 	for row := minRow; row < maxRow; row++ {
+		itemHeight := visibleRowHeights[row]
+		size := fyne.NewSize(width, itemHeight)
+
 		c, ok := wasVisible[row]
 		if !ok {
 			c = l.getItem()
@@ -496,7 +564,7 @@ func (l *listLayout) updateList(refresh bool) {
 			}
 		}
 
-		y += l.list.itemMin.Height + separatorThickness
+		y += itemHeight + separatorThickness
 		l.visible[row] = c
 		cells = append(cells, c)
 	}

@@ -67,6 +67,30 @@ func TestList_Resize(t *testing.T) {
 	test.AssertRendersToMarkup(t, "list/resized.xml", w.Canvas())
 }
 
+func TestList_SetItemHeight(t *testing.T) {
+	list := NewList(
+		func() int { return 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 0, A: 0x33})
+			r.SetMinSize(fyne.NewSize(10, 10))
+			return r
+		},
+		func(ListItemID, fyne.CanvasObject) {
+		})
+
+	lay := test.WidgetRenderer(list).(*listRenderer).layout
+	assert.Equal(t, fyne.NewSize(32, 32), list.MinSize())
+	assert.Equal(t, fyne.NewSize(10, 10*5+(4*theme.Padding())), lay.MinSize())
+
+	list.SetItemHeight(2, 50)
+	assert.Equal(t, fyne.NewSize(10, 10*5+(4*theme.Padding())+40), lay.MinSize())
+
+	list.Select(2)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(200, 200))
+	test.AssertImageMatches(t, "list/list_item_height.png", w.Canvas().Capture())
+}
+
 func TestList_OffsetChange(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
