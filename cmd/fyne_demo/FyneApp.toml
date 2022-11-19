@@ -2,7 +2,8 @@
   Icon = "../../theme/icons/fyne.png"
   Name = "Fyne Demo"
   ID = "io.fyne.demo"
-  Build = 7
+  Version = "2.3.0"
+  Build = 10
 
 [Development]
   HelperText = "This binary was build with debug symbol"
