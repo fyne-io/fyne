@@ -53,14 +53,14 @@ func findThemeVariant() fyne.ThemeVariant {
 	case "gnome", "xfce", "unity", "gnome-shell", "gnome-classic", "mate", "gnome-mate":
 		return findGnomeThemeVariant()
 	case "kde", "kde-plasma", "plasma":
-		return findKdeThemeVariant()
+		return findKDEThemeVariant()
 	default:
 		return theme.VariantDark
 	}
 }
 
 // find the current KDE theme variant. At this time, no solution.
-func findKdeThemeVariant() fyne.ThemeVariant {
+func findKDEThemeVariant() fyne.ThemeVariant {
 	homedir, err := os.UserHomeDir()
 	if err != nil || homedir == "" {
 		// there is a problem, fallback to dark theme
@@ -237,6 +237,10 @@ func watchTheme() {
 	}
 }
 
+func themeChanged() {
+	fyne.CurrentApp().Settings().(*settings).setupTheme()
+}
+
 func watchGnomeTheme() {
 	// connect to dbus to detect color-schem theme changes
 	conn, err := dbus.SessionBus()
@@ -256,20 +260,10 @@ func watchGnomeTheme() {
 	defer conn.Close()
 	dbusChan := make(chan *dbus.Signal, 10)
 	conn.Signal(dbusChan)
-	currentTheme := fyne.CurrentApp().Settings().Theme()
 	for sig := range dbusChan {
 		for _, v := range sig.Body {
-			switch v {
-			case "color-scheme":
-				if currentTheme == theme.DefaultTheme() {
-					variant := findGnomeThemeVariant()
-					switch variant {
-					case theme.VariantLight:
-						fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-					case theme.VariantDark:
-						fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-					}
-				}
+			if v == "color-scheme" {
+				themeChanged()
 			}
 		}
 	}
