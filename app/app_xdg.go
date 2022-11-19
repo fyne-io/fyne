@@ -9,6 +9,7 @@
 package app
 
 import (
+	"image/color"
 	"io/ioutil"
 	"log"
 	"net/url"
@@ -98,17 +99,8 @@ func findKDEThemeVariant() fyne.ThemeVariant {
 	// we can try to calculate the theme variant from the current KDE theme using the WM activeBackground key
 	for _, line := range lines {
 		if strings.HasPrefix(line, "activeBackground=") {
-			// read the value, it's a color in the form of r,g,b
-			col := strings.Split(line, "=")[1]
-			// convert the color to a hex string
-			cols := strings.Split(col, ",")
-			// convert the string to int
-			r, _ := strconv.Atoi(cols[0])
-			g, _ := strconv.Atoi(cols[1])
-			b, _ := strconv.Atoi(cols[2])
-
-			// calculate the luminance of the color
-			brightness := (float32(r)/255*299 + float32(g)/255*587 + float32(b)/255*114) / 1000
+			bgcolor := parseKDEColor(line)
+			brightness := calculateBrightness(bgcolor)
 			if brightness > 0.5 {
 				return theme.VariantLight
 			} else {
@@ -267,4 +259,22 @@ func watchGnomeTheme() {
 			}
 		}
 	}
+}
+
+func calculateBrightness(col color.Color) float32 {
+	r, g, b, _ := col.RGBA()
+	return (float32(r)/255*299 + float32(g)/255*587 + float32(b)/255*114) / 1000
+}
+
+// parseKDEColor parses a color from a string in the format "0,0,0", values are in range [0, 255]
+func parseKDEColor(line string) color.Color {
+	col := strings.Split(line, "=")[1]
+	// convert the color to a hex string
+	cols := strings.Split(col, ",")
+	// convert the string to int
+	r, _ := strconv.Atoi(cols[0])
+	g, _ := strconv.Atoi(cols[1])
+	b, _ := strconv.Atoi(cols[2])
+	// convert the int to hex
+	return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 }
