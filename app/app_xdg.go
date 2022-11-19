@@ -257,24 +257,20 @@ func watchGnomeTheme() {
 	dbusChan := make(chan *dbus.Signal, 10)
 	conn.Signal(dbusChan)
 	currentTheme := fyne.CurrentApp().Settings().Theme()
-	for {
-		select {
-		case sig := <-dbusChan:
-			for _, v := range sig.Body {
-				switch v {
-				case "color-scheme":
-					if currentTheme == theme.DefaultTheme() {
-						variant := findGnomeThemeVariant()
-						switch variant {
-						case theme.VariantLight:
-							fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-						case theme.VariantDark:
-							fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-						}
+	for sig := range dbusChan {
+		for _, v := range sig.Body {
+			switch v {
+			case "color-scheme":
+				if currentTheme == theme.DefaultTheme() {
+					variant := findGnomeThemeVariant()
+					switch variant {
+					case theme.VariantLight:
+						fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+					case theme.VariantDark:
+						fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 					}
 				}
 			}
 		}
 	}
-
 }
