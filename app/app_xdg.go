@@ -14,7 +14,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -115,19 +114,33 @@ func findKDEThemeVariant() fyne.ThemeVariant {
 
 // fetch org.gnome.desktop.interface color-scheme 'prefer-dark' or 'prefer-light' from gsettings
 func findGnomeThemeVariant() fyne.ThemeVariant {
-	cmd := exec.Command("gsettings", "get", "org.gnome.desktop.interface", "color-scheme")
-	out, err := cmd.CombinedOutput()
-	if err == nil {
-		w := strings.TrimSpace(string(out))
-		w = strings.Trim(w, "'")
-		switch w {
-		case "prefer-light", "default":
-			return theme.VariantLight
-		case "prefer-dark":
-			return theme.VariantDark
-		}
+	dbusConn, err := dbus.SessionBus()
+	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
+	call := dbusObj.Call(
+		"org.freedesktop.portal.Settings.Read",
+		dbus.FlagNoAutoStart,
+		"org.freedesktop.appearance",
+		"color-scheme",
+	)
+	if call.Err != nil {
+		log.Println("failed to read dbus value:", call.Err)
+		return theme.VariantDark
 	}
-	return theme.VariantDark
+	var value uint8
+	if err = call.Store(&value); err != nil {
+		log.Println("failed to read dbus value:", err)
+		return theme.VariantDark
+	}
+
+	switch value {
+	case 0:
+		return theme.VariantLight
+	case 1:
+		return theme.VariantDark
+	default:
+		return theme.VariantDark
+	}
+
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
