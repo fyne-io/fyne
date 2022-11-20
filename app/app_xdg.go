@@ -115,6 +115,11 @@ func findKDEThemeVariant() fyne.ThemeVariant {
 // fetch color variant from DBus stored values
 func findGnomeThemeVariant() fyne.ThemeVariant {
 	dbusConn, err := dbus.SessionBus()
+	if err != nil {
+		log.Println("Error connecting to DBus:", err)
+		return theme.VariantDark
+	}
+
 	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
 	call := dbusObj.Call(
 		"org.freedesktop.portal.Settings.Read",
@@ -126,6 +131,7 @@ func findGnomeThemeVariant() fyne.ThemeVariant {
 		log.Println("failed to read dbus value:", call.Err)
 		return theme.VariantDark
 	}
+
 	var value uint8
 	if err = call.Store(&value); err != nil {
 		log.Println("failed to read dbus value:", err)
@@ -203,7 +209,6 @@ func (a *fyneApp) cachedIconPath() string {
 	})
 
 	return filePath
-
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
