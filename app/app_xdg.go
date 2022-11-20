@@ -112,7 +112,7 @@ func findKDEThemeVariant() fyne.ThemeVariant {
 	return theme.VariantDark
 }
 
-// fetch org.gnome.desktop.interface color-scheme 'prefer-dark' or 'prefer-light' from gsettings
+// fetch color variant from DBus stored values
 func findGnomeThemeVariant() fyne.ThemeVariant {
 	dbusConn, err := dbus.SessionBus()
 	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
