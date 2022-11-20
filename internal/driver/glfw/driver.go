@@ -182,7 +182,7 @@ func NewGLDriver() fyne.Driver {
 
 func catchTerm(d *gLDriver) {
 	terminateSignals := make(chan os.Signal, 1)
-	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGKILL)
+	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
 
 	for range terminateSignals {
 		d.Quit()
