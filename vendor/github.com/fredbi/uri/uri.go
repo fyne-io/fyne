@@ -20,7 +20,7 @@ import (
 	"strings"
 )
 
-// Validation errors
+// Validation errors.
 var (
 	ErrNoSchemeFound    = errors.New("no scheme found in URI")
 	ErrInvalidURI       = errors.New("not a valid URI")
@@ -115,34 +115,36 @@ func UsesDNSHostValidation(scheme string) bool {
 	return false
 }
 
-// URI represents a general RFC3986 specified URI.
+// URI represents a general RFC3986 URI.
 type URI interface {
-	// Scheme is the scheme the URI conforms to.
+	// Scheme the URI conforms to.
 	Scheme() string
 
-	// Authority returns the authority information for the URI, including "//" prefix.
+	// Authority information for the URI, including the "//" prefix.
 	Authority() Authority
 
 	// Query returns a map of key/value pairs of all parameters
 	// in the query string of the URI.
 	Query() url.Values
 
-	// Fragment returns the fragment (component proceeded by '#') in the
+	// Fragment returns the fragment (component preceded by '#') in the
 	// URI if there is one.
 	Fragment() string
 
 	// Builder returns a Builder that can be used to modify the URI.
 	Builder() Builder
 
-	// String return a string representation of the URI
+	// String representation of the URI
 	String() string
 
 	// Validate the different components of the URI
 	Validate() error
 }
 
-// Authority represents the authority information that a URI contains
-// as specified by RFC3986. Username and password are given by UserInfo().
+// Authority information that a URI contains
+// as specified by RFC3986.
+//
+// Username and password are given by UserInfo().
 type Authority interface {
 	UserInfo() string
 	Host() string
@@ -152,7 +154,7 @@ type Authority interface {
 	Validate(...string) error
 }
 
-// Builder is a construct for building URIs.
+// Builder builds URIs.
 type Builder interface {
 	URI() URI
 	SetScheme(scheme string) Builder
@@ -168,29 +170,32 @@ type Builder interface {
 }
 
 const (
-	// char and string literals
-	colonMark       = ':'
-	questionMark    = '?'
-	fragmentMark    = '#'
-	percentMark     = '%'
-	atHost          = '@'
-	authorityPrefix = "//"
+	// char and string literals.
+	colonMark          = ':'
+	questionMark       = '?'
+	fragmentMark       = '#'
+	percentMark        = '%'
+	atHost             = '@'
+	slashMark          = '/'
+	openingBracketMark = '['
+	closingBracketMark = ']'
+	authorityPrefix    = "//"
 )
 
-// IsURI tells if a URI is valid according to RFC3986/RFC397
+// IsURI tells if a URI is valid according to RFC3986/RFC397.
 func IsURI(raw string) bool {
 	_, err := Parse(raw)
 	return err == nil
 }
 
-// IsURIReference tells if a URI reference is valid according to RFC3986/RFC397
+// IsURIReference tells if a URI reference is valid according to RFC3986/RFC397.
 func IsURIReference(raw string) bool {
 	_, err := ParseReference(raw)
 	return err == nil
 }
 
 // Parse attempts to parse a URI and returns an error if the URI
-// is not RFC3986 compliant.
+// is not RFC3986-compliant.
 func Parse(raw string) (URI, error) {
 	return parse(raw, false)
 }
@@ -203,16 +208,22 @@ func ParseReference(raw string) (URI, error) {
 
 func parse(raw string, withURIReference bool) (URI, error) {
 	var (
-		schemeEnd   = strings.IndexByte(raw, colonMark)
-		hierPartEnd = strings.IndexByte(raw, questionMark)
-		queryEnd    = strings.IndexByte(raw, fragmentMark)
-		scheme      string
-
-		curr int
+		scheme string
+		curr   int
 	)
 
+	schemeEnd := strings.IndexByte(raw, colonMark)      // position of a ":"
+	hierPartEnd := strings.IndexByte(raw, questionMark) // position of a "?"
+	queryEnd := strings.IndexByte(raw, fragmentMark)    // position of a "#"
+
 	// exclude pathological input
+	if schemeEnd == 0 || hierPartEnd == 0 || queryEnd == 0 {
+		// ":", "?", "#"
+		return nil, ErrInvalidURI
+	}
+
 	if schemeEnd == 1 || hierPartEnd == 1 || queryEnd == 1 {
+		// ".:", ".?", ".#"
 		return nil, ErrInvalidURI
 	}
 
@@ -231,15 +242,19 @@ func parse(raw string, withURIReference bool) (URI, error) {
 	case schemeEnd > 0 && !isRelative:
 		scheme = raw[curr:schemeEnd]
 		if schemeEnd+1 == len(raw) {
-			// trailing : (e.g. http:)
+			// trailing ':' (e.g. http:)
 			u := &uri{
 				scheme: scheme,
 			}
+
 			return u, u.Validate()
 		}
 	case !withURIReference:
+		// scheme is required for URI
 		return nil, ErrNoSchemeFound
 	case isRelative:
+		// scheme is optional for URI references.
+		//
 		// start with // and a ':' is following... e.g //example.com:8080/path
 		schemeEnd = -1
 	}
@@ -260,14 +275,15 @@ func parse(raw string, withURIReference bool) (URI, error) {
 			hierPart:  raw[curr:hierPartEnd],
 			authority: authorityInfo,
 		}
+
 		return u, u.Validate()
 	}
 
 	var (
 		hierPart, query, fragment string
 		authorityInfo             *authorityInfo
+		err                       error
 	)
-	var err error
 
 	if hierPartEnd > 0 {
 		hierPart = raw[curr:hierPartEnd]
@@ -294,6 +310,7 @@ func parse(raw string, withURIReference bool) (URI, error) {
 		if err != nil {
 			return nil, ErrInvalidURI
 		}
+
 		u := &uri{
 			scheme:    scheme,
 			hierPart:  hierPart,
@@ -353,7 +370,7 @@ func (u *uri) Authority() Authority {
 	return u.authority
 }
 
-// Query returns parsed query parameters like standard lib URL.Query()
+// Query returns parsed query parameters like standard lib URL.Query().
 func (u *uri) Query() url.Values {
 	v, _ := url.ParseQuery(u.query)
 	return v
@@ -370,9 +387,9 @@ var (
 	rexSegment  = regexp.MustCompile(`^([\p{L}\d\-\._~\:@!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2})+)+$`)
 	rexHostname = regexp.MustCompile(`^[a-zA-Z0-9\p{L}]((-?[a-zA-Z0-9\p{L}]+)?|(([a-zA-Z0-9-\p{L}]{0,63})(\.)){1,6}([a-zA-Z\p{L}]){2,})$`)
 
-	// unreserved | pct-encoded | sub-delims
+	// unreserved | pct-encoded | sub-delims.
 	rexRegname = regexp.MustCompile(`^([\p{L}\d\-\._~!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2})+)+$`)
-	// unreserved | pct-encoded | sub-delims | ":"
+	// unreserved | pct-encoded | sub-delims | ":".
 	rexUserInfo = regexp.MustCompile(`^([\p{L}\d\-\._~\:!\$\&'\(\)\*\+,;=\?/]|(%[[:xdigit:]]{2})+)+$`)
 
 	rexIPv6Zone = regexp.MustCompile(`:[^%:]+%25(([\p{L}\d\-\._~\:@!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2}))+)?$`)
@@ -384,7 +401,7 @@ func isNumerical(input string) bool {
 	) == -1
 }
 
-// Validate checks that all parts of a URI abide by allowed characters
+// Validate checks that all parts of a URI abide by allowed characters.
 func (u *uri) Validate() error {
 	if u.scheme != "" {
 		if ok := rexScheme.MatchString(u.scheme); !ok {
@@ -514,8 +531,8 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 		path = hier
 	} else {
 		// authority   = [ userinfo "@" ] host [ ":" port ]
-		slashEnd := strings.IndexByte(hier, '/')
-		if slashEnd > 0 {
+		slashEnd := strings.IndexByte(hier, slashMark)
+		if slashEnd > -1 {
 			if slashEnd < len(hier) {
 				path = hier[slashEnd:]
 			}
@@ -530,12 +547,12 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 			}
 		}
 
-		if bracket := strings.IndexByte(host, '['); bracket >= 0 {
+		if bracket := strings.IndexByte(host, openingBracketMark); bracket >= 0 {
 			// ipv6 addresses: "[" xx:yy:zz "]":port
 			rawHost := host
-			closingbracket := strings.IndexByte(host, ']')
-			if closingbracket > 0 {
-				host = host[bracket+1 : closingbracket-bracket]
+			closingbracket := strings.IndexByte(host, closingBracketMark)
+			if closingbracket > bracket+1 {
+				host = host[bracket+1 : closingbracket]
 				rawHost = rawHost[closingbracket+1:]
 			} else {
 				return nil, ErrInvalidURI
@@ -567,12 +584,14 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 func (u *uri) ensureAuthorityExists() {
 	if u.authority == nil {
 		u.authority = &authorityInfo{}
-	} else {
-		if u.authority.userinfo != "" ||
-			u.authority.host != "" ||
-			u.authority.port != "" {
-			u.authority.prefix = "//"
-		}
+
+		return
+	}
+
+	if u.authority.userinfo != "" ||
+		u.authority.host != "" ||
+		u.authority.port != "" {
+		u.authority.prefix = "//"
 	}
 }
 
