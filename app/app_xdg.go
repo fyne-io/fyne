@@ -62,8 +62,6 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 	switch value {
 	case 0:
 		return theme.VariantLight
-	case 1:
-		return theme.VariantDark
 	default:
 		return theme.VariantDark
 	}
