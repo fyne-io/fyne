@@ -9,14 +9,10 @@
 package app
 
 import (
-	"image/color"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/godbus/dbus/v5"
@@ -28,7 +24,7 @@ import (
 var once sync.Once
 
 func defaultVariant() fyne.ThemeVariant {
-	return findThemeVariant()
+	return findFreedestktopColorScheme()
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
@@ -37,86 +33,11 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 	return cmd.Start()
 }
 
-func findCurrentWM() string {
-
-	wm := os.Getenv("XDG_CURRENT_DESKTOP")
-	if wm == "" {
-		wm = os.Getenv("DESKTOP_SESSION")
-	}
-	wm = strings.ToLower(wm)
-	return wm
-}
-
-func findThemeVariant() fyne.ThemeVariant {
-	wm := findCurrentWM()
-	switch wm {
-	case "gnome", "xfce", "unity", "gnome-shell", "gnome-classic", "mate", "gnome-mate":
-		return findGnomeThemeVariant()
-	case "kde", "kde-plasma", "plasma":
-		return findKDEThemeVariant()
-	default:
-		return theme.VariantDark
-	}
-}
-
-// find the current KDE theme variant. At this time, no solution.
-func findKDEThemeVariant() fyne.ThemeVariant {
-	homedir, err := os.UserHomeDir()
-	if err != nil || homedir == "" {
-		// there is a problem, fallback to dark theme
-		return theme.VariantDark
-	}
-
-	// check if the user has a .config/kdeglobals file
-	kdeGlobals := filepath.Join(homedir, ".config/kdeglobals")
-	if _, err := os.Stat(kdeGlobals); os.IsNotExist(err) {
-		// no kdeglobals file, fallback to dark theme
-		return theme.VariantDark
-	}
-
-	// find the LookAndFeelPackage key in the kdeglobals file
-	content, err := ioutil.ReadFile(kdeGlobals)
-	if err != nil {
-		// there is a problem, fallback to dark theme
-		return theme.VariantDark
-	}
-	lines := strings.Split(string(content), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "LookAndFeelPackage=") {
-			// there is 2 possible values for the LookAndFeelPackage key
-			// =org.kde.breeze.desktop for the light theme
-			// =org.kde.breezedark.desktop for the dark theme
-			if strings.HasSuffix(line, "org.kde.breeze.desktop") {
-				return theme.VariantLight
-			} else if strings.HasSuffix(line, "org.kde.breezedark.desktop") {
-				return theme.VariantDark
-			}
-		}
-	}
-
-	// If we reach this point, it means that the LookAndFeelPackage key is not present in the kdeglobals file
-	// we can try to calculate the theme variant from the current KDE theme using the WM activeBackground key
-	for _, line := range lines {
-		if strings.HasPrefix(line, "activeBackground=") {
-			bgcolor := parseKDEColor(line)
-			brightness := calculateBrightness(bgcolor)
-			if brightness > 0.5 {
-				return theme.VariantLight
-			} else {
-				return theme.VariantDark
-			}
-
-		}
-	}
-
-	return theme.VariantDark
-}
-
-// fetch color variant from DBus stored values
-func findGnomeThemeVariant() fyne.ThemeVariant {
+// fetch color variant from dbus portal desktop settings.
+func findFreedestktopColorScheme() fyne.ThemeVariant {
 	dbusConn, err := dbus.SessionBus()
 	if err != nil {
-		log.Println("Error connecting to DBus:", err)
+		log.Println("Unable to connect to session D-Bus", err)
 		return theme.VariantDark
 	}
 
@@ -128,13 +49,13 @@ func findGnomeThemeVariant() fyne.ThemeVariant {
 		"color-scheme",
 	)
 	if call.Err != nil {
-		log.Println("failed to read dbus value:", call.Err)
+		log.Println("failed to read theme variant from D-Bus", call.Err)
 		return theme.VariantDark
 	}
 
 	var value uint8
 	if err = call.Store(&value); err != nil {
-		log.Println("failed to read dbus value:", err)
+		log.Println("failed to read theme variant from D-Bus", err)
 		return theme.VariantDark
 	}
 
@@ -238,24 +159,18 @@ func rootCacheDir() string {
 }
 
 func watchTheme() {
-	wm := findCurrentWM()
-	switch wm {
-	case "gnome":
-		go watchGnomeTheme()
-	case "kde":
-		// no-op, not able to read linux theme in a standard way
-	}
+	go watchFreedekstopThemeChange()
 }
 
 func themeChanged() {
 	fyne.CurrentApp().Settings().(*settings).setupTheme()
 }
 
-func watchGnomeTheme() {
-	// connect to dbus to detect color-schem theme changes
+// connect to dbus to detect color-schem theme changes in portal settings.
+func watchFreedekstopThemeChange() {
 	conn, err := dbus.SessionBus()
 	if err != nil {
-		log.Println(err)
+		log.Println("Unable to connect to session D-Bus", err)
 		return
 	}
 
@@ -268,8 +183,10 @@ func watchGnomeTheme() {
 		return
 	}
 	defer conn.Close()
+
 	dbusChan := make(chan *dbus.Signal, 10)
 	conn.Signal(dbusChan)
+
 	for sig := range dbusChan {
 		for _, v := range sig.Body {
 			if v == "color-scheme" {
@@ -277,22 +194,4 @@ func watchGnomeTheme() {
 			}
 		}
 	}
-}
-
-func calculateBrightness(col color.Color) float32 {
-	r, g, b, _ := col.RGBA()
-	return (float32(r)/255*299 + float32(g)/255*587 + float32(b)/255*114) / 1000
-}
-
-// parseKDEColor parses a color from a string in the format "0,0,0", values are in range [0, 255]
-func parseKDEColor(line string) color.Color {
-	col := strings.Split(line, "=")[1]
-	// convert the color to a hex string
-	cols := strings.Split(col, ",")
-	// convert the string to int
-	r, _ := strconv.Atoi(cols[0])
-	g, _ := strconv.Atoi(cols[1])
-	b, _ := strconv.Atoi(cols[2])
-	// convert the int to hex
-	return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 }
