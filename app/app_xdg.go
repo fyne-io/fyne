@@ -189,6 +189,7 @@ func watchFreedekstopThemeChange() {
 		for _, v := range sig.Body {
 			if v == "color-scheme" {
 				themeChanged()
+				break
 			}
 		}
 	}
