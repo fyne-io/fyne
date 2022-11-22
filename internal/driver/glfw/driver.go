@@ -6,8 +6,10 @@ import (
 	"bytes"
 	"image"
 	"os"
+	"os/signal"
 	"runtime"
 	"sync"
+	"syscall"
 
 	"github.com/fyne-io/image/ico"
 
@@ -161,6 +163,8 @@ func (d *gLDriver) Run() {
 	if goroutineID() != mainGoroutineID {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
+
+	go catchTerm(d)
 	d.runGL()
 }
 
@@ -174,4 +178,14 @@ func NewGLDriver() fyne.Driver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return d
+}
+
+func catchTerm(d *gLDriver) {
+	terminateSignals := make(chan os.Signal, 1)
+	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
+
+	for range terminateSignals {
+		d.Quit()
+		break
+	}
 }

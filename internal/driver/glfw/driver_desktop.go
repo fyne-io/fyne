@@ -47,6 +47,13 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 		}, func() {
 			// anything required for tear-down
 		})
+
+		// the only way we know the app was asked to quit is if this window is asked to close...
+		w := d.CreateWindow("SystrayMonitor")
+		w.(*window).create()
+		w.SetCloseIntercept(func() {
+			d.Quit()
+		})
 	})
 
 	d.refreshSystray(m)
