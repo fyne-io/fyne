@@ -256,10 +256,12 @@ type breakOption struct {
 // isValid returns whether a given option violates shaping rules (like breaking
 // a shaped text cluster).
 func (option breakOption) isValid(runeToGlyph []int, out Output) bool {
-	if option.breakAtRune+1 < len(runeToGlyph) {
+	breakAfter := option.breakAtRune - out.Runes.Offset
+	nextRune := breakAfter + 1
+	if nextRune < len(runeToGlyph) && breakAfter >= 0 {
 		// Check if this break is valid.
-		gIdx := runeToGlyph[option.breakAtRune]
-		g2Idx := runeToGlyph[option.breakAtRune+1]
+		gIdx := runeToGlyph[breakAfter]
+		g2Idx := runeToGlyph[nextRune]
 		cIdx := out.Glyphs[gIdx].ClusterIndex
 		c2Idx := out.Glyphs[g2Idx].ClusterIndex
 		if cIdx == c2Idx {
