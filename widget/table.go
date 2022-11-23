@@ -691,24 +691,32 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 	}
 
 	width := float32(0)
-	cellWidth := r.cells.cellSize.Width
-	for col := 0; col < cols; col++ {
-		colWidth, ok := r.cells.t.columnWidths[col]
-		if ok {
-			width += colWidth
-		} else {
-			width += cellWidth
+	if len(r.cells.t.columnWidths) == 0 {
+		width = r.cells.cellSize.Width*float32(cols)
+	} else {
+		cellWidth := r.cells.cellSize.Width
+		for col := 0; col < cols; col++ {
+			colWidth, ok := r.cells.t.columnWidths[col]
+			if ok {
+				width += colWidth
+			} else {
+				width += cellWidth
+			}
 		}
 	}
 
 	height := float32(0)
-	cellHeight := r.cells.cellSize.Height
-	for row := 0; row < rows; row++ {
-		rowHeight, ok := r.cells.t.rowHeights[row]
-		if ok {
-			height += rowHeight
-		} else {
-			height += cellHeight
+	if len(r.cells.t.rowHeights) == 0 {
+		height = r.cells.cellSize.Height*float32(rows)
+	} else {
+		cellHeight := r.cells.cellSize.Height
+		for row := 0; row < rows; row++ {
+			rowHeight, ok := r.cells.t.rowHeights[row]
+			if ok {
+				height += rowHeight
+			} else {
+				height += cellHeight
+			}
 		}
 	}
 
