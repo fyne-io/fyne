@@ -110,6 +110,7 @@ func (t *HarfbuzzShaper) Shape(input Input) Output {
 		Glyphs:    glyphs,
 		Direction: input.Direction,
 		Face:      input.Face,
+		Size:      input.Size,
 	}
 	fontExtents := font.ExtentsForDirection(t.buf.Props.Direction)
 	out.LineBounds = Bounds{
