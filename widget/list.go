@@ -468,8 +468,8 @@ func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 
 	separatorThickness := theme.Padding()
 	if l.list.itemHeights == nil || len(l.list.itemHeights) == 0 {
-	return fyne.NewSize(l.list.itemMin.Width,
-		(l.list.itemMin.Height+separatorThickness)*float32(items)-separatorThickness)
+		return fyne.NewSize(l.list.itemMin.Width,
+			(l.list.itemMin.Height+separatorThickness)*float32(items)-separatorThickness)
 	}
 
 	height := float32(0)
