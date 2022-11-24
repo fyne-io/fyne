@@ -178,8 +178,8 @@ It is recommended that you install the following additional apps:
 
 | app | go install | description |
 | --- | ------ | ----------- |
-| fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings` | A GUI for managing your global Fyne settings like theme and scaling |
-| apps | `github.com/fyne-io/apps` | A graphical installer for the Fyne apps listed at https://apps.fyne.io |
+| fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings@latest` | A GUI for managing your global Fyne settings like theme and scaling |
+| apps | `fyne.io/apps@latest` | A graphical installer for the Fyne apps listed at https://apps.fyne.io |
 
 These are optional applications but can help to create a more complete desktop experience.
 
