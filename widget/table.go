@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"math"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -35,7 +33,7 @@ type Table struct {
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
-	columnWidths              map[int]float32
+	columnWidths, rowHeights  map[int]float32
 	moveCallback              func()
 	offset                    fyne.Position
 	scroll                    *widget.Scroll
@@ -115,6 +113,20 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 		t.columnWidths = make(map[int]float32)
 	}
 	t.columnWidths[id] = width
+	t.Refresh()
+	t.scroll.Refresh()
+}
+
+// SetRowHeight supports changing the height of the specified row. Rows normally take the height of the template
+// cell returned from the CreateCell callback. The height parameter uses the same units as a fyne.Size type and refers
+// to the internal content height not including the divider size.
+//
+// Since: 2.3
+func (t *Table) SetRowHeight(id int, height float32) {
+	if t.rowHeights == nil {
+		t.rowHeights = make(map[int]float32)
+	}
+	t.rowHeights[id] = height
 	t.Refresh()
 	t.scroll.Refresh()
 }
@@ -277,8 +289,18 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 	cellSize := t.templateSize()
-	cellHeight = cellSize.Height
 	cellY = float32(row) * (cellHeight + theme.Padding())
+	for i := 0; i <= row; i++ {
+		if cellHeight > 0 {
+			cellY += cellHeight + theme.Padding()
+		}
+
+		height := cellSize.Height
+		if h, ok := t.rowHeights[i]; ok {
+			height = h
+		}
+		cellHeight = height
+	}
 	return
 }
 
@@ -337,6 +359,43 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	return
 }
 
+func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]float32, offY float32, minRow, maxRow int) {
+	maxRow = rows
+	rowOffset := float32(0)
+	isVisible := false
+	visible = make(map[int]float32)
+
+	if t.scroll.Size().Height <= 0 {
+		return
+	}
+
+	for i := 0; i < rows; i++ {
+		height := rowHeight
+		if h, ok := t.rowHeights[i]; ok {
+			height = h
+		}
+
+		if rowOffset <= t.offset.Y-height-theme.Padding() {
+			// before scroll
+		} else if rowOffset <= t.offset.Y {
+			minRow = i
+			offY = rowOffset
+			isVisible = true
+		}
+		if rowOffset < t.offset.Y+t.scroll.Size().Height {
+			maxRow = i + 1
+		} else {
+			break
+		}
+
+		rowOffset += height + theme.Padding()
+		if isVisible {
+			visible[i] = height
+		}
+	}
+	return
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*tableRenderer)(nil)
 
@@ -379,22 +438,23 @@ func (t *tableRenderer) moveIndicators() {
 		rows, cols = t.t.Length()
 	}
 	visibleColWidths, offX, minCol, maxCol := t.t.visibleColumnWidths(t.cellSize.Width, cols)
+	visibleRowHeights, offY, minRow, maxRow := t.t.visibleRowHeights(t.cellSize.Height, rows)
 	separatorThickness := theme.SeparatorThicknessSize()
 	dividerOff := (theme.Padding() - separatorThickness) / 2
 
 	if t.t.selectedCell == nil {
-		t.moveMarker(t.marker, -1, -1, offX, minCol, visibleColWidths)
+		t.moveMarker(t.marker, -1, -1, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	} else {
-		t.moveMarker(t.marker, t.t.selectedCell.Row, t.t.selectedCell.Col, offX, minCol, visibleColWidths)
+		t.moveMarker(t.marker, t.t.selectedCell.Row, t.t.selectedCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}
 	if t.t.hoveredCell == nil {
-		t.moveMarker(t.hover, -1, -1, offX, minCol, visibleColWidths)
+		t.moveMarker(t.hover, -1, -1, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	} else {
-		t.moveMarker(t.hover, t.t.hoveredCell.Row, t.t.hoveredCell.Col, offX, minCol, visibleColWidths)
+		t.moveMarker(t.hover, t.t.hoveredCell.Row, t.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}
 
 	colDivs := maxCol - minCol - 1
-	rowDivs := int(math.Ceil(float64(t.t.size.Height+theme.Padding()) / float64(t.cellSize.Height+1)))
+	rowDivs := maxRow - minRow - 1
 
 	if len(t.dividers) < colDivs+rowDivs {
 		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
@@ -416,12 +476,8 @@ func (t *tableRenderer) moveIndicators() {
 		divs++
 	}
 
-	i = 0
-	count := float32(math.Mod(float64(t.scroll.Offset.Y), float64(t.cellSize.Height+theme.Padding())))
-	for y := t.scroll.Offset.Y - count - theme.Padding(); y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1 && divs < len(t.dividers); y += t.cellSize.Height + theme.Padding() {
-		if y < t.scroll.Offset.Y {
-			continue
-		}
+	i = minRow
+	for y := offY + visibleRowHeights[i]; i < minRow+rowDivs && divs < len(t.dividers); y += visibleRowHeights[i] + theme.Padding() {
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(0, y-t.scroll.Offset.Y+dividerOff))
@@ -436,7 +492,7 @@ func (t *tableRenderer) moveIndicators() {
 	canvas.Refresh(t.t)
 }
 
-func (t *tableRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX float32, minCol int, widths map[int]float32) {
+func (t *tableRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX, offY float32, minCol, minRow int, widths, heights map[int]float32) {
 	if col == -1 || row == -1 {
 		marker.Hide()
 		marker.Refresh()
@@ -455,9 +511,17 @@ func (t *tableRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX 
 	x1 := xPos - t.scroll.Offset.X
 	x2 := x1 + widths[col]
 
-	offY := float32(row)*(t.cellSize.Height+theme.Padding()) - t.scroll.Offset.Y
-	y1 := offY
-	y2 := y1 + t.cellSize.Height
+	yPos := offY
+	for i := minRow; i < row; i++ {
+		if height, ok := heights[i]; ok {
+			yPos += height
+		} else {
+			yPos += t.cellSize.Height
+		}
+		yPos += theme.Padding()
+	}
+	y1 := yPos - t.scroll.Offset.Y
+	y2 := y1 + heights[row]
 
 	if x2 < 0 || x1 > t.t.size.Width || y2 < 0 || y1 > t.t.size.Height {
 		marker.Hide()
@@ -528,7 +592,10 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	if col == -1 {
 		return // out of col range
 	}
-	row := int(e.Position.Y / (c.cellSize.Height + theme.Padding()))
+	row := c.rowAt(e.Position)
+	if row == -1 {
+		return // out of row range
+	}
 	c.t.Select(TableCellID{row, col})
 }
 
@@ -557,14 +624,14 @@ func (c *tableCells) hoverAt(pos fyne.Position) {
 	}
 
 	col := c.columnAt(pos)
-	row := int(pos.Y / (c.cellSize.Height + theme.Padding()))
+	row := c.rowAt(pos)
 	c.t.hoveredCell = &TableCellID{row, col}
 
 	rows, cols := 0, 0
 	if f := c.t.Length; f != nil {
 		rows, cols = c.t.Length()
 	}
-	if c.t.hoveredCell.Col >= cols || c.t.hoveredCell.Row >= rows {
+	if c.t.hoveredCell.Col >= cols || c.t.hoveredCell.Row >= rows || c.t.hoveredCell.Col < 0 || c.t.hoveredCell.Row < 0 {
 		c.hoverOut()
 		return
 	}
@@ -580,6 +647,24 @@ func (c *tableCells) hoverOut() {
 	if c.t.moveCallback != nil {
 		c.t.moveCallback()
 	}
+}
+
+func (c *tableCells) rowAt(pos fyne.Position) int {
+	dataRows := 0
+	if f := c.t.Length; f != nil {
+		dataRows, _ = c.t.Length()
+	}
+
+	row := -1
+	visibleRowHeights, offY, minRow, _ := c.t.visibleRowHeights(c.cellSize.Height, dataRows)
+	i := minRow
+	for y := offY; i < minRow+len(visibleRowHeights); y += visibleRowHeights[i-1] + theme.Padding() {
+		if pos.Y >= y && pos.Y < y+visibleRowHeights[i] {
+			row = i
+		}
+		i++
+	}
+	return row
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -606,18 +691,37 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 	}
 
 	width := float32(0)
-	cellWidth := r.cells.cellSize.Width
-	for col := 0; col < cols; col++ {
-		colWidth, ok := r.cells.t.columnWidths[col]
-		if ok {
-			width += colWidth
-		} else {
-			width += cellWidth
+	if len(r.cells.t.columnWidths) == 0 {
+		width = r.cells.cellSize.Width * float32(cols)
+	} else {
+		cellWidth := r.cells.cellSize.Width
+		for col := 0; col < cols; col++ {
+			colWidth, ok := r.cells.t.columnWidths[col]
+			if ok {
+				width += colWidth
+			} else {
+				width += cellWidth
+			}
+		}
+	}
+
+	height := float32(0)
+	if len(r.cells.t.rowHeights) == 0 {
+		height = r.cells.cellSize.Height * float32(rows)
+	} else {
+		cellHeight := r.cells.cellSize.Height
+		for row := 0; row < rows; row++ {
+			rowHeight, ok := r.cells.t.rowHeights[row]
+			if ok {
+				height += rowHeight
+			} else {
+				height += cellHeight
+			}
 		}
 	}
 
 	separatorSize := theme.Padding()
-	return fyne.NewSize(width+float32(cols-1)*separatorSize, r.cells.cellSize.Height*float32(rows)+float32(rows-1)*separatorSize)
+	return fyne.NewSize(width+float32(cols-1)*separatorSize, height+float32(rows-1)*separatorSize)
 }
 
 func (r *tableCellsRenderer) Refresh() {
@@ -634,14 +738,14 @@ func (r *tableCellsRenderer) Refresh() {
 	if f := r.cells.t.Length; f != nil {
 		dataRows, dataCols = r.cells.t.Length()
 	}
-	rows := r.visibleRows()
 	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.cellSize.Width, dataCols)
 	if len(visibleColWidths) == 0 { // we can't show anything until we have some dimensions
 		return
 	}
-	offY := r.cells.t.offset.Y - float32(int(r.cells.t.offset.Y)%int(r.cells.cellSize.Height+separatorThickness))
-	minRow := int(offY / (r.cells.cellSize.Height + separatorThickness))
-	maxRow := int(fyne.Min(float32(minRow+rows), float32(dataRows)))
+	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.cellSize.Height, dataRows)
+	if len(visibleRowHeights) == 0 { // we can't show anything until we have some dimensions
+		return
+	}
 
 	updateCell := r.cells.t.UpdateCell
 	if updateCell == nil {
@@ -651,8 +755,10 @@ func (r *tableCellsRenderer) Refresh() {
 	wasVisible := r.visible
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
+	cellYOffset := offY
 	for row := minRow; row < maxRow; row++ {
-		cellOffset := offX
+		rowHeight := visibleRowHeights[row]
+		cellXOffset := offX
 		for col := minCol; col < maxCol; col++ {
 			id := TableCellID{row, col}
 			colWidth := visibleColWidths[col]
@@ -667,17 +773,17 @@ func (r *tableCellsRenderer) Refresh() {
 				}
 			}
 
-			c.Move(fyne.NewPos(cellOffset,
-				float32(row)*(r.cells.cellSize.Height+separatorThickness)))
-			c.Resize(fyne.NewSize(colWidth, r.cells.cellSize.Height))
+			c.Move(fyne.NewPos(cellXOffset, cellYOffset))
+			c.Resize(fyne.NewSize(colWidth, rowHeight))
 
 			if updateCell != nil {
 				updateCell(TableCellID{row, col}, c)
 			}
 			r.visible[id] = c
 			cells = append(cells, c)
-			cellOffset += colWidth + separatorThickness
+			cellXOffset += colWidth + separatorThickness
 		}
+		cellYOffset += rowHeight + separatorThickness
 	}
 
 	for id, old := range wasVisible {
@@ -694,14 +800,4 @@ func (r *tableCellsRenderer) returnAllToPool() {
 	}
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	r.SetObjects(nil)
-}
-
-func (r *tableCellsRenderer) visibleRows() int {
-	rows := math.Ceil(float64(r.cells.t.Size().Height+theme.Padding())/float64(r.cells.cellSize.Height+theme.Padding()) + 1)
-
-	dataRows := 0
-	if f := r.cells.t.Length; f != nil {
-		dataRows, _ = r.cells.t.Length()
-	}
-	return int(fyne.Min(float32(rows), float32(dataRows)))
 }
