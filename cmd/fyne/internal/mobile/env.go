@@ -379,6 +379,11 @@ func (tc *ndkToolchain) Path(ndkRoot, toolName string) string {
 		toolPath := filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin", pref+"-"+toolName)
 		if util.Exists(toolPath) {
 			return toolPath
+		} else if runtime.GOOS == "windows" {
+			toolPath += ".exe"
+			if util.Exists(toolPath) {
+				return toolPath
+			}
 		}
 	}
 	return ""
