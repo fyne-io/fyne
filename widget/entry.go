@@ -1158,17 +1158,23 @@ func (e *Entry) truncatePosition(row, col int) (int, int) {
 
 func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 	row, col := e.getRowCol(p)
-	e.setFieldsAndRefresh(func() {
-		if !rightClick || rightClick && !e.selecting {
-			e.CursorRow = row
-			e.CursorColumn = col
-		}
+	e.propertyLock.Lock()
 
-		if !e.selecting {
-			e.selectRow = row
-			e.selectColumn = col
-		}
-	})
+	if !rightClick || rightClick && !e.selecting {
+		e.CursorRow = row
+		e.CursorColumn = col
+	}
+
+	if !e.selecting {
+		e.selectRow = row
+		e.selectColumn = col
+	}
+	e.propertyLock.Unlock()
+
+	r := cache.Renderer(e.content)
+	if r != nil {
+		r.(*entryContentRenderer).moveCursor()
+	}
 }
 
 // updateText updates the internal text to the given value
