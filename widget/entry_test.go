@@ -183,17 +183,19 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapWord
-	entry.Resize(fyne.NewSize(68, 64))
 	entry.SetText("1234")
 	entry.CursorColumn = 3
+
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(72, 64))
+
 	test.Type(entry, "a")
 	test.Type(entry, "b")
 	test.Type(entry, "c")
 	assert.Equal(t, 0, entry.CursorColumn)
 	assert.Equal(t, 1, entry.CursorRow)
-	w := test.NewWindow(entry)
-	// TODO this was broken a while back, raised with https://github.com/fyne-io/fyne/issues/3024
-	//w.Resize(fyne.NewSize(64, 70))
+	w.Resize(fyne.NewSize(70, 70))
+	assert.Equal(t, 1, entry.CursorColumn)
 	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
 }
 
