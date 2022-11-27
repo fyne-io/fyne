@@ -1305,6 +1305,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 	r.entry.propertyLock.Lock()
 	textPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
+	selectPos := r.entry.textPosFromRowCol(r.entry.selectRow, r.entry.selectColumn)
 	r.entry.propertyLock.Unlock()
 	if r.entry.Wrapping == fyne.TextWrapOff {
 		r.entry.content.Resize(entrySize)
@@ -1320,6 +1321,10 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	if textPos != resizedTextPos {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
+
+			if r.entry.selecting {
+				r.entry.selectRow, r.entry.selectColumn = r.entry.rowColFromTextPos(selectPos)
+			}
 		})
 	}
 }

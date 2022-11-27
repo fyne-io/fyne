@@ -197,6 +197,12 @@ func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	w.Resize(fyne.NewSize(70, 70))
 	assert.Equal(t, 1, entry.CursorColumn)
 	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
+
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "c", entry.SelectedText())
+	assert.Equal(t, 0, entry.CursorColumn)
+	w.Resize(fyne.NewSize(64, 78))
+	assert.Equal(t, "c", entry.SelectedText())
 }
 
 func TestEntry_CursorPasswordRevealer(t *testing.T) {
