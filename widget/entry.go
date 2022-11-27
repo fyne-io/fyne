@@ -1160,7 +1160,7 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 	row, col := e.getRowCol(p)
 	e.propertyLock.Lock()
 
-	if !rightClick || rightClick && !e.selecting {
+	if !rightClick || !e.selecting {
 		e.CursorRow = row
 		e.CursorColumn = col
 	}
