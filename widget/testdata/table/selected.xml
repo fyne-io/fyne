@@ -2,6 +2,21 @@
 	<content>
 		<widget pos="4,4" size="172x172" type="*widget.Table">
 			<rectangle fillColor="selection" pos="0,39" size="93x35"/>
+			<widget pos="95,0" size="1x172" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="1x172"/>
+			</widget>
+			<widget pos="0,36" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
+			<widget pos="0,75" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
+			<widget pos="0,114" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
+			<widget pos="0,153" size="172x1" type="*widget.Separator">
+				<rectangle fillColor="disabled" size="172x1"/>
+			</widget>
 			<widget size="172x172" type="*widget.Scroll">
 				<widget size="484x191" type="*widget.tableCells">
 					<widget size="93x35" type="*widget.Label">
@@ -51,21 +66,6 @@
 						<rectangle fillColor="scrollbar" size="61x3"/>
 					</widget>
 				</widget>
-			</widget>
-			<widget pos="95,0" size="1x172" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="1x172"/>
-			</widget>
-			<widget pos="0,36" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
-			<widget pos="0,75" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
-			<widget pos="0,114" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
-			<widget pos="0,153" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
 			</widget>
 		</widget>
 	</content>

@@ -461,8 +461,9 @@ func (t *tableRenderer) moveIndicators() {
 			t.dividers = append(t.dividers, NewSeparator())
 		}
 
-		obj := []fyne.CanvasObject{t.marker, t.hover, t.scroll}
-		t.SetObjects(append(obj, t.dividers...))
+		obj := []fyne.CanvasObject{t.marker, t.hover}
+		obj = append(obj, t.dividers...)
+		t.SetObjects(append(obj, t.scroll))
 	}
 
 	divs := 0
