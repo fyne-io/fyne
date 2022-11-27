@@ -680,7 +680,7 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameHover:
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
 	case ColorNameInputBackground:
-		return color.NRGBA{R: 0x24, G: 0x25, B: 0x29, A: 0xff}
+		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	case ColorNameInputBorder:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	case ColorNameMenuBackground:
@@ -859,7 +859,7 @@ func selectionColorNamed(name string) color.NRGBA {
 
 	// We return the value for ColorBlue for every other value.
 	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x40}
 }
 
 func setupDefaultTheme() fyne.Theme {
