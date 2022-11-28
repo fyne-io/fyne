@@ -1308,12 +1308,30 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	r.entry.placeholderProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
 	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	entryPos := fyne.NewPos(0, theme.InputBorderSize())
+
+	r.entry.propertyLock.Lock()
+	textPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
+	selectPos := r.entry.textPosFromRowCol(r.entry.selectRow, r.entry.selectColumn)
+	r.entry.propertyLock.Unlock()
 	if r.entry.Wrapping == fyne.TextWrapOff {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
 	} else {
 		r.scroll.Resize(entrySize)
 		r.scroll.Move(entryPos)
+	}
+
+	r.entry.propertyLock.Lock()
+	resizedTextPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
+	r.entry.propertyLock.Unlock()
+	if textPos != resizedTextPos {
+		r.entry.setFieldsAndRefresh(func() {
+			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
+
+			if r.entry.selecting {
+				r.entry.selectRow, r.entry.selectColumn = r.entry.rowColFromTextPos(selectPos)
+			}
+		})
 	}
 }
 
