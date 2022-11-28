@@ -9,7 +9,6 @@
 package app
 
 import (
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -37,7 +36,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 func findFreedestktopColorScheme() fyne.ThemeVariant {
 	dbusConn, err := dbus.SessionBus()
 	if err != nil {
-		log.Println("Unable to connect to session D-Bus", err)
+		fyne.LogError("Unable to connect to session D-Bus", err)
 		return theme.VariantDark
 	}
 
@@ -49,13 +48,13 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 		"color-scheme",
 	)
 	if call.Err != nil {
-		log.Println("failed to read theme variant from D-Bus", call.Err)
+		fyne.LogError("failed to read theme variant from D-Bus", call.Err)
 		return theme.VariantDark
 	}
 
 	var value uint8
 	if err = call.Store(&value); err != nil {
-		log.Println("failed to read theme variant from D-Bus", err)
+		fyne.LogError("failed to read theme variant from D-Bus", err)
 		return theme.VariantDark
 	}
 
@@ -168,7 +167,7 @@ func themeChanged() {
 func watchFreedekstopThemeChange() {
 	conn, err := dbus.SessionBus()
 	if err != nil {
-		log.Println("Unable to connect to session D-Bus", err)
+		fyne.LogError("Unable to connect to session D-Bus", err)
 		return
 	}
 
@@ -177,7 +176,7 @@ func watchFreedekstopThemeChange() {
 		dbus.WithMatchInterface("org.freedesktop.portal.Settings"),
 		dbus.WithMatchMember("SettingChanged"),
 	); err != nil {
-		log.Println(err)
+		fyne.LogError("D-Bus signal match failed", err)
 		return
 	}
 	defer conn.Close()
