@@ -181,7 +181,7 @@ func watchFreedekstopThemeChange() {
 	}
 	defer conn.Close()
 
-	dbusChan := make(chan *dbus.Signal, 0)
+	dbusChan := make(chan *dbus.Signal)
 	conn.Signal(dbusChan)
 
 	for sig := range dbusChan {
