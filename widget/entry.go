@@ -1012,9 +1012,10 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 // Note: this functionality depends on the relationship between the selection start row/col and
 // the current cursor row/column.
 // eg: (whitespace for clarity, '_' denotes cursor)
-//   "T  e  s [t  i]_n  g" == 3, 5
-//   "T  e  s_[t  i] n  g" == 3, 5
-//   "T  e_[s  t  i] n  g" == 2, 5
+//
+//	"T  e  s [t  i]_n  g" == 3, 5
+//	"T  e  s_[t  i] n  g" == 3, 5
+//	"T  e_[s  t  i] n  g" == 2, 5
 func (e *Entry) selection() (int, int) {
 	e.propertyLock.RLock()
 	noSelection := !e.selecting || (e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn)

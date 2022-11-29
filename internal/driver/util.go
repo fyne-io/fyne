@@ -86,9 +86,9 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 // - the obj's children are traversed by calling walkObjects on each of the visible items
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediately, the after function
-//   will not be called for the obj where the walk stopped, however, it will be called for all its
-//   parents
+//   - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//     will not be called for the obj where the walk stopped, however, it will be called for all its
+//     parents
 func ReverseWalkVisibleObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
@@ -104,9 +104,9 @@ func ReverseWalkVisibleObjectTree(
 // - the obj's children are traversed by calling walkObjects on each of the items
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediately, the after function
-//   will not be called for the obj where the walk stopped, however, it will be called for all its
-//   parents
+//   - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//     will not be called for the obj where the walk stopped, however, it will be called for all its
+//     parents
 func WalkCompleteObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
@@ -122,9 +122,9 @@ func WalkCompleteObjectTree(
 // - the obj's children are traversed by calling walkObjects on each of the visible items
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediately, the after function
-//   will not be called for the obj where the walk stopped, however, it will be called for all its
-//   parents
+//   - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//     will not be called for the obj where the walk stopped, however, it will be called for all its
+//     parents
 func WalkVisibleObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
