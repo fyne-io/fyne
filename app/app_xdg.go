@@ -23,13 +23,48 @@ import (
 var once sync.Once
 
 func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantDark
+	return findFreedestktopColorScheme()
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	cmd := a.exec("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
+}
+
+// fetch color variant from dbus portal desktop settings.
+func findFreedestktopColorScheme() fyne.ThemeVariant {
+	dbusConn, err := dbus.SessionBus()
+	if err != nil {
+		fyne.LogError("Unable to connect to session D-Bus", err)
+		return theme.VariantDark
+	}
+
+	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
+	call := dbusObj.Call(
+		"org.freedesktop.portal.Settings.Read",
+		dbus.FlagNoAutoStart,
+		"org.freedesktop.appearance",
+		"color-scheme",
+	)
+	if call.Err != nil {
+		fyne.LogError("failed to read theme variant from D-Bus", call.Err)
+		return theme.VariantDark
+	}
+
+	var value uint8
+	if err = call.Store(&value); err != nil {
+		fyne.LogError("failed to read theme variant from D-Bus", err)
+		return theme.VariantDark
+	}
+
+	switch value {
+	case 0:
+		return theme.VariantLight
+	default:
+		return theme.VariantDark
+	}
+
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
@@ -92,7 +127,6 @@ func (a *fyneApp) cachedIconPath() string {
 	})
 
 	return filePath
-
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
@@ -122,5 +156,40 @@ func rootCacheDir() string {
 }
 
 func watchTheme() {
-	// no-op, not able to read linux theme in a standard way
+	go watchFreedekstopThemeChange()
+}
+
+func themeChanged() {
+	fyne.CurrentApp().Settings().(*settings).setupTheme()
+}
+
+// connect to dbus to detect color-schem theme changes in portal settings.
+func watchFreedekstopThemeChange() {
+	conn, err := dbus.SessionBus()
+	if err != nil {
+		fyne.LogError("Unable to connect to session D-Bus", err)
+		return
+	}
+
+	if err := conn.AddMatchSignal(
+		dbus.WithMatchObjectPath("/org/freedesktop/portal/desktop"),
+		dbus.WithMatchInterface("org.freedesktop.portal.Settings"),
+		dbus.WithMatchMember("SettingChanged"),
+	); err != nil {
+		fyne.LogError("D-Bus signal match failed", err)
+		return
+	}
+	defer conn.Close()
+
+	dbusChan := make(chan *dbus.Signal)
+	conn.Signal(dbusChan)
+
+	for sig := range dbusChan {
+		for _, v := range sig.Body {
+			if v == "color-scheme" {
+				themeChanged()
+				break
+			}
+		}
+	}
 }
