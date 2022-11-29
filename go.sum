@@ -103,8 +103,8 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b h1:GgabKamyOY
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-ole/go-ole v1.2.6 h1:/Fpf6oFPoeFik9ty7siob0G6Ke8QvQEuVcuChpwXzpY=
 github.com/go-ole/go-ole v1.2.6/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
-github.com/go-text/typesetting v0.0.0-20221123115637-1b69ca38a859 h1:AaAwnpLoDn9nCsCpWOEV9CW8lQ44yJq1MzFciSzZp+8=
-github.com/go-text/typesetting v0.0.0-20221123115637-1b69ca38a859/go.mod h1:kssHQBiSa7hcHEW4iDHI8JnhXB87V5kDmLtnk9Ccx/A=
+github.com/go-text/typesetting v0.0.0-20221129122707-b081989d8c45 h1:U8LDBBo6EfHVZW8uh4dNAhEOKDbBuJRon4QOI18dR5c=
+github.com/go-text/typesetting v0.0.0-20221129122707-b081989d8c45/go.mod h1:kssHQBiSa7hcHEW4iDHI8JnhXB87V5kDmLtnk9Ccx/A=
 github.com/godbus/dbus/v5 v5.0.4/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
 github.com/godbus/dbus/v5 v5.1.0 h1:4KLkAxT3aOY8Li4FRJe/KvhoNFFxo0m6fNuFUO8QJUk=
 github.com/godbus/dbus/v5 v5.1.0/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
