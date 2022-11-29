@@ -531,7 +531,36 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 		return fyne.KeyName('A' + char - 'a')
 	}
 
-	return fyne.KeyName(char)
+	switch char {
+	case '[':
+		return fyne.KeyLeftBracket
+	case '\\':
+		return fyne.KeyBackslash
+	case ']':
+		return fyne.KeyRightBracket
+	case '\'':
+		return fyne.KeyApostrophe
+	case ',':
+		return fyne.KeyComma
+	case '-':
+		return fyne.KeyMinus
+	case '.':
+		return fyne.KeyPeriod
+	case '/':
+		return fyne.KeySlash
+	case '*':
+		return fyne.KeyAsterisk
+	case '`':
+		return fyne.KeyBackTick
+	case ';':
+		return fyne.KeySemicolon
+	case '+':
+		return fyne.KeyPlus
+	case '=':
+		return fyne.KeyEqual
+	}
+
+	return fyne.KeyUnknown
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
