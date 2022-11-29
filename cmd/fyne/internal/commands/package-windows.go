@@ -76,6 +76,7 @@ func (p *Packager) packageWindows() error {
 	vi.IconPath = icoPath
 	vi.ManifestPath = manifest
 	vi.StringFileInfo.ProductVersion = p.combinedVersion()
+	vi.StringFileInfo.FileDescription = p.Name
 	vi.FixedFileInfo.FileVersion = fixedVersionInfo(p.combinedVersion())
 
 	vi.Build()
