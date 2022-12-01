@@ -401,7 +401,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	}
 
 	ret := glfwKeyToKeyName(code)
-	if ret != "" {
+	if ret != fyne.KeyUnknown {
 		return ret
 	}
 

@@ -87,6 +87,9 @@ func TestGlfwKeyToKeyName(t *testing.T) {
 		translated := glfwKeyToKeyName(key)
 		assert.Equal(t, value, translated)
 	}
+
+	invalid := glfwKeyToKeyName(glfw.Key(-1))
+	assert.Equal(t, fyne.KeyUnknown, invalid)
 }
 
 func TestConvertASCII(t *testing.T) {
@@ -95,6 +98,9 @@ func TestConvertASCII(t *testing.T) {
 		expected := fyne.KeyName(rune(fyne.KeyA[0] + byte(i)))
 		assert.Equal(t, expected, translated)
 	}
+
+	invalid := convertASCII(glfw.Key(-1))
+	assert.Equal(t, fyne.KeyUnknown, invalid)
 }
 
 var keyNameMapSpecialCharacters = map[string]fyne.KeyName{
@@ -127,6 +133,9 @@ func TestKeyCodeToKeyName(t *testing.T) {
 		assert.Equal(t, expected, translated)
 	}
 
-	translated := keyCodeToKeyName("invalid")
-	assert.Equal(t, fyne.KeyUnknown, translated)
+	invalid := keyCodeToKeyName("@")
+	assert.Equal(t, fyne.KeyUnknown, invalid)
+
+	invalid = keyCodeToKeyName("invalid")
+	assert.Equal(t, fyne.KeyUnknown, invalid)
 }

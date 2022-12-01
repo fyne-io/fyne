@@ -517,7 +517,7 @@ func glfwKeyToKeyName(key glfw.Key) fyne.KeyName {
 		return fyne.Key9
 	}
 
-	return ""
+	return fyne.KeyUnknown
 }
 
 func keyCodeToKeyName(code string) fyne.KeyName {
@@ -569,7 +569,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	}
 
 	ret := glfwKeyToKeyName(code)
-	if ret != "" {
+	if ret != fyne.KeyUnknown {
 		return ret
 	}
 
