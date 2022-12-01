@@ -43,8 +43,8 @@ type nodeReaderWriter struct {
 //
 // * The Parent() of a path that exists does not necessarily exist
 //
-// * Listing takes O(number of extant paths in the repository), rather than
-//   O(number of children of path being listed).
+//   - Listing takes O(number of extant paths in the repository), rather than
+//     O(number of children of path being listed).
 //
 // This repository is not designed to be particularly fast or robust, but
 // rather to be simple and easy to read. If you need performance, look
