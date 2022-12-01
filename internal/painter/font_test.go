@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
@@ -31,6 +32,11 @@ func TestCachedFontFace(t *testing.T) {
 			}
 		})
 	}
+
+	// check the wide symbol rune
+	symbol := canvas.NewText("⌘", color.Black)
+	symbol.TextStyle.Symbol = true
+	assert.True(t, symbol.MinSize().Width > 10)
 }
 
 func TestDrawString(t *testing.T) {
