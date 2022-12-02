@@ -133,8 +133,8 @@ func DrawString(dst draw.Image, s string, color color.Color, f font.Face, face g
 	height int, tabWidth int) {
 	src := &image.Uniform{C: color}
 	dot := freetype.Pt(0, height-f.Metrics().Descent.Ceil())
-	walkString(face, s, float32ToFixed266(fontSize), tabWidth, &dot.X, scale, func(r rune) {
-		dr, mask, maskp, _, ok := f.Glyph(dot, r)
+	walkString(face, s, float32ToFixed266(fontSize), tabWidth, &dot.X, scale, func(g gotext.GID) {
+		dr, mask, maskp, _, ok := f.(truetype.IndexableFace).GlyphAtIndex(dot, truetype.Index(g))
 		if !ok {
 			dr, mask, maskp, _, ok = f.Glyph(dot, 0xfffd)
 		}
@@ -156,7 +156,7 @@ func loadMeasureFont(data fyne.Resource) gotext.Face {
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f gotext.Face, s string, textSize float32, tabWidth int) (size fyne.Size, advance fixed.Int26_6) {
-	return walkString(f, s, float32ToFixed266(textSize), tabWidth, &advance, 1, func(r rune) {})
+	return walkString(f, s, float32ToFixed266(textSize), tabWidth, &advance, 1, func(gotext.GID) {})
 }
 
 // RenderedTextSize looks up how big a string would be if drawn on screen.
@@ -209,7 +209,7 @@ func tabStop(spacew, x fixed.Int26_6, tabWidth int) fixed.Int26_6 {
 	return tabw * fixed.Int26_6(tabs)
 }
 
-func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *fixed.Int26_6, scale float32, cb func(r rune)) (size fyne.Size, base fixed.Int26_6) {
+func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *fixed.Int26_6, scale float32, cb func(g gotext.GID)) (size fyne.Size, base fixed.Int26_6) {
 	runes := []rune(s)
 	in := shaping.Input{
 		Text:      []rune{' '},
@@ -247,7 +247,7 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 			if c == '\t' {
 				*advance = tabStop(spacew, *advance, tabWidth)
 			} else {
-				cb(c)
+				cb(g.GlyphID)
 				*advance += float32ToFixed266(fixed266ToFloat32(g.XAdvance) * scale)
 			}
 		}
@@ -256,6 +256,8 @@ func walkString(f gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, a
 	return fyne.NewSize(fixed266ToFloat32(*advance), fixed266ToFloat32(out.LineBounds.LineHeight())),
 		out.LineBounds.Ascent
 }
+
+var _ truetype.IndexableFace = (*compositeFace)(nil)
 
 type compositeFace struct {
 	sync.Mutex
@@ -309,6 +311,23 @@ func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 	}
 
 	return
+}
+
+func (c *compositeFace) GlyphAtIndex(dot fixed.Point26_6, g truetype.Index)  (dr image.Rectangle, mask image.Image, maskp image.Point,
+	advance fixed.Int26_6, ok bool) {
+	if g == 0 {
+		return image.Rectangle{}, nil, image.Point{}, 0, false
+	}
+
+	c.Lock()
+	defer c.Unlock()
+
+	dr, mask, maskp, advance, ok = c.chosen.(truetype.IndexableFace).GlyphAtIndex(dot, g)
+	if ok {
+		return
+	}
+
+	return c.fallback.(truetype.IndexableFace).GlyphAtIndex(dot, g)
 }
 
 func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {

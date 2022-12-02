@@ -75,7 +75,7 @@ github.com/go-text/typesetting/shaping
 github.com/godbus/dbus/v5
 github.com/godbus/dbus/v5/introspect
 github.com/godbus/dbus/v5/prop
-# github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+# github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
 ## explicit
 github.com/goki/freetype
 github.com/goki/freetype/raster
