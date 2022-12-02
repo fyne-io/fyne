@@ -313,7 +313,7 @@ func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 	return
 }
 
-func (c *compositeFace) GlyphAtIndex(dot fixed.Point26_6, g truetype.Index)  (dr image.Rectangle, mask image.Image, maskp image.Point,
+func (c *compositeFace) GlyphAtIndex(dot fixed.Point26_6, g truetype.Index) (dr image.Rectangle, mask image.Image, maskp image.Point,
 	advance fixed.Int26_6, ok bool) {
 	if g == 0 {
 		return image.Rectangle{}, nil, image.Point{}, 0, false
