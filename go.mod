@@ -15,7 +15,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/typesetting v0.0.0-20221129122707-b081989d8c45
 	github.com/godbus/dbus/v5 v5.1.0
-	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
 	github.com/gopherjs/gopherjs v1.17.2
 	github.com/jackmordaunt/icns/v2 v2.2.1
 	github.com/josephspurrier/goversioninfo v1.4.0
