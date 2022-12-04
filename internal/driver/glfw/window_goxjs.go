@@ -234,13 +234,29 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 
 //gocyclo:ignore
 func glfwKeyToKeyName(key glfw.Key) fyne.KeyName {
-	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	if key >= glfw.Key0 && key <= glfw.Key9 {
-		return fyne.KeyName(rune(key))
-	}
-
-	// Keys that can not be easily translated:
 	switch key {
+	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
+	case glfw.Key0, glfw.KeyKP0:
+		return fyne.Key0
+	case glfw.Key1, glfw.KeyKP1:
+		return fyne.Key1
+	case glfw.Key2, glfw.KeyKP2:
+		return fyne.Key2
+	case glfw.Key3, glfw.KeyKP3:
+		return fyne.Key3
+	case glfw.Key4, glfw.KeyKP4:
+		return fyne.Key4
+	case glfw.Key5, glfw.KeyKP5:
+		return fyne.Key5
+	case glfw.Key6, glfw.KeyKP6:
+		return fyne.Key6
+	case glfw.Key7, glfw.KeyKP7:
+		return fyne.Key7
+	case glfw.Key8, glfw.KeyKP8:
+		return fyne.Key8
+	case glfw.Key9, glfw.KeyKP9:
+		return fyne.Key9
+
 	// non-printable
 	case glfw.KeyEscape:
 		return fyne.KeyEscape
@@ -325,31 +341,9 @@ func glfwKeyToKeyName(key glfw.Key) fyne.KeyName {
 		return fyne.KeyF11
 	case glfw.KeyF12:
 		return fyne.KeyF12
-
-	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	case glfw.KeyKP0:
-		return fyne.Key0
-	case glfw.KeyKP1:
-		return fyne.Key1
-	case glfw.KeyKP2:
-		return fyne.Key2
-	case glfw.KeyKP3:
-		return fyne.Key3
-	case glfw.KeyKP4:
-		return fyne.Key4
-	case glfw.KeyKP5:
-		return fyne.Key5
-	case glfw.KeyKP6:
-		return fyne.Key6
-	case glfw.KeyKP7:
-		return fyne.Key7
-	case glfw.KeyKP8:
-		return fyne.Key8
-	case glfw.KeyKP9:
-		return fyne.Key9
 	}
 
-	return ""
+	return fyne.KeyUnknown
 }
 
 func keyCodeToKeyName(code string) fyne.KeyName {
