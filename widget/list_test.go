@@ -65,6 +65,18 @@ func TestList_Resize(t *testing.T) {
 
 	assert.Equal(t, float32(0), list.offsetY)
 	test.AssertRendersToMarkup(t, "list/resized.xml", w.Canvas())
+
+	// and check empty too
+	list = NewList(
+		func() int {
+			return 0
+		},
+		func() fyne.CanvasObject {
+			return NewButton("", func() {})
+		},
+		func(ListItemID, fyne.CanvasObject) {
+		})
+	list.Resize(list.Size())
 }
 
 func TestList_SetItemHeight(t *testing.T) {
