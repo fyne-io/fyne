@@ -235,7 +235,7 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 //gocyclo:ignore
 func glfwKeyToKeyName(key glfw.Key) fyne.KeyName {
 	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	if key >= '0' && key <= '9' {
+	if key >= glfw.Key0 && key <= glfw.Key9 {
 		return fyne.KeyName(rune(key))
 	}
 
