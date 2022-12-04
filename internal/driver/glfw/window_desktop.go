@@ -526,9 +526,11 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 	}
 
 	char := code[0]
-	if char >= 'a' && char <= 'z' {
+
+	relativeLetter := char - 'a'
+	if relativeLetter <= 'z' {
 		// Our alphabetical keys are all upper case characters.
-		return fyne.KeyName('A' + char - 'a')
+		return fyne.KeyName('A' + relativeLetter)
 	}
 
 	switch char {
