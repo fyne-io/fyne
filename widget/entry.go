@@ -1277,8 +1277,8 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	// 0.1 is removed so on low DPI it rounds down on the trailing edge
-	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize()-.1, size.Height-theme.InputBorderSize()-.1))
+	// 0.5 is removed so on low DPI it rounds down on the trailing edge
+	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize()-.5, size.Height-theme.InputBorderSize()-.5))
 	r.border.StrokeWidth = theme.InputBorderSize()
 	r.border.Move(fyne.NewPos(theme.InputBorderSize()/2, theme.InputBorderSize()/2))
 	r.box.Resize(size.Subtract(fyne.NewSize(theme.InputBorderSize()*2, theme.InputBorderSize()*2)))
