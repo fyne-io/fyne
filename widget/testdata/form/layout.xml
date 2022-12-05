@@ -5,8 +5,8 @@
 				<container size="187x74">
 					<text alignment="trailing" bold pos="8,8" size="35x19">test1</text>
 					<widget pos="55,0" size="132x35" type="*widget.Entry">
-						<rectangle fillColor="inputBackground" pos="0,2" size="132x31"/>
-						<rectangle pos="1,1" size="130x33" strokeColor="inputBorder" strokeWidth="2"/>
+						<rectangle fillColor="inputBackground" pos="2,2" size="128x31"/>
+						<rectangle pos="1,1" size="130x32" strokeColor="inputBorder" strokeWidth="2"/>
 						<widget pos="0,2" size="132x31" type="*widget.Scroll">
 							<widget size="132x31" type="*widget.entryContent">
 								<widget size="132x31" type="*widget.RichText">
@@ -20,8 +20,8 @@
 					</widget>
 					<text alignment="trailing" bold pos="8,47" size="35x19">test2</text>
 					<widget pos="55,39" size="132x35" type="*widget.Entry">
-						<rectangle fillColor="inputBackground" pos="0,2" size="132x31"/>
-						<rectangle pos="1,1" size="130x33" strokeColor="inputBorder" strokeWidth="2"/>
+						<rectangle fillColor="inputBackground" pos="2,2" size="128x31"/>
+						<rectangle pos="1,1" size="130x32" strokeColor="inputBorder" strokeWidth="2"/>
 						<widget pos="0,2" size="132x31" type="*widget.Scroll">
 							<widget size="132x31" type="*widget.entryContent">
 								<widget size="132x31" type="*widget.RichText">
