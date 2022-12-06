@@ -105,9 +105,10 @@ func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
-	pixelsSize := fyne.NewSize(float32(math.Ceil(float64(size.Width))), float32(math.Ceil(float64(size.Height))))
+	nearestSize := fyne.NewSize(float32(math.Ceil(float64(size.Width))), float32(math.Ceil(float64(size.Height))))
+
 	c.Lock()
-	c.size = pixelsSize
+	c.size = nearestSize
 	c.Unlock()
 
 	for _, overlay := range c.Overlays().List() {
@@ -116,17 +117,17 @@ func (c *glCanvas) Resize(size fyne.Size) {
 			// “Notifies” the PopUp of the canvas size change.
 			p.Refresh()
 		} else {
-			overlay.Resize(pixelsSize)
+			overlay.Resize(nearestSize)
 		}
 	}
 
 	c.RLock()
-	c.content.Resize(c.contentSize(pixelsSize))
+	c.content.Resize(c.contentSize(nearestSize))
 	c.content.Move(c.contentPos())
 
 	if c.menu != nil {
 		c.menu.Refresh()
-		c.menu.Resize(fyne.NewSize(pixelsSize.Width, c.menu.MinSize().Height))
+		c.menu.Resize(fyne.NewSize(nearestSize.Width, c.menu.MinSize().Height))
 	}
 	c.RUnlock()
 }
