@@ -14,10 +14,11 @@
 It is designed to build applications that run on desktop and mobile devices with a
 single codebase.
 
-Version 2.2 is the current release of the Fyne API, it added system tray support,
-`App.Metadata` as well as richer menus and support for building WASM apps.
+Version 2.3 is the current release of the Fyne API, it added a refined theme design,
+cloud storage, improved text handling for international languages and many
+smaller feature additions.
 We are now working towards the next big release, codenamed
-[cragganmore](https://github.com/fyne-io/fyne/milestone/17)
+[Dalwhinnie](https://github.com/fyne-io/fyne/milestone/18)
 and more news will follow in our news feeds and GitHub project.
 
 # Prerequisites
