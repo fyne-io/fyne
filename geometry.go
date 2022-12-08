@@ -140,3 +140,12 @@ func (s Size) Subtract(v Vector2) Size {
 func (s Size) SubtractWidthHeight(width, height float32) Size {
 	return Size{s.Width - width, s.Height - height}
 }
+
+// RectangleRadius describes a radius of the 4 corners as Size
+// Max Size <= the smaller Rectangle Size
+type RectangleRadius struct {
+	Left          float32
+	LeftSegments  int32
+	Right         float32
+	RightSegments int32
+}

@@ -13,9 +13,10 @@ var _ fyne.CanvasObject = (*Rectangle)(nil)
 type Rectangle struct {
 	baseObject
 
-	FillColor   color.Color // The rectangle fill color
-	StrokeColor color.Color // The rectangle stroke color
-	StrokeWidth float32     // The stroke width of the rectangle
+	FillColor   color.Color          // The rectangle fill color
+	StrokeColor color.Color          // The rectangle stroke color
+	StrokeWidth float32              // The stroke width of the rectangle
+	Radius      fyne.RectangleRadius // The radius of the rectangle corners
 }
 
 // Refresh causes this object to be redrawn in it's current state
