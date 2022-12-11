@@ -29,10 +29,10 @@
 				</widget>
 				<widget size="127x35" type="*widget.Scroll">
 					<widget size="127x35" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="127x43"/>
-						<container pos="0,4" size="127x43">
-							<widget size="127x27" type="*widget.menuItem">
-								<text alignment="center" pos="8,4" size="111x19">Hi</text>
+						<rectangle fillColor="menuBackground" size="127x35"/>
+						<container size="127x35">
+							<widget size="127x35" type="*widget.menuItem">
+								<text alignment="center" pos="8,8" size="111x19">Hi</text>
 							</widget>
 						</container>
 					</widget>

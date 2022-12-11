@@ -342,14 +342,13 @@ type menuBoxRenderer struct {
 var _ fyne.WidgetRenderer = (*menuBoxRenderer)(nil)
 
 func (r *menuBoxRenderer) Layout(size fyne.Size) {
-	s := fyne.NewSize(size.Width, size.Height+2*theme.Padding())
+	s := fyne.NewSize(size.Width, size.Height)
 	r.background.Resize(s)
 	r.cont.Resize(s)
-	r.cont.Move(fyne.NewPos(0, theme.Padding()))
 }
 
 func (r *menuBoxRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize().Add(fyne.NewSize(0, 2*theme.Padding()))
+	return r.cont.MinSize()
 }
 
 func (r *menuBoxRenderer) Refresh() {
