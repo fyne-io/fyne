@@ -130,6 +130,19 @@ func TestTable_MinSize(t *testing.T) {
 	}
 }
 
+func TestTable_Resize(t *testing.T) {
+	table := NewTable(
+		func() (int, int) { return 2, 2 },
+		func() fyne.CanvasObject {
+			return NewLabel("abc")
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	w.Resize(fyne.NewSize(100, 100))
+	test.AssertImageMatches(t, "table/resize.png", w.Canvas().Capture())
+}
+
 func TestTable_Unselect(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
