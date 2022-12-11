@@ -1,0 +1,12 @@
+[Details]
+  Icon = "../../theme/icons/fyne.png"
+  Name = "Fyne Light"
+  ID = "io.fyne.light"
+  Version = "1.0.0"
+  Build = 1
+
+[Development]
+  HelperText = "This binary was build with debug symbol"
+
+[Release]
+  HelperText = "This binary was build without debug symbol"

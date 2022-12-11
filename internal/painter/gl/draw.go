@@ -67,7 +67,7 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
 	p.ctx.Uniform1f(featherUniform, feather)
 
-	println("Line: 6")
+	println("Line_6 ")
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 	p.freeBuffer(vbo)
@@ -138,7 +138,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	}
 	p.logError()
 
-	println("Rect: ", triangleXYPoints)
+	print("Rect_", triangleXYPoints, " ")
 	p.ctx.DrawArrays(triangles, 0, triangleXYPoints)
 
 	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "colorSwitch"))

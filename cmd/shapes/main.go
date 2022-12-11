@@ -123,10 +123,10 @@ func main() {
 	cir2.Move(fyne.NewPos(50, 50))
 	// Line
 	line := canvas.NewLine(blue_gray)
-	line.Position1.X = 500.0
-	line.Position1.Y = 150.0
-	line.Position2.X = 570.0
-	line.Position2.Y = 80.0
+	line.Position1.X = 620.0
+	line.Position1.Y = 550.0
+	line.Position2.X = 690.0
+	line.Position2.Y = 480.0
 	line.StrokeWidth = 3.0
 	// Widgets
 	btn1 := widget.NewButton("click me", func() {
@@ -143,7 +143,6 @@ func main() {
 
 	cont := container.NewWithoutLayout(
 		&rr2,
-		line,
 		&rr1,
 		&rr3,
 		&rr4, // base rect green (no stroke, no radius) with 6 points
@@ -159,6 +158,7 @@ func main() {
 		&cir1,
 		//&cir2,
 		btn1,
+		line,
 	)
 	myWindow.SetContent(cont)
 	myWindow.Resize(fyne.NewSize(900, 600))
