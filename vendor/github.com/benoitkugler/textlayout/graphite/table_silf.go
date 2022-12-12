@@ -2,12 +2,8 @@ package graphite
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 
 	"github.com/benoitkugler/textlayout/fonts/binaryreader"
 )
@@ -67,53 +63,6 @@ type extractedRule struct {
 	PreContext uint8
 }
 
-func extractByteCodes(subtable silfSubtable, numAttributes, numFeatures uint16) {
-	context := codeContext{
-		NumAttributes:     numAttributes,
-		NumFeatures:       numFeatures,
-		NumClasses:        subtable.classMap.numClasses(),
-		NumUserAttributes: subtable.NumUserDefn,
-	}
-	var out []extractedPass
-	for i := range subtable.passes {
-		pass := &subtable.passes[i]
-
-		// resolve the pass type
-		context.Pt = ptUNKNOWN
-		switch {
-		case i >= int(subtable.IJust):
-			context.Pt = ptJUSTIFICATION
-		case i >= int(subtable.IPos):
-			context.Pt = ptPOSITIONING
-		case i >= int(subtable.ISubst):
-			context.Pt = ptSUBSTITUTE
-		default:
-			context.Pt = ptLINEBREAK
-		}
-
-		pa := extractedPass{Context: context}
-		for j := range pass.ruleSortKeys {
-			pa.Rules = append(pa.Rules, extractedRule{
-				SortKey:    pass.ruleSortKeys[j],
-				PreContext: pass.rulePreContext[j],
-				Action:     pass.actions[j],
-				Constraint: pass.ruleConstraints[j],
-			})
-		}
-
-		out = append(out, pa)
-	}
-
-	b, err := json.MarshalIndent(out, " ", " ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = ioutil.WriteFile("testdata/MagyarLinLibertineG_bytecodes.json", b, os.ModePerm)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func parseTableSilf(data []byte, numAttributes, numFeatures uint16) (tableSilf, error) {
 	data, version, err := decompressTable(data)
 	if err != nil {
@@ -147,8 +96,6 @@ func parseTableSilf(data []byte, numAttributes, numFeatures uint16) (tableSilf, 
 		if err != nil {
 			return nil, fmt.Errorf("invalid silf subtable %d: %s", i, err)
 		}
-
-		// extractByteCodes(subtable, numAttributes, numFeatures) // DEBUG only
 
 		out[i], err = newPasses(&subtable, numAttributes, numFeatures)
 		if err != nil {

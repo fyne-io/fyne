@@ -28,7 +28,7 @@ type TableHead struct {
 
 func parseTableHead(data []byte) (out TableHead, err error) {
 	const headerSize = 54
-	if len(data) < 54 {
+	if len(data) < headerSize {
 		return TableHead{}, errors.New("invalid 'head' table (EOF)")
 	}
 	// out.VersionMajor = binary.BigEndian.Uint16(data)

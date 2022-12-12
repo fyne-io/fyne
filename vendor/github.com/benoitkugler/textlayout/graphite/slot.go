@@ -753,16 +753,6 @@ func (sl *Slot) clusterMetric(seg *Segment, metric, attrLevel uint8, rtl bool) i
 const numJustParams = 5
 
 type slotJustify struct {
-
-	//     SlotJustify(const SlotJustify &);
-	//     SlotJustify & operator = (const SlotJustify &);
-
-	// public:
-	//     static size_t size_of(size_t levels) { return sizeof(SlotJustify) + ((levels > 1 ? levels : 1)*NUMJUSTPARAMS - 1)*sizeof(int16); }
-
-	//     void LoadSlot(const Slot *s, const Segment *seg);
-
-	next   *slotJustify
 	values [][numJustParams]int16 // with length levels
 }
 

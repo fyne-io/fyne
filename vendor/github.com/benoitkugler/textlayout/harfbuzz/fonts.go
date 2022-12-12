@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/benoitkugler/textlayout/fonts"
-	"github.com/benoitkugler/textlayout/fonts/truetype"
 	tt "github.com/benoitkugler/textlayout/fonts/truetype"
 	"github.com/benoitkugler/textlayout/graphite"
 )
@@ -16,23 +15,23 @@ import (
 // see the extension interface `FaceOpentype`.
 type Face = fonts.Face
 
-var _ FaceOpentype = (*truetype.Font)(nil)
+var _ FaceOpentype = (*tt.Font)(nil)
 
 // FaceOpentype adds support for advanced layout features
 // found in Opentype/Truetype font files.
 // See the package fonts/truetype for more details.
 type FaceOpentype interface {
 	Face
-	truetype.FaceVariable
+	tt.FaceVariable
 
 	// Returns true if the font has Graphite capabilities.
 	// Note that tables validity will still be checked in `NewFont`,
-	// using the table from the returned `truetype.Font`.
+	// using the table from the returned `tt.Font`.
 	// Overide this method to disable Graphite functionalities.
-	IsGraphite() (*truetype.Font, bool)
+	IsGraphite() (*tt.Font, bool)
 
 	// LayoutTables fetchs the Opentype layout tables of the font.
-	LayoutTables() truetype.LayoutTables
+	LayoutTables() tt.LayoutTables
 
 	// GetGlyphContourPoint retrieves the (X,Y) coordinates (in font units) for a
 	// specified contour point in a glyph, or false if not found.
@@ -60,7 +59,7 @@ type Font struct {
 	gr *graphite.GraphiteFace
 
 	// opentype fields, initialized from a FaceOpentype
-	otTables               *truetype.LayoutTables
+	otTables               *tt.LayoutTables
 	gsubAccels, gposAccels []otLayoutLookupAccelerator // accelators for lookup
 	faceUpem               int32                       // cached value of Face.Upem()
 
@@ -214,7 +213,8 @@ func (f *Font) getGlyphVAdvance(glyph fonts.GID) Position {
 // Calls the appropriate direction-specific variant (horizontal
 // or vertical) depending on the value of @direction.
 func (f *Font) subtractGlyphOriginForDirection(glyph fonts.GID, direction Direction,
-	x, y Position) (Position, Position) {
+	x, y Position,
+) (Position, Position) {
 	originX, originY := f.getGlyphOriginForDirection(glyph, direction)
 
 	return x - originX, y - originY
@@ -430,22 +430,22 @@ func (f *Font) GetOTLigatureCarets(direction Direction, glyph fonts.GID) []Posit
 }
 
 // interpreted the CaretValue according to its format
-func (f *Font) getCaretValue(caret truetype.CaretValue, direction Direction, glyph fonts.GID, varStore truetype.VariationStore) Position {
+func (f *Font) getCaretValue(caret tt.CaretValue, direction Direction, glyph fonts.GID, varStore tt.VariationStore) Position {
 	switch caret := caret.(type) {
-	case truetype.CaretValueFormat1:
+	case tt.CaretValueFormat1:
 		if direction.isHorizontal() {
 			return f.emScaleX(int16(caret))
 		} else {
 			return f.emScaleY(int16(caret))
 		}
-	case truetype.CaretValueFormat2:
+	case tt.CaretValueFormat2:
 		x, y, _ := f.getGlyphContourPointForOrigin(glyph, uint16(caret), direction)
 		if direction.isHorizontal() {
 			return x
 		} else {
 			return y
 		}
-	case truetype.CaretValueFormat3:
+	case tt.CaretValueFormat3:
 		if direction.isHorizontal() {
 			return f.emScaleX(caret.Coordinate) + f.getXDelta(varStore, caret.Device)
 		} else {

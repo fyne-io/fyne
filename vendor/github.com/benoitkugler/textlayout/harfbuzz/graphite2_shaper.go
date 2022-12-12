@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/benoitkugler/textlayout/fonts"
-	"github.com/benoitkugler/textlayout/fonts/truetype"
 	tt "github.com/benoitkugler/textlayout/fonts/truetype"
 	"github.com/benoitkugler/textlayout/graphite"
 )
@@ -37,7 +36,7 @@ func (shaperGraphite) compile(props SegmentProperties, userFeatures []Feature) {
 // padded with spaces. Longer input strings will be
 // truncated.
 // The empty string is mapped to 0.
-func tagFromString(str string) truetype.Tag {
+func tagFromString(str string) tt.Tag {
 	if str == "" {
 		return 0
 	}
@@ -58,7 +57,7 @@ func (sh *shaperGraphite) shape(font *Font, buffer *Buffer, features []Feature) 
 	grface := (*graphite.GraphiteFace)(sh)
 
 	lang := languageToString(buffer.Props.Language)
-	var tagLang truetype.Tag
+	var tagLang tt.Tag
 	if lang != "" {
 		tagLang = tagFromString(strings.Split(lang, "-")[0])
 	}
@@ -80,7 +79,7 @@ func (sh *shaperGraphite) shape(font *Font, buffer *Buffer, features []Feature) 
 	if len(scriptTag) != 0 {
 		tagScript = scriptTag[len(scriptTag)-1]
 	}
-	dirMask := int8(2 | 0)
+	dirMask := int8(2)
 	if buffer.Props.Direction == RightToLeft {
 		dirMask = 2 | 1
 	}

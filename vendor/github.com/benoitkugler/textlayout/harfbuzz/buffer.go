@@ -2,7 +2,6 @@ package harfbuzz
 
 import (
 	"math"
-	"sort"
 
 	"github.com/benoitkugler/textlayout/fonts"
 	"github.com/benoitkugler/textlayout/fonts/truetype"
@@ -555,7 +554,7 @@ func (b *Buffer) reverseClusters() {
 	}, false)
 }
 
-//  mergeClusters = false
+// mergeClusters = false
 func (b *Buffer) reverseGroups(groupFunc func(*GlyphInfo, *GlyphInfo) bool, mergeClusters bool) {
 	if len(b.Info) == 0 {
 		return
@@ -768,75 +767,5 @@ func (b *Buffer) mergeOutClusters(start, end int) {
 
 	for i := start; i < end; i++ {
 		b.outInfo[i].setCluster(cluster, 0)
-	}
-}
-
-func (b *Buffer) normalizeGlyphsCluster(start, end int, backward bool) {
-	pos := b.Pos
-
-	/* Total cluster advance */
-	var totalXAdvance, totalYAdvance Position
-	for i := start; i < end; i++ {
-		totalXAdvance += pos[i].XAdvance
-		totalYAdvance += pos[i].YAdvance
-	}
-
-	var xAdvance, yAdvance Position
-	for i := start; i < end; i++ {
-		pos[i].XOffset += xAdvance
-		pos[i].YOffset += yAdvance
-
-		xAdvance += pos[i].XAdvance
-		yAdvance += pos[i].YAdvance
-
-		pos[i].XAdvance = 0
-		pos[i].YAdvance = 0
-	}
-
-	if backward {
-		/* Transfer all cluster advance to the last glyph. */
-		pos[end-1].XAdvance = totalXAdvance
-		pos[end-1].YAdvance = totalYAdvance
-		sort.Stable(infoAndPos{info: b.Info[start : end-1], pos: b.Pos[start : end-1]})
-	} else {
-		/* Transfer all cluster advance to the first glyph. */
-		pos[start].XAdvance += totalXAdvance
-		pos[start].YAdvance += totalYAdvance
-		for i := start + 1; i < end; i++ {
-			pos[i].XOffset -= totalXAdvance
-			pos[i].YOffset -= totalYAdvance
-		}
-		sort.Stable(infoAndPos{info: b.Info[start+1 : end], pos: b.Pos[start+1 : end]})
-	}
-}
-
-// used to sort both array at the same time,
-// according to the glyph index
-type infoAndPos struct {
-	info []GlyphInfo
-	pos  []GlyphPosition
-}
-
-func (a infoAndPos) Len() int { return len(a.info) }
-func (a infoAndPos) Swap(i, j int) {
-	a.info[i], a.info[j] = a.info[j], a.info[i]
-	a.pos[i], a.pos[j] = a.pos[j], a.pos[i]
-}
-func (a infoAndPos) Less(i, j int) bool { return a.info[i].Glyph < a.info[j].Glyph }
-
-// Reorders a glyph buffer to have canonical in-cluster glyph order / position.
-// The resulting clusters should behave identical to pre-reordering clusters.
-//
-// This has nothing to do with Unicode normalization.
-func (b *Buffer) normalizeGlyphs() {
-	// assert(buffer.have_positions)
-
-	// buffer.assert_glyphs()
-
-	backward := b.Props.Direction.isBackward()
-
-	iter, count := b.clusterIterator()
-	for start, end := iter.next(); start < count; start, end = iter.next() {
-		b.normalizeGlyphsCluster(start, end, backward)
 	}
 }

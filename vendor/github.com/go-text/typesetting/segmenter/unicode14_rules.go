@@ -421,8 +421,8 @@ func (cr *cursor) endIteration(isStart bool) {
 			cr.prevLine == ucd.BreakZW
 		if isStart || isLB10 { // Rule LB10
 			cr.prevLine = ucd.BreakAL
-		} else { // rule LB9 : ignore the rune for prevLine and prevPrevLine
-		}
+		} // else rule LB9 : ignore the rune for prevLine and prevPrevLine
+
 	} else { // regular update
 		cr.prevPrevLine = cr.prevLine
 		cr.prevLine = cr.line
