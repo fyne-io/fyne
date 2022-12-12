@@ -485,14 +485,14 @@ type unpadTextWidgetLayout struct {
 }
 
 func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
-	pad2 := theme.Padding() * -2
-	pad4 := pad2 * -2
+	pad := theme.InnerPadding() * -1
+	pad2 := pad * -1
 
-	o[0].Move(fyne.NewPos(pad2, pad2))
-	o[0].Resize(s.Add(fyne.NewSize(pad4, pad4)))
+	o[0].Move(fyne.NewPos(pad, pad))
+	o[0].Resize(s.Add(fyne.NewSize(pad2, pad2)))
 }
 
 func (u *unpadTextWidgetLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
-	pad4 := theme.Padding() * 4
+	pad4 := theme.InnerPadding() * 2
 	return o[0].MinSize().Subtract(fyne.NewSize(pad4, pad4))
 }

@@ -4,10 +4,31 @@ import (
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestRichText_HyperLink(t *testing.T) {
+	text := NewRichText(&ParagraphSegment{Texts: []RichTextSegment{
+		&TextSegment{Text: "Text"},
+		&HyperlinkSegment{Text: "Link"},
+	}})
+	texts := test.WidgetRenderer(text).Objects()
+	assert.Equal(t, "Text", texts[0].(*canvas.Text).Text)
+	richLink := test.WidgetRenderer(texts[1].(*fyne.Container).Objects[0].(*Hyperlink)).Objects()[0].(fyne.Widget)
+	linkText := test.WidgetRenderer(richLink).Objects()[0].(*canvas.Text)
+	assert.Equal(t, "Link", linkText.Text)
+
+	c := test.NewCanvas()
+	c.SetContent(text)
+	abs := func(o fyne.CanvasObject) fyne.Position {
+		return driver.AbsolutePositionForObject(o, []fyne.CanvasObject{c.Content()})
+	}
+	assert.Equal(t, abs(texts[0]).Y, abs(linkText).Y)
+}
 
 func TestRichText_List(t *testing.T) {
 	seg := trailingBoldErrorSegment()
