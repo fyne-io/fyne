@@ -3,6 +3,7 @@ package gl
 import (
 	"image/color"
 	"math"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -43,8 +44,9 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
 		return
 	}
-
+	start := time.Now()
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
+	coords := time.Now()
 	p.ctx.UseProgram(p.lineProgram)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.lineProgram, "vert", 2, 4, 0)
@@ -67,10 +69,11 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	featherUniform := p.ctx.GetUniformLocation(p.lineProgram, "feather")
 	p.ctx.Uniform1f(featherUniform, feather)
 
-	println("Line_6 ")
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 	p.freeBuffer(vbo)
+	upload := time.Now()
+	println("Line_6: Time coords: ", coords.Sub(start), " upload: ", upload.Sub(coords), " sum: ", upload.Sub(start), " ")
 }
 
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
@@ -99,7 +102,9 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	start := time.Now()
 	points := p.flexRectCoords(pos, rect, 0.5, frame)
+	coords := time.Now()
 	p.ctx.UseProgram(p.rectangleProgram)
 
 	vbo := p.createBuffer(points)
@@ -138,7 +143,6 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	}
 	p.logError()
 
-	print("Rect_", triangleXYPoints, " ")
 	p.ctx.DrawArrays(triangles, 0, triangleXYPoints)
 
 	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "colorSwitch"))
@@ -147,6 +151,8 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 
 	p.logError()
 	p.freeBuffer(vbo)
+	upload := time.Now()
+	println("Rect_", triangleXYPoints, ": Time coords: ", coords.Sub(start), " upload: ", upload.Sub(coords), " sum: ", upload.Sub(start), " ")
 }
 
 func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
