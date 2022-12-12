@@ -85,26 +85,8 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	o := internalWidget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
 	w.SetContent(o)
 
-	// tap on top padding
-	p := fyne.NewPos(5, 1)
-	if test.AssertCanvasTappableAt(t, c, p) {
-		test.TapCanvas(c, p)
-		assert.False(t, item1Hit, "item 1 should not be hit")
-		assert.False(t, item2Hit, "item 2 should not be hit")
-		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	}
-
 	// tap on separator
-	fyne.NewPos(5, size.Height/2)
-	if test.AssertCanvasTappableAt(t, c, p) {
-		test.TapCanvas(c, p)
-		assert.False(t, item1Hit, "item 1 should not be hit")
-		assert.False(t, item2Hit, "item 2 should not be hit")
-		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	}
-
-	// tap bottom padding
-	p = fyne.NewPos(5, size.Height-1)
+	p := fyne.NewPos(5, size.Height/2)
 	if test.AssertCanvasTappableAt(t, c, p) {
 		test.TapCanvas(c, p)
 		assert.False(t, item1Hit, "item 1 should not be hit")

@@ -16,26 +16,26 @@
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x90"/>
 				</widget>
 				<widget size="26x90" type="*widget.Scroll">
-					<widget pos="0,-100" size="26x190" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="26x198"/>
-						<container pos="0,4" size="26x198">
-							<widget size="26x27" type="*widget.menuItem">
-								<text pos="8,4" size="10x19">A</text>
+					<widget pos="0,-140" size="26x230" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="26x230"/>
+						<container size="26x230">
+							<widget size="26x35" type="*widget.menuItem">
+								<text pos="8,8" size="10x19">A</text>
 							</widget>
-							<widget pos="0,31" size="26x27" type="*widget.menuItem">
-								<text pos="8,4" size="10x19">B</text>
+							<widget pos="0,39" size="26x35" type="*widget.menuItem">
+								<text pos="8,8" size="10x19">B</text>
 							</widget>
-							<widget pos="0,62" size="26x27" type="*widget.menuItem">
-								<text pos="8,4" size="10x19">C</text>
+							<widget pos="0,78" size="26x35" type="*widget.menuItem">
+								<text pos="8,8" size="10x19">C</text>
 							</widget>
-							<widget pos="0,93" size="26x27" type="*widget.menuItem">
-								<text pos="8,4" size="10x19">D</text>
+							<widget pos="0,117" size="26x35" type="*widget.menuItem">
+								<text pos="8,8" size="10x19">D</text>
 							</widget>
-							<widget pos="0,124" size="26x27" type="*widget.menuItem">
-								<text pos="8,4" size="10x19">E</text>
+							<widget pos="0,156" size="26x35" type="*widget.menuItem">
+								<text pos="8,8" size="10x19">E</text>
 							</widget>
-							<widget pos="0,155" size="26x27" type="*widget.menuItem">
-								<text pos="8,4" size="10x19">F</text>
+							<widget pos="0,195" size="26x35" type="*widget.menuItem">
+								<text pos="8,8" size="10x19">F</text>
 							</widget>
 						</container>
 					</widget>
@@ -43,8 +43,8 @@
 						<linearGradient size="26x8" startColor="shadow"/>
 					</widget>
 					<widget pos="20,0" size="6x90" type="*widget.scrollBarArea">
-						<widget pos="3,47" size="3x42" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="3x42"/>
+						<widget pos="3,54" size="3x35" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="3x35"/>
 						</widget>
 					</widget>
 				</widget>
