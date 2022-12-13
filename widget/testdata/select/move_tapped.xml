@@ -3,7 +3,7 @@
 		<widget pos="10,10" size="127x35" type="*widget.Select">
 			<rectangle fillColor="inputBackground" pos="0,2" size="127x31"/>
 			<rectangle fillColor="shadow" pos="0,33" size="127x2"/>
-			<rectangle fillColor="rgba(0,0,0,0)" size="123x35"/>
+			<rectangle fillColor="rgba(0,0,0,0)" size="127x35"/>
 			<widget pos="4,4" size="95x27" type="*widget.RichText">
 				<text pos="4,4" size="87x19">(Select one)</text>
 			</widget>
