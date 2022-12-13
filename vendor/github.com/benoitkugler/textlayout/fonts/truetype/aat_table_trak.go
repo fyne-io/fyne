@@ -20,7 +20,7 @@ func parseTrakTable(data []byte) (out TableTrak, err error) {
 	}
 	// ignoring version and format
 	horizOffset := binary.BigEndian.Uint16(data[6:])
-	vertOffset := binary.BigEndian.Uint16(data[6:])
+	vertOffset := binary.BigEndian.Uint16(data[8:])
 
 	if horizOffset != 0 {
 		out.Horizontal, err = parseTrakData(data, int(horizOffset))

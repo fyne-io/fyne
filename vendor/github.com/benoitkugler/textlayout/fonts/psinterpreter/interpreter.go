@@ -21,7 +21,6 @@ var (
 	ErrInterrupt = errors.New("interruption")
 
 	errInvalidCFFTable               = errors.New("invalid ps instructions")
-	errUnsupportedCFFVersion         = errors.New("unsupported CFF version")
 	errUnsupportedRealNumberEncoding = errors.New("unsupported real number encoding")
 
 	be = binary.BigEndian
@@ -118,18 +117,6 @@ func (p *Machine) SkipBytes(count int32) {
 	}
 	p.instructions = p.instructions[count:]
 	p.ArgStack.Clear()
-}
-
-func (p *Machine) hasMoreInstructions() bool {
-	if len(p.instructions) != 0 {
-		return true
-	}
-	for i := int32(0); i < p.callStack.top; i++ {
-		if len(p.callStack.vals[i]) != 0 {
-			return true
-		}
-	}
-	return false
 }
 
 // 5176.CFF.pdf section 4 "DICT Data" says that "Two-byte operators have an

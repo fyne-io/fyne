@@ -37,6 +37,37 @@ func parseTableFvar(table []byte, names TableName) (out TableFvar, err error) {
 	return out, nil
 }
 
+func (out *fvarHeader) mustParse(data []byte) {
+	_ = data[15] // early bound checking
+	out.majorVersion = uint16(binary.BigEndian.Uint16(data[0:2]))
+	out.minorVersion = uint16(binary.BigEndian.Uint16(data[2:4]))
+	out.axesArrayOffset = uint16(binary.BigEndian.Uint16(data[4:6]))
+	out.reserved = uint16(binary.BigEndian.Uint16(data[6:8]))
+	out.axisCount = uint16(binary.BigEndian.Uint16(data[8:10]))
+	out.axisSize = uint16(binary.BigEndian.Uint16(data[10:12]))
+	out.instanceCount = uint16(binary.BigEndian.Uint16(data[12:14]))
+	out.instanceSize = uint16(binary.BigEndian.Uint16(data[14:16]))
+}
+
+func parseFvarHeader(data []byte) (fvarHeader, error) {
+	var out fvarHeader
+	if L := len(data); L < 16 {
+		return fvarHeader{}, fmt.Errorf("EOF: expected length: 16, got %d", L)
+	}
+	out.mustParse(data)
+	return out, nil
+}
+
+func (out *VarAxis) mustParse(data []byte) {
+	_ = data[19] // early bound checking
+	out.Tag = Tag(binary.BigEndian.Uint32(data[0:4]))
+	out.Minimum = Float1616FromUint(binary.BigEndian.Uint32(data[4:8]))
+	out.Default = Float1616FromUint(binary.BigEndian.Uint32(data[8:12]))
+	out.Maximum = Float1616FromUint(binary.BigEndian.Uint32(data[12:16]))
+	out.flags = uint16(binary.BigEndian.Uint16(data[16:18]))
+	out.strid = NameID(binary.BigEndian.Uint16(data[18:20]))
+}
+
 func parseVarAxisList(table []byte, offset, size int, count uint16) ([]VarAxis, int, error) {
 	// we need at least 20 byte per axis ....
 	if size < 20 {

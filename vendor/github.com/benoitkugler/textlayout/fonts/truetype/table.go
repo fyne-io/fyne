@@ -51,7 +51,6 @@ var (
 	tagVvar = MustNewTag("VVAR")
 
 	tagFeat = MustNewTag("feat")
-	tagMort = MustNewTag("mort")
 	tagMorx = MustNewTag("morx")
 	tagKerx = MustNewTag("kerx")
 	tagAnkr = MustNewTag("ankr")

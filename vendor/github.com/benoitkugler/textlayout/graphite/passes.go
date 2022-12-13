@@ -376,7 +376,8 @@ func inKernCluster(seg *Segment, s *Slot) bool {
 // Return true if everything was fixed, false if there are still collisions remaining.
 // isRev means be we are processing backwards.
 func (pass *pass) resolveCollisions(seg *Segment, slotFix, start *Slot,
-	coll *shiftCollider, isRev, isRTL bool, moved, hasCol *bool) (fixed bool) {
+	coll *shiftCollider, isRev, isRTL bool, moved, hasCol *bool,
+) (fixed bool) {
 	var nbor *Slot // neighboring slot
 	cFix := seg.getCollisionInfo(slotFix)
 	if !coll.initSlot(seg, slotFix, cFix.limit, float32(cFix.margin), float32(cFix.marginWt),
@@ -439,18 +440,7 @@ func (pass *pass) resolveCollisions(seg *Segment, slotFix, start *Slot,
 				slotFix.child.finalise(seg, nil, here, &bbox, 0, &clusterMin, isRTL, false, 0)
 			}
 		}
-	} else {
-		// This glyph is not colliding with anything.
-		// #if !defined GRAPHITE2_NTRACING
-		// 	if (dbgout)
-		// 	{
-		// 		*dbgout << json::object
-		// 						<< "missed" << objectid(dslot(seg, slotFix));
-		// 		coll.outputJsonDbg(dbgout, seg, -1);
-		// 		*dbgout << json::close;
-		// 	}
-		// #endif
-	}
+	} // else, This glyph is not colliding with anything.
 
 	// Set the is-collision flag bit.
 	if isCol {

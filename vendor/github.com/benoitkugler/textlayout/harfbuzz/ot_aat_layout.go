@@ -60,22 +60,10 @@ const (
 	aatLayoutFeatureTypeTextSpacing = 22
 	// [Transliteration](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type23)
 	aatLayoutFeatureTypeTransliteration = 23
-	// [Annotation](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type24)
-	aatLayoutFeatureTypeAnnotationType = 24
-	// [Kana Spacing](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type25)
-	aatLayoutFeatureTypeKanaSpacingType = 25
-	// [Ideographic Spacing](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type26)
-	aatLayoutFeatureTypeIdeographicSpacingType = 26
-	// [Unicode Decomposition](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type27)
-	aatLayoutFeatureTypeUnicodeDecompositionType = 27
+
 	// [Ruby Kana](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type28)
 	aatLayoutFeatureTypeRubyKana = 28
-	// [CJK Symbol Alternatives](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type29)
-	aatLayoutFeatureTypeCjkSymbolAlternativesType = 29
-	// [Ideographic Alternatives](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type30)
-	aatLayoutFeatureTypeIdeographicAlternativesType = 30
-	// [CJK Vertical Roman Placement](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type31)
-	aatLayoutFeatureTypeCjkVerticalRomanPlacementType = 31
+
 	// [Italic CJK Roman](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type32)
 	aatLayoutFeatureTypeItalicCjkRoman = 32
 	// [Case Sensitive Layout](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type33)
@@ -90,30 +78,13 @@ const (
 	aatLayoutFeatureTypeLowerCase = 37
 	// [Upper Case](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type38)
 	aatLayoutFeatureTypeUpperCase = 38
-	// [Language Tag](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type39)
-	aatLayoutFeatureTypeLanguageTagType = 39
-	// [CJK Roman Spacing](https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html#Type103)
-	aatLayoutFeatureTypeCjkRomanSpacingType = 103
 )
 
 // The selectors defined for specifying AAT feature settings.
 type aatLayoutFeatureSelector = uint16
 
 const (
-	// Initial, unset feature selector
-	aatLayoutFeatureSelectorInvalid = 0xFFFF
-
-	/* Selectors for #aatLayoutFeatureTypeAllTypographic */
-	// for #aatLayoutFeatureTypeAllTypographic
-	aatLayoutFeatureSelectorAllTypeFeaturesOn = 0
-	// for #aatLayoutFeatureTypeAllTypographic
-	aatLayoutFeatureSelectorAllTypeFeaturesOff = 1
-
 	/* Selectors for #aatLayoutFeatureTypeLigatures */
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorRequiredLigaturesOn = 0
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorRequiredLigaturesOff = 1
 	// for #aatLayoutFeatureTypeLigatures
 	aatLayoutFeatureSelectorCommonLigaturesOn = 2
 	// for #aatLayoutFeatureTypeLigatures
@@ -122,30 +93,7 @@ const (
 	aatLayoutFeatureSelectorRareLigaturesOn = 4
 	// for #aatLayoutFeatureTypeLigatures
 	aatLayoutFeatureSelectorRareLigaturesOff = 5
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorLogosOn = 6
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorLogosOff = 7
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorRebusPicturesOn = 8
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorRebusPicturesOff = 9
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorDiphthongLigaturesOn = 10
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorDiphthongLigaturesOff = 11
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorSquaredLigaturesOn = 12
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorSquaredLigaturesOff = 13
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorAbbrevSquaredLigaturesOn = 14
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorAbbrevSquaredLigaturesOff = 15
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorSymbolLigaturesOn = 16
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorSymbolLigaturesOff = 17
+
 	// for #aatLayoutFeatureTypeLigatures
 	aatLayoutFeatureSelectorContextualLigaturesOn = 18
 	// for #aatLayoutFeatureTypeLigatures
@@ -155,27 +103,10 @@ const (
 	// for #aatLayoutFeatureTypeLigatures
 	aatLayoutFeatureSelectorHistoricalLigaturesOff = 21
 
-	/* Selectors for #aatLayoutFeatureTypeLigatures */
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorUnconnected = 0
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorPartiallyConnected = 1
-	// for #aatLayoutFeatureTypeLigatures
-	aatLayoutFeatureSelectorCursive = 2
-
 	/* Selectors for #aatLayoutFeatureTypeLetterCase */
-	// Deprecated
-	aatLayoutFeatureSelectorUpperAndLowerCase = 0 /* deprecated */
-	// Deprecated
-	aatLayoutFeatureSelectorAllCaps = 1 /* deprecated */
-	// Deprecated
-	aatLayoutFeatureSelectorAllLowerCase = 2 /* deprecated */
+
 	// Deprecated
 	aatLayoutFeatureSelectorSmallCaps = 3 /* deprecated */
-	// Deprecated
-	aatLayoutFeatureSelectorInitialCaps = 4 /* deprecated */
-	// Deprecated
-	aatLayoutFeatureSelectorInitialCapsAndSmallCaps = 5 /* deprecated */
 
 	/* Selectors for #aatLayoutFeatureTypeVerticalSubstitution */
 	// for #aatLayoutFeatureTypeVerticalSubstitution
@@ -183,51 +114,11 @@ const (
 	// for #aatLayoutFeatureTypeVerticalSubstitution
 	aatLayoutFeatureSelectorSubstituteVerticalFormsOff = 1
 
-	/* Selectors for #aatLayoutFeatureTypeLinguisticRearrangement */
-	// for #aatLayoutFeatureTypeLinguisticRearrangement
-	aatLayoutFeatureSelectorLinguisticRearrangementOn = 0
-	// for #aatLayoutFeatureTypeLinguisticRearrangement
-	aatLayoutFeatureSelectorLinguisticRearrangementOff = 1
-
 	/* Selectors for #aatLayoutFeatureTypeNumberSpacing */
 	// for #aatLayoutFeatureTypeNumberSpacing
 	aatLayoutFeatureSelectorMonospacedNumbers = 0
 	// for #aatLayoutFeatureTypeNumberSpacing
 	aatLayoutFeatureSelectorProportionalNumbers = 1
-	// for #aatLayoutFeatureTypeNumberSpacing
-	aatLayoutFeatureSelectorThirdWidthNumbers = 2
-	// for #aatLayoutFeatureTypeNumberSpacing
-	aatLayoutFeatureSelectorQuarterWidthNumbers = 3
-
-	/* Selectors for #aatLayoutFeatureTypeSmartSwashType */
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorWordInitialSwashesOn = 0
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorWordInitialSwashesOff = 1
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorWordFinalSwashesOn = 2
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorWordFinalSwashesOff = 3
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorLineInitialSwashesOn = 4
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorLineInitialSwashesOff = 5
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorLineFinalSwashesOn = 6
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorLineFinalSwashesOff = 7
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorNonFinalSwashesOn = 8
-	// for #aatLayoutFeatureTypeSmartSwashType
-	aatLayoutFeatureSelectorNonFinalSwashesOff = 9
-
-	/* Selectors for #aatLayoutFeatureTypeDiacriticsType */
-	// for #aatLayoutFeatureTypeDiacriticsType
-	aatLayoutFeatureSelectorShowDiacritics = 0
-	// for #aatLayoutFeatureTypeDiacriticsType
-	aatLayoutFeatureSelectorHideDiacritics = 1
-	// for #aatLayoutFeatureTypeDiacriticsType
-	aatLayoutFeatureSelectorDecomposeDiacritics = 2
 
 	/* Selectors for #aatLayoutFeatureTypeVerticalPosition */
 	// for #aatLayoutFeatureTypeVerticalPosition
@@ -249,109 +140,23 @@ const (
 	// for #aatLayoutFeatureTypeFractions
 	aatLayoutFeatureSelectorDiagonalFractions = 2
 
-	/* Selectors for #aatLayoutFeatureTypeOverlappingCharactersType */
-	// for #aatLayoutFeatureTypeOverlappingCharactersType
-	aatLayoutFeatureSelectorPreventOverlapOn = 0
-	// for #aatLayoutFeatureTypeOverlappingCharactersType
-	aatLayoutFeatureSelectorPreventOverlapOff = 1
-
-	/* Selectors for #aatLayoutFeatureTypeTypographicExtras */
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorHyphensToEmDashOn = 0
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorHyphensToEmDashOff = 1
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorHyphenToEnDashOn = 2
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorHyphenToEnDashOff = 3
 	// for #aatLayoutFeatureTypeTypographicExtras
 	aatLayoutFeatureSelectorSlashedZeroOn = 4
 	// for #aatLayoutFeatureTypeTypographicExtras
 	aatLayoutFeatureSelectorSlashedZeroOff = 5
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorFormInterrobangOn = 6
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorFormInterrobangOff = 7
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorSmartQuotesOn = 8
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorSmartQuotesOff = 9
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorPeriodsToEllipsisOn = 10
-	// for #aatLayoutFeatureTypeTypographicExtras
-	aatLayoutFeatureSelectorPeriodsToEllipsisOff = 11
 
 	/* Selectors for #aatLayoutFeatureTypeMathematicalExtras */
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorHyphenToMinusOn = 0
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorHyphenToMinusOff = 1
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorAsteriskToMultiplyOn = 2
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorAsteriskToMultiplyOff = 3
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorSlashToDivideOn = 4
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorSlashToDivideOff = 5
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorInequalityLigaturesOn = 6
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorInequalityLigaturesOff = 7
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorExponentsOn = 8
-	// for #aatLayoutFeatureTypeMathematicalExtras
-	aatLayoutFeatureSelectorExponentsOff = 9
 	// for #aatLayoutFeatureTypeMathematicalExtras
 	aatLayoutFeatureSelectorMathematicalGreekOn = 10
 	// for #aatLayoutFeatureTypeMathematicalExtras
 	aatLayoutFeatureSelectorMathematicalGreekOff = 11
 
-	/* Selectors for #aatLayoutFeatureTypeOrnamentSetsType */
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorNoOrnaments = 0
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorDingbats = 1
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorPiCharacters = 2
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorFleurons = 3
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorDecorativeBorders = 4
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorInternationalSymbols = 5
-	// for #aatLayoutFeatureTypeOrnamentSetsType
-	aatLayoutFeatureSelectorMathSymbols = 6
-
-	/* Selectors for #aatLayoutFeatureTypeCharacterAlternatives */
-	// for #aatLayoutFeatureTypeCharacterAlternatives
-	aatLayoutFeatureSelectorNoAlternates = 0
-
-	/* Selectors for #aatLayoutFeatureTypeDesignComplexityType */
-	// for #aatLayoutFeatureTypeDesignComplexityType
-	aatLayoutFeatureSelectorDesignLevel1 = 0
-	// for #aatLayoutFeatureTypeDesignComplexityType
-	aatLayoutFeatureSelectorDesignLevel2 = 1
-	// for #aatLayoutFeatureTypeDesignComplexityType
-	aatLayoutFeatureSelectorDesignLevel3 = 2
-	// for #aatLayoutFeatureTypeDesignComplexityType
-	aatLayoutFeatureSelectorDesignLevel4 = 3
-	// for #aatLayoutFeatureTypeDesignComplexityType
-	aatLayoutFeatureSelectorDesignLevel5 = 4
-
 	/* Selectors for #aatLayoutFeatureTypeStyleOptions */
 	// for #aatLayoutFeatureTypeStyleOptions
 	aatLayoutFeatureSelectorNoStyleOptions = 0
-	// for #aatLayoutFeatureTypeStyleOptions
-	aatLayoutFeatureSelectorDisplayText = 1
-	// for #aatLayoutFeatureTypeStyleOptions
-	aatLayoutFeatureSelectorEngravedText = 2
-	// for #aatLayoutFeatureTypeStyleOptions
-	aatLayoutFeatureSelectorIlluminatedCaps = 3
+
 	// for #aatLayoutFeatureTypeStyleOptions
 	aatLayoutFeatureSelectorTitlingCaps = 4
-	// for #aatLayoutFeatureTypeStyleOptions
-	aatLayoutFeatureSelectorTallCaps = 5
 
 	/* Selectors for #aatLayoutFeatureTypeCharacterShape */
 	// for #aatLayoutFeatureTypeCharacterShape
@@ -364,16 +169,7 @@ const (
 	aatLayoutFeatureSelectorJis1983Characters = 3
 	// for #aatLayoutFeatureTypeCharacterShape
 	aatLayoutFeatureSelectorJis1990Characters = 4
-	// for #aatLayoutFeatureTypeCharacterShape
-	aatLayoutFeatureSelectorTraditionalAltOne = 5
-	// for #aatLayoutFeatureTypeCharacterShape
-	aatLayoutFeatureSelectorTraditionalAltTwo = 6
-	// for #aatLayoutFeatureTypeCharacterShape
-	aatLayoutFeatureSelectorTraditionalAltThree = 7
-	// for #aatLayoutFeatureTypeCharacterShape
-	aatLayoutFeatureSelectorTraditionalAltFour = 8
-	// for #aatLayoutFeatureTypeCharacterShape
-	aatLayoutFeatureSelectorTraditionalAltFive = 9
+
 	// for #aatLayoutFeatureTypeCharacterShape
 	aatLayoutFeatureSelectorExpertCharacters = 10
 	// for #aatLayoutFeatureTypeCharacterShape
@@ -412,124 +208,14 @@ const (
 	aatLayoutFeatureSelectorNoTransliteration = 0
 	// for #aatLayoutFeatureTypeTransliteration
 	aatLayoutFeatureSelectorHanjaToHangul = 1
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorHiraganaToKatakana = 2
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorKatakanaToHiragana = 3
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorKanaToRomanization = 4
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorRomanizationToHiragana = 5
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorRomanizationToKatakana = 6
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorHanjaToHangulAltOne = 7
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorHanjaToHangulAltTwo = 8
-	// for #aatLayoutFeatureTypeTransliteration
-	aatLayoutFeatureSelectorHanjaToHangulAltThree = 9
-
-	/* Selectors for #aatLayoutFeatureTypeAnnotationType */
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorNoAnnotation = 0
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorBoxAnnotation = 1
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorRoundedBoxAnnotation = 2
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorCircleAnnotation = 3
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorInvertedCircleAnnotation = 4
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorParenthesisAnnotation = 5
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorPeriodAnnotation = 6
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorRomanNumeralAnnotation = 7
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorDiamondAnnotation = 8
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorInvertedBoxAnnotation = 9
-	// for #aatLayoutFeatureTypeAnnotationType
-	aatLayoutFeatureSelectorInvertedRoundedBoxAnnotation = 10
-
-	/* Selectors for #aatLayoutFeatureTypeKanaSpacingType */
-	// for #aatLayoutFeatureTypeKanaSpacingType
-	aatLayoutFeatureSelectorFullWidthKana = 0
-	// for #aatLayoutFeatureTypeKanaSpacingType
-	aatLayoutFeatureSelectorProportionalKana = 1
-
-	/* Selectors for #aatLayoutFeatureTypeIdeographicSpacingType */
-	// for #aatLayoutFeatureTypeIdeographicSpacingType
-	aatLayoutFeatureSelectorFullWidthIdeographs = 0
-	// for #aatLayoutFeatureTypeIdeographicSpacingType
-	aatLayoutFeatureSelectorProportionalIdeographs = 1
-	// for #aatLayoutFeatureTypeIdeographicSpacingType
-	aatLayoutFeatureSelectorHalfWidthIdeographs = 2
-
-	/* Selectors for #aatLayoutFeatureTypeUnicodeDecompositionType */
-	// for #aatLayoutFeatureTypeUnicodeDecompositionType
-	aatLayoutFeatureSelectorCanonicalCompositionOn = 0
-	// for #aatLayoutFeatureTypeUnicodeDecompositionType
-	aatLayoutFeatureSelectorCanonicalCompositionOff = 1
-	// for #aatLayoutFeatureTypeUnicodeDecompositionType
-	aatLayoutFeatureSelectorCompatibilityCompositionOn = 2
-	// for #aatLayoutFeatureTypeUnicodeDecompositionType
-	aatLayoutFeatureSelectorCompatibilityCompositionOff = 3
-	// for #aatLayoutFeatureTypeUnicodeDecompositionType
-	aatLayoutFeatureSelectorTranscodingCompositionOn = 4
-	// for #aatLayoutFeatureTypeUnicodeDecompositionType
-	aatLayoutFeatureSelectorTranscodingCompositionOff = 5
 
 	/* Selectors for #aatLayoutFeatureTypeRubyKana */
-	// Deprecated; use #aatLayoutFeatureSelectorRubyKanaOff instead
-	aatLayoutFeatureSelectorNoRubyKana = 0 /* deprecated - use RUBY_KANA_OFF instead */
-	// Deprecated; use #aatLayoutFeatureSelectorRubyKanaOn instead
-	aatLayoutFeatureSelectorRubyKana = 1 /* deprecated - use RUBY_KANA_ON instead */
 	// for #aatLayoutFeatureTypeRubyKana
 	aatLayoutFeatureSelectorRubyKanaOn = 2
 	// for #aatLayoutFeatureTypeRubyKana
 	aatLayoutFeatureSelectorRubyKanaOff = 3
 
-	/* Selectors for #aatLayoutFeatureTypeCjkSymbolAlternativesType */
-	// for #aatLayoutFeatureTypeCjkSymbolAlternativesType
-	aatLayoutFeatureSelectorNoCjkSymbolAlternatives = 0
-	// for #aatLayoutFeatureTypeCjkSymbolAlternativesType
-	aatLayoutFeatureSelectorCjkSymbolAltOne = 1
-	// for #aatLayoutFeatureTypeCjkSymbolAlternativesType
-	aatLayoutFeatureSelectorCjkSymbolAltTwo = 2
-	// for #aatLayoutFeatureTypeCjkSymbolAlternativesType
-	aatLayoutFeatureSelectorCjkSymbolAltThree = 3
-	// for #aatLayoutFeatureTypeCjkSymbolAlternativesType
-	aatLayoutFeatureSelectorCjkSymbolAltFour = 4
-	// for #aatLayoutFeatureTypeCjkSymbolAlternativesType
-	aatLayoutFeatureSelectorCjkSymbolAltFive = 5
-
-	/* Selectors for #aatLayoutFeatureTypeIdeographicAlternativesType */
-	// for #aatLayoutFeatureTypeIdeographicAlternativesType
-	aatLayoutFeatureSelectorNoIdeographicAlternatives = 0
-	// for #aatLayoutFeatureTypeIdeographicAlternativesType
-	aatLayoutFeatureSelectorIdeographicAltOne = 1
-	// for #aatLayoutFeatureTypeIdeographicAlternativesType
-	aatLayoutFeatureSelectorIdeographicAltTwo = 2
-	// for #aatLayoutFeatureTypeIdeographicAlternativesType
-	aatLayoutFeatureSelectorIdeographicAltThree = 3
-	// for #aatLayoutFeatureTypeIdeographicAlternativesType
-	aatLayoutFeatureSelectorIdeographicAltFour = 4
-	// for #aatLayoutFeatureTypeIdeographicAlternativesType
-	aatLayoutFeatureSelectorIdeographicAltFive = 5
-
-	/* Selectors for #aatLayoutFeatureTypeCjkVerticalRomanPlacementType */
-	// for #aatLayoutFeatureTypeCjkVerticalRomanPlacementType
-	aatLayoutFeatureSelectorCjkVerticalRomanCentered = 0
-	// for #aatLayoutFeatureTypeCjkVerticalRomanPlacementType
-	aatLayoutFeatureSelectorCjkVerticalRomanHbaseline = 1
-
 	/* Selectors for #aatLayoutFeatureTypeItalicCjkRoman */
-	// Deprecated; use #aatLayoutFeatureSelectorCjkItalicRomanOff instead
-	aatLayoutFeatureSelectorNoCjkItalicRoman = 0 /* deprecated - use CJK_ITALIC_ROMAN_OFF instead */
-	// Deprecated; use #aatLayoutFeatureSelectorCjkItalicRomanOn instead
-	aatLayoutFeatureSelectorCjkItalicRoman = 1 /* deprecated - use CJK_ITALIC_ROMAN_ON instead */
 	// for #aatLayoutFeatureTypeItalicCjkRoman
 	aatLayoutFeatureSelectorCjkItalicRomanOn = 2
 	// for #aatLayoutFeatureTypeItalicCjkRoman
@@ -556,8 +242,7 @@ const (
 	aatLayoutFeatureSelectorAlternateVertKanaOff = 3
 
 	/* Selectors for #aatLayoutFeatureTypeStylisticAlternatives */
-	// for #aatLayoutFeatureTypeStylisticAlternatives
-	aatLayoutFeatureSelectorNoStylisticAlternates = 0
+
 	// for #aatLayoutFeatureTypeStylisticAlternatives
 	aatLayoutFeatureSelectorStylisticAltOneOn = 2
 	// for #aatLayoutFeatureTypeStylisticAlternatives
@@ -668,16 +353,6 @@ const (
 	aatLayoutFeatureSelectorUpperCaseSmallCaps = 1
 	// for #aatLayoutFeatureTypeUpperCase
 	aatLayoutFeatureSelectorUpperCasePetiteCaps = 2
-
-	/* Selectors for #aatLayoutFeatureTypeCjkRomanSpacingType */
-	// for #aatLayoutFeatureTypeCjkRomanSpacingType
-	aatLayoutFeatureSelectorHalfWidthCjkRoman = 0
-	// for #aatLayoutFeatureTypeCjkRomanSpacingType
-	aatLayoutFeatureSelectorProportionalCjkRoman = 1
-	// for #aatLayoutFeatureTypeCjkRomanSpacingType
-	aatLayoutFeatureSelectorDefaultCjkRoman = 2
-	// for #aatLayoutFeatureTypeCjkRomanSpacingType
-	aatLayoutFeatureSelectorFullWidthCjkRoman = 3
 )
 
 /* Mapping from OpenType feature tags to AAT feature names and selectors.
@@ -761,13 +436,6 @@ var featureMappings = [...]aatFeatureMapping{
 	{tt.NewTag('v', 'p', 'a', 'l'), aatLayoutFeatureTypeTextSpacing, aatLayoutFeatureSelectorAltProportionalText, 7},
 	{tt.NewTag('v', 'r', 't', '2'), aatLayoutFeatureTypeVerticalSubstitution, aatLayoutFeatureSelectorSubstituteVerticalFormsOn, aatLayoutFeatureSelectorSubstituteVerticalFormsOff},
 	{tt.NewTag('z', 'e', 'r', 'o'), aatLayoutFeatureTypeTypographicExtras, aatLayoutFeatureSelectorSlashedZeroOn, aatLayoutFeatureSelectorSlashedZeroOff},
-}
-
-// aatLayoutFeatureSelectorInfo represents a setting for an `hb_aat_layout_feature_type_t`.
-type aatLayoutFeatureSelectorInfo struct {
-	nameID  tt.NameID                // selector's name identifier
-	enable  aatLayoutFeatureSelector // value to turn the selector on
-	disable aatLayoutFeatureSelector // value to turn the selector off
 }
 
 // Used when getting or setting AAT feature selectors. Indicates that
@@ -864,24 +532,22 @@ func (s stateTableDriver) drive(c driverContext) {
 		 */
 
 		wouldbeEntry := s.machine.GetEntry(stateStartOfText, class)
-		safeToBreak :=
-			/* 1. */
-			!c.isActionable(s, entry) &&
-				/* 2. */
+		safeToBreak := /* 1. */ !c.isActionable(s, entry) &&
+			/* 2. */
+			(
+			/* 2a. */
+			state == stateStartOfText ||
+				/* 2b. */
+				((entry.Flags&DontAdvance != 0) && nextState == stateStartOfText) ||
+				/* 2c. */
 				(
-				/* 2a. */
-				state == stateStartOfText ||
-					/* 2b. */
-					((entry.Flags&DontAdvance != 0) && nextState == stateStartOfText) ||
-					/* 2c. */
-					(
-					/* 2c'. */
-					!c.isActionable(s, wouldbeEntry) &&
-						/* 2c". */
-						(nextState == wouldbeEntry.NewState) &&
-						(entry.Flags&DontAdvance) == (wouldbeEntry.Flags&DontAdvance))) &&
-				/* 3. */
-				!c.isActionable(s, s.machine.GetEntry(state, classEndOfText))
+				/* 2c'. */
+				!c.isActionable(s, wouldbeEntry) &&
+					/* 2c". */
+					(nextState == wouldbeEntry.NewState) &&
+					(entry.Flags&DontAdvance) == (wouldbeEntry.Flags&DontAdvance))) &&
+			/* 3. */
+			!c.isActionable(s, s.machine.GetEntry(state, classEndOfText))
 
 		if !safeToBreak && s.buffer.backtrackLen() != 0 && s.buffer.idx < len(s.buffer.Info) {
 			s.buffer.unsafeToBreakFromOutbuffer(s.buffer.backtrackLen()-1, s.buffer.idx+1)

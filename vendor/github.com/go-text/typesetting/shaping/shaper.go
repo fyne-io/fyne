@@ -73,8 +73,8 @@ func (t *HarfbuzzShaper) Shape(input Input) Output {
 	}
 	t.buf.Props.Language = input.Language
 	t.buf.Props.Script = input.Script
-	// TODO: figure out what (if anything) to do if this type assertion fails.
-	font := harfbuzz.NewFont(input.Face.(harfbuzz.Face))
+
+	font := harfbuzz.NewFont(input.Face)
 	font.XScale = int32(input.Size.Ceil()) << scaleShift
 	font.YScale = font.XScale
 
