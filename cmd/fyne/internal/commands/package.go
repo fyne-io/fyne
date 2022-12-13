@@ -360,11 +360,10 @@ func (p *Packager) validate() (err error) {
 		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
 			"Change directory to the main package and try again")
 	}
-	os.Chdir(p.srcDir)
 
 	p.appData.CustomMetadata = p.customMetadata.m
 
-	data, err := metadata.LoadStandard(p.srcDir)
+	data, err := metadata.LoadStandard(baseDir)
 	if err == nil {
 		p.appData.Release = p.release
 		mergeMetadata(p.appData, data)

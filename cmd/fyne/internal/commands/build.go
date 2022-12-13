@@ -228,7 +228,7 @@ func (b *Builder) build() error {
 
 		if goos == "windows" {
 			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui", "-trimpath")
+				args = append(args, "-ldflags", "-s -w -H=windowsgui -extldflags='-static'", "-trimpath")
 			} else {
 				args = append(args, "-ldflags", "-H=windowsgui ")
 			}
@@ -277,7 +277,9 @@ func (b *Builder) build() error {
 		return err
 	}
 
-	b.runner.setDir(b.srcdir)
+	absSrcdir, _ := filepath.Abs(b.srcdir)
+	args = append(args, absSrcdir)
+
 	b.runner.setEnv(env)
 	out, err := b.runner.runOutput(args...)
 	if err != nil {
