@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,10 +23,7 @@ func TestRichText_HyperLink(t *testing.T) {
 
 	c := test.NewCanvas()
 	c.SetContent(text)
-	abs := func(o fyne.CanvasObject) fyne.Position {
-		return driver.AbsolutePositionForObject(o, []fyne.CanvasObject{c.Content()})
-	}
-	assert.Equal(t, abs(texts[0]).Y, abs(linkText).Y)
+	assert.Equal(t, texts[0].Position().Y, linkText.Position().Y)
 }
 
 func TestRichText_List(t *testing.T) {
