@@ -52,7 +52,7 @@ type dialog struct {
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
-	d := &dialog{content: content, title: title, icon: nil, parent: parent}
+	d := &dialog{content: content, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
 
 	d.dismiss = &widget.Button{Text: dismiss,
@@ -175,7 +175,7 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 
 // The method .create() needs to be called before the dialog cna be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
-	d := &dialog{content: newLabel(message), title: title, icon: icon, parent: parent}
+	d := &dialog{content: newCenterLabel(message), title: title, icon: icon, parent: parent}
 	d.layout = &dialogLayout{d: d}
 
 	d.callback = callback
@@ -183,17 +183,8 @@ func newDialog(title, message string, icon fyne.Resource, callback func(bool), p
 	return d
 }
 
-func newLabel(message string) fyne.CanvasObject {
-	return widget.NewLabelWithStyle(message, fyne.TextAlignCenter, fyne.TextStyle{})
-}
-
-func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
-	list := container.New(layout.NewGridLayout(len(buttons)))
-	for _, button := range buttons {
-		list.Add(button)
-	}
-
-	return list
+func newCenterLabel(message string) fyne.CanvasObject {
+	return &widget.Label{Text: message, Alignment: fyne.TextAlignCenter}
 }
 
 // ===============================================================
