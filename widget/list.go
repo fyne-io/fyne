@@ -557,7 +557,7 @@ func (l *listLayout) updateList(refresh bool) {
 	l.list.propertyLock.Lock()
 	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
 	l.list.propertyLock.Unlock()
-	l.renderLock.Unlock() // user code should not be locked
+	l.renderLock.Unlock()                          // user code should not be locked
 	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		return
 	}
