@@ -161,10 +161,7 @@ func (b *Button) MinSize() fyne.Size {
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
 
-	if b.background != nil {
-		b.applyButtonTheme()
-		b.background.Refresh()
-	}
+	b.applyButtonTheme()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -175,10 +172,7 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 func (b *Button) MouseOut() {
 	b.hovered = false
 
-	if b.background != nil {
-		b.applyButtonTheme()
-		b.background.Refresh()
-	}
+	b.applyButtonTheme()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -202,7 +196,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.Refresh()
+	b.applyButtonTheme()
 
 	if b.OnTapped != nil {
 		b.OnTapped()
@@ -221,7 +215,12 @@ func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 }
 
 func (b *Button) applyButtonTheme() {
+	if b.background == nil {
+		return
+	}
+
 	b.background.FillColor = b.buttonColor()
+	b.background.Refresh()
 }
 
 func (b *Button) buttonColor() color.Color {
