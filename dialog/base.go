@@ -122,7 +122,6 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newCenterLabel(message), title: title, icon: icon, parent: parent}
 	d.layout = &dialogLayout{d: d}
-
 	d.callback = callback
 
 	return d

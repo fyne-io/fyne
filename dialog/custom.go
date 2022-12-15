@@ -29,7 +29,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) Dialog {
-	d := &dialog{content: content, title: title, icon: nil, parent: parent}
+	d := &dialog{content: content, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
 	d.callback = callback
 
