@@ -112,7 +112,22 @@ func (l *List) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.Padding())
+
+	separatorThickness := theme.Padding()
+	y := float32(0)
+	if l.itemHeights == nil || len(l.itemHeights) == 0 {
+		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
+	} else {
+		for i := 0; i < id; i++ {
+			height := l.itemMin.Height
+			if h, ok := l.itemHeights[i]; ok {
+				height = h
+			}
+
+			y += height + separatorThickness
+		}
+	}
+
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
