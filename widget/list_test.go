@@ -103,6 +103,31 @@ func TestList_SetItemHeight(t *testing.T) {
 	test.AssertImageMatches(t, "list/list_item_height.png", w.Canvas().Capture())
 }
 
+func TestList_SetItemHeight_InUpdate(t *testing.T) {
+	var list *List
+	list = NewList(
+		func() int { return 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 0, A: 0x33})
+			r.SetMinSize(fyne.NewSize(10, 10))
+			return r
+		},
+		func(id ListItemID, o fyne.CanvasObject) {
+			list.SetItemHeight(id, 32)
+		})
+
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-done:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for list to complete refresh")
+		}
+	}()
+	list.Refresh() // could block
+	done <- struct{}{}
+}
+
 func TestList_OffsetChange(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
