@@ -204,7 +204,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 			return ok && len(children) > 0
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
-			return widget.NewLabel("Collection Widgets")
+			return container.NewHBox(widget.NewLabel("Collection Widgets"))
 		},
 		UpdateNode: func(uid string, branch bool, obj fyne.CanvasObject) {
 			t, ok := tutorials.Tutorials[uid]
@@ -212,11 +212,12 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				fyne.LogError("Missing tutorial panel: "+uid, nil)
 				return
 			}
-			obj.(*widget.Label).SetText(t.Title)
+			label := obj.(*fyne.Container).Objects[0].(*widget.Label)
+			label.SetText(t.Title)
 			if unsupportedTutorial(t) {
-				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
+				label.TextStyle = fyne.TextStyle{Italic: true}
 			} else {
-				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
+				label.TextStyle = fyne.TextStyle{}
 			}
 		},
 		OnSelected: func(uid string) {
