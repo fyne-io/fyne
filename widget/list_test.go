@@ -203,6 +203,17 @@ func TestList_Selection(t *testing.T) {
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
 	assert.False(t, children[0].(*listItem).background.Visible())
+
+	offset := 0
+	list.SetItemHeight(2, 220)
+	list.SetItemHeight(3, 220)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
+
+	list.Select(200)
+	offset = 7220
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 }
 
 func TestList_Select(t *testing.T) {
