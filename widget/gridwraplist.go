@@ -259,9 +259,11 @@ func (l *gridWrapListLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 }
 
 func (l *gridWrapListLayout) MinSize([]fyne.CanvasObject) fyne.Size {
-	// TODO is this actually a good min size?
-	if f := l.list.Length; f != nil {
-		return fyne.NewSize(l.list.itemMin.Width, l.list.itemMin.Height)
+	if lenF := l.list.Length; lenF != nil {
+		cols := l.list.getColCount()
+		rows := float32(math.Ceil(float64(lenF()) / float64(cols)))
+		return fyne.NewSize(l.list.itemMin.Width,
+			(l.list.itemMin.Height+theme.Padding())*rows-theme.Padding())
 	}
 	return fyne.NewSize(0, 0)
 }
