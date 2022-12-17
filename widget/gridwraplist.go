@@ -110,7 +110,7 @@ func (l *GridWrapList) scrollTo(id ListItemID) {
 func (l *GridWrapList) Resize(s fyne.Size) {
 	l.BaseWidget.Resize(s)
 	l.offsetUpdated(l.scroller.Offset)
-	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(true)
+	l.scroller.Content.(*fyne.Container).Layout.(*gridWrapListLayout).updateList(true)
 }
 
 // Select add the item identified by the given ID to the selection.
