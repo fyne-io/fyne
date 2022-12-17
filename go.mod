@@ -1,4 +1,4 @@
-module github.com/dweymouth/fyne/v2
+module fyne.io/fyne/v2
 
 go 1.14
 
