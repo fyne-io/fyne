@@ -651,7 +651,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 			case fyne.TextAlignTrailing:
 				xPad = lineWidth - min.Width
 			case fyne.TextAlignCenter:
-				xPad = (lineWidth - min.Width)/2
+				xPad = (lineWidth - min.Width) / 2
 			}
 			texts[0].Move(fyne.NewPos(xPos+xPad, yPos))
 		} else {
