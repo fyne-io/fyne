@@ -8,9 +8,9 @@
 					<rectangle fillColor="selection" pos="37,6" size="18x19"/>
 					<rectangle fillColor="selection" pos="7,25" size="15x19"/>
 					<widget size="120x96" type="*widget.RichText">
-						<text pos="8,6" size="104x19">Testing</text>
-						<text pos="8,25" size="104x19">Testing</text>
-						<text pos="8,44" size="104x19">Testing</text>
+						<text pos="8,6" size="47x19">Testing</text>
+						<text pos="8,25" size="47x19">Testing</text>
+						<text pos="8,44" size="47x19">Testing</text>
 					</widget>
 					<rectangle fillColor="primary" pos="37,6" size="2x19"/>
 				</widget>

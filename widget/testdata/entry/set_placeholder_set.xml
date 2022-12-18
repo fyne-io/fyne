@@ -5,10 +5,10 @@
 			<rectangle pos="1,1" size="117x32" strokeColor="inputBorder" strokeWidth="2"/>
 			<widget pos="0,2" size="120x31" type="*widget.entryContent">
 				<widget size="120x31" type="*widget.RichText">
-					<text color="placeholder" pos="8,6" size="104x19">Test</text>
+					<text color="placeholder" pos="8,6" size="26x19">Test</text>
 				</widget>
 				<widget size="120x31" type="*widget.RichText">
-					<text pos="8,6" size="104x19"></text>
+					<text pos="8,6" size="0x19"></text>
 				</widget>
 			</widget>
 		</widget>
