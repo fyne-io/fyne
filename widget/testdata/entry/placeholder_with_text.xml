@@ -5,7 +5,7 @@
 			<rectangle pos="1,1" size="34x32" strokeColor="inputBorder" strokeWidth="2"/>
 			<widget pos="0,2" size="36x31" type="*widget.entryContent">
 				<widget size="36x31" type="*widget.RichText">
-					<text pos="8,6" size="20x19">Text</text>
+					<text pos="8,6" size="26x19">Text</text>
 				</widget>
 			</widget>
 		</widget>

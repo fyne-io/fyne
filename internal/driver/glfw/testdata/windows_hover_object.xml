@@ -10,10 +10,10 @@
 							<widget pos="0,1" size="188x31" type="*widget.Scroll">
 								<widget size="188x31" type="*widget.entryContent">
 									<widget size="188x31" type="*widget.RichText">
-										<text color="placeholder" pos="8,7" size="172x17"></text>
+										<text color="placeholder" pos="8,7" size="0x17"></text>
 									</widget>
 									<widget size="188x31" type="*widget.RichText">
-										<text pos="8,7" size="172x17"></text>
+										<text pos="8,7" size="0x17"></text>
 									</widget>
 								</widget>
 							</widget>
@@ -26,10 +26,10 @@
 							<widget pos="0,1" size="188x31" type="*widget.Scroll">
 								<widget size="188x31" type="*widget.entryContent">
 									<widget size="188x31" type="*widget.RichText">
-										<text color="placeholder" pos="8,7" size="172x17"></text>
+										<text color="placeholder" pos="8,7" size="0x17"></text>
 									</widget>
 									<widget size="188x31" type="*widget.RichText">
-										<text pos="8,7" size="172x17"></text>
+										<text pos="8,7" size="0x17"></text>
 									</widget>
 								</widget>
 							</widget>
