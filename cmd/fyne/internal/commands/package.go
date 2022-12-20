@@ -30,16 +30,6 @@ const (
 	defaultAppVersion = "0.0.1"
 )
 
-type appData struct {
-	icon, Name        string
-	AppID, AppVersion string
-	AppBuild          int
-	ResGoString       string
-	Release           bool
-	CustomMetadata    map[string]string
-	VersionAtLeast2_3 bool
-}
-
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
 	p := &Packager{appData: &appData{}}
@@ -367,7 +357,7 @@ func (p *Packager) validate() (err error) {
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
 		p.appData.Release = p.release
-		mergeMetadata(p.appData, data)
+		p.appData.mergeMetadata(data)
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -443,43 +433,6 @@ func isValidVersion(ver string) bool {
 		}
 	}
 	return true
-}
-
-func (p *appData) appendCustomMetadata(fromFile map[string]string) {
-	if p.CustomMetadata == nil {
-		p.CustomMetadata = map[string]string{}
-	}
-
-	for key, value := range fromFile {
-		_, ok := p.CustomMetadata[key]
-		if ok {
-			continue
-		}
-		p.CustomMetadata[key] = value
-	}
-}
-
-func mergeMetadata(p *appData, data *metadata.FyneApp) {
-	if p.icon == "" {
-		p.icon = data.Details.Icon
-	}
-	if p.Name == "" {
-		p.Name = data.Details.Name
-	}
-	if p.AppID == "" {
-		p.AppID = data.Details.ID
-	}
-	if p.AppVersion == "" {
-		p.AppVersion = data.Details.Version
-	}
-	if p.AppBuild == 0 {
-		p.AppBuild = data.Details.Build
-	}
-	if p.Release {
-		p.appendCustomMetadata(data.Release)
-	} else {
-		p.appendCustomMetadata(data.Development)
-	}
 }
 
 // normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
