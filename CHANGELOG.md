@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.0 - 11 December 2022
+## 2.3.0 - 24 December 2022
 
 ### Added
 
@@ -45,6 +45,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Preferences RemoveValue does not save (#3229)
 * Create new folder directly from FolderDialog (#3174)
 * Slider drag handle is clipped off at minimum size (#2966)
+* Entry text "flickering" while typing (#3461)
+* Rendering of not changed canvas objects after an event (#3211)
 
 
 ## 2.2.4 - 9 November 2022
