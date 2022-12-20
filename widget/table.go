@@ -289,7 +289,6 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 	cellSize := t.templateSize()
-	cellY = float32(row) * (cellHeight + theme.Padding())
 	for i := 0; i <= row; i++ {
 		if cellHeight > 0 {
 			cellY += cellHeight + theme.Padding()
