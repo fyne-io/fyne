@@ -20,13 +20,14 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * The buttons on the default theme are no longer transparent, but we added more button importance types
 * Expose a storage.ErrNotExists for non existing documents (#3083)
+* Update `go-gl/glfw` to build against latest Glfw 3.3.8.
 
 ### Fixed
 
 * Displaying unicode or different language like Bengali doesn't work (#598)
 * Cannot disable container.TabItem (#1904)
-* Update Linux/XDG app settings to delegate theme to new fd.o color-scheme (#2657)
-* fyne package -os android needs NDK 16/19c (#3066)
+* Update Linux/XDG application theme to follow the FreeDesktop Dark Style Preference (#2657)
+* Running `fyne package -os android` needs NDK 16/19c (#3066)
 * Caret position lost when resizing a MultilineEntry (#3024)
 * Fix possible crash in table resize (#3369)
 * Memory usage surge when selecting/appending MultilineEntry text (#3426)
