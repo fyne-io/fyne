@@ -16,13 +16,9 @@ var _ fyne.URI = &uri{}
 type uri struct {
 	scheme    string
 	authority string
-	// haveAuthority lets us distinguish between a present-but-empty
-	// authority, and having no authority. This is needed because net/url
-	// incorrectly handles scheme:/absolute/path URIs.
-	haveAuthority bool
-	path          string
-	query         string
-	fragment      string
+	path      string
+	query     string
+	fragment  string
 }
 
 func (u *uri) Extension() string {
@@ -65,11 +61,7 @@ func (u *uri) String() string {
 	// NOTE: this string reconstruction is mandated by IETF RFC3986,
 	// section 5.3, pp. 35.
 
-	s := u.scheme + ":"
-	if u.haveAuthority {
-		s += "//" + u.authority
-	}
-	s += u.path
+	s := u.scheme + "://" + u.authority + u.path
 	if len(u.query) > 0 {
 		s += "?" + u.query
 	}
