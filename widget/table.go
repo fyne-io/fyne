@@ -18,7 +18,7 @@ type TableCellID struct {
 }
 
 // Table widget is a grid of items that can be scrolled and a cell selected.
-// It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
+// Its performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the Length callback.
 //
 // Since: 1.4
@@ -574,9 +574,6 @@ func (c *tableCells) MouseOut() {
 }
 
 func (c *tableCells) Resize(s fyne.Size) {
-	if s == c.BaseWidget.size {
-		return
-	}
 	c.BaseWidget.Resize(s)
 	c.Refresh() // trigger a redraw
 }
