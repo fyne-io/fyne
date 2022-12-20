@@ -82,10 +82,6 @@ func Build() *cli.Command {
 				b.goPackage = ctx.Args().First()
 			}
 
-			if b.customMetadata.m == nil {
-				b.customMetadata.m = map[string]string{}
-			}
-
 			return b.Build()
 		},
 	}

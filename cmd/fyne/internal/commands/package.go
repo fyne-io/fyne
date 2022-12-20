@@ -445,13 +445,17 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
-func appendCustomMetadata(customMetadata *map[string]string, fromFile map[string]string) {
+func (p *appData) appendCustomMetadata(fromFile map[string]string) {
+	if p.CustomMetadata == nil {
+		p.CustomMetadata = map[string]string{}
+	}
+
 	for key, value := range fromFile {
-		_, ok := (*customMetadata)[key]
+		_, ok := p.CustomMetadata[key]
 		if ok {
 			continue
 		}
-		(*customMetadata)[key] = value
+		p.CustomMetadata[key] = value
 	}
 }
 
@@ -472,9 +476,9 @@ func mergeMetadata(p *appData, data *metadata.FyneApp) {
 		p.AppBuild = data.Details.Build
 	}
 	if p.Release {
-		appendCustomMetadata(&p.CustomMetadata, data.Release)
+		p.appendCustomMetadata(data.Release)
 	} else {
-		appendCustomMetadata(&p.CustomMetadata, data.Development)
+		p.appendCustomMetadata(data.Development)
 	}
 }
 
