@@ -28,9 +28,8 @@ func NewFileURI(path string) fyne.URI {
 	}
 
 	return &uri{
-		scheme:        "file",
-		haveAuthority: true,
-		path:          path,
+		scheme: "file",
+		path:   path,
 	}
 }
 
@@ -98,10 +97,8 @@ func ParseURI(s string) (fyne.URI, error) {
 	return &uri{
 		scheme:    scheme,
 		authority: authority,
-		// workaround for net/url, see type uri struct comments
-		haveAuthority: true,
-		path:          l.Authority().Path(),
-		query:         l.Query().Encode(),
-		fragment:      l.Fragment(),
+		path:      l.Authority().Path(),
+		query:     l.Query().Encode(),
+		fragment:  l.Fragment(),
 	}, nil
 }
