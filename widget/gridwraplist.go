@@ -335,7 +335,7 @@ func (l *gridWrapListLayout) updateList(refresh bool) {
 	minRow := int(offY / (l.list.itemMin.Height + theme.Padding()))
 	minItem := ListItemID(minRow * colCount)
 	maxRow := int(fyne.Min(float32(minRow+visibleRowsCount), float32(math.Ceil(float64(length/colCount)))))
-	maxItem := ListItemID(math.Min(float64(maxRow*colCount), float64(length)))
+	maxItem := ListItemID(math.Min(float64((maxRow+1)*colCount), float64(length)))
 
 	if l.list.UpdateItem == nil {
 		fyne.LogError("Missing UpdateCell callback required for GridWrapList", nil)
