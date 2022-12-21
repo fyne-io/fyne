@@ -20,7 +20,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * The buttons on the default theme are no longer transparent, but we added more button importance types
 * Expose a storage.ErrNotExists for non existing documents (#3083)
-* Update `go-gl/glfw` to build against latest Glfw 3.3.8.
+* Update `go-gl/glfw` to build against latest Glfw 3.3.8
+* List items in `widget.List` now implement the Focusable interface
 
 ### Fixed
 
@@ -47,6 +48,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Slider drag handle is clipped off at minimum size (#2966)
 * Entry text "flickering" while typing (#3461)
 * Rendering of not changed canvas objects after an event (#3211)
+* Form dialog not displaying hint text and validation errors (#2781)
 
 
 ## 2.2.4 - 9 November 2022
