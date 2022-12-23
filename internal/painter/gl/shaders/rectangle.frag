@@ -1,37 +1,25 @@
 #version 110
 
+uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
+uniform float stroke;
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
-
-varying vec2 delta;
-varying float switch_var;
-varying float lineWidth_var;
-varying float feather_var;
+varying vec2 frame_resolution;
 
 void main() {
-    vec4 color = vec4(1.0, 0.0, 0.0, 255.0);
 
-    if ( switch_var == 1.0 ){
-        color = fill_color;
-    }; 
-    if ( switch_var == 2.0 ){	
+    vec4 color = fill_color;
+    
+    if (gl_FragCoord.x >= rect_coords[1] - stroke ){
         color = stroke_color;
-    };
-    if ( switch_var > 50.0 ){	
-        color = vec4(stroke_color.r, stroke_color.g, stroke_color.b, stroke_color.a * switch_var / 100.0 );
-    };
-    if ( switch_var >= 10.0 && switch_var <= 50.0 ){	
-        color = vec4(fill_color.r, fill_color.g, fill_color.b, fill_color.a * switch_var / 100.0 );
-    };
-    if ( delta != vec2(0.0, 0.0) ){
-        float distance = length(delta);
-
-        if (distance <= lineWidth_var - feather_var) {
-            gl_FragColor = color;
-        } else {
-            gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth_var - feather_var)) / feather_var));
-        }
-    } else {
-        gl_FragColor = color;
+    } else if (gl_FragCoord.x <= rect_coords[0] + stroke){
+        color = stroke_color;
+    } else if (gl_FragCoord.y <= frame_resolution.y - rect_coords[3] + stroke ){
+        color = stroke_color;
+    } else if (gl_FragCoord.y >= frame_resolution.y - rect_coords[2] - stroke ){
+        color = stroke_color;
     }
+
+    gl_FragColor = color;
+
 }

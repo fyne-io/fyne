@@ -20,11 +20,11 @@ func main() {
 	purple := color.NRGBA{R: 150, G: 0, B: 205, A: 255}
 
 	// RRect1
-	rr1 := canvas.Rectangle{FillColor: green}
+	rr1 := canvas.Rectangle{FillColor: green, StrokeColor: purple}
 	rr1.Resize((fyne.NewSize(300, 150)))
 	rr1.Move(fyne.NewPos(10, 0))
 	// RRect2
-	rr2 := canvas.Rectangle{FillColor: purple}
+	rr2 := canvas.Rectangle{FillColor: purple, StrokeColor: green}
 	rr2.Resize((fyne.NewSize(300, 150)))
 	rr2.Move(fyne.NewPos(360, 0))
 	// Line1
@@ -48,12 +48,6 @@ func main() {
 	})
 	btn1.Move(fyne.NewPos(700, 450))
 	btn1.Resize((fyne.NewSize(140.0, 40.0)))
-	txtSeg1 := &widget.TextSegment{Text: "composition"}
-	txt1 := widget.NewRichText(txtSeg1)
-	txt1.Move(fyne.NewPos(380, 380))
-	txtSeg2 := &widget.TextSegment{Text: "one GL stream to GPU"}
-	txt2 := widget.NewRichText(txtSeg2)
-	txt2.Move(fyne.NewPos(70, 380))
 
 	cont := container.NewWithoutLayout(
 		&rr1,

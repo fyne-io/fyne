@@ -2,23 +2,14 @@
 
 attribute vec2 vert;
 attribute vec2 normal;
-attribute float colorSwitch;
-attribute float lineWidth;
-attribute float feather;
 
-varying vec2 delta;
-varying float switch_var;
-varying float lineWidth_var;
-varying float feather_var;
+uniform vec4 frame_size; //size of view/window; only x,y used (z,w not); 
+varying vec2 frame_resolution;
 
 void main() {
-    switch_var = colorSwitch;
-    lineWidth_var = lineWidth;
-    feather_var = feather;
-    if ( normal == vec2(0.0, 0.0) ) {
-        gl_Position = vec4(vert, 0, 1);
-    } else {
-        delta = normal * lineWidth_var;
-        gl_Position = vec4(vert + delta, 0, 1);
-    }
+    frame_resolution = vec2(frame_size.x, frame_size.y);
+
+    gl_Position = vec4(2.0*vert.x/frame_size.x - 1.0, 1.0 - 2.0*vert.y/frame_size.y, 0, 1);
+    // gl_Position = vec4(vert, 0, 1);
+
 }

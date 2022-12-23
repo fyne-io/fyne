@@ -3,7 +3,6 @@ package gl
 import (
 	"image/color"
 	"math"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -44,9 +43,7 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
 		return
 	}
-	start := time.Now()
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
-	coords := time.Now()
 	p.ctx.UseProgram(p.lineProgram)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.lineProgram, "vert", 2, 4, 0)
@@ -72,8 +69,6 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 	p.freeBuffer(vbo)
-	upload := time.Now()
-	println("Line_6: Time coords: ", coords.Sub(start), " upload: ", upload.Sub(coords), " sum: ", upload.Sub(start), " ")
 }
 
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
@@ -101,28 +96,34 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
 }
 
-func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	start := time.Now()
-	points := p.flexRectCoords(pos, rect, 0.5, frame)
-	coords := time.Now()
+func (p *painter) drawRectangle(
+	rect *canvas.Rectangle,
+	pos fyne.Position,
+	frame fyne.Size,
+) {
 	p.ctx.UseProgram(p.rectangleProgram)
-
-	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.rectangleProgram, "vert", 2, 7, 0)
-	p.defineVertexArray(p.rectangleProgram, "normal", 2, 7, 2)
-	p.defineVertexArray(p.rectangleProgram, "colorSwitch", 1, 7, 4)
-	p.defineVertexArray(p.rectangleProgram, "lineWidth", 1, 7, 5)
-	p.defineVertexArray(p.rectangleProgram, "feather", 1, 7, 6)
-
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+
+	// Vertex: BEG
+	points := p.vecRectCoords(pos, rect, frame)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.rectangleProgram, "vert", 2, 4, 0)
+	p.defineVertexArray(p.rectangleProgram, "normal", 2, 4, 2)
+
+	frameSizeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "frame_size")
+	p.ctx.Uniform4f(frameSizeUniform, frame.Width, frame.Height, 0.0, 0.0)
 	p.logError()
+	// Vertex: END
 
-	triangleXYPoints := len(points) / 7
+	// Fragment: BEG
+	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
+	p.ctx.Uniform4f(rectCoordsUniform, points[0], points[4], points[1], points[9])
+	println(points[1], " | ", points[9])
 
-	var col color.Color
-	if rect.StrokeColor == col {
-		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
-	}
+	strokeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke")
+	stroke := float32(roundToPixel(rect.StrokeWidth, p.pixScale))
+	p.ctx.Uniform1f(strokeUniform, stroke)
+
 	fillColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "fill_color")
 	rF, gF, bF, aF := rect.FillColor.RGBA()
 	if aF == 0 {
@@ -132,7 +133,12 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 		colF := []float32{float32(rF) / alphaF, float32(gF) / alphaF, float32(bF) / alphaF, alphaF / 0xffff}
 		p.ctx.Uniform4f(fillColorUniform, colF[0], colF[1], colF[2], colF[3])
 	}
+
 	strokeColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_color")
+	var col color.Color
+	if rect.StrokeColor == col {
+		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
+	}
 	rS, gS, bS, aS := rect.StrokeColor.RGBA()
 	if aS == 0 {
 		p.ctx.Uniform4f(strokeColorUniform, 0, 0, 0, 0)
@@ -142,17 +148,11 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 		p.ctx.Uniform4f(strokeColorUniform, colF[0], colF[1], colF[2], colF[3])
 	}
 	p.logError()
+	// Fragment: END
 
-	p.ctx.DrawArrays(triangles, 0, triangleXYPoints)
-
-	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "colorSwitch"))
-	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "lineWidth"))
-	p.ctx.DisableVertexAttribArray(p.ctx.GetAttribLocation(p.rectangleProgram, "feather"))
-
+	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 	p.freeBuffer(vbo)
-	upload := time.Now()
-	println("Rect_", triangleXYPoints, ": Time coords: ", coords.Sub(start), " upload: ", upload.Sub(coords), " sum: ", upload.Sub(start), " ")
 }
 
 func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
@@ -455,6 +455,59 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	}
 
 	return size, pos
+}
+
+func (p *painter) vecRectCoords(
+	pos fyne.Position,
+	rect *canvas.Rectangle,
+	frame fyne.Size,
+) []float32 {
+	size := rect.Size()
+	pos1 := rect.Position()
+
+	xPosDiff := pos.X - pos1.X
+	yPosDiff := pos.Y - pos1.Y
+	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
+	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
+	size.Width = roundToPixel(size.Width, p.pixScale)
+	size.Height = roundToPixel(size.Height, p.pixScale)
+
+	/*
+		x1Pos := pos1.X / frame.Width
+		x1 := -1 + x1Pos*2
+		x2Pos := (pos1.X + size.Width) / frame.Width
+		x2 := -1 + x2Pos*2
+		y1Pos := pos1.Y / frame.Height
+		y1 := 1 - y1Pos*2
+		y2Pos := (pos1.Y + size.Height) / frame.Height
+		y2 := 1 - y2Pos*2
+		coords := []float32{
+			x1, y1, 0.0, 0.0, // 1. triangle
+			x2, y1, 0.0, 0.0,
+			x1, y2, 0.0, 0.0,
+			x1, y2, 0.0, 0.0, // 2. triangle
+			x2, y1, 0.0, 0.0,
+			x2, y2, 0.0, 0.0}
+	*/
+
+	x1Pos := pos1.X
+	x2Pos := pos1.X + size.Width
+	y1Pos := pos1.Y
+	y2Pos := pos1.Y + size.Height
+	coords := []float32{
+		x1Pos, y1Pos, 0.0, 0.0, // 1. triangle
+		x2Pos, y1Pos, 0.0, 0.0,
+		x1Pos, y2Pos, 0.0, 0.0,
+		x1Pos, y2Pos, 0.0, 0.0, // 2. triangle
+		x2Pos, y1Pos, 0.0, 0.0,
+		x2Pos, y2Pos, 0.0, 0.0}
+
+	//println(x1Pos)
+	//println(x2Pos)
+	//println(y1Pos)
+	//println(y2Pos)
+
+	return coords
 }
 
 func (p *painter) flexRectCoords(pos fyne.Position, rect *canvas.Rectangle, feather float32, frame fyne.Size) []float32 {

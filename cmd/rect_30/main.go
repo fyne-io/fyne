@@ -20,13 +20,17 @@ func main() {
 	purple := color.NRGBA{R: 150, G: 0, B: 205, A: 255}
 
 	// RRect1
-	rr1 := canvas.Rectangle{FillColor: green, StrokeColor: purple, StrokeWidth: 10.0}
+	rr1 := canvas.Rectangle{FillColor: green, StrokeColor: purple, StrokeWidth: 40.0}
 	rr1.Resize((fyne.NewSize(300, 150)))
 	rr1.Move(fyne.NewPos(10, 0))
 	// RRect2
 	rr2 := canvas.Rectangle{FillColor: purple, StrokeColor: green, StrokeWidth: 5.0}
 	rr2.Resize((fyne.NewSize(300, 150)))
 	rr2.Move(fyne.NewPos(360, 0))
+	// RRect3
+	rr3 := canvas.Rectangle{FillColor: red, StrokeColor: green, StrokeWidth: 5.0}
+	rr3.Resize((fyne.NewSize(300, 150)))
+	rr3.Move(fyne.NewPos(10, 400))
 	// Line1
 	line1 := canvas.NewLine(blue)
 	line1.Position1.X = 10.0
@@ -58,9 +62,10 @@ func main() {
 	cont := container.NewWithoutLayout(
 		&rr1,
 		&rr2,
+		&rr3,
 		line1,
 		line2,
-		btn1,
+		//btn1,
 	)
 	myWindow.SetContent(cont)
 	myWindow.Resize(fyne.NewSize(900, 600))
