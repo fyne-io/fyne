@@ -18,7 +18,7 @@ type complexShaperHangul struct {
 
 /* Same order as the feature array below */
 const (
-	jmo = iota
+	_ = iota // jmo
 
 	ljmo
 	vjmo

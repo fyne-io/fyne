@@ -82,10 +82,6 @@ func Build() *cli.Command {
 				b.goPackage = ctx.Args().First()
 			}
 
-			if b.customMetadata.m == nil {
-				b.customMetadata.m = map[string]string{}
-			}
-
 			return b.Build()
 		},
 	}
@@ -289,7 +285,7 @@ func (b *Builder) build() error {
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	data, err := metadata.LoadStandard(srcdir)
 	if err == nil {
-		mergeMetadata(app, data)
+		app.mergeMetadata(data)
 	}
 
 	metadataInitFilePath := filepath.Join(srcdir, "fyne_metadata_init.go")

@@ -7,11 +7,6 @@ import (
 )
 
 var (
-	errInvalidKernTable     = errors.New("invalid kern table")
-	errUnsupportedKernTable = errors.New("unsupported kern table")
-)
-
-var (
 	_ SimpleKerns = Kern0{}
 	_ SimpleKerns = Kern2{}
 	_ SimpleKerns = Kerx6{}
@@ -28,15 +23,6 @@ type SimpleKerns interface {
 	// Size() int
 }
 
-// key is left << 16 + right
-type simpleKerns map[uint32]int16
-
-func (s simpleKerns) KernPair(left, right GID) int16 {
-	return s[uint32(left)<<16|uint32(right)]
-}
-
-// func (s simpleKerns) Size() int { return len(s) }
-
 // assume non overlapping kerns, otherwise the return value is undefined
 type kernUnions []SimpleKerns
 
@@ -50,22 +36,14 @@ func (ks kernUnions) KernPair(left, right GID) int16 {
 	return 0
 }
 
-// func (ks kernUnions) Size() int {
-// 	out := 0
-// 	for _, k := range ks {
-// 		out += k.Size()
-// 	}
-// 	return out
-// }
-
 // there are several formats for the 'kern' table, due to the
 // differents specs from Apple and Microsoft. The concepts are similar,
 // but the bit sizes of the various fields differ.
 // We apply the following logic:
-//	- read the first uint16 -> it's always the major version
-//	- if it's 0, we have a Miscrosoft table
-//	- if it's 1, we have an Apple table. We read the next uint16,
-// to differentiate between the old and the new Apple format.
+//   - read the first uint16 -> it's always the major version
+//   - if it's 0, we have a Miscrosoft table
+//   - if it's 1, we have an Apple table. We read the next uint16,
+//     to differentiate between the old and the new Apple format.
 func parseKernTable(input []byte, numGlyphs int) (TableKernx, error) {
 	if len(input) < 4 {
 		return nil, errors.New("invalid kern table (EOF)")
@@ -186,33 +164,6 @@ func parseKerningPairs(data []byte, count int) ([]KerningPair, error) {
 		out[i].Value = int16(binary.BigEndian.Uint16(data[entrySize*i+4:]))
 	}
 	return out, nil
-}
-
-func parseKernFormat0(input []byte, out simpleKerns) (int, error) {
-	const headerSize, entrySize = 8, 6
-	if len(input) < headerSize {
-		return 0, errInvalidKernTable
-	}
-	numPairs := binary.BigEndian.Uint16(input)
-
-	// skip searchRange , entrySelector , rangeShift
-
-	subtableProperSize := headerSize + entrySize*int(numPairs)
-	if len(input) < subtableProperSize {
-		return 0, errInvalidKernTable
-	}
-	ar, err := parseKerningPairs(input[headerSize:], int(numPairs))
-	if err != nil {
-		return 0, err
-	}
-
-	// we opt for a brute force approach:
-	// we could instead store a sorted slice of {left, right, value} to reduce
-	// memory usage
-	for _, pair := range ar {
-		out[uint32(pair.Left)<<16|uint32(pair.Right)] = pair.Value
-	}
-	return subtableProperSize, nil
 }
 
 // Kern3 is the Apple kerning subtable format 3

@@ -78,6 +78,7 @@ type Button struct {
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
+	background       *canvas.Rectangle
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -111,18 +112,18 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text := NewRichText(seg)
 	text.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 
-	background := canvas.NewRectangle(theme.ButtonColor())
+	b.background = canvas.NewRectangle(theme.ButtonColor())
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
-		background,
+		b.background,
 		tapBG,
 		text,
 	}
 	r := &buttonRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
-		background:   background,
+		background:   b.background,
 		tapBG:        tapBG,
 		button:       b,
 		label:        text,
@@ -159,7 +160,8 @@ func (b *Button) MinSize() fyne.Size {
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
-	b.Refresh()
+
+	b.applyButtonTheme()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -169,7 +171,8 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
 	b.hovered = false
-	b.Refresh()
+
+	b.applyButtonTheme()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -193,7 +196,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.Refresh()
+	b.applyButtonTheme()
 
 	if b.OnTapped != nil {
 		b.OnTapped()
@@ -208,6 +211,48 @@ func (b *Button) TypedRune(rune) {
 func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 	if ev.Name == fyne.KeySpace {
 		b.Tapped(nil)
+	}
+}
+
+func (b *Button) applyButtonTheme() {
+	if b.background == nil {
+		return
+	}
+
+	b.background.FillColor = b.buttonColor()
+	b.background.Refresh()
+}
+
+func (b *Button) buttonColor() color.Color {
+	switch {
+	case b.Disabled():
+		if b.Importance == LowImportance {
+			return color.Transparent
+		}
+		return theme.DisabledButtonColor()
+	case b.focused:
+		return blendColor(theme.ButtonColor(), theme.FocusColor())
+	case b.hovered:
+		bg := theme.ButtonColor()
+		if b.Importance == HighImportance {
+			bg = theme.PrimaryColor()
+		} else if b.Importance == DangerImportance {
+			bg = theme.ErrorColor()
+		} else if b.Importance == WarningImportance {
+			bg = theme.WarningColor()
+		}
+
+		return blendColor(bg, theme.HoverColor())
+	case b.Importance == HighImportance:
+		return theme.PrimaryColor()
+	case b.Importance == LowImportance:
+		return color.Transparent
+	case b.Importance == DangerImportance:
+		return theme.ErrorColor()
+	case b.Importance == WarningImportance:
+		return theme.WarningColor()
+	default:
+		return theme.ButtonColor()
 	}
 }
 
@@ -305,7 +350,7 @@ func (r *buttonRenderer) Refresh() {
 
 // applyTheme updates this button to match the current theme
 func (r *buttonRenderer) applyTheme() {
-	r.background.FillColor = r.buttonColor()
+	r.button.applyButtonTheme()
 	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
 	case r.button.disabled:
@@ -327,39 +372,6 @@ func (r *buttonRenderer) applyTheme() {
 				r.icon.Refresh()
 			}
 		}
-	}
-}
-
-func (r *buttonRenderer) buttonColor() color.Color {
-	switch {
-	case r.button.Disabled():
-		if r.button.Importance == LowImportance {
-			return color.Transparent
-		}
-		return theme.DisabledButtonColor()
-	case r.button.focused:
-		return blendColor(theme.ButtonColor(), theme.FocusColor())
-	case r.button.hovered:
-		bg := theme.ButtonColor()
-		if r.button.Importance == HighImportance {
-			bg = theme.PrimaryColor()
-		} else if r.button.Importance == DangerImportance {
-			bg = theme.ErrorColor()
-		} else if r.button.Importance == WarningImportance {
-			bg = theme.WarningColor()
-		}
-
-		return blendColor(bg, theme.HoverColor())
-	case r.button.Importance == HighImportance:
-		return theme.PrimaryColor()
-	case r.button.Importance == LowImportance:
-		return color.Transparent
-	case r.button.Importance == DangerImportance:
-		return theme.ErrorColor()
-	case r.button.Importance == WarningImportance:
-		return theme.WarningColor()
-	default:
-		return theme.ButtonColor()
 	}
 }
 
@@ -424,7 +436,7 @@ func blendColor(under, over color.Color) color.Color {
 
 func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation {
 	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
-		mid := (w.Size().Width - theme.Padding()) / 2
+		mid := w.Size().Width / 2
 		size := mid * done
 		bg.Resize(fyne.NewSize(size*2, w.Size().Height))
 		bg.Move(fyne.NewPos(mid-size, 0))

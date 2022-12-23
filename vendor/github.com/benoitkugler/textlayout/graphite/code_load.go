@@ -17,7 +17,7 @@ const (
 	/// This slot attaches to its parent at the given design units in the y direction
 	acAttY
 	/// This slot attaches to its parent at the given glyph point (not implemented)
-	acAttGpt
+	_
 	/// x-direction adjustment from the given glyph point (not implemented)
 	acAttXOff
 	/// y-direction adjustment from the given glyph point (not implemented)
@@ -27,7 +27,7 @@ const (
 	/// Where on this glyph should align with the attachment point on the parent glyph in the y-direction
 	acAttWithY
 	/// Which glyph point on this glyph should align with the attachment point on the parent glyph (not implemented).
-	acWithGpt
+	_
 	/// Adjustment to acWithGpt in x-direction (not implemented)
 	acAttWithXOff
 	/// Adjustment to acWithGpt in y-direction (not implemented)
@@ -59,11 +59,11 @@ const (
 	/// Amount this slot can stretch (not implemented)
 	acJStretch
 	/// Amount this slot can shrink (not implemented)
-	acJShrink
+	_
 	/// Granularity by which this slot can stretch or shrink (not implemented)
-	acJStep
+	_
 	/// Justification weight for this glyph (not implemented)
-	acJWeight
+	_
 	/// Amount this slot mush shrink or stretch in design units
 	acJWidth
 	/// SubSegment split point
@@ -108,7 +108,7 @@ const (
 	/// not implemented
 	acMax
 	/// not implemented
-	acNoEffect = acMax + 1
+	_ = acMax + 1
 )
 
 type opcode uint8
@@ -300,8 +300,8 @@ type codeContext struct {
 // If skipAnalysis is true, the required TEMP_COPY opcodes are not inserted.
 // This is only useful to get a direct representation of the font file content required in tests.
 func newCode(isConstraint bool, bytecode []byte,
-	preContext uint8, ruleLength uint16, context codeContext, skipAnalysis bool) (code, error) {
-
+	preContext uint8, ruleLength uint16, context codeContext, skipAnalysis bool,
+) (code, error) {
 	if len(bytecode) == 0 {
 		return code{}, nil
 	}
@@ -363,9 +363,9 @@ type context struct {
 
 // decoder is responsible for reading a sequence of instructions.
 // This is the first step of the use of the code sequence from a font:
-//	- at font creation (see computeRules), a first analyze of the sequence if done,
-//		checking for some errors like out of bounds access
-//	- at runtime, the code is run against an input
+//   - at font creation (see computeRules), a first analyze of the sequence if done,
+//     checking for some errors like out of bounds access
+//   - at runtime, the code is run against an input
 type decoder struct {
 	code code // resulting loaded code
 
@@ -537,7 +537,10 @@ func (dec *decoder) fetchOpcode(bc []byte) (opcode, error) {
 			return 0, err
 		}
 	case ocCNTXT_ITEM:
-		validUpto(dec.max.ruleLength, uint16(int(dec.max.preContext)+int(int8(bc[0]))))
+		err := validUpto(dec.max.ruleLength, uint16(int(dec.max.preContext)+int(int8(bc[0]))))
+		if err != nil {
+			return 0, err
+		}
 		if len(bc) < 2+int(bc[1]) {
 			return 0, jumpPastEnd
 		}
@@ -549,7 +552,10 @@ func (dec *decoder) fetchOpcode(bc []byte) (opcode, error) {
 		if dec.stackDepth < 0 {
 			return 0, underfullStack
 		}
-		validUpto(acMax, uint16(bc[0]))
+		err := validUpto(acMax, uint16(bc[0]))
+		if err != nil {
+			return 0, err
+		}
 		if attrCode(bc[0]) == acUserDefn { // use IATTR for user attributes
 			return 0, outOfRangeData
 		}

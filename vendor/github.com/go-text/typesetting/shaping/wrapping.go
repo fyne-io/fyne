@@ -289,15 +289,6 @@ func newBreaker(seg *segmenter.Segmenter, text []rune) *breaker {
 	return br
 }
 
-// nextValid returns the next valid break candidate, if any. If ok is false, there are no candidates.
-func (b *breaker) nextValid(currentRuneToGlyph []int, currentOutput Output) (option breakOption, ok bool) {
-	option, ok = b.next()
-	for ok && !option.isValid(currentRuneToGlyph, currentOutput) {
-		option, ok = b.next()
-	}
-	return
-}
-
 // next returns a naive break candidate which may be invalid.
 func (b *breaker) next() (option breakOption, ok bool) {
 	if b.segmenter.Next() {

@@ -101,18 +101,41 @@ func (l *List) MinSize() fyne.Size {
 //
 // Since: 2.3
 func (l *List) SetItemHeight(id ListItemID, height float32) {
+	l.propertyLock.Lock()
+
 	if l.itemHeights == nil {
 		l.itemHeights = make(map[ListItemID]float32)
 	}
+
+	refresh := l.itemHeights[id] != height
 	l.itemHeights[id] = height
-	l.Refresh()
+	l.propertyLock.Unlock()
+
+	if refresh {
+		l.Refresh()
+	}
 }
 
 func (l *List) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	y := (float32(id) * l.itemMin.Height) + (float32(id) * theme.Padding())
+
+	separatorThickness := theme.Padding()
+	y := float32(0)
+	if l.itemHeights == nil || len(l.itemHeights) == 0 {
+		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
+	} else {
+		for i := 0; i < id; i++ {
+			height := l.itemMin.Height
+			if h, ok := l.itemHeights[i]; ok {
+				height = h
+			}
+
+			y += height + separatorThickness
+		}
+	}
+
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -463,6 +486,8 @@ func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 }
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
+	l.list.propertyLock.Lock()
+	defer l.list.propertyLock.Unlock()
 	items := 0
 	if f := l.list.Length; f == nil {
 		return fyne.NewSize(0, 0)
@@ -530,7 +555,6 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 
 func (l *listLayout) updateList(refresh bool) {
 	l.renderLock.Lock()
-	defer l.renderLock.Unlock()
 	separatorThickness := theme.Padding()
 	width := l.list.Size().Width
 	length := 0
@@ -542,11 +566,14 @@ func (l *listLayout) updateList(refresh bool) {
 	}
 
 	wasVisible := l.visible
-	l.visible = make(map[ListItemID]*listItem)
+	visible := make(map[ListItemID]*listItem)
 	cells := []fyne.CanvasObject{}
 
+	l.list.propertyLock.Lock()
 	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
+	l.list.propertyLock.Unlock()
 	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
+		l.renderLock.Unlock() // user code should not be locked
 		return
 	}
 
@@ -562,21 +589,17 @@ func (l *listLayout) updateList(refresh bool) {
 				continue
 			}
 			c.Resize(size)
-			l.setupListItem(c, row)
 		}
 
 		c.Move(fyne.NewPos(0, y))
-		if refresh {
-			c.Resize(size)
-			if ok { // refresh visible
-				l.setupListItem(c, row)
-			}
-		}
+		c.Resize(size)
 
 		y += itemHeight + separatorThickness
-		l.visible[row] = c
+		visible[row] = c
 		cells = append(cells, c)
 	}
+
+	l.visible = visible
 
 	for id, old := range wasVisible {
 		if _, ok := l.visible[id]; !ok {
@@ -590,6 +613,11 @@ func (l *listLayout) updateList(refresh bool) {
 	objects := l.children
 	objects = append(objects, l.separators...)
 	l.list.scroller.Content.(*fyne.Container).Objects = objects
+	l.renderLock.Unlock() // user code should not be locked
+
+	for row, obj := range visible {
+		l.setupListItem(obj, row)
+	}
 }
 
 func (l *listLayout) updateSeparators() {

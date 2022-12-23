@@ -526,9 +526,6 @@ func delete_(reg *regbank, st *stack, args []byte) ([]byte, bool) {
 	if is == reg.smap.highwater {
 		reg.smap.highwater = is.Next
 	}
-	if is.prev != nil {
-		is = is.prev
-	}
 	seg.NumGlyphs -= 1
 	return args, st.top < stackMax
 }

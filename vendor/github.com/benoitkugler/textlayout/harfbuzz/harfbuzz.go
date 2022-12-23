@@ -480,8 +480,6 @@ func toLower(c byte) byte {
 
 const maxInt = int(^uint(0) >> 1)
 
-type glyphIndex uint16
-
 // bitStorage returns the number of bits needed to store the number.
 func bitStorage(v uint32) int { return 32 - bits.LeadingZeros32(v) }
 

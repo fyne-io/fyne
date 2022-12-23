@@ -24,26 +24,26 @@
 						<text pos="8,4" size="25x19">Edit</text>
 					</widget>
 				</container>
-				<widget pos="50,27" size="51x66" type="*widget.Menu">
-					<widget size="51x66" type="*widget.Shadow">
+				<widget pos="50,27" size="51x74" type="*widget.Menu">
+					<widget size="51x74" type="*widget.Shadow">
 						<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 						<linearGradient endColor="shadow" pos="0,-4" size="51x4"/>
 						<radialGradient centerOffset="-0.5,0.5" pos="51,-4" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" pos="51,0" size="4x66" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="51,66" size="4x4" startColor="shadow"/>
-						<linearGradient pos="0,66" size="51x4" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-4,66" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x66"/>
+						<linearGradient angle="270" pos="51,0" size="4x74" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="51,74" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,74" size="51x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-4,74" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x74"/>
 					</widget>
-					<widget size="51x66" type="*widget.Scroll">
-						<widget size="51x66" type="*widget.menuBox">
+					<widget size="51x74" type="*widget.Scroll">
+						<widget size="51x74" type="*widget.menuBox">
 							<rectangle fillColor="menuBackground" size="51x74"/>
-							<container pos="0,4" size="51x74">
-								<widget size="51x27" type="*widget.menuItem">
-									<text pos="8,4" size="35x19">Copy</text>
+							<container size="51x74">
+								<widget size="51x35" type="*widget.menuItem">
+									<text pos="8,8" size="35x19">Copy</text>
 								</widget>
-								<widget pos="0,31" size="51x27" type="*widget.menuItem">
-									<text pos="8,4" size="35x19">Paste</text>
+								<widget pos="0,39" size="51x35" type="*widget.menuItem">
+									<text pos="8,8" size="35x19">Paste</text>
 								</widget>
 							</container>
 						</widget>

@@ -24,26 +24,26 @@
 						<text pos="8,4" size="25x19">Edit</text>
 					</widget>
 				</container>
-				<widget pos="8,27" size="52x66" type="*widget.Menu">
-					<widget size="52x66" type="*widget.Shadow">
+				<widget pos="8,27" size="52x74" type="*widget.Menu">
+					<widget size="52x74" type="*widget.Shadow">
 						<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
 						<linearGradient endColor="shadow" pos="0,-4" size="52x4"/>
 						<radialGradient centerOffset="-0.5,0.5" pos="52,-4" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" pos="52,0" size="4x66" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="52,66" size="4x4" startColor="shadow"/>
-						<linearGradient pos="0,66" size="52x4" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-4,66" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x66"/>
+						<linearGradient angle="270" pos="52,0" size="4x74" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="52,74" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,74" size="52x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-4,74" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x74"/>
 					</widget>
-					<widget size="52x66" type="*widget.Scroll">
-						<widget size="52x66" type="*widget.menuBox">
+					<widget size="52x74" type="*widget.Scroll">
+						<widget size="52x74" type="*widget.menuBox">
 							<rectangle fillColor="menuBackground" size="52x74"/>
-							<container pos="0,4" size="52x74">
-								<widget size="52x27" type="*widget.menuItem">
-									<text pos="8,4" size="36x19">New</text>
+							<container size="52x74">
+								<widget size="52x35" type="*widget.menuItem">
+									<text pos="8,8" size="36x19">New</text>
 								</widget>
-								<widget pos="0,31" size="52x27" type="*widget.menuItem">
-									<text pos="8,4" size="36x19">Open</text>
+								<widget pos="0,39" size="52x35" type="*widget.menuItem">
+									<text pos="8,8" size="36x19">Open</text>
 								</widget>
 							</container>
 						</widget>

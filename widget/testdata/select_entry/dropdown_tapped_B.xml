@@ -6,13 +6,13 @@
 			<widget pos="0,2" size="106x31" type="*widget.Scroll">
 				<widget size="106x31" type="*widget.entryContent">
 					<widget size="106x31" type="*widget.RichText">
-						<text pos="8,6" size="90x19">B</text>
+						<text pos="8,6" size="9x19">B</text>
 					</widget>
 				</widget>
 			</widget>
 			<widget pos="102,8" size="20x20" type="*widget.Button">
 				<rectangle size="20x20"/>
-				<rectangle fillColor="rgba(0,0,0,0)" size="16x20"/>
+				<rectangle fillColor="rgba(0,0,0,0)" size="20x20"/>
 				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 			</widget>
 		</widget>

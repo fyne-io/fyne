@@ -13,11 +13,8 @@ import (
 )
 
 var (
-	errInvalidCFFTable                = errors.New("invalid CFF font file")
-	errUnsupportedCFFVersion          = errors.New("unsupported CFF version")
-	errUnsupportedRealNumberEncoding  = errors.New("unsupported real number encoding")
-	errUnsupportedCFFFDSelectTable    = errors.New("unsupported FD Select version")
-	errUnsupportedNumberOfSubroutines = errors.New("unsupported number of subroutines")
+	errUnsupportedCFFVersion       = errors.New("unsupported CFF version")
+	errUnsupportedCFFFDSelectTable = errors.New("unsupported FD Select version")
 
 	be = binary.BigEndian
 )
@@ -50,17 +47,18 @@ func (u userStrings) getString(sid uint16) (string, error) {
 //
 // A fundamental concept is a DICT, or a key-value map, expressed in reverse
 // Polish notation. For example, this sequence of operations:
-//	- push the number 379
-//	- version operator
-//	- push the number 392
-//	- Notice operator
-//	- etc
-//	- push the number 100
-//	- push the number 0
-//	- push the number 500
-//	- push the number 800
-//	- FontBBox operator
-//	- etc
+//   - push the number 379
+//   - version operator
+//   - push the number 392
+//   - Notice operator
+//   - etc
+//   - push the number 100
+//   - push the number 0
+//   - push the number 500
+//   - push the number 800
+//   - FontBBox operator
+//   - etc
+//
 // defines a DICT that maps "version" to the String ID (SID) 379, "Notice" to
 // the SID 392, "FontBBox" to the four numbers [100, 0, 500, 800], etc.
 //
@@ -79,8 +77,8 @@ func (u userStrings) getString(sid uint16) (string, error) {
 // referenced below.
 //
 // The relevant specifications are:
-// 	- http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5176.CFF.pdf
-// 	- http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5177.Type2.pdf
+//   - http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5176.CFF.pdf
+//   - http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5177.Type2.pdf
 type cffParser struct {
 	src    []byte // whole input
 	offset int    // current position

@@ -23,9 +23,6 @@ type longdatetime struct {
 }
 
 var (
-	// errInvalidChecksum is returned by ParseOTF if the font's checksum is wrong
-	errInvalidChecksum = errors.New("invalid checksum")
-
 	// errUnsupportedFormat is returned from Parse if parsing failed
 	errUnsupportedFormat = errors.New("unsupported font format")
 

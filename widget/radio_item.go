@@ -169,8 +169,8 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 
 	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-	r.bg.Resize(iconSize)
-	r.bg.Move(iconPos)
+	r.bg.Move(iconPos.AddXY(3, 3)) // absolute numbers to move relative to SVG details
+	r.bg.Resize(iconSize.SubtractWidthHeight(6, 6))
 	r.icon.Resize(iconSize)
 	r.icon.Move(iconPos)
 	r.over.Resize(iconSize)

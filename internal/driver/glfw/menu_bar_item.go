@@ -174,5 +174,5 @@ func (r *menuBarItemRenderer) Refresh() {
 }
 
 func (r *menuBarItemRenderer) padding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+	return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding())
 }

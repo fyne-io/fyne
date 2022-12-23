@@ -226,7 +226,8 @@ func LoadGraphite(font *truetype.Font) (*GraphiteFace, error) {
 
 // process the 'glyf', 'htmx' and 'glat' tables to extract relevant info.
 func (f *GraphiteFace) preprocessGlyphsAttributes(glyphs truetype.TableGlyf, htmx truetype.TableHVmtx,
-	attrs tableGlat) {
+	attrs tableGlat,
+) {
 	// take into account pseudo glyphs (len(glyphs) <= len(attrs))
 	L := len(glyphs)
 
@@ -292,11 +293,10 @@ func (f *GraphiteFace) runGraphite(seg *Segment, silf *passes) {
 		seg.associateChars(0, len(seg.charinfo))
 		if silf.hasCollision {
 			ok := seg.initCollisions()
-			res = res && ok
+			res = ok
 		}
 		if res {
-			ok := silf.runGraphite(seg, silf.indexPosPass, uint8(len(silf.passes)), false)
-			res = res && ok
+			res = silf.runGraphite(seg, silf.indexPosPass, uint8(len(silf.passes)), false)
 		}
 	}
 
