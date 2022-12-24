@@ -3,6 +3,54 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.3.0 - 24 December 2022
+
+### Added
+
+* Shiny new theme that was designed for us
+* Improved text handling to support non-latin alphabets
+* Add cloud storage and preference support
+* Add menu icon and submenu support to system tray menus
+* More button importance levels `ErrorImportance`, `WarningImportance`
+* Support disabling of `AppTabs` and `DocTabs` items
+* Add image support to rich text (#2366)
+* Add CheckGroup.Remove (#3124)
+
+### Changed
+
+* The buttons on the default theme are no longer transparent, but we added more button importance types
+* Expose a storage.ErrNotExists for non existing documents (#3083)
+* Update `go-gl/glfw` to build against latest Glfw 3.3.8
+* List items in `widget.List` now implement the Focusable interface
+
+### Fixed
+
+* Displaying unicode or different language like Bengali doesn't work (#598)
+* Cannot disable container.TabItem (#1904)
+* Update Linux/XDG application theme to follow the FreeDesktop Dark Style Preference (#2657)
+* Running `fyne package -os android` needs NDK 16/19c (#3066)
+* Caret position lost when resizing a MultilineEntry (#3024)
+* Fix possible crash in table resize (#3369)
+* Memory usage surge when selecting/appending MultilineEntry text (#3426)
+* Fyne bundle does not support appending when parameter is a directory
+* Crash parsing invalid file URI (#3275)
+* Systray apps on macOS can only be terminated via the systray menu quit button (#3395)
+* Wayland Scaling support: sizes and distances are scaled wrong (#2850)
+* Google play console minimum API level 31 (#3375)
+* Data bound entry text replacing selection is ignored (#3340)
+* Split Container does not respect item's Visible status (#3232)
+* Android - Entry - OnSubmitted is not working (#3267)
+* Can't set custom CGO_CFLAGS and CGO_LDFLAGS with "fyne package" on darwin (#3276)
+* Text line not displayed in RichText (#3117)
+* Segfault when adding items directly in form struct (#3153)
+* Preferences RemoveValue does not save (#3229)
+* Create new folder directly from FolderDialog (#3174)
+* Slider drag handle is clipped off at minimum size (#2966)
+* Entry text "flickering" while typing (#3461)
+* Rendering of not changed canvas objects after an event (#3211)
+* Form dialog not displaying hint text and validation errors (#2781)
+
+
 ## 2.2.4 - 9 November 2022
 
 ### Fixes

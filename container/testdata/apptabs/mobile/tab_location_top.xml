@@ -1,22 +1,22 @@
-<canvas size="59x77">
+<canvas size="54x75">
 	<content>
-		<widget size="59x77" type="*container.AppTabs">
-			<container size="59x36">
-				<container size="19x36">
-					<widget size="19x37" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,8" size="11x20">Test1</text>
+		<widget size="54x75" type="*container.AppTabs">
+			<container size="54x36">
+				<container size="14x36">
+					<widget size="14x36" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="4,8" size="6x19">Test1</text>
 					</widget>
 				</container>
-				<widget pos="23,0" size="36x36" type="*widget.Button">
+				<widget pos="18,0" size="36x36" type="*widget.Button">
 					<rectangle size="36x36"/>
 					<rectangle size="0x0"/>
 					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 				</widget>
 			</container>
-			<rectangle fillColor="shadow" pos="0,36" size="59x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="19x4"/>
-			<widget pos="0,40" size="59x36" type="*widget.Label">
-				<text pos="8,8" size="43x20">Text 1</text>
+			<rectangle fillColor="shadow" pos="0,36" size="54x4"/>
+			<rectangle fillColor="primary" pos="0,36" size="14x4"/>
+			<widget pos="0,40" size="54x35" type="*widget.Label">
+				<text pos="8,8" size="38x19">Text 1</text>
 			</widget>
 		</widget>
 	</content>

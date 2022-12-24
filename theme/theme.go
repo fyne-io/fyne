@@ -88,6 +88,21 @@ const (
 	// Since: 2.0
 	ColorNameInputBackground fyne.ThemeColorName = "inputBackground"
 
+	// ColorNameInputBorder is the name of theme lookup for border color of an input field.
+	//
+	// Since: 2.3
+	ColorNameInputBorder fyne.ThemeColorName = "inputBorder"
+
+	// ColorNameMenuBackground is the name of theme lookup for background color of menus.
+	//
+	// Since: 2.3
+	ColorNameMenuBackground fyne.ThemeColorName = "menuBackground"
+
+	// ColorNameOverlayBackground is the name of theme lookup for background color of overlays like dialogs.
+	//
+	// Since: 2.3
+	ColorNameOverlayBackground fyne.ThemeColorName = "overlayBackground"
+
 	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
 	//
 	// Since: 2.0
@@ -113,10 +128,25 @@ const (
 	// Since: 2.1
 	ColorNameSelection fyne.ThemeColorName = "selection"
 
+	// ColorNameSeparator is the name of theme lookup for separator bars.
+	//
+	// Since: 2.3
+	ColorNameSeparator fyne.ThemeColorName = "separator"
+
 	// ColorNameShadow is the name of theme lookup for shadow color.
 	//
 	// Since: 2.0
 	ColorNameShadow fyne.ThemeColorName = "shadow"
+
+	// ColorNameSuccess is the name of theme lookup for foreground success color.
+	//
+	// Since: 2.3
+	ColorNameSuccess fyne.ThemeColorName = "success"
+
+	// ColorNameWarning is the name of theme lookup for foreground warning color.
+	//
+	// Since: 2.3
+	ColorNameWarning fyne.ThemeColorName = "warning"
 
 	// SizeNameCaptionText is the name of theme lookup for helper text size, normally smaller than regular text size.
 	//
@@ -127,6 +157,16 @@ const (
 	//
 	// Since: 2.0
 	SizeNameInlineIcon fyne.ThemeSizeName = "iconInline"
+
+	// SizeNameInnerPadding is the name of theme lookup for internal widget padding size.
+	//
+	// Since: 2.3
+	SizeNameInnerPadding fyne.ThemeSizeName = "innerPadding"
+
+	// SizeNameLineSpacing is the name of theme lookup for between text line spacing.
+	//
+	// Since: 2.3
+	SizeNameLineSpacing fyne.ThemeSizeName = "lineSpacing"
 
 	// SizeNamePadding is the name of theme lookup for padding size.
 	//
@@ -269,7 +309,7 @@ func DisabledTextColor() color.Color {
 	return DisabledColor()
 }
 
-// ErrorColor returns the theme's error text color.
+// ErrorColor returns the theme's error foreground color.
 //
 // Since: 2.0
 func ErrorColor() color.Color {
@@ -298,9 +338,23 @@ func IconInlineSize() float32 {
 	return current().Size(SizeNameInlineIcon)
 }
 
+// InnerPadding is the standard gap between element content and the outside edge of a widget.
+//
+// Since: 2.3
+func InnerPadding() float32 {
+	return current().Size(SizeNameInnerPadding)
+}
+
 // InputBackgroundColor returns the color used to draw underneath input elements.
 func InputBackgroundColor() color.Color {
 	return current().Color(ColorNameInputBackground, currentVariant())
+}
+
+// InputBorderColor returns the color used to draw underneath input elements.
+//
+// Since: 2.3
+func InputBorderColor() color.Color {
+	return current().Color(ColorNameInputBorder, currentVariant())
 }
 
 // InputBorderSize returns the input border size (or underline size for an entry).
@@ -318,6 +372,27 @@ func LightTheme() fyne.Theme {
 
 	theme.initFonts()
 	return theme
+}
+
+// LineSpacing is the default gap between multiple lines of text.
+//
+// Since: 2.3
+func LineSpacing() float32 {
+	return current().Size(SizeNameLineSpacing)
+}
+
+// MenuBackgroundColor returns the theme's background color for menus.
+//
+// Since: 2.3
+func MenuBackgroundColor() color.Color {
+	return safeColorLookup(ColorNameMenuBackground, currentVariant())
+}
+
+// OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
+//
+// Since: 2.3
+func OverlayBackgroundColor() color.Color {
+	return safeColorLookup(ColorNameOverlayBackground, currentVariant())
 }
 
 // Padding is the standard gap between elements and the border around interface elements.
@@ -346,11 +421,7 @@ func PrimaryColor() color.Color {
 //
 // Since: 1.4
 func PrimaryColorNamed(name string) color.Color {
-	col, ok := primaryColors[name]
-	if !ok {
-		return primaryColors[ColorBlue]
-	}
-	return col
+	return primaryColorNamed(name)
 }
 
 // PrimaryColorNames returns a list of the standard primary color options.
@@ -382,6 +453,13 @@ func SelectionColor() color.Color {
 	return safeColorLookup(ColorNameSelection, currentVariant())
 }
 
+// SeparatorColor returns the color for the separator element.
+//
+// Since: 2.3
+func SeparatorColor() color.Color {
+	return safeColorLookup(ColorNameSeparator, currentVariant())
+}
+
 // SeparatorThicknessSize is the standard thickness of the separator widget.
 //
 // Since: 2.0
@@ -392,6 +470,13 @@ func SeparatorThicknessSize() float32 {
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation.
 func ShadowColor() color.Color {
 	return safeColorLookup(ColorNameShadow, currentVariant())
+}
+
+// SuccessColor returns the theme's success foreground color.
+//
+// Since: 2.3
+func SuccessColor() color.Color {
+	return safeColorLookup(ColorNameSuccess, currentVariant())
 }
 
 // TextBoldFont returns the font resource for the bold font style.
@@ -445,70 +530,19 @@ func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
 }
 
+// WarningColor returns the theme's warning foreground color.
+//
+// Since: 2.3
+func WarningColor() color.Color {
+	return safeColorLookup(ColorNameWarning, currentVariant())
+}
+
 var (
 	defaultTheme fyne.Theme
 
-	errorColor  = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	focusColors = map[string]color.Color{
-		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x7f},
-		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f},
-		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f},
-		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f},
-	}
-	primaryColors = map[string]color.Color{
-		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
-		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
-		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
-		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
-	}
-	selectionColors = map[string]color.Color{
-		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f},
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0x3f},
-		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f},
-		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f},
-		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f},
-	}
-
-	darkPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{R: 0x30, G: 0x30, B: 0x30, A: 0xff},
-		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x42},
-		ColorNameDisabledButton:  color.NRGBA{R: 0x26, G: 0x26, B: 0x26, A: 0xff},
-		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
-		ColorNameHover:           color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f},
-		ColorNameInputBackground: color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x19},
-		ColorNamePlaceHolder:     color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff},
-		ColorNamePressed:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66},
-		ColorNameScrollBar:       color.NRGBA{A: 0x99},
-		ColorNameShadow:          color.NRGBA{A: 0x66},
-	}
-
-	lightPalette = map[fyne.ThemeColorName]color.Color{
-		ColorNameBackground:      color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
-		ColorNameButton:          color.Transparent,
-		ColorNameDisabled:        color.NRGBA{A: 0x42},
-		ColorNameDisabledButton:  color.NRGBA{R: 0xe5, G: 0xe5, B: 0xe5, A: 0xff},
-		ColorNameError:           errorColor,
-		ColorNameForeground:      color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xff},
-		ColorNameHover:           color.NRGBA{A: 0x0f},
-		ColorNameInputBackground: color.NRGBA{A: 0x19},
-		ColorNamePlaceHolder:     color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
-		ColorNamePressed:         color.NRGBA{A: 0x19},
-		ColorNameScrollBar:       color.NRGBA{A: 0x99},
-		ColorNameShadow:          color.NRGBA{A: 0x33},
-	}
+	errorColor   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	successColor = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	warningColor = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 )
 
 type builtinTheme struct {
@@ -547,23 +581,21 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	if t.variant != variantNameUserPreference {
 		v = t.variant
 	}
-	colors := darkPalette
-	if v == VariantLight {
-		colors = lightPalette
-	}
 
+	primary := fyne.CurrentApp().Settings().PrimaryColor()
 	if n == ColorNamePrimary {
-		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+		return primaryColorNamed(primary)
 	} else if n == ColorNameFocus {
-		return focusColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {
-		return selectionColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+		return selectionColorNamed(primary)
 	}
 
-	if c, ok := colors[n]; ok {
-		return c
+	if v == VariantLight {
+		return lightPaletColorNamed(n)
 	}
-	return color.Transparent
+
+	return darkPaletColorNamed(n)
 }
 
 func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
@@ -588,14 +620,18 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 1
 	case SizeNameInlineIcon:
 		return 20
-	case SizeNamePadding:
+	case SizeNameInnerPadding:
+		return 8
+	case SizeNameLineSpacing:
 		return 4
+	case SizeNamePadding:
+		return 6
 	case SizeNameScrollBar:
 		return 16
 	case SizeNameScrollBarSmall:
 		return 3
 	case SizeNameText:
-		return 14
+		return 13
 	case SizeNameHeadingText:
 		return 24
 	case SizeNameSubHeadingText:
@@ -603,7 +639,7 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameCaptionText:
 		return 11
 	case SizeNameInputBorder:
-		return 2
+		return 1
 	default:
 		return 0
 	}
@@ -627,12 +663,113 @@ func currentVariant() fyne.ThemeVariant {
 	return fyne.CurrentApp().Settings().ThemeVariant()
 }
 
-func focusColorNamed(name string) color.Color {
-	col, ok := focusColors[name]
-	if !ok {
-		return focusColors[ColorBlue]
+func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
+	switch name {
+	case ColorNameBackground:
+		return color.NRGBA{R: 0x14, G: 0x14, B: 0x15, A: 0xff}
+	case ColorNameButton:
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+	case ColorNameDisabled:
+		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+	case ColorNameDisabledButton:
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+	case ColorNameError:
+		return errorColor
+	case ColorNameForeground:
+		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
+	case ColorNameHover:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
+	case ColorNameInputBackground:
+		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
+	case ColorNameInputBorder:
+		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+	case ColorNameMenuBackground:
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+	case ColorNameOverlayBackground:
+		return color.NRGBA{R: 0x18, G: 0x1d, B: 0x25, A: 0xff}
+	case ColorNamePlaceHolder:
+		return color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff}
+	case ColorNamePressed:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66}
+	case ColorNameScrollBar:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99}
+	case ColorNameSeparator:
+		return color.NRGBA{R: 0x0, G: 0x0, B: 0x0, A: 0xff}
+	case ColorNameShadow:
+		return color.NRGBA{A: 0x66}
+	case ColorNameSuccess:
+		return successColor
+	case ColorNameWarning:
+		return warningColor
 	}
-	return col
+
+	return color.Transparent
+}
+
+func focusColorNamed(name string) color.NRGBA {
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f}
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
+}
+
+func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
+	switch name {
+	case ColorNameBackground:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+	case ColorNameButton:
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	case ColorNameDisabled:
+		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+	case ColorNameDisabledButton:
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	case ColorNameError:
+		return errorColor
+	case ColorNameForeground:
+		return color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
+	case ColorNameHover:
+		return color.NRGBA{A: 0x0f}
+	case ColorNameInputBackground:
+		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
+	case ColorNameInputBorder:
+		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+	case ColorNameMenuBackground:
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	case ColorNameOverlayBackground:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+	case ColorNamePlaceHolder:
+		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
+	case ColorNamePressed:
+		return color.NRGBA{A: 0x19}
+	case ColorNameScrollBar:
+		return color.NRGBA{A: 0x99}
+	case ColorNameSeparator:
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	case ColorNameShadow:
+		return color.NRGBA{A: 0x33}
+	case ColorNameSuccess:
+		return successColor
+	case ColorNameWarning:
+		return warningColor
+	}
+
+	return color.Transparent
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
@@ -645,6 +782,29 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	}
 
 	return res
+}
+
+func primaryColorNamed(name string) color.NRGBA {
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
 }
 
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
@@ -679,12 +839,27 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	return DefaultTextFont()
 }
 
-func selectionColorNamed(name string) color.Color {
-	col, ok := selectionColors[name]
-	if !ok {
-		return selectionColors[ColorBlue]
+func selectionColorNamed(name string) color.NRGBA {
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f}
 	}
-	return col
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x40}
 }
 
 func setupDefaultTheme() fyne.Theme {

@@ -10,11 +10,19 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var shaderSources = map[string][2][]byte{
-	"line":      {shaderLineVert.StaticContent, shaderLineFrag.StaticContent},
-	"line_es":   {shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent},
-	"simple":    {shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent},
-	"simple_es": {shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent},
+func shaderSourceNamed(name string) ([]byte, []byte) {
+	switch name {
+	case "line":
+		return shaderLineVert.StaticContent, shaderLineFrag.StaticContent
+	case "line_es":
+		return shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent
+	case "simple":
+		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
+	case "simple_es":
+		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
+	}
+
+	return nil, nil
 }
 
 // Painter defines the functionality of our OpenGL based renderer
@@ -116,8 +124,8 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 	}
 
 	// The info is probably a null terminated string.
-	// An empty info has been seen as "\x00".
-	if len(info) > 0 && info != "\x00" {
+	// An empty info has been seen as "\x00" or "\x00\x00".
+	if len(info) > 0 && info != "\x00" && info != "\x00\x00" {
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
@@ -128,8 +136,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	// Why a switch over a filename?
 	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
 	// fyne bundle.
-	sources := shaderSources[shaderFilename]
-	vertexSrc, fragmentSrc := sources[0], sources[1]
+	vertexSrc, fragmentSrc := shaderSourceNamed(shaderFilename)
 	if vertexSrc == nil {
 		panic("shader not found: " + shaderFilename)
 	}
@@ -154,8 +161,8 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	// The info is probably a null terminated string.
-	// An empty info has been seen as "\x00".
-	if len(info) > 0 && info != "\x00" {
+	// An empty info has been seen as "\x00" or "\x00\x00".
+	if len(info) > 0 && info != "\x00" && info != "\x00\x00" {
 		fmt.Printf("OpenGL program linking output:\n%s\n", info)
 	}
 

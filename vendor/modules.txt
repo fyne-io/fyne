@@ -1,4 +1,4 @@
-# fyne.io/systray v1.10.1-0.20220621085403-9a2652634e93
+# fyne.io/systray v1.10.1-0.20221115204952-d16a6177e6f1
 ## explicit
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
@@ -11,11 +11,23 @@ github.com/BurntSushi/toml/internal
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
+# github.com/benoitkugler/textlayout v0.3.0
+github.com/benoitkugler/textlayout/fonts
+github.com/benoitkugler/textlayout/fonts/binaryreader
+github.com/benoitkugler/textlayout/fonts/glyphsnames
+github.com/benoitkugler/textlayout/fonts/psinterpreter
+github.com/benoitkugler/textlayout/fonts/simpleencodings
+github.com/benoitkugler/textlayout/fonts/truetype
+github.com/benoitkugler/textlayout/fonts/type1C
+github.com/benoitkugler/textlayout/graphite
+github.com/benoitkugler/textlayout/harfbuzz
+github.com/benoitkugler/textlayout/language
+github.com/benoitkugler/textlayout/unicodedata
 # github.com/cpuguy83/go-md2man/v2 v2.0.1
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3
+# github.com/fredbi/uri v0.1.0
 ## explicit
 github.com/fredbi/uri
 # github.com/fsnotify/fsnotify v1.5.4
@@ -38,7 +50,7 @@ github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.1/gles2/KHR
 github.com/go-gl/gl/v3.2-core/gl
 github.com/go-gl/gl/v3.2-core/gl/KHR
-# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
+# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 ## explicit
 github.com/go-gl/glfw/v3.3/glfw
 github.com/go-gl/glfw/v3.3/glfw/glfw/deps
@@ -51,12 +63,19 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
+# github.com/go-text/typesetting v0.0.0-20221212183139-1eb938670a1f
+## explicit
+github.com/go-text/typesetting/di
+github.com/go-text/typesetting/font
+github.com/go-text/typesetting/language
+github.com/go-text/typesetting/segmenter
+github.com/go-text/typesetting/shaping
 # github.com/godbus/dbus/v5 v5.1.0
 ## explicit
 github.com/godbus/dbus/v5
 github.com/godbus/dbus/v5/introspect
 github.com/godbus/dbus/v5/prop
-# github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+# github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
 ## explicit
 github.com/goki/freetype
 github.com/goki/freetype/raster
@@ -88,13 +107,13 @@ github.com/nfnt/resize
 github.com/pmezard/go-difflib/difflib
 # github.com/russross/blackfriday/v2 v2.1.0
 github.com/russross/blackfriday/v2
-# github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
+# github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76
 ## explicit
 github.com/srwiley/oksvg
-# github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
+# github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 ## explicit
 github.com/srwiley/rasterx
-# github.com/stretchr/testify v1.7.2
+# github.com/stretchr/testify v1.8.0
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
@@ -114,11 +133,14 @@ github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
 # golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
 ## explicit
+golang.org/x/image/ccitt
 golang.org/x/image/colornames
 golang.org/x/image/draw
 golang.org/x/image/font
 golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
+golang.org/x/image/tiff
+golang.org/x/image/tiff/lzw
 golang.org/x/image/vector
 # golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
 ## explicit
@@ -129,7 +151,7 @@ golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+# golang.org/x/net v0.0.0-20211118161319-6a13c67c3ce4
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset

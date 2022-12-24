@@ -28,6 +28,16 @@ func (t *Text) MinSize() fyne.Size {
 	return fyne.MeasureText(t.Text, t.TextSize, t.TextStyle)
 }
 
+// Resize on a text updates the new size of this object, which may not result in a visual change, depending on alignment.
+func (t *Text) Resize(s fyne.Size) {
+	if s == t.Size() {
+		return
+	}
+
+	t.baseObject.Resize(s)
+	Refresh(t)
+}
+
 // SetMinSize has no effect as the smallest size this canvas object can be is based on its font size and content.
 func (t *Text) SetMinSize(size fyne.Size) {
 	// no-op

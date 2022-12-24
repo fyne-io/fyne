@@ -4,9 +4,13 @@
 package glfw
 
 import (
+	"bytes"
+	"image/png"
 	"runtime"
 	"sync"
 
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
@@ -43,38 +47,62 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 		}, func() {
 			// anything required for tear-down
 		})
+
+		// the only way we know the app was asked to quit is if this window is asked to close...
+		w := d.CreateWindow("SystrayMonitor")
+		w.(*window).create()
+		w.SetCloseIntercept(func() {
+			d.Quit()
+		})
 	})
 
 	d.refreshSystray(m)
 }
 
-func (d *gLDriver) refreshSystray(m *fyne.Menu) {
-	d.systrayMenu = m
-	systray.ResetMenu()
-	for _, i := range m.Items {
-		if i.IsSeparator {
-			systray.AddSeparator()
-			continue
-		}
+func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
+	if i.IsSeparator {
+		systray.AddSeparator()
+		return nil
+	}
 
-		var item *systray.MenuItem
-		fn := i.Action
-
-		if i.Checked {
+	var item *systray.MenuItem
+	if i.Checked {
+		if parent != nil {
+			item = parent.AddSubMenuItemCheckbox(i.Label, i.Label, true)
+		} else {
 			item = systray.AddMenuItemCheckbox(i.Label, i.Label, true)
+		}
+	} else {
+		if parent != nil {
+			item = parent.AddSubMenuItem(i.Label, i.Label)
 		} else {
 			item = systray.AddMenuItem(i.Label, i.Label)
 		}
-		if i.Disabled {
-			item.Disable()
-		}
-
-		go func() {
-			for range item.ClickedCh {
-				fn()
-			}
-		}()
 	}
+	if i.Disabled {
+		item.Disable()
+	}
+	if i.Icon != nil {
+		data := i.Icon.Content()
+		if painter.IsResourceSVG(i.Icon) {
+			b := &bytes.Buffer{}
+			img := painter.PaintImage(canvas.NewImageFromResource(i.Icon), nil, 64, 64)
+			err := png.Encode(b, img)
+			if err != nil {
+				fyne.LogError("Failed to encode SVG icon for menu", err)
+			} else {
+				data = b.Bytes()
+			}
+		}
+		item.SetIcon(data)
+	}
+	return item
+}
+
+func (d *gLDriver) refreshSystray(m *fyne.Menu) {
+	d.systrayMenu = m
+	systray.ResetMenu()
+	d.refreshSystrayMenu(m, nil)
 
 	systray.AddSeparator()
 	quit := systray.AddMenuItem("Quit", "Quit application")
@@ -82,6 +110,27 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 		<-quit.ClickedCh
 		d.Quit()
 	}()
+}
+
+func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
+	for _, i := range m.Items {
+		item := itemForMenuItem(i, parent)
+		if item == nil {
+			continue // separator
+		}
+		if i.ChildMenu != nil {
+			d.refreshSystrayMenu(i.ChildMenu, item)
+		}
+
+		fn := i.Action
+		go func() {
+			for range item.ClickedCh {
+				if fn != nil {
+					fn()
+				}
+			}
+		}()
+	}
 }
 
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {

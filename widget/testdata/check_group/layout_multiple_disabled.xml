@@ -1,15 +1,17 @@
 <canvas padded size="150x200">
 	<content>
 		<widget pos="4,4" size="142x192" type="*widget.CheckGroup">
-			<widget size="62x36" type="*widget.Check">
-				<circle fillColor="background" pos="2,4" size="28x28"/>
-				<image pos="6,8" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
-				<text color="disabled" pos="32,0" size="34x36">Foo</text>
+			<widget size="60x35" type="*widget.Check">
+				<circle pos="2,3" size="28x28"/>
+				<rectangle pos="10,11" size="12x12"/>
+				<image pos="6,7" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="28x35">Foo</text>
 			</widget>
-			<widget pos="0,36" size="62x36" type="*widget.Check">
-				<circle fillColor="background" pos="2,4" size="28x28"/>
-				<image pos="6,8" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
-				<text color="disabled" pos="32,0" size="34x36">Bar</text>
+			<widget pos="0,35" size="60x35" type="*widget.Check">
+				<circle pos="2,3" size="28x28"/>
+				<rectangle pos="10,11" size="12x12"/>
+				<image pos="6,7" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="28x35">Bar</text>
 			</widget>
 		</widget>
 	</content>

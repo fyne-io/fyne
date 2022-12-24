@@ -1,28 +1,28 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="19,38" size="102x115" type="*widget.Accordion">
-				<widget size="102x36" type="*widget.Button">
-					<rectangle size="102x36"/>
+			<widget pos="22,38" size="96x115" type="*widget.Accordion">
+				<widget size="96x36" type="*widget.Button">
+					<rectangle size="96x36"/>
 					<rectangle size="0x0"/>
-					<widget pos="36,8" size="10x20" type="*widget.RichText">
-						<text alignment="center" bold size="10x20">A</text>
+					<widget pos="32,8" size="9x20" type="*widget.RichText">
+						<text alignment="center" bold size="9x19">A</text>
 					</widget>
-					<image fillMode="contain" pos="12,8" rsc="menuDropDownIcon" size="20x20"/>
+					<image fillMode="contain" pos="8,8" rsc="menuDropDownIcon" size="iconInlineSize"/>
 				</widget>
-				<widget pos="0,37" size="102x36" type="*widget.Button">
-					<rectangle size="102x36"/>
+				<widget pos="0,40" size="96x36" type="*widget.Button">
+					<rectangle size="96x36"/>
 					<rectangle size="0x0"/>
-					<widget pos="36,8" size="10x20" type="*widget.RichText">
-						<text alignment="center" bold size="10x20">B</text>
+					<widget pos="32,8" size="9x20" type="*widget.RichText">
+						<text alignment="center" bold size="9x19">B</text>
 					</widget>
-					<image fillMode="contain" pos="12,8" rsc="menuDropUpIcon" size="20x20"/>
+					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="iconInlineSize"/>
 				</widget>
-				<widget pos="0,78" size="102x36" type="*widget.Label">
-					<text pos="8,8" size="86x20">2222222222</text>
+				<widget pos="0,76" size="96x35" type="*widget.Label">
+					<text pos="8,8" size="80x19">2222222222</text>
 				</widget>
-				<widget pos="0,36" size="102x1" type="*widget.Separator">
-					<rectangle fillColor="disabled" size="102x1"/>
+				<widget pos="0,37" size="96x1" type="*widget.Separator">
+					<rectangle fillColor="disabled" size="96x1"/>
 				</widget>
 			</widget>
 		</container>

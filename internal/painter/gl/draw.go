@@ -123,6 +123,8 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
+	// text size is sensitive to position on screen
+	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 }
 

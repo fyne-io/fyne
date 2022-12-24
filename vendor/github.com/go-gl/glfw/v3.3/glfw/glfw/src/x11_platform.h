@@ -222,6 +222,8 @@ typedef struct _GLFWlibraryX11
     XContext        context;
     // XIM input method
     XIM             im;
+    // The previous X error handler, to be restored later
+    XErrorHandler   errorHandler;
     // Most recent error code received by X error handler
     int             errorCode;
     // Primary selection string (while the primary selection is owned)
@@ -238,6 +240,7 @@ typedef struct _GLFWlibraryX11
     double          restoreCursorPosX, restoreCursorPosY;
     // The window whose disabled cursor mode is active
     _GLFWwindow*    disabledCursorWindow;
+    int             emptyEventPipe[2];
 
     // Window manager atoms
     Atom            NET_SUPPORTED;

@@ -23,10 +23,11 @@ type TableRef uint32
 // Resolve returns the Entry of TableRef in the given table.
 //
 // A TableRef is structured as follows:
-//  0xpptteeee
-//  pp: package index
-//  tt: type spec index in package
-//  eeee: entry index in type spec
+//
+//	0xpptteeee
+//	pp: package index
+//	tt: type spec index in package
+//	eeee: entry index in type spec
 //
 // The package and type spec values start at 1 for the first item,
 // to help catch cases where they have not been supplied.
@@ -128,8 +129,10 @@ func OpenTable() (*Table, error) {
 // indices.
 //
 // For example:
-//  tbl.SpecByName("@android:style/Theme.NoTitleBar")
-//  tbl.SpecByName("style")
+//
+//	tbl.SpecByName("@android:style/Theme.NoTitleBar")
+//	tbl.SpecByName("style")
+//
 // Both locate the spec by name "style".
 func (tbl *Table) SpecByName(name string) (int, *Package, int, *TypeSpec, error) {
 	n := strings.TrimPrefix(name, "@android:")

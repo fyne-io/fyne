@@ -48,6 +48,8 @@ To manage this we have various checks and processes in place that everyone shoul
 * Imports should be ordered according to the GoImports spec - you can use the `goimports` tool instead of `gofmt`.
 * Everything should have a unit test attached (as much as possible, to keep our coverage up)
 
+For detailed Code style, check [Contributing](https://github.com/fyne-io/fyne/wiki/Contributing#code-style) in our wiki please.
+
 # Decision Process
 
 The following points apply to our decision making process:

@@ -2,14 +2,14 @@
 	<content>
 		<widget size="150x150" type="*container.DocTabs">
 			<container size="72x150">
-				<widget size="72x109" type="*widget.Scroll">
-					<container size="72x109">
+				<widget size="72x110" type="*widget.Scroll">
+					<container size="72x110">
 						<widget size="72x56" type="*container.tabButton">
 							<image pos="16,8" rsc="infoIcon" size="40x40" themed="primary"/>
 						</widget>
 					</container>
 				</widget>
-				<container pos="0,113" size="72x36">
+				<container pos="0,114" size="72x36">
 					<widget size="36x36" type="*widget.Button">
 						<rectangle size="36x36"/>
 						<rectangle size="0x0"/>

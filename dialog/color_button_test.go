@@ -36,7 +36,7 @@ func Test_colorButton_Layout(t *testing.T) {
 			window := test.NewWindow(container.NewCenter(color))
 			window.Resize(color.MinSize().Max(fyne.NewSize(50, 50)))
 
-			test.AssertImageMatches(t, "color/button_layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToImage(t, "color/button_layout_"+name+".png", window.Canvas())
 
 			window.Close()
 		})

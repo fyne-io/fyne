@@ -20,10 +20,20 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile/binres"
+	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
 	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
+
+type manifestTmplData struct {
+	JavaPkgPath string
+	Name        string
+	Debug       bool
+	LibName     string
+	Version     string
+	Build       int
+}
 
 func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
 	iconPath, appName, version string, build, target int, release bool) (map[string]bool, error) {
@@ -46,7 +56,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		err := manifestTmpl.Execute(buf, manifestTmplData{
+		err := templates.ManifestAndroid.Execute(buf, manifestTmplData{
 			JavaPkgPath: bundleID,
 			Name:        strings.Title(appName),
 			Debug:       !buildRelease,

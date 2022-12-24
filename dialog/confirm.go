@@ -33,7 +33,7 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 			d.hideWithResponse(true)
 		},
 	}
-	d.setButtons(newButtonList(d.dismiss, confirm))
+	d.create(newButtonList(d.dismiss, confirm))
 
 	return &ConfirmDialog{d, confirm}
 }

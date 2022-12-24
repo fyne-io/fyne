@@ -13,7 +13,7 @@
 			</widget>
 			<text bold size="0x0" textSize="23"></text>
 			<text size="0x0"></text>
-			<rectangle fillColor="rgba(102,102,102,255)" pos="6,6" size="68x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+			<rectangle fillColor="inputBackground" pos="6,6" size="68x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 		</widget>
 	</content>
 </canvas>

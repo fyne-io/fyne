@@ -226,8 +226,7 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	checkSpace := r.checkSpace()
-	leftOffset := 2*theme.Padding() + checkSpace
+	leftOffset := theme.InnerPadding() + r.checkSpace()
 	rightOffset := size.Width
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	iconTopOffset := (size.Height - theme.IconInlineSize()) / 2
@@ -238,26 +237,30 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		r.expandIcon.Move(fyne.NewPos(rightOffset, iconTopOffset))
 	}
 
-	rightOffset -= theme.Padding() * 2
+	rightOffset -= theme.InnerPadding()
 	for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
 		text := r.shortcutTexts[i]
 		text.Resize(text.MinSize())
 		rightOffset -= text.MinSize().Width
-		text.Move(fyne.NewPos(rightOffset, theme.Padding()))
+		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()))
+
+		if i == 0 {
+			rightOffset -= theme.InnerPadding()
+		}
 	}
 
 	r.checkIcon.Resize(iconSize)
-	r.checkIcon.Move(fyne.NewPos(theme.Padding(), iconTopOffset))
+	r.checkIcon.Move(fyne.NewPos(theme.InnerPadding(), iconTopOffset))
 
 	if r.icon != nil {
 		r.icon.Resize(iconSize)
 		r.icon.Move(fyne.NewPos(leftOffset, iconTopOffset))
 		leftOffset += theme.IconInlineSize()
-		leftOffset += theme.Padding()
+		leftOffset += theme.InnerPadding()
 	}
 
 	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
-	r.text.Move(fyne.NewPos(leftOffset, theme.Padding()))
+	r.text.Move(fyne.NewPos(leftOffset, theme.InnerPadding()))
 
 	r.background.Resize(size)
 }
@@ -267,19 +270,19 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().AddWidthHeight(theme.Padding()*4+r.checkSpace(), theme.Padding()*2)
+	minSize := r.text.MinSize().AddWidthHeight(theme.InnerPadding()*2+r.checkSpace(), theme.InnerPadding()*2)
 	if r.expandIcon != nil {
 		minSize = minSize.AddWidthHeight(theme.IconInlineSize(), 0)
 	}
 	if r.icon != nil {
-		minSize = minSize.AddWidthHeight(theme.IconInlineSize()+theme.Padding(), 0)
+		minSize = minSize.AddWidthHeight(theme.IconInlineSize()+theme.InnerPadding(), 0)
 	}
 	if r.shortcutTexts != nil {
 		var textWidth float32
 		for _, text := range r.shortcutTexts {
 			textWidth += text.MinSize().Width
 		}
-		minSize = minSize.AddWidthHeight(textWidth+theme.Padding()*2, 0)
+		minSize = minSize.AddWidthHeight(textWidth+theme.InnerPadding(), 0)
 	}
 	r.minSize = minSize
 	return r.minSize
@@ -314,7 +317,7 @@ func (r *menuItemRenderer) Refresh() {
 
 func (r *menuItemRenderer) checkSpace() float32 {
 	if r.i.Parent.containsCheck {
-		return theme.IconInlineSize()
+		return theme.IconInlineSize() + theme.InnerPadding()
 	}
 	return 0
 }
@@ -323,7 +326,7 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 	return !r.minSize.IsZero() &&
 		r.text.TextSize == theme.TextSize() &&
 		(r.expandIcon == nil || r.expandIcon.Size().Width == theme.IconInlineSize()) &&
-		r.lastThemePadding == theme.Padding()
+		r.lastThemePadding == theme.InnerPadding()
 }
 
 func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {

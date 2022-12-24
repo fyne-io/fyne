@@ -1,16 +1,16 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.AppTabs">
-			<container pos="0,113" size="150x36">
+			<container pos="0,114" size="150x36">
 				<container size="150x36">
 					<widget size="28x36" type="*container.tabButton">
 						<image pos="4,8" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,109" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,109" size="28x4"/>
-			<circle fillColor="background" size="150x109"/>
+			<rectangle fillColor="shadow" pos="0,110" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,110" size="28x4"/>
+			<circle fillColor="background" size="150x110"/>
 		</widget>
 	</content>
 </canvas>

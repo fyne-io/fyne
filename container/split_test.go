@@ -413,3 +413,48 @@ func TestSplitContainer_divider_MinSize(t *testing.T) {
 		assert.Equal(t, dividerThickness(), min.Height)
 	})
 }
+
+func TestSplitContainer_Hidden(t *testing.T) {
+	dt := dividerThickness()
+	size := fyne.NewSize(10, 10)
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objA.SetMinSize(size)
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+
+	t.Run("Horizontal_Leading", func(t *testing.T) {
+		sc := NewHSplit(objA, objB)
+		sc.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 50-(dt/2), sc.Leading.Size().Width)
+
+		objA.Hide()
+		sc.SetOffset(0)
+		assert.Equal(t, float32(0), sc.Leading.Size().Width)
+	})
+	t.Run("Horizontal_Trailing", func(t *testing.T) {
+		sc := NewHSplit(objA, objB)
+		sc.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 50-(dt/2), sc.Trailing.Size().Width)
+
+		objB.Hide()
+		sc.SetOffset(1)
+		assert.Equal(t, float32(0), sc.Trailing.Size().Width)
+	})
+	t.Run("Vertical_Leading", func(t *testing.T) {
+		sc := NewVSplit(objA, objB)
+		sc.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 50-(dt/2), sc.Leading.Size().Height)
+
+		objA.Hide()
+		sc.SetOffset(0)
+		assert.Equal(t, float32(0), sc.Leading.Size().Height)
+	})
+	t.Run("Vertical_Trailing", func(t *testing.T) {
+		sc := NewVSplit(objA, objB)
+		sc.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 50-(dt/2), sc.Trailing.Size().Height)
+
+		objB.Hide()
+		sc.SetOffset(1)
+		assert.Equal(t, float32(0), sc.Trailing.Size().Height)
+	})
+}

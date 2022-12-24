@@ -60,9 +60,10 @@ func (e Event) String() string {
 }
 
 // Crosses reports whether the transition from From to To crosses the stage s:
-// 	- It returns CrossOn if it does, and the lifecycle change is positive.
-// 	- It returns CrossOff if it does, and the lifecycle change is negative.
-//	- Otherwise, it returns CrossNone.
+//   - It returns CrossOn if it does, and the lifecycle change is positive.
+//   - It returns CrossOff if it does, and the lifecycle change is negative.
+//   - Otherwise, it returns CrossNone.
+//
 // See the documentation for Stage for more discussion of positive and negative
 // crosses.
 func (e Event) Crosses(s Stage) Cross {

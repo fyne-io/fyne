@@ -98,11 +98,11 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 }
 
 func (s *Slider) buttonDiameter() float32 {
-	return theme.Padding() * standardScale
+	return theme.IconInlineSize() - 3.5 // match radio icons
 }
 
 func (s *Slider) endOffset() float32 {
-	return s.buttonDiameter()/2 + theme.Padding()
+	return s.buttonDiameter()/2 + theme.InnerPadding() - 1.5 // align with radio icons
 }
 
 func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
@@ -193,11 +193,9 @@ func (s *Slider) MinSize() fyne.Size {
 // CreateRenderer links this widget to its renderer.
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	track := canvas.NewRectangle(theme.ShadowColor())
+	track := canvas.NewRectangle(theme.InputBackgroundColor())
 	active := canvas.NewRectangle(theme.ForegroundColor())
-	thumb := &canvas.Circle{
-		FillColor:   theme.ForegroundColor(),
-		StrokeWidth: 0}
+	thumb := &canvas.Circle{FillColor: theme.ForegroundColor()}
 
 	objects := []fyne.CanvasObject{track, active, thumb}
 
@@ -258,8 +256,7 @@ func (s *Slider) Unbind() {
 }
 
 const (
-	standardScale = float32(4)
-	minLongSide   = float32(50)
+	minLongSide = float32(34) // added to button diameter
 )
 
 type sliderRenderer struct {
@@ -272,7 +269,7 @@ type sliderRenderer struct {
 
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
-	s.track.FillColor = theme.ShadowColor()
+	s.track.FillColor = theme.InputBackgroundColor()
 	s.thumb.FillColor = theme.ForegroundColor()
 	s.active.FillColor = theme.ForegroundColor()
 
@@ -283,7 +280,7 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the widget.
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	trackWidth := theme.Padding()
+	trackWidth := theme.InputBorderSize() * 2
 	diameter := s.slider.buttonDiameter()
 	endPad := s.slider.endOffset()
 
@@ -293,11 +290,11 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	// some calculations are relative to trackSize, so we must update that first
 	switch s.slider.Orientation {
 	case Vertical:
-		trackPos = fyne.NewPos(size.Width/2, endPad)
+		trackPos = fyne.NewPos(size.Width/2-theme.InputBorderSize(), endPad)
 		trackSize = fyne.NewSize(trackWidth, size.Height-endPad*2)
 
 	case Horizontal:
-		trackPos = fyne.NewPos(endPad, size.Height/2)
+		trackPos = fyne.NewPos(endPad, size.Height/2-theme.InputBorderSize())
 		trackSize = fyne.NewSize(size.Width-endPad*2, trackWidth)
 	}
 	s.track.Move(trackPos)
@@ -310,13 +307,13 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset+endPad)
 
 		thumbPos = fyne.NewPos(
-			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
+			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-(diameter/2))
 	case Horizontal:
 		activePos = trackPos
 		activeSize = fyne.NewSize(activeOffset-endPad, trackWidth)
 
 		thumbPos = fyne.NewPos(
-			activeOffset-((diameter-theme.Padding())/2), trackPos.Y-(diameter-trackSize.Height)/2)
+			activeOffset-(diameter/2), trackPos.Y-(diameter-trackSize.Height)/2)
 	}
 
 	s.active.Move(activePos)
@@ -328,7 +325,8 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 // MinSize calculates the minimum size of a widget.
 func (s *sliderRenderer) MinSize() fyne.Size {
-	s1, s2 := minLongSide, s.slider.buttonDiameter()
+	dia := s.slider.buttonDiameter()
+	s1, s2 := minLongSide+dia, dia
 
 	switch s.slider.Orientation {
 	case Vertical:

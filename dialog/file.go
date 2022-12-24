@@ -233,7 +233,33 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 
+	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
+		newFolderEntry := widget.NewEntry()
+		ShowForm("New Folder", "Create Folder", "Cancel", []*widget.FormItem{
+			{
+				Text:   "Name",
+				Widget: newFolderEntry,
+			},
+		}, func(s bool) {
+			if !s || newFolderEntry.Text == "" {
+				return
+			}
+
+			newFolderPath := filepath.Join(f.dir.Path(), newFolderEntry.Text)
+			createFolderErr := os.MkdirAll(newFolderPath, 0750)
+			if createFolderErr != nil {
+				fyne.LogError(
+					fmt.Sprintf("Failed to create folder with path %s", newFolderPath),
+					createFolderErr,
+				)
+				ShowError(errors.New("folder cannot be created"), f.file.parent)
+			}
+			f.refreshDir(f.dir)
+		}, f.file.parent)
+	})
+
 	optionsbuttons := container.NewHBox(
+		newFolderButton,
 		toggleViewButton,
 		optionsButton,
 	)
@@ -471,12 +497,11 @@ func (f *fileDialog) setView(view viewLayout) {
 //
 // Order of precedence is:
 //
-// * file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
-//   URI scheme
-// * os.UserHomeDir()
-// * os.Getwd()
-// * "/" (should be filesystem root on all supported platforms)
-//
+//   - file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
+//     URI scheme
+//   - os.UserHomeDir()
+//   - os.Getwd()
+//   - "/" (should be filesystem root on all supported platforms)
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	if f.startingLocation != nil {
 		if f.startingLocation.Scheme() == "file" {

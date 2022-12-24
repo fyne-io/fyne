@@ -107,14 +107,9 @@ func TestText_Layout(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			text := canvas.NewText(tt.text, theme.ForegroundColor())
 			text.Alignment = tt.align
+			text.Resize(tt.size)
 
-			window := test.NewWindow(text)
-			window.SetPadded(false)
-			window.Resize(text.MinSize().Max(tt.size))
-
-			test.AssertImageMatches(t, "text/layout_"+name+".png", window.Canvas().Capture())
-
-			window.Close()
+			test.AssertObjectRendersToImage(t, "text/layout_"+name+".png", text)
 		})
 	}
 }
@@ -192,14 +187,9 @@ func TestText_CarriageReturn(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			text := canvas.NewText(tt.text, theme.ForegroundColor())
 			text.Alignment = tt.align
+			text.Resize(tt.size)
 
-			window := test.NewWindow(text)
-			window.SetPadded(false)
-			window.Resize(text.MinSize().Max(tt.size))
-
-			test.AssertImageMatches(t, "text/layout_"+name+".png", window.Canvas().Capture())
-
-			window.Close()
+			test.AssertObjectRendersToImage(t, "text/layout_"+name+".png", text)
 		})
 	}
 }

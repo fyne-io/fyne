@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/storage"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
@@ -135,6 +137,17 @@ func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 		assert.Equal(t, "fyne.io", link.URL.Host)
 	} else {
 		t.Error("Segment should be a Hyperlink")
+	}
+}
+
+func TestRichTextMarkdown_Image(t *testing.T) {
+	r := NewRichTextFromMarkdown("![title](../../theme/icons/fyne.png)")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if img, ok := r.Segments[0].(*ImageSegment); ok {
+		assert.Equal(t, storage.NewFileURI("../../theme/icons/fyne.png"), img.Source)
+	} else {
+		t.Error("Segment should be a Image")
 	}
 }
 

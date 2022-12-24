@@ -60,7 +60,7 @@ func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
 func getLeading(size float64, offset int) float32 {
 	ret := (size + float64(theme.Padding())) * float64(offset)
 
-	return float32(math.Round(ret))
+	return float32(ret)
 }
 
 // Get the trailing (bottom or right) edge of a grid cell.

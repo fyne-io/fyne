@@ -58,7 +58,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 	d.dismiss = &widget.Button{Text: dismiss,
 		OnTapped: d.Hide,
 	}
-	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
+	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
 	return d
 }
@@ -81,7 +81,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 			d.hideWithResponse(true)
 		},
 	}
-	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
+	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
 	return d
 }
@@ -157,34 +157,23 @@ func (d *dialog) hideWithResponse(resp bool) {
 	}
 }
 
-func (d *dialog) setButtons(buttons fyne.CanvasObject) {
+func (d *dialog) create(buttons fyne.CanvasObject) {
 	d.bg = newThemedBackground()
 	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
-	var content fyne.CanvasObject
-	if d.icon == nil {
-		content = container.New(d.layout,
-			&canvas.Image{},
-			d.bg,
-			d.content,
-			buttons,
-			d.label,
-		)
-	} else {
-		bgIcon := canvas.NewImageFromResource(d.icon)
-		content = container.New(d.layout,
-			bgIcon,
-			d.bg,
-			d.content,
-			buttons,
-			d.label,
-		)
-	}
+	content := container.New(d.layout,
+		&canvas.Image{Resource: d.icon},
+		d.bg,
+		d.content,
+		buttons,
+		d.label,
+	)
 
 	d.win = widget.NewModalPopUp(content, d.parent.Canvas())
 	d.Refresh()
 }
 
+// The method .create() needs to be called before the dialog cna be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newLabel(message), title: title, icon: icon, parent: parent}
 	d.layout = &dialogLayout{d: d}
@@ -223,7 +212,7 @@ func newThemedBackground() *themedBackground {
 
 func (t *themedBackground) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	rect := canvas.NewRectangle(theme.BackgroundColor())
+	rect := canvas.NewRectangle(theme.OverlayBackgroundColor())
 	return &themedBackgroundRenderer{rect, []fyne.CanvasObject{rect}}
 }
 
@@ -248,7 +237,7 @@ func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (renderer *themedBackgroundRenderer) Refresh() {
-	r, g, b, _ := col.ToNRGBA(theme.BackgroundColor())
+	r, g, b, _ := col.ToNRGBA(theme.OverlayBackgroundColor())
 	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
 	renderer.rect.FillColor = bg
 }

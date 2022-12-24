@@ -46,6 +46,8 @@ when the application has started and will end, to loop in appropriate features.
 
 See [full API](https://pkg.go.dev/fyne.io/systray?tab=doc) as well as [CHANGELOG](https://github.com/fyne-io/systray/tree/master/CHANGELOG.md).
 
+Note: this package requires cgo, so make sure you set `CGO_ENABLED=1` before building.
+
 ## Try the example app!
 
 Have go v1.12+ or higher installed? Here's an example to get started on macOS:

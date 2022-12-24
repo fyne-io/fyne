@@ -1,7 +1,18 @@
+// Package uri is meant to be an RFC 3986 compliant URI builder and parser.
+//
+// This is based on the work from ttacon/uri (credits: Trey Tacon).
+//
+// This fork concentrates on RFC 3986 strictness for URI parsing and validation.
+//
+// Reference: https://tools.ietf.org/html/rfc3986
+//
+// Tests have been augmented with test suites of URI validators in other languages:
+// perl, python, scala, .Net.
+//
+// Extra features like MySQL URIs present in the original repo have been removed.
 package uri
 
 import (
-	"bytes"
 	"errors"
 	"net"
 	"net/url"
@@ -9,7 +20,7 @@ import (
 	"strings"
 )
 
-// Validation errors
+// Validation errors.
 var (
 	ErrNoSchemeFound    = errors.New("no scheme found in URI")
 	ErrInvalidURI       = errors.New("not a valid URI")
@@ -24,81 +35,116 @@ var (
 	ErrMissingHost      = errors.New("missing host in URI")
 )
 
-// SchemesWithDNSHost provides a list of schemes for which the host validation
-// does not follow RFC3986 (which is quite generic), but assume a valid
+// UsesDNSHostValidation returns true if the provided scheme has host validation
+// that does not follow RFC3986 (which is quite generic), but assume a valid
 // DNS hostname instead.
 //
 // See: https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
-//
-var SchemesWithDNSHost map[string]bool
-
-func init() {
-	SchemesWithDNSHost = map[string]bool{
-		"dns":      true,
-		"dntp":     true,
-		"finger":   true,
-		"ftp":      true,
-		"git":      true,
-		"http":     true,
-		"https":    true,
-		"imap":     true,
-		"irc":      true,
-		"jms":      true,
-		"mailto":   true,
-		"nfs":      true,
-		"nntp":     true,
-		"ntp":      true,
-		"postgres": true,
-		"redis":    true,
-		"rmi":      true,
-		"rtsp":     true,
-		"rsync":    true,
-		"sftp":     true,
-		"skype":    true,
-		"smtp":     true,
-		"snmp":     true,
-		"soap":     true,
-		"ssh":      true,
-		"steam":    true,
-		"svn":      true,
-		"tcp":      true,
-		"telnet":   true,
-		"udp":      true,
-		"vnc":      true,
-		"wais":     true,
-		"ws":       true,
-		"wss":      true,
+func UsesDNSHostValidation(scheme string) bool {
+	switch scheme {
+	case "dns":
+		return true
+	case "dntp":
+		return true
+	case "finger":
+		return true
+	case "ftp":
+		return true
+	case "git":
+		return true
+	case "http":
+		return true
+	case "https":
+		return true
+	case "imap":
+		return true
+	case "irc":
+		return true
+	case "jms":
+		return true
+	case "mailto":
+		return true
+	case "nfs":
+		return true
+	case "nntp":
+		return true
+	case "ntp":
+		return true
+	case "postgres":
+		return true
+	case "redis":
+		return true
+	case "rmi":
+		return true
+	case "rtsp":
+		return true
+	case "rsync":
+		return true
+	case "sftp":
+		return true
+	case "skype":
+		return true
+	case "smtp":
+		return true
+	case "snmp":
+		return true
+	case "soap":
+		return true
+	case "ssh":
+		return true
+	case "steam":
+		return true
+	case "svn":
+		return true
+	case "tcp":
+		return true
+	case "telnet":
+		return true
+	case "udp":
+		return true
+	case "vnc":
+		return true
+	case "wais":
+		return true
+	case "ws":
+		return true
+	case "wss":
+		return true
 	}
+
+	return false
 }
 
-// URI represents a general RFC3986 specified URI.
+// URI represents a general RFC3986 URI.
 type URI interface {
-	// Scheme is the scheme the URI conforms to.
+	// Scheme the URI conforms to.
 	Scheme() string
 
-	// Authority returns the authority information for the URI, including "//" prefix.
+	// Authority information for the URI, including the "//" prefix.
 	Authority() Authority
 
 	// Query returns a map of key/value pairs of all parameters
 	// in the query string of the URI.
 	Query() url.Values
 
-	// Fragment returns the fragment (component proceeded by '#') in the
+	// Fragment returns the fragment (component preceded by '#') in the
 	// URI if there is one.
 	Fragment() string
 
 	// Builder returns a Builder that can be used to modify the URI.
 	Builder() Builder
 
-	// String return a string representation of the URI
+	// String representation of the URI
 	String() string
 
 	// Validate the different components of the URI
 	Validate() error
 }
 
-// Authority represents the authority information that a URI contains
-// as specified by RFC3986. Username and password are given by UserInfo().
+// Authority information that a URI contains
+// as specified by RFC3986.
+//
+// Username and password are given by UserInfo().
 type Authority interface {
 	UserInfo() string
 	Host() string
@@ -108,7 +154,7 @@ type Authority interface {
 	Validate(...string) error
 }
 
-// Builder is a construct for building URIs.
+// Builder builds URIs.
 type Builder interface {
 	URI() URI
 	SetScheme(scheme string) Builder
@@ -124,37 +170,32 @@ type Builder interface {
 }
 
 const (
-	// string literals
-	colonMark       = ":"
-	questionMark    = "?"
-	fragmentMark    = "#"
-	percentMark     = "%"
-	atHost          = "@"
-	authorityPrefix = "//"
+	// char and string literals.
+	colonMark          = ':'
+	questionMark       = '?'
+	fragmentMark       = '#'
+	percentMark        = '%'
+	atHost             = '@'
+	slashMark          = '/'
+	openingBracketMark = '['
+	closingBracketMark = ']'
+	authorityPrefix    = "//"
 )
 
-var (
-	// byte literals
-	atBytes       = []byte(atHost)
-	colonBytes    = []byte(colonMark)
-	queryBytes    = []byte(questionMark)
-	fragmentBytes = []byte(fragmentMark)
-)
-
-// IsURI tells if a URI is valid according to RFC3986/RFC397
+// IsURI tells if a URI is valid according to RFC3986/RFC397.
 func IsURI(raw string) bool {
 	_, err := Parse(raw)
 	return err == nil
 }
 
-// IsURIReference tells if a URI reference is valid according to RFC3986/RFC397
+// IsURIReference tells if a URI reference is valid according to RFC3986/RFC397.
 func IsURIReference(raw string) bool {
 	_, err := ParseReference(raw)
 	return err == nil
 }
 
 // Parse attempts to parse a URI and returns an error if the URI
-// is not RFC3986 compliant.
+// is not RFC3986-compliant.
 func Parse(raw string) (URI, error) {
 	return parse(raw, false)
 }
@@ -167,16 +208,22 @@ func ParseReference(raw string) (URI, error) {
 
 func parse(raw string, withURIReference bool) (URI, error) {
 	var (
-		schemeEnd   = strings.Index(raw, colonMark)
-		hierPartEnd = strings.Index(raw, questionMark)
-		queryEnd    = strings.Index(raw, fragmentMark)
-		scheme      string
-
-		curr int
+		scheme string
+		curr   int
 	)
 
+	schemeEnd := strings.IndexByte(raw, colonMark)      // position of a ":"
+	hierPartEnd := strings.IndexByte(raw, questionMark) // position of a "?"
+	queryEnd := strings.IndexByte(raw, fragmentMark)    // position of a "#"
+
 	// exclude pathological input
+	if schemeEnd == 0 || hierPartEnd == 0 || queryEnd == 0 {
+		// ":", "?", "#"
+		return nil, ErrInvalidURI
+	}
+
 	if schemeEnd == 1 || hierPartEnd == 1 || queryEnd == 1 {
+		// ".:", ".?", ".#"
 		return nil, ErrInvalidURI
 	}
 
@@ -195,15 +242,19 @@ func parse(raw string, withURIReference bool) (URI, error) {
 	case schemeEnd > 0 && !isRelative:
 		scheme = raw[curr:schemeEnd]
 		if schemeEnd+1 == len(raw) {
-			// trailing : (e.g. http:)
+			// trailing ':' (e.g. http:)
 			u := &uri{
 				scheme: scheme,
 			}
+
 			return u, u.Validate()
 		}
 	case !withURIReference:
+		// scheme is required for URI
 		return nil, ErrNoSchemeFound
 	case isRelative:
+		// scheme is optional for URI references.
+		//
 		// start with // and a ':' is following... e.g //example.com:8080/path
 		schemeEnd = -1
 	}
@@ -224,14 +275,15 @@ func parse(raw string, withURIReference bool) (URI, error) {
 			hierPart:  raw[curr:hierPartEnd],
 			authority: authorityInfo,
 		}
+
 		return u, u.Validate()
 	}
 
 	var (
 		hierPart, query, fragment string
 		authorityInfo             *authorityInfo
+		err                       error
 	)
-	var err error
 
 	if hierPartEnd > 0 {
 		hierPart = raw[curr:hierPartEnd]
@@ -258,6 +310,7 @@ func parse(raw string, withURIReference bool) (URI, error) {
 		if err != nil {
 			return nil, ErrInvalidURI
 		}
+
 		u := &uri{
 			scheme:    scheme,
 			hierPart:  hierPart,
@@ -317,7 +370,7 @@ func (u *uri) Authority() Authority {
 	return u.authority
 }
 
-// Query returns parsed query parameters like standard lib URL.Query()
+// Query returns parsed query parameters like standard lib URL.Query().
 func (u *uri) Query() url.Values {
 	v, _ := url.ParseQuery(u.query)
 	return v
@@ -334,16 +387,21 @@ var (
 	rexSegment  = regexp.MustCompile(`^([\p{L}\d\-\._~\:@!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2})+)+$`)
 	rexHostname = regexp.MustCompile(`^[a-zA-Z0-9\p{L}]((-?[a-zA-Z0-9\p{L}]+)?|(([a-zA-Z0-9-\p{L}]{0,63})(\.)){1,6}([a-zA-Z\p{L}]){2,})$`)
 
-	// unreserved | pct-encoded | sub-delims
+	// unreserved | pct-encoded | sub-delims.
 	rexRegname = regexp.MustCompile(`^([\p{L}\d\-\._~!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2})+)+$`)
-	// unreserved | pct-encoded | sub-delims | ":"
+	// unreserved | pct-encoded | sub-delims | ":".
 	rexUserInfo = regexp.MustCompile(`^([\p{L}\d\-\._~\:!\$\&'\(\)\*\+,;=\?/]|(%[[:xdigit:]]{2})+)+$`)
 
 	rexIPv6Zone = regexp.MustCompile(`:[^%:]+%25(([\p{L}\d\-\._~\:@!\$\&'\(\)\*\+,;=]|(%[[:xdigit:]]{2}))+)?$`)
-	rexPort     = regexp.MustCompile(`^\d+$`)
 )
 
-// Validate checks that all parts of a URI abide by allowed characters
+func isNumerical(input string) bool {
+	return strings.IndexFunc(input,
+		func(r rune) bool { return r < '0' || r > '9' },
+	) == -1
+}
+
+// Validate checks that all parts of a URI abide by allowed characters.
 func (u *uri) Validate() error {
 	if u.scheme != "" {
 		if ok := rexScheme.MatchString(u.scheme); !ok {
@@ -362,10 +420,7 @@ func (u *uri) Validate() error {
 	}
 	if u.hierPart != "" {
 		if u.authority != nil {
-			a := u.Authority()
-			if a != nil {
-				return a.Validate(u.scheme)
-			}
+			return u.Authority().Validate(u.scheme)
 		}
 	}
 	// empty hierpart case
@@ -385,20 +440,20 @@ func (a authorityInfo) Host() string     { return a.host }
 func (a authorityInfo) Port() string     { return a.port }
 func (a authorityInfo) Path() string     { return a.path }
 func (a authorityInfo) String() string {
-	buf := bytes.NewBuffer(nil)
+	buf := strings.Builder{}
 	buf.WriteString(a.prefix)
 	buf.WriteString(a.userinfo)
 	if len(a.userinfo) > 0 {
-		buf.Write(atBytes)
+		buf.WriteByte(atHost)
 	}
-	if strings.Index(a.host, colonMark) > 0 {
+	if strings.IndexByte(a.host, colonMark) > 0 {
 		// ipv6 address host
 		buf.WriteString("[" + a.host + "]")
 	} else {
 		buf.WriteString(a.host)
 	}
 	if len(a.port) > 0 {
-		buf.Write(colonBytes)
+		buf.WriteByte(colonMark)
 	}
 	buf.WriteString(a.port)
 	buf.WriteString(a.path)
@@ -418,7 +473,7 @@ func (a authorityInfo) Validate(schemes ...string) error {
 	if a.host != "" {
 		var isIP bool
 		if ok := rexIPv6Zone.MatchString(a.host); ok {
-			z := strings.Index(a.host, percentMark)
+			z := strings.IndexByte(a.host, percentMark)
 			isIP = net.ParseIP(a.host[0:z]) != nil
 		} else {
 			isIP = net.ParseIP(a.host) != nil
@@ -430,7 +485,7 @@ func (a authorityInfo) Validate(schemes ...string) error {
 				return ErrInvalidHost
 			}
 			for _, scheme := range schemes {
-				if SchemesWithDNSHost[scheme] {
+				if UsesDNSHostValidation(scheme) {
 					// DNS name
 					isHost = rexHostname.MatchString(unescapedHost)
 				} else {
@@ -445,7 +500,7 @@ func (a authorityInfo) Validate(schemes ...string) error {
 	}
 
 	if a.port != "" {
-		if ok := rexPort.MatchString(a.port); !ok {
+		if !isNumerical(a.port) {
 			return ErrInvalidPort
 		}
 		if a.host == "" {
@@ -476,8 +531,8 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 		path = hier
 	} else {
 		// authority   = [ userinfo "@" ] host [ ":" port ]
-		slashEnd := strings.Index(hier, "/")
-		if slashEnd > 0 {
+		slashEnd := strings.IndexByte(hier, slashMark)
+		if slashEnd > -1 {
 			if slashEnd < len(hier) {
 				path = hier[slashEnd:]
 			}
@@ -485,30 +540,30 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 		}
 
 		host = hier
-		if at := strings.Index(host, atHost); at > 0 {
+		if at := strings.IndexByte(host, atHost); at > 0 {
 			userinfo = host[:at]
 			if at+1 < len(host) {
 				host = host[at+1:]
 			}
 		}
 
-		if bracket := strings.Index(host, "["); bracket >= 0 {
+		if bracket := strings.IndexByte(host, openingBracketMark); bracket >= 0 {
 			// ipv6 addresses: "[" xx:yy:zz "]":port
 			rawHost := host
-			closingbracket := strings.Index(host, "]")
-			if closingbracket > 0 {
-				host = host[bracket+1 : closingbracket-bracket]
+			closingbracket := strings.IndexByte(host, closingBracketMark)
+			if closingbracket > bracket+1 {
+				host = host[bracket+1 : closingbracket]
 				rawHost = rawHost[closingbracket+1:]
 			} else {
 				return nil, ErrInvalidURI
 			}
-			if colon := strings.Index(rawHost, colonMark); colon >= 0 {
+			if colon := strings.IndexByte(rawHost, colonMark); colon >= 0 {
 				if colon+1 < len(rawHost) {
 					port = rawHost[colon+1:]
 				}
 			}
 		} else {
-			if colon := strings.Index(host, colonMark); colon >= 0 {
+			if colon := strings.IndexByte(host, colonMark); colon >= 0 {
 				if colon+1 < len(host) {
 					port = host[colon+1:]
 				}
@@ -529,12 +584,14 @@ func parseAuthority(hier string) (*authorityInfo, error) {
 func (u *uri) ensureAuthorityExists() {
 	if u.authority == nil {
 		u.authority = &authorityInfo{}
-	} else {
-		if u.authority.userinfo != "" ||
-			u.authority.host != "" ||
-			u.authority.port != "" {
-			u.authority.prefix = "//"
-		}
+
+		return
+	}
+
+	if u.authority.userinfo != "" ||
+		u.authority.host != "" ||
+		u.authority.port != "" {
+		u.authority.prefix = "//"
 	}
 }
 
@@ -582,21 +639,21 @@ func (u *uri) Builder() Builder {
 }
 
 func (u *uri) String() string {
-	buf := bytes.NewBuffer(nil)
+	buf := strings.Builder{}
 	if len(u.scheme) > 0 {
 		buf.WriteString(u.scheme)
-		buf.Write(colonBytes)
+		buf.WriteByte(colonMark)
 	}
 
 	buf.WriteString(u.authority.String())
 
 	if len(u.query) > 0 {
-		buf.Write(queryBytes)
+		buf.WriteByte(questionMark)
 		buf.WriteString(u.query)
 	}
 
 	if len(u.fragment) > 0 {
-		buf.Write(fragmentBytes)
+		buf.WriteByte(fragmentMark)
 		buf.WriteString(u.fragment)
 	}
 

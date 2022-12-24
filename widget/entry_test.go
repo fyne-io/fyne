@@ -42,6 +42,21 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "Typed", entry.Text)
 }
 
+func TestEntry_Binding_Replace(t *testing.T) {
+	entry := widget.NewEntry()
+	str := binding.NewString()
+	_ = str.Set("Content")
+	entry.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "Content", entry.Text)
+
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "nt", entry.SelectedText())
+
+	test.Type(entry, "g")
+	assert.Equal(t, "Cogent", entry.Text)
+}
+
 func TestEntry_Clicked(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
@@ -168,17 +183,26 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapWord
-	entry.Resize(fyne.NewSize(72, 64))
 	entry.SetText("1234")
 	entry.CursorColumn = 3
+
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(72, 64))
+
 	test.Type(entry, "a")
 	test.Type(entry, "b")
 	test.Type(entry, "c")
 	assert.Equal(t, 0, entry.CursorColumn)
 	assert.Equal(t, 1, entry.CursorRow)
-	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(70, 70))
+	assert.Equal(t, 1, entry.CursorColumn)
 	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
+
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "c", entry.SelectedText())
+	assert.Equal(t, 0, entry.CursorColumn)
+	w.Resize(fyne.NewSize(64, 78))
+	assert.Equal(t, "c", entry.SelectedText())
 }
 
 func TestEntry_CursorPasswordRevealer(t *testing.T) {
@@ -349,8 +373,8 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Refresh()
@@ -368,8 +392,8 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Refresh()
@@ -1730,7 +1754,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
-		tapPos := fyne.NewPos(140-theme.Padding()*2-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
+		tapPos := fyne.NewPos(140-theme.InnerPadding()-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
 		test.TapCanvas(c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)

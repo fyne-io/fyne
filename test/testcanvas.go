@@ -54,7 +54,8 @@ func Canvas() fyne.Canvas {
 	return dummyCanvas
 }
 
-// NewCanvas returns a single use in-memory canvas used for testing
+// NewCanvas returns a single use in-memory canvas used for testing.
+// This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
 	c := &testCanvas{
 		focusMgr: app.NewFocusManager(nil),

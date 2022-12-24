@@ -142,15 +142,15 @@ func TestForm_ChangeTheme(t *testing.T) {
 
 	test.WithTestTheme(t, func() {
 		form.Refresh()
-		w.Resize(form.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		w.Resize(form.MinSize().Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 		test.AssertImageMatches(t, "form/theme_changed.png", w.Canvas().Capture())
 	})
 }
 
 func TestForm_Disabled(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	disabled := NewEntry()
 	disabled.Disable()
@@ -414,5 +414,35 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 	entry1.SetText("15-true")
 	assert.NoError(t, form.Validate())
 	assert.False(t, validationError)
+
+}
+
+func TestForm_ExtendedEntry(t *testing.T) {
+	extendedEntry := NewSelectEntry([]string{""})
+
+	test.NewApp()
+	defer test.NewApp()
+
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "Extended entry", Widget: extendedEntry},
+		},
+	}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	test.AssertRendersToMarkup(t, "form/extended_entry.xml", w.Canvas())
+}
+
+func TestForm_RefreshFromStructInit(t *testing.T) {
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "Entry", Widget: NewEntry()},
+		},
+	}
+
+	assert.NotPanics(t, func() {
+		form.Refresh()
+	})
 
 }

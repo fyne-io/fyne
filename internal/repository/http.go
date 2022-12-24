@@ -70,7 +70,7 @@ func constructURI(u fyne.URI) string {
 // Exists checks whether the the resource at u returns a
 // non "404 NOT FOUND" response header.
 //
-// The method is a part of the implementation for repository.Repository.Exists
+// Implements: repository.Repository
 //
 // Since: 2.1
 func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
@@ -89,7 +89,7 @@ func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
 // Reader provides a interface for reading the body of the response received
 // from the request to u.
 //
-// The method is a part of the implementation for repository.Repository.Exists
+// Implements: repository.Repository
 //
 // Since: 2.1
 func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
@@ -103,7 +103,7 @@ func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // from the remote server.
 // Any response status code apart from 2xx is considered to be invalid.
 //
-// CanRead implements repository.Repository.CanRead
+// Implements: repository.Repository
 //
 // Since: 2.1
 func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
@@ -119,9 +119,11 @@ func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
 	return true, nil
 }
 
-// Destroy implements repository.Repository.Destroy
+// Destroy satisfies the repository.Repository interface.
 //
-// Sine: 2.1
+// Implements: repository.Repository
+//
+// Since: 2.1
 func (r *HTTPRepository) Destroy(string) {
 	// do nothing
 }
