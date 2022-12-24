@@ -156,6 +156,34 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_Control_Word(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("a\nbc")
+	entry.CursorRow = 0
+	entry.CursorColumn = 0
+
+	// ctrl-right to move on
+	nextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	// ctrl-left to move back
+	prevWord := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.TypedShortcut(prevWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedShortcut(prevWord)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+}
+
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nb")
