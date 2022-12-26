@@ -364,3 +364,18 @@ func TestPainter_paintText_boldItalicClip(t *testing.T) {
 
 	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Paint(c))
 }
+
+func TestPainter_paintText_scale2(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	text := canvas.NewText("scale2", theme.ForegroundColor())
+	text.TextSize = 18
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(text)
+	c.Resize(fyne.NewSize(70, text.MinSize().Height))
+
+	c.SetScale(2)
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_text_scale2.png", p.Paint(c))
+}
