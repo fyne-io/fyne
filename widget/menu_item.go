@@ -96,7 +96,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	objects = append(objects, checkIcon)
-	return &menuItemRenderer{
+	r := &menuItemRenderer{
 		BaseRenderer:  widget.NewBaseRenderer(objects),
 		i:             i,
 		expandIcon:    expandIcon,
@@ -106,6 +106,8 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		text:          text,
 		background:    background,
 	}
+	r.Refresh() // ensure text and icon resources match state
+	return r
 }
 
 // MouseIn activates the item which shows the submenu if the item has one.
