@@ -143,9 +143,11 @@ func (s Size) SubtractWidthHeight(width, height float32) Size {
 
 // RectangleRadius describes a radius of the 4 corners as Size
 // Max Size <= the smaller Rectangle Size
+/*
 type RectangleRadius struct {
-	Left          float32
-	LeftSegments  int32
-	Right         float32
-	RightSegments int32
+	LeftTop     float32
+	LeftBottom  float32
+	RightTop    float32
+	RightBottom float32
 }
+*/

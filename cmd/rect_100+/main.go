@@ -21,13 +21,11 @@ func main() {
 	yellow := color.NRGBA{R: 255, G: 200, B: 0, A: 180}
 
 	// RRect1
-	rectRad1 := fyne.RectangleRadius{Left: 50.0, LeftSegments: 8, Right: 50.0, RightSegments: 8}
-	rr1 := canvas.Rectangle{FillColor: green, Radius: rectRad1}
+	rr1 := canvas.Rectangle{FillColor: green, StrokeColor: blue, StrokeWidth: 10.0, Radius: 50.0}
 	rr1.Resize((fyne.NewSize(300, 150)))
 	rr1.Move(fyne.NewPos(10, 0))
 	// RRect2
-	rectRad2 := fyne.RectangleRadius{Left: 50.0, LeftSegments: 16, Right: 50.0, RightSegments: 16}
-	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: rectRad2}
+	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 50.0}
 	rr2.Resize((fyne.NewSize(300, 150)))
 	rr2.Move(fyne.NewPos(360, 0))
 	// Line1
