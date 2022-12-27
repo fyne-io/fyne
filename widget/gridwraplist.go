@@ -95,8 +95,7 @@ func (l *GridWrapList) scrollTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
-	// TODO there could be bugs here too, but less likely
-	row := math.Ceil(float64(id) / float64(l.getColCount()))
+	row := math.Floor(float64(id) / float64(l.getColCount()))
 	y := (float32(row) * l.itemMin.Height) + (float32(row) * theme.Padding())
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
@@ -319,8 +318,6 @@ func (l *GridWrapList) getColCount() int {
 func (l *gridWrapListLayout) updateList(refresh bool) {
 	// code here is a mashup of listLayout.updateList and gridWrapLayout.Layout
 
-	// TODO - if there are bugs it's probably in here
-
 	l.renderLock.Lock()
 	defer l.renderLock.Unlock()
 	length := 0
@@ -334,8 +331,8 @@ func (l *gridWrapListLayout) updateList(refresh bool) {
 	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+theme.Padding())))
 	minRow := int(offY / (l.list.itemMin.Height + theme.Padding()))
 	minItem := ListItemID(minRow * colCount)
-	maxRow := int(fyne.Min(float32(minRow+visibleRowsCount), float32(math.Ceil(float64(length/colCount)))))
-	maxItem := ListItemID(math.Min(float64((maxRow+1)*colCount), float64(length)))
+	maxRow := int(math.Min(float64(minRow+visibleRowsCount), math.Ceil(float64(length)/float64(colCount))))
+	maxItem := ListItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
 
 	if l.list.UpdateItem == nil {
 		fyne.LogError("Missing UpdateCell callback required for GridWrapList", nil)
@@ -346,12 +343,9 @@ func (l *gridWrapListLayout) updateList(refresh bool) {
 	var cells []fyne.CanvasObject
 	y := offY
 	curItem := minItem
-	for row := minRow; row < maxRow; row++ {
+	for row := minRow; row <= maxRow && curItem <= maxItem; row++ {
 		x := float32(0)
-		for col := 0; col < colCount; col++ {
-			if curItem > maxItem {
-				break
-			}
+		for col := 0; col < colCount && curItem <= maxItem; col++ {
 			c, ok := wasVisible[curItem]
 			if !ok {
 				c = l.getItem()
@@ -374,9 +368,6 @@ func (l *gridWrapListLayout) updateList(refresh bool) {
 			l.visible[curItem] = c
 			cells = append(cells, c)
 			curItem++
-		}
-		if curItem > maxItem {
-			break
 		}
 		y += l.list.itemMin.Height + theme.Padding()
 	}
