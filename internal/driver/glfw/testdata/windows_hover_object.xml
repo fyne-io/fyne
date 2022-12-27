@@ -5,15 +5,15 @@
 				<container size="188x288">
 					<widget size="188x33" type="*widget.listItem">
 						<widget size="188x33" type="*widget.Entry">
-							<rectangle fillColor="inputBackground" pos="0,1" size="188x31"/>
-							<rectangle size="187x32" strokeColor="inputBorder" strokeWidth="1"/>
+							<rectangle fillColor="inputBackground" pos="1,1" size="186x31"/>
+							<rectangle size="186x32" strokeColor="inputBorder" strokeWidth="1"/>
 							<widget pos="0,1" size="188x31" type="*widget.Scroll">
 								<widget size="188x31" type="*widget.entryContent">
 									<widget size="188x31" type="*widget.RichText">
-										<text color="placeholder" pos="8,7" size="172x17"></text>
+										<text color="placeholder" pos="8,7" size="0x17"></text>
 									</widget>
 									<widget size="188x31" type="*widget.RichText">
-										<text pos="8,7" size="172x17"></text>
+										<text pos="8,7" size="0x17"></text>
 									</widget>
 								</widget>
 							</widget>
@@ -21,15 +21,15 @@
 					</widget>
 					<widget pos="0,39" size="188x33" type="*widget.listItem">
 						<widget size="188x33" type="*widget.Entry">
-							<rectangle fillColor="inputBackground" pos="0,1" size="188x31"/>
-							<rectangle size="187x32" strokeColor="inputBorder" strokeWidth="1"/>
+							<rectangle fillColor="inputBackground" pos="1,1" size="186x31"/>
+							<rectangle size="186x32" strokeColor="inputBorder" strokeWidth="1"/>
 							<widget pos="0,1" size="188x31" type="*widget.Scroll">
 								<widget size="188x31" type="*widget.entryContent">
 									<widget size="188x31" type="*widget.RichText">
-										<text color="placeholder" pos="8,7" size="172x17"></text>
+										<text color="placeholder" pos="8,7" size="0x17"></text>
 									</widget>
 									<widget size="188x31" type="*widget.RichText">
-										<text pos="8,7" size="172x17"></text>
+										<text pos="8,7" size="0x17"></text>
 									</widget>
 								</widget>
 							</widget>

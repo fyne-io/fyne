@@ -16,27 +16,12 @@ type otfHeader struct {
 	RangeShift    uint16
 }
 
-const (
-	otfHeaderLength      = 12
-	directoryEntryLength = 16
-)
-
-func (header *otfHeader) checkSum() uint32 {
-	return uint32(header.ScalerType) +
-		(uint32(header.NumTables)<<16 | uint32(header.SearchRange)) +
-		(uint32(header.EntrySelector)<<16 + uint32(header.RangeShift))
-}
-
 // An Entry in an OpenType table.
 type directoryEntry struct {
 	Tag      Tag
 	CheckSum uint32
 	Offset   uint32
 	Length   uint32
-}
-
-func (entry *directoryEntry) checkSum() uint32 {
-	return uint32(entry.Tag) + entry.CheckSum + entry.Offset + entry.Length
 }
 
 func readOTFHeader(r io.Reader, header *otfHeader) error {

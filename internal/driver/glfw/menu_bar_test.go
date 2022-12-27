@@ -74,11 +74,11 @@ func TestMenuBar(t *testing.T) {
 
 		buttonPos := fyne.NewPos(110, 60)
 		fileMenuPos := fyne.NewPos(20, 10)
-		fileNewPos := fyne.NewPos(20, 50)
-		fileOpenPos := fyne.NewPos(20, 70)
-		fileRecentPos := fyne.NewPos(20, 100)
-		fileRecentOlderPos := fyne.NewPos(120, 170)
-		fileRecentOlderOld1Pos := fyne.NewPos(200, 170)
+		fileNewPos := fyne.NewPos(20, 55)
+		fileOpenPos := fyne.NewPos(20, 75)
+		fileRecentPos := fyne.NewPos(20, 110)
+		fileRecentOlderPos := fyne.NewPos(120, 190)
+		fileRecentOlderOld1Pos := fyne.NewPos(200, 190)
 		editMenuPos := fyne.NewPos(70, 10)
 		helpMenuPos := fyne.NewPos(120, 10)
 		type action struct {

@@ -6,7 +6,7 @@
 				<rectangle fillColor="shadow" pos="0,33" size="127x2"/>
 				<rectangle size="0x0"/>
 				<widget pos="4,4" size="95x27" type="*widget.RichText">
-					<text pos="4,4" size="87x19">Option B</text>
+					<text pos="4,4" size="58x19">Option B</text>
 				</widget>
 				<widget pos="99,7" size="20x20" type="*widget.Icon">
 					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>

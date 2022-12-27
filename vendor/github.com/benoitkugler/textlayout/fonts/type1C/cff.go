@@ -15,12 +15,6 @@ import (
 	"github.com/benoitkugler/textlayout/fonts/simpleencodings"
 )
 
-// var Loader fonts.FontLoader = loader{}
-
-// var _ fonts.Face = (*Font)(nil)
-
-type loader struct{}
-
 // Load reads standalone .cff font files and may
 // return multiple fonts.
 func Load(file fonts.Resource) ([]Font, error) {
@@ -84,7 +78,17 @@ func parse(file fonts.Resource) ([]Font, error) {
 	}
 	p := cffParser{src: input}
 	p.skip(4)
-	return p.parse()
+	out, err := p.parse()
+	if err != nil {
+		return nil, err
+	}
+
+	// for standalone use, generate a cmap
+	for _, ft := range out {
+		ft.synthetizeCmap()
+	}
+
+	return out, nil
 }
 
 // Type1 fonts have no natural notion of Unicode code points
@@ -249,8 +253,3 @@ func (f *Font) LoadSummary() (fonts.FontSummary, error) {
 		HasColorGlyphs:    false,
 	}, nil
 }
-
-// func (Font) LoadBitmaps() []fonts.BitmapSize { return nil }
-// func (f *Font) LoadMetrics() fonts.FaceMetrics {
-// 	return nil // TODO:
-// }

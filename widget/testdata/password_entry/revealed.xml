@@ -6,7 +6,7 @@
 			<widget pos="0,2" size="106x31" type="*widget.Scroll">
 				<widget size="106x31" type="*widget.entryContent">
 					<widget size="106x31" type="*widget.RichText">
-						<text pos="8,6" size="90x19">Hié™שרה</text>
+						<text pos="8,6" size="57x19">Hié™שרה</text>
 					</widget>
 					<rectangle fillColor="primary" pos="64,6" size="2x19"/>
 				</widget>

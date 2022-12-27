@@ -68,10 +68,6 @@ func (s *Server) requestPackage() error {
 		appData: s.appData,
 	}
 
-	if p.customMetadata.m == nil {
-		p.customMetadata.m = map[string]string{}
-	}
-
 	err := p.Package()
 	s.dir = p.dir
 	return err

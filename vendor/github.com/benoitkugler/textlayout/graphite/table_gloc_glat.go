@@ -118,6 +118,9 @@ func parseTableGloc(data []byte, numGlyphs int) ([]uint32, uint16, error) {
 			return nil, 0, fmt.Errorf("invalid Gloc table: %s", err)
 		}
 		locations, err = r.Uint32s(numLocations)
+		if err != nil {
+			return nil, 0, err
+		}
 	} else {
 		tmp, err := r.Uint16s(numLocations)
 		if err != nil {

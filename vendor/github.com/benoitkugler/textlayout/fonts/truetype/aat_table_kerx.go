@@ -140,11 +140,11 @@ func parseKernxSubtable0(data []byte, headerLength int, extended bool, tupleCoun
 	}
 
 	if tupleCount != 0 { // interpret values as offset
-		for _, pair := range out {
+		for i, pair := range out {
 			if len(data) < int(uint16(pair.Value))+2 {
 				return nil, errors.New("invalid kern/x subtable format 0 (EOF)")
 			}
-			pair.Value = int16(binary.BigEndian.Uint16(data[pair.Value:]))
+			out[i].Value = int16(binary.BigEndian.Uint16(data[pair.Value:]))
 		}
 	}
 	return out, err

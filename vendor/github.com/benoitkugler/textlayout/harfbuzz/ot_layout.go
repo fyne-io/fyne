@@ -331,9 +331,6 @@ func otLayoutPositionStart(_ *Font, buffer *Buffer) {
 	positionStartGPOS(buffer)
 }
 
-// Called after positioning lookups are performed, to finish glyph advances.
-func otLayoutPositionFinishAdvances(_ *Font, _ *Buffer) {}
-
 // Called after positioning lookups are performed, to finish glyph offsets.
 func otLayoutPositionFinishOffsets(_ *Font, buffer *Buffer) {
 	positionFinishOffsetsGPOS(buffer)

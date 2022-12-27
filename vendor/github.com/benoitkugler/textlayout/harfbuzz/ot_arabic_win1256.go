@@ -85,7 +85,7 @@ var (
 	// Lam+Alef ligatures
 	lamAlefLigaturesSubLookup = tt.GSUBSubtable{
 		Coverage: tt.CoverageList{225},
-		Data:     tt.GSUBLigature1{shaddaLigatureSet},
+		Data:     tt.GSUBLigature1{lamLigatureSet},
 	}
 	lamLigatureSet = ligs{
 		tt.LigatureGlyph{
