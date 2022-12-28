@@ -5,7 +5,7 @@ uniform float stroke;
 uniform float radius;
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
-varying vec2 frame_resolution;
+varying vec4 frame_resolution; //size of view/window = x,y; z = pixScale (w not used); 
 
 
 float RectSDF(vec2 p, vec2 b, float r)
@@ -32,7 +32,8 @@ void main() {
         gl_FragColor = color;
 
     } else {
-        vec4 norm_coords = vec4(rect_coords[0], rect_coords[1], frame_resolution.y - rect_coords[3], frame_resolution.y - rect_coords[2]);
+        float pixScale = frame_resolution.z;  // -> for better readability
+        vec4 norm_coords = vec4(rect_coords[0] * pixScale, rect_coords[1] * pixScale, (frame_resolution.y - rect_coords[3]) * pixScale, (frame_resolution.y - rect_coords[2]) * pixScale);
         float u_fHalfBorderThickness = stroke / 2.0;
         vec2 u_v2HalfShapeSizePx =  vec2(norm_coords[1] - norm_coords[0], norm_coords[3] - norm_coords[2]) / 2.0 - vec2(u_fHalfBorderThickness);
         vec2 v_v2CenteredPos = (gl_FragCoord.xy - vec2(norm_coords[0] + norm_coords[1], norm_coords[2] + norm_coords[3]) / 2.0);

@@ -112,7 +112,7 @@ func (p *painter) drawRectangle(
 	p.defineVertexArray(p.rectangleProgram, "normal", 2, 4, 2)
 
 	frameSizeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "frame_size")
-	p.ctx.Uniform4f(frameSizeUniform, frame.Width, frame.Height, 0.0, 0.0)
+	p.ctx.Uniform4f(frameSizeUniform, frame.Width, frame.Height, p.pixScale, 0.0)
 	p.logError()
 	// Vertex: END
 
