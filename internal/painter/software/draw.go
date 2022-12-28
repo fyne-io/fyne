@@ -142,7 +142,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 		color = theme.ForegroundColor()
 	}
 
-	face, measureFace := painter.CachedFontFace(text.TextStyle, text.TextSize, 1)
+	face, measureFace := painter.CachedFontFace(text.TextStyle, text.TextSize*c.Scale(), 1)
 	painter.DrawString(txtImg, text.Text, color, face, measureFace, text.TextSize, c.Scale(), height, text.TextStyle.TabWidth)
 
 	size := text.Size()
