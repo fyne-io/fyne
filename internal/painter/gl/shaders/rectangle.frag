@@ -40,7 +40,12 @@ void main() {
         float fDist = RectSDF(v_v2CenteredPos, u_v2HalfShapeSizePx, radius - u_fHalfBorderThickness);
     
         vec4 v4FromColor = stroke_color; //Always the border color. If no border, this still should be set
-        vec4 v4ToColor = vec4(1.0, 1.0, 1.0, 0.0); //Outside color
+        vec4 v4ToColor = vec4(0.5, 0.5, 0.5, 0.5); //Outside color
+        if ( frame_resolution.x != 800.0 ){
+            v4ToColor = vec4(1.0, 0.0, 0.0, 0.5); //Outside color
+        } else if ( frame_resolution.y != 600.0 ){
+            v4ToColor = vec4(1.0, 0.0, 0.0, 0.5); //Outside color
+        } 
     
         if (u_fHalfBorderThickness > 0.0)
         {
