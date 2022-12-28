@@ -69,6 +69,7 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.ctx.DrawArrays(triangles, 0, 6)
 	p.logError()
 	p.freeBuffer(vbo)
+	println("LINE >> frameWidth: ", frame.Width, "frameHeight: ", frame.Height)
 }
 
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
@@ -105,7 +106,7 @@ func (p *painter) drawRectangle(
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 
 	// Vertex: BEG
-	points := p.vecRectCoords(pos, rect, frame)
+	points := p.vecRectCoords(pos, rect)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.rectangleProgram, "vert", 2, 4, 0)
 	p.defineVertexArray(p.rectangleProgram, "normal", 2, 4, 2)
@@ -118,6 +119,7 @@ func (p *painter) drawRectangle(
 	// Fragment: BEG
 	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
 	p.ctx.Uniform4f(rectCoordsUniform, points[0], points[4], points[1], points[9])
+	println("RECT >> frameWidth: ", frame.Width, "frameHeight: ", frame.Height)
 	println("scale: ", p.pixScale, " x1/x2 ", points[0], points[4], " y1/y2 ", points[1], points[9])
 
 	strokeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke")
@@ -395,7 +397,6 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 func (p *painter) vecRectCoords(
 	pos fyne.Position,
 	rect *canvas.Rectangle,
-	frame fyne.Size,
 ) []float32 {
 	size := rect.Size()
 	pos1 := rect.Position()

@@ -69,7 +69,7 @@ func main() {
 		//btn1,
 	)
 	myWindow.SetContent(cont)
-	myWindow.Resize(fyne.NewSize(900, 600))
+	myWindow.Resize(fyne.NewSize(800, 600))
 
 	myWindow.ShowAndRun()
 }
