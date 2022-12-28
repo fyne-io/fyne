@@ -118,7 +118,7 @@ func (p *painter) drawRectangle(
 	// Fragment: BEG
 	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
 	p.ctx.Uniform4f(rectCoordsUniform, points[0], points[4], points[1], points[9])
-	//println(points[1], " | ", points[9])
+	println("scale: ", p.pixScale, " x1/x2 ", points[0], points[4], " y1/y2 ", points[1], points[9])
 
 	strokeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke")
 	stroke := float32(roundToPixel(rect.StrokeWidth, p.pixScale))
