@@ -44,11 +44,8 @@ type RichText struct {
 // Since: 2.1
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
-	t.Scroll = widget.ScrollNone
-	t.ExtendBaseWidget(t)
-	
+	t.Scroll = widget.ScrollNone	
 	t.updateRowBounds()
-	t.Refresh()
 	return t
 }
 
@@ -797,7 +794,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
-	if wrap == fyne.TextWrapOff {
+	if maxWidth < 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
 
