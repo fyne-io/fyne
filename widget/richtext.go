@@ -44,7 +44,7 @@ type RichText struct {
 // Since: 2.1
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
-	t.Scroll = widget.ScrollNone	
+	t.Scroll = widget.ScrollNone
 	t.updateRowBounds()
 	return t
 }
