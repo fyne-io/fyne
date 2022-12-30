@@ -893,6 +893,10 @@ func TestText_findSpaceIndex(t *testing.T) {
 			text: "ww wwww www wwwww",
 			want: 11,
 		},
+		"space beginning": {
+			text: " ww",
+			want: 2,
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, tt.want, findSpaceIndex([]rune(tt.text), len(tt.text)-1))

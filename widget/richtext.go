@@ -785,7 +785,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 			break
 		}
 	}
-	if curIndex < 0 {
+	if curIndex <= 0 {
 		return fallback
 	}
 	return curIndex
