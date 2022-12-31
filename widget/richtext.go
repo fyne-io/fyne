@@ -870,7 +870,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 					} else {
 						spaceIndex := findSpaceIndex(sub, fallback)
 						if spaceIndex == 0 {
-							spaceIndex = fallback
+							spaceIndex = 1
 						}
 
 						high = low + spaceIndex
