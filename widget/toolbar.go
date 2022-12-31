@@ -48,7 +48,7 @@ func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 // SetDisabled updated the disabled property of ToolbarAction
 func (t *ToolbarAction) SetDisabled(disabled bool) {
 	t.disabled = disabled
-	t.ToolbarObject().Refresh()
+	t.Refresh()
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
