@@ -15,6 +15,7 @@ type ToolbarItem interface {
 
 // ToolbarAction is push button style of ToolbarItem
 type ToolbarAction struct {
+	DisableableWidget
 	Icon        fyne.Resource
 	OnActivated func() `json:"-"`
 }
@@ -23,7 +24,7 @@ type ToolbarAction struct {
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
 	button.Importance = LowImportance
-
+	button.disabled = t.disabled
 	return button
 }
 
@@ -37,7 +38,17 @@ func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
-	return &ToolbarAction{icon, onActivated}
+	toolbarAction := &ToolbarAction{
+		Icon:        icon,
+		OnActivated: onActivated,
+	}
+	return toolbarAction
+}
+
+// SetDisabled updated the disabled property of ToolbarAction
+func (t *ToolbarAction) SetDisabled(disabled bool) {
+	t.disabled = disabled
+	t.ToolbarObject().Refresh()
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
