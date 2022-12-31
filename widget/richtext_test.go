@@ -895,7 +895,7 @@ func TestText_findSpaceIndex(t *testing.T) {
 		},
 		"space beginning": {
 			text: " ww",
-			want: 2,
+			want: 0,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
