@@ -29,17 +29,35 @@ type fileDialogItem struct {
 	hovered bool
 }
 
-func (i *fileDialogItem) MouseIn(*desktop.MouseEvent) {
+func (i *fileDialogItem) FocusGained() {
 	i.hovered = true
 	i.Refresh()
 }
 
-func (i *fileDialogItem) MouseMoved(*desktop.MouseEvent) {
+func (i *fileDialogItem) FocusLost() {
+	i.hovered = false
+	i.Refresh()
+}
+
+func (i *fileDialogItem) TypedRune(_ rune) {
+}
+
+func (i *fileDialogItem) TypedKey(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeySpace {
+		i.picker.setSelected(i)
+		i.Refresh()
+	}
+}
+
+func (i *fileDialogItem) MouseIn(_ *desktop.MouseEvent) {
+	i.FocusGained()
+}
+
+func (i *fileDialogItem) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 func (i *fileDialogItem) MouseOut() {
-	i.hovered = false
-	i.Refresh()
+	i.FocusLost()
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {

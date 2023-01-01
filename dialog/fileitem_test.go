@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 
 	"fyne.io/fyne/v2/test"
@@ -118,4 +119,27 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 	assert.False(t, item.isCurrent)
 	assert.Equal(t, (*fileDialogItem)(nil), f.selected)
 	assert.Equal(t, parentDir.String(), f.dir.String())
+}
+
+func TestFileDialogItemNavigation(t *testing.T) {
+	f := &fileDialog{file: &FileDialog{}}
+	_ = f.makeUI()
+
+	uri := storage.NewFileURI("/random/file")
+	item := f.newFileItem(uri, false)
+
+	item.FocusGained()
+	assert.True(t, item.hovered)
+
+	item.FocusLost()
+	assert.False(t, item.hovered)
+
+	item.MouseIn(nil)
+	assert.True(t, item.hovered)
+
+	item.MouseOut()
+	assert.False(t, item.hovered)
+
+	item.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.True(t, item.isCurrent)
 }
