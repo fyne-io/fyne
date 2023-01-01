@@ -17,6 +17,9 @@ const (
 	fileIconCellWidth  = fileIconSize * 1.25
 )
 
+var _ fyne.Focusable = (*fileDialogItem)(nil)
+var _ fyne.Tappable = (*fileDialogItem)(nil)
+
 type fileDialogItem struct {
 	widget.BaseWidget
 	picker    *fileDialog
