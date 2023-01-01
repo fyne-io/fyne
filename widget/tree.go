@@ -712,6 +712,12 @@ func (n *treeNode) TypedRune(_ rune) {
 func (n *treeNode) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeySpace {
 		n.tree.Select(n.uid)
+	} else if n.isBranch {
+		if key.Name == fyne.KeyRight {
+			n.tree.OpenBranch(n.uid)
+		} else if key.Name == fyne.KeyLeft {
+			n.tree.CloseBranch(n.uid)
+		}
 	}
 }
 
