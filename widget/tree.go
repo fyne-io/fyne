@@ -662,6 +662,7 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	return
 }
 
+var _ fyne.Focusable = (*treeNode)(nil)
 var _ desktop.Hoverable = (*treeNode)(nil)
 var _ fyne.CanvasObject = (*treeNode)(nil)
 var _ fyne.Tappable = (*treeNode)(nil)
@@ -695,23 +696,40 @@ func (n *treeNode) Indent() float32 {
 	return float32(n.depth) * (theme.IconInlineSize() + theme.Padding())
 }
 
-// MouseIn is called when a desktop pointer enters the widget
-func (n *treeNode) MouseIn(*desktop.MouseEvent) {
+func (n *treeNode) FocusGained() {
 	n.hovered = true
 	n.partialRefresh()
 }
 
-// MouseMoved is called when a desktop pointer hovers over the widget
-func (n *treeNode) MouseMoved(*desktop.MouseEvent) {
-}
-
-// MouseOut is called when a desktop pointer exits the widget
-func (n *treeNode) MouseOut() {
+func (n *treeNode) FocusLost() {
 	n.hovered = false
 	n.partialRefresh()
 }
 
-func (n *treeNode) Tapped(*fyne.PointEvent) {
+func (n *treeNode) TypedRune(_ rune) {
+}
+
+func (n *treeNode) TypedKey(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeySpace {
+		n.tree.Select(n.uid)
+	}
+}
+
+// MouseIn is called when a desktop pointer enters the widget
+func (n *treeNode) MouseIn(_ *desktop.MouseEvent) {
+	n.FocusGained()
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget
+func (n *treeNode) MouseMoved(_ *desktop.MouseEvent) {
+}
+
+// MouseOut is called when a desktop pointer exits the widget
+func (n *treeNode) MouseOut() {
+	n.FocusLost()
+}
+
+func (n *treeNode) Tapped(_ *fyne.PointEvent) {
 	n.tree.Select(n.uid)
 }
 
