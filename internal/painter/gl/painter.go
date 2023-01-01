@@ -22,6 +22,8 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
 	case "rectangle":
 		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
+	case "round_rectangle":
+		return shaderRectangleVert.StaticContent, shaderRoundRectangleFrag.StaticContent
 	case "rectangle_es":
 		return shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent
 	}
@@ -59,14 +61,15 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas           fyne.Canvas
-	ctx              context
-	contextProvider  driver.WithContext
-	program          Program
-	lineProgram      Program
-	rectangleProgram Program
-	texScale         float32
-	pixScale         float32 // pre-calculate scale*texScale for each draw
+	canvas                fyne.Canvas
+	ctx                   context
+	contextProvider       driver.WithContext
+	program               Program
+	lineProgram           Program
+	rectangleProgram      Program
+	roundRectangleProgram Program
+	texScale              float32
+	pixScale              float32 // pre-calculate scale*texScale for each draw
 }
 
 // Declare conformity to Painter interface

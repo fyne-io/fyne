@@ -25,11 +25,11 @@ func main() {
 	rr1.Resize((fyne.NewSize(300, 150)))
 	rr1.Move(fyne.NewPos(10, 0))
 	// RRect2
-	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 50.0}
+	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 0.01}
 	rr2.Resize((fyne.NewSize(300, 150)))
 	rr2.Move(fyne.NewPos(360, 0))
 	// RRect3
-	rr3 := canvas.Rectangle{FillColor: red, StrokeColor: green, StrokeWidth: 5.0}
+	rr3 := canvas.Rectangle{FillColor: red, StrokeColor: green, StrokeWidth: 20.0}
 	rr3.Resize((fyne.NewSize(300, 150)))
 	rr3.Move(fyne.NewPos(10, 400))
 	// Line1
