@@ -13,7 +13,7 @@ import (
 
 func main() {
 	myApp := app.New()
-	myWindow := myApp.NewWindow("Renlite - Flex RoundRectangle Time")
+	myWindow := myApp.NewWindow("Renlite - Vector/GPU based Rectangle and RoundRectangle")
 	green := color.NRGBA{R: 0, G: 180, B: 0, A: 150}
 	red := color.NRGBA{R: 255, G: 0, B: 0, A: 255}
 	blue := color.NRGBA{R: 0, G: 0, B: 255, A: 100}
@@ -25,13 +25,21 @@ func main() {
 	rr1.Resize((fyne.NewSize(300, 150)))
 	rr1.Move(fyne.NewPos(10, 0))
 	// RRect2
-	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 0.01}
+	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 25.0}
 	rr2.Resize((fyne.NewSize(300, 150)))
 	rr2.Move(fyne.NewPos(360, 0))
 	// RRect3
-	rr3 := canvas.Rectangle{FillColor: red, StrokeColor: green, StrokeWidth: 20.0}
+	rr3 := canvas.Rectangle{FillColor: orange, StrokeColor: blue, StrokeWidth: 15.0}
 	rr3.Resize((fyne.NewSize(300, 150)))
 	rr3.Move(fyne.NewPos(10, 400))
+	// RRect4
+	rr4 := canvas.Rectangle{FillColor: orange, StrokeColor: blue, StrokeWidth: 15.0, Radius: 0.01}
+	rr4.Resize((fyne.NewSize(300, 150)))
+	rr4.Move(fyne.NewPos(360, 400))
+	// RRect5 as Circle emulation
+	rr5 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 75.0}
+	rr5.Resize((fyne.NewSize(150, 150)))
+	rr5.Move(fyne.NewPos(700, 0))
 	// Line1
 	line1 := canvas.NewLine(blue)
 	line1.Position1.X = 10.0
@@ -53,23 +61,19 @@ func main() {
 	})
 	btn1.Move(fyne.NewPos(700, 450))
 	btn1.Resize((fyne.NewSize(140.0, 40.0)))
-	txtSeg1 := &widget.TextSegment{Text: "composition"}
-	txt1 := widget.NewRichText(txtSeg1)
-	txt1.Move(fyne.NewPos(380, 380))
-	txtSeg2 := &widget.TextSegment{Text: "one GL stream to GPU"}
-	txt2 := widget.NewRichText(txtSeg2)
-	txt2.Move(fyne.NewPos(70, 380))
 
 	cont := container.NewWithoutLayout(
 		&rr1,
 		&rr2,
+		&rr5,
 		line1,
 		line2,
 		&rr3,
-		//btn1,
+		&rr4,
+		btn1,
 	)
 	myWindow.SetContent(cont)
-	myWindow.Resize(fyne.NewSize(800, 600))
+	myWindow.Resize(fyne.NewSize(1000, 600))
 
 	myWindow.ShowAndRun()
 }

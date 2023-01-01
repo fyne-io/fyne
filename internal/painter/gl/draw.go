@@ -197,6 +197,11 @@ func (p *painter) drawRoundRectangle(
 	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
 	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
+	rectSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_size_half")
+	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
+	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+	p.ctx.Uniform4f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5, 0.0, 0.0)
+
 	radiusUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "radius")
 	radiusScaled := roundToPixel(rect.Radius*p.pixScale, 1.0)
 	p.ctx.Uniform1f(radiusUniform, radiusScaled)
