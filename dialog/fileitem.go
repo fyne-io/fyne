@@ -154,7 +154,6 @@ func (s fileItemRenderer) Refresh() {
 	} else {
 		s.background.Hide()
 	}
-	s.background.Refresh()
 	canvas.Refresh(s.item)
 }
 
