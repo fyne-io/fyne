@@ -182,6 +182,12 @@ func TestEntry_Control_Word(t *testing.T) {
 	entry.TypedShortcut(prevWord)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
+
+	// select word
+	entry.TypedShortcut(nextWord)
+	selectNextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
+	entry.TypedShortcut(selectNextWord)
+	assert.Equal(t, "bc", entry.SelectedText())
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {

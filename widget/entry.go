@@ -928,8 +928,18 @@ func (e *Entry) registerShortcut() {
 			}
 		})
 	}
+	selectMoveWord := func(se fyne.Shortcut) {
+		if !e.selecting {
+			e.selectColumn = e.CursorColumn
+			e.selectRow = e.CursorRow
+			e.selecting = true
+		}
+		moveWord(se)
+	}
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}, moveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}, moveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
 }
 
 func (e *Entry) requestFocus() {
