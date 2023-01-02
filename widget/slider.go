@@ -151,8 +151,7 @@ func (s *Slider) MouseOut() {
 //
 // Implements: fyne.Tappable
 func (s *Slider) Tapped(_ *fyne.PointEvent) {
-	s.focused = true
-	s.Refresh()
+	s.FocusGained()
 }
 
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
