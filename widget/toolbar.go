@@ -51,6 +51,7 @@ func (t *ToolbarAction) Enable() {
 	}
 
 	t.disabled = false
+	t.ToolbarObject().Refresh()
 }
 
 // Disable this ToolbarAction, updating any style or features appropriately.
@@ -60,6 +61,7 @@ func (t *ToolbarAction) Disable() {
 	}
 
 	t.disabled = true
+	t.ToolbarObject().Refresh()
 }
 
 // Disabled returns true if this ToolbarAction is currently disabled or false if it can currently be interacted with.
