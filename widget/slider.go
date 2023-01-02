@@ -2,11 +2,13 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -20,7 +22,9 @@ const (
 	Vertical   Orientation = 1
 )
 
+var _ fyne.Focusable = (*Slider)(nil)
 var _ fyne.Draggable = (*Slider)(nil)
+var _ desktop.Hoverable = (*Slider)(nil)
 
 // Slider is a widget that can slide between two fixed values.
 type Slider struct {
@@ -34,7 +38,9 @@ type Slider struct {
 	Orientation Orientation
 	OnChanged   func(float64)
 
-	binder basicBinder
+	binder  basicBinder
+	hovered bool
+	focused bool
 }
 
 // NewSlider returns a basic slider.
@@ -74,6 +80,16 @@ func (s *Slider) Bind(data binding.Float) {
 	}
 }
 
+func (s *Slider) FocusGained() {
+	s.focused = true
+	s.Refresh()
+}
+
+func (s *Slider) FocusLost() {
+	s.focused = false
+	s.Refresh()
+}
+
 // DragEnd function.
 func (s *Slider) DragEnd() {
 }
@@ -106,6 +122,40 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
+}
+
+// MouseIn is called when a desktop pointer enters the widget.
+//
+// Implements: desktop.Hoverable
+func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
+	s.hovered = true
+	s.Refresh()
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget.
+//
+// Implements: desktop.Hoverable
+func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
+}
+
+// MouseOut is called when a desktop pointer exits the widget
+//
+// Implements: desktop.Hoverable
+func (s *Slider) MouseOut() {
+	s.hovered = false
+	s.Refresh()
+}
+
+func (s *Slider) TypedKey(key *fyne.KeyEvent) {
+	switch key.Name {
+	case fyne.KeyLeft:
+		s.SetValue(s.Value - s.Step)
+	case fyne.KeyRight:
+		s.SetValue(s.Value + s.Step)
+	}
+}
+
+func (s *Slider) TypedRune(_ rune) {
 }
 
 func (s *Slider) buttonDiameter() float32 {
@@ -198,10 +248,11 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	track := canvas.NewRectangle(theme.InputBackgroundColor())
 	active := canvas.NewRectangle(theme.ForegroundColor())
 	thumb := &canvas.Circle{FillColor: theme.ForegroundColor()}
+	focusIndicator := &canvas.Circle{FillColor: color.Transparent}
 
-	objects := []fyne.CanvasObject{track, active, thumb}
+	objects := []fyne.CanvasObject{track, active, thumb, focusIndicator}
 
-	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
+	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, focusIndicator, s}
 	slide.Refresh() // prepare for first draw
 	return slide
 }
@@ -257,16 +308,15 @@ func (s *Slider) Unbind() {
 	s.binder.Unbind()
 }
 
-const (
-	minLongSide = float32(34) // added to button diameter
-)
+const minLongSide = float32(34) // added to button diameter
 
 type sliderRenderer struct {
 	widget.BaseRenderer
-	track  *canvas.Rectangle
-	active *canvas.Rectangle
-	thumb  *canvas.Circle
-	slider *Slider
+	track          *canvas.Rectangle
+	active         *canvas.Rectangle
+	thumb          *canvas.Circle
+	focusIndicator *canvas.Circle
+	slider         *Slider
 }
 
 // Refresh updates the widget state for drawing.
@@ -274,6 +324,14 @@ func (s *sliderRenderer) Refresh() {
 	s.track.FillColor = theme.InputBackgroundColor()
 	s.thumb.FillColor = theme.ForegroundColor()
 	s.active.FillColor = theme.ForegroundColor()
+
+	if s.slider.hovered {
+		s.focusIndicator.FillColor = theme.HoverColor()
+	} else if s.slider.focused {
+		s.focusIndicator.FillColor = theme.FocusColor()
+	} else {
+		s.focusIndicator.FillColor = color.Transparent
+	}
 
 	s.slider.clampValueToRange()
 	s.Layout(s.slider.Size())
@@ -323,6 +381,10 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
+
+	focusIndicatorSize := fyne.NewSize(diameter+theme.InnerPadding()*2, diameter+theme.InnerPadding()*2)
+	s.focusIndicator.Move(thumbPos.SubtractXY(theme.InnerPadding(), theme.InnerPadding()))
+	s.focusIndicator.Resize(focusIndicatorSize)
 }
 
 // MinSize calculates the minimum size of a widget.
