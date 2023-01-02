@@ -184,10 +184,18 @@ func TestEntry_Control_Word(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 
 	// select word
-	entry.TypedShortcut(nextWord)
+	entry.SetText("word1 word2 word3")
+	entry.CursorRow = 0
+	entry.CursorColumn = 3
 	selectNextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
 	entry.TypedShortcut(selectNextWord)
-	assert.Equal(t, "bc", entry.SelectedText())
+	assert.Equal(t, "d1", entry.SelectedText())
+	entry.TypedShortcut(selectNextWord)
+	assert.Equal(t, "d1 word2", entry.SelectedText())
+
+	// unselect when no shift press
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
