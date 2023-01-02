@@ -22,9 +22,10 @@ const (
 	Vertical   Orientation = 1
 )
 
-var _ fyne.Focusable = (*Slider)(nil)
 var _ fyne.Draggable = (*Slider)(nil)
+var _ fyne.Focusable = (*Slider)(nil)
 var _ desktop.Hoverable = (*Slider)(nil)
+var _ fyne.Tappable = (*Slider)(nil)
 
 // Slider is a widget that can slide between two fixed values.
 type Slider struct {
@@ -143,6 +144,14 @@ func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
 // Implements: desktop.Hoverable
 func (s *Slider) MouseOut() {
 	s.hovered = false
+	s.Refresh()
+}
+
+// Tapped is called when a pointer tapped event is captured and triggers any change handler
+//
+// Implements: fyne.Tappable
+func (s *Slider) Tapped(_ *fyne.PointEvent) {
+	s.focused = true
 	s.Refresh()
 }
 
@@ -325,10 +334,10 @@ func (s *sliderRenderer) Refresh() {
 	s.thumb.FillColor = theme.ForegroundColor()
 	s.active.FillColor = theme.ForegroundColor()
 
-	if s.slider.hovered {
-		s.focusIndicator.FillColor = theme.HoverColor()
-	} else if s.slider.focused {
+	if s.slider.focused {
 		s.focusIndicator.FillColor = theme.FocusColor()
+	} else if s.slider.hovered {
+		s.focusIndicator.FillColor = theme.HoverColor()
 	} else {
 		s.focusIndicator.FillColor = color.Transparent
 	}
