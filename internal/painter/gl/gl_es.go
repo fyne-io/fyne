@@ -80,6 +80,8 @@ func (p *painter) Init() {
 	p.logError()
 	p.program = p.createProgram("simple_es")
 	p.lineProgram = p.createProgram("line_es")
+	p.rectangleProgram = p.createProgram("rectangle_es")
+	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
 }
 
 type esContext struct{}
