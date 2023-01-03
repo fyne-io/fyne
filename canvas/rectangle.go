@@ -16,7 +16,7 @@ type Rectangle struct {
 	FillColor   color.Color // The rectangle fill color
 	StrokeColor color.Color // The rectangle stroke color
 	StrokeWidth float32     // The stroke width of the rectangle
-	Radius      float32     // The radius of the rectangle corners
+	Radius      fyne.Radius // The radius of the rectangle corners
 }
 
 // Refresh causes this object to be redrawn in it's current state

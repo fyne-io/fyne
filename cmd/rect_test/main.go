@@ -21,11 +21,11 @@ func main() {
 	yellow := color.NRGBA{R: 255, G: 200, B: 0, A: 180}
 
 	// RRect1
-	rr1 := canvas.Rectangle{FillColor: green, StrokeColor: blue, StrokeWidth: 10.0, Radius: 50.0}
+	rr1 := canvas.Rectangle{FillColor: green, StrokeColor: blue, StrokeWidth: 10.0, Radius: fyne.Radius{Pixel: 50.0}}
 	rr1.Resize((fyne.NewSize(300, 150)))
 	rr1.Move(fyne.NewPos(10, 0))
 	// RRect2
-	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 25.0}
+	rr2 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: fyne.Radius{Pixel: 25.0}}
 	rr2.Resize((fyne.NewSize(300, 150)))
 	rr2.Move(fyne.NewPos(360, 0))
 	// RRect3
@@ -33,11 +33,11 @@ func main() {
 	rr3.Resize((fyne.NewSize(300, 150)))
 	rr3.Move(fyne.NewPos(10, 400))
 	// RRect4
-	rr4 := canvas.Rectangle{FillColor: orange, StrokeColor: blue, StrokeWidth: 15.0, Radius: 0.01}
+	rr4 := canvas.Rectangle{FillColor: orange, StrokeColor: blue, StrokeWidth: 15.0, Radius: fyne.Radius{Pixel: 0.01}}
 	rr4.Resize((fyne.NewSize(300, 150)))
 	rr4.Move(fyne.NewPos(360, 400))
 	// RRect5 as Circle emulation
-	rr5 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: 75.0}
+	rr5 := canvas.Rectangle{FillColor: yellow, StrokeColor: orange, StrokeWidth: 8.0, Radius: fyne.Radius{Percent: 0.50}}
 	rr5.Resize((fyne.NewSize(150, 150)))
 	rr5.Move(fyne.NewPos(700, 0))
 	// Line1
