@@ -14,5 +14,6 @@ attribute vec2 vert;
 attribute vec2 normal;
 
 void main() {
+    vert;  //Workaround, because WebGL optimizes away attributes unused
     gl_Position = vec4(normal, 0, 1);
 }

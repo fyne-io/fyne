@@ -105,14 +105,14 @@ func (p *painter) drawRectangle(
 	pos fyne.Position,
 	frame fyne.Size,
 ) {
-	p.ctx.UseProgram(p.rectangleProgram)
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-
 	// Vertex: BEG
 	points := p.vecRectCoords(pos, rect, frame)
+	p.ctx.UseProgram(p.rectangleProgram)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.rectangleProgram, "vert", 2, 4, 0)
 	p.defineVertexArray(p.rectangleProgram, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 	// Vertex: END
 
@@ -169,14 +169,14 @@ func (p *painter) drawRoundRectangle(
 	pos fyne.Position,
 	frame fyne.Size,
 ) {
-	p.ctx.UseProgram(p.roundRectangleProgram)
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-
 	// Vertex: BEG
 	points := p.vecRectCoords(pos, rect, frame)
+	p.ctx.UseProgram(p.roundRectangleProgram)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.roundRectangleProgram, "vert", 2, 4, 0)
 	p.defineVertexArray(p.roundRectangleProgram, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 	// Vertex: END
 
