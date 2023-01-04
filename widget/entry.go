@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	multiLineRows            = 3
-	doubleClickWordSeperator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
+	multiLineRows = 3
+	wordSeparator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
 
 // Declare conformity with interfaces
@@ -220,7 +220,7 @@ func (e *Entry) Disabled() bool {
 // Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 	row := e.textProvider().row(e.CursorRow)
-	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
+	start, end := getTextWhitespaceRegion(row, e.CursorColumn, false)
 	if start == -1 || end == -1 {
 		return
 	}
@@ -898,6 +898,52 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
 		e.selectAll()
 	})
+
+	moveWord := func(s fyne.Shortcut) {
+		row := e.textProvider().row(e.CursorRow)
+		start, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
+		if start == -1 || end == -1 {
+			return
+		}
+
+		e.setFieldsAndRefresh(func() {
+			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
+				if e.CursorColumn == 0 {
+					if e.CursorRow > 0 {
+						e.CursorRow--
+						e.CursorColumn = len(e.textProvider().row(e.CursorRow))
+					}
+				} else {
+					e.CursorColumn = start
+				}
+			} else {
+				if e.CursorColumn == len(e.textProvider().row(e.CursorRow)) {
+					if e.CursorRow < e.textProvider().rows()-1 {
+						e.CursorRow++
+						e.CursorColumn = 0
+					}
+				} else {
+					e.CursorColumn = end
+				}
+			}
+		})
+	}
+	selectMoveWord := func(se fyne.Shortcut) {
+		if !e.selecting {
+			e.selectColumn = e.CursorColumn
+			e.selectRow = e.CursorRow
+			e.selecting = true
+		}
+		moveWord(se)
+	}
+	unselectMoveWord := func(se fyne.Shortcut) {
+		e.selecting = false
+		moveWord(se)
+	}
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
 }
 
 func (e *Entry) requestFocus() {
@@ -1735,8 +1781,8 @@ func (r *entryContentRenderer) updateScrollDirections() {
 
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
 // and expanding to the start and end of the whitespace or text underneath the specified position.
-func getTextWhitespaceRegion(row []rune, col int) (int, int) {
-
+// Pass `true` for `expand` if you want whitespace selection to extend to the neighboring words.
+func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 	if len(row) == 0 || col < 0 {
 		return -1, -1
 	}
@@ -1753,30 +1799,42 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 			return ' '
 		}
 		// If this rune is a typical word separator then classify it as whitespace
-		if strings.ContainsRune(doubleClickWordSeperator, r) {
+		if strings.ContainsRune(wordSeparator, r) {
 			return ' '
 		}
 		return '-'
 	}
 	toks := strings.Map(space, string(row))
-
 	c := byte(' ')
-	if toks[col] == ' ' {
+
+	startCheck := col
+	endCheck := col
+	if expand {
+		if col > 0 && toks[col-1] == ' ' { // ignore the prior whitespace then count
+			startCheck = strings.LastIndexByte(toks[:startCheck], '-')
+			if startCheck == -1 {
+				startCheck = 0
+			}
+		}
+		if toks[col] == ' ' { // ignore the current whitespace then count
+			endCheck = col + strings.IndexByte(toks[endCheck:], '-')
+		}
+	} else if toks[col] == ' ' {
 		c = byte('-')
 	}
 
-	// LastIndexByte + 1 ensures that the position of the unwanted character 'c' is excluded
-	// +1 also has the added side effect whereby if 'c' isn't found then -1 is snapped to 0
-	start := strings.LastIndexByte(toks[:col], c) + 1
+	// LastIndexByte + 1 ensures that the position of the unwanted character ' ' is excluded
+	// +1 also has the added side effect whereby if ' ' isn't found then -1 is snapped to 0
+	start := strings.LastIndexByte(toks[:startCheck], c) + 1
 
 	// IndexByte will find the position of the next unwanted character, this is to be the end
 	// marker for the selection
-	end := strings.IndexByte(toks[col:], c)
+	end := strings.IndexByte(toks[endCheck:], c)
 
 	if end == -1 {
 		end = len(toks) // snap end to len(toks) if it results in -1
 	} else {
-		end += col // otherwise include the text slice position
+		end += endCheck // otherwise include the text slice position
 	}
 	return start, end
 }
