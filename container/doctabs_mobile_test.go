@@ -5,6 +5,7 @@ package container_test
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -360,6 +361,7 @@ func TestDocTabs_Tapped(t *testing.T) {
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(330, 10))
+	time.Sleep(time.Millisecond)
 	require.Equal(t, 3, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_create_tab.xml", c)
 

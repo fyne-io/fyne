@@ -5,6 +5,7 @@ package container_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -368,6 +369,7 @@ func TestDocTabs_Tapped(t *testing.T) {
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_first_selected.xml", c)
 
 	test.TapCanvas(c, fyne.NewPos(254, 10))
+	time.Sleep(time.Millisecond)
 	require.Equal(t, 3, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_create_tab.xml", c)
 
