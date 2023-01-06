@@ -53,13 +53,9 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.logError()
 
 	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
-	r, g, b, a := line.StrokeColor.RGBA()
-	if a == 0 {
-		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
-	} else {
-		alpha := float32(a)
-		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
-	}
+	r, g, b, a := getFragmentColor(line.StrokeColor)
+	p.ctx.Uniform4f(colorUniform, r, g, b, a)
+
 	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
 	p.ctx.Uniform1f(lineWidthUniform, halfWidth)
 
@@ -118,44 +114,29 @@ func (p *painter) drawRectangle(
 
 	// Fragment: BEG
 	frameSizeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "frame_size")
-	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
-	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
 	p.ctx.Uniform4f(frameSizeUniform, frameWidthScaled, frameHeightScaled, 0.0, 0.0)
 
 	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
-	x1Scaled := roundToPixel(points[0]*p.pixScale, 1.0)
-	x2Scaled := roundToPixel(points[4]*p.pixScale, 1.0)
-	y1Scaled := roundToPixel(points[1]*p.pixScale, 1.0)
-	y2Scaled := roundToPixel(points[9]*p.pixScale, 1.0)
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
 	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_width")
 	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
 	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
 
+	var r, g, b, a float32
 	fillColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "fill_color")
-	rF, gF, bF, aF := rect.FillColor.RGBA()
-	if aF == 0 {
-		p.ctx.Uniform4f(fillColorUniform, 0, 0, 0, 0)
-	} else {
-		alphaF := float32(aF)
-		colF := []float32{float32(rF) / alphaF, float32(gF) / alphaF, float32(bF) / alphaF, alphaF / 0xffff}
-		p.ctx.Uniform4f(fillColorUniform, colF[0], colF[1], colF[2], colF[3])
-	}
+	r, g, b, a = getFragmentColor(rect.FillColor)
+	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
 
 	strokeColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_color")
-	var col color.Color
-	if rect.StrokeColor == col {
+	var initCol color.Color
+	if rect.StrokeColor == initCol {
 		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
 	}
-	rS, gS, bS, aS := rect.StrokeColor.RGBA()
-	if aS == 0 {
-		p.ctx.Uniform4f(strokeColorUniform, 0, 0, 0, 0)
-	} else {
-		alphaS := float32(aS)
-		colF := []float32{float32(rS) / alphaS, float32(gS) / alphaS, float32(bS) / alphaS, alphaS / 0xffff}
-		p.ctx.Uniform4f(strokeColorUniform, colF[0], colF[1], colF[2], colF[3])
-	}
+	r, g, b, a = getFragmentColor(rect.StrokeColor)
+	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
 	p.logError()
 	// Fragment: END
 
@@ -182,15 +163,11 @@ func (p *painter) drawRoundRectangle(
 
 	// Fragment: BEG
 	frameSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "frame_size")
-	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
-	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
 	p.ctx.Uniform4f(frameSizeUniform, frameWidthScaled, frameHeightScaled, 0.0, 0.0)
 
 	rectCoordsUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_coords")
-	x1Scaled := roundToPixel(points[0]*p.pixScale, 1.0)
-	x2Scaled := roundToPixel(points[4]*p.pixScale, 1.0)
-	y1Scaled := roundToPixel(points[1]*p.pixScale, 1.0)
-	y2Scaled := roundToPixel(points[9]*p.pixScale, 1.0)
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
 	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "stroke_width_half")
@@ -212,29 +189,18 @@ func (p *painter) drawRoundRectangle(
 	}
 	p.ctx.Uniform1f(radiusUniform, radiusScaled)
 
+	var r, g, b, a float32
 	fillColorUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "fill_color")
-	rF, gF, bF, aF := rect.FillColor.RGBA()
-	if aF == 0 {
-		p.ctx.Uniform4f(fillColorUniform, 0, 0, 0, 0)
-	} else {
-		alphaF := float32(aF)
-		colF := []float32{float32(rF) / alphaF, float32(gF) / alphaF, float32(bF) / alphaF, alphaF / 0xffff}
-		p.ctx.Uniform4f(fillColorUniform, colF[0], colF[1], colF[2], colF[3])
-	}
+	r, g, b, a = getFragmentColor(rect.FillColor)
+	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
 
 	strokeColorUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "stroke_color")
-	var col color.Color
-	if rect.StrokeColor == col {
+	var initCol color.Color
+	if rect.StrokeColor == initCol {
 		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
 	}
-	rS, gS, bS, aS := rect.StrokeColor.RGBA()
-	if aS == 0 {
-		p.ctx.Uniform4f(strokeColorUniform, 0, 0, 0, 0)
-	} else {
-		alphaS := float32(aS)
-		colF := []float32{float32(rS) / alphaS, float32(gS) / alphaS, float32(bS) / alphaS, alphaS / 0xffff}
-		p.ctx.Uniform4f(strokeColorUniform, colF[0], colF[1], colF[2], colF[3])
-	}
+	r, g, b, a = getFragmentColor(rect.StrokeColor)
+	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
 	p.logError()
 	// Fragment: END
 
@@ -369,66 +335,6 @@ func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather f
 	}, halfWidth, featherWidth
 }
 
-/*
-func (p *painter) flexLineCoordsNew(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {
-	if lineWidth <= 1 {
-		offset := float32(0.5)                  // adjust location for lines < 1pt on regular display
-		if lineWidth <= 0.5 && p.pixScale > 1 { // and for 1px drawing on HiDPI (width 0.5)
-			offset = 0.25
-		}
-		if pos1.X == pos2.X {
-			pos1.X -= offset
-			pos2.X -= offset
-		}
-		if pos1.Y == pos2.Y {
-			pos1.Y -= offset
-			pos2.Y -= offset
-		}
-	}
-
-	x1Pos := pos1.X / frame.Width
-	x1 := -1 + x1Pos*2
-	y1Pos := pos1.Y / frame.Height
-	y1 := 1 - y1Pos*2
-	x2Pos := pos2.X / frame.Width
-	x2 := -1 + x2Pos*2
-	y2Pos := pos2.Y / frame.Height
-	y2 := 1 - y2Pos*2
-
-	// Line calculation: y = k * x + d
-	// Opposite slope of line (-k ... k_minus)
-	y_lenght := pos1.Y + pos2.Y*(-1)
-	x_lenght := pos1.X + pos2.X*(-1)
-	k := y_lenght / x_lenght
-	k_minus := k * (-1)
-
-	// d = P (0/y)
-	y_xnull := pos1.Y - (k_minus * pos1.X)
-	// P (x/0)
-	x_ynull := ((-1) * y_xnull) / k_minus
-	// h_relation = Pythagoras of y_xnull and x_ynull
-	h_rel := math.Sqrt(float64(y_xnull*y_xnull) + (float64(x_ynull * x_ynull)))
-	// calculate x_dif and y_dif on ralation
-	// x_ynull : h_rel = x_dif : lineWidth
-	// y_xnull : h_rel = y_dif : lineWidth
-	x_dif := x_ynull / float32(h_rel) * lineWidth
-	y_dif := y_xnull / float32(h_rel) * lineWidth
-
-	normalX := -1 + x_dif/frame.Width
-	normalY := 1 - y_dif/frame.Height
-
-	return []float32{
-		// coord x, y normal x, y
-		x1, y1, normalX, normalY,
-		x2, y2, normalX, normalY,
-		x2, y2, -normalX, -normalY,
-		x2, y2, -normalX, -normalY,
-		x1, y1, normalX, normalY,
-		x1, y1, -normalX, -normalY,
-	}, 0.0, 0.0
-}
-*/
-
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
@@ -528,4 +434,31 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 	size.Height = end.Y - pos.Y
 
 	return size, pos
+}
+
+// Returns FragmentColor(red,green,blue,alpha) from fyne.Color
+func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
+	r, g, b, a := col.RGBA()
+	if a == 0 {
+		return 0, 0, 0, 0
+	} else {
+		alpha := float32(a)
+		return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
+	}
+}
+
+// Returns scaled Width and Height of Frame(fyne.Size)
+func (p *painter) scaleFrameSize(frame fyne.Size) (float32, float32) {
+	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
+	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
+	return frameWidthScaled, frameHeightScaled
+}
+
+// Returns scaled RectCoords(x1,x2,y1,y2) in same order
+func (p *painter) scaleRectCoords(x1, x2, y1, y2 float32) (float32, float32, float32, float32) {
+	x1Scaled := roundToPixel(x1*p.pixScale, 1.0)
+	x2Scaled := roundToPixel(x2*p.pixScale, 1.0)
+	y1Scaled := roundToPixel(y1*p.pixScale, 1.0)
+	y2Scaled := roundToPixel(y2*p.pixScale, 1.0)
+	return x1Scaled, x2Scaled, y1Scaled, y2Scaled
 }
