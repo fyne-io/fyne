@@ -168,46 +168,50 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 	str := []rune(" fish 日本語日  \t  test 本日本 moose  \t")
 
 	// select invalid (before start)
-	start, end := getTextWhitespaceRegion(str, -1)
+	start, end := getTextWhitespaceRegion(str, -1, false)
 	assert.Equal(t, -1, start)
 	assert.Equal(t, -1, end)
 
 	// select whitespace at the end of text
-	start, end = getTextWhitespaceRegion(str, len(str))
+	start, end = getTextWhitespaceRegion(str, len(str), false)
 	assert.Equal(t, 29, start)
 	assert.Equal(t, 32, end)
-	start, end = getTextWhitespaceRegion(str, len(str)+100)
+	start, end = getTextWhitespaceRegion(str, len(str)+100, false)
 	assert.Equal(t, 29, start)
 	assert.Equal(t, 32, end)
 
 	// select the whitespace
-	start, end = getTextWhitespaceRegion(str, 0)
+	start, end = getTextWhitespaceRegion(str, 0, false)
 	assert.Equal(t, 0, start)
 	assert.Equal(t, 1, end)
+	// select the whitespace - grab adjacent words
+	start, end = getTextWhitespaceRegion(str, 0, true)
+	assert.Equal(t, 0, start)
+	assert.Equal(t, 5, end)
 
 	// select "fish"
-	start, end = getTextWhitespaceRegion(str, 1)
+	start, end = getTextWhitespaceRegion(str, 1, false)
 	assert.Equal(t, 1, start)
 	assert.Equal(t, 5, end)
-	start, end = getTextWhitespaceRegion(str, 4)
+	start, end = getTextWhitespaceRegion(str, 4, false)
 	assert.Equal(t, 1, start)
 	assert.Equal(t, 5, end)
 
 	// select "日本語日"
-	start, end = getTextWhitespaceRegion(str, 6)
+	start, end = getTextWhitespaceRegion(str, 7, false)
 	assert.Equal(t, 6, start)
 	assert.Equal(t, 10, end)
-	start, end = getTextWhitespaceRegion(str, 9)
+	start, end = getTextWhitespaceRegion(str, 9, false)
 	assert.Equal(t, 6, start)
 	assert.Equal(t, 10, end)
 
 	// select "  \t  "
-	start, end = getTextWhitespaceRegion(str, 10)
+	start, end = getTextWhitespaceRegion(str, 10, false)
 	assert.Equal(t, 10, start)
 	assert.Equal(t, 15, end)
 
 	// select "  \t"
-	start, end = getTextWhitespaceRegion(str, 30)
+	start, end = getTextWhitespaceRegion(str, 30, false)
 	assert.Equal(t, 29, start)
 	assert.Equal(t, len(str), end)
 }
@@ -215,7 +219,7 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
 	// select "is_a"
 	str := []rune("This-is_a-test")
-	start, end := getTextWhitespaceRegion(str, 6)
+	start, end := getTextWhitespaceRegion(str, 6, false)
 	assert.Equal(t, 5, start)
 	assert.Equal(t, 9, end)
 }
