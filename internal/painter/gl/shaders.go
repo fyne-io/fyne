@@ -8,74 +8,70 @@ import "fyne.io/fyne/v2"
 var shaderLineFrag = &fyne.StaticResource{
 	StaticName: "line.frag",
 	StaticContent: []byte(
-		"#version 110\n\nuniform vec4 color;\nuniform float lineWidth;\nuniform float feather;\n\nvarying vec2 delta;\n\nvoid main() {\n    float alpha = color.a;\n    float distance = length(delta);\n\n    if (feather == 0.0 || distance <= lineWidth - feather) {\n        gl_FragColor = color;\n    } else {\n        gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));\n    }\n}\n"),
+		"#version 110\r\n\r\nuniform vec4 color;\r\nuniform float lineWidth;\r\nuniform float feather;\r\n\r\nvarying vec2 delta;\r\n\r\nvoid main() {\r\n    float alpha = color.a;\r\n    float distance = length(delta);\r\n\r\n    if (feather == 0.0 || distance <= lineWidth - feather) {\r\n        gl_FragColor = color;\r\n    } else {\r\n        gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));\r\n    }\r\n}\r\n"),
 }
 var shaderLineVert = &fyne.StaticResource{
 	StaticName: "line.vert",
 	StaticContent: []byte(
-		"#version 110\n\nattribute vec2 vert;\nattribute vec2 normal;\n    \nuniform float lineWidth;\n\nvarying vec2 delta;\n\nvoid main() {\n    delta = normal * lineWidth;\n\n    gl_Position = vec4(vert + delta, 0, 1);\n}\n"),
+		"#version 110\r\n\r\nattribute vec2 vert;\r\nattribute vec2 normal;\r\n    \r\nuniform float lineWidth;\r\n\r\nvarying vec2 delta;\r\n\r\nvoid main() {\r\n    delta = normal * lineWidth;\r\n\r\n    gl_Position = vec4(vert + delta, 0, 1);\r\n}\r\n"),
 }
 var shaderLineesFrag = &fyne.StaticResource{
 	StaticName: "line_es.frag",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform vec4 color;\nuniform float lineWidth;\nuniform float feather;\n\nvarying vec2 delta;\n\nvoid main() {\n    float alpha = color.a;\n    float distance = length(delta);\n\n    if (feather == 0.0 || distance <= lineWidth - feather) {\n        gl_FragColor = color;\n    } else {\n        gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));\n    }\n}\n"),
+		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\nuniform vec4 color;\r\nuniform float lineWidth;\r\nuniform float feather;\r\n\r\nvarying vec2 delta;\r\n\r\nvoid main() {\r\n    float alpha = color.a;\r\n    float distance = length(delta);\r\n\r\n    if (feather == 0.0 || distance <= lineWidth - feather) {\r\n        gl_FragColor = color;\r\n    } else {\r\n        gl_FragColor = vec4(color.r, color.g, color.b, mix(color.a, 0.0, (distance - (lineWidth - feather)) / feather));\r\n    }\r\n}\r\n"),
 }
 var shaderLineesVert = &fyne.StaticResource{
 	StaticName: "line_es.vert",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec2 vert;\nattribute vec2 normal;\n    \nuniform float lineWidth;\n\nvarying vec2 delta;\n\nvoid main() {\n    delta = normal * lineWidth;\n\n    gl_Position = vec4(vert + delta, 0, 1);\n}\n"),
-}
-var shaderSimpleFrag = &fyne.StaticResource{
-	StaticName: "simple.frag",
-	StaticContent: []byte(
-		"#version 110\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    gl_FragColor = texture2D(tex, fragTexCoord);\n}\n"),
-}
-var shaderSimpleVert = &fyne.StaticResource{
-	StaticName: "simple.vert",
-	StaticContent: []byte(
-		"#version 110\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
-}
-var shaderSimpleesFrag = &fyne.StaticResource{
-	StaticName: "simple_es.frag",
-	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    gl_FragColor = texture2D(tex, fragTexCoord);\n}\n"),
-}
-var shaderSimpleesVert = &fyne.StaticResource{
-	StaticName: "simple_es.vert",
-	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
+		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\nattribute vec2 vert;\r\nattribute vec2 normal;\r\n    \r\nuniform float lineWidth;\r\n\r\nvarying vec2 delta;\r\n\r\nvoid main() {\r\n    delta = normal * lineWidth;\r\n\r\n    gl_Position = vec4(vert + delta, 0, 1);\r\n}\r\n"),
 }
 var shaderRectangleFrag = &fyne.StaticResource{
 	StaticName: "rectangle.frag",
 	StaticContent: []byte(
-		"#version 110\n\n/* scaled params */\nuniform vec4 frame_size;  //width = x, height = y (z, w NOT USED)\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\nuniform float stroke_width;\n/* colors params*/\nuniform vec4 fill_color;\nuniform vec4 stroke_color;\n\n\nvoid main() {\n\n    vec4 color = fill_color;\n    \n    if (gl_FragCoord.x >= rect_coords[1] - stroke_width ){\n        color = stroke_color;\n    } else if (gl_FragCoord.x <= rect_coords[0] + stroke_width){\n        color = stroke_color;\n    } else if (gl_FragCoord.y <= frame_size.y - rect_coords[3] + stroke_width ){\n        color = stroke_color;\n    } else if (gl_FragCoord.y >= frame_size.y - rect_coords[2] - stroke_width ){\n        color = stroke_color;\n    }\n\n    gl_FragColor = color;\n}\n"),
+		"#version 110\r\n\r\n/* scaled params */\r\nuniform vec4 frame_size;  //width = x, height = y (z, w NOT USED)\r\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\r\nuniform float stroke_width;\r\n/* colors params*/\r\nuniform vec4 fill_color;\r\nuniform vec4 stroke_color;\r\n\r\n\r\nvoid main() {\r\n\r\n    vec4 color = fill_color;\r\n    \r\n    if (gl_FragCoord.x >= rect_coords[1] - stroke_width ){\r\n        color = stroke_color;\r\n    } else if (gl_FragCoord.x <= rect_coords[0] + stroke_width){\r\n        color = stroke_color;\r\n    } else if (gl_FragCoord.y <= frame_size.y - rect_coords[3] + stroke_width ){\r\n        color = stroke_color;\r\n    } else if (gl_FragCoord.y >= frame_size.y - rect_coords[2] - stroke_width ){\r\n        color = stroke_color;\r\n    }\r\n\r\n    gl_FragColor = color;\r\n}\r\n"),
 }
-var shaderRoundRectangleFrag = &fyne.StaticResource{
-	StaticName: "round_rectangle.frag",
-	StaticContent: []byte(
-		"#version 110\n\n/* scaled params */\nuniform vec4 frame_size;  //frame_size_width = x, frame_size_height = y (z, w NOT USED)\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\nuniform float stroke_width_half;\nuniform vec4 rect_size_half; //rect_size_width_half = x, rect_size_height_half = y (z, w NOT USED)\nuniform float radius;\n/* colors params*/\nuniform vec4 fill_color;\nuniform vec4 stroke_color;\n\n\n\nfloat calc_distance(vec2 p, vec2 b, float r)\n{\n    vec2 d = abs(p) - b + vec2(r);\n\treturn min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   \n}\n\nvoid main() {\n\n    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);\n    // vec2 rect_size_half =  vec2(frag_rect_coords[1] - frag_rect_coords[0], frag_rect_coords[3] - frag_rect_coords[2]) * 0.5 - vec2(stroke_width_half);\n    vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);\n\n    float distance = calc_distance(vec_centered_pos, vec2(rect_size_half.x, rect_size_half.y), radius - stroke_width_half);\n\n    vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set\n    vec4 to_color = vec4(1.0, 1.0, 1.0, 0.0); //Outside color\n\n    if (stroke_width_half > 0.0)\n    {\n        if (distance < 0.0)\n        {\n            to_color = fill_color;   \n        } \n        \n        distance = abs(distance) - stroke_width_half;\n    }\n\n    float blend_amount = smoothstep(-1.0, 1.0, distance);\n\n    // final color\n    gl_FragColor = mix(from_color, to_color, blend_amount);\n    //gl_FragColor = vec4(vec3(blend_amount), 1.0);\n    //gl_FragColor = vec4(vec3(abs(distance) / (2.0 * corner)), 1.0);\n\n}\n"),
-}
-
-// rectangle.vert is used for rectangle.frag and round_rectangle.frag
 var shaderRectangleVert = &fyne.StaticResource{
 	StaticName: "rectangle.vert",
 	StaticContent: []byte(
-		"#version 110\n\nattribute vec2 vert;\nattribute vec2 normal;\n\nvoid main() {\n    gl_Position = vec4(normal, 0, 1);\n}\n"),
+		"#version 110\r\n\r\nattribute vec2 vert;\r\nattribute vec2 normal;\r\n\r\nvoid main() {\r\n    gl_Position = vec4(normal, 0, 1);\r\n}\r\n"),
 }
 var shaderRectangleesFrag = &fyne.StaticResource{
 	StaticName: "rectangle_es.frag",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\n/* scaled params */\nuniform vec4 frame_size;  //width = x, height = y (z, w NOT USED)\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\nuniform float stroke_width;\n/* colors params*/\nuniform vec4 fill_color;\nuniform vec4 stroke_color;\n\n\nvoid main() {\n\n    vec4 color = fill_color;\n    \n    if (gl_FragCoord.x >= rect_coords[1] - stroke_width ){\n        color = stroke_color;\n    } else if (gl_FragCoord.x <= rect_coords[0] + stroke_width){\n        color = stroke_color;\n    } else if (gl_FragCoord.y <= frame_size.y - rect_coords[3] + stroke_width ){\n        color = stroke_color;\n    } else if (gl_FragCoord.y >= frame_size.y - rect_coords[2] - stroke_width ){\n        color = stroke_color;\n    }\n\n    gl_FragColor = color;\n}\n"),
+		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\n/* scaled params */\r\nuniform vec4 frame_size;  //width = x, height = y (z, w NOT USED)\r\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\r\nuniform float stroke_width;\r\n/* colors params*/\r\nuniform vec4 fill_color;\r\nuniform vec4 stroke_color;\r\n\r\n\r\nvoid main() {\r\n\r\n    vec4 color = fill_color;\r\n    \r\n    if (gl_FragCoord.x >= rect_coords[1] - stroke_width ){\r\n        color = stroke_color;\r\n    } else if (gl_FragCoord.x <= rect_coords[0] + stroke_width){\r\n        color = stroke_color;\r\n    } else if (gl_FragCoord.y <= frame_size.y - rect_coords[3] + stroke_width ){\r\n        color = stroke_color;\r\n    } else if (gl_FragCoord.y >= frame_size.y - rect_coords[2] - stroke_width ){\r\n        color = stroke_color;\r\n    }\r\n\r\n    gl_FragColor = color;\r\n}\r\n"),
 }
-var shaderRoundRectangleesFrag = &fyne.StaticResource{
-	StaticName: "round_rectangle_es.frag",
-	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\n/* scaled params */\nuniform vec4 frame_size;  //frame_size_width = x, frame_size_height = y (z, w NOT USED)\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\nuniform float stroke_width_half;\nuniform vec4 rect_size_half; //rect_size_width_half = x, rect_size_height_half = y (z, w NOT USED)\nuniform float radius;\n/* colors params*/\nuniform vec4 fill_color;\nuniform vec4 stroke_color;\n\n\n\nfloat calc_distance(vec2 p, vec2 b, float r)\n{\n    vec2 d = abs(p) - b + vec2(r);\n\treturn min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   \n}\n\nvoid main() {\n\n    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);\n    // vec2 rect_size_half =  vec2(frag_rect_coords[1] - frag_rect_coords[0], frag_rect_coords[3] - frag_rect_coords[2]) * 0.5 - vec2(stroke_width_half);\n    vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);\n\n    float distance = calc_distance(vec_centered_pos, vec2(rect_size_half.x, rect_size_half.y), radius - stroke_width_half);\n\n    vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set\n    vec4 to_color = vec4(1.0, 1.0, 1.0, 0.0); //Outside color\n\n    if (stroke_width_half > 0.0)\n    {\n        if (distance < 0.0)\n        {\n            to_color = fill_color;   \n        } \n        \n        distance = abs(distance) - stroke_width_half;\n    }\n\n    float blend_amount = smoothstep(-1.0, 1.0, distance);\n\n    // final color\n    gl_FragColor = mix(from_color, to_color, blend_amount);\n    //gl_FragColor = vec4(vec3(blend_amount), 1.0);\n    //gl_FragColor = vec4(vec3(abs(distance) / (2.0 * corner)), 1.0);\n\n}\n"),
-}
-
-// rectangle_es.vert is used for rectangle_es.frag and round_rectangle_es.frag
 var shaderRectangleesVert = &fyne.StaticResource{
 	StaticName: "rectangle_es.vert",
 	StaticContent: []byte(
 		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\nattribute vec2 vert;\r\nattribute vec2 normal;\r\n\r\nvoid main() {\r\n    vert;  //Workaround, because WebGL optimizes away attributes unused\r\n    gl_Position = vec4(normal, 0, 1);\r\n}\r\n"),
+}
+var shaderRoundrectangleFrag = &fyne.StaticResource{
+	StaticName: "round_rectangle.frag",
+	StaticContent: []byte(
+		"#version 110\r\n\r\n/* scaled params */\r\nuniform vec4 frame_size;  //frame_size_width = x, frame_size_height = y (z, w NOT USED)\r\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\r\nuniform float stroke_width_half;\r\nuniform vec4 rect_size_half; //rect_size_width_half = x, rect_size_height_half = y (z, w NOT USED)\r\nuniform float radius;\r\n/* colors params*/\r\nuniform vec4 fill_color;\r\nuniform vec4 stroke_color;\r\n\r\n\r\n\r\nfloat calc_distance(vec2 p, vec2 b, float r)\r\n{\r\n    vec2 d = abs(p) - b + vec2(r);\r\n\treturn min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   \r\n}\r\n\r\nvoid main() {\r\n\r\n    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);\r\n    // vec2 rect_size_half =  vec2(frag_rect_coords[1] - frag_rect_coords[0], frag_rect_coords[3] - frag_rect_coords[2]) * 0.5 - vec2(stroke_width_half);\r\n    vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);\r\n\r\n    float distance = calc_distance(vec_centered_pos, vec2(rect_size_half.x, rect_size_half.y), radius - stroke_width_half);\r\n\r\n    vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set\r\n    vec4 to_color = vec4(1.0, 1.0, 1.0, 0.0); //Outside color\r\n\r\n    if (stroke_width_half > 0.0)\r\n    {\r\n        if (distance < 0.0)\r\n        {\r\n            to_color = fill_color;   \r\n        } \r\n        \r\n        distance = abs(distance) - stroke_width_half;\r\n    }\r\n\r\n    float blend_amount = smoothstep(-1.0, 1.0, distance);\r\n\r\n    // final color\r\n    gl_FragColor = mix(from_color, to_color, blend_amount);\r\n    //gl_FragColor = vec4(vec3(blend_amount), 1.0);\r\n    //gl_FragColor = vec4(vec3(abs(distance) / (2.0 * corner)), 1.0);\r\n\r\n}\r\n"),
+}
+var shaderRoundrectangleesFrag = &fyne.StaticResource{
+	StaticName: "round_rectangle_es.frag",
+	StaticContent: []byte(
+		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\n/* scaled params */\r\nuniform vec4 frame_size;  //frame_size_width = x, frame_size_height = y (z, w NOT USED)\r\nuniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame\r\nuniform float stroke_width_half;\r\nuniform vec4 rect_size_half; //rect_size_width_half = x, rect_size_height_half = y (z, w NOT USED)\r\nuniform float radius;\r\n/* colors params*/\r\nuniform vec4 fill_color;\r\nuniform vec4 stroke_color;\r\n\r\n\r\n\r\nfloat calc_distance(vec2 p, vec2 b, float r)\r\n{\r\n    vec2 d = abs(p) - b + vec2(r);\r\n\treturn min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   \r\n}\r\n\r\nvoid main() {\r\n\r\n    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);\r\n    // vec2 rect_size_half =  vec2(frag_rect_coords[1] - frag_rect_coords[0], frag_rect_coords[3] - frag_rect_coords[2]) * 0.5 - vec2(stroke_width_half);\r\n    vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);\r\n\r\n    float distance = calc_distance(vec_centered_pos, vec2(rect_size_half.x, rect_size_half.y), radius - stroke_width_half);\r\n\r\n    vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set\r\n    vec4 to_color = vec4(1.0, 1.0, 1.0, 0.0); //Outside color\r\n\r\n    if (stroke_width_half > 0.0)\r\n    {\r\n        if (distance < 0.0)\r\n        {\r\n            to_color = fill_color;   \r\n        } \r\n        \r\n        distance = abs(distance) - stroke_width_half;\r\n    }\r\n\r\n    float blend_amount = smoothstep(-1.0, 1.0, distance);\r\n\r\n    // final color\r\n    gl_FragColor = mix(from_color, to_color, blend_amount);\r\n    //gl_FragColor = vec4(vec3(blend_amount), 1.0);\r\n    //gl_FragColor = vec4(vec3(abs(distance) / (2.0 * corner)), 1.0);\r\n\r\n}\r\n"),
+}
+var shaderSimpleFrag = &fyne.StaticResource{
+	StaticName: "simple.frag",
+	StaticContent: []byte(
+		"#version 110\r\n\r\nuniform sampler2D tex;\r\n\r\nvarying vec2 fragTexCoord;\r\n\r\nvoid main() {\r\n    gl_FragColor = texture2D(tex, fragTexCoord);\r\n}\r\n"),
+}
+var shaderSimpleVert = &fyne.StaticResource{
+	StaticName: "simple.vert",
+	StaticContent: []byte(
+		"#version 110\r\n\r\nattribute vec3 vert;\r\nattribute vec2 vertTexCoord;\r\nvarying vec2 fragTexCoord;\r\n\r\nvoid main() {\r\n    fragTexCoord = vertTexCoord;\r\n\r\n    gl_Position = vec4(vert, 1);\r\n}"),
+}
+var shaderSimpleesFrag = &fyne.StaticResource{
+	StaticName: "simple_es.frag",
+	StaticContent: []byte(
+		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\nuniform sampler2D tex;\r\n\r\nvarying vec2 fragTexCoord;\r\n\r\nvoid main() {\r\n    gl_FragColor = texture2D(tex, fragTexCoord);\r\n}\r\n"),
+}
+var shaderSimpleesVert = &fyne.StaticResource{
+	StaticName: "simple_es.vert",
+	StaticContent: []byte(
+		"#version 100\r\n\r\n#ifdef GL_ES\r\n# ifdef GL_FRAGMENT_PRECISION_HIGH\r\nprecision highp float;\r\n# else\r\nprecision mediump float;\r\n#endif\r\nprecision mediump int;\r\nprecision lowp sampler2D;\r\n#endif\r\n\r\nattribute vec3 vert;\r\nattribute vec2 vertTexCoord;\r\nvarying vec2 fragTexCoord;\r\n\r\nvoid main() {\r\n    fragTexCoord = vertTexCoord;\r\n\r\n    gl_Position = vec4(vert, 1);\r\n}"),
 }

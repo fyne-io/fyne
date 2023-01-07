@@ -23,11 +23,11 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 	case "rectangle":
 		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
 	case "round_rectangle":
-		return shaderRectangleVert.StaticContent, shaderRoundRectangleFrag.StaticContent
+		return shaderRectangleVert.StaticContent, shaderRoundrectangleFrag.StaticContent
 	case "rectangle_es":
 		return shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent
 	case "round_rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRoundRectangleesFrag.StaticContent
+		return shaderRectangleesVert.StaticContent, shaderRoundrectangleesFrag.StaticContent
 	}
 	return nil, nil
 }

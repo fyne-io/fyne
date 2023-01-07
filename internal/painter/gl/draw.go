@@ -96,11 +96,7 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
 }
 
-func (p *painter) drawRectangle(
-	rect *canvas.Rectangle,
-	pos fyne.Position,
-	frame fyne.Size,
-) {
+func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
 	// Vertex: BEG
 	points := p.vecRectCoords(pos, rect, frame)
 	p.ctx.UseProgram(p.rectangleProgram)
@@ -145,11 +141,7 @@ func (p *painter) drawRectangle(
 	p.freeBuffer(vbo)
 }
 
-func (p *painter) drawRoundRectangle(
-	rect *canvas.Rectangle,
-	pos fyne.Position,
-	frame fyne.Size,
-) {
+func (p *painter) drawRoundRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
 	// Vertex: BEG
 	points := p.vecRectCoords(pos, rect, frame)
 	p.ctx.UseProgram(p.roundRectangleProgram)
@@ -376,11 +368,7 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return size, pos
 }
 
-func (p *painter) vecRectCoords(
-	pos fyne.Position,
-	rect *canvas.Rectangle,
-	frame fyne.Size,
-) []float32 {
+func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size) []float32 {
 	size := rect.Size()
 	pos1 := rect.Position()
 
@@ -435,10 +423,9 @@ func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
 	r, g, b, a := col.RGBA()
 	if a == 0 {
 		return 0, 0, 0, 0
-	} else {
-		alpha := float32(a)
-		return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
 	}
+	alpha := float32(a)
+	return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
 }
 
 // Returns scaled Width and Height of Frame(fyne.Size)
