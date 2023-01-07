@@ -140,9 +140,3 @@ func (s Size) Subtract(v Vector2) Size {
 func (s Size) SubtractWidthHeight(width, height float32) Size {
 	return Size{s.Width - width, s.Height - height}
 }
-
-// RectangleRadius describes a radius in pixel or in percentage
-type Radius struct {
-	Pixel   float32
-	Percent float32 // 0,2 = 20%, 0,5 = 50% (50% = max Radius)
-}

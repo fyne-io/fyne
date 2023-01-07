@@ -78,7 +78,7 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Raster:
 		p.drawRaster(obj, pos, frame)
 	case *canvas.Rectangle:
-		if o.(*canvas.Rectangle).Radius.Pixel == 0 && o.(*canvas.Rectangle).Radius.Percent == 0 {
+		if o.(*canvas.Rectangle).Radius == 0 {
 			p.drawRectangle(obj, pos, frame)
 		} else {
 			p.drawRoundRectangle(obj, pos, frame)
@@ -180,13 +180,7 @@ func (p *painter) drawRoundRectangle(
 	p.ctx.Uniform4f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5, 0.0, 0.0)
 
 	radiusUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "radius")
-	var radiusScaled float32
-	if rect.Radius.Pixel == 0 {
-		rectSideMin := fyne.Min(rect.Size().Width, rect.Size().Height)
-		radiusScaled = roundToPixel(rectSideMin*rect.Radius.Percent*p.pixScale, 1.0)
-	} else {
-		radiusScaled = roundToPixel(rect.Radius.Pixel*p.pixScale, 1.0)
-	}
+	radiusScaled := roundToPixel(rect.Radius*p.pixScale, 1.0)
 	p.ctx.Uniform1f(radiusUniform, radiusScaled)
 
 	var r, g, b, a float32
