@@ -295,6 +295,7 @@ func (b *Builder) build() error {
 	absSrcdir, _ := filepath.Abs(b.srcdir)
 	args = append(args, absSrcdir)
 
+	b.runner.setDir(b.srcdir)
 	b.runner.setEnv(env)
 	out, err := b.runner.runOutput(args...)
 	if err != nil {
