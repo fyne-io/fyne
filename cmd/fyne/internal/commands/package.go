@@ -115,11 +115,6 @@ func Package() *cli.Command {
 				Usage:       "Enable installation in release mode (disable debug etc).",
 				Destination: &p.release,
 			},
-			&cli.BoolFlag{
-				Name:        "static",
-				Usage:       "Do not link against shared libraries",
-				Destination: &p.static,
-			},
 			&cli.GenericFlag{
 				Name:  "metadata",
 				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
@@ -139,11 +134,11 @@ func Package() *cli.Command {
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
 	*appData
-	srcDir, dir, exe, os                   string
-	install, release, distribution, static bool
-	certificate, profile                   string // optional flags for releasing
-	tags, category                         string
-	tempDir                                string
+	srcDir, dir, exe, os           string
+	install, release, distribution bool
+	certificate, profile           string // optional flags for releasing
+	tags, category                 string
+	tempDir                        string
 
 	customMetadata keyValueFlag
 }
@@ -225,7 +220,6 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 			srcdir:  p.srcDir,
 			target:  p.exe,
 			release: p.release,
-			static:  p.static,
 			tags:    tags,
 			runner:  runner,
 
@@ -369,11 +363,7 @@ func (p *Packager) validate() (err error) {
 
 	p.appData.CustomMetadata = p.customMetadata.m
 
-	// First look at the srcDir for FyneApp.toml, look at baseDir if it is not there
-	data, err := metadata.LoadStandard(p.srcDir)
-	if err != nil {
-		data, err = metadata.LoadStandard(baseDir)
-	}
+	data, err := metadata.LoadStandard(baseDir)
 	if err == nil {
 		p.appData.Release = p.release
 		mergeMetadata(p.appData, data)

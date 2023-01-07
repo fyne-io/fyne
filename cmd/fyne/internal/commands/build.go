@@ -23,7 +23,6 @@ type Builder struct {
 	os, srcdir, target string
 	goPackage          string
 	release            bool
-	static             bool
 	tags               []string
 	tagsToParse        string
 
@@ -61,11 +60,6 @@ func Build() *cli.Command {
 			&cli.BoolFlag{
 				Name:        "release",
 				Usage:       "Enable installation in release mode (disable debug etc).",
-				Destination: &b.release,
-			},
-			&cli.BoolFlag{
-				Name:        "static",
-				Usage:       "Do not link against shared libraries",
 				Destination: &b.release,
 			},
 			&cli.StringFlag{
@@ -232,22 +226,14 @@ func (b *Builder) build() error {
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
-		ldflags := []string{}
-		if b.release {
-			ldflags = append(ldflags, "-s", "-w")
-		}
 		if goos == "windows" {
-			ldflags = append(ldflags, "-H=windowsgui")
-		}
-		if b.static {
-			ldflags = append(ldflags, "-extldflags='-static'")
-		}
-		if len(ldflags) > 0 {
-			args = append(args, "-ldflags", strings.Join(ldflags, " "))
-		}
-
-		if b.release {
-			args = append(args, "-trimpath")
+			if b.release {
+				args = append(args, "-ldflags", "-s -w -H=windowsgui -extldflags='-static'", "-trimpath")
+			} else {
+				args = append(args, "-ldflags", "-H=windowsgui ")
+			}
+		} else if b.release {
+			args = append(args, "-ldflags", "-s -w", "-trimpath")
 		}
 	}
 
@@ -291,7 +277,6 @@ func (b *Builder) build() error {
 		return err
 	}
 
-	// Giving relative source directory may fail with "package is not in GOROOT"
 	absSrcdir, _ := filepath.Abs(b.srcdir)
 	args = append(args, absSrcdir)
 
