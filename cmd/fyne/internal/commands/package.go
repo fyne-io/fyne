@@ -115,6 +115,11 @@ func Package() *cli.Command {
 				Usage:       "Enable installation in release mode (disable debug etc).",
 				Destination: &p.release,
 			},
+			&cli.BoolFlag{
+				Name:        "static",
+				Usage:       "Do not link against shared libraries",
+				Destination: &p.static,
+			},
 			&cli.GenericFlag{
 				Name:  "metadata",
 				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
@@ -136,6 +141,7 @@ type Packager struct {
 	*appData
 	srcDir, dir, exe, os           string
 	install, release, distribution bool
+	static                         bool
 	certificate, profile           string // optional flags for releasing
 	tags, category                 string
 	tempDir                        string
@@ -220,6 +226,7 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 			srcdir:  p.srcDir,
 			target:  p.exe,
 			release: p.release,
+			static:  p.static,
 			tags:    tags,
 			runner:  runner,
 

@@ -121,6 +121,11 @@ func Release() *cli.Command {
 				Value:       "",
 				Destination: &r.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "static",
+				Usage:       "Do not link against shared libraries",
+				Destination: &r.Packager.static,
+			},
 		},
 		Action: r.releaseAction,
 	}
