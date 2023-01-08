@@ -30,15 +30,16 @@ type fileDialogItem struct {
 	dir      bool
 
 	hovered bool
+	focused bool
 }
 
 func (i *fileDialogItem) FocusGained() {
-	i.hovered = true
+	i.focused = true
 	i.Refresh()
 }
 
 func (i *fileDialogItem) FocusLost() {
-	i.hovered = false
+	i.focused = false
 	i.Refresh()
 }
 
@@ -53,14 +54,16 @@ func (i *fileDialogItem) TypedKey(key *fyne.KeyEvent) {
 }
 
 func (i *fileDialogItem) MouseIn(_ *desktop.MouseEvent) {
-	i.FocusGained()
+	i.hovered = true
+	i.Refresh()
 }
 
 func (i *fileDialogItem) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 func (i *fileDialogItem) MouseOut() {
-	i.FocusLost()
+	i.hovered = false
+	i.Refresh()
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
@@ -150,7 +153,7 @@ func (s fileItemRenderer) Refresh() {
 	if s.item.isCurrent {
 		s.background.FillColor = theme.SelectionColor()
 		s.background.Show()
-	} else if s.item.hovered {
+	} else if s.item.hovered || s.item.focused {
 		s.background.FillColor = theme.HoverColor()
 		s.background.Show()
 	} else {
