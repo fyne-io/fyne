@@ -129,10 +129,10 @@ func TestFileDialogItemNavigation(t *testing.T) {
 	item := f.newFileItem(uri, false)
 
 	item.FocusGained()
-	assert.True(t, item.hovered)
+	assert.True(t, item.focused)
 
 	item.FocusLost()
-	assert.False(t, item.hovered)
+	assert.False(t, item.focused)
 
 	item.MouseIn(nil)
 	assert.True(t, item.hovered)
