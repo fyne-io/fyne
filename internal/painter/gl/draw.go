@@ -78,7 +78,10 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Raster:
 		p.drawRaster(obj, pos, frame)
 	case *canvas.Rectangle:
-		if o.(*canvas.Rectangle).Radius == 0 {
+		if (obj.FillColor == color.Transparent || obj.FillColor == nil) && (obj.StrokeColor == color.Transparent || obj.StrokeColor == nil || obj.StrokeWidth == 0) {
+			return
+		}
+		if obj.Radius == 0 {
 			p.drawRectangle(obj, pos, frame)
 		} else {
 			p.drawRoundRectangle(obj, pos, frame)
