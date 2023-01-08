@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
@@ -255,10 +256,11 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	track := canvas.NewRectangle(theme.InputBackgroundColor())
 	active := canvas.NewRectangle(theme.ForegroundColor())
 	thumb := &canvas.Circle{FillColor: theme.ForegroundColor()}
+	focusIndicator := &canvas.Circle{FillColor: color.Transparent}
 
-	objects := []fyne.CanvasObject{track, active, thumb}
+	objects := []fyne.CanvasObject{track, active, thumb, focusIndicator}
 
-	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
+	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, focusIndicator, s}
 	slide.Refresh() // prepare for first draw
 	return slide
 }
@@ -318,10 +320,11 @@ const minLongSide = float32(34) // added to button diameter
 
 type sliderRenderer struct {
 	widget.BaseRenderer
-	track  *canvas.Rectangle
-	active *canvas.Rectangle
-	thumb  *canvas.Circle
-	slider *Slider
+	track          *canvas.Rectangle
+	active         *canvas.Rectangle
+	thumb          *canvas.Circle
+	focusIndicator *canvas.Circle
+	slider         *Slider
 }
 
 // Refresh updates the widget state for drawing.
@@ -331,14 +334,11 @@ func (s *sliderRenderer) Refresh() {
 	s.active.FillColor = theme.ForegroundColor()
 
 	if s.slider.focused {
-		s.thumb.StrokeColor = theme.FocusColor()
-		s.thumb.StrokeWidth = 2 * theme.InnerPadding()
+		s.focusIndicator.FillColor = theme.FocusColor()
 	} else if s.slider.hovered {
-		s.thumb.StrokeColor = theme.HoverColor()
-		s.thumb.StrokeWidth = 2 * theme.InnerPadding()
+		s.focusIndicator.FillColor = theme.HoverColor()
 	} else {
-		s.thumb.StrokeColor = nil
-		s.thumb.StrokeWidth = 0
+		s.focusIndicator.FillColor = color.Transparent
 	}
 
 	s.slider.clampValueToRange()
@@ -389,6 +389,10 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
+
+	focusIndicatorSize := fyne.NewSize(diameter+theme.InnerPadding()*2, diameter+theme.InnerPadding()*2)
+	s.focusIndicator.Move(thumbPos.SubtractXY(theme.InnerPadding(), theme.InnerPadding()))
+	s.focusIndicator.Resize(focusIndicatorSize)
 }
 
 // MinSize calculates the minimum size of a widget.
