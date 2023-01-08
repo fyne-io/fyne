@@ -346,9 +346,18 @@ func (p *Packager) validate() (err error) {
 	}
 	if p.srcDir == "" {
 		p.srcDir = baseDir
-	} else if p.os == "ios" || p.os == "android" {
-		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
-			"Change directory to the main package and try again")
+	} else {
+		if p.os == "ios" || p.os == "android" {
+			return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
+				"Change directory to the main package and try again")
+		}
+		// Use absolute srcdir
+		if !filepath.IsAbs(p.srcDir) {
+			absSrcDir, err := filepath.Abs(p.srcDir)
+			if err == nil {
+				p.srcDir = absSrcDir
+			}
+		}
 	}
 	os.Chdir(p.srcDir)
 
