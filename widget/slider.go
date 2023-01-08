@@ -332,10 +332,13 @@ func (s *sliderRenderer) Refresh() {
 
 	if s.slider.focused {
 		s.thumb.StrokeColor = theme.FocusColor()
+		s.thumb.StrokeWidth = 2 * theme.InnerPadding()
 	} else if s.slider.hovered {
 		s.thumb.StrokeColor = theme.HoverColor()
+		s.thumb.StrokeWidth = 2 * theme.InnerPadding()
 	} else {
 		s.thumb.StrokeColor = nil
+		s.thumb.StrokeWidth = 0
 	}
 
 	s.slider.clampValueToRange()
@@ -386,15 +389,6 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
-
-	indicatorWidth := theme.IconInlineSize() + theme.InnerPadding() - diameter
-	if s.slider.focused {
-		s.thumb.StrokeWidth = indicatorWidth
-	} else if s.slider.hovered {
-		s.thumb.StrokeWidth = indicatorWidth
-	} else {
-		s.thumb.StrokeWidth = 0
-	}
 }
 
 // MinSize calculates the minimum size of a widget.
