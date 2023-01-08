@@ -18,7 +18,7 @@ type TableCellID struct {
 }
 
 // Table widget is a grid of items that can be scrolled and a cell selected.
-// It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
+// Its performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the Length callback.
 //
 // Since: 1.4
@@ -289,7 +289,6 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 	cellSize := t.templateSize()
-	cellY = float32(row) * (cellHeight + theme.Padding())
 	for i := 0; i <= row; i++ {
 		if cellHeight > 0 {
 			cellY += cellHeight + theme.Padding()
@@ -575,9 +574,6 @@ func (c *tableCells) MouseOut() {
 }
 
 func (c *tableCells) Resize(s fyne.Size) {
-	if s == c.BaseWidget.size {
-		return
-	}
 	c.BaseWidget.Resize(s)
 	c.Refresh() // trigger a redraw
 }
@@ -727,7 +723,6 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 
 func (r *tableCellsRenderer) Refresh() {
 	r.cells.propertyLock.Lock()
-	defer r.cells.propertyLock.Unlock()
 	oldSize := r.cells.cellSize
 	r.cells.cellSize = r.cells.t.templateSize()
 	if oldSize != r.cells.cellSize { // theme changed probably
@@ -741,10 +736,12 @@ func (r *tableCellsRenderer) Refresh() {
 	}
 	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.cellSize.Width, dataCols)
 	if len(visibleColWidths) == 0 { // we can't show anything until we have some dimensions
+		r.cells.propertyLock.Unlock()
 		return
 	}
 	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.cellSize.Height, dataRows)
 	if len(visibleRowHeights) == 0 { // we can't show anything until we have some dimensions
+		r.cells.propertyLock.Unlock()
 		return
 	}
 
@@ -777,9 +774,6 @@ func (r *tableCellsRenderer) Refresh() {
 			c.Move(fyne.NewPos(cellXOffset, cellYOffset))
 			c.Resize(fyne.NewSize(colWidth, rowHeight))
 
-			if updateCell != nil {
-				updateCell(TableCellID{row, col}, c)
-			}
 			r.visible[id] = c
 			cells = append(cells, c)
 			cellXOffset += colWidth + separatorThickness
@@ -792,7 +786,15 @@ func (r *tableCellsRenderer) Refresh() {
 			r.pool.Release(old)
 		}
 	}
+	visible := r.visible
+	r.cells.propertyLock.Unlock()
 	r.SetObjects(cells)
+
+	if updateCell != nil {
+		for id, cell := range visible {
+			updateCell(TableCellID{id.Row, id.Col}, cell)
+		}
+	}
 }
 
 func (r *tableCellsRenderer) returnAllToPool() {

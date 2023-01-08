@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -34,6 +35,7 @@ type RichText struct {
 
 	visualCache map[RichTextSegment][]fyne.CanvasObject
 	cacheLock   sync.Mutex
+	minCache    fyne.Size
 }
 
 // NewRichText returns a new RichText widget that renders the given text and segments.
@@ -43,6 +45,7 @@ type RichText struct {
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
 	t.Scroll = widget.ScrollNone
+	t.ExtendBaseWidget(t)
 	t.updateRowBounds()
 	return t
 }
@@ -77,15 +80,19 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 // MinSize calculates the minimum size of a rich text widget.
 // This is based on the contained text with a standard amount of padding added.
 func (t *RichText) MinSize() fyne.Size {
+	// we don't return the minCache here, as any internal segments could have caused it to change...
 	t.ExtendBaseWidget(t)
 
-	return t.BaseWidget.MinSize()
+	min := t.BaseWidget.MinSize()
+	t.minCache = min
+	return min
 }
 
 // Refresh triggers a redraw of the rich text.
 //
 // Implements: fyne.Widget
 func (t *RichText) Refresh() {
+	t.minCache = fyne.Size{}
 	t.updateRowBounds()
 
 	t.BaseWidget.Refresh()
@@ -98,14 +105,22 @@ func (t *RichText) Refresh() {
 func (t *RichText) Resize(size fyne.Size) {
 	t.propertyLock.RLock()
 	baseSize := t.size
+	segments := t.Segments
+	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff
 	t.propertyLock.RUnlock()
 	if baseSize == size {
 		return
 	}
-
 	t.propertyLock.Lock()
 	t.size = size
 	t.propertyLock.Unlock()
+
+	if skipResize {
+		if len(segments) < 2 { // we can simplify :)
+			cache.Renderer(t).Layout(size)
+			return
+		}
+	}
 	t.updateRowBounds()
 
 	t.Refresh()
@@ -628,9 +643,23 @@ func (r *textRenderer) Refresh() {
 func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
 	initialX := xPos
 	if len(texts) == 1 {
-		texts[0].Resize(fyne.NewSize(lineWidth, texts[0].MinSize().Height))
-		texts[0].Move(fyne.NewPos(xPos, yPos))
-		return texts[0].MinSize().Width, texts[0].MinSize().Height
+		min := texts[0].MinSize()
+		if text, ok := texts[0].(*canvas.Text); ok {
+			texts[0].Resize(min)
+			xPad := float32(0)
+			switch text.Alignment {
+			case fyne.TextAlignLeading:
+			case fyne.TextAlignTrailing:
+				xPad = lineWidth - min.Width
+			case fyne.TextAlignCenter:
+				xPad = (lineWidth - min.Width) / 2
+			}
+			texts[0].Move(fyne.NewPos(xPos+xPad, yPos))
+		} else {
+			texts[0].Resize(fyne.NewSize(lineWidth, min.Height))
+			texts[0].Move(fyne.NewPos(xPos, yPos))
+		}
+		return min.Width, min.Height
 	}
 	height := float32(0)
 	tallestBaseline := float32(0)
@@ -766,7 +795,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
-	if wrap == fyne.TextWrapOff {
+	if maxWidth < 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
 

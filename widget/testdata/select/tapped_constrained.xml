@@ -3,9 +3,9 @@
 		<widget pos="190,140" size="127x35" type="*widget.Select">
 			<rectangle fillColor="inputBackground" pos="0,2" size="127x31"/>
 			<rectangle fillColor="shadow" pos="0,33" size="127x2"/>
-			<rectangle fillColor="rgba(0,0,0,0)" size="123x35"/>
+			<rectangle fillColor="rgba(0,0,0,0)" size="127x35"/>
 			<widget pos="4,4" size="95x27" type="*widget.RichText">
-				<text pos="4,4" size="87x19">(Select one)</text>
+				<text pos="4,4" size="75x19">(Select one)</text>
 			</widget>
 			<widget pos="99,7" size="20x20" type="*widget.Icon">
 				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>

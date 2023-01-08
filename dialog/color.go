@@ -137,10 +137,10 @@ func (p *ColorPickerDialog) updateUI() {
 				p.selectColor(p.color)
 			},
 		}
-		p.dialog.create(newButtonList(p.dialog.dismiss, confirm))
+		p.dialog.create(container.NewGridWithColumns(2, p.dialog.dismiss, confirm))
 	} else {
 		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
-		p.dialog.create(newButtonList(p.dialog.dismiss))
+		p.dialog.create(container.NewGridWithColumns(1, p.dialog.dismiss))
 	}
 }
 

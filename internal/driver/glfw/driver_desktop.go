@@ -102,16 +102,24 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	d.systrayMenu = m
 	systray.ResetMenu()
+	d.refreshSystrayMenu(m, nil)
+
+	systray.AddSeparator()
+	quit := systray.AddMenuItem("Quit", "Quit application")
+	go func() {
+		<-quit.ClickedCh
+		d.Quit()
+	}()
+}
+
+func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 	for _, i := range m.Items {
-		item := itemForMenuItem(i, nil)
+		item := itemForMenuItem(i, parent)
 		if item == nil {
 			continue // separator
 		}
 		if i.ChildMenu != nil {
-			for _, c := range i.ChildMenu.Items {
-				itemForMenuItem(c, item)
-			}
-			continue
+			d.refreshSystrayMenu(i.ChildMenu, item)
 		}
 
 		fn := i.Action
@@ -123,13 +131,6 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 			}
 		}()
 	}
-
-	systray.AddSeparator()
-	quit := systray.AddMenuItem("Quit", "Quit application")
-	go func() {
-		<-quit.ClickedCh
-		d.Quit()
-	}()
 }
 
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {

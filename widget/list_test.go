@@ -103,6 +103,31 @@ func TestList_SetItemHeight(t *testing.T) {
 	test.AssertImageMatches(t, "list/list_item_height.png", w.Canvas().Capture())
 }
 
+func TestList_SetItemHeight_InUpdate(t *testing.T) {
+	var list *List
+	list = NewList(
+		func() int { return 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 0, A: 0x33})
+			r.SetMinSize(fyne.NewSize(10, 10))
+			return r
+		},
+		func(id ListItemID, o fyne.CanvasObject) {
+			list.SetItemHeight(id, 32)
+		})
+
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-done:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for list to complete refresh")
+		}
+	}()
+	list.Refresh() // could block
+	done <- struct{}{}
+}
+
 func TestList_OffsetChange(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -203,6 +228,17 @@ func TestList_Selection(t *testing.T) {
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
 	assert.False(t, children[0].(*listItem).background.Visible())
+
+	offset := 0
+	list.SetItemHeight(2, 220)
+	list.SetItemHeight(3, 220)
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
+
+	list.Select(200)
+	offset = 7220
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
 }
 
 func TestList_Select(t *testing.T) {

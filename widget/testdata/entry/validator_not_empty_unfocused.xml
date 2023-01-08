@@ -6,10 +6,10 @@
 			<widget pos="0,2" size="36x31" type="*widget.Scroll">
 				<widget size="36x31" type="*widget.entryContent">
 					<widget size="36x31" type="*widget.RichText">
-						<text color="placeholder" pos="8,6" size="20x19"></text>
+						<text color="placeholder" pos="8,6" size="0x19"></text>
 					</widget>
 					<widget size="36x31" type="*widget.RichText">
-						<text pos="8,6" size="20x19"></text>
+						<text pos="8,6" size="0x19"></text>
 					</widget>
 				</widget>
 			</widget>
