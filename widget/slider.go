@@ -390,9 +390,10 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
 
-	focusIndicatorSize := fyne.NewSize(diameter+theme.InnerPadding()*2, diameter+theme.InnerPadding()*2)
-	s.focusIndicator.Move(thumbPos.SubtractXY(theme.InnerPadding(), theme.InnerPadding()))
+	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
+	delta := (focusIndicatorSize.Width - diameter) / 2
 	s.focusIndicator.Resize(focusIndicatorSize)
+	s.focusIndicator.Move(thumbPos.SubtractXY(delta, delta))
 }
 
 // MinSize calculates the minimum size of a widget.
