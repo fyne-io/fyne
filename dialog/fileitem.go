@@ -46,9 +46,9 @@ func (i *fileDialogItem) TypedRune(_ rune) {
 }
 
 func (i *fileDialogItem) TypedKey(key *fyne.KeyEvent) {
-	if key.Name == fyne.KeySpace {
+	switch key.Name {
+	case fyne.KeySpace, fyne.KeyEnter, fyne.KeyReturn:
 		i.picker.setSelected(i)
-		i.Refresh()
 	}
 }
 
@@ -65,7 +65,6 @@ func (i *fileDialogItem) MouseOut() {
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 	i.picker.setSelected(i)
-	i.Refresh()
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
