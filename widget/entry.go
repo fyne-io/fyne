@@ -438,6 +438,9 @@ func (e *Entry) SelectedText() string {
 	}
 
 	start, stop := e.selection()
+	if start == stop {
+		return ""
+	}
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
