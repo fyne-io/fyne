@@ -4,7 +4,9 @@ import (
 	"image/color"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -31,17 +33,6 @@ func TestRectangle_Radius(t *testing.T) {
 		StrokeWidth: 2.0,
 		Radius:      25}
 
-	assert.Equal(t, float32(25.0), rect.Radius)
-}
-
-func TestRectangle_StrokeColor(t *testing.T) {
-	orange := color.NRGBA{R: 255, G: 120, B: 0, A: 255}
-	rect := &canvas.Rectangle{
-		FillColor:   color.NRGBA{R: 255, G: 200, B: 0, A: 180},
-		StrokeColor: orange,
-		StrokeWidth: 5,
-		Radius:      25.0}
-
-	assert.Equal(t, orange, rect.StrokeColor)
-
+	rect.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "rounded_rect.xml", rect)
 }
