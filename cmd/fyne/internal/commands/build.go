@@ -66,7 +66,7 @@ func Build() *cli.Command {
 			&cli.BoolFlag{
 				Name:        "static",
 				Usage:       "Do not link against shared libraries",
-				Destination: &b.release,
+				Destination: &b.static,
 			},
 			&cli.StringFlag{
 				Name:        "o",
