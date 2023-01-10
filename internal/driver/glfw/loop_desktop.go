@@ -29,7 +29,7 @@ func (d *gLDriver) initGLFW() {
 	})
 }
 
-func (d *glDriver) tryWaitEventsTimeout() {
+func (d *gLDriver) tryWaitEventsTimeout() {
 	defer func() {
 		if r := recover(); r != nil {
 			fyne.LogError(fmt.Sprint("GLFW waitEvents error: ", r), nil)
