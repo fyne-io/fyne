@@ -9,4 +9,3 @@ func (w *window) scaleInput(in float64) float64 {
 	return math.Ceil(in * float64(w.canvas.Scale()))
 
 }
-
