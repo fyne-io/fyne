@@ -148,6 +148,6 @@ func newPreferences(app *fyneApp) *preferences {
 			fyne.LogError("Failed on saving preferences", err)
 		}
 	})
-	p.watch()
+	//p.watch()
 	return p
 }
