@@ -171,6 +171,18 @@ func (l *GridWrapList) ScrollToTop() {
 	l.Refresh()
 }
 
+// ScrollToOffset scrolls the list to the given offset position
+func (l *GridWrapList) ScrollToOffset(offset float32) {
+	// TODO: bounds checking
+	l.scroller.Offset.Y = offset
+	l.offsetUpdated(l.scroller.Offset)
+}
+
+// GetScrollOffset returns the current scroll offset position
+func (l *GridWrapList) GetScrollOffset() float32 {
+	return l.offsetY
+}
+
 // Unselect removes the item identified by the given ID from the selection.
 func (l *GridWrapList) Unselect(id ListItemID) {
 	if len(l.selected) == 0 || l.selected[0] != id {
