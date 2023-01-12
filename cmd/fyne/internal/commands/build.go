@@ -197,18 +197,9 @@ func (b *Builder) build() error {
 		}
 	}
 
-	srcdir := b.srcdir
-	if b.goPackage != "" {
-		if strings.HasPrefix(b.goPackage, "./") {
-			srcdir = filepath.Join(srcdir, b.goPackage)
-		} else {
-			// get the output of go env GOROOT
-			goroot, err := fyneGoModRunner.runOutput("env", "GOROOT")
-			if err != nil {
-				return err
-			}
-			srcdir = filepath.Join(strings.TrimSpace(string(goroot)), "src", b.goPackage)
-		}
+	srcdir, err := b.computeSrcDir(fyneGoModRunner)
+	if err != nil {
+		return err
 	}
 
 	if b.icon == "" {
@@ -294,6 +285,25 @@ func (b *Builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
+	if b.goPackage == "" {
+		return b.srcdir, nil
+	}
+
+	srcdir := b.srcdir
+	if strings.HasPrefix(b.goPackage, "./") {
+		srcdir = filepath.Join(srcdir, b.goPackage)
+	} else {
+		// get the output of go env GOROOT
+		goroot, err := fyneGoModRunner.runOutput("env", "GOROOT")
+		if err != nil {
+			return "", err
+		}
+		srcdir = filepath.Join(strings.TrimSpace(string(goroot)), "src", b.goPackage)
+	}
+	return srcdir, nil
 }
 
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
