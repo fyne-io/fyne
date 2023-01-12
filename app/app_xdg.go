@@ -58,8 +58,12 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 		return theme.VariantDark
 	}
 
+	// See: https://github.com/flatpak/xdg-desktop-portal/blob/1.16.0/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
+	// 0: No preference
+	// 1: Prefer dark appearance
+	// 2: Prefer light appearance
 	switch value {
-	case 0:
+	case 2:
 		return theme.VariantLight
 	default:
 		return theme.VariantDark
