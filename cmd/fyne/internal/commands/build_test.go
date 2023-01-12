@@ -230,6 +230,40 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	wasmBuildTest.verifyExpectation()
 }
 
+func Test_BuildLinuxReleaseVersion(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"env", "GOROOT"}},
+			mockReturn: mockReturn{
+				ret: []byte("/usr/lib/go"),
+			},
+		},
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", "cmd/terminal"},
+				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
+	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: "cmd/terminal"}
+	err := b.build()
+	assert.Nil(t, err)
+	linuxBuildTest.verifyExpectation()
+}
+
 type jsonTest struct {
 	expected bool
 	json     []byte
