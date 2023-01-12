@@ -197,14 +197,28 @@ func (b *Builder) build() error {
 		}
 	}
 
+	srcdir := b.srcdir
+	if b.goPackage != "" {
+		if strings.HasPrefix(b.goPackage, "./") {
+			srcdir = filepath.Join(srcdir, b.goPackage)
+		} else {
+			// get the output of go env GOROOT
+			goroot, err := fyneGoModRunner.runOutput("env", "GOROOT")
+			if err != nil {
+				return err
+			}
+			srcdir = filepath.Join(strings.TrimSpace(string(goroot)), "src", b.goPackage)
+		}
+	}
+
 	if b.icon == "" {
-		defaultIcon := filepath.Join(b.srcdir, "Icon.png")
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
 		if util.Exists(defaultIcon) {
 			b.icon = defaultIcon
 		}
 	}
 
-	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, createMetadataInitFile)
+	close, err := injectMetadataIfPossible(fyneGoModRunner, srcdir, b.appData, createMetadataInitFile)
 	if err != nil {
 		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 	} else if close != nil {
