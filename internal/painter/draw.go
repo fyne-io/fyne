@@ -98,17 +98,17 @@ func DrawRectangle(rect *canvas.Rectangle, vectorPad float32, scale func(float32
 	if rect.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(rect.FillColor)
-		if rect.Radius == 0 {
+		if rect.CornerRadius == 0 {
 			rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
 		} else {
-			r := float64(scale(rect.Radius))
+			r := float64(scale(rect.CornerRadius))
 			rasterx.AddRoundRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), r, r, 0, rasterx.RoundGap, filler)
 		}
 		filler.Draw()
 	}
 
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
-		r := scale(rect.Radius)
+		r := scale(rect.CornerRadius)
 		c := (1 - 0.55228) * r
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(rect.StrokeColor)
