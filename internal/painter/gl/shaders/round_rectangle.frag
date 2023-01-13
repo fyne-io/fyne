@@ -25,14 +25,13 @@ void main() {
 
     vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set
     vec4 to_color = stroke_color; //Outside color
-    to_color[3] = 0.0; // blend the stroke colour to alpha
 
     if (stroke_width_half == 0.0)
     {
         from_color = fill_color;
         to_color = fill_color;
-        to_color[3] = 0.0; // blend the fill colour to alpha
     }
+    to_color[3] = 0.0; // blend the fill colour to alpha
 
     if (distance < 0.0)
     {

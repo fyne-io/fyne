@@ -20,8 +20,6 @@ uniform float radius;
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
 
-
-
 float calc_distance(vec2 p, vec2 b, float r)
 {
     vec2 d = abs(p) - b + vec2(r);
@@ -31,29 +29,29 @@ float calc_distance(vec2 p, vec2 b, float r)
 void main() {
 
     vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);
-    // vec2 rect_size_half =  vec2(frag_rect_coords[1] - frag_rect_coords[0], frag_rect_coords[3] - frag_rect_coords[2]) * 0.5 - vec2(stroke_width_half);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     float distance = calc_distance(vec_centered_pos, vec2(rect_size_half.x, rect_size_half.y), radius - stroke_width_half);
 
     vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set
-    vec4 to_color = vec4(1.0, 1.0, 1.0, 0.0); //Outside color
+    vec4 to_color = stroke_color; //Outside color
 
-    if (stroke_width_half > 0.0)
+    if (stroke_width_half == 0.0)
     {
-        if (distance < 0.0)
-        {
-            to_color = fill_color;   
-        } 
-        
-        distance = abs(distance) - stroke_width_half;
+        from_color = fill_color;
+        to_color = fill_color;
     }
+    to_color[3] = 0.0; // blend the fill colour to alpha
+
+    if (distance < 0.0)
+    {
+        to_color = fill_color;
+    } 
+
+    distance = abs(distance) - stroke_width_half;
 
     float blend_amount = smoothstep(-1.0, 1.0, distance);
 
     // final color
     gl_FragColor = mix(from_color, to_color, blend_amount);
-    //gl_FragColor = vec4(vec3(blend_amount), 1.0);
-    //gl_FragColor = vec4(vec3(abs(distance) / (2.0 * corner)), 1.0);
-
 }
