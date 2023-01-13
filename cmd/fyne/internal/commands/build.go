@@ -288,20 +288,18 @@ func (b *Builder) build() error {
 }
 
 func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
-	if b.goPackage == "" {
+	if b.goPackage == "" || b.goPackage == "." {
 		return b.srcdir, nil
 	}
 
 	srcdir := b.srcdir
-	if strings.HasPrefix(b.goPackage, "./") {
+	if strings.HasPrefix(b.goPackage, "."+string(os.PathSeparator)) ||
+		strings.HasPrefix(b.goPackage, ".."+string(os.PathSeparator)) {
 		srcdir = filepath.Join(srcdir, b.goPackage)
+	} else if strings.HasPrefix(b.goPackage, string(os.PathSeparator)) {
+		srcdir = b.goPackage
 	} else {
-		// get the output of go env GOROOT
-		goroot, err := fyneGoModRunner.runOutput("env", "GOROOT")
-		if err != nil {
-			return "", err
-		}
-		srcdir = filepath.Join(strings.TrimSpace(string(goroot)), "src", b.goPackage)
+		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
 	}
 	return srcdir, nil
 }
