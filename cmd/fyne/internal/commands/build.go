@@ -25,6 +25,7 @@ type Builder struct {
 	release            bool
 	tags               []string
 	tagsToParse        string
+	ldFlags            string
 
 	customMetadata keyValueFlag
 
@@ -71,6 +72,11 @@ func Build() *cli.Command {
 				Name:  "metadata",
 				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
 				Value: &b.customMetadata,
+			},
+			&cli.StringFlag{
+				Name:        "ldflags",
+				Usage:       "A string of flags to pass to the linker. See https://golang.org/cmd/link/ for more information.",
+				Destination: &b.ldFlags,
 			},
 		},
 		Action: func(ctx *cli.Context) error {
@@ -222,15 +228,23 @@ func (b *Builder) build() error {
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
-		if goos == "windows" {
-			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui", "-trimpath")
-			} else {
-				args = append(args, "-ldflags", "-H=windowsgui ")
-			}
-		} else if b.release {
-			args = append(args, "-ldflags", "-s -w", "-trimpath")
+		if b.release {
+			appendEnv(&env, "GOFLAGS", "-s -w")
+			args = append(args, "-trimpath")
 		}
+
+		if goos == "windows" {
+			appendEnv(&env, "GOFLAGS", "-H=windowsgui")
+		}
+	}
+
+	if b.ldFlags != "" {
+		appendEnv(&env, "GOFLAGS", b.ldFlags)
+	}
+
+	ldFlags := getEnv(env, "GOFLAGS")
+	if len(ldFlags) > 0 {
+		args = append(args, "-ldflags", ldFlags)
 	}
 
 	if b.target != "" {
@@ -356,4 +370,15 @@ func appendEnv(env *[]string, varName, value string) {
 	}
 
 	*env = append(*env, varName+"="+value)
+}
+
+func getEnv(env []string, varName string) string {
+	for _, e := range env {
+		keyValue := strings.SplitN(e, "=", 2)
+
+		if keyValue[0] == "GOFLAGS" {
+			return keyValue[1]
+		}
+	}
+	return ""
 }
