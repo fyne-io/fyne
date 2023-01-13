@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -240,7 +241,7 @@ func Test_BuildLinuxReleaseVersion(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", "./cmd/terminal"},
+				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", filepath.Join(".", "cmd", "terminal")},
 				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
 				osEnv: true,
 				dir:   "myTest",
@@ -252,7 +253,7 @@ func Test_BuildLinuxReleaseVersion(t *testing.T) {
 	}
 
 	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: "./cmd/terminal"}
+	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: filepath.Join(".", "cmd", "terminal")}
 	err := b.build()
 	assert.Nil(t, err)
 	linuxBuildTest.verifyExpectation()
