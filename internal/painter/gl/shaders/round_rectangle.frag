@@ -29,15 +29,17 @@ void main() {
     vec4 from_color = stroke_color; //Always the border color. If no border, this still should be set
     vec4 to_color = vec4(1.0, 1.0, 1.0, 0.0); //Outside color
 
-    if (stroke_width_half > 0.0)
+    if (stroke_width_half == 0.0)
     {
-        if (distance < 0.0)
-        {
-            to_color = fill_color;   
-        } 
-        
-        distance = abs(distance) - stroke_width_half;
+        from_color = fill_color;
     }
+
+    if (distance < 0.0)
+    {
+        to_color = fill_color;
+    } 
+
+    distance = abs(distance) - stroke_width_half;
 
     float blend_amount = smoothstep(-1.0, 1.0, distance);
 
