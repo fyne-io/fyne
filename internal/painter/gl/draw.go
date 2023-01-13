@@ -81,7 +81,7 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		if (obj.FillColor == color.Transparent || obj.FillColor == nil) && (obj.StrokeColor == color.Transparent || obj.StrokeColor == nil || obj.StrokeWidth == 0) {
 			return
 		}
-		if obj.Radius == 0 {
+		if obj.CornerRadius == 0 {
 			p.drawRectangle(obj, pos, frame)
 		} else {
 			p.drawRoundRectangle(obj, pos, frame)
@@ -175,7 +175,7 @@ func (p *painter) drawRoundRectangle(rect *canvas.Rectangle, pos fyne.Position, 
 	p.ctx.Uniform4f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5, 0.0, 0.0)
 
 	radiusUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "radius")
-	radiusScaled := roundToPixel(rect.Radius*p.pixScale, 1.0)
+	radiusScaled := roundToPixel(rect.CornerRadius*p.pixScale, 1.0)
 	p.ctx.Uniform1f(radiusUniform, radiusScaled)
 
 	var r, g, b, a float32

@@ -10,6 +10,8 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+const quarterCircleControl = 1 - 0.55228
+
 // DrawCircle rasterizes the given circle object into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
@@ -98,18 +100,39 @@ func DrawRectangle(rect *canvas.Rectangle, vectorPad float32, scale func(float32
 	if rect.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(rect.FillColor)
-		rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
+		if rect.CornerRadius == 0 {
+			rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
+		} else {
+			r := float64(scale(rect.CornerRadius))
+			rasterx.AddRoundRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), r, r, 0, rasterx.RoundGap, filler)
+		}
 		filler.Draw()
 	}
 
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+		r := scale(rect.CornerRadius)
+		c := quarterCircleControl * r
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(rect.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-		dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
-		dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
-		dasher.Line(rasterx.ToFixedP(float64(p3x), float64(p3y)))
-		dasher.Line(rasterx.ToFixedP(float64(p4x), float64(p4y)))
+		if c != 0 {
+			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+r)))
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p1x), float64(p1y+c)), rasterx.ToFixedP(float64(p1x+c), float64(p1y)), rasterx.ToFixedP(float64(p1x+r), float64(p2y)))
+		} else {
+			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
+		}
+		dasher.Line(rasterx.ToFixedP(float64(p2x-r), float64(p2y)))
+		if c != 0 {
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p2x-c), float64(p2y)), rasterx.ToFixedP(float64(p2x), float64(p2y+c)), rasterx.ToFixedP(float64(p2x), float64(p2y+r)))
+		}
+		dasher.Line(rasterx.ToFixedP(float64(p3x), float64(p3y-r)))
+		if c != 0 {
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p3x), float64(p3y-c)), rasterx.ToFixedP(float64(p3x-c), float64(p3y)), rasterx.ToFixedP(float64(p3x-r), float64(p3y)))
+		}
+		dasher.Line(rasterx.ToFixedP(float64(p4x+r), float64(p4y)))
+		if c != 0 {
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p4x+c), float64(p4y)), rasterx.ToFixedP(float64(p4x), float64(p4y-c)), rasterx.ToFixedP(float64(p4x), float64(p4y-r)))
+		}
 		dasher.Stop(true)
 		dasher.Draw()
 	}

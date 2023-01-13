@@ -19,7 +19,7 @@ type Rectangle struct {
 	// The radius of the rectangle corners
 	//
 	// Since: 2.4
-	Radius float32
+	CornerRadius float32
 }
 
 // Refresh causes this object to be redrawn in it's current state
