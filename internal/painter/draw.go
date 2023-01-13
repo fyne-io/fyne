@@ -10,6 +10,8 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+const quarterCircleControl = 1 - 0.55228
+
 // DrawCircle rasterizes the given circle object into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
@@ -109,7 +111,7 @@ func DrawRectangle(rect *canvas.Rectangle, vectorPad float32, scale func(float32
 
 	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
 		r := scale(rect.CornerRadius)
-		c := (1 - 0.55228) * r
+		c := quarterCircleControl * r
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(rect.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
