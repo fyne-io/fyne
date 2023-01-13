@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -232,6 +233,8 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 }
 
 func Test_BuildLinuxReleaseVersion(t *testing.T) {
+	relativePath := "." + string(os.PathSeparator) + filepath.Join("cmd", "terminal")
+
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -241,7 +244,7 @@ func Test_BuildLinuxReleaseVersion(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", filepath.Join(".", "cmd", "terminal")},
+				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", relativePath},
 				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
 				osEnv: true,
 				dir:   "myTest",
@@ -253,7 +256,7 @@ func Test_BuildLinuxReleaseVersion(t *testing.T) {
 	}
 
 	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: filepath.Join(".", "cmd", "terminal")}
+	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: relativePath}
 	err := b.build()
 	assert.Nil(t, err)
 	linuxBuildTest.verifyExpectation()
