@@ -62,15 +62,12 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 	// 0: No preference
 	// 1: Prefer dark appearance
 	// 2: Prefer light appearance
-	switch value {
-	case 2:
-		return theme.VariantLight
-	case 1:
+	if value == 1 {
 		return theme.VariantDark
-	default:
-		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
-		return theme.VariantLight
 	}
+
+	// Default to light theme for 0, 2 and unknown values to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
+	return theme.VariantLight
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
