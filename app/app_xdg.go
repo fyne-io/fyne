@@ -58,13 +58,19 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 		return theme.VariantDark
 	}
 
+	// See: https://github.com/flatpak/xdg-desktop-portal/blob/1.16.0/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
+	// 0: No preference
+	// 1: Prefer dark appearance
+	// 2: Prefer light appearance
 	switch value {
-	case 0:
+	case 2:
 		return theme.VariantLight
-	default:
+	case 1:
 		return theme.VariantDark
+	default:
+		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
+		return theme.VariantLight
 	}
-
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
