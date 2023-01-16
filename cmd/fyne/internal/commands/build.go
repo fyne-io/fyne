@@ -203,14 +203,19 @@ func (b *Builder) build() error {
 		}
 	}
 
+	srcdir, err := b.computeSrcDir(fyneGoModRunner)
+	if err != nil {
+		return err
+	}
+
 	if b.icon == "" {
-		defaultIcon := filepath.Join(b.srcdir, "Icon.png")
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
 		if util.Exists(defaultIcon) {
 			b.icon = defaultIcon
 		}
 	}
 
-	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, createMetadataInitFile)
+	close, err := injectMetadataIfPossible(fyneGoModRunner, srcdir, b.appData, createMetadataInitFile)
 	if err != nil {
 		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 	} else if close != nil {
@@ -299,6 +304,23 @@ func (b *Builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
+	if b.goPackage == "" || b.goPackage == "." {
+		return b.srcdir, nil
+	}
+
+	srcdir := b.srcdir
+	if strings.HasPrefix(b.goPackage, "."+string(os.PathSeparator)) ||
+		strings.HasPrefix(b.goPackage, ".."+string(os.PathSeparator)) {
+		srcdir = filepath.Join(srcdir, b.goPackage)
+	} else if strings.HasPrefix(b.goPackage, string(os.PathSeparator)) {
+		srcdir = b.goPackage
+	} else {
+		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
+	}
+	return srcdir, nil
 }
 
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
