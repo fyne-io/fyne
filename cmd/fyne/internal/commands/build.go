@@ -229,22 +229,27 @@ func (b *Builder) build() error {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
 		if b.release {
-			appendEnv(&env, "GOFLAGS", "-s -w")
+			b.ldFlags += " -s -w"
 			args = append(args, "-trimpath")
 		}
 
 		if goos == "windows" {
-			appendEnv(&env, "GOFLAGS", "-H=windowsgui")
+			b.ldFlags += " -H=windowsgui"
 		}
 	}
 
-	if b.ldFlags != "" {
-		appendEnv(&env, "GOFLAGS", b.ldFlags)
+	goFlags := os.Getenv("GOFLAGS")
+	goLdFlags, goFlags := extractLdFlags(goFlags)
+	if goLdFlags != "" {
+		b.ldFlags += " " + goLdFlags
+	}
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
 	}
 
-	ldFlags := getEnv(env, "GOFLAGS")
-	if len(ldFlags) > 0 {
-		args = append(args, "-ldflags", ldFlags)
+	if len(b.ldFlags) > 0 {
+		b.ldFlags = strings.TrimSpace(b.ldFlags)
+		args = append(args, "-ldflags", b.ldFlags)
 	}
 
 	if b.target != "" {
@@ -372,13 +377,25 @@ func appendEnv(env *[]string, varName, value string) {
 	*env = append(*env, varName+"="+value)
 }
 
-func getEnv(env []string, varName string) string {
-	for _, e := range env {
-		keyValue := strings.SplitN(e, "=", 2)
+func extractLdFlags(goFlags string) (string, string) {
+	if goFlags == "" {
+		return "", ""
+	}
 
-		if keyValue[0] == "GOFLAGS" {
-			return keyValue[1]
+	flags := strings.Fields(goFlags)
+	ldflags := ""
+	newGoFlags := ""
+
+	for _, flag := range flags {
+		if strings.HasPrefix(flag, "-ldflags=") {
+			ldflags += strings.TrimPrefix(flag, "-ldflags=") + " "
+		} else {
+			newGoFlags += flag + " "
 		}
 	}
-	return ""
+
+	ldflags = strings.TrimSpace(ldflags)
+	newGoFlags = strings.TrimSpace(newGoFlags)
+
+	return ldflags, newGoFlags
 }
