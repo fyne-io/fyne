@@ -5,8 +5,8 @@
 				<container size="188x288">
 					<widget size="188x33" type="*widget.listItem">
 						<widget size="188x33" type="*widget.Entry">
-							<rectangle fillColor="inputBackground" pos="1,1" size="186x31"/>
-							<rectangle size="186x32" strokeColor="inputBorder" strokeWidth="1"/>
+							<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="186x31" strokeColor="rgba(0,0,0,0)"/>
+							<rectangle radius="5" size="186x32" strokeColor="inputBorder" strokeWidth="1"/>
 							<widget pos="0,1" size="188x31" type="*widget.Scroll">
 								<widget size="188x31" type="*widget.entryContent">
 									<widget size="188x31" type="*widget.RichText">
@@ -22,8 +22,8 @@
 					<widget pos="0,39" size="188x33" type="*widget.listItem">
 						<rectangle fillColor="hover" size="188x33"/>
 						<widget size="188x33" type="*widget.Entry">
-							<rectangle fillColor="inputBackground" pos="1,1" size="186x31"/>
-							<rectangle size="186x32" strokeColor="inputBorder" strokeWidth="1"/>
+							<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="186x31" strokeColor="rgba(0,0,0,0)"/>
+							<rectangle radius="5" size="186x32" strokeColor="inputBorder" strokeWidth="1"/>
 							<widget pos="0,1" size="188x31" type="*widget.Scroll">
 								<widget size="188x31" type="*widget.entryContent">
 									<widget size="188x31" type="*widget.RichText">
@@ -37,10 +37,10 @@
 						</widget>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="rgba(0,0,0,255)" size="0x0"/>
+						<rectangle fillColor="rgba(0,0,0,255)" size="0x0" strokeColor="rgba(0,0,0,0)"/>
 					</widget>
 					<widget pos="0,36" size="188x1" type="*widget.Separator">
-						<rectangle fillColor="rgba(0,0,0,255)" size="188x1"/>
+						<rectangle fillColor="rgba(0,0,0,255)" size="188x1" strokeColor="rgba(0,0,0,0)"/>
 					</widget>
 				</container>
 			</widget>

@@ -5,8 +5,8 @@
 				<container size="187x74">
 					<text alignment="trailing" bold pos="8,8" size="35x19">test1</text>
 					<widget pos="55,0" size="132x35" type="*widget.Entry">
-						<rectangle fillColor="inputBackground" pos="2,2" size="128x31"/>
-						<rectangle pos="1,1" size="129x32" strokeColor="inputBorder" strokeWidth="2"/>
+						<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="128x31"/>
+						<rectangle pos="1,1" radius="4" size="129x32" strokeColor="inputBorder" strokeWidth="2"/>
 						<widget pos="0,2" size="132x31" type="*widget.Scroll">
 							<widget size="132x31" type="*widget.entryContent">
 								<widget size="132x31" type="*widget.RichText">
@@ -20,8 +20,8 @@
 					</widget>
 					<text alignment="trailing" bold pos="8,47" size="35x19">test2</text>
 					<widget pos="55,39" size="132x35" type="*widget.Entry">
-						<rectangle fillColor="inputBackground" pos="2,2" size="128x31"/>
-						<rectangle pos="1,1" size="129x32" strokeColor="inputBorder" strokeWidth="2"/>
+						<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="128x31"/>
+						<rectangle pos="1,1" radius="4" size="129x32" strokeColor="inputBorder" strokeWidth="2"/>
 						<widget pos="0,2" size="132x31" type="*widget.Scroll">
 							<widget size="132x31" type="*widget.entryContent">
 								<widget size="132x31" type="*widget.RichText">
@@ -37,7 +37,7 @@
 				<container pos="0,78" size="187x36">
 					<container pos="4,0" size="183x36">
 						<widget size="89x36" type="*widget.Button">
-							<rectangle fillColor="button" size="89x36"/>
+							<rectangle fillColor="button" radius="4" size="89x36"/>
 							<rectangle size="0x0"/>
 							<widget pos="33,8" size="46x20" type="*widget.RichText">
 								<text alignment="center" bold size="46x19">Cancel</text>
@@ -45,7 +45,7 @@
 							<image fillMode="contain" pos="9,8" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 						<widget pos="93,0" size="89x36" type="*widget.Button">
-							<rectangle fillColor="primary" size="89x36"/>
+							<rectangle fillColor="primary" radius="4" size="89x36"/>
 							<rectangle size="0x0"/>
 							<widget pos="32,8" size="49x20" type="*widget.RichText">
 								<text alignment="center" bold color="background" size="49x19">Submit</text>
