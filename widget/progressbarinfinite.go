@@ -30,7 +30,7 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 	// this is to create the same size infinite progress bar as regular progress bar
 	text := fyne.MeasureText("100%", theme.TextSize(), fyne.TextStyle{})
 
-	return fyne.NewSize(text.Width+theme.InnerPadding()*2, text.Height+theme.InnerPadding())
+	return fyne.NewSize(text.Width+theme.InnerPadding()*2, text.Height+theme.InnerPadding()*2)
 }
 
 func (p *infProgressRenderer) updateBar(done float32) {
