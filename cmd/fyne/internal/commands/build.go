@@ -243,17 +243,9 @@ func (b *Builder) build() error {
 		}
 	}
 
-	goFlags := os.Getenv("GOFLAGS")
-	goLdFlags, goFlags := extractLdFlags(goFlags)
-	if goLdFlags != "" {
-		b.ldFlags += " " + goLdFlags
-	}
-	if goFlags != "" {
-		os.Setenv("GOFLAGS", goFlags)
-	}
+	b.updateGoLdFlags()
 
 	if len(b.ldFlags) > 0 {
-		b.ldFlags = strings.TrimSpace(b.ldFlags)
 		args = append(args, "-ldflags", b.ldFlags)
 	}
 
@@ -304,6 +296,19 @@ func (b *Builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func (b *Builder) updateGoLdFlags() {
+	goFlags := os.Getenv("GOFLAGS")
+	goLdFlags, goFlags := extractLdFlags(goFlags)
+	if goLdFlags != "" {
+		b.ldFlags += " " + goLdFlags
+	}
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
+	}
+
+	b.ldFlags = strings.TrimSpace(b.ldFlags)
 }
 
 func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
