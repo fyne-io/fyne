@@ -94,7 +94,7 @@ func TestSelect_ClipValue(t *testing.T) {
 	combo.Resize(fyne.NewSize(90, 38))
 
 	r := cache.Renderer(combo)
-	text := r.Objects()[3].(*widget.RichText)
+	text := r.Objects()[2].(*widget.RichText)
 	assert.Equal(t, 1, len(text.Segments))
 	assert.Equal(t, "some text", text.Segments[0].(*widget.TextSegment).Text)
 
