@@ -162,9 +162,11 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.placeholderProvider()
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
+	box.CornerRadius = theme.InputRadiusSize()
 	border := canvas.NewRectangle(color.Transparent)
 	border.StrokeWidth = theme.InputBorderSize()
 	border.StrokeColor = theme.InputBorderColor()
+	border.CornerRadius = theme.InputRadiusSize()
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
@@ -1462,6 +1464,8 @@ func (r *entryRenderer) Refresh() {
 	r.entry.updateCursorAndSelection()
 
 	r.box.FillColor = theme.InputBackgroundColor()
+	r.box.CornerRadius = theme.InputRadiusSize()
+	r.border.CornerRadius = theme.InputRadiusSize()
 	if focusedAppearance {
 		r.border.StrokeColor = theme.PrimaryColor()
 	} else {

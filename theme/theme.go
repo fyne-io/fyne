@@ -208,6 +208,11 @@ const (
 	// Since: 2.0
 	SizeNameInputBorder fyne.ThemeSizeName = "inputBorder"
 
+	// SizeNameInputRadius is the name of theme lookup for input corner radius.
+	//
+	// Since: 2.0
+	SizeNameInputRadius fyne.ThemeSizeName = "inputRadius"
+
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since: 2.0
@@ -362,6 +367,13 @@ func InputBorderColor() color.Color {
 // Since: 2.0
 func InputBorderSize() float32 {
 	return current().Size(SizeNameInputBorder)
+}
+
+// InputRadiusSize returns the input radius size.
+//
+// Since: 2.4
+func InputRadiusSize() float32 {
+	return current().Size(SizeNameInputRadius)
 }
 
 // LightTheme defines the built-in light theme colors and sizes.
@@ -640,6 +652,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 11
 	case SizeNameInputBorder:
 		return 1
+	case SizeNameInputRadius:
+		return 5
 	default:
 		return 0
 	}

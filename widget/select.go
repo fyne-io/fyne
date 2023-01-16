@@ -78,6 +78,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{background, line, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, line, objects, s}
 	background.FillColor, line.FillColor = r.bgLineColor()
+	background.CornerRadius = theme.InputRadiusSize()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
 	r.updateLabel()
@@ -315,6 +316,7 @@ func (s *selectRenderer) Refresh() {
 	s.updateLabel()
 	s.updateIcon()
 	s.background.FillColor, s.line.FillColor = s.bgLineColor()
+	s.background.CornerRadius = theme.InputRadiusSize()
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
