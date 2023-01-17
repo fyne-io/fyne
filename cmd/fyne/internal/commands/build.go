@@ -224,7 +224,7 @@ func (b *Builder) build() error {
 		appendEnv(&env, "CGO_LDFLAGS", "-mmacosx-version-min=10.11")
 	}
 
-	ldFlags := ""
+	ldFlags := extractLdflagsFromGoFlags()
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
@@ -238,9 +238,8 @@ func (b *Builder) build() error {
 		}
 	}
 
-	ldFlags = updateGoLdFlags(ldFlags)
 	if len(ldFlags) > 0 {
-		args = append(args, "-ldflags", ldFlags)
+		args = append(args, "-ldflags", strings.TrimSpace(ldFlags))
 	}
 
 	if b.target != "" {
@@ -292,19 +291,17 @@ func (b *Builder) build() error {
 	return err
 }
 
-func updateGoLdFlags(ldFlags string) string {
+func extractLdflagsFromGoFlags() string {
 	goFlags := os.Getenv("GOFLAGS")
-	goLdFlags, goFlags := extractLdFlags(goFlags)
-	if goLdFlags != "" {
-		ldFlags += " " + goLdFlags
-	}
+
+	ldFlags, goFlags := extractLdFlags(goFlags)
 	if goFlags != "" {
 		os.Setenv("GOFLAGS", goFlags)
 	} else {
 		os.Unsetenv("GOFLAGS")
 	}
 
-	return strings.TrimSpace(ldFlags)
+	return ldFlags
 }
 
 func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
