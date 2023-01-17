@@ -298,7 +298,11 @@ func updateGoLdFlags(ldFlags string) string {
 	if goLdFlags != "" {
 		ldFlags += " " + goLdFlags
 	}
-	os.Setenv("GOFLAGS", goFlags)
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
+	} else {
+		os.Unsetenv("GOFLAGS")
+	}
 
 	return strings.TrimSpace(ldFlags)
 }
