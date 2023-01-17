@@ -156,6 +156,48 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_Control_Word(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("a\nbc")
+	entry.CursorRow = 0
+	entry.CursorColumn = 0
+
+	// ctrl-right to move on
+	nextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	// ctrl-left to move back
+	prevWord := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.TypedShortcut(prevWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedShortcut(prevWord)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	// select word
+	entry.SetText("word1 word2 word3")
+	entry.CursorRow = 0
+	entry.CursorColumn = 3
+	selectNextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
+	entry.TypedShortcut(selectNextWord)
+	assert.Equal(t, "d1", entry.SelectedText())
+	entry.TypedShortcut(selectNextWord)
+	assert.Equal(t, "d1 word2", entry.SelectedText())
+
+	// unselect when no shift press
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, "", entry.SelectedText())
+}
+
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nb")
@@ -311,6 +353,11 @@ func TestEntry_EmptySelection(t *testing.T) {
 	typeKeys(entry, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
 	assert.Equal(t, "", entry.SelectedText())
 	assert.Equal(t, 1, entry.CursorColumn)
+
+	// manually setting to empty selection
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyRight)
+	entry.CursorColumn = 1
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_Focus(t *testing.T) {

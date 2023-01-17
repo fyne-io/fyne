@@ -332,6 +332,7 @@ func (r *markupRenderer) writeRectangle(rct *canvas.Rectangle, attrs map[string]
 	r.setColorAttr(attrs, "fillColor", rct.FillColor)
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
 	r.writeTag("rectangle", true, attrs)
 }
 

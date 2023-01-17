@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -228,6 +230,36 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	err := b.build()
 	assert.NotNil(t, err)
 	wasmBuildTest.verifyExpectation()
+}
+
+func Test_BuildLinuxReleaseVersion(t *testing.T) {
+	relativePath := "." + string(os.PathSeparator) + filepath.Join("cmd", "terminal")
+
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", relativePath},
+				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
+	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: relativePath}
+	err := b.build()
+	assert.Nil(t, err)
+	linuxBuildTest.verifyExpectation()
 }
 
 type jsonTest struct {

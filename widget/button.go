@@ -362,12 +362,12 @@ func (r *buttonRenderer) applyTheme() {
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Importance == HighImportance {
+			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance {
 				r.icon.Resource = theme.NewInvertedThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
-			if r.button.Importance != HighImportance {
+			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}

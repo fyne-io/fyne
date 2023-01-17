@@ -205,7 +205,7 @@ func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Positio
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	if rect.StrokeColor != nil && rect.StrokeWidth > 0 { // use a rasterizer if there is a stroke
+	if (rect.StrokeColor != nil && rect.StrokeWidth > 0) || rect.CornerRadius != 0 { // use a rasterizer if there is a stroke or radius
 		drawRectangleStroke(c, rect, pos, base, clip)
 		return
 	}

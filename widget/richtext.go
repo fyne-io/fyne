@@ -45,7 +45,6 @@ type RichText struct {
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
 	t.Scroll = widget.ScrollNone
-	t.ExtendBaseWidget(t)
 	t.updateRowBounds()
 	return t
 }
@@ -252,6 +251,12 @@ func (t *RichText) len() int {
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
 func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
+	if row < 0 {
+		row = 0
+	}
+	if col < 0 {
+		col = 0
+	}
 	bound := t.rowBoundary(row)
 	total := fyne.NewSize(0, 0)
 	counted := 0

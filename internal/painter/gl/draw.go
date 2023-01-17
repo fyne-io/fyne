@@ -43,7 +43,6 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
 		return
 	}
-
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
 	p.ctx.UseProgram(p.lineProgram)
 	vbo := p.createBuffer(points)
@@ -54,13 +53,9 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.logError()
 
 	colorUniform := p.ctx.GetUniformLocation(p.lineProgram, "color")
-	r, g, b, a := line.StrokeColor.RGBA()
-	if a == 0 {
-		p.ctx.Uniform4f(colorUniform, 0, 0, 0, 0)
-	} else {
-		alpha := float32(a)
-		p.ctx.Uniform4f(colorUniform, float32(r)/alpha, float32(g)/alpha, float32(b)/alpha, alpha/0xffff)
-	}
+	r, g, b, a := getFragmentColor(line.StrokeColor)
+	p.ctx.Uniform4f(colorUniform, r, g, b, a)
+
 	lineWidthUniform := p.ctx.GetUniformLocation(p.lineProgram, "lineWidth")
 	p.ctx.Uniform1f(lineWidthUniform, halfWidth)
 
@@ -83,7 +78,14 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Raster:
 		p.drawRaster(obj, pos, frame)
 	case *canvas.Rectangle:
-		p.drawRectangle(obj, pos, frame)
+		if (obj.FillColor == color.Transparent || obj.FillColor == nil) && (obj.StrokeColor == color.Transparent || obj.StrokeColor == nil || obj.StrokeWidth == 0) {
+			return
+		}
+		if obj.CornerRadius == 0 {
+			p.drawRectangle(obj, pos, frame)
+		} else {
+			p.drawRoundRectangle(obj, pos, frame)
+		}
 	case *canvas.Text:
 		p.drawText(obj, pos, frame)
 	case *canvas.LinearGradient:
@@ -98,11 +100,102 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.StrokeColor == nil || rect.StrokeWidth == 0) {
-		return
+	// Vertex: BEG
+	points := p.vecRectCoords(pos, rect, frame)
+	p.ctx.UseProgram(p.rectangleProgram)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.rectangleProgram, "vert", 2, 4, 0)
+	p.defineVertexArray(p.rectangleProgram, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameSizeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "frame_size")
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.ctx.Uniform4f(frameSizeUniform, frameWidthScaled, frameHeightScaled, 0.0, 0.0)
+
+	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
+	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	strokeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_width")
+	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
+	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
+
+	var r, g, b, a float32
+	fillColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "fill_color")
+	r, g, b, a = getFragmentColor(rect.FillColor)
+	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
+
+	strokeColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_color")
+	var initCol color.Color
+	if rect.StrokeColor == initCol {
+		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
 	}
-	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
-		1.0, paint.VectorPad(rect))
+	r, g, b, a = getFragmentColor(rect.StrokeColor)
+	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangles, 0, 6)
+	p.logError()
+	p.freeBuffer(vbo)
+}
+
+func (p *painter) drawRoundRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	// Vertex: BEG
+	points := p.vecRectCoords(pos, rect, frame)
+	p.ctx.UseProgram(p.roundRectangleProgram)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.roundRectangleProgram, "vert", 2, 4, 0)
+	p.defineVertexArray(p.roundRectangleProgram, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "frame_size")
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.ctx.Uniform4f(frameSizeUniform, frameWidthScaled, frameHeightScaled, 0.0, 0.0)
+
+	rectCoordsUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_coords")
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
+	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	strokeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "stroke_width_half")
+	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
+	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
+
+	rectSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_size_half")
+	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
+	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+	p.ctx.Uniform4f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5, 0.0, 0.0)
+
+	radiusUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "radius")
+	radiusScaled := roundToPixel(rect.CornerRadius*p.pixScale, 1.0)
+	p.ctx.Uniform1f(radiusUniform, radiusScaled)
+
+	var r, g, b, a float32
+	fillColorUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "fill_color")
+	r, g, b, a = getFragmentColor(rect.FillColor)
+	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
+
+	strokeColorUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "stroke_color")
+	var initCol color.Color
+	if rect.StrokeColor == initCol {
+		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
+	}
+	r, g, b, a = getFragmentColor(rect.StrokeColor)
+	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangles, 0, 6)
+	p.logError()
+	p.freeBuffer(vbo)
 }
 
 func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
@@ -278,6 +371,36 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return size, pos
 }
 
+func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size) []float32 {
+	size := rect.Size()
+	pos1 := rect.Position()
+
+	xPosDiff := pos.X - pos1.X
+	yPosDiff := pos.Y - pos1.Y
+	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
+	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
+	size.Width = roundToPixel(size.Width, p.pixScale)
+	size.Height = roundToPixel(size.Height, p.pixScale)
+
+	x1Pos := pos1.X
+	x1Norm := -1 + x1Pos*2/frame.Width
+	x2Pos := (pos1.X + size.Width)
+	x2Norm := -1 + x2Pos*2/frame.Width
+	y1Pos := pos1.Y
+	y1Norm := 1 - y1Pos*2/frame.Height
+	y2Pos := (pos1.Y + size.Height)
+	y2Norm := 1 - y2Pos*2/frame.Height
+	coords := []float32{
+		x1Pos, y1Pos, x1Norm, y1Norm, // 1. triangle
+		x2Pos, y1Pos, x2Norm, y1Norm,
+		x1Pos, y2Pos, x1Norm, y2Norm,
+		x1Pos, y2Pos, x1Norm, y2Norm, // 2. triangle
+		x2Pos, y1Pos, x2Norm, y1Norm,
+		x2Pos, y2Pos, x2Norm, y2Norm}
+
+	return coords
+}
+
 func roundToPixel(v float32, pixScale float32) float32 {
 	if pixScale == 1.0 {
 		return float32(math.Round(float64(v)))
@@ -296,4 +419,30 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 	size.Height = end.Y - pos.Y
 
 	return size, pos
+}
+
+// Returns FragmentColor(red,green,blue,alpha) from fyne.Color
+func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
+	r, g, b, a := col.RGBA()
+	if a == 0 {
+		return 0, 0, 0, 0
+	}
+	alpha := float32(a)
+	return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
+}
+
+// Returns scaled Width and Height of Frame(fyne.Size)
+func (p *painter) scaleFrameSize(frame fyne.Size) (float32, float32) {
+	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
+	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
+	return frameWidthScaled, frameHeightScaled
+}
+
+// Returns scaled RectCoords(x1,x2,y1,y2) in same order
+func (p *painter) scaleRectCoords(x1, x2, y1, y2 float32) (float32, float32, float32, float32) {
+	x1Scaled := roundToPixel(x1*p.pixScale, 1.0)
+	x2Scaled := roundToPixel(x2*p.pixScale, 1.0)
+	y1Scaled := roundToPixel(y1*p.pixScale, 1.0)
+	y2Scaled := roundToPixel(y2*p.pixScale, 1.0)
+	return x1Scaled, x2Scaled, y1Scaled, y2Scaled
 }

@@ -115,7 +115,7 @@ func (p *Packager) packageWindows() error {
 		if filepath.Ext(p.Name) != ".exe" {
 			appName = appName + ".exe"
 		}
-		appPath = filepath.Join(filepath.Dir(p.exe), appName)
+		appPath = filepath.Join(p.dir, appName)
 		os.Rename(filepath.Base(p.exe), appName)
 	}
 

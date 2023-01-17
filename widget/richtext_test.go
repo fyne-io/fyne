@@ -370,6 +370,9 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	fullSize := provider.lineSizeToColumn(4, 0)
 	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
 	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+
+	out := provider.lineSizeToColumn(-1, -1)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0))
 }
 
 func TestText_splitLines(t *testing.T) {
