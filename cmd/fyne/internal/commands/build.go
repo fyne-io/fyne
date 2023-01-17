@@ -291,19 +291,6 @@ func (b *Builder) build() error {
 	return err
 }
 
-func extractLdflagsFromGoFlags() string {
-	goFlags := os.Getenv("GOFLAGS")
-
-	ldFlags, goFlags := extractLdFlags(goFlags)
-	if goFlags != "" {
-		os.Setenv("GOFLAGS", goFlags)
-	} else {
-		os.Unsetenv("GOFLAGS")
-	}
-
-	return ldFlags
-}
-
 func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 	if b.goPackage == "" || b.goPackage == "." {
 		return b.srcdir, nil
@@ -395,6 +382,19 @@ func appendEnv(env *[]string, varName, value string) {
 	}
 
 	*env = append(*env, varName+"="+value)
+}
+
+func extractLdflagsFromGoFlags() string {
+	goFlags := os.Getenv("GOFLAGS")
+
+	ldFlags, goFlags := extractLdFlags(goFlags)
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
+	} else {
+		os.Unsetenv("GOFLAGS")
+	}
+
+	return ldFlags
 }
 
 func extractLdFlags(goFlags string) (string, string) {
