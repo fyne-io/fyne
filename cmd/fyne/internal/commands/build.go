@@ -25,7 +25,6 @@ type Builder struct {
 	release            bool
 	tags               []string
 	tagsToParse        string
-	ldFlags            string
 
 	customMetadata keyValueFlag
 
@@ -72,11 +71,6 @@ func Build() *cli.Command {
 				Name:  "metadata",
 				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
 				Value: &b.customMetadata,
-			},
-			&cli.StringFlag{
-				Name:        "ldflags",
-				Usage:       "A string of flags to pass to the linker. See https://golang.org/cmd/link/ for more information.",
-				Destination: &b.ldFlags,
 			},
 		},
 		Action: func(ctx *cli.Context) error {
@@ -230,23 +224,23 @@ func (b *Builder) build() error {
 		appendEnv(&env, "CGO_LDFLAGS", "-mmacosx-version-min=10.11")
 	}
 
+	ldFlags := ""
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
 		if b.release {
-			b.ldFlags += " -s -w"
+			ldFlags += " -s -w"
 			args = append(args, "-trimpath")
 		}
 
 		if goos == "windows" {
-			b.ldFlags += " -H=windowsgui"
+			ldFlags += " -H=windowsgui"
 		}
 	}
 
-	b.updateGoLdFlags()
-
-	if len(b.ldFlags) > 0 {
-		args = append(args, "-ldflags", b.ldFlags)
+	ldFlags = updateGoLdFlags(ldFlags)
+	if len(ldFlags) > 0 {
+		args = append(args, "-ldflags", ldFlags)
 	}
 
 	if b.target != "" {
@@ -298,17 +292,15 @@ func (b *Builder) build() error {
 	return err
 }
 
-func (b *Builder) updateGoLdFlags() {
+func updateGoLdFlags(ldFlags string) string {
 	goFlags := os.Getenv("GOFLAGS")
 	goLdFlags, goFlags := extractLdFlags(goFlags)
 	if goLdFlags != "" {
-		b.ldFlags += " " + goLdFlags
+		ldFlags += " " + goLdFlags
 	}
-	if goFlags != "" {
-		os.Setenv("GOFLAGS", goFlags)
-	}
+	os.Setenv("GOFLAGS", goFlags)
 
-	b.ldFlags = strings.TrimSpace(b.ldFlags)
+	return strings.TrimSpace(ldFlags)
 }
 
 func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
