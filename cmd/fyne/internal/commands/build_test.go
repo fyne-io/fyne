@@ -244,7 +244,7 @@ func Test_BuildLinuxReleaseVersion(t *testing.T) {
 		},
 		{
 			expectedValue: expectedValue{
-				args:  []string{"build", "-ldflags", "-s -w", "-trimpath", "-tags", "release", relativePath},
+				args:  []string{"build", "-trimpath", "-ldflags", "-s -w", "-tags", "release", relativePath},
 				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
 				osEnv: true,
 				dir:   "myTest",
@@ -311,5 +311,26 @@ func Test_AppendEnv(t *testing.T) {
 		assert.Equal(t, "bar=baz", env[1])
 		assert.Equal(t, "foo1=bar=baz -bar", env[2])
 		assert.Equal(t, "foo2=baz2", env[3])
+	}
+}
+
+type extractTest struct {
+	value       string
+	wantLdFlags string
+	wantGoFlags string
+}
+
+func Test_ExtractLdFlags(t *testing.T) {
+	goFlagsTests := []extractTest{
+		{"-ldflags=-w", "-w", ""},
+		{"-ldflags=-s", "-s", ""},
+		{"-ldflags=-w -ldflags=-s", "-w -s", ""},
+		{"-mod=vendor", "", "-mod=vendor"},
+	}
+
+	for _, test := range goFlagsTests {
+		ldFlags, goFlags := extractLdFlags(test.value)
+		assert.Equal(t, test.wantLdFlags, ldFlags)
+		assert.Equal(t, test.wantGoFlags, goFlags)
 	}
 }

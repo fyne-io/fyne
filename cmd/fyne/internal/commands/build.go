@@ -224,18 +224,22 @@ func (b *Builder) build() error {
 		appendEnv(&env, "CGO_LDFLAGS", "-mmacosx-version-min=10.11")
 	}
 
+	ldFlags := extractLdflagsFromGoFlags()
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
-		if goos == "windows" {
-			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui", "-trimpath")
-			} else {
-				args = append(args, "-ldflags", "-H=windowsgui ")
-			}
-		} else if b.release {
-			args = append(args, "-ldflags", "-s -w", "-trimpath")
+		if b.release {
+			ldFlags += " -s -w"
+			args = append(args, "-trimpath")
 		}
+
+		if goos == "windows" {
+			ldFlags += " -H=windowsgui"
+		}
+	}
+
+	if len(ldFlags) > 0 {
+		args = append(args, "-ldflags", strings.TrimSpace(ldFlags))
 	}
 
 	if b.target != "" {
@@ -378,4 +382,40 @@ func appendEnv(env *[]string, varName, value string) {
 	}
 
 	*env = append(*env, varName+"="+value)
+}
+
+func extractLdflagsFromGoFlags() string {
+	goFlags := os.Getenv("GOFLAGS")
+
+	ldFlags, goFlags := extractLdFlags(goFlags)
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
+	} else {
+		os.Unsetenv("GOFLAGS")
+	}
+
+	return ldFlags
+}
+
+func extractLdFlags(goFlags string) (string, string) {
+	if goFlags == "" {
+		return "", ""
+	}
+
+	flags := strings.Fields(goFlags)
+	ldflags := ""
+	newGoFlags := ""
+
+	for _, flag := range flags {
+		if strings.HasPrefix(flag, "-ldflags=") {
+			ldflags += strings.TrimPrefix(flag, "-ldflags=") + " "
+		} else {
+			newGoFlags += flag + " "
+		}
+	}
+
+	ldflags = strings.TrimSpace(ldflags)
+	newGoFlags = strings.TrimSpace(newGoFlags)
+
+	return ldflags, newGoFlags
 }
