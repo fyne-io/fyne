@@ -72,7 +72,7 @@ func (l *GridWrapList) CreateRenderer() fyne.WidgetRenderer {
 
 	if f := l.CreateItem; f != nil {
 		if l.itemMin.IsZero() {
-			l.itemMin = newListItem(f(), nil).MinSize()
+			l.itemMin = newGridWrapListItem(f()).MinSize()
 		}
 	}
 	layout := &fyne.Container{}
@@ -212,6 +212,25 @@ func (l *GridWrapList) UnselectAll() {
 	}
 }
 
+type gridWrapListItem struct {
+	BaseWidget
+
+	child fyne.CanvasObject
+}
+
+func newGridWrapListItem(child fyne.CanvasObject) *gridWrapListItem {
+	li := &gridWrapListItem{
+		child: child,
+	}
+
+	li.ExtendBaseWidget(li)
+	return li
+}
+
+func (g *gridWrapListItem) CreateRenderer() fyne.WidgetRenderer {
+	return NewSimpleRenderer(g.child)
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*gridWrapListRenderer)(nil)
 
@@ -239,7 +258,7 @@ func (l *gridWrapListRenderer) MinSize() fyne.Size {
 
 func (l *gridWrapListRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		l.list.itemMin = newListItem(f(), nil).MinSize()
+		l.list.itemMin = newGridWrapListItem(f()).MinSize()
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
@@ -255,12 +274,12 @@ type gridWrapListLayout struct {
 	children []fyne.CanvasObject
 
 	itemPool   *syncPool
-	visible    map[ListItemID]*listItem
+	visible    map[ListItemID]*gridWrapListItem
 	renderLock sync.Mutex
 }
 
 func newGridWrapListLayout(list *GridWrapList) fyne.Layout {
-	l := &gridWrapListLayout{list: list, itemPool: &syncPool{}, visible: make(map[ListItemID]*listItem)}
+	l := &gridWrapListLayout{list: list, itemPool: &syncPool{}, visible: make(map[ListItemID]*gridWrapListItem)}
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -279,14 +298,14 @@ func (l *gridWrapListLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
-func (l *gridWrapListLayout) getItem() *listItem {
+func (l *gridWrapListLayout) getItem() *gridWrapListItem {
 	item := l.itemPool.Obtain()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
-			item = newListItem(f(), nil)
+			item = newGridWrapListItem(f())
 		}
 	}
-	return item.(*listItem)
+	return item.(*gridWrapListItem)
 }
 
 func (l *gridWrapListLayout) offsetUpdated(pos fyne.Position) {
@@ -297,25 +316,30 @@ func (l *gridWrapListLayout) offsetUpdated(pos fyne.Position) {
 	l.updateList(false)
 }
 
-func (l *gridWrapListLayout) setupListItem(li *listItem, id ListItemID) {
+func (l *gridWrapListLayout) setupListItem(li *gridWrapListItem, id ListItemID) {
+	/*
+	   previousIndicator := li.selected
+	   li.selected = false
 
-	previousIndicator := li.selected
-	li.selected = false
-	for _, s := range l.list.selected {
-		if id == s {
-			li.selected = true
-			break
-		}
-	}
-	if previousIndicator != li.selected {
-		li.Refresh()
-	}
+	   	for _, s := range l.list.selected {
+	   		if id == s {
+	   			li.selected = true
+	   			break
+	   		}
+	   	}
+
+	   	if previousIndicator != li.selected {
+	   		li.Refresh()
+	   	}
+	*/
 	if f := l.list.UpdateItem; f != nil {
 		f(id, li.child)
 	}
-	li.onTapped = func() {
-		l.list.Select(id)
-	}
+	/*
+		li.onTapped = func() {
+			l.list.Select(id)
+		}
+	*/
 }
 
 func (l *GridWrapList) getColCount() int {
@@ -351,7 +375,7 @@ func (l *gridWrapListLayout) updateList(refresh bool) {
 	}
 
 	wasVisible := l.visible
-	l.visible = make(map[ListItemID]*listItem)
+	l.visible = make(map[ListItemID]*gridWrapListItem)
 	var cells []fyne.CanvasObject
 	y := offY
 	curItem := minItem
