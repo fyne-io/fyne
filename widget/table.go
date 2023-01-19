@@ -499,17 +499,22 @@ func (t *tableRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX,
 		return
 	}
 
-	xPos := offX
-	for i := minCol; i < col; i++ {
-		if width, ok := widths[i]; ok {
-			xPos += width
-		} else {
-			xPos += t.cellSize.Width
-		}
-		xPos += theme.Padding()
-	}
-	x1 := xPos - t.scroll.Offset.X
-	x2 := x1 + widths[col]
+	// 选中一个单元格显示背景色
+	//xPos := offX
+	//for i := minCol; i < col; i++ {
+	//	if width, ok := widths[i]; ok {
+	//		xPos += width
+	//	} else {
+	//		xPos += t.cellSize.Width
+	//	}
+	//	xPos += theme.Padding()
+	//}
+	//x1 := xPos - t.scroll.Offset.X
+	//x2 := x1 + widths[col]
+
+	// 选中一整行显示背景色
+	x1 := float32(0)
+	x2 := t.t.size.Width
 
 	yPos := offY
 	for i := minRow; i < row; i++ {
