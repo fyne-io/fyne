@@ -31,6 +31,8 @@ type Table struct {
 	OnSelected   func(id TableCellID)                             `json:"-"`
 	OnUnselected func(id TableCellID)                             `json:"-"`
 
+	Tapped bool // 是否允许点击触发 Tapped
+
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
 	columnWidths, rowHeights  map[int]float32
@@ -46,7 +48,7 @@ type Table struct {
 //
 // Since: 1.4
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update}
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, Tapped: true}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -584,6 +586,10 @@ func (c *tableCells) Resize(s fyne.Size) {
 }
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
+	if !c.t.Tapped {
+		return
+	}
+
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
 		c.t.selectedCell = nil
 		c.t.Refresh()
