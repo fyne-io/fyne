@@ -76,6 +76,8 @@ type Button struct {
 
 	OnTapped func() `json:"-"`
 
+	BackgroundColor color.Color // background color
+
 	hovered, focused bool
 	tapAnim          *fyne.Animation
 	background       *canvas.Rectangle
@@ -240,6 +242,8 @@ func (b *Button) buttonColor() color.Color {
 			bg = theme.ErrorColor()
 		} else if b.Importance == WarningImportance {
 			bg = theme.WarningColor()
+		} else if b.BackgroundColor != nil {
+			bg = b.BackgroundColor
 		}
 
 		return blendColor(bg, theme.HoverColor())
@@ -252,6 +256,9 @@ func (b *Button) buttonColor() color.Color {
 	case b.Importance == WarningImportance:
 		return theme.WarningColor()
 	default:
+		if b.BackgroundColor != nil {
+			return b.BackgroundColor
+		}
 		return theme.ButtonColor()
 	}
 }

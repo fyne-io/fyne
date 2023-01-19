@@ -31,6 +31,8 @@ type Table struct {
 	OnSelected   func(id TableCellID)                             `json:"-"`
 	OnUnselected func(id TableCellID)                             `json:"-"`
 
+	Tapped bool // 是否允许点击触发 Tapped
+
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
 	columnWidths, rowHeights  map[int]float32
@@ -46,7 +48,7 @@ type Table struct {
 //
 // Since: 1.4
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update}
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, Tapped: true}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -499,17 +501,22 @@ func (t *tableRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX,
 		return
 	}
 
-	xPos := offX
-	for i := minCol; i < col; i++ {
-		if width, ok := widths[i]; ok {
-			xPos += width
-		} else {
-			xPos += t.cellSize.Width
-		}
-		xPos += theme.Padding()
-	}
-	x1 := xPos - t.scroll.Offset.X
-	x2 := x1 + widths[col]
+	// 选中一个单元格显示背景色
+	//xPos := offX
+	//for i := minCol; i < col; i++ {
+	//	if width, ok := widths[i]; ok {
+	//		xPos += width
+	//	} else {
+	//		xPos += t.cellSize.Width
+	//	}
+	//	xPos += theme.Padding()
+	//}
+	//x1 := xPos - t.scroll.Offset.X
+	//x2 := x1 + widths[col]
+
+	// 选中一整行显示背景色
+	x1 := float32(0)
+	x2 := t.t.size.Width
 
 	yPos := offY
 	for i := minRow; i < row; i++ {
@@ -579,6 +586,10 @@ func (c *tableCells) Resize(s fyne.Size) {
 }
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
+	if !c.t.Tapped {
+		return
+	}
+
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
 		c.t.selectedCell = nil
 		c.t.Refresh()
