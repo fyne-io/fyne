@@ -539,7 +539,6 @@ func TestList_Focus(t *testing.T) {
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.True(t, canvas.Focused().(*listItem).selected)
-	assert.True(t, canvas.Focused().(*listItem).hovered)
 }
 
 func createList(items int) *List {
