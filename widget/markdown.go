@@ -143,13 +143,15 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 				link.Text = link.Text + trimmed
 			}
 
-			if !m.heading {
+			_, isImage := m.nextSeg.(*ImageSegment)
+			if !m.heading && !isImage {
 				m.segs = append(m.segs, m.nextSeg)
 			}
 		case "Blockquote":
 			m.blockquote = true
 		case "Image":
-			m.nextSeg = makeImage(n.(*ast.Image))
+			m.nextSeg = makeImage(n.(*ast.Image)) // remember this for applying title
+			m.segs = append(m.segs, m.nextSeg)
 		}
 
 		return ast.WalkContinue, nil
