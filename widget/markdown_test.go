@@ -149,6 +149,15 @@ func TestRichTextMarkdown_Image(t *testing.T) {
 	} else {
 		t.Error("Segment should be a Image")
 	}
+
+	r = NewRichTextFromMarkdown("![](../../theme/icons/fyne.png)")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if img, ok := r.Segments[0].(*ImageSegment); ok {
+		assert.Equal(t, storage.NewFileURI("../../theme/icons/fyne.png"), img.Source)
+	} else {
+		t.Error("Segment should be a Image")
+	}
 }
 
 func TestRichTextMarkdown_Lines(t *testing.T) {
