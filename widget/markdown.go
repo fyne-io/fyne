@@ -122,25 +122,9 @@ func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error 
 				Style: RichTextStyleStrong,
 			}
 		case "Text":
-			trimmed := string(n.Text(source))
-			trimmed = strings.ReplaceAll(trimmed, "\n", " ") // newline inside paragraph is not newline
-			if trimmed == "" {
-				return ast.WalkContinue, nil
-			}
-			if t, ok := m.nextSeg.(*TextSegment); ok {
-				next := n.(*ast.Text).NextSibling()
-				if next != nil {
-					if nextText, ok := next.(*ast.Text); ok {
-						if nextText.Segment.Start > n.(*ast.Text).Segment.Stop { // detect presence of a trailing newline
-							trimmed = trimmed + " "
-						}
-					}
-				}
-
-				t.Text = t.Text + trimmed
-			}
-			if link, ok := m.nextSeg.(*HyperlinkSegment); ok {
-				link.Text = link.Text + trimmed
+			ret := addTextToSegment(string(n.Text(source)), m.nextSeg, n)
+			if ret != 0 {
+				return ret, nil
 			}
 
 			_, isImage := m.nextSeg.(*ImageSegment)
@@ -184,6 +168,29 @@ func (m *markdownRenderer) handleExitNode(n ast.Node) error {
 		}
 	}
 	return nil
+}
+
+func addTextToSegment(text string, s RichTextSegment, node ast.Node) ast.WalkStatus {
+	trimmed := strings.ReplaceAll(text, "\n", " ") // newline inside paragraph is not newline
+	if trimmed == "" {
+		return ast.WalkContinue
+	}
+	if t, ok := s.(*TextSegment); ok {
+		next := node.(*ast.Text).NextSibling()
+		if next != nil {
+			if nextText, ok := next.(*ast.Text); ok {
+				if nextText.Segment.Start > node.(*ast.Text).Segment.Stop { // detect presence of a trailing newline
+					trimmed = trimmed + " "
+				}
+			}
+		}
+
+		t.Text = t.Text + trimmed
+	}
+	if link, ok := s.(*HyperlinkSegment); ok {
+		link.Text = link.Text + trimmed
+	}
+	return 0
 }
 
 func makeImage(n *ast.Image) *ImageSegment {
