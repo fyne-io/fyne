@@ -104,12 +104,14 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	systray.ResetMenu()
 	d.refreshSystrayMenu(m, nil)
 
-	systray.AddSeparator()
-	quit := systray.AddMenuItem("Quit", "Quit application")
-	go func() {
-		<-quit.ClickedCh
-		d.Quit()
-	}()
+	if !m.NoDefaultEntries {
+		systray.AddSeparator()
+		quit := systray.AddMenuItem("Quit", "Quit application")
+		go func() {
+			<-quit.ClickedCh
+			d.Quit()
+		}()
+	}
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
