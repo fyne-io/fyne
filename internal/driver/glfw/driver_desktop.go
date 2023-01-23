@@ -54,6 +54,9 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 		w.SetCloseIntercept(func() {
 			d.Quit()
 		})
+		w.SetOnClosed(func() {
+			systray.Quit()
+		})
 	})
 
 	d.refreshSystray(m)
