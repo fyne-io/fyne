@@ -18,8 +18,11 @@ import (
 )
 
 var (
-	systrayIcon fyne.Resource
-	setup       sync.Once
+	systrayIcon    fyne.Resource
+	setup          sync.Once
+	systrayTitle   string
+	systrayTooltip string
+	quitMenuItem   *systray.MenuItem
 )
 
 func goroutineID() (id uint64) {
@@ -105,9 +108,16 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	d.refreshSystrayMenu(m, nil)
 
 	systray.AddSeparator()
-	quit := systray.AddMenuItem("Quit", "Quit application")
+
+	if systrayTitle == "" {
+		quitMenuItem = systray.AddMenuItem("Quit", "Quit application")
+	} else {
+		quitMenuItem = systray.AddMenuItem(systrayTitle, systrayTooltip)
+	}
+
 	go func() {
-		<-quit.ClickedCh
+		<-quitMenuItem.ClickedCh
+		quitMenuItem = nil
 		d.Quit()
 	}()
 }
@@ -143,6 +153,18 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 	}
 
 	systray.SetIcon(img)
+}
+
+func (d *gLDriver) SetSystemTrayQuitText(title string, tooltip string) {
+	// in case we need it later
+	systrayTitle = title
+	systrayTooltip = tooltip
+
+	// in case we can apply it right now
+	if quitMenuItem != nil {
+		quitMenuItem.SetTitle(systrayTitle)
+		quitMenuItem.SetTooltip(systrayTooltip)
+	}
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {

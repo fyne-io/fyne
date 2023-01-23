@@ -151,6 +151,13 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	}
 }
 
+// SetSystemTrayQuitText sets the title and tooltip strings for the Quit option that's available by default on a SystemTray Menu.
+func (a *fyneApp) SetSystemTrayQuitText(title string, tooltip string) {
+	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
+		desk.SetSystemTrayQuitText(title, tooltip)
+	}
+}
+
 func rootConfigDir() string {
 	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")

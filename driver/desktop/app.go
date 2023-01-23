@@ -8,4 +8,5 @@ import "fyne.io/fyne/v2"
 type App interface {
 	SetSystemTrayMenu(menu *fyne.Menu)
 	SetSystemTrayIcon(icon fyne.Resource)
+	SetSystemTrayQuitText(title string, tooltip string)
 }
