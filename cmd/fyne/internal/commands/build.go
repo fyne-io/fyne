@@ -90,13 +90,7 @@ func Build() *cli.Command {
 // Build parse the tags and start building
 func (b *Builder) Build() error {
 	if b.srcdir != "" {
-		// Use absolute srcdir
-		if !filepath.IsAbs(b.srcdir) {
-			absSrcDir, err := filepath.Abs(b.srcdir)
-			if err == nil {
-				b.srcdir = absSrcDir
-			}
-		}
+		b.srcdir = util.EnsureAbsPath(b.srcdir)
 		dirStat, err := os.Stat(b.srcdir)
 		if err != nil {
 			return err
@@ -318,6 +312,9 @@ func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	data, err := metadata.LoadStandard(srcdir)
 	if err == nil {
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		data.Details.Icon = util.MakePathRelative(srcdir, data.Details.Icon)
+
 		app.mergeMetadata(data)
 	}
 
@@ -330,10 +327,6 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 
 	app.ResGoString = "nil"
 	if app.icon != "" {
-		// Icon path should relative to FyneApp.toml and it is in the srcdir
-		if !filepath.IsAbs(app.icon) {
-			app.icon = filepath.Join(srcdir, app.icon)
-		}
 		res, err := fyne.LoadResourceFromPath(app.icon)
 		if err != nil {
 			fyne.LogError("Unable to load medadata icon file "+app.icon, err)

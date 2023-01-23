@@ -351,13 +351,7 @@ func (p *Packager) validate() (err error) {
 			return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
 				"Change directory to the main package and try again")
 		}
-		// Use absolute srcdir
-		if !filepath.IsAbs(p.srcDir) {
-			absSrcDir, err := filepath.Abs(p.srcDir)
-			if err == nil {
-				p.srcDir = absSrcDir
-			}
-		}
+		p.srcDir = util.EnsureAbsPath(p.srcDir)
 	}
 	os.Chdir(p.srcDir)
 
@@ -365,6 +359,9 @@ func (p *Packager) validate() (err error) {
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		data.Details.Icon = util.MakePathRelative(p.srcDir, data.Details.Icon)
+		
 		p.appData.Release = p.release
 		p.appData.mergeMetadata(data)
 	}
