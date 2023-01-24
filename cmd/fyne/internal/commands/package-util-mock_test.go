@@ -13,7 +13,7 @@ var utilCopyExeFileMock func(src, tgt string) error
 var utilWriteFileMock func(target string, data []byte) error
 var utilEnsureSubDirMock func(parent, name string) string
 var utilEnsureAbsPathMock func(path string) string
-var utilMakePathRelativeMock func(root, path string) string
+var utilMakePathRelativeToMock func(root, path string) string
 
 var utilRequireAndroidSDKMock func() error
 var utilAndroidBuildToolsPathMock func() string
@@ -145,8 +145,8 @@ func (m mockUtil) EnsureAbsPath(path string) string {
 	return utilEnsureAbsPathMock(path)
 }
 
-func (m mockUtil) MakePathRelative(root, path string) string {
-	return utilMakePathRelativeMock(root, path)
+func (m mockUtil) MakePathRelativeTo(root, path string) string {
+	return utilMakePathRelativeToMock(root, path)
 }
 
 func (m mockUtil) RequireAndroidSDK() error {

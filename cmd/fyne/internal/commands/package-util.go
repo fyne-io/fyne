@@ -13,7 +13,7 @@ type packagerUtil interface {
 	WriteFile(target string, data []byte) error
 	EnsureSubDir(parent, name string) string
 	EnsureAbsPath(path string) string
-	MakePathRelative(root, path string) string
+	MakePathRelativeTo(root, path string) string
 
 	RequireAndroidSDK() error
 	AndroidBuildToolsPath() string
@@ -49,8 +49,8 @@ func (d defaultUtil) EnsureAbsPath(path string) string {
 	return realUtil.EnsureAbsPath(path)
 }
 
-func (d defaultUtil) MakePathRelative(root, path string) string {
-	return realUtil.MakePathRelative(root, path)
+func (d defaultUtil) MakePathRelativeTo(root, path string) string {
+	return realUtil.MakePathRelativeTo(root, path)
 }
 
 func (d defaultUtil) RequireAndroidSDK() error {
