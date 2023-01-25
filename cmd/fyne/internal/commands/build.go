@@ -90,6 +90,7 @@ func Build() *cli.Command {
 // Build parse the tags and start building
 func (b *Builder) Build() error {
 	if b.srcdir != "" {
+		b.srcdir = util.EnsureAbsPath(b.srcdir)
 		dirStat, err := os.Stat(b.srcdir)
 		if err != nil {
 			return err
@@ -311,6 +312,9 @@ func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	data, err := metadata.LoadStandard(srcdir)
 	if err == nil {
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		data.Details.Icon = util.MakePathRelativeTo(srcdir, data.Details.Icon)
+
 		app.mergeMetadata(data)
 	}
 
