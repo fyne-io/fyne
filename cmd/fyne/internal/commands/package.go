@@ -360,7 +360,9 @@ func (p *Packager) validate() (err error) {
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
 		// When icon path specified in metadata file, we should make it relative to metadata file
-		data.Details.Icon = util.MakePathRelativeTo(p.srcDir, data.Details.Icon)
+		if data.Details.Icon != "" {
+			data.Details.Icon = util.MakePathRelativeTo(p.srcDir, data.Details.Icon)
+		}
 
 		p.appData.Release = p.release
 		p.appData.mergeMetadata(data)

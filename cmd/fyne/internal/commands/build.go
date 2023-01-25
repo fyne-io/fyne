@@ -313,7 +313,9 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	data, err := metadata.LoadStandard(srcdir)
 	if err == nil {
 		// When icon path specified in metadata file, we should make it relative to metadata file
-		data.Details.Icon = util.MakePathRelativeTo(srcdir, data.Details.Icon)
+		if data.Details.Icon != "" {
+			data.Details.Icon = util.MakePathRelativeTo(srcdir, data.Details.Icon)
+		}
 
 		app.mergeMetadata(data)
 	}
