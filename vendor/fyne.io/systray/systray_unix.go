@@ -154,7 +154,7 @@ func nativeLoop() int {
 }
 
 func nativeEnd() {
-	systrayExit()
+	runSystrayExit()
 	instance.conn.Close()
 }
 

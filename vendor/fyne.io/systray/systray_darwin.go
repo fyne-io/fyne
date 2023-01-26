@@ -127,6 +127,12 @@ func showMenuItem(item *MenuItem) {
 	)
 }
 
+func removeMenuItem(item *MenuItem) {
+	C.remove_menu_item(
+		C.int(item.id),
+	)
+}
+
 func resetMenu() {
 	C.reset_menu()
 }
@@ -138,7 +144,7 @@ func systray_ready() {
 
 //export systray_on_exit
 func systray_on_exit() {
-	systrayExit()
+	runSystrayExit()
 }
 
 //export systray_menu_item_selected

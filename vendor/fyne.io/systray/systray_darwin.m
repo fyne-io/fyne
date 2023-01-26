@@ -203,6 +203,14 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   }
 }
 
+- (void) remove_menu_item:(NSNumber*) menuId
+{
+  NSMenuItem* menuItem = find_menu_item(menu, menuId);
+  if (menuItem != NULL) {
+    [menuItem.menu removeItem:menuItem];     
+  }
+}
+
 - (void) reset_menu
 {
   [self->menu removeAllItems];
@@ -266,19 +274,23 @@ void runInMainThread(SEL method, id object) {
 
 void setIcon(const char* iconBytes, int length, bool template) {
   NSData* buffer = [NSData dataWithBytes: iconBytes length:length];
-  NSImage *image = [[NSImage alloc] initWithData:buffer];
-  [image setSize:NSMakeSize(16, 16)];
-  image.template = template;
-  runInMainThread(@selector(setIcon:), (id)image);
+  @autoreleasepool {
+    NSImage *image = [[NSImage alloc] initWithData:buffer];
+    [image setSize:NSMakeSize(16, 16)];
+    image.template = template;
+    runInMainThread(@selector(setIcon:), (id)image);
+  }
 }
 
 void setMenuItemIcon(const char* iconBytes, int length, int menuId, bool template) {
   NSData* buffer = [NSData dataWithBytes: iconBytes length:length];
-  NSImage *image = [[NSImage alloc] initWithData:buffer];
-  [image setSize:NSMakeSize(16, 16)];
-  image.template = template;
-  NSNumber *mId = [NSNumber numberWithInt:menuId];
-  runInMainThread(@selector(setMenuItemIcon:), @[image, (id)mId]);
+  @autoreleasepool {
+    NSImage *image = [[NSImage alloc] initWithData:buffer];
+    [image setSize:NSMakeSize(16, 16)];
+    image.template = template;
+    NSNumber *mId = [NSNumber numberWithInt:menuId];
+    runInMainThread(@selector(setMenuItemIcon:), @[image, (id)mId]);
+  }
 }
 
 void setTitle(char* ctitle) {
@@ -310,6 +322,11 @@ void add_separator(int menuId) {
 void hide_menu_item(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(hide_menu_item:), (id)mId);
+}
+
+void remove_menu_item(int menuId) {
+  NSNumber *mId = [NSNumber numberWithInt:menuId];
+  runInMainThread(@selector(remove_menu_item:), (id)mId);
 }
 
 void show_menu_item(int menuId) {
