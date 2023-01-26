@@ -125,6 +125,10 @@ func (i *Image) Generate(width, height int) (image.Image, error) {
 		return i.Image, nil
 	}
 
+	if i.reader == nil {
+		return nil, errors.New("no image data")
+	}
+
 	if i.isSVG {
 		tex := cache.GetSvg(i.Name(), width, height)
 		if tex == nil {
