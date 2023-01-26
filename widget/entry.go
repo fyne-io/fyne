@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	multiLineRows            = 3
-	doubleClickWordSeperator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
+	multiLineRows = 3
+	wordSeparator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
 
 // Declare conformity with interfaces
@@ -220,7 +220,7 @@ func (e *Entry) Disabled() bool {
 // Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 	row := e.textProvider().row(e.CursorRow)
-	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
+	start, end := getTextWhitespaceRegion(row, e.CursorColumn, false)
 	if start == -1 || end == -1 {
 		return
 	}
@@ -260,7 +260,7 @@ func (e *Entry) DragEnd() {
 //
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
-	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InnerPadding()-theme.InputBorderSize()))
+	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InputBorderSize()))
 	if !e.selecting {
 		e.selectRow, e.selectColumn = e.getRowCol(pos)
 		e.selecting = true
@@ -438,6 +438,9 @@ func (e *Entry) SelectedText() string {
 	}
 
 	start, stop := e.selection()
+	if start == stop {
+		return ""
+	}
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
@@ -728,7 +731,10 @@ func (e *Entry) TypedRune(r rune) {
 
 	// if we've typed a character and we're selecting then replace the selection with the character
 	if selecting {
+		cb := e.OnChanged
+		e.OnChanged = nil // don't propagate this change to binding etc
 		e.eraseSelection()
+		e.OnChanged = cb // the change later will then trigger callback
 	}
 
 	e.propertyLock.Lock()
@@ -895,6 +901,52 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
 		e.selectAll()
 	})
+
+	moveWord := func(s fyne.Shortcut) {
+		row := e.textProvider().row(e.CursorRow)
+		start, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
+		if start == -1 || end == -1 {
+			return
+		}
+
+		e.setFieldsAndRefresh(func() {
+			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
+				if e.CursorColumn == 0 {
+					if e.CursorRow > 0 {
+						e.CursorRow--
+						e.CursorColumn = len(e.textProvider().row(e.CursorRow))
+					}
+				} else {
+					e.CursorColumn = start
+				}
+			} else {
+				if e.CursorColumn == len(e.textProvider().row(e.CursorRow)) {
+					if e.CursorRow < e.textProvider().rows()-1 {
+						e.CursorRow++
+						e.CursorColumn = 0
+					}
+				} else {
+					e.CursorColumn = end
+				}
+			}
+		})
+	}
+	selectMoveWord := func(se fyne.Shortcut) {
+		if !e.selecting {
+			e.selectColumn = e.CursorColumn
+			e.selectRow = e.CursorRow
+			e.selecting = true
+		}
+		moveWord(se)
+	}
+	unselectMoveWord := func(se fyne.Shortcut) {
+		e.selecting = false
+		moveWord(se)
+	}
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
 }
 
 func (e *Entry) requestFocus() {
@@ -1009,9 +1061,10 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 // Note: this functionality depends on the relationship between the selection start row/col and
 // the current cursor row/column.
 // eg: (whitespace for clarity, '_' denotes cursor)
-//   "T  e  s [t  i]_n  g" == 3, 5
-//   "T  e  s_[t  i] n  g" == 3, 5
-//   "T  e_[s  t  i] n  g" == 2, 5
+//
+//	"T  e  s [t  i]_n  g" == 3, 5
+//	"T  e  s_[t  i] n  g" == 3, 5
+//	"T  e_[s  t  i] n  g" == 2, 5
 func (e *Entry) selection() (int, int) {
 	e.propertyLock.RLock()
 	noSelection := !e.selecting || (e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn)
@@ -1155,17 +1208,23 @@ func (e *Entry) truncatePosition(row, col int) (int, int) {
 
 func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 	row, col := e.getRowCol(p)
-	e.setFieldsAndRefresh(func() {
-		if !rightClick || rightClick && !e.selecting {
-			e.CursorRow = row
-			e.CursorColumn = col
-		}
+	e.propertyLock.Lock()
 
-		if !e.selecting {
-			e.selectRow = row
-			e.selectColumn = col
-		}
-	})
+	if !rightClick || !e.selecting {
+		e.CursorRow = row
+		e.CursorColumn = col
+	}
+
+	if !e.selecting {
+		e.selectRow = row
+		e.selectColumn = col
+	}
+	e.propertyLock.Unlock()
+
+	r := cache.Renderer(e.content)
+	if r != nil {
+		r.(*entryContentRenderer).moveCursor()
+	}
 }
 
 // updateText updates the internal text to the given value
@@ -1267,11 +1326,12 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize(), size.Height-theme.InputBorderSize()))
+	// 0.5 is removed so on low DPI it rounds down on the trailing edge
+	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize()-.5, size.Height-theme.InputBorderSize()-.5))
 	r.border.StrokeWidth = theme.InputBorderSize()
 	r.border.Move(fyne.NewPos(theme.InputBorderSize()/2, theme.InputBorderSize()/2))
-	r.box.Resize(size.Subtract(fyne.NewSize(0, theme.InputBorderSize()*2)))
-	r.box.Move(fyne.NewPos(0, theme.InputBorderSize()))
+	r.box.Resize(size.Subtract(fyne.NewSize(theme.InputBorderSize()*2, theme.InputBorderSize()*2)))
+	r.box.Move(fyne.NewPos(theme.InputBorderSize(), theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
@@ -1299,12 +1359,30 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	r.entry.placeholderProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
 	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	entryPos := fyne.NewPos(0, theme.InputBorderSize())
+
+	r.entry.propertyLock.Lock()
+	textPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
+	selectPos := r.entry.textPosFromRowCol(r.entry.selectRow, r.entry.selectColumn)
+	r.entry.propertyLock.Unlock()
 	if r.entry.Wrapping == fyne.TextWrapOff {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
 	} else {
 		r.scroll.Resize(entrySize)
 		r.scroll.Move(entryPos)
+	}
+
+	r.entry.propertyLock.Lock()
+	resizedTextPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
+	r.entry.propertyLock.Unlock()
+	if textPos != resizedTextPos {
+		r.entry.setFieldsAndRefresh(func() {
+			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
+
+			if r.entry.selecting {
+				r.entry.selectRow, r.entry.selectColumn = r.entry.rowColFromTextPos(selectPos)
+			}
+		})
 	}
 }
 
@@ -1706,8 +1784,8 @@ func (r *entryContentRenderer) updateScrollDirections() {
 
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
 // and expanding to the start and end of the whitespace or text underneath the specified position.
-func getTextWhitespaceRegion(row []rune, col int) (int, int) {
-
+// Pass `true` for `expand` if you want whitespace selection to extend to the neighboring words.
+func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 	if len(row) == 0 || col < 0 {
 		return -1, -1
 	}
@@ -1724,30 +1802,42 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 			return ' '
 		}
 		// If this rune is a typical word separator then classify it as whitespace
-		if strings.ContainsRune(doubleClickWordSeperator, r) {
+		if strings.ContainsRune(wordSeparator, r) {
 			return ' '
 		}
 		return '-'
 	}
 	toks := strings.Map(space, string(row))
-
 	c := byte(' ')
-	if toks[col] == ' ' {
+
+	startCheck := col
+	endCheck := col
+	if expand {
+		if col > 0 && toks[col-1] == ' ' { // ignore the prior whitespace then count
+			startCheck = strings.LastIndexByte(toks[:startCheck], '-')
+			if startCheck == -1 {
+				startCheck = 0
+			}
+		}
+		if toks[col] == ' ' { // ignore the current whitespace then count
+			endCheck = col + strings.IndexByte(toks[endCheck:], '-')
+		}
+	} else if toks[col] == ' ' {
 		c = byte('-')
 	}
 
-	// LastIndexByte + 1 ensures that the position of the unwanted character 'c' is excluded
-	// +1 also has the added side effect whereby if 'c' isn't found then -1 is snapped to 0
-	start := strings.LastIndexByte(toks[:col], c) + 1
+	// LastIndexByte + 1 ensures that the position of the unwanted character ' ' is excluded
+	// +1 also has the added side effect whereby if ' ' isn't found then -1 is snapped to 0
+	start := strings.LastIndexByte(toks[:startCheck], c) + 1
 
 	// IndexByte will find the position of the next unwanted character, this is to be the end
 	// marker for the selection
-	end := strings.IndexByte(toks[col:], c)
+	end := strings.IndexByte(toks[endCheck:], c)
 
 	if end == -1 {
 		end = len(toks) // snap end to len(toks) if it results in -1
 	} else {
-		end += col // otherwise include the text slice position
+		end += endCheck // otherwise include the text slice position
 	}
 	return start, end
 }

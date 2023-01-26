@@ -19,7 +19,7 @@ func Test_colorPreview_Color(t *testing.T) {
 	padding := theme.Padding() * 2
 	window.Resize(fyne.NewSize(128+padding, 64+padding))
 
-	test.AssertImageMatches(t, "color/preview_color.png", window.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/preview_color.png", window.Canvas())
 
 	window.Close()
 }

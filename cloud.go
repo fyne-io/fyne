@@ -28,3 +28,12 @@ type CloudProviderPreferences interface {
 	// CloudPreferences returns a preference provider that will sync values to the cloud this provider uses.
 	CloudPreferences(App) Preferences
 }
+
+// CloudProviderStorage interface defines the functionality that a cloud provider will include if it is capable
+// of synchronizing user documents.
+//
+// Since: 2.3
+type CloudProviderStorage interface {
+	// CloudStorage returns a storage provider that will sync documents to the cloud this provider uses.
+	CloudStorage(App) Storage
+}

@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -23,7 +24,7 @@ type checkRenderer struct {
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
-	pad4 := theme.Padding() * 4
+	pad4 := theme.InnerPadding() * 2
 	min := c.label.MinSize().Add(fyne.NewSize(theme.IconInlineSize()+pad4, pad4))
 	if c.check.Text != "" {
 		min.Add(fyne.NewSize(theme.Padding(), 0))
@@ -45,7 +46,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-	c.bg.Move(iconPos.AddXY(4, 4))
+	c.bg.Move(iconPos.AddXY(4, 4)) // absolute numbers to move relative to SVG details
 	c.bg.Resize(iconSize.SubtractWidthHeight(8, 8))
 	c.icon.Resize(iconSize)
 	c.icon.Move(iconPos)
@@ -53,7 +54,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.bg.FillColor = theme.BackgroundColor()
+	c.bg.FillColor = color.Transparent
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.disabled {
@@ -83,27 +84,27 @@ func (c *checkRenderer) updateResource() {
 	if c.check.Checked {
 		res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		res.ColorName = theme.ColorNamePrimary
-		c.bg.FillColor = theme.ForegroundColor()
+		c.bg.FillColor = theme.BackgroundColor()
 	}
-	if c.check.Disabled() {
+	if c.check.disabled {
 		if c.check.Checked {
 			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
 		res.ColorName = theme.ColorNameDisabled
-		c.bg.FillColor = theme.BackgroundColor()
+		c.bg.FillColor = color.Transparent
 	}
 	c.icon.Resource = res
 }
 
 func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
-		c.focusIndicator.FillColor = theme.BackgroundColor()
+		c.focusIndicator.FillColor = color.Transparent
 	} else if c.check.focused {
 		c.focusIndicator.FillColor = theme.FocusColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
-		c.focusIndicator.FillColor = theme.BackgroundColor()
+		c.focusIndicator.FillColor = color.Transparent
 	}
 }
 

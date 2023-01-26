@@ -2,6 +2,9 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/mcuadros/go-version"
@@ -164,39 +167,47 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 }
 
 func Test_BuildGopherJSReleaseVersion(t *testing.T) {
-	expected := []mockRunner{
-		{
-			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
-			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+	expected := []mockRunner{}
+
+	if runtime.GOOS != "windows" {
+		expected = []mockRunner{
+			{
+				expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+				mockReturn: mockReturn{
+					ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"version"},
-				osEnv: true,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"version"},
+					osEnv: true,
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+					err: nil,
+				},
 			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-				err: nil,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"build", "--tags", "release"},
+					osEnv: true,
+					dir:   "myTest",
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"build", "--tags", "release"},
-				osEnv: true,
-				dir:   "myTest",
-			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-			},
-		},
+		}
 	}
 
 	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &Builder{appData: &appData{}, os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
 	err := b.build()
-	assert.Nil(t, err)
+	if runtime.GOOS == "windows" {
+		assert.NotNil(t, err)
+	} else {
+		assert.Nil(t, err)
+	}
 	gopherJSBuildTest.verifyExpectation()
 }
 
@@ -219,6 +230,36 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	err := b.build()
 	assert.NotNil(t, err)
 	wasmBuildTest.verifyExpectation()
+}
+
+func Test_BuildLinuxReleaseVersion(t *testing.T) {
+	relativePath := "." + string(os.PathSeparator) + filepath.Join("cmd", "terminal")
+
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-trimpath", "-ldflags", "-s -w", "-tags", "release", relativePath},
+				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
+	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: relativePath}
+	err := b.build()
+	assert.Nil(t, err)
+	linuxBuildTest.verifyExpectation()
 }
 
 type jsonTest struct {
@@ -251,5 +292,45 @@ func Test_FyneGoMod(t *testing.T) {
 			})
 
 		assert.Equal(t, j.expected, called)
+	}
+}
+
+func Test_AppendEnv(t *testing.T) {
+	env := []string{
+		"foo=bar",
+		"bar=baz",
+		"foo1=bar=baz",
+	}
+
+	appendEnv(&env, "foo2", "baz2")
+	appendEnv(&env, "foo", "baz")
+	appendEnv(&env, "foo1", "-bar")
+
+	if assert.Len(t, env, 4) {
+		assert.Equal(t, "foo=bar baz", env[0])
+		assert.Equal(t, "bar=baz", env[1])
+		assert.Equal(t, "foo1=bar=baz -bar", env[2])
+		assert.Equal(t, "foo2=baz2", env[3])
+	}
+}
+
+type extractTest struct {
+	value       string
+	wantLdFlags string
+	wantGoFlags string
+}
+
+func Test_ExtractLdFlags(t *testing.T) {
+	goFlagsTests := []extractTest{
+		{"-ldflags=-w", "-w", ""},
+		{"-ldflags=-s", "-s", ""},
+		{"-ldflags=-w -ldflags=-s", "-w -s", ""},
+		{"-mod=vendor", "", "-mod=vendor"},
+	}
+
+	for _, test := range goFlagsTests {
+		ldFlags, goFlags := extractLdFlags(test.value)
+		assert.Equal(t, test.wantLdFlags, ldFlags)
+		assert.Equal(t, test.wantGoFlags, goFlags)
 	}
 }

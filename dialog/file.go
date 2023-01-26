@@ -497,12 +497,11 @@ func (f *fileDialog) setView(view viewLayout) {
 //
 // Order of precedence is:
 //
-// * file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
-//   URI scheme
-// * os.UserHomeDir()
-// * os.Getwd()
-// * "/" (should be filesystem root on all supported platforms)
-//
+//   - file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
+//     URI scheme
+//   - os.UserHomeDir()
+//   - os.Getwd()
+//   - "/" (should be filesystem root on all supported platforms)
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	if f.startingLocation != nil {
 		if f.startingLocation.Scheme() == "file" {

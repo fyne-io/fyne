@@ -98,11 +98,7 @@ static char* getMonitorName(CGDirectDisplayID displayID, NSScreen* screen)
     IOObjectRelease(it);
 
     if (!service)
-    {
-        _glfwInputError(GLFW_PLATFORM_ERROR,
-                        "Cocoa: Failed to find service port for display");
         return _glfw_strdup("Display");
-    }
 
     CFDictionaryRef names =
         CFDictionaryGetValue(info, CFSTR(kDisplayProductName));

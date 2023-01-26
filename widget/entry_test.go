@@ -42,6 +42,21 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "Typed", entry.Text)
 }
 
+func TestEntry_Binding_Replace(t *testing.T) {
+	entry := widget.NewEntry()
+	str := binding.NewString()
+	_ = str.Set("Content")
+	entry.Bind(str)
+	waitForBinding()
+	assert.Equal(t, "Content", entry.Text)
+
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "nt", entry.SelectedText())
+
+	test.Type(entry, "g")
+	assert.Equal(t, "Cogent", entry.Text)
+}
+
 func TestEntry_Clicked(t *testing.T) {
 	entry, window := setupImageTest(t, true)
 	defer teardownImageTest(window)
@@ -141,6 +156,48 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_Control_Word(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("a\nbc")
+	entry.CursorRow = 0
+	entry.CursorColumn = 0
+
+	// ctrl-right to move on
+	nextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	// ctrl-left to move back
+	prevWord := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.TypedShortcut(prevWord)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedShortcut(prevWord)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	// select word
+	entry.SetText("word1 word2 word3")
+	entry.CursorRow = 0
+	entry.CursorColumn = 3
+	selectNextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
+	entry.TypedShortcut(selectNextWord)
+	assert.Equal(t, "d1", entry.SelectedText())
+	entry.TypedShortcut(selectNextWord)
+	assert.Equal(t, "d1 word2", entry.SelectedText())
+
+	// unselect when no shift press
+	entry.TypedShortcut(nextWord)
+	assert.Equal(t, "", entry.SelectedText())
+}
+
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nb")
@@ -168,17 +225,26 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapWord
-	entry.Resize(fyne.NewSize(72, 64))
 	entry.SetText("1234")
 	entry.CursorColumn = 3
+
+	w := test.NewWindow(entry)
+	w.Resize(fyne.NewSize(72, 64))
+
 	test.Type(entry, "a")
 	test.Type(entry, "b")
 	test.Type(entry, "c")
 	assert.Equal(t, 0, entry.CursorColumn)
 	assert.Equal(t, 1, entry.CursorRow)
-	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(70, 70))
+	assert.Equal(t, 1, entry.CursorColumn)
 	test.AssertImageMatches(t, "entry/wrap_multi_line_cursor.png", w.Canvas().Capture())
+
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "c", entry.SelectedText())
+	assert.Equal(t, 0, entry.CursorColumn)
+	w.Resize(fyne.NewSize(64, 78))
+	assert.Equal(t, "c", entry.SelectedText())
 }
 
 func TestEntry_CursorPasswordRevealer(t *testing.T) {
@@ -287,6 +353,11 @@ func TestEntry_EmptySelection(t *testing.T) {
 	typeKeys(entry, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
 	assert.Equal(t, "", entry.SelectedText())
 	assert.Equal(t, 1, entry.CursorColumn)
+
+	// manually setting to empty selection
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyRight)
+	entry.CursorColumn = 1
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_Focus(t *testing.T) {

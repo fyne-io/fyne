@@ -10,19 +10,11 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-var AndroidId = regexp.MustCompile(`Android`)
-var BlackBerryID = regexp.MustCompile(`BlackBerry`)
-var iOSID = regexp.MustCompile(`iPhone|iPad|iPod`)
-var OperaID = regexp.MustCompile(`Opera Mini`)
-var WindowsMobileID = regexp.MustCompile(`IEMobile`)
+var isMobile = regexp.MustCompile("Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile")
 
 var navigator = js.Global().Get("navigator")
 var userAgent = navigator.Get("userAgent").String()
-var mobileCheck = AndroidId.MatchString(userAgent) ||
-	BlackBerryID.MatchString(userAgent) ||
-	iOSID.MatchString(userAgent) ||
-	OperaID.MatchString(userAgent) ||
-	WindowsMobileID.MatchString(userAgent)
+var mobileCheck = isMobile.MatchString(userAgent)
 
 func (*glDevice) IsMobile() bool {
 	return mobileCheck

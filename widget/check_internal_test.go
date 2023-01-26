@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -131,11 +132,11 @@ func TestCheck_Focused(t *testing.T) {
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	assert.False(t, check.focused)
-	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.SetChecked(true)
 	assert.False(t, check.focused)
-	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	test.Tap(check)
 	if fyne.CurrentDevice().IsMobile() {
@@ -147,7 +148,7 @@ func TestCheck_Focused(t *testing.T) {
 
 	check.Disable()
 	assert.True(t, check.disabled)
-	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.Enable()
 	if fyne.CurrentDevice().IsMobile() {
@@ -171,7 +172,7 @@ func TestCheck_Hovered(t *testing.T) {
 
 	check.SetChecked(true)
 	assert.False(t, check.hovered)
-	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.MouseIn(&desktop.MouseEvent{})
 	assert.True(t, check.hovered)
@@ -186,7 +187,7 @@ func TestCheck_Hovered(t *testing.T) {
 	check.Disable()
 	assert.True(t, check.disabled)
 	assert.True(t, check.hovered)
-	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.Enable()
 	assert.True(t, check.hovered)
@@ -199,14 +200,14 @@ func TestCheck_Hovered(t *testing.T) {
 	check.MouseOut()
 	assert.False(t, check.hovered)
 	if fyne.CurrentDevice().IsMobile() {
-		assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 	} else {
 		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
 	}
 
 	check.FocusLost()
 	assert.False(t, check.hovered)
-	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 }
 
 func TestCheck_TypedRune(t *testing.T) {

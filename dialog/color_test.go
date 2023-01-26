@@ -24,18 +24,18 @@ func TestColorDialog_Theme(t *testing.T) {
 	d.Refresh()
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_theme_ugly.png", w.Canvas())
 
 	d.advanced.Open(0)
 
 	test.ApplyTheme(t, test.Theme())
-	test.AssertImageMatches(t, "color/dialog_expanded_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_expanded_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_expanded_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_expanded_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }
@@ -55,10 +55,10 @@ func TestColorDialog_Recents(t *testing.T) {
 	d.Refresh()
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_recents_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_recents_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_recents_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_recents_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }
@@ -111,10 +111,10 @@ func TestColorDialogSimple_Theme(t *testing.T) {
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_simple_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_simple_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }
@@ -132,10 +132,10 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_simple_recents_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_recents_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_simple_recents_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_recents_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }

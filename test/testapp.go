@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -129,6 +130,11 @@ func (a *testApp) transitionCloud(p fyne.CloudProvider) {
 	} else {
 		a.prefs = internal.NewInMemoryPreferences()
 	}
+	if store, ok := p.(fyne.CloudProviderStorage); ok {
+		a.storage = store.CloudStorage(a)
+	} else {
+		a.storage = &testStorage{}
+	}
 
 	for _, l := range listeners {
 		a.prefs.AddChangeListener(l)
@@ -149,6 +155,7 @@ func NewApp() fyne.App {
 		lifecycle: &app.Lifecycle{}}
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
+	painter.ClearFontCache()
 	cache.ResetThemeCaches()
 	fyne.SetCurrentApp(test)
 
@@ -157,10 +164,11 @@ func NewApp() fyne.App {
 	go func() {
 		for {
 			<-listener
+			test.propertyLock.Lock()
+			painter.ClearFontCache()
 			cache.ResetThemeCaches()
 			app.ApplySettings(test.Settings(), test)
 
-			test.propertyLock.Lock()
 			test.appliedTheme = test.Settings().Theme()
 			test.propertyLock.Unlock()
 		}

@@ -1,19 +1,19 @@
-<canvas padded size="94x81">
+<canvas padded size="90x78">
 	<content>
-		<widget pos="4,4" size="86x73" type="*widget.Card">
-			<widget pos="2,2" size="82x69" type="*widget.Shadow">
+		<widget pos="4,4" size="82x70" type="*widget.Card">
+			<widget pos="2,2" size="78x66" type="*widget.Shadow">
 				<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
-				<linearGradient endColor="shadow" pos="0,-1" size="82x1"/>
-				<radialGradient centerOffset="-0.5,0.5" pos="82,-1" size="1x1" startColor="shadow"/>
-				<linearGradient angle="270" pos="82,0" size="1x69" startColor="shadow"/>
-				<radialGradient centerOffset="-0.5,-0.5" pos="82,69" size="1x1" startColor="shadow"/>
-				<linearGradient pos="0,69" size="82x1" startColor="shadow"/>
-				<radialGradient centerOffset="0.5,-0.5" pos="-1,69" size="1x1" startColor="shadow"/>
-				<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x69"/>
+				<linearGradient endColor="shadow" pos="0,-1" size="78x1"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="78,-1" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" pos="78,0" size="1x66" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="78,66" size="1x1" startColor="shadow"/>
+				<linearGradient pos="0,66" size="78x1" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-1,66" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x66"/>
 			</widget>
-			<text bold pos="10,10" size="66x35" textSize="23">Hello</text>
+			<text bold pos="10,10" size="62x32" textSize="23">Hello</text>
 			<text size="0x0"></text>
-			<rectangle fillColor="rgba(102,102,102,255)" pos="6,57" size="74x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+			<rectangle fillColor="inputBackground" pos="6,54" size="70x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 		</widget>
 	</content>
 </canvas>

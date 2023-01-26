@@ -23,6 +23,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+const defaultTitle = "Fyne Application"
+
 // Input modes.
 const (
 	CursorMode             glfw.InputMode = glfw.CursorMode
@@ -276,6 +278,9 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 }
 
 func (w *window) detectScale() float32 {
+	if isWayland { // Wayland controls scale through content scaling
+		return 1.0
+	}
 	monitor := w.getMonitorForWindow()
 	widthMm, _ := monitor.GetPhysicalSize()
 	widthPx := monitor.GetVideoMode().Width
@@ -289,6 +294,15 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
 	w.processResized(width, height)
+}
+
+func (w *window) scaled(_ *glfw.Window, x float32, y float32) {
+	if !isWayland { // other platforms handle this using older APIs
+		return
+	}
+
+	w.canvas.texScale = x
+	w.canvas.Refresh(w.canvas.content)
 }
 
 func (w *window) frameSized(_ *glfw.Window, width, height int) {
@@ -388,8 +402,31 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 }
 
 //gocyclo:ignore
-func glfwToFyneKey(key glfw.Key) fyne.KeyName {
+func glfwKeyToKeyName(key glfw.Key) fyne.KeyName {
 	switch key {
+	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
+	case glfw.Key0, glfw.KeyKP0:
+		return fyne.Key0
+	case glfw.Key1, glfw.KeyKP1:
+		return fyne.Key1
+	case glfw.Key2, glfw.KeyKP2:
+		return fyne.Key2
+	case glfw.Key3, glfw.KeyKP3:
+		return fyne.Key3
+	case glfw.Key4, glfw.KeyKP4:
+		return fyne.Key4
+	case glfw.Key5, glfw.KeyKP5:
+		return fyne.Key5
+	case glfw.Key6, glfw.KeyKP6:
+		return fyne.Key6
+	case glfw.Key7, glfw.KeyKP7:
+		return fyne.Key7
+	case glfw.Key8, glfw.KeyKP8:
+		return fyne.Key8
+	case glfw.Key9, glfw.KeyKP9:
+		return fyne.Key9
+
+	// non-printable
 	case glfw.KeyEscape:
 		return fyne.KeyEscape
 	case glfw.KeyEnter:
@@ -418,10 +455,35 @@ func glfwToFyneKey(key glfw.Key) fyne.KeyName {
 		return fyne.KeyHome
 	case glfw.KeyEnd:
 		return fyne.KeyEnd
+
 	case glfw.KeySpace:
 		return fyne.KeySpace
 	case glfw.KeyKPEnter:
 		return fyne.KeyEnter
+
+	// desktop
+	case glfw.KeyLeftShift:
+		return desktop.KeyShiftLeft
+	case glfw.KeyRightShift:
+		return desktop.KeyShiftRight
+	case glfw.KeyLeftControl:
+		return desktop.KeyControlLeft
+	case glfw.KeyRightControl:
+		return desktop.KeyControlRight
+	case glfw.KeyLeftAlt:
+		return desktop.KeyAltLeft
+	case glfw.KeyRightAlt:
+		return desktop.KeyAltRight
+	case glfw.KeyLeftSuper:
+		return desktop.KeySuperLeft
+	case glfw.KeyRightSuper:
+		return desktop.KeySuperRight
+	case glfw.KeyMenu:
+		return desktop.KeyMenu
+	case glfw.KeyPrintScreen:
+		return desktop.KeyPrintScreen
+	case glfw.KeyCapsLock:
+		return desktop.KeyCapsLock
 
 	// functions
 	case glfw.KeyF1:
@@ -448,55 +510,52 @@ func glfwToFyneKey(key glfw.Key) fyne.KeyName {
 		return fyne.KeyF11
 	case glfw.KeyF12:
 		return fyne.KeyF12
+	}
 
-	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	case glfw.Key0, glfw.KeyKP0:
-		return fyne.Key0
-	case glfw.Key1, glfw.KeyKP1:
-		return fyne.Key1
-	case glfw.Key2, glfw.KeyKP2:
-		return fyne.Key2
-	case glfw.Key3, glfw.KeyKP3:
-		return fyne.Key4
-	case glfw.Key4, glfw.KeyKP4:
-		return fyne.Key4
-	case glfw.Key5, glfw.KeyKP5:
-		return fyne.Key5
-	case glfw.Key6, glfw.KeyKP6:
-		return fyne.Key6
-	case glfw.Key7, glfw.KeyKP7:
-		return fyne.Key7
-	case glfw.Key8, glfw.KeyKP8:
-		return fyne.Key8
-	case glfw.Key9, glfw.KeyKP9:
-		return fyne.Key9
+	return fyne.KeyUnknown
+}
 
-	// return desktop keys
-	case glfw.KeyLeftShift:
-		return desktop.KeyShiftLeft
-	case glfw.KeyRightShift:
-		return desktop.KeyShiftRight
-	case glfw.KeyLeftControl:
-		return desktop.KeyControlLeft
-	case glfw.KeyRightControl:
-		return desktop.KeyControlRight
-	case glfw.KeyLeftAlt:
-		return desktop.KeyAltLeft
-	case glfw.KeyRightAlt:
-		return desktop.KeyAltRight
-	case glfw.KeyLeftSuper:
-		return desktop.KeySuperLeft
-	case glfw.KeyRightSuper:
-		return desktop.KeySuperRight
-	case glfw.KeyMenu:
-		return desktop.KeyMenu
-	case glfw.KeyPrintScreen:
-		return desktop.KeyPrintScreen
-	case glfw.KeyCapsLock:
-		return desktop.KeyCapsLock
-	default:
+func keyCodeToKeyName(code string) fyne.KeyName {
+	if len(code) != 1 {
 		return fyne.KeyUnknown
 	}
+
+	char := code[0]
+	if char >= 'a' && char <= 'z' {
+		// Our alphabetical keys are all upper case characters.
+		return fyne.KeyName('A' + char - 'a')
+	}
+
+	switch char {
+	case '[':
+		return fyne.KeyLeftBracket
+	case '\\':
+		return fyne.KeyBackslash
+	case ']':
+		return fyne.KeyRightBracket
+	case '\'':
+		return fyne.KeyApostrophe
+	case ',':
+		return fyne.KeyComma
+	case '-':
+		return fyne.KeyMinus
+	case '.':
+		return fyne.KeyPeriod
+	case '/':
+		return fyne.KeySlash
+	case '*':
+		return fyne.KeyAsterisk
+	case '`':
+		return fyne.KeyBackTick
+	case ';':
+		return fyne.KeySemicolon
+	case '+':
+		return fyne.KeyPlus
+	case '=':
+		return fyne.KeyEqual
+	}
+
+	return fyne.KeyUnknown
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
@@ -504,18 +563,13 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 		code = glfw.KeyPrintScreen
 	}
 
-	key := glfwToFyneKey(code)
-	if key != fyne.KeyUnknown {
-		return key
+	ret := glfwKeyToKeyName(code)
+	if ret != fyne.KeyUnknown {
+		return ret
 	}
 
 	keyName := glfw.GetKeyName(code, scancode)
-	if unknownKey(keyName) {
-		return fyne.KeyUnknown
-	}
-
-	// The key is known and we can safely convert to fyne.KeyName (same string values).
-	return fyne.KeyName(keyName)
+	return keyCodeToKeyName(keyName)
 }
 
 func convertAction(action glfw.Action) action {
@@ -531,12 +585,11 @@ func convertAction(action glfw.Action) action {
 }
 
 func convertASCII(key glfw.Key) fyne.KeyName {
-	keyRune := rune('A' + key - glfw.KeyA)
-	if keyRune < 'A' || keyRune > 'Z' {
+	if key < glfw.KeyA || key > glfw.KeyZ {
 		return fyne.KeyUnknown
 	}
 
-	return fyne.KeyName(keyRune)
+	return fyne.KeyName(rune(key))
 }
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
@@ -659,6 +712,7 @@ func (w *window) create() {
 		win.SetSizeCallback(w.resized)
 		win.SetFramebufferSizeCallback(w.frameSized)
 		win.SetRefreshCallback(w.refresh)
+		win.SetContentScaleCallback(w.scaled)
 		win.SetCursorPosCallback(w.mouseMoved)
 		win.SetMouseButtonCallback(w.mouseClicked)
 		win.SetScrollCallback(w.mouseScrolled)

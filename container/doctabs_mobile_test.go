@@ -28,10 +28,10 @@ func TestDocTabs_ApplyTheme(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "doctabs/mobile/theme_default.png", c.Capture())
+	test.AssertRendersToImage(t, "doctabs/mobile/theme_default.png", c)
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "doctabs/mobile/theme_ugly.png", c.Capture())
+	test.AssertRendersToImage(t, "doctabs/mobile/theme_ugly.png", c)
 }
 
 func TestDocTabs_ChangeItemContent(t *testing.T) {
@@ -341,17 +341,17 @@ func TestDocTabs_Tapped(t *testing.T) {
 	w := test.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
-	w.Resize(fyne.NewSize(300, 100))
+	w.Resize(fyne.NewSize(380, 100))
 	c := w.Canvas()
 
 	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_first_selected.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(100, 10))
+	test.TapCanvas(c, fyne.NewPos(120, 10))
 	assert.Equal(t, 1, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_second_selected.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(200, 10))
+	test.TapCanvas(c, fyne.NewPos(240, 10))
 	assert.Equal(t, 2, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_third_selected.xml", c)
 
@@ -359,10 +359,10 @@ func TestDocTabs_Tapped(t *testing.T) {
 	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_first_selected.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(254, 10))
+	test.TapCanvas(c, fyne.NewPos(330, 10))
 	require.Equal(t, 3, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_create_tab.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(286, 10))
+	test.TapCanvas(c, fyne.NewPos(346, 10))
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_all_tabs.xml", c)
 }

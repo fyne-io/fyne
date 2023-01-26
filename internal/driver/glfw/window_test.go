@@ -1417,7 +1417,7 @@ func TestWindow_SetPadded(t *testing.T) {
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
-		menuHeight = canvas.NewText("", color.Black).MinSize().Height + theme.Padding()*2
+		menuHeight = canvas.NewText("", color.Black).MinSize().Height
 	}
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tests := []struct {

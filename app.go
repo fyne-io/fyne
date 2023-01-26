@@ -121,6 +121,12 @@ type AppMetadata struct {
 	Build int
 	// Icon contains, if present, a resource of the icon that was bundled at build time.
 	Icon Resource
+	// Release if true this binary was build in release mode
+	// Since 2.3
+	Release bool
+	// Custom contain the custom metadata defined either in FyneApp.toml or on the compile command line
+	// Since 2.3
+	Custom map[string]string
 }
 
 // Lifecycle represents the various phases that an app can transition through.

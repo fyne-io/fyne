@@ -93,6 +93,16 @@ const (
 	// Since: 2.3
 	ColorNameInputBorder fyne.ThemeColorName = "inputBorder"
 
+	// ColorNameMenuBackground is the name of theme lookup for background color of menus.
+	//
+	// Since: 2.3
+	ColorNameMenuBackground fyne.ThemeColorName = "menuBackground"
+
+	// ColorNameOverlayBackground is the name of theme lookup for background color of overlays like dialogs.
+	//
+	// Since: 2.3
+	ColorNameOverlayBackground fyne.ThemeColorName = "overlayBackground"
+
 	// ColorNamePlaceHolder is the name of theme lookup for placeholder text color.
 	//
 	// Since: 2.0
@@ -369,6 +379,20 @@ func LightTheme() fyne.Theme {
 // Since: 2.3
 func LineSpacing() float32 {
 	return current().Size(SizeNameLineSpacing)
+}
+
+// MenuBackgroundColor returns the theme's background color for menus.
+//
+// Since: 2.3
+func MenuBackgroundColor() color.Color {
+	return safeColorLookup(ColorNameMenuBackground, currentVariant())
+}
+
+// OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
+//
+// Since: 2.3
+func OverlayBackgroundColor() color.Color {
+	return safeColorLookup(ColorNameOverlayBackground, currentVariant())
 }
 
 // Padding is the standard gap between elements and the border around interface elements.
@@ -648,7 +672,7 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabled:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	case ColorNameDisabledButton:
-		return color.NRGBA{R: 0x26, G: 0x26, B: 0x26, A: 0xff}
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNameError:
 		return errorColor
 	case ColorNameForeground:
@@ -656,9 +680,13 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameHover:
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
 	case ColorNameInputBackground:
-		return color.NRGBA{R: 0x24, G: 0x25, B: 0x29, A: 0xff}
+		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	case ColorNameInputBorder:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+	case ColorNameMenuBackground:
+		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+	case ColorNameOverlayBackground:
+		return color.NRGBA{R: 0x18, G: 0x1d, B: 0x25, A: 0xff}
 	case ColorNamePlaceHolder:
 		return color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff}
 	case ColorNamePressed:
@@ -710,7 +738,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabled:
 		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	case ColorNameDisabledButton:
-		return color.NRGBA{R: 0xe5, G: 0xe5, B: 0xe5, A: 0xff}
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameError:
 		return errorColor
 	case ColorNameForeground:
@@ -721,6 +749,10 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameInputBorder:
 		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+	case ColorNameMenuBackground:
+		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	case ColorNameOverlayBackground:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	case ColorNamePlaceHolder:
 		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	case ColorNamePressed:
@@ -827,7 +859,7 @@ func selectionColorNamed(name string) color.NRGBA {
 
 	// We return the value for ColorBlue for every other value.
 	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x40}
 }
 
 func setupDefaultTheme() fyne.Theme {

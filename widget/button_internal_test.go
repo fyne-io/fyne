@@ -17,20 +17,20 @@ import (
 
 func TestButton_Style(t *testing.T) {
 	button := NewButton("Test", nil)
-	bg := test.WidgetRenderer(button).(*buttonRenderer).buttonColor()
+	bg := button.buttonColor()
 
 	button.Importance = HighImportance
-	assert.NotEqual(t, bg, test.WidgetRenderer(button).(*buttonRenderer).buttonColor())
+	assert.NotEqual(t, bg, button.buttonColor())
 }
 
 func TestButton_DisabledColor(t *testing.T) {
 	button := NewButton("Test", nil)
-	bg := test.WidgetRenderer(button).(*buttonRenderer).buttonColor()
+	bg := button.buttonColor()
 	button.Importance = MediumImportance
 	assert.Equal(t, bg, theme.ButtonColor())
 
 	button.Disable()
-	bg = test.WidgetRenderer(button).(*buttonRenderer).buttonColor()
+	bg = button.buttonColor()
 	assert.Equal(t, bg, theme.DisabledButtonColor())
 }
 
@@ -67,7 +67,7 @@ func TestButton_Hover_Math(t *testing.T) {
 	outB := uint32((float32(srcB)*srcAlpha + float32(dstB)*dstAlpha*(1-srcAlpha)) / outAlpha)
 
 	nrgba := color.NRGBA{R: uint8(outR), G: uint8(outG), B: uint8(outB), A: uint8(outAlpha * 0xFF)}
-	bcn := color.NRGBAModel.Convert(render.buttonColor())
+	bcn := color.NRGBAModel.Convert(button.buttonColor())
 
 	assert.Equal(t, nrgba, bcn)
 }
@@ -131,18 +131,18 @@ func TestButton_Focus(t *testing.T) {
 		tapped = true
 	})
 	render := test.WidgetRenderer(button).(*buttonRenderer)
-	assert.Equal(t, theme.ButtonColor(), render.buttonColor())
+	assert.Equal(t, theme.ButtonColor(), button.buttonColor())
 
 	assert.Equal(t, false, tapped)
 	button.FocusGained()
 	render.Refresh() // force update without waiting
 
-	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.buttonColor())
+	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), button.buttonColor())
 	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, true, tapped)
 
 	button.FocusLost()
-	assert.Equal(t, theme.ButtonColor(), render.buttonColor())
+	assert.Equal(t, theme.ButtonColor(), button.buttonColor())
 }
 
 func TestButtonRenderer_Layout(t *testing.T) {
@@ -167,8 +167,7 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	assert.Equal(t, theme.IconInlineSize(), render.icon.Size().Width, "icon width")
 	assert.Equal(t, minIconHeight, render.icon.Size().Height, "icon height")
 	assert.Equal(t, 50+theme.InnerPadding()+theme.Padding()+theme.IconInlineSize(), render.label.Position().X, "label x")
-	assert.Equal(t, 50+theme.InnerPadding(), render.label.Position().Y, "label y")
-	assert.Equal(t, render.label.MinSize(), render.label.Size(), "label size")
+	assert.Equal(t, render.label.MinSize().Width, render.label.Size().Width, "label size")
 }
 
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
@@ -199,15 +198,13 @@ func TestButtonRenderer_ApplyTheme(t *testing.T) {
 func TestButtonRenderer_TapAnimation(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
 
 	button := NewButton("Hi", func() {})
 	w := test.NewWindow(button)
 	defer w.Close()
-	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(10, 10)))
+	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(20, 20)))
 	button.Resize(fyne.NewSize(50, 50))
-
-	test.ApplyTheme(t, test.NewTheme())
-	button.Refresh()
 
 	render1 := test.WidgetRenderer(button).(*buttonRenderer)
 	test.Tap(button)

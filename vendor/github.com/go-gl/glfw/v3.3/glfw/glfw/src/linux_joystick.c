@@ -128,7 +128,7 @@ static GLFWbool openJoystickDevice(const char* path)
 {
     for (int jid = 0;  jid <= GLFW_JOYSTICK_LAST;  jid++)
     {
-        if (!_glfw.joysticks[jid].present)
+        if (!_glfw.joysticks[jid].connected)
             continue;
         if (strcmp(_glfw.joysticks[jid].linjs.path, path) == 0)
             return GLFW_FALSE;
@@ -245,9 +245,9 @@ static GLFWbool openJoystickDevice(const char* path)
 //
 static void closeJoystick(_GLFWjoystick* js)
 {
+    _glfwInputJoystick(js, GLFW_DISCONNECTED);
     close(js->linjs.fd);
     _glfwFreeJoystick(js);
-    _glfwInputJoystick(js, GLFW_DISCONNECTED);
 }
 
 // Lexically compare joysticks by name; used by qsort
@@ -329,7 +329,7 @@ void _glfwTerminateJoysticksLinux(void)
     for (jid = 0;  jid <= GLFW_JOYSTICK_LAST;  jid++)
     {
         _GLFWjoystick* js = _glfw.joysticks + jid;
-        if (js->present)
+        if (js->connected)
             closeJoystick(js);
     }
 
@@ -424,7 +424,7 @@ int _glfwPlatformPollJoystick(_GLFWjoystick* js, int mode)
             handleAbsEvent(js, e.code, e.value);
     }
 
-    return js->present;
+    return js->connected;
 }
 
 void _glfwPlatformUpdateGamepadGUID(char* guid)

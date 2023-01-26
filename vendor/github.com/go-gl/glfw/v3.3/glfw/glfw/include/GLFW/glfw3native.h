@@ -74,6 +74,16 @@ extern "C" {
  *  and which platform-specific headers to include.  It is then up your (by
  *  definition platform-specific) code to handle which of these should be
  *  defined.
+ *
+ *  If you do not want the platform-specific headers to be included, define
+ *  `GLFW_NATIVE_INCLUDE_NONE` before including the @ref glfw3native.h header.
+ *
+ *  @code
+ *  #define GLFW_EXPOSE_NATIVE_WIN32
+ *  #define GLFW_EXPOSE_NATIVE_WGL
+ *  #define GLFW_NATIVE_INCLUDE_NONE
+ *  #include <GLFW/glfw3native.h>
+ *  @endcode
  */
 
 
@@ -81,44 +91,65 @@ extern "C" {
  * System headers and types
  *************************************************************************/
 
-#if defined(GLFW_EXPOSE_NATIVE_WIN32) || defined(GLFW_EXPOSE_NATIVE_WGL)
- // This is a workaround for the fact that glfw3.h needs to export APIENTRY (for
- // example to allow applications to correctly declare a GL_KHR_debug callback)
- // but windows.h assumes no one will define APIENTRY before it does
- #if defined(GLFW_APIENTRY_DEFINED)
-  #undef APIENTRY
-  #undef GLFW_APIENTRY_DEFINED
- #endif
- #include <windows.h>
-#elif defined(GLFW_EXPOSE_NATIVE_COCOA) || defined(GLFW_EXPOSE_NATIVE_NSGL)
- #if defined(__OBJC__)
-  #import <Cocoa/Cocoa.h>
- #else
-  #include <ApplicationServices/ApplicationServices.h>
-  typedef void* id;
- #endif
-#elif defined(GLFW_EXPOSE_NATIVE_X11) || defined(GLFW_EXPOSE_NATIVE_GLX)
- #include <X11/Xlib.h>
- #include <X11/extensions/Xrandr.h>
-#elif defined(GLFW_EXPOSE_NATIVE_WAYLAND)
- #include <wayland-client.h>
-#endif
+#if !defined(GLFW_NATIVE_INCLUDE_NONE)
 
-#if defined(GLFW_EXPOSE_NATIVE_WGL)
- /* WGL is declared by windows.h */
-#endif
-#if defined(GLFW_EXPOSE_NATIVE_NSGL)
- /* NSGL is declared by Cocoa.h */
-#endif
-#if defined(GLFW_EXPOSE_NATIVE_GLX)
- #include <GL/glx.h>
-#endif
-#if defined(GLFW_EXPOSE_NATIVE_EGL)
- #include <EGL/egl.h>
-#endif
-#if defined(GLFW_EXPOSE_NATIVE_OSMESA)
- #include <GL/osmesa.h>
-#endif
+ #if defined(GLFW_EXPOSE_NATIVE_WIN32) || defined(GLFW_EXPOSE_NATIVE_WGL)
+  /* This is a workaround for the fact that glfw3.h needs to export APIENTRY (for
+   * example to allow applications to correctly declare a GL_KHR_debug callback)
+   * but windows.h assumes no one will define APIENTRY before it does
+   */
+  #if defined(GLFW_APIENTRY_DEFINED)
+   #undef APIENTRY
+   #undef GLFW_APIENTRY_DEFINED
+  #endif
+  #include <windows.h>
+ #elif defined(GLFW_EXPOSE_NATIVE_COCOA) || defined(GLFW_EXPOSE_NATIVE_NSGL)
+  #if defined(__OBJC__)
+   #import <Cocoa/Cocoa.h>
+  #else
+   #include <ApplicationServices/ApplicationServices.h>
+   #include <objc/objc.h>
+  #endif
+ #elif defined(GLFW_EXPOSE_NATIVE_X11) || defined(GLFW_EXPOSE_NATIVE_GLX)
+  #include <X11/Xlib.h>
+  #include <X11/extensions/Xrandr.h>
+ #elif defined(GLFW_EXPOSE_NATIVE_WAYLAND)
+  #include <wayland-client.h>
+ #endif
+
+ #if defined(GLFW_EXPOSE_NATIVE_WGL)
+  /* WGL is declared by windows.h */
+ #endif
+ #if defined(GLFW_EXPOSE_NATIVE_NSGL)
+  /* NSGL is declared by Cocoa.h */
+ #endif
+ #if defined(GLFW_EXPOSE_NATIVE_GLX)
+  /* This is a workaround for the fact that glfw3.h defines GLAPIENTRY because by
+   * default it also acts as an OpenGL header
+   * However, glx.h will include gl.h, which will define it unconditionally
+   */
+  #if defined(GLFW_GLAPIENTRY_DEFINED)
+   #undef GLAPIENTRY
+   #undef GLFW_GLAPIENTRY_DEFINED
+  #endif
+  #include <GL/glx.h>
+ #endif
+ #if defined(GLFW_EXPOSE_NATIVE_EGL)
+  #include <EGL/egl.h>
+ #endif
+ #if defined(GLFW_EXPOSE_NATIVE_OSMESA)
+  /* This is a workaround for the fact that glfw3.h defines GLAPIENTRY because by
+   * default it also acts as an OpenGL header
+   * However, osmesa.h will include gl.h, which will define it unconditionally
+   */
+  #if defined(GLFW_GLAPIENTRY_DEFINED)
+   #undef GLAPIENTRY
+   #undef GLFW_GLAPIENTRY_DEFINED
+  #endif
+  #include <GL/osmesa.h>
+ #endif
+
+#endif /*GLFW_NATIVE_INCLUDE_NONE*/
 
 
 /*************************************************************************
@@ -474,6 +505,9 @@ GLFWAPI struct wl_surface* glfwGetWaylandWindow(GLFWwindow* window);
  *  [error](@ref error_handling) occurred.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
+ *
+ *  @remark Because EGL is initialized on demand, this function will return
+ *  `EGL_NO_DISPLAY` until the first context has been created via EGL.
  *
  *  @thread_safety This function may be called from any thread.  Access is not
  *  synchronized.

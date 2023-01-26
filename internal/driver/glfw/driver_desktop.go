@@ -48,6 +48,16 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 		}, func() {
 			// anything required for tear-down
 		})
+
+		// the only way we know the app was asked to quit is if this window is asked to close...
+		w := d.CreateWindow("SystrayMonitor")
+		w.(*window).create()
+		w.SetCloseIntercept(func() {
+			d.Quit()
+		})
+		w.SetOnClosed(func() {
+			systray.Quit()
+		})
 	})
 
 	d.refreshSystray(m)
@@ -96,25 +106,7 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	d.systrayMenu = m
 	systray.ResetMenu()
-	for _, i := range m.Items {
-		item := itemForMenuItem(i, nil)
-		if item == nil {
-			continue // separator
-		}
-		if i.ChildMenu != nil {
-			for _, c := range i.ChildMenu.Items {
-				itemForMenuItem(c, item)
-			}
-			continue
-		}
-
-		fn := i.Action
-		go func() {
-			for range item.ClickedCh {
-				fn()
-			}
-		}()
-	}
+	d.refreshSystrayMenu(m, nil)
 
 	systray.AddSeparator()
 	quit := systray.AddMenuItem("Quit", "Quit application")
@@ -122,6 +114,27 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 		<-quit.ClickedCh
 		d.Quit()
 	}()
+}
+
+func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
+	for _, i := range m.Items {
+		item := itemForMenuItem(i, parent)
+		if item == nil {
+			continue // separator
+		}
+		if i.ChildMenu != nil {
+			d.refreshSystrayMenu(i.ChildMenu, item)
+		}
+
+		fn := i.Action
+		go func() {
+			for range item.ClickedCh {
+				if fn != nil {
+					fn()
+				}
+			}
+		}()
+	}
 }
 
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {

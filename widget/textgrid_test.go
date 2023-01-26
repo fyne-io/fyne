@@ -23,7 +23,7 @@ func TestNewTextGrid(t *testing.T) {
 
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
-	grid.Resize(fyne.NewSize(56, 22))
+	grid.Resize(fyne.NewSize(52, 22))
 	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 	rend.Refresh()
 
@@ -167,7 +167,7 @@ func TestTextGridRenderer_ShowLineNumbers(t *testing.T) {
 
 func TestTextGridRender_Size(t *testing.T) {
 	grid := NewTextGrid()
-	grid.Resize(fyne.NewSize(32, 42)) // causes refresh
+	grid.Resize(fyne.NewSize(30, 42)) // causes refresh
 	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 
 	assert.Equal(t, 3, rend.cols)

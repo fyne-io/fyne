@@ -12,6 +12,8 @@ type packagerUtil interface {
 	CopyExeFile(src, tgt string) error
 	WriteFile(target string, data []byte) error
 	EnsureSubDir(parent, name string) string
+	EnsureAbsPath(path string) string
+	MakePathRelativeTo(root, path string) string
 
 	RequireAndroidSDK() error
 	AndroidBuildToolsPath() string
@@ -41,6 +43,14 @@ func (d defaultUtil) WriteFile(target string, data []byte) error {
 
 func (d defaultUtil) EnsureSubDir(parent, name string) string {
 	return realUtil.EnsureSubDir(parent, name)
+}
+
+func (d defaultUtil) EnsureAbsPath(path string) string {
+	return realUtil.EnsureAbsPath(path)
+}
+
+func (d defaultUtil) MakePathRelativeTo(root, path string) string {
+	return realUtil.MakePathRelativeTo(root, path)
 }
 
 func (d defaultUtil) RequireAndroidSDK() error {

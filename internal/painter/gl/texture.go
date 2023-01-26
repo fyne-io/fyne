@@ -6,8 +6,6 @@ import (
 	"image/draw"
 	"math"
 
-	"github.com/goki/freetype/truetype"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
@@ -142,24 +140,6 @@ func (p *painter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(rast.Generator(int(width), int(height)), rast.ScaleMode)
 }
 
-func (p *painter) newGlRectTexture(obj fyne.CanvasObject) Texture {
-	rect := obj.(*canvas.Rectangle)
-	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
-		return p.newGlStrokedRectTexture(rect)
-	}
-	if rect.FillColor == nil {
-		return noTexture
-	}
-	return p.imgToTexture(image.NewUniform(rect.FillColor), canvas.ImageScaleSmooth)
-}
-
-func (p *painter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
-	rect := obj.(*canvas.Rectangle)
-	raw := paint.DrawRectangle(rect, paint.VectorPad(rect), p.textureScale)
-
-	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
-}
-
 func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
 	color := text.Color
@@ -168,17 +148,12 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	}
 
 	bounds := text.MinSize()
-	width := int(p.textureScale(bounds.Width + paint.VectorPad(text))) // potentially italic overspill
-	height := int(p.textureScale(bounds.Height))
+	width := int(math.Ceil(float64(p.textureScale(bounds.Width + paint.VectorPad(text))))) // potentially italic overspill
+	height := int(math.Ceil(float64(p.textureScale(bounds.Height))))
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
-	var opts truetype.Options
-	fontSize := float64(text.TextSize) * float64(p.canvas.Scale())
-	opts.Size = fontSize
-	opts.DPI = float64(paint.TextDPI * p.texScale)
-	face := paint.CachedFontFace(text.TextStyle, &opts)
-
-	paint.DrawString(img, text.Text, color, face, height, text.TextStyle.TabWidth)
+	face, measureFace := paint.CachedFontFace(text.TextStyle, text.TextSize*p.canvas.Scale(), p.texScale)
+	paint.DrawString(img, text.Text, color, face, measureFace, text.TextSize, p.pixScale, height, text.TextStyle.TabWidth)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 

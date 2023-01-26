@@ -65,6 +65,8 @@ func (p *painter) Init() {
 	p.logError()
 	p.program = p.createProgram("simple_es")
 	p.lineProgram = p.createProgram("line_es")
+	p.rectangleProgram = p.createProgram("rectangle_es")
+	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
 }
 
 type xjsContext struct{}
@@ -149,6 +151,10 @@ func (c *xjsContext) Enable(capability uint32) {
 
 func (c *xjsContext) EnableVertexAttribArray(attribute Attribute) {
 	gl.EnableVertexAttribArray(gl.Attrib(attribute))
+}
+
+func (c *xjsContext) DisableVertexAttribArray(attribute Attribute) {
+	gl.DisableVertexAttribArray(gl.Attrib(attribute))
 }
 
 func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
