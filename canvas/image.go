@@ -269,7 +269,7 @@ func (i *Image) didResourceChange() bool {
 	if i.Resource.Name() != i.previous.resource.Name() {
 		return true
 	}
-	return bytes.Compare(i.Resource.Content(), i.previous.resource.Content()) != 0
+	return !bytes.Equal(i.Resource.Content(), i.previous.resource.Content())
 }
 
 func (i *Image) updateReader() {
