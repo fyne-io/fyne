@@ -3,7 +3,6 @@ package canvas
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -342,7 +341,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(img)
 	if c == nil {
-		return fyne.NewSize(0, 0), fmt.Errorf("object is not attached to a canvas yet")
+		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
 	}
 	dpSize := fyne.NewSize(scale.UnscaleInt(c, width), scale.UnscaleInt(c, height))
 
