@@ -125,10 +125,6 @@ func (i *Image) Generate(width, height int) (image.Image, error) {
 		return i.Image, nil
 	}
 
-	if i.reader == nil {
-		return nil, errors.New("no image data")
-	}
-
 	if i.isSVG {
 		tex := cache.GetSvg(i.Name(), width, height)
 		if tex == nil {
@@ -142,6 +138,10 @@ func (i *Image) Generate(width, height int) (image.Image, error) {
 		return tex, nil
 	}
 	var err error
+
+	if i.reader == nil {
+		return nil, errors.New("image has nothing to render")
+	}
 
 	i.Image, _, err = image.Decode(i.reader)
 	i.previous.image = i.Image
