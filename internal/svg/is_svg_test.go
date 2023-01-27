@@ -16,7 +16,7 @@ func TestIsFileSVG(t *testing.T) {
 }
 
 func TestIsResourceSVG(t *testing.T) {
-	res, err := fyne.LoadResourceFromPath("./testdata/stroke.svg")
+	res, err := fyne.LoadResourceFromPath("./testdata/circles.svg")
 	assert.Nil(t, err)
 	assert.True(t, IsResourceSVG(res))
 
