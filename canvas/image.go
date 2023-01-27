@@ -109,6 +109,9 @@ func (i *Image) Resize(s fyne.Size) {
 
 // Aspect will return the original content aspect after it was last Refresh
 func (i *Image) Aspect() float32 {
+	if !i.updated {
+		i.MinSize()
+	}
 	return i.aspect
 }
 
@@ -303,6 +306,7 @@ func (i *Image) calculateMinSize() {
 	} else if i.Image != nil {
 		original := i.Image.Bounds().Size()
 		size = fyne.NewSize(float32(original.X), float32(original.Y))
+		i.aspect = size.Width / size.Height
 	} else {
 		return
 	}
