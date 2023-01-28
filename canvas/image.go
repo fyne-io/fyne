@@ -3,6 +3,7 @@ package canvas
 import (
 	"bytes"
 	"errors"
+	"hash/fnv"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -55,8 +56,12 @@ const (
 var _ fyne.CanvasObject = (*Image)(nil)
 
 type state struct {
-	file     string
-	resource fyne.Resource
+	file string
+
+	resource       fyne.Resource
+	resourceLength int
+	resourceHash   uint64
+
 	image    image.Image
 	fillMode ImageFill
 }
@@ -272,7 +277,23 @@ func (i *Image) didResourceChange() bool {
 	if i.Resource.Name() != i.previous.resource.Name() {
 		return true
 	}
-	return !bytes.Equal(i.Resource.Content(), i.previous.resource.Content())
+
+	if i.Resource.Content() == nil {
+		return false
+	}
+	if len(i.Resource.Content()) != i.previous.resourceLength {
+		return true
+	}
+
+	hash := fnv.New64()
+	hash.Write(i.Resource.Content())
+	resourceHash := hash.Sum64()
+
+	if resourceHash != i.previous.resourceHash {
+		i.previous.resourceHash = resourceHash
+		return true
+	}
+	return false
 }
 
 func (i *Image) updateReader() {
