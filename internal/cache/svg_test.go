@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,15 +55,14 @@ func TestSvgCacheReset(t *testing.T) {
 }
 
 func addFileToCache(path string, w, h int) image.Image {
-	img := canvas.NewImageFromFile(path)
 	tex := image.NewNRGBA(image.Rect(0, 0, w, h))
-	SetSvg(img.File, tex, w, h)
+	SetSvg(path, tex, w, h)
 	return tex
 }
 
 func addToCache(name, content string, w, h int) image.Image {
-	img := canvas.NewImageFromResource(fyne.NewStaticResource(name, []byte(content)))
+	resource := fyne.NewStaticResource(name, []byte(content))
 	tex := image.NewNRGBA(image.Rect(0, 0, w, h))
-	SetSvg(img.Resource.Name(), tex, w, h)
+	SetSvg(resource.Name(), tex, w, h)
 	return tex
 }
