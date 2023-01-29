@@ -157,17 +157,17 @@ func (s *Slider) Tapped(_ *fyne.PointEvent) {
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 	if s.Orientation == Vertical {
 		switch key.Name {
-		case fyne.KeyLeft:
-			s.SetValue(s.Value - s.Step)
-		case fyne.KeyRight:
-			s.SetValue(s.Value + s.Step)
-		}
-	} else {
-		switch key.Name {
 		case fyne.KeyUp:
 			s.SetValue(s.Value + s.Step)
 		case fyne.KeyDown:
 			s.SetValue(s.Value - s.Step)
+		}
+	} else {
+		switch key.Name {
+		case fyne.KeyLeft:
+			s.SetValue(s.Value - s.Step)
+		case fyne.KeyRight:
+			s.SetValue(s.Value + s.Step)
 		}
 	}
 }

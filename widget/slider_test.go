@@ -250,4 +250,13 @@ func TestSlider_Focus(t *testing.T) {
 	slider.TypedKey(left)
 	assert.Equal(t, slider.Min, slider.Value)
 
+	slider.Orientation = Vertical
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+
+	slider.TypedKey(up)
+	assert.Equal(t, slider.Min+1, slider.Value)
+
+	slider.TypedKey(down)
+	assert.Equal(t, slider.Min, slider.Value)
 }
