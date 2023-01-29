@@ -167,6 +167,9 @@ func (s *Slider) Tapped(_ *fyne.PointEvent) {
 	}
 }
 
+// TypedKey is called when this item receives a key event.
+//
+// Implements: fyne.Focusable
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 	if s.Orientation == Vertical {
 		switch key.Name {
@@ -185,6 +188,9 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 	}
 }
 
+// TypedRune is called when this item receives a char event.
+//
+// Implements: fyne.Focusable
 func (s *Slider) TypedRune(_ rune) {
 }
 
