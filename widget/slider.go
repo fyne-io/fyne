@@ -81,16 +81,6 @@ func (s *Slider) Bind(data binding.Float) {
 	}
 }
 
-func (s *Slider) FocusGained() {
-	s.focused = true
-	s.Refresh()
-}
-
-func (s *Slider) FocusLost() {
-	s.focused = false
-	s.Refresh()
-}
-
 // DragEnd function.
 func (s *Slider) DragEnd() {
 }
@@ -123,6 +113,22 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
+}
+
+// FocusGained is called when this item gained the focus.
+//
+// Implements: fyne.Focusable
+func (s *Slider) FocusGained() {
+	s.focused = true
+	s.Refresh()
+}
+
+// FocusLost is called when this item lost the focus.
+//
+// Implements: fyne.Focusable
+func (s *Slider) FocusLost() {
+	s.focused = false
+	s.Refresh()
 }
 
 // MouseIn is called when a desktop pointer enters the widget.
