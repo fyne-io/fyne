@@ -155,11 +155,20 @@ func (s *Slider) Tapped(_ *fyne.PointEvent) {
 }
 
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
-	switch key.Name {
-	case fyne.KeyLeft:
-		s.SetValue(s.Value - s.Step)
-	case fyne.KeyRight:
-		s.SetValue(s.Value + s.Step)
+	if s.Orientation == Vertical {
+		switch key.Name {
+		case fyne.KeyLeft:
+			s.SetValue(s.Value - s.Step)
+		case fyne.KeyRight:
+			s.SetValue(s.Value + s.Step)
+		}
+	} else {
+		switch key.Name {
+		case fyne.KeyUp:
+			s.SetValue(s.Value + s.Step)
+		case fyne.KeyDown:
+			s.SetValue(s.Value - s.Step)
+		}
 	}
 }
 
@@ -341,6 +350,8 @@ func (s *sliderRenderer) Refresh() {
 		s.focusIndicator.FillColor = color.Transparent
 	}
 
+	s.focusIndicator.Refresh()
+
 	s.slider.clampValueToRange()
 	s.Layout(s.slider.Size())
 	canvas.Refresh(s.slider.super())
@@ -391,7 +402,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
 
 	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
-	delta := (focusIndicatorSize.Width - diameter) / 2
+	delta := focusIndicatorSize.Width/2 - diameter/2
 	s.focusIndicator.Resize(focusIndicatorSize)
 	s.focusIndicator.Move(thumbPos.SubtractXY(delta, delta))
 }
