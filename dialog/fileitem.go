@@ -44,6 +44,7 @@ func (i *fileDialogItem) MouseOut() {
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 	i.picker.setSelected(i)
+	i.Refresh()
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
