@@ -151,7 +151,14 @@ func (s *Slider) MouseOut() {
 //
 // Implements: fyne.Tappable
 func (s *Slider) Tapped(_ *fyne.PointEvent) {
-	s.FocusGained()
+	driver := fyne.CurrentApp().Driver()
+	if !s.focused && !driver.Device().IsMobile() {
+		impl := s.super()
+
+		if c := driver.CanvasForObject(impl); c != nil {
+			c.Focus(impl.(fyne.Focusable))
+		}
+	}
 }
 
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
@@ -402,7 +409,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
 
 	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
-	delta := focusIndicatorSize.Width/2 - diameter/2
+	delta := (focusIndicatorSize.Width - diameter) / 2
 	s.focusIndicator.Resize(focusIndicatorSize)
 	s.focusIndicator.Move(thumbPos.SubtractXY(delta, delta))
 }
