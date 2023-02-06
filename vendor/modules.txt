@@ -12,6 +12,7 @@ github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
 # github.com/benoitkugler/textlayout v0.3.0
+## explicit
 github.com/benoitkugler/textlayout/fonts
 github.com/benoitkugler/textlayout/fonts/binaryreader
 github.com/benoitkugler/textlayout/fonts/glyphsnames
@@ -63,6 +64,9 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
+# github.com/go-text/render v0.0.0 => ../../go-text/render
+## explicit
+github.com/go-text/render
 # github.com/go-text/typesetting v0.0.0-20221212183139-1eb938670a1f
 ## explicit
 github.com/go-text/typesetting/di
@@ -75,11 +79,6 @@ github.com/go-text/typesetting/shaping
 github.com/godbus/dbus/v5
 github.com/godbus/dbus/v5/introspect
 github.com/godbus/dbus/v5/prop
-# github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
-## explicit
-github.com/goki/freetype
-github.com/goki/freetype/raster
-github.com/goki/freetype/truetype
 # github.com/gopherjs/gopherjs v1.17.2
 ## explicit
 github.com/gopherjs/gopherjs/js
@@ -110,7 +109,7 @@ github.com/russross/blackfriday/v2
 # github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76
 ## explicit
 github.com/srwiley/oksvg
-# github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
+# github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 ## explicit
 github.com/srwiley/rasterx
 # github.com/stretchr/testify v1.8.0
@@ -122,7 +121,7 @@ github.com/tevino/abool
 # github.com/urfave/cli/v2 v2.4.0
 ## explicit
 github.com/urfave/cli/v2
-# github.com/yuin/goldmark v1.4.0
+# github.com/yuin/goldmark v1.4.13
 ## explicit
 github.com/yuin/goldmark
 github.com/yuin/goldmark/ast
@@ -131,12 +130,11 @@ github.com/yuin/goldmark/renderer
 github.com/yuin/goldmark/renderer/html
 github.com/yuin/goldmark/text
 github.com/yuin/goldmark/util
-# golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
+# golang.org/x/image v0.3.0
 ## explicit
 golang.org/x/image/ccitt
 golang.org/x/image/colornames
 golang.org/x/image/draw
-golang.org/x/image/font
 golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/tiff
@@ -145,24 +143,24 @@ golang.org/x/image/vector
 # golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
 ## explicit
 golang.org/x/mobile/exp/f32
-# golang.org/x/mod v0.4.2
+# golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 ## explicit
 golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20211118161319-6a13c67c3ce4
+# golang.org/x/net v0.0.0-20220722155237-a158d28d115b
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
+# golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
 ## explicit
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
-# golang.org/x/text v0.3.7
+# golang.org/x/text v0.6.0
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
@@ -180,11 +178,12 @@ golang.org/x/text/internal/utf8internal
 golang.org/x/text/language
 golang.org/x/text/runes
 golang.org/x/text/transform
-# golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098
+# golang.org/x/tools v0.1.12
 ## explicit
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
 golang.org/x/tools/go/internal/packagesdriver
+golang.org/x/tools/go/internal/pkgbits
 golang.org/x/tools/go/packages
 golang.org/x/tools/internal/event
 golang.org/x/tools/internal/event/core
@@ -194,9 +193,6 @@ golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/packagesinternal
 golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
-# golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-golang.org/x/xerrors
-golang.org/x/xerrors/internal
 # gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
 ## explicit
 # gopkg.in/yaml.v3 v3.0.1
@@ -204,3 +200,4 @@ gopkg.in/yaml.v3
 # honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 ## explicit
 honnef.co/go/js/dom
+# github.com/go-text/render => ../../go-text/render
