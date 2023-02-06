@@ -76,7 +76,8 @@ type Button struct {
 
 	OnTapped func() `json:"-"`
 
-	BackgroundColor color.Color // background color
+	BackgroundColor color.Color         // background color
+	TextColorName   fyne.ThemeColorName // text color name
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
@@ -358,23 +359,31 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 func (r *buttonRenderer) applyTheme() {
 	r.button.applyButtonTheme()
-	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
+	labelColorName := theme.ColorNameForeground
 	switch {
 	case r.button.disabled:
-		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance:
-		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
+		labelColorName = theme.ColorNameDisabled
+	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance ||
+		r.button.BackgroundColor != nil:
+		labelColorName = theme.ColorNameBackground
 	}
+
+	// customize text color
+	if r.button.TextColorName != "" {
+		labelColorName = r.button.TextColorName
+	}
+	r.label.Segments[0].(*TextSegment).Style.ColorName = labelColorName
+
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Importance == HighImportance {
+			if labelColorName == theme.ColorNameBackground {
 				r.icon.Resource = theme.NewInvertedThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
-			if r.button.Importance != HighImportance {
+			if labelColorName != theme.ColorNameBackground {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}
