@@ -83,6 +83,7 @@ func openStream(uri string) unsafe.Pointer {
 	return stream
 }
 
+// If the file by the give uri is not found, the ErrResourceNotFound error will be returned
 func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	if f.uri == nil || f.uri.String() == "" {
 		return nil, nil
@@ -90,7 +91,7 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 
 	ret := openStream(f.uri.String())
 	if ret == nil {
-		return nil, errors.New("resource not found at URI")
+        return nil, ErrResourceNotFound
 	}
 
 	stream := &javaStream{}
@@ -115,6 +116,7 @@ func saveStream(uri string) unsafe.Pointer {
 	return stream
 }
 
+// If the file by the give uri is not found, the ErrResourceNotFound error will be returned
 func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 	if f.uri == nil || f.uri.String() == "" {
 		return nil, nil
@@ -122,7 +124,7 @@ func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 
 	ret := saveStream(f.uri.String())
 	if ret == nil {
-		return nil, errors.New("resource not found at URI")
+        return nil, ErrResourceNotFound
 	}
 
 	stream := &javaStream{}
