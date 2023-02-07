@@ -574,11 +574,11 @@ func convertASCII(key glfw.Key) fyne.KeyName {
 
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
-	keyDesktopModifier := desktopModifier(mods)
+	w.driver.activeKeyModifiers = desktopModifier(mods)
 	keyAction := convertAction(action)
 	keyASCII := convertASCII(key)
 
-	w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
+	w.processKeyPressed(keyName, keyASCII, scancode, keyAction, w.driver.activeKeyModifiers)
 }
 
 func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
