@@ -259,7 +259,13 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 }
 
 func (p *Packager) combinedVersion() string {
-	return fmt.Sprintf("%s.%d", p.AppVersion, p.AppBuild)
+	versions := strings.Split(p.AppVersion, ".")
+	for len(versions) < 3 {
+		versions = append(versions, "0")
+	}
+	appVersion := strings.Join(versions, ".")
+
+	return fmt.Sprintf("%s.%d", appVersion, p.AppBuild)
 }
 
 func (p *Packager) doPackage(runner runner) error {
