@@ -100,6 +100,6 @@ func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
 }
 
-func (d *gLDriver) KeyModifierState() fyne.KeyModifier {
+func (d *gLDriver) ActiveKeyModifiers() fyne.KeyModifier {
 	return d.activeKeyModifiers
 }
