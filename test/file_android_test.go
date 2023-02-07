@@ -1,10 +1,10 @@
 package test
 
 import (
+	"github.com/stretchr/testify/assert"
+	"mobile"
 	"net/url"
 	"testing"
-	"mobile"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNativeFileSave(t *testing.T) {
@@ -70,4 +70,3 @@ func TestNativeFileOpen(t *testing.T) {
 		})
 	}
 }
-

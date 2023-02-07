@@ -3,5 +3,5 @@ package mobile
 import "errors"
 
 var (
-    ErrResourceNotFound = errors.New("resource not found at URI")
+	ErrResourceNotFound = errors.New("resource not found at URI")
 )

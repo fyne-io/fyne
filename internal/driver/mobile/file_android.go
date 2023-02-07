@@ -91,7 +91,7 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 
 	ret := openStream(f.uri.String())
 	if ret == nil {
-        	return nil, ErrResourceNotFound
+		return nil, ErrResourceNotFound
 	}
 
 	stream := &javaStream{}
@@ -124,7 +124,7 @@ func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 
 	ret := saveStream(f.uri.String())
 	if ret == nil {
-        	return nil, ErrResourceNotFound
+		return nil, ErrResourceNotFound
 	}
 
 	stream := &javaStream{}
