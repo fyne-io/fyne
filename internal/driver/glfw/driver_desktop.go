@@ -165,3 +165,7 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
 }
+
+func (d *gLDriver) KeyModifierState() fyne.KeyModifier {
+	return d.activeKeyModifiers
+}
