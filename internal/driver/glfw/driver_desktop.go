@@ -101,5 +101,5 @@ func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 }
 
 func (d *gLDriver) ActiveKeyModifiers() fyne.KeyModifier {
-	return d.activeKeyModifiers
+	return d.currentKeyModifiers
 }

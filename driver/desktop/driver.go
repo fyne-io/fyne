@@ -10,6 +10,6 @@ type Driver interface {
 
 	// Gets the set of key modifiers that are currently active
 	//
-	// Since: TODO
-	ActiveKeyModifiers() fyne.KeyModifier
+	// Since: 2.4
+	CurrentKeyModifiers() fyne.KeyModifier
 }
