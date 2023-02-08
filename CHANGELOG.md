@@ -26,6 +26,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Wrong icon colour for danger and warning buttons
 * Embedding Fyne apps in iFrame alignment issue
 * Generated metadata can be in wrong directory
+* Android RootURI may not exist when used for storage (#3207)
 
 
 ## 2.3.0 - 24 December 2022
