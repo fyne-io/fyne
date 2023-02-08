@@ -20,16 +20,16 @@ type Renderer struct {
 	FontSize float32
 	// PixScale is used to indicate the pixel density of your output target.
 	// For example on a hi-DPI (or "retina") display this may be 2.0.
-	// Default value is 1.0, meaning
+	// Default value is 1.0, meaning 1 pixel on the image for each render pixel.
 	PixScale float32
 	// Color is the pen colour for rendering
-	Color    color.Color
+	Color color.Color
 
 	shaper shaping.Shaper
 }
 
 // DrawString will rasterise the given string into the output image using the specified font face.
-// The text will be drawn starting at the left edge, down from the image top by the 
+// The text will be drawn starting at the left edge, down from the image top by the
 // font ascent value, so that the text is all visible.
 // The return value is the X pixel position of the end of the drawn string.
 func (r *Renderer) DrawString(str string, img draw.Image, face fonts.Face) int {
