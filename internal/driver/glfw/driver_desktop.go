@@ -64,7 +64,11 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
 	if i.IsSeparator {
-		systray.AddSeparator()
+		if parent != nil {
+			parent.AddSeparator()
+		} else {
+			systray.AddSeparator()
+		}
 		return nil
 	}
 
