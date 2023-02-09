@@ -34,8 +34,8 @@ func paintImage(img *canvas.Image, width, height int) (dst image.Image, err erro
 		return
 	}
 
-	dst, err = img.Generate(width, height)
-	if err != nil {
+	dst = img.Image
+	if dst == nil {
 		dst = image.NewNRGBA(image.Rect(0, 0, width, height))
 	}
 

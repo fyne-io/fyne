@@ -9,6 +9,7 @@ import (
 	_ "image/png"  // avoid the same for PNG images
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -108,8 +109,10 @@ func (i *Image) Resize(s fyne.Size) {
 	}
 
 	i.baseObject.Resize(s)
+	i.updated = false
+	log.Println("image", i)
 
-	Refresh(i)
+	i.Refresh()
 }
 
 // Aspect will return the original content aspect after it was last Refresh
@@ -118,42 +121,6 @@ func (i *Image) Aspect() float32 {
 		i.MinSize()
 	}
 	return i.aspect
-}
-
-// Generate will generate ideally an image with the content that was set on it of the requested ideal size
-func (i *Image) Generate(width, height int) (image.Image, error) {
-	if !i.updated {
-		i.MinSize()
-	}
-
-	i.lock.Lock()
-	defer i.lock.Unlock()
-
-	if i.Image != nil {
-		return i.Image, nil
-	}
-
-	if i.isSVG {
-		tex := cache.GetSvg(i.Name(), width, height)
-		if tex == nil {
-			var err error
-			tex, err = i.icon.Draw(width, height)
-			if err != nil {
-				return nil, err
-			}
-			cache.SetSvg(i.Name(), tex, width, height)
-		}
-		return tex, nil
-	}
-	var err error
-
-	if i.reader == nil {
-		return nil, errors.New("image has nothing to render")
-	}
-
-	i.Image, _, err = image.Decode(i.reader)
-	i.previous.image = i.Image
-	return i.Image, err
 }
 
 // Name return an unique name that match the ressource used by the image to identify it in the cache
@@ -166,36 +133,78 @@ func (i *Image) Name() string {
 	return ""
 }
 
+func (i *Image) MinSize() fyne.Size {
+	if !i.updated {
+		i.Refresh()
+	}
+	return i.baseObject.MinSize()
+}
+
 // Refresh causes this object to be redrawn in it's current state
 func (i *Image) Refresh() {
 	i.lock.Lock()
 	defer i.lock.Unlock()
 
-	if i.previous.file != i.File ||
-		i.previous.image != i.Image ||
-		i.previous.fillMode != i.FillMode ||
-		i.didResourceChange() {
-		i.updated = false
+	fileNeedUpdate := !i.updated
+	if !fileNeedUpdate &&
+		(i.previous.file != i.File ||
+			i.previous.image != i.Image ||
+			i.previous.fillMode != i.FillMode ||
+			i.didResourceChange()) {
+		fileNeedUpdate = true
 	}
 
-	Refresh(i)
-}
+	if fileNeedUpdate {
+		err := i.updateReader()
+		if err != nil {
+			fyne.LogError("Failed to load image", err)
+			return
+		}
+		err = i.calculateMinSize()
+		if err != nil {
+			return
+		}
 
-func (i *Image) MinSize() fyne.Size {
-	i.lock.Lock()
-	defer i.lock.Unlock()
-
-	if !i.updated {
-		i.updateReader()
-		i.calculateMinSize()
-
+		i.updated = false
 		i.previous.file = i.File
 		i.previous.resource = i.Resource
 		i.previous.image = i.Image
 		i.previous.fillMode = i.FillMode
+	}
+
+	if !i.updated {
+		size := i.Size()
+		width := size.Width
+		height := size.Height
+
+		if width == 0 || height == 0 {
+			return
+		}
+
+		if i.isSVG {
+			tex, err := i.renderSVG(width, height)
+			if err != nil {
+				fyne.LogError("Failed to render SVG", err)
+				return
+			}
+			i.Image = tex
+		} else {
+			if i.reader == nil {
+				return
+			}
+
+			image, _, err := image.Decode(i.reader)
+			if err != nil {
+				fyne.LogError("Failed to render image", err)
+				return
+			}
+			i.Image = image
+		}
+		i.previous.image = i.Image
 		i.updated = true
 	}
-	return i.baseObject.MinSize()
+
+	Refresh(i)
 }
 
 // NewImageFromFile creates a new image from a local file.
@@ -296,45 +305,48 @@ func (i *Image) didResourceChange() bool {
 	return false
 }
 
-func (i *Image) updateReader() {
+func (i *Image) updateReader() error {
 	i.reader = nil
 
+	var fd io.Reader
 	if i.Resource != nil {
-		fd := bytes.NewReader(i.Resource.Content())
-
-		i.reader = fd
+		fd = bytes.NewReader(i.Resource.Content())
 		i.isSVG = svg.IsResourceSVG(i.Resource)
 	} else if i.File != "" {
-		fd, err := os.Open(i.File)
+		var err error
+
+		fd, err = os.Open(i.File)
 		if err != nil {
-			fyne.LogError("Failed to open image", err)
-			return
+			return err
 		}
-		i.reader = fd
 		i.isSVG = svg.IsFileSVG(i.File)
 	}
+	i.reader = fd
+	return nil
 }
 
-func (i *Image) calculateMinSize() {
+func (i *Image) calculateMinSize() error {
 	var size fyne.Size
 
 	if i.Resource != nil || i.File != "" {
 		var err error
+
 		size, err = i.minSizeFromReader(i.reader)
 		if err != nil {
-			return
+			return err
 		}
 	} else if i.Image != nil {
 		original := i.Image.Bounds().Size()
 		size = fyne.NewSize(float32(original.X), float32(original.Y))
 		i.aspect = size.Width / size.Height
 	} else {
-		return
+		return errors.New("no matching image source")
 	}
 
 	if i.FillMode == ImageFillOriginal {
 		i.SetMinSize(size)
 	}
+	return nil
 }
 
 func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
@@ -368,11 +380,42 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 		img.aspect = float32(width) / float32(height)
 	}
 
-	c := fyne.CurrentApp().Driver().CanvasForObject(img)
+	app := fyne.CurrentApp()
+	if app == nil {
+		return fyne.NewSize(0, 0), errors.New("no current app")
+	}
+	driver := app.Driver()
+	if driver == nil {
+		return fyne.NewSize(0, 0), errors.New("no current driver")
+	}
+	c := driver.CanvasForObject(img)
 	if c == nil {
 		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
 	}
 	dpSize := fyne.NewSize(scale.UnscaleInt(c, width), scale.UnscaleInt(c, height))
 
 	return dpSize, nil
+}
+
+func (img *Image) renderSVG(width, height float32) (image.Image, error) {
+	c := fyne.CurrentApp().Driver().CanvasForObject(img)
+	if c == nil {
+		return nil, errors.New("object is not attached to a canvas yet")
+	}
+
+	screenWidth := scale.ScaleInt(c, width)
+	screenHeight := scale.ScaleInt(c, height)
+
+	tex := cache.GetSvg(img.Name(), screenWidth, screenHeight)
+	if tex != nil {
+		return tex, nil
+	}
+
+	var err error
+	tex, err = img.icon.Draw(screenWidth, screenHeight)
+	if err != nil {
+		return nil, err
+	}
+	cache.SetSvg(img.Name(), tex, screenWidth, screenHeight)
+	return tex, nil
 }
