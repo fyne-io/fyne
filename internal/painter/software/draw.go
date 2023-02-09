@@ -61,7 +61,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	origImg := painter.PaintImage(img, c, width, height)
 
 	if img.FillMode == canvas.ImageFillContain {
-		imgAspect := painter.GetAspect(img)
+		imgAspect := img.Aspect()
 		objAspect := float32(width) / float32(height)
 
 		if objAspect > imgAspect {

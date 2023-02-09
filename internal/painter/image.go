@@ -11,11 +11,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 )
 
-// GetAspect looks up an aspect ratio of an image
-func GetAspect(img *canvas.Image) float32 {
-	return img.Aspect()
-}
-
 // PaintImage renders a given fyne Image to a Go standard image
 // If a fyne.Canvas is given and the image’s fill mode is “fill original” the image’s min size has
 // to fit its original size. If it doesn’t, PaintImage does not paint the image but adjusts its min size.
