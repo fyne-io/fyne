@@ -9,7 +9,6 @@ import (
 	_ "image/png"  // avoid the same for PNG images
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -110,8 +109,6 @@ func (i *Image) Resize(s fyne.Size) {
 
 	i.baseObject.Resize(s)
 	i.updated = false
-	log.Println("image", i)
-
 	i.Refresh()
 }
 
