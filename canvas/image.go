@@ -210,7 +210,7 @@ func NewImageFromFile(file string) *Image {
 // Since: 2.0
 func NewImageFromURI(uri fyne.URI) *Image {
 	if uri.Scheme() == "file" && len(uri.String()) > 7 {
-		return NewImageFromFile(uri.String()[7:])
+		return NewImageFromFile(uri.Path())
 	}
 
 	var read io.ReadCloser
