@@ -31,7 +31,8 @@ type Table struct {
 	OnSelected   func(id TableCellID)                             `json:"-"`
 	OnUnselected func(id TableCellID)                             `json:"-"`
 
-	Tapped bool // 是否允许点击触发 Tapped
+	IsCanTappedCell func(TableCellID) bool `json:"-"` // 是否允许点击 cell 触发 Tapped
+	OnRowSelected   func(row int)          `json:"-"`
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
@@ -48,7 +49,7 @@ type Table struct {
 //
 // Since: 1.4
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update, Tapped: true}
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -586,25 +587,42 @@ func (c *tableCells) Resize(s fyne.Size) {
 }
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
-	if !c.t.Tapped {
-		return
-	}
-
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
 		c.t.selectedCell = nil
 		c.t.Refresh()
 		return
 	}
 
-	col := c.columnAt(e.Position)
-	if col == -1 {
-		return // out of col range
-	}
 	row := c.rowAt(e.Position)
 	if row == -1 {
 		return // out of row range
 	}
-	c.t.Select(TableCellID{row, col})
+
+	col := c.columnAt(e.Position)
+	if col == -1 {
+		if row >= 0 {
+			// TODO 处理的不好, 实现 行选中事件
+			c.selectCell(TableCellID{row, 0})
+		}
+		return // out of col range
+	}
+
+	c.selectCell(TableCellID{row, col})
+}
+
+func (c *tableCells) selectCell(id TableCellID) {
+	if f := c.t.IsCanTappedCell; f != nil {
+		if !f(id) {
+			return
+		}
+	}
+
+	c.t.Select(id)
+
+	// TODO 处理的不好, 实现 行选中事件
+	if f := c.t.OnRowSelected; f != nil {
+		f(id.Row)
+	}
 }
 
 func (c *tableCells) columnAt(pos fyne.Position) int {
