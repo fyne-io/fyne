@@ -120,16 +120,6 @@ func (i *Image) Aspect() float32 {
 	return i.aspect
 }
 
-// Name return an unique name that match the ressource used by the image to identify it in the cache
-func (i *Image) Name() string {
-	if i.Resource != nil {
-		return i.Resource.Name()
-	} else if i.File != "" {
-		return i.File
-	}
-	return ""
-}
-
 func (i *Image) MinSize() fyne.Size {
 	if !i.updated {
 		i.Refresh()
@@ -272,6 +262,15 @@ func NewImageFromImage(img image.Image) *Image {
 	return &Image{Image: img}
 }
 
+func (i *Image) name() string {
+	if i.Resource != nil {
+		return i.Resource.Name()
+	} else if i.File != "" {
+		return i.File
+	}
+	return ""
+}
+
 func (i *Image) didResourceChange() bool {
 	if i.previous.resource != i.Resource {
 		return true
@@ -403,7 +402,7 @@ func (img *Image) renderSVG(width, height float32) (image.Image, error) {
 	screenWidth := scale.ScaleInt(c, width)
 	screenHeight := scale.ScaleInt(c, height)
 
-	tex := cache.GetSvg(img.Name(), screenWidth, screenHeight)
+	tex := cache.GetSvg(img.name(), screenWidth, screenHeight)
 	if tex != nil {
 		return tex, nil
 	}
@@ -413,6 +412,6 @@ func (img *Image) renderSVG(width, height float32) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	cache.SetSvg(img.Name(), tex, screenWidth, screenHeight)
+	cache.SetSvg(img.name(), tex, screenWidth, screenHeight)
 	return tex, nil
 }
