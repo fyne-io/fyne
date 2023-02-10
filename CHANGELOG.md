@@ -3,12 +3,16 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.1 - 12 February 2023
+## 2.3.1 - 13 February 2023
+
+### Changed
+
+* Pad app version to ensure Windows packages correctly (#3638)
 
 ### Fixed
 
 * Custom shortcuts with fyne.KeyTab is not working (#3087)
-* Running a program with root privileges resulted in panic (#3120)
+* Running a systray app with root privileges resulted in panic (#3120)
 * Markdown image with no title is not parsed (#3577)
 * Systray app on macOS panic when started while machine sleeps (#3609)
 * Runtime error with VNC on RaspbianOS (#2972)
