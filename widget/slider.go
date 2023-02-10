@@ -97,6 +97,25 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	}
 }
 
+// Tapped function.
+func (s *Slider) Tapped(e *fyne.PointEvent) {
+	ratio := s.getRatio(e)
+
+	lastValue := s.Value
+
+	s.updateValue(ratio)
+
+	if s.almostEqual(lastValue, s.Value) {
+		return
+	}
+
+	s.Refresh()
+
+	if s.OnChanged != nil {
+		s.OnChanged(s.Value)
+	}
+}
+
 func (s *Slider) buttonDiameter() float32 {
 	return theme.IconInlineSize() - 3.5 // match radio icons
 }
