@@ -1,10 +1,11 @@
 package mobile
 
 import (
-	"fyne.io/fyne/v2/storage"
-	"github.com/stretchr/testify/assert"
 	"net/url"
 	"testing"
+
+	"fyne.io/fyne/v2/storage"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNativeFileSave(t *testing.T) {
