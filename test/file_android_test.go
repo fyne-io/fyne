@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/url"
 	"testing"
+	"fyne.io/fyne/v2/internal/driver/mobile"
 )
 
 func TestNativeFileSave(t *testing.T) {
