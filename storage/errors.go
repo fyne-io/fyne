@@ -12,4 +12,7 @@ var (
 	//
 	// Since: 2.3
 	ErrNotExists = errors.New("document does not exist")
+
+	// ErrResourceNotFound may be thrown by android driver. E.g., opening an unknown resource.
+	ErrResourceNotFound = errors.New("resource not found at URI")
 )

@@ -1,10 +1,10 @@
-package test
+package mobile
 
 import (
+	"fyne.io/fyne/v2/storage"
 	"github.com/stretchr/testify/assert"
 	"net/url"
 	"testing"
-	"fyne.io/fyne/v2/internal/driver/mobile"
 )
 
 func TestNativeFileSave(t *testing.T) {
@@ -20,7 +20,7 @@ func TestNativeFileSave(t *testing.T) {
 					String: func() string { return "not_found" },
 				},
 			},
-			expectedErr: ErrResourceNotFound,
+			expectedErr: storage.ErrResourceNotFound,
 		},
 		{
 			name: "returns nil error",
@@ -52,7 +52,7 @@ func TestNativeFileOpen(t *testing.T) {
 			uri: &url.URL{
 				String: func() string { return "not_found" },
 			},
-			expectedErr: ErrResourceNotFound,
+			expectedErr: storage.ErrResourceNotFound,
 		},
 		{
 			name: "returns nil error",
