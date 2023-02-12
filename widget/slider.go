@@ -81,12 +81,23 @@ func (s *Slider) DragEnd() {
 // Dragged function.
 func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
-
 	lastValue := s.Value
 
 	s.updateValue(ratio)
+	s.positionChanged(lastValue, s.Value)
+}
 
-	if s.almostEqual(lastValue, s.Value) {
+// Tapped function.
+func (s *Slider) Tapped(e *fyne.PointEvent) {
+	ratio := s.getRatio(e)
+	lastValue := s.Value
+
+	s.updateValue(ratio)
+	s.positionChanged(lastValue, s.Value)
+}
+
+func (s *Slider) positionChanged(lastValue, currentValue float64) {
+	if s.almostEqual(lastValue, currentValue) {
 		return
 	}
 
@@ -169,19 +180,10 @@ func (s *Slider) SetValue(value float64) {
 	}
 
 	lastValue := s.Value
-
 	s.Value = value
+
 	s.clampValueToRange()
-
-	if s.almostEqual(lastValue, s.Value) {
-		return
-	}
-
-	if s.OnChanged != nil {
-		s.OnChanged(s.Value)
-	}
-
-	s.Refresh()
+	s.positionChanged(lastValue, s.Value)
 }
 
 // MinSize returns the size that this widget should not shrink below
