@@ -94,8 +94,19 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	s.positionChanged(lastValue, s.Value)
 }
 
-// Tapped function.
+// Tapped is called when a pointer tapped event is captured.
+//
+// Implements: fyne.Tappable
 func (s *Slider) Tapped(e *fyne.PointEvent) {
+	driver := fyne.CurrentApp().Driver()
+	if !s.focused && !driver.Device().IsMobile() {
+		impl := s.super()
+
+		if c := driver.CanvasForObject(impl); c != nil {
+			c.Focus(impl.(fyne.Focusable))
+		}
+	}
+
 	ratio := s.getRatio(e)
 	lastValue := s.Value
 
@@ -151,20 +162,6 @@ func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
 func (s *Slider) MouseOut() {
 	s.hovered = false
 	s.Refresh()
-}
-
-// Tapped is called when a pointer tapped event is captured and triggers any change handler
-//
-// Implements: fyne.Tappable
-func (s *Slider) Tapped(_ *fyne.PointEvent) {
-	driver := fyne.CurrentApp().Driver()
-	if !s.focused && !driver.Device().IsMobile() {
-		impl := s.super()
-
-		if c := driver.CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
-	}
 }
 
 // TypedKey is called when this item receives a key event.
