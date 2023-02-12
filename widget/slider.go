@@ -98,7 +98,7 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 }
 
 func (s *Slider) buttonDiameter() float32 {
-	return theme.IconInlineSize() - 3.5 // match radio icons
+	return theme.IconInlineSize() - 4 // match radio icons
 }
 
 func (s *Slider) endOffset() float32 {
