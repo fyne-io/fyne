@@ -81,13 +81,17 @@ func (s *Slider) Bind(data binding.Float) {
 	}
 }
 
-// DragEnd function.
+// DragEnd is called when the drag ends.
+//
+// Implements: fyne.Draggable
 func (s *Slider) DragEnd() {
 }
 
-// Dragged function.
+// DragEnd is called when a drag event occurs.
+//
+// Implements: fyne.Draggable
 func (s *Slider) Dragged(e *fyne.DragEvent) {
-	ratio := s.getRatio(&(e.PointEvent))
+	ratio := s.getRatio(&e.PointEvent)
 	lastValue := s.Value
 
 	s.updateValue(ratio)
