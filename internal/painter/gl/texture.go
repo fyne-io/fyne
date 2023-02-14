@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
-	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 var noTexture = Texture(cache.NoTexture)
@@ -83,7 +82,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 			return noTexture
 		}
 
-		gl.PixelStorei(unpackAlignment, 1) // OpenGL expects 4 byte alignment for images which is not guaranteed for image.Gray
+		p.ctx.PixelStorei(unpackAlignment, 1) // OpenGL expects 4 byte alignment for images which is not guaranteed for image.Gray
 		texture := p.newTexture(textureFilter)
 		p.ctx.TexImage2D(
 			texture2D,
@@ -94,7 +93,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 			unsignedByte,
 			i.Pix,
 		)
-		gl.PixelStorei(unpackAlignment, 4) // Reset to default for performance reasons
+		p.ctx.PixelStorei(unpackAlignment, 4) // Reset to default for performance reasons
 		p.logError()
 		return texture
 	default:
