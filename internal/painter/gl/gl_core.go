@@ -17,6 +17,7 @@ const (
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
 	colorFormatRGBA       = gl.RGBA
+	colorFormatR          = gl.RED
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
