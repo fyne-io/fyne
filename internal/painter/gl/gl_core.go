@@ -74,6 +74,7 @@ func (p *painter) Init() {
 	gl.Enable(gl.BLEND)
 	p.logError()
 	p.program = p.createProgram("simple")
+	p.grayProgram = p.createProgram("gray")
 	p.lineProgram = p.createProgram("line")
 	p.rectangleProgram = p.createProgram("rectangle")
 	p.roundRectangleProgram = p.createProgram("round_rectangle")
