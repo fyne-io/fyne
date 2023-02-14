@@ -24,6 +24,8 @@ const (
 	DefaultTabWidth = 4
 
 	fontTabSpaceSize = 10
+
+	textDPIRatio = 78.0 / 72.0 // We (historically) had text at 78 DPI but the go-text/render uses 72
 )
 
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
@@ -70,10 +72,9 @@ func ClearFontCache() {
 }
 
 // DrawString draws a string into an image.
-func DrawString(dst draw.Image, s string, color color.Color, f []gotext.Face, fontSize, scale float32,
-	height int, tabWidth int) {
+func DrawString(dst draw.Image, s string, color color.Color, f []gotext.Face, fontSize, scale float32, tabWidth int) {
 	r := render.Renderer{
-		FontSize: fontSize,
+		FontSize: fontSize * textDPIRatio,
 		PixScale: scale,
 		Color:    color,
 	}
@@ -85,11 +86,11 @@ func DrawString(dst draw.Image, s string, color color.Color, f []gotext.Face, fo
 		RunStart: 0,
 		RunEnd:   len(s),
 		Face:     f[0],
-		Size:     fixed.I(int(r.FontSize * r.PixScale)),
+		Size:     fixed.I(int(fontSize * r.PixScale)),
 	})
 
 	x := float32(0)
-	y := int(fixed266ToFloat32(out.LineBounds.Ascent)) // descent is negative
+	y := int(fixed266ToFloat32(out.LineBounds.Ascent))
 	walkString(f, s, float32ToFixed266(fontSize), tabWidth, &x, scale, func(run shaping.Output, x float32) {
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {

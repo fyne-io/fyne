@@ -46,7 +46,6 @@ func TestDrawString(t *testing.T) {
 		color    color.Color
 		style    fyne.TextStyle
 		size     float32
-		height   int
 		string   string
 		tabWidth int
 		want     string
@@ -55,7 +54,6 @@ func TestDrawString(t *testing.T) {
 			color:    color.Black,
 			style:    fyne.TextStyle{},
 			size:     40,
-			height:   50,
 			string:   "Hello\tworld!",
 			tabWidth: 7,
 			want:     "hello_TAB_world_regular_size_40_height_50_tab_width_7.png",
@@ -64,7 +62,6 @@ func TestDrawString(t *testing.T) {
 			color:    color.NRGBA{R: 255, A: 255},
 			style:    fyne.TextStyle{Bold: true, Italic: true},
 			size:     27.42,
-			height:   42,
 			string:   "Hello\tworld!",
 			tabWidth: 3,
 			want:     "hello_TAB_world_bold_italic_size_27.42_height_42_tab_width_3.png",
@@ -73,7 +70,6 @@ func TestDrawString(t *testing.T) {
 			color:    color.Black,
 			style:    fyne.TextStyle{},
 			size:     40,
-			height:   50,
 			string:   "Missing: ↩",
 			tabWidth: 4,
 			want:     "missing_glyph.png",
@@ -82,7 +78,7 @@ func TestDrawString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
 			f := painter.CachedFontFace(tt.style, tt.size, 1)
-			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, tt.height, tt.tabWidth)
+			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, tt.tabWidth)
 			test.AssertImageMatches(t, "font/"+tt.want, img)
 		})
 	}

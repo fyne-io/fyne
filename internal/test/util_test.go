@@ -19,7 +19,7 @@ import (
 )
 
 func TestAssertImageMatches(t *testing.T) {
-	bounds := image.Rect(0, 0, 100, 50)
+	bounds := image.Rect(0, 0, 100, 32)
 	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(color.White), image.Point{}, draw.Src)
 
@@ -27,7 +27,7 @@ func TestAssertImageMatches(t *testing.T) {
 	face, err := font.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
 	assert.Nil(t, err)
 
-	painter.DrawString(txtImg, "Hello!", color.Black, []font.Face{face}, 25, 1, 50, 4)
+	painter.DrawString(txtImg, "Hello!", color.Black, []font.Face{face}, 25, 1, 4)
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}
