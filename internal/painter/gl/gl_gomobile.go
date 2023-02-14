@@ -225,7 +225,7 @@ func (c *mobileContext) LinkProgram(program Program) {
 }
 
 func (c *mobileContext) PixelStorei(pname uint32, param int32) {
-	gl.PixelStorei(pname, param)
+	c.glContext.PixelStorei(pname, param)
 }
 
 func (c *mobileContext) ReadBuffer(_ uint32) {

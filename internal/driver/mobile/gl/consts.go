@@ -50,6 +50,7 @@ const (
 	UnsignedByte = 0x1401
 	Float        = 0x1406
 	RGBA         = 0x1908
+	LUMINANCE    = 0x1909
 
 	Nearest          = 0x2600
 	Linear           = 0x2601
