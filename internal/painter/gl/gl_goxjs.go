@@ -187,7 +187,7 @@ func (c *xjsContext) LinkProgram(program Program) {
 }
 
 func (c *xjsContext) PixelStorei(pname uint32, param int32) {
-	gl.PixelStorei(pname, param)
+	gl.PixelStorei(gl.Enum(pname), param)
 }
 
 func (c *xjsContext) ReadBuffer(_ uint32) {
