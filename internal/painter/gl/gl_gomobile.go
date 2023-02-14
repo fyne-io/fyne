@@ -40,6 +40,7 @@ const (
 	textureWrapT          = gl.TextureWrapT
 	triangles             = gl.Triangles
 	triangleStrip         = gl.TriangleStrip
+	unpackAlignment       = gl.UNPACK_ALIGNMENT
 	unsignedByte          = gl.UnsignedByte
 	vertexShader          = gl.VertexShader
 )
@@ -220,6 +221,10 @@ func (c *mobileContext) GetUniformLocation(program Program, name string) Uniform
 
 func (c *mobileContext) LinkProgram(program Program) {
 	c.glContext.LinkProgram(gl.Program(program))
+}
+
+func (c *mobileContext) PixelStorei(pname uint32, param int32) {
+	gl.PixelStorei(pname, param)
 }
 
 func (c *mobileContext) ReadBuffer(_ uint32) {

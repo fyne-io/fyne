@@ -38,6 +38,7 @@ const (
 	textureWrapT          = gl.TEXTURE_WRAP_T
 	triangles             = gl.TRIANGLES
 	triangleStrip         = gl.TRIANGLE_STRIP
+	unpackAlignment       = gl.UNPACK_ALIGNMENT
 	unsignedByte          = gl.UNSIGNED_BYTE
 	vertexShader          = gl.VERTEX_SHADER
 )
@@ -182,6 +183,10 @@ func (c *xjsContext) GetUniformLocation(program Program, name string) Uniform {
 
 func (c *xjsContext) LinkProgram(program Program) {
 	gl.LinkProgram(gl.Program(program))
+}
+
+func (c *xjsContext) PixelStorei(pname uint32, param int32) {
+	gl.PixelStorei(pname, param)
 }
 
 func (c *xjsContext) ReadBuffer(_ uint32) {
