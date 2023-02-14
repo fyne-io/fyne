@@ -44,6 +44,7 @@ const (
 	DepthTest        = 0x0B71
 	Blend            = 0x0BE2
 	ScissorTest      = 0x0C11
+	UnpackAlignment  = 0x0CF5
 	Texture2D        = 0x0DE1
 
 	UnsignedByte = 0x1401

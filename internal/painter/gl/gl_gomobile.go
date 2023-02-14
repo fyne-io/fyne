@@ -40,7 +40,7 @@ const (
 	textureWrapT          = gl.TextureWrapT
 	triangles             = gl.Triangles
 	triangleStrip         = gl.TriangleStrip
-	unpackAlignment       = gl.UNPACK_ALIGNMENT
+	unpackAlignment       = gl.UnpackAlignment
 	unsignedByte          = gl.UnsignedByte
 	vertexShader          = gl.VertexShader
 )
