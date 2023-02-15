@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"strings"
 	"sync"
 
 	"github.com/benoitkugler/textlayout/fonts"
@@ -156,6 +157,8 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 
 func walkString(faces []gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *float32, scale float32,
 	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
+	s = strings.ReplaceAll(s, "\r", "")
+
 	runes := []rune(s)
 	in := shaping.Input{
 		Text:      []rune{' '},
@@ -191,7 +194,7 @@ func walkString(faces []gotext.Face, s string, textSize fixed.Int26_6, tabWidth 
 				in.RunStart = i + 1
 				in.RunEnd = inEnd
 				pending = false
-			} else { // TODO do we have to hide \r?
+			} else {
 				pending = true
 			}
 		}
