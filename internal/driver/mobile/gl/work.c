@@ -125,6 +125,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnLinkProgram:
 		glLinkProgram((GLint)args->a0);
 		break;
+	case glfnPixelStorei:
+		glPixelStorei((GLenum)args->a0, (GLint)args->a1);
+		break;
 	case glfnReadPixels:
 		glReadPixels((GLint)args->a0, (GLint)args->a1, (GLsizei)args->a2, (GLsizei)args->a3, (GLenum)args->a4, (GLenum)args->a5, (void*)parg);
 		break;
