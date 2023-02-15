@@ -42,7 +42,7 @@ func (r *Renderer) DrawString(str string, img draw.Image, face fonts.Face) int {
 		RunStart: 0,
 		RunEnd:   len(str),
 		Face:     face,
-		Size:     fixed.I(int(r.FontSize * r.PixScale)),
+		Size:     fixed.I(int(r.FontSize)),
 	}
 	out := r.cachedShaper().Shape(in)
 	return r.DrawShapedRunAt(out, img, 0, out.LineBounds.Ascent.Ceil())
@@ -62,7 +62,7 @@ func (r *Renderer) DrawStringAt(str string, img draw.Image, x, y int, face fonts
 		RunStart: 0,
 		RunEnd:   len(str),
 		Face:     face,
-		Size:     fixed.I(int(r.FontSize * r.PixScale)),
+		Size:     fixed.I(int(r.FontSize)),
 	}
 	return r.DrawShapedRunAt(r.cachedShaper().Shape(in), img, x, y)
 }
@@ -72,10 +72,10 @@ func (r *Renderer) DrawStringAt(str string, img draw.Image, x, y int, face fonts
 // Note that startX and startY are not multiplied by the `PixScale` value as they refer to output coordinates.
 // The return value is the X pixel position of the end of the drawn string.
 func (r *Renderer) DrawShapedRunAt(run shaping.Output, img draw.Image, startX, startY int) int {
-	scale := r.FontSize * r.PixScale / float32(run.Face.Upem())
 	if r.PixScale == 0 {
 		r.PixScale = 1
 	}
+	scale := r.FontSize * r.PixScale / float32(run.Face.Upem())
 
 	b := img.Bounds()
 	scanner := rasterx.NewScannerGV(b.Dx(), b.Dy(), img, b)

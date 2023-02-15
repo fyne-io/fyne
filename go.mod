@@ -14,7 +14,7 @@ require (
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.0.0-20230208134104-e2c925e416ab
+	github.com/go-text/render v0.0.0-20230215111215-e9b9e6cfedc5
 	github.com/go-text/typesetting v0.0.0-20221212183139-1eb938670a1f
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gopherjs/gopherjs v1.17.2
@@ -36,5 +36,3 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )
-
-replace github.com/go-text/render => ../../go-text/render
