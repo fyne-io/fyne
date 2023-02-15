@@ -49,7 +49,7 @@ func (w *window) minSizeOnScreen() (int, int) {
 
 // screenSize computes the actual output size of the given content size in screen pixels
 func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
-	return scale.ScaleInt(w.canvas, canvasSize.Width), scale.ScaleInt(w.canvas, canvasSize.Height)
+	return scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -58,7 +58,7 @@ func (w *window) Resize(size fyne.Size) {
 	w.runOnMainWhenCreated(func() {
 		w.viewLock.Lock()
 
-		width, height := scale.ScaleInt(w.canvas, bigEnough.Width), scale.ScaleInt(w.canvas, bigEnough.Height)
+		width, height := scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
 		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
 			w.shouldWidth, w.shouldHeight = width, height
 			w.width, w.height = width, height
@@ -306,8 +306,8 @@ func (w *window) processMoved(x, y int) {
 func (w *window) processResized(width, height int) {
 	canvasSize := w.computeCanvasSize(width, height)
 	if !w.fullScreen {
-		w.width = scale.ScaleInt(w.canvas, canvasSize.Width)
-		w.height = scale.ScaleInt(w.canvas, canvasSize.Height)
+		w.width = scale.ToScreenCoordinate(w.canvas, canvasSize.Width)
+		w.height = scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
 	}
 
 	if !w.visible { // don't redraw if hidden

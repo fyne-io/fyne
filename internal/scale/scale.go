@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-// ScaleInt converts a fyne coordinate in the given canvas to a screen coordinate
-func ScaleInt(c fyne.Canvas, v float32) int {
+// ToScreenCoordinate converts a fyne coordinate in the given canvas to a screen coordinate
+func ToScreenCoordinate(c fyne.Canvas, v float32) int {
 	return int(math.Ceil(float64(v * c.Scale())))
 }
 

@@ -91,7 +91,7 @@ func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 
 func (c *testCanvas) Capture() image.Image {
 	cache.Clean(true)
-	bounds := image.Rect(0, 0, scale.ScaleInt(c, c.Size().Width), scale.ScaleInt(c, c.Size().Height))
+	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
 	if !c.transparent {
 		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)

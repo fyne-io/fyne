@@ -339,8 +339,8 @@ func (img *Image) renderSVG(width, height float32) (image.Image, error) {
 		return nil, errors.New("object is not attached to a canvas yet")
 	}
 
-	screenWidth := scale.ScaleInt(c, width)
-	screenHeight := scale.ScaleInt(c, height)
+	screenWidth := scale.ToScreenCoordinate(c, width)
+	screenHeight := scale.ToScreenCoordinate(c, height)
 
 	tex := cache.GetSvg(img.name(), screenWidth, screenHeight)
 	if tex != nil {

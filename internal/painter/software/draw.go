@@ -21,9 +21,9 @@ type gradient interface {
 
 func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(circle)
-	scaledWidth := scale.ScaleInt(c, circle.Size().Width+pad*2)
-	scaledHeight := scale.ScaleInt(c, circle.Size().Height+pad*2)
-	scaledX, scaledY := scale.ScaleInt(c, pos.X-pad), scale.ScaleInt(c, pos.Y-pad)
+	scaledWidth := scale.ToScreenCoordinate(c, circle.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, circle.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawCircle(circle, pad, func(in float32) float32 {
@@ -43,10 +43,10 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 
 func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	bounds := g.Size()
-	width := scale.ScaleInt(c, bounds.Width)
-	height := scale.ScaleInt(c, bounds.Height)
+	width := scale.ToScreenCoordinate(c, bounds.Width)
+	height := scale.ToScreenCoordinate(c, bounds.Height)
 	tex := g.Generate(width, height)
-	drawTex(scale.ScaleInt(c, pos.X), scale.ScaleInt(c, pos.Y), width, height, base, tex, clip)
+	drawTex(scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y), width, height, base, tex, clip)
 }
 
 func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -54,9 +54,9 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	if bounds.IsZero() {
 		return
 	}
-	width := scale.ScaleInt(c, bounds.Width)
-	height := scale.ScaleInt(c, bounds.Height)
-	scaledX, scaledY := scale.ScaleInt(c, pos.X), scale.ScaleInt(c, pos.Y)
+	width := scale.ToScreenCoordinate(c, bounds.Width)
+	height := scale.ToScreenCoordinate(c, bounds.Height)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
 	origImg := painter.PaintImage(img, c, width, height)
 
@@ -104,9 +104,9 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 
 func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(line)
-	scaledWidth := scale.ScaleInt(c, line.Size().Width+pad*2)
-	scaledHeight := scale.ScaleInt(c, line.Size().Height+pad*2)
-	scaledX, scaledY := scale.ScaleInt(c, pos.X-pad), scale.ScaleInt(c, pos.Y-pad)
+	scaledWidth := scale.ToScreenCoordinate(c, line.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, line.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawLine(line, pad, func(in float32) float32 {
@@ -133,8 +133,8 @@ func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip i
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	bounds := text.MinSize()
-	width := scale.ScaleInt(c, bounds.Width+painter.VectorPad(text))
-	height := scale.ScaleInt(c, bounds.Height)
+	width := scale.ToScreenCoordinate(c, bounds.Width+painter.VectorPad(text))
+	height := scale.ToScreenCoordinate(c, bounds.Height)
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	color := text.Color
@@ -157,8 +157,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	if size.Height > bounds.Height {
 		offsetY = (size.Height - bounds.Height) / 2
 	}
-	scaledX := scale.ScaleInt(c, pos.X+offsetX)
-	scaledY := scale.ScaleInt(c, pos.Y+offsetY)
+	scaledX := scale.ToScreenCoordinate(c, pos.X+offsetX)
+	scaledY := scale.ToScreenCoordinate(c, pos.Y+offsetY)
 	imgBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	clippedBounds := clip.Intersect(imgBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - imgBounds.Min.X, Y: clippedBounds.Min.Y - imgBounds.Min.Y}
@@ -170,9 +170,9 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	if bounds.IsZero() {
 		return
 	}
-	width := scale.ScaleInt(c, bounds.Width)
-	height := scale.ScaleInt(c, bounds.Height)
-	scaledX, scaledY := scale.ScaleInt(c, pos.X), scale.ScaleInt(c, pos.Y)
+	width := scale.ToScreenCoordinate(c, bounds.Width)
+	height := scale.ToScreenCoordinate(c, bounds.Height)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
 	pix := rast.Generator(width, height)
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
@@ -184,9 +184,9 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 
 func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(rect)
-	scaledWidth := scale.ScaleInt(c, rect.Size().Width+pad*2)
-	scaledHeight := scale.ScaleInt(c, rect.Size().Height+pad*2)
-	scaledX, scaledY := scale.ScaleInt(c, pos.X-pad), scale.ScaleInt(c, pos.Y-pad)
+	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawRectangle(rect, pad, func(in float32) float32 {
@@ -210,9 +210,9 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 		return
 	}
 
-	scaledWidth := scale.ScaleInt(c, rect.Size().Width)
-	scaledHeight := scale.ScaleInt(c, rect.Size().Height)
-	scaledX, scaledY := scale.ScaleInt(c, pos.X), scale.ScaleInt(c, pos.Y)
+	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width)
+	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.Point{}, draw.Over)
 }
