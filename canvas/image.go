@@ -328,7 +328,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 	if c == nil {
 		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
 	}
-	dpSize := fyne.NewSize(scale.UnscaleInt(c, width), scale.UnscaleInt(c, height))
+	dpSize := fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height))
 
 	return dpSize, nil
 }

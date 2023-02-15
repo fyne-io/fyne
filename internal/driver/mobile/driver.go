@@ -327,16 +327,16 @@ func (d *mobileDriver) setTheme(dark bool) {
 }
 
 func (d *mobileDriver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.UnscaleInt(w.canvas, int(x))
-	tapY := scale.UnscaleInt(w.canvas, int(y))
+	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
+	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapDown(pos, int(tapID))
 }
 
 func (d *mobileDriver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.UnscaleInt(w.canvas, int(x))
-	tapY := scale.UnscaleInt(w.canvas, int(y))
+	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
+	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
@@ -345,8 +345,8 @@ func (d *mobileDriver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequen
 }
 
 func (d *mobileDriver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.UnscaleInt(w.canvas, int(x))
-	tapY := scale.UnscaleInt(w.canvas, int(y))
+	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
+	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
