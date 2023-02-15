@@ -280,7 +280,7 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 		checkGroup,
 		radio,
 		disabledRadio,
-		widget.NewSlider(0, 100),
+		widget.NewSlider(0, 1000),
 	)
 }
 

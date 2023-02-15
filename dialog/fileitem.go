@@ -48,8 +48,7 @@ func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(theme.PrimaryColor())
-	background.Hide()
+	background := canvas.NewRectangle(nil)
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
 	icon := widget.NewFileIcon(i.location)
@@ -129,13 +128,12 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 func (s fileItemRenderer) Refresh() {
 	if s.item.isCurrent {
 		s.background.FillColor = theme.SelectionColor()
-		s.background.Show()
 	} else if s.item.hovered {
 		s.background.FillColor = theme.HoverColor()
-		s.background.Show()
 	} else {
-		s.background.Hide()
+		s.background.FillColor = nil
 	}
+
 	s.background.Refresh()
 	canvas.Refresh(s.item)
 }

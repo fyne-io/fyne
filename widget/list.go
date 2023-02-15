@@ -542,7 +542,8 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 			break
 		}
 	}
-	if previousIndicator != li.selected {
+	if previousIndicator != li.selected || li.hovered {
+		li.hovered = false
 		li.Refresh()
 	}
 	if f := l.list.UpdateItem; f != nil {
