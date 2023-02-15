@@ -96,7 +96,9 @@ func (i *Image) Resize(s fyne.Size) {
 	i.Refresh()
 }
 
-// Aspect will return the original content aspect after it was last Refresh
+// Aspect will return the original content aspect after it was last refreshed.
+//
+// Since: 2.4
 func (i *Image) Aspect() float32 {
 	if i.aspect == 0 {
 		i.Refresh()
@@ -104,6 +106,7 @@ func (i *Image) Aspect() float32 {
 	return i.aspect
 }
 
+// MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (i *Image) MinSize() fyne.Size {
 	if i.Image == nil || i.aspect == 0 {
 		i.Refresh()
@@ -241,6 +244,7 @@ func (i *Image) updateReader() error {
 	i.reader = nil
 
 	var fd io.Reader
+	i.isSVG = false
 	if i.Resource != nil {
 		fd = bytes.NewReader(i.Resource.Content())
 		i.isSVG = svg.IsResourceSVG(i.Resource)
@@ -260,7 +264,7 @@ func (i *Image) updateReader() error {
 func (i *Image) calculateMinSize() error {
 	var size fyne.Size
 
-	if i.Resource != nil || i.File != "" {
+	if i.reader != nil {
 		var err error
 
 		size, err = i.minSizeFromReader(i.reader)
