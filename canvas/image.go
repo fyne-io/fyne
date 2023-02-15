@@ -3,7 +3,6 @@ package canvas
 import (
 	"bytes"
 	"errors"
-	"hash/fnv"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -55,31 +54,17 @@ const (
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Image)(nil)
 
-type state struct {
-	file string
-
-	resource       fyne.Resource
-	resourceLength int
-	resourceHash   uint64
-
-	image    image.Image
-	fillMode ImageFill
-}
-
 // Image describes a drawable image area that can render in a Fyne canvas
 // The image may be a vector or a bitmap representation and it will fill the area.
 // The fill mode can be changed by setting FillMode to a different ImageFill.
 type Image struct {
 	baseObject
 
-	aspect  float32
-	reader  io.Reader
-	icon    *svg.Decoder
-	isSVG   bool
-	updated bool
-	lock    sync.Mutex
-
-	previous state
+	aspect float32
+	reader io.Reader
+	icon   *svg.Decoder
+	isSVG  bool
+	lock   sync.Mutex
 
 	// one of the following sources will provide our image data
 	File     string        // Load the image from a file
@@ -108,20 +93,19 @@ func (i *Image) Resize(s fyne.Size) {
 	}
 
 	i.baseObject.Resize(s)
-	i.updated = false
 	i.Refresh()
 }
 
 // Aspect will return the original content aspect after it was last Refresh
 func (i *Image) Aspect() float32 {
-	if !i.updated {
-		i.MinSize()
+	if i.aspect == 0 {
+		i.Refresh()
 	}
 	return i.aspect
 }
 
 func (i *Image) MinSize() fyne.Size {
-	if !i.updated {
+	if i.Image == nil || i.aspect == 0 {
 		i.Refresh()
 	}
 	return i.baseObject.MinSize()
@@ -132,34 +116,18 @@ func (i *Image) Refresh() {
 	i.lock.Lock()
 	defer i.lock.Unlock()
 
-	fileNeedUpdate := !i.updated
-	if !fileNeedUpdate &&
-		(i.previous.file != i.File ||
-			i.previous.image != i.Image ||
-			i.previous.fillMode != i.FillMode ||
-			i.didResourceChange()) {
-		fileNeedUpdate = true
+	err := i.updateReader()
+	if err != nil {
+		fyne.LogError("Failed to load image", err)
+		return
+	}
+	err = i.calculateMinSize()
+	if err != nil {
+		fyne.LogError("Failed to load image", err)
+		return
 	}
 
-	if fileNeedUpdate {
-		err := i.updateReader()
-		if err != nil {
-			fyne.LogError("Failed to load image", err)
-			return
-		}
-		err = i.calculateMinSize()
-		if err != nil {
-			return
-		}
-
-		i.updated = false
-		i.previous.file = i.File
-		i.previous.resource = i.Resource
-		i.previous.image = i.Image
-		i.previous.fillMode = i.FillMode
-	}
-
-	if !i.updated {
+	if i.File != "" || i.Resource != nil {
 		size := i.Size()
 		width := size.Width
 		height := size.Height
@@ -187,8 +155,6 @@ func (i *Image) Refresh() {
 			}
 			i.Image = image
 		}
-		i.previous.image = i.Image
-		i.updated = true
 	}
 
 	Refresh(i)
@@ -269,36 +235,6 @@ func (i *Image) name() string {
 		return i.File
 	}
 	return ""
-}
-
-func (i *Image) didResourceChange() bool {
-	if i.previous.resource != i.Resource {
-		return true
-	}
-
-	if i.Resource == nil {
-		return i.previous.resource != nil
-	}
-	if i.Resource.Name() != i.previous.resource.Name() {
-		return true
-	}
-
-	if i.Resource.Content() == nil {
-		return false
-	}
-	if len(i.Resource.Content()) != i.previous.resourceLength {
-		return true
-	}
-
-	hash := fnv.New64()
-	hash.Write(i.Resource.Content())
-	resourceHash := hash.Sum64()
-
-	if resourceHash != i.previous.resourceHash {
-		i.previous.resourceHash = resourceHash
-		return true
-	}
-	return false
 }
 
 func (i *Image) updateReader() error {
