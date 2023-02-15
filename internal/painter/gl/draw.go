@@ -224,10 +224,10 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 
 	// text size is sensitive to position on screen
 	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
-	p.drawGrayTexture(text, p.newGlTextTexture, pos, size, frame, color, 0)
+	p.drawSingleChannelTexture(text, p.newGlTextTexture, pos, size, frame, color, 0)
 }
 
-func (p *painter) drawGrayTexture(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
+func (p *painter) drawSingleChannelTexture(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
 	pos fyne.Position, size, frame fyne.Size, c color.Color, pad float32) {
 	texture, err := p.getTexture(o, creator)
 	if err != nil {
