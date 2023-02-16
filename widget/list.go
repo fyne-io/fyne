@@ -128,9 +128,11 @@ func (l *List) scrollTo(id ListItemID) {
 	} else {
 		for i := 0; i < id; i++ {
 			height := l.itemMin.Height
+			l.propertyLock.RLock()
 			if h, ok := l.itemHeights[i]; ok {
 				height = h
 			}
+			l.propertyLock.RUnlock()
 
 			y += height + separatorThickness
 		}
