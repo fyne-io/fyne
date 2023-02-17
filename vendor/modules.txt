@@ -1,4 +1,4 @@
-# fyne.io/systray v1.10.1-0.20221115204952-d16a6177e6f1
+# fyne.io/systray v1.10.1-0.20230207085535-4a244dbb9d03
 ## explicit
 fyne.io/systray
 fyne.io/systray/internal/generated/menu
@@ -153,7 +153,7 @@ golang.org/x/mod/semver
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
+# golang.org/x/sys v0.5.0
 ## explicit
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader

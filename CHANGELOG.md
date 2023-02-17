@@ -3,6 +3,36 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.3.1 - 13 February 2023
+
+### Changed
+
+* Pad app version to ensure Windows packages correctly (#3638)
+
+### Fixed
+
+* Custom shortcuts with fyne.KeyTab is not working (#3087)
+* Running a systray app with root privileges resulted in panic (#3120)
+* Markdown image with no title is not parsed (#3577)
+* Systray app on macOS panic when started while machine sleeps (#3609)
+* Runtime error with VNC on RaspbianOS (#2972)
+* Hovered background in List widget isn't reset when scrolling reuses an existing list item (#3584)
+* cmd/fyne package can't find FyneApp.toml when -src option has given (#3459)
+* TextWrapWord will cause crash in RichText unverified (#3498)
+* crash in widget.(*RichText).lineSizeToColumn (#3292)
+* Crash in widget.(*Entry).SelectedText (#3290)
+* Crash in widget.(*RichText).updateRowBounds.func1 (#3291)
+* window is max size at all times (#3507)
+* systray.Quit() is not called consistently when the app is closing (#3597)
+* Software rendering would ignore scale for text
+* crash when minimize a window which contains a stroked rectangle (#3552)
+* Menu item would not appear disabled initially
+* Wrong icon colour for danger and warning buttons
+* Embedding Fyne apps in iFrame alignment issue
+* Generated metadata can be in wrong directory
+* Android RootURI may not exist when used for storage (#3207)
+
+
 ## 2.3.0 - 24 December 2022
 
 ### Added

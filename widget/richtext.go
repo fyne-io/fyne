@@ -873,7 +873,12 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 							return bounds
 						}
 					} else {
-						high = low + findSpaceIndex(sub, fallback)
+						spaceIndex := findSpaceIndex(sub, fallback)
+						if spaceIndex == 0 {
+							spaceIndex = 1
+						}
+
+						high = low + spaceIndex
 					}
 					if high == fallback && subWidth <= maxWidth { // add a newline as there is more space on next
 						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low})

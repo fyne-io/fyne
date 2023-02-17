@@ -39,6 +39,31 @@ func EnsureSubDir(parent, name string) string {
 	return path
 }
 
+// EnsureAbsPath returns the absolute path of the given file if it is not already absolute
+func EnsureAbsPath(path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		fyne.LogError("Failed to find absolute path", err)
+		return path
+	}
+	return abs
+}
+
+// MakePathRelativeTo joins root with path if path is not absolute and exists in root
+func MakePathRelativeTo(root, path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	joined := filepath.Join(root, path)
+	if !Exists(joined) {
+		return path
+	}
+	return joined
+}
+
 func copyFileMode(src, tgt string, perm os.FileMode) (err error) {
 	if _, err := os.Stat(src); err != nil {
 		return err
