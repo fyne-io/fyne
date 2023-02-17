@@ -71,7 +71,7 @@ func (p *painter) Init() {
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	p.program = p.createProgram("simple_es")
-	p.grayProgram = p.createProgram("gray_es")
+	p.singleChannelProgram = p.createProgram("single_channel_es")
 	p.lineProgram = p.createProgram("line_es")
 }
 

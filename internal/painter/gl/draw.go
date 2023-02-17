@@ -142,15 +142,15 @@ func (p *painter) drawSingleChannelTexture(o fyne.CanvasObject, creator func(can
 	}
 
 	points := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0, pad)
-	p.ctx.UseProgram(p.grayProgram)
+	p.ctx.UseProgram(p.singleChannelProgram)
 	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.grayProgram, "vert", 3, 5, 0)
-	p.defineVertexArray(p.grayProgram, "vertTexCoord", 2, 5, 3)
+	p.defineVertexArray(p.singleChannelProgram, "vert", 3, 5, 0)
+	p.defineVertexArray(p.singleChannelProgram, "vertTexCoord", 2, 5, 3)
 
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 
-	shaderColor := p.ctx.GetUniformLocation(p.grayProgram, "color")
+	shaderColor := p.ctx.GetUniformLocation(p.singleChannelProgram, "color")
 	r, g, b, a := getFragmentColor(c)
 	p.ctx.Uniform4f(shaderColor, r, g, b, a)
 

@@ -20,10 +20,10 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
 	case "simple_es":
 		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
-	case "gray":
-		return shaderSimpleVert.StaticContent, shaderGrayFrag.StaticContent
-	case "gray_es":
-		return shaderSimpleesVert.StaticContent, shaderGrayesFrag.StaticContent
+	case "single_channel":
+		return shaderSimpleVert.StaticContent, shaderSinglechannelFrag.StaticContent
+	case "single_channel_es":
+		return shaderSimpleesVert.StaticContent, shaderSinglechannelesFrag.StaticContent
 	}
 
 	return nil, nil
@@ -60,14 +60,14 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas          fyne.Canvas
-	ctx             context
-	contextProvider driver.WithContext
-	program         Program
-	grayProgram     Program
-	lineProgram     Program
-	texScale        float32
-	pixScale        float32 // pre-calculate scale*texScale for each draw
+	canvas               fyne.Canvas
+	ctx                  context
+	contextProvider      driver.WithContext
+	program              Program
+	singleChannelProgram Program
+	lineProgram          Program
+	texScale             float32
+	pixScale             float32 // pre-calculate scale*texScale for each draw
 }
 
 // Declare conformity to Painter interface
