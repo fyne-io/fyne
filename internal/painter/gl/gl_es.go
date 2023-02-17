@@ -81,7 +81,7 @@ func (p *painter) Init() {
 	gl.Enable(gl.BLEND)
 	p.logError()
 	p.program = p.createProgram("simple_es")
-	p.grayProgram = p.createProgram("gray_es")
+	p.singleChannelProgram = p.createProgram("single_channel_es")
 	p.lineProgram = p.createProgram("line_es")
 	p.rectangleProgram = p.createProgram("rectangle_es")
 	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
