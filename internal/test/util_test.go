@@ -19,7 +19,7 @@ import (
 )
 
 func TestAssertImageMatches(t *testing.T) {
-	bounds := image.Rect(0, 0, 100, 32)
+	bounds := image.Rect(0, 0, 100, 34)
 	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(color.White), image.Point{}, draw.Src)
 

@@ -91,7 +91,7 @@ func DrawString(dst draw.Image, s string, color color.Color, f []gotext.Face, fo
 	})
 
 	x := float32(0)
-	y := int(fixed266ToFloat32(out.LineBounds.Ascent))
+	y := int(math.Ceil(float64(fixed266ToFloat32(out.LineBounds.Ascent))))
 	walkString(f, s, float32ToFixed266(fontSize), tabWidth, &x, scale, func(run shaping.Output, x float32) {
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
