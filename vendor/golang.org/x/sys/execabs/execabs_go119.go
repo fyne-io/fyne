@@ -7,11 +7,9 @@
 
 package execabs
 
-import (
-	"errors"
-	"os/exec"
-)
+import "strings"
 
 func isGo119ErrDot(err error) bool {
-	return errors.Is(err, exec.ErrDot)
+	// TODO: return errors.Is(err, exec.ErrDot)
+	return strings.Contains(err.Error(), "current directory")
 }

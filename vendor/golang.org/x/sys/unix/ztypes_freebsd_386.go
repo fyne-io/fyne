@@ -294,7 +294,7 @@ type PtraceLwpInfoStruct struct {
 	Flags        int32
 	Sigmask      Sigset_t
 	Siglist      Sigset_t
-	Siginfo      __PtraceSiginfo
+	Siginfo      __Siginfo
 	Tdname       [20]int8
 	Child_pid    int32
 	Syscall_code uint32
@@ -309,17 +309,6 @@ type __Siginfo struct {
 	Uid    uint32
 	Status int32
 	Addr   *byte
-	Value  [4]byte
-	_      [32]byte
-}
-type __PtraceSiginfo struct {
-	Signo  int32
-	Errno  int32
-	Code   int32
-	Pid    int32
-	Uid    uint32
-	Status int32
-	Addr   uintptr
 	Value  [4]byte
 	_      [32]byte
 }
@@ -361,8 +350,8 @@ type FpExtendedPrecision struct{}
 
 type PtraceIoDesc struct {
 	Op   int32
-	Offs uintptr
-	Addr uintptr
+	Offs *byte
+	Addr *byte
 	Len  uint32
 }
 

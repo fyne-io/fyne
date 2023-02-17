@@ -13,7 +13,6 @@ package unix
 
 import (
 	"encoding/binary"
-	"strconv"
 	"syscall"
 	"time"
 	"unsafe"
@@ -234,7 +233,7 @@ func Futimesat(dirfd int, path string, tv []Timeval) error {
 func Futimes(fd int, tv []Timeval) (err error) {
 	// Believe it or not, this is the best we can do on Linux
 	// (and is what glibc does).
-	return Utimes("/proc/self/fd/"+strconv.Itoa(fd), tv)
+	return Utimes("/proc/self/fd/"+itoa(fd), tv)
 }
 
 const ImplementsGetwd = true
@@ -1542,7 +1541,7 @@ func sendmsgN(fd int, iov []Iovec, oob []byte, ptr unsafe.Pointer, salen _Sockle
 	var dummy byte
 	var empty bool
 	if len(oob) > 0 {
-		empty = emptyIovecs(iov)
+		empty := emptyIovecs(iov)
 		if empty {
 			var sockType int
 			sockType, err = GetsockoptInt(fd, SOL_SOCKET, SO_TYPE)
@@ -1554,7 +1553,6 @@ func sendmsgN(fd int, iov []Iovec, oob []byte, ptr unsafe.Pointer, salen _Sockle
 				var iova [1]Iovec
 				iova[0].Base = &dummy
 				iova[0].SetLen(1)
-				iov = iova[:]
 			}
 		}
 		msg.Control = &oob[0]
@@ -1800,7 +1798,6 @@ func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 //sysnb	Capset(hdr *CapUserHeader, data *CapUserData) (err error)
 //sys	Chdir(path string) (err error)
 //sys	Chroot(path string) (err error)
-//sys	ClockAdjtime(clockid int32, buf *Timex) (state int, err error)
 //sys	ClockGetres(clockid int32, res *Timespec) (err error)
 //sys	ClockGettime(clockid int32, time *Timespec) (err error)
 //sys	ClockNanosleep(clockid int32, flags int, request *Timespec, remain *Timespec) (err error)
@@ -1894,28 +1891,17 @@ func PrctlRetInt(option int, arg2 uintptr, arg3 uintptr, arg4 uintptr, arg5 uint
 	return int(ret), nil
 }
 
+// issue 1435.
+// On linux Setuid and Setgid only affects the current thread, not the process.
+// This does not match what most callers expect so we must return an error
+// here rather than letting the caller think that the call succeeded.
+
 func Setuid(uid int) (err error) {
-	return syscall.Setuid(uid)
+	return EOPNOTSUPP
 }
 
-func Setgid(gid int) (err error) {
-	return syscall.Setgid(gid)
-}
-
-func Setreuid(ruid, euid int) (err error) {
-	return syscall.Setreuid(ruid, euid)
-}
-
-func Setregid(rgid, egid int) (err error) {
-	return syscall.Setregid(rgid, egid)
-}
-
-func Setresuid(ruid, euid, suid int) (err error) {
-	return syscall.Setresuid(ruid, euid, suid)
-}
-
-func Setresgid(rgid, egid, sgid int) (err error) {
-	return syscall.Setresgid(rgid, egid, sgid)
+func Setgid(uid int) (err error) {
+	return EOPNOTSUPP
 }
 
 // SetfsgidRetGid sets fsgid for current thread and returns previous fsgid set.
@@ -1974,46 +1960,36 @@ func Signalfd(fd int, sigmask *Sigset_t, flags int) (newfd int, err error) {
 //sys	preadv2(fd int, iovs []Iovec, offs_l uintptr, offs_h uintptr, flags int) (n int, err error) = SYS_PREADV2
 //sys	pwritev2(fd int, iovs []Iovec, offs_l uintptr, offs_h uintptr, flags int) (n int, err error) = SYS_PWRITEV2
 
-// minIovec is the size of the small initial allocation used by
-// Readv, Writev, etc.
-//
-// This small allocation gets stack allocated, which lets the
-// common use case of len(iovs) <= minIovs avoid more expensive
-// heap allocations.
-const minIovec = 8
-
-// appendBytes converts bs to Iovecs and appends them to vecs.
-func appendBytes(vecs []Iovec, bs [][]byte) []Iovec {
-	for _, b := range bs {
-		var v Iovec
-		v.SetLen(len(b))
+func bytes2iovec(bs [][]byte) []Iovec {
+	iovecs := make([]Iovec, len(bs))
+	for i, b := range bs {
+		iovecs[i].SetLen(len(b))
 		if len(b) > 0 {
-			v.Base = &b[0]
+			iovecs[i].Base = &b[0]
 		} else {
-			v.Base = (*byte)(unsafe.Pointer(&_zero))
+			iovecs[i].Base = (*byte)(unsafe.Pointer(&_zero))
 		}
-		vecs = append(vecs, v)
 	}
-	return vecs
+	return iovecs
 }
 
-// offs2lohi splits offs into its low and high order bits.
+// offs2lohi splits offs into its lower and upper unsigned long. On 64-bit
+// systems, hi will always be 0. On 32-bit systems, offs will be split in half.
+// preadv/pwritev chose this calling convention so they don't need to add a
+// padding-register for alignment on ARM.
 func offs2lohi(offs int64) (lo, hi uintptr) {
-	const longBits = SizeofLong * 8
-	return uintptr(offs), uintptr(uint64(offs) >> (longBits - 1) >> 1) // two shifts to avoid false positive in vet
+	return uintptr(offs), uintptr(uint64(offs) >> SizeofLong)
 }
 
 func Readv(fd int, iovs [][]byte) (n int, err error) {
-	iovecs := make([]Iovec, 0, minIovec)
-	iovecs = appendBytes(iovecs, iovs)
+	iovecs := bytes2iovec(iovs)
 	n, err = readv(fd, iovecs)
 	readvRacedetect(iovecs, n, err)
 	return n, err
 }
 
 func Preadv(fd int, iovs [][]byte, offset int64) (n int, err error) {
-	iovecs := make([]Iovec, 0, minIovec)
-	iovecs = appendBytes(iovecs, iovs)
+	iovecs := bytes2iovec(iovs)
 	lo, hi := offs2lohi(offset)
 	n, err = preadv(fd, iovecs, lo, hi)
 	readvRacedetect(iovecs, n, err)
@@ -2021,8 +1997,7 @@ func Preadv(fd int, iovs [][]byte, offset int64) (n int, err error) {
 }
 
 func Preadv2(fd int, iovs [][]byte, offset int64, flags int) (n int, err error) {
-	iovecs := make([]Iovec, 0, minIovec)
-	iovecs = appendBytes(iovecs, iovs)
+	iovecs := bytes2iovec(iovs)
 	lo, hi := offs2lohi(offset)
 	n, err = preadv2(fd, iovecs, lo, hi, flags)
 	readvRacedetect(iovecs, n, err)
@@ -2049,8 +2024,7 @@ func readvRacedetect(iovecs []Iovec, n int, err error) {
 }
 
 func Writev(fd int, iovs [][]byte) (n int, err error) {
-	iovecs := make([]Iovec, 0, minIovec)
-	iovecs = appendBytes(iovecs, iovs)
+	iovecs := bytes2iovec(iovs)
 	if raceenabled {
 		raceReleaseMerge(unsafe.Pointer(&ioSync))
 	}
@@ -2060,8 +2034,7 @@ func Writev(fd int, iovs [][]byte) (n int, err error) {
 }
 
 func Pwritev(fd int, iovs [][]byte, offset int64) (n int, err error) {
-	iovecs := make([]Iovec, 0, minIovec)
-	iovecs = appendBytes(iovecs, iovs)
+	iovecs := bytes2iovec(iovs)
 	if raceenabled {
 		raceReleaseMerge(unsafe.Pointer(&ioSync))
 	}
@@ -2072,8 +2045,7 @@ func Pwritev(fd int, iovs [][]byte, offset int64) (n int, err error) {
 }
 
 func Pwritev2(fd int, iovs [][]byte, offset int64, flags int) (n int, err error) {
-	iovecs := make([]Iovec, 0, minIovec)
-	iovecs = appendBytes(iovecs, iovs)
+	iovecs := bytes2iovec(iovs)
 	if raceenabled {
 		raceReleaseMerge(unsafe.Pointer(&ioSync))
 	}
@@ -2268,7 +2240,7 @@ func (fh *FileHandle) Bytes() []byte {
 	if n == 0 {
 		return nil
 	}
-	return unsafe.Slice((*byte)(unsafe.Pointer(uintptr(unsafe.Pointer(&fh.fileHandle.Type))+4)), n)
+	return (*[1 << 30]byte)(unsafe.Pointer(uintptr(unsafe.Pointer(&fh.fileHandle.Type)) + 4))[:n:n]
 }
 
 // NameToHandleAt wraps the name_to_handle_at system call; it obtains
@@ -2384,16 +2356,6 @@ func Setitimer(which ItimerWhich, it Itimerval) (Itimerval, error) {
 	return prev, nil
 }
 
-//sysnb	rtSigprocmask(how int, set *Sigset_t, oldset *Sigset_t, sigsetsize uintptr) (err error) = SYS_RT_SIGPROCMASK
-
-func PthreadSigmask(how int, set, oldset *Sigset_t) error {
-	if oldset != nil {
-		// Explicitly clear in case Sigset_t is larger than _C__NSIG.
-		*oldset = Sigset_t{}
-	}
-	return rtSigprocmask(how, set, oldset, _C__NSIG/8)
-}
-
 /*
  * Unimplemented
  */
@@ -2452,6 +2414,7 @@ func PthreadSigmask(how int, set, oldset *Sigset_t) error {
 // RestartSyscall
 // RtSigaction
 // RtSigpending
+// RtSigprocmask
 // RtSigqueueinfo
 // RtSigreturn
 // RtSigsuspend
