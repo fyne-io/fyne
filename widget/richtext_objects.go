@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -482,8 +482,8 @@ func (r *richImage) MinSize() fyne.Size {
 	}
 
 	// unscale the image so it is not varying based on canvas
-	w := internal.ScaleInt(c, orig.Width)
-	h := internal.ScaleInt(c, orig.Height)
+	w := scale.ToScreenCoordinate(c, orig.Width)
+	h := scale.ToScreenCoordinate(c, orig.Height)
 	// we return size / 2 as this assumes a HiDPI / 2x image scaling
 	return fyne.NewSize(float32(w)/2, float32(h)/2)
 }

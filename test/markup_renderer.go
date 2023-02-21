@@ -293,7 +293,9 @@ func (r *markupRenderer) writeIndent() {
 func (r *markupRenderer) writeImage(i *canvas.Image, attrs map[string]*string) {
 	r.setStringAttr(attrs, "file", i.File)
 	r.setResourceAttr(attrs, "rsc", i.Resource)
-	r.setBoolAttr(attrs, "img", i.Image != nil)
+	if i.File == "" && i.Resource == nil {
+		r.setBoolAttr(attrs, "img", i.Image != nil)
+	}
 	r.setFloatAttr(attrs, "translucency", i.Translucency)
 	r.setFillModeAttr(attrs, "fillMode", i.FillMode)
 	r.setScaleModeAttr(attrs, "scaleMode", i.ScaleMode)

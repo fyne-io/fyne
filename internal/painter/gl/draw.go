@@ -267,7 +267,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 
 	aspect := float32(0)
 	if img, ok := o.(*canvas.Image); ok {
-		aspect = paint.GetAspect(img)
+		aspect = img.Aspect()
 		if aspect == 0 {
 			aspect = 1 // fallback, should not occur - normally an image load error
 		}
