@@ -69,6 +69,7 @@ typedef enum {
 	glfnGetShaderiv,
 	glfnGetTexParameteriv,
 	glfnGetUniformLocation,
+	glfnPixelStorei,
 	glfnLinkProgram,
 	glfnReadPixels,
 	glfnScissor,
