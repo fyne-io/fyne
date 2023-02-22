@@ -15,12 +15,12 @@ import (
 	"golang.org/x/sys/execabs"
 )
 
-func (p *Packager) packageAndroid(arch string) error {
-	return mobile.RunNewBuild(arch, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, "", "")
+func (p *Packager) packageAndroid(arch string, tags []string) error {
+	return mobile.RunNewBuild(arch, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, "", "", tags)
 }
 
-func (p *Packager) packageIOS(target string) error {
-	err := mobile.RunNewBuild(target, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, p.certificate, p.profile)
+func (p *Packager) packageIOS(target string, tags []string) error {
+	err := mobile.RunNewBuild(target, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, p.certificate, p.profile, tags)
 	if err != nil {
 		return err
 	}
