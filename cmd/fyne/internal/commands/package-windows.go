@@ -21,7 +21,7 @@ type windowsData struct {
 	CombinedVersion string
 }
 
-func (p *Packager) packageWindows() error {
+func (p *Packager) packageWindows(tags []string) error {
 	exePath := filepath.Dir(p.exe)
 
 	// convert icon
@@ -103,7 +103,7 @@ func (p *Packager) packageWindows() error {
 		}
 	}
 
-	_, err = p.buildPackage(nil)
+	_, err = p.buildPackage(nil, tags)
 	if err != nil {
 		return fmt.Errorf("failed to rebuild after adding metadata: %w", err)
 	}
