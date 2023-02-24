@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/theme"
 )
 
 func (p *painter) createBuffer(points []float32) Buffer {
@@ -216,9 +217,44 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
+	color := text.Color
+	if color == nil {
+		color = theme.ForegroundColor()
+	}
+
 	// text size is sensitive to position on screen
 	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
-	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+	p.drawSingleChannelTexture(text, p.newGlTextTexture, pos, size, frame, color, 0)
+}
+
+func (p *painter) drawSingleChannelTexture(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
+	pos fyne.Position, size, frame fyne.Size, c color.Color, pad float32) {
+	texture, err := p.getTexture(o, creator)
+	if err != nil {
+		return
+	}
+
+	points := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0, pad)
+	p.ctx.UseProgram(p.singleChannelProgram)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.singleChannelProgram, "vert", 3, 5, 0)
+	p.defineVertexArray(p.singleChannelProgram, "vertTexCoord", 2, 5, 3)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+
+	shaderColor := p.ctx.GetUniformLocation(p.singleChannelProgram, "color")
+	r, g, b, a := getFragmentColor(c)
+	p.ctx.Uniform4f(shaderColor, r, g, b, a)
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+	p.freeBuffer(vbo)
+
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
@@ -231,7 +267,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 
 	aspect := float32(0)
 	if img, ok := o.(*canvas.Image); ok {
-		aspect = paint.GetAspect(img)
+		aspect = img.Aspect()
 		if aspect == 0 {
 			aspect = 1 // fallback, should not occur - normally an image load error
 		}

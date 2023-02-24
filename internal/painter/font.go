@@ -108,6 +108,7 @@ func loadMeasureFont(data fyne.Resource) gotext.Face {
 	loaded, err := gotext.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
+		return nil
 	}
 
 	return loaded

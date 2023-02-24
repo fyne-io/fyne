@@ -1,4 +1,4 @@
-package painter
+package svg
 
 import (
 	"testing"
@@ -9,14 +9,14 @@ import (
 )
 
 func TestIsFileSVG(t *testing.T) {
-	assert.True(t, isFileSVG("test.svg"))
-	assert.True(t, isFileSVG("test.SVG"))
-	assert.False(t, isFileSVG("testsvg"))
-	assert.False(t, isFileSVG("test.png"))
+	assert.True(t, IsFileSVG("test.svg"))
+	assert.True(t, IsFileSVG("test.SVG"))
+	assert.False(t, IsFileSVG("testsvg"))
+	assert.False(t, IsFileSVG("test.png"))
 }
 
 func TestIsResourceSVG(t *testing.T) {
-	res, err := fyne.LoadResourceFromPath("./testdata/stroke.svg")
+	res, err := fyne.LoadResourceFromPath("./testdata/circles.svg")
 	assert.Nil(t, err)
 	assert.True(t, IsResourceSVG(res))
 

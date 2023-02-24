@@ -50,6 +50,12 @@ func TestNewImageFromReader(t *testing.T) {
 	assert.Equal(t, "", img.File)
 	assert.NotNil(t, img.Resource)
 	assert.Equal(t, "fyne.png", img.Resource.Name())
+
+	img.FillMode = canvas.ImageFillOriginal
+
+	size := img.MinSize()
+	assert.Equal(t, float32(512), size.Width)
+	assert.Equal(t, float32(512), size.Height)
 }
 
 func TestNewImageFromURI_File(t *testing.T) {
@@ -63,6 +69,12 @@ func TestNewImageFromURI_File(t *testing.T) {
 	img := canvas.NewImageFromURI(storage.NewFileURI(path))
 	assert.NotNil(t, img)
 	assert.Equal(t, path, img.File)
+
+	img.FillMode = canvas.ImageFillOriginal
+
+	size := img.MinSize()
+	assert.Equal(t, float32(512), size.Width)
+	assert.Equal(t, float32(512), size.Height)
 }
 
 func TestNewImageFromURI_HTTP(t *testing.T) {
@@ -91,4 +103,10 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 	assert.NotNil(t, img.Resource)
 	assert.Equal(t, url.Authority(), img.Resource.Name())
 	assert.Equal(t, f, img.Resource.Content())
+
+	img.FillMode = canvas.ImageFillOriginal
+
+	size := img.MinSize()
+	assert.Equal(t, float32(512), size.Width)
+	assert.Equal(t, float32(512), size.Height)
 }

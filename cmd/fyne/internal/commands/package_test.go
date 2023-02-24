@@ -162,7 +162,7 @@ func Test_buildPackageWasm(t *testing.T) {
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(wasmBuildTest)
+	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	assert.Equal(t, 1, len(files))
@@ -321,7 +321,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(wasmBuildTest)
+	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	assert.Equal(t, 1, len(files))
@@ -507,7 +507,7 @@ func Test_BuildPackageWeb(t *testing.T) {
 		exe:     "myTest",
 	}
 	webBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(webBuildTest)
+	files, err := p.buildPackage(webBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	expectedFiles := 2
