@@ -15,8 +15,8 @@ import (
 
 func TestCachedFontFace(t *testing.T) {
 	for name, tt := range map[string]struct {
-		style      fyne.TextStyle
-		wantGlyphs string
+		style fyne.TextStyle
+		runes string
 	}{
 		"symbol font": {
 			fyne.TextStyle{
@@ -26,12 +26,11 @@ func TestCachedFontFace(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			_ = painter.CachedFontFace(tt.style, 14, 1)
-			// TODO fix this and remove rule / glyph ambiguity
-			//for _, r := range tt.wantGlyphs {
-			//	_, ok := got.Font.GlyphAdvance(r)
-			//	assert.True(t, ok, "symbol Font should include: %c", r)
-			//}
+			got := painter.CachedFontFace(tt.style, 14, 1)
+			for _, r := range tt.runes {
+				_, ok := got.Fonts[0].NominalGlyph(r)
+				assert.True(t, ok, "symbol Font should include: %c", r)
+			}
 		})
 	}
 
