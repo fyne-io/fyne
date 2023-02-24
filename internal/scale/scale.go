@@ -24,7 +24,7 @@ func ToFyneCoordinate(c fyne.Canvas, v int) float32 {
 	}
 }
 
-func AdaptToFyneCoordinate(obj fyne.CanvasObject, width, height int) (fyne.Size, error) {
+func ToFyneSize(obj fyne.CanvasObject, width, height int) (fyne.Size, error) {
 	app := fyne.CurrentApp()
 	if app == nil {
 		return fyne.NewSize(0, 0), errors.New("no current app")

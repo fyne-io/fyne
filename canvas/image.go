@@ -316,7 +316,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 		img.aspect = float32(width) / float32(height)
 	}
 
-	dpSize, err := scale.AdaptToFyneCoordinate(img, width, height)
+	dpSize, err := scale.ToFyneSize(img, width, height)
 	if err != nil {
 		dpSize = fyne.NewSize(float32(width), float32(height))
 	}
