@@ -1,6 +1,7 @@
 package scale
 
 import (
+	"errors"
 	"math"
 
 	"fyne.io/fyne/v2"
@@ -21,4 +22,22 @@ func ToFyneCoordinate(c fyne.Canvas, v int) float32 {
 	default:
 		return float32(v) / c.Scale()
 	}
+}
+
+func AdaptToFyneCoordinate(obj fyne.CanvasObject, width, height int) (fyne.Size, error) {
+	app := fyne.CurrentApp()
+	if app == nil {
+		return fyne.NewSize(0, 0), errors.New("no current app")
+	}
+	driver := app.Driver()
+	if driver == nil {
+		return fyne.NewSize(0, 0), errors.New("no current driver")
+	}
+	c := driver.CanvasForObject(obj)
+	if c == nil {
+		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
+	}
+	dpSize := fyne.NewSize(ToFyneCoordinate(c, width), ToFyneCoordinate(c, height))
+
+	return dpSize, nil
 }

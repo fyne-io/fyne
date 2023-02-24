@@ -285,24 +285,6 @@ func (i *Image) calculateMinSize() error {
 	return nil
 }
 
-func (img *Image) scaleSizeForCanvas(width, height int) (fyne.Size, error) {
-	app := fyne.CurrentApp()
-	if app == nil {
-		return fyne.NewSize(0, 0), errors.New("no current app")
-	}
-	driver := app.Driver()
-	if driver == nil {
-		return fyne.NewSize(0, 0), errors.New("no current driver")
-	}
-	c := driver.CanvasForObject(img)
-	if c == nil {
-		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
-	}
-	dpSize := fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height))
-
-	return dpSize, nil
-}
-
 func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 	var width int
 	var height int
@@ -334,7 +316,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 		img.aspect = float32(width) / float32(height)
 	}
 
-	dpSize, err := img.scaleSizeForCanvas(width, height)
+	dpSize, err := scale.AdaptToFyneCoordinate(img, width, height)
 	if err != nil {
 		dpSize = fyne.NewSize(float32(width), float32(height))
 	}
