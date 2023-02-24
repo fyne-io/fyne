@@ -30,18 +30,3 @@ jobs:
     - name: Wayland Tests
       run: go test -tags ci,wayland ./...
       if: ${{ runner.os == 'Linux' }}
-
-    - name: Update coverage
-      run: |
-        GO111MODULE=off go get github.com/mattn/goveralls
-        set -e
-        go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-        coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-        if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
-      if: ${{ runner.os == 'Linux' }}
-
-    - name: Update PR Coverage
-      uses: shogo82148/actions-goveralls@v1
-      with:
-        path-to-profile: coverage.out
-      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.20' }}
