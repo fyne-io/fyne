@@ -167,8 +167,8 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	height := int(math.Ceil(float64(p.textureScale(bounds.Height))))
 	img := image.NewGray(image.Rect(0, 0, width, height))
 
-	face, measureFace := paint.CachedFontFace(text.TextStyle, text.TextSize*p.canvas.Scale(), p.texScale)
-	paint.DrawString(img, text.Text, color.White, face, measureFace, text.TextSize, p.pixScale, height, text.TextStyle.TabWidth)
+	face := paint.CachedFontFace(text.TextStyle, text.TextSize*p.canvas.Scale(), p.texScale)
+	paint.DrawString(img, text.Text, color.White, face.Fonts, text.TextSize, p.pixScale, text.TextStyle.TabWidth)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 

@@ -9,29 +9,25 @@ import (
 	"os"
 	"testing"
 
-	"fyne.io/fyne/v2/internal/painter"
-	"fyne.io/fyne/v2/theme"
-	gotext "github.com/go-text/typesetting/font"
-	"github.com/goki/freetype/truetype"
+	"github.com/go-text/typesetting/font"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/test"
-	"github.com/stretchr/testify/assert"
+	"fyne.io/fyne/v2/theme"
 )
 
 func TestAssertImageMatches(t *testing.T) {
-	bounds := image.Rect(0, 0, 100, 50)
+	bounds := image.Rect(0, 0, 100, 34)
 	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(color.White), image.Point{}, draw.Src)
 
 	txtImg := image.NewNRGBA(bounds)
-	opts := truetype.Options{Size: 25, DPI: 78}
-	f, _ := truetype.Parse(theme.TextFont().Content())
-	face := truetype.NewFace(f, &opts)
-	measureFace, err := gotext.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
+	face, err := font.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
 	assert.Nil(t, err)
 
-	painter.DrawString(txtImg, "Hello!", color.Black, face, measureFace, 25, 1, 50, 4)
+	painter.DrawString(txtImg, "Hello!", color.Black, []font.Face{face}, 25, 1, 4)
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}
