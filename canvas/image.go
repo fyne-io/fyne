@@ -318,7 +318,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 
 	app := fyne.CurrentApp()
 	if app == nil {
-		return fyne.NewSize(0, 0), errors.New("no current app")
+		return fyne.NewSize(0, 0), nil // error logged already with more info
 	}
 	driver := app.Driver()
 	if driver == nil {
@@ -326,7 +326,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 	}
 	c := driver.CanvasForObject(img)
 	if c == nil {
-		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
+		return fyne.NewSize(0, 0), nil // this will happen a lot during init
 	}
 	dpSize := fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height))
 
@@ -336,7 +336,7 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 func (img *Image) renderSVG(width, height float32) (image.Image, error) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(img)
 	if c == nil {
-		return nil, errors.New("object is not attached to a canvas yet")
+		return nil, nil // this will happen a lot during init
 	}
 
 	screenWidth := scale.ToScreenCoordinate(c, width)
