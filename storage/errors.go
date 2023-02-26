@@ -13,12 +13,14 @@ var (
 	// Since: 2.3
 	ErrNotExists = errors.New("document does not exist")
 
+	// ErrPathNotFound is an error that is used by platform-independent code and indicates that a file/directory was not found.
 	ErrPathNotFound = errors.New("contents at path not found")
+
+	// ErrAndroidResourceNotFound is an error that is specific to Android and indicates that a resource was not found.
 
 	ErrAndroidResourceNotFound = &ErrResourceNotFound{}
 )
 
-// ErrResourceNotFound is an error that is specific to Android and indicates that a resource was not found.
 type ErrResourceNotFound struct{}
 
 func (e *ErrResourceNotFound) Error() string {
