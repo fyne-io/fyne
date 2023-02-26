@@ -124,10 +124,12 @@ func (i *Image) Refresh() {
 		fyne.LogError("Failed to load image", err)
 		return
 	}
-	err = i.updateAspectAndMinSize()
-	if err != nil {
-		fyne.LogError("Failed to load image", err)
-		return
+	if i.File != "" || i.Resource != nil || i.Image != nil {
+		err = i.updateAspectAndMinSize()
+		if err != nil {
+			fyne.LogError("Failed to load image", err)
+			return
+		}
 	}
 
 	if i.File != "" || i.Resource != nil {
