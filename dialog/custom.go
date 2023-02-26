@@ -8,10 +8,16 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+type CustomDialog struct {
+	*dialog
+
+	//buttons []*widget.Button
+}
+
 // NewCustom creates and returns a dialog over the specified application using custom
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
+func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) *CustomDialog {
 	d := &dialog{content: content, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
 
@@ -20,7 +26,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 	}
 	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
-	return d
+	return &CustomDialog{dialog: d}
 }
 
 // NewCustomConfirm creates and returns a dialog over the specified application using
@@ -28,7 +34,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 // use the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) Dialog {
+	callback func(bool), parent fyne.Window) *CustomDialog {
 	d := &dialog{content: content, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
 	d.callback = callback
@@ -43,7 +49,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	}
 	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
-	return d
+	return &CustomDialog{dialog: d}
 }
 
 // ShowCustom shows a dialog over the specified application using custom
