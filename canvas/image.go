@@ -124,7 +124,7 @@ func (i *Image) Refresh() {
 		fyne.LogError("Failed to load image", err)
 		return
 	}
-	err = i.calculateMinSize()
+	err = i.updateAspectAndMinSize()
 	if err != nil {
 		fyne.LogError("Failed to load image", err)
 		return
@@ -261,36 +261,38 @@ func (i *Image) updateReader() error {
 	return nil
 }
 
-func (i *Image) calculateMinSize() error {
-	var size fyne.Size
-
+func (i *Image) updateAspectAndMinSize() error {
 	if i.reader != nil {
-		var err error
-
-		size, err = i.minSizeFromReader(i.reader)
+		width, height, aspect, err := i.imageDetailsFromReader(i.reader)
 		if err != nil {
 			return err
 		}
+		i.aspect = aspect
+
+		if i.FillMode == ImageFillOriginal {
+			size, err := i.minSizeForPixels(width, height)
+			if err != nil {
+				return err
+			}
+			i.SetMinSize(size)
+		}
 	} else if i.Image != nil {
 		original := i.Image.Bounds().Size()
-		size = fyne.NewSize(float32(original.X), float32(original.Y))
+		size := fyne.NewSize(float32(original.X), float32(original.Y))
 		i.aspect = size.Width / size.Height
+		if i.FillMode == ImageFillOriginal {
+			i.SetMinSize(size)
+		}
 	} else {
 		return errors.New("no matching image source")
 	}
 
-	if i.FillMode == ImageFillOriginal {
-		i.SetMinSize(size)
-	}
 	return nil
 }
 
-func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
-	var width int
-	var height int
-
+func (img *Image) imageDetailsFromReader(source io.Reader) (width, height int, aspect float32, err error) {
 	if source == nil {
-		return fyne.NewSize(0, 0), errors.New("no matching reading reader")
+		return 0, 0, 0, errors.New("no matching reading reader")
 	}
 
 	if img.isSVG {
@@ -298,11 +300,11 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 
 		img.icon, err = svg.NewDecoder(source)
 		if err != nil {
-			return fyne.NewSize(0, 0), err
+			return 0, 0, 0, err
 		}
 		config := img.icon.Config()
 		width, height = config.Width, config.Height
-		img.aspect = config.Aspect
+		aspect = config.Aspect
 	} else {
 		var buf bytes.Buffer
 		tee := io.TeeReader(source, &buf)
@@ -310,12 +312,15 @@ func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
 
 		config, _, err := image.DecodeConfig(tee)
 		if err != nil {
-			return fyne.NewSize(0, 0), err
+			return 0, 0, 0, err
 		}
 		width, height = config.Width, config.Height
-		img.aspect = float32(width) / float32(height)
+		aspect = float32(width) / float32(height)
 	}
+	return
+}
 
+func (img *Image) minSizeForPixels(width, height int) (fyne.Size, error) {
 	app := fyne.CurrentApp()
 	if app == nil {
 		return fyne.NewSize(0, 0), nil // error logged already with more info
