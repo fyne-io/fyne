@@ -285,25 +285,25 @@ func (i *Image) updateAspectAndMinSize() error {
 	return nil
 }
 
-func (img *Image) imageDetailsFromReader(source io.Reader) (width, height int, aspect float32, err error) {
+func (i *Image) imageDetailsFromReader(source io.Reader) (width, height int, aspect float32, err error) {
 	if source == nil {
 		return 0, 0, 0, errors.New("no matching reading reader")
 	}
 
-	if img.isSVG {
+	if i.isSVG {
 		var err error
 
-		img.icon, err = svg.NewDecoder(source)
+		i.icon, err = svg.NewDecoder(source)
 		if err != nil {
 			return 0, 0, 0, err
 		}
-		config := img.icon.Config()
+		config := i.icon.Config()
 		width, height = config.Width, config.Height
 		aspect = config.Aspect
 	} else {
 		var buf bytes.Buffer
 		tee := io.TeeReader(source, &buf)
-		img.reader = io.MultiReader(&buf, source)
+		i.reader = io.MultiReader(&buf, source)
 
 		config, _, err := image.DecodeConfig(tee)
 		if err != nil {
@@ -315,7 +315,7 @@ func (img *Image) imageDetailsFromReader(source io.Reader) (width, height int, a
 	return
 }
 
-func (img *Image) setMinSizeForPixels(width, height int) error {
+func (i *Image) setMinSizeForPixels(width, height int) error {
 	app := fyne.CurrentApp()
 	if app == nil {
 		return nil // error logged already with more info
@@ -324,17 +324,17 @@ func (img *Image) setMinSizeForPixels(width, height int) error {
 	if driver == nil {
 		return errors.New("no current driver")
 	}
-	c := driver.CanvasForObject(img)
+	c := driver.CanvasForObject(i)
 	if c == nil {
 		return nil // this will happen a lot during init
 	}
-	img.SetMinSize(fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height)))
+	i.SetMinSize(fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height)))
 
 	return nil
 }
 
-func (img *Image) renderSVG(width, height float32) (image.Image, error) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(img)
+func (i *Image) renderSVG(width, height float32) (image.Image, error) {
+	c := fyne.CurrentApp().Driver().CanvasForObject(i)
 	if c == nil {
 		return nil, nil // this will happen a lot during init
 	}
@@ -342,16 +342,16 @@ func (img *Image) renderSVG(width, height float32) (image.Image, error) {
 	screenWidth := scale.ToScreenCoordinate(c, width)
 	screenHeight := scale.ToScreenCoordinate(c, height)
 
-	tex := cache.GetSvg(img.name(), screenWidth, screenHeight)
+	tex := cache.GetSvg(i.name(), screenWidth, screenHeight)
 	if tex != nil {
 		return tex, nil
 	}
 
 	var err error
-	tex, err = img.icon.Draw(screenWidth, screenHeight)
+	tex, err = i.icon.Draw(screenWidth, screenHeight)
 	if err != nil {
 		return nil, err
 	}
-	cache.SetSvg(img.name(), tex, screenWidth, screenHeight)
+	cache.SetSvg(i.name(), tex, screenWidth, screenHeight)
 	return tex, nil
 }
