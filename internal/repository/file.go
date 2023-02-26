@@ -81,6 +81,9 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 		f, err = os.Create(path) // If it exists this will truncate which is what we wanted
 	} else {
 		f, err = os.Open(path)
+		if err != nil && os.IsNotExist(err) {
+			return nil, storage.ErrPathNotFound
+		}
 	}
 	return &file{File: f, uri: uri}, err
 }
@@ -216,6 +219,18 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 
 	path := u.Path()
+
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, storage.ErrNotExists
+		}
+		return nil, err
+	}
+	if !info.IsDir() {
+		return nil, storage.ErrNotExists
+	}
+
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err

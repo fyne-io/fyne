@@ -13,6 +13,18 @@ var (
 	// Since: 2.3
 	ErrNotExists = errors.New("document does not exist")
 
-	// ErrResourceNotFound may be thrown by android driver. E.g., opening an unknown resource.
-	ErrResourceNotFound = errors.New("resource not found at URI")
+	ErrPathNotFound = errors.New("contents at path not found")
+
+	ErrAndroidResourceNotFound = &ErrResourceNotFound{}
 )
+
+// ErrResourceNotFound is an error that is specific to Android and indicates that a resource was not found.
+type ErrResourceNotFound struct{}
+
+func (e *ErrResourceNotFound) Error() string {
+	return "resource not found at URI"
+}
+
+func (e *ErrResourceNotFound) Is(target error) bool {
+	return target == e || target == ErrPathNotFound || target.Error() == e.Error()
+}

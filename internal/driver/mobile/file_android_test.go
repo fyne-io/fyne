@@ -21,7 +21,7 @@ func TestNativeFileSave(t *testing.T) {
 					String: func() string { return "not_found" },
 				},
 			},
-			expectedErr: storage.ErrResourceNotFound,
+			expectedErr: storage.ErrAndroidResourceNotFound,
 		},
 		{
 			name: "returns nil error",
@@ -53,7 +53,7 @@ func TestNativeFileOpen(t *testing.T) {
 			uri: &url.URL{
 				String: func() string { return "not_found" },
 			},
-			expectedErr: storage.ErrResourceNotFound,
+			expectedErr: storage.ErrAndroidResourceNotFound,
 		},
 		{
 			name: "returns nil error",
