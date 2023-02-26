@@ -270,18 +270,13 @@ func (i *Image) updateAspectAndMinSize() error {
 		i.aspect = aspect
 
 		if i.FillMode == ImageFillOriginal {
-			size, err := i.minSizeForPixels(width, height)
-			if err != nil {
-				return err
-			}
-			i.SetMinSize(size)
+			return i.setMinSizeForPixels(width, height)
 		}
 	} else if i.Image != nil {
 		original := i.Image.Bounds().Size()
-		size := fyne.NewSize(float32(original.X), float32(original.Y))
-		i.aspect = size.Width / size.Height
+		i.aspect = float32(original.X) / float32(original.Y)
 		if i.FillMode == ImageFillOriginal {
-			i.SetMinSize(size)
+			return i.setMinSizeForPixels(original.X, original.Y)
 		}
 	} else {
 		return errors.New("no matching image source")
@@ -320,22 +315,22 @@ func (img *Image) imageDetailsFromReader(source io.Reader) (width, height int, a
 	return
 }
 
-func (img *Image) minSizeForPixels(width, height int) (fyne.Size, error) {
+func (img *Image) setMinSizeForPixels(width, height int) error {
 	app := fyne.CurrentApp()
 	if app == nil {
-		return fyne.NewSize(0, 0), nil // error logged already with more info
+		return nil // error logged already with more info
 	}
 	driver := app.Driver()
 	if driver == nil {
-		return fyne.NewSize(0, 0), errors.New("no current driver")
+		return errors.New("no current driver")
 	}
 	c := driver.CanvasForObject(img)
 	if c == nil {
-		return fyne.NewSize(0, 0), nil // this will happen a lot during init
+		return nil // this will happen a lot during init
 	}
-	dpSize := fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height))
+	img.SetMinSize(fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height)))
 
-	return dpSize, nil
+	return nil
 }
 
 func (img *Image) renderSVG(width, height float32) (image.Image, error) {
