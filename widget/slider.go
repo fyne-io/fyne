@@ -82,14 +82,10 @@ func (s *Slider) Bind(data binding.Float) {
 }
 
 // DragEnd is called when the drag ends.
-//
-// Implements: fyne.Draggable
 func (s *Slider) DragEnd() {
 }
 
 // DragEnd is called when a drag event occurs.
-//
-// Implements: fyne.Draggable
 func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&e.PointEvent)
 	lastValue := s.Value
@@ -100,7 +96,7 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 
 // Tapped is called when a pointer tapped event is captured.
 //
-// Implements: fyne.Tappable
+// Since: 2.4
 func (s *Slider) Tapped(e *fyne.PointEvent) {
 	driver := fyne.CurrentApp().Driver()
 	if !s.focused && !driver.Device().IsMobile() {
@@ -132,7 +128,7 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 
 // FocusGained is called when this item gained the focus.
 //
-// Implements: fyne.Focusable
+// Since: 2.4
 func (s *Slider) FocusGained() {
 	s.focused = true
 	s.Refresh()
@@ -140,7 +136,7 @@ func (s *Slider) FocusGained() {
 
 // FocusLost is called when this item lost the focus.
 //
-// Implements: fyne.Focusable
+// Since: 2.4
 func (s *Slider) FocusLost() {
 	s.focused = false
 	s.Refresh()
@@ -148,7 +144,7 @@ func (s *Slider) FocusLost() {
 
 // MouseIn is called when a desktop pointer enters the widget.
 //
-// Implements: desktop.Hoverable
+// Since: 2.4
 func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
 	s.hovered = true
 	s.Refresh()
@@ -156,13 +152,13 @@ func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
 //
-// Implements: desktop.Hoverable
+// Since: 2.4
 func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 //
-// Implements: desktop.Hoverable
+// Since: 2.4
 func (s *Slider) MouseOut() {
 	s.hovered = false
 	s.Refresh()
@@ -170,7 +166,7 @@ func (s *Slider) MouseOut() {
 
 // TypedKey is called when this item receives a key event.
 //
-// Implements: fyne.Focusable
+// Since: 2.4
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 	if s.Orientation == Vertical {
 		switch key.Name {
@@ -191,7 +187,7 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 
 // TypedRune is called when this item receives a char event.
 //
-// Implements: fyne.Focusable
+// Since: 2.4
 func (s *Slider) TypedRune(_ rune) {
 }
 
