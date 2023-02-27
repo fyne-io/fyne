@@ -20,6 +20,13 @@ func (d *ConfirmDialog) SetConfirmText(label string) {
 	d.win.Refresh()
 }
 
+// SetConfirmImportance sets the importance level of the confirm button.
+//
+// Since 2.4
+func (d *ConfirmDialog) SetConfirmImportance(importance widget.ButtonImportance) {
+	d.confirm.Importance = importance
+}
+
 // NewConfirm creates a dialog over the specified window for user confirmation.
 // The title is used for the dialog window and message is the content.
 // The callback is executed when the user decides. After creation you should call Show().
@@ -36,7 +43,7 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 	}
 	d.create(container.NewGridWithColumns(2, d.dismiss, confirm))
 
-	return &ConfirmDialog{d, confirm}
+	return &ConfirmDialog{dialog: d, confirm: confirm}
 }
 
 // ShowConfirm shows a dialog over the specified window for a user
