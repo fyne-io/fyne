@@ -8,14 +8,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type Custom struct {
-	*dialog
-}
-
 // NewCustom creates and returns a dialog over the specified application using custom
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) *Custom {
+func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
 
@@ -24,7 +20,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 	}
 	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
-	return &Custom{dialog: d}
+	return d
 }
 
 // ShowCustom shows a dialog over the specified application using custom
