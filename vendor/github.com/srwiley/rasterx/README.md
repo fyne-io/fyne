@@ -5,7 +5,7 @@ Rasterx is a golang rasterizer that implements path stroking functions capable o
 
 
 * Paths can be explicity closed or left open, resulting in a line join or end caps. 
-* Arc joins are supported, which causes the extending edge from a Bezier curve to follow the radius of curvature at the end point rather than a straight line miter, resulting in a more fliud looking join. 
+* Arc joins are supported, which causes the extending edge from a Bezier curve to follow the radius of curvature at the end point rather than a straight line miter, resulting in a more fluid looking join. 
 * Not specified in the SVG2.0 spec., but supported in rasterx is the arc-clip join, which is the arc join analog of a miter-clip join, both of which end the miter at a specified distance, rather than all or nothing.
 * Several cap and gap functions in addition to those specified by SVG2.0 are implemented, specifically quad and cubic caps and gaps.
 * Line start and end capping functions can be different.

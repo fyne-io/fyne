@@ -199,11 +199,7 @@ func (p *Packager) packageWithoutValidate() error {
 	return metadata.SaveStandard(data, p.srcDir)
 }
 
-func (p *Packager) buildPackage(runner runner) ([]string, error) {
-	var tags []string
-	if p.tags != "" {
-		tags = strings.Split(p.tags, ",")
-	}
+func (p *Packager) buildPackage(runner runner, tags []string) ([]string, error) {
 	if p.os != "web" {
 		b := &Builder{
 			os:      p.os,
@@ -278,8 +274,13 @@ func (p *Packager) doPackage(runner runner) error {
 	}
 	defer os.RemoveAll(p.tempDir)
 
+	var tags []string
+	if p.tags != "" {
+		tags = strings.Split(p.tags, ",")
+	}
+
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		files, err := p.buildPackage(runner)
+		files, err := p.buildPackage(runner, tags)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}
@@ -307,11 +308,11 @@ func (p *Packager) doPackage(runner runner) error {
 	case "linux", "openbsd", "freebsd", "netbsd":
 		return p.packageUNIX()
 	case "windows":
-		return p.packageWindows()
+		return p.packageWindows(tags)
 	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
-		return p.packageAndroid(p.os)
+		return p.packageAndroid(p.os, tags)
 	case "ios", "iossimulator":
-		return p.packageIOS(p.os)
+		return p.packageIOS(p.os, tags)
 	case "wasm":
 		return p.packageWasm()
 	case "gopherjs":
