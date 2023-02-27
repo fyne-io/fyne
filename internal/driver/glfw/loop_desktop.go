@@ -15,7 +15,7 @@ import (
 func (d *gLDriver) initGLFW() {
 	initOnce.Do(func() {
 		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-			d.drawOnMainThread = true
+			drawOnMainThread = true
 		}
 
 		err := glfw.Init()
