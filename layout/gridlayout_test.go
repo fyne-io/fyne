@@ -110,6 +110,9 @@ func TestGridLayout_MinSize_HiddenItem(t *testing.T) {
 
 	container := container.NewWithoutLayout(text1, text2, text3)
 	layoutMin := layout.NewGridLayout(1).MinSize(container.Objects)
+	assert.Equal(t, minSize, layoutMin)
 
+	// someone set to 0 rows/cols
+	layoutMin = layout.NewGridLayout(0).MinSize(container.Objects)
 	assert.Equal(t, minSize, layoutMin)
 }
