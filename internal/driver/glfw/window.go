@@ -274,7 +274,7 @@ func (w *window) processClosed() {
 		return
 	}
 
-	w.Close()
+	go w.Close() // unsure which thread this comes from, so don't block
 }
 
 // destroy this window and, if it's the last window quit the app
