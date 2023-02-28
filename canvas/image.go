@@ -124,10 +124,12 @@ func (i *Image) Refresh() {
 		fyne.LogError("Failed to load image", err)
 		return
 	}
-	err = i.calculateMinSize()
-	if err != nil {
-		fyne.LogError("Failed to load image", err)
-		return
+	if i.File != "" || i.Resource != nil || i.Image != nil {
+		err = i.updateAspectAndMinSize()
+		if err != nil {
+			fyne.LogError("Failed to load image", err)
+			return
+		}
 	}
 
 	if i.File != "" || i.Resource != nil {
@@ -261,88 +263,79 @@ func (i *Image) updateReader() error {
 	return nil
 }
 
-func (i *Image) calculateMinSize() error {
-	var size fyne.Size
+func (i *Image) updateAspectAndMinSize() error {
+	var pixWidth, pixHeight int
 
 	if i.reader != nil {
-		var err error
-
-		size, err = i.minSizeFromReader(i.reader)
+		width, height, aspect, err := i.imageDetailsFromReader(i.reader)
 		if err != nil {
 			return err
 		}
+		i.aspect = aspect
+		pixWidth, pixHeight = width, height
 	} else if i.Image != nil {
 		original := i.Image.Bounds().Size()
-		size = fyne.NewSize(float32(original.X), float32(original.Y))
-		i.aspect = size.Width / size.Height
+		i.aspect = float32(original.X) / float32(original.Y)
+		pixWidth, pixHeight = original.X, original.Y
 	} else {
 		return errors.New("no matching image source")
 	}
 
 	if i.FillMode == ImageFillOriginal {
-		i.SetMinSize(size)
+		i.SetMinSize(scale.ToFyneSize(i, pixWidth, pixHeight))
 	}
 	return nil
 }
 
-func (img *Image) minSizeFromReader(source io.Reader) (fyne.Size, error) {
-	var width int
-	var height int
-
+func (i *Image) imageDetailsFromReader(source io.Reader) (width, height int, aspect float32, err error) {
 	if source == nil {
-		return fyne.NewSize(0, 0), errors.New("no matching reading reader")
+		return 0, 0, 0, errors.New("no matching reading reader")
 	}
 
-	if img.isSVG {
+	if i.isSVG {
 		var err error
 
-		img.icon, err = svg.NewDecoder(source)
+		i.icon, err = svg.NewDecoder(source)
 		if err != nil {
-			return fyne.NewSize(0, 0), err
+			return 0, 0, 0, err
 		}
-		config := img.icon.Config()
+		config := i.icon.Config()
 		width, height = config.Width, config.Height
-		img.aspect = config.Aspect
+		aspect = config.Aspect
 	} else {
 		var buf bytes.Buffer
 		tee := io.TeeReader(source, &buf)
-		img.reader = io.MultiReader(&buf, source)
+		i.reader = io.MultiReader(&buf, source)
 
 		config, _, err := image.DecodeConfig(tee)
 		if err != nil {
-			return fyne.NewSize(0, 0), err
+			return 0, 0, 0, err
 		}
 		width, height = config.Width, config.Height
-		img.aspect = float32(width) / float32(height)
+		aspect = float32(width) / float32(height)
 	}
-
-	dpSize, err := scale.ToFyneSize(img, width, height)
-	if err != nil {
-		dpSize = fyne.NewSize(float32(width), float32(height))
-	}
-
-	return dpSize, nil
+	return
 }
 
-func (img *Image) renderSVG(width, height float32) (image.Image, error) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(img)
+func (i *Image) renderSVG(width, height float32) (image.Image, error) {
+	c := fyne.CurrentApp().Driver().CanvasForObject(i)
 	if c == nil {
-		return nil, errors.New("object is not attached to a canvas yet")
+		return nil, nil // this will happen a lot during init
 	}
 
 	screenWidth := scale.ToScreenCoordinate(c, width)
 	screenHeight := scale.ToScreenCoordinate(c, height)
 
-	tex := cache.GetSvg(img.name(), screenWidth, screenHeight)
+	tex := cache.GetSvg(i.name(), screenWidth, screenHeight)
 	if tex != nil {
 		return tex, nil
 	}
 
 	var err error
-	tex, err = img.icon.Draw(screenWidth, screenHeight)
+	tex, err = i.icon.Draw(screenWidth, screenHeight)
 	if err != nil {
 		return nil, err
 	}
-	cache.SetSvg(img.name(), tex, screenWidth, screenHeight)
+	cache.SetSvg(i.name(), tex, screenWidth, screenHeight)
 	return tex, nil
 }

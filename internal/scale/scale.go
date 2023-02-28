@@ -1,7 +1,6 @@
 package scale
 
 import (
-	"errors"
 	"math"
 
 	"fyne.io/fyne/v2"
@@ -24,20 +23,21 @@ func ToFyneCoordinate(c fyne.Canvas, v int) float32 {
 	}
 }
 
-func ToFyneSize(obj fyne.CanvasObject, width, height int) (fyne.Size, error) {
+// ToFyneSize returns the scaled size of an object based on pixel coordinates, typically for images.
+// This method will attempt to find the canvas for an object to get its scale.
+// In the event that this fails it will assume a 1:1 mapping (scale=1 or low DPI display).
+func ToFyneSize(obj fyne.CanvasObject, width, height int) fyne.Size {
 	app := fyne.CurrentApp()
 	if app == nil {
-		return fyne.NewSize(0, 0), errors.New("no current app")
+		return fyne.NewSize(float32(width), float32(height)) // can occur if called before app.New
 	}
 	driver := app.Driver()
 	if driver == nil {
-		return fyne.NewSize(0, 0), errors.New("no current driver")
+		return fyne.NewSize(float32(width), float32(height))
 	}
 	c := driver.CanvasForObject(obj)
 	if c == nil {
-		return fyne.NewSize(0, 0), errors.New("object is not attached to a canvas yet")
+		return fyne.NewSize(float32(width), float32(height)) // this will happen a lot during init
 	}
-	dpSize := fyne.NewSize(ToFyneCoordinate(c, width), ToFyneCoordinate(c, height))
-
-	return dpSize, nil
+	return fyne.NewSize(ToFyneCoordinate(c, width), ToFyneCoordinate(c, height))
 }
