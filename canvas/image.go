@@ -264,26 +264,26 @@ func (i *Image) updateReader() error {
 }
 
 func (i *Image) updateAspectAndMinSize() error {
+	var pixWidth, pixHeight int
+
 	if i.reader != nil {
 		width, height, aspect, err := i.imageDetailsFromReader(i.reader)
 		if err != nil {
 			return err
 		}
 		i.aspect = aspect
-
-		if i.FillMode == ImageFillOriginal {
-			return i.setMinSizeForPixels(width, height)
-		}
+		pixWidth, pixHeight = width, height
 	} else if i.Image != nil {
 		original := i.Image.Bounds().Size()
 		i.aspect = float32(original.X) / float32(original.Y)
-		if i.FillMode == ImageFillOriginal {
-			return i.setMinSizeForPixels(original.X, original.Y)
-		}
+		pixWidth, pixHeight = original.X, original.Y
 	} else {
 		return errors.New("no matching image source")
 	}
 
+	if i.FillMode == ImageFillOriginal {
+		return i.setMinSizeForPixels(pixWidth, pixHeight)
+	}
 	return nil
 }
 
