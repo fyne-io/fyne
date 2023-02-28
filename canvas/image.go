@@ -282,7 +282,7 @@ func (i *Image) updateAspectAndMinSize() error {
 	}
 
 	if i.FillMode == ImageFillOriginal {
-		return i.setMinSizeForPixels(pixWidth, pixHeight)
+		i.SetMinSize(scale.ToFyneSize(i, pixWidth, pixHeight))
 	}
 	return nil
 }
@@ -315,29 +315,6 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (width, height int, asp
 		aspect = float32(width) / float32(height)
 	}
 	return
-}
-
-func (i *Image) setMinSizeForPixels(width, height int) error {
-	app := fyne.CurrentApp()
-	if app == nil {
-		return nil // error logged already with more info
-	}
-	driver := app.Driver()
-	if driver == nil {
-		return errors.New("no current driver")
-	}
-	c := driver.CanvasForObject(i)
-	if c == nil {
-		return nil // this will happen a lot during init
-	}
-	dpSize, err := scale.ToFyneSize(i, width, height)
-	if err != nil {
-		i.SetMinSize(fyne.NewSize(float32(width), float32(height)))
-	} else {
-		i.SetMinSize(dpSize)
-	}
-
-	return nil
 }
 
 func (i *Image) renderSVG(width, height float32) (image.Image, error) {
