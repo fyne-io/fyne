@@ -330,7 +330,12 @@ func (i *Image) setMinSizeForPixels(width, height int) error {
 	if c == nil {
 		return nil // this will happen a lot during init
 	}
-	i.SetMinSize(fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height)))
+	dpSize, err := scale.ToFyneSize(i, width, height)
+	if err != nil {
+		i.SetMinSize(fyne.NewSize(float32(width), float32(height)))
+	} else {
+		i.SetMinSize(dpSize)
+	}
 
 	return nil
 }
