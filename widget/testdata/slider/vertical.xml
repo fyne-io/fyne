@@ -4,6 +4,7 @@
 			<rectangle fillColor="inputBackground" pos="18,14" size="2x179"/>
 			<rectangle fillColor="foreground" pos="18,193" size="2x0"/>
 			<circle fillColor="foreground" pos="11,185" size="16x16"/>
+			<circle pos="5,179" size="28x28"/>
 		</widget>
 	</content>
 </canvas>
