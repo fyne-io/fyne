@@ -30,28 +30,12 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 	NewCustom(title, dismiss, content, parent).Show()
 }
 
-// CustomConfirm is a custom dialog with dismiss and confirm buttons.
-//
-// Since 2.4
-type CustomConfirm struct {
-	*dialog
-
-	confirm *widget.Button
-}
-
-// SetConfirmImportance sets the importance level of the confirm button.
-//
-// Since 2.4
-func (c *CustomConfirm) SetConfirmImportance(importance widget.ButtonImportance) {
-	c.confirm.Importance = importance
-}
-
 // NewCustomConfirm creates and returns a dialog over the specified application using
 // custom content. The cancel button will have the dismiss text set and the "OK" will
 // use the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) *CustomConfirm {
+	callback func(bool), parent fyne.Window) *ConfirmDialog {
 	d := &dialog{content: content, title: title, parent: parent}
 	d.layout = &dialogLayout{d: d}
 	d.callback = callback
@@ -66,7 +50,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	}
 	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
-	return &CustomConfirm{dialog: d, confirm: ok}
+	return &ConfirmDialog{dialog: d, confirm: ok}
 }
 
 // ShowCustomConfirm shows a dialog over the specified application using custom
