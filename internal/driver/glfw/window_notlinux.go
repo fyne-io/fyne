@@ -12,8 +12,13 @@ func (w *window) platformResize(canvasSize fyne.Size) {
 		return
 	}
 
-	runOnDraw(w, func() {
+	if drawOnMainThread {
 		w.canvas.Resize(canvasSize)
 		d.repaintWindow(w)
-	})
+	} else {
+		runOnDraw(w, func() {
+			w.canvas.Resize(canvasSize)
+			d.repaintWindow(w)
+		})
+	}
 }

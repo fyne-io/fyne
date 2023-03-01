@@ -37,6 +37,8 @@ var (
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
 
+var drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
+
 type gLDriver struct {
 	windowLock sync.RWMutex
 	windows    []fyne.Window
@@ -46,7 +48,6 @@ type gLDriver struct {
 
 	animation *animation.Runner
 
-	drawOnMainThread    bool       // A workaround on Apple M1, just use 1 thread until fixed upstream
 	trayStart, trayStop func()     // shut down the system tray, if used
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
 }
