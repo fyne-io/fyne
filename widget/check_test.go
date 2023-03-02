@@ -96,3 +96,16 @@ func TestNewCheckWithData(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, false, v)
 }
+
+func TestCheckUncheck(t *testing.T) {
+	c := widget.NewCheck("", nil)
+	c.SetChecked(true)
+
+	w := test.NewWindow(c)
+	test.AssertRendersToImage(t, "check/checked.png", w.Canvas())
+	assert.Equal(t, true, c.Checked)
+
+	c.SetChecked(false)
+	test.AssertRendersToImage(t, "check/unchecked.png", w.Canvas())
+	assert.Equal(t, false, c.Checked)
+}
