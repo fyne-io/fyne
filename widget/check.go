@@ -94,6 +94,7 @@ func (c *checkRenderer) updateResource() {
 		c.bg.FillColor = color.Transparent
 	}
 	c.icon.Resource = res
+	c.icon.Refresh()
 }
 
 func (c *checkRenderer) updateFocusIndicator() {
