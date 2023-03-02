@@ -3,7 +3,6 @@ package dialog
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -42,7 +41,7 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 			d.hideWithResponse(true)
 		},
 	}
-	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, confirm, layout.NewSpacer()))
+	d.create(container.NewGridWithColumns(2, d.dismiss, confirm))
 
 	return &ConfirmDialog{dialog: d, confirm: confirm}
 }
