@@ -723,6 +723,8 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 
 func (r *tableCellsRenderer) Refresh() {
 	r.cells.propertyLock.Lock()
+	defer r.cells.propertyLock.Unlock()
+
 	oldSize := r.cells.cellSize
 	r.cells.cellSize = r.cells.t.templateSize()
 	if oldSize != r.cells.cellSize { // theme changed probably
@@ -736,12 +738,10 @@ func (r *tableCellsRenderer) Refresh() {
 	}
 	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.cellSize.Width, dataCols)
 	if len(visibleColWidths) == 0 { // we can't show anything until we have some dimensions
-		r.cells.propertyLock.Unlock()
 		return
 	}
 	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.cellSize.Height, dataRows)
 	if len(visibleRowHeights) == 0 { // we can't show anything until we have some dimensions
-		r.cells.propertyLock.Unlock()
 		return
 	}
 
@@ -787,7 +787,6 @@ func (r *tableCellsRenderer) Refresh() {
 		}
 	}
 	visible := r.visible
-	r.cells.propertyLock.Unlock()
 	r.SetObjects(cells)
 
 	if updateCell != nil {
