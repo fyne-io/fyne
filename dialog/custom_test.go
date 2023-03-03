@@ -96,3 +96,19 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 	assert.Equal(t, size, d.win.Size())
 	d.Hide()
 }
+
+func TestCustomConfirm_Importance(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	label := widget.NewLabel("This is dangerous!")
+	d := NewCustomConfirm("Delete me?", "Delete", "Dismiss", label, nil, w)
+	d.SetConfirmImportance(widget.DangerImportance)
+
+	test.ApplyTheme(t, test.Theme())
+	d.Show()
+	test.AssertRendersToImage(t, "dialog-custom-confirm-importance.png", w.Canvas())
+}
