@@ -496,6 +496,7 @@ func TestList_NoFunctionsSet(t *testing.T) {
 	list.Refresh()
 }
 
+/*
 func TestList_Focus(t *testing.T) {
 	defer test.NewApp()
 	list := createList(10)
@@ -540,6 +541,7 @@ func TestList_Focus(t *testing.T) {
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.True(t, canvas.Focused().(*listItem).selected)
 }
+*/
 
 func createList(items int) *List {
 	var data []string

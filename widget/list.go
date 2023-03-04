@@ -323,7 +323,7 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Focusable = (*listItem)(nil)
+// var _ fyne.Focusable = (*listItem)(nil)
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
@@ -359,6 +359,7 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
 
+/*
 // FocusGained is called after this listItem has gained focus.
 //
 // Implements: fyne.Focusable
@@ -374,6 +375,7 @@ func (li *listItem) FocusLost() {
 	li.hovered = false
 	li.Refresh()
 }
+*/
 
 // MinSize returns the size that this widget should not shrink below.
 func (li *listItem) MinSize() fyne.Size {
@@ -406,6 +408,7 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 	}
 }
 
+/*
 // TypedKey is called if a key event happens while this listItem is focused.
 //
 // Implements: fyne.Focusable
@@ -426,6 +429,7 @@ func (li *listItem) TypedKey(event *fyne.KeyEvent) {
 func (li *listItem) TypedRune(_ rune) {
 	// intentionally left blank
 }
+*/
 
 // Declare conformity with the WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*listItemRenderer)(nil)
