@@ -1,7 +1,6 @@
 package tutorials
 
 import (
-	"errors"
 	"fmt"
 	"image/color"
 	"io/ioutil"
@@ -10,7 +9,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
@@ -93,56 +91,11 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 	}, win)
 	advancedPicker.Advanced = true
 	return container.NewVScroll(container.NewVBox(
-		widget.NewButton("Info", func() {
-			dialog.ShowInformation("Information", "You should know this thing...", win)
-		}),
-		widget.NewButton("Error", func() {
-			err := errors.New("a dummy error message")
-			dialog.ShowError(err, win)
-		}),
-		widget.NewButton("Confirm", func() {
-			cnf := dialog.NewConfirm("Confirmation", "Are you enjoying this demo?", confirmCallback, win)
-			cnf.SetDismissText("Nah")
-			cnf.SetConfirmText("Oh Yes!")
-			cnf.Show()
-		}),
-		openFile,
-		saveFile,
-		openFolder,
-		widget.NewButton("Color Picker", func() {
-			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
-				colorPicked(c, win)
-			}, win)
-			picker.Show()
-		}),
-		widget.NewButton("Advanced Color Picker", func() {
-			advancedPicker.Show()
-		}),
-		widget.NewButton("Form Dialog (Login Form)", func() {
-			username := widget.NewEntry()
-			username.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "username can only contain letters, numbers, '_', and '-'")
-			password := widget.NewPasswordEntry()
-			password.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "password can only contain letters, numbers, '_', and '-'")
-			remember := false
-			items := []*widget.FormItem{
-				widget.NewFormItem("Username", username),
-				widget.NewFormItem("Password", password),
-				widget.NewFormItem("Remember me", widget.NewCheck("", func(checked bool) {
-					remember = checked
-				})),
-			}
-
-			dialog.ShowForm("Login...", "Log In", "Cancel", items, func(b bool) {
-				if !b {
-					return
-				}
-				var rememberText string
-				if remember {
-					rememberText = "and remember this login"
-				}
-
-				log.Println("Please Authenticate", username.Text, password.Text, rememberText)
-			}, win)
+		widget.NewButton("Custom Buttons", func() {
+			custom := dialog.NewCustom("Test", "Nope", widget.NewLabel("Empty"), win)
+			//custom.SetButtons([]fyne.CanvasObject{widget.NewButton("Left", custom.Hide), widget.NewButton("Middle", custom.Hide), widget.NewButton("Right", custom.Hide)})
+			custom.SetButtons(nil)
+			custom.Show()
 		}),
 	))
 }

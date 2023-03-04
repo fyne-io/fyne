@@ -46,7 +46,7 @@ func TestShowCustom_Resize(t *testing.T) {
 	size := fyne.NewSize(200, 200)
 	d.Resize(size)
 	d.Show()
-	assert.Equal(t, size, d.(*dialog).win.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	assert.Equal(t, size, d.dialog.win.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 }
 
 func TestCustom_ApplyThemeOnShow(t *testing.T) {
@@ -84,7 +84,7 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 
 	label := widget.NewLabel("Content")
 	label.Alignment = fyne.TextAlignCenter
-	d := NewCustom("Title", "OK", label, w).(*dialog)
+	d := NewCustom("Title", "OK", label, w).dialog
 
 	d.Show()
 	assert.Equal(t, size, d.win.Size())
