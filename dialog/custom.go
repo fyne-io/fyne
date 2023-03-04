@@ -3,7 +3,6 @@ package dialog
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -17,7 +16,7 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 	d.dismiss = &widget.Button{Text: dismiss,
 		OnTapped: d.Hide,
 	}
-	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
+	d.create(container.NewGridWithColumns(1, d.dismiss))
 
 	return d
 }
@@ -45,7 +44,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 			d.hideWithResponse(true)
 		},
 	}
-	d.create(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
+	d.create(container.NewGridWithColumns(2, d.dismiss, ok))
 
 	return &ConfirmDialog{dialog: d, confirm: ok}
 }
