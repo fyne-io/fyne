@@ -26,19 +26,42 @@ func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Win
 	return &Custom{dialog: d}
 }
 
-// SetButtons sets the row of buttons at the bottom of the dialog.
-// Passing an empy slice will result in a dialog with no buttons.
-//
-// Since 2.4
-func (d *Custom) SetButtons(buttons []fyne.CanvasObject) {
-	d.create(container.NewGridWithRows(1, buttons...))
-}
-
 // ShowCustom shows a dialog over the specified application using custom
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
 	NewCustom(title, dismiss, content, parent).Show()
+}
+
+// NewCustomWithoutButtons creates a new custom dialog without any buttons.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+//
+// Since 2.4
+func NewCustomWithoutButtons(title string, content fyne.CanvasObject, parent fyne.Window) *Custom {
+	d := &dialog{content: content, title: title, parent: parent}
+	d.layout = &dialogLayout{d: d}
+
+	d.create(container.NewGridWithColumns(1))
+
+	return &Custom{dialog: d}
+}
+
+// SetButtons sets the row of buttons at the bottom of the dialog.
+// Passing an empy slice will result in a dialog with no buttons.
+//
+// Since 2.4
+func (d *Custom) SetButtons(buttons []fyne.CanvasObject) {
+	d.dismiss = nil // New button row invalidates possible dismiss button.
+	d.create(container.NewGridWithRows(1, buttons...))
+}
+
+// ShowCustomWithoutButtons shows a dialog, wihout buttons, over the specified application
+// using custom content.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+//
+// Since 2.4
+func ShowCustomWithoutButtons(title string, content fyne.CanvasObject, parent fyne.Window) {
+	NewCustomWithoutButtons(title, content, parent).Show()
 }
 
 // NewCustomConfirm creates and returns a dialog over the specified application using
