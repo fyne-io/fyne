@@ -106,6 +106,7 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 	d.bg = newThemedBackground()
 	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
+	d.layout = &dialogLayout{d: d}
 	content := container.New(d.layout,
 		&canvas.Image{Resource: d.icon},
 		d.bg,
@@ -121,7 +122,6 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 // The method .create() needs to be called before the dialog cna be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newCenterLabel(message), title: title, icon: icon, parent: parent}
-	d.layout = &dialogLayout{d: d}
 	d.callback = callback
 
 	return d

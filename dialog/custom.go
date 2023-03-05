@@ -13,7 +13,6 @@ import (
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, parent: parent}
-	d.layout = &dialogLayout{d: d}
 
 	d.dismiss = &widget.Button{Text: dismiss,
 		OnTapped: d.Hide,
@@ -36,9 +35,7 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) *ConfirmDialog {
-	d := &dialog{content: content, title: title, parent: parent}
-	d.layout = &dialogLayout{d: d}
-	d.callback = callback
+	d := &dialog{content: content, title: title, parent: parent, callback: callback}
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
