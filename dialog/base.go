@@ -44,7 +44,6 @@ type dialog struct {
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
-	layout         *dialogLayout
 }
 
 func (d *dialog) Hide() {
@@ -106,8 +105,7 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 	d.bg = newThemedBackground()
 	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
-	d.layout = &dialogLayout{d: d}
-	content := container.New(d.layout,
+	content := container.New(&dialogLayout{d: d},
 		&canvas.Image{Resource: d.icon},
 		d.bg,
 		d.content,
