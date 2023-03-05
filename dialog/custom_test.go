@@ -97,6 +97,42 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 	d.Hide()
 }
 
+func TestConfirm_SetButtons(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	label := widget.NewLabel("Custom buttons")
+	d := NewCustom("Test", "Initial", label, w)
+	test.ApplyTheme(t, test.Theme())
+
+	d.SetButtons([]fyne.CanvasObject{&widget.Button{Text: "1"}, &widget.Button{Text: "2"}, &widget.Button{Text: "3"}})
+	d.Show()
+	test.AssertRendersToMarkup(t, "dialog-custom-custom-buttons.xml", w.Canvas())
+	assert.Nil(t, d.dialog.dismiss)
+	d.Hide()
+
+	d.SetButtons(nil)
+	d.Show()
+	test.AssertRendersToMarkup(t, "dialog-custom-no-buttons.xml", w.Canvas())
+	d.Hide()
+}
+
+func TestConfirmWithoutButtons(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	test.ApplyTheme(t, test.Theme())
+	label := widget.NewLabel("No buttons")
+	ShowCustomWithoutButtons("Empty", label, w)
+	test.AssertRendersToImage(t, "dialog-custom-without-buttons.png", w.Canvas())
+}
+
 func TestCustomConfirm_Importance(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
