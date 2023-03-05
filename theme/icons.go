@@ -716,7 +716,9 @@ func NewDisabledResource(res fyne.Resource) *DisabledResource {
 	}
 }
 
-// FyneLogo returns a resource containing the Fyne logo
+// FyneLogo returns a resource containing the Fyne logo.
+//
+// Deprecated: Applications should use their own icon in most cases.
 func FyneLogo() fyne.Resource {
 	return fynelogo
 }

@@ -40,7 +40,7 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 			} else if fyne.CurrentApp().Icon() != nil {
 				d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
 			} else {
-				d.SetSystemTrayIcon(theme.FyneLogo())
+				d.SetSystemTrayIcon(theme.WarningIcon())
 			}
 
 			// it must be refreshed after init, so an earlier call would have been ineffective
