@@ -27,7 +27,7 @@
 				<container pos="76,90" size="0x0">
 				</container>
 				<widget size="0x0" type="*widget.Label">
-					<text bold pos="8,8" size="77x19">Delete me?</text>
+					<text bold pos="8,8" size="28x19">Test</text>
 				</widget>
 			</container>
 		</widget>
