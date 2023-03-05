@@ -403,7 +403,7 @@ func TestFileFilters(t *testing.T) {
 	}
 
 	// NOTE: This count needs to be updated when more test images are added.
-	assert.Equal(t, 7, count)
+	assert.Equal(t, 8, count)
 
 	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/jpeg"}))
 
@@ -432,7 +432,7 @@ func TestFileFilters(t *testing.T) {
 	}
 
 	// NOTE: This count needs to be updated when more test images are added.
-	assert.Equal(t, 8, count)
+	assert.Equal(t, 9, count)
 }
 
 func TestView(t *testing.T) {
