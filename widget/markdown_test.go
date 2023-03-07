@@ -111,8 +111,8 @@ func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
 
 	assert.Equal(t, 1, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "#", text.Text)
-		assert.Equal(t, RichTextStyleParagraph, text.Style)
+		assert.Equal(t, "", text.Text)
+		assert.Equal(t, RichTextStyleHeading, text.Style)
 	} else {
 		t.Error("Segment should be Text")
 	}
