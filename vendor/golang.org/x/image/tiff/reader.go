@@ -38,6 +38,52 @@ func (e UnsupportedError) Error() string {
 
 var errNoPixels = FormatError("not enough pixel data")
 
+const maxChunkSize = 10 << 20 // 10M
+
+// safeReadtAt is a verbatim copy of internal/saferio.ReadDataAt from the
+// standard library, which is used to read data from a reader using a length
+// provided by untrusted data, without allocating the entire slice ahead of time
+// if it is large (>maxChunkSize). This allows us to avoid allocating giant
+// slices before learning that we can't actually read that much data from the
+// reader.
+func safeReadAt(r io.ReaderAt, n uint64, off int64) ([]byte, error) {
+	if int64(n) < 0 || n != uint64(int(n)) {
+		// n is too large to fit in int, so we can't allocate
+		// a buffer large enough. Treat this as a read failure.
+		return nil, io.ErrUnexpectedEOF
+	}
+
+	if n < maxChunkSize {
+		buf := make([]byte, n)
+		_, err := r.ReadAt(buf, off)
+		if err != nil {
+			// io.SectionReader can return EOF for n == 0,
+			// but for our purposes that is a success.
+			if err != io.EOF || n > 0 {
+				return nil, err
+			}
+		}
+		return buf, nil
+	}
+
+	var buf []byte
+	buf1 := make([]byte, maxChunkSize)
+	for n > 0 {
+		next := n
+		if next > maxChunkSize {
+			next = maxChunkSize
+		}
+		_, err := r.ReadAt(buf1[:next], off)
+		if err != nil {
+			return nil, err
+		}
+		buf = append(buf, buf1[:next]...)
+		n -= next
+		off += int64(next)
+	}
+	return buf, nil
+}
+
 type decoder struct {
 	r         io.ReaderAt
 	byteOrder binary.ByteOrder
@@ -82,8 +128,7 @@ func (d *decoder) ifdUint(p []byte) (u []uint, err error) {
 	}
 	if datalen := lengths[datatype] * count; datalen > 4 {
 		// The IFD contains a pointer to the real value.
-		raw = make([]byte, datalen)
-		_, err = d.r.ReadAt(raw, int64(d.byteOrder.Uint32(p[8:12])))
+		raw, err = safeReadAt(d.r, uint64(datalen), int64(d.byteOrder.Uint32(p[8:12])))
 	} else {
 		raw = p[8 : 8+datalen]
 	}
@@ -427,8 +472,9 @@ func newDecoder(r io.Reader) (*decoder, error) {
 	numItems := int(d.byteOrder.Uint16(p[0:2]))
 
 	// All IFD entries are read in one chunk.
-	p = make([]byte, ifdLen*numItems)
-	if _, err := d.r.ReadAt(p, ifdOffset+2); err != nil {
+	var err error
+	p, err = safeReadAt(d.r, uint64(ifdLen*numItems), ifdOffset+2)
+	if err != nil {
 		return nil, err
 	}
 
@@ -656,8 +702,7 @@ func Decode(r io.Reader) (img image.Image, err error) {
 				if b, ok := d.r.(*buffer); ok {
 					d.buf, err = b.Slice(int(offset), int(n))
 				} else {
-					d.buf = make([]byte, n)
-					_, err = d.r.ReadAt(d.buf, offset)
+					d.buf, err = safeReadAt(d.r, uint64(n), offset)
 				}
 			case cG3:
 				inv := d.firstVal(tPhotometricInterpretation) == pWhiteIsZero
