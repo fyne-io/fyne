@@ -79,8 +79,10 @@ func NewHBox(objects ...fyne.CanvasObject) *fyne.Container {
 // NewMax creates a new container with the specified objects filling the available space.
 //
 // Since: 1.4
+//
+// Deprecated: Use container.NewStack() instead.
 func NewMax(objects ...fyne.CanvasObject) *fyne.Container {
-	return New(layout.NewMaxLayout(), objects...)
+	return NewStack(objects...)
 }
 
 // NewPadded creates a new container with the specified objects inset by standard padding size.
@@ -88,6 +90,14 @@ func NewMax(objects ...fyne.CanvasObject) *fyne.Container {
 // Since: 1.4
 func NewPadded(objects ...fyne.CanvasObject) *fyne.Container {
 	return New(layout.NewPaddedLayout(), objects...)
+}
+
+// NewStack returns a new container that stacks objects on top of each other.
+// Objects at the end of the container will be stacked on top of objects before.
+//
+// Since: 2.4
+func NewStack(objects ...fyne.CanvasObject) *fyne.Container {
+	return New(layout.NewStackLayout(), objects...)
 }
 
 // NewVBox creates a new container with the specified objects and using the VBox layout.
