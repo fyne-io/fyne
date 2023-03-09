@@ -245,21 +245,22 @@ func (i *Image) name() string {
 func (i *Image) updateReader() error {
 	i.reader = nil
 
-	var fd io.Reader
 	i.isSVG = false
 	if i.Resource != nil {
-		fd = bytes.NewReader(i.Resource.Content())
+		i.reader = bytes.NewReader(i.Resource.Content())
 		i.isSVG = svg.IsResourceSVG(i.Resource)
 	} else if i.File != "" {
 		var err error
 
-		fd, err = os.Open(i.File)
+		fd, err := os.Open(i.File)
 		if err != nil {
 			return err
 		}
 		i.isSVG = svg.IsFileSVG(i.File)
+		b, _ := ioutil.ReadAll(fd)
+		fd.Close()
+		i.reader = bytes.NewReader(b)
 	}
-	i.reader = fd
 	return nil
 }
 
