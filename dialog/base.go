@@ -40,7 +40,6 @@ type dialog struct {
 	desiredSize fyne.Size
 
 	win            *widget.PopUp
-	bg             *themedBackground
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
@@ -102,12 +101,11 @@ func (d *dialog) hideWithResponse(resp bool) {
 }
 
 func (d *dialog) create(buttons fyne.CanvasObject) {
-	d.bg = newThemedBackground()
 	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	content := container.New(&dialogLayout{d: d},
 		&canvas.Image{Resource: d.icon},
-		d.bg,
+		newThemedBackground(),
 		d.content,
 		buttons,
 		d.label,
@@ -184,8 +182,8 @@ type dialogLayout struct {
 }
 
 func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	l.d.bg.Move(fyne.NewPos(0, 0))
-	l.d.bg.Resize(size)
+	obj[1].Move(fyne.NewPos(0, 0))
+	obj[1].Resize(size)
 
 	btnMin := obj[3].MinSize()
 
