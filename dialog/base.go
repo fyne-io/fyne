@@ -182,9 +182,6 @@ type dialogLayout struct {
 }
 
 func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	obj[1].Move(fyne.NewPos(0, 0))
-	obj[1].Resize(size)
-
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()
 
@@ -193,15 +190,19 @@ func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[0].Resize(fyne.NewSize(iconHeight, iconHeight))
 	obj[0].Move(fyne.NewPos(size.Width-iconHeight+theme.Padding(), -theme.Padding()))
 
-	// buttons
-	obj[3].Resize(btnMin)
-	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
+	// background
+	obj[1].Move(fyne.NewPos(0, 0))
+	obj[1].Resize(size)
 
 	// content
 	contentStart := obj[4].Position().Y + labelMin.Height + padHeight
 	contentEnd := obj[3].Position().Y - theme.Padding()
 	obj[2].Move(fyne.NewPos(padWidth/2, labelMin.Height+padHeight))
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
+
+	// buttons
+	obj[3].Resize(btnMin)
+	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
 }
 
 func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
@@ -209,7 +210,7 @@ func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()
 
-	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
+	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), labelMin.Width) + padWidth
 	height := contentMin.Height + btnMin.Height + labelMin.Height + theme.Padding() + padHeight*2
 
 	return fyne.NewSize(width, height)
