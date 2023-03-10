@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -191,10 +192,17 @@ func (b *Builder) build() error {
 	fyneGoModRunner := b.runner
 	if b.runner == nil {
 		fyneGoModRunner = newCommand("go")
-		if goos != "gopherjs" {
-			b.runner = newCommand("go")
+		goBin := os.Getenv("GOBIN")
+		if goBin != "" {
+			log.Println("Using GOBIN environment variable for go command:", goBin)
+			fyneGoModRunner = newCommand(goBin)
+			b.runner = fyneGoModRunner
 		} else {
-			b.runner = newCommand("gopherjs")
+			if goos != "gopherjs" {
+				b.runner = newCommand("go")
+			} else {
+				b.runner = newCommand("gopherjs")
+			}
 		}
 	}
 
