@@ -162,6 +162,7 @@ func (i *Image) Refresh() {
 		}
 	}
 
+	i.reader = nil
 	Refresh(i)
 }
 
