@@ -438,6 +438,9 @@ func (e *Entry) SelectedText() string {
 	}
 
 	start, stop := e.selection()
+	if start == stop {
+		return ""
+	}
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
@@ -1683,7 +1686,7 @@ func (r *entryContentRenderer) ensureCursorVisible() {
 	}
 	if cy1 < offset.Y {
 		move.DY -= offset.Y - cy1
-	} else if cy2 >= offset.X+size.Height {
+	} else if cy2 >= offset.Y+size.Height {
 		move.DY += cy2 - (offset.Y + size.Height)
 	}
 	if r.content.scroll.Content != nil {

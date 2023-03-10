@@ -281,6 +281,10 @@ func (w *window) detectScale() float32 {
 		return 1.0
 	}
 	monitor := w.getMonitorForWindow()
+	if monitor == nil {
+		return 1.0
+	}
+
 	widthMm, _ := monitor.GetPhysicalSize()
 	widthPx := monitor.GetVideoMode().Width
 

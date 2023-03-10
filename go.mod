@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.14
 
 require (
-	fyne.io/systray v1.10.1-0.20221115204952-d16a6177e6f1
+	fyne.io/systray v1.10.1-0.20230207085535-4a244dbb9d03
 	github.com/BurntSushi/toml v1.1.0
 	github.com/fredbi/uri v0.1.0
 	github.com/fsnotify/fsnotify v1.5.4

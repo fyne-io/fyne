@@ -251,6 +251,12 @@ func (t *RichText) len() int {
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
 func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
+	if row < 0 {
+		row = 0
+	}
+	if col < 0 {
+		col = 0
+	}
 	bound := t.rowBoundary(row)
 	total := fyne.NewSize(0, 0)
 	counted := 0
@@ -794,7 +800,7 @@ func findSpaceIndex(text []rune, fallback int) int {
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
-	if wrap == fyne.TextWrapOff {
+	if maxWidth < 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
 
@@ -867,7 +873,12 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 							return bounds
 						}
 					} else {
-						high = low + findSpaceIndex(sub, fallback)
+						spaceIndex := findSpaceIndex(sub, fallback)
+						if spaceIndex == 0 {
+							spaceIndex = 1
+						}
+
+						high = low + spaceIndex
 					}
 					if high == fallback && subWidth <= maxWidth { // add a newline as there is more space on next
 						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low})
