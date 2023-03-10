@@ -587,7 +587,9 @@ func NewThemedResource(src fyne.Resource) *ThemedResource {
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
 	prefix := res.ColorName
-	if prefix != "" {
+	if prefix == "" {
+		prefix = "foreground_"
+	} else {
 		prefix += "_"
 	}
 
