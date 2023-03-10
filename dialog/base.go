@@ -39,11 +39,10 @@ type dialog struct {
 	icon        fyne.Resource
 	desiredSize fyne.Size
 
-	win            *widget.PopUp
-	bg             *themedBackground
-	content, label fyne.CanvasObject
-	dismiss        *widget.Button
-	parent         fyne.Window
+	win     *widget.PopUp
+	content fyne.CanvasObject
+	dismiss *widget.Button
+	parent  fyne.Window
 }
 
 func (d *dialog) Hide() {
@@ -102,15 +101,14 @@ func (d *dialog) hideWithResponse(resp bool) {
 }
 
 func (d *dialog) create(buttons fyne.CanvasObject) {
-	d.bg = newThemedBackground()
-	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	label := widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	content := container.New(&dialogLayout{d: d},
 		&canvas.Image{Resource: d.icon},
-		d.bg,
+		newThemedBackground(),
 		d.content,
 		buttons,
-		d.label,
+		label,
 	)
 
 	d.win = widget.NewModalPopUp(content, d.parent.Canvas())
@@ -184,33 +182,36 @@ type dialogLayout struct {
 }
 
 func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	l.d.bg.Move(fyne.NewPos(0, 0))
-	l.d.bg.Resize(size)
-
 	btnMin := obj[3].MinSize()
+	labelMin := obj[4].MinSize()
 
 	// icon
-	iconHeight := padHeight*2 + l.d.label.MinSize().Height*2 - theme.Padding()
+	iconHeight := padHeight*2 + labelMin.Height*2 - theme.Padding()
 	obj[0].Resize(fyne.NewSize(iconHeight, iconHeight))
 	obj[0].Move(fyne.NewPos(size.Width-iconHeight+theme.Padding(), -theme.Padding()))
+
+	// background
+	obj[1].Move(fyne.NewPos(0, 0))
+	obj[1].Resize(size)
+
+	// content
+	contentStart := obj[4].Position().Y + labelMin.Height + padHeight
+	contentEnd := obj[3].Position().Y - theme.Padding()
+	obj[2].Move(fyne.NewPos(padWidth/2, labelMin.Height+padHeight))
+	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 
 	// buttons
 	obj[3].Resize(btnMin)
 	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
-
-	// content
-	contentStart := l.d.label.Position().Y + l.d.label.MinSize().Height + padHeight
-	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos(padWidth/2, l.d.label.MinSize().Height+padHeight))
-	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
 func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	contentMin := obj[2].MinSize()
 	btnMin := obj[3].MinSize()
+	labelMin := obj[4].MinSize()
 
-	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
-	height := contentMin.Height + btnMin.Height + l.d.label.MinSize().Height + theme.Padding() + padHeight*2
+	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), labelMin.Width) + padWidth
+	height := contentMin.Height + btnMin.Height + labelMin.Height + theme.Padding() + padHeight*2
 
 	return fyne.NewSize(width, height)
 }
