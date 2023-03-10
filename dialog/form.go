@@ -49,7 +49,6 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 	form := widget.NewForm(items...)
 
 	d := &dialog{content: form, callback: callback, title: title, parent: parent}
-	d.layout = &dialogLayout{d: d}
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}

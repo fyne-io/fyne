@@ -44,7 +44,6 @@ type dialog struct {
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
-	layout         *dialogLayout
 }
 
 func (d *dialog) Hide() {
@@ -106,7 +105,7 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 	d.bg = newThemedBackground()
 	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
-	content := container.New(d.layout,
+	content := container.New(&dialogLayout{d: d},
 		&canvas.Image{Resource: d.icon},
 		d.bg,
 		d.content,
@@ -121,7 +120,6 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 // The method .create() needs to be called before the dialog cna be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newCenterLabel(message), title: title, icon: icon, parent: parent}
-	d.layout = &dialogLayout{d: d}
 	d.callback = callback
 
 	return d
