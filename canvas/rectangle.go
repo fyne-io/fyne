@@ -26,6 +26,10 @@ func (r *Rectangle) Refresh() {
 // Resize on a rectangle updates the new size of this object.
 // If it has a stroke width this will cause it to Refresh.
 func (r *Rectangle) Resize(s fyne.Size) {
+	if s == r.Size() {
+		return
+	}
+
 	r.baseObject.Resize(s)
 	if r.StrokeWidth == 0 {
 		return

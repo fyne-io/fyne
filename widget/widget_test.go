@@ -1,10 +1,13 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -23,7 +26,7 @@ func (m *myWidget) Refresh() {
 
 func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 	m.ExtendBaseWidget(m)
-	return &simpleRenderer{&fyne.Container{}}
+	return internalWidget.NewSimpleRenderer(&fyne.Container{})
 }
 
 func TestApplyThemeCalled(t *testing.T) {
@@ -58,6 +61,35 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	}()
 
 	window.Close()
+}
+
+func TestSimpleRenderer(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	c := &fyne.Container{Layout: layout.NewMaxLayout(), Objects: []fyne.CanvasObject{
+		newTestWidget(canvas.NewRectangle(color.Gray{Y: 0x79})),
+		newTestWidget(canvas.NewText("Hi", color.Black))}}
+
+	window := test.NewWindow(c)
+	defer window.Close()
+
+	test.AssertImageMatches(t, "simple_renderer.png", window.Canvas().Capture())
+}
+
+type testWidget struct {
+	BaseWidget
+	obj fyne.CanvasObject
+}
+
+func newTestWidget(o fyne.CanvasObject) fyne.Widget {
+	t := &testWidget{obj: o}
+	t.ExtendBaseWidget(t)
+	return t
+}
+
+func (t *testWidget) CreateRenderer() fyne.WidgetRenderer {
+	return NewSimpleRenderer(t.obj)
 }
 
 func waitForBinding() {

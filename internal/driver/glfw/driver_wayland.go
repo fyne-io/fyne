@@ -1,3 +1,4 @@
+//go:build wayland
 // +build wayland
 
 package glfw

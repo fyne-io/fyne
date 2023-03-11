@@ -26,6 +26,11 @@ func (p *InMemoryPreferences) AddChangeListener(listener func()) {
 	p.changeListeners = append(p.changeListeners, listener)
 }
 
+// ChangeListeners returns the list of listeners registered for this set of preferences.
+func (p *InMemoryPreferences) ChangeListeners() []func() {
+	return p.changeListeners
+}
+
 // ReadValues provides read access to the underlying value map - for internal use only...
 // You should not retain a reference to the map nor write to the values in the callback function
 func (p *InMemoryPreferences) ReadValues(fn func(map[string]interface{})) {
@@ -47,6 +52,11 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
 
+	if stored, ok := p.values[key]; ok && stored == value {
+		p.lock.Unlock()
+		return
+	}
+
 	p.values[key] = value
 	p.lock.Unlock()
 
@@ -63,16 +73,18 @@ func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
 
 func (p *InMemoryPreferences) remove(key string) {
 	p.lock.Lock()
-	defer p.lock.Unlock()
-
 	delete(p.values, key)
+	p.lock.Unlock()
+
+	p.fireChange()
 }
 
 func (p *InMemoryPreferences) fireChange() {
 	p.lock.RLock()
-	defer p.lock.RUnlock()
+	listeners := p.changeListeners
+	p.lock.RUnlock()
 
-	for _, l := range p.changeListeners {
+	for _, l := range listeners {
 		p.wg.Add(1)
 		go func(listener func()) {
 			defer p.wg.Done()

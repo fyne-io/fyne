@@ -1,3 +1,4 @@
+//go:build !mobile && (!ci || !windows)
 // +build !mobile
 // +build !ci !windows
 
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/driver/glfw"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -54,7 +56,7 @@ func TestMenuBar(t *testing.T) {
 
 		menuBar := glfw.NewMenuBar(menu, c)
 		themeCounter := 0
-		button := widget.NewButton("Button", func() {
+		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
 			case 0:
 				test.ApplyTheme(t, test.NewTheme())
@@ -63,7 +65,7 @@ func TestMenuBar(t *testing.T) {
 			}
 			themeCounter++
 		})
-		container := fyne.NewContainerWithoutLayout(button, menuBar)
+		container := container.NewWithoutLayout(button, menuBar)
 		w.SetContent(container)
 		w.Resize(fyne.NewSize(300, 300))
 		button.Resize(button.MinSize())
@@ -72,11 +74,11 @@ func TestMenuBar(t *testing.T) {
 
 		buttonPos := fyne.NewPos(110, 60)
 		fileMenuPos := fyne.NewPos(20, 10)
-		fileNewPos := fyne.NewPos(20, 50)
-		fileOpenPos := fyne.NewPos(20, 70)
-		fileRecentPos := fyne.NewPos(20, 100)
-		fileRecentOlderPos := fyne.NewPos(120, 170)
-		fileRecentOlderOld1Pos := fyne.NewPos(200, 170)
+		fileNewPos := fyne.NewPos(20, 55)
+		fileOpenPos := fyne.NewPos(20, 75)
+		fileRecentPos := fyne.NewPos(20, 110)
+		fileRecentOlderPos := fyne.NewPos(120, 190)
+		fileRecentOlderOld1Pos := fyne.NewPos(200, 190)
 		editMenuPos := fyne.NewPos(70, 10)
 		helpMenuPos := fyne.NewPos(120, 10)
 		type action struct {
@@ -327,7 +329,7 @@ func TestMenuBar(t *testing.T) {
 
 		menuBar := glfw.NewMenuBar(menu, c)
 		themeCounter := 0
-		button := widget.NewButton("Button", func() {
+		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
 			case 0:
 				test.ApplyTheme(t, test.NewTheme())
@@ -336,7 +338,7 @@ func TestMenuBar(t *testing.T) {
 			}
 			themeCounter++
 		})
-		container := fyne.NewContainerWithoutLayout(button, menuBar)
+		container := container.NewWithoutLayout(button, menuBar)
 		w.SetContent(container)
 		w.Resize(fyne.NewSize(300, 300))
 		button.Resize(button.MinSize())
@@ -470,7 +472,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 		menuBar := glfw.NewMenuBar(menu, c)
-		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
@@ -490,7 +492,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 		menuBar := glfw.NewMenuBar(menu, c)
-		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
@@ -511,7 +513,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 		menuBar := glfw.NewMenuBar(menu, c)
-		w.SetContent(fyne.NewContainerWithoutLayout(menuBar))
+		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
@@ -525,4 +527,20 @@ func TestMenuBar_Toggle(t *testing.T) {
 		assert.Nil(t, c.Focused())
 		test.AssertRendersToMarkup(t, "menu_bar_toggle_deactivated.xml", c)
 	})
+}
+
+type notFocusableButton struct {
+	widget.Label
+	f func()
+}
+
+func newNotFocusableButton(l string, f func()) *notFocusableButton {
+	n := &notFocusableButton{f: f}
+	n.ExtendBaseWidget(n)
+	n.Label.Text = l
+	return n
+}
+
+func (n *notFocusableButton) Tapped(e *fyne.PointEvent) {
+	n.f()
 }

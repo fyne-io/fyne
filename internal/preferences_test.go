@@ -141,7 +141,11 @@ func TestInMemoryPreferences_OnChange(t *testing.T) {
 
 	p.SetString("dummy", "another")
 	time.Sleep(time.Millisecond * 100)
+	assert.True(t, called)
 
+	called = false
+	p.RemoveValue("dummy")
+	time.Sleep(time.Millisecond * 100)
 	assert.True(t, called)
 }
 
@@ -162,4 +166,25 @@ func TestRemoveValue(t *testing.T) {
 	assert.Equal(t, float64(0), p.Float("pi"))
 	assert.Equal(t, 0, p.Int("number"))
 	assert.Equal(t, "", p.String("month"))
+}
+
+func TestPrefs_SetSameValue(t *testing.T) {
+	p := NewInMemoryPreferences()
+	called := 0
+	p.AddChangeListener(func() {
+		called++
+	})
+
+	// We should not fire change when it hasn't changed.
+	for i := 0; i < 2; i++ {
+		p.SetBool("enabled", true)
+		time.Sleep(time.Millisecond * 100)
+
+		assert.Equal(t, 1, called)
+	}
+
+	p.SetBool("enabled", false)
+	time.Sleep(time.Millisecond * 100)
+
+	assert.Equal(t, 2, called)
 }

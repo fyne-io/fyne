@@ -14,6 +14,8 @@ const (
 	SingleLineKeyboard
 	// NumberKeyboard is the keyboard with number input style and "Done" return key
 	NumberKeyboard
+	// PasswordKeyboard is used to ensure that text is not leaked to 3rd party keyboard providers
+	PasswordKeyboard
 )
 
 // Keyboardable describes any CanvasObject that needs a keyboard

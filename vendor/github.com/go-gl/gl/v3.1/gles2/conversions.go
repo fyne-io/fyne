@@ -39,7 +39,7 @@ func Ptr(data interface{}) unsafe.Pointer {
 			panic(fmt.Errorf("unsupported pointer to type %s; must be a slice or pointer to a singular scalar value or the first element of an array or slice", e.Kind()))
 		}
 	case reflect.Uintptr:
-		addr = unsafe.Pointer(v.Pointer())
+		addr = unsafe.Pointer(data.(uintptr))
 	case reflect.Slice:
 		addr = unsafe.Pointer(v.Index(0).UnsafeAddr())
 	default:
@@ -49,8 +49,16 @@ func Ptr(data interface{}) unsafe.Pointer {
 }
 
 // PtrOffset takes a pointer offset and returns a GL-compatible pointer.
-// Useful for functions such as glVertexAttribPointer that take pointer
-// parameters indicating an offset rather than an absolute memory address.
+// Originally intended for functions such as glVertexAttribPointer that take pointer
+// parameters also for offsets, since Go 1.14 this is no longer recommended.
+//
+// Use a corresponding offset-compatible variant of the function instead.
+// For example, for gl.VertexAttribPointer() there is gl.VertexAttribPointerWithOffset().
+//
+// See https://github.com/go-gl/gl#go-114-and-checkptr for more details on the checkptr detector.
+// See https://github.com/go-gl/glow#overloads, about adding new overloads.
+//
+// Deprecated: Use more appropriate overload function instead
 func PtrOffset(offset int) unsafe.Pointer {
 	return unsafe.Pointer(uintptr(offset))
 }
@@ -89,14 +97,13 @@ func Strs(strs ...string) (cstrs **uint8, free func()) {
 	for i := range strs {
 		n += len(strs[i])
 	}
+	if n == 0 {
+		n = 1 // avoid allocating zero bytes in case all strings are empty.
+	}
 	data := C.malloc(C.size_t(n))
 
 	// Copy all the strings into data.
-	dataSlice := *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
-		Data: uintptr(data),
-		Len:  n,
-		Cap:  n,
-	}))
+	dataSlice := (*[1 << 30]byte)(data)[:n]
 	css := make([]*uint8, len(strs)) // Populated with pointers to each string.
 	offset := 0
 	for i := range strs {

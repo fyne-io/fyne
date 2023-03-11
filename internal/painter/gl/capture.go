@@ -25,13 +25,16 @@ func (c *captureImage) At(x, y int) color.Color {
 	return color.RGBA{R: c.pix[start], G: c.pix[start+1], B: c.pix[start+2], A: c.pix[start+3]}
 }
 
-func (p *glPainter) Capture(c fyne.Canvas) image.Image {
+func (p *painter) Capture(c fyne.Canvas) image.Image {
 	pos := fyne.NewPos(c.Size().Width, c.Size().Height)
 	width, height := c.PixelCoordinateForPosition(pos)
 	pixels := make([]uint8, width*height*4)
 
-	p.context.RunWithContext(func() {
-		p.glCapture(int32(width), int32(height), &pixels)
+	p.contextProvider.RunWithContext(func() {
+		p.ctx.ReadBuffer(front)
+		p.logError()
+		p.ctx.ReadPixels(0, 0, width, height, colorFormatRGBA, unsignedByte, pixels)
+		p.logError()
 	})
 
 	return &captureImage{

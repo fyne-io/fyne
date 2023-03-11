@@ -9,6 +9,10 @@ import (
 
 type dummyApp struct{}
 
+func (dummyApp) CloudProvider() CloudProvider {
+	return nil
+}
+
 func (dummyApp) NewWindow(title string) Window {
 	return nil
 }
@@ -41,6 +45,9 @@ func (dummyApp) UniqueID() string {
 func (dummyApp) SendNotification(*Notification) {
 }
 
+func (dummyApp) SetCloudProvider(CloudProvider) {
+}
+
 func (dummyApp) Settings() Settings {
 	return nil
 }
@@ -51,6 +58,14 @@ func (dummyApp) Storage() Storage {
 
 func (dummyApp) Preferences() Preferences {
 	return nil
+}
+
+func (dummyApp) Lifecycle() Lifecycle {
+	return nil
+}
+
+func (dummyApp) Metadata() AppMetadata {
+	return AppMetadata{}
 }
 
 func TestSetCurrentApp(t *testing.T) {

@@ -1,4 +1,5 @@
-// +build mobile nacl
+//go:build mobile
+// +build mobile
 
 package app
 

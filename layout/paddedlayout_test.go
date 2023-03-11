@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 
@@ -31,7 +32,7 @@ func TestPaddedLayout_MinSize(t *testing.T) {
 	text := canvas.NewText("FooBar", color.Black)
 	minSize := text.MinSize()
 
-	container := fyne.NewContainer(text)
+	container := container.NewWithoutLayout(text)
 	layoutMin := layout.NewPaddedLayout().MinSize(container.Objects)
 
 	assert.Equal(t, minSize.Width+2*theme.Padding(), layoutMin.Width)
@@ -42,7 +43,7 @@ func TestContainer_PaddedLayout_MinSize(t *testing.T) {
 	text := canvas.NewText("FooBar", color.Black)
 	minSize := text.MinSize()
 
-	container := fyne.NewContainer(text)
+	container := container.NewWithoutLayout(text)
 	container.Layout = layout.NewPaddedLayout()
 	layoutMin := container.MinSize()
 

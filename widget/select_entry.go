@@ -15,10 +15,9 @@ type SelectEntry struct {
 
 // NewSelectEntry creates a SelectEntry.
 func NewSelectEntry(options []string) *SelectEntry {
-	e := &SelectEntry{}
+	e := &SelectEntry{options: options}
 	e.ExtendBaseWidget(e)
 	e.Wrapping = fyne.TextTruncate
-	e.options = options
 	return e
 }
 
@@ -56,16 +55,7 @@ func (e *SelectEntry) Disable() {
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
-	min := e.Entry.MinSize()
-
-	if e.dropDown != nil {
-		padding := fyne.NewSize(4*theme.Padding(), 0)
-		for _, item := range e.dropDown.Items {
-			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(padding)
-			min = min.Max(itemMin)
-		}
-	}
-	return min
+	return e.Entry.MinSize()
 }
 
 // Move changes the relative position of the select entry.

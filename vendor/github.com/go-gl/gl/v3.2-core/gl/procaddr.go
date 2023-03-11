@@ -5,7 +5,7 @@
 //
 // windows: WGL
 // darwin: CGL
-// linux freebsd: GLX
+// linux freebsd netbsd openbsd: GLX
 //
 // Use of EGL instead of the platform's default (listed above) is made possible
 // via the "egl" build tag.
@@ -17,13 +17,17 @@ package gl
 
 /*
 #cgo windows CFLAGS: -DTAG_WINDOWS
-#cgo windows LDFLAGS: -lopengl32
+#cgo !gles2,windows       LDFLAGS: -lopengl32
+#cgo gles2,windows        LDFLAGS: -lGLESv2
 #cgo darwin CFLAGS: -DTAG_DARWIN
-#cgo darwin LDFLAGS: -framework OpenGL
-#cgo linux freebsd              CFLAGS: -DTAG_POSIX
-#cgo !egl,linux !egl,freebsd    pkg-config: gl
-#cgo egl,linux egl,freebsd  CFLAGS: -DTAG_EGL
-#cgo egl,linux egl,freebsd  pkg-config: egl
+#cgo !gles2,darwin LDFLAGS: -framework OpenGL
+#cgo gles2,darwin  LDFLAGS: -framework OpenGLES
+#cgo linux freebsd netbsd openbsd CFLAGS: -DTAG_POSIX
+#cgo !egl,linux !egl,freebsd !egl,netbsd !egl,openbsd pkg-config: gl
+#cgo egl,linux egl,freebsd egl,netbsd egl,openbsd egl,windows CFLAGS: -DTAG_EGL
+#cgo egl,linux egl,freebsd egl,netbsd egl,openbsd pkg-config: egl
+#cgo egl,windows LDFLAGS: -lEGL
+#cgo egl,darwin  LDFLAGS: -lEGL
 // Check the EGL tag first as it takes priority over the platform's default
 // configuration of WGL/GLX/CGL.
 #if defined(TAG_EGL)

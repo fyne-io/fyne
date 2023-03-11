@@ -1,3 +1,4 @@
+//go:build (linux || openbsd || freebsd || netbsd) && !android
 // +build linux openbsd freebsd netbsd
 // +build !android
 

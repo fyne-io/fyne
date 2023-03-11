@@ -1,6 +1,5 @@
-// +build !ci
-
-// +build ios
+//go:build !ci && ios
+// +build !ci,ios
 
 package app
 
@@ -21,20 +20,14 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
-
-func defaultVariant() fyne.ThemeVariant {
-	// TODO read the iOS setting when 10.13 arrives in 2019
-	return theme.VariantLight
-}
 
 func rootConfigDir() string {
 	root := C.documentsPath()
 	return filepath.Join(C.GoString(root), "fyne")
 }
 
-func (app *fyneApp) OpenURL(url *url.URL) error {
+func (a *fyneApp) OpenURL(url *url.URL) error {
 	urlStr := C.CString(url.String())
 	C.openURL(urlStr)
 	C.free(unsafe.Pointer(urlStr))
@@ -42,11 +35,6 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return nil
 }
 
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
-	titleStr := C.CString(n.Title)
-	defer C.free(unsafe.Pointer(titleStr))
-	contentStr := C.CString(n.Content)
-	defer C.free(unsafe.Pointer(contentStr))
-
-	C.sendNotification(titleStr, contentStr)
+func defaultVariant() fyne.ThemeVariant {
+	return systemTheme
 }

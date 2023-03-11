@@ -1,6 +1,7 @@
 GoVersionInfo
 ==========
-[![Build Status](https://travis-ci.org/josephspurrier/goversioninfo.svg)](https://travis-ci.org/josephspurrier/goversioninfo) [![Coverage Status](https://coveralls.io/repos/josephspurrier/goversioninfo/badge.svg)](https://coveralls.io/r/josephspurrier/goversioninfo) [![GoDoc](https://godoc.org/github.com/josephspurrier/goversioninfo?status.svg)](https://godoc.org/github.com/josephspurrier/goversioninfo)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/josephspurrier/goversioninfo)](https://goreportcard.com/report/github.com/josephspurrier/goversioninfo) [![Build Status](https://travis-ci.org/josephspurrier/goversioninfo.svg)](https://travis-ci.org/josephspurrier/goversioninfo) [![Coverage Status](https://coveralls.io/repos/josephspurrier/goversioninfo/badge.svg)](https://coveralls.io/r/josephspurrier/goversioninfo) [![GoDoc](https://godoc.org/github.com/josephspurrier/goversioninfo?status.svg)](https://godoc.org/github.com/josephspurrier/goversioninfo)
 
 Microsoft Windows File Properties/Version Info and Icon Resource Generator for the Go Language
 
@@ -40,12 +41,15 @@ Complete list of the flags for goversioninfo:
   -company="": StringFileInfo.CompanyName
   -copyright="": StringFileInfo.LegalCopyright
   -description="": StringFileInfo.FileDescription
-  -example=false: just dump out an example versioninfo.json to stdout
+  -example=false: dump out an example versioninfo.json to stdout
   -file-version="": StringFileInfo.FileVersion
   -icon="": icon file name
   -internal-name="": StringFileInfo.InternalName
   -manifest="": manifest file name
+  -skip-versioninfo=false: skip version info reading on true, allows setting just icon
   -o="resource.syso": output file name
+  -gofile="": Go output file name (optional) - generates a Go file to access version information internally
+  -gofilepackage="main": Go output package name (optional, requires parameter: 'gofile')
   -platform-specific=false: output i386 and amd64 named resource.syso, ignores -o
   -original-name="": StringFileInfo.OriginalFilename
   -private-build="": StringFileInfo.PrivateBuild
@@ -55,6 +59,7 @@ Complete list of the flags for goversioninfo:
   -trademark="": StringFileInfo.LegalTrademarks
   -translation=0: translation ID
   -64:false: generate 64-bit binaries on true
+  -arm:false: generate ARM binaries on true
   -ver-major=-1: FileVersion.Major
   -ver-minor=-1: FileVersion.Minor
   -ver-patch=-1: FileVersion.Patch

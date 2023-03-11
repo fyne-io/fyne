@@ -21,15 +21,15 @@ const (
 type FileIcon struct {
 	BaseWidget
 
+	// Deprecated: Selection is now handled externally.
 	Selected bool
 	URI      fyne.URI
 
 	resource  fyne.Resource
 	extension string
-	cachedURI fyne.URI
 }
 
-// NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
+// NewFileIcon takes a filepath and creates an icon with an overlaid label using the detected mimetype and extension
 //
 // Since: 1.4
 func NewFileIcon(uri fyne.URI) *FileIcon {
@@ -40,10 +40,8 @@ func NewFileIcon(uri fyne.URI) *FileIcon {
 
 // SetURI changes the URI and makes the icon reflect a different file
 func (i *FileIcon) SetURI(uri fyne.URI) {
-	if uri != i.URI {
-		i.URI = uri
-		i.Refresh()
-	}
+	i.URI = uri
+	i.Refresh()
 }
 
 func (i *FileIcon) setURI(uri fyne.URI) {
@@ -53,7 +51,6 @@ func (i *FileIcon) setURI(uri fyne.URI) {
 	}
 
 	i.URI = uri
-	i.cachedURI = nil
 	i.resource = i.lookupIcon(i.URI)
 	i.extension = trimmedExtension(uri)
 }
@@ -74,9 +71,8 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	// TODO should FileIcon render a background representing selection, or should it be in the collection?
-	// TODO file dialog currently uses a container with NewGridWrapLayout, but if this changes to List, or Table then the primary color background would be rendered twice.
-	background := canvas.NewRectangle(theme.PrimaryColor())
+	// TODO remove background when `SetSelected` is gone.
+	background := canvas.NewRectangle(theme.SelectionColor())
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
@@ -86,12 +82,13 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	s.ext.Alignment = fyne.TextAlignCenter
 
 	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
-	i.cachedURI = i.URI
 
 	return s
 }
 
-// SetSelected makes the file look like it is selected
+// SetSelected makes the file look like it is selected.
+//
+// Deprecated: Selection is now handled externally.
 func (i *FileIcon) SetSelected(selected bool) {
 	i.Selected = selected
 	i.Refresh()
@@ -123,11 +120,13 @@ func (i *FileIcon) isDir(uri fyne.URI) bool {
 		return true
 	}
 
-	can, err := storage.CanList(uri)
+	listable, err := storage.ListerForURI(uri)
 	if err != nil {
 		return false
 	}
-	return can
+
+	i.URI = listable // Avoid having to call storage.ListerForURI(uri) the next time.
+	return true
 }
 
 type fileIconRenderer struct {
@@ -169,21 +168,18 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileIconRenderer) Refresh() {
-	if s.file.URI != s.file.cachedURI {
-		s.file.propertyLock.Lock()
-		s.file.setURI(s.file.URI)
-		s.file.propertyLock.Unlock()
+	s.file.propertyLock.Lock()
+	s.file.setURI(s.file.URI)
+	s.file.propertyLock.Unlock()
 
-		s.file.propertyLock.RLock()
-		s.file.cachedURI = s.file.URI
-		s.img.Resource = s.file.resource
-		s.ext.Text = s.file.extension
-		s.file.propertyLock.RUnlock()
-	}
+	s.file.propertyLock.RLock()
+	s.img.Resource = s.file.resource
+	s.ext.Text = s.file.extension
+	s.file.propertyLock.RUnlock()
 
 	if s.file.Selected {
 		s.background.Show()
-		s.ext.Color = theme.PrimaryColor()
+		s.ext.Color = theme.SelectionColor()
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}

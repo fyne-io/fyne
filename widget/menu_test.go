@@ -6,10 +6,63 @@ import (
 	"fyne.io/fyne/v2"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMenu_RefreshOptions(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	w := fyne.CurrentApp().NewWindow("")
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	itemFoo := fyne.NewMenuItem("Foo", nil)
+	itemBar := fyne.NewMenuItem("Bar", nil)
+	itemBar.ChildMenu = fyne.NewMenu("", fyne.NewMenuItem("Sub", nil))
+	itemBar.Icon = theme.AccountIcon()
+	itemBaz := fyne.NewMenuItem("Baz", nil)
+
+	m := widget.NewMenu(fyne.NewMenu("",
+		itemFoo,
+		fyne.NewMenuItemSeparator(),
+		itemBar,
+		fyne.NewMenuItemSeparator(),
+		itemBaz,
+	))
+	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
+	w.Resize(m.MinSize())
+	m.Resize(m.MinSize())
+	test.AssertRendersToMarkup(t, "menu/refresh_initial.xml", c)
+
+	itemBar.Disabled = true
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/refresh_disabled.xml", c)
+
+	itemBaz.Checked = true
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/refresh_checkmark.xml", c)
+
+	itemBar.Checked = true
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/refresh_2nd_checkmark.xml", c)
+
+	itemBar.Checked = false
+	itemBar.Disabled = false
+	m.Refresh()
+
+	itemBaz.Checked = false
+	m.Refresh()
+
+	test.AssertRendersToMarkup(t, "menu/refresh_initial.xml", c)
+}
 
 func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	test.NewApp()
@@ -32,26 +85,8 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	o := internalWidget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
 	w.SetContent(o)
 
-	// tap on top padding
-	p := fyne.NewPos(5, 1)
-	if test.AssertCanvasTappableAt(t, c, p) {
-		test.TapCanvas(c, p)
-		assert.False(t, item1Hit, "item 1 should not be hit")
-		assert.False(t, item2Hit, "item 2 should not be hit")
-		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	}
-
 	// tap on separator
-	fyne.NewPos(5, size.Height/2)
-	if test.AssertCanvasTappableAt(t, c, p) {
-		test.TapCanvas(c, p)
-		assert.False(t, item1Hit, "item 1 should not be hit")
-		assert.False(t, item2Hit, "item 2 should not be hit")
-		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	}
-
-	// tap bottom padding
-	p = fyne.NewPos(5, size.Height-1)
+	p := fyne.NewPos(5, size.Height/2)
 	if test.AssertCanvasTappableAt(t, c, p) {
 		test.TapCanvas(c, p)
 		assert.False(t, item1Hit, "item 1 should not be hit")

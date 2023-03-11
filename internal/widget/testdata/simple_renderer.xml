@@ -1,0 +1,7 @@
+<canvas padded size="100x100">
+	<content>
+		<widget pos="4,4" size="92x92" type="*widget_test.simpleWidget">
+			<rectangle size="92x92"/>
+		</widget>
+	</content>
+</canvas>

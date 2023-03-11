@@ -11,10 +11,7 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 
-	"github.com/goki/freetype"
-	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/draw"
-	"golang.org/x/image/font"
 )
 
 type gradient interface {
@@ -136,7 +133,7 @@ func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip i
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	bounds := text.MinSize()
-	width := internal.ScaleInt(c, bounds.Width)
+	width := internal.ScaleInt(c, bounds.Width+painter.VectorPad(text))
 	height := internal.ScaleInt(c, bounds.Height)
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
@@ -145,18 +142,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 		color = theme.ForegroundColor()
 	}
 
-	var opts truetype.Options
-	fontSize := text.TextSize * c.Scale()
-	opts.Size = float64(fontSize)
-	opts.DPI = painter.TextDPI
-	face := painter.CachedFontFace(text.TextStyle, &opts)
-
-	d := font.Drawer{}
-	d.Dst = txtImg
-	d.Src = &image.Uniform{C: color}
-	d.Face = face
-	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
-	d.DrawString(text.Text)
+	face, measureFace := painter.CachedFontFace(text.TextStyle, text.TextSize*c.Scale(), 1)
+	painter.DrawString(txtImg, text.Text, color, face, measureFace, text.TextSize, c.Scale(), height, text.TextStyle.TabWidth)
 
 	size := text.Size()
 	offsetX := float32(0)

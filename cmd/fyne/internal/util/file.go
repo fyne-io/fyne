@@ -39,9 +39,33 @@ func EnsureSubDir(parent, name string) string {
 	return path
 }
 
-func copyFileMode(src, tgt string, perm os.FileMode) error {
-	_, err := os.Stat(src)
+// EnsureAbsPath returns the absolute path of the given file if it is not already absolute
+func EnsureAbsPath(path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	abs, err := filepath.Abs(path)
 	if err != nil {
+		fyne.LogError("Failed to find absolute path", err)
+		return path
+	}
+	return abs
+}
+
+// MakePathRelativeTo joins root with path if path is not absolute and exists in root
+func MakePathRelativeTo(root, path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	joined := filepath.Join(root, path)
+	if !Exists(joined) {
+		return path
+	}
+	return joined
+}
+
+func copyFileMode(src, tgt string, perm os.FileMode) (err error) {
+	if _, err := os.Stat(src); err != nil {
 		return err
 	}
 
@@ -51,11 +75,15 @@ func copyFileMode(src, tgt string, perm os.FileMode) error {
 	}
 	defer source.Close()
 
-	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE, perm)
+	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE|os.O_TRUNC, perm)
 	if err != nil {
 		return err
 	}
-	defer target.Close()
+	defer func() {
+		if r := target.Close(); r != nil && err == nil {
+			err = r
+		}
+	}()
 
 	_, err = io.Copy(target, source)
 	return err

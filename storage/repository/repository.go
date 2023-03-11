@@ -1,3 +1,4 @@
+// Package repository provides primitives for working with storage repositories.
 package repository
 
 import (

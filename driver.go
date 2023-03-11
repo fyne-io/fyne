@@ -9,8 +9,8 @@ type Driver interface {
 	AllWindows() []Window
 
 	// RenderedTextSize returns the size required to render the given string of specified
-	// font size and style.
-	RenderedTextSize(string, float32, TextStyle) Size
+	// font size and style. It also returns the height to text baseline, measured from the top.
+	RenderedTextSize(text string, fontSize float32, style TextStyle) (size Size, baseline float32)
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas

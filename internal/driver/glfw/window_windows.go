@@ -6,6 +6,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -21,7 +22,7 @@ func (w *window) setDarkMode() {
 			uintptr(unsafe.Pointer(&dark)), // on or off
 			8)                              // sizeof(darkMode)
 
-		if ret != 0 { // err is always non-nil, we check return value
+		if ret != 0 && ret != 0x80070057 { // err is always non-nil, we check return value (except erroneous code)
 			fyne.LogError("Failed to set dark mode", err)
 		}
 	}
@@ -40,4 +41,11 @@ func isDark() bool {
 	}
 
 	return useLight == 0
+}
+
+func (w *window) computeCanvasSize(width, height int) fyne.Size {
+	if w.fixedSize {
+		return fyne.NewSize(internal.UnscaleInt(w.canvas, w.width), internal.UnscaleInt(w.canvas, w.height))
+	}
+	return fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height))
 }

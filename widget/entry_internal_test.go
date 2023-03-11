@@ -6,11 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
+
+func clickPrimary(e *Entry, ev *fyne.PointEvent) {
+	mouseEvent := &desktop.MouseEvent{
+		PointEvent: *ev,
+		Button:     desktop.MouseButtonPrimary,
+	}
+	e.MouseDown(mouseEvent)
+	e.MouseUp(mouseEvent)
+	e.Tapped(ev) // in the glfw driver there is a double click delay before Tapped()
+}
 
 func TestEntry_Cursor(t *testing.T) {
 	entry := NewEntry()
@@ -25,21 +36,19 @@ func TestEntry_DoubleTapped(t *testing.T) {
 
 	// select the word 'quick'
 	ev := getClickPosition("The qui", 0)
-	entry.Tapped(ev)
+	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "quick", entry.SelectedText())
 
 	// select the whitespace after 'quick'
 	ev = getClickPosition("The quick", 0)
-	// add half a ' ' character
-	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
-	entry.Tapped(ev)
+	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
 
 	// select all whitespace after 'jumped'
 	ev = getClickPosition("jumped  ", 1)
-	entry.Tapped(ev)
+	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "    ", entry.SelectedText())
 }
@@ -55,13 +64,14 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry.Resize(entry.MinSize())
 	c := window.Canvas()
 
-	test.Tap(entry)
+	ev := getClickPosition("", 0)
+	clickPrimary(entry, ev)
 	assert.Equal(t, entry, c.Focused())
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-	entry.Tapped(ev)
+	ev = &fyne.PointEvent{Position: pos}
+	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 
 	assert.Equal(t, "", entry.SelectedText())
@@ -77,8 +87,6 @@ func TestEntry_DragSelect(t *testing.T) {
 	ev1 := getClickPosition("ove", 1)
 	// get position after the letter 'z' on the second row
 	ev2 := getClickPosition("over the laz", 1)
-	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
-	ev2.Position.X += 2
 
 	// mouse down and drag from 'r' to 'z'
 	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
@@ -213,7 +221,7 @@ func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
 }
 
 func TestEntry_EraseSelection(t *testing.T) {
-	// Selects "sti" on line 2 of a new multiline
+	// Selects "sti" on border 2 of a new multiline
 	// T e s t i n g
 	// T e[s t i]n g
 	// T e s t i n g
@@ -271,13 +279,13 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
+	assert.Equal(t, "Ahnj\nBuki\n", entry.SelectedText())
 
 	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.MouseButtonPrimary}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.SelectedText(), "")
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_PasteFromClipboard(t *testing.T) {
@@ -293,7 +301,7 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 
 	entry.pasteFromClipboard(clipboard)
 
-	assert.Equal(t, entry.Text, testContent)
+	assert.Equal(t, testContent, entry.Text)
 }
 
 func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
@@ -302,7 +310,7 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 	w := test.NewApp().NewWindow("")
 	w.SetContent(entry)
-	w.Resize(fyne.NewSize(100, 64))
+	w.Resize(fyne.NewSize(108, 64))
 
 	test.Type(entry, "T")
 	assert.Equal(t, 0, entry.CursorRow)
@@ -327,13 +335,13 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 func TestEntry_Tab(t *testing.T) {
 	e := NewEntry()
-	e.SetText("a\n\tb\nc")
 	e.TextStyle.Monospace = true
+	e.SetText("a\n\tb\nc")
 
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
-	assert.Equal(t, 3, len(r.texts))
-	assert.Equal(t, "a", r.texts[0].Text)
-	assert.Equal(t, textTabIndent+"b", r.texts[1].Text)
+	assert.Equal(t, 3, len(r.Objects()))
+	assert.Equal(t, "a", r.Objects()[0].(*canvas.Text).Text)
+	assert.Equal(t, "\tb", r.Objects()[1].(*canvas.Text).Text)
 
 	w := test.NewWindow(e)
 	w.Resize(fyne.NewSize(86, 86))
@@ -377,6 +385,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
 	y := float32(row)*rowHeight + rowHeight/2
 
-	pos := fyne.NewPos(x, y)
+	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
+	pos := fyne.NewPos(x+2, y)
 	return &fyne.PointEvent{Position: pos}
 }

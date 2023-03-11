@@ -7,8 +7,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const accordionDividerHeight = 1
-
 var _ fyne.Widget = (*Accordion)(nil)
 
 // Accordion displays a list of AccordionItems.
@@ -120,16 +118,15 @@ type accordionRenderer struct {
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
+	dividerOff := (theme.Padding() + theme.SeparatorThicknessSize()) / 2
 	x := float32(0)
 	y := float32(0)
 	for i, ai := range r.container.Items {
 		if i != 0 {
 			div := r.dividers[i-1]
-			div.Move(fyne.NewPos(x, y))
-			div.Resize(fyne.NewSize(size.Width, accordionDividerHeight))
-			y += accordionDividerHeight
+			div.Move(fyne.NewPos(x, y-dividerOff))
+			div.Resize(fyne.NewSize(size.Width, theme.SeparatorThicknessSize()))
 		}
-		y += theme.Padding()
 
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
@@ -137,23 +134,22 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		h.Resize(fyne.NewSize(size.Width, min))
 		y += min
 		if ai.Open {
-			y += theme.Padding()
 			d := ai.Detail
 			d.Move(fyne.NewPos(x, y))
 			min := d.MinSize().Height
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
 		}
-
-		y += theme.Padding()
+		if i < len(r.container.Items)-1 {
+			y += theme.Padding()
+		}
 	}
 }
 
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
-		size.Height += theme.Padding() * 2
 		if i != 0 {
-			size.Height += accordionDividerHeight
+			size.Height += theme.Padding()
 		}
 		min := r.headers[i].MinSize()
 		size.Width = fyne.Max(size.Width, min.Width)
@@ -239,10 +235,11 @@ func (r *accordionRenderer) updateObjects() {
 		r.dividers = append(r.dividers, div)
 		objects = append(objects, div)
 	}
+
 	r.SetObjects(objects)
 }
 
-// AccordionItem represents a single item in an Accordion.
+// AccordionItem represents a single item in an Acc rdion.
 type AccordionItem struct {
 	Title  string
 	Detail fyne.CanvasObject

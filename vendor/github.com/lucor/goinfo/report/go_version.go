@@ -2,10 +2,10 @@ package report
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/lucor/goinfo"
+	"golang.org/x/sys/execabs"
 )
 
 // GoVersion collects the info about the Go version using the go version command
@@ -18,7 +18,7 @@ func (i *GoVersion) Summary() string {
 
 // Info returns the collected info
 func (i *GoVersion) Info() (goinfo.Info, error) {
-	cmd := exec.Command("go", "version")
+	cmd := execabs.Command("go", "version")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("could not detect go version info: %w", err)

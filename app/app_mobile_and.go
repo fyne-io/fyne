@@ -1,6 +1,5 @@
-// +build !ci
-
-// +build android
+//go:build !ci && android
+// +build !ci,android
 
 package app
 
@@ -9,6 +8,7 @@ package app
 
 #include <stdlib.h>
 
+void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url);
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
 */
 import "C"
@@ -19,33 +19,35 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	mobileApp "github.com/fyne-io/mobile/app"
-
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 )
 
-func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantLight
+func (a *fyneApp) OpenURL(url *url.URL) error {
+	urlStr := C.CString(url.String())
+	defer C.free(unsafe.Pointer(urlStr))
+
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.openURL(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), urlStr)
+		return nil
+	})
+	return nil
 }
 
-func (app *fyneApp) OpenURL(url *url.URL) error {
-	cmd := app.exec("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "--user", "0",
-		"-d", url.String())
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	return cmd.Run()
-}
-
-func (app *fyneApp) SendNotification(n *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	titleStr := C.CString(n.Title)
 	defer C.free(unsafe.Pointer(titleStr))
 	contentStr := C.CString(n.Content)
 	defer C.free(unsafe.Pointer(contentStr))
 
-	mobileApp.RunOnJVM(func(vm, env, ctx uintptr) error {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr)
 		return nil
 	})
+}
+
+func defaultVariant() fyne.ThemeVariant {
+	return systemTheme
 }
 
 func rootConfigDir() string {

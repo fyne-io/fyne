@@ -23,9 +23,9 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(data.FyneScene)
 	logo.FillMode = canvas.ImageFillContain
 	if fyne.CurrentDevice().IsMobile() {
-		logo.SetMinSize(fyne.NewSize(171, 125))
+		logo.SetMinSize(fyne.NewSize(192, 192))
 	} else {
-		logo.SetMinSize(fyne.NewSize(228, 167))
+		logo.SetMinSize(fyne.NewSize(256, 256))
 	}
 
 	return container.NewCenter(container.NewVBox(
@@ -38,5 +38,6 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 			widget.NewLabel("-"),
 			widget.NewHyperlink("sponsor", parseURL("https://fyne.io/sponsor/")),
 		),
+		widget.NewLabel(""), // balance the header on the tutorial screen we leave blank on this content
 	))
 }

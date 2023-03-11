@@ -4,13 +4,23 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"math/cmplx"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/container"
+	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+)
+
+const (
+	checkeredBoxSize       = 8
+	checkeredNumberOfRings = 12
+
+	preferenceRecents    = "color_recents"
+	preferenceMaxRecents = 7
 )
 
 // ColorPickerDialog is a simple dialog window that displays a color picker.
@@ -36,6 +46,8 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 		color:    theme.PrimaryColor(),
 		callback: callback,
 	}
+	p.dialog.layout = &dialogLayout{d: p.dialog}
+
 	return p
 }
 
@@ -54,6 +66,12 @@ func (p *ColorPickerDialog) Refresh() {
 
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
+	if p.picker == nil && p.Advanced {
+		p.updateUI()
+	} else if !p.Advanced {
+		fyne.LogError("Advanced mode needs to be enabled to use SetColor", nil)
+		return
+	}
 	p.picker.SetColor(c)
 }
 
@@ -66,8 +84,7 @@ func (p *ColorPickerDialog) Show() {
 }
 
 func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
-	contents = append(contents, newColorBasicPicker(p.selectColor))
-	contents = append(contents, newColorGreyscalePicker(p.selectColor))
+	contents = append(contents, newColorBasicPicker(p.selectColor), newColorGreyscalePicker(p.selectColor))
 	if recent := newColorRecentPicker(p.selectColor); len(recent.(*fyne.Container).Objects) > 0 {
 		// Add divider and recents if there are any
 		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
@@ -77,10 +94,14 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
 	p.dialog.Hide()
-	writeRecentColor(colorToString(p.color))
+	writeRecentColor(colorToString(c))
+	if p.picker != nil {
+		p.picker.SetColor(c)
+	}
 	if f := p.callback; f != nil {
 		f(c)
 	}
+	p.updateUI()
 }
 
 func (p *ColorPickerDialog) updateUI() {
@@ -94,11 +115,16 @@ func (p *ColorPickerDialog) updateUI() {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
 			p.color = c
 		})
-		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
 
-		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
-			fyne.NewContainerWithLayout(layout.NewCenterLayout(),
-				fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+		advancedItem := widget.NewAccordionItem("Advanced", p.picker)
+		if p.advanced != nil {
+			advancedItem.Open = p.advanced.Items[0].Open
+		}
+		p.advanced = widget.NewAccordion(advancedItem)
+
+		p.dialog.content = container.NewVBox(
+			container.NewCenter(
+				container.NewVBox(
 					p.createSimplePickers()...,
 				),
 			),
@@ -111,19 +137,19 @@ func (p *ColorPickerDialog) updateUI() {
 				p.selectColor(p.color)
 			},
 		}
-		p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
+		p.dialog.create(newButtonList(p.dialog.dismiss, confirm))
 	} else {
-		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(), p.createSimplePickers()...)
-		p.dialog.setButtons(newButtonList(p.dialog.dismiss))
+		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
+		p.dialog.create(newButtonList(p.dialog.dismiss))
 	}
 }
 
 func clamp(value, min, max int) int {
 	if value < min {
-		value = min
+		return min
 	}
 	if value > max {
-		value = max
+		return max
 	}
 	return value
 }
@@ -146,25 +172,30 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	for _, c := range colors {
 		objects = append(objects, newColorButton(c, callback))
 	}
-	return fyne.NewContainerWithLayout(layout.NewGridLayoutWithColumns(8), objects...)
+	return container.NewGridWithColumns(8, objects...)
 }
 
-func newCheckeredBackground() *canvas.Raster {
-	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 10
-
-		if (x/boxSize)%2 == (y/boxSize)%2 {
+func newCheckeredBackground(radial bool) *canvas.Raster {
+	f := func(x, y, _, _ int) color.Color {
+		if (x/checkeredBoxSize)%2 == (y/checkeredBoxSize)%2 {
 			return color.Gray{Y: 58}
 		}
 
 		return color.Gray{Y: 84}
-	})
-}
+	}
 
-const (
-	preferenceRecents    = "color_recents"
-	preferenceMaxRecents = 8
-)
+	if radial {
+		rect := f
+		f = func(x, y, w, h int) color.Color {
+			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
+			x = int((t + math.Pi) / (2 * math.Pi) * checkeredNumberOfRings * checkeredBoxSize)
+			y = int(r)
+			return rect(x, y, 0, 0)
+		}
+	}
+
+	return canvas.NewRasterWithPixels(f)
+}
 
 func readRecentColors() (recents []string) {
 	for _, r := range strings.Split(fyne.CurrentApp().Preferences().String(preferenceRecents), ",") {
@@ -190,7 +221,7 @@ func writeRecentColor(color string) {
 }
 
 func colorToString(c color.Color) string {
-	red, green, blue, alpha := colorToRGBA(c)
+	red, green, blue, alpha := col.ToNRGBA(c)
 	if alpha == 0xff {
 		return fmt.Sprintf("#%02x%02x%02x", red, green, blue)
 	}
@@ -225,27 +256,9 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 }
 
 func colorToHSLA(c color.Color) (int, int, int, int) {
-	r, g, b, a := colorToRGBA(c)
+	r, g, b, a := col.ToNRGBA(c)
 	h, s, l := rgbToHsl(r, g, b)
 	return h, s, l, a
-}
-
-func colorToRGBA(c color.Color) (r, g, b, a int) {
-	switch col := c.(type) {
-	case color.NRGBA:
-		r = int(col.R)
-		g = int(col.G)
-		b = int(col.B)
-		a = int(col.A)
-	case *color.NRGBA:
-		r = int(col.R)
-		g = int(col.G)
-		b = int(col.B)
-		a = int(col.A)
-	default:
-		r, g, b, a = unmultiplyAlpha(c)
-	}
-	return
 }
 
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
@@ -341,20 +354,4 @@ func hueToChannel(h, v1, v2 float64) float64 {
 		return v2 + (v1-v2)*6*((2.0/3.0)-h)
 	}
 	return v2
-}
-
-func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
-	red, green, blue, alpha := c.RGBA()
-	if alpha != 0 && alpha != 0xffff {
-		ratio := float64(alpha) / 0xffff
-		red = uint32(float64(red) / ratio)
-		green = uint32(float64(green) / ratio)
-		blue = uint32(float64(blue) / ratio)
-	}
-	// Convert from range 0-65535 to range 0-255
-	r = int(red >> 8)
-	g = int(green >> 8)
-	b = int(blue >> 8)
-	a = int(alpha >> 8)
-	return
 }

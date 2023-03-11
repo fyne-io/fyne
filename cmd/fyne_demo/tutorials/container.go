@@ -3,6 +3,7 @@ package tutorials
 import (
 	"fmt"
 	"image/color"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -23,11 +24,16 @@ func containerScreen(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeAppTabsTab(_ fyne.Window) fyne.CanvasObject {
-	return container.NewAppTabs(
+	tabs := container.NewAppTabs(
 		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
 		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
 		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
 	)
+	for i := 4; i <= 12; i++ {
+		tabs.Append(container.NewTabItem(fmt.Sprintf("Tab %d", i), widget.NewLabel(fmt.Sprintf("Content of tab %d", i))))
+	}
+	locations := makeTabLocationSelect(tabs.SetTabLocation)
+	return container.NewBorder(locations, nil, nil, nil, tabs)
 }
 
 func makeBorderLayout(_ fyne.Window) fyne.CanvasObject {
@@ -56,7 +62,7 @@ func makeButtonList(count int) []fyne.CanvasObject {
 	var items []fyne.CanvasObject
 	for i := 1; i <= count; i++ {
 		index := i // capture
-		items = append(items, widget.NewButton(fmt.Sprintf("Button %d", index), func() {
+		items = append(items, widget.NewButton("Button "+strconv.Itoa(index), func() {
 			fmt.Println("Tapped", index)
 		}))
 	}
@@ -74,6 +80,21 @@ func makeCenterLayout(_ fyne.Window) fyne.CanvasObject {
 	middle := widget.NewButton("CenterLayout", func() {})
 
 	return container.NewCenter(middle)
+}
+
+func makeDocTabsTab(_ fyne.Window) fyne.CanvasObject {
+	tabs := container.NewDocTabs(
+		container.NewTabItem("Doc 1", widget.NewLabel("Content of document 1")),
+		container.NewTabItem("Doc 2 bigger", widget.NewLabel("Content of document 2")),
+		container.NewTabItem("Doc 3", widget.NewLabel("Content of document 3")),
+	)
+	i := 3
+	tabs.CreateTab = func() *container.TabItem {
+		i++
+		return container.NewTabItem(fmt.Sprintf("Doc %d", i), widget.NewLabel(fmt.Sprintf("Content of document %d", i)))
+	}
+	locations := makeTabLocationSelect(tabs.SetTabLocation)
+	return container.NewBorder(locations, nil, nil, nil, tabs)
 }
 
 func makeGridLayout(_ fyne.Window) fyne.CanvasObject {
@@ -117,4 +138,17 @@ func makeSplitTab(_ fyne.Window) fyne.CanvasObject {
 		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
 	)
 	return container.NewHSplit(container.NewVScroll(left), right)
+}
+
+func makeTabLocationSelect(callback func(container.TabLocation)) *widget.Select {
+	locations := widget.NewSelect([]string{"Top", "Bottom", "Leading", "Trailing"}, func(s string) {
+		callback(map[string]container.TabLocation{
+			"Top":      container.TabLocationTop,
+			"Bottom":   container.TabLocationBottom,
+			"Leading":  container.TabLocationLeading,
+			"Trailing": container.TabLocationTrailing,
+		}[s])
+	})
+	locations.SetSelected("Top")
+	return locations
 }

@@ -205,6 +205,8 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     window->focusOnShow = wndconfig.focusOnShow;
     window->cursorMode  = GLFW_CURSOR_NORMAL;
 
+    window->doublebuffer = fbconfig.doublebuffer;
+
     window->minwidth    = GLFW_DONT_CARE;
     window->minheight   = GLFW_DONT_CARE;
     window->maxwidth    = GLFW_DONT_CARE;
@@ -217,30 +219,6 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     {
         glfwDestroyWindow((GLFWwindow*) window);
         return NULL;
-    }
-
-    if (ctxconfig.client != GLFW_NO_API)
-    {
-        if (!_glfwRefreshContextAttribs(window, &ctxconfig))
-        {
-            glfwDestroyWindow((GLFWwindow*) window);
-            return NULL;
-        }
-    }
-
-    if (window->monitor)
-    {
-        if (wndconfig.centerCursor)
-            _glfwCenterCursorInContentArea(window);
-    }
-    else
-    {
-        if (wndconfig.visible)
-        {
-            _glfwPlatformShowWindow(window);
-            if (wndconfig.focused)
-                _glfwPlatformFocusWindow(window);
-        }
     }
 
     return (GLFWwindow*) window;
@@ -502,12 +480,33 @@ GLFWAPI void glfwSetWindowTitle(GLFWwindow* handle, const char* title)
 GLFWAPI void glfwSetWindowIcon(GLFWwindow* handle,
                                int count, const GLFWimage* images)
 {
+    int i;
     _GLFWwindow* window = (_GLFWwindow*) handle;
+
     assert(window != NULL);
     assert(count >= 0);
     assert(count == 0 || images != NULL);
 
     _GLFW_REQUIRE_INIT();
+
+    if (count < 0)
+    {
+        _glfwInputError(GLFW_INVALID_VALUE, "Invalid image count for window icon");
+        return;
+    }
+
+    for (i = 0; i < count; i++)
+    {
+        assert(images[i].pixels != NULL);
+
+        if (images[i].width <= 0 || images[i].height <= 0)
+        {
+            _glfwInputError(GLFW_INVALID_VALUE,
+                            "Invalid image dimensions for window icon");
+            return;
+        }
+    }
+
     _glfwPlatformSetWindowIcon(window, count, images);
 }
 

@@ -1,6 +1,5 @@
-// +build !ci
-
-// +build !ios
+//go:build !ci && !ios
+// +build !ci,!ios
 
 package app
 

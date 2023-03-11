@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+
+	"golang.org/x/mod/semver"
+	"golang.org/x/sys/execabs"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -24,8 +27,10 @@ var (
 	darwinArmNM string
 
 	allArchs = map[string][]string{
-		"android": {"arm", "arm64", "386", "amd64"},
-		"ios":     {"arm64", "amd64"}}
+		"android":      {"arm", "arm64", "386", "amd64"},
+		"ios":          {"arm64"},
+		"iossimulator": {"arm64", "amd64"},
+	}
 
 	bitcodeEnabled bool
 )
@@ -64,7 +69,7 @@ func buildEnvInit() (cleanup func(), err error) {
 		tmpdir = "$WORK"
 		cleanupFn = func() {}
 	} else {
-		tmpdir, err = ioutil.TempDir("", "gomobile-work-")
+		tmpdir, err = ioutil.TempDir("", "fyne-work-")
 		if err != nil {
 			return nil, err
 		}
@@ -80,11 +85,45 @@ func buildEnvInit() (cleanup func(), err error) {
 	return cleanupFn, nil
 }
 
+var (
+	before115 = false
+	before116 = false
+)
+
 func envInit() (err error) {
 	// Check the current Go version by go-list.
 	// An arbitrary standard package ('runtime' here) is given to go-list.
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
+
+	ver, err := execabs.Command("go", "version").Output()
+	if err == nil && string(ver) != "" {
+		fields := strings.Split(string(ver), " ")
+		if len(fields) >= 3 {
+			goVer := strings.TrimPrefix(fields[2], "go")
+
+			// If a go command is a development version, the version
+			// information may only appears in the third elements.
+			// For instance:
+			// go version devel go1.18-527609d47b Wed Aug 25 17:07:58 2021 +0200 darwin/arm64
+			if goVer == "devel" && len(fields) >= 4 {
+				prefix := strings.Split(fields[3], "-")
+				// a go command may miss version information. If that happens
+				// we just use the environment version.
+				if len(prefix) > 0 {
+					goVer = strings.TrimPrefix(prefix[0], "go")
+				} else {
+					goVer = runtime.Version()
+				}
+			}
+
+			before115 = semver.Compare("v"+goVer, "v1.15.0") < 0
+			before116 = semver.Compare("v"+goVer, "v1.16.0") < 0
+		}
+	}
+	if before115 {
+		allArchs["ios"] = []string{"arm64", "amd64", "arm"}
+	}
 
 	// TODO re-enable once we find out what broke after September event 2020
 	//cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
@@ -134,13 +173,13 @@ func envInit() (err error) {
 		}
 	}
 
-	if !xcodeAvailable() {
+	if !xcodeAvailable() || !util.IsIOS(buildTarget) {
 		return nil
 	}
 
 	darwinArmNM = "nm"
 	darwinEnv = make(map[string][]string)
-	for _, arch := range allArchs["ios"] {
+	for _, arch := range allArchs[buildTarget] {
 		var env []string
 		var err error
 		var clang, cflags string
@@ -149,8 +188,13 @@ func envInit() (err error) {
 			env = append(env, "GOARM=7")
 			fallthrough
 		case "arm64":
-			clang, cflags, err = envClang("iphoneos")
-			cflags += " -miphoneos-version-min=" + buildIOSVersion
+			if buildTarget == "ios" {
+				clang, cflags, err = envClang("iphoneos")
+				cflags += " -miphoneos-version-min=" + buildIOSVersion
+			} else { // iossimulator
+				clang, cflags, err = envClang("iphonesimulator")
+				cflags += " -mios-simulator-version-min=" + buildIOSVersion
+			}
 		case "386", "amd64":
 			clang, cflags, err = envClang("iphonesimulator")
 			cflags += " -mios-simulator-version-min=" + buildIOSVersion
@@ -164,8 +208,13 @@ func envInit() (err error) {
 		if bitcodeEnabled {
 			cflags += " -fembed-bitcode"
 		}
+
+		os := "ios"
+		if before116 {
+			os = "darwin"
+		}
 		env = append(env,
-			"GOOS=darwin",
+			"GOOS="+os,
 			"GOARCH="+arch,
 			"CC="+clang,
 			"CXX="+clang+"++",
@@ -185,17 +234,17 @@ func ndkRoot() (string, error) {
 		return "$NDK_PATH", nil
 	}
 
-	androidHome := os.Getenv("ANDROID_HOME")
-	if androidHome != "" {
-		ndkRoot := filepath.Join(androidHome, "ndk-bundle")
+	ndkRoot := os.Getenv("ANDROID_NDK_HOME")
+	if ndkRoot != "" {
 		_, err := os.Stat(ndkRoot)
 		if err == nil {
 			return ndkRoot, nil
 		}
 	}
 
-	ndkRoot := os.Getenv("ANDROID_NDK_HOME")
-	if ndkRoot != "" {
+	androidHome := os.Getenv("ANDROID_HOME")
+	if androidHome != "" {
+		ndkRoot := filepath.Join(androidHome, "ndk-bundle")
 		_, err := os.Stat(ndkRoot)
 		if err == nil {
 			return ndkRoot, nil
@@ -209,14 +258,14 @@ func envClang(sdkName string) (clang, cflags string, err error) {
 	if buildN {
 		return sdkName + "-clang", "-isysroot=" + sdkName, nil
 	}
-	cmd := exec.Command("xcrun", "--sdk", sdkName, "--find", "clang")
+	cmd := execabs.Command("xcrun", "--sdk", sdkName, "--find", "clang")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --find: %v\n%s", err, out)
 	}
 	clang = strings.TrimSpace(string(out))
 
-	cmd = exec.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
+	cmd = execabs.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --show-sdk-path: %v\n%s", err, out)
@@ -287,6 +336,13 @@ func archNDK() string {
 		arch = "x86"
 	case "amd64":
 		arch = "x86_64"
+	case "arm64":
+		// For darwin/arm64, see https://golang.org/cl/346153.
+		if runtime.GOOS == "darwin" {
+			arch = "x86_64"
+			break
+		}
+		fallthrough
 	default:
 		panic("unsupported GOARCH: " + runtime.GOARCH)
 	}
@@ -301,22 +357,37 @@ type ndkToolchain struct {
 	clangPrefix string
 }
 
-func (tc *ndkToolchain) ClangPrefix() string {
-	if buildAndroidAPI < tc.minAPI {
+func (tc *ndkToolchain) ClangPrefix(api int) string {
+	if api < tc.minAPI {
 		return fmt.Sprintf("%s%d", tc.clangPrefix, tc.minAPI)
 	}
-	return fmt.Sprintf("%s%d", tc.clangPrefix, buildAndroidAPI)
+	return fmt.Sprintf("%s%d", tc.clangPrefix, api)
 }
 
 func (tc *ndkToolchain) Path(ndkRoot, toolName string) string {
-	var pref string
-	switch toolName {
-	case "clang", "clang++":
-		pref = tc.ClangPrefix()
-	default:
-		pref = tc.toolPrefix
+	for api := buildAndroidAPI; api < 99; api++ {
+		var pref string
+		switch toolName {
+		case "clang", "clang++":
+			pref = tc.ClangPrefix(api)
+		case "nm":
+			pref = "llvm"
+		default:
+			pref = tc.toolPrefix
+		}
+
+		toolPath := filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin", pref+"-"+toolName)
+		if util.Exists(toolPath) {
+			return toolPath
+		} else if runtime.GOOS == "windows" {
+			// On windows some of the NDK executable have a .exe extension and some don't, so try both.
+			toolPath += ".exe"
+			if util.Exists(toolPath) {
+				return toolPath
+			}
+		}
 	}
-	return filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin", pref+"-"+toolName)
+	return ""
 }
 
 type ndkConfig map[string]ndkToolchain // map: GOOS->androidConfig.
@@ -362,6 +433,6 @@ var ndk = ndkConfig{
 }
 
 func xcodeAvailable() bool {
-	err := exec.Command("xcrun", "xcodebuild", "-version").Run()
+	err := execabs.Command("xcrun", "xcodebuild", "-version").Run()
 	return err == nil
 }

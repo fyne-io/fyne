@@ -97,8 +97,8 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 		tableRow := table[row]
 		if _, ok := objects[i].(*canvas.Text); ok {
-			objects[i].Move(fyne.NewPos(theme.Padding()*2, y+theme.Padding()*2))
-			objects[i].Resize(fyne.NewSize(tableRow[0].Width-theme.Padding()*4, objects[i].MinSize().Height))
+			objects[i].Move(fyne.NewPos(theme.InnerPadding(), y+theme.InnerPadding()))
+			objects[i].Resize(fyne.NewSize(tableRow[0].Width-theme.InnerPadding()*2, objects[i].MinSize().Height))
 		} else {
 			objects[i].Move(fyne.NewPos(0, y))
 			objects[i].Resize(fyne.NewSize(tableRow[0].Width, tableRow[0].Height))

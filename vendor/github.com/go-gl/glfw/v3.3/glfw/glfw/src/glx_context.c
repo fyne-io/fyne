@@ -92,6 +92,9 @@ static GLFWbool chooseGLXFBConfig(const _GLFWfbconfig* desired,
                 continue;
         }
 
+        if (getGLXFBConfigAttrib(n, GLX_DOUBLEBUFFER) != desired->doublebuffer)
+            continue;
+
         if (desired->transparent)
         {
             XVisualInfo* vi = glXGetVisualFromFBConfig(_glfw.x11.display, n);
@@ -119,8 +122,6 @@ static GLFWbool chooseGLXFBConfig(const _GLFWfbconfig* desired,
 
         if (getGLXFBConfigAttrib(n, GLX_STEREO))
             u->stereo = GLFW_TRUE;
-        if (getGLXFBConfigAttrib(n, GLX_DOUBLEBUFFER))
-            u->doublebuffer = GLFW_TRUE;
 
         if (_glfw.glx.ARB_multisample)
             u->samples = getGLXFBConfigAttrib(n, GLX_SAMPLES);
@@ -259,6 +260,8 @@ GLFWbool _glfwInitGLX(void)
         _GLFW_GLX_LIBRARY,
 #elif defined(__CYGWIN__)
         "libGL-1.so",
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
+        "libGL.so",
 #else
         "libGL.so.1",
         "libGL.so",
@@ -306,10 +309,6 @@ GLFWbool _glfwInitGLX(void)
         _glfw_dlsym(_glfw.glx.handle, "glXCreateWindow");
     _glfw.glx.DestroyWindow =
         _glfw_dlsym(_glfw.glx.handle, "glXDestroyWindow");
-    _glfw.glx.GetProcAddress =
-        _glfw_dlsym(_glfw.glx.handle, "glXGetProcAddress");
-    _glfw.glx.GetProcAddressARB =
-        _glfw_dlsym(_glfw.glx.handle, "glXGetProcAddressARB");
     _glfw.glx.GetVisualFromFBConfig =
         _glfw_dlsym(_glfw.glx.handle, "glXGetVisualFromFBConfig");
 
@@ -325,14 +324,18 @@ GLFWbool _glfwInitGLX(void)
         !_glfw.glx.CreateNewContext ||
         !_glfw.glx.CreateWindow ||
         !_glfw.glx.DestroyWindow ||
-        !_glfw.glx.GetProcAddress ||
-        !_glfw.glx.GetProcAddressARB ||
         !_glfw.glx.GetVisualFromFBConfig)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "GLX: Failed to load required entry points");
         return GLFW_FALSE;
     }
+
+    // NOTE: Unlike GLX 1.3 entry points these are not required to be present
+    _glfw.glx.GetProcAddress = (PFNGLXGETPROCADDRESSPROC)
+        _glfw_dlsym(_glfw.glx.handle, "glXGetProcAddress");
+    _glfw.glx.GetProcAddressARB = (PFNGLXGETPROCADDRESSPROC)
+        _glfw_dlsym(_glfw.glx.handle, "glXGetProcAddressARB");
 
     if (!glXQueryExtension(_glfw.x11.display,
                            &_glfw.glx.errorBase,
@@ -673,7 +676,7 @@ GLFWAPI GLXContext glfwGetGLXContext(GLFWwindow* handle)
     _GLFWwindow* window = (_GLFWwindow*) handle;
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 
-    if (window->context.client == GLFW_NO_API)
+    if (window->context.source != GLFW_NATIVE_CONTEXT_API)
     {
         _glfwInputError(GLFW_NO_WINDOW_CONTEXT, NULL);
         return NULL;
@@ -687,7 +690,7 @@ GLFWAPI GLXWindow glfwGetGLXWindow(GLFWwindow* handle)
     _GLFWwindow* window = (_GLFWwindow*) handle;
     _GLFW_REQUIRE_INIT_OR_RETURN(None);
 
-    if (window->context.client == GLFW_NO_API)
+    if (window->context.source != GLFW_NATIVE_CONTEXT_API)
     {
         _glfwInputError(GLFW_NO_WINDOW_CONTEXT, NULL);
         return None;

@@ -1,6 +1,6 @@
 package fyne
 
-// KeyName represents the name of a key that has been pressed
+// KeyName represents the name of a key that has been pressed.
 type KeyName string
 
 const (
@@ -167,4 +167,34 @@ const (
 	KeyPlus KeyName = "+"
 	// KeyBackTick is the key "`" on a US keyboard
 	KeyBackTick KeyName = "`"
+
+	// KeyUnknown is used for key events where the underlying hardware generated an
+	// event that Fyne could not decode.
+	//
+	// Since: 2.1
+	KeyUnknown KeyName = ""
+)
+
+// KeyModifier represents any modifier key (shift etc.) that is being pressed together with a key.
+//
+// Since: 2.2
+type KeyModifier int
+
+const (
+	// KeyModifierShift represents a shift key being held
+	//
+	// Since: 2.2
+	KeyModifierShift KeyModifier = 1 << iota
+	// KeyModifierControl represents the ctrl key being held
+	//
+	// Since: 2.2
+	KeyModifierControl
+	// KeyModifierAlt represents either alt keys being held
+	//
+	// Since: 2.2
+	KeyModifierAlt
+	// KeyModifierSuper represents either super keys being held
+	//
+	// Since: 2.2
+	KeyModifierSuper
 )

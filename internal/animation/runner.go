@@ -118,7 +118,7 @@ func (r *Runner) tickAnimation(a *anim) bool {
 		return true
 	}
 
-	delta := time.Since(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
+	delta := time.Since(a.start).Milliseconds()
 
 	val := float32(delta) / float32(a.total)
 	curve := a.a.Curve

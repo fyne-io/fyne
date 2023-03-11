@@ -1,17 +1,15 @@
 package glfw
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
-	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 type funcData struct {
@@ -25,73 +23,107 @@ type drawData struct {
 	done chan struct{} // Zero allocation signalling channel
 }
 
+type runFlag struct {
+	sync.Mutex
+	flag bool
+	cond *sync.Cond
+}
+
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var runFlag = false
-var runMutex = &sync.Mutex{}
+var run *runFlag
 var initOnce = &sync.Once{}
+var donePool = &sync.Pool{New: func() interface{} {
+	return make(chan struct{})
+}}
+
+func newRun() *runFlag {
+	r := runFlag{}
+	r.cond = sync.NewCond(&r)
+	return &r
+}
 
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
-}
+	mainGoroutineID = goroutineID()
 
-func running() bool {
-	runMutex.Lock()
-	defer runMutex.Unlock()
-	return runFlag
+	run = newRun()
 }
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	if !running() {
+	run.Lock()
+	if !run.flag {
 		f()
+		run.Unlock()
 	} else {
-		done := make(chan struct{})
+		run.Unlock()
+
+		done := donePool.Get().(chan struct{})
+		defer donePool.Put(done)
 
 		funcQueue <- funcData{f: f, done: done}
+
 		<-done
 	}
 }
 
 // force a function f to run on the draw thread
 func runOnDraw(w *window, f func()) {
-	done := make(chan struct{})
+	done := donePool.Get().(chan struct{})
+	defer donePool.Put(done)
 
 	drawFuncQueue <- drawData{f: f, win: w, done: done}
 	<-done
 }
 
-func (d *gLDriver) initGLFW() {
-	initOnce.Do(func() {
-		err := glfw.Init()
-		if err != nil {
-			fyne.LogError("failed to initialise GLFW", err)
-			return
+func (d *gLDriver) drawSingleFrame() {
+	refreshingCanvases := make([]fyne.Canvas, 0)
+	for _, win := range d.windowList() {
+		w := win.(*window)
+		w.viewLock.RLock()
+		canvas := w.canvas
+		closing := w.closing
+		visible := w.visible
+		w.viewLock.RUnlock()
+
+		// CheckDirtyAndClear must be checked after visibility,
+		// because when a window becomes visible, it could be
+		// showing old content without a dirty flag set to true.
+		// Do the clear if and only if the window is visible.
+		if closing || !visible || !canvas.CheckDirtyAndClear() {
+			continue
 		}
 
-		initCursors()
-		d.startDrawThread()
-	})
+		d.repaintWindow(w)
+		refreshingCanvases = append(refreshingCanvases, canvas)
+	}
+	cache.CleanCanvases(refreshingCanvases)
 }
 
 func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(time.Second / 60)
-	runMutex.Lock()
-	runFlag = true
-	runMutex.Unlock()
+	run.Lock()
+	run.flag = true
+	run.Unlock()
+	run.cond.Broadcast()
 
 	d.initGLFW()
-
+	if d.trayStart != nil {
+		d.trayStart()
+	}
+	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
 			d.drawDone <- nil // wait for draw thread to stop
-			glfw.Terminate()
+			d.Terminate()
+			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
 		case f := <-funcQueue:
 			f.f()
@@ -129,13 +161,20 @@ func (d *gLDriver) runGL() {
 				if expand && !fullScreen {
 					w.fitContent()
 					w.viewLock.Lock()
+					shouldExpand := w.shouldExpand
 					w.shouldExpand = false
 					view := w.viewport
 					w.viewLock.Unlock()
-					view.SetSize(w.width, w.height)
+					if shouldExpand {
+						view.SetSize(w.shouldWidth, w.shouldHeight)
+					}
 				}
 
 				newWindows = append(newWindows, win)
+
+				if d.drawOnMainThread {
+					d.drawSingleFrame()
+				}
 			}
 			if reassign {
 				d.windowLock.Lock()
@@ -153,12 +192,12 @@ func (d *gLDriver) runGL() {
 func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
-		if w.canvas.ensureMinSize() {
+		if w.canvas.EnsureMinSize() {
 			w.viewLock.Lock()
 			w.shouldExpand = true
 			w.viewLock.Unlock()
 		}
-		freeDirtyTextures(canvas)
+		canvas.FreeDirtyTextures()
 
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
@@ -177,7 +216,12 @@ func (d *gLDriver) repaintWindow(w *window) {
 func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	draw := time.NewTicker(time.Second / 60)
+	var drawCh <-chan time.Time
+	if d.drawOnMainThread {
+		drawCh = make(chan time.Time) // don't tick when on M1
+	} else {
+		drawCh = time.NewTicker(time.Second / 60).C
+	}
 
 	go func() {
 		runtime.LockOSThread()
@@ -191,58 +235,27 @@ func (d *gLDriver) startDrawThread() {
 				if f.done != nil {
 					f.done <- struct{}{}
 				}
-			case <-settingsChange:
+			case set := <-settingsChange:
 				painter.ClearFontCache()
-				for _, win := range d.windowList() {
-					go win.Canvas().(*glCanvas).reloadScale()
-				}
-			case <-draw.C:
-				for _, win := range d.windowList() {
-					w := win.(*window)
-					w.viewLock.RLock()
-					canvas := w.canvas
-					closing := w.closing
-					visible := w.visible
-					w.viewLock.RUnlock()
-					if closing || !canvas.isDirty() || !visible {
-						continue
+				cache.ResetThemeCaches()
+				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+					c, ok := w.Canvas().(*glCanvas)
+					if !ok {
+						return
 					}
-
-					d.repaintWindow(w)
-				}
+					c.applyThemeOutOfTreeObjects()
+					go c.reloadScale()
+				})
+			case <-drawCh:
+				d.drawSingleFrame()
 			}
 		}
 	}()
-}
-
-func (d *gLDriver) tryPollEvents() {
-	defer func() {
-		if r := recover(); r != nil {
-			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
-		}
-	}()
-
-	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
-}
-
-func freeDirtyTextures(canvas *glCanvas) {
-	for {
-		select {
-		case object := <-canvas.refreshQueue:
-			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				canvas.painter.Free(obj)
-				return false
-			}
-			driver.WalkCompleteObjectTree(object, freeWalked, nil)
-		default:
-			return
-		}
-	}
 }
 
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
-	w.canvas.setDirty(true)
+	w.canvas.SetDirty()
 }
 
 func updateGLContext(w *window) {
@@ -253,6 +266,6 @@ func updateGLContext(w *window) {
 	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
 	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
 
-	canvas.painter.SetFrameBufferScale(canvas.texScale)
-	w.canvas.painter.SetOutputSize(int(winWidth), int(winHeight))
+	canvas.Painter().SetFrameBufferScale(canvas.texScale)
+	w.canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
 }

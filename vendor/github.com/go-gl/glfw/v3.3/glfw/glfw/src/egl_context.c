@@ -173,7 +173,7 @@ static GLFWbool chooseEGLConfig(const _GLFWctxconfig* ctxconfig,
         u->stencilBits = getEGLConfigAttrib(n, EGL_STENCIL_SIZE);
 
         u->samples = getEGLConfigAttrib(n, EGL_SAMPLES);
-        u->doublebuffer = GLFW_TRUE;
+        u->doublebuffer = desired->doublebuffer;
 
         u->handle = (uintptr_t) n;
         usableCount++;
@@ -229,6 +229,12 @@ static void swapBuffersEGL(_GLFWwindow* window)
                         "EGL: The context must be current on the calling thread when swapping buffers");
         return;
     }
+
+#if defined(_GLFW_WAYLAND)
+    // NOTE: Swapping buffers on a hidden window on Wayland makes it visible
+    if (!window->wl.visible)
+        return;
+#endif
 
     eglSwapBuffers(_glfw.egl.display, window->context.egl.surface);
 }
@@ -314,6 +320,8 @@ GLFWbool _glfwInitEGL(void)
         "libEGL.dylib",
 #elif defined(__CYGWIN__)
         "libEGL-1.so",
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
+        "libEGL.so",
 #else
         "libEGL.so.1",
 #endif
@@ -426,6 +434,8 @@ GLFWbool _glfwInitEGL(void)
         extensionSupportedEGL("EGL_KHR_get_all_proc_addresses");
     _glfw.egl.KHR_context_flush_control =
         extensionSupportedEGL("EGL_KHR_context_flush_control");
+    _glfw.egl.EXT_present_opaque =
+        extensionSupportedEGL("EGL_EXT_present_opaque");
 
     return GLFW_TRUE;
 }
@@ -596,6 +606,12 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
             setAttrib(EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR);
     }
 
+    if (!fbconfig->doublebuffer)
+        setAttrib(EGL_RENDER_BUFFER, EGL_SINGLE_BUFFER);
+
+    if (_glfw.egl.EXT_present_opaque)
+        setAttrib(EGL_PRESENT_OPAQUE_EXT, !fbconfig->transparent);
+
     setAttrib(EGL_NONE, EGL_NONE);
 
     window->context.egl.surface =
@@ -627,6 +643,8 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
             "libGLES_CM.dll",
 #elif defined(_GLFW_COCOA)
             "libGLESv1_CM.dylib",
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
+            "libGLESv1_CM.so",
 #else
             "libGLESv1_CM.so.1",
             "libGLES_CM.so.1",
@@ -644,6 +662,8 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
             "libGLESv2.dylib",
 #elif defined(__CYGWIN__)
             "libGLESv2-2.so",
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
+            "libGLESv2.so",
 #else
             "libGLESv2.so.2",
 #endif
@@ -655,6 +675,8 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
             _GLFW_OPENGL_LIBRARY,
 #elif defined(_GLFW_WIN32)
 #elif defined(_GLFW_COCOA)
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
+            "libGL.so",
 #else
             "libGL.so.1",
 #endif
@@ -762,7 +784,7 @@ GLFWAPI EGLContext glfwGetEGLContext(GLFWwindow* handle)
     _GLFWwindow* window = (_GLFWwindow*) handle;
     _GLFW_REQUIRE_INIT_OR_RETURN(EGL_NO_CONTEXT);
 
-    if (window->context.client == GLFW_NO_API)
+    if (window->context.source != GLFW_EGL_CONTEXT_API)
     {
         _glfwInputError(GLFW_NO_WINDOW_CONTEXT, NULL);
         return EGL_NO_CONTEXT;
@@ -776,7 +798,7 @@ GLFWAPI EGLSurface glfwGetEGLSurface(GLFWwindow* handle)
     _GLFWwindow* window = (_GLFWwindow*) handle;
     _GLFW_REQUIRE_INIT_OR_RETURN(EGL_NO_SURFACE);
 
-    if (window->context.client == GLFW_NO_API)
+    if (window->context.source != GLFW_EGL_CONTEXT_API)
     {
         _glfwInputError(GLFW_NO_WINDOW_CONTEXT, NULL);
         return EGL_NO_SURFACE;

@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://pkg.go.dev/fyne.io/fyne/v2?tab=doc" title="Go API Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="Go API Reference"></a>
-  <a href="https://github.com/fyne-io/fyne/releases/tag/v2.0.4" title="2.0.4 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-2.0.4-blue.svg?style=flat" alt="2.0.4 release"></a>
+  <a href="https://img.shields.io/github/v/release/fyne-io/fyne?include_prereleases" title="Latest Release" rel="nofollow"><img src="https://img.shields.io/github/v/release/fyne-io/fyne?include_prereleases" alt="Latest Release"></a>
   <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
   <a href="https://goreportcard.com/report/fyne.io/fyne/v2"><img src="https://goreportcard.com/badge/fyne.io/fyne/v2" alt="Code Status" /></a>
@@ -14,30 +14,31 @@
 It is designed to build applications that run on desktop and mobile devices with a
 single codebase.
 
-Version 2.0 is the current release of the Fyne API, this represented the first release since
-1.0 that may break some API usage. It also added new features including data binding, animation,
-storage repositories and a new more flexible theme API.
-We also refreshed the default theme, adding animations, a focus colour and 
-redesigning the Entry, Select, SelectEntry, ProgressBar and ProgressBarInfinite widgets.
-We are now working towards the next [big release](https://github.com/fyne-io/fyne/milestone/14)
+Version 2.3 is the current release of the Fyne API, it added a refined theme design,
+cloud storage, improved text handling for international languages and many
+smaller feature additions.
+We are now working towards the next big release, codenamed
+[Dalwhinnie](https://github.com/fyne-io/fyne/milestone/18)
 and more news will follow in our news feeds and GitHub project.
 
 # Prerequisites
 
-To develop apps using Fyne you will need Go version 1.12 or later, a C compiler and your system's development tools.
+To develop apps using Fyne you will need Go version 1.14 or later, a C compiler and your system's development tools.
 If you're not sure if that's all installed or you don't know how then check out our
 [Getting Started](https://fyne.io/develop/) document.
 
 Using the standard go tools you can install Fyne's core library using:
 
-    $ go get fyne.io/fyne/v2
+    go get fyne.io/fyne/v2
 
 # Widget demo
 
 To run a showcase of the features of Fyne execute the following:
 
-    $ go get fyne.io/fyne/v2/cmd/fyne_demo/
-    $ fyne_demo
+    go install fyne.io/fyne/v2/cmd/fyne_demo@latest
+    fyne_demo
+
+(For Go versions earlier than v1.16 use `go get fyne.io/fyne/v2/cmd/fyne_demo`)
 
 And you should see something like this (after you click a few buttons):
 
@@ -61,7 +62,7 @@ And even running on a mobile device:
 
 Fyne is designed to be really easy to code with.
 If you have followed the prerequisite steps above then all you need is a
-Go IDE (or a text editor). 
+Go IDE (or a text editor).
 
 Open a new file and you're ready to write your first app!
 
@@ -92,7 +93,7 @@ func main() {
 
 And you can run that simply as:
 
-    $ go run main.go
+    go run main.go
 
 It should look like this:
 
@@ -113,7 +114,9 @@ It should look like this:
 
 There is a helpful mobile simulation mode that gives a hint of how your app would work on a mobile device:
 
-    $ go run -tags mobile main.go
+    go run -tags mobile main.go
+
+Another option is to use `fyne` command, see [Packaging for mobile](#packaging-for-mobile).
 
 # Installing
 
@@ -121,8 +124,10 @@ Using `go install` will copy the executable into your go `bin` dir.
 To install the application with icons etc into your operating system's standard
 application location you can use the fyne utility and the "install" subcommand.
 
-    $ go get fyne.io/fyne/v2/cmd/fyne
-    $ fyne install
+    go install fyne.io/fyne/v2/cmd/fyne@latest
+    fyne install
+
+(for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
 
 # Packaging for mobile
 
@@ -131,8 +136,16 @@ To do this we can use the fyne utility "package" subcommand.
 You will need to add appropriate parameters as prompted, but the basic command is shown below.
 Once packaged you can install using the platform development tools or the fyne "install" subcommand.
 
-    $ fyne package -os android -appID my.domain.appname
-    $ fyne install -os android
+    fyne package -os android -appID my.domain.appname
+    fyne install -os android
+
+The built Android application can run either in a real device or an Android emulator.
+However, building for iOS is slightly different.
+If the "-os" argument is "ios", it is build only for a real iOS device.
+Specify "-os" to "iossimulator" allows the application be able to run in an iOS simulator:
+
+    fyne package -os ios -appID my.domain.appname
+    fyne package -os iossimulator -appID my.domain.appname
 
 # Preparing a release
 
@@ -143,7 +156,7 @@ Then you can execute something like the following, notice the `-os ios` paramete
 building an iOS app from macOS computer. Other combinations work as well :)
 
     $ fyne release -os ios -certificate "Apple Distribution" -profile "My App Distribution" -appID "com.example.myapp"
-    
+
 The above command will create a '.ipa' file that can then be uploaded to the iOS App Store.
 
 # Documentation
@@ -164,7 +177,7 @@ However, if looking to support Fyne in a bigger way on your operating system the
 
 It is recommended that you install the following additional apps:
 
-| app | go get | description |
+| app | go install | description |
 | --- | ------ | ----------- |
 | fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings` | A GUI for managing your global Fyne settings like theme and scaling |
 | apps | `github.com/fyne-io/apps` | A graphical installer for the Fyne apps listed at https://apps.fyne.io |

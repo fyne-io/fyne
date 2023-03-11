@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2014 The Go Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.zentus.balloon"
+	android:versionCode="42"
+	android:versionName=""
+	xmlns:tools="http://schemas.android.com/tools">
+
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	<application
+			android:label="Balloon世界"
+			android:allowBackup="true"
+			android:hasCode="false"
+			android:icon="@mipmap/icon"
+			foo="bar"
+			android:debuggable="true"
+			baz="bar"
+			tools:strict="label">
+	<activity android:name="android.app.NativeActivity"
+		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+		android:label="Balloon"
+		android:screenOrientation="portrait"
+		android:configChanges="orientation|keyboardHidden">
+		<meta-data android:name="android.app.lib_name" android:value="balloon" />
+		<intent-filter>
+			here is some text
+			<action android:name="android.intent.action.MAIN" />
+			<category android:name="android.intent.category.LAUNCHER" />
+		</intent-filter>
+	</activity>
+	</application>
+</manifest>

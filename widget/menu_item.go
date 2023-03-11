@@ -1,12 +1,38 @@
 package widget
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
+
+const (
+	runeModifierAlt     = '⌥'
+	runeModifierControl = '⌃'
+	runeModifierShift   = '⇧'
+)
+
+var keySymbols = map[fyne.KeyName]rune{
+	fyne.KeyBackspace: '⌫',
+	fyne.KeyDelete:    '⌦',
+	fyne.KeyDown:      '↓',
+	fyne.KeyEnd:       '↘',
+	fyne.KeyEnter:     '↩',
+	fyne.KeyEscape:    '⎋',
+	fyne.KeyHome:      '↖',
+	fyne.KeyLeft:      '←',
+	fyne.KeyPageDown:  '⇟',
+	fyne.KeyPageUp:    '⇞',
+	fyne.KeyReturn:    '↩',
+	fyne.KeyRight:     '→',
+	fyne.KeySpace:     '␣',
+	fyne.KeyTab:       '⇥',
+	fyne.KeyUp:        '↑',
+}
 
 var _ fyne.Widget = (*menuItem)(nil)
 
@@ -16,12 +42,16 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child *Menu
+	alignment fyne.TextAlign
+	child     *Menu
 }
 
 // newMenuItem creates a new menuItem.
 func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
-	return &menuItem{Item: item, Parent: parent}
+	i := &menuItem{Item: item, Parent: parent}
+	i.alignment = parent.alignment
+	i.ExtendBaseWidget(i)
+	return i
 }
 
 func (i *menuItem) Child() *Menu {
@@ -41,33 +71,43 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
 	background.Hide()
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
+	text.Alignment = i.alignment
 	objects := []fyne.CanvasObject{background, text}
-	var icon *canvas.Image
+	var expandIcon *canvas.Image
 	if i.Item.ChildMenu != nil {
-		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
+		expandIcon = canvas.NewImageFromResource(theme.MenuExpandIcon())
+		objects = append(objects, expandIcon)
+	}
+	checkIcon := canvas.NewImageFromResource(theme.ConfirmIcon())
+	if !i.Item.Checked {
+		checkIcon.Hide()
+	}
+	var icon *canvas.Image
+	if i.Item.Icon != nil {
+		icon = canvas.NewImageFromResource(i.Item.Icon)
 		objects = append(objects, icon)
 	}
-	return &menuItemRenderer{
-		BaseRenderer: widget.NewBaseRenderer(objects),
-		i:            i,
-		icon:         icon,
-		text:         text,
-		background:   background,
+	var shortcutTexts []*canvas.Text
+	if s, ok := i.Item.Shortcut.(fyne.KeyboardShortcut); ok {
+		shortcutTexts = textsForShortcut(s)
+		for _, t := range shortcutTexts {
+			objects = append(objects, t)
+		}
 	}
-}
 
-// Hide hides the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Hide() {
-	widget.HideWidget(&i.Base, i)
-}
-
-// MinSize returns the minimal size of the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) MinSize() fyne.Size {
-	return widget.MinSizeOf(i)
+	objects = append(objects, checkIcon)
+	r := &menuItemRenderer{
+		BaseRenderer:  widget.NewBaseRenderer(objects),
+		i:             i,
+		expandIcon:    expandIcon,
+		checkIcon:     checkIcon,
+		icon:          icon,
+		shortcutTexts: shortcutTexts,
+		text:          text,
+		background:    background,
+	}
+	r.Refresh() // ensure text and icon resources match state
+	return r
 }
 
 // MouseIn activates the item which shows the submenu if the item has one.
@@ -93,39 +133,14 @@ func (i *menuItem) MouseOut() {
 	}
 }
 
-// Move sets the position of the widget relative to its parent.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Move(pos fyne.Position) {
-	widget.MoveWidget(&i.Base, i, pos)
-}
-
-// Refresh triggers a redraw of the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Refresh() {
-	widget.RefreshWidget(i)
-}
-
-// Resize changes the size of the menu item.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Resize(size fyne.Size) {
-	widget.ResizeWidget(&i.Base, i, size)
-}
-
-// Show makes the menu item visible.
-//
-// Implements: fyne.Widget
-func (i *menuItem) Show() {
-	widget.ShowWidget(&i.Base, i)
-}
-
 // Tapped performs the action of the item and dismisses the menu.
 // It does nothing if the item doesn’t have an action.
 //
 // Implements: fyne.Tappable
 func (i *menuItem) Tapped(*fyne.PointEvent) {
+	if i.Item.Disabled {
+		return
+	}
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
 			i.activate()
@@ -137,6 +152,9 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 }
 
 func (i *menuItem) activate() {
+	if i.Item.Disabled {
+		return
+	}
 	if i.Child() != nil {
 		i.Child().Show()
 	}
@@ -199,25 +217,52 @@ func (i *menuItem) triggerLast() {
 type menuItemRenderer struct {
 	widget.BaseRenderer
 	i                *menuItem
+	background       *canvas.Rectangle
+	checkIcon        *canvas.Image
+	expandIcon       *canvas.Image
 	icon             *canvas.Image
 	lastThemePadding float32
 	minSize          fyne.Size
+	shortcutTexts    []*canvas.Text
 	text             *canvas.Text
-	background       *canvas.Rectangle
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	padding := r.itemPadding()
+	leftOffset := theme.InnerPadding() + r.checkSpace()
+	rightOffset := size.Width
+	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconTopOffset := (size.Height - theme.IconInlineSize()) / 2
 
-	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.ForegroundColor()
-	r.text.Resize(r.text.MinSize())
-	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+	if r.expandIcon != nil {
+		rightOffset -= theme.IconInlineSize()
+		r.expandIcon.Resize(iconSize)
+		r.expandIcon.Move(fyne.NewPos(rightOffset, iconTopOffset))
+	}
+
+	rightOffset -= theme.InnerPadding()
+	for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
+		text := r.shortcutTexts[i]
+		text.Resize(text.MinSize())
+		rightOffset -= text.MinSize().Width
+		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()))
+
+		if i == 0 {
+			rightOffset -= theme.InnerPadding()
+		}
+	}
+
+	r.checkIcon.Resize(iconSize)
+	r.checkIcon.Move(fyne.NewPos(theme.InnerPadding(), iconTopOffset))
 
 	if r.icon != nil {
-		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		r.icon.Move(fyne.NewPos(size.Width-theme.IconInlineSize(), (size.Height-theme.IconInlineSize())/2))
+		r.icon.Resize(iconSize)
+		r.icon.Move(fyne.NewPos(leftOffset, iconTopOffset))
+		leftOffset += theme.IconInlineSize()
+		leftOffset += theme.InnerPadding()
 	}
+
+	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
+	r.text.Move(fyne.NewPos(leftOffset, theme.InnerPadding()))
 
 	r.background.Resize(size)
 }
@@ -227,9 +272,19 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().Add(r.itemPadding())
+	minSize := r.text.MinSize().AddWidthHeight(theme.InnerPadding()*2+r.checkSpace(), theme.InnerPadding()*2)
+	if r.expandIcon != nil {
+		minSize = minSize.AddWidthHeight(theme.IconInlineSize(), 0)
+	}
 	if r.icon != nil {
-		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
+		minSize = minSize.AddWidthHeight(theme.IconInlineSize()+theme.InnerPadding(), 0)
+	}
+	if r.shortcutTexts != nil {
+		var textWidth float32
+		for _, text := range r.shortcutTexts {
+			textWidth += text.MinSize().Width
+		}
+		minSize = minSize.AddWidthHeight(textWidth+theme.InnerPadding(), 0)
 	}
 	r.minSize = minSize
 	return r.minSize
@@ -245,16 +300,83 @@ func (r *menuItemRenderer) Refresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
+	r.text.Alignment = r.i.alignment
+	r.refreshText(r.text)
+	for _, text := range r.shortcutTexts {
+		r.refreshText(text)
+	}
+
+	if r.i.Item.Checked {
+		r.checkIcon.Show()
+	} else {
+		r.checkIcon.Hide()
+	}
+	r.refreshIcon(r.checkIcon, theme.ConfirmIcon())
+	r.refreshIcon(r.expandIcon, theme.MenuExpandIcon())
+	r.refreshIcon(r.icon, r.i.Item.Icon)
 	canvas.Refresh(r.i)
+}
+
+func (r *menuItemRenderer) checkSpace() float32 {
+	if r.i.Parent.containsCheck {
+		return theme.IconInlineSize() + theme.InnerPadding()
+	}
+	return 0
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {
 	return !r.minSize.IsZero() &&
 		r.text.TextSize == theme.TextSize() &&
-		(r.icon == nil || r.icon.Size().Width == theme.IconInlineSize()) &&
-		r.lastThemePadding == theme.Padding()
+		(r.expandIcon == nil || r.expandIcon.Size().Width == theme.IconInlineSize()) &&
+		r.lastThemePadding == theme.InnerPadding()
 }
 
-func (r *menuItemRenderer) itemPadding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
+	if img == nil {
+		return
+	}
+	if r.i.Item.Disabled {
+		img.Resource = theme.NewDisabledResource(rsc)
+	} else {
+		img.Resource = rsc
+	}
+	img.Refresh()
+}
+
+func (r *menuItemRenderer) refreshText(text *canvas.Text) {
+	text.TextSize = theme.TextSize()
+	if r.i.Item.Disabled {
+		text.Color = theme.DisabledColor()
+	} else {
+		text.Color = theme.ForegroundColor()
+	}
+	text.Refresh()
+}
+
+func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
+	b := strings.Builder{}
+	mods := s.Mod()
+	if mods&fyne.KeyModifierControl != 0 {
+		b.WriteRune(runeModifierControl)
+	}
+	if mods&fyne.KeyModifierAlt != 0 {
+		b.WriteRune(runeModifierAlt)
+	}
+	if mods&fyne.KeyModifierShift != 0 {
+		b.WriteRune(runeModifierShift)
+	}
+	if mods&fyne.KeyModifierSuper != 0 {
+		b.WriteRune(runeModifierSuper)
+	}
+	r := keySymbols[s.Key()]
+	if r != 0 {
+		b.WriteRune(r)
+	}
+	t := canvas.NewText(b.String(), theme.ForegroundColor())
+	t.TextStyle.Symbol = true
+	texts = append(texts, t)
+	if r == 0 {
+		texts = append(texts, canvas.NewText(string(s.Key()), theme.ForegroundColor()))
+	}
+	return
 }

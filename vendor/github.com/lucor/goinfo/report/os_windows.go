@@ -4,15 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/lucor/goinfo"
+	"golang.org/x/sys/execabs"
 )
 
 // Info returns the collected info about the OS
 func (i *OS) Info() (goinfo.Info, error) {
-	cmd := exec.Command("cmd", "/C", "wmic os get /value")
+	cmd := execabs.Command("cmd", "/C", "wmic os get /value")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("could not detect os info using wmic command: %w", err)

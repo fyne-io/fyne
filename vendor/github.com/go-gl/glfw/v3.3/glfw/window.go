@@ -171,7 +171,7 @@ type Window struct {
 	fSizeHolder            func(w *Window, width int, height int)
 	fFramebufferSizeHolder func(w *Window, width int, height int)
 	fCloseHolder           func(w *Window)
-	fMaximizeHolder        func(w *Window, iconified bool)
+	fMaximizeHolder        func(w *Window, maximized bool)
 	fContentScaleHolder    func(w *Window, x float32, y float32)
 	fRefreshHolder         func(w *Window)
 	fFocusHolder           func(w *Window, focused bool)
@@ -226,9 +226,9 @@ func goWindowCloseCB(window unsafe.Pointer) {
 }
 
 //export goWindowMaximizeCB
-func goWindowMaximizeCB(window unsafe.Pointer, iconified C.int) {
+func goWindowMaximizeCB(window unsafe.Pointer, maximized C.int) {
 	w := windows.get((*C.GLFWwindow)(window))
-	w.fMaximizeHolder(w, glfwbool(iconified))
+	w.fMaximizeHolder(w, glfwbool(maximized))
 }
 
 //export goWindowRefreshCB
@@ -309,7 +309,7 @@ func WindowHintString(hint Hint, value string) {
 // as not all parameters and hints are hard constraints. This includes the size
 // of the window, especially for full screen windows. To retrieve the actual
 // attributes of the created window and context, use queries like
-// GetWindowAttrib and GetWindowSize.
+// Window.GetAttrib and Window.GetSize.
 //
 // To create the window at a specific position, make it initially invisible using
 // the Visible window hint, set its position and then show it.
@@ -809,7 +809,7 @@ func (w *Window) SetCloseCallback(cbfun CloseCallback) (previous CloseCallback) 
 
 // MaximizeCallback is the function signature for window maximize callback
 // functions.
-type MaximizeCallback func(w *Window, iconified bool)
+type MaximizeCallback func(w *Window, maximized bool)
 
 // SetMaximizeCallback sets the maximization callback of the specified window,
 // which is called when the window is maximized or restored.
@@ -936,6 +936,21 @@ func (w *Window) GetClipboardString() string {
 	return C.GoString(cs)
 }
 
+// panicErrorExceptForInvalidValue is the same as panicError but ignores
+// invalidValue.
+func panicErrorExceptForInvalidValue() {
+	// invalidValue can happen when specific joysticks are used. This issue
+	// will be fixed in GLFW 3.3.5. As a temporary fix, ignore this error.
+	// See go-gl/glfw#292, go-gl/glfw#324, and glfw/glfw#1763.
+	err := acceptError(invalidValue)
+	if e, ok := err.(*Error); ok && e.Code == invalidValue {
+		return
+	}
+	if err != nil {
+		panic(err)
+	}
+}
+
 // PollEvents processes only those events that have already been received and
 // then returns immediately. Processing events will cause the window and input
 // callbacks associated with those events to be called.
@@ -947,7 +962,7 @@ func (w *Window) GetClipboardString() string {
 // This function may only be called from the main thread.
 func PollEvents() {
 	C.glfwPollEvents()
-	panicError()
+	panicErrorExceptForInvalidValue()
 }
 
 // WaitEvents puts the calling thread to sleep until at least one event has been
@@ -965,7 +980,7 @@ func PollEvents() {
 // This function may only be called from the main thread.
 func WaitEvents() {
 	C.glfwWaitEvents()
-	panicError()
+	panicErrorExceptForInvalidValue()
 }
 
 // WaitEventsTimeout puts the calling thread to sleep until at least one event is available in the
@@ -992,7 +1007,7 @@ func WaitEvents() {
 // Event processing is not required for joystick input to work.
 func WaitEventsTimeout(timeout float64) {
 	C.glfwWaitEventsTimeout(C.double(timeout))
-	panicError()
+	panicErrorExceptForInvalidValue()
 }
 
 // PostEmptyEvent posts an empty event from the current thread to the main

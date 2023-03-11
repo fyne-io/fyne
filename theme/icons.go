@@ -1,12 +1,8 @@
 package theme
 
 import (
-	"bytes"
-	"encoding/xml"
-	"fmt"
-	"image/color"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/svg"
 )
 
 const (
@@ -160,6 +156,16 @@ const (
 	// Since: 2.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
 
+	// IconNameMoreHorizontal is the name of theme lookup for horizontal more.
+	//
+	// Since 2.0
+	IconNameMoreHorizontal fyne.ThemeIconName = "moreHorizontal"
+
+	// IconNameMoreVertical is the name of theme lookup for vertical more.
+	//
+	// Since 2.0
+	IconNameMoreVertical fyne.ThemeIconName = "moreVertical"
+
 	// IconNameMailAttachment is the name of theme lookup for mail attachment icon.
 	//
 	// Since: 2.0
@@ -189,6 +195,21 @@ const (
 	//
 	// Since: 2.0
 	IconNameMailSend fyne.ThemeIconName = "mailSend"
+
+	// IconNameMediaMusic is the name of theme lookup for media music icon.
+	//
+	// Since: 2.1
+	IconNameMediaMusic fyne.ThemeIconName = "mediaMusic"
+
+	// IconNameMediaPhoto is the name of theme lookup for media photo icon.
+	//
+	// Since: 2.1
+	IconNameMediaPhoto fyne.ThemeIconName = "mediaPhoto"
+
+	// IconNameMediaVideo is the name of theme lookup for media video icon.
+	//
+	// Since: 2.1
+	IconNameMediaVideo fyne.ThemeIconName = "mediaVideo"
 
 	// IconNameMediaFastForward is the name of theme lookup for media fast-forward icon.
 	//
@@ -404,6 +425,31 @@ const (
 	//
 	// Since: 2.0
 	IconNameComputer fyne.ThemeIconName = "computer"
+
+	// IconNameAccount is the name of theme lookup for account icon.
+	//
+	// Since: 2.1
+	IconNameAccount fyne.ThemeIconName = "account"
+
+	// IconNameLogin is the name of theme lookup for login icon.
+	//
+	// Since: 2.1
+	IconNameLogin fyne.ThemeIconName = "login"
+
+	// IconNameLogout is the name of theme lookup for logout icon.
+	//
+	// Since: 2.1
+	IconNameLogout fyne.ThemeIconName = "logout"
+
+	// IconNameList is the name of theme lookup for list icon.
+	//
+	// Since: 2.1
+	IconNameList fyne.ThemeIconName = "list"
+
+	// IconNameGrid is the name of theme lookup for grid icon.
+	//
+	// Since: 2.1
+	IconNameGrid fyne.ThemeIconName = "grid"
 )
 
 var (
@@ -439,6 +485,9 @@ var (
 		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
 		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
 
+		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
+		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
+
 		IconNameInfo:     NewThemedResource(infoIconRes),
 		IconNameQuestion: NewThemedResource(questionIconRes),
 		IconNameWarning:  NewThemedResource(warningIconRes),
@@ -451,6 +500,9 @@ var (
 		IconNameMailReplyAll:   NewThemedResource(mailreplyallIconRes),
 		IconNameMailSend:       NewThemedResource(mailsendIconRes),
 
+		IconNameMediaMusic:        NewThemedResource(mediamusicIconRes),
+		IconNameMediaPhoto:        NewThemedResource(mediaphotoIconRes),
+		IconNameMediaVideo:        NewThemedResource(mediavideoIconRes),
 		IconNameMediaFastForward:  NewThemedResource(mediafastforwardIconRes),
 		IconNameMediaFastRewind:   NewThemedResource(mediafastrewindIconRes),
 		IconNameMediaPause:        NewThemedResource(mediapauseIconRes),
@@ -500,6 +552,13 @@ var (
 		IconNameComputer: NewThemedResource(computerIconRes),
 		IconNameStorage:  NewThemedResource(storageIconRes),
 		IconNameUpload:   NewThemedResource(uploadIconRes),
+
+		IconNameAccount: NewThemedResource(accountIconRes),
+		IconNameLogin:   NewThemedResource(loginIconRes),
+		IconNameLogout:  NewThemedResource(logoutIconRes),
+
+		IconNameList: NewThemedResource(listIconRes),
+		IconNameGrid: NewThemedResource(gridIconRes),
 	}
 )
 
@@ -511,6 +570,11 @@ func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 // for the currently selected theme.
 type ThemedResource struct {
 	source fyne.Resource
+
+	// ColorName specifies which theme colour should be used to theme the resource
+	//
+	// Since: 2.3
+	ColorName fyne.ThemeColorName
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
@@ -522,12 +586,22 @@ func NewThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	return res.source.Name()
+	prefix := res.ColorName
+	if prefix != "" {
+		prefix += "_"
+	}
+
+	return string(prefix) + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	return colorizeResource(res.source, ForegroundColor())
+	name := res.ColorName
+	if name == "" {
+		name = ColorNameForeground
+	}
+
+	return svg.Colorize(res.source.Content(), safeColorLookup(name, currentVariant()))
 }
 
 // Error returns a different resource for indicating an error.
@@ -549,13 +623,13 @@ func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *InvertedThemedResource) Name() string {
-	return "inverted-" + res.source.Name()
+	return "inverted_" + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
 	clr := BackgroundColor()
-	return colorizeResource(res.source, clr)
+	return svg.Colorize(res.source.Content(), clr)
 }
 
 // Original returns the underlying resource that this inverted themed resource was adapted from
@@ -582,7 +656,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return colorizeResource(res.source, ErrorColor())
+	return svg.Colorize(res.source.Content(), ErrorColor())
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -604,12 +678,12 @@ func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *PrimaryThemedResource) Name() string {
-	return "primary-" + res.source.Name()
+	return "primary_" + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return colorizeResource(res.source, PrimaryColor())
+	return svg.Colorize(res.source.Content(), PrimaryColor())
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -618,45 +692,26 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 }
 
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
-// the current theme's `DisabledIconColor` color.
+// the current theme's `DisabledColor` color.
 type DisabledResource struct {
 	source fyne.Resource
 }
 
 // Name returns the resource source name prefixed with `disabled_` (used for caching)
 func (res *DisabledResource) Name() string {
-	return fmt.Sprintf("disabled_%s", res.source.Name())
+	return "disabled_" + res.source.Name()
 }
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return colorizeResource(res.source, DisabledColor())
+	return svg.Colorize(res.source.Content(), DisabledColor())
 }
 
-// NewDisabledResource creates a resource that adapts to the current theme's DisabledIconColor setting.
+// NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
 func NewDisabledResource(res fyne.Resource) *DisabledResource {
 	return &DisabledResource{
 		source: res,
 	}
-}
-
-func colorizeResource(res fyne.Resource, clr color.Color) []byte {
-	rdr := bytes.NewReader(res.Content())
-	s, err := svgFromXML(rdr)
-	if err != nil {
-		fyne.LogError("could not load SVG, falling back to static content:", err)
-		return res.Content()
-	}
-	if err := s.replaceFillColor(clr); err != nil {
-		fyne.LogError("could not replace fill color, falling back to static content:", err)
-		return res.Content()
-	}
-	b, err := xml.Marshal(s)
-	if err != nil {
-		fyne.LogError("could not marshal svg, falling back to static content:", err)
-		return res.Content()
-	}
-	return b
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -794,6 +849,16 @@ func DocumentSaveIcon() fyne.Resource {
 	return safeIconLookup(IconNameDocumentSave)
 }
 
+// MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
+func MoreHorizontalIcon() fyne.Resource {
+	return current().Icon(IconNameMoreHorizontal)
+}
+
+// MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
+func MoreVerticalIcon() fyne.Resource {
+	return current().Icon(IconNameMoreVertical)
+}
+
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
 func InfoIcon() fyne.Resource {
 	return safeIconLookup(IconNameInfo)
@@ -907,6 +972,27 @@ func MailReplyAllIcon() fyne.Resource {
 // MailSendIcon returns a resource containing the standard mail send icon for the current theme
 func MailSendIcon() fyne.Resource {
 	return safeIconLookup(IconNameMailSend)
+}
+
+// MediaMusicIcon returns a resource containing the standard media music icon for the current theme
+//
+// Since: 2.1
+func MediaMusicIcon() fyne.Resource {
+	return safeIconLookup(IconNameMediaMusic)
+}
+
+// MediaPhotoIcon returns a resource containing the standard media photo icon for the current theme
+//
+// Since: 2.1
+func MediaPhotoIcon() fyne.Resource {
+	return safeIconLookup(IconNameMediaPhoto)
+}
+
+// MediaVideoIcon returns a resource containing the standard media video icon for the current theme
+//
+// Since: 2.1
+func MediaVideoIcon() fyne.Resource {
+	return safeIconLookup(IconNameMediaVideo)
 }
 
 // MediaFastForwardIcon returns a resource containing the standard media fast-forward icon for the current theme
@@ -1057,6 +1143,31 @@ func StorageIcon() fyne.Resource {
 // UploadIcon returns a resource containing the standard upload icon for the current theme
 func UploadIcon() fyne.Resource {
 	return safeIconLookup(IconNameUpload)
+}
+
+// AccountIcon returns a resource containing the standard account icon for the current theme
+func AccountIcon() fyne.Resource {
+	return safeIconLookup(IconNameAccount)
+}
+
+// LoginIcon returns a resource containing the standard login icon for the current theme
+func LoginIcon() fyne.Resource {
+	return safeIconLookup(IconNameLogin)
+}
+
+// LogoutIcon returns a resource containing the standard logout icon for the current theme
+func LogoutIcon() fyne.Resource {
+	return safeIconLookup(IconNameLogout)
+}
+
+// ListIcon returns a resource containing the standard list icon for the current theme
+func ListIcon() fyne.Resource {
+	return safeIconLookup(IconNameList)
+}
+
+// GridIcon returns a resource containing the standard grid icon for the current theme
+func GridIcon() fyne.Resource {
+	return safeIconLookup(IconNameGrid)
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {

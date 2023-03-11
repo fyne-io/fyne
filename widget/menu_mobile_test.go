@@ -1,3 +1,4 @@
+//go:build mobile
 // +build mobile
 
 package widget_test
@@ -10,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -27,9 +29,14 @@ func TestMenu_Layout(t *testing.T) {
 	sep := fyne.NewMenuItemSeparator()
 	item3 := fyne.NewMenuItem("C", nil)
 	subItem1 := fyne.NewMenuItem("subitem A", nil)
+	subItem1.Checked = true
 	subItem2 := fyne.NewMenuItem("subitem B", nil)
+	subItem2.Checked = true
+	subItem2.Icon = theme.InfoIcon()
 	subItem3 := fyne.NewMenuItem("subitem C (long)", nil)
+	subItem3.Icon = theme.MenuIcon()
 	subsubItem1 := fyne.NewMenuItem("subsubitem A (long)", nil)
+	subsubItem1.Icon = theme.FileIcon()
 	subsubItem2 := fyne.NewMenuItem("subsubitem B", nil)
 	subItem3.ChildMenu = fyne.NewMenu("", subsubItem1, subsubItem2)
 	item3.ChildMenu = fyne.NewMenu("", subItem1, subItem2, subItem3)
@@ -119,9 +126,9 @@ func TestMenu_Layout(t *testing.T) {
 			}
 			test.AssertRendersToMarkup(t, tt.want, w.Canvas())
 			if tt.useTestTheme {
-				test.AssertImageMatches(t, "menu/layout_normal.png", c.Capture())
+				test.AssertImageMatches(t, "menu/mobile/layout_normal.png", c.Capture())
 				test.WithTestTheme(t, func() {
-					test.AssertImageMatches(t, "menu/layout_theme_changed.png", c.Capture())
+					test.AssertImageMatches(t, "menu/mobile/layout_theme_changed.png", c.Capture())
 				})
 			}
 		})

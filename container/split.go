@@ -95,7 +95,7 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerSize, leadingSize, trailingSize fyne.Size
 
 	if r.split.Horizontal {
-		lw, tw := r.computeSplitLengths(size.Width, r.split.Leading.MinSize().Width, r.split.Trailing.MinSize().Width)
+		lw, tw := r.computeSplitLengths(size.Width, r.minLeadingWidth(), r.minTrailingWidth())
 		leadingPos.X = 0
 		leadingSize.Width = lw
 		leadingSize.Height = size.Height
@@ -106,7 +106,7 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 		trailingSize.Width = tw
 		trailingSize.Height = size.Height
 	} else {
-		lh, th := r.computeSplitLengths(size.Height, r.split.Leading.MinSize().Height, r.split.Trailing.MinSize().Height)
+		lh, th := r.computeSplitLengths(size.Height, r.minLeadingHeight(), r.minTrailingHeight())
 		leadingPos.Y = 0
 		leadingSize.Width = size.Width
 		leadingSize.Height = lh
@@ -149,6 +149,9 @@ func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *splitContainerRenderer) Refresh() {
+	r.objects[0] = r.split.Leading
+	// [1] is divider which doesn't change
+	r.objects[2] = r.split.Trailing
 	r.Layout(r.split.Size())
 	canvas.Refresh(r.split)
 }
@@ -178,6 +181,34 @@ func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) 
 	ld = offset * available
 	tr = available - ld
 	return float32(ld), float32(tr)
+}
+
+func (r *splitContainerRenderer) minLeadingWidth() float32 {
+	if r.split.Leading.Visible() {
+		return r.split.Leading.MinSize().Width
+	}
+	return 0
+}
+
+func (r *splitContainerRenderer) minLeadingHeight() float32 {
+	if r.split.Leading.Visible() {
+		return r.split.Leading.MinSize().Height
+	}
+	return 0
+}
+
+func (r *splitContainerRenderer) minTrailingWidth() float32 {
+	if r.split.Trailing.Visible() {
+		return r.split.Trailing.MinSize().Width
+	}
+	return 0
+}
+
+func (r *splitContainerRenderer) minTrailingHeight() float32 {
+	if r.split.Trailing.Visible() {
+		return r.split.Trailing.MinSize().Height
+	}
+	return 0
 }
 
 // Declare conformity with interfaces

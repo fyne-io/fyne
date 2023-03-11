@@ -64,11 +64,13 @@ func (a *colorWheel) CreateRenderer() fyne.WidgetRenderer {
 	raster := &canvas.Raster{
 		Generator: a.generator,
 	}
+	background := newCheckeredBackground(true)
 	x := canvas.NewLine(color.Black)
 	y := canvas.NewLine(color.Black)
 	return &colorWheelRenderer{
-		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{raster, x, y}),
+		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{background, raster, x, y}),
 		area:         a,
+		background:   background,
 		raster:       raster,
 		x:            x,
 		y:            y,
@@ -170,21 +172,21 @@ func (a *colorWheel) trigger(pos fyne.Position) {
 
 type colorWheelRenderer struct {
 	internalwidget.BaseRenderer
-	area   *colorWheel
-	raster *canvas.Raster
-	x, y   *canvas.Line
+	area       *colorWheel
+	background *canvas.Raster
+	raster     *canvas.Raster
+	x, y       *canvas.Line
 }
 
 func (r *colorWheelRenderer) Layout(size fyne.Size) {
-	if f := r.area.selection; f != nil {
-		x, y := f(size.Width, size.Height)
-		r.x.Position1 = fyne.NewPos(0, y)
-		r.x.Position2 = fyne.NewPos(size.Width, y)
-		r.y.Position1 = fyne.NewPos(x, 0)
-		r.y.Position2 = fyne.NewPos(x, size.Height)
-	}
+	x, y := r.area.selection(size.Width, size.Height)
+	r.x.Position1 = fyne.NewPos(0, y)
+	r.x.Position2 = fyne.NewPos(size.Width, y)
+	r.y.Position1 = fyne.NewPos(x, 0)
+	r.y.Position2 = fyne.NewPos(x, size.Height)
 	r.raster.Move(fyne.NewPos(0, 0))
 	r.raster.Resize(size)
+	r.background.Resize(size)
 }
 
 func (r *colorWheelRenderer) MinSize() fyne.Size {
@@ -203,5 +205,6 @@ func (r *colorWheelRenderer) Refresh() {
 	r.y.StrokeColor = theme.ForegroundColor()
 	r.y.Refresh()
 	r.raster.Refresh()
+	r.background.Refresh()
 	canvas.Refresh(r.area)
 }

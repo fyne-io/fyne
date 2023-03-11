@@ -1,0 +1,5 @@
+<canvas size="20x20">
+	<content>
+		<circle fillColor="rgba(0,0,0,255)" size="20x20"/>
+	</content>
+</canvas>

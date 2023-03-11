@@ -1,4 +1,5 @@
-// +build ci nacl
+//go:build ci
+// +build ci
 
 package app
 

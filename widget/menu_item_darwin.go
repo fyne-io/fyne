@@ -1,0 +1,3 @@
+package widget
+
+const runeModifierSuper = '⌘'

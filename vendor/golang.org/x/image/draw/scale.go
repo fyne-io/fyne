@@ -46,8 +46,8 @@ type Scaler interface {
 //
 // For example, if m is the matrix
 //
-// 	m00 m01 m02
-// 	m10 m11 m12
+//	m00 m01 m02
+//	m10 m11 m12
 //
 // then the src-space point (sx, sy) maps to the dst-space point
 // (m00*sx + m01*sy + m02, m10*sx + m11*sy + m12).
@@ -98,9 +98,9 @@ type Options struct {
 // have a 1:1 correspondence.
 //
 // Of the interpolators provided by this package:
-//	- NearestNeighbor is fast but usually looks worst.
-//	- CatmullRom is slow but usually looks best.
-//	- ApproxBiLinear has reasonable speed and quality.
+//   - NearestNeighbor is fast but usually looks worst.
+//   - CatmullRom is slow but usually looks best.
+//   - ApproxBiLinear has reasonable speed and quality.
 //
 // The time taken depends on the size of dr. For kernel interpolators, the
 // speed also depends on the size of sr, and so are often slower than

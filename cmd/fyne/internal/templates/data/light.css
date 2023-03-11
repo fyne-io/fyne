@@ -1,0 +1,17 @@
+body {
+    background-color: white;
+}
+.application-name {
+    color: #141415;
+    font-size: 18px;
+}
+.application-version {
+    color: #616161;
+    font-size: 12px;
+}
+.action {
+    color: #2196f3;
+}
+.action-error {
+    color: red;
+}

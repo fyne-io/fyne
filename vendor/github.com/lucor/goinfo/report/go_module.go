@@ -5,12 +5,12 @@ import (
 	"go/build"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/lucor/goinfo"
 	"golang.org/x/mod/modfile"
+	"golang.org/x/sys/execabs"
 )
 
 const (
@@ -120,7 +120,7 @@ func vcsInfo(workDir string) (string, error) {
 
 // gitInfo returns the "human-readable" commit name using git describe
 func gitInfo(workDir string) (string, error) {
-	cmd := exec.Command("git", "describe", "--tags", "--dirty", "--always")
+	cmd := execabs.Command("git", "describe", "--tags", "--dirty", "--always")
 	cmd.Dir = workDir
 	out, err := cmd.CombinedOutput()
 	s := strings.Trim(string(out), "\n")

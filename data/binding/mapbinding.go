@@ -40,7 +40,7 @@ type UntypedMap interface {
 //
 // Since: 2.0
 func NewUntypedMap() UntypedMap {
-	return &mapBase{items: make(map[string]DataItem), val: &map[string]interface{}{}}
+	return &mapBase{items: make(map[string]reflectUntyped), val: &map[string]interface{}{}}
 }
 
 // BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
@@ -51,7 +51,7 @@ func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 	if d == nil {
 		return NewUntypedMap().(ExternalUntypedMap)
 	}
-	m := &mapBase{items: make(map[string]DataItem), val: d, updateExternal: true}
+	m := &mapBase{items: make(map[string]reflectUntyped), val: d, updateExternal: true}
 
 	for k := range *d {
 		m.setItem(k, bindUntypedMapValue(d, k, m.updateExternal))
@@ -87,7 +87,7 @@ func BindStruct(i interface{}) Struct {
 	}
 
 	s := &boundStruct{orig: i}
-	s.items = make(map[string]DataItem)
+	s.items = make(map[string]reflectUntyped)
 	s.val = &map[string]interface{}{}
 	s.updateExternal = true
 
@@ -107,10 +107,7 @@ func BindStruct(i interface{}) Struct {
 	return s
 }
 
-// Untyped id used tpo represent binding an interface{} value.
-//
-// Since: 2.0
-type Untyped interface {
+type reflectUntyped interface {
 	DataItem
 	get() (interface{}, error)
 	set(interface{}) error
@@ -120,7 +117,7 @@ type mapBase struct {
 	base
 
 	updateExternal bool
-	items          map[string]DataItem
+	items          map[string]reflectUntyped
 	val            *map[string]interface{}
 }
 
@@ -174,7 +171,7 @@ func (b *mapBase) GetValue(key string) (interface{}, error) {
 	defer b.lock.RUnlock()
 
 	if i, ok := b.items[key]; ok {
-		return i.(Untyped).get()
+		return i.get()
 	}
 
 	return nil, errKeyNotFound
@@ -206,8 +203,7 @@ func (b *mapBase) SetValue(key string, d interface{}) error {
 	defer b.lock.Unlock()
 
 	if i, ok := b.items[key]; ok {
-		i.(Untyped).set(d)
-		return nil
+		return i.set(d)
 	}
 
 	(*b.val)[key] = d
@@ -220,13 +216,7 @@ func (b *mapBase) doReload() (retErr error) {
 	changed := false
 	// add new
 	for key := range *b.val {
-		found := false
-		for newKey := range b.items {
-			if newKey == key {
-				found = true
-			}
-		}
-
+		_, found := b.items[key]
 		if !found {
 			b.setItem(key, bindUntypedMapValue(b.val, key, b.updateExternal))
 			changed = true
@@ -235,12 +225,7 @@ func (b *mapBase) doReload() (retErr error) {
 
 	// remove old
 	for key := range b.items {
-		found := false
-		for newKey := range *b.val {
-			if newKey == key {
-				found = true
-			}
-		}
+		_, found := (*b.val)[key]
 		if !found {
 			delete(b.items, key)
 			changed = true
@@ -266,7 +251,7 @@ func (b *mapBase) doReload() (retErr error) {
 	return
 }
 
-func (b *mapBase) setItem(key string, d DataItem) {
+func (b *mapBase) setItem(key string, d reflectUntyped) {
 	b.items[key] = d
 
 	b.trigger()
@@ -289,6 +274,11 @@ func (b *boundStruct) Reload() (retErr error) {
 		if !f.CanSet() {
 			continue
 		}
+		kind := f.Kind()
+		if kind == reflect.Slice || kind == reflect.Struct {
+			fyne.LogError("Data binding does not yet support slice or struct elements in a struct", nil)
+			continue
+		}
 
 		key := t.Field(j).Name
 		old := (*b.val)[key]
@@ -297,7 +287,7 @@ func (b *boundStruct) Reload() (retErr error) {
 		}
 
 		var err error
-		switch f.Kind() {
+		switch kind {
 		case reflect.Bool:
 			err = b.items[key].(*reflectBool).Set(f.Bool())
 		case reflect.Float32, reflect.Float64:
@@ -315,7 +305,7 @@ func (b *boundStruct) Reload() (retErr error) {
 	return
 }
 
-func bindUntypedMapValue(m *map[string]interface{}, k string, external bool) Untyped {
+func bindUntypedMapValue(m *map[string]interface{}, k string, external bool) reflectUntyped {
 	if external {
 		ret := &boundExternalMapValue{old: (*m)[k]}
 		ret.val = m
@@ -412,7 +402,7 @@ func (r *reflectBool) Set(b bool) (err error) {
 	return
 }
 
-func bindReflectBool(f reflect.Value) DataItem {
+func bindReflectBool(f reflect.Value) reflectUntyped {
 	r := &reflectBool{}
 	r.val = f
 	return r
@@ -445,7 +435,7 @@ func (r *reflectFloat) Set(f float64) (err error) {
 	return
 }
 
-func bindReflectFloat(f reflect.Value) DataItem {
+func bindReflectFloat(f reflect.Value) reflectUntyped {
 	r := &reflectFloat{}
 	r.val = f
 	return r
@@ -478,7 +468,7 @@ func (r *reflectInt) Set(i int) (err error) {
 	return
 }
 
-func bindReflectInt(f reflect.Value) DataItem {
+func bindReflectInt(f reflect.Value) reflectUntyped {
 	r := &reflectInt{}
 	r.val = f
 	return r
@@ -511,13 +501,13 @@ func (r *reflectString) Set(s string) (err error) {
 	return
 }
 
-func bindReflectString(f reflect.Value) DataItem {
+func bindReflectString(f reflect.Value) reflectUntyped {
 	r := &reflectString{}
 	r.val = f
 	return r
 }
 
-func bindReflect(field reflect.Value) DataItem {
+func bindReflect(field reflect.Value) reflectUntyped {
 	switch field.Kind() {
 	case reflect.Bool:
 		return bindReflectBool(field)

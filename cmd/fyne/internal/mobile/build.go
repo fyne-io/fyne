@@ -12,10 +12,13 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -76,11 +79,15 @@ func runBuild(cmd *command) (err error) {
 }
 
 // AppOutputName provides the name of a build resource for a given os - "ios" or "android".
-func AppOutputName(os, name string) string {
+func AppOutputName(os, name string, release bool) string {
 	switch os {
 	case "android":
-		return androidPkgName(name) + ".apk"
-	case "ios":
+		if release {
+			return androidPkgName(name) + ".aab"
+		} else {
+			return androidPkgName(name) + ".apk"
+		}
+	case "ios", "iossimulator":
 		return rfc1034Label(name) + ".app"
 	}
 
@@ -143,7 +150,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		target := 30
+		target := 31
 		if !buildRelease {
 			target = 29 // TODO once we have gomobile debug signing working for v2 android signs
 		}
@@ -156,7 +163,11 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			return nil, fmt.Errorf("-os=ios requires XCode")
 		}
 		if buildRelease {
-			targetArchs = []string{"arm64"}
+			if len(allArchs["ios"]) > 2 {
+				targetArchs = []string{"arm", "arm64"}
+			} else {
+				targetArchs = []string{"arm64"}
+			}
 		}
 
 		if pkg.Name != "main" {
@@ -167,27 +178,27 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build, cmd.Cert, cmd.Profile)
+		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build, buildRelease, cmd.Cert, cmd.Profile)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if !nmpkgs["github.com/fyne-io/mobile/app"] {
-		return nil, fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.PkgPath)
+	if !nmpkgs["fyne.io/fyne/v2/internal/driver/mobile/app"] {
+		return nil, fmt.Errorf(`%s does not import "fyne.io/fyne/v2/internal/driver/mobile/app"`, pkg.PkgPath)
 	}
 
 	return pkg, nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(github.com/fyne-io.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(fyne.io/fyne/v2/internal/driver/mobile.*/[^.]*)`)
 
 func extractPkgs(nm string, path string) (map[string]bool, error) {
 	if buildN {
-		return map[string]bool{"github.com/fyne-io/mobile/app": true}, nil
+		return map[string]bool{"fyne.io/fyne/v2/internal/driver/mobile/app": true}, nil
 	}
 	r, w := io.Pipe()
-	cmd := exec.Command(nm, path)
+	cmd := execabs.Command(nm, path)
 	cmd.Stdout = w
 	cmd.Stderr = os.Stderr
 
@@ -262,10 +273,14 @@ var (
 )
 
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name, version string, build int, release bool, cert, profile string) error {
+func RunNewBuild(target, appID, icon, name, version string, build int, release, distribution bool, cert, profile string) error {
 	buildTarget = target
 	buildBundleID = appID
-	buildRelease = release
+	buildRelease = distribution
+	if release {
+		buildLdflags = "-w"
+		buildTrimpath = true
+	}
 
 	cmd := cmdBuild
 	cmd.Flag = flag.FlagSet{}
@@ -316,7 +331,7 @@ func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
 }
 
 func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...string) error {
-	cmd := exec.Command("go", subcmd)
+	cmd := execabs.Command("go", subcmd)
 	tags := buildTags
 	targetOS, _, err := parseBuildTarget(buildTarget)
 	if err != nil {
@@ -368,8 +383,11 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 	archNames := []string{}
 	for i, p := range strings.Split(buildTarget, ",") {
 		osarch := strings.SplitN(p, "/", 2) // len(osarch) > 0
-		if osarch[0] != "android" && osarch[0] != "ios" {
+		if !util.IsAndroid(osarch[0]) && !util.IsIOS(osarch[0]) {
 			return "", nil, fmt.Errorf(`unsupported os`)
+		}
+		if osarch[0] == "iossimulator" {
+			osarch[0] = "ios"
 		}
 
 		if i == 0 {
@@ -414,6 +432,19 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 	if os == "ios" {
 		targetOS = "darwin"
 	}
+
+	if buildTarget == "iossimulator" {
+		if before116 {
+			// If the build target is iossimulator, and the go distribution also before
+			// 1.16, then we can only build amd64 arch app for simulators. Because
+			// arm64 simulators is only supported after go 1.16.
+			allArchs[os] = []string{"amd64"}
+		} else {
+			// Otherwise, the iossimulator arch is depending on the host arch.
+			allArchs[os] = []string{runtime.GOARCH}
+		}
+	}
+
 	if all {
 		return targetOS, allArchs[os], nil
 	}

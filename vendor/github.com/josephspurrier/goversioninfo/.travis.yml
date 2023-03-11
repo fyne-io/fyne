@@ -2,29 +2,18 @@ os: windows
 sudo: false
 language: go
 go:
-  # - '1.0'
-  # - '1.1'
-  # - '1.2'
-  # - '1.3'
-  # - '1.4'
-  - '1.5'
-  - '1.6'
-  - '1.7'
-  - '1.8'
-  - '1.9'
-  - '1.10'
-  - '1.11'
-  - '1.12'
-  - '1.13'
-  - '1.14'
+  - "1.12"
+  - "1.13"
+  - "1.14"
+env:
+  - GO111MODULE=on
 before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
-  - go get github.com/akavel/rsrc/binutil
-  - go get github.com/akavel/rsrc/coff
-  - go get github.com/akavel/rsrc/ico
 script:
+  # Output directory.
+  - pwd
   # Install binary.
   - go install github.com/$TRAVIS_REPO_SLUG/cmd/goversioninfo
   # Test building 32 and 64 on Windows.

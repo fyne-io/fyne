@@ -173,7 +173,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s = strings.TrimPrefix(s, fileSchemePrefix)
 
 	// Completely empty URI with just a scheme
-	if len(s) == 0 {
+	if s == "" {
 		return nil, repository.ErrURIRoot
 	}
 

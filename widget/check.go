@@ -2,18 +2,19 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
 type checkRenderer struct {
 	widget.BaseRenderer
+	bg             *canvas.Rectangle
 	icon           *canvas.Image
 	label          *canvas.Text
 	focusIndicator *canvas.Circle
@@ -23,34 +24,41 @@ type checkRenderer struct {
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
-	min := c.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), theme.Padding()*2))
+	pad4 := theme.InnerPadding() * 2
+	min := c.label.MinSize().Add(fyne.NewSize(theme.IconInlineSize()+pad4, pad4))
+	if c.check.Text != "" {
+		min.Add(fyne.NewSize(theme.Padding(), 0))
+	}
 
 	return min
 }
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-
-	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
+	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
 	c.focusIndicator.Resize(focusIndicatorSize)
-	c.focusIndicator.Move(fyne.NewPos(theme.Padding()*0.5, (size.Height-focusIndicatorSize.Height)/2))
+	c.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
 
-	offset := fyne.NewSize(focusIndicatorSize.Width, 0)
-
-	labelSize := size.Subtract(offset)
+	xOff := focusIndicatorSize.Width + theme.InputBorderSize()*2
+	labelSize := size.SubtractWidthHeight(xOff, 0)
 	c.label.Resize(labelSize)
-	c.label.Move(fyne.NewPos(offset.Width+theme.Padding(), 0))
+	c.label.Move(fyne.NewPos(xOff, 0))
 
-	c.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	c.icon.Move(fyne.NewPos(theme.Padding()*1.5, (size.Height-theme.IconInlineSize())/2))
+	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
+	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	c.bg.Move(iconPos.AddXY(4, 4)) // absolute numbers to move relative to SVG details
+	c.bg.Resize(iconSize.SubtractWidthHeight(8, 8))
+	c.icon.Resize(iconSize)
+	c.icon.Move(iconPos)
 }
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
+	c.bg.FillColor = color.Transparent
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
-	if c.check.Disabled() {
+	if c.check.disabled {
+		c.bg.FillColor = theme.InputBackgroundColor()
 		c.label.Color = theme.DisabledColor()
 	}
 }
@@ -70,25 +78,33 @@ func (c *checkRenderer) updateLabel() {
 }
 
 func (c *checkRenderer) updateResource() {
-	res := theme.CheckButtonIcon()
+	res := theme.NewThemedResource(theme.CheckButtonIcon())
+	res.ColorName = theme.ColorNameInputBorder
+	c.bg.FillColor = theme.InputBackgroundColor()
 	if c.check.Checked {
-		res = theme.CheckButtonCheckedIcon()
+		res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
+		res.ColorName = theme.ColorNamePrimary
+		c.bg.FillColor = theme.BackgroundColor()
 	}
-	if c.check.Disabled() {
-		res = theme.NewDisabledResource(res)
+	if c.check.disabled {
+		if c.check.Checked {
+			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
+		}
+		res.ColorName = theme.ColorNameDisabled
+		c.bg.FillColor = color.Transparent
 	}
 	c.icon.Resource = res
 }
 
 func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
-		c.focusIndicator.FillColor = theme.BackgroundColor()
+		c.focusIndicator.FillColor = color.Transparent
 	} else if c.check.focused {
 		c.focusIndicator.FillColor = theme.FocusColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
-		c.focusIndicator.FillColor = theme.BackgroundColor()
+		c.focusIndicator.FillColor = color.Transparent
 	}
 }
 
@@ -103,8 +119,7 @@ type Check struct {
 	focused bool
 	hovered bool
 
-	checkSource   binding.Bool
-	checkListener binding.DataListener
+	binder basicBinder
 }
 
 // Bind connects the specified data source to this Check.
@@ -113,27 +128,11 @@ type Check struct {
 //
 // Since: 2.0
 func (c *Check) Bind(data binding.Bool) {
-	c.Unbind()
-	c.checkSource = data
+	c.binder.SetCallback(c.updateFromData)
+	c.binder.Bind(data)
 
-	c.checkListener = binding.NewDataListener(func() {
-		val, err := data.Get()
-		if err != nil {
-			fyne.LogError("Error getting current data value", err)
-			return
-		}
-		c.Checked = val
-		if cache.IsRendered(c) {
-			c.Refresh()
-		}
-	})
-	data.AddListener(c.checkListener)
-
-	c.OnChanged = func(b bool) {
-		err := data.Set(b)
-		if err != nil {
-			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", b), err)
-		}
+	c.OnChanged = func(_ bool) {
+		c.binder.CallWithData(c.writeData)
 	}
 }
 
@@ -156,7 +155,11 @@ func (c *Check) SetChecked(checked bool) {
 func (c *Check) Hide() {
 	if c.focused {
 		c.FocusLost()
-		fyne.CurrentApp().Driver().CanvasForObject(c).Focus(nil)
+		impl := c.super()
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+			c.Focus(nil)
+		}
 	}
 
 	c.BaseWidget.Hide()
@@ -183,8 +186,12 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	if !c.focused {
-		c.FocusGained()
+	if !c.focused && !fyne.CurrentDevice().IsMobile() {
+		impl := c.super()
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+			c.Focus(impl.(fyne.Focusable))
+		}
 	}
 	if !c.Disabled() {
 		c.SetChecked(!c.Checked)
@@ -202,6 +209,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
+	bg := canvas.NewRectangle(theme.InputBackgroundColor())
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.ForegroundColor())
@@ -209,7 +217,8 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
 	r := &checkRenderer{
-		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, text}),
+		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, bg, icon, text}),
+		bg,
 		icon,
 		text,
 		focusIndicator,
@@ -280,11 +289,41 @@ func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 // Since: 2.0
 func (c *Check) Unbind() {
 	c.OnChanged = nil
-	if c.checkSource == nil || c.checkListener == nil {
+	c.binder.Unbind()
+}
+
+func (c *Check) updateFromData(data binding.DataItem) {
+	if data == nil {
 		return
 	}
+	boolSource, ok := data.(binding.Bool)
+	if !ok {
+		return
+	}
+	val, err := boolSource.Get()
+	if err != nil {
+		fyne.LogError("Error getting current data value", err)
+		return
+	}
+	c.SetChecked(val) // if val != c.Checked, this will call updateFromData again, but only once
+}
 
-	c.checkSource.RemoveListener(c.checkListener)
-	c.checkListener = nil
-	c.checkSource = nil
+func (c *Check) writeData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	boolTarget, ok := data.(binding.Bool)
+	if !ok {
+		return
+	}
+	currentValue, err := boolTarget.Get()
+	if err != nil {
+		return
+	}
+	if currentValue != c.Checked {
+		err := boolTarget.Set(c.Checked)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", c.Checked), err)
+		}
+	}
 }

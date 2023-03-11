@@ -20,8 +20,20 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile/binres"
+	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
+	"fyne.io/fyne/v2/cmd/fyne/internal/util"
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
+
+type manifestTmplData struct {
+	JavaPkgPath string
+	Name        string
+	Debug       bool
+	LibName     string
+	Version     string
+	Build       int
+}
 
 func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
 	iconPath, appName, version string, build, target int, release bool) (map[string]bool, error) {
@@ -44,7 +56,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		err := manifestTmpl.Execute(buf, manifestTmplData{
+		err := templates.ManifestAndroid.Execute(buf, manifestTmplData{
 			JavaPkgPath: bundleID,
 			Name:        strings.Title(appName),
 			Debug:       !buildRelease,
@@ -76,6 +88,10 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
+		// If building release and no ldflags are set then remove the useless debug and DWARF build options
+		if release && buildLdflags == "" {
+			buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
+		}
 		err = goBuild(
 			pkg.PkgPath,
 			androidEnv[arch],
@@ -92,24 +108,20 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		libFiles = append(libFiles, libPath)
 	}
 
-	block, _ := pem.Decode([]byte(debugCert))
-	if block == nil {
-		return nil, errors.New("no debug cert")
+	ext := ".apk"
+	if release {
+		ext = ".aab"
 	}
-	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
+	if buildO == "" {
+		buildO = androidPkgName(appName) + ext
+	}
+	if !strings.HasSuffix(buildO, ext) {
+		return nil, fmt.Errorf("output file name %q does not end in '%s", buildO, ext)
 	}
 
-	if buildO == "" {
-		buildO = androidPkgName(appName) + ".apk"
-	}
-	if !strings.HasSuffix(buildO, ".apk") {
-		return nil, fmt.Errorf("output file name %q does not end in '.apk'", buildO)
-	}
 	var out io.Writer
 	if !buildN {
-		f, err := os.Create(buildO)
+		f, err := os.Create(buildO[:len(buildO)-3] + "apk")
 		if err != nil {
 			return nil, err
 		}
@@ -119,6 +131,143 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 			}
 		}()
 		out = f
+	}
+
+	apkw, err := buildAPK(out, nmpkgs, libFiles, androidArchs)
+	if err != nil {
+		return nil, err
+	}
+	err = addAssets(apkw, manifestData, dir, iconPath, target)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: add gdbserver to apk?
+
+	if !buildN {
+		if err := apkw.Close(); err != nil {
+			return nil, err
+		}
+	}
+	if release {
+		_, err := execabs.LookPath("bundletool")
+		if err != nil {
+			_, _ = fmt.Fprint(os.Stderr, "Required command 'bundletool' not found when building Android for release.\n")
+			_, _ = fmt.Fprint(os.Stderr, "For more information see https://g.co/androidappbundle.\n")
+			return nil, fmt.Errorf("bundletool: command not found")
+		}
+		err = convertAPKToAAB(buildO)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// TODO: return nmpkgs
+	return nmpkgs[androidArchs[0]], nil
+}
+
+func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target int) error {
+	// Add any assets.
+	var arsc struct {
+		iconPath string
+	}
+	arsc.iconPath = iconPath
+	assetsDir := filepath.Join(dir, "assets")
+	assetsDirExists := true
+	fi, err := os.Stat(assetsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			assetsDirExists = false
+		} else {
+			return err
+		}
+	} else {
+		assetsDirExists = fi.IsDir()
+	}
+	if assetsDirExists {
+		// if assets is a symlink, follow the symlink.
+		assetsDir, err = filepath.EvalSymlinks(assetsDir)
+		if err != nil {
+			return err
+		}
+		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if name := filepath.Base(path); strings.HasPrefix(name, ".") {
+				// Do not include the hidden files.
+				return nil
+			}
+			if info.IsDir() {
+				return nil
+			}
+
+			if rel, err := filepath.Rel(assetsDir, path); rel == "icon.png" && err == nil {
+				arsc.iconPath = path
+				// TODO returning here does not write the assets/icon.png to the final assets output,
+				// making it unavailable via the assets API. Should the file be duplicated into assets
+				// or should assets API be able to retrieve files from the generated resource table?
+				return nil
+			}
+
+			name := "assets/" + path[len(assetsDir)+1:]
+			return apkwWriteFile(name, path, apkw)
+		})
+		if err != nil {
+			return fmt.Errorf("asset %v", err)
+		}
+	}
+
+	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", target)
+	if err != nil {
+		return err
+	}
+
+	// generate resources.arsc identifying single xxxhdpi icon resource.
+	if arsc.iconPath != "" {
+		pkgname, err := bxml.RawValueByName("manifest", xml.Name{Local: "package"})
+		if err != nil {
+			return err
+		}
+		tbl, name := binres.NewMipmapTable(pkgname)
+		if err := apkwWriteFile(name, arsc.iconPath, apkw); err != nil {
+			return err
+		}
+		w, err := apkwCreate("resources.arsc", apkw)
+		if err != nil {
+			return err
+		}
+		bin, err := tbl.MarshalBinary()
+		if err != nil {
+			return err
+		}
+		if _, err := w.Write(bin); err != nil {
+			return err
+		}
+	}
+
+	w, err := apkwCreate("AndroidManifest.xml", apkw)
+	if err != nil {
+		return err
+	}
+	bin, err := bxml.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	if _, err := w.Write(bin); err != nil {
+		return err
+	}
+	return nil
+}
+
+func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []string, androidArchs []string) (*Writer, error) {
+	block, _ := pem.Decode([]byte(debugCert))
+	if block == nil {
+		return nil, errors.New("no debug cert")
+	}
+	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
 	}
 
 	var apkw *Writer
@@ -146,119 +295,18 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 	for _, arch := range androidArchs {
 		toolchain := ndk.Toolchain(arch)
-		if nmpkgs[arch]["github.com/fyne-io/mobile/exp/audio/al"] {
+		if nmpkgs[arch]["fyne.io/fyne/v2/internal/driver/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.abi + "/libopenal.so"
 			src := filepath.Join(gomobilepath, dst)
 			if _, err := os.Stat(src); err != nil {
-				return nil, errors.New("the Android requires the github.com/fyne-io/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
+				return nil, errors.New("the Android requires the fyne.io/fyne/v2/internal/driver/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
 			}
 			if err := apkwWriteFile(dst, src, apkw); err != nil {
 				return nil, err
 			}
 		}
 	}
-
-	// Add any assets.
-	var arsc struct {
-		iconPath string
-	}
-	arsc.iconPath = iconPath
-	assetsDir := filepath.Join(dir, "assets")
-	assetsDirExists := true
-	fi, err := os.Stat(assetsDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			assetsDirExists = false
-		} else {
-			return nil, err
-		}
-	} else {
-		assetsDirExists = fi.IsDir()
-	}
-	if assetsDirExists {
-		// if assets is a symlink, follow the symlink.
-		assetsDir, err = filepath.EvalSymlinks(assetsDir)
-		if err != nil {
-			return nil, err
-		}
-		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if name := filepath.Base(path); strings.HasPrefix(name, ".") {
-				// Do not include the hidden files.
-				return nil
-			}
-			if info.IsDir() {
-				return nil
-			}
-
-			if rel, err := filepath.Rel(assetsDir, path); rel == "icon.png" && err == nil {
-				arsc.iconPath = path
-				// TODO returning here does not write the assets/icon.png to the final assets output,
-				// making it unavailable via the assets API. Should the file be duplicated into assets
-				// or should assets API be able to retrieve files from the generated resource table?
-				return nil
-			}
-
-			name := "assets/" + path[len(assetsDir)+1:]
-			return apkwWriteFile(name, path, apkw)
-		})
-		if err != nil {
-			return nil, fmt.Errorf("asset %v", err)
-		}
-	}
-
-	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", target)
-	if err != nil {
-		return nil, err
-	}
-
-	// generate resources.arsc identifying single xxxhdpi icon resource.
-	if arsc.iconPath != "" {
-		pkgname, err := bxml.RawValueByName("manifest", xml.Name{Local: "package"})
-		if err != nil {
-			return nil, err
-		}
-		tbl, name := binres.NewMipmapTable(pkgname)
-		if err := apkwWriteFile(name, arsc.iconPath, apkw); err != nil {
-			return nil, err
-		}
-		w, err := apkwCreate("resources.arsc", apkw)
-		if err != nil {
-			return nil, err
-		}
-		bin, err := tbl.MarshalBinary()
-		if err != nil {
-			return nil, err
-		}
-		if _, err := w.Write(bin); err != nil {
-			return nil, err
-		}
-	}
-
-	w, err = apkwCreate("AndroidManifest.xml", apkw)
-	if err != nil {
-		return nil, err
-	}
-	bin, err := bxml.MarshalBinary()
-	if err != nil {
-		return nil, err
-	}
-	if _, err := w.Write(bin); err != nil {
-		return nil, err
-	}
-
-	// TODO: add gdbserver to apk?
-
-	if !buildN {
-		if err := apkw.Close(); err != nil {
-			return nil, err
-		}
-	}
-
-	// TODO: return nmpkgs
-	return nmpkgs[androidArchs[0]], nil
+	return apkw, nil
 }
 
 func apkwCreate(name string, apkw *Writer) (io.Writer, error) {
@@ -327,6 +375,56 @@ func androidPkgName(name string) string {
 		s += "_"
 	}
 	return s
+}
+
+func convertAPKToAAB(aabPath string) error {
+	apkPath := buildO[:len(aabPath)-3] + "apk"
+	apkProtoPath := buildO[:len(aabPath)-3] + "apk-proto"
+	tmpPath := filepath.Join(filepath.Dir(aabPath), "tmpbundle")
+	err := os.MkdirAll(tmpPath, 0755)
+	if err != nil {
+		return err
+	}
+	defer removeAll(tmpPath)
+
+	aapt2 := filepath.Join(util.AndroidBuildToolsPath(), "aapt2")
+	cmd := execabs.Command(aapt2, "convert", "--output-format", "proto", "-o", apkProtoPath, apkPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	_ = os.Remove(apkPath)
+
+	cmd = execabs.Command("unzip", apkProtoPath, "-x", "META-INF/*", "-d", tmpPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	_ = os.Remove(apkProtoPath)
+
+	_ = os.MkdirAll(filepath.Join(tmpPath, "dex"), 0755)
+	_ = os.MkdirAll(filepath.Join(tmpPath, "manifest"), 0755)
+	_ = os.Rename(filepath.Join(tmpPath, "AndroidManifest.xml"), filepath.Join(tmpPath, "manifest", "AndroidManifest.xml"))
+	_ = os.Rename(filepath.Join(tmpPath, "classes.dex"), filepath.Join(tmpPath, "dex", "classes.dex"))
+
+	cmd = execabs.Command("zip", "../base.zip", "-r", ".")
+	cmd.Dir = tmpPath
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(filepath.Join(filepath.Dir(aabPath), "base.zip"))
+
+	cmd = execabs.Command("bundletool", "build-bundle", "--output", aabPath, "--modules", "base.zip")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 // A random uninteresting private key.

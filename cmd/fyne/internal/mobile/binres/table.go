@@ -23,10 +23,11 @@ type TableRef uint32
 // Resolve returns the Entry of TableRef in the given table.
 //
 // A TableRef is structured as follows:
-//  0xpptteeee
-//  pp: package index
-//  tt: type spec index in package
-//  eeee: entry index in type spec
+//
+//	0xpptteeee
+//	pp: package index
+//	tt: type spec index in package
+//	eeee: entry index in type spec
 //
 // The package and type spec values start at 1 for the first item,
 // to help catch cases where they have not been supplied.
@@ -128,8 +129,10 @@ func OpenTable() (*Table, error) {
 // indices.
 //
 // For example:
-//  tbl.SpecByName("@android:style/Theme.NoTitleBar")
-//  tbl.SpecByName("style")
+//
+//	tbl.SpecByName("@android:style/Theme.NoTitleBar")
+//	tbl.SpecByName("style")
+//
 // Both locate the spec by name "style".
 func (tbl *Table) SpecByName(name string) (int, *Package, int, *TypeSpec, error) {
 	n := strings.TrimPrefix(name, "@android:")
@@ -405,8 +408,8 @@ func (spec *TypeSpec) UnmarshalBinary(bin []byte) error {
 	if spec.typ != ResTableTypeSpec {
 		return errWrongType(spec.typ, ResTableTypeSpec)
 	}
-	spec.id = uint8(bin[8])
-	spec.res0 = uint8(bin[9])
+	spec.id = bin[8]
+	spec.res0 = bin[9]
 	spec.res1 = btou16(bin[10:])
 	spec.entryCount = btou32(bin[12:])
 
@@ -425,7 +428,7 @@ func (spec *TypeSpec) MarshalBinary() ([]byte, error) {
 	putu16(bin[2:], 16)
 	putu32(bin[4:], uint32(len(bin)))
 
-	bin[8] = byte(spec.id)
+	bin[8] = spec.id
 	// [9] = 0
 	// [10:12] = 0
 	putu32(bin[12:], uint32(len(spec.entries)))
@@ -507,8 +510,8 @@ func (typ *Type) UnmarshalBinary(bin []byte) error {
 		return errWrongType(typ.typ, ResTableType)
 	}
 
-	typ.id = uint8(bin[8])
-	typ.res0 = uint8(bin[9])
+	typ.id = bin[8]
+	typ.res0 = bin[9]
 	typ.res1 = btou16(bin[10:])
 	typ.entryCount = btou32(bin[12:])
 	typ.entriesStart = btou32(bin[16:])
@@ -522,19 +525,19 @@ func (typ *Type) UnmarshalBinary(bin []byte) error {
 	typ.config.imsi.mnc = btou16(bin[26:])
 	typ.config.locale.language = btou16(bin[28:])
 	typ.config.locale.country = btou16(bin[30:])
-	typ.config.screenType.orientation = uint8(bin[32])
-	typ.config.screenType.touchscreen = uint8(bin[33])
+	typ.config.screenType.orientation = bin[32]
+	typ.config.screenType.touchscreen = bin[33]
 	typ.config.screenType.density = btou16(bin[34:])
-	typ.config.input.keyboard = uint8(bin[36])
-	typ.config.input.navigation = uint8(bin[37])
-	typ.config.input.inputFlags = uint8(bin[38])
-	typ.config.input.inputPad0 = uint8(bin[39])
+	typ.config.input.keyboard = bin[36]
+	typ.config.input.navigation = bin[37]
+	typ.config.input.inputFlags = bin[38]
+	typ.config.input.inputPad0 = bin[39]
 	typ.config.screenSize.width = btou16(bin[40:])
 	typ.config.screenSize.height = btou16(bin[42:])
 	typ.config.version.sdk = btou16(bin[44:])
 	typ.config.version.minor = btou16(bin[46:])
-	typ.config.screenConfig.layout = uint8(bin[48])
-	typ.config.screenConfig.uiMode = uint8(bin[49])
+	typ.config.screenConfig.layout = bin[48]
+	typ.config.screenConfig.uiMode = bin[49]
 	typ.config.screenConfig.smallestWidthDP = btou16(bin[50:])
 	typ.config.screenSizeDP.width = btou16(bin[52:])
 	typ.config.screenSizeDP.height = btou16(bin[54:])
@@ -572,7 +575,7 @@ func (typ *Type) MarshalBinary() ([]byte, error) {
 	putu16(bin, uint16(ResTableType))
 	putu16(bin[2:], 56)
 
-	bin[8] = byte(typ.id)
+	bin[8] = typ.id
 	// [9] = 0
 	// [10:12] = 0
 	putu32(bin[12:], uint32(len(typ.entries)))
@@ -755,7 +758,7 @@ type Data struct {
 // UnmarshalBinary creates the data item from binary data
 func (d *Data) UnmarshalBinary(bin []byte) error {
 	d.ByteSize = btou16(bin)
-	d.Res0 = uint8(bin[2])
+	d.Res0 = bin[2]
 	d.Type = DataType(bin[3])
 	d.Value = btou32(bin[4:])
 	return nil
@@ -765,7 +768,7 @@ func (d *Data) UnmarshalBinary(bin []byte) error {
 func (d *Data) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 8)
 	putu16(bin, 8)
-	bin[2] = byte(d.Res0)
+	bin[2] = d.Res0
 	bin[3] = byte(d.Type)
 	putu32(bin[4:], d.Value)
 	return bin, nil

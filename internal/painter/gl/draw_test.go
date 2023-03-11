@@ -1,3 +1,4 @@
+//go:build !windows || !ci
 // +build !windows !ci
 
 package gl
@@ -5,9 +6,10 @@ package gl
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestInnerRect_Stretch(t *testing.T) {

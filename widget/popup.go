@@ -41,9 +41,9 @@ func (p *PopUp) Move(pos fyne.Position) {
 	p.Refresh()
 }
 
-// Resize changes the size of the PopUp.
-// PopUps always have the size of their canvas.
-// However, Resize changes the size of the PopUp's content.
+// Resize changes the size of the PopUp's content.
+// PopUps always have the size of their canvas, but this call updates the
+// size of the content portion.
 //
 // Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
@@ -92,7 +92,7 @@ func (p *PopUp) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	background := canvas.NewRectangle(theme.BackgroundColor())
+	background := canvas.NewRectangle(theme.OverlayBackgroundColor())
 	if p.modal {
 		underlay := canvas.NewRectangle(theme.ShadowColor())
 		objects := []fyne.CanvasObject{underlay, background, p.Content}
@@ -156,11 +156,11 @@ type popUpBaseRenderer struct {
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	return fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 }
 
 func (r *popUpBaseRenderer) offset() fyne.Position {
-	return fyne.NewPos(theme.Padding(), theme.Padding())
+	return fyne.NewPos(theme.InnerPadding()/2, theme.InnerPadding()/2)
 }
 
 type popUpRenderer struct {
@@ -197,18 +197,19 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *popUpRenderer) Refresh() {
-	r.background.FillColor = theme.BackgroundColor()
+	r.background.FillColor = theme.OverlayBackgroundColor()
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
-	shouldRelayout := !r.popUp.Content.Size().Subtract(expectedContentSize).IsZero()
+	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
 	if r.background.Size() != r.popUp.innerSize || r.background.Position() != r.popUp.innerPos || shouldRelayout {
 		r.Layout(r.popUp.Size())
 	}
-	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+	if r.popUp.Canvas.Size() != r.popUp.BaseWidget.Size() {
 		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
 	}
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
+	r.ShadowingRenderer.RefreshShadow()
 }
 
 type modalPopUpRenderer struct {
@@ -242,14 +243,14 @@ func (r *modalPopUpRenderer) MinSize() fyne.Size {
 
 func (r *modalPopUpRenderer) Refresh() {
 	r.underlay.FillColor = theme.ShadowColor()
-	r.background.FillColor = theme.BackgroundColor()
+	r.background.FillColor = theme.OverlayBackgroundColor()
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
-	shouldRelayout := !r.popUp.Content.Size().Subtract(expectedContentSize).IsZero()
+	shouldLayout := r.popUp.Content.Size() != expectedContentSize
 
-	if r.background.Size() != r.popUp.innerSize || shouldRelayout {
+	if r.background.Size() != r.popUp.innerSize || shouldLayout {
 		r.Layout(r.popUp.Size())
 	}
-	if !r.popUp.Canvas.Size().Subtract(r.popUp.BaseWidget.Size()).IsZero() {
+	if r.popUp.Canvas.Size() != r.popUp.BaseWidget.Size() {
 		r.popUp.BaseWidget.Resize(r.popUp.Canvas.Size())
 	}
 	r.popUp.Content.Refresh()

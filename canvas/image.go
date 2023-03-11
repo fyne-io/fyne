@@ -20,7 +20,7 @@ const (
 	// ImageFillContain makes the image fit within the object Size(),
 	// centrally and maintaining aspect ratio.
 	// There may be transparent sections top and bottom or left and right.
-	ImageFillContain //(Fit)
+	ImageFillContain // (Fit)
 	// ImageFillOriginal ensures that the container grows to the pixel dimensions
 	// required to fit the original image. The aspect of the image will be maintained so,
 	// as with ImageFillContain there may be transparent areas around the image.
@@ -33,13 +33,13 @@ type ImageScale int32
 
 const (
 	// ImageScaleSmooth will scale the image using ApproxBiLinear filter (or GL equivalent)
-	ImageScaleSmooth ImageScale = 0
+	ImageScaleSmooth ImageScale = iota
 	// ImageScalePixels will scale the image using NearestNeighbor filter (or GL equivalent)
-	ImageScalePixels ImageScale = 1
+	ImageScalePixels
 	// ImageScaleFastest will scale the image using hardware GPU if available
 	//
 	// Since: 2.0
-	ImageScaleFastest ImageScale = 2
+	ImageScaleFastest
 )
 
 // Declare conformity with CanvasObject interface
@@ -99,6 +99,7 @@ func NewImageFromFile(file string) *Image {
 
 // NewImageFromURI creates a new image from named resource.
 // File URIs will read the file path and other schemes will download the data into a resource.
+// HTTP and HTTPs URIs will use the GET method by default to request the resource.
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
 //
@@ -112,10 +113,10 @@ func NewImageFromURI(uri fyne.URI) *Image {
 
 	var read io.ReadCloser
 
-	read, err := storage.Reader(uri) // attempt unknown file type
+	read, err := storage.Reader(uri) // attempt unknown / http file type
 	if err != nil {
 		fyne.LogError("Failed to open image URI", err)
-		return nil
+		return &Image{}
 	}
 
 	defer read.Close()

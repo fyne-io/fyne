@@ -31,6 +31,67 @@ func colorPicked(c color.Color, w fyne.Window) {
 
 // dialogScreen loads demos of the dialogs we support
 func dialogScreen(win fyne.Window) fyne.CanvasObject {
+	openFile := widget.NewButton("File Open With Filter (.jpg or .png)", func() {
+		fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, win)
+				return
+			}
+			if reader == nil {
+				log.Println("Cancelled")
+				return
+			}
+
+			imageOpened(reader)
+		}, win)
+		fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
+		fd.Show()
+	})
+	saveFile := widget.NewButton("File Save", func() {
+		dialog.ShowFileSave(func(writer fyne.URIWriteCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, win)
+				return
+			}
+			if writer == nil {
+				log.Println("Cancelled")
+				return
+			}
+
+			fileSaved(writer, win)
+		}, win)
+	})
+	openFolder := widget.NewButton("Folder Open", func() {
+		dialog.ShowFolderOpen(func(list fyne.ListableURI, err error) {
+			if err != nil {
+				dialog.ShowError(err, win)
+				return
+			}
+			if list == nil {
+				log.Println("Cancelled")
+				return
+			}
+
+			children, err := list.List()
+			if err != nil {
+				dialog.ShowError(err, win)
+				return
+			}
+			out := fmt.Sprintf("Folder %s (%d children):\n%s", list.Name(), len(children), list.String())
+			dialog.ShowInformation("Folder Open", out, win)
+		}, win)
+	})
+
+	if fyne.CurrentDevice().IsBrowser() {
+		openFile.Disable()
+		saveFile.Disable()
+		openFolder.Disable()
+	}
+
+	advancedPicker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+		colorPicked(c, win)
+	}, win)
+	advancedPicker.Advanced = true
 	return container.NewVScroll(container.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
@@ -45,56 +106,9 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			cnf.SetConfirmText("Oh Yes!")
 			cnf.Show()
 		}),
-		widget.NewButton("File Open With Filter (.jpg or .png)", func() {
-			fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				if reader == nil {
-					log.Println("Cancelled")
-					return
-				}
-
-				imageOpened(reader)
-			}, win)
-			fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
-			fd.Show()
-		}),
-		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(func(writer fyne.URIWriteCloser, err error) {
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				if writer == nil {
-					log.Println("Cancelled")
-					return
-				}
-
-				fileSaved(writer, win)
-			}, win)
-		}),
-		widget.NewButton("Folder Open", func() {
-			dialog.ShowFolderOpen(func(list fyne.ListableURI, err error) {
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				if list == nil {
-					log.Println("Cancelled")
-					return
-				}
-
-				children, err := list.List()
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				out := fmt.Sprintf("Folder %s (%d children):\n%s", list.Name(), len(children), list.String())
-				dialog.ShowInformation("Folder Open", out, win)
-			}, win)
-		}),
+		openFile,
+		saveFile,
+		openFolder,
 		widget.NewButton("Color Picker", func() {
 			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
 				colorPicked(c, win)
@@ -102,11 +116,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			picker.Show()
 		}),
 		widget.NewButton("Advanced Color Picker", func() {
-			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
-				colorPicked(c, win)
-			}, win)
-			picker.Advanced = true
-			picker.Show()
+			advancedPicker.Show()
 		}),
 		widget.NewButton("Form Dialog (Login Form)", func() {
 			username := widget.NewEntry()
@@ -150,6 +160,10 @@ func imageOpened(f fyne.URIReadCloser) {
 func fileSaved(f fyne.URIWriteCloser, w fyne.Window) {
 	defer f.Close()
 	_, err := f.Write([]byte("Written by Fyne demo\n"))
+	if err != nil {
+		dialog.ShowError(err, w)
+	}
+	err = f.Close()
 	if err != nil {
 		dialog.ShowError(err, w)
 	}

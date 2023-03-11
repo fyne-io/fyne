@@ -1,6 +1,10 @@
 package test
 
-import "fyne.io/fyne/v2"
+import (
+	"runtime"
+
+	"fyne.io/fyne/v2"
+)
 
 type device struct {
 }
@@ -22,4 +26,8 @@ func (d *device) SystemScale() float32 {
 
 func (d *device) SystemScaleForWindow(fyne.Window) float32 {
 	return 1
+}
+
+func (*device) IsBrowser() bool {
+	return runtime.GOARCH == "js" || runtime.GOOS == "js"
 }

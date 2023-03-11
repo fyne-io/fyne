@@ -77,5 +77,11 @@ func (i *ClipItem) Intersect(p fyne.Position, s fyne.Size) *ClipItem {
 	if p.Y+s.Height > i.pos.Y+i.size.Height {
 		ret.size.Height = (i.pos.Y + i.size.Height) - ret.pos.Y
 	}
+
+	if ret.size.Width < 0 || ret.size.Height < 0 {
+		ret.size = fyne.NewSize(0, 0)
+		return ret
+	}
+
 	return ret
 }

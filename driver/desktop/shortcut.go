@@ -9,11 +9,24 @@ import (
 
 // Declare conformity with Shortcut interface
 var _ fyne.Shortcut = (*CustomShortcut)(nil)
+var _ fyne.KeyboardShortcut = (*CustomShortcut)(nil)
 
 // CustomShortcut describes a shortcut desktop event.
 type CustomShortcut struct {
 	fyne.KeyName
-	Modifier
+	Modifier fyne.KeyModifier
+}
+
+// Key returns the key name of this shortcut.
+// @implements KeyboardShortcut
+func (cs *CustomShortcut) Key() fyne.KeyName {
+	return cs.KeyName
+}
+
+// Mod returns the modifier of this shortcut.
+// @implements KeyboardShortcut
+func (cs *CustomShortcut) Mod() fyne.KeyModifier {
+	return cs.Modifier
 }
 
 // ShortcutName returns the shortcut name associated to the event
@@ -26,18 +39,18 @@ func (cs *CustomShortcut) ShortcutName() string {
 	return id.String()
 }
 
-func modifierToString(mods Modifier) string {
+func modifierToString(mods fyne.KeyModifier) string {
 	s := []string{}
-	if (mods & ShiftModifier) != 0 {
+	if (mods & fyne.KeyModifierShift) != 0 {
 		s = append(s, string("Shift"))
 	}
-	if (mods & ControlModifier) != 0 {
+	if (mods & fyne.KeyModifierControl) != 0 {
 		s = append(s, string("Control"))
 	}
-	if (mods & AltModifier) != 0 {
+	if (mods & fyne.KeyModifierAlt) != 0 {
 		s = append(s, string("Alt"))
 	}
-	if (mods & SuperModifier) != 0 {
+	if (mods & fyne.KeyModifierSuper) != 0 {
 		if runtime.GOOS == "darwin" {
 			s = append(s, string("Command"))
 		} else {

@@ -3,7 +3,6 @@ package dialog
 import (
 	"testing"
 
-	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,8 +18,8 @@ func TestListDrives(t *testing.T) {
 func TestFileDialog_LoadPlaces(t *testing.T) {
 	f := &fileDialog{}
 	driveLetters := listDrives()
-	places := f.loadPlaces()
+	places := f.getPlaces()
 
 	assert.Equal(t, len(driveLetters), len(places))
-	assert.Equal(t, driveLetters[0], places[0].(*widget.Button).Text)
+	assert.Equal(t, driveLetters[0], places[0].locName)
 }

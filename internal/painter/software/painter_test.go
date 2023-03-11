@@ -55,7 +55,7 @@ func TestPainter_paintGradient_clipped(t *testing.T) {
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-30, -30)})
-	cont := fyne.NewContainer(scroll)
+	cont := container.NewWithoutLayout(scroll)
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
@@ -87,7 +87,7 @@ func TestPainter_paintImage_clipped(t *testing.T) {
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-15, -15)})
-	cont := fyne.NewContainer(scroll)
+	cont := container.NewWithoutLayout(scroll)
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
@@ -222,15 +222,32 @@ func TestPainter_paintLine(t *testing.T) {
 	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
 }
 
+func TestPainter_paintLine_thin(t *testing.T) {
+	c := test.NewCanvas()
+	lines := [5]*canvas.Line{}
+	sws := []float32{4, 2, 1, 0.5, 0.3}
+	for i, sw := range sws {
+		lines[i] = canvas.NewLine(color.RGBA{255, 0, 0, 255})
+		lines[i].StrokeWidth = sw
+		x := float32(i * 20)
+		lines[i].Position1 = fyne.NewPos(x, 10)
+		lines[i].Position2 = fyne.NewPos(x+15, 10)
+	}
+	c.SetContent(container.NewWithoutLayout(lines[0], lines[1], lines[2], lines[3], lines[4]))
+	c.Resize(fyne.NewSize(109, 28))
+
+	p := software.NewPainter()
+	test.AssertImageMatches(t, "draw_line_thin.png", p.Paint(c))
+}
+
 func TestPainter_paintRaster(t *testing.T) {
 	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
 		x = x / 5
 		y = y / 5
 		if x%2 == y%2 {
 			return color.White
-		} else {
-			return color.Black
 		}
+		return color.Black
 	})
 
 	c := test.NewCanvas()
@@ -249,9 +266,8 @@ func TestPainter_paintRaster_scaled(t *testing.T) {
 		y = y / 5
 		if x%2 == y%2 {
 			return color.White
-		} else {
-			return color.Black
 		}
+		return color.Black
 	})
 
 	c := test.NewCanvas()
@@ -293,7 +309,7 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
-	cont := fyne.NewContainer(scroll)
+	cont := container.NewWithoutLayout(scroll)
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
@@ -324,7 +340,7 @@ func TestPainter_paintText_clipped(t *testing.T) {
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
-	cont := fyne.NewContainer(scroll)
+	cont := container.NewWithoutLayout(scroll)
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
@@ -332,4 +348,34 @@ func TestPainter_paintText_clipped(t *testing.T) {
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_text_clipped.png", p.Paint(c))
+}
+
+func TestPainter_paintText_boldItalicClip(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	text := canvas.NewText("Dd", theme.ForegroundColor())
+	text.TextStyle.Bold = true
+	text.TextStyle.Italic = true
+	text.TextSize = 42
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(text)
+	c.Resize(fyne.NewSize(70, text.MinSize().Height))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Paint(c))
+}
+
+func TestPainter_paintText_scale2(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	text := canvas.NewText("scale2", theme.ForegroundColor())
+	text.TextSize = 18
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(text)
+	c.Resize(fyne.NewSize(70, text.MinSize().Height))
+
+	c.SetScale(2)
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_text_scale2.png", p.Paint(c))
 }

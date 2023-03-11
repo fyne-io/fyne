@@ -1,4 +1,4 @@
-// Package layout defines the various layouts available to Fyne apps
+// Package layout defines the various layouts available to Fyne apps.
 package layout // import "fyne.io/fyne/v2/layout"
 
 import "fyne.io/fyne/v2"

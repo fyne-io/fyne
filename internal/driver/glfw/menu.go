@@ -4,21 +4,41 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func buildMenuOverlay(menus *fyne.MainMenu, c fyne.Canvas) fyne.CanvasObject {
+func buildMenuOverlay(menus *fyne.MainMenu, w *window) fyne.CanvasObject {
 	if len(menus.Items) == 0 {
 		fyne.LogError("Main menu must have at least one child menu", nil)
 		return nil
 	}
-	var firstItem *fyne.MenuItem
+
+	menus = addMissingQuit(menus, w)
+	return NewMenuBar(menus, w.canvas)
+}
+
+func addMissingQuit(menus *fyne.MainMenu, w *window) *fyne.MainMenu {
+	var lastItem *fyne.MenuItem
 	if len(menus.Items[0].Items) > 0 {
-		firstItem = menus.Items[0].Items[len(menus.Items[0].Items)-1]
+		lastItem = menus.Items[0].Items[len(menus.Items[0].Items)-1]
+		if lastItem.Label == "Quit" {
+			lastItem.IsQuit = true
+		}
 	}
-	if firstItem == nil || firstItem.Label != "Quit" { // make sure the first menu always has a quit option
-		quitItem := fyne.NewMenuItem("Quit", func() {
-			fyne.CurrentApp().Quit()
-		})
+	if lastItem == nil || !lastItem.IsQuit { // make sure the first menu always has a quit option
+		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem.IsQuit = true
 		menus.Items[0].Items = append(menus.Items[0].Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
-
-	return NewMenuBar(menus, c)
+	for _, item := range menus.Items[0].Items {
+		if item.IsQuit && item.Action == nil {
+			item.Action = func() {
+				for _, win := range w.driver.AllWindows() {
+					if glWin, ok := win.(*window); ok {
+						glWin.closed(glWin.view())
+					} else {
+						win.Close() // for test windows
+					}
+				}
+			}
+		}
+	}
+	return menus
 }

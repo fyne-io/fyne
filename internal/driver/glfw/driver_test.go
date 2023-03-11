@@ -1,5 +1,5 @@
-// +build !ci
-// +build !mobile
+//go:build !ci && !mobile
+// +build !ci,!mobile
 
 package glfw
 
@@ -16,7 +16,7 @@ import (
 )
 
 func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindow("Test").(*window)
 
 	cr1c1 := widget.NewLabel("row 1 col 1")
 	cr1c2 := widget.NewLabel("row 1 col 2")
@@ -40,8 +40,10 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	// We want to test the handling of the canvas' Fyne menu here.
 	// We work around w.SetMainMenu because on MacOS the main menu is a native menu.
 	c := w.Canvas().(*glCanvas)
-	movl := buildMenuOverlay(mm, c)
+	movl := buildMenuOverlay(mm, w)
+	c.Lock()
 	c.setMenuOverlay(movl)
+	c.Unlock()
 	w.SetContent(content)
 	w.Resize(fyne.NewSize(200, 199))
 
@@ -52,7 +54,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	ovl := widget.NewModalPopUp(ovlContent, c)
 	ovl.Show()
 
-	repaintWindow(w.(*window))
+	repaintWindow(w)
 	// accessing the menu bar's actual CanvasObjects isn't straight forward
 	// 0 is the shadow
 	// 1 is the menu bar’s underlay
@@ -62,61 +64,71 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	m2 := mbarCont.Objects[1]
 
 	tests := map[string]struct {
-		object fyne.CanvasObject
-		want   fyne.Position
+		object       fyne.CanvasObject
+		wantX, wantY int
 	}{
 		"a cell": {
 			object: cr1c3,
-			want:   fyne.NewPos(198, 33),
+			wantX:  180,
+			wantY:  31,
 		},
 		"a row": {
 			object: cr2,
-			want:   fyne.NewPos(4, 74),
+			wantX:  6,
+			wantY:  71,
 		},
 		"the window content": {
 			object: content,
-			want:   fyne.NewPos(4, 33),
+			wantX:  6,
+			wantY:  31,
 		},
 		"a hidden element": {
 			object: cr2c2,
-			want:   fyne.NewPos(0, 0),
+			wantX:  0,
+			wantY:  0,
 		},
 
 		"a menu": {
 			object: m2,
-			want:   fyne.NewPos(78, 0),
+			wantX:  76,
+			wantY:  0,
 		},
 
 		"an overlay item": {
 			object: ovli2,
-			want:   fyne.NewPos(87, 81),
+			wantX:  81,
+			wantY:  82,
 		},
 		"the overlay content": {
 			object: ovlContent,
-			want:   fyne.NewPos(87, 40),
+			wantX:  81,
+			wantY:  42,
 		},
 		"the overlay": {
 			object: ovl,
-			want:   fyne.NewPos(0, 0),
+			wantX:  0,
+			wantY:  0,
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.want, d.AbsolutePositionForObject(tt.object))
+			pos := d.AbsolutePositionForObject(tt.object)
+			assert.Equal(t, tt.wantX, int(pos.X))
+			assert.Equal(t, tt.wantY, int(pos.Y))
 		})
 	}
 }
 
-var mainRoutineID int
+var mainRoutineID uint64
 
 func init() {
 	mainRoutineID = goroutineID()
 }
 
 func TestGoroutineID(t *testing.T) {
-	assert.Equal(t, 1, mainRoutineID)
+	assert.Equal(t, uint64(1), mainRoutineID)
 
-	var childID1, childID2 int
+	var childID1, childID2 uint64
 	testID1 := goroutineID()
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -132,8 +144,8 @@ func TestGoroutineID(t *testing.T) {
 	testID2 := goroutineID()
 
 	assert.Equal(t, testID1, testID2)
-	assert.Greater(t, childID1, 0)
+	assert.Greater(t, childID1, uint64(0))
 	assert.NotEqual(t, testID1, childID1)
-	assert.Greater(t, childID2, 0)
+	assert.Greater(t, childID2, uint64(0))
 	assert.NotEqual(t, childID1, childID2)
 }

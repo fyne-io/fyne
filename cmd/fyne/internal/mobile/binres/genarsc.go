@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ignore
 // +build ignore
 
 // Genarsc generates stripped down version of android.jar resources used
@@ -9,7 +10,7 @@
 //
 // Requires ANDROID_HOME be set to the path of the Android SDK and the
 // current sdk platform installed that matches MinSDK.
-package binres
+package main
 
 import (
 	"fmt"
@@ -17,7 +18,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/fyne-io/mobile/internal/binres"
+	"fyne.io/fyne/v2/cmd/fyne/internal/mobile/binres"
 )
 
 const tmpl = `// Copyright 2016 The Go Authors.  All rights reserved.

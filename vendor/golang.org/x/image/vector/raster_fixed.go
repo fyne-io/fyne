@@ -32,8 +32,11 @@ type int1ϕ int32
 // The Rasterizer's bufU32 field, nominally of type []uint32 (since that slice
 // is also used by other code), can be thought of as a []int2ϕ during the
 // fixedLineTo method. Lines of code that are actually like:
+//
 //	buf[i] += uint32(etc) // buf has type []uint32.
+//
 // can be thought of as
+//
 //	buf[i] += int2ϕ(etc)  // buf has type []int2ϕ.
 type int2ϕ int32
 

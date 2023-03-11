@@ -2,13 +2,15 @@ package app
 
 import (
 	"net/url"
-	"os/exec"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	_ "fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
+
+	"golang.org/x/sys/execabs"
 )
 
 func TestDummyApp(t *testing.T) {
@@ -28,14 +30,19 @@ func TestFyneApp_UniqueID(t *testing.T) {
 	app := NewWithID(appID)
 
 	assert.Equal(t, appID, app.UniqueID())
+
+	meta.ID = "fakedInject"
+	app = New()
+
+	assert.Equal(t, meta.ID, app.UniqueID())
 }
 
 func TestFyneApp_OpenURL(t *testing.T) {
 	opened := ""
 	app := NewWithID("io.fyne.test")
-	app.(*fyneApp).exec = func(cmd string, arg ...string) *exec.Cmd {
+	app.(*fyneApp).exec = func(cmd string, arg ...string) *execabs.Cmd {
 		opened = arg[len(arg)-1]
-		return exec.Command("")
+		return execabs.Command("")
 	}
 
 	urlStr := "https://fyne.io"

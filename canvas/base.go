@@ -1,10 +1,10 @@
-// Package canvas contains all of the primitive CanvasObjects that make up a Fyne GUI
+// Package canvas contains all of the primitive CanvasObjects that make up a Fyne GUI.
 //
 // The types implemented in this package are used as building blocks in order
 // to build higher order functionality. These types are designed to be
-// non-interactive, by design. If additional functonality is required,
+// non-interactive, by design. If additional functionality is required,
 // it's usually a sign that this type should be used as part of a custom
-// Widget.
+// widget.
 package canvas // import "fyne.io/fyne/v2/canvas"
 
 import (
@@ -23,90 +23,78 @@ type baseObject struct {
 	propertyLock sync.RWMutex
 }
 
-// CurrentSize returns the current size of this canvas object.
-func (r *baseObject) Size() fyne.Size {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
+// Hide will set this object to not be visible.
+func (o *baseObject) Hide() {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	return r.size
-}
-
-// Resize sets a new size for the canvas object.
-func (r *baseObject) Resize(size fyne.Size) {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
-
-	r.size = size
-}
-
-// CurrentPosition gets the current position of this canvas object, relative to its parent.
-func (r *baseObject) Position() fyne.Position {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
-
-	return r.position
-}
-
-// Move the object to a new position, relative to its parent.
-func (r *baseObject) Move(pos fyne.Position) {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
-
-	r.position = pos
+	o.Hidden = true
 }
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
-func (r *baseObject) MinSize() fyne.Size {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
+func (o *baseObject) MinSize() fyne.Size {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	if r.min.Width == 0 && r.min.Height == 0 {
+	if o.min.Width == 0 && o.min.Height == 0 {
 		return fyne.NewSize(1, 1)
 	}
 
-	return r.min
+	return o.min
+}
+
+// Move the object to a new position, relative to its parent.
+func (o *baseObject) Move(pos fyne.Position) {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
+
+	o.position = pos
+}
+
+// Position gets the current position of this canvas object, relative to its parent.
+func (o *baseObject) Position() fyne.Position {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
+
+	return o.position
+}
+
+// Resize sets a new size for the canvas object.
+func (o *baseObject) Resize(size fyne.Size) {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
+
+	o.size = size
 }
 
 // SetMinSize specifies the smallest size this object should be.
-func (r *baseObject) SetMinSize(size fyne.Size) {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) SetMinSize(size fyne.Size) {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.min = size
-}
-
-// IsVisible returns true if this object is visible, false otherwise.
-func (r *baseObject) Visible() bool {
-	r.propertyLock.RLock()
-	defer r.propertyLock.RUnlock()
-
-	return !r.Hidden
+	o.min = size
 }
 
 // Show will set this object to be visible.
-func (r *baseObject) Show() {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+func (o *baseObject) Show() {
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
 
-	r.Hidden = false
+	o.Hidden = false
 }
 
-// Hide will set this object to not be visible.
-func (r *baseObject) Hide() {
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+// Size returns the current size of this canvas object.
+func (o *baseObject) Size() fyne.Size {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	r.Hidden = true
+	return o.size
 }
 
-// Refresh instructs the containing canvas to refresh the specified obj.
-func Refresh(obj fyne.CanvasObject) {
-	if fyne.CurrentApp() == nil || fyne.CurrentApp().Driver() == nil {
-		return
-	}
+// Visible returns true if this object is visible, false otherwise.
+func (o *baseObject) Visible() bool {
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
 
-	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
-	if c != nil {
-		c.Refresh(obj)
-	}
+	return !o.Hidden
 }

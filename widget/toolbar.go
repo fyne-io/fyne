@@ -16,7 +16,7 @@ type ToolbarItem interface {
 // ToolbarAction is push button style of ToolbarItem
 type ToolbarAction struct {
 	Icon        fyne.Resource
-	OnActivated func()
+	OnActivated func() `json:"-"`
 }
 
 // ToolbarObject gets a button to render this ToolbarAction
@@ -27,8 +27,16 @@ func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 	return button
 }
 
+// SetIcon updates the icon on a ToolbarItem
+//
+// Since: 2.2
+func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
+	t.Icon = icon
+	t.ToolbarObject().Refresh()
+}
+
 // NewToolbarAction returns a new push button style ToolbarItem
-func NewToolbarAction(icon fyne.Resource, onActivated func()) ToolbarItem {
+func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 	return &ToolbarAction{icon, onActivated}
 }
 
@@ -44,7 +52,7 @@ func (t *ToolbarSpacer) ToolbarObject() fyne.CanvasObject {
 }
 
 // NewToolbarSpacer returns a new spacer item for a Toolbar to assist with ToolbarItem alignment
-func NewToolbarSpacer() ToolbarItem {
+func NewToolbarSpacer() *ToolbarSpacer {
 	return &ToolbarSpacer{}
 }
 
@@ -59,7 +67,7 @@ func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
 }
 
 // NewToolbarSeparator returns a new separator item for a Toolbar to assist with ToolbarItem grouping
-func NewToolbarSeparator() ToolbarItem {
+func NewToolbarSeparator() *ToolbarSeparator {
 	return &ToolbarSeparator{}
 }
 

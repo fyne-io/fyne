@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -32,7 +32,7 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 		}
 	}()
 
-	return fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(90, 90)),
+	return container.NewGridWrap(fyne.NewSize(90, 90),
 		canvas.NewImageFromResource(theme.FyneLogo()),
 		&canvas.Rectangle{FillColor: color.NRGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.NRGBA{0xff, 0xff, 0xff, 0xff},

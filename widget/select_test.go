@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -19,6 +21,25 @@ func TestNewSelect(t *testing.T) {
 
 	assert.Equal(t, 2, len(combo.Options))
 	assert.Equal(t, "", combo.Selected)
+}
+
+func TestSelect_Align(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
+	sel.Alignment = fyne.TextAlignCenter
+	w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+	defer w.Close()
+	w.Resize(fyne.NewSize(200, 150))
+	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
+
+	test.Tap(sel)
+	test.AssertRendersToMarkup(t, "select/center.xml", c)
+
+	sel.Alignment = fyne.TextAlignTrailing
+	sel.Refresh()
+	test.AssertRendersToMarkup(t, "select/trailing.xml", c)
 }
 
 func TestSelect_ChangeTheme(t *testing.T) {
@@ -67,6 +88,21 @@ func TestSelect_ClearSelected(t *testing.T) {
 	assert.Equal(t, optClear, triggeredValue)
 }
 
+func TestSelect_ClipValue(t *testing.T) {
+	combo := widget.NewSelect([]string{"some text", "more"}, func(string) {})
+	combo.SetSelected("some text")
+	combo.Resize(fyne.NewSize(90, 38))
+
+	r := cache.Renderer(combo)
+	text := r.Objects()[3].(*widget.RichText)
+	assert.Equal(t, 1, len(text.Segments))
+	assert.Equal(t, "some text", text.Segments[0].(*widget.TextSegment).Text)
+
+	r2 := cache.Renderer(text)
+	assert.Equal(t, 1, len(r2.Objects()))
+	assert.Equal(t, "some t", r2.Objects()[0].(*canvas.Text).Text)
+}
+
 func TestSelect_Disable(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -106,7 +142,7 @@ func TestSelect_Enable(t *testing.T) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
 	ovl := c.Overlays().Top()
 	if assert.NotNil(t, ovl, "pop-up for enabled Select") {
-		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.Padding()*2, theme.Padding()*2)))
+		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.InnerPadding(), theme.InnerPadding())))
 		assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 	}
 }

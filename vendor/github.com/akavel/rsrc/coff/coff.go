@@ -52,6 +52,8 @@ type RelocationEntry struct {
 const (
 	_IMAGE_REL_AMD64_ADDR32NB = 0x03
 	_IMAGE_REL_I386_DIR32NB   = 0x07
+	_IMAGE_REL_ARM64_ADDR32NB = 0x02
+	_IMAGE_REL_ARM_ADDR32NB   = 0x02
 )
 
 type Auxiliary [18]byte
@@ -85,11 +87,15 @@ const (
 )
 
 var (
-	STRING_RSRC  = [8]byte{'.', 'r', 's', 'r', 'c', 0, 0, 0}
-	STRING_RDATA = [8]byte{'.', 'r', 'd', 'a', 't', 'a', 0, 0}
+	STRING_RSRC = [8]byte{'.', 'r', 's', 'r', 'c', 0, 0, 0}
 
 	LANG_ENTRY = DirEntry{NameOrId: 0x0409} //FIXME: language; what value should be here?
 )
+
+type PaddedData struct {
+	Data    Sizer
+	Padding []byte
+}
 
 type Sizer interface {
 	Size() int64 //NOTE: must not exceed limits of uint32, or behavior is undefined
@@ -101,52 +107,12 @@ type Coff struct {
 
 	*Dir
 	DataEntries []DataEntry
-	Data        []Sizer
+	Data        []PaddedData
 
 	Relocations []RelocationEntry
 	Symbols     []Symbol
 	StringsHeader
 	Strings []Sizer
-}
-
-func NewRDATA() *Coff {
-	return &Coff{
-		pe.FileHeader{
-			Machine:              pe.IMAGE_FILE_MACHINE_I386,
-			NumberOfSections:     1, // .data
-			TimeDateStamp:        0,
-			NumberOfSymbols:      2, // starting only with '.rdata', will increase; must include auxiliaries, apparently
-			SizeOfOptionalHeader: 0,
-			Characteristics:      0x0105, //http://www.delorie.com/djgpp/doc/coff/filhdr.html
-		},
-		pe.SectionHeader32{
-			Name:            STRING_RDATA,
-			Characteristics: 0x40000040, // "INITIALIZED_DATA MEM_READ" ?
-		},
-
-		// "directory hierarchy" of .rsrc section; empty for .data function
-		nil,
-		[]DataEntry{},
-
-		[]Sizer{},
-
-		[]RelocationEntry{},
-
-		[]Symbol{Symbol{
-			Name:           STRING_RDATA,
-			Value:          0,
-			SectionNumber:  1,
-			Type:           0, // FIXME: wtf?
-			StorageClass:   3, // FIXME: is it ok? and uint8? and what does the value mean?
-			AuxiliaryCount: 1,
-			Auxiliaries:    []Auxiliary{{}}, //http://www6.cptec.inpe.br/sx4/sx4man2/g1af01e/chap5.html
-		}},
-
-		StringsHeader{
-			Length: uint32(binary.Size(StringsHeader{})), // empty strings table for now -- but we must still show size of the table's header...
-		},
-		[]Sizer{},
-	}
 }
 
 // NOTE: must be called immediately after NewRSRC, before any other
@@ -161,19 +127,17 @@ func (coff *Coff) Arch(arch string) error {
 		// https://github.com/yasm/yasm/blob/7160679eee91323db98b0974596c7221eeff772c/modules/objfmts/coff/coff-objfmt.c#L38
 		// FIXME: currently experimental -- not sure if something more doesn't need to be changed
 		coff.Machine = pe.IMAGE_FILE_MACHINE_AMD64
+	case "arm":
+		// see
+		// https://github.com/golang/go/blob/f3424ceff2fa48615ed98580f337ab044925c940/src/cmd/link/internal/ld/pe.go#L736
+		coff.Machine = pe.IMAGE_FILE_MACHINE_ARMNT
+	case "arm64":
+		// Waiting https://github.com/golang/go/issues/36439
+		coff.Machine = pe.IMAGE_FILE_MACHINE_ARM64
 	default:
 		return errors.New("coff: unknown architecture: " + arch)
 	}
 	return nil
-}
-
-//NOTE: only usable for Coff created using NewRDATA
-//NOTE: symbol names must be probably >8 characters long
-//NOTE: symbol names should not contain embedded zeroes
-func (coff *Coff) AddData(symbol string, data Sizer) {
-	coff.addSymbol(symbol)
-	coff.Data = append(coff.Data, data)
-	coff.SectionHeader32.SizeOfRawData += uint32(data.Size())
 }
 
 // addSymbol appends a symbol to Coff.Symbols and to Coff.Strings.
@@ -217,7 +181,7 @@ func NewRSRC() *Coff {
 		&Dir{},
 
 		[]DataEntry{},
-		[]Sizer{},
+		[]PaddedData{},
 
 		[]RelocationEntry{},
 
@@ -253,6 +217,10 @@ func (coff *Coff) AddResource(kind uint32, id uint16, data Sizer) {
 		re.Type = _IMAGE_REL_I386_DIR32NB
 	case pe.IMAGE_FILE_MACHINE_AMD64:
 		re.Type = _IMAGE_REL_AMD64_ADDR32NB
+	case pe.IMAGE_FILE_MACHINE_ARMNT:
+		re.Type = _IMAGE_REL_ARM_ADDR32NB
+	case pe.IMAGE_FILE_MACHINE_ARM64:
+		re.Type = _IMAGE_REL_ARM64_ADDR32NB
 	}
 	coff.Relocations = append(coff.Relocations, re)
 	coff.SectionHeader32.NumberOfRelocations++
@@ -289,7 +257,14 @@ func (coff *Coff) AddResource(kind uint32, id uint16, data Sizer) {
 
 	// insert new data in correct place
 	coff.DataEntries = append(coff.DataEntries[:n], append([]DataEntry{{Size1: uint32(data.Size())}}, coff.DataEntries[n:]...)...)
-	coff.Data = append(coff.Data[:n], append([]Sizer{data}, coff.Data[n:]...)...)
+	coff.Data = append(coff.Data[:n], append([]PaddedData{pad(data)}, coff.Data[n:]...)...)
+}
+
+func pad(data Sizer) PaddedData {
+	return PaddedData{
+		Data:    data,
+		Padding: make([]byte, -data.Size()&7),
+	}
 }
 
 // Freeze fills in some important offsets in resulting file.
@@ -297,8 +272,6 @@ func (coff *Coff) Freeze() {
 	switch coff.SectionHeader32.Name {
 	case STRING_RSRC:
 		coff.freezeRSRC()
-	case STRING_RDATA:
-		coff.freezeRDATA()
 	}
 }
 
@@ -327,33 +300,6 @@ func freezeCommon2(v reflect.Value, offset *uint32) error {
 		return binutil.WALK_SKIP
 	}
 	return nil
-}
-
-func (coff *Coff) freezeRDATA() {
-	var offset, diroff, stringsoff uint32
-	binutil.Walk(coff, func(v reflect.Value, path string) error {
-		diroff = coff.freezeCommon1(path, offset, diroff)
-
-		RE := regexp.MustCompile
-		const N = `\[(\d+)\]`
-		m := matcher{}
-		//TODO: adjust symbol pointers
-		//TODO: fill Symbols.Name, .Value
-		switch {
-		case m.Find(path, RE("^/Data"+N+"$")):
-			n := m[0]
-			coff.Symbols[1+n].Value = offset - diroff // FIXME: is it ok?
-			sz := uint64(coff.Data[n].Size())
-			binary.LittleEndian.PutUint64(coff.Symbols[0].Auxiliaries[0][0:8], binary.LittleEndian.Uint64(coff.Symbols[0].Auxiliaries[0][0:8])+sz)
-		case path == "/StringsHeader":
-			stringsoff = offset
-		case m.Find(path, RE("^/Strings"+N+"$")):
-			binary.LittleEndian.PutUint32(coff.Symbols[m[0]+1].Name[4:8], offset-stringsoff)
-		}
-
-		return freezeCommon2(v, &offset)
-	})
-	coff.SectionHeader32.PointerToRelocations = 0
 }
 
 func (coff *Coff) freezeRSRC() {

@@ -29,7 +29,7 @@ func splitQuotedFields(s string) ([]string, error) {
 		for len(s) > 0 && isSpaceByte(s[0]) {
 			s = s[1:]
 		}
-		if len(s) == 0 {
+		if s == "" {
 			break
 		}
 		// Accepted quoted string. No unescaping inside.

@@ -2,10 +2,10 @@ package glfw
 
 import "fyne.io/fyne/v2"
 
-func (g *gLDriver) StartAnimation(a *fyne.Animation) {
-	g.animation.Start(a)
+func (d *gLDriver) StartAnimation(a *fyne.Animation) {
+	d.animation.Start(a)
 }
 
-func (g *gLDriver) StopAnimation(a *fyne.Animation) {
-	g.animation.Stop(a)
+func (d *gLDriver) StopAnimation(a *fyne.Animation) {
+	d.animation.Stop(a)
 }

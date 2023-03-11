@@ -1,9 +1,10 @@
 package widget
 
 import (
+	"errors"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -23,9 +24,7 @@ func (e *Entry) Validate() error {
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (e *Entry) SetOnValidationChanged(callback func(error)) {
-	if callback != nil {
-		e.onValidationChanged = callback
-	}
+	e.onValidationChanged = callback
 }
 
 // SetValidationError manually updates the validation status until the next input change
@@ -37,8 +36,7 @@ func (e *Entry) SetValidationError(err error) {
 		return
 	}
 
-	if (err == nil && e.validationError != nil) || (e.validationError == nil && err != nil) ||
-		err.Error() != e.validationError.Error() {
+	if !errors.Is(err, e.validationError) {
 		e.validationError = err
 
 		if e.onValidationChanged != nil {
@@ -69,16 +67,16 @@ func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
 	icon := &canvas.Image{}
 	icon.Hide()
 	return &validationStatusRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{icon}),
-		icon:         icon,
-		entry:        r.entry,
+		WidgetRenderer: NewSimpleRenderer(icon),
+		icon:           icon,
+		entry:          r.entry,
 	}
 }
 
 var _ fyne.WidgetRenderer = (*validationStatusRenderer)(nil)
 
 type validationStatusRenderer struct {
-	widget.BaseRenderer
+	fyne.WidgetRenderer
 	entry *Entry
 	icon  *canvas.Image
 }

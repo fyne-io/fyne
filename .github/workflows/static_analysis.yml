@@ -1,22 +1,29 @@
 name: Static Analysis
 on: [push, pull_request]
+permissions:
+  contents: read
 
 jobs:
-  checks:
+  static_analysis:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
       with:
-        go-version: '^1.15.x'     
+        persist-credentials: false
+    - uses: WillAbides/setup-go-faster@v1.7.0
+      with:
+        go-version: '1.19.x'
 
     - name: Get dependencies
       run: |
         sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
-        GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
-        GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
-        GO111MODULE=off go get golang.org/x/lint/golint
-        GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
+        go install golang.org/x/tools/cmd/goimports@latest
+        go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+        go install honnef.co/go/tools/cmd/staticcheck@v0.3.3
+
     - name: Cleanup repository
       run: rm -rf vendor/
 
@@ -24,13 +31,10 @@ jobs:
       run: go vet -tags ci ./...
 
     - name: Goimports
-      run: test -z $(goimports -e -d . | tee /dev/stderr)
+      run: test -z "$(goimports -e -d . | tee /dev/stderr)"
 
     - name: Gocyclo
-      run: gocyclo -over 50 .
-
-    - name: Golint
-      run: golint -set_exit_status $(go list -tags ci ./...)
+      run: gocyclo -over 30 .
 
     - name: Staticcheck
-      run: CGO_ENABLED=1 staticcheck -f stylish ./...
+      run: staticcheck ./...

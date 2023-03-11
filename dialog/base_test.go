@@ -18,18 +18,21 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 	defer test.NewApp()
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
-	w.Resize(fyne.NewSize(200, 300))
 
 	label := widget.NewLabel("Content")
 	label.Alignment = fyne.TextAlignCenter
 
 	d := NewCustom("Title", "OK", label, w)
+	shadowPad := float32(50)
+	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
 
 	d.Show()
-	test.AssertImageMatches(t, "dialog-custom-default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-custom-default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "dialog-custom-ugly.png", w.Canvas().Capture())
+	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
+	d.Resize(d.MinSize()) // TODO remove once #707 is resolved
+	test.AssertRendersToImage(t, "dialog-custom-ugly.png", w.Canvas())
 }
 
 func TestShowCustom_Resize(t *testing.T) {
@@ -58,17 +61,17 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
-	test.AssertImageMatches(t, "dialog-onshow-theme-default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-onshow-theme-default.png", w.Canvas())
 	d.Hide()
 
 	test.ApplyTheme(t, test.NewTheme())
 	d.Show()
-	test.AssertImageMatches(t, "dialog-onshow-theme-changed.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-onshow-theme-changed.png", w.Canvas())
 	d.Hide()
 
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
-	test.AssertImageMatches(t, "dialog-onshow-theme-default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "dialog-onshow-theme-default.png", w.Canvas())
 	d.Hide()
 }
 

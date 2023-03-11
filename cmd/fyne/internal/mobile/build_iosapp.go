@@ -11,17 +11,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/tools/go/packages"
 )
 
 func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
-	appName, version string, build int, cert, profile string) (map[string]bool, error) {
+	appName, version string, build int, release bool, cert, profile string) (map[string]bool, error) {
 	src := pkg.PkgPath
 	buildO = rfc1034Label(appName) + ".app"
 	// Detect the team ID
@@ -35,6 +35,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		BitcodeEnabled: bitcodeEnabled,
 		BundleID:       bundleID,
 		Certificate:    cert,
+		Debug:          !release,
 		Profile:        profile,
 		TeamID:         teamID,
 		Type:           "Manual",
@@ -53,6 +54,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		Name:     strings.Title(appName),
 		Version:  version,
 		Build:    build,
+		Legacy:   len(allArchs["ios"]) > 2,
 	}); err != nil {
 		return nil, err
 	}
@@ -81,7 +83,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	}
 
 	// We are using lipo tool to build multiarchitecture binaries.
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"xcrun", "lipo",
 		"-o", filepath.Join(tmpdir, "main/main"),
 		"-create",
@@ -121,7 +123,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		"DEVELOPMENT_TEAM=" + teamID,
 	}
 
-	cmd = exec.Command("xcrun", cmdStrings...)
+	cmd = execabs.Command("xcrun", cmdStrings...)
 	if err := runCmd(cmd); err != nil {
 		return nil, err
 	}
@@ -152,6 +154,16 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 			return nil, err
 		}
 	}
+
+	// Use codesign to remove the codesign certificate for the built application
+	// so that it can run in iOS simulator.
+	if buildTarget == "iossimulator" {
+		if out, err := execabs.Command("codesign", "--force", "--sign", "-", buildO).CombinedOutput(); err != nil {
+			printcmd("codesign --force --sign --keychain %s\n%s", buildO, out)
+			return nil, err
+		}
+	}
+
 	return nmpkgs, nil
 }
 
@@ -251,7 +263,7 @@ func lookupCert(optName string) ([]byte, error) {
 }
 
 func lookupCertNamed(name string) ([]byte, error) {
-	cmd := exec.Command(
+	cmd := execabs.Command(
 		"security", "find-certificate",
 		"-c", name, "-p",
 	)
@@ -263,6 +275,7 @@ type infoplistTmplData struct {
 	Name     string
 	Version  string
 	Build    int
+	Legacy   bool
 }
 
 var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -320,7 +333,11 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
+{{ if .Legacy }}
+    <string>armv7</string>
+{{ else }}
     <string>arm64</string>
+{{ end }}
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>
@@ -347,6 +364,7 @@ type projPbxprojTmplData struct {
 	Certificate    string
 	Profile        string
 	TeamID, Type   string
+	Debug          bool
 }
 
 var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
@@ -505,7 +523,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         GCC_WARN_UNUSED_FUNCTION = YES;
         GCC_WARN_UNUSED_VARIABLE = YES;
         IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-        MTL_ENABLE_DEBUG_INFO = NO;
+        MTL_ENABLE_DEBUG_INFO = {{if .Debug}}YES{{else}}NO{{end}};
         PRODUCT_BUNDLE_IDENTIFIER = {{.BundleID}};
         PROVISIONING_PROFILE_SPECIFIER = "{{.Profile}}";
         SDKROOT = iphoneos;

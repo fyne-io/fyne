@@ -1,0 +1,4 @@
+[Details]
+  Icon = "../../theme/icons/fyne.png"
+  ID = "io.fyne.settings"
+  Build = 1

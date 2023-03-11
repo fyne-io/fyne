@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
@@ -30,6 +31,56 @@ func TestAssertCanvasTappableAt(t *testing.T) {
 	tt = &testing.T{}
 	assert.False(t, test.AssertCanvasTappableAt(tt, c, fyne.NewPos(99, 99)), "tappable not found")
 	assert.True(t, tt.Failed(), "test failed")
+}
+
+func TestAssertObjectRendersToImage(t *testing.T) {
+	obj := canvas.NewCircle(color.Black)
+	obj.Resize(fyne.NewSize(20, 20))
+
+	test.AssertObjectRendersToImage(t, "circle.png", obj)
+}
+
+func TestAssertObjectRendersToMarkup(t *testing.T) {
+	obj := canvas.NewCircle(color.Black)
+	obj.Resize(fyne.NewSize(20, 20))
+
+	assert.True(t, test.AssertObjectRendersToMarkup(t, "circle.xml", obj), "existing master is equal to rendered markup")
+}
+
+func TestAssertRendersToImage(t *testing.T) {
+	c := test.NewCanvas() // no painter, would be cycle - images will be blank
+	c.SetContent(canvas.NewCircle(color.Black))
+	c.Resize(fyne.NewSize(10, 10))
+
+	t.Run("non-existing master", func(t *testing.T) {
+		tt := &testing.T{}
+		assert.False(t, test.AssertRendersToImage(tt, "non_existing_master.png", c), "non existing master is not equal to rendered image")
+		assert.True(t, tt.Failed(), "test failed")
+		_, err := os.Stat("testdata/failed/non_existing_master.png")
+		assert.Nil(t, err)
+	})
+
+	t.Run("matching master", func(t *testing.T) {
+		tt := &testing.T{}
+		assert.True(t, test.AssertRendersToImage(tt, "image_master.png", c), "existing master is equal to rendered image")
+		assert.False(t, tt.Failed(), "test should not fail")
+		_, err := os.Stat("testdata/failed/image_master.png")
+		assert.True(t, os.IsNotExist(err))
+	})
+
+	t.Run("diffing master", func(t *testing.T) {
+		c.Resize(fyne.NewSize(15, 15))
+
+		tt := &testing.T{}
+		assert.False(t, test.AssertRendersToImage(tt, "image_diffing_master.png", c), "existing master is not equal to rendered image")
+		assert.True(t, tt.Failed(), "test should fail")
+		_, err := os.Stat("testdata/failed/image_diffing_master.png")
+		assert.Nil(t, err)
+	})
+
+	if !t.Failed() {
+		_ = os.RemoveAll("testdata/failed")
+	}
 }
 
 func TestAssertRendersToMarkup(t *testing.T) {
@@ -71,7 +122,7 @@ func TestDrag(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	d := &draggable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(d))
+	c.SetContent(container.NewWithoutLayout(d))
 	c.Resize(fyne.NewSize(30, 30))
 	d.Resize(fyne.NewSize(20, 20))
 	d.Move(fyne.NewPos(10, 10))
@@ -93,7 +144,7 @@ func TestFocusNext(t *testing.T) {
 	f1 := &focusable{}
 	f2 := &focusable{}
 	f3 := &focusable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
+	c.SetContent(container.NewWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
 	assert.False(t, f1.focused)
@@ -130,7 +181,7 @@ func TestFocusPrevious(t *testing.T) {
 	f1 := &focusable{}
 	f2 := &focusable{}
 	f3 := &focusable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
+	c.SetContent(container.NewWithoutLayout(f1, f2, f3))
 
 	assert.Nil(t, c.Focused())
 	assert.False(t, f1.focused)
@@ -166,7 +217,7 @@ func TestScroll(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	s := &scrollable{}
-	c.SetContent(fyne.NewContainerWithoutLayout(s))
+	c.SetContent(container.NewWithoutLayout(s))
 	c.Resize(fyne.NewSize(30, 30))
 	s.Resize(fyne.NewSize(20, 20))
 	s.Move(fyne.NewPos(10, 10))
