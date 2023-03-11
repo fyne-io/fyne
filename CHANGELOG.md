@@ -3,6 +3,20 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.3.2 - Ongoing
+
+### Fixed
+
+* Fyne does not run perfectly on ARM-based MacOS platforms (#3639)
+* Panic on closing window in form submit on Мac M2 (#3397)
+* Wobbling slider effect for very small steps (#3648)
+* Fix memory leak in test canvas refresh
+* Optimise text texture memory by switching to single channel
+* Packaging an android fyne app that uses tags can fail (#3641)
+* on Windows 10 NewAdaptiveGrid(0) blanks app window on start until resized (#3669)
+* Unnecessary refresh when sliding Split container
+* Linux window resize refreshes all content
+
 ## 2.3.1 - 13 February 2023
 
 ### Changed
