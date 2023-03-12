@@ -1,8 +1,9 @@
 package commands
 
-import "strings"
+import (
+	"html"
+)
 
 func encodeXMLString(in string) string {
-	amped := strings.ReplaceAll(in, "&", "&amp;")
-	return strings.ReplaceAll(strings.ReplaceAll(amped, "<", "&lt;"), ">", "&gt;")
+	return html.EscapeString(in)
 }
