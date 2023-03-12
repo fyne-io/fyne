@@ -100,9 +100,6 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 			} else {
 				data = b.Bytes()
 			}
-			prev := fyne.CurrentApp().NewWindow("img")
-			prev.SetContent(canvas.NewImageFromImage(img))//canvas.NewImageFromResource(fyne.NewStaticResource("bytes", data)))
-			prev.Show()
 		}
 
 		img, err := toOSIcon(data)
