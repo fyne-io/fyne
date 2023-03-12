@@ -59,7 +59,7 @@ func (p *Packager) packageWindows() error {
 		manifestFile, _ := os.Create(manifest)
 
 		tplData := windowsData{
-			Name:            p.Name,
+			Name:            encodeXMLString(p.Name),
 			CombinedVersion: p.combinedVersion(),
 		}
 		err := templates.ManifestWindows.Execute(manifestFile, tplData)
