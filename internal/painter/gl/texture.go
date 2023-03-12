@@ -113,11 +113,15 @@ func (p *painter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 func (p *painter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	img := obj.(*canvas.Image)
 
-	if img.Image == nil {
+	width := p.textureScale(img.Size().Width)
+	height := p.textureScale(img.Size().Height)
+
+	tex := paint.PaintImage(img, p.canvas, int(width), int(height))
+	if tex == nil {
 		return noTexture
 	}
 
-	return p.imgToTexture(img.Image, img.ScaleMode)
+	return p.imgToTexture(tex, img.ScaleMode)
 }
 
 func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
