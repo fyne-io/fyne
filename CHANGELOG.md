@@ -13,9 +13,12 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix memory leak in test canvas refresh
 * Optimise text texture memory by switching to single channel
 * Packaging an android fyne app that uses tags can fail (#3641)
-* on Windows 10 NewAdaptiveGrid(0) blanks app window on start until resized (#3669)
+* NewAdaptiveGrid(0) blanks app window on start until first resize on Windows (#3669)
 * Unnecessary refresh when sliding Split container
 * Linux window resize refreshes all content
+* Themed and unthemed svg resources can cache collide
+* When packaging an ampersand in "Name" causes an error (#3195)
+
 
 ## 2.3.1 - 13 February 2023
 
