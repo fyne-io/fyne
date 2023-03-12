@@ -3,5 +3,6 @@ package commands
 import "strings"
 
 func encodeXMLString(in string) string {
-	return strings.ReplaceAll(in, "&", "&amp;")
+	amped := strings.ReplaceAll(in, "&", "&amp;")
+	return strings.ReplaceAll(strings.ReplaceAll(amped, "<", "&lt;"), ">", "&gt;")
 }

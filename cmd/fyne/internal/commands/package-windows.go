@@ -35,7 +35,7 @@ func (p *Packager) packageWindows() error {
 		return fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	icoPath := filepath.Join(exePath, p.Name+".ico")
+	icoPath := filepath.Join(exePath, "FyneApp.ico")
 	file, err := os.Create(icoPath)
 	if err != nil {
 		return fmt.Errorf("failed to open image file: %w", err)
