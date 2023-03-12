@@ -192,9 +192,9 @@ func (b *Builder) build() error {
 	fyneGoModRunner := b.runner
 	if b.runner == nil {
 		fyneGoModRunner = newCommand("go")
-		goBin := os.Getenv("GOBIN")
+		goBin := os.Getenv("GOEXEC")
 		if goBin != "" {
-			log.Println("Using GOBIN environment variable for go command:", goBin)
+			log.Println("Picking", goBin, "from GOEXEC environment variable to use as go command.")
 			fyneGoModRunner = newCommand(goBin)
 			b.runner = fyneGoModRunner
 		} else {
