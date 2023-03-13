@@ -81,7 +81,7 @@ type svg struct {
 	XMLNS    string        `xml:"xmlns,attr"`
 	Width    string        `xml:"width,attr"`
 	Height   string        `xml:"height,attr"`
-	ViewBox  string        `xml:"viewBox,attr"`
+	ViewBox  string        `xml:"viewBox,attr,omitempty"`
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
 	Circles  []*circleObj  `xml:"circle"`
