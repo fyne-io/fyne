@@ -533,7 +533,7 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 	l.updateList(false)
 }
 
-func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
+func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	previousIndicator := li.selected
 	li.selected = false
 	for _, s := range l.list.selected {
@@ -542,7 +542,10 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID) {
 			break
 		}
 	}
-	if previousIndicator != li.selected || li.hovered {
+	if focus {
+		li.hovered = true
+		li.Refresh()
+	} else if previousIndicator != li.selected || li.hovered {
 		li.hovered = false
 		li.Refresh()
 	}
@@ -602,8 +605,16 @@ func (l *listLayout) updateList(refresh bool) {
 
 	l.visible = visible
 
+	var focused fyne.Focusable
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+	if canvas != nil {
+		focused = canvas.Focused()
+	}
 	for id, old := range wasVisible {
 		if _, ok := l.visible[id]; !ok {
+			if focused == old {
+				canvas.Focus(nil)
+			}
 			l.itemPool.Release(old)
 		}
 	}
@@ -617,7 +628,7 @@ func (l *listLayout) updateList(refresh bool) {
 	l.renderLock.Unlock() // user code should not be locked
 
 	for row, obj := range visible {
-		l.setupListItem(obj, row)
+		l.setupListItem(obj, row, focused == obj)
 	}
 }
 
