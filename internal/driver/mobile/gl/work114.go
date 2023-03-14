@@ -15,7 +15,7 @@ package gl
 #cgo darwin,arm64       LDFLAGS: -framework OpenGLES
 #cgo linux              LDFLAGS: -lGLESv2
 #cgo openbsd            LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
-#cgo freebsd            LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
+#cgo freebsd            LDFLAGS: -L/usr/local/lib/ -lGLESv2
 
 #cgo android            CFLAGS: -Dos_android
 #cgo ios                CFLAGS: -Dos_ios
@@ -27,7 +27,7 @@ package gl
 #cgo openbsd      CFLAGS: -Dos_openbsd
 #cgo freebsd      CFLAGS: -Dos_freebsd
 #cgo openbsd      CFLAGS: -I/usr/X11R6/include/
-#cgo freebsd      CFLAGS: -I/usr/local/X11R6/include/
+#cgo freebsd      CFLAGS: -I/usr/local/include/
 
 #include <stdint.h>
 #include "work.h"
