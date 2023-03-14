@@ -197,7 +197,9 @@ func addOrUpdateMenuItem(item *MenuItem) {
 	}
 }
 
-func addSeparator(id uint32) {
+func addSeparator(id uint32, parent uint32) {
+	menu, _ := findLayout(int32(parent))
+
 	instance.menuLock.Lock()
 	defer instance.menuLock.Unlock()
 	layout := &menuLayout{
@@ -207,7 +209,7 @@ func addSeparator(id uint32) {
 		},
 		V2: []dbus.Variant{},
 	}
-	instance.menu.V2 = append(instance.menu.V2, dbus.MakeVariant(layout))
+	menu.V2 = append(menu.V2, dbus.MakeVariant(layout))
 	refresh()
 }
 
