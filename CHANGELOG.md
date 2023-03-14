@@ -18,6 +18,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Linux window resize refreshes all content
 * Themed and unthemed svg resources can cache collide
 * When packaging an ampersand in "Name" causes an error (#3195)
+* Svg in ThemedResource without viewBox does not match theme (#3714)
+* Missing menu icons in Windows system tray
 
 
 ## 2.3.1 - 13 February 2023
