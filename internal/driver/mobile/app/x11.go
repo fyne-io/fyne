@@ -15,6 +15,7 @@ than screens with touch panels.
 
 /*
 #cgo LDFLAGS: -lEGL -lGLESv2 -lX11
+#cgo freebsd CFLAGS: -I/usr/local/include/
 
 void createWindow(void);
 void processEvents(void);
