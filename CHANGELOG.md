@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.2 - Ongoing
+## 2.3.2 - 18 March 2023
 
 ### Fixed
 
@@ -20,6 +20,9 @@ More detailed release notes can be found on the [releases page](https://github.c
 * When packaging an ampersand in "Name" causes an error (#3195)
 * Svg in ThemedResource without viewBox does not match theme (#3714)
 * Missing menu icons in Windows system tray
+* Systray Menu Separators don't respect the submenu placement (#3642)
+* List row focus indicator disappears on scrolling (#3699)
+* List row focus not reset when row widget is reused to display a new item (#3700)
 
 
 ## 2.3.1 - 13 February 2023
