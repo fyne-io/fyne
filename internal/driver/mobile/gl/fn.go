@@ -63,8 +63,8 @@ const (
 	glfnGetShaderiv
 	glfnGetTexParameteriv
 	glfnGetUniformLocation
-	glfnLinkProgram
 	glfnPixelStorei
+	glfnLinkProgram
 	glfnReadPixels
 	glfnScissor
 	glfnShaderSource
