@@ -130,7 +130,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 
 	// text size is sensitive to position on screen
-	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
+	size, _ = roundToPixelCoords(size.AddWidthHeight(paint.VectorPad(text), 0), text.Position(), p.pixScale)
 	p.drawSingleChannelTexture(text, p.newGlTextTexture, pos, size, frame, color, 0)
 }
 
