@@ -10,3 +10,5 @@ import (
 const (
 	singleChannelColorFormat = gl.LUMINANCE
 )
+
+var _ = singleChannelColorFormat
