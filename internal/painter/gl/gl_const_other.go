@@ -1,5 +1,5 @@
-//go:build !darwin
-// +build !darwin
+//go:build !darwin && !js && !wasm
+// +build !darwin,!js,!wasm
 
 package gl
 
