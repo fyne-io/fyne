@@ -387,7 +387,7 @@ func (ctx *context) PixelStorei(pname Enum, param int32) {
 		args: fnargs{
 			fn: glfnPixelStorei,
 			a0: pname.c(),
-			a2: uintptr(param),
+			a1: uintptr(param),
 		},
 	})
 }
