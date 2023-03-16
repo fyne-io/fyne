@@ -27,6 +27,7 @@ func VectorPad(obj fyne.CanvasObject) float32 {
 		if co.TextStyle.Italic {
 			return co.TextSize / 5 // make sure that even a 20% lean does not overflow
 		}
+		return co.TextSize / 5 // TODO remove after we get our new text rendering all sorted in 2.4 - #3500
 	}
 
 	return 0
