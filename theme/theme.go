@@ -530,8 +530,10 @@ func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
 }
 
-// TextSymbolFont returns the font resource for the symbol font style.
-func TextSymbolFont() fyne.Resource {
+// SymbolFont returns the font resource for the symbol font style.
+//
+// Since: 2.4
+func SymbolFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Symbol: true})
 }
 

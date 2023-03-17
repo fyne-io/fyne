@@ -137,7 +137,7 @@ func Test_TextMonospaceFont(t *testing.T) {
 func Test_TextSymbolFont(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	expect := "InterSymbols-Regular.ttf"
-	result := TextSymbolFont().Name()
+	result := SymbolFont().Name()
 	assert.Equal(t, expect, result, "wrong symbol font")
 }
 
