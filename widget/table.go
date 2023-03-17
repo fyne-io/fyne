@@ -410,7 +410,7 @@ type tableRenderer struct {
 }
 
 func (t *tableRenderer) Layout(s fyne.Size) {
-	t.scroll.Resize(s)
+	t.t.scroll.Resize(s)
 	t.moveIndicators()
 }
 
