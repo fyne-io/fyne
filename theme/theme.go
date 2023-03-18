@@ -530,6 +530,13 @@ func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
 }
 
+// SymbolFont returns the font resource for the symbol font style.
+//
+// Since: 2.4
+func SymbolFont() fyne.Resource {
+	return safeFontLookup(fyne.TextStyle{Symbol: true})
+}
+
 // WarningColor returns the theme's warning foreground color.
 //
 // Since: 2.3
@@ -548,7 +555,7 @@ var (
 type builtinTheme struct {
 	variant fyne.ThemeVariant
 
-	regular, bold, italic, boldItalic, monospace fyne.Resource
+	regular, bold, italic, boldItalic, monospace, symbol fyne.Resource
 }
 
 func (t *builtinTheme) initFonts() {
@@ -557,6 +564,7 @@ func (t *builtinTheme) initFonts() {
 	t.italic = italic
 	t.boldItalic = bolditalic
 	t.monospace = monospace
+	t.symbol = symbol
 
 	font := os.Getenv("FYNE_FONT")
 	if font != "" {
@@ -574,6 +582,10 @@ func (t *builtinTheme) initFonts() {
 	font = os.Getenv("FYNE_FONT_MONOSPACE")
 	if font != "" {
 		t.monospace = loadCustomFont(font, "Regular", monospace)
+	}
+	font = os.Getenv("FYNE_FONT_SYMBOL")
+	if font != "" {
+		t.symbol = loadCustomFont(font, "Regular", symbol)
 	}
 }
 
@@ -610,6 +622,9 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	}
 	if style.Italic {
 		return t.italic
+	}
+	if style.Symbol {
+		return t.symbol
 	}
 	return t.regular
 }
@@ -834,6 +849,9 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	}
 	if s.Italic {
 		return DefaultTextItalicFont()
+	}
+	if s.Symbol {
+		return DefaultSymbolFont()
 	}
 
 	return DefaultTextFont()

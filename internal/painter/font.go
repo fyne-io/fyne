@@ -50,6 +50,7 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 			f1 = loadMeasureFont(theme.TextItalicFont())
 			f2 = loadMeasureFont(theme.DefaultTextItalicFont())
 		case style.Symbol:
+			f1 = loadMeasureFont(theme.SymbolFont())
 			f2 = loadMeasureFont(theme.DefaultSymbolFont())
 		default:
 			f1 = loadMeasureFont(theme.TextFont())
