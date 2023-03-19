@@ -30,6 +30,7 @@ type Table struct {
 	UpdateCell   func(id TableCellID, template fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id TableCellID)                             `json:"-"`
 	OnUnselected func(id TableCellID)                             `json:"-"`
+	OnScrolled   func(pos fyne.Position)                          `json:"-"`
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
@@ -71,10 +72,29 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 		t.offset = pos
 		t.cells.Refresh()
 		r.moveIndicators()
+		if t.OnScrolled != nil {
+			t.OnScrolled(pos) // Makes tables scroll synchronisation possible
+		}
 	}
 
 	r.Layout(t.Size())
 	return r
+}
+
+// SyncHPos synchronise (set) table t horizontal scroll position
+func (t *Table) SyncHPos(pos fyne.Position) {
+	t.scroll.Offset.X = pos.X
+	t.scroll.Base.Refresh()
+	t.offset.X = pos.X
+	t.cells.Refresh()
+}
+
+// SyncVPos synchronise (set) table t vertical scroll position
+func (t *Table) SyncVPos(pos fyne.Position) {
+	t.scroll.Offset.Y = pos.Y
+	t.scroll.Base.Refresh()
+	t.offset.Y = pos.Y
+	t.cells.Refresh()
 }
 
 // Select will mark the specified cell as selected.

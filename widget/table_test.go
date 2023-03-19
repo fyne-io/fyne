@@ -626,3 +626,42 @@ func (t *paddingZeroTheme) Size(n fyne.ThemeSizeName) float32 {
 	}
 	return t.Theme.Size(n)
 }
+
+func TestTable_SyncHVPos(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	length := func() (int, int) { return 5, 5 }
+	create := func() fyne.CanvasObject {
+		return NewLabel("placeholder")
+	}
+	update := func(id TableCellID, c fyne.CanvasObject) {
+		text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
+		c.(*Label).SetText(text)
+	}
+
+	leadTable := NewTable(length, create, update)
+	leadWindow := test.NewWindow(leadTable)
+	defer leadWindow.Close()
+	leadWindow.Resize(fyne.NewSize(180, 180))
+
+	flownTable := NewTable(length, create, update)
+	flownWindow := test.NewWindow(flownTable)
+	defer flownWindow.Close()
+	flownWindow.Resize(fyne.NewSize(180, 180))
+
+	leadTable.OnScrolled = func(pos fyne.Position) {
+		flownTable.SyncHPos(pos)
+		flownTable.SyncVPos(pos)
+	}
+
+	scrollPos := fyne.NewDelta(-15, -15)
+	leadTable.scroll.Scrolled(&fyne.ScrollEvent{Scrolled: scrollPos})
+
+	assert.Equal(t, scrollPos.DX, -flownTable.scroll.Offset.X)
+	assert.Equal(t, scrollPos.DY, -flownTable.scroll.Offset.Y)
+
+	assert.Equal(t, scrollPos.DX, -flownTable.offset.X)
+	assert.Equal(t, scrollPos.DY, -flownTable.offset.Y)
+
+}
