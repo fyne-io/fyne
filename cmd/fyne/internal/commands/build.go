@@ -224,25 +224,12 @@ func (b *Builder) build() error {
 	}
 
 	if b.pprof {
-		pprofInitFilePath := filepath.Join(srcdir, "fyne_pprof.go")
-		pprofInitFile, err := os.Create(pprofInitFilePath)
+		close, err := injectPprofFile(fyneGoModRunner, srcdir, b.pprofPort)
 		if err != nil {
-			return err
+			fyne.LogError("Failed to inject pprof file, omitting pprof", err)
+		} else if close != nil {
+			defer close()
 		}
-
-		pprofInfo := struct {
-			Port int
-		}{
-			Port: b.pprofPort,
-		}
-
-		err = templates.FynePprofInit.Execute(pprofInitFile, pprofInfo)
-		if err != nil {
-			fyne.LogError("Error executing metadata template", err)
-		}
-		pprofInitFile.Close()
-
-		defer os.Remove(pprofInitFilePath)
 	}
 
 	close, err := injectMetadataIfPossible(fyneGoModRunner, srcdir, b.appData, createMetadataInitFile)
@@ -342,6 +329,29 @@ func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
 	}
 	return srcdir, nil
+}
+
+func injectPprofFile(runner runner, srcdir string, port int) (func(), error) {
+	pprofInitFilePath := filepath.Join(srcdir, "fyne_pprof.go")
+	pprofInitFile, err := os.Create(pprofInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer pprofInitFile.Close()
+
+	pprofInfo := struct {
+		Port int
+	}{
+		Port: port,
+	}
+
+	err = templates.FynePprofInit.Execute(pprofInitFile, pprofInfo)
+	if err != nil {
+		os.Remove(pprofInitFilePath)
+		return func() {}, err
+	}
+
+	return func() { os.Remove(pprofInitFilePath) }, nil
 }
 
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
