@@ -23,6 +23,8 @@ type Builder struct {
 	os, srcdir, target string
 	goPackage          string
 	release            bool
+	pprof              bool
+	pprofPort          int
 	tags               []string
 	tagsToParse        string
 
@@ -66,6 +68,17 @@ func Build() *cli.Command {
 				Name:        "o",
 				Usage:       "Specify a name for the output file, default is based on the current directory.",
 				Destination: &b.target,
+			},
+			&cli.BoolFlag{
+				Name:        "pprof",
+				Usage:       "Enable pprof profiling.",
+				Destination: &b.pprof,
+			},
+			&cli.IntFlag{
+				Name:        "pprof-port",
+				Usage:       "Specify the port to use for pprof profiling.",
+				Value:       6060,
+				Destination: &b.pprofPort,
 			},
 			&cli.GenericFlag{
 				Name:  "metadata",
@@ -208,6 +221,28 @@ func (b *Builder) build() error {
 		if util.Exists(defaultIcon) {
 			b.icon = defaultIcon
 		}
+	}
+
+	if b.pprof {
+		pprofInitFilePath := filepath.Join(srcdir, "fyne_pprof.go")
+		pprofInitFile, err := os.Create(pprofInitFilePath)
+		if err != nil {
+			return err
+		}
+
+		pprofInfo := struct {
+			Port int
+		}{
+			Port: b.pprofPort,
+		}
+
+		err = templates.FynePprofInit.Execute(pprofInitFile, pprofInfo)
+		if err != nil {
+			fyne.LogError("Error executing metadata template", err)
+		}
+		pprofInitFile.Close()
+
+		defer os.Remove(pprofInitFilePath)
 	}
 
 	close, err := injectMetadataIfPossible(fyneGoModRunner, srcdir, b.appData, createMetadataInitFile)
