@@ -45,3 +45,13 @@ var shaderSimpleesVert = &fyne.StaticResource{
 	StaticContent: []byte(
 		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
 }
+var shaderSinglechannelFrag = &fyne.StaticResource{
+	StaticName: "single_channel.frag",
+	StaticContent: []byte(
+		"#version 110\n\nuniform vec4 color;\n\nuniform sampler2D tex;\nvarying vec2 fragTexCoord;\n\nvoid main()\n{\n    gl_FragColor = vec4(color.r, color.g, color.b, texture2D(tex, fragTexCoord).r*color.a);\n}\n"),
+}
+var shaderSinglechannelesFrag = &fyne.StaticResource{
+	StaticName: "single_channel_es.frag",
+	StaticContent: []byte(
+		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform vec4 color;\n\nuniform sampler2D tex;\nvarying vec2 fragTexCoord;\n\nvoid main()\n{\n    gl_FragColor = vec4(color.r, color.g, color.b, texture2D(tex, fragTexCoord).r*color.a);\n}\n"),
+}

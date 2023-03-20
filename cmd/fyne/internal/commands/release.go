@@ -346,9 +346,9 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 	manifestData := struct{ AppID, Developer, DeveloperName, Name, Version string }{
 		AppID: r.AppID,
 		// TODO read this info
-		Developer:     r.developer,
-		DeveloperName: r.nameFromCertInfo(r.developer),
-		Name:          r.Name,
+		Developer:     encodeXMLString(r.developer),
+		DeveloperName: encodeXMLString(r.nameFromCertInfo(r.developer)),
+		Name:          encodeXMLString(r.Name),
 		Version:       r.combinedVersion(),
 	}
 	err = templates.AppxManifestWindows.Execute(manifest, manifestData)

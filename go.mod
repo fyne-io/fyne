@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.14
 
 require (
-	fyne.io/systray v1.10.1-0.20230207085535-4a244dbb9d03
+	fyne.io/systray v1.10.1-0.20230312215936-7f71b037e260
 	github.com/BurntSushi/toml v1.1.0
 	github.com/fredbi/uri v0.1.0
 	github.com/fsnotify/fsnotify v1.5.4
@@ -26,12 +26,13 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.4.0
-	github.com/yuin/goldmark v1.4.0
+	github.com/yuin/goldmark v1.4.13
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
-	golang.org/x/mod v0.4.2
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
-	golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
+	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/tools v0.1.12
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )

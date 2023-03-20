@@ -18,6 +18,7 @@ const (
 	bitDepthBuffer        = gl.DepthBufferBit
 	clampToEdge           = gl.ClampToEdge
 	colorFormatRGBA       = gl.RGBA
+	colorFormatR          = singleChannelColorFormat
 	compileStatus         = gl.CompileStatus
 	constantAlpha         = gl.ConstantAlpha
 	float                 = gl.Float
@@ -39,6 +40,7 @@ const (
 	textureWrapT          = gl.TextureWrapT
 	triangles             = gl.Triangles
 	triangleStrip         = gl.TriangleStrip
+	unpackAlignment       = gl.UnpackAlignment
 	unsignedByte          = gl.UnsignedByte
 	vertexShader          = gl.VertexShader
 )
@@ -69,6 +71,7 @@ func (p *painter) Init() {
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	p.program = p.createProgram("simple_es")
+	p.singleChannelProgram = p.createProgram("single_channel_es")
 	p.lineProgram = p.createProgram("line_es")
 }
 
@@ -219,6 +222,10 @@ func (c *mobileContext) GetUniformLocation(program Program, name string) Uniform
 
 func (c *mobileContext) LinkProgram(program Program) {
 	c.glContext.LinkProgram(gl.Program(program))
+}
+
+func (c *mobileContext) PixelStorei(pname uint32, param int32) {
+	c.glContext.PixelStorei(gl.Enum(pname), param)
 }
 
 func (c *mobileContext) ReadBuffer(_ uint32) {

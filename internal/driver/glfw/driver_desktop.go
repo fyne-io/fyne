@@ -64,7 +64,11 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
 	if i.IsSeparator {
-		systray.AddSeparator()
+		if parent != nil {
+			parent.AddSeparator()
+		} else {
+			systray.AddSeparator()
+		}
 		return nil
 	}
 
@@ -89,7 +93,11 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 		data := i.Icon.Content()
 		if painter.IsResourceSVG(i.Icon) {
 			b := &bytes.Buffer{}
-			img := painter.PaintImage(canvas.NewImageFromResource(i.Icon), nil, 64, 64)
+			res := i.Icon
+			if runtime.GOOS == "windows" && isDark() { // windows menus don't match dark mode so invert icons
+				res = theme.NewInvertedThemedResource(i.Icon)
+			}
+			img := painter.PaintImage(canvas.NewImageFromResource(res), nil, 64, 64)
 			err := png.Encode(b, img)
 			if err != nil {
 				fyne.LogError("Failed to encode SVG icon for menu", err)
@@ -97,7 +105,13 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 				data = b.Bytes()
 			}
 		}
-		item.SetIcon(data)
+
+		img, err := toOSIcon(data)
+		if err != nil {
+			fyne.LogError("Failed to convert systray icon", err)
+		} else {
+			item.SetIcon(img)
+		}
 	}
 	return item
 }
@@ -139,7 +153,7 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 	systrayIcon = resource // in case we need it later
 
-	img, err := toOSIcon(resource)
+	img, err := toOSIcon(resource.Content())
 	if err != nil {
 		fyne.LogError("Failed to convert systray icon", err)
 		return
