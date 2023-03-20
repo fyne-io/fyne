@@ -216,12 +216,7 @@ func (b *Builder) build() error {
 		return err
 	}
 
-	if b.icon == "" {
-		defaultIcon := filepath.Join(srcdir, "Icon.png")
-		if util.Exists(defaultIcon) {
-			b.icon = defaultIcon
-		}
-	}
+	b.updateToDefaultIconIfNotSet(srcdir)
 
 	if b.pprof {
 		close, err := injectPprofFile(fyneGoModRunner, srcdir, b.pprofPort)
@@ -329,6 +324,15 @@ func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
 	}
 	return srcdir, nil
+}
+
+func (b *Builder) updateToDefaultIconIfNotSet(srcdir string) {
+	if b.icon == "" {
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
+		if util.Exists(defaultIcon) {
+			b.icon = defaultIcon
+		}
+	}
 }
 
 func injectPprofFile(runner runner, srcdir string, port int) (func(), error) {
