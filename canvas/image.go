@@ -61,7 +61,6 @@ type Image struct {
 	baseObject
 
 	aspect float32
-	reader io.Reader
 	icon   *svg.Decoder
 	isSVG  bool
 	lock   sync.Mutex
@@ -119,17 +118,23 @@ func (i *Image) Refresh() {
 	i.lock.Lock()
 	defer i.lock.Unlock()
 
-	err := i.updateReader()
+	rc, err := i.updateReader()
 	if err != nil {
 		fyne.LogError("Failed to load image", err)
 		return
 	}
+	if rc != nil {
+		rcMem := rc
+		defer rcMem.Close()
+	}
+
 	if i.File != "" || i.Resource != nil || i.Image != nil {
-		err = i.updateAspectAndMinSize()
+		r, err := i.updateAspectAndMinSize(rc)
 		if err != nil {
 			fyne.LogError("Failed to load image", err)
 			return
 		}
+		rc = ioutil.NopCloser(r)
 	}
 
 	if i.File != "" || i.Resource != nil {
@@ -149,11 +154,11 @@ func (i *Image) Refresh() {
 			}
 			i.Image = tex
 		} else {
-			if i.reader == nil {
+			if rc == nil {
 				return
 			}
 
-			image, _, err := image.Decode(i.reader)
+			image, _, err := image.Decode(rc)
 			if err != nil {
 				fyne.LogError("Failed to render image", err)
 				return
@@ -162,7 +167,6 @@ func (i *Image) Refresh() {
 		}
 	}
 
-	i.reader = nil
 	Refresh(i)
 }
 
@@ -243,36 +247,33 @@ func (i *Image) name() string {
 	return ""
 }
 
-func (i *Image) updateReader() error {
-	i.reader = nil
-
+func (i *Image) updateReader() (io.ReadCloser, error) {
 	i.isSVG = false
 	if i.Resource != nil {
-		i.reader = bytes.NewReader(i.Resource.Content())
 		i.isSVG = svg.IsResourceSVG(i.Resource)
+		return ioutil.NopCloser(bytes.NewReader(i.Resource.Content())), nil
 	} else if i.File != "" {
 		var err error
 
 		fd, err := os.Open(i.File)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		i.isSVG = svg.IsFileSVG(i.File)
-		b, _ := ioutil.ReadAll(fd)
-		fd.Close()
-		i.reader = bytes.NewReader(b)
+		return fd, nil
 	}
-	return nil
+	return nil, nil
 }
 
-func (i *Image) updateAspectAndMinSize() error {
+func (i *Image) updateAspectAndMinSize(reader io.Reader) (io.Reader, error) {
 	var pixWidth, pixHeight int
 
-	if i.reader != nil {
-		width, height, aspect, err := i.imageDetailsFromReader(i.reader)
+	if reader != nil {
+		r, width, height, aspect, err := i.imageDetailsFromReader(reader)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		reader = r
 		i.aspect = aspect
 		pixWidth, pixHeight = width, height
 	} else if i.Image != nil {
@@ -280,18 +281,18 @@ func (i *Image) updateAspectAndMinSize() error {
 		i.aspect = float32(original.X) / float32(original.Y)
 		pixWidth, pixHeight = original.X, original.Y
 	} else {
-		return errors.New("no matching image source")
+		return nil, errors.New("no matching image source")
 	}
 
 	if i.FillMode == ImageFillOriginal {
 		i.SetMinSize(scale.ToFyneSize(i, pixWidth, pixHeight))
 	}
-	return nil
+	return reader, nil
 }
 
-func (i *Image) imageDetailsFromReader(source io.Reader) (width, height int, aspect float32, err error) {
+func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, width, height int, aspect float32, err error) {
 	if source == nil {
-		return 0, 0, 0, errors.New("no matching reading reader")
+		return nil, 0, 0, 0, errors.New("no matching reading reader")
 	}
 
 	if i.isSVG {
@@ -299,7 +300,7 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (width, height int, asp
 
 		i.icon, err = svg.NewDecoder(source)
 		if err != nil {
-			return 0, 0, 0, err
+			return nil, 0, 0, 0, err
 		}
 		config := i.icon.Config()
 		width, height = config.Width, config.Height
@@ -307,11 +308,11 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (width, height int, asp
 	} else {
 		var buf bytes.Buffer
 		tee := io.TeeReader(source, &buf)
-		i.reader = io.MultiReader(&buf, source)
+		reader = io.MultiReader(&buf, source)
 
 		config, _, err := image.DecodeConfig(tee)
 		if err != nil {
-			return 0, 0, 0, err
+			return nil, 0, 0, 0, err
 		}
 		width, height = config.Width, config.Height
 		aspect = float32(width) / float32(height)
