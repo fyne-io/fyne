@@ -224,6 +224,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 
 	// text size is sensitive to position on screen
 	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
+	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
 	p.drawSingleChannelTexture(text, p.newGlTextTexture, pos, size, frame, color, 0)
 }
 
@@ -467,7 +468,6 @@ func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
 	return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
 }
 
-// Returns scaled Width and Height of Frame(fyne.Size)
 func (p *painter) scaleFrameSize(frame fyne.Size) (float32, float32) {
 	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
 	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)

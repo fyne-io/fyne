@@ -52,12 +52,12 @@ type gLDriver struct {
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
 }
 
-func toOSIcon(icon fyne.Resource) ([]byte, error) {
+func toOSIcon(icon []byte) ([]byte, error) {
 	if runtime.GOOS != "windows" {
-		return icon.Content(), nil
+		return icon, nil
 	}
 
-	img, _, err := image.Decode(bytes.NewReader(icon.Content()))
+	img, _, err := image.Decode(bytes.NewReader(icon))
 	if err != nil {
 		return nil, err
 	}
