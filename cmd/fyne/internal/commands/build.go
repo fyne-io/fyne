@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -308,7 +307,6 @@ func (b *Builder) updateAndGetGoExecutable(goos string) runner {
 		fyneGoModRunner = newCommand("go")
 		goBin := os.Getenv("GO")
 		if goBin != "" {
-			log.Println("Picking", goBin, "from GOEXEC environment variable to use as go command.")
 			fyneGoModRunner = newCommand(goBin)
 			b.runner = fyneGoModRunner
 		} else {
