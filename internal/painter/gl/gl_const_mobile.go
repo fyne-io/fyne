@@ -1,8 +1,8 @@
-//go:build !darwin && !js && !wasm && (android || ios)
+//go:build !darwin && !js && !wasm && (android || ios || mobile)
 // +build !darwin
 // +build !js
 // +build !wasm
-// +build android ios
+// +build android ios mobile
 
 package gl
 
