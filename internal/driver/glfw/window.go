@@ -17,13 +17,37 @@ import (
 )
 
 const (
-	scrollAccelerateRate   = float64(5)
-	scrollAccelerateCutoff = float64(5)
-	scrollSpeed            = float32(10)
-	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
-	dragMoveThreshold      = 2   // how far can we move before it is a drag
-	windowIconSize         = 256
+	doubleClickDelay  = 300 // ms (maximum interval between clicks for double click detection)
+	dragMoveThreshold = 2   // how far can we move before it is a drag
+	windowIconSize    = 256
 )
+
+var (
+	scrollAccelerateRate   = getScrollAccelerateRate()
+	scrollAccelerateCutoff = getScrollAccelerateCutoff()
+	scrollSpeed            = getScrollSpeed()
+)
+
+func getScrollAccelerateRate() float64 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return 125
+	}
+	return 5
+}
+
+func getScrollAccelerateCutoff() float64 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return 10
+	}
+	return 5
+}
+
+func getScrollSpeed() float32 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return 25
+	}
+	return 10
+}
 
 func (w *window) Title() string {
 	return w.title
