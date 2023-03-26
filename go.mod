@@ -5,7 +5,6 @@ go 1.14
 require (
 	fyne.io/systray v1.10.1-0.20230324154429-a8f53a63dc8d
 	github.com/BurntSushi/toml v1.1.0
-	github.com/benoitkugler/textlayout v0.3.0
 	github.com/fredbi/uri v0.1.0
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
@@ -14,8 +13,8 @@ require (
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.0.0-20230216150601-73a50f52a509
-	github.com/go-text/typesetting v0.0.0-20221212183139-1eb938670a1f
+	github.com/go-text/render v0.0.0-20230326211130-e84e57caa025
+	github.com/go-text/typesetting v0.0.0-20230326210850-e6ad9b6306c6
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gopherjs/gopherjs v1.17.2
 	github.com/jackmordaunt/icns/v2 v2.2.1

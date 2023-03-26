@@ -314,10 +314,21 @@ type Range struct {
 // Output should be displayed sequentially on one line.
 type Line []Output
 
+// WrapConfig provides line-wrapper settings.
+type WrapConfig struct {
+	// TruncateAfterLines is the number of lines of text to allow before truncating
+	// the text. A value of zero means no limit.
+	TruncateAfterLines int
+}
+
 // LineWrapper holds reusable state for a line wrapping operation. Reusing
 // LineWrappers for multiple paragraphs should improve performance.
 type LineWrapper struct {
-	// seg is an internal storage used to initiate the breaker iterator
+	// config holds the current line wrapping settings.
+	config WrapConfig
+	// truncating tracks whether the wrapper should be performing truncation.
+	truncating bool
+	// seg is an internal storage used to initiate the breaker iterator.
 	seg segmenter.Segmenter
 
 	// breaker provides line-breaking candidates.
@@ -349,7 +360,9 @@ type LineWrapper struct {
 
 // Prepare initializes the LineWrapper for the given paragraph and shaped text.
 // It must be called prior to invoking WrapNextLine.
-func (l *LineWrapper) Prepare(paragraph []rune, shapedRuns ...Output) {
+func (l *LineWrapper) Prepare(config WrapConfig, paragraph []rune, shapedRuns ...Output) {
+	l.config = config
+	l.truncating = l.config.TruncateAfterLines > 0
 	l.breaker = newBreaker(&l.seg, paragraph)
 	l.glyphRuns = shapedRuns
 	l.isUnused = false
@@ -361,11 +374,13 @@ func (l *LineWrapper) Prepare(paragraph []rune, shapedRuns ...Output) {
 
 // WrapParagraph wraps the paragraph's shaped glyphs to a constant maxWidth.
 // It is equivalent to iteratively invoking WrapLine with a constant maxWidth.
-func (l *LineWrapper) WrapParagraph(maxWidth int, paragraph []rune, shapedRuns ...Output) []Line {
+// If the config has a non-zero TruncateAfterLines, WrapParagraph will return at most
+// that many lines.
+func (l *LineWrapper) WrapParagraph(config WrapConfig, maxWidth int, paragraph []rune, shapedRuns ...Output) []Line {
 	if len(shapedRuns) == 1 && shapedRuns[0].Advance.Ceil() < maxWidth {
 		return []Line{shapedRuns}
 	}
-	l.Prepare(paragraph, shapedRuns...)
+	l.Prepare(config, paragraph, shapedRuns...)
 	var lines []Line
 	var done bool
 	for !done {
@@ -382,6 +397,12 @@ func (l *LineWrapper) WrapParagraph(maxWidth int, paragraph []rune, shapedRuns .
 // subsequent calls to WrapNextLine (without calling Prepare) will return a nil line.
 func (l *LineWrapper) WrapNextLine(maxWidth int) (_ Line, done bool) {
 	defer func() {
+		if l.truncating {
+			l.config.TruncateAfterLines--
+			if l.config.TruncateAfterLines == 0 {
+				done = true
+			}
+		}
 		if done {
 			l.more = false
 		}
