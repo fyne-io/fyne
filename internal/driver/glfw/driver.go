@@ -102,7 +102,9 @@ func (d *gLDriver) Quit() {
 		if d.trayStop != nil {
 			d.trayStop()
 		}
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+			curWindow.QueueEvent(f)
+		}
 	}
 	defer func() {
 		recover() // we could be called twice - no safe way to check if d.done is closed

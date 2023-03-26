@@ -792,7 +792,9 @@ func (w *window) processCharInput(char rune) {
 func (w *window) processFocused(focus bool) {
 	if focus {
 		if curWindow == nil {
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerEnteredForeground()
+			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnEnteredForeground(); f != nil {
+				w.QueueEvent(f)
+			}
 		}
 		curWindow = w
 		w.canvas.FocusGained()
@@ -809,7 +811,9 @@ func (w *window) processFocused(focus bool) {
 			}
 
 			curWindow = nil
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerExitedForeground()
+			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
+				w.QueueEvent(f)
+			}
 		}()
 	}
 }

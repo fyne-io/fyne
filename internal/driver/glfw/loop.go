@@ -120,14 +120,18 @@ func (d *gLDriver) runGL() {
 	if d.trayStart != nil {
 		d.trayStart()
 	}
-	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
+	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
+		go f() // don't block main, we don't have window event queue
+	}
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
 			d.drawDone <- nil // wait for draw thread to stop
 			d.Terminate()
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
+			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStopped(); f != nil {
+				go f() // don't block main, we don't have window event queue
+			}
 			return
 		case f := <-funcQueue:
 			f.f()
