@@ -609,16 +609,16 @@ func (l *listLayout) updateList(refresh bool) {
 
 	l.visible = visible
 
-	var focused fyne.Focusable
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
-	if canvas != nil {
-		focused = canvas.Focused()
-	}
+	//var focused fyne.Focusable
+	//canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+	//if canvas != nil {
+	//	focused = canvas.Focused()
+	//}
 	for id, old := range wasVisible {
 		if _, ok := l.visible[id]; !ok {
-			if focused == old {
-				canvas.Focus(nil)
-			}
+			//if focused == old {
+			//	canvas.Focus(nil)
+			//}
 			l.itemPool.Release(old)
 		}
 	}
@@ -632,7 +632,7 @@ func (l *listLayout) updateList(refresh bool) {
 	l.renderLock.Unlock() // user code should not be locked
 
 	for row, obj := range visible {
-		l.setupListItem(obj, row, focused == obj)
+		l.setupListItem(obj, row, /*focused == obj*/false)
 	}
 }
 
