@@ -1,5 +1,5 @@
-github.com/go-text/typesetting v0.0.0-20230326210850-e6ad9b6306c6 h1:MToKEswC+ICigOfznV2heSgiMbRoRwAzx8a6D7j3ba0=
-github.com/go-text/typesetting v0.0.0-20230326210850-e6ad9b6306c6/go.mod h1:zvWM81wAVW6QfVDI6yxfbCuoLnobSYTuMsrXU/u11y8=
+github.com/go-text/typesetting v0.0.0-20230326213217-3355bdaa7d70 h1:R8zViQwUWX6gfQa7aKonPRVe0dE+bP4uhINZ2M78fS4=
+github.com/go-text/typesetting v0.0.0-20230326213217-3355bdaa7d70/go.mod h1:zvWM81wAVW6QfVDI6yxfbCuoLnobSYTuMsrXU/u11y8=
 github.com/go-text/typesetting-utils v0.0.0-20230326210548-458646692de6 h1:zAAA1U4ykFwqPbcj6YDxvq3F2g0wc/ngPfLJjkR/8zs=
 github.com/go-text/typesetting-utils v0.0.0-20230326210548-458646692de6/go.mod h1:RaqFwjcYyM5BjbYGwON0H5K0UqwO3sJlo9ukKha80ZE=
 github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef h1:Ch6Q+AZUxDBCVqdkI8FSpFyZDtCVBc2VmejdNrm5rRQ=

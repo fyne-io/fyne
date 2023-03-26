@@ -13,8 +13,8 @@ require (
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.0.0-20230326211130-e84e57caa025
-	github.com/go-text/typesetting v0.0.0-20230326210850-e6ad9b6306c6
+	github.com/go-text/render v0.0.0-20230326213825-a8049dd94a88
+	github.com/go-text/typesetting v0.0.0-20230326213217-3355bdaa7d70
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gopherjs/gopherjs v1.17.2
 	github.com/jackmordaunt/icns/v2 v2.2.1
