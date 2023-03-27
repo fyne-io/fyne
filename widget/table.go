@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
+	"strconv"
 )
 
 // Declare conformity with Widget interface.
@@ -30,6 +31,30 @@ type Table struct {
 	UpdateCell   func(id TableCellID, template fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id TableCellID)                             `json:"-"`
 	OnUnselected func(id TableCellID)                             `json:"-"`
+
+	// ShowHeaderRow specifies that a row should be added to the table with header content.
+	// This will default to an A-Z style content, unless overridden with `CreateHeader` and `UpdateHeader` calls.
+	//
+	// Since: 2.4
+	ShowHeaderRow bool
+
+	// ShowHeaderColumn specifies that a column should be added to the table with header content.
+	// This will default to an 1-10 style numeric content, unless overridden with `CreateHeader` and `UpdateHeader` calls.
+	//
+	// Since: 2.4
+	ShowHeaderColumn bool
+
+	// CreateHeader is an optional function that allows overriding of the default header widget.
+	// Developers must also override `UpdateHeader`.
+	//
+	// Since: 2.4
+	CreateHeader func() fyne.CanvasObject `json:"-"`
+
+	// UpdateHeader is used with `CreateHeader` to support custom header content.
+	// The `id` parameter will have `-1` value to indicate a header, and `> 0` where the column or row refer to data.
+	//
+	// Since: 2.4
+	UpdateHeader func(id TableCellID, template fyne.CanvasObject) `json:"-"`
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
@@ -60,11 +85,12 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	hover := canvas.NewRectangle(theme.HoverColor())
 
 	cellSize := t.templateSize()
-	t.cells = newTableCells(t, cellSize)
+	t.cells = newTableCells(t, cellSize, t.createHeader().MinSize())
 	t.scroll = widget.NewScroll(t.cells)
 
 	obj := []fyne.CanvasObject{marker, hover, t.scroll}
-	r := &tableRenderer{t: t, scroll: t.scroll, marker: marker, hover: hover, cellSize: cellSize}
+	r := &tableRenderer{t: t, scroll: t.scroll, marker: marker, hover: hover, cellSize: cellSize,
+		headerSize: t.createHeader().MinSize()}
 	r.SetObjects(obj)
 	t.moveCallback = r.moveIndicators
 	t.scroll.OnScrolled = func(pos fyne.Position) {
@@ -271,6 +297,39 @@ func (t *Table) ScrollToTrailing() {
 	t.finishScroll()
 }
 
+func (t *Table) createHeader() fyne.CanvasObject {
+	if f := t.CreateHeader; f != nil {
+		return f()
+	}
+
+	l := NewLabel("00")
+	l.TextStyle.Bold = true
+	l.Alignment = fyne.TextAlignCenter
+	return l
+}
+
+func (t *Table) updateHeader(id TableCellID, o fyne.CanvasObject) {
+	if f := t.UpdateHeader; f != nil {
+		f(id, o)
+		return
+	}
+
+	l := o.(*Label)
+	if id.Row < 0 {
+		ids := []rune{'A' + rune(id.Col%26)}
+		pre := (id.Col - id.Col%26) / 26
+		for pre > 0 {
+			ids = append([]rune{'A' + rune(pre%26)}, ids...)
+			pre = (id.Col - id.Col%26) / 26
+		}
+		l.SetText(string(ids))
+	} else if id.Col < 0 {
+		l.SetText(strconv.Itoa(id.Row + 1))
+	} else {
+		l.SetText("")
+	}
+}
+
 func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 	cellSize := t.templateSize()
 	for i := 0; i <= col; i++ {
@@ -314,7 +373,7 @@ func (t *Table) finishScroll() {
 func (t *Table) templateSize() fyne.Size {
 	if f := t.CreateCell; f != nil {
 		template := f() // don't use cache, we need new template
-		return template.MinSize()
+		return template.MinSize().Max(t.createHeader().MinSize())
 	}
 
 	fyne.LogError("Missing CreateCell callback required for Table", nil)
@@ -323,7 +382,11 @@ func (t *Table) templateSize() fyne.Size {
 
 func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int]float32, offX float32, minCol, maxCol int) {
 	maxCol = cols
-	colOffset := float32(0)
+	colOffset, headWidth := float32(0), float32(0)
+	if t.ShowHeaderColumn {
+		headWidth = t.createHeader().MinSize().Width + theme.SeparatorThicknessSize()
+		colOffset += headWidth
+	}
 	isVisible := false
 	visible = make(map[int]float32)
 
@@ -338,8 +401,8 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		}
 
 		if colOffset <= t.offset.X-width-theme.Padding() {
-			// before scroll
-		} else if colOffset <= t.offset.X {
+			// before visible content
+		} else if colOffset <= headWidth || colOffset <= t.offset.X {
 			minCol = i
 			offX = colOffset
 			isVisible = true
@@ -360,7 +423,11 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 
 func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]float32, offY float32, minRow, maxRow int) {
 	maxRow = rows
-	rowOffset := float32(0)
+	rowOffset, headHeight := float32(0), float32(0)
+	if t.ShowHeaderRow {
+		headHeight = t.createHeader().MinSize().Height + theme.SeparatorThicknessSize()
+		rowOffset += headHeight
+	}
 	isVisible := false
 	visible = make(map[int]float32)
 
@@ -375,8 +442,8 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		}
 
 		if rowOffset <= t.offset.Y-height-theme.Padding() {
-			// before scroll
-		} else if rowOffset <= t.offset.Y {
+			// before visible content
+		} else if rowOffset <= headHeight || rowOffset <= t.offset.Y {
 			minRow = i
 			offY = rowOffset
 			isVisible = true
@@ -406,7 +473,7 @@ type tableRenderer struct {
 	hover, marker *canvas.Rectangle
 	dividers      []fyne.CanvasObject
 
-	cellSize fyne.Size
+	cellSize, headerSize fyne.Size
 }
 
 func (t *tableRenderer) Layout(s fyne.Size) {
@@ -415,11 +482,19 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 }
 
 func (t *tableRenderer) MinSize() fyne.Size {
-	return t.t.scroll.MinSize().Max(t.cellSize)
+	min := t.t.scroll.MinSize().Max(t.cellSize)
+	if t.t.ShowHeaderRow {
+		min.Height += t.headerSize.Height + theme.SeparatorThicknessSize()
+	}
+	if t.t.ShowHeaderColumn {
+		min.Width += t.headerSize.Width + theme.SeparatorThicknessSize()
+	}
+	return min
 }
 
 func (t *tableRenderer) Refresh() {
 	t.cellSize = t.t.templateSize()
+	t.headerSize = t.t.createHeader().MinSize()
 	t.moveIndicators()
 
 	t.marker.FillColor = theme.SelectionColor()
@@ -547,18 +622,20 @@ var _ fyne.Widget = (*tableCells)(nil)
 
 type tableCells struct {
 	BaseWidget
-	t        *Table
-	cellSize fyne.Size
+	t                    *Table
+	cellSize, headerSize fyne.Size
 }
 
-func newTableCells(t *Table, s fyne.Size) *tableCells {
-	c := &tableCells{t: t, cellSize: s}
+func newTableCells(t *Table, s, hs fyne.Size) *tableCells {
+	c := &tableCells{t: t, cellSize: s, headerSize: hs}
 	c.ExtendBaseWidget(c)
 	return c
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[TableCellID]fyne.CanvasObject)}
+	return &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
+		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
+		headRowBG: canvas.NewRectangle(theme.OverlayBackgroundColor()), headColBG: canvas.NewRectangle(theme.OverlayBackgroundColor())}
 }
 
 func (c *tableCells) MouseIn(ev *desktop.MouseEvent) {
@@ -670,9 +747,10 @@ var _ fyne.WidgetRenderer = (*tableCellsRenderer)(nil)
 type tableCellsRenderer struct {
 	widget.BaseRenderer
 
-	cells   *tableCells
-	pool    pool
-	visible map[TableCellID]fyne.CanvasObject
+	cells                *tableCells
+	pool, headerPool     pool
+	visible, headers     map[TableCellID]fyne.CanvasObject
+	headColBG, headRowBG *canvas.Rectangle
 }
 
 func (r *tableCellsRenderer) Layout(_ fyne.Size) {
@@ -718,6 +796,12 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 	}
 
 	separatorSize := theme.Padding()
+	if r.cells.t.ShowHeaderRow {
+		height += r.cells.headerSize.Height + separatorSize
+	}
+	if r.cells.t.ShowHeaderColumn {
+		width += r.cells.headerSize.Width + separatorSize
+	}
 	return fyne.NewSize(width+float32(cols-1)*separatorSize, height+float32(rows-1)*separatorSize)
 }
 
@@ -725,6 +809,7 @@ func (r *tableCellsRenderer) Refresh() {
 	r.cells.propertyLock.Lock()
 	oldSize := r.cells.cellSize
 	r.cells.cellSize = r.cells.t.templateSize()
+	r.cells.headerSize = r.cells.t.createHeader().MinSize()
 	if oldSize != r.cells.cellSize { // theme changed probably
 		r.returnAllToPool()
 	}
@@ -786,21 +871,108 @@ func (r *tableCellsRenderer) Refresh() {
 			r.pool.Release(old)
 		}
 	}
+	cells = append(cells, r.refreshHeaders(visibleRowHeights, visibleColWidths, offX, offY, minRow, maxRow, minCol, maxCol, separatorThickness)...)
 	visible := r.visible
+	headers := r.headers
 	r.cells.propertyLock.Unlock()
 	r.SetObjects(cells)
 
 	if updateCell != nil {
 		for id, cell := range visible {
-			updateCell(TableCellID{id.Row, id.Col}, cell)
+			updateCell(id, cell)
 		}
 	}
+	for id, head := range headers {
+		r.cells.t.updateHeader(id, head)
+	}
+}
+
+func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32, minRow, maxRow, minCol, maxCol int, separatorThickness float32) []fyne.CanvasObject {
+	wasVisible := r.headers
+	r.headers = make(map[TableCellID]fyne.CanvasObject)
+	var cells []fyne.CanvasObject
+	headerMin := r.cells.t.createHeader().MinSize()
+	rowHeight := headerMin.Height
+	colWidth := headerMin.Width
+
+	if r.cells.t.ShowHeaderRow {
+		cellXOffset := offX
+		for col := minCol; col < maxCol; col++ {
+			id := TableCellID{-1, col}
+			colWidth := visibleColWidths[col]
+			c, ok := wasVisible[id]
+			if !ok {
+				c = r.headerPool.Obtain()
+				if c == nil {
+					c = r.cells.t.createHeader()
+				}
+				if c == nil {
+					continue
+				}
+			}
+
+			c.Move(fyne.NewPos(cellXOffset, 0))
+			c.Resize(fyne.NewSize(colWidth, rowHeight))
+
+			r.headers[id] = c
+			cells = append(cells, c)
+			cellXOffset += colWidth + separatorThickness
+		}
+	}
+
+	if r.cells.t.ShowHeaderColumn {
+		cellYOffset := offY
+		for row := minRow; row < maxRow; row++ {
+			id := TableCellID{row, -1}
+			rowHeight := visibleRowHeights[row]
+			c, ok := wasVisible[id]
+			if !ok {
+				c = r.headerPool.Obtain()
+				if c == nil {
+					c = r.cells.t.createHeader()
+				}
+				if c == nil {
+					continue
+				}
+			}
+
+			c.Move(fyne.NewPos(0, cellYOffset))
+			c.Resize(fyne.NewSize(colWidth, rowHeight))
+
+			r.headers[id] = c
+			cells = append(cells, c)
+			cellYOffset += rowHeight + separatorThickness
+		}
+	}
+
+	r.headColBG.Hidden = !r.cells.t.ShowHeaderColumn
+	r.headColBG.FillColor = theme.OverlayBackgroundColor()
+	r.headColBG.Move(fyne.NewPos(0, r.cells.t.scroll.Offset.Y))
+	r.headColBG.Resize(fyne.NewSize(colWidth, r.cells.t.scroll.Size().Height))
+	r.headRowBG.Hidden = !r.cells.t.ShowHeaderRow
+	r.headRowBG.FillColor = theme.OverlayBackgroundColor()
+	r.headRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, 0))
+	r.headRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, rowHeight))
+
+	for id, old := range wasVisible {
+		if _, ok := r.headers[id]; !ok {
+			r.headerPool.Release(old)
+		}
+	}
+	return append([]fyne.CanvasObject{r.headRowBG, r.headColBG}, cells...)
 }
 
 func (r *tableCellsRenderer) returnAllToPool() {
 	for _, cell := range r.BaseRenderer.Objects() {
+		for _, h := range r.headers { // a different pool for headers
+			if h == cell {
+				r.headerPool.Release(h)
+				break
+			}
+		}
 		r.pool.Release(cell)
 	}
+	r.headers = make(map[TableCellID]fyne.CanvasObject)
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	r.SetObjects(nil)
 }
