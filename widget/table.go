@@ -319,8 +319,8 @@ func (t *Table) updateHeader(id TableCellID, o fyne.CanvasObject) {
 		ids := []rune{'A' + rune(id.Col%26)}
 		pre := (id.Col - id.Col%26) / 26
 		for pre > 0 {
-			ids = append([]rune{'A' + rune(pre%26)}, ids...)
-			pre = (id.Col - id.Col%26) / 26
+			ids = append([]rune{'A' - 1 + rune(pre%26)}, ids...)
+			pre = (pre - pre%26) / 26
 		}
 		l.SetText(string(ids))
 	} else if id.Col < 0 {
