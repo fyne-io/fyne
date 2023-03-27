@@ -707,7 +707,7 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameHover:
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
 	case ColorNameHeaderBackground:
-		return color.NRGBA{R: 0x18, G: 0x1d, B: 0x25, A: 0xff}
+		return color.NRGBA{R: 0x1b, G: 0x1b, B: 0x1b, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	case ColorNameInputBorder:
@@ -775,7 +775,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameHover:
 		return color.NRGBA{A: 0x0f}
 	case ColorNameHeaderBackground:
-		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+		return color.NRGBA{R: 0xf9, G: 0xf9, B: 0xf9, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameInputBorder:
