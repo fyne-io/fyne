@@ -78,6 +78,11 @@ const (
 	// Since: 2.0
 	ColorNameForeground fyne.ThemeColorName = "foreground"
 
+	// ColorNameHeaderBackground is the name of theme lookup for background color of a collection header.
+	//
+	// Since: 2.4
+	ColorNameHeaderBackground fyne.ThemeColorName = "headerBackground"
+
 	// ColorNameHover is the name of theme lookup for hover color.
 	//
 	// Since: 2.0
@@ -326,6 +331,13 @@ func FocusColor() color.Color {
 // Since: 2.0
 func ForegroundColor() color.Color {
 	return safeColorLookup(ColorNameForeground, currentVariant())
+}
+
+// HeaderBackgroundColor returns the color used to draw underneath collection headers.
+//
+// Since: 2.4
+func HeaderBackgroundColor() color.Color {
+	return current().Color(ColorNameHeaderBackground, currentVariant())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
@@ -694,6 +706,8 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameHover:
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
+	case ColorNameHeaderBackground:
+		return color.NRGBA{R: 0x18, G: 0x1d, B: 0x25, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	case ColorNameInputBorder:
@@ -760,6 +774,8 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
 	case ColorNameHover:
 		return color.NRGBA{A: 0x0f}
+	case ColorNameHeaderBackground:
+		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameInputBorder:

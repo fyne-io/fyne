@@ -635,7 +635,7 @@ func newTableCells(t *Table, s, hs fyne.Size) *tableCells {
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	return &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
-		headRowBG: canvas.NewRectangle(theme.OverlayBackgroundColor()), headColBG: canvas.NewRectangle(theme.OverlayBackgroundColor())}
+		headRowBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColBG: canvas.NewRectangle(theme.HeaderBackgroundColor())}
 }
 
 func (c *tableCells) MouseIn(ev *desktop.MouseEvent) {
@@ -946,11 +946,11 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	}
 
 	r.headColBG.Hidden = !r.cells.t.ShowHeaderColumn
-	r.headColBG.FillColor = theme.OverlayBackgroundColor()
+	r.headColBG.FillColor = theme.HeaderBackgroundColor()
 	r.headColBG.Move(fyne.NewPos(0, r.cells.t.scroll.Offset.Y))
 	r.headColBG.Resize(fyne.NewSize(colWidth, r.cells.t.scroll.Size().Height))
 	r.headRowBG.Hidden = !r.cells.t.ShowHeaderRow
-	r.headRowBG.FillColor = theme.OverlayBackgroundColor()
+	r.headRowBG.FillColor = theme.HeaderBackgroundColor()
 	r.headRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, 0))
 	r.headRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, rowHeight))
 
