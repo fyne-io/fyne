@@ -1,6 +1,6 @@
 module github.com/go-text/render
 
-go 1.15
+go 1.17
 
 require (
 	github.com/go-text/typesetting v0.0.0-20230326213217-3355bdaa7d70
