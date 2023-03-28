@@ -964,6 +964,9 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 
 func (r *tableCellsRenderer) returnAllToPool() {
 	for _, cell := range r.BaseRenderer.Objects() {
+		if _, isRect := cell.(*canvas.Rectangle); isRect {
+			continue // ignore the header backgrounds
+		}
 		for _, h := range r.headers { // a different pool for headers
 			if h == cell {
 				r.headerPool.Release(h)
