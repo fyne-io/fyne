@@ -8,10 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/benoitkugler/textlayout/fonts"
 	"github.com/go-text/render"
 	"github.com/go-text/typesetting/di"
-	gotext "github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 
@@ -33,7 +32,7 @@ const (
 func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *FontCacheItem {
 	val, ok := fontCache.Load(style)
 	if !ok {
-		var f1, f2 gotext.Face
+		var f1, f2 font.Face
 		switch {
 		case style.Monospace:
 			f1 = loadMeasureFont(theme.TextMonospaceFont())
@@ -60,7 +59,7 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 		if f1 == nil {
 			f1 = f2
 		}
-		val = &FontCacheItem{Fonts: []fonts.Face{f1, f2}}
+		val = &FontCacheItem{Fonts: []font.Face{f1, f2}}
 		fontCache.Store(style, val)
 	}
 
@@ -74,7 +73,7 @@ func ClearFontCache() {
 }
 
 // DrawString draws a string into an image.
-func DrawString(dst draw.Image, s string, color color.Color, f []gotext.Face, fontSize, scale float32, tabWidth int) {
+func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, fontSize, scale float32, tabWidth int) {
 	r := render.Renderer{
 		FontSize: fontSize * textDPIRatio,
 		PixScale: scale,
@@ -105,8 +104,8 @@ func DrawString(dst draw.Image, s string, color color.Color, f []gotext.Face, fo
 	})
 }
 
-func loadMeasureFont(data fyne.Resource) gotext.Face {
-	loaded, err := gotext.ParseTTF(bytes.NewReader(data.Content()))
+func loadMeasureFont(data fyne.Resource) font.Face {
+	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
@@ -117,7 +116,7 @@ func loadMeasureFont(data fyne.Resource) gotext.Face {
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
-func MeasureString(f []gotext.Face, s string, textSize float32, tabWidth int) (size fyne.Size, advance float32) {
+func MeasureString(f []font.Face, s string, textSize float32, tabWidth int) (size fyne.Size, advance float32) {
 	return walkString(f, s, float32ToFixed266(textSize), tabWidth, &advance, 1, func(shaping.Output, float32) {})
 }
 
@@ -157,7 +156,7 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 	return tabw * float32(tabs)
 }
 
-func walkString(faces []gotext.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *float32, scale float32,
+func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *float32, scale float32,
 	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
@@ -247,7 +246,7 @@ func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, 
 }
 
 type FontCacheItem struct {
-	Fonts []gotext.Face
+	Fonts []font.Face
 }
 
 var fontCache = &sync.Map{} // map[fyne.TextStyle]*FontCacheItem

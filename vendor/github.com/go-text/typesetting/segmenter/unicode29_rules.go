@@ -2,7 +2,7 @@
 
 package segmenter
 
-import ucd "github.com/benoitkugler/textlayout/unicodedata"
+import ucd "github.com/go-text/typesetting/unicodedata"
 
 // Apply the Grapheme_Cluster_Boundary_Rules and returns a true if we are
 // at a grapheme break.
