@@ -51,7 +51,7 @@ github.com/go-gl/glfw/v3.3/glfw/glfw/src
 ## explicit
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
-# github.com/go-text/render v0.0.0-20230327180206-7c55e4766643
+# github.com/go-text/render v0.0.0-20230327192424-adef04305ec0
 ## explicit
 github.com/go-text/render
 # github.com/go-text/typesetting v0.0.0-20230326213217-3355bdaa7d70
