@@ -373,6 +373,9 @@ func (t *Table) finishScroll() {
 func (t *Table) templateSize() fyne.Size {
 	if f := t.CreateCell; f != nil {
 		template := f() // don't use cache, we need new template
+		if !t.ShowHeaderRow && !t.ShowHeaderColumn {
+			return template.MinSize()
+		}
 		return template.MinSize().Max(t.createHeader().MinSize())
 	}
 
