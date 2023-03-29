@@ -594,6 +594,7 @@ func convertASCII(key glfw.Key) fyne.KeyName {
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
 	keyDesktopModifier := desktopModifier(mods)
+	w.driver.currentKeyModifiers = desktopModifierCorrected(mods, key, action)
 	keyAction := convertAction(action)
 	keyASCII := convertASCII(key)
 
@@ -613,6 +614,44 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 	}
 	if (mods & glfw.ModSuper) != 0 {
 		m |= fyne.KeyModifierSuper
+	}
+	return m
+}
+
+func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.Action) fyne.KeyModifier {
+	var correctedM fyne.KeyModifier
+	// On X11, pressing/releasing modifier keys does not include newly pressed/released keys in 'mod' mask.
+	// https://github.com/glfw/glfw/issues/1630
+	if action == glfw.Press {
+		mods |= glfwKeyToModifier(key)
+	} else {
+		mods &= ^glfwKeyToModifier(key)
+	}
+	if (mods & glfw.ModShift) != 0 {
+		correctedM |= fyne.KeyModifierShift
+	}
+	if (mods & glfw.ModControl) != 0 {
+		correctedM |= fyne.KeyModifierControl
+	}
+	if (mods & glfw.ModAlt) != 0 {
+		correctedM |= fyne.KeyModifierAlt
+	}
+	if (mods & glfw.ModSuper) != 0 {
+		correctedM |= fyne.KeyModifierSuper
+	}
+	return correctedM
+}
+
+func glfwKeyToModifier(key glfw.Key) glfw.ModifierKey {
+	var m glfw.ModifierKey
+	if key == glfw.KeyLeftControl || key == glfw.KeyRightControl {
+		m = glfw.ModControl
+	} else if key == glfw.KeyLeftAlt || key == glfw.KeyRightAlt {
+		m = glfw.ModAlt
+	} else if key == glfw.KeyLeftShift || key == glfw.KeyRightShift {
+		m = glfw.ModShift
+	} else if key == glfw.KeyLeftSuper || key == glfw.KeyRightSuper {
+		m = glfw.ModSuper
 	}
 	return m
 }
