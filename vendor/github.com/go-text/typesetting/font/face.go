@@ -1,10 +1,13 @@
 package font
 
 import (
-	"github.com/benoitkugler/textlayout/fonts"
-	"github.com/benoitkugler/textlayout/harfbuzz"
+	"github.com/go-text/typesetting/harfbuzz"
+	"github.com/go-text/typesetting/opentype/api"
+	"github.com/go-text/typesetting/opentype/api/font"
 )
 
-type Face = fonts.Face
-type GID = fonts.GID
-type GlyphMask = harfbuzz.GlyphMask
+type (
+	Face      = *font.Face
+	GID       = api.GID
+	GlyphMask = harfbuzz.GlyphMask
+)

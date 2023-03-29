@@ -201,15 +201,7 @@ func (b *Builder) build() error {
 		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
 	}
 
-	fyneGoModRunner := b.runner
-	if b.runner == nil {
-		fyneGoModRunner = newCommand("go")
-		if goos != "gopherjs" {
-			b.runner = newCommand("go")
-		} else {
-			b.runner = newCommand("gopherjs")
-		}
-	}
+	fyneGoModRunner := b.updateAndGetGoExecutable(goos)
 
 	srcdir, err := b.computeSrcDir(fyneGoModRunner)
 	if err != nil {
@@ -356,6 +348,25 @@ func injectPprofFile(runner runner, srcdir string, port int) (func(), error) {
 	}
 
 	return func() { os.Remove(pprofInitFilePath) }, nil
+}
+
+func (b *Builder) updateAndGetGoExecutable(goos string) runner {
+	fyneGoModRunner := b.runner
+	if b.runner == nil {
+		fyneGoModRunner = newCommand("go")
+		goBin := os.Getenv("GO")
+		if goBin != "" {
+			fyneGoModRunner = newCommand(goBin)
+			b.runner = fyneGoModRunner
+		} else {
+			if goos != "gopherjs" {
+				b.runner = newCommand("go")
+			} else {
+				b.runner = newCommand("gopherjs")
+			}
+		}
+	}
+	return fyneGoModRunner
 }
 
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
