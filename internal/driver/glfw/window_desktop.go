@@ -619,7 +619,6 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 }
 
 func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.Action) fyne.KeyModifier {
-	var correctedM fyne.KeyModifier
 	// On X11, pressing/releasing modifier keys does not include newly pressed/released keys in 'mod' mask.
 	// https://github.com/glfw/glfw/issues/1630
 	if action == glfw.Press {
@@ -627,19 +626,7 @@ func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.A
 	} else {
 		mods &= ^glfwKeyToModifier(key)
 	}
-	if (mods & glfw.ModShift) != 0 {
-		correctedM |= fyne.KeyModifierShift
-	}
-	if (mods & glfw.ModControl) != 0 {
-		correctedM |= fyne.KeyModifierControl
-	}
-	if (mods & glfw.ModAlt) != 0 {
-		correctedM |= fyne.KeyModifierAlt
-	}
-	if (mods & glfw.ModSuper) != 0 {
-		correctedM |= fyne.KeyModifierSuper
-	}
-	return correctedM
+	return desktopModifier(mods)
 }
 
 func glfwKeyToModifier(key glfw.Key) glfw.ModifierKey {
