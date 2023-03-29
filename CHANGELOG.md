@@ -3,11 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.3.4 - Ongoing
+
+### Fixed
+
+* Memory leak when switching theme (#3640)
+
+
 ## 2.3.3 - 24 March 2023
 
 ### Fixed
 
 * Linux, Windows and BSD builds could fail if gles was missing
+
 
 ## 2.3.2 - 20 March 2023
 
