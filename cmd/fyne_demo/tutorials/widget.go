@@ -67,7 +67,7 @@ func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 		shareItem,
 	))
 
-	return container.NewVBox(
+	return container.NewVScroll(container.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
 		&widget.Button{
@@ -83,11 +83,26 @@ func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 			OnTapped:      func() { fmt.Println("tapped trailing-aligned, text & trailing icon button") },
 		},
 		disabled,
+		&widget.Button{
+			Text:       "Primary button",
+			Importance: widget.HighImportance,
+			OnTapped:   func() { fmt.Println("high importance button") },
+		},
+		&widget.Button{
+			Text:       "Danger button",
+			Importance: widget.DangerImportance,
+			OnTapped:   func() { fmt.Println("tapped danger button") },
+		},
+		&widget.Button{
+			Text:       "Warning button",
+			Importance: widget.WarningImportance,
+			OnTapped:   func() { fmt.Println("tapped warning button") },
+		},
 		layout.NewSpacer(),
 		layout.NewSpacer(),
 		menuLabel,
 		layout.NewSpacer(),
-	)
+	))
 }
 
 func makeCardTab(_ fyne.Window) fyne.CanvasObject {
@@ -162,6 +177,8 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 # RichText Heading
 
 ## A Sub Heading
+
+![title](../../theme/icons/fyne.png)
 
 ---
 

@@ -192,9 +192,9 @@ func TestTree_Resize(t *testing.T) {
 	addTreePath(data, "B", "C")
 
 	tree.OpenBranch("B")
-	separatorThickness := theme.SeparatorThicknessSize()
+	separatorThickness := theme.Padding()
 
-	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + theme.Padding()*2
+	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + theme.InnerPadding()
 	height := fyne.Max(templateMinSize.Height, theme.IconInlineSize())*3 + separatorThickness*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
@@ -219,7 +219,7 @@ func TestTree_Resize(t *testing.T) {
 }
 
 func TestTree_MinSize(t *testing.T) {
-	separatorThickness := theme.SeparatorThicknessSize()
+	separatorThickness := theme.Padding()
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
@@ -421,15 +421,14 @@ func TestTree_ScrollTo(t *testing.T) {
 
 	var (
 		min = getLeaf(t, tree, "A").MinSize()
-		sep = theme.SeparatorThicknessSize()
-		pad = theme.Padding()
+		sep = theme.Padding()
 	)
 
-	// Resize tall enough to display two nodes and the separater between them
+	// Resize tall enough to display two nodes and the separator between them
 	treeHeight := 2*(min.Height) + sep
 	w.Resize(fyne.Size{
 		Width:  400,
-		Height: treeHeight + 2*pad,
+		Height: treeHeight + 2*theme.Padding(),
 	})
 
 	tree.ScrollTo("F")
@@ -458,15 +457,14 @@ func TestTree_ScrollToBottom(t *testing.T) {
 
 	var (
 		min = getLeaf(t, tree, "A").MinSize()
-		sep = theme.SeparatorThicknessSize()
-		pad = theme.Padding()
+		sep = theme.Padding()
 	)
 
 	// Resize tall enough to display two nodes and the separater between them
 	treeHeight := 2*(min.Height) + sep
 	w.Resize(fyne.Size{
 		Width:  400,
-		Height: treeHeight + 2*pad,
+		Height: treeHeight + 2*theme.Padding(),
 	})
 
 	tree.ScrollToBottom()
@@ -490,7 +488,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 
 	a := getLeaf(t, tree, "A")
 	m := a.MinSize()
-	separatorThickness := theme.SeparatorThicknessSize()
+	separatorThickness := theme.Padding()
 
 	// Make tree tall enough to display two nodes
 	tree.Resize(fyne.NewSize(m.Width, m.Height*2+separatorThickness))

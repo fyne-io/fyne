@@ -35,7 +35,7 @@ func (p *Packager) packageWindows() error {
 		return fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	icoPath := filepath.Join(exePath, p.Name+".ico")
+	icoPath := filepath.Join(exePath, "FyneApp.ico")
 	file, err := os.Create(icoPath)
 	if err != nil {
 		return fmt.Errorf("failed to open image file: %w", err)
@@ -59,7 +59,7 @@ func (p *Packager) packageWindows() error {
 		manifestFile, _ := os.Create(manifest)
 
 		tplData := windowsData{
-			Name:            p.Name,
+			Name:            encodeXMLString(p.Name),
 			CombinedVersion: p.combinedVersion(),
 		}
 		err := templates.ManifestWindows.Execute(manifestFile, tplData)
@@ -76,6 +76,7 @@ func (p *Packager) packageWindows() error {
 	vi.IconPath = icoPath
 	vi.ManifestPath = manifest
 	vi.StringFileInfo.ProductVersion = p.combinedVersion()
+	vi.StringFileInfo.FileDescription = p.Name
 	vi.FixedFileInfo.FileVersion = fixedVersionInfo(p.combinedVersion())
 
 	vi.Build()
@@ -114,7 +115,7 @@ func (p *Packager) packageWindows() error {
 		if filepath.Ext(p.Name) != ".exe" {
 			appName = appName + ".exe"
 		}
-		appPath = filepath.Join(filepath.Dir(p.exe), appName)
+		appPath = filepath.Join(p.dir, appName)
 		os.Rename(filepath.Base(p.exe), appName)
 	}
 

@@ -154,7 +154,7 @@ func nativeLoop() int {
 }
 
 func nativeEnd() {
-	systrayExit()
+	runSystrayExit()
 	instance.conn.Close()
 }
 
@@ -165,6 +165,10 @@ func quit() {
 func nativeStart() {
 	systrayReady()
 	conn, _ := dbus.ConnectSessionBus()
+	if conn == nil {
+		log.Printf("systray error: failed to connect to DBus")
+		return
+	}
 	err := notifier.ExportStatusNotifierItem(conn, path, &notifier.UnimplementedStatusNotifierItem{})
 	if err != nil {
 		log.Printf("systray error: failed to export status notifier item: %s\n", err)
@@ -172,6 +176,7 @@ func nativeStart() {
 	err = menu.ExportDbusmenu(conn, menuPath, instance)
 	if err != nil {
 		log.Printf("systray error: failed to export status notifier item: %s\n", err)
+		return
 	}
 
 	name := fmt.Sprintf("org.kde.StatusNotifierItem-%d-1", os.Getpid()) // register id 1 for this process

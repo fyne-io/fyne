@@ -383,20 +383,20 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 	scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
 	scr.leftShadow = NewShadow(ShadowRight, SubmergedContentLevel)
 	scr.rightShadow = NewShadow(ShadowLeft, SubmergedContentLevel)
-	scr.SetObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow, scr.horizArea,
-		scr.leftShadow, scr.rightShadow))
+	scr.SetObjects(append(scr.Objects(), scr.topShadow, scr.bottomShadow, scr.leftShadow, scr.rightShadow,
+		scr.vertArea, scr.horizArea))
 	scr.updatePosition()
 
 	return scr
 }
 
-//ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
+// ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 func (s *Scroll) ScrollToBottom() {
 	s.scrollBy(0, -1*(s.Content.MinSize().Height-s.Size().Height-s.Offset.Y))
 	s.Refresh()
 }
 
-//ScrollToTop will scroll content to container top
+// ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
 	s.scrollBy(0, -s.Offset.Y)
 }

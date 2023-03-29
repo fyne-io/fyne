@@ -68,7 +68,7 @@ func (p *Packager) packageUNIX() error {
 		}
 
 		var buf bytes.Buffer
-		tarCmd := execabs.Command("tar", "-Jcf", p.Name+".tar.xz", "-C", tempDir, "usr", "Makefile")
+		tarCmd := execabs.Command("tar", "-Jcf", filepath.Join(p.dir, p.Name+".tar.xz"), "-C", filepath.Join(p.dir, tempDir), "usr", "Makefile")
 		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
 			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.String(), err)

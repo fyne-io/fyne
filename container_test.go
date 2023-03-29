@@ -1,6 +1,7 @@
 package fyne
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -104,6 +105,41 @@ func TestContainer_Remove(t *testing.T) {
 	assert.Equal(t, float32(10), container.MinSize().Height)
 	assert.Equal(t, float32(0), box2.Position().X)
 	assert.Equal(t, float32(0), box2.Position().Y)
+}
+
+func TestContainer_Remove_Race(t *testing.T) {
+	var objs []CanvasObject
+	for i := 0; i < 100; i++ {
+		objs = append(objs, new(dummyObject))
+	}
+
+	container := NewContainerWithLayout(new(customLayout), objs...)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(100)
+	for _, o := range objs {
+		rmo := o
+		go func() {
+			container.Remove(rmo)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	assert.Equal(t, 0, len(container.Objects))
+}
+
+func TestContainer_Add_Race(t *testing.T) {
+	container := NewContainerWithLayout(new(customLayout))
+	wg := &sync.WaitGroup{}
+	wg.Add(100)
+	for i := 0; i < 100; i++ {
+		go func() {
+			container.Add(new(dummyObject))
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	assert.Equal(t, 100, len(container.Objects))
 }
 
 func TestContainer_RemoveAll(t *testing.T) {

@@ -74,6 +74,10 @@ func runOnMain(f func()) {
 
 // force a function f to run on the draw thread
 func runOnDraw(w *window, f func()) {
+	if drawOnMainThread {
+		runOnMain(func() { w.RunWithContext(f) })
+		return
+	}
 	done := donePool.Get().(chan struct{})
 	defer donePool.Put(done)
 
@@ -106,7 +110,7 @@ func (d *gLDriver) drawSingleFrame() {
 }
 
 func (d *gLDriver) runGL() {
-	eventTick := time.NewTicker(time.Second / 60)
+	//eventTick := time.NewTicker(time.Second / 60)
 	run.Lock()
 	run.flag = true
 	run.Unlock()
@@ -120,7 +124,7 @@ func (d *gLDriver) runGL() {
 	for {
 		select {
 		case <-d.done:
-			eventTick.Stop()
+			//eventTick.Stop()
 			d.drawDone <- nil // wait for draw thread to stop
 			d.Terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
@@ -130,8 +134,9 @@ func (d *gLDriver) runGL() {
 			if f.done != nil {
 				f.done <- struct{}{}
 			}
-		case <-eventTick.C:
-			d.tryPollEvents()
+		//case <-eventTick.C:
+		default:
+			d.tryWaitEventsTimeout()
 			newWindows := []fyne.Window{}
 			reassign := false
 			for _, win := range d.windowList() {
@@ -172,7 +177,7 @@ func (d *gLDriver) runGL() {
 
 				newWindows = append(newWindows, win)
 
-				if d.drawOnMainThread {
+				if drawOnMainThread {
 					d.drawSingleFrame()
 				}
 			}
@@ -181,7 +186,7 @@ func (d *gLDriver) runGL() {
 				d.windows = newWindows
 				d.windowLock.Unlock()
 
-				if d.systrayMenu == nil && len(newWindows) == 0 {
+				if len(newWindows) == 0 {
 					d.Quit()
 				}
 			}
@@ -217,7 +222,7 @@ func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 	var drawCh <-chan time.Time
-	if d.drawOnMainThread {
+	if drawOnMainThread {
 		drawCh = make(chan time.Time) // don't tick when on M1
 	} else {
 		drawCh = time.NewTicker(time.Second / 60).C

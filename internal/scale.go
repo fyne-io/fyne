@@ -8,7 +8,7 @@ import (
 
 // ScaleInt converts a fyne coordinate in the given canvas to a screen coordinate
 func ScaleInt(c fyne.Canvas, v float32) int {
-	return int(math.Round(float64(v * c.Scale())))
+	return int(math.Ceil(float64(v * c.Scale())))
 }
 
 // UnscaleInt converts a screen coordinate for a given canvas to a fyne coordinate

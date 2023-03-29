@@ -39,7 +39,11 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
+			if id == 5 || id == 6 {
+				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id] + "\ntaller")
+			} else {
+				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
+			}
 		},
 	)
 	list.OnSelected = func(id widget.ListItemID) {
@@ -51,6 +55,8 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 		icon.SetResource(nil)
 	}
 	list.Select(125)
+	list.SetItemHeight(5, 50)
+	list.SetItemHeight(6, 50)
 
 	return container.NewHSplit(list, container.NewCenter(hbox))
 }
@@ -74,6 +80,7 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 		})
 	t.SetColumnWidth(0, 34)
 	t.SetColumnWidth(1, 102)
+	t.SetRowHeight(2, 50)
 	return t
 }
 

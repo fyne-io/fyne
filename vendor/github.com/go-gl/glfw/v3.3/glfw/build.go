@@ -26,8 +26,8 @@ package glfw
 // Linux Build Tags
 // ----------------
 // GLFW Options:
-#cgo linux,!wayland CFLAGS: -D_GLFW_X11 -D_GNU_SOURCE
-#cgo linux,wayland CFLAGS: -D_GLFW_WAYLAND -D_GNU_SOURCE
+#cgo linux,!wayland CFLAGS: -D_GLFW_X11
+#cgo linux,wayland CFLAGS: -D_GLFW_WAYLAND
 
 // Linker Options:
 #cgo linux,!gles1,!gles2,!gles3,!vulkan LDFLAGS: -lGL

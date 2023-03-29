@@ -30,7 +30,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 		tsize = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 	}
 
-	return fyne.NewSize(tsize.Width+theme.Padding()*4, tsize.Height+theme.Padding()*4)
+	return fyne.NewSize(tsize.Width+theme.InnerPadding()*2, tsize.Height+theme.InnerPadding()*2)
 }
 
 func (p *progressRenderer) updateBar() {
@@ -65,7 +65,7 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 func (p *progressRenderer) applyTheme() {
 	p.background.FillColor = progressBackgroundColor()
 	p.bar.FillColor = theme.PrimaryColor()
-	p.label.Color = theme.ForegroundColor()
+	p.label.Color = theme.BackgroundColor()
 	p.label.TextSize = theme.TextSize()
 }
 
@@ -158,7 +158,7 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 
 func progressBackgroundColor() color.Color {
 	r, g, b, a := col.ToNRGBA(theme.PrimaryColor())
-	faded := uint8(a) / 3
+	faded := uint8(a) / 2
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }
 

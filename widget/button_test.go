@@ -17,8 +17,8 @@ func TestButton_MinSize(t *testing.T) {
 	button := widget.NewButton("Hi", nil)
 	min := button.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+	assert.True(t, min.Width > theme.InnerPadding())
+	assert.True(t, min.Height > theme.InnerPadding())
 }
 
 func TestButton_SetText(t *testing.T) {
@@ -119,6 +119,20 @@ func TestButton_Disabled(t *testing.T) {
 	assert.True(t, button.Disabled())
 	button.Enable()
 	assert.False(t, button.Disabled())
+}
+
+func TestButton_LowImportance(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	b := &widget.Button{Text: "Text", Icon: theme.HomeIcon(), Importance: widget.LowImportance}
+	w := test.NewWindow(b)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "button/low_importance.png", w.Canvas().Capture())
+
+	b.Disable()
+	test.AssertImageMatches(t, "button/low_importance_disabled.png", w.Canvas().Capture())
 }
 
 func TestButton_Hover(t *testing.T) {

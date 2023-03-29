@@ -3,6 +3,118 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.3.3 - 24 March 2023
+
+### Fixed
+
+* Linux, Windows and BSD builds could fail if gles was missing
+
+## 2.3.2 - 20 March 2023
+
+### Fixed
+
+* Fyne does not run perfectly on ARM-based MacOS platforms (#3639) *
+* Panic on closing window in form submit on Мac M2 (#3397) *
+* Wobbling slider effect for very small steps (#3648)
+* Fix memory leak in test canvas refresh
+* Optimise text texture memory by switching to single channel
+* Packaging an android fyne app that uses tags can fail (#3641)
+* NewAdaptiveGrid(0) blanks app window on start until first resize on Windows (#3669)
+* Unnecessary refresh when sliding Split container
+* Linux window resize refreshes all content
+* Themed and unthemed svg resources can cache collide
+* When packaging an ampersand in "Name" causes an error (#3195)
+* Svg in ThemedResource without viewBox does not match theme (#3714)
+* Missing menu icons in Windows system tray
+* Systray Menu Separators don't respect the submenu placement (#3642)
+* List row focus indicator disappears on scrolling (#3699)
+* List row focus not reset when row widget is reused to display a new item (#3700)
+* Avoid panic if accidental 5th nil is passed to Border container
+* Mobile simulator not compiling on Apple M1/2
+* Cropped letters in certain cases with the new v2.3.0 theme (#3500)
+
+Many thanks indeed to [Dymium](https://dymium.io) for sponsoring an Apple
+M2 device which allowed us to complete the marked (*) issues.
+
+
+## 2.3.1 - 13 February 2023
+
+### Changed
+
+* Pad app version to ensure Windows packages correctly (#3638)
+
+### Fixed
+
+* Custom shortcuts with fyne.KeyTab is not working (#3087)
+* Running a systray app with root privileges resulted in panic (#3120)
+* Markdown image with no title is not parsed (#3577)
+* Systray app on macOS panic when started while machine sleeps (#3609)
+* Runtime error with VNC on RaspbianOS (#2972)
+* Hovered background in List widget isn't reset when scrolling reuses an existing list item (#3584)
+* cmd/fyne package can't find FyneApp.toml when -src option has given (#3459)
+* TextWrapWord will cause crash in RichText unverified (#3498)
+* crash in widget.(*RichText).lineSizeToColumn (#3292)
+* Crash in widget.(*Entry).SelectedText (#3290)
+* Crash in widget.(*RichText).updateRowBounds.func1 (#3291)
+* window is max size at all times (#3507)
+* systray.Quit() is not called consistently when the app is closing (#3597)
+* Software rendering would ignore scale for text
+* crash when minimize a window which contains a stroked rectangle (#3552)
+* Menu item would not appear disabled initially
+* Wrong icon colour for danger and warning buttons
+* Embedding Fyne apps in iFrame alignment issue
+* Generated metadata can be in wrong directory
+* Android RootURI may not exist when used for storage (#3207)
+
+
+## 2.3.0 - 24 December 2022
+
+### Added
+
+* Shiny new theme that was designed for us
+* Improved text handling to support non-latin alphabets
+* Add cloud storage and preference support
+* Add menu icon and submenu support to system tray menus
+* More button importance levels `ErrorImportance`, `WarningImportance`
+* Support disabling of `AppTabs` and `DocTabs` items
+* Add image support to rich text (#2366)
+* Add CheckGroup.Remove (#3124)
+
+### Changed
+
+* The buttons on the default theme are no longer transparent, but we added more button importance types
+* Expose a storage.ErrNotExists for non existing documents (#3083)
+* Update `go-gl/glfw` to build against latest Glfw 3.3.8
+* List items in `widget.List` now implement the Focusable interface
+
+### Fixed
+
+* Displaying unicode or different language like Bengali doesn't work (#598)
+* Cannot disable container.TabItem (#1904)
+* Update Linux/XDG application theme to follow the FreeDesktop Dark Style Preference (#2657)
+* Running `fyne package -os android` needs NDK 16/19c (#3066)
+* Caret position lost when resizing a MultilineEntry (#3024)
+* Fix possible crash in table resize (#3369)
+* Memory usage surge when selecting/appending MultilineEntry text (#3426)
+* Fyne bundle does not support appending when parameter is a directory
+* Crash parsing invalid file URI (#3275)
+* Systray apps on macOS can only be terminated via the systray menu quit button (#3395)
+* Wayland Scaling support: sizes and distances are scaled wrong (#2850)
+* Google play console minimum API level 31 (#3375)
+* Data bound entry text replacing selection is ignored (#3340)
+* Split Container does not respect item's Visible status (#3232)
+* Android - Entry - OnSubmitted is not working (#3267)
+* Can't set custom CGO_CFLAGS and CGO_LDFLAGS with "fyne package" on darwin (#3276)
+* Text line not displayed in RichText (#3117)
+* Segfault when adding items directly in form struct (#3153)
+* Preferences RemoveValue does not save (#3229)
+* Create new folder directly from FolderDialog (#3174)
+* Slider drag handle is clipped off at minimum size (#2966)
+* Entry text "flickering" while typing (#3461)
+* Rendering of not changed canvas objects after an event (#3211)
+* Form dialog not displaying hint text and validation errors (#2781)
+
+
 ## 2.2.4 - 9 November 2022
 
 ### Fixes

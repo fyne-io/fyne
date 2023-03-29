@@ -287,7 +287,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	s.background.Move(fyne.NewPos(0, theme.InputBorderSize()))
 	s.label.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 
-	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding()*2, (size.Height-theme.IconInlineSize())/2)
+	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.InnerPadding(), (size.Height-theme.IconInlineSize())/2)
 	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), s.label.MinSize().Height)
 
 	s.label.Resize(labelSize)
@@ -306,8 +306,8 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), fyne.TextStyle{}).Width
 	min := s.label.MinSize()
 	min.Width = minPlaceholderWidth
-	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*2))
-	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, 0))
+	min = min.Add(fyne.NewSize(theme.InnerPadding()*3, theme.InnerPadding()))
+	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), 0))
 }
 
 func (s *selectRenderer) Refresh() {

@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -54,7 +55,8 @@ func Canvas() fyne.Canvas {
 	return dummyCanvas
 }
 
-// NewCanvas returns a single use in-memory canvas used for testing
+// NewCanvas returns a single use in-memory canvas used for testing.
+// This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
 	c := &testCanvas{
 		focusMgr: app.NewFocusManager(nil),
@@ -87,6 +89,7 @@ func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 }
 
 func (c *testCanvas) Capture() image.Image {
+	cache.Clean(true)
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
 	if !c.transparent {

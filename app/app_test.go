@@ -5,9 +5,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	_ "fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 
 	"golang.org/x/sys/execabs"
 )

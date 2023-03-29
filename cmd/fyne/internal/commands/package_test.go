@@ -51,6 +51,24 @@ func Test_isValidVersion(t *testing.T) {
 	assert.False(t, isValidVersion("1..2"))
 }
 
+func Test_combinedVersion(t *testing.T) {
+	tests := []struct {
+		ver   string
+		build int
+		comb  string
+	}{
+		{"1.2.3", 4, "1.2.3.4"},
+		{"1.2", 4, "1.2.0.4"},
+		{"1", 4, "1.0.0.4"},
+	}
+
+	for _, tt := range tests {
+		p := &Packager{appData: &appData{AppVersion: tt.ver, AppBuild: tt.build}}
+		comb := p.combinedVersion()
+		assert.Equal(t, tt.comb, comb)
+	}
+}
+
 func Test_MergeMetata(t *testing.T) {
 	p := &Packager{appData: &appData{}}
 	p.AppVersion = "v0.1"
@@ -62,7 +80,7 @@ func Test_MergeMetata(t *testing.T) {
 		},
 	}
 
-	mergeMetadata(p.appData, data)
+	p.appData.mergeMetadata(data)
 	assert.Equal(t, "v0.1", p.AppVersion)
 	assert.Equal(t, 3, p.AppBuild)
 	assert.Equal(t, "test.png", p.icon)
@@ -93,6 +111,21 @@ func Test_validateAppID(t *testing.T) {
 
 	_, err = validateAppID("myApp", "android", "myApp", true)
 	assert.NotNil(t, err)
+
+	_, err = validateAppID("com._server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("com.5server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("0com.server.myApp", "android", "myApp", true)
+	assert.NotNil(t, err)
+
+	_, err = validateAppID("......", "android", "myApp", true)
+	assert.Nil(t, err)
+
+	_, err = validateAppID(".....myApp", "android", "myApp", true)
+	assert.Nil(t, err)
 }
 
 func Test_buildPackageWasm(t *testing.T) {
@@ -234,6 +267,9 @@ func Test_PackageWasm(t *testing.T) {
 }
 
 func Test_buildPackageGopherJS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -292,6 +328,9 @@ func Test_buildPackageGopherJS(t *testing.T) {
 }
 
 func Test_PackageGopherJS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -471,7 +510,11 @@ func Test_BuildPackageWeb(t *testing.T) {
 	files, err := p.buildPackage(webBuildTest)
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
-	assert.Equal(t, 2, len(files))
+	expectedFiles := 2
+	if runtime.GOOS == "windows" {
+		expectedFiles = 1
+	}
+	assert.Equal(t, expectedFiles, len(files))
 }
 
 func Test_PackageWeb(t *testing.T) {
@@ -499,33 +542,38 @@ func Test_PackageWeb(t *testing.T) {
 				ret: []byte(""),
 			},
 		},
-		{
-			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
-			mockReturn: mockReturn{
-				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+	}
+
+	if runtime.GOOS != "windows" {
+		expected = append(expected, []mockRunner{
+			{
+				expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+				mockReturn: mockReturn{
+					ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args:  []string{"version"},
-				osEnv: true,
+			{
+				expectedValue: expectedValue{
+					args:  []string{"version"},
+					osEnv: true,
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+					err: nil,
+				},
 			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-				err: nil,
+			{
+				expectedValue: expectedValue{
+					args: []string{"build",
+						"-o", "myTest.js"},
+					osEnv: true,
+					dir:   "myTest",
+				},
+				mockReturn: mockReturn{
+					ret: []byte(""),
+				},
 			},
-		},
-		{
-			expectedValue: expectedValue{
-				args: []string{"build",
-					"-o", "myTest.js"},
-				osEnv: true,
-				dir:   "myTest",
-			},
-			mockReturn: mockReturn{
-				ret: []byte(""),
-			},
-		},
+		}...)
 	}
 
 	p := &Packager{

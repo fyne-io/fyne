@@ -17,13 +17,37 @@ import (
 )
 
 const (
-	scrollAccelerateRate   = float64(5)
-	scrollAccelerateCutoff = float64(5)
-	scrollSpeed            = float32(10)
-	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
-	dragMoveThreshold      = 2   // how far can we move before it is a drag
-	windowIconSize         = 256
+	doubleClickDelay  = 300 // ms (maximum interval between clicks for double click detection)
+	dragMoveThreshold = 2   // how far can we move before it is a drag
+	windowIconSize    = 256
 )
+
+var (
+	scrollAccelerateRate   = getScrollAccelerateRate()
+	scrollAccelerateCutoff = getScrollAccelerateCutoff()
+	scrollSpeed            = getScrollSpeed()
+)
+
+func getScrollAccelerateRate() float64 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return 125
+	}
+	return 5
+}
+
+func getScrollAccelerateCutoff() float64 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return 10
+	}
+	return 5
+}
+
+func getScrollSpeed() float32 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
+		return 25
+	}
+	return 10
+}
 
 func (w *window) Title() string {
 	return w.title
@@ -274,7 +298,7 @@ func (w *window) processClosed() {
 		return
 	}
 
-	w.Close()
+	go w.Close() // unsure which thread this comes from, so don't block
 }
 
 // destroy this window and, if it's the last window quit the app
@@ -760,7 +784,11 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyASCII, keyDesktopModifier) {
+	modifierOtherThanShift := (keyDesktopModifier & fyne.KeyModifierControl) |
+		(keyDesktopModifier & fyne.KeyModifierAlt) |
+		(keyDesktopModifier & fyne.KeyModifierSuper)
+	if (keyName == fyne.KeyTab && modifierOtherThanShift == 0 && !w.capturesTab(keyDesktopModifier)) ||
+		w.triggersShortcut(keyName, keyASCII, keyDesktopModifier) {
 		return
 	}
 

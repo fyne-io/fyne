@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/internal/test"
 
 	"github.com/stretchr/testify/assert"
@@ -29,6 +30,46 @@ func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool
 	return true
 }
 
+// AssertObjectRendersToImage asserts that the given `CanvasObject` renders the same image as the one stored in the master file.
+// The theme used is the standard test theme which may look different to how it shows on your device.
+// The master filename is relative to the `testdata` directory which is relative to the test.
+// The test `t` fails if the given image is not equal to the loaded master image.
+// In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
+// This path is also reported, thus the file can be used as new master.
+//
+// Since 2.3
+func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...interface{}) bool {
+	c := NewCanvasWithPainter(software.NewPainter())
+	c.SetPadded(false)
+	size := o.MinSize().Max(o.Size())
+	c.SetContent(o)
+	c.Resize(size) // ensure we are large enough for current size
+
+	return AssertRendersToImage(t, masterFilename, c, msgAndArgs...)
+}
+
+// AssertObjectRendersToMarkup asserts that the given `CanvasObject` renders the same markup as the one stored in the master file.
+// The master filename is relative to the `testdata` directory which is relative to the test.
+// The test `t` fails if the rendered markup is not equal to the loaded master markup.
+// In this case the rendered markup is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
+// This path is also reported, thus the file can be used as new master.
+//
+// Be aware, that the indentation has to use tab characters ('\t') instead of spaces.
+// Every element starts on a new line indented one more than its parent.
+// Closing elements stand on their own line, too, using the same indentation as the opening element.
+// The only exception to this are text elements which do not contain line breaks unless the text includes them.
+//
+// Since 2.3
+func AssertObjectRendersToMarkup(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...interface{}) bool {
+	c := NewCanvas()
+	c.SetPadded(false)
+	size := o.MinSize().Max(o.Size())
+	c.SetContent(o)
+	c.Resize(size) // ensure we are large enough for current size
+
+	return AssertRendersToMarkup(t, masterFilename, c, msgAndArgs...)
+}
+
 // AssertImageMatches asserts that the given image is the same as the one stored in the master file.
 // The master filename is relative to the `testdata` directory which is relative to the test.
 // The test `t` fails if the given image is not equal to the loaded master image.
@@ -36,6 +77,17 @@ func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool
 // This path is also reported, thus the file can be used as new master.
 func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...interface{}) bool {
 	return test.AssertImageMatches(t, masterFilename, img, msgAndArgs...)
+}
+
+// AssertRendersToImage asserts that the given canvas renders the same image as the one stored in the master file.
+// The master filename is relative to the `testdata` directory which is relative to the test.
+// The test `t` fails if the given image is not equal to the loaded master image.
+// In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
+// This path is also reported, thus the file can be used as new master.
+//
+// Since 2.3
+func AssertRendersToImage(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
+	return test.AssertImageMatches(t, masterFilename, c.Capture(), msgAndArgs...)
 }
 
 // AssertRendersToMarkup asserts that the given canvas renders the same markup as the one stored in the master file.

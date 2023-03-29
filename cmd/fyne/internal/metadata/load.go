@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -12,13 +11,9 @@ import (
 // Load attempts to read a FyneApp metadata from the provided reader.
 // If this cannot be done an error will be returned.
 func Load(r io.Reader) (*FyneApp, error) {
-	str, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
 	var data FyneApp
-	if _, err := toml.Decode(string(str), &data); err != nil {
+	_, err := toml.NewDecoder(r).Decode(&data)
+	if err != nil {
 		return nil, err
 	}
 

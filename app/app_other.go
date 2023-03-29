@@ -6,6 +6,8 @@ package app
 import (
 	"errors"
 	"net/url"
+	"os"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -16,7 +18,7 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func rootConfigDir() string {
-	return "/tmp/fyne-test/"
+	return filepath.Join(os.TempDir(), "fyne-test")
 }
 
 func (a *fyneApp) OpenURL(_ *url.URL) error {

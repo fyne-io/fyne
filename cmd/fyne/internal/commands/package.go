@@ -11,14 +11,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
-	"fyne.io/fyne/v2"
 	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
+
+	"fyne.io/fyne/v2"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 )
@@ -27,12 +29,6 @@ const (
 	defaultAppBuild   = 1
 	defaultAppVersion = "0.0.1"
 )
-
-type appData struct {
-	icon, Name        string
-	AppID, AppVersion string
-	AppBuild          int
-}
 
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
@@ -46,7 +42,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, gopherjs, web).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
@@ -109,8 +105,17 @@ func Package() *cli.Command {
 				Usage:       "Enable installation in release mode (disable debug etc).",
 				Destination: &p.release,
 			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &p.customMetadata,
+			},
 		},
 		Action: func(_ *cli.Context) error {
+			if p.customMetadata.m == nil {
+				p.customMetadata.m = map[string]string{}
+			}
+
 			return p.Package()
 		},
 	}
@@ -124,6 +129,8 @@ type Packager struct {
 	certificate, profile           string // optional flags for releasing
 	tags, category                 string
 	tempDir                        string
+
+	customMetadata keyValueFlag
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -228,6 +235,10 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 		return nil, err
 	}
 
+	if runtime.GOOS == "windows" {
+		return []string{bWasm.target}, nil
+	}
+
 	bGopherJS := &Builder{
 		os:      "gopherjs",
 		srcdir:  p.srcDir,
@@ -248,7 +259,13 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 }
 
 func (p *Packager) combinedVersion() string {
-	return fmt.Sprintf("%s.%d", p.AppVersion, p.AppBuild)
+	versions := strings.Split(p.AppVersion, ".")
+	for len(versions) < 3 {
+		versions = append(versions, "0")
+	}
+	appVersion := strings.Join(versions, ".")
+
+	return fmt.Sprintf("%s.%d", appVersion, p.AppBuild)
 }
 
 func (p *Packager) doPackage(runner runner) error {
@@ -335,15 +352,26 @@ func (p *Packager) validate() (err error) {
 	}
 	if p.srcDir == "" {
 		p.srcDir = baseDir
-	} else if p.os == "ios" || p.os == "android" {
-		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
-			"Change directory to the main package and try again")
+	} else {
+		if p.os == "ios" || p.os == "android" {
+			return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
+				"Change directory to the main package and try again")
+		}
+		p.srcDir = util.EnsureAbsPath(p.srcDir)
 	}
 	os.Chdir(p.srcDir)
 
+	p.appData.CustomMetadata = p.customMetadata.m
+
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
-		mergeMetadata(p.appData, data)
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		if data.Details.Icon != "" {
+			data.Details.Icon = util.MakePathRelativeTo(p.srcDir, data.Details.Icon)
+		}
+
+		p.appData.Release = p.release
+		p.appData.mergeMetadata(data)
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -421,24 +449,6 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
-func mergeMetadata(p *appData, data *metadata.FyneApp) {
-	if p.icon == "" {
-		p.icon = data.Details.Icon
-	}
-	if p.Name == "" {
-		p.Name = data.Details.Name
-	}
-	if p.AppID == "" {
-		p.AppID = data.Details.ID
-	}
-	if p.AppVersion == "" {
-		p.AppVersion = data.Details.Version
-	}
-	if p.AppBuild == 0 {
-		p.AppBuild = data.Details.Build
-	}
-}
-
 // normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
 // Successful conversion will return a path to the new file.
 // Any errors that occur will be returned with an empty string for new path.
@@ -477,6 +487,24 @@ func validateAppID(appID, os, name string, release bool) (string, error) {
 			return "", errors.New("missing appID parameter for package")
 		} else if !strings.Contains(appID, ".") {
 			return "", errors.New("appID must be globally unique and contain at least 1 '.'")
+		} else if util.IsAndroid(os) {
+			if strings.Contains(appID, "-") {
+				return "", errors.New("appID can not contain '-'")
+			}
+
+			// appID package names can not start with '_' or a number
+			packageNames := strings.Split(appID, ".")
+			for _, name := range packageNames {
+				if len(name) == 0 {
+					continue
+				}
+
+				if name[0] == '_' {
+					return "", fmt.Errorf("appID package names can not start with '_' (%s)", name)
+				} else if name[0] >= '0' && name[0] <= '9' {
+					return "", fmt.Errorf("appID package names can not start with a number (%s)", name)
+				}
+			}
 		}
 	}
 

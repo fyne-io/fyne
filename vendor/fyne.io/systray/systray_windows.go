@@ -26,6 +26,7 @@ var (
 	g32                     = windows.NewLazySystemDLL("Gdi32.dll")
 	pCreateCompatibleBitmap = g32.NewProc("CreateCompatibleBitmap")
 	pCreateCompatibleDC     = g32.NewProc("CreateCompatibleDC")
+	pCreateDIBSection       = g32.NewProc("CreateDIBSection")
 	pDeleteDC               = g32.NewProc("DeleteDC")
 	pSelectObject           = g32.NewProc("SelectObject")
 
@@ -41,12 +42,12 @@ var (
 	pCreateWindowEx        = u32.NewProc("CreateWindowExW")
 	pDefWindowProc         = u32.NewProc("DefWindowProcW")
 	pDeleteMenu            = u32.NewProc("DeleteMenu")
+	pRemoveMenu            = u32.NewProc("RemoveMenu")
 	pDestroyWindow         = u32.NewProc("DestroyWindow")
 	pDispatchMessage       = u32.NewProc("DispatchMessageW")
 	pDrawIconEx            = u32.NewProc("DrawIconEx")
 	pGetCursorPos          = u32.NewProc("GetCursorPos")
 	pGetDC                 = u32.NewProc("GetDC")
-	pGetMenuItemID         = u32.NewProc("GetMenuItemID")
 	pGetMessage            = u32.NewProc("GetMessageW")
 	pGetSystemMetrics      = u32.NewProc("GetSystemMetrics")
 	pInsertMenuItem        = u32.NewProc("InsertMenuItemW")
@@ -180,6 +181,30 @@ type point struct {
 	X, Y int32
 }
 
+// The BITMAPINFO structure defines the dimensions and color information for a DIB.
+// https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfo
+type bitmapInfo struct {
+	BmiHeader bitmapInfoHeader
+	BmiColors windows.Handle
+}
+
+// The BITMAPINFOHEADER structure contains information about the dimensions and color format of a device-independent bitmap (DIB).
+// https://learn.microsoft.com/en-us/previous-versions/dd183376(v=vs.85)
+// https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
+type bitmapInfoHeader struct {
+	BiSize          uint32
+	BiWidth         int32
+	BiHeight        int32
+	BiPlanes        uint16
+	BiBitCount      uint16
+	BiCompression   uint32
+	BiSizeImage     uint32
+	BiXPelsPerMeter int32
+	BiYPelsPerMeter int32
+	BiClrUsed       uint32
+	BiClrImportant  uint32
+}
+
 // Contains information about loaded resources
 type winTray struct {
 	instance,
@@ -278,12 +303,8 @@ func (t *winTray) wndProc(hWnd windows.Handle, message uint32, wParam, lParam ui
 		WM_ENDSESSION = 0x0016
 		WM_CLOSE      = 0x0010
 		WM_DESTROY    = 0x0002
-		WM_CREATE     = 0x0001
 	)
 	switch message {
-	case WM_CREATE:
-		t.initialized.Set()
-		systrayReady()
 	case WM_COMMAND:
 		menuItemId := int32(wParam)
 		// https://docs.microsoft.com/en-us/windows/win32/menurc/wm-command#menus
@@ -303,7 +324,7 @@ func (t *winTray) wndProc(hWnd windows.Handle, message uint32, wParam, lParam ui
 			t.nid.delete()
 		}
 		t.muNID.Unlock()
-		systrayExit()
+		runSystrayExit()
 	case t.wmSystrayMessage:
 		switch lParam {
 		case WM_RBUTTONUP, WM_LBUTTONUP:
@@ -586,6 +607,14 @@ func (t *winTray) addOrUpdateMenuItem(menuItemId uint32, parentId uint32, title 
 	}
 
 	if res == 0 {
+		// Menu item does not already exist, create it
+		t.muMenus.RLock()
+		submenu, exists := t.menus[menuItemId]
+		t.muMenus.RUnlock()
+		if exists {
+			mi.Mask |= MIIM_SUBMENU
+			mi.SubMenu = submenu
+		}
 		t.addToVisibleItems(parentId, menuItemId)
 		position := t.getVisibleItemIndex(parentId, menuItemId)
 		res, _, err = pInsertMenuItem.Call(
@@ -645,12 +674,11 @@ func (t *winTray) addSeparatorMenuItem(menuItemId, parentId uint32) error {
 	return nil
 }
 
-func (t *winTray) hideMenuItem(menuItemId, parentId uint32) error {
+func (t *winTray) removeMenuItem(menuItemId, parentId uint32) error {
 	if !wt.isReady() {
 		return ErrTrayNotReadyYet
 	}
 
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms647629(v=vs.85).aspx
 	const MF_BYCOMMAND = 0x00000000
 	const ERROR_SUCCESS syscall.Errno = 0
 
@@ -658,6 +686,30 @@ func (t *winTray) hideMenuItem(menuItemId, parentId uint32) error {
 	menu := uintptr(t.menus[parentId])
 	t.muMenus.RUnlock()
 	res, _, err := pDeleteMenu.Call(
+		menu,
+		uintptr(menuItemId),
+		MF_BYCOMMAND,
+	)
+	if res == 0 && err.(syscall.Errno) != ERROR_SUCCESS {
+		return err
+	}
+	t.delFromVisibleItems(parentId, menuItemId)
+
+	return nil
+}
+
+func (t *winTray) hideMenuItem(menuItemId, parentId uint32) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
+	const MF_BYCOMMAND = 0x00000000
+	const ERROR_SUCCESS syscall.Errno = 0
+
+	t.muMenus.RLock()
+	menu := uintptr(t.menus[parentId])
+	t.muMenus.RUnlock()
+	res, _, err := pRemoveMenu.Call(
 		menu,
 		uintptr(menuItemId),
 		MF_BYCOMMAND,
@@ -708,7 +760,7 @@ func (t *winTray) delFromVisibleItems(parent, val uint32) {
 	visibleItems := t.visibleItems[parent]
 	for i, itemval := range visibleItems {
 		if val == itemval {
-			visibleItems = append(visibleItems[:i], visibleItems[i+1:]...)
+			t.visibleItems[parent] = append(visibleItems[:i], visibleItems[i+1:]...)
 			break
 		}
 	}
@@ -776,7 +828,7 @@ func (t *winTray) loadIconFrom(src string) (windows.Handle, error) {
 	return h, nil
 }
 
-func (t *winTray) iconToBitmap(hIcon windows.Handle) (windows.Handle, error) {
+func iconToBitmap(hIcon windows.Handle) (windows.Handle, error) {
 	const SM_CXSMICON = 49
 	const SM_CYSMICON = 50
 	const DI_NORMAL = 0x3
@@ -792,10 +844,7 @@ func (t *winTray) iconToBitmap(hIcon windows.Handle) (windows.Handle, error) {
 	defer pDeleteDC.Call(hMemDC)
 	cx, _, _ := pGetSystemMetrics.Call(SM_CXSMICON)
 	cy, _, _ := pGetSystemMetrics.Call(SM_CYSMICON)
-	hMemBmp, _, err := pCreateCompatibleBitmap.Call(hDC, cx, cy)
-	if hMemBmp == 0 {
-		return 0, err
-	}
+	hMemBmp, err := create32BitHBitmap(hMemDC, int32(cx), int32(cy))
 	hOriginalBmp, _, _ := pSelectObject.Call(hMemDC, hMemBmp)
 	defer pSelectObject.Call(hMemDC, hOriginalBmp)
 	res, _, err := pDrawIconEx.Call(hMemDC, 0, 0, uintptr(hIcon), cx, cy, 0, uintptr(0), DI_NORMAL)
@@ -803,6 +852,35 @@ func (t *winTray) iconToBitmap(hIcon windows.Handle) (windows.Handle, error) {
 		return 0, err
 	}
 	return windows.Handle(hMemBmp), nil
+}
+
+// https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createdibsection
+func create32BitHBitmap(hDC uintptr, cx, cy int32) (uintptr, error) {
+	const BI_RGB uint32 = 0
+	const DIB_RGB_COLORS = 0
+	bmi := bitmapInfo{
+		BmiHeader: bitmapInfoHeader{
+			BiPlanes:      1,
+			BiCompression: BI_RGB,
+			BiWidth:       cx,
+			BiHeight:      cy,
+			BiBitCount:    32,
+		},
+	}
+	bmi.BmiHeader.BiSize = uint32(unsafe.Sizeof(bmi.BmiHeader))
+	var bits uintptr
+	hBitmap, _, err := pCreateDIBSection.Call(
+		hDC,
+		uintptr(unsafe.Pointer(&bmi)),
+		DIB_RGB_COLORS,
+		uintptr(unsafe.Pointer(&bits)),
+		uintptr(0),
+		0,
+	)
+	if hBitmap == 0 {
+		return 0, err
+	}
+	return hBitmap, nil
 }
 
 func registerSystray() {
@@ -816,6 +894,8 @@ func registerSystray() {
 		return
 	}
 
+	wt.initialized.Set()
+	systrayReady()
 }
 
 var m = &struct {
@@ -871,6 +951,13 @@ func quit() {
 		0,
 		0,
 	)
+
+	wt.muNID.Lock()
+	if wt.nid != nil {
+		wt.nid.delete()
+	}
+	wt.muNID.Unlock()
+	runSystrayExit()
 }
 
 func setInternalLoop(bool) {
@@ -939,7 +1026,7 @@ func (item *MenuItem) SetIcon(iconBytes []byte) {
 		return
 	}
 
-	h, err = wt.iconToBitmap(h)
+	h, err = iconToBitmap(h)
 	if err != nil {
 		log.Printf("systray error: unable to convert icon to bitmap: %s\n", err)
 		return
@@ -980,8 +1067,8 @@ func (item *MenuItem) SetTemplateIcon(templateIconBytes []byte, regularIconBytes
 	item.SetIcon(regularIconBytes)
 }
 
-func addSeparator(id uint32) {
-	err := wt.addSeparatorMenuItem(id, 0)
+func addSeparator(id uint32, parent uint32) {
+	err := wt.addSeparatorMenuItem(id, parent)
 	if err != nil {
 		log.Printf("systray error: unable to addSeparator: %s\n", err)
 		return
@@ -992,6 +1079,14 @@ func hideMenuItem(item *MenuItem) {
 	err := wt.hideMenuItem(uint32(item.id), item.parentId())
 	if err != nil {
 		log.Printf("systray error: unable to hideMenuItem: %s\n", err)
+		return
+	}
+}
+
+func removeMenuItem(item *MenuItem) {
+	err := wt.removeMenuItem(uint32(item.id), item.parentId())
+	if err != nil {
+		log.Printf("systray error: unable to removeMenuItem: %s\n", err)
 		return
 	}
 }

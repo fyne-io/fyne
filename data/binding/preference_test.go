@@ -135,6 +135,7 @@ func TestPreferenceBindingCopies(t *testing.T) {
 func TestPreferenceBindingTriggers(t *testing.T) {
 	a := test.NewApp()
 	p := a.Preferences()
+	prefBinds.appPrefs = nil // reset app migration checks
 	key := "test-string"
 
 	p.SetString(key, "aString")

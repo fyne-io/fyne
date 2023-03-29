@@ -180,8 +180,24 @@ type indexCacheEntry struct {
 	index Index
 }
 
+type IndexableFace interface {
+	font.Face
+
+	// GlyphAtIndex returns the draw.DrawMask parameters (dr, mask, maskp) to draw the
+	// glyph identified by gid at the sub-pixel destination location dot, and that glyph's
+	// advance width.
+	//
+	// It returns !ok if the face does not contain a glyph for r.
+	//
+	// The contents of the mask image returned by one Glyph call may change
+	// after the next Glyph call. Callers that want to cache the mask must make
+	// a copy.
+	GlyphAtIndex(dot fixed.Point26_6, gid Index) (
+		dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool)
+}
+
 // NewFace returns a new font.Face for the given Font.
-func NewFace(f *Font, opts *Options) font.Face {
+func NewFace(f *Font, opts *Options) IndexableFace {
 	a := &face{
 		f:          f,
 		hinting:    opts.hinting(),
@@ -291,6 +307,13 @@ func (a *face) Kern(r0, r1 rune) fixed.Int26_6 {
 func (a *face) Glyph(dot fixed.Point26_6, r rune) (
 	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
 
+	return a.GlyphAtIndex(dot, a.index(r))
+}
+
+// GlyphAtIndex satisfies the IndexableFace interface.
+func (a *face) GlyphAtIndex(dot fixed.Point26_6, index Index) (
+	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
+
 	// Quantize to the sub-pixel granularity.
 	dotX := (dot.X + a.subPixelBiasX) & a.subPixelMaskX
 	dotY := (dot.Y + a.subPixelBiasY) & a.subPixelMaskY
@@ -299,7 +322,6 @@ func (a *face) Glyph(dot fixed.Point26_6, r rune) (
 	ix, fx := int(dotX>>6), dotX&0x3f
 	iy, fy := int(dotY>>6), dotY&0x3f
 
-	index := a.index(r)
 	cIndex := uint32(index)
 	cIndex = cIndex*a.subPixelX - uint32(fx/a.subPixelMaskX)
 	cIndex = cIndex*a.subPixelY - uint32(fy/a.subPixelMaskY)

@@ -108,6 +108,7 @@ typedef struct wl_egl_window* EGLNativeWindowType;
 #define EGL_CONTEXT_RELEASE_BEHAVIOR_KHR 0x2097
 #define EGL_CONTEXT_RELEASE_BEHAVIOR_NONE_KHR 0
 #define EGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_KHR 0x2098
+#define EGL_PRESENT_OPAQUE_EXT 0x31df
 
 typedef int EGLint;
 typedef unsigned int EGLBoolean;
@@ -179,6 +180,7 @@ typedef struct _GLFWlibraryEGL
     GLFWbool        KHR_gl_colorspace;
     GLFWbool        KHR_get_all_proc_addresses;
     GLFWbool        KHR_context_flush_control;
+    GLFWbool        EXT_present_opaque;
 
     void*           handle;
 

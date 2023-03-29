@@ -15,7 +15,7 @@ import (
 func (d *gLDriver) initGLFW() {
 	initOnce.Do(func() {
 		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-			d.drawOnMainThread = true
+			drawOnMainThread = true
 		}
 
 		err := glfw.Init()
@@ -27,6 +27,16 @@ func (d *gLDriver) initGLFW() {
 		initCursors()
 		d.startDrawThread()
 	})
+}
+
+func (d *gLDriver) tryWaitEventsTimeout() {
+	defer func() {
+		if r := recover(); r != nil {
+			fyne.LogError(fmt.Sprint("GLFW waitEvents error: ", r), nil)
+		}
+	}()
+
+	glfw.WaitEventsTimeout(0.1)
 }
 
 func (d *gLDriver) tryPollEvents() {

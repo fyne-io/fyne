@@ -24,18 +24,18 @@ func TestColorDialog_Theme(t *testing.T) {
 	d.Refresh()
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_theme_ugly.png", w.Canvas())
 
 	d.advanced.Open(0)
 
 	test.ApplyTheme(t, test.Theme())
-	test.AssertImageMatches(t, "color/dialog_expanded_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_expanded_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_expanded_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_expanded_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }
@@ -55,11 +55,49 @@ func TestColorDialog_Recents(t *testing.T) {
 	d.Refresh()
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_recents_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_recents_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_recents_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_recents_theme_ugly.png", w.Canvas())
 
+	w.Close()
+}
+
+func TestColorDialog_SetColor(t *testing.T) {
+
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(800, 600))
+
+	col := color.RGBA{70, 210, 200, 255}
+
+	d := NewColorPicker("pick colour", "select colour", func(c color.Color) {
+		r, g, b, a := c.RGBA()
+		col = color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	}, w)
+	d.Advanced = true
+
+	assert.Nil(t, d.picker)
+	d.SetColor(col)
+	assert.NotNil(t, d.picker)
+
+	assert.Equal(t, 70, d.picker.Red)
+	assert.Equal(t, 210, d.picker.Green)
+	assert.Equal(t, 200, d.picker.Blue)
+	assert.Equal(t, 255, d.picker.Alpha)
+
+	col = color.RGBA{255, 40, 70, 244}
+	assert.NotEqual(t, int(col.R), d.picker.Red)
+	assert.NotEqual(t, int(col.G), d.picker.Green)
+	assert.NotEqual(t, int(col.B), d.picker.Blue)
+	assert.NotEqual(t, int(col.A), d.picker.Alpha)
+
+	d.SetColor(col)
+	assert.Equal(t, 255, d.picker.Red)
+	assert.Equal(t, 41, d.picker.Green)
+	assert.Equal(t, 73, d.picker.Blue)
+	assert.Equal(t, 244, d.picker.Alpha)
+
+	d.Show()
 	w.Close()
 }
 
@@ -73,10 +111,10 @@ func TestColorDialogSimple_Theme(t *testing.T) {
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_simple_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_simple_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }
@@ -94,10 +132,10 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
-	test.AssertImageMatches(t, "color/dialog_simple_recents_theme_default.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_recents_theme_default.png", w.Canvas())
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "color/dialog_simple_recents_theme_ugly.png", w.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/dialog_simple_recents_theme_ugly.png", w.Canvas())
 
 	w.Close()
 }
@@ -147,7 +185,7 @@ func Test_recent_color(t *testing.T) {
 	t.Run("Limit", func(t *testing.T) {
 		test.NewApp()
 		defer test.NewApp()
-		// Max recents is 8
+		// Max recents is 7
 		writeRecentColor("#000000") // Black
 		writeRecentColor("#bbbbbb") // Dark Grey
 		writeRecentColor("#444444") // Light Grey
@@ -159,7 +197,7 @@ func Test_recent_color(t *testing.T) {
 		writeRecentColor("#00ffff") // Cyan
 		writeRecentColor("#ff00ff") // Magenta
 		colors := readRecentColors()
-		assert.Equal(t, 8, len(colors))
+		assert.Equal(t, 7, len(colors))
 		assert.Equal(t, "#ff00ff", colors[0]) // Magenta
 		assert.Equal(t, "#00ffff", colors[1]) // Cyan
 		assert.Equal(t, "#ffff00", colors[2]) // Yellow
@@ -167,7 +205,6 @@ func Test_recent_color(t *testing.T) {
 		assert.Equal(t, "#00ff00", colors[4]) // Green
 		assert.Equal(t, "#ff0000", colors[5]) // Red
 		assert.Equal(t, "#ffffff", colors[6]) // White
-		assert.Equal(t, "#444444", colors[7]) // Light Grey
 	})
 }
 

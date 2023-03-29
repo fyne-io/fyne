@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"math/cmplx"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +13,14 @@ import (
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+)
+
+const (
+	checkeredBoxSize       = 8
+	checkeredNumberOfRings = 12
+
+	preferenceRecents    = "color_recents"
+	preferenceMaxRecents = 7
 )
 
 // ColorPickerDialog is a simple dialog window that displays a color picker.
@@ -57,6 +66,12 @@ func (p *ColorPickerDialog) Refresh() {
 
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
+	if p.picker == nil && p.Advanced {
+		p.updateUI()
+	} else if !p.Advanced {
+		fyne.LogError("Advanced mode needs to be enabled to use SetColor", nil)
+		return
+	}
 	p.picker.SetColor(c)
 }
 
@@ -79,10 +94,14 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
 	p.dialog.Hide()
-	writeRecentColor(colorToString(p.color))
+	writeRecentColor(colorToString(c))
+	if p.picker != nil {
+		p.picker.SetColor(c)
+	}
 	if f := p.callback; f != nil {
 		f(c)
 	}
+	p.updateUI()
 }
 
 func (p *ColorPickerDialog) updateUI() {
@@ -96,7 +115,12 @@ func (p *ColorPickerDialog) updateUI() {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
 			p.color = c
 		})
-		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
+
+		advancedItem := widget.NewAccordionItem("Advanced", p.picker)
+		if p.advanced != nil {
+			advancedItem.Open = p.advanced.Items[0].Open
+		}
+		p.advanced = widget.NewAccordion(advancedItem)
 
 		p.dialog.content = container.NewVBox(
 			container.NewCenter(
@@ -113,19 +137,19 @@ func (p *ColorPickerDialog) updateUI() {
 				p.selectColor(p.color)
 			},
 		}
-		p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
+		p.dialog.create(newButtonList(p.dialog.dismiss, confirm))
 	} else {
 		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
-		p.dialog.setButtons(newButtonList(p.dialog.dismiss))
+		p.dialog.create(newButtonList(p.dialog.dismiss))
 	}
 }
 
 func clamp(value, min, max int) int {
 	if value < min {
-		value = min
+		return min
 	}
 	if value > max {
-		value = max
+		return max
 	}
 	return value
 }
@@ -151,22 +175,27 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	return container.NewGridWithColumns(8, objects...)
 }
 
-func newCheckeredBackground() *canvas.Raster {
-	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 10
-
-		if (x/boxSize)%2 == (y/boxSize)%2 {
+func newCheckeredBackground(radial bool) *canvas.Raster {
+	f := func(x, y, _, _ int) color.Color {
+		if (x/checkeredBoxSize)%2 == (y/checkeredBoxSize)%2 {
 			return color.Gray{Y: 58}
 		}
 
 		return color.Gray{Y: 84}
-	})
-}
+	}
 
-const (
-	preferenceRecents    = "color_recents"
-	preferenceMaxRecents = 8
-)
+	if radial {
+		rect := f
+		f = func(x, y, w, h int) color.Color {
+			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
+			x = int((t + math.Pi) / (2 * math.Pi) * checkeredNumberOfRings * checkeredBoxSize)
+			y = int(r)
+			return rect(x, y, 0, 0)
+		}
+	}
+
+	return canvas.NewRasterWithPixels(f)
+}
 
 func readRecentColors() (recents []string) {
 	for _, r := range strings.Split(fyne.CurrentApp().Preferences().String(preferenceRecents), ",") {

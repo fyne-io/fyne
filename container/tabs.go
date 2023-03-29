@@ -19,6 +19,30 @@ type TabItem struct {
 	Text    string
 	Icon    fyne.Resource
 	Content fyne.CanvasObject
+
+	button *tabButton
+}
+
+// Disabled returns whether or not the TabItem is disabled.
+//
+// Since: 2.3
+func (ti *TabItem) Disabled() bool {
+	if ti.button != nil {
+		return ti.button.Disabled()
+	}
+	return false
+}
+
+func (ti *TabItem) disable() {
+	if ti.button != nil {
+		ti.button.Disable()
+	}
+}
+
+func (ti *TabItem) enable() {
+	if ti.button != nil {
+		ti.button.Enable()
+	}
 }
 
 // TabLocation is the location where the tabs of a tab container should be rendered
@@ -205,6 +229,58 @@ func setItems(t baseTabs, items []*TabItem) {
 	}
 }
 
+func disableIndex(t baseTabs, index int) {
+	items := t.items()
+	if index < 0 || index >= len(items) {
+		return
+	}
+
+	item := items[index]
+	item.disable()
+
+	if selected(t) == item {
+		// the disabled tab is currently selected, so select the first enabled tab
+		for i, it := range items {
+			if !it.Disabled() {
+				selectIndex(t, i)
+				break
+			}
+		}
+	}
+
+	if selected(t) == item {
+		selectIndex(t, -1) // no other tab is able to be selected
+	}
+}
+
+func disableItem(t baseTabs, item *TabItem) {
+	for i, it := range t.items() {
+		if it == item {
+			disableIndex(t, i)
+			return
+		}
+	}
+}
+
+func enableIndex(t baseTabs, index int) {
+	items := t.items()
+	if index < 0 || index >= len(items) {
+		return
+	}
+
+	item := items[index]
+	item.enable()
+}
+
+func enableItem(t baseTabs, item *TabItem) {
+	for i, it := range t.items() {
+		if it == item {
+			enableIndex(t, i)
+			return
+		}
+	}
+}
+
 type baseTabsRenderer struct {
 	positionAnimation, sizeAnimation *fyne.Animation
 
@@ -216,8 +292,6 @@ type baseTabsRenderer struct {
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
-
-	buttonCache map[*TabItem]*tabButton
 }
 
 func (r *baseTabsRenderer) Destroy() {
@@ -393,7 +467,7 @@ var _ fyne.Tappable = (*tabButton)(nil)
 var _ desktop.Hoverable = (*tabButton)(nil)
 
 type tabButton struct {
-	widget.BaseWidget
+	widget.DisableableWidget
 	hovered       bool
 	icon          fyne.Resource
 	iconPosition  buttonIconPosition
@@ -459,6 +533,10 @@ func (b *tabButton) MouseOut() {
 }
 
 func (b *tabButton) Tapped(*fyne.PointEvent) {
+	if b.Disabled() {
+		return
+	}
+
 	b.onTapped()
 }
 
@@ -546,7 +624,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
-	if r.button.hovered {
+	if r.button.hovered && !r.button.Disabled() {
 		r.background.FillColor = theme.HoverColor()
 		r.background.Show()
 	} else {
@@ -556,10 +634,14 @@ func (r *tabButtonRenderer) Refresh() {
 
 	r.label.Text = r.button.text
 	r.label.Alignment = r.button.textAlignment
-	if r.button.importance == widget.HighImportance {
-		r.label.Color = theme.PrimaryColor()
+	if !r.button.Disabled() {
+		if r.button.importance == widget.HighImportance {
+			r.label.Color = theme.PrimaryColor()
+		} else {
+			r.label.Color = theme.ForegroundColor()
+		}
 	} else {
-		r.label.Color = theme.ForegroundColor()
+		r.label.Color = theme.DisabledTextColor()
 	}
 	r.label.TextSize = theme.TextSize()
 	if r.button.text == "" {
@@ -608,9 +690,9 @@ func (r *tabButtonRenderer) iconSize() float32 {
 
 func (r *tabButtonRenderer) padding() fyne.Size {
 	if r.label.Text != "" && r.button.iconPosition == buttonIconInline {
-		return fyne.NewSize(theme.Padding()*4, theme.Padding()*4)
+		return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2)
 	}
-	return fyne.NewSize(theme.Padding()*2, theme.Padding()*4)
+	return fyne.NewSize(theme.InnerPadding(), theme.InnerPadding()*2)
 }
 
 var _ fyne.Widget = (*tabCloseButton)(nil)

@@ -137,7 +137,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	}
 
 	var variant string
-	switch rsc.(type) {
+	switch t := rsc.(type) {
 	case *theme.DisabledResource:
 		variant = "disabled"
 	case *theme.ErrorThemedResource:
@@ -147,7 +147,10 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.PrimaryThemedResource:
 		variant = "primary"
 	case *theme.ThemedResource:
-		variant = "default"
+		variant = string(t.ColorName)
+		if variant == "" {
+			variant = "default"
+		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
@@ -384,19 +387,23 @@ func nrgbaColor(c color.Color) color.NRGBA {
 
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		nrgbaColor(theme.BackgroundColor()):     "background",
-		nrgbaColor(theme.ButtonColor()):         "button",
-		nrgbaColor(theme.DisabledButtonColor()): "disabled button",
-		nrgbaColor(theme.DisabledColor()):       "disabled",
-		nrgbaColor(theme.ErrorColor()):          "error",
-		nrgbaColor(theme.FocusColor()):          "focus",
-		nrgbaColor(theme.ForegroundColor()):     "foreground",
-		nrgbaColor(theme.HoverColor()):          "hover",
-		nrgbaColor(theme.PlaceHolderColor()):    "placeholder",
-		nrgbaColor(theme.PrimaryColor()):        "primary",
-		nrgbaColor(theme.ScrollBarColor()):      "scrollbar",
-		nrgbaColor(theme.SelectionColor()):      "selection",
-		nrgbaColor(theme.ShadowColor()):         "shadow",
+		nrgbaColor(theme.BackgroundColor()):        "background",
+		nrgbaColor(theme.ButtonColor()):            "button",
+		nrgbaColor(theme.DisabledButtonColor()):    "disabled button",
+		nrgbaColor(theme.DisabledColor()):          "disabled",
+		nrgbaColor(theme.ErrorColor()):             "error",
+		nrgbaColor(theme.FocusColor()):             "focus",
+		nrgbaColor(theme.ForegroundColor()):        "foreground",
+		nrgbaColor(theme.HoverColor()):             "hover",
+		nrgbaColor(theme.InputBackgroundColor()):   "inputBackground",
+		nrgbaColor(theme.InputBorderColor()):       "inputBorder",
+		nrgbaColor(theme.MenuBackgroundColor()):    "menuBackground",
+		nrgbaColor(theme.OverlayBackgroundColor()): "overlayBackground",
+		nrgbaColor(theme.PlaceHolderColor()):       "placeholder",
+		nrgbaColor(theme.PrimaryColor()):           "primary",
+		nrgbaColor(theme.ScrollBarColor()):         "scrollbar",
+		nrgbaColor(theme.SelectionColor()):         "selection",
+		nrgbaColor(theme.ShadowColor()):            "shadow",
 	}[nrgbaColor(c)]
 }
 

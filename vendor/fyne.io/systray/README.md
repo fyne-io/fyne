@@ -37,6 +37,27 @@ func onExit() {
 }
 ```
 
+### Running in a Fyne app
+
+This repository is designed to allow any toolkit to integrate system tray without any additional dependencies.
+It is maintained by the Fyne team, but if you are using Fyne there is an even easier to use API in the main repository that wraps this project.
+
+In your app you can use a standard `fyne.Menu` structure and pass it to `SetSystemTrayMenu` when your app is a desktop app, as follows:
+
+```go
+	menu := fyne.NewMenu("MyApp",
+		fyne.NewMenuItem("Show", func() {
+			log.Println("Tapped show")
+		}))
+
+	if desk, ok := myApp.(desktop.App); ok {
+		desk.SetSystemTrayMenu(menu)
+	}
+```
+
+You can find out more in the toolkit documentation:
+[System Tray Menu](https://developer.fyne.io/explore/systray).
+
 ### Run in another toolkit
 
 Most graphical toolkits will grab the main loop so the `Run` code above is not possible.
@@ -46,28 +67,22 @@ when the application has started and will end, to loop in appropriate features.
 
 See [full API](https://pkg.go.dev/fyne.io/systray?tab=doc) as well as [CHANGELOG](https://github.com/fyne-io/systray/tree/master/CHANGELOG.md).
 
+Note: this package requires cgo, so make sure you set `CGO_ENABLED=1` before building.
+
 ## Try the example app!
 
-Have go v1.12+ or higher installed? Here's an example to get started on macOS:
+Have go v1.12+ or higher installed? Here's an example to get started on macOS or Linux:
 
 ```sh
 git clone https://github.com/fyne-io/systray
 cd systray/example
-env GO111MODULE=on go build
-./example
+go run .
 ```
 
-On Windows, you should build like this:
+On Windows, you should follow the instructions above, but use the followign run command:
 
 ```
-env GO111MODULE=on go build -ldflags "-H=windowsgui"
-```
-
-The following text will then appear on the console:
-
-
-```sh
-go: finding github.com/fyne-io/systray latest
+go run -ldflags "-H=windowsgui" .
 ```
 
 Now look for *Awesome App* in your menu bar!
@@ -79,6 +94,10 @@ Now look for *Awesome App* in your menu bar!
 ### Linux/BSD
 
 This implementation uses DBus to communicate through the SystemNotifier/AppIndicator spec, older tray implementations may not load the icon.
+
+If you are running an older desktop environment, or system tray provider, you may require a proxy app which can convert the new DBus calls to the old format.
+The recommended tool for Gnome based trays is [snixembed](https://git.sr.ht/~steef/snixembed), others are available.
+Search for "StatusNotifierItems XEmbedded" in your package manager.
 
 ### Windows
 
@@ -102,10 +121,10 @@ SystrayApp.app/
       SystrayApp.icns
 ```
 
-When running as an app bundle, you may want to add one or both of the following to your Info.plist:
+If bundling manually, you may want to add one or both of the following to your Info.plist:
 
 ```xml
-<!-- avoid having a blurry icon and text -->
+	<!-- avoid having a blurry icon and text -->
 	<key>NSHighResolutionCapable</key>
 	<string>True</string>
 

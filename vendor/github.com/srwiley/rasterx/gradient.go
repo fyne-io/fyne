@@ -189,8 +189,10 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix Matrix2D) inter
 			ry *= g.Bounds.H
 		} else {
 			cx, cy = g.Matrix.Transform(cx, cy)
+			fx, fy = g.Matrix.Transform(fx, fy)
 			rx, ry = g.Matrix.TransformVector(rx, ry)
 			cx, cy = objMatrix.Transform(cx, cy)
+			fx, fy = objMatrix.Transform(fx, fy)
 			rx, ry = objMatrix.TransformVector(rx, ry)
 		}
 
@@ -203,7 +205,7 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix Matrix2D) inter
 					x, y := gradT.Transform(float64(xi)+0.5, float64(yi)+0.5)
 					dx := float64(x) - cx
 					dy := float64(y) - cy
-					return g.tColor(math.Sqrt(dx*dx/(rx*rx)+dy*dy/(ry*ry)), opacity)
+					return g.tColor(math.Sqrt(dx*dx/(rx*rx)+(dy*dy)/(ry*ry)), opacity)
 				})
 			}
 			return ColorFunc(func(xi, yi int) color.Color {
@@ -211,7 +213,7 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix Matrix2D) inter
 				y := float64(yi) + 0.5
 				dx := x - cx
 				dy := y - cy
-				return g.tColor(math.Sqrt(dx*dx/(rx*rx)+dy*dy/(ry*ry)), opacity)
+				return g.tColor(math.Sqrt(dx*dx/(rx*rx)+(dy*dy)/(ry*ry)), opacity)
 			})
 		}
 		fx /= rx

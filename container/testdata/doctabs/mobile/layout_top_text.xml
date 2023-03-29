@@ -4,8 +4,8 @@
 			<container size="150x36">
 				<widget size="110x36" type="*widget.Scroll">
 					<container size="110x36">
-						<widget size="110x37" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="102x20">Text2</text>
+						<widget size="110x36" type="*container.tabButton">
+							<text bold color="primary" pos="4,8" size="102x19">Text2</text>
 							<widget pos="86,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
@@ -22,7 +22,7 @@
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
 			<rectangle fillColor="primary" pos="0,36" size="110x4"/>
-			<circle fillColor="background" pos="0,40" size="150x109"/>
+			<circle fillColor="background" pos="0,40" size="150x110"/>
 		</widget>
 	</content>
 </canvas>
