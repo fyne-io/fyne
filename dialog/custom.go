@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var _ Dialog = (*CustomDialog)(nil)
+
 // CustomDialog implements a custom dialog.
 //
 // Since: 2.4
