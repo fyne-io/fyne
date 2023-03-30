@@ -39,8 +39,6 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 // Since 2.4
 func NewCustomWithoutButtons(title string, content fyne.CanvasObject, parent fyne.Window) *Custom {
 	d := &dialog{content: content, title: title, parent: parent}
-	d.layout = &dialogLayout{d: d}
-
 	d.create(container.NewGridWithColumns(1))
 
 	return &Custom{dialog: d}
