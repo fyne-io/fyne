@@ -38,7 +38,7 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 // NewCustomWithoutButtons creates a new custom dialog without any buttons.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 //
-// Since 2.4
+// Since: 2.4
 func NewCustomWithoutButtons(title string, content fyne.CanvasObject, parent fyne.Window) *CustomDialog {
 	d := &dialog{content: content, title: title, parent: parent}
 	d.create(container.NewGridWithColumns(1))
