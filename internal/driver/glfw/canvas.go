@@ -124,12 +124,17 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		}
 	}
 
-	c.content.Resize(c.contentSize(nearestSize))
-	c.content.Move(c.contentPos())
+	c.RLock()
+	content := c.content
+	menu := c.menu
+	c.RUnlock()
 
-	if c.menu != nil {
-		c.menu.Refresh()
-		c.menu.Resize(fyne.NewSize(nearestSize.Width, c.menu.MinSize().Height))
+	content.Resize(c.contentSize(nearestSize))
+	content.Move(c.contentPos())
+
+	if menu != nil {
+		menu.Refresh()
+		menu.Resize(fyne.NewSize(nearestSize.Width, menu.MinSize().Height))
 	}
 }
 
