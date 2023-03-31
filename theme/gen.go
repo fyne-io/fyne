@@ -116,6 +116,7 @@ func main() {
 	bundleIcon("question", f)
 	bundleIcon("warning", f)
 	bundleIcon("error", f)
+	bundleIcon("broken-image", f)
 
 	bundleIcon("arrow-back", f)
 	bundleIcon("arrow-down", f)
