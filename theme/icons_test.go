@@ -289,7 +289,7 @@ func Test_WarningIcon_FileSource(t *testing.T) {
 
 func Test_BrokenImageIcon_FileSource(t *testing.T) {
 	result := BrokenImageIcon().Name()
-	assert.Equal(t, "broken-image.svg", result)
+	assert.Equal(t, "foreground_broken-image.svg", result)
 }
 
 func Test_FolderIcon_FileSource(t *testing.T) {
