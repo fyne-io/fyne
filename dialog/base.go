@@ -74,7 +74,12 @@ func (d *dialog) Resize(size fyne.Size) {
 }
 
 // SetDismissText allows custom text to be set in the dismiss button
+// This is a no-op for dialogs without dismiss buttons.
 func (d *dialog) SetDismissText(label string) {
+	if d.dismiss == nil {
+		return
+	}
+
 	d.dismiss.SetText(label)
 	d.win.Refresh()
 }
