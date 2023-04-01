@@ -89,6 +89,23 @@ func NewTable(length func() (int, int), create func() fyne.CanvasObject, update 
 	return t
 }
 
+// NewColumnWithHeaders returns a new performant table widget defined by the passed functions including sticky headers.
+// The first returns the data size in rows and columns, second parameter is a function that returns cell
+// template objects that can be cached and the third is used to apply data at specified data location to the
+// passed template CanvasObject.
+// The row and column headers will stick to the leading and top edges of the table and contain "1-10" and "A-Z" formatted labels.
+//
+// Since: 2.4
+func NewColumnWithHeaders(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
+	t := NewTable(length, create, update)
+	t.ShowHeaderRow = true
+	t.StickyRowCount = 1
+	t.ShowHeaderColumn = true
+	t.StickyColumnCount = 1
+
+	return t
+}
+
 // CreateRenderer returns a new renderer for the table.
 //
 // Implements: fyne.Widget
