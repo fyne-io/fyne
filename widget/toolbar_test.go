@@ -75,7 +75,7 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 }
 
 func TestToolbar_SetIcon(t *testing.T) {
-	oldIcon := theme.FyneLogo()
+	oldIcon := theme.CancelIcon()
 	toolbarItem := NewToolbarAction(oldIcon, nil)
 	newIcon := theme.QuestionIcon()
 	toolbarItem.SetIcon(newIcon)
