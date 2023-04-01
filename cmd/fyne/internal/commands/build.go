@@ -28,6 +28,8 @@ type Builder struct {
 	tags               []string
 	tagsToParse        string
 
+	noWindowsGui bool
+
 	customMetadata keyValueFlag
 
 	runner runner
@@ -118,6 +120,7 @@ func (b *Builder) Build() error {
 	b.appData.Release = b.release
 	b.appData.CustomMetadata = b.customMetadata.m
 
+	b.noWindowsGui = true
 	return b.build()
 }
 
@@ -243,7 +246,7 @@ func (b *Builder) build() error {
 			args = append(args, "-trimpath")
 		}
 
-		if goos == "windows" {
+		if goos == "windows" && !b.noWindowsGui {
 			ldFlags += " -H=windowsgui"
 		}
 	}
