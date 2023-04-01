@@ -126,34 +126,52 @@ func TestTable_Headers(t *testing.T) {
 
 func TestTable_MinSize(t *testing.T) {
 	for name, tt := range map[string]struct {
-		cellSize         fyne.Size
-		expectedMinSize  fyne.Size
-		headRow, headCol bool
+		cellSize             fyne.Size
+		expectedMinSize      fyne.Size
+		headRow, headCol     bool
+		stickRows, stickCols int
 	}{
 		"small": {
 			fyne.NewSize(1, 1),
 			fyne.NewSize(float32(32), float32(32)),
 			false, false,
+			0, 0,
 		},
 		"large": {
 			fyne.NewSize(100, 100),
 			fyne.NewSize(100, 100),
 			false, false,
+			0, 0,
+		},
+		"sticky": {
+			fyne.NewSize(40, 40),
+			fyne.NewSize(81, 81),
+			false, false,
+			1, 1,
 		},
 		"headerrow": {
 			fyne.NewSize(1, 1),
 			fyne.NewSize(float32(32), float32(43)),
 			true, false,
+			0, 0,
 		},
 		"headercol": {
 			fyne.NewSize(1, 1),
 			fyne.NewSize(float32(43), float32(32)),
 			false, true,
+			0, 0,
 		},
 		"headers": {
 			fyne.NewSize(1, 1),
 			fyne.NewSize(float32(43), float32(43)),
 			true, true,
+			0, 0,
+		},
+		"stickyheaders": {
+			fyne.NewSize(40, 40),
+			fyne.NewSize(92, 92),
+			true, true,
+			2, 2,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -174,6 +192,8 @@ func TestTable_MinSize(t *testing.T) {
 				r.Resize(fyne.NewSize(10, 10))
 				return r
 			}
+			table.StickyRowCount = tt.stickRows
+			table.StickyColumnCount = tt.stickCols
 
 			assert.Equal(t, tt.expectedMinSize, table.MinSize())
 		})

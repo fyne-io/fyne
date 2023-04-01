@@ -57,6 +57,18 @@ type Table struct {
 	// Since: 2.4
 	UpdateHeader func(id TableCellID, template fyne.CanvasObject) `json:"-"`
 
+	// StickyRowCount specifies how many rows should not scroll when the content moves, including headers.
+	// Setting this to `2` with `ShowHeaderRow` set to `true` will cause 1 additional row to stick.
+	//
+	// Since: 2.4
+	StickyRowCount int
+
+	// StickyColumnCount specifies how many columns should not scroll when the content moves, including headers.
+	// Setting this to `2` with `ShowHeaderColumn` set to `true` will cause 1 additional column to stick.
+	//
+	// Since: 2.4
+	StickyColumnCount int
+
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
 	columnWidths, rowHeights  map[int]float32
@@ -398,6 +410,10 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		return
 	}
 
+	stick := t.StickyRowCount
+	if t.ShowHeaderRow {
+		stick--
+	}
 	for i := 0; i < cols; i++ {
 		width := colWidth
 		if w, ok := t.columnWidths[i]; ok {
@@ -418,7 +434,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		}
 
 		colOffset += width + theme.Padding()
-		if isVisible {
+		if isVisible || i < stick {
 			visible[i] = width
 		}
 	}
@@ -439,6 +455,10 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		return
 	}
 
+	stick := t.StickyColumnCount
+	if t.ShowHeaderColumn {
+		stick--
+	}
 	for i := 0; i < rows; i++ {
 		height := rowHeight
 		if h, ok := t.rowHeights[i]; ok {
@@ -459,7 +479,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		}
 
 		rowOffset += height + theme.Padding()
-		if isVisible {
+		if isVisible || i < stick {
 			visible[i] = height
 		}
 	}
@@ -487,11 +507,42 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 
 func (t *tableRenderer) MinSize() fyne.Size {
 	min := t.t.scroll.MinSize().Max(t.cellSize)
+	sep := theme.SeparatorThicknessSize()
 	if t.t.ShowHeaderRow {
-		min.Height += t.headerSize.Height + theme.SeparatorThicknessSize()
+		min.Height += t.headerSize.Height + sep
 	}
 	if t.t.ShowHeaderColumn {
-		min.Width += t.headerSize.Width + theme.SeparatorThicknessSize()
+		min.Width += t.headerSize.Width + sep
+	}
+	if t.t.StickyRowCount >= 1 {
+		stick := t.t.StickyRowCount
+		if t.t.ShowHeaderRow {
+			stick--
+		}
+
+		for i := 0; i < stick; i++ {
+			height := t.cellSize.Height
+			if h, ok := t.t.rowHeights[i]; ok {
+				height = h
+			}
+
+			min.Height += height + sep
+		}
+	}
+	if t.t.StickyColumnCount >= 1 {
+		stick := t.t.StickyColumnCount
+		if t.t.ShowHeaderColumn {
+			stick--
+		}
+
+		for i := 0; i < stick; i++ {
+			width := t.cellSize.Width
+			if w, ok := t.t.columnWidths[i]; ok {
+				width = w
+			}
+
+			min.Width += width + sep
+		}
 	}
 	return min
 }
@@ -842,11 +893,12 @@ func (r *tableCellsRenderer) Refresh() {
 	wasVisible := r.visible
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
+
 	cellYOffset := offY
-	for row := minRow; row < maxRow; row++ {
+	displayRow := func(row int) {
 		rowHeight := visibleRowHeights[row]
 		cellXOffset := offX
-		for col := minCol; col < maxCol; col++ {
+		displayCol := func(col int) {
 			id := TableCellID{row, col}
 			colWidth := visibleColWidths[col]
 			c, ok := wasVisible[id]
@@ -856,7 +908,7 @@ func (r *tableCellsRenderer) Refresh() {
 					c = f()
 				}
 				if c == nil {
-					continue
+					return
 				}
 			}
 
@@ -867,7 +919,33 @@ func (r *tableCellsRenderer) Refresh() {
 			cells = append(cells, c)
 			cellXOffset += colWidth + separatorThickness
 		}
+
+		for col := minCol; col < maxCol; col++ {
+			displayCol(col)
+		}
+		cellXOffset = r.cells.t.scroll.Offset.X
+		stick := r.cells.t.StickyColumnCount
+		if r.cells.t.ShowHeaderColumn {
+			cellXOffset += r.cells.headerSize.Width
+			stick--
+		}
+		for col := 0; col < stick; col++ {
+			displayCol(col)
+		}
 		cellYOffset += rowHeight + separatorThickness
+	}
+
+	for row := minRow; row < maxRow; row++ {
+		displayRow(row)
+	}
+	cellYOffset = r.cells.t.scroll.Offset.Y
+	stick := r.cells.t.StickyRowCount
+	if r.cells.t.ShowHeaderRow {
+		cellYOffset += r.cells.headerSize.Height
+		stick--
+	}
+	for row := 0; row < stick; row++ {
+		displayRow(row)
 	}
 
 	for id, old := range wasVisible {
@@ -899,9 +977,18 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	rowHeight := headerMin.Height
 	colWidth := headerMin.Width
 
+	xPos := float32(0)
+	if r.cells.t.StickyColumnCount > 0 {
+		xPos = r.cells.t.scroll.Offset.X
+	}
+	yPos := float32(0)
+	if r.cells.t.StickyRowCount > 0 {
+		yPos = r.cells.t.scroll.Offset.Y
+	}
+
 	if r.cells.t.ShowHeaderRow {
 		cellXOffset := offX
-		for col := minCol; col < maxCol; col++ {
+		displayColHeader := func(col int) {
 			id := TableCellID{-1, col}
 			colWidth := visibleColWidths[col]
 			c, ok := wasVisible[id]
@@ -911,22 +998,37 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 					c = r.cells.t.createHeader()
 				}
 				if c == nil {
-					continue
+					return
 				}
 			}
 
-			c.Move(fyne.NewPos(cellXOffset, 0))
+			c.Move(fyne.NewPos(cellXOffset, yPos))
 			c.Resize(fyne.NewSize(colWidth, rowHeight))
 
 			r.headers[id] = c
 			cells = append(cells, c)
 			cellXOffset += colWidth + separatorThickness
 		}
+		for col := minCol; col < maxCol; col++ {
+			displayColHeader(col)
+		}
+		if r.cells.t.StickyColumnCount > 0 {
+			cellXOffset = r.cells.t.scroll.Offset.X
+			stick := r.cells.t.StickyColumnCount
+			if r.cells.t.ShowHeaderColumn {
+				cellXOffset += r.cells.headerSize.Width
+				stick--
+			}
+
+			for col := 0; col < stick; col++ {
+				displayColHeader(col)
+			}
+		}
 	}
 
 	if r.cells.t.ShowHeaderColumn {
 		cellYOffset := offY
-		for row := minRow; row < maxRow; row++ {
+		displayRowHeader := func(row int) {
 			id := TableCellID{row, -1}
 			rowHeight := visibleRowHeights[row]
 			c, ok := wasVisible[id]
@@ -936,26 +1038,42 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 					c = r.cells.t.createHeader()
 				}
 				if c == nil {
-					continue
+					return
 				}
 			}
 
-			c.Move(fyne.NewPos(0, cellYOffset))
+			c.Move(fyne.NewPos(xPos, cellYOffset))
 			c.Resize(fyne.NewSize(colWidth, rowHeight))
 
 			r.headers[id] = c
 			cells = append(cells, c)
 			cellYOffset += rowHeight + separatorThickness
 		}
+		for row := minRow; row < maxRow; row++ {
+			displayRowHeader(row)
+		}
+
+		if r.cells.t.StickyRowCount > 0 {
+			cellYOffset = r.cells.t.scroll.Offset.Y
+			stick := r.cells.t.StickyRowCount
+			if r.cells.t.ShowHeaderRow {
+				cellYOffset += r.cells.headerSize.Height
+				stick--
+			}
+
+			for row := 0; row < stick; row++ {
+				displayRowHeader(row)
+			}
+		}
 	}
 
 	r.headColBG.Hidden = !r.cells.t.ShowHeaderColumn
 	r.headColBG.FillColor = theme.HeaderBackgroundColor()
-	r.headColBG.Move(fyne.NewPos(0, r.cells.t.scroll.Offset.Y))
+	r.headColBG.Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
 	r.headColBG.Resize(fyne.NewSize(colWidth, r.cells.t.scroll.Size().Height))
 	r.headRowBG.Hidden = !r.cells.t.ShowHeaderRow
 	r.headRowBG.FillColor = theme.HeaderBackgroundColor()
-	r.headRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, 0))
+	r.headRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
 	r.headRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, rowHeight))
 
 	for id, old := range wasVisible {
