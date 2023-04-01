@@ -119,6 +119,11 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 	d.win = widget.NewModalPopUp(content, d.parent.Canvas())
 }
 
+func (d *dialog) setButtons(buttons fyne.CanvasObject) {
+	d.win.Content.(*fyne.Container).Objects[3] = buttons
+	d.win.Refresh()
+}
+
 // The method .create() needs to be called before the dialog cna be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newCenterLabel(message), title: title, icon: icon, parent: parent}
