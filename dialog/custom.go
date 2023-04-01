@@ -52,7 +52,7 @@ func NewCustomWithoutButtons(title string, content fyne.CanvasObject, parent fyn
 // Since: 2.4
 func (d *CustomDialog) SetButtons(buttons []fyne.CanvasObject) {
 	d.dismiss = nil // New button row invalidates possible dismiss button.
-	d.create(container.NewGridWithRows(1, buttons...))
+	d.setButtons(container.NewGridWithRows(1, buttons...))
 }
 
 // ShowCustomWithoutButtons shows a dialog, wihout buttons, over the specified application
