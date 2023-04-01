@@ -75,7 +75,9 @@ func NewGridWrap(size fyne.Size, objects ...fyne.CanvasObject) *fyne.Container {
 }
 
 // NewHBox creates a new container with the specified objects and using the HBox layout.
-// The objects will be placed in the container from left to right.
+// The objects will be placed in the container from left to right and always displayed
+// at their horizontal MinSize. Use a different layout if the objects are intended
+// to be larger then their horizontal MinSize.
 //
 // Since: 1.4
 func NewHBox(objects ...fyne.CanvasObject) *fyne.Container {
@@ -97,7 +99,9 @@ func NewPadded(objects ...fyne.CanvasObject) *fyne.Container {
 }
 
 // NewVBox creates a new container with the specified objects and using the VBox layout.
-// The objects will be stacked in the container from top to bottom.
+// The objects will be stacked in the container from top to bottom and always displayed
+// at their vertical MinSize. Use a different layout if the objects are intended
+// to be larger then their vertical MinSize.
 //
 // Since: 1.4
 func NewVBox(objects ...fyne.CanvasObject) *fyne.Container {
