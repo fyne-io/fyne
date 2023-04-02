@@ -142,7 +142,6 @@ func (r *CheckGroup) itemTapped(item *Check) {
 	if r.OnChanged != nil {
 		r.OnChanged(r.Selected)
 	}
-	r.Refresh()
 }
 
 func (r *CheckGroup) update() {

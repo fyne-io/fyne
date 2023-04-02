@@ -109,7 +109,6 @@ func (r *RadioGroup) itemTapped(item *radioItem) {
 	if r.OnChanged != nil {
 		r.OnChanged(r.Selected)
 	}
-	r.Refresh()
 }
 
 func (r *RadioGroup) update() {
