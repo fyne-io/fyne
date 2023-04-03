@@ -62,7 +62,7 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {
-	t := widget.NewColumnWithHeaders(
+	t := widget.NewTableWithHeaders(
 		func() (int, int) { return 500, 150 },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Cell 000, 000")
