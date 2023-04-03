@@ -969,17 +969,10 @@ func (r *tableCellsRenderer) Refresh() {
 		stuckYOff = r.cells.headerSize.Height
 	}
 
-	r.stickyRowBG.Hidden = r.cells.t.StickyRowCount == 0 || (r.cells.t.StickyRowCount == 1 && r.cells.t.ShowHeaderRow)
-	r.stickyRowBG.FillColor = theme.BackgroundColor()
 	cells = append(cells, r.stickyRowBG, r.stickyColBG)
 	for row := 0; row < stickRows; row++ {
 		stuckHeight += displayRow(row) + separatorThickness
 	}
-	r.stickyRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y+stuckYOff))
-	r.stickyRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, stuckHeight))
-
-	r.stickyColBG.Hidden = r.cells.t.StickyColumnCount == 0 || (r.cells.t.StickyColumnCount == 1 && r.cells.t.ShowHeaderColumn)
-	r.stickyColBG.FillColor = theme.BackgroundColor()
 	cellXOffset = r.cells.t.scroll.Offset.X
 	cellYOffset = offY
 	stickCols := r.cells.t.StickyColumnCount
@@ -998,15 +991,8 @@ func (r *tableCellsRenderer) Refresh() {
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
-	r.stickyColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stuckXOff, r.cells.t.scroll.Offset.Y))
-	r.stickyColBG.Resize(fyne.NewSize(stuckWidth, r.cells.t.scroll.Size().Height))
-
-	r.stickyRowColBG.Hidden = r.cells.t.StickyRowCount == 0 || (r.cells.t.StickyRowCount == 1 && r.cells.t.ShowHeaderRow) ||
-		r.cells.t.StickyColumnCount == 0 || (r.cells.t.StickyColumnCount == 1 && r.cells.t.ShowHeaderColumn)
-	r.stickyRowColBG.FillColor = theme.BackgroundColor()
 	cells = append(cells, r.stickyRowColBG)
-	r.stickyRowColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stuckXOff, r.cells.t.scroll.Offset.Y+stuckYOff))
-	r.stickyRowColBG.Resize(fyne.NewSize(stuckWidth, stuckHeight))
+	r.refreshStickyBackgrounds(stuckXOff, stuckYOff, stuckWidth, stuckHeight)
 
 	cellYOffset = r.cells.t.scroll.Offset.Y + stuckYOff
 	for row := 0; row < stickRows; row++ {
@@ -1182,6 +1168,22 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	all = append(all, r.headRowStickyBG, r.headColStickyBG)
 	all = append(all, stuck...)
 	return all
+}
+
+func (r *tableCellsRenderer) refreshStickyBackgrounds(stuckXOff, stuckYOff, stuckWidth, stuckHeight float32) {
+	r.stickyRowBG.Hidden = r.cells.t.StickyRowCount == 0 || (r.cells.t.StickyRowCount == 1 && r.cells.t.ShowHeaderRow)
+	r.stickyRowBG.FillColor = theme.BackgroundColor()
+	r.stickyRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y+stuckYOff))
+	r.stickyRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, stuckHeight))
+	r.stickyColBG.Hidden = r.cells.t.StickyColumnCount == 0 || (r.cells.t.StickyColumnCount == 1 && r.cells.t.ShowHeaderColumn)
+	r.stickyColBG.FillColor = theme.BackgroundColor()
+	r.stickyColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stuckXOff, r.cells.t.scroll.Offset.Y))
+	r.stickyColBG.Resize(fyne.NewSize(stuckWidth, r.cells.t.scroll.Size().Height))
+	r.stickyRowColBG.Hidden = r.cells.t.StickyRowCount == 0 || (r.cells.t.StickyRowCount == 1 && r.cells.t.ShowHeaderRow) ||
+		r.cells.t.StickyColumnCount == 0 || (r.cells.t.StickyColumnCount == 1 && r.cells.t.ShowHeaderColumn)
+	r.stickyRowColBG.FillColor = theme.BackgroundColor()
+	r.stickyRowColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stuckXOff, r.cells.t.scroll.Offset.Y+stuckYOff))
+	r.stickyRowColBG.Resize(fyne.NewSize(stuckWidth, stuckHeight))
 }
 
 func (r *tableCellsRenderer) returnAllToPool() {
