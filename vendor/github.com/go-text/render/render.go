@@ -5,7 +5,8 @@ import (
 	"image/draw"
 	"math"
 
-	"github.com/benoitkugler/textlayout/fonts"
+	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/opentype/api"
 	"github.com/go-text/typesetting/shaping"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/math/fixed"
@@ -32,7 +33,7 @@ type Renderer struct {
 // The text will be drawn starting at the left edge, down from the image top by the
 // font ascent value, so that the text is all visible.
 // The return value is the X pixel position of the end of the drawn string.
-func (r *Renderer) DrawString(str string, img draw.Image, face fonts.Face) int {
+func (r *Renderer) DrawString(str string, img draw.Image, face font.Face) int {
 	if r.PixScale == 0 {
 		r.PixScale = 1
 	}
@@ -52,7 +53,7 @@ func (r *Renderer) DrawString(str string, img draw.Image, face fonts.Face) int {
 // The text will be drawn starting at the x, y pixel position.
 // Note that x and y are not multiplied by the `PixScale` value as they refer to output coordinates.
 // The return value is the X pixel position of the end of the drawn string.
-func (r *Renderer) DrawStringAt(str string, img draw.Image, x, y int, face fonts.Face) int {
+func (r *Renderer) DrawStringAt(str string, img draw.Image, x, y int, face font.Face) int {
 	if r.PixScale == 0 {
 		r.PixScale = 1
 	}
@@ -81,23 +82,22 @@ func (r *Renderer) DrawShapedRunAt(run shaping.Output, img draw.Image, startX, s
 	scanner := rasterx.NewScannerGV(b.Dx(), b.Dy(), img, b)
 	f := rasterx.NewFiller(b.Dx(), b.Dy(), scanner)
 	f.SetColor(r.Color)
-	point := uint16(float32(run.Face.Upem()) * r.PixScale)
 	x := float32(startX)
 	y := float32(startY)
 	for _, g := range run.Glyphs {
 		x -= fixed266ToFloat(g.XOffset) * r.PixScale
-		outline, _ := run.Face.GlyphData(g.GlyphID, point, point).(fonts.GlyphOutline)
+		outline, _ := run.Face.GlyphData(g.GlyphID).(api.GlyphOutline)
 
 		for _, s := range outline.Segments {
 			switch s.Op {
-			case fonts.SegmentOpMoveTo:
+			case api.SegmentOpMoveTo:
 				f.Start(fixed.Point26_6{X: floatToFixed266(s.Args[0].X*scale + x), Y: floatToFixed266(-s.Args[0].Y*scale + y)})
-			case fonts.SegmentOpLineTo:
+			case api.SegmentOpLineTo:
 				f.Line(fixed.Point26_6{X: floatToFixed266(s.Args[0].X*scale + x), Y: floatToFixed266(-s.Args[0].Y*scale + y)})
-			case fonts.SegmentOpQuadTo:
+			case api.SegmentOpQuadTo:
 				f.QuadBezier(fixed.Point26_6{X: floatToFixed266(s.Args[0].X*scale + x), Y: floatToFixed266(-s.Args[0].Y*scale + y)},
 					fixed.Point26_6{X: floatToFixed266(s.Args[1].X*scale + x), Y: floatToFixed266(-s.Args[1].Y*scale + y)})
-			case fonts.SegmentOpCubeTo:
+			case api.SegmentOpCubeTo:
 				f.CubeBezier(fixed.Point26_6{X: floatToFixed266(s.Args[0].X*scale + x), Y: floatToFixed266(-s.Args[0].Y*scale + y)},
 					fixed.Point26_6{X: floatToFixed266(s.Args[1].X*scale + x), Y: floatToFixed266(-s.Args[1].Y*scale + y)},
 					fixed.Point26_6{X: floatToFixed266(s.Args[2].X*scale + x), Y: floatToFixed266(-s.Args[2].Y*scale + y)})

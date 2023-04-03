@@ -23,6 +23,8 @@ type Builder struct {
 	os, srcdir, target string
 	goPackage          string
 	release            bool
+	pprof              bool
+	pprofPort          int
 	tags               []string
 	tagsToParse        string
 
@@ -66,6 +68,17 @@ func Build() *cli.Command {
 				Name:        "o",
 				Usage:       "Specify a name for the output file, default is based on the current directory.",
 				Destination: &b.target,
+			},
+			&cli.BoolFlag{
+				Name:        "pprof",
+				Usage:       "Enable pprof profiling.",
+				Destination: &b.pprof,
+			},
+			&cli.IntFlag{
+				Name:        "pprof-port",
+				Usage:       "Specify the port to use for pprof profiling.",
+				Value:       6060,
+				Destination: &b.pprofPort,
 			},
 			&cli.GenericFlag{
 				Name:  "metadata",
@@ -195,10 +208,14 @@ func (b *Builder) build() error {
 		return err
 	}
 
-	if b.icon == "" {
-		defaultIcon := filepath.Join(srcdir, "Icon.png")
-		if util.Exists(defaultIcon) {
-			b.icon = defaultIcon
+	b.updateToDefaultIconIfNotSet(srcdir)
+
+	if b.pprof {
+		close, err := injectPprofFile(fyneGoModRunner, srcdir, b.pprofPort)
+		if err != nil {
+			fyne.LogError("Failed to inject pprof file, omitting pprof", err)
+		} else if close != nil {
+			defer close()
 		}
 	}
 
@@ -299,6 +316,38 @@ func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
 	}
 	return srcdir, nil
+}
+
+func (b *Builder) updateToDefaultIconIfNotSet(srcdir string) {
+	if b.icon == "" {
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
+		if util.Exists(defaultIcon) {
+			b.icon = defaultIcon
+		}
+	}
+}
+
+func injectPprofFile(runner runner, srcdir string, port int) (func(), error) {
+	pprofInitFilePath := filepath.Join(srcdir, "fyne_pprof.go")
+	pprofInitFile, err := os.Create(pprofInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer pprofInitFile.Close()
+
+	pprofInfo := struct {
+		Port int
+	}{
+		Port: port,
+	}
+
+	err = templates.FynePprofInit.Execute(pprofInitFile, pprofInfo)
+	if err != nil {
+		os.Remove(pprofInitFilePath)
+		return func() {}, err
+	}
+
+	return func() { os.Remove(pprofInitFilePath) }, nil
 }
 
 func (b *Builder) updateAndGetGoExecutable(goos string) runner {
