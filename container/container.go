@@ -16,5 +16,5 @@ func New(layout fyne.Layout, objects ...fyne.CanvasObject) *fyne.Container {
 //
 // Since: 2.0
 func NewWithoutLayout(objects ...fyne.CanvasObject) *fyne.Container {
-	return fyne.NewContainerWithoutLayout(objects...)
+	return &fyne.Container{Objects: objects}
 }
