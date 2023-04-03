@@ -1152,17 +1152,25 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	r.headColBG.FillColor = theme.HeaderBackgroundColor()
 	r.headColBG.Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
 	r.headColBG.Resize(fyne.NewSize(colWidth, r.cells.t.scroll.Size().Height))
-	r.headColStickyBG.Hidden = !(r.cells.t.ShowHeaderColumn && r.cells.t.StickyColumnCount > 0)
+	r.headColStickyBG.Hidden = !r.cells.t.ShowHeaderColumn
 	r.headColStickyBG.FillColor = theme.HeaderBackgroundColor()
-	r.headColStickyBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
+	if r.cells.t.StickyColumnCount > 0 {
+		r.headColStickyBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
+	} else {
+		r.headColStickyBG.Move(fyne.NewPos(0, yPos))
+	}
 	r.headColStickyBG.Resize(fyne.NewSize(colWidth, stickHeight))
 	r.headRowBG.Hidden = !r.cells.t.ShowHeaderRow
 	r.headRowBG.FillColor = theme.HeaderBackgroundColor()
 	r.headRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
 	r.headRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, rowHeight))
-	r.headRowStickyBG.Hidden = !(r.cells.t.ShowHeaderRow && r.cells.t.StickyRowCount > 0)
+	r.headRowStickyBG.Hidden = !r.cells.t.ShowHeaderRow
 	r.headRowStickyBG.FillColor = theme.HeaderBackgroundColor()
-	r.headRowStickyBG.Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
+	if r.cells.t.StickyRowCount > 0 {
+		r.headRowStickyBG.Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
+	} else {
+		r.headRowStickyBG.Move(fyne.NewPos(xPos, 0))
+	}
 	r.headRowStickyBG.Resize(fyne.NewSize(stickWidth, rowHeight))
 
 	for id, old := range wasVisible {
