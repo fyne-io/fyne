@@ -42,6 +42,7 @@ var (
 	pCreateWindowEx        = u32.NewProc("CreateWindowExW")
 	pDefWindowProc         = u32.NewProc("DefWindowProcW")
 	pDeleteMenu            = u32.NewProc("DeleteMenu")
+	pDestroyMenu           = u32.NewProc("DestroyMenu")
 	pRemoveMenu            = u32.NewProc("RemoveMenu")
 	pDestroyWindow         = u32.NewProc("DestroyWindow")
 	pDispatchMessage       = u32.NewProc("DispatchMessageW")
@@ -1096,5 +1097,10 @@ func showMenuItem(item *MenuItem) {
 }
 
 func resetMenu() {
+	_, _, _ = pDestroyMenu.Call(uintptr(wt.menus[0]))
+	wt.visibleItems = make(map[uint32][]uint32)
+	wt.menus = make(map[uint32]windows.Handle)
+	wt.menuOf = make(map[uint32]windows.Handle)
+	wt.menuItemIcons = make(map[uint32]windows.Handle)
 	wt.createMenu()
 }
