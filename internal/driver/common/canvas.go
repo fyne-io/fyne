@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
@@ -288,6 +289,22 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
+	walkNeeded := false
+	switch obj.(type) {
+	case *fyne.Container:
+		walkNeeded = true
+	case fyne.Widget:
+		walkNeeded = true
+	}
+
+	if walkNeeded {
+		driver.WalkCompleteObjectTree(obj, func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
+			if i, ok := co.(*canvas.Image); ok {
+				i.Refresh()
+			}
+			return false
+		}, nil)
+	}
 	c.refreshQueue.In(obj)
 	c.SetDirty()
 }
