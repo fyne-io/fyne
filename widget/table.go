@@ -111,22 +111,17 @@ func NewTableWithHeaders(length func() (int, int), create func() fyne.CanvasObje
 // Implements: fyne.Widget
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	marker := canvas.NewRectangle(theme.SelectionColor())
-	hover := canvas.NewRectangle(theme.HoverColor())
 
 	cellSize := t.templateSize()
 	t.cells = newTableCells(t, cellSize, t.createHeader().MinSize())
 	t.scroll = widget.NewScroll(t.cells)
 
-	obj := []fyne.CanvasObject{marker, hover, t.scroll}
-	r := &tableRenderer{t: t, scroll: t.scroll, marker: marker, hover: hover, cellSize: cellSize,
+	r := &tableRenderer{t: t, scroll: t.scroll, cellSize: cellSize,
 		headerSize: t.createHeader().MinSize()}
-	r.SetObjects(obj)
-	t.moveCallback = r.moveIndicators
+	r.SetObjects([]fyne.CanvasObject{t.scroll})
 	t.scroll.OnScrolled = func(pos fyne.Position) {
 		t.offset = pos
 		t.cells.Refresh()
-		r.moveIndicators()
 	}
 
 	r.Layout(t.Size())
@@ -510,16 +505,13 @@ type tableRenderer struct {
 	widget.BaseRenderer
 	t *Table
 
-	scroll        *widget.Scroll
-	hover, marker *canvas.Rectangle
-	dividers      []fyne.CanvasObject
+	scroll *widget.Scroll
 
 	cellSize, headerSize fyne.Size
 }
 
 func (t *tableRenderer) Layout(s fyne.Size) {
 	t.scroll.Resize(s)
-	t.moveIndicators()
 }
 
 func (t *tableRenderer) MinSize() fyne.Size {
@@ -567,120 +559,8 @@ func (t *tableRenderer) MinSize() fyne.Size {
 func (t *tableRenderer) Refresh() {
 	t.cellSize = t.t.templateSize()
 	t.headerSize = t.t.createHeader().MinSize()
-	t.moveIndicators()
-
-	t.marker.FillColor = theme.SelectionColor()
-	t.marker.Refresh()
-
-	t.hover.FillColor = theme.HoverColor()
-	t.hover.Refresh()
 
 	t.t.cells.Refresh()
-}
-
-func (t *tableRenderer) moveIndicators() {
-	rows, cols := 0, 0
-	if f := t.t.Length; f != nil {
-		rows, cols = t.t.Length()
-	}
-	visibleColWidths, offX, minCol, maxCol := t.t.visibleColumnWidths(t.cellSize.Width, cols)
-	visibleRowHeights, offY, minRow, maxRow := t.t.visibleRowHeights(t.cellSize.Height, rows)
-	separatorThickness := theme.SeparatorThicknessSize()
-	dividerOff := (theme.Padding() - separatorThickness) / 2
-
-	if t.t.selectedCell == nil {
-		t.moveMarker(t.marker, -1, -1, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
-	} else {
-		t.moveMarker(t.marker, t.t.selectedCell.Row, t.t.selectedCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
-	}
-	if t.t.hoveredCell == nil {
-		t.moveMarker(t.hover, -1, -1, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
-	} else {
-		t.moveMarker(t.hover, t.t.hoveredCell.Row, t.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
-	}
-
-	colDivs := maxCol - minCol - 1
-	rowDivs := maxRow - minRow - 1
-
-	if len(t.dividers) < colDivs+rowDivs {
-		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
-			t.dividers = append(t.dividers, NewSeparator())
-		}
-
-		obj := []fyne.CanvasObject{t.marker, t.hover}
-		obj = append(obj, t.dividers...)
-		t.SetObjects(append(obj, t.scroll))
-	}
-
-	divs := 0
-	i := minCol
-	for x := offX + visibleColWidths[i]; i < minCol+colDivs && divs < len(t.dividers); x += visibleColWidths[i] + theme.Padding() {
-		i++
-
-		t.dividers[divs].Move(fyne.NewPos(x-t.scroll.Offset.X+dividerOff, 0))
-		t.dividers[divs].Resize(fyne.NewSize(separatorThickness, t.t.size.Height))
-		t.dividers[divs].Show()
-		divs++
-	}
-
-	i = minRow
-	for y := offY + visibleRowHeights[i]; i < minRow+rowDivs && divs < len(t.dividers); y += visibleRowHeights[i] + theme.Padding() {
-		i++
-
-		t.dividers[divs].Move(fyne.NewPos(0, y-t.scroll.Offset.Y+dividerOff))
-		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width, separatorThickness))
-		t.dividers[divs].Show()
-		divs++
-	}
-
-	for i := divs; i < len(t.dividers); i++ {
-		t.dividers[i].Hide()
-	}
-	canvas.Refresh(t.t)
-}
-
-func (t *tableRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX, offY float32, minCol, minRow int, widths, heights map[int]float32) {
-	if col == -1 || row == -1 {
-		marker.Hide()
-		marker.Refresh()
-		return
-	}
-
-	xPos := offX
-	for i := minCol; i < col; i++ {
-		if width, ok := widths[i]; ok {
-			xPos += width
-		} else {
-			xPos += t.cellSize.Width
-		}
-		xPos += theme.Padding()
-	}
-	x1 := xPos - t.scroll.Offset.X
-	x2 := x1 + widths[col]
-
-	yPos := offY
-	for i := minRow; i < row; i++ {
-		if height, ok := heights[i]; ok {
-			yPos += height
-		} else {
-			yPos += t.cellSize.Height
-		}
-		yPos += theme.Padding()
-	}
-	y1 := yPos - t.scroll.Offset.Y
-	y2 := y1 + heights[row]
-
-	if x2 < 0 || x1 > t.t.size.Width || y2 < 0 || y1 > t.t.size.Height {
-		marker.Hide()
-	} else {
-		left := fyne.Max(0, x1)
-		top := fyne.Max(0, y1)
-		marker.Move(fyne.NewPos(left, top))
-		marker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, fyne.Min(y2, t.t.size.Height)-top))
-
-		marker.Show()
-	}
-	marker.Refresh()
 }
 
 // Declare conformity with Hoverable interface.
@@ -705,12 +585,19 @@ func newTableCells(t *Table, s, hs fyne.Size) *tableCells {
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	return &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
+	marker := canvas.NewRectangle(theme.SelectionColor())
+	hover := canvas.NewRectangle(theme.HoverColor())
+	overlay := &fyne.Container{}
+
+	r := &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
 		headRowBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColBG: canvas.NewRectangle(theme.HeaderBackgroundColor()),
 		headRowStickyBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColStickyBG: canvas.NewRectangle(theme.HeaderBackgroundColor()),
 		stickyRowBG: canvas.NewRectangle(theme.BackgroundColor()), stickyColBG: canvas.NewRectangle(theme.BackgroundColor()),
-		stickyRowColBG: canvas.NewRectangle(theme.BackgroundColor())}
+		stickyRowColBG: canvas.NewRectangle(theme.BackgroundColor()), dividerLayer: overlay, marker: marker, hover: hover}
+
+	c.t.moveCallback = r.moveIndicators
+	return r
 }
 
 func (c *tableCells) MouseIn(ev *desktop.MouseEvent) {
@@ -822,15 +709,21 @@ var _ fyne.WidgetRenderer = (*tableCellsRenderer)(nil)
 type tableCellsRenderer struct {
 	widget.BaseRenderer
 
-	cells                                                  *tableCells
-	pool, headerPool                                       pool
-	visible, headers                                       map[TableCellID]fyne.CanvasObject
+	cells            *tableCells
+	pool, headerPool pool
+	visible, headers map[TableCellID]fyne.CanvasObject
+	hover, marker    *canvas.Rectangle
+	dividers         []fyne.CanvasObject
+	dividerLayer     *fyne.Container
+
 	headColBG, headRowBG, headRowStickyBG, headColStickyBG *canvas.Rectangle
 	stickyRowBG, stickyColBG, stickyRowColBG               *canvas.Rectangle
+	stuckXOff, stuckYOff, stuckWidth, stuckHeight          float32
 }
 
 func (r *tableCellsRenderer) Layout(_ fyne.Size) {
 	// we deal with cached objects so just refresh instead
+	r.moveIndicators()
 }
 
 func (r *tableCellsRenderer) MinSize() fyne.Size {
@@ -992,7 +885,8 @@ func (r *tableCellsRenderer) Refresh() {
 		cellYOffset += rowHeight + separatorThickness
 	}
 	cells = append(cells, r.stickyRowColBG)
-	r.refreshStickyBackgrounds(stuckXOff, stuckYOff, stuckWidth, stuckHeight)
+	r.stuckXOff, r.stuckYOff, r.stuckWidth, r.stuckHeight = stuckXOff, stuckYOff, stuckWidth, stuckHeight
+	r.refreshStickyBackgrounds()
 
 	cellYOffset = r.cells.t.scroll.Offset.Y + stuckYOff
 	for row := 0; row < stickRows; row++ {
@@ -1013,7 +907,7 @@ func (r *tableCellsRenderer) Refresh() {
 	visible := r.visible
 	headers := r.headers
 	r.cells.propertyLock.Unlock()
-	r.SetObjects(cells)
+	r.SetObjects(append(cells, r.dividerLayer))
 
 	if updateCell != nil {
 		for id, cell := range visible {
@@ -1023,6 +917,128 @@ func (r *tableCellsRenderer) Refresh() {
 	for id, head := range headers {
 		r.cells.t.updateHeader(id, head)
 	}
+
+	r.moveIndicators()
+	r.marker.FillColor = theme.SelectionColor()
+	r.marker.Refresh()
+	r.hover.FillColor = theme.HoverColor()
+	r.hover.Refresh()
+}
+
+func (r *tableCellsRenderer) moveIndicators() {
+	rows, cols := 0, 0
+	if f := r.cells.t.Length; f != nil {
+		rows, cols = r.cells.t.Length()
+	}
+	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.cellSize.Width, cols)
+	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.cellSize.Height, rows)
+	separatorThickness := theme.SeparatorThicknessSize()
+	dividerOff := (theme.Padding() - separatorThickness) / 2
+
+	offX += r.cells.t.scroll.Offset.X
+	offY += r.cells.t.scroll.Offset.Y
+	stickX := r.stuckXOff + r.stuckWidth
+	stickY := r.stuckYOff + r.stuckHeight
+	if r.cells.t.selectedCell == nil {
+		r.moveMarker(r.marker, -1, -1, offX, offY, stickX, stickY, minCol, minRow, visibleColWidths, visibleRowHeights)
+	} else {
+		r.moveMarker(r.marker, r.cells.t.selectedCell.Row, r.cells.t.selectedCell.Col, offX, offY, stickX, stickY, minCol, minRow, visibleColWidths, visibleRowHeights)
+	}
+	if r.cells.t.hoveredCell == nil {
+		r.moveMarker(r.hover, -1, -1, offX, offY, stickX, stickY, minCol, minRow, visibleColWidths, visibleRowHeights)
+	} else {
+		r.moveMarker(r.hover, r.cells.t.hoveredCell.Row, r.cells.t.hoveredCell.Col, offX, offY, stickX, stickY, minCol, minRow, visibleColWidths, visibleRowHeights)
+	}
+
+	colDivs := maxCol - minCol - 1
+	rowDivs := maxRow - minRow - 1
+
+	if len(r.dividers) < colDivs+rowDivs {
+		for i := len(r.dividers); i < colDivs+rowDivs; i++ {
+			r.dividers = append(r.dividers, NewSeparator())
+		}
+
+		objs := []fyne.CanvasObject{r.marker, r.hover}
+		r.dividerLayer.Objects = append(objs, r.dividers...)
+		r.dividerLayer.Refresh()
+	}
+
+	divs := 0
+	i := minCol
+	for x := offX + visibleColWidths[i]; i < minCol+colDivs && divs < len(r.dividers); x += visibleColWidths[i] + theme.Padding() {
+		i++
+
+		xPos := x - r.cells.t.scroll.Offset.X + dividerOff
+		r.dividers[divs].Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
+		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+		if xPos < r.cells.t.scroll.Offset.X+stickX-theme.Padding()/2 {
+			r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stickX-(theme.Padding()+separatorThickness)/2, r.cells.t.scroll.Offset.Y))
+		}
+		r.dividers[divs].Show()
+		divs++
+	}
+
+	i = minRow
+	for y := offY + visibleRowHeights[i]; i < minRow+rowDivs && divs < len(r.dividers); y += visibleRowHeights[i] + theme.Padding() {
+		i++
+
+		yPos := y - r.cells.t.scroll.Offset.Y + dividerOff
+		r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
+		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+		if yPos < r.cells.t.scroll.Offset.Y+stickY-theme.Padding()/2 {
+			r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y+stickY-(theme.Padding()+separatorThickness)/2))
+		}
+		r.dividers[divs].Show()
+		divs++
+	}
+
+	for i := divs; i < len(r.dividers); i++ {
+		r.dividers[i].Hide()
+	}
+}
+
+func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, offX, offY, stickX, stickY float32, minCol, minRow int, widths, heights map[int]float32) {
+	if col == -1 || row == -1 {
+		marker.Hide()
+		marker.Refresh()
+		return
+	}
+
+	xPos := offX
+	for i := minCol; i < col; i++ {
+		if width, ok := widths[i]; ok {
+			xPos += width
+		} else {
+			xPos += r.cells.cellSize.Width
+		}
+		xPos += theme.Padding()
+	}
+	x1 := xPos - r.cells.t.scroll.Offset.X
+	x2 := x1 + widths[col]
+
+	yPos := offY
+	for i := minRow; i < row; i++ {
+		if height, ok := heights[i]; ok {
+			yPos += height
+		} else {
+			yPos += r.cells.cellSize.Height
+		}
+		yPos += theme.Padding()
+	}
+	y1 := yPos - r.cells.t.scroll.Offset.Y
+	y2 := y1 + heights[row]
+
+	if x2 < stickX || x1 > r.cells.t.scroll.Offset.X+r.cells.t.size.Width || y2 < stickY || y1 > r.cells.t.scroll.Offset.Y+r.cells.t.size.Height {
+		marker.Hide()
+	} else {
+		left := fyne.Max(stickX+r.cells.t.scroll.Offset.X, x1)
+		top := fyne.Max(stickY+r.cells.t.scroll.Offset.Y, y1)
+		marker.Move(fyne.NewPos(left, top))
+		marker.Resize(fyne.NewSize(x2-left, y2-top))
+
+		marker.Show()
+	}
+	marker.Refresh()
 }
 
 func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32, minRow, maxRow, minCol, maxCol int, separatorThickness float32) []fyne.CanvasObject {
@@ -1170,20 +1186,20 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	return all
 }
 
-func (r *tableCellsRenderer) refreshStickyBackgrounds(stuckXOff, stuckYOff, stuckWidth, stuckHeight float32) {
+func (r *tableCellsRenderer) refreshStickyBackgrounds() {
 	r.stickyRowBG.Hidden = r.cells.t.StickyRowCount == 0 || (r.cells.t.StickyRowCount == 1 && r.cells.t.ShowHeaderRow)
 	r.stickyRowBG.FillColor = theme.BackgroundColor()
-	r.stickyRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y+stuckYOff))
-	r.stickyRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, stuckHeight))
+	r.stickyRowBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y+r.stuckYOff))
+	r.stickyRowBG.Resize(fyne.NewSize(r.cells.t.scroll.Size().Width, r.stuckHeight))
 	r.stickyColBG.Hidden = r.cells.t.StickyColumnCount == 0 || (r.cells.t.StickyColumnCount == 1 && r.cells.t.ShowHeaderColumn)
 	r.stickyColBG.FillColor = theme.BackgroundColor()
-	r.stickyColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stuckXOff, r.cells.t.scroll.Offset.Y))
-	r.stickyColBG.Resize(fyne.NewSize(stuckWidth, r.cells.t.scroll.Size().Height))
+	r.stickyColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+r.stuckXOff, r.cells.t.scroll.Offset.Y))
+	r.stickyColBG.Resize(fyne.NewSize(r.stuckWidth, r.cells.t.scroll.Size().Height))
 	r.stickyRowColBG.Hidden = r.cells.t.StickyRowCount == 0 || (r.cells.t.StickyRowCount == 1 && r.cells.t.ShowHeaderRow) ||
 		r.cells.t.StickyColumnCount == 0 || (r.cells.t.StickyColumnCount == 1 && r.cells.t.ShowHeaderColumn)
 	r.stickyRowColBG.FillColor = theme.BackgroundColor()
-	r.stickyRowColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stuckXOff, r.cells.t.scroll.Offset.Y+stuckYOff))
-	r.stickyRowColBG.Resize(fyne.NewSize(stuckWidth, stuckHeight))
+	r.stickyRowColBG.Move(fyne.NewPos(r.cells.t.scroll.Offset.X+r.stuckXOff, r.cells.t.scroll.Offset.Y+r.stuckYOff))
+	r.stickyRowColBG.Resize(fyne.NewSize(r.stuckWidth, r.stuckHeight))
 }
 
 func (r *tableCellsRenderer) returnAllToPool() {
