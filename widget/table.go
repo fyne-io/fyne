@@ -1204,7 +1204,11 @@ func (r *tableCellsRenderer) refreshStickyBackgrounds() {
 }
 
 func (r *tableCellsRenderer) returnAllToPool() {
-	for _, cell := range r.BaseRenderer.Objects() {
+	cells := r.BaseRenderer.Objects()
+	for i, cell := range cells {
+		if i == len(cells)-1 {
+			continue // overlay container
+		}
 		if _, isRect := cell.(*canvas.Rectangle); isRect {
 			continue // ignore the header backgrounds
 		}
