@@ -721,8 +721,9 @@ type tableCellsRenderer struct {
 	stuckXOff, stuckYOff, stuckWidth, stuckHeight          float32
 }
 
-func (r *tableCellsRenderer) Layout(_ fyne.Size) {
+func (r *tableCellsRenderer) Layout(s fyne.Size) {
 	// we deal with cached objects so just refresh instead
+	r.dividerLayer.Resize(s)
 	r.moveIndicators()
 }
 
