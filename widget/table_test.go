@@ -161,7 +161,7 @@ func TestTable_Sticky(t *testing.T) {
 	assert.Equal(t, "text 6,2", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text 7,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
 	// stuck cells
-	assert.Equal(t, "text 0,0", cellRenderer.(*tableCellsRenderer).Objects()[18].(*Label).Text)
+	assert.Equal(t, "text 0,0", cellRenderer.(*tableCellsRenderer).Objects()[27].(*Label).Text)
 	assert.Equal(t, "text 0,3", cellRenderer.(*tableCellsRenderer).Objects()[21].(*Label).Text)
 	assert.Equal(t, "text 6,0", cellRenderer.(*tableCellsRenderer).Objects()[22].(*Label).Text)
 	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[31].(*Label).Text)
