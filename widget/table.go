@@ -643,20 +643,20 @@ func (c *tableCells) columnAt(pos fyne.Position) int {
 		_, dataCols = c.t.Length()
 	}
 
+	visibleColWidths, offX, minCol, _ := c.t.visibleColumnWidths(c.cellSize.Width, dataCols)
 	if pos.X < c.stuckXOff+c.stuckWidth+c.t.scroll.Offset.X {
-		return 0 // TODO col (not always 0)
+		offX = c.stuckXOff + c.t.scroll.Offset.X
+		minCol = 0
 	}
 
-	col := -1
-	visibleColWidths, offX, minCol, _ := c.t.visibleColumnWidths(c.cellSize.Width, dataCols)
 	i := minCol
 	for x := offX; i < minCol+len(visibleColWidths); x += visibleColWidths[i-1] + theme.Padding() {
 		if pos.X >= x && pos.X < x+visibleColWidths[i] {
-			col = i
+			return i
 		}
 		i++
 	}
-	return col
+	return -1
 }
 
 func (c *tableCells) hoverAt(pos fyne.Position) {
@@ -697,20 +697,20 @@ func (c *tableCells) rowAt(pos fyne.Position) int {
 		dataRows, _ = c.t.Length()
 	}
 
+	visibleRowHeights, offY, minRow, _ := c.t.visibleRowHeights(c.cellSize.Height, dataRows)
 	if pos.Y < c.stuckYOff+c.stuckHeight+c.t.scroll.Offset.Y {
-		return 0 // TODO row (not always 0)
+		offY = c.stuckYOff + c.t.scroll.Offset.Y
+		minRow = 0
 	}
 
-	row := -1
-	visibleRowHeights, offY, minRow, _ := c.t.visibleRowHeights(c.cellSize.Height, dataRows)
 	i := minRow
 	for y := offY; i < minRow+len(visibleRowHeights); y += visibleRowHeights[i-1] + theme.Padding() {
 		if pos.Y >= y && pos.Y < y+visibleRowHeights[i] {
-			row = i
+			return i
 		}
 		i++
 	}
-	return row
+	return -1
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -869,7 +869,9 @@ func (r *tableCellsRenderer) Refresh() {
 	if r.cells.t.ShowHeaderRow {
 		cellYOffset += r.cells.headerSize.Height
 		stickRows--
-		stuckYOff = r.cells.headerSize.Height
+		if r.cells.t.StickyRowCount > 0 {
+			stuckYOff = r.cells.headerSize.Height
+		}
 	}
 
 	cells = append(cells, r.stickyRowBG, r.stickyColBG)
@@ -883,7 +885,9 @@ func (r *tableCellsRenderer) Refresh() {
 	if r.cells.t.ShowHeaderColumn {
 		cellXOffset += r.cells.headerSize.Width
 		stickCols--
-		stuckXOff = r.cells.headerSize.Width
+		if r.cells.t.StickyColumnCount > 0 {
+			stuckXOff = r.cells.headerSize.Width
+		}
 	}
 	for row := minRow; row < maxRow; row++ {
 		cellXOffset = r.cells.t.scroll.Offset.X + stuckXOff
@@ -980,10 +984,16 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		xPos := x - r.cells.t.scroll.Offset.X + dividerOff
-		r.dividers[divs].Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
 		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
 		if xPos < r.cells.t.scroll.Offset.X+stickX-theme.Padding()/2 {
-			r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X+stickX-(theme.Padding()+separatorThickness)/2, r.cells.t.scroll.Offset.Y))
+			divX := xPos - offX + r.cells.t.scroll.Offset.X + r.cells.stuckXOff
+			if divX < stickX {
+				r.dividers[divs].Move(fyne.NewPos(divX+r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y))
+			} else {
+				r.dividers[divs].Move(fyne.NewPos(-5, r.cells.t.scroll.Offset.Y)) // move the one behind a header out
+			}
+		} else {
+			r.dividers[divs].Move(fyne.NewPos(xPos, r.cells.t.scroll.Offset.Y))
 		}
 		r.dividers[divs].Show()
 		divs++
@@ -994,10 +1004,16 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		yPos := y - r.cells.t.scroll.Offset.Y + dividerOff
-		r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
 		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
 		if yPos < r.cells.t.scroll.Offset.Y+stickY-theme.Padding()/2 {
-			r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, r.cells.t.scroll.Offset.Y+stickY-(theme.Padding()+separatorThickness)/2))
+			divY := yPos - offY + r.cells.t.scroll.Offset.Y + r.cells.stuckYOff
+			if divY < stickY {
+				r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, divY+r.cells.t.scroll.Offset.Y))
+			} else {
+				r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, -5)) // move the one behind a header out
+			}
+		} else {
+			r.dividers[divs].Move(fyne.NewPos(r.cells.t.scroll.Offset.X, yPos))
 		}
 		r.dividers[divs].Show()
 		divs++
@@ -1021,7 +1037,12 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 		stickCols--
 	}
 	if col < stickCols {
-		xPos = -r.cells.stuckXOff
+		if r.cells.t.ShowHeaderColumn {
+			xPos = r.cells.stuckXOff
+		} else {
+			xPos = -r.cells.stuckXOff
+		}
+		minCol = 0
 	}
 
 	for i := minCol; i < col; i++ {
@@ -1046,7 +1067,12 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 		stickRows--
 	}
 	if row < stickRows {
-		yPos = -r.cells.stuckYOff
+		if r.cells.t.ShowHeaderRow {
+			yPos = r.cells.stuckYOff
+		} else {
+			yPos = -r.cells.stuckYOff
+		}
+		minRow = 0
 	}
 	for i := minRow; i < row; i++ {
 		if height, ok := heights[i]; ok {
