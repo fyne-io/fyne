@@ -62,27 +62,11 @@ body:
     placeholder: "e.g. 1.14.8 or 1.18.3"
   validations:
     required: true
-- type: dropdown
-  attributes:
-    label: Operating system
-    description: What operating system are you running the code on?
-    options:
-      - Android
-      - FreeBSD
-      - iOS
-      - Linux
-      - macOS
-      - NetBSD
-      - OpenBSD
-      - Windows
-      - Other (specify below)
-  validations:
-    required: true
 - type: input
   attributes:
-    label: Operating system version
-    description: Clarify the version of the operating system you are using.
-    placeholder: "e.g. Windows 10, 10.13 High Sierra or Ubuntu 18.04"
+    label: Operating system and version
+    description: The name and version of the operating system you are using.
+    placeholder: "e.g. Windows 10, macOS High Sierra or Ubuntu 18.04"
   validations:
     required: true
 - type: textarea

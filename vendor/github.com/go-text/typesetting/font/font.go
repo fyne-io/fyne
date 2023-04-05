@@ -1,12 +1,20 @@
 package font
 
 import (
-	"github.com/benoitkugler/textlayout/fonts"
-	"github.com/benoitkugler/textlayout/fonts/truetype"
+	"github.com/go-text/typesetting/opentype/api/font"
+	"github.com/go-text/typesetting/opentype/loader"
 )
 
-type Resource = fonts.Resource
+type Resource = loader.Resource
 
 func ParseTTF(file Resource) (Face, error) {
-	return truetype.Parse(file)
+	ld, err := loader.NewLoader(file)
+	if err != nil {
+		return nil, err
+	}
+	ft, err := font.NewFont(ld)
+	if err != nil {
+		return nil, err
+	}
+	return &font.Face{Font: ft}, nil
 }

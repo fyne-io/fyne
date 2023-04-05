@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/scale"
 )
 
 type funcData struct {
@@ -74,6 +74,10 @@ func runOnMain(f func()) {
 
 // force a function f to run on the draw thread
 func runOnDraw(w *window, f func()) {
+	if drawOnMainThread {
+		runOnMain(func() { w.RunWithContext(f) })
+		return
+	}
 	done := donePool.Get().(chan struct{})
 	defer donePool.Put(done)
 
@@ -172,7 +176,7 @@ func (d *gLDriver) runGL() {
 
 				newWindows = append(newWindows, win)
 
-				if d.drawOnMainThread {
+				if drawOnMainThread {
 					d.drawSingleFrame()
 				}
 			}
@@ -217,7 +221,7 @@ func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 	var drawCh <-chan time.Time
-	if d.drawOnMainThread {
+	if drawOnMainThread {
 		drawCh = make(chan time.Time) // don't tick when on M1
 	} else {
 		drawCh = time.NewTicker(time.Second / 60).C
@@ -263,8 +267,8 @@ func updateGLContext(w *window) {
 	size := canvas.Size()
 
 	// w.width and w.height are not correct if we are maximised, so figure from canvas
-	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
-	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
+	winWidth := float32(scale.ToScreenCoordinate(canvas, size.Width)) * canvas.texScale
+	winHeight := float32(scale.ToScreenCoordinate(canvas, size.Height)) * canvas.texScale
 
 	canvas.Painter().SetFrameBufferScale(canvas.texScale)
 	w.canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))

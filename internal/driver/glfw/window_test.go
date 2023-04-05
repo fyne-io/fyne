@@ -16,7 +16,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -1360,7 +1360,7 @@ func TestWindow_SetIcon(t *testing.T) {
 	w := createWindow("Test")
 	assert.Equal(t, fyne.CurrentApp().Icon(), w.Icon())
 
-	newIcon := theme.FyneLogo()
+	newIcon := theme.ComputerIcon()
 	w.SetIcon(newIcon)
 	assert.Equal(t, newIcon, w.Icon())
 }
@@ -1375,8 +1375,8 @@ func TestWindow_PixelSize(t *testing.T) {
 	w.Canvas().Refresh(w.Content())
 
 	winW, winH := w.(*window).minSizeOnScreen()
-	assert.Equal(t, internal.ScaleInt(w.Canvas(), 100), winW)
-	assert.Equal(t, internal.ScaleInt(w.Canvas(), 100), winH)
+	assert.Equal(t, scale.ToScreenCoordinate(w.Canvas(), 100), winW)
+	assert.Equal(t, scale.ToScreenCoordinate(w.Canvas(), 100), winH)
 }
 
 var scaleTests = []struct {
@@ -1504,6 +1504,64 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 
 	assert.Equal(t, 1, len(content.capturedShortcuts))
 	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
+}
+
+func TestWindow_OnlyTabAndShiftTabToCapturesTab(t *testing.T) {
+	w := createWindow("Test").(*window)
+	content := &tabbable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.Canvas().Focus(content)
+
+	// Tab and Shift-Tab are passed to capturesTab
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModShift)
+	w.WaitForEvents()
+	assert.Equal(t, 1, content.acceptTabCallCount)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, 0)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, 0)
+	w.WaitForEvents()
+	assert.Equal(t, 2, content.acceptTabCallCount)
+
+	// Tab with ctrl or alt is not passed
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl|glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModControl|glfw.ModShift)
+	w.WaitForEvents()
+	assert.Equal(t, 2, content.acceptTabCallCount)
+}
+
+func TestWindow_TabWithModifierToTriggersShortcut(t *testing.T) {
+	w := createWindow("Test").(*window)
+	content := &typedShortcutable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.Canvas().Focus(content)
+
+	// Tab and Shift-Tab are passed to capturesTab
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModShift)
+
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, 0)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, 0)
+	w.WaitForEvents()
+
+	assert.Equal(t, 0, len(content.capturedShortcuts))
+
+	// Tab with ctrl or alt is not passed
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl|glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModControl|glfw.ModShift)
+	w.WaitForEvents()
+	assert.Equal(t, 2, len(content.capturedShortcuts))
+	assert.Equal(t, "CustomDesktop:Control+Tab", content.capturedShortcuts[0].ShortcutName())
+	assert.Equal(t, "CustomDesktop:Shift+Control+Tab", content.capturedShortcuts[1].ShortcutName())
 }
 
 func TestWindow_ManualFocus(t *testing.T) {
@@ -1948,4 +2006,14 @@ func newDoubleTappableButton() *doubleTappableButton {
 
 func waitForMain() {
 	runOnMain(func() {}) // this blocks until processed
+}
+
+type tabbable struct {
+	focusable
+	acceptTabCallCount int
+}
+
+func (t *tabbable) AcceptsTab() bool {
+	t.acceptTabCallCount += 1
+	return true
 }

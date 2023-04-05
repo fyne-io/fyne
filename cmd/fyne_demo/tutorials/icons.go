@@ -115,6 +115,7 @@ func loadIcons() []iconInfo {
 		{"ErrorIcon", theme.ErrorIcon()},
 		{"QuestionIcon", theme.QuestionIcon()},
 		{"WarningIcon", theme.WarningIcon()},
+		{"BrokenImageIcon", theme.BrokenImageIcon()},
 
 		{"DocumentIcon", theme.DocumentIcon()},
 		{"DocumentCreateIcon", theme.DocumentCreateIcon()},

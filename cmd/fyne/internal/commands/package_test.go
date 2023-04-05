@@ -51,6 +51,24 @@ func Test_isValidVersion(t *testing.T) {
 	assert.False(t, isValidVersion("1..2"))
 }
 
+func Test_combinedVersion(t *testing.T) {
+	tests := []struct {
+		ver   string
+		build int
+		comb  string
+	}{
+		{"1.2.3", 4, "1.2.3.4"},
+		{"1.2", 4, "1.2.0.4"},
+		{"1", 4, "1.0.0.4"},
+	}
+
+	for _, tt := range tests {
+		p := &Packager{appData: &appData{AppVersion: tt.ver, AppBuild: tt.build}}
+		comb := p.combinedVersion()
+		assert.Equal(t, tt.comb, comb)
+	}
+}
+
 func Test_MergeMetata(t *testing.T) {
 	p := &Packager{appData: &appData{}}
 	p.AppVersion = "v0.1"
@@ -144,7 +162,7 @@ func Test_buildPackageWasm(t *testing.T) {
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(wasmBuildTest)
+	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	assert.Equal(t, 1, len(files))
@@ -303,7 +321,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(wasmBuildTest)
+	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	assert.Equal(t, 1, len(files))
@@ -489,7 +507,7 @@ func Test_BuildPackageWeb(t *testing.T) {
 		exe:     "myTest",
 	}
 	webBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(webBuildTest)
+	files, err := p.buildPackage(webBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	expectedFiles := 2

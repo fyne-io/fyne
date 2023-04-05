@@ -17,7 +17,7 @@ func TestDialog_MinSize(t *testing.T) {
 	information := d.(*dialog)
 
 	dialogContent := information.win.Content.MinSize()
-	label := information.label.MinSize()
+	label := information.win.Content.(*fyne.Container).Objects[4].MinSize()
 
 	assert.Less(t, label.Width, dialogContent.Width)
 }

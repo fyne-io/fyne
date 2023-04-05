@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
 	"fyne.io/fyne/v2/container"
@@ -22,7 +23,7 @@ var topWindow fyne.Window
 
 func main() {
 	a := app.NewWithID("io.fyne.demo")
-	a.SetIcon(theme.FyneLogo())
+	a.SetIcon(data.FyneLogo)
 	makeTray(a)
 	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")

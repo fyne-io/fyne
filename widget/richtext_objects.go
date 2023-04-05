@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -482,8 +482,8 @@ func (r *richImage) MinSize() fyne.Size {
 	}
 
 	// unscale the image so it is not varying based on canvas
-	w := internal.ScaleInt(c, orig.Width)
-	h := internal.ScaleInt(c, orig.Height)
+	w := scale.ToScreenCoordinate(c, orig.Width)
+	h := scale.ToScreenCoordinate(c, orig.Height)
 	// we return size / 2 as this assumes a HiDPI / 2x image scaling
 	return fyne.NewSize(float32(w)/2, float32(h)/2)
 }
@@ -493,13 +493,13 @@ type unpadTextWidgetLayout struct {
 
 func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
 	pad := theme.InnerPadding() * -1
-	pad2 := pad * -1
+	pad2 := pad * -2
 
 	o[0].Move(fyne.NewPos(pad, pad))
 	o[0].Resize(s.Add(fyne.NewSize(pad2, pad2)))
 }
 
 func (u *unpadTextWidgetLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
-	pad4 := theme.InnerPadding() * 2
-	return o[0].MinSize().Subtract(fyne.NewSize(pad4, pad4))
+	pad := theme.InnerPadding() * 2
+	return o[0].MinSize().Subtract(fyne.NewSize(pad, pad))
 }

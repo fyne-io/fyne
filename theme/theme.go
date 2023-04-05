@@ -78,6 +78,11 @@ const (
 	// Since: 2.0
 	ColorNameForeground fyne.ThemeColorName = "foreground"
 
+	// ColorNameHeaderBackground is the name of theme lookup for background color of a collection header.
+	//
+	// Since: 2.4
+	ColorNameHeaderBackground fyne.ThemeColorName = "headerBackground"
+
 	// ColorNameHover is the name of theme lookup for hover color.
 	//
 	// Since: 2.0
@@ -328,6 +333,13 @@ func ForegroundColor() color.Color {
 	return safeColorLookup(ColorNameForeground, currentVariant())
 }
 
+// HeaderBackgroundColor returns the color used to draw underneath collection headers.
+//
+// Since: 2.4
+func HeaderBackgroundColor() color.Color {
+	return current().Color(ColorNameHeaderBackground, currentVariant())
+}
+
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
 func HoverColor() color.Color {
 	return safeColorLookup(ColorNameHover, currentVariant())
@@ -530,6 +542,13 @@ func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
 }
 
+// SymbolFont returns the font resource for the symbol font style.
+//
+// Since: 2.4
+func SymbolFont() fyne.Resource {
+	return safeFontLookup(fyne.TextStyle{Symbol: true})
+}
+
 // WarningColor returns the theme's warning foreground color.
 //
 // Since: 2.3
@@ -548,7 +567,7 @@ var (
 type builtinTheme struct {
 	variant fyne.ThemeVariant
 
-	regular, bold, italic, boldItalic, monospace fyne.Resource
+	regular, bold, italic, boldItalic, monospace, symbol fyne.Resource
 }
 
 func (t *builtinTheme) initFonts() {
@@ -557,6 +576,7 @@ func (t *builtinTheme) initFonts() {
 	t.italic = italic
 	t.boldItalic = bolditalic
 	t.monospace = monospace
+	t.symbol = symbol
 
 	font := os.Getenv("FYNE_FONT")
 	if font != "" {
@@ -574,6 +594,10 @@ func (t *builtinTheme) initFonts() {
 	font = os.Getenv("FYNE_FONT_MONOSPACE")
 	if font != "" {
 		t.monospace = loadCustomFont(font, "Regular", monospace)
+	}
+	font = os.Getenv("FYNE_FONT_SYMBOL")
+	if font != "" {
+		t.symbol = loadCustomFont(font, "Regular", symbol)
 	}
 }
 
@@ -610,6 +634,9 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	}
 	if style.Italic {
 		return t.italic
+	}
+	if style.Symbol {
+		return t.symbol
 	}
 	return t.regular
 }
@@ -679,6 +706,8 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameHover:
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
+	case ColorNameHeaderBackground:
+		return color.NRGBA{R: 0x1b, G: 0x1b, B: 0x1b, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	case ColorNameInputBorder:
@@ -745,6 +774,8 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
 	case ColorNameHover:
 		return color.NRGBA{A: 0x0f}
+	case ColorNameHeaderBackground:
+		return color.NRGBA{R: 0xf9, G: 0xf9, B: 0xf9, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameInputBorder:
@@ -834,6 +865,9 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	}
 	if s.Italic {
 		return DefaultTextItalicFont()
+	}
+	if s.Symbol {
+		return DefaultSymbolFont()
 	}
 
 	return DefaultTextFont()

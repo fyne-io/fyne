@@ -55,6 +55,11 @@ var resourceFynemetadatainitGot = &fyne.StaticResource{
 	StaticContent: []byte(
 		"package main\n\nimport (\n\t\"fyne.io/fyne/v2\"\n\t\"fyne.io/fyne/v2/app\"\n)\n\nfunc init() {\n\tapp.SetMetadata(fyne.AppMetadata{\n\t\tID: \"{{.AppID}}\",\n\t\tName: \"{{.Name}}\",\n\t\tVersion: \"{{.AppVersion}}\",\n\t\tBuild: {{.AppBuild}},\n\t\tIcon: {{.ResGoString}},\n\t\t{{if .VersionAtLeast2_3}}\n\t\tRelease: {{.Release}},\n\t\tCustom: map[string]string{\n\t\t\t{{range $key, $value := .CustomMetadata}}\n\t\t\t\"{{$key}}\": \"{{$value}}\",\n\t\t\t{{end}}\n\t\t},\n\t\t{{end}}\n\t})\n}\n\n"),
 }
+var resourceFynepprofGot = &fyne.StaticResource{
+	StaticName: "fyne_pprof.got",
+	StaticContent: []byte(
+		"package main\n\nimport (\n    \"log\"\n    \"net/http\"\n\n    _ \"net/http/pprof\"\n)\n\nfunc init() {\n\tgo func() {\n\t\tlog.Println(\"Start pprof server at localhost:{{.Port}}\")\n\t\tif err := http.ListenAndServe(\"localhost:{{.Port}}\", nil); err != nil {\n\t\t\tlog.Fatal(err)\n\t\t}\n\t}()\n}\n"),
+}
 var resourceIndexHtml = &fyne.StaticResource{
 	StaticName: "index.html",
 	StaticContent: []byte(

@@ -14,10 +14,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/internal/svg"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -189,7 +190,7 @@ func (w *window) SetIcon(icon fyne.Resource) {
 		}
 
 		var img image.Image
-		if painter.IsResourceSVG(w.icon) {
+		if svg.IsResourceSVG(w.icon) {
 			img = painter.PaintImage(&canvas.Image{Resource: w.icon}, nil, windowIconSize, windowIconSize)
 		} else {
 			pix, _, err := image.Decode(bytes.NewReader(w.icon.Content()))
@@ -281,6 +282,10 @@ func (w *window) detectScale() float32 {
 		return 1.0
 	}
 	monitor := w.getMonitorForWindow()
+	if monitor == nil {
+		return 1.0
+	}
+
 	widthMm, _ := monitor.GetPhysicalSize()
 	widthPx := monitor.GetVideoMode().Width
 
@@ -668,8 +673,8 @@ func (w *window) rescaleOnMain() {
 	if w.fullScreen {
 		w.width, w.height = w.viewport.GetSize()
 		scaledFull := fyne.NewSize(
-			internal.UnscaleInt(w.canvas, w.width),
-			internal.UnscaleInt(w.canvas, w.height))
+			scale.ToFyneCoordinate(w.canvas, w.width),
+			scale.ToFyneCoordinate(w.canvas, w.height))
 		w.canvas.Resize(scaledFull)
 		return
 	}
@@ -757,7 +762,7 @@ func (w *window) create() {
 
 		if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 			bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-			w.width, w.height = internal.ScaleInt(w.canvas, bigEnough.Width), internal.ScaleInt(w.canvas, bigEnough.Height)
+			w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
 			w.shouldWidth, w.shouldHeight = w.width, w.height
 		}
 

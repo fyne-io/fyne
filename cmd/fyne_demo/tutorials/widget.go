@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/driver/mobile"
@@ -109,7 +110,7 @@ func makeCardTab(_ fyne.Window) fyne.CanvasObject {
 	card1 := widget.NewCard("Book a table", "Which time suits?",
 		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
 	card2 := widget.NewCard("With media", "No content, with image", nil)
-	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
+	card2.Image = canvas.NewImageFromResource(data.FyneLogo)
 	card3 := widget.NewCard("Title 3", "Another card", widget.NewLabel("Content"))
 	return container.NewGridWithColumns(2, container.NewVBox(card1, card3),
 		container.NewVBox(card2))
@@ -280,7 +281,7 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 		checkGroup,
 		radio,
 		disabledRadio,
-		widget.NewSlider(0, 100),
+		widget.NewSlider(0, 1000),
 	)
 }
 

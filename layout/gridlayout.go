@@ -45,6 +45,9 @@ func (g *gridLayout) horizontal() bool {
 }
 
 func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
+	if g.Cols < 1 {
+		g.Cols = 1
+	}
 	count := 0
 	for _, child := range objects {
 		if child.Visible() {

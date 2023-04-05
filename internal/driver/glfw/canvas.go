@@ -125,14 +125,20 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	}
 
 	c.RLock()
-	c.content.Resize(c.contentSize(nearestSize))
-	c.content.Move(c.contentPos())
-
-	if c.menu != nil {
-		c.menu.Refresh()
-		c.menu.Resize(fyne.NewSize(nearestSize.Width, c.menu.MinSize().Height))
-	}
+	content := c.content
+	contentSize := c.contentSize(nearestSize)
+	contentPos := c.contentPos()
+	menu := c.menu
+	menuHeight := c.menuHeight()
 	c.RUnlock()
+
+	content.Resize(contentSize)
+	content.Move(contentPos)
+
+	if menu != nil {
+		menu.Refresh()
+		menu.Resize(fyne.NewSize(nearestSize.Width, menuHeight))
+	}
 }
 
 func (c *glCanvas) Scale() float32 {
@@ -280,6 +286,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 		if _, ok := obj.(fyne.Scrollable); ok {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
+		}
+		if size.Width <= 0 || size.Height <= 0 { // iconifying on Windows can do bad things
+			return
 		}
 		c.Painter().Paint(obj, pos, size)
 	}

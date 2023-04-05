@@ -171,7 +171,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image fillMode=\"original\" rsc=\"zoomInIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image fillMode=\"original\" rsc=\"zoomInIcon\" size=\"24x24\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},

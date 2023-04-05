@@ -13,7 +13,7 @@
 			</widget>
 			<text bold pos="10,138" size="140x32" textSize="23">Longer title</text>
 			<text pos="10,174" size="140x19">subtitle with length</text>
-			<image pos="2,2" rsc="fyneLogo" size="156x128"/>
+			<image pos="2,2" rsc="computerIcon" size="156x128"/>
 			<rectangle fillColor="inputBackground" pos="6,205" size="148x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 		</widget>
 	</content>

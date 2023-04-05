@@ -155,8 +155,13 @@ func ToLength(p fixed.Point26_6, ln fixed.Int26_6) (q fixed.Point26_6) {
 	if ln == 0 || (p.X == 0 && p.Y == 0) {
 		return
 	}
-	lp := Length(p)
-	q.X, q.Y = p.X*ln/lp, p.Y*ln/lp
+
+	pX, pY := float64(p.X), float64(p.Y)
+	lnF := float64(ln)
+	pLen := math.Sqrt(pX*pX + pY*pY)
+
+	qX, qY := pX*lnF/pLen, pY*lnF/pLen
+	q.X, q.Y = fixed.Int26_6(qX), fixed.Int26_6(qY)
 	return
 }
 

@@ -7,8 +7,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -120,7 +120,7 @@ func makeScrollTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeScrollBothTab() fyne.CanvasObject {
-	logo := canvas.NewImageFromResource(theme.FyneLogo())
+	logo := canvas.NewImageFromResource(data.FyneLogo)
 	logo.SetMinSize(fyne.NewSize(800, 800))
 
 	scroll := container.NewScroll(logo)

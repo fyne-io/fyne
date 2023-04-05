@@ -382,6 +382,16 @@ func (ctx *context) LinkProgram(p Program) {
 	})
 }
 
+func (ctx *context) PixelStorei(pname Enum, param int32) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnPixelStorei,
+			a0: pname.c(),
+			a1: uintptr(param),
+		},
+	})
+}
+
 func (ctx *context) ReadPixels(dst []byte, x, y, width, height int, format, ty Enum) {
 	ctx.enqueue(call{
 		args: fnargs{

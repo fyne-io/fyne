@@ -11,9 +11,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/internal/scale"
 
 	"github.com/fyne-io/glfw-js"
 )
@@ -474,8 +474,8 @@ func (w *window) rescaleOnMain() {
 	//	if w.fullScreen {
 	w.width, w.height = w.viewport.GetSize()
 	scaledFull := fyne.NewSize(
-		internal.UnscaleInt(w.canvas, w.width),
-		internal.UnscaleInt(w.canvas, w.height))
+		scale.ToFyneCoordinate(w.canvas, w.width),
+		scale.ToFyneCoordinate(w.canvas, w.height))
 	w.canvas.Resize(scaledFull)
 	return
 	//	}

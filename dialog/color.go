@@ -41,14 +41,11 @@ type ColorPickerDialog struct {
 //
 // Since: 1.4
 func NewColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
-	p := &ColorPickerDialog{
+	return &ColorPickerDialog{
 		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
 		color:    theme.PrimaryColor(),
 		callback: callback,
 	}
-	p.dialog.layout = &dialogLayout{d: p.dialog}
-
-	return p
 }
 
 // ShowColorPicker creates and shows a color dialog.

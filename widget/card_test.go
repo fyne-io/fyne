@@ -18,7 +18,7 @@ func TestCard_SetImage(t *testing.T) {
 	r := test.WidgetRenderer(c)
 	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
 
-	c.SetImage(canvas.NewImageFromResource(theme.FyneLogo()))
+	c.SetImage(canvas.NewImageFromResource(theme.ComputerIcon()))
 	assert.Equal(t, 5, len(r.Objects()))
 }
 
@@ -62,13 +62,13 @@ func TestCard_Layout(t *testing.T) {
 		"titles_image": {
 			title:    "Title",
 			subtitle: "Subtitle",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  nil,
 		},
 		"just_image": {
 			title:    "",
 			subtitle: "",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  nil,
 		},
 		"just_content": {
@@ -86,13 +86,13 @@ func TestCard_Layout(t *testing.T) {
 		"image_content": {
 			title:    "",
 			subtitle: "",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  newContentRect(),
 		},
 		"all_items": {
 			title:    "Longer title",
 			subtitle: "subtitle with length",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  newContentRect(),
 		},
 	} {
