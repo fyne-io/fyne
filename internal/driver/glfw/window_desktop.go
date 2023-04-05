@@ -636,13 +636,14 @@ func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.A
 
 func glfwKeyToModifier(key glfw.Key) glfw.ModifierKey {
 	var m glfw.ModifierKey
-	if key == glfw.KeyLeftControl || key == glfw.KeyRightControl {
+	switch key {
+	case glfw.KeyLeftControl, glfw.KeyRightControl:
 		m = glfw.ModControl
-	} else if key == glfw.KeyLeftAlt || key == glfw.KeyRightAlt {
+	case glfw.KeyLeftAlt, glfw.KeyRightAlt:
 		m = glfw.ModAlt
-	} else if key == glfw.KeyLeftShift || key == glfw.KeyRightShift {
+	case glfw.KeyLeftShift, glfw.KeyRightShift:
 		m = glfw.ModShift
-	} else if key == glfw.KeyLeftSuper || key == glfw.KeyRightSuper {
+	case glfw.KeyLeftSuper, glfw.KeyRightSuper:
 		m = glfw.ModSuper
 	}
 	return m
