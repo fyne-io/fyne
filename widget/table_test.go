@@ -124,6 +124,51 @@ func TestTable_Headers(t *testing.T) {
 	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[14].(*Label).Text)
 }
 
+func TestTable_Sticky(t *testing.T) {
+	table := NewTableWithHeaders(
+		func() (int, int) { return 25, 25 },
+		func() fyne.CanvasObject {
+			return NewLabel("text")
+		},
+		func(i TableCellID, o fyne.CanvasObject) {
+			o.(*Label).SetText(fmt.Sprintf("text %d,%d", i.Row, i.Col))
+		})
+	table.Resize(fyne.NewSize(120, 120))
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	assert.Equal(t, "text 0,0", cellRenderer.(*tableCellsRenderer).Objects()[0].(*Label).Text)
+	assert.Equal(t, "text 1,0", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
+	assert.Equal(t, "text 2,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
+	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[11].(*Label).Text)
+	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[12].(*Label).Text)
+	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[13].(*Label).Text)
+	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[14].(*Label).Text)
+
+	table.ScrollTo(TableCellID{Row: 10, Col: 3})
+	assert.Equal(t, "text 6,0", cellRenderer.(*tableCellsRenderer).Objects()[0].(*Label).Text)
+	assert.Equal(t, "text 6,2", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
+	assert.Equal(t, "text 7,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
+	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[21].(*Label).Text)
+	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[22].(*Label).Text)
+	assert.Equal(t, "7", cellRenderer.(*tableCellsRenderer).Objects()[25].(*Label).Text)
+	assert.Equal(t, "8", cellRenderer.(*tableCellsRenderer).Objects()[26].(*Label).Text)
+
+	table.StickyRowCount = 2
+	table.StickyColumnCount = 2
+	table.Refresh()
+	assert.Equal(t, "text 6,0", cellRenderer.(*tableCellsRenderer).Objects()[0].(*Label).Text)
+	assert.Equal(t, "text 6,2", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
+	assert.Equal(t, "text 7,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
+	// stuck cells
+	assert.Equal(t, "text 0,0", cellRenderer.(*tableCellsRenderer).Objects()[18].(*Label).Text)
+	assert.Equal(t, "text 0,3", cellRenderer.(*tableCellsRenderer).Objects()[21].(*Label).Text)
+	assert.Equal(t, "text 6,0", cellRenderer.(*tableCellsRenderer).Objects()[22].(*Label).Text)
+	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[31].(*Label).Text)
+	assert.Equal(t, "7", cellRenderer.(*tableCellsRenderer).Objects()[34].(*Label).Text)
+	assert.Equal(t, "8", cellRenderer.(*tableCellsRenderer).Objects()[35].(*Label).Text)
+}
+
 func TestTable_MinSize(t *testing.T) {
 	for name, tt := range map[string]struct {
 		cellSize             fyne.Size
