@@ -1,22 +1,6 @@
 <canvas padded size="180x180">
 	<content>
 		<widget pos="4,4" size="172x172" type="*widget.Table">
-			<rectangle fillColor="selection" pos="78,136" size="93x35"/>
-			<widget pos="75,0" size="1x172" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="1x172"/>
-			</widget>
-			<widget pos="0,17" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
-			<widget pos="0,56" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
-			<widget pos="0,95" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
-			<widget pos="0,134" size="172x1" type="*widget.Separator">
-				<rectangle fillColor="disabled" size="172x1"/>
-			</widget>
 			<widget size="172x172" type="*widget.Scroll">
 				<widget pos="-214,-19" size="484x191" type="*widget.tableCells">
 					<widget pos="195,0" size="93x35" type="*widget.Label">
@@ -49,6 +33,24 @@
 					<widget pos="293,156" size="93x35" type="*widget.Label">
 						<text pos="8,8" size="51x19">Cell 4, 3</text>
 					</widget>
+					<container size="484x191">
+						<rectangle fillColor="selection" pos="293,156" size="93x35"/>
+						<widget pos="290,19" size="1x172" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="1x172"/>
+						</widget>
+						<widget pos="214,36" size="172x1" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="172x1"/>
+						</widget>
+						<widget pos="214,75" size="172x1" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="172x1"/>
+						</widget>
+						<widget pos="214,114" size="172x1" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="172x1"/>
+						</widget>
+						<widget pos="214,153" size="172x1" type="*widget.Separator">
+							<rectangle fillColor="disabled" size="172x1"/>
+						</widget>
+					</container>
 				</widget>
 				<widget size="172x0" type="*widget.Shadow">
 					<linearGradient size="172x8" startColor="shadow"/>
