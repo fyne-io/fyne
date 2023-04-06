@@ -391,7 +391,6 @@ func (t *Table) finishScroll() {
 	if t.moveCallback != nil {
 		t.moveCallback()
 	}
-	t.scroll.Refresh()
 	t.cells.Refresh()
 }
 
@@ -589,14 +588,14 @@ func newTableCells(t *Table, s, hs fyne.Size) *tableCells {
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	marker := canvas.NewRectangle(theme.SelectionColor())
 	hover := canvas.NewRectangle(theme.HoverColor())
-	overlay := &fyne.Container{}
 
 	r := &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
 		headRowBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColBG: canvas.NewRectangle(theme.HeaderBackgroundColor()),
 		headRowStickyBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColStickyBG: canvas.NewRectangle(theme.HeaderBackgroundColor()),
 		stickyRowBG: canvas.NewRectangle(theme.BackgroundColor()), stickyColBG: canvas.NewRectangle(theme.BackgroundColor()),
-		stickyRowColBG: canvas.NewRectangle(theme.BackgroundColor()), dividerLayer: overlay, marker: marker, hover: hover}
+		stickyRowColBG: canvas.NewRectangle(theme.BackgroundColor()), marker: marker, hover: hover,
+		dividerLayer: &fyne.Container{}, stickyLayer: &fyne.Container{}}
 
 	c.t.moveCallback = r.moveIndicators
 	return r
@@ -719,19 +718,19 @@ var _ fyne.WidgetRenderer = (*tableCellsRenderer)(nil)
 type tableCellsRenderer struct {
 	widget.BaseRenderer
 
-	cells            *tableCells
-	pool, headerPool pool
-	visible, headers map[TableCellID]fyne.CanvasObject
-	hover, marker    *canvas.Rectangle
-	dividers         []fyne.CanvasObject
-	dividerLayer     *fyne.Container
+	cells                     *tableCells
+	pool, headerPool          pool
+	visible, headers          map[TableCellID]fyne.CanvasObject
+	hover, marker             *canvas.Rectangle
+	dividers                  []fyne.CanvasObject
+	dividerLayer, stickyLayer *fyne.Container
 
 	headColBG, headRowBG, headRowStickyBG, headColStickyBG *canvas.Rectangle
 	stickyRowBG, stickyColBG, stickyRowColBG               *canvas.Rectangle
 }
 
 func (r *tableCellsRenderer) Layout(s fyne.Size) {
-	// we deal with cached objects so just refresh instead
+	r.stickyLayer.Resize(s)
 	r.dividerLayer.Resize(s)
 	r.moveIndicators()
 }
@@ -820,7 +819,7 @@ func (r *tableCellsRenderer) Refresh() {
 
 	cellYOffset := offY
 	var rowHeight, cellXOffset, stuckWidth, stuckHeight float32
-	displayCol := func(row, col int) float32 {
+	displayCol := func(row, col int, cells *[]fyne.CanvasObject) float32 {
 		id := TableCellID{row, col}
 		colWidth := visibleColWidths[col]
 		c, ok := wasVisible[id]
@@ -838,17 +837,17 @@ func (r *tableCellsRenderer) Refresh() {
 		c.Resize(fyne.NewSize(colWidth, rowHeight))
 
 		r.visible[id] = c
-		cells = append(cells, c)
+		*cells = append(*cells, c)
 		cellXOffset += colWidth + separatorThickness
 		return colWidth
 	}
 
-	displayRow := func(row int) float32 {
+	displayRow := func(row int, cells *[]fyne.CanvasObject) float32 {
 		rowHeight = visibleRowHeights[row]
 		cellXOffset = offX
 
 		for col := minCol; col < maxCol; col++ {
-			displayCol(row, col)
+			displayCol(row, col, cells)
 		}
 		cellXOffset = r.cells.t.scroll.Offset.X
 		stick := r.cells.t.StickyColumnCount
@@ -861,7 +860,7 @@ func (r *tableCellsRenderer) Refresh() {
 	}
 
 	for row := minRow; row < maxRow; row++ {
-		displayRow(row)
+		displayRow(row, &cells)
 	}
 	cellYOffset = r.cells.t.scroll.Offset.Y
 	stickRows := r.cells.t.StickyRowCount
@@ -874,9 +873,9 @@ func (r *tableCellsRenderer) Refresh() {
 		}
 	}
 
-	cells = append(cells, r.stickyRowBG, r.stickyColBG)
+	stuck := []fyne.CanvasObject{r.stickyRowBG, r.stickyColBG}
 	for row := 0; row < stickRows; row++ {
-		stuckHeight += displayRow(row) + separatorThickness
+		stuckHeight += displayRow(row, &stuck) + separatorThickness
 	}
 	cellXOffset = r.cells.t.scroll.Offset.X
 	cellYOffset = offY
@@ -894,20 +893,20 @@ func (r *tableCellsRenderer) Refresh() {
 		rowHeight = visibleRowHeights[row]
 		stuckWidth = 0
 		for col := 0; col < stickCols; col++ {
-			stuckWidth += displayCol(row, col) + separatorThickness
+			stuckWidth += displayCol(row, col, &stuck) + separatorThickness
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
-	cells = append(cells, r.stickyRowColBG)
 	r.cells.stuckXOff, r.cells.stuckYOff, r.cells.stuckWidth, r.cells.stuckHeight = stuckXOff, stuckYOff, stuckWidth, stuckHeight
 	r.refreshStickyBackgrounds()
 
+	stuck = append(stuck, r.stickyRowColBG)
 	cellYOffset = r.cells.t.scroll.Offset.Y + stuckYOff
 	for row := 0; row < stickRows; row++ {
 		cellXOffset = r.cells.t.scroll.Offset.X + stuckXOff
 		rowHeight = visibleRowHeights[row]
 		for col := 0; col < stickCols; col++ {
-			_ = displayCol(row, col)
+			_ = displayCol(row, col, &stuck)
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
@@ -917,11 +916,16 @@ func (r *tableCellsRenderer) Refresh() {
 			r.pool.Release(old)
 		}
 	}
-	cells = append(cells, r.refreshHeaders(visibleRowHeights, visibleColWidths, offX, offY, minRow, maxRow, minCol, maxCol, separatorThickness)...)
+	under, over := r.refreshHeaders(visibleRowHeights, visibleColWidths, offX, offY, minRow, maxRow, minCol, maxCol, separatorThickness)
+	cells = append(cells, under...)
+	stuck = append(stuck, over...)
 	visible := r.visible
 	headers := r.headers
+
+	r.stickyLayer.Objects = stuck
+	r.stickyLayer.Refresh()
 	r.cells.propertyLock.Unlock()
-	r.SetObjects(append(cells, r.dividerLayer))
+	r.SetObjects(append(cells, r.stickyLayer, r.dividerLayer))
 
 	if updateCell != nil {
 		for id, cell := range visible {
@@ -1109,10 +1113,9 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	marker.Refresh()
 }
 
-func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32, minRow, maxRow, minCol, maxCol int, separatorThickness float32) []fyne.CanvasObject {
+func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32, minRow, maxRow, minCol, maxCol int, separatorThickness float32) (under, over []fyne.CanvasObject) {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
-	var cells, stuck []fyne.CanvasObject
 	headerMin := r.cells.t.createHeader().MinSize()
 	rowHeight := headerMin.Height
 	colWidth := headerMin.Width
@@ -1127,6 +1130,13 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	}
 
 	stickWidth, stickHeight := float32(0), float32(0)
+
+	if r.cells.t.StickyRowCount > 0 {
+		under = append(under, r.headRowBG)
+	} else {
+		over = append(over, r.headRowBG)
+	}
+
 	if r.cells.t.ShowHeaderRow {
 		cellXOffset := offX
 		displayColHeader := func(col int, list *[]fyne.CanvasObject) (stuck float32) {
@@ -1155,8 +1165,10 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			return
 		}
 		for col := minCol; col < maxCol; col++ {
-			displayColHeader(col, &cells)
+			displayColHeader(col, &under)
 		}
+
+		over = append(over, r.headRowStickyBG)
 		if r.cells.t.StickyColumnCount > 0 {
 			cellXOffset = r.cells.t.scroll.Offset.X
 			stick := r.cells.t.StickyColumnCount
@@ -1167,9 +1179,15 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			}
 
 			for col := 0; col < stick; col++ {
-				stickWidth += displayColHeader(col, &stuck)
+				stickWidth += displayColHeader(col, &over)
 			}
 		}
+	}
+
+	if r.cells.t.StickyColumnCount > 0 {
+		under = append(under, r.headColBG)
+	} else {
+		over = append(over, r.headColBG)
 	}
 
 	if r.cells.t.ShowHeaderColumn {
@@ -1200,9 +1218,10 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			return
 		}
 		for row := minRow; row < maxRow; row++ {
-			displayRowHeader(row, &cells)
+			displayRowHeader(row, &under)
 		}
 
+		over = append(over, r.headColStickyBG)
 		if r.cells.t.StickyRowCount > 0 {
 			cellYOffset = r.cells.t.scroll.Offset.Y
 			stick := r.cells.t.StickyRowCount
@@ -1213,7 +1232,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			}
 
 			for row := 0; row < stick; row++ {
-				stickHeight += displayRowHeader(row, &stuck)
+				stickHeight += displayRowHeader(row, &over)
 			}
 		}
 	}
@@ -1248,10 +1267,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			r.headerPool.Release(old)
 		}
 	}
-	all := append([]fyne.CanvasObject{r.headRowBG, r.headColBG}, cells...)
-	all = append(all, r.headRowStickyBG, r.headColStickyBG)
-	all = append(all, stuck...)
-	return all
+	return
 }
 
 func (r *tableCellsRenderer) refreshStickyBackgrounds() {
