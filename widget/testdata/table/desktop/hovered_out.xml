@@ -16,6 +16,8 @@
 						<text pos="8,8" size="51x19">Cell 1, 1</text>
 					</widget>
 					<container size="191x172">
+					</container>
+					<container size="191x172">
 						<widget pos="95,0" size="1x172" type="*widget.Separator">
 							<rectangle fillColor="disabled" size="1x172"/>
 						</widget>
