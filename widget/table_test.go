@@ -118,10 +118,10 @@ func TestTable_Headers(t *testing.T) {
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
-	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[6].(*Label).Text)
-	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
-	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[8].(*Label).Text)
-	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[9].(*Label).Text)
+	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
+	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[8].(*Label).Text)
+	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[10].(*Label).Text)
+	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[11].(*Label).Text)
 }
 
 func TestTable_Sticky(t *testing.T) {
