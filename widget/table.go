@@ -1131,10 +1131,12 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 
 	stickWidth, stickHeight := float32(0), float32(0)
 
-	if r.cells.t.StickyRowCount > 0 {
+	add := &under
+	if r.cells.t.StickyRowCount == 0 {
 		under = append(under, r.headRowBG)
 	} else {
 		over = append(over, r.headRowBG)
+		add = &over
 	}
 
 	if r.cells.t.ShowHeaderRow {
@@ -1165,7 +1167,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			return
 		}
 		for col := minCol; col < maxCol; col++ {
-			displayColHeader(col, &under)
+			displayColHeader(col, add)
 		}
 
 		over = append(over, r.headRowStickyBG)
@@ -1184,10 +1186,12 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 		}
 	}
 
-	if r.cells.t.StickyColumnCount > 0 {
+	add = &under
+	if r.cells.t.StickyColumnCount == 0 {
 		under = append(under, r.headColBG)
 	} else {
 		over = append(over, r.headColBG)
+		add = &over
 	}
 
 	if r.cells.t.ShowHeaderColumn {
@@ -1218,7 +1222,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			return
 		}
 		for row := minRow; row < maxRow; row++ {
-			displayRowHeader(row, &under)
+			displayRowHeader(row, add)
 		}
 
 		over = append(over, r.headColStickyBG)

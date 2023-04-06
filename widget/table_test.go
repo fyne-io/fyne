@@ -118,10 +118,10 @@ func TestTable_Headers(t *testing.T) {
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
-	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[11].(*Label).Text)
-	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[12].(*Label).Text)
-	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[13].(*Label).Text)
-	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[14].(*Label).Text)
+	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[6].(*Label).Text)
+	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
+	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[8].(*Label).Text)
+	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[9].(*Label).Text)
 }
 
 func TestTable_Sticky(t *testing.T) {
@@ -140,19 +140,21 @@ func TestTable_Sticky(t *testing.T) {
 	assert.Equal(t, "text 0,0", cellRenderer.(*tableCellsRenderer).Objects()[0].(*Label).Text)
 	assert.Equal(t, "text 1,0", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text 2,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
-	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[11].(*Label).Text)
-	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[12].(*Label).Text)
-	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[13].(*Label).Text)
-	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[14].(*Label).Text)
+	stuck := cellRenderer.(*tableCellsRenderer).Objects()[6].(*fyne.Container)
+	assert.Equal(t, "A", stuck.Objects[4].(*Label).Text)
+	assert.Equal(t, "B", stuck.Objects[5].(*Label).Text)
+	assert.Equal(t, "1", stuck.Objects[8].(*Label).Text)
+	assert.Equal(t, "2", stuck.Objects[9].(*Label).Text)
 
 	table.ScrollTo(TableCellID{Row: 10, Col: 3})
 	assert.Equal(t, "text 6,0", cellRenderer.(*tableCellsRenderer).Objects()[0].(*Label).Text)
 	assert.Equal(t, "text 6,2", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text 7,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
-	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[21].(*Label).Text)
-	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[22].(*Label).Text)
-	assert.Equal(t, "7", cellRenderer.(*tableCellsRenderer).Objects()[25].(*Label).Text)
-	assert.Equal(t, "8", cellRenderer.(*tableCellsRenderer).Objects()[26].(*Label).Text)
+	stuck = cellRenderer.(*tableCellsRenderer).Objects()[16].(*fyne.Container)
+	assert.Equal(t, "A", stuck.Objects[4].(*Label).Text)
+	assert.Equal(t, "B", stuck.Objects[5].(*Label).Text)
+	assert.Equal(t, "7", stuck.Objects[10].(*Label).Text)
+	assert.Equal(t, "8", stuck.Objects[11].(*Label).Text)
 
 	table.StickyRowCount = 2
 	table.StickyColumnCount = 2
@@ -161,12 +163,13 @@ func TestTable_Sticky(t *testing.T) {
 	assert.Equal(t, "text 6,2", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text 7,1", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
 	// stuck cells
-	assert.Equal(t, "text 0,0", cellRenderer.(*tableCellsRenderer).Objects()[27].(*Label).Text)
-	assert.Equal(t, "text 0,3", cellRenderer.(*tableCellsRenderer).Objects()[21].(*Label).Text)
-	assert.Equal(t, "text 6,0", cellRenderer.(*tableCellsRenderer).Objects()[22].(*Label).Text)
-	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[31].(*Label).Text)
-	assert.Equal(t, "7", cellRenderer.(*tableCellsRenderer).Objects()[34].(*Label).Text)
-	assert.Equal(t, "8", cellRenderer.(*tableCellsRenderer).Objects()[35].(*Label).Text)
+	stuck = cellRenderer.(*tableCellsRenderer).Objects()[16].(*fyne.Container)
+	assert.Equal(t, "text 0,3", stuck.Objects[5].(*Label).Text)
+	assert.Equal(t, "text 6,0", stuck.Objects[6].(*Label).Text)
+	assert.Equal(t, "A", stuck.Objects[18].(*Label).Text)
+	assert.Equal(t, "1", stuck.Objects[25].(*Label).Text)
+	assert.Equal(t, "8", stuck.Objects[21].(*Label).Text)
+	assert.Equal(t, "text 0,0", stuck.Objects[11].(*Label).Text)
 }
 
 func TestTable_MinSize(t *testing.T) {
