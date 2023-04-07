@@ -72,7 +72,7 @@ func TestCheck_Layout(t *testing.T) {
 				check.Disable()
 			}
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), check))
+			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{check}})
 			window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "check/layout_"+name+".xml", window.Canvas())

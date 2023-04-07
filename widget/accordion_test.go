@@ -207,7 +207,7 @@ func TestAccordion_Layout(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), accordion))
+			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
