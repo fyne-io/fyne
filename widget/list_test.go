@@ -19,7 +19,11 @@ import (
 func TestNewList(t *testing.T) {
 	list := createList(1000)
 
-	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
+	content := &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+		NewIcon(theme.DocumentIcon()),
+		NewLabel("Template Object")},
+	}
+	template := newListItem(content, nil)
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
@@ -347,7 +351,10 @@ func TestList_SmallList(t *testing.T) {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+			return &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+				NewIcon(theme.DocumentIcon()),
+				NewLabel("Template Object")},
+			}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
@@ -395,7 +402,10 @@ func TestList_RemoveItem(t *testing.T) {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+			return &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+				NewIcon(theme.DocumentIcon()),
+				NewLabel("Template Object")},
+			}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
@@ -553,7 +563,7 @@ func createList(items int) *List {
 		},
 		func() fyne.CanvasObject {
 			icon := NewIcon(theme.DocumentIcon())
-			return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, icon, nil), icon, NewLabel("Template Object"))
+			return &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, icon, nil), Objects: []fyne.CanvasObject{icon, NewLabel("Template Object")}}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
