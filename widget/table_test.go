@@ -65,7 +65,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 			c.(*Label).SetText(text)
 		})
 	table.CreateRenderer()
-	
+
 	table.Resize(fyne.NewSize(50, 30))
 	content := test.WidgetRenderer(table.content.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)

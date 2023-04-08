@@ -1066,7 +1066,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minRow
-	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs-rowDivs< colDivs; y += visibleRowHeights[i] + theme.Padding() {
+	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs-rowDivs < colDivs; y += visibleRowHeights[i] + theme.Padding() {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
