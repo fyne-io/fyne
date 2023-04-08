@@ -954,7 +954,7 @@ func (r *tableCellsRenderer) Refresh() {
 	headers := r.headers
 
 	r.cells.propertyLock.Unlock()
-	r.SetObjects(append(cells))
+	r.SetObjects(cells)
 
 	if updateCell != nil {
 		for id, cell := range visible {
@@ -1205,7 +1205,6 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			r.headers[id] = c
 			*list = append(*list, c)
 			cellXOffset += colWidth + separatorThickness
-			return
 		}
 		for col := startCol; col < maxCol; col++ {
 			displayColHeader(col, add)
@@ -1260,7 +1259,6 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			r.headers[id] = c
 			*list = append(*list, c)
 			cellYOffset += rowHeight + separatorThickness
-			return
 		}
 		for row := startRow; row < maxRow; row++ {
 			displayRowHeader(row, add)
@@ -1314,28 +1312,6 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 		}
 	}
 	return cells
-}
-
-func (r *tableCellsRenderer) returnAllToPool() {
-	cells := r.BaseRenderer.Objects()
-	for i, cell := range cells {
-		if i >= len(cells)-2 {
-			continue // overlay containers
-		}
-		if _, isRect := cell.(*canvas.Rectangle); isRect {
-			continue // ignore the header backgrounds
-		}
-		for _, h := range r.headers { // a different pool for headers
-			if h == cell {
-				r.headerPool.Release(h)
-				break
-			}
-		}
-		r.pool.Release(cell)
-	}
-	r.headers = make(map[TableCellID]fyne.CanvasObject)
-	r.visible = make(map[TableCellID]fyne.CanvasObject)
-	r.SetObjects(nil)
 }
 
 type clip struct {
