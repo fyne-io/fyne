@@ -592,10 +592,10 @@ func (t *tableRenderer) Refresh() {
 }
 
 func (t *tableRenderer) calculateHeaderSizes() {
-	stickRows := t.t.StickyRowCount
 	t.t.stuckXOff = 0
 	t.t.stuckYOff = 0
 
+	stickRows := t.t.StickyRowCount
 	if t.t.ShowHeaderRow {
 		stickRows--
 		if t.t.StickyRowCount > 0 {
@@ -1066,9 +1066,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	if col < stickCols {
 		if r.cells.t.ShowHeaderColumn {
-			xPos = r.cells.t.stuckXOff
-		} else {
-			xPos = -r.cells.t.stuckXOff
+			xPos += r.cells.t.stuckXOff
 		}
 		minCol = 0
 	}
@@ -1085,7 +1083,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	if col >= stickCols {
 		x1 -= r.cells.t.content.Offset.X
 	} else {
-		x1 += r.cells.t.content.Offset.X
+		x1 -= r.cells.t.stuckXOff
 	}
 	x2 := x1 + widths[col]
 
@@ -1096,9 +1094,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	if row < stickRows {
 		if r.cells.t.ShowHeaderRow {
-			yPos = r.cells.t.stuckYOff
-		} else {
-			yPos = -r.cells.t.stuckYOff
+			yPos += r.cells.t.stuckYOff
 		}
 		minRow = 0
 	}
@@ -1114,7 +1110,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	if row >= stickRows {
 		y1 -= r.cells.t.content.Offset.Y
 	} else {
-		y1 += r.cells.t.content.Offset.Y
+		y1 -= r.cells.t.stuckYOff
 	}
 	y2 := y1 + heights[row]
 
@@ -1123,11 +1119,11 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	} else {
 		left := x1
 		if col >= stickCols { // clip X
-			left = fyne.Max(r.cells.t.content.Offset.X, x1)
+			left = fyne.Max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
 		}
 		top := y1
 		if row >= stickRows { // clip Y
-			top = fyne.Max(r.cells.t.content.Offset.Y, y1)
+			top = fyne.Max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
 		}
 		marker.Move(fyne.NewPos(left, top))
 		marker.Resize(fyne.NewSize(x2-left, y2-top))
