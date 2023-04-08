@@ -267,8 +267,6 @@ func (t *Table) ScrollTo(id TableCellID) {
 
 	t.offset = scrollPos
 	t.content.Offset = scrollPos
-	t.top.Offset.X = scrollPos.X
-	t.left.Offset.Y = scrollPos.Y
 	t.finishScroll()
 }
 
@@ -285,7 +283,6 @@ func (t *Table) ScrollToBottom() {
 	y := cellY + cellHeight - t.content.Size().Height
 
 	t.content.Offset.Y = y
-	t.left.Offset.Y = y
 	t.offset.Y = y
 	t.finishScroll()
 }
@@ -299,7 +296,6 @@ func (t *Table) ScrollToLeading() {
 	}
 
 	t.content.Offset.X = 0
-	t.left.Offset.X = 0
 	t.offset.X = 0
 	t.finishScroll()
 }
@@ -313,7 +309,6 @@ func (t *Table) ScrollToTop() {
 	}
 
 	t.content.Offset.Y = 0
-	t.left.Offset.Y = 0
 	t.offset.Y = 0
 	t.finishScroll()
 }
@@ -331,7 +326,6 @@ func (t *Table) ScrollToTrailing() {
 	scrollX := cellX + cellWidth - t.content.Size().Width
 
 	t.content.Offset.X = scrollX
-	t.left.Offset.X = scrollX
 	t.offset.X = scrollX
 	t.finishScroll()
 }
@@ -1022,8 +1016,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.moveMarker(r.hover, r.cells.t.hoveredCell.Row, r.cells.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}
 
-	colDivs := stickCols + (maxCol - startCol) - 1
-	rowDivs := stickRows + (maxRow - startRow) - 1
+	colDivs := stickCols + maxCol - minCol - 1
+	rowDivs := stickRows + maxRow - minRow - 1
 
 	if len(r.dividers) < colDivs+rowDivs {
 		for i := len(r.dividers); i < colDivs+rowDivs; i++ {
@@ -1037,17 +1031,19 @@ func (r *tableCellsRenderer) moveIndicators() {
 
 	divs := 0
 	i := 0
-	for x := r.cells.t.stuckXOff + visibleColWidths[i]; i <= stickCols && divs < len(r.dividers); x += visibleColWidths[i] + theme.Padding() {
-		i++
+	if stickCols > 0 {
+		for x := r.cells.t.stuckXOff + visibleColWidths[i]; i < stickCols && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
+			i++
 
-		xPos := x + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
-		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
-		r.dividers[divs].Show()
-		divs++
+			xPos := x + dividerOff
+			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+			r.dividers[divs].Move(fyne.NewPos(xPos, 0))
+			r.dividers[divs].Show()
+			divs++
+		}
 	}
-	i = startCol
-	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol && divs < len(r.dividers); x += visibleColWidths[i] + theme.Padding() {
+	i = minCol
+	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
 		i++
 
 		xPos := x - r.cells.t.content.Offset.X + dividerOff
@@ -1058,17 +1054,19 @@ func (r *tableCellsRenderer) moveIndicators() {
 	}
 
 	i = 0
-	for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs < len(r.dividers); y += visibleRowHeights[i] + theme.Padding() {
-		i++
+	if stickRows > 0 {
+		for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs < rowDivs; y += visibleRowHeights[i] + theme.Padding() {
+			i++
 
-		yPos := y + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
-		r.dividers[divs].Move(fyne.NewPos(0, yPos))
-		r.dividers[divs].Show()
-		divs++
+			yPos := y + dividerOff
+			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+			r.dividers[divs].Move(fyne.NewPos(0, yPos))
+			r.dividers[divs].Show()
+			divs++
+		}
 	}
-	i = startRow
-	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs < len(r.dividers); y += visibleRowHeights[i] + theme.Padding() {
+	i = minRow
+	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs-rowDivs< colDivs; y += visibleRowHeights[i] + theme.Padding() {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
