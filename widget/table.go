@@ -988,6 +988,23 @@ func (r *tableCellsRenderer) moveIndicators() {
 	separatorThickness := theme.SeparatorThicknessSize()
 	dividerOff := (theme.Padding() - separatorThickness) / 2
 
+	stickRows := r.cells.t.StickyRowCount
+	if r.cells.t.ShowHeaderRow && stickRows > 0 {
+		stickRows--
+	}
+	stickCols := r.cells.t.StickyColumnCount
+	if r.cells.t.ShowHeaderColumn && stickCols > 0 {
+		stickCols--
+	}
+	startRow := minRow
+	if startRow < stickRows {
+		startRow = stickRows
+	}
+	startCol := minCol
+	if startCol < stickCols {
+		startCol = stickCols
+	}
+
 	if r.cells.t.ShowHeaderColumn && r.cells.t.StickyColumnCount > 0 {
 		offX += r.cells.t.headerSize.Width
 	}
@@ -1005,8 +1022,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.moveMarker(r.hover, r.cells.t.hoveredCell.Row, r.cells.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}
 
-	colDivs := maxCol - minCol - 1
-	rowDivs := maxRow - minRow - 1
+	colDivs := stickCols + (maxCol - startCol) - 1
+	rowDivs := stickRows + (maxRow - startRow) - 1
 
 	if len(r.dividers) < colDivs+rowDivs {
 		for i := len(r.dividers); i < colDivs+rowDivs; i++ {
@@ -1019,28 +1036,42 @@ func (r *tableCellsRenderer) moveIndicators() {
 	}
 
 	divs := 0
-	i := minCol
-	for x := offX + visibleColWidths[i]; i < minCol+colDivs && divs < len(r.dividers); x += visibleColWidths[i] + theme.Padding() {
+	i := 0
+	for x := r.cells.t.stuckXOff + visibleColWidths[i]; i <= stickCols && divs < len(r.dividers); x += visibleColWidths[i] + theme.Padding() {
+		i++
+
+		xPos := x + dividerOff
+		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
+		r.dividers[divs].Show()
+		divs++
+	}
+	i = startCol
+	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol && divs < len(r.dividers); x += visibleColWidths[i] + theme.Padding() {
 		i++
 
 		xPos := x - r.cells.t.content.Offset.X + dividerOff
-		if xPos < r.cells.t.stuckXOff+r.cells.t.stuckWidth {
-			xPos += r.cells.t.content.Offset.X - offX + r.cells.t.stuckXOff
-		}
 		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
 		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 		r.dividers[divs].Show()
 		divs++
 	}
 
-	i = minRow
-	for y := offY + visibleRowHeights[i]; i < minRow+rowDivs && divs < len(r.dividers); y += visibleRowHeights[i] + theme.Padding() {
+	i = 0
+	for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs < len(r.dividers); y += visibleRowHeights[i] + theme.Padding() {
+		i++
+
+		yPos := y + dividerOff
+		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+		r.dividers[divs].Move(fyne.NewPos(0, yPos))
+		r.dividers[divs].Show()
+		divs++
+	}
+	i = startRow
+	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs < len(r.dividers); y += visibleRowHeights[i] + theme.Padding() {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
-		if yPos < r.cells.t.stuckYOff+r.cells.t.stuckHeight {
-			yPos += r.cells.t.content.Offset.Y - offY + r.cells.t.stuckYOff
-		}
 		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
 		r.dividers[divs].Move(fyne.NewPos(0, yPos))
 		r.dividers[divs].Show()
