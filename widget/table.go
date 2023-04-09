@@ -464,11 +464,6 @@ func (t *Table) finishScroll() {
 }
 
 func (t *Table) hoverAt(pos fyne.Position) {
-	if pos.X < t.content.Offset.X || pos.X >= t.Size().Width || pos.Y < t.content.Offset.Y || pos.Y >= t.Size().Height {
-		t.hoverOut()
-		return
-	}
-
 	col := t.columnAt(pos)
 	row := t.rowAt(pos)
 	t.hoveredCell = &TableCellID{row, col}
