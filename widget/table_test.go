@@ -148,7 +148,7 @@ func TestTable_Sticky(t *testing.T) {
 	table.ScrollTo(TableCellID{Row: 8, Col: 3})
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,1"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,2"))
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,1"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "C"))
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "D"))
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "7"))
@@ -157,12 +157,12 @@ func TestTable_Sticky(t *testing.T) {
 	table.StickyRowCount = 2
 	table.StickyColumnCount = 2
 	table.Refresh()
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,1"))
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,2"))
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,1"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,2"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,4"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
 	// stuck cells
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "text 0,3"))
-	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "text 6,0"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "text 7,0"))
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "C"))
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "8"))
 	assert.True(t, areaContainsLabel(table.corner.Content.(*fyne.Container).Objects, "A"))
