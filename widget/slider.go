@@ -199,7 +199,6 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 			s.SetValue(s.Value + s.Step)
 		}
 	}
-	s.checkInvokeOnChangeEnded()
 }
 
 // TypedRune is called when this item receives a char event.
@@ -284,6 +283,7 @@ func (s *Slider) SetValue(value float64) {
 
 	s.clampValueToRange()
 	s.positionChanged(lastValue, s.Value)
+	s.checkInvokeOnChangeEnded()
 }
 
 // MinSize returns the size that this widget should not shrink below
