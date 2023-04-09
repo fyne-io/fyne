@@ -156,6 +156,9 @@ func TestSlider_OnChanged(t *testing.T) {
 	tap.Position = fyne.NewPos(50, 2)
 	slider.Tapped(tap)
 	assert.Equal(t, 4, changes)
+
+	slider.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, 5, changes)
 }
 
 func TestSlider_OnChangeEnded(t *testing.T) {
@@ -200,6 +203,9 @@ func TestSlider_OnChangeEnded(t *testing.T) {
 	tap.Position = fyne.NewPos(50, 2)
 	slider.Tapped(tap)
 	assert.Equal(t, 3, changes)
+
+	slider.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, 4, changes)
 }
 
 func TestSlider_OnChanged_Float(t *testing.T) {

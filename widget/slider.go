@@ -199,6 +199,7 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 			s.SetValue(s.Value + s.Step)
 		}
 	}
+	s.checkInvokeOnChangeEnded()
 }
 
 // TypedRune is called when this item receives a char event.
