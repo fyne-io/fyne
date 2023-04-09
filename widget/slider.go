@@ -39,9 +39,13 @@ type Slider struct {
 	Orientation Orientation
 	OnChanged   func(float64)
 
-	binder  basicBinder
-	hovered bool
-	focused bool
+	// Since: 2.4
+	OnChangeEnded func(float64)
+
+	binder        basicBinder
+	hovered       bool
+	focused       bool
+	pendingChange bool // true if value changed since last OnChangeEnded
 }
 
 // NewSlider returns a basic slider.
@@ -83,6 +87,7 @@ func (s *Slider) Bind(data binding.Float) {
 
 // DragEnd is called when the drag ends.
 func (s *Slider) DragEnd() {
+	s.checkInvokeOnChangeEnded()
 }
 
 // DragEnd is called when a drag event occurs.
@@ -112,6 +117,7 @@ func (s *Slider) Tapped(e *fyne.PointEvent) {
 
 	s.updateValue(ratio)
 	s.positionChanged(lastValue, s.Value)
+	s.checkInvokeOnChangeEnded()
 }
 
 func (s *Slider) positionChanged(lastValue, currentValue float64) {
@@ -121,8 +127,18 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 
 	s.Refresh()
 
+	s.pendingChange = true
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
+	}
+}
+
+func (s *Slider) checkInvokeOnChangeEnded() {
+	if s.pendingChange {
+		s.pendingChange = false
+		if s.OnChangeEnded != nil {
+			s.OnChangeEnded(s.Value)
+		}
 	}
 }
 

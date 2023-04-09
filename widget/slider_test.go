@@ -158,6 +158,50 @@ func TestSlider_OnChanged(t *testing.T) {
 	assert.Equal(t, 4, changes)
 }
 
+func TestSlider_OnChangeEnded(t *testing.T) {
+	slider := NewSlider(0, 2)
+	slider.Resize(slider.MinSize())
+	assert.Empty(t, slider.OnChangeEnded)
+
+	changes := 0
+
+	slider.OnChangeEnded = func(_ float64) {
+		changes++
+	}
+
+	assert.Equal(t, 0, changes)
+
+	slider.SetValue(0.5)
+	assert.Equal(t, 0, changes)
+
+	drag := &fyne.DragEvent{}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 0, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 0, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	slider.Dragged(drag)
+	slider.DragEnd()
+	assert.Equal(t, 1, changes)
+
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 2, changes)
+
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 2, changes)
+
+	tap.Position = fyne.NewPos(50, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 3, changes)
+}
+
 func TestSlider_OnChanged_Float(t *testing.T) {
 	slider := NewSlider(0, 1)
 	slider.Step = 0.5
