@@ -87,7 +87,7 @@ func (s *Slider) Bind(data binding.Float) {
 
 // DragEnd is called when the drag ends.
 func (s *Slider) DragEnd() {
-	s.checkInvokeOnChangeEnded()
+	s.fireChangeEnded()
 }
 
 // DragEnd is called when a drag event occurs.
@@ -117,7 +117,7 @@ func (s *Slider) Tapped(e *fyne.PointEvent) {
 
 	s.updateValue(ratio)
 	s.positionChanged(lastValue, s.Value)
-	s.checkInvokeOnChangeEnded()
+	s.fireChangeEnded()
 }
 
 func (s *Slider) positionChanged(lastValue, currentValue float64) {
@@ -133,7 +133,7 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 	}
 }
 
-func (s *Slider) checkInvokeOnChangeEnded() {
+func (s *Slider) fireChangeEnded() {
 	if !s.pendingChange {
 		return
 	}
@@ -284,7 +284,7 @@ func (s *Slider) SetValue(value float64) {
 
 	s.clampValueToRange()
 	s.positionChanged(lastValue, s.Value)
-	s.checkInvokeOnChangeEnded()
+	s.fireChangeEnded()
 }
 
 // MinSize returns the size that this widget should not shrink below
