@@ -381,6 +381,7 @@ func (t *Table) columnAt(pos fyne.Position) int {
 		i = 0
 	} else {
 		pos.X += t.content.Offset.X
+		offX += t.stuckXOff
 	}
 	for x := offX; i < end; x += visibleColWidths[i-1] + theme.Padding() {
 		if pos.X >= x && pos.X < x+visibleColWidths[i] {
@@ -488,6 +489,7 @@ func (t *Table) rowAt(pos fyne.Position) int {
 		i = 0
 	} else {
 		pos.Y += t.content.Offset.Y
+		offY += t.stuckYOff
 	}
 	for y := offY; i < end; y += visibleRowHeights[i-1] + theme.Padding() {
 		if pos.Y >= y && pos.Y < y+visibleRowHeights[i] {
@@ -1001,14 +1003,6 @@ func (r *tableCellsRenderer) moveIndicators() {
 	if r.cells.t.ShowHeaderColumn && stickCols > 0 {
 		stickCols--
 	}
-	startRow := minRow
-	if startRow < stickRows {
-		startRow = stickRows
-	}
-	startCol := minCol
-	if startCol < stickCols {
-		startCol = stickCols
-	}
 
 	if r.cells.t.ShowHeaderColumn && r.cells.t.StickyColumnCount > 0 {
 		offX += r.cells.t.headerSize.Width
@@ -1114,11 +1108,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 
 	for i := minCol; i < col; i++ {
-		if width, ok := widths[i]; ok {
-			xPos += width
-		} else {
-			xPos += r.cells.t.cellSize.Width
-		}
+		xPos += widths[i]
 		xPos += theme.Padding()
 	}
 	x1 := xPos
@@ -1141,11 +1131,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 		minRow = 0
 	}
 	for i := minRow; i < row; i++ {
-		if height, ok := heights[i]; ok {
-			yPos += height
-		} else {
-			yPos += r.cells.t.cellSize.Height
-		}
+		yPos += heights[i]
 		yPos += theme.Padding()
 	}
 	y1 := yPos
@@ -1154,7 +1140,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	y2 := y1 + heights[row]
 
-	if x2 < 0 || x1 > r.cells.t.content.Offset.X+r.cells.t.size.Width || y2 < 0 || y1 > r.cells.t.content.Offset.Y+r.cells.t.size.Height {
+	if x2 < 0 || x1 > r.cells.t.size.Width || y2 < 0 || y1 > r.cells.t.size.Height {
 		marker.Hide()
 	} else {
 		left := x1
