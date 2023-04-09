@@ -134,11 +134,12 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 }
 
 func (s *Slider) checkInvokeOnChangeEnded() {
-	if s.pendingChange {
-		s.pendingChange = false
-		if s.OnChangeEnded != nil {
-			s.OnChangeEnded(s.Value)
-		}
+	if !s.pendingChange {
+		return
+	}
+	s.pendingChange = false
+	if s.OnChangeEnded != nil {
+		s.OnChangeEnded(s.Value)
 	}
 }
 
