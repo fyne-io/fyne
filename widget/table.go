@@ -270,21 +270,42 @@ func (t *Table) ScrollTo(id TableCellID) {
 	scrollPos := t.offset
 
 	cellX, cellWidth := t.findX(id.Col)
-	if cellX < scrollPos.X {
-		scrollPos.X = cellX
-	} else if cellX+cellWidth > scrollPos.X+t.content.Size().Width {
-		scrollPos.X = cellX + cellWidth - t.content.Size().Width
+	stickCols := t.StickyColumnCount
+	if stickCols > 0 {
+		cellX -= t.stuckXOff + t.stuckWidth
+	}
+	if t.ShowHeaderColumn {
+		cellX += t.headerSize.Width
+		stickCols--
+	}
+	if id.Col > stickCols {
+		if cellX < scrollPos.X {
+			scrollPos.X = cellX
+		} else if cellX+cellWidth > scrollPos.X+t.content.Size().Width {
+			scrollPos.X = cellX + cellWidth - t.content.Size().Width
+		}
 	}
 
 	cellY, cellHeight := t.findY(id.Row)
-	if cellY < scrollPos.Y {
-		scrollPos.Y = cellY
-	} else if cellY+cellHeight > scrollPos.Y+t.content.Size().Height {
-		scrollPos.Y = cellY + cellHeight - t.content.Size().Height
+	stickRows := t.StickyRowCount
+	if stickRows > 0 {
+		cellY -= t.stuckYOff + t.stuckHeight
+	}
+	if t.ShowHeaderRow {
+		cellY += t.headerSize.Height
+		stickRows--
+	}
+	if id.Row > stickRows {
+		if cellY < scrollPos.Y {
+			scrollPos.Y = cellY
+		} else if cellY+cellHeight > scrollPos.Y+t.content.Size().Height {
+			scrollPos.Y = cellY + cellHeight - t.content.Size().Height
+		}
 	}
 
 	t.offset = scrollPos
 	t.content.Offset = scrollPos
+	t.content.Refresh()
 	t.finishScroll()
 }
 
