@@ -19,7 +19,7 @@ type Head struct {
 	YMin               int16
 	XMax               int16
 	YMax               int16
-	macStyle           uint16
+	MacStyle           uint16
 	lowestRecPPEM      uint16
 	fontDirectionHint  int16
 	IndexToLocFormat   int16

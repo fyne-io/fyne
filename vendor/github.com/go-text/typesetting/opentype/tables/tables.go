@@ -48,8 +48,7 @@ type PlatformID uint16
 // The most common values are provided as constants.
 type EncodingID uint16
 
-// LanguageID represents the language used by an entry in the name table,
-// the three most common values are provided as constants.
+// LanguageID represents the language used by an entry in the name table
 type LanguageID uint16
 
 // Offset16 is an offset into the input byte slice

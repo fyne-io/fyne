@@ -14,6 +14,15 @@ import (
 // for each operation.
 type HarfbuzzShaper struct {
 	buf *harfbuzz.Buffer
+
+	fonts fontLRU
+}
+
+// SetFontCacheSize adjusts the size of the font cache within the shaper.
+// It is safe to adjust the size after using the shaper, though shrinking
+// it may result in many evictions on the next shaping.
+func (h *HarfbuzzShaper) SetFontCacheSize(size int) {
+	h.fonts.maxSize = size
 }
 
 var _ Shaper = (*HarfbuzzShaper)(nil)
@@ -52,6 +61,7 @@ func (t *HarfbuzzShaper) Shape(input Input) Output {
 	} else {
 		t.buf.Clear()
 	}
+
 	runes, start, end := input.Text, input.RunStart, input.RunEnd
 	if end < start {
 		// Try to guess what the caller actually wanted.
@@ -74,7 +84,13 @@ func (t *HarfbuzzShaper) Shape(input Input) Output {
 	t.buf.Props.Language = input.Language
 	t.buf.Props.Script = input.Script
 
-	font := harfbuzz.NewFont(input.Face)
+	// reuse font when possible
+	font, ok := t.fonts.Get(input.Face.Font)
+	if !ok { // create a new font and cache it
+		font = harfbuzz.NewFont(input.Face)
+		t.fonts.Put(input.Face.Font, font)
+	}
+	// adjust the user provided fields
 	font.XScale = int32(input.Size.Ceil()) << scaleShift
 	font.YScale = font.XScale
 

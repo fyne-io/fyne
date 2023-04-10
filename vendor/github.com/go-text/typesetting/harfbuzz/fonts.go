@@ -10,10 +10,12 @@ import (
 
 type Face = *font.Face
 
-// Font is used internally as a light wrapper around the provided Face.
+// Font is used internally as a wrapper around the provided Face.
 //
 // Font are constructed with `NewFont` and adjusted by accessing the fields
 // Ptem, XScale, YScale.
+//
+// Fonts private fields only depend on the provided [*font.Font], so a Font object is suitable for caching.
 type Font struct {
 	face Face
 
