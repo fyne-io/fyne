@@ -262,7 +262,8 @@ func (e *Entry) DragEnd() {
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InputBorderSize()))
 	if !e.selecting {
-		e.selectRow, e.selectColumn = e.getRowCol(pos)
+		startPos := pos.Subtract(d.Dragged)
+		e.selectRow, e.selectColumn = e.getRowCol(startPos)
 		e.selecting = true
 	}
 	e.updateMousePointer(pos, false)
