@@ -199,12 +199,25 @@ func (c *Canvas) FocusPrevious() {
 func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 	freeObject := func(object fyne.CanvasObject) {
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+			// No image refresh while recursing to avoid double texture upload.
+			if _, ok := obj.(*canvas.Image); ok {
+				return false
+			}
 			if c.painter != nil {
 				c.painter.Free(obj)
 			}
 			return false
 		}
-		driver.WalkCompleteObjectTree(object, freeWalked, nil)
+
+		// Image.Refresh will trigger a refresh specific to the object, while recursing on parent widget would just lead to
+		// a double texture upload.
+		if img, ok := object.(*canvas.Image); ok {
+			if c.painter != nil {
+				c.painter.Free(img)
+			}
+		} else {
+			driver.WalkCompleteObjectTree(object, freeWalked, nil)
+		}
 	}
 
 	// Within a frame, refresh tasks are requested from the Refresh method,
