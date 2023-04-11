@@ -6,8 +6,11 @@ package glfw
 import (
 	"bytes"
 	"image/png"
+	"os"
+	"os/signal"
 	"runtime"
 	"sync"
+	"syscall"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
@@ -165,4 +168,14 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
+}
+
+func catchTerm(d *gLDriver) {
+	terminateSignals := make(chan os.Signal, 1)
+	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
+
+	for range terminateSignals {
+		d.Quit()
+		break
+	}
 }
