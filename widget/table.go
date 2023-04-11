@@ -81,11 +81,10 @@ type Table struct {
 	moveCallback              func()
 	offset                    fyne.Position
 	content                   *widget.Scroll
-	top, left, corner         *clip
 
 	cellSize, headerSize                          fyne.Size
 	stuckXOff, stuckYOff, stuckWidth, stuckHeight float32
-	dividerLayer                                  *fyne.Container
+	top, left, corner, dividerLayer               *clip
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -130,7 +129,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.top = newClip(&fyne.Container{})
 	t.left = newClip(&fyne.Container{})
 	t.corner = newClip(&fyne.Container{})
-	t.dividerLayer = &fyne.Container{}
+	t.dividerLayer = newClip(&fyne.Container{})
 
 	r := &tableRenderer{t: t}
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
@@ -1046,8 +1045,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 
 		objs := []fyne.CanvasObject{r.marker, r.hover}
-		r.cells.t.dividerLayer.Objects = append(objs, r.dividers...)
-		r.cells.t.dividerLayer.Refresh()
+		r.cells.t.dividerLayer.Content.(*fyne.Container).Objects = append(objs, r.dividers...)
+		r.cells.t.dividerLayer.Content.Refresh()
 	}
 
 	divs := 0
