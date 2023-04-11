@@ -101,6 +101,31 @@ func TestEntry_DragSelect(t *testing.T) {
 	assert.Equal(t, "r the laz", entry.SelectedText())
 }
 
+func TestEntry_DragSelectLargeStep(t *testing.T) {
+	entry := NewEntry()
+	entry.Wrapping = fyne.TextWrapOff
+	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
+	entry.Resize(entry.MinSize())
+
+	// get position after the letter 'e' on the second row
+	ev1 := getClickPosition("ove", 1)
+	// get position after the letter 'z' on the second row
+	ev2 := getClickPosition("over the laz", 1)
+
+	// mouse down and drag from 'r' to 'z'
+	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
+	entry.MouseDown(me)
+
+	delta := ev2.Position.Subtract(ev1.Position)
+	de := &fyne.DragEvent{PointEvent: *ev2, Dragged: fyne.NewDelta(delta.X, delta.Y)}
+	entry.Dragged(de)
+
+	me = &desktop.MouseEvent{PointEvent: *ev2, Button: desktop.MouseButtonPrimary}
+	entry.MouseUp(me)
+
+	assert.Equal(t, "r the laz", entry.SelectedText())
+}
+
 func TestEntry_DragSelectEmpty(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Testing")
