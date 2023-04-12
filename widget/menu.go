@@ -206,7 +206,9 @@ func (m *Menu) activateItem(item *menuItem) {
 	m.DeactivateChild()
 	m.activeItem = item
 	m.activeItem.Refresh()
-	m.Refresh()
+	if m.activeItem.child != nil {
+		m.Refresh()
+	}
 }
 
 func (m *Menu) setMenu(menu *fyne.Menu) {
