@@ -815,12 +815,21 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 		fyne.LogError("Missing Length callback required for Table", nil)
 	}
 
+	stickRows := r.cells.t.StickyRowCount
+	if r.cells.t.ShowHeaderRow && stickRows > 0 {
+		stickRows--
+	}
+	stickCols := r.cells.t.StickyColumnCount
+	if r.cells.t.ShowHeaderColumn && stickCols > 0 {
+		stickCols--
+	}
+
 	width := float32(0)
 	if len(r.cells.t.columnWidths) == 0 {
-		width = r.cells.t.cellSize.Width * float32(cols)
+		width = r.cells.t.cellSize.Width * float32(cols-stickCols)
 	} else {
 		cellWidth := r.cells.t.cellSize.Width
-		for col := 0; col < cols; col++ {
+		for col := stickCols; col < cols; col++ {
 			colWidth, ok := r.cells.t.columnWidths[col]
 			if ok {
 				width += colWidth
@@ -832,10 +841,10 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 
 	height := float32(0)
 	if len(r.cells.t.rowHeights) == 0 {
-		height = r.cells.t.cellSize.Height * float32(rows)
+		height = r.cells.t.cellSize.Height * float32(rows-stickRows)
 	} else {
 		cellHeight := r.cells.t.cellSize.Height
-		for row := 0; row < rows; row++ {
+		for row := stickRows; row < rows; row++ {
 			rowHeight, ok := r.cells.t.rowHeights[row]
 			if ok {
 				height += rowHeight
@@ -852,7 +861,7 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 	if r.cells.t.ShowHeaderColumn {
 		width += r.cells.t.headerSize.Width + separatorSize
 	}
-	return fyne.NewSize(width+float32(cols-1)*separatorSize, height+float32(rows-1)*separatorSize)
+	return fyne.NewSize(width+float32(cols-stickCols-1)*separatorSize, height+float32(rows-stickRows-1)*separatorSize)
 }
 
 func (r *tableCellsRenderer) Refresh() {
