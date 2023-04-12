@@ -10,6 +10,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// Declare conformity with Cursorable interface.
+var _ desktop.Cursorable = (*Table)(nil)
+
 // Declare conformity with Hoverable interface.
 var _ desktop.Hoverable = (*Table)(nil)
 
@@ -85,6 +88,7 @@ type Table struct {
 	cellSize, headerSize                          fyne.Size
 	stuckXOff, stuckYOff, stuckWidth, stuckHeight float32
 	top, left, corner, dividerLayer               *clip
+	hoverHeaderCol, hoverHeaderRow                bool
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -140,6 +144,16 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	r.Layout(t.Size())
 	return r
+}
+
+func (t *Table) Cursor() desktop.Cursor {
+	if t.hoverHeaderCol {
+		return desktop.VResizeCursor
+	} else if t.hoverHeaderRow {
+		return desktop.HResizeCursor
+	}
+
+	return desktop.DefaultCursor
 }
 
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
@@ -466,6 +480,18 @@ func (t *Table) hoverAt(pos fyne.Position) {
 	col := t.columnAt(pos)
 	row := t.rowAt(pos)
 	t.hoveredCell = &TableCellID{row, col}
+	overHeaderRow := (t.StickyRowCount == 0 && pos.Y < t.headerSize.Height-t.content.Offset.Y) || (t.StickyRowCount >= 1 && pos.Y < t.headerSize.Height)
+	overHeaderCol := (t.StickyColumnCount == 0 && pos.X < t.headerSize.Width-t.content.Offset.X) || (t.StickyColumnCount >= 1 && pos.X < t.headerSize.Width)
+	if overHeaderRow && t.ShowHeaderRow && (!t.ShowHeaderColumn || !overHeaderCol) {
+		t.hoverHeaderRow = t.columnAt(pos) == -1
+	} else {
+		t.hoverHeaderRow = false
+	}
+	if overHeaderCol && t.ShowHeaderColumn && (!t.ShowHeaderRow || !overHeaderRow) {
+		t.hoverHeaderCol = t.rowAt(pos) == -1
+	} else {
+		t.hoverHeaderCol = false
+	}
 
 	rows, cols := 0, 0
 	if f := t.Length; f != nil {
