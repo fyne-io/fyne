@@ -126,6 +126,7 @@ func NewTableWithHeaders(length func() (int, int), create func() fyne.CanvasObje
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 
+	t.propertyLock.Lock()
 	t.headerSize = t.createHeader().MinSize()
 	t.cellSize = t.templateSize()
 	t.cells = newTableCells(t)
@@ -134,6 +135,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.left = newClip(&fyne.Container{})
 	t.corner = newClip(&fyne.Container{})
 	t.dividerLayer = newClip(&fyne.Container{})
+	t.propertyLock.Unlock()
 
 	r := &tableRenderer{t: t}
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
@@ -200,12 +202,14 @@ func (t *Table) Select(id TableCellID) {
 //
 // Since: 1.4.1
 func (t *Table) SetColumnWidth(id int, width float32) {
+	t.propertyLock.Lock()
 	if t.columnWidths == nil {
 		t.columnWidths = make(map[int]float32)
 	}
 	t.columnWidths[id] = width
+	t.propertyLock.Unlock()
+
 	t.Refresh()
-	t.content.Refresh()
 }
 
 // SetRowHeight supports changing the height of the specified row. Rows normally take the height of the template
@@ -214,10 +218,13 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 //
 // Since: 2.3
 func (t *Table) SetRowHeight(id int, height float32) {
+	t.propertyLock.Lock()
 	if t.rowHeights == nil {
 		t.rowHeights = make(map[int]float32)
 	}
 	t.rowHeights[id] = height
+	t.propertyLock.Unlock()
+
 	t.Refresh()
 }
 
@@ -698,6 +705,10 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 func (t *tableRenderer) MinSize() fyne.Size {
 	min := t.t.content.MinSize().Max(t.t.cellSize)
 	sep := theme.Padding()
+
+	t.t.propertyLock.RLock()
+	defer t.t.propertyLock.RUnlock()
+
 	if t.t.ShowHeaderRow {
 		min.Height += t.t.headerSize.Height + sep
 	}
@@ -830,10 +841,14 @@ type tableCellsRenderer struct {
 }
 
 func (r *tableCellsRenderer) Layout(fyne.Size) {
+	r.cells.propertyLock.Lock()
 	r.moveIndicators()
+	r.cells.propertyLock.Unlock()
 }
 
 func (r *tableCellsRenderer) MinSize() fyne.Size {
+	r.cells.propertyLock.RLock()
+	defer r.cells.propertyLock.RUnlock()
 	rows, cols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		rows, cols = r.cells.t.Length()
