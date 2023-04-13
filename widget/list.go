@@ -252,7 +252,6 @@ func (l *List) UnselectAll() {
 }
 
 func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow int) {
-	maxRow := length
 	rowOffset := float32(0)
 	isVisible := false
 	visible = []float32{}
@@ -269,14 +268,14 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 
 		offY = float32(math.Floor(float64(l.offsetY/paddedItemHeight))) * paddedItemHeight
 		minRow = int(math.Floor(float64(offY / paddedItemHeight)))
-		maxRow = int(math.Ceil(float64((offY + l.scroller.Size().Height) / paddedItemHeight)))
+		maxRow := int(math.Ceil(float64((offY + l.scroller.Size().Height) / paddedItemHeight)))
 
+		if minRow > length-1 {
+			minRow = length - 1
+		}
 		if minRow < 0 {
 			minRow = 0
 			offY = 0
-		}
-		if minRow > length {
-			minRow = length
 		}
 
 		if maxRow > length {
@@ -303,9 +302,7 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset < l.offsetY+l.scroller.Size().Height {
-			maxRow = i + 1
-		} else {
+		if !(rowOffset < l.offsetY+l.scroller.Size().Height) {
 			break
 		}
 
