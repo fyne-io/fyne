@@ -250,11 +250,11 @@ func (l *List) UnselectAll() {
 	}
 }
 
-func (l *List) visibleItemHeights(itemHeight float32, length int) (visible map[int]float32, offY float32, minRow, maxRow int) {
+func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow, maxRow int) {
 	maxRow = length
 	rowOffset := float32(0)
 	isVisible := false
-	visible = make(map[int]float32)
+	visible = []float32{}
 
 	if l.scroller.Size().Height <= 0 {
 		return
@@ -281,7 +281,7 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible map[i
 
 		rowOffset += height + theme.Padding()
 		if isVisible {
-			visible[i] = height
+			visible = append(visible, height)
 		}
 	}
 	return
@@ -582,8 +582,9 @@ func (l *listLayout) updateList(refresh bool) {
 	}
 
 	y := offY
-	for row := minRow; row < maxRow; row++ {
-		itemHeight := visibleRowHeights[row]
+	for index := 0; index < maxRow-minRow; index++ {
+		row := index + minRow
+		itemHeight := visibleRowHeights[index]
 		size := fyne.NewSize(width, itemHeight)
 
 		c, ok := wasVisible[row]
