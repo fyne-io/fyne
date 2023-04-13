@@ -260,13 +260,15 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 		return
 	}
 
+	padding := theme.Padding()
+
 	for i := 0; i < length; i++ {
 		height := itemHeight
 		if h, ok := l.itemHeights[i]; ok {
 			height = h
 		}
 
-		if rowOffset <= l.offsetY-height-theme.Padding() {
+		if rowOffset <= l.offsetY-height-padding {
 			// before scroll
 		} else if rowOffset <= l.offsetY {
 			minRow = i
@@ -279,7 +281,7 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 			break
 		}
 
-		rowOffset += height + theme.Padding()
+		rowOffset += height + padding
 		if isVisible {
 			visible = append(visible, height)
 		}
