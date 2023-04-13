@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -657,6 +658,32 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	test.AssertImageMatches(t, "table/col_size.png", w.Canvas().Capture())
 }
 
+func TestTable_SetColumnWidth_Dragged(t *testing.T) {
+	test.NewApp()
+
+	table := NewTableWithHeaders(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+		})
+	table.ShowHeaderColumn = false
+	table.StickyColumnCount = 0
+	table.Refresh()
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(table)
+	c.Resize(fyne.NewSize(120, 120))
+
+	dragPos := fyne.NewPos(table.cellSize.Width*2+theme.Padding()+2, 2) // gap between col 1 and 2
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	test.Drag(c, dragPos, 5, 0) // expanded column 5.0
+
+	assert.Equal(t, table.cellSize.Width+5, table.columnWidths[1])
+}
+
 func TestTable_SetRowHeight(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -694,6 +721,32 @@ func TestTable_SetRowHeight(t *testing.T) {
 	defer w.Close()
 	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
 	test.AssertImageMatches(t, "table/row_size.png", w.Canvas().Capture())
+}
+
+func TestTable_SetRowHeight_Dragged(t *testing.T) {
+	test.NewApp()
+
+	table := NewTableWithHeaders(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+		})
+	table.ShowHeaderRow = false
+	table.StickyRowCount = 0
+	table.Refresh()
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(table)
+	c.Resize(fyne.NewSize(120, 120))
+
+	dragPos := fyne.NewPos(2, table.cellSize.Height*3+theme.Padding()*2+2) // gap between row 2 and 3
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	test.Drag(c, dragPos, 0, 5) // expanded row 5.0
+
+	assert.Equal(t, table.cellSize.Height+5, table.rowHeights[2])
 }
 
 func TestTable_ShowVisible(t *testing.T) {

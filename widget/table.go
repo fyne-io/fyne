@@ -156,12 +156,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 func (t *Table) Cursor() desktop.Cursor {
 	if t.hoverHeaderCol != noCellMatch {
-		t.dragCol = noCellMatch
-		t.dragRow = t.hoverHeaderCol
 		return desktop.VResizeCursor
 	} else if t.hoverHeaderRow != noCellMatch {
-		t.dragCol = t.hoverHeaderRow
-		t.dragRow = noCellMatch
 		return desktop.HResizeCursor
 	}
 
@@ -169,9 +165,17 @@ func (t *Table) Cursor() desktop.Cursor {
 }
 
 func (t *Table) Dragged(e *fyne.DragEvent) {
-	t.propertyLock.RLock()
+	t.propertyLock.Lock()
+	if t.hoverHeaderCol != noCellMatch {
+		t.dragCol = noCellMatch
+		t.dragRow = t.hoverHeaderCol
+	} else if t.hoverHeaderRow != noCellMatch {
+		t.dragCol = t.hoverHeaderRow
+		t.dragRow = noCellMatch
+	}
+
 	min := t.cellSize
-	t.propertyLock.RUnlock()
+	t.propertyLock.Unlock()
 
 	if t.dragCol != noCellMatch {
 		t.propertyLock.RLock()
@@ -457,7 +461,7 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 
 // columnAt returns a positive integer (or 0) for the column that is found at the `pos` X position.
 // If the position is between cells the method will return a negative integer representing the next column,
-// i.e. -1 means the gap between columns 0 and 1.
+// i.e. -1 means the gap between 0 and 1.
 func (t *Table) columnAt(pos fyne.Position) int {
 	dataCols := 0
 	if f := t.Length; f != nil {
@@ -543,21 +547,19 @@ func (t *Table) hoverAt(pos fyne.Position) {
 	overHeaderRow := (t.StickyRowCount == 0 && pos.Y < t.headerSize.Height-t.content.Offset.Y) || (t.StickyRowCount >= 1 && pos.Y < t.headerSize.Height)
 	overHeaderCol := (t.StickyColumnCount == 0 && pos.X < t.headerSize.Width-t.content.Offset.X) || (t.StickyColumnCount >= 1 && pos.X < t.headerSize.Width)
 	if overHeaderRow && t.ShowHeaderRow && (!t.ShowHeaderColumn || !overHeaderCol) {
-		hovering := t.columnAt(pos)
-		if hovering >= 0 {
+		if col >= 0 {
 			t.hoverHeaderRow = noCellMatch
 		} else {
-			t.hoverHeaderRow = -hovering - 1
+			t.hoverHeaderRow = -col - 1
 		}
 	} else {
 		t.hoverHeaderRow = noCellMatch
 	}
 	if overHeaderCol && t.ShowHeaderColumn && (!t.ShowHeaderRow || !overHeaderRow) {
-		hovering := t.rowAt(pos)
-		if hovering >= 0 {
+		if row >= 0 {
 			t.hoverHeaderCol = noCellMatch
 		} else {
-			t.hoverHeaderCol = -hovering - 1
+			t.hoverHeaderCol = -row - 1
 		}
 	} else {
 		t.hoverHeaderCol = noCellMatch
