@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const noCellMatch = math.MaxInt
+const noCellMatch = math.MaxInt32 // TODO make this MaxInt once we move to newer Go version
 
 // Declare conformity with Cursorable interface.
 var _ desktop.Cursorable = (*Table)(nil)
