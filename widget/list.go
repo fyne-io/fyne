@@ -251,8 +251,8 @@ func (l *List) UnselectAll() {
 	}
 }
 
-func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow, maxRow int) {
-	maxRow = length
+func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow int) {
+	maxRow := length
 	rowOffset := float32(0)
 	isVisible := false
 	visible = []float32{}
@@ -600,19 +600,20 @@ func (l *listLayout) updateList(refresh bool) {
 	}
 
 	wasVisible := l.visible
-	visible := make(map[ListItemID]*listItem)
-	cells := []fyne.CanvasObject{}
 
 	l.list.propertyLock.Lock()
-	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
+	visibleRowHeights, offY, minRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
 	l.list.propertyLock.Unlock()
 	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		l.renderLock.Unlock() // user code should not be locked
 		return
 	}
 
+	visible := make(map[ListItemID]*listItem, len(visibleRowHeights))
+	cells := make([]fyne.CanvasObject, len(visibleRowHeights))
+
 	y := offY
-	for index := 0; index < maxRow-minRow; index++ {
+	for index := range visibleRowHeights {
 		row := index + minRow
 		itemHeight := visibleRowHeights[index]
 		size := fyne.NewSize(width, itemHeight)
@@ -631,7 +632,7 @@ func (l *listLayout) updateList(refresh bool) {
 
 		y += itemHeight + separatorThickness
 		visible[row] = c
-		cells = append(cells, c)
+		cells[index] = c
 	}
 
 	l.visible = visible
