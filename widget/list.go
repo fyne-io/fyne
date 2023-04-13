@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"math"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -260,7 +261,21 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 		return
 	}
 
+	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
+
+	if len(l.itemHeights) == 0 {
+		offY = l.offsetY - itemHeight - padding
+		paddedItemHeight := itemHeight + padding
+		minRow = int(math.Floor(float64(l.offsetY / paddedItemHeight)))
+		maxRow = int(math.Ceil(float64((l.offsetY + l.scroller.Size().Height) / paddedItemHeight)))
+
+		visible = make([]float32, maxRow-minRow)
+		for i := 0; i < maxRow-minRow; i++ {
+			visible[i] = itemHeight
+		}
+		return
+	}
 
 	for i := 0; i < length; i++ {
 		height := itemHeight
