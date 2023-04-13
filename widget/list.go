@@ -265,10 +265,23 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 	padding := theme.Padding()
 
 	if len(l.itemHeights) == 0 {
-		offY = l.offsetY - itemHeight - padding
 		paddedItemHeight := itemHeight + padding
-		minRow = int(math.Floor(float64(l.offsetY / paddedItemHeight)))
-		maxRow = int(math.Ceil(float64((l.offsetY + l.scroller.Size().Height) / paddedItemHeight)))
+
+		offY = float32(math.Floor(float64(l.offsetY/paddedItemHeight))) * paddedItemHeight
+		minRow = int(math.Floor(float64(offY / paddedItemHeight)))
+		maxRow = int(math.Ceil(float64((offY + l.scroller.Size().Height) / paddedItemHeight)))
+
+		if minRow < 0 {
+			minRow = 0
+			offY = 0
+		}
+		if minRow > length {
+			minRow = length
+		}
+
+		if maxRow > length {
+			maxRow = length
+		}
 
 		visible = make([]float32, maxRow-minRow)
 		for i := 0; i < maxRow-minRow; i++ {
