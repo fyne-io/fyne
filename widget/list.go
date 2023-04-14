@@ -610,9 +610,8 @@ func (l *listLayout) updateList(refresh bool) {
 	cells := make([]fyne.CanvasObject, len(visibleRowHeights))
 
 	y := offY
-	for index := range visibleRowHeights {
+	for index, itemHeight := range visibleRowHeights {
 		row := index + minRow
-		itemHeight := visibleRowHeights[index]
 		size := fyne.NewSize(width, itemHeight)
 
 		c, ok := wasVisible[row]
