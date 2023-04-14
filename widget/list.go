@@ -302,7 +302,7 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 			offY = rowOffset
 			isVisible = true
 		}
-		if !(rowOffset < l.offsetY+l.scroller.Size().Height) {
+		if rowOffset >= l.offsetY+l.scroller.Size().Height {
 			break
 		}
 
