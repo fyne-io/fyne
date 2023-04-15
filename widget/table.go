@@ -142,6 +142,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.corner = newClip(t, &fyne.Container{})
 	t.dividerLayer = newClip(t, &fyne.Container{})
 	t.propertyLock.Unlock()
+	t.dragCol = noCellMatch
+	t.dragRow = noCellMatch
 
 	r := &tableRenderer{t: t}
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
@@ -166,12 +168,14 @@ func (t *Table) Cursor() desktop.Cursor {
 
 func (t *Table) Dragged(e *fyne.DragEvent) {
 	t.propertyLock.Lock()
-	if t.hoverHeaderCol != noCellMatch {
-		t.dragCol = noCellMatch
-		t.dragRow = t.hoverHeaderCol
-	} else if t.hoverHeaderRow != noCellMatch {
-		t.dragCol = t.hoverHeaderRow
-		t.dragRow = noCellMatch
+	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
+		if t.hoverHeaderCol != noCellMatch {
+			t.dragCol = noCellMatch
+			t.dragRow = t.hoverHeaderCol
+		} else if t.hoverHeaderRow != noCellMatch {
+			t.dragCol = t.hoverHeaderRow
+			t.dragRow = noCellMatch
+		}
 	}
 
 	min := t.cellSize
@@ -1462,6 +1466,8 @@ func newClip(t *Table, o fyne.CanvasObject) *clip {
 
 func (c *clip) DragEnd() {
 	c.t.DragEnd()
+	c.t.dragCol = noCellMatch
+	c.t.dragRow = noCellMatch
 }
 
 func (c *clip) Dragged(e *fyne.DragEvent) {
