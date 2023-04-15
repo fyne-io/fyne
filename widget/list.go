@@ -79,13 +79,11 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 			l.itemMin = newListItem(f(), nil).MinSize()
 		}
 	}
-	layout := &fyne.Container{}
+	layout := &fyne.Container{Layout: newListLayout(l)}
 	l.scroller = widget.NewVScroll(layout)
-	layout.Layout = newListLayout(l)
 	layout.Resize(layout.MinSize())
 	objects := []fyne.CanvasObject{l.scroller}
-	lr := newListRenderer(objects, l, l.scroller, layout)
-	return lr
+	return newListRenderer(objects, l, l.scroller, layout)
 }
 
 // MinSize returns the size that this widget should not shrink below.
