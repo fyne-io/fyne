@@ -125,6 +125,30 @@ func TestTable_Headers(t *testing.T) {
 	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[11].(*Label).Text)
 }
 
+func TestTable_JustHeaders(t *testing.T) {
+
+	test.NewApp()
+	defer test.NewApp()
+
+	table := NewTable(
+		func() (int, int) { return 0, 9 },
+		func() fyne.CanvasObject {
+			return NewLabel("text")
+		},
+		func(_ TableCellID, _ fyne.CanvasObject) {
+		})
+	table.ShowHeaderRow = true
+	table.StickyRowCount = 1
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120, 120))
+
+	table.ScrollTo(TableCellID{Row: 0, Col: 0})
+
+	test.AssertRendersToMarkup(t, "table/just_headers.xml", w.Canvas())
+}
+
 func TestTable_Sticky(t *testing.T) {
 	table := NewTableWithHeaders(
 		func() (int, int) { return 25, 25 },
