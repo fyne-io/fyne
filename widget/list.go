@@ -46,7 +46,7 @@ type List struct {
 //
 // Since: 1.4
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(ListItemID, fyne.CanvasObject)) *List {
-	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem}
+	list := &List{Length: length, CreateItem: createItem, UpdateItem: updateItem}
 	list.ExtendBaseWidget(list)
 	return list
 }
@@ -80,13 +80,11 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 			l.itemMin = newListItem(f(), nil).MinSize()
 		}
 	}
-	layout := &fyne.Container{}
+	layout := &fyne.Container{Layout: newListLayout(l)}
 	l.scroller = widget.NewVScroll(layout)
-	layout.Layout = newListLayout(l)
 	layout.Resize(layout.MinSize())
 	objects := []fyne.CanvasObject{l.scroller}
-	lr := newListRenderer(objects, l, l.scroller, layout)
-	return lr
+	return newListRenderer(objects, l, l.scroller, layout)
 }
 
 // MinSize returns the size that this widget should not shrink below.
