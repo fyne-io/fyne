@@ -22,8 +22,8 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install
         gcc
-        libgl1-mesa-dev
         libegl1-mesa-dev
+        libgl1-mesa-dev
         libgles2-mesa-dev
         libx11-dev
         xorg-dev

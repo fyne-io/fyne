@@ -24,13 +24,13 @@ jobs:
       run: >-
         sudo apt-get update &&
         sudo apt-get install
+        bc
         gcc
         libgl1-mesa-dev
-        libx11-dev
-        xorg-dev
         libwayland-dev
+        libx11-dev
         libxkbcommon-dev
-        bc
+        xorg-dev
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
