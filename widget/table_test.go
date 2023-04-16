@@ -679,6 +679,7 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 
 	dragPos := fyne.NewPos(table.cellSize.Width*2+theme.Padding()+2, 2) // gap between col 1 and 2
 	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	test.Drag(c, dragPos, 5, 0) // expanded column 5.0
 
 	assert.Equal(t, table.cellSize.Width+5, table.columnWidths[1])
@@ -744,6 +745,7 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 
 	dragPos := fyne.NewPos(2, table.cellSize.Height*3+theme.Padding()*2+2) // gap between row 2 and 3
 	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	test.Drag(c, dragPos, 0, 5) // expanded row 5.0
 
 	assert.Equal(t, table.cellSize.Height+5, table.rowHeights[2])

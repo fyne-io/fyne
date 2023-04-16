@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -168,22 +169,14 @@ func (t *Table) Cursor() desktop.Cursor {
 
 func (t *Table) Dragged(e *fyne.DragEvent) {
 	t.propertyLock.Lock()
-	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
-		if t.hoverHeaderCol != noCellMatch {
-			t.dragCol = noCellMatch
-			t.dragRow = t.hoverHeaderCol
-		} else if t.hoverHeaderRow != noCellMatch {
-			t.dragCol = t.hoverHeaderRow
-			t.dragRow = noCellMatch
-		}
-	}
-
 	min := t.cellSize
+	col := t.dragCol
+	row := t.dragRow
 	t.propertyLock.Unlock()
 
-	if t.dragCol != noCellMatch {
+	if col != noCellMatch {
 		t.propertyLock.RLock()
-		oldSize, ok := t.columnWidths[t.dragCol]
+		oldSize, ok := t.columnWidths[col]
 		t.propertyLock.RUnlock()
 		if !ok {
 			oldSize = min.Width
@@ -194,9 +187,9 @@ func (t *Table) Dragged(e *fyne.DragEvent) {
 		}
 		t.SetColumnWidth(t.dragCol, newSize)
 	}
-	if t.dragRow != noCellMatch {
+	if row != noCellMatch {
 		t.propertyLock.RLock()
-		oldSize, ok := t.rowHeights[t.dragRow]
+		oldSize, ok := t.rowHeights[row]
 		t.propertyLock.RUnlock()
 		if !ok {
 			oldSize = min.Height
@@ -218,12 +211,21 @@ func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
+// MouseDown response to desktop mouse event
+func (t *Table) MouseDown(*desktop.MouseEvent) {
+	t.tapped()
+}
+
 func (t *Table) MouseMoved(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
 func (t *Table) MouseOut() {
 	t.hoverOut()
+}
+
+// MouseUp response to desktop mouse event
+func (t *Table) MouseUp(*desktop.MouseEvent) {
 }
 
 // Select will mark the specified cell as selected.
@@ -282,6 +284,19 @@ func (t *Table) SetRowHeight(id int, height float32) {
 	t.propertyLock.Unlock()
 
 	t.Refresh()
+}
+
+// TouchDown response to mobile touch event
+func (t *Table) TouchDown(*mobile.TouchEvent) {
+	t.tapped()
+}
+
+// TouchUp response to mobile touch event
+func (t *Table) TouchUp(*mobile.TouchEvent) {
+}
+
+// TouchCancel response to mobile touch event
+func (t *Table) TouchCancel(*mobile.TouchEvent) {
 }
 
 // Unselect will mark the cell provided by id as unselected.
@@ -620,6 +635,18 @@ func (t *Table) rowAt(pos fyne.Position) int {
 		i++
 	}
 	return noCellMatch
+}
+
+func (t *Table) tapped() {
+	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
+		if t.hoverHeaderCol != noCellMatch {
+			t.dragCol = noCellMatch
+			t.dragRow = t.hoverHeaderCol
+		} else if t.hoverHeaderRow != noCellMatch {
+			t.dragCol = t.hoverHeaderRow
+			t.dragRow = noCellMatch
+		}
+	}
 }
 
 func (t *Table) templateSize() fyne.Size {
