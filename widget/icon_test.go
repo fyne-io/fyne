@@ -27,7 +27,7 @@ func TestIcon_Layout(t *testing.T) {
 				Resource: tt.resource,
 			}
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), icon))
+			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{icon}})
 			window.Resize(icon.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "icon/layout_"+name+".xml", window.Canvas())

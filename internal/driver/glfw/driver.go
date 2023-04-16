@@ -6,10 +6,8 @@ import (
 	"bytes"
 	"image"
 	"os"
-	"os/signal"
 	"runtime"
 	"sync"
-	"syscall"
 
 	"github.com/fyne-io/image/ico"
 
@@ -181,14 +179,4 @@ func NewGLDriver() fyne.Driver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return d
-}
-
-func catchTerm(d *gLDriver) {
-	terminateSignals := make(chan os.Signal, 1)
-	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
-
-	for range terminateSignals {
-		d.Quit()
-		break
-	}
 }

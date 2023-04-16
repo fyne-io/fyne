@@ -254,7 +254,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	}
 
 	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(container.NewMax(but))
+	c.SetContent(container.NewStack(but))
 	c.Resize(fyne.NewSize(36, 24))
 
 	simulateTap(c)

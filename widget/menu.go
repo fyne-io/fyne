@@ -206,7 +206,9 @@ func (m *Menu) activateItem(item *menuItem) {
 	m.DeactivateChild()
 	m.activeItem = item
 	m.activeItem.Refresh()
-	m.Refresh()
+	if m.activeItem.child != nil {
+		m.Refresh()
+	}
 }
 
 func (m *Menu) setMenu(menu *fyne.Menu) {
@@ -323,7 +325,7 @@ func newMenuBox(items []fyne.CanvasObject) *menuBox {
 
 func (b *menuBox) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.MenuBackgroundColor())
-	cont := fyne.NewContainerWithLayout(layout.NewVBoxLayout(), b.items...)
+	cont := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: b.items}
 	return &menuBoxRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, cont}),
 		b:            b,

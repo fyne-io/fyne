@@ -234,9 +234,8 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
-		DisableableWidget: DisableableWidget{},
-		Text:              label,
-		OnChanged:         changed,
+		Text:      label,
+		OnChanged: changed,
 	}
 
 	c.ExtendBaseWidget(c)
