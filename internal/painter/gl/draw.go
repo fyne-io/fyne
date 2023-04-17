@@ -160,7 +160,7 @@ func (p *painter) drawRoundRectangle(rect *canvas.Rectangle, pos fyne.Position, 
 	// Fragment: BEG
 	frameSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "frame_size")
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.ctx.Uniform4f(frameSizeUniform, frameWidthScaled, frameHeightScaled, 0.0, 0.0)
+	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
 
 	rectCoordsUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_coords")
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
@@ -173,7 +173,7 @@ func (p *painter) drawRoundRectangle(rect *canvas.Rectangle, pos fyne.Position, 
 	rectSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_size_half")
 	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
-	p.ctx.Uniform4f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5, 0.0, 0.0)
+	p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 	radiusUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "radius")
 	radiusScaled := roundToPixel(rect.CornerRadius*p.pixScale, 1.0)
