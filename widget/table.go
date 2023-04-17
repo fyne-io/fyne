@@ -968,12 +968,12 @@ func (r *tableCellsRenderer) Refresh() {
 		dataRows, dataCols = r.cells.t.Length()
 	}
 	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.t.cellSize.Width, dataCols)
-	if len(visibleColWidths) == 0 { // we can't show anything until we have some dimensions
+	if len(visibleColWidths) == 0 && dataCols > 0 { // we can't show anything until we have some dimensions
 		r.cells.propertyLock.Unlock()
 		return
 	}
 	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.t.cellSize.Height, dataRows)
-	if len(visibleRowHeights) == 0 { // we can't show anything until we have some dimensions
+	if len(visibleRowHeights) == 0 && dataRows > 0 { // we can't show anything until we have some dimensions
 		r.cells.propertyLock.Unlock()
 		return
 	}
@@ -1160,14 +1160,16 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minCol + stickCols
-	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
-		i++
+	if i > 0 {
+		for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
+			i++
 
-		xPos := x - r.cells.t.content.Offset.X + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
-		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
-		r.dividers[divs].Show()
-		divs++
+			xPos := x - r.cells.t.content.Offset.X + dividerOff
+			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+			r.dividers[divs].Move(fyne.NewPos(xPos, 0))
+			r.dividers[divs].Show()
+			divs++
+		}
 	}
 
 	i = 0
@@ -1183,14 +1185,16 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minRow + stickRows
-	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs-rowDivs < colDivs; y += visibleRowHeights[i] + theme.Padding() {
-		i++
+	if i > 0 {
+		for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs-rowDivs < colDivs; y += visibleRowHeights[i] + theme.Padding() {
+			i++
 
-		yPos := y - r.cells.t.content.Offset.Y + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
-		r.dividers[divs].Move(fyne.NewPos(0, yPos))
-		r.dividers[divs].Show()
-		divs++
+			yPos := y - r.cells.t.content.Offset.Y + dividerOff
+			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+			r.dividers[divs].Move(fyne.NewPos(0, yPos))
+			r.dividers[divs].Show()
+			divs++
+		}
 	}
 
 	for i := divs; i < len(r.dividers); i++ {

@@ -124,6 +124,26 @@ func TestTable_Headers(t *testing.T) {
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "2"))
 }
 
+func TestTable_JustHeaders(t *testing.T) {
+
+	test.NewApp()
+	defer test.NewApp()
+
+	table := NewTableWithHeaders(
+		func() (int, int) { return 0, 9 },
+		func() fyne.CanvasObject {
+			return NewLabel("text")
+		},
+		func(_ TableCellID, _ fyne.CanvasObject) {
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120, 120))
+
+	test.AssertRendersToMarkup(t, "table/just_headers.xml", w.Canvas())
+}
+
 func TestTable_Sticky(t *testing.T) {
 	table := NewTableWithHeaders(
 		func() (int, int) { return 25, 25 },
