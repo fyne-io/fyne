@@ -103,34 +103,34 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
 	// Vertex: BEG
 	points := p.vecRectCoords(pos, rect, frame)
-	p.ctx.UseProgram(p.rectangleProgram)
+	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.rectangleProgram, "vert", 2, 4, 0)
-	p.defineVertexArray(p.rectangleProgram, "normal", 2, 4, 2)
+	p.defineVertexArray(program, "vert", 2, 4, 0)
+	p.defineVertexArray(program, "normal", 2, 4, 2)
 
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 	// Vertex: END
 
 	// Fragment: BEG
-	frameSizeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "frame_size")
+	frameSizeUniform := p.ctx.GetUniformLocation(program, "frame_size")
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
 	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
 
-	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
+	rectCoordsUniform := p.ctx.GetUniformLocation(program, "rect_coords")
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
 	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
-	strokeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_width")
+	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
 	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
 	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
 
 	var r, g, b, a float32
-	fillColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "fill_color")
+	fillColorUniform := p.ctx.GetUniformLocation(program, "fill_color")
 	r, g, b, a = getFragmentColor(rect.FillColor)
 	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
 
-	strokeColorUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "stroke_color")
+	strokeColorUniform := p.ctx.GetUniformLocation(program, "stroke_color")
 	var initCol color.Color
 	if rect.StrokeColor == initCol {
 		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
