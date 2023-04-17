@@ -1134,7 +1134,13 @@ func (r *tableCellsRenderer) moveIndicators() {
 	}
 
 	colDivs := stickCols + maxCol - minCol - 1
+	if colDivs < 0 {
+		colDivs = 0
+	}
 	rowDivs := stickRows + maxRow - minRow - 1
+	if rowDivs < 0 {
+		rowDivs = 0
+	}
 
 	if len(r.dividers) < colDivs+rowDivs {
 		for i := len(r.dividers); i < colDivs+rowDivs; i++ {
@@ -1160,21 +1166,19 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minCol + stickCols
-	if i > 0 {
-		for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
-			i++
+	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol-1 && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
+		i++
 
-			xPos := x - r.cells.t.content.Offset.X + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
-			r.dividers[divs].Move(fyne.NewPos(xPos, 0))
-			r.dividers[divs].Show()
-			divs++
-		}
+		xPos := x - r.cells.t.content.Offset.X + dividerOff
+		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
+		r.dividers[divs].Show()
+		divs++
 	}
 
 	i = 0
 	if stickRows > 0 {
-		for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs < rowDivs; y += visibleRowHeights[i] + theme.Padding() {
+		for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs-colDivs < rowDivs; y += visibleRowHeights[i] + theme.Padding() {
 			i++
 
 			yPos := y + dividerOff
@@ -1185,16 +1189,14 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minRow + stickRows
-	if i > 0 {
-		for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow && divs-rowDivs < colDivs; y += visibleRowHeights[i] + theme.Padding() {
-			i++
+	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow-1 && divs-colDivs < rowDivs; y += visibleRowHeights[i] + theme.Padding() {
+		i++
 
-			yPos := y - r.cells.t.content.Offset.Y + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
-			r.dividers[divs].Move(fyne.NewPos(0, yPos))
-			r.dividers[divs].Show()
-			divs++
-		}
+		yPos := y - r.cells.t.content.Offset.Y + dividerOff
+		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+		r.dividers[divs].Move(fyne.NewPos(0, yPos))
+		r.dividers[divs].Show()
+		divs++
 	}
 
 	for i := divs; i < len(r.dividers); i++ {

@@ -28,6 +28,12 @@
 			</widget>
 			<widget size="112x112" type="*widget.clip">
 				<container size="0x0">
+					<widget pos="74,0" size="1x112" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="1x112"/>
+					</widget>
+					<widget pos="119,0" size="1x112" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="1x112"/>
+					</widget>
 				</container>
 			</widget>
 			<widget pos="32,35" size="79x76" type="*widget.Scroll">
