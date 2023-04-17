@@ -79,14 +79,7 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Raster:
 		p.drawRaster(obj, pos, frame)
 	case *canvas.Rectangle:
-		if (obj.FillColor == color.Transparent || obj.FillColor == nil) && (obj.StrokeColor == color.Transparent || obj.StrokeColor == nil || obj.StrokeWidth == 0) {
-			return
-		}
-		if obj.CornerRadius == 0 {
-			p.drawRectangle(obj, pos, frame)
-		} else {
-			p.drawRoundRectangle(obj, pos, frame)
-		}
+		p.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
 		p.drawText(obj, pos, frame)
 	case *canvas.LinearGradient:
@@ -101,6 +94,18 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.StrokeColor == nil || rect.StrokeWidth == 0) {
+		return
+	}
+
+	roundedCorners := rect.CornerRadius != 0
+	var program Program
+	if roundedCorners {
+		program = p.roundRectangleProgram
+	} else {
+		program = p.rectangleProgram
+	}
+
 	// Vertex: BEG
 	points := p.vecRectCoords(pos, rect, frame)
 	p.ctx.UseProgram(program)
@@ -121,9 +126,23 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
 	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
-	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
 	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
-	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
+	if roundedCorners {
+		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
+		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
+
+		rectSizeUniform := p.ctx.GetUniformLocation(program, "rect_size_half")
+		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
+		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+		p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+
+		radiusUniform := p.ctx.GetUniformLocation(program, "radius")
+		radiusScaled := roundToPixel(rect.CornerRadius*p.pixScale, 1.0)
+		p.ctx.Uniform1f(radiusUniform, radiusScaled)
+	} else {
+		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
+		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
+	}
 
 	var r, g, b, a float32
 	fillColorUniform := p.ctx.GetUniformLocation(program, "fill_color")
@@ -131,60 +150,6 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
 
 	strokeColorUniform := p.ctx.GetUniformLocation(program, "stroke_color")
-	var initCol color.Color
-	if rect.StrokeColor == initCol {
-		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
-	}
-	r, g, b, a = getFragmentColor(rect.StrokeColor)
-	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
-	p.logError()
-	// Fragment: END
-
-	p.ctx.DrawArrays(triangles, 0, 6)
-	p.logError()
-	p.freeBuffer(vbo)
-}
-
-func (p *painter) drawRoundRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	// Vertex: BEG
-	points := p.vecRectCoords(pos, rect, frame)
-	p.ctx.UseProgram(p.roundRectangleProgram)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.roundRectangleProgram, "vert", 2, 4, 0)
-	p.defineVertexArray(p.roundRectangleProgram, "normal", 2, 4, 2)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-	// Vertex: END
-
-	// Fragment: BEG
-	frameSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "frame_size")
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
-
-	rectCoordsUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_coords")
-	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
-	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
-
-	strokeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "stroke_width_half")
-	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
-	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
-
-	rectSizeUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "rect_size_half")
-	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
-	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
-	p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
-
-	radiusUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "radius")
-	radiusScaled := roundToPixel(rect.CornerRadius*p.pixScale, 1.0)
-	p.ctx.Uniform1f(radiusUniform, radiusScaled)
-
-	var r, g, b, a float32
-	fillColorUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "fill_color")
-	r, g, b, a = getFragmentColor(rect.FillColor)
-	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
-
-	strokeColorUniform := p.ctx.GetUniformLocation(p.roundRectangleProgram, "stroke_color")
 	var initCol color.Color
 	if rect.StrokeColor == initCol {
 		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
