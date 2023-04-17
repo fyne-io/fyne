@@ -106,24 +106,22 @@ func TestTable_Filled(t *testing.T) {
 }
 
 func TestTable_Headers(t *testing.T) {
-	table := NewTable(
+	table := NewTableWithHeaders(
 		func() (int, int) { return 5, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("text")
 		},
 		func(_ TableCellID, _ fyne.CanvasObject) {
 		})
-	table.ShowHeaderRow = true
-	table.ShowHeaderColumn = true
 	table.Resize(fyne.NewSize(120, 120))
 
 	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
-	assert.Equal(t, "A", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
-	assert.Equal(t, "B", cellRenderer.(*tableCellsRenderer).Objects()[8].(*Label).Text)
-	assert.Equal(t, "1", cellRenderer.(*tableCellsRenderer).Objects()[10].(*Label).Text)
-	assert.Equal(t, "2", cellRenderer.(*tableCellsRenderer).Objects()[11].(*Label).Text)
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "A"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "B"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "1"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "2"))
 }
 
 func TestTable_Sticky(t *testing.T) {
@@ -146,7 +144,7 @@ func TestTable_Sticky(t *testing.T) {
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "1"))
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "2"))
 
-	table.ScrollTo(TableCellID{Row: 8, Col: 3})
+	table.ScrollTo(TableCellID{Row: 7, Col: 2})
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,1"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,2"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
@@ -155,8 +153,8 @@ func TestTable_Sticky(t *testing.T) {
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "7"))
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "8"))
 
-	table.StickyRowCount = 2
-	table.StickyColumnCount = 2
+	table.StickyRowCount = 1
+	table.StickyColumnCount = 1
 	table.Refresh()
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,2"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,4"))
@@ -214,11 +212,11 @@ func TestTable_MinSize(t *testing.T) {
 			true, true,
 			0, 0,
 		},
-		"stickyheaders": {
+		"stickyandheaders": {
 			fyne.NewSize(40, 40),
 			fyne.NewSize(98, 98),
 			true, true,
-			2, 2,
+			1, 1,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
