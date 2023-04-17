@@ -269,6 +269,10 @@ func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
 }
 
+func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+	c.glContext.Uniform2f(gl.Uniform(uniform), v0, v1)
+}
+
 func (c *mobileContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {
 	c.glContext.Uniform4f(gl.Uniform(uniform), v0, v1, v2, v3)
 }

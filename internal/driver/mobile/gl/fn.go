@@ -71,6 +71,7 @@ const (
 	glfnTexImage2D
 	glfnTexParameteri
 	glfnUniform1f
+	glfnUniform2f
 	glfnUniform4f
 	glfnUniform4fv
 	glfnUseProgram
