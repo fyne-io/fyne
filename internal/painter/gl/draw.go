@@ -150,11 +150,11 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
 
 	strokeColorUniform := p.ctx.GetUniformLocation(program, "stroke_color")
-	var initCol color.Color
-	if rect.StrokeColor == initCol {
-		rect.StrokeColor = color.NRGBA{0.0, 0.0, 0.0, 0.0}
+	strokeColor := rect.StrokeColor
+	if strokeColor == nil {
+		strokeColor = color.Transparent
 	}
-	r, g, b, a = getFragmentColor(rect.StrokeColor)
+	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
 	p.logError()
 	// Fragment: END
