@@ -115,7 +115,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	// Fragment: BEG
 	frameSizeUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "frame_size")
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.ctx.Uniform4f(frameSizeUniform, frameWidthScaled, frameHeightScaled, 0.0, 0.0)
+	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
 
 	rectCoordsUniform := p.ctx.GetUniformLocation(p.rectangleProgram, "rect_coords")
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
