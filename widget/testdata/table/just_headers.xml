@@ -1,0 +1,40 @@
+<canvas padded size="120x120">
+	<content>
+		<widget pos="4,4" size="112x112" type="*widget.Table">
+			<widget size="112x35" type="*widget.clip">
+				<container size="0x0">
+				</container>
+			</widget>
+			<widget pos="0,35" size="0x76" type="*widget.clip">
+				<container size="0x0">
+				</container>
+			</widget>
+			<widget size="0x35" type="*widget.clip">
+				<container size="0x0">
+				</container>
+			</widget>
+			<widget size="112x112" type="*widget.clip">
+				<container size="0x0">
+					<widget pos="42,0" size="1x112" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="1x112"/>
+					</widget>
+					<widget pos="87,0" size="1x112" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="1x112"/>
+					</widget>
+				</container>
+			</widget>
+			<widget pos="0,35" size="112x76" type="*widget.Scroll">
+				<widget size="402x76" type="*widget.tableCells">
+				</widget>
+				<widget pos="112,0" size="0x76" type="*widget.Shadow">
+					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x76"/>
+				</widget>
+				<widget pos="0,70" size="112x6" type="*widget.scrollBarArea">
+					<widget pos="0,3" size="31x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="31x3"/>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+</canvas>
