@@ -32,7 +32,7 @@ func main() {
 	w.SetMainMenu(makeMenu(a, w))
 	w.SetMaster()
 
-	content := container.NewMax()
+	content := container.NewStack()
 	title := widget.NewLabel("Component name")
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord

@@ -641,7 +641,7 @@ func (r *tabButtonRenderer) Refresh() {
 			r.label.Color = theme.ForegroundColor()
 		}
 	} else {
-		r.label.Color = theme.DisabledTextColor()
+		r.label.Color = theme.DisabledColor()
 	}
 	r.label.TextSize = theme.TextSize()
 	if r.button.text == "" {

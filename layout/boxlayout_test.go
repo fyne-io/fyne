@@ -28,6 +28,10 @@ func TestHBoxLayout_Simple(t *testing.T) {
 	obj3 := NewMinSizeRect(cellSize)
 
 	container := container.NewHBox(obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
 	assert.Equal(t, container.MinSize(), fyne.NewSize(150+(theme.Padding()*2), 50))
 
 	assert.Equal(t, obj1.Size(), cellSize)
@@ -46,6 +50,10 @@ func TestHBoxLayout_HiddenItem(t *testing.T) {
 	obj3 := NewMinSizeRect(cellSize)
 
 	container := container.NewHBox(obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100+(theme.Padding()), 50))
 
 	assert.Equal(t, obj1.Size(), cellSize)
@@ -80,6 +88,10 @@ func TestHBoxLayout_Tall(t *testing.T) {
 	obj3 := NewMinSizeRect(cellSize)
 
 	container := container.NewHBox(obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
 	assert.Equal(t, container.MinSize(), fyne.NewSize(150+(theme.Padding()*2), 100))
 
 	assert.Equal(t, obj1.Size(), cellSize)
@@ -136,6 +148,10 @@ func TestVBoxLayout_Simple(t *testing.T) {
 	obj3 := NewMinSizeRect(cellSize)
 
 	container := container.NewVBox(obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
 	assert.Equal(t, container.MinSize(), fyne.NewSize(50, 150+(theme.Padding()*2)))
 
 	assert.Equal(t, obj1.Size(), cellSize)
@@ -154,6 +170,10 @@ func TestVBoxLayout_HiddenItem(t *testing.T) {
 	obj3 := NewMinSizeRect(cellSize)
 
 	container := container.NewVBox(obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
 	assert.Equal(t, container.MinSize(), fyne.NewSize(50, 100+(theme.Padding())))
 
 	assert.Equal(t, obj1.Size(), cellSize)
@@ -169,6 +189,10 @@ func TestVBoxLayout_Wide(t *testing.T) {
 	obj3 := NewMinSizeRect(cellSize)
 
 	container := container.NewVBox(obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
 	assert.Equal(t, obj1.Size(), cellSize)

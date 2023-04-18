@@ -8,3 +8,6 @@ import "fyne.io/fyne/v2"
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	// no-op for mobile apps using this driver
 }
+
+func catchTerm(_ *gLDriver) {
+}

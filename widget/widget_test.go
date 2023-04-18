@@ -67,7 +67,7 @@ func TestSimpleRenderer(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	c := &fyne.Container{Layout: layout.NewMaxLayout(), Objects: []fyne.CanvasObject{
+	c := &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
 		newTestWidget(canvas.NewRectangle(color.Gray{Y: 0x79})),
 		newTestWidget(canvas.NewText("Hi", color.Black))}}
 

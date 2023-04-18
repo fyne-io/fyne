@@ -59,7 +59,7 @@ func TestRender_ImageSize(t *testing.T) {
 	bg.StrokeColor = color.White
 	bg.StrokeWidth = 5
 
-	c := container.NewMax(image, bg)
+	c := container.NewStack(image, bg)
 
 	test.AssertImageMatches(t, "image_size.png", Render(c, theme.LightTheme()))
 }
