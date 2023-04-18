@@ -121,7 +121,6 @@ func NewTableWithHeaders(length func() (int, int), create func() fyne.CanvasObje
 	t := NewTable(length, create, update)
 	t.ShowHeaderRow = true
 	t.ShowHeaderColumn = true
-	t.ExtendBaseWidget(t)
 
 	return t
 }
@@ -130,6 +129,8 @@ func NewTableWithHeaders(length func() (int, int), create func() fyne.CanvasObje
 //
 // Implements: fyne.Widget
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
+
 	t.propertyLock.Lock()
 	t.headerSize = t.createHeader().MinSize()
 	t.cellSize = t.templateSize()
