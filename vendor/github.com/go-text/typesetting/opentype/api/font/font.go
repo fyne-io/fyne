@@ -90,7 +90,7 @@ func NewFont(ld *loader.Loader) (*Font, error) {
 		return nil, err
 	}
 
-	out.head, err = loadHeadTable(ld)
+	out.head, err = LoadHeadTable(ld)
 	if err != nil {
 		return nil, err
 	}
@@ -104,10 +104,11 @@ func NewFont(ld *loader.Loader) (*Font, error) {
 		return nil, err
 	}
 
-	// we considerer all the following tables as optional,
+	// We considerer all the following tables as optional,
 	// since, in practice, users won't have much control on the
 	// font files they use
-	// ignoring the errors on `RawTable` is OK : it will trigger an error on the next tables.ParseXXX,
+	//
+	// Ignoring the errors on `RawTable` is OK : it will trigger an error on the next tables.ParseXXX,
 	// which in turn will return a zero value
 
 	raw, _ = ld.RawTable(loader.MustNewTag("fvar"))
@@ -220,9 +221,9 @@ func NewFont(ld *loader.Loader) (*Font, error) {
 
 var bhedTag = loader.MustNewTag("bhed")
 
-// loads the table corresponding to the 'head' tag.
-// if a 'bhed' Apple table is present, it replaces the 'head' one
-func loadHeadTable(ld *loader.Loader) (tables.Head, error) {
+// LoadHeadTable loads the table corresponding to the 'head' tag.
+// If a 'bhed' Apple table is present, it replaces the 'head' one.
+func LoadHeadTable(ld *loader.Loader) (tables.Head, error) {
 	var (
 		s   []byte
 		err error

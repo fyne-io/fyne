@@ -24,7 +24,7 @@ func (item *Head) mustParse(src []byte) {
 	item.YMin = int16(binary.BigEndian.Uint16(src[38:]))
 	item.XMax = int16(binary.BigEndian.Uint16(src[40:]))
 	item.YMax = int16(binary.BigEndian.Uint16(src[42:]))
-	item.macStyle = binary.BigEndian.Uint16(src[44:])
+	item.MacStyle = binary.BigEndian.Uint16(src[44:])
 	item.lowestRecPPEM = binary.BigEndian.Uint16(src[46:])
 	item.fontDirectionHint = int16(binary.BigEndian.Uint16(src[48:]))
 	item.IndexToLocFormat = int16(binary.BigEndian.Uint16(src[50:]))
