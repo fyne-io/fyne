@@ -706,7 +706,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			offX = colOffset
 			isVisible = true
 		}
-		if colOffset < t.offset.X+t.Size().Width {
+		if colOffset < t.offset.X+t.size.Width {
 			maxCol = i + 1
 		} else {
 			break
@@ -744,7 +744,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset < t.offset.Y+t.Size().Height {
+		if rowOffset < t.offset.Y+t.size.Height {
 			maxRow = i + 1
 		} else {
 			break
@@ -767,6 +767,9 @@ type tableRenderer struct {
 }
 
 func (t *tableRenderer) Layout(s fyne.Size) {
+	t.t.propertyLock.RLock()
+	defer t.t.propertyLock.RUnlock()
+
 	t.calculateHeaderSizes()
 	off := fyne.NewPos(t.t.stuckWidth, t.t.stuckHeight)
 	if t.t.ShowHeaderRow {
@@ -788,12 +791,11 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 }
 
 func (t *tableRenderer) MinSize() fyne.Size {
-	min := t.t.content.MinSize().Max(t.t.cellSize)
 	sep := theme.Padding()
-
 	t.t.propertyLock.RLock()
 	defer t.t.propertyLock.RUnlock()
 
+	min := t.t.content.MinSize().Max(t.t.cellSize)
 	if t.t.ShowHeaderRow {
 		min.Height += t.t.headerSize.Height + sep
 	}
@@ -824,9 +826,11 @@ func (t *tableRenderer) MinSize() fyne.Size {
 }
 
 func (t *tableRenderer) Refresh() {
+	t.t.propertyLock.Lock()
 	t.t.headerSize = t.t.createHeader().MinSize()
 	t.t.cellSize = t.t.templateSize()
 	t.calculateHeaderSizes()
+	t.t.propertyLock.Unlock()
 
 	t.Layout(t.t.Size())
 	t.t.cells.Refresh()
