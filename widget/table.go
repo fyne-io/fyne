@@ -95,7 +95,7 @@ type Table struct {
 	cellSize, headerSize                                         fyne.Size
 	stuckXOff, stuckYOff, stuckWidth, stuckHeight, dragStartSize float32
 	top, left, corner, dividerLayer                              *clip
-	hoverHeaderCol, hoverHeaderRow, dragCol, dragRow             int
+	hoverHeaderRow, hoverHeaderCol, dragCol, dragRow             int
 	dragStartPos                                                 fyne.Position
 }
 
@@ -157,9 +157,9 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (t *Table) Cursor() desktop.Cursor {
-	if t.hoverHeaderCol != noCellMatch {
+	if t.hoverHeaderRow != noCellMatch {
 		return desktop.VResizeCursor
-	} else if t.hoverHeaderRow != noCellMatch {
+	} else if t.hoverHeaderCol != noCellMatch {
 		return desktop.HResizeCursor
 	}
 
@@ -556,21 +556,21 @@ func (t *Table) hoverAt(pos fyne.Position) {
 	overHeaderCol := t.ShowHeaderColumn && pos.X < t.headerSize.Width
 	if overHeaderRow && !overHeaderCol {
 		if col >= 0 {
-			t.hoverHeaderRow = noCellMatch
-		} else {
-			t.hoverHeaderRow = -col - 1
-		}
-	} else {
-		t.hoverHeaderRow = noCellMatch
-	}
-	if overHeaderCol && !overHeaderRow {
-		if row >= 0 {
 			t.hoverHeaderCol = noCellMatch
 		} else {
-			t.hoverHeaderCol = -row - 1
+			t.hoverHeaderCol = -col - 1
 		}
 	} else {
 		t.hoverHeaderCol = noCellMatch
+	}
+	if overHeaderCol && !overHeaderRow {
+		if row >= 0 {
+			t.hoverHeaderRow = noCellMatch
+		} else {
+			t.hoverHeaderRow = -row - 1
+		}
+	} else {
+		t.hoverHeaderRow = noCellMatch
 	}
 
 	rows, cols := 0, 0
@@ -629,18 +629,18 @@ func (t *Table) rowAt(pos fyne.Position) int {
 func (t *Table) tapped(pos fyne.Position) {
 	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
 		t.dragStartPos = pos
-		if t.hoverHeaderCol != noCellMatch {
+		if t.hoverHeaderRow != noCellMatch {
 			t.dragCol = noCellMatch
-			t.dragRow = t.hoverHeaderCol
-			size, ok := t.rowHeights[t.hoverHeaderCol]
+			t.dragRow = t.hoverHeaderRow
+			size, ok := t.rowHeights[t.hoverHeaderRow]
 			if !ok {
 				size = t.cellSize.Height
 			}
 			t.dragStartSize = size
-		} else if t.hoverHeaderRow != noCellMatch {
-			t.dragCol = t.hoverHeaderRow
+		} else if t.hoverHeaderCol != noCellMatch {
+			t.dragCol = t.hoverHeaderCol
 			t.dragRow = noCellMatch
-			size, ok := t.columnWidths[t.hoverHeaderRow]
+			size, ok := t.columnWidths[t.hoverHeaderCol]
 			if !ok {
 				size = t.cellSize.Width
 			}
