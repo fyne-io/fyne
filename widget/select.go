@@ -329,7 +329,7 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) bgLineColor() (bg color.Color, line color.Color) {
-	if s.combo.Disabled() {
+	if s.combo.disabled {
 		return theme.InputBackgroundColor(), theme.DisabledColor()
 	}
 	if s.combo.focused {
@@ -342,7 +342,7 @@ func (s *selectRenderer) bgLineColor() (bg color.Color, line color.Color) {
 }
 
 func (s *selectRenderer) updateIcon() {
-	if s.combo.Disabled() {
+	if s.combo.disabled {
 		s.icon.Resource = theme.NewDisabledResource(theme.MenuDropDownIcon())
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()

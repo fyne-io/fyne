@@ -97,7 +97,7 @@ func (c *checkRenderer) updateResource() {
 }
 
 func (c *checkRenderer) updateFocusIndicator() {
-	if c.check.Disabled() {
+	if c.check.disabled {
 		c.focusIndicator.FillColor = color.Transparent
 	} else if c.check.focused {
 		c.focusIndicator.FillColor = theme.FocusColor()
