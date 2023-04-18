@@ -365,8 +365,8 @@ func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
 		split := NewHSplit(objA, objB)
-		split.Resize(fyne.NewSize(100, 100))
-		divider := newDivider(split)
+		split.Resize(fyne.NewSize(108, 108))
+		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
 		t.Run("Leading", func(t *testing.T) {
 			split.SetOffset(0.1)
 
@@ -390,8 +390,8 @@ func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		split := NewVSplit(objA, objB)
-		split.Resize(fyne.NewSize(100, 100))
-		divider := newDivider(split)
+		split.Resize(fyne.NewSize(108, 108))
+		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
 		t.Run("Leading", func(t *testing.T) {
 			split.SetOffset(0.1)
 
