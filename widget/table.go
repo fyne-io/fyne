@@ -1146,6 +1146,13 @@ func (r *tableCellsRenderer) moveIndicators() {
 		rowDivs = 0
 	}
 
+	if colDivs < 0 {
+		colDivs = 0
+	}
+	if rowDivs < 0 {
+		rowDivs = 0
+	}
+
 	if len(r.dividers) < colDivs+rowDivs {
 		for i := len(r.dividers); i < colDivs+rowDivs; i++ {
 			r.dividers = append(r.dividers, NewSeparator())
