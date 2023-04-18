@@ -767,7 +767,6 @@ type tableRenderer struct {
 
 func (t *tableRenderer) Layout(s fyne.Size) {
 	t.t.propertyLock.RLock()
-	defer t.t.propertyLock.RUnlock()
 
 	t.calculateHeaderSizes()
 	off := fyne.NewPos(t.t.stuckWidth, t.t.stuckHeight)
@@ -777,6 +776,8 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 	if t.t.ShowHeaderColumn {
 		off.X += t.t.headerSize.Width
 	}
+	t.t.propertyLock.RUnlock()
+
 	t.t.content.Move(off)
 	t.t.content.Resize(s.SubtractWidthHeight(off.X, off.Y))
 
