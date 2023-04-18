@@ -92,10 +92,11 @@ type Table struct {
 	offset                    fyne.Position
 	content                   *widget.Scroll
 
-	cellSize, headerSize                             fyne.Size
-	stuckXOff, stuckYOff, stuckWidth, stuckHeight    float32
-	top, left, corner, dividerLayer                  *clip
-	hoverHeaderCol, hoverHeaderRow, dragCol, dragRow int
+	cellSize, headerSize                                         fyne.Size
+	stuckXOff, stuckYOff, stuckWidth, stuckHeight, dragStartSize float32
+	top, left, corner, dividerLayer                              *clip
+	hoverHeaderCol, hoverHeaderRow, dragCol, dragRow             int
+	dragStartPos                                                 fyne.Position
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -170,29 +171,19 @@ func (t *Table) Dragged(e *fyne.DragEvent) {
 	min := t.cellSize
 	col := t.dragCol
 	row := t.dragRow
+	startPos := t.dragStartPos
+	startSize := t.dragStartSize
 	t.propertyLock.Unlock()
 
 	if col != noCellMatch {
-		t.propertyLock.RLock()
-		oldSize, ok := t.columnWidths[col]
-		t.propertyLock.RUnlock()
-		if !ok {
-			oldSize = min.Width
-		}
-		newSize := oldSize + e.Dragged.DX
+		newSize := startSize + (e.Position.X - startPos.X)
 		if newSize < min.Width {
 			newSize = min.Width
 		}
 		t.SetColumnWidth(t.dragCol, newSize)
 	}
 	if row != noCellMatch {
-		t.propertyLock.RLock()
-		oldSize, ok := t.rowHeights[row]
-		t.propertyLock.RUnlock()
-		if !ok {
-			oldSize = min.Height
-		}
-		newSize := oldSize + e.Dragged.DY
+		newSize := startSize + (e.Position.Y - startPos.Y)
 		if newSize < min.Height {
 			newSize = min.Height
 		}
@@ -210,8 +201,8 @@ func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 }
 
 // MouseDown response to desktop mouse event
-func (t *Table) MouseDown(*desktop.MouseEvent) {
-	t.tapped()
+func (t *Table) MouseDown(e *desktop.MouseEvent) {
+	t.tapped(e.Position)
 }
 
 func (t *Table) MouseMoved(ev *desktop.MouseEvent) {
@@ -285,8 +276,8 @@ func (t *Table) SetRowHeight(id int, height float32) {
 }
 
 // TouchDown response to mobile touch event
-func (t *Table) TouchDown(*mobile.TouchEvent) {
-	t.tapped()
+func (t *Table) TouchDown(e *mobile.TouchEvent) {
+	t.tapped(e.Position)
 }
 
 // TouchUp response to mobile touch event
@@ -635,14 +626,25 @@ func (t *Table) rowAt(pos fyne.Position) int {
 	return noCellMatch
 }
 
-func (t *Table) tapped() {
+func (t *Table) tapped(pos fyne.Position) {
 	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
+		t.dragStartPos = pos
 		if t.hoverHeaderCol != noCellMatch {
 			t.dragCol = noCellMatch
 			t.dragRow = t.hoverHeaderCol
+			size, ok := t.rowHeights[t.hoverHeaderCol]
+			if !ok {
+				size = t.cellSize.Height
+			}
+			t.dragStartSize = size
 		} else if t.hoverHeaderRow != noCellMatch {
 			t.dragCol = t.hoverHeaderRow
 			t.dragRow = noCellMatch
+			size, ok := t.columnWidths[t.hoverHeaderRow]
+			if !ok {
+				size = t.cellSize.Width
+			}
+			t.dragStartSize = size
 		}
 	}
 }

@@ -698,7 +698,21 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 	dragPos := fyne.NewPos(table.cellSize.Width*2+theme.Padding()+2, 2) // gap between col 1 and 2
 	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
-	test.Drag(c, dragPos, 5, 0) // expanded column 5.0
+	test.Drag(c, dragPos.AddXY(5, 0), 5, 0) // expanded column 5.0
+
+	assert.Equal(t, table.cellSize.Width+5, table.columnWidths[1])
+
+	dragPos = dragPos.AddXY(5, 0)
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.Dragged(&fyne.DragEvent{ // reduce less than min width
+		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(25, 0)},
+		Dragged:    fyne.Delta{DX: -25, DY: 0}})
+
+	assert.Equal(t, table.cellSize.Width, table.columnWidths[1])
+
+	dragPos = dragPos.SubtractXY(25, 0)
+	test.Drag(c, dragPos.AddXY(25, 0), 25, 0) // return to before-min-drag
 
 	assert.Equal(t, table.cellSize.Width+5, table.columnWidths[1])
 }
@@ -759,12 +773,26 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(table)
-	c.Resize(fyne.NewSize(120, 120))
+	c.Resize(fyne.NewSize(120, 150))
 
-	dragPos := fyne.NewPos(2, table.cellSize.Height*3+theme.Padding()*2+2) // gap between row 2 and 3
+	dragPos := fyne.NewPos(2, table.cellSize.Height*3+theme.Padding()*2+1) // gap between row 2 and 3
 	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
-	test.Drag(c, dragPos, 0, 5) // expanded row 5.0
+	test.Drag(c, dragPos.AddXY(0, 5), 0, 5) // expanded row 5.0
+
+	assert.Equal(t, table.cellSize.Height+5, table.rowHeights[2])
+
+	dragPos = dragPos.AddXY(0, 5)
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.Dragged(&fyne.DragEvent{ // reduce less than min height
+		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(0, 25)},
+		Dragged:    fyne.Delta{DX: 0, DY: -25}})
+
+	assert.Equal(t, table.cellSize.Height, table.rowHeights[2])
+
+	dragPos = dragPos.SubtractXY(0, 25)
+	test.Drag(c, dragPos.AddXY(0, 25), 0, 25) // return to before-min-drag
 
 	assert.Equal(t, table.cellSize.Height+5, table.rowHeights[2])
 }
