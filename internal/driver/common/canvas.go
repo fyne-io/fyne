@@ -68,21 +68,25 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	var lastParent fyne.CanvasObject
 
-	c.RLock()
-	defer c.RUnlock()
-
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
 	min := c.impl.MinSize()
+
+	c.RLock()
+	defer c.RUnlock()
 
 	ensureMinSize := func(node *RenderCacheNode) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl)
 
+		c.RUnlock()
 		if !obj.Visible() {
+			c.RLock()
 			return
 		}
 		minSize := obj.MinSize()
+		c.RLock()
+
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
 			objToLayout := obj
@@ -91,7 +95,9 @@ func (c *Canvas) EnsureMinSize() bool {
 				objToLayout = node.parent.obj
 			} else {
 				windowNeedsMinSizeUpdate = true
+				c.RUnlock()
 				size := obj.Size()
+				c.RLock()
 				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != csize {
 					objToLayout = nil
