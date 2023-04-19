@@ -572,8 +572,9 @@ func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 	case *fyne.Container:
 		if cont.Layout != nil {
 			layout := cont.Layout
+			objects := cont.Objects
 			c.RUnlock()
-			layout.Layout(cont.Objects, cont.Size())
+			layout.Layout(objects, cont.Size())
 			c.RLock()
 		}
 	case fyne.Widget:
