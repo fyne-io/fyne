@@ -311,7 +311,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 300))
 	repaintWindow(w)
 
-	w.mouseMoved(w.viewport, 7, 42)
+	w.mouseMoved(w.viewport, 15, 48)
 	w.WaitForEvents()
 	repaintWindow(w)
 	w.mouseLock.RLock()
@@ -319,7 +319,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
-	w.mouseMoved(w.viewport, 42, 42)
+	w.mouseMoved(w.viewport, 42, 48)
 	w.WaitForEvents()
 	repaintWindow(w)
 	w.mouseLock.RLock()
