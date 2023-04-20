@@ -16,6 +16,9 @@ import (
 // to fit its original size. If it doesn’t, PaintImage does not paint the image but adjusts its min size.
 // The image will then be painted on the next frame because of the min size change.
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
+	if img.Size().IsZero() && width != 0 && height != 0 { // if the image has not been realised for some reason, set it up
+		img.Resize(fyne.NewSize(float32(width), float32(height)))
+	}
 	dst, err := paintImage(img, width, height)
 	if err != nil {
 		fyne.LogError("failed to paint image", err)

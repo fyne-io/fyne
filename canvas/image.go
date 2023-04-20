@@ -322,12 +322,11 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, widt
 
 func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(i)
-	if c == nil {
-		return nil, nil // this will happen a lot during init
+	screenWidth, screenHeight := int(width), int(height)
+	if c != nil {
+		screenWidth = scale.ToScreenCoordinate(c, width)
+		screenHeight = scale.ToScreenCoordinate(c, height)
 	}
-
-	screenWidth := scale.ToScreenCoordinate(c, width)
-	screenHeight := scale.ToScreenCoordinate(c, height)
 
 	tex := cache.GetSvg(i.name(), screenWidth, screenHeight)
 	if tex != nil {
