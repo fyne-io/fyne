@@ -1747,9 +1747,7 @@ func (r *entryContentRenderer) moveCursor() {
 	r.buildSelection()
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
-	provider.propertyLock.RLock()
 	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow)
-	provider.propertyLock.RUnlock()
 	xPos := size.Width
 	yPos := size.Height * float32(r.content.entry.CursorRow)
 	r.content.entry.propertyLock.RUnlock()

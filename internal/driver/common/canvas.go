@@ -72,14 +72,21 @@ func (c *Canvas) EnsureMinSize() bool {
 	csize := c.impl.Size()
 	min := c.impl.MinSize()
 
+	c.RLock()
+	defer c.RUnlock()
+
 	ensureMinSize := func(node *RenderCacheNode) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl)
 
+		c.RUnlock()
 		if !obj.Visible() {
+			c.RLock()
 			return
 		}
 		minSize := obj.MinSize()
+		c.RLock()
+
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
 			objToLayout := obj
@@ -88,7 +95,9 @@ func (c *Canvas) EnsureMinSize() bool {
 				objToLayout = node.parent.obj
 			} else {
 				windowNeedsMinSizeUpdate = true
+				c.RUnlock()
 				size := obj.Size()
+				c.RLock()
 				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != csize {
 					objToLayout = nil
@@ -97,7 +106,7 @@ func (c *Canvas) EnsureMinSize() bool {
 			}
 
 			if objToLayout != lastParent {
-				updateLayout(lastParent)
+				c.updateLayout(lastParent)
 				lastParent = objToLayout
 			}
 		}
@@ -110,9 +119,7 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 
 	if lastParent != nil {
-		c.RLock()
-		updateLayout(lastParent)
-		c.RUnlock()
+		c.updateLayout(lastParent)
 	}
 	return windowNeedsMinSizeUpdate
 }
@@ -560,13 +567,20 @@ type renderCacheTree struct {
 	root *RenderCacheNode
 }
 
-func updateLayout(objToLayout fyne.CanvasObject) {
+func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 	switch cont := objToLayout.(type) {
 	case *fyne.Container:
 		if cont.Layout != nil {
-			cont.Layout.Layout(cont.Objects, cont.Size())
+			layout := cont.Layout
+			objects := cont.Objects
+			c.RUnlock()
+			layout.Layout(objects, cont.Size())
+			c.RLock()
 		}
 	case fyne.Widget:
-		cache.Renderer(cont).Layout(cont.Size())
+		renderer := cache.Renderer(cont)
+		c.RUnlock()
+		renderer.Layout(cont.Size())
+		c.RLock()
 	}
 }
