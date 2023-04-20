@@ -176,10 +176,6 @@ func (c *esContext) EnableVertexAttribArray(attribute Attribute) {
 	gl.EnableVertexAttribArray(uint32(attribute))
 }
 
-func (c *esContext) DisableVertexAttribArray(attribute Attribute) {
-	gl.DisableVertexAttribArray(uint32(attribute))
-}
-
 func (c *esContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(gl.GetAttribLocation(uint32(program), gl.Str(name+"\x00")))
 }
@@ -266,6 +262,10 @@ func (c *esContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
+}
+
+func (c *esContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+	gl.Uniform2f(int32(uniform), v0, v1)
 }
 
 func (c *esContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

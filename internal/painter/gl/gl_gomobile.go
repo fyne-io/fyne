@@ -194,9 +194,6 @@ func (c *mobileContext) EnableVertexAttribArray(attribute Attribute) {
 	c.glContext.EnableVertexAttribArray(gl.Attrib(attribute))
 }
 
-func (c *mobileContext) DisableVertexAttribArray(attribute Attribute) {
-}
-
 func (c *mobileContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(c.glContext.GetAttribLocation(gl.Program(program), name))
 }
@@ -267,6 +264,10 @@ func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+	c.glContext.Uniform2f(gl.Uniform(uniform), v0, v1)
 }
 
 func (c *mobileContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

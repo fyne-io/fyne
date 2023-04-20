@@ -21,7 +21,6 @@ type context interface {
 	DrawArrays(mode uint32, first, count int)
 	Enable(capability uint32)
 	EnableVertexAttribArray(attribute Attribute)
-	DisableVertexAttribArray(attribute Attribute)
 	GetAttribLocation(program Program, name string) Attribute
 	GetError() uint32
 	GetProgrami(program Program, param uint32) int
@@ -38,6 +37,7 @@ type context interface {
 	TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8)
 	TexParameteri(target, param uint32, value int32)
 	Uniform1f(uniform Uniform, v float32)
+	Uniform2f(uniform Uniform, v0, v1 float32)
 	Uniform4f(uniform Uniform, v0, v1, v2, v3 float32)
 	UseProgram(program Program)
 	VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int)
