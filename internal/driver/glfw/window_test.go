@@ -2014,6 +2014,6 @@ type tabbable struct {
 }
 
 func (t *tabbable) AcceptsTab() bool {
-	t.acceptTabCallCount += 1
+	t.acceptTabCallCount++
 	return true
 }
