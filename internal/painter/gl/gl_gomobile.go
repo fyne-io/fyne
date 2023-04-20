@@ -194,9 +194,6 @@ func (c *mobileContext) EnableVertexAttribArray(attribute Attribute) {
 	c.glContext.EnableVertexAttribArray(gl.Attrib(attribute))
 }
 
-func (c *mobileContext) DisableVertexAttribArray(attribute Attribute) {
-}
-
 func (c *mobileContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(c.glContext.GetAttribLocation(gl.Program(program), name))
 }
