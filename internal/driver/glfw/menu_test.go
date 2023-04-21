@@ -14,8 +14,8 @@ import (
 
 func Test_Menu_Empty(t *testing.T) {
 	w := createWindow("Menu Test").(*window)
-	bar := buildMenuOverlay(fyne.NewMainMenu(), w)
-	assert.Nil(t, bar) // no bar but does not crash
+	bar := buildMenuOverlay(fyne.NewMainMenu(), w) // does not crash but logs a Fyne error
+	assert.Nil(t, bar, "no bar for an empty menu: a main menu must have at least one entry => see error log")
 }
 
 func Test_Menu_AddsQuit(t *testing.T) {
