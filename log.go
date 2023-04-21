@@ -14,8 +14,10 @@ func LogError(reason string, err error) {
 		log.Println("  Cause:", err)
 	}
 
-	_, file, line, ok := runtime.Caller(1)
-	if ok {
-		log.Printf("  At: %s:%d", file, line)
+	for i := 1; i < 3; i++ {
+		_, file, line, ok := runtime.Caller(i)
+		if ok {
+			log.Printf("  At: %s:%d", file, line)
+		}
 	}
 }
