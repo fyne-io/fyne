@@ -1666,38 +1666,58 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 }
 
 func TestWindow_CloseInterception(t *testing.T) {
-	d := NewGLDriver()
-	w := d.CreateWindow("test").(*window)
-	w.create()
+	// Note: The #Close() is run asynchronously when the window is notified about the viewport close.
+	// Therefore, we have to wait some time before checking its state via the onClosed callback.
 
-	onIntercepted := false
-	onClosed := false
-	w.SetCloseIntercept(func() {
-		onIntercepted = true
+	d := NewGLDriver().(*gLDriver)
+	t.Run("when closing window with #Close()", func(t *testing.T) {
+		w := d.CreateWindow("test").(*window)
+		w.create()
+		onIntercepted := false
+		onClosed := false
+		w.SetCloseIntercept(func() { onIntercepted = true })
+		w.SetOnClosed(func() { onClosed = true })
+		w.Close()
+		w.WaitForEvents()
+		assert.False(t, onIntercepted, "the interceptor should not have been called")
+		assert.True(t, onClosed, "the on closed handler should have been called")
+		assert.True(t, w.viewport.ShouldClose()) // For #2694
+		w.destroy(d)
 	})
-	w.SetOnClosed(func() {
-		onClosed = true
+
+	t.Run("when window is closed from the outside (notified by GLFW callback)", func(t *testing.T) {
+		w := d.CreateWindow("test").(*window)
+		w.create()
+		onIntercepted := false
+		w.SetCloseIntercept(func() { onIntercepted = true })
+		closed := make(chan bool, 1)
+		w.SetOnClosed(func() { closed <- true })
+		w.closed(w.viewport)
+		w.WaitForEvents()
+		assert.True(t, onIntercepted, "the interceptor should have been called")
+		select {
+		case <-closed:
+			t.Error("window was unexpectedly closed")
+		case <-time.After(20 * time.Millisecond):
+			// hopefully enough time to let an unexpected asynchronous Close() finish.
+		}
+		w.destroy(d)
 	})
-	w.Close()
-	w.WaitForEvents()
-	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
-	assert.True(t, onClosed)
-	assert.True(t, w.viewport.ShouldClose()) // For #2694
 
-	w.closing = false // fake a fresh window
-	onIntercepted = false
-	onClosed = false
-	w.closed(w.viewport)
-	w.WaitForEvents()
-	assert.True(t, onIntercepted) // The interceptor is called by the closed.
-	assert.False(t, onClosed)     // If the interceptor is set Close is not called.
-
-	w.closing = false // fake a fresh window
-	onClosed = false
-	w.SetCloseIntercept(nil)
-	w.closed(w.viewport)
-	w.WaitForEvents()
-	assert.True(t, onClosed) // Close is called if the interceptor is not set.
+	t.Run("when window is closed from the outside but no interceptor is set", func(t *testing.T) {
+		w := d.CreateWindow("test").(*window)
+		w.create()
+		closed := make(chan bool, 1)
+		w.SetOnClosed(func() { closed <- true })
+		w.closed(w.viewport)
+		w.WaitForEvents()
+		select {
+		case <-closed:
+		case <-time.After(20 * time.Millisecond):
+			t.Error("window was not closed")
+		}
+		w.destroy(d)
+	})
 }
 
 func TestWindow_SetContent_Twice(t *testing.T) {
