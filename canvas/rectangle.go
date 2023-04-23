@@ -37,7 +37,7 @@ func (r *Rectangle) Move(pos fyne.Position) {
 	common.Repaint(r)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this rectangle to be redrawn with its configured state.
 func (r *Rectangle) Refresh() {
 	Refresh(r)
 }
