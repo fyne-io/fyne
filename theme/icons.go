@@ -467,8 +467,8 @@ var (
 		IconNameMenu:          NewThemedResource(menuIconRes),
 		IconNameMenuExpand:    NewThemedResource(menuexpandIconRes),
 
-		IconNameCheckButton:        NewThemedResource(checkboxblankIconRes),
-		IconNameCheckButtonChecked: NewThemedResource(checkboxIconRes),
+		IconNameCheckButton:        NewThemedResource(checkboxIconRes),
+		IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
 		IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
 		IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
 
