@@ -74,7 +74,7 @@ func (g *LinearGradient) Move(pos fyne.Position) {
 	common.Repaint(g)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this gradient to be redrawn with its configured state.
 func (g *LinearGradient) Refresh() {
 	Refresh(g)
 }
@@ -137,7 +137,7 @@ func (g *RadialGradient) Move(pos fyne.Position) {
 	common.Repaint(g)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this gradient to be redrawn with its configured state.
 func (g *RadialGradient) Refresh() {
 	Refresh(g)
 }

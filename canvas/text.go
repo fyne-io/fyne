@@ -58,7 +58,7 @@ func (t *Text) SetMinSize(fyne.Size) {
 	// no-op
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this text to be redrawn with its configured state.
 func (t *Text) Refresh() {
 	Refresh(t)
 }

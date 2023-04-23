@@ -89,7 +89,7 @@ func (l *Line) Hide() {
 	common.Repaint(l)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this line to be redrawn with its configured state.
 func (l *Line) Refresh() {
 	Refresh(l)
 }
