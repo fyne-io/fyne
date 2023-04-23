@@ -584,17 +584,3 @@ func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 		c.RLock()
 	}
 }
-
-// Repaint instructs the containing canvas to redraw, even if nothing changed.
-func Repaint(obj fyne.CanvasObject) {
-	if fyne.CurrentApp() == nil || fyne.CurrentApp().Driver() == nil {
-		return
-	}
-
-	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
-	if c != nil {
-		if paint, ok := c.(interface{ SetDirty() }); ok {
-			paint.SetDirty()
-		}
-	}
-}

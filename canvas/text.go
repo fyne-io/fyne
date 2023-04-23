@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // Declare conformity with CanvasObject interface
@@ -27,7 +26,7 @@ type Text struct {
 func (t *Text) Hide() {
 	t.baseObject.Hide()
 
-	common.Repaint(t)
+	repaint(t)
 }
 
 // MinSize returns the minimum size of this text object based on its font size and content.
@@ -40,7 +39,7 @@ func (t *Text) MinSize() fyne.Size {
 func (t *Text) Move(pos fyne.Position) {
 	t.baseObject.Move(pos)
 
-	common.Repaint(t)
+	repaint(t)
 }
 
 // Resize on a text updates the new size of this object, which may not result in a visual change, depending on alignment.

@@ -196,7 +196,7 @@ func (c *Container) layout() {
 }
 
 // repaint instructs the containing canvas to redraw, even if nothing changed.
-// This method is a duplicate of what is in `internal/driver/common/canvas.go` to avoid the dependency loop.
+// This method is a duplicate of what is in `canvas/canvas.go` to avoid a dependency loop or public API.
 func repaint(obj *Container) {
 	if CurrentApp() == nil || CurrentApp().Driver() == nil {
 		return

@@ -14,7 +14,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/storage"
@@ -96,7 +95,7 @@ func (i *Image) Aspect() float32 {
 func (i *Image) Hide() {
 	i.baseObject.Hide()
 
-	common.Repaint(i)
+	repaint(i)
 }
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
@@ -111,7 +110,7 @@ func (i *Image) MinSize() fyne.Size {
 func (i *Image) Move(pos fyne.Position) {
 	i.baseObject.Move(pos)
 
-	common.Repaint(i)
+	repaint(i)
 }
 
 // Refresh causes this image to be redrawn with its configured state.
