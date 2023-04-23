@@ -199,12 +199,12 @@ func Test_SearchReplaceIcon_FileSource(t *testing.T) {
 
 func Test_CheckButtonIcon_FileSource(t *testing.T) {
 	result := CheckButtonIcon().Name()
-	assert.Equal(t, "foreground_check-box-blank.svg", result)
+	assert.Equal(t, "foreground_check-box.svg", result)
 }
 
 func Test_CheckButtonCheckedIcon_FileSource(t *testing.T) {
 	result := CheckButtonCheckedIcon().Name()
-	assert.Equal(t, "foreground_check-box.svg", result)
+	assert.Equal(t, "foreground_check-box-checked.svg", result)
 }
 
 func Test_RadioButtonIcon_FileSource(t *testing.T) {
