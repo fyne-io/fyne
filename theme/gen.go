@@ -88,7 +88,7 @@ func main() {
 	bundleIcon("menu-expand", f)
 
 	bundleIcon("check-box", f)
-	bundleIcon("check-box-blank", f)
+	bundleIcon("check-box-checked", f)
 	bundleIcon("radio-button", f)
 	bundleIcon("radio-button-checked", f)
 
