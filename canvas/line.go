@@ -16,7 +16,7 @@ var _ fyne.CanvasObject = (*Line)(nil)
 // an inverse slope (i.e. slope up vs down).
 type Line struct {
 	Position1 fyne.Position // The current top-left position of the Line
-	Position2 fyne.Position // The current bottomright position of the Line
+	Position2 fyne.Position // The current bottom-right position of the Line
 	Hidden    bool          // Is this Line currently hidden
 
 	StrokeColor color.Color // The line stroke color
@@ -29,7 +29,7 @@ func (l *Line) Size() fyne.Size {
 		float32(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))))
 }
 
-// Resize sets a new bottom-right position for the line object and it will then be refreshed.
+// Resize sets a new bottom-right position for the line object, then it will then be refreshed.
 func (l *Line) Resize(size fyne.Size) {
 	if size == l.Size() {
 		return

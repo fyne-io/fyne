@@ -192,7 +192,7 @@ func NewHorizontalGradient(start, end color.Color) *LinearGradient {
 	return g
 }
 
-// NewLinearGradient creates a linear gradient at a the specified angle.
+// NewLinearGradient creates a linear gradient at the specified angle.
 // The angle parameter is the degree angle along which the gradient is calculated.
 // A NewHorizontalGradient uses 270 degrees and NewVerticalGradient is 0 degrees.
 func NewLinearGradient(start, end color.Color, angle float64) *LinearGradient {
