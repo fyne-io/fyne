@@ -69,21 +69,6 @@ func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
 
-// Resize on an image will scale the content or reposition it according to FillMode.
-// It will normally cause a Refresh to ensure the pixels are recalculated.
-func (i *Image) Resize(s fyne.Size) {
-	if s == i.Size() {
-		return
-	}
-	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
-		return
-	}
-
-	i.baseObject.Resize(s)
-
-	Refresh(i)
-}
-
 // Hide will set this image to not be visible
 func (i *Image) Hide() {
 	i.baseObject.Hide()
@@ -100,6 +85,21 @@ func (i *Image) Move(pos fyne.Position) {
 
 // Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
+	Refresh(i)
+}
+
+// Resize on an image will scale the content or reposition it according to FillMode.
+// It will normally cause a Refresh to ensure the pixels are recalculated.
+func (i *Image) Resize(s fyne.Size) {
+	if s == i.Size() {
+		return
+	}
+	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
+		return
+	}
+
+	i.baseObject.Resize(s)
+
 	Refresh(i)
 }
 
