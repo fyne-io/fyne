@@ -82,20 +82,6 @@ func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
 
-// Resize on an image will scale the content or reposition it according to FillMode.
-// It will normally cause a Refresh to ensure the pixels are recalculated.
-func (i *Image) Resize(s fyne.Size) {
-	if s == i.Size() {
-		return
-	}
-	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
-		return
-	}
-
-	i.baseObject.Resize(s)
-	i.Refresh()
-}
-
 // Aspect will return the original content aspect after it was last refreshed.
 //
 // Since: 2.4
@@ -183,6 +169,20 @@ func (i *Image) Refresh() {
 	}
 
 	Refresh(i)
+}
+
+// Resize on an image will scale the content or reposition it according to FillMode.
+// It will normally cause a Refresh to ensure the pixels are recalculated.
+func (i *Image) Resize(s fyne.Size) {
+	if s == i.Size() {
+		return
+	}
+	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
+		return
+	}
+
+	i.baseObject.Resize(s)
+	i.Refresh()
 }
 
 // NewImageFromFile creates a new image from a local file.
