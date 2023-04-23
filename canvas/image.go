@@ -14,6 +14,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/storage"
@@ -105,12 +106,26 @@ func (i *Image) Aspect() float32 {
 	return i.aspect
 }
 
+// Hide will set this image to not be visible
+func (i *Image) Hide() {
+	i.baseObject.Hide()
+
+	common.Repaint(i)
+}
+
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (i *Image) MinSize() fyne.Size {
 	if i.Image == nil || i.aspect == 0 {
 		i.Refresh()
 	}
 	return i.baseObject.MinSize()
+}
+
+// Move the image object to a new position, relative to its parent top, left corner.
+func (i *Image) Move(pos fyne.Position) {
+	i.baseObject.Move(pos)
+
+	common.Repaint(i)
 }
 
 // Refresh causes this object to be redrawn in it's current state

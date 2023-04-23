@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // Declare conformity with CanvasObject interface
@@ -20,6 +21,20 @@ type Rectangle struct {
 	//
 	// Since: 2.4
 	CornerRadius float32
+}
+
+// Hide will set this rectangle to not be visible
+func (r *Rectangle) Hide() {
+	r.baseObject.Hide()
+
+	common.Repaint(r)
+}
+
+// Move the rectangle to a new position, relative to its parent / canvas
+func (r *Rectangle) Move(pos fyne.Position) {
+	r.baseObject.Move(pos)
+
+	common.Repaint(r)
 }
 
 // Refresh causes this object to be redrawn in it's current state

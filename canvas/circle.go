@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // Declare conformity with CanvasObject interface
@@ -31,7 +32,7 @@ func NewCircle(color color.Color) *Circle {
 func (c *Circle) Hide() {
 	c.Hidden = true
 
-	c.Refresh()
+	common.Repaint(c)
 }
 
 // MinSize for a Circle simply returns Size{1, 1} as there is no
@@ -45,6 +46,7 @@ func (c *Circle) Move(pos fyne.Position) {
 	size := c.Size()
 	c.Position1 = pos
 	c.Position2 = fyne.NewPos(c.Position1.X+size.Width, c.Position1.Y+size.Height)
+	common.Repaint(c)
 }
 
 // Position gets the current top-left position of this circle object, relative to its parent / canvas

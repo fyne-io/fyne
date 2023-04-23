@@ -6,6 +6,7 @@ import (
 	"image/draw"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // Declare conformity with CanvasObject interface
@@ -29,6 +30,20 @@ type Raster struct {
 // based on its Translucency value. The result is 1.0 - Translucency.
 func (r *Raster) Alpha() float64 {
 	return 1.0 - r.Translucency
+}
+
+// Hide will set this raster to not be visible
+func (r *Raster) Hide() {
+	r.baseObject.Hide()
+
+	common.Repaint(r)
+}
+
+// Move the raster to a new position, relative to its parent / canvas
+func (r *Raster) Move(pos fyne.Position) {
+	r.baseObject.Move(pos)
+
+	common.Repaint(r)
 }
 
 // Resize on a raster image causes the new size to be set and then calls Refresh.

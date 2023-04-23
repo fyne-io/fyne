@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/common"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 )
 
@@ -76,6 +77,7 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 	defer w.propertyLock.Unlock()
 
 	w.position = pos
+	common.Repaint(w)
 }
 
 // MinSize for the widget - it should never be resized below this value.

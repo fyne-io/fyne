@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // Declare conformity with CanvasObject interface
@@ -60,6 +61,7 @@ func (l *Line) Move(pos fyne.Position) {
 
 	l.Position1 = l.Position1.Add(fyne.NewPos(deltaX, deltaY))
 	l.Position2 = l.Position2.Add(fyne.NewPos(deltaX, deltaY))
+	common.Repaint(l)
 }
 
 // MinSize for a Line simply returns Size{1, 1} as there is no
@@ -84,7 +86,7 @@ func (l *Line) Show() {
 func (l *Line) Hide() {
 	l.Hidden = true
 
-	l.Refresh()
+	common.Repaint(l)
 }
 
 // Refresh causes this object to be redrawn in it's current state
