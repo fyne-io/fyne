@@ -54,7 +54,7 @@ func (c *Circle) Position() fyne.Position {
 	return c.Position1
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this object to be redrawn with its configured state.
 func (c *Circle) Refresh() {
 	Refresh(c)
 }

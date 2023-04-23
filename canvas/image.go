@@ -47,7 +47,7 @@ const (
 var _ fyne.CanvasObject = (*Image)(nil)
 
 // Image describes a drawable image area that can render in a Fyne canvas
-// The image may be a vector or a bitmap representation and it will fill the area.
+// The image may be a vector or a bitmap representation, it will fill the area.
 // The fill mode can be changed by setting FillMode to a different ImageFill.
 type Image struct {
 	baseObject
@@ -98,7 +98,7 @@ func (i *Image) Move(pos fyne.Position) {
 	common.Repaint(i)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
 	Refresh(i)
 }
@@ -139,7 +139,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 }
 
 // NewImageFromReader creates a new image from a data stream.
-// The name parameter is required to uniquely identify this image (for caching etc).
+// The name parameter is required to uniquely identify this image (for caching etc.).
 // If the image in this io.Reader is an SVG, the name should end ".svg".
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.

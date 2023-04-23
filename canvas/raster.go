@@ -57,7 +57,7 @@ func (r *Raster) Resize(s fyne.Size) {
 	Refresh(r)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this raster to be redrawn with its configured state.
 func (r *Raster) Refresh() {
 	Refresh(r)
 }
@@ -166,25 +166,25 @@ func NewRasterFromImage(img image.Image) *Raster {
 			// respect the user's pixel format (if possible)
 			var dst draw.Image
 			switch i := img.(type) {
-			case (*image.Alpha):
+			case *image.Alpha:
 				dst = image.NewAlpha(rect)
-			case (*image.Alpha16):
+			case *image.Alpha16:
 				dst = image.NewAlpha16(rect)
-			case (*image.CMYK):
+			case *image.CMYK:
 				dst = image.NewCMYK(rect)
-			case (*image.Gray):
+			case *image.Gray:
 				dst = image.NewGray(rect)
-			case (*image.Gray16):
+			case *image.Gray16:
 				dst = image.NewGray16(rect)
-			case (*image.NRGBA):
+			case *image.NRGBA:
 				dst = image.NewNRGBA(rect)
-			case (*image.NRGBA64):
+			case *image.NRGBA64:
 				dst = image.NewNRGBA64(rect)
-			case (*image.Paletted):
+			case *image.Paletted:
 				dst = image.NewPaletted(rect, i.Palette)
-			case (*image.RGBA):
+			case *image.RGBA:
 				dst = image.NewRGBA(rect)
-			case (*image.RGBA64):
+			case *image.RGBA64:
 				dst = image.NewRGBA64(rect)
 			default:
 				dst = image.NewRGBA(rect)
