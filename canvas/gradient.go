@@ -4,6 +4,9 @@ import (
 	"image"
 	"image/color"
 	"math"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // LinearGradient defines a Gradient travelling straight at a given angle.
@@ -57,6 +60,20 @@ func (g *LinearGradient) Generate(iw, ih int) image.Image {
 	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
 }
 
+// Hide will set this gradient to not be visible
+func (g *LinearGradient) Hide() {
+	g.baseObject.Hide()
+
+	common.Repaint(g)
+}
+
+// Move the gradient to a new position, relative to its parent / canvas
+func (g *LinearGradient) Move(pos fyne.Position) {
+	g.baseObject.Move(pos)
+
+	common.Repaint(g)
+}
+
 // Refresh causes this object to be redrawn in it's current state
 func (g *LinearGradient) Refresh() {
 	Refresh(g)
@@ -104,6 +121,20 @@ func (g *RadialGradient) Generate(iw, ih int) image.Image {
 		return da / a
 	}
 	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
+}
+
+// Hide will set this gradient to not be visible
+func (g *RadialGradient) Hide() {
+	g.baseObject.Hide()
+
+	common.Repaint(g)
+}
+
+// Move the gradient to a new position, relative to its parent / canvas
+func (g *RadialGradient) Move(pos fyne.Position) {
+	g.baseObject.Move(pos)
+
+	common.Repaint(g)
 }
 
 // Refresh causes this object to be redrawn in it's current state

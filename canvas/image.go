@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/storage"
 )
 
@@ -81,6 +82,20 @@ func (i *Image) Resize(s fyne.Size) {
 	i.baseObject.Resize(s)
 
 	Refresh(i)
+}
+
+// Hide will set this image to not be visible
+func (i *Image) Hide() {
+	i.baseObject.Hide()
+
+	common.Repaint(i)
+}
+
+// Move the image object to a new position, relative to its parent top, left corner.
+func (i *Image) Move(pos fyne.Position) {
+	i.baseObject.Move(pos)
+
+	common.Repaint(i)
 }
 
 // Refresh causes this object to be redrawn in it's current state
