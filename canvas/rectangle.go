@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/driver/common"
 )
 
 // Declare conformity with CanvasObject interface
@@ -23,14 +22,14 @@ type Rectangle struct {
 func (r *Rectangle) Hide() {
 	r.baseObject.Hide()
 
-	common.Repaint(r)
+	repaint(r)
 }
 
 // Move the rectangle to a new position, relative to its parent / canvas
 func (r *Rectangle) Move(pos fyne.Position) {
 	r.baseObject.Move(pos)
 
-	common.Repaint(r)
+	repaint(r)
 }
 
 // Refresh causes this rectangle to be redrawn with its configured state.

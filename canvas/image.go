@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/storage"
 )
 
@@ -73,14 +72,14 @@ func (i *Image) Alpha() float64 {
 func (i *Image) Hide() {
 	i.baseObject.Hide()
 
-	common.Repaint(i)
+	repaint(i)
 }
 
 // Move the image object to a new position, relative to its parent top, left corner.
 func (i *Image) Move(pos fyne.Position) {
 	i.baseObject.Move(pos)
 
-	common.Repaint(i)
+	repaint(i)
 }
 
 // Refresh causes this image to be redrawn with its configured state.

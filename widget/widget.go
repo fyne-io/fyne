@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver/common"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 )
 
@@ -77,7 +76,7 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 	defer w.propertyLock.Unlock()
 
 	w.position = pos
-	common.Repaint(w)
+	repaint(w)
 }
 
 // MinSize for the widget - it should never be resized below this value.
@@ -207,4 +206,19 @@ func (w *DisableableWidget) Disabled() bool {
 // Since: 2.1
 func NewSimpleRenderer(object fyne.CanvasObject) fyne.WidgetRenderer {
 	return internalWidget.NewSimpleRenderer(object)
+}
+
+// repaint instructs the containing canvas to redraw, even if nothing changed.
+// This method is a duplicate of what is in `canvas/canvas.go` to avoid a dependency loop or public API.
+func repaint(obj fyne.CanvasObject) {
+	if fyne.CurrentApp() == nil || fyne.CurrentApp().Driver() == nil {
+		return
+	}
+
+	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
+	if c != nil {
+		if paint, ok := c.(interface{ SetDirty() }); ok {
+			paint.SetDirty()
+		}
+	}
 }
