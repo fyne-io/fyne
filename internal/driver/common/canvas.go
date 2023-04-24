@@ -38,8 +38,6 @@ type Canvas struct {
 
 	painter gl.Painter
 
-	serializeRefresh sync.Mutex
-
 	// Any object that requestes to enter to the refresh queue should
 	// not be omitted as it is always a rendering task's decision
 	// for skipping frames or drawing calls.
@@ -320,14 +318,12 @@ func (c *Canvas) Refresh(obj fyne.CanvasObject) {
 	}
 
 	if walkNeeded {
-		c.serializeRefresh.Lock()
 		driver.WalkCompleteObjectTree(obj, func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
 			if i, ok := co.(*canvas.Image); ok {
 				i.Refresh()
 			}
 			return false
 		}, nil)
-		c.serializeRefresh.Unlock()
 	}
 
 	c.refreshQueue.In(obj)
