@@ -55,7 +55,7 @@ const (
 var _ fyne.CanvasObject = (*Image)(nil)
 
 // Image describes a drawable image area that can render in a Fyne canvas
-// The image may be a vector or a bitmap representation and it will fill the area.
+// The image may be a vector or a bitmap representation, it will fill the area.
 // The fill mode can be changed by setting FillMode to a different ImageFill.
 type Image struct {
 	baseObject
@@ -81,20 +81,6 @@ func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
 
-// Resize on an image will scale the content or reposition it according to FillMode.
-// It will normally cause a Refresh to ensure the pixels are recalculated.
-func (i *Image) Resize(s fyne.Size) {
-	if s == i.Size() {
-		return
-	}
-	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
-		return
-	}
-
-	i.baseObject.Resize(s)
-	i.Refresh()
-}
-
 // Aspect will return the original content aspect after it was last refreshed.
 //
 // Since: 2.4
@@ -105,6 +91,13 @@ func (i *Image) Aspect() float32 {
 	return i.aspect
 }
 
+// Hide will set this image to not be visible
+func (i *Image) Hide() {
+	i.baseObject.Hide()
+
+	repaint(i)
+}
+
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (i *Image) MinSize() fyne.Size {
 	if i.Image == nil || i.aspect == 0 {
@@ -113,7 +106,14 @@ func (i *Image) MinSize() fyne.Size {
 	return i.baseObject.MinSize()
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Move the image object to a new position, relative to its parent top, left corner.
+func (i *Image) Move(pos fyne.Position) {
+	i.baseObject.Move(pos)
+
+	repaint(i)
+}
+
+// Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
 	i.lock.Lock()
 	defer i.lock.Unlock()
@@ -158,16 +158,30 @@ func (i *Image) Refresh() {
 				return
 			}
 
-			image, _, err := image.Decode(rc)
+			img, _, err := image.Decode(rc)
 			if err != nil {
 				fyne.LogError("Failed to render image", err)
 				return
 			}
-			i.Image = image
+			i.Image = img
 		}
 	}
 
 	Refresh(i)
+}
+
+// Resize on an image will scale the content or reposition it according to FillMode.
+// It will normally cause a Refresh to ensure the pixels are recalculated.
+func (i *Image) Resize(s fyne.Size) {
+	if s == i.Size() {
+		return
+	}
+	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
+		return
+	}
+
+	i.baseObject.Resize(s)
+	i.Refresh()
 }
 
 // NewImageFromFile creates a new image from a local file.
@@ -202,7 +216,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 }
 
 // NewImageFromReader creates a new image from a data stream.
-// The name parameter is required to uniquely identify this image (for caching etc).
+// The name parameter is required to uniquely identify this image (for caching etc.).
 // If the image in this io.Reader is an SVG, the name should end ".svg".
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
