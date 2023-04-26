@@ -1,6 +1,6 @@
 module fyne.io/fyne/v2
 
-go 1.14
+go 1.17
 
 require (
 	fyne.io/systray v1.10.1-0.20230403195833-7dc3c09283d6
@@ -32,4 +32,18 @@ require (
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
 	golang.org/x/tools v0.1.12
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
+)
+
+require (
+	github.com/akavel/rsrc v0.10.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/tevino/abool v1.2.0 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/text v0.7.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
