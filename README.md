@@ -38,8 +38,6 @@ To run a showcase of the features of Fyne execute the following:
     go install fyne.io/fyne/v2/cmd/fyne_demo@latest
     fyne_demo
 
-(For Go versions earlier than v1.16 use `go get fyne.io/fyne/v2/cmd/fyne_demo`)
-
 And you should see something like this (after you click a few buttons):
 
 <p align="center" markdown="1" style="max-width: 100%">
@@ -126,8 +124,6 @@ application location you can use the fyne utility and the "install" subcommand.
 
     go install fyne.io/fyne/v2/cmd/fyne@latest
     fyne install
-
-(for Go versions before v1.16 use `go get fyne.io/fyne/v2/cmd/fyne`)
 
 # Packaging for mobile
 
