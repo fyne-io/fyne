@@ -66,16 +66,16 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
 	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
-	assert.Equal(t, "primary_"+theme.RadioButtonCheckedIcon().Name(), render.icon.Resource.Name())
+	icon := fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill")
+	assert.Equal(t, "primary_"+icon.Name(), render.icon.Resource.Name())
 
 	radio.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.RadioButtonCheckedIcon().Name()), render.icon.Resource.Name())
+	assert.Equal(t, fmt.Sprintf("background_%v", icon.Name()), render.icon.Resource.Name())
 }
 
 func TestRadioGroup_DisableWhenNotSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
-	assert.True(t, render.icon.Hidden)
 
 	radio.Disable()
 	resName := render.over.Resource.Name()
