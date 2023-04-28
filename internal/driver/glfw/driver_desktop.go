@@ -170,6 +170,10 @@ func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
 }
 
+func (d *gLDriver) CurrentKeyModifiers() fyne.KeyModifier {
+	return d.currentKeyModifiers
+}
+
 func catchTerm(d *gLDriver) {
 	terminateSignals := make(chan os.Signal, 1)
 	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)

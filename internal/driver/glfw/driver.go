@@ -46,6 +46,8 @@ type gLDriver struct {
 
 	animation *animation.Runner
 
+	currentKeyModifiers fyne.KeyModifier // desktop driver only
+
 	trayStart, trayStop func()     // shut down the system tray, if used
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
 }
