@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.4 - 2 May 2023
+## 2.3.4 - 3 May 2023
 
 ### Fixed
 
@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Start of selection in entry is shifted when moving too fast (#3804)
 * Performance issue in widget.List (#3816)
 * Moving canvas items (e.g. Images) does not cause canvas repaint (#2205)
+* Minor graphic glitch with checkbox (#3792)
 * VBox and HBox using heap memory that was not required
 * Menu hover is slow on long menus
 
