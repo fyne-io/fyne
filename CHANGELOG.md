@@ -3,11 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.4 - Ongoing
+## 2.3.4 - 2 May 2023
 
 ### Fixed
 
 * Memory leak when switching theme (#3640)
+* Systray MenuItem separators not rendered in macOS root menu (#3759)
+* Systray leaks window handles on Windows (#3760)
+* RadioGroup miscalculates label widths in horizontal mode (#3386)
+* Start of selection in entry is shifted when moving too fast (#3804)
+* Performance issue in widget.List (#3816)
+* Moving canvas items (e.g. Images) does not cause canvas repaint (#2205)
+* VBox and HBox using heap memory that was not required
+* Menu hover is slow on long menus
 
 
 ## 2.3.3 - 24 March 2023
