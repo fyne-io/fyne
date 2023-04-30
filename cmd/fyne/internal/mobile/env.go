@@ -343,7 +343,7 @@ func archNDK() string {
 			break
 		}
 		if runtime.GOOS == "android" { // termux
-		   return "linux-aarch64"
+			return "linux-aarch64"
 		}
 		fallthrough
 	default:
