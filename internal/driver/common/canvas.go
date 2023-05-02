@@ -99,7 +99,9 @@ func (c *Canvas) EnsureMinSize() bool {
 				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != csize {
 					objToLayout = nil
+					c.RUnlock()
 					obj.Resize(expectedSize)
+					c.RLock()
 				}
 			}
 
@@ -113,7 +115,9 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
 	if shouldResize {
+		c.RUnlock()
 		c.impl.Resize(csize.Max(min))
+		c.RLock()
 	}
 
 	if lastParent != nil {
