@@ -73,9 +73,10 @@ func (w *BaseWidget) Position() fyne.Position {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
 	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
-
 	w.position = pos
+	w.propertyLock.Unlock()
+
+	internalWidget.Repaint(w.super())
 }
 
 // MinSize for the widget - it should never be resized below this value.

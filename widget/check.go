@@ -14,8 +14,7 @@ import (
 
 type checkRenderer struct {
 	widget.BaseRenderer
-	bg             *canvas.Rectangle
-	icon           *canvas.Image
+	bg, icon       *canvas.Image
 	label          *canvas.Text
 	focusIndicator *canvas.Circle
 	check          *Check
@@ -46,19 +45,17 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 
 	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-	c.bg.Move(iconPos.AddXY(4, 4)) // absolute numbers to move relative to SVG details
-	c.bg.Resize(iconSize.SubtractWidthHeight(8, 8))
+	c.bg.Move(iconPos)
+	c.bg.Resize(iconSize)
 	c.icon.Resize(iconSize)
 	c.icon.Move(iconPos)
 }
 
 // applyTheme updates this Check to the current theme
 func (c *checkRenderer) applyTheme() {
-	c.bg.FillColor = color.Transparent
 	c.label.Color = theme.ForegroundColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.disabled {
-		c.bg.FillColor = theme.InputBackgroundColor()
 		c.label.Color = theme.DisabledColor()
 	}
 }
@@ -80,20 +77,24 @@ func (c *checkRenderer) updateLabel() {
 func (c *checkRenderer) updateResource() {
 	res := theme.NewThemedResource(theme.CheckButtonIcon())
 	res.ColorName = theme.ColorNameInputBorder
-	c.bg.FillColor = theme.InputBackgroundColor()
+	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
+	bgRes := theme.NewThemedResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
+	bgRes.ColorName = theme.ColorNameInputBackground
+
 	if c.check.Checked {
 		res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		res.ColorName = theme.ColorNamePrimary
-		c.bg.FillColor = theme.BackgroundColor()
+		bgRes.ColorName = theme.ColorNameBackground
 	}
 	if c.check.disabled {
 		if c.check.Checked {
 			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
 		res.ColorName = theme.ColorNameDisabled
-		c.bg.FillColor = color.Transparent
+		bgRes.ColorName = theme.ColorNameBackground
 	}
 	c.icon.Resource = res
+	c.bg.Resource = bgRes
 }
 
 func (c *checkRenderer) updateFocusIndicator() {
@@ -209,7 +210,8 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
-	bg := canvas.NewRectangle(theme.InputBackgroundColor())
+	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
+	bg := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.ForegroundColor())

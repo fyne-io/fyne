@@ -13,3 +13,17 @@ func Refresh(obj fyne.CanvasObject) {
 		c.Refresh(obj)
 	}
 }
+
+// repaint instructs the containing canvas to redraw, even if nothing changed.
+func repaint(obj fyne.CanvasObject) {
+	if fyne.CurrentApp() == nil || fyne.CurrentApp().Driver() == nil {
+		return
+	}
+
+	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
+	if c != nil {
+		if paint, ok := c.(interface{ SetDirty() }); ok {
+			paint.SetDirty()
+		}
+	}
+}

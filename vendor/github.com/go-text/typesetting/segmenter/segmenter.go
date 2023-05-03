@@ -15,7 +15,7 @@ package segmenter
 import (
 	"unicode"
 
-	ucd "github.com/benoitkugler/textlayout/unicodedata"
+	ucd "github.com/go-text/typesetting/unicodedata"
 )
 
 // runeAttr is a flag storing the break properties between two runes of

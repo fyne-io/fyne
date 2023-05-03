@@ -242,20 +242,7 @@ func TestList_Selection(t *testing.T) {
 }
 
 func TestList_Select(t *testing.T) {
-	list := NewList(
-		func() int {
-			return 5
-		},
-		func() fyne.CanvasObject {
-			return NewLabel("")
-		},
-		func(id ListItemID, item fyne.CanvasObject) {
-		},
-	)
-	list.Resize(fyne.NewSize(20, 20))
-	list.Select(3)
-
-	list = createList(1000)
+	list := createList(1000)
 
 	assert.Equal(t, float32(0), list.offsetY)
 	list.Select(50)
