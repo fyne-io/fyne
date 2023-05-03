@@ -732,6 +732,9 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		return
 	}
 
+	// theme.Padding is a slow call, so we cache it
+	padding := theme.Padding()
+
 	stick := t.StickyRowCount
 	for i := 0; i < rows; i++ {
 		height := rowHeight
@@ -739,7 +742,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			height = h
 		}
 
-		if rowOffset <= t.offset.Y-height-theme.Padding() {
+		if rowOffset <= t.offset.Y-height-padding {
 			// before visible content
 		} else if rowOffset <= headHeight || rowOffset <= t.offset.Y {
 			minRow = i
@@ -752,7 +755,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			break
 		}
 
-		rowOffset += height + theme.Padding()
+		rowOffset += height + padding
 		if isVisible || i < stick {
 			visible[i] = height
 		}
