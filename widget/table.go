@@ -729,8 +729,38 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		return
 	}
 
-	stick := t.StickyColumnCount
+	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
+	stick := t.StickyColumnCount
+
+	if len(t.columnWidths) == 0 {
+		paddedWidth := colWidth + padding
+
+		offX = float32(math.Floor(float64(t.offset.X/paddedWidth))) * paddedWidth
+		minCol = int(math.Floor(float64(offX / paddedWidth)))
+		maxCol = int(math.Ceil(float64((t.offset.X+t.size.Width)/paddedWidth))) + 1
+
+		if minCol > cols-1 {
+			minCol = cols - 1
+		}
+		if minCol < 0 {
+			minCol = 0
+		}
+
+		if maxCol > cols {
+			maxCol = cols
+		}
+
+		visible = make(map[int]float32, maxCol-minCol+stick)
+		for i := minCol; i < maxCol; i++ {
+			visible[i] = colWidth
+		}
+		for i := 0; i < stick; i++ {
+			visible[i] = colWidth
+		}
+		return
+	}
+
 	for i := 0; i < cols; i++ {
 		width := colWidth
 		if w, ok := t.columnWidths[i]; ok {
@@ -801,8 +831,36 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
-
 	stick := t.StickyRowCount
+
+	if len(t.rowHeights) == 0 {
+		paddedHeight := rowHeight + padding
+
+		offY = float32(math.Floor(float64(t.offset.Y/paddedHeight))) * paddedHeight
+		minRow = int(math.Floor(float64(offY / paddedHeight)))
+		maxRow = int(math.Ceil(float64((t.offset.Y+t.size.Height)/paddedHeight))) + 1
+
+		if minRow > rows-1 {
+			minRow = rows - 1
+		}
+		if minRow < 0 {
+			minRow = 0
+		}
+
+		if maxRow > rows {
+			maxRow = rows
+		}
+
+		visible = make(map[int]float32, maxRow-minRow+stick)
+		for i := minRow; i < maxRow; i++ {
+			visible[i] = rowHeight
+		}
+		for i := 0; i < stick; i++ {
+			visible[i] = rowHeight
+		}
+		return
+	}
+
 	for i := 0; i < rows; i++ {
 		height := rowHeight
 		if h, ok := t.rowHeights[i]; ok {
