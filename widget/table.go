@@ -688,6 +688,37 @@ func (t *Table) updateHeader(id TableCellID, o fyne.CanvasObject) {
 	}
 }
 
+func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float32) {
+	if cols == 0 {
+		return []float32{}
+	}
+
+	max := t.StickyColumnCount
+	if max > cols {
+		max = cols
+	}
+
+	visible = make([]float32, max)
+
+	if len(t.columnWidths) == 0 {
+		for i := 0; i < max; i++ {
+			visible[i] = colWidth
+		}
+		return
+	}
+
+	for i := 0; i < max; i++ {
+		height := colWidth
+
+		if h, ok := t.columnWidths[i]; ok {
+			height = h
+		}
+
+		visible[i] = height
+	}
+	return
+}
+
 func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int]float32, offX float32, minCol, maxCol int) {
 	maxCol = cols
 	colOffset, headWidth := float32(0), float32(0)
@@ -723,6 +754,37 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		if isVisible || i < stick {
 			visible[i] = width
 		}
+	}
+	return
+}
+
+func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32) {
+	if rows == 0 {
+		return []float32{}
+	}
+
+	max := t.StickyRowCount
+	if max > rows {
+		max = rows
+	}
+
+	visible = make([]float32, max)
+
+	if len(t.rowHeights) == 0 {
+		for i := 0; i < max; i++ {
+			visible[i] = rowHeight
+		}
+		return
+	}
+
+	for i := 0; i < max; i++ {
+		height := rowHeight
+
+		if h, ok := t.rowHeights[i]; ok {
+			height = h
+		}
+
+		visible[i] = height
 	}
 	return
 }
@@ -859,17 +921,17 @@ func (t *tableRenderer) calculateHeaderSizes() {
 	}
 
 	separatorThickness := theme.Padding()
-	visibleColWidths, _, _, _ := t.t.visibleColumnWidths(t.t.cellSize.Width, t.t.StickyColumnCount)
-	visibleRowHeights, _, _, _ := t.t.visibleRowHeights(t.t.cellSize.Height, t.t.StickyRowCount)
+	stickyColWidths := t.t.stickyColumnWidths(t.t.cellSize.Width, t.t.StickyColumnCount)
+	stickyRowHeights := t.t.stickyRowHeights(t.t.cellSize.Height, t.t.StickyRowCount)
 
 	var stuckHeight float32
-	for row := 0; row < t.t.StickyRowCount; row++ {
-		stuckHeight += visibleRowHeights[row] + separatorThickness
+	for _, rowHeight := range stickyRowHeights {
+		stuckHeight += rowHeight + separatorThickness
 	}
 	t.t.stuckHeight = stuckHeight
 	var stuckWidth float32
-	for col := 0; col < t.t.StickyColumnCount; col++ {
-		stuckWidth += visibleColWidths[col] + separatorThickness
+	for _, colWidth := range stickyColWidths {
+		stuckWidth += colWidth + separatorThickness
 	}
 	t.t.stuckWidth = stuckWidth
 }
