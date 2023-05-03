@@ -13,13 +13,17 @@ type boxLayout struct {
 }
 
 // NewHBoxLayout returns a horizontal box layout for stacking a number of child
-// canvas objects or widgets left to right.
+// canvas objects or widgets left to right. The objects are always displayed
+// at their horizontal MinSize. Use a different layout if the objects are intended
+// to be larger then their horizontal MinSize.
 func NewHBoxLayout() fyne.Layout {
 	return &boxLayout{true}
 }
 
 // NewVBoxLayout returns a vertical box layout for stacking a number of child
-// canvas objects or widgets top to bottom.
+// canvas objects or widgets top to bottom. The objects are always displayed
+// at their vertical MinSize. Use a different layout if the objects are intended
+// to be larger then their vertical MinSize.
 func NewVBoxLayout() fyne.Layout {
 	return &boxLayout{false}
 }
