@@ -52,7 +52,7 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 			return container.NewBorder(nil, nil, nil, widget.NewButton("+", nil),
 				widget.NewLabel("item x.y"))
 		},
-		func(id widget.ListItemID, item binding.DataItem, obj fyne.CanvasObject) {
+		func(item binding.DataItem, obj fyne.CanvasObject) {
 			f := item.(binding.Float)
 			text := obj.(*fyne.Container).Objects[0].(*widget.Label)
 			text.Bind(binding.FloatToStringWithFormat(f, "item %0.1f"))
