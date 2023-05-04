@@ -14,6 +14,8 @@ import (
 )
 
 func TestGLDriver_StartAnimation(t *testing.T) {
+	// ticker simulates animations ticker goroutine
+	ticker := time.NewTicker(time.Second / 60).C
 	done := make(chan float32)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -24,6 +26,8 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 
 	run.Start(a)
 	select {
+	case <-ticker:
+		run.TickAnimations()
 	case d := <-done:
 		assert.Greater(t, d, float32(0))
 	case <-time.After(100 * time.Millisecond):
@@ -32,6 +36,8 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 }
 
 func TestGLDriver_StopAnimation(t *testing.T) {
+	// ticker simulates animations ticker goroutine
+	ticker := time.NewTicker(time.Second / 60).C
 	done := make(chan float32)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -42,6 +48,8 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 
 	run.Start(a)
 	select {
+	case <-ticker:
+		run.TickAnimations()
 	case d := <-done:
 		assert.Greater(t, d, float32(0))
 	case <-time.After(time.Second):
@@ -85,6 +93,13 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		Duration: time.Second,
 		Tick:     func(f float32) {},
 	}
+	// Animations ticker goroutine simulation
+	go func() {
+		for {
+			run.TickAnimations()
+			time.Sleep(time.Second / 60)
+		}
+	}()
 	run.Start(c)
 	run.Stop(c)
 
