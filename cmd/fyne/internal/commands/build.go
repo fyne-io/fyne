@@ -90,6 +90,7 @@ func Build() *cli.Command {
 // Build parse the tags and start building
 func (b *Builder) Build() error {
 	if b.srcdir != "" {
+		b.srcdir = util.EnsureAbsPath(b.srcdir)
 		dirStat, err := os.Stat(b.srcdir)
 		if err != nil {
 			return err
@@ -197,14 +198,19 @@ func (b *Builder) build() error {
 		}
 	}
 
+	srcdir, err := b.computeSrcDir(fyneGoModRunner)
+	if err != nil {
+		return err
+	}
+
 	if b.icon == "" {
-		defaultIcon := filepath.Join(b.srcdir, "Icon.png")
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
 		if util.Exists(defaultIcon) {
 			b.icon = defaultIcon
 		}
 	}
 
-	close, err := injectMetadataIfPossible(fyneGoModRunner, b.srcdir, b.appData, createMetadataInitFile)
+	close, err := injectMetadataIfPossible(fyneGoModRunner, srcdir, b.appData, createMetadataInitFile)
 	if err != nil {
 		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
 	} else if close != nil {
@@ -219,18 +225,22 @@ func (b *Builder) build() error {
 		appendEnv(&env, "CGO_LDFLAGS", "-mmacosx-version-min=10.11")
 	}
 
+	ldFlags := extractLdflagsFromGoFlags()
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
-		if goos == "windows" {
-			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui", "-trimpath")
-			} else {
-				args = append(args, "-ldflags", "-H=windowsgui ")
-			}
-		} else if b.release {
-			args = append(args, "-ldflags", "-s -w", "-trimpath")
+		if b.release {
+			ldFlags += " -s -w"
+			args = append(args, "-trimpath")
 		}
+
+		if goos == "windows" {
+			ldFlags += " -H=windowsgui"
+		}
+	}
+
+	if len(ldFlags) > 0 {
+		args = append(args, "-ldflags", strings.TrimSpace(ldFlags))
 	}
 
 	if b.target != "" {
@@ -282,9 +292,31 @@ func (b *Builder) build() error {
 	return err
 }
 
+func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
+	if b.goPackage == "" || b.goPackage == "." {
+		return b.srcdir, nil
+	}
+
+	srcdir := b.srcdir
+	if strings.HasPrefix(b.goPackage, "."+string(os.PathSeparator)) ||
+		strings.HasPrefix(b.goPackage, ".."+string(os.PathSeparator)) {
+		srcdir = filepath.Join(srcdir, b.goPackage)
+	} else if strings.HasPrefix(b.goPackage, string(os.PathSeparator)) {
+		srcdir = b.goPackage
+	} else {
+		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
+	}
+	return srcdir, nil
+}
+
 func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	data, err := metadata.LoadStandard(srcdir)
 	if err == nil {
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		if data.Details.Icon != "" {
+			data.Details.Icon = util.MakePathRelativeTo(srcdir, data.Details.Icon)
+		}
+
 		app.mergeMetadata(data)
 	}
 
@@ -356,4 +388,40 @@ func appendEnv(env *[]string, varName, value string) {
 	}
 
 	*env = append(*env, varName+"="+value)
+}
+
+func extractLdflagsFromGoFlags() string {
+	goFlags := os.Getenv("GOFLAGS")
+
+	ldFlags, goFlags := extractLdFlags(goFlags)
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
+	} else {
+		os.Unsetenv("GOFLAGS")
+	}
+
+	return ldFlags
+}
+
+func extractLdFlags(goFlags string) (string, string) {
+	if goFlags == "" {
+		return "", ""
+	}
+
+	flags := strings.Fields(goFlags)
+	ldflags := ""
+	newGoFlags := ""
+
+	for _, flag := range flags {
+		if strings.HasPrefix(flag, "-ldflags=") {
+			ldflags += strings.TrimPrefix(flag, "-ldflags=") + " "
+		} else {
+			newGoFlags += flag + " "
+		}
+	}
+
+	ldflags = strings.TrimSpace(ldflags)
+	newGoFlags = strings.TrimSpace(newGoFlags)
+
+	return ldflags, newGoFlags
 }

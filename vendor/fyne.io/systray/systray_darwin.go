@@ -111,8 +111,8 @@ func addOrUpdateMenuItem(item *MenuItem) {
 	)
 }
 
-func addSeparator(id uint32) {
-	C.add_separator(C.int(id))
+func addSeparator(id uint32, parent uint32) {
+	C.add_separator(C.int(id), C.int(parent))
 }
 
 func hideMenuItem(item *MenuItem) {
@@ -123,6 +123,12 @@ func hideMenuItem(item *MenuItem) {
 
 func showMenuItem(item *MenuItem) {
 	C.show_menu_item(
+		C.int(item.id),
+	)
+}
+
+func removeMenuItem(item *MenuItem) {
+	C.remove_menu_item(
 		C.int(item.id),
 	)
 }
@@ -138,7 +144,7 @@ func systray_ready() {
 
 //export systray_on_exit
 func systray_on_exit() {
-	systrayExit()
+	runSystrayExit()
 }
 
 //export systray_menu_item_selected

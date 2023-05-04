@@ -74,6 +74,10 @@ func runOnMain(f func()) {
 
 // force a function f to run on the draw thread
 func runOnDraw(w *window, f func()) {
+	if drawOnMainThread {
+		runOnMain(func() { w.RunWithContext(f) })
+		return
+	}
 	done := donePool.Get().(chan struct{})
 	defer donePool.Put(done)
 
@@ -172,7 +176,7 @@ func (d *gLDriver) runGL() {
 
 				newWindows = append(newWindows, win)
 
-				if d.drawOnMainThread {
+				if drawOnMainThread {
 					d.drawSingleFrame()
 				}
 			}
@@ -217,7 +221,7 @@ func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 	var drawCh <-chan time.Time
-	if d.drawOnMainThread {
+	if drawOnMainThread {
 		drawCh = make(chan time.Time) // don't tick when on M1
 	} else {
 		drawCh = time.NewTicker(time.Second / 60).C

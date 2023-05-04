@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -230,6 +232,36 @@ func Test_BuildWasmOldVersion(t *testing.T) {
 	wasmBuildTest.verifyExpectation()
 }
 
+func Test_BuildLinuxReleaseVersion(t *testing.T) {
+	relativePath := "." + string(os.PathSeparator) + filepath.Join("cmd", "terminal")
+
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-trimpath", "-ldflags", "-s -w", "-tags", "release", relativePath},
+				env:   []string{"CGO_ENABLED=1", "GOOS=linux"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
+	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: relativePath}
+	err := b.build()
+	assert.Nil(t, err)
+	linuxBuildTest.verifyExpectation()
+}
+
 type jsonTest struct {
 	expected bool
 	json     []byte
@@ -279,5 +311,26 @@ func Test_AppendEnv(t *testing.T) {
 		assert.Equal(t, "bar=baz", env[1])
 		assert.Equal(t, "foo1=bar=baz -bar", env[2])
 		assert.Equal(t, "foo2=baz2", env[3])
+	}
+}
+
+type extractTest struct {
+	value       string
+	wantLdFlags string
+	wantGoFlags string
+}
+
+func Test_ExtractLdFlags(t *testing.T) {
+	goFlagsTests := []extractTest{
+		{"-ldflags=-w", "-w", ""},
+		{"-ldflags=-s", "-s", ""},
+		{"-ldflags=-w -ldflags=-s", "-w -s", ""},
+		{"-mod=vendor", "", "-mod=vendor"},
+	}
+
+	for _, test := range goFlagsTests {
+		ldFlags, goFlags := extractLdFlags(test.value)
+		assert.Equal(t, test.wantLdFlags, ldFlags)
+		assert.Equal(t, test.wantGoFlags, goFlags)
 	}
 }

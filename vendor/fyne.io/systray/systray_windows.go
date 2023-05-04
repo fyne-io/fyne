@@ -41,6 +41,8 @@ var (
 	pCreatePopupMenu       = u32.NewProc("CreatePopupMenu")
 	pCreateWindowEx        = u32.NewProc("CreateWindowExW")
 	pDefWindowProc         = u32.NewProc("DefWindowProcW")
+	pDeleteMenu            = u32.NewProc("DeleteMenu")
+	pDestroyMenu           = u32.NewProc("DestroyMenu")
 	pRemoveMenu            = u32.NewProc("RemoveMenu")
 	pDestroyWindow         = u32.NewProc("DestroyWindow")
 	pDispatchMessage       = u32.NewProc("DispatchMessageW")
@@ -323,7 +325,7 @@ func (t *winTray) wndProc(hWnd windows.Handle, message uint32, wParam, lParam ui
 			t.nid.delete()
 		}
 		t.muNID.Unlock()
-		systrayExit()
+		runSystrayExit()
 	case t.wmSystrayMessage:
 		switch lParam {
 		case WM_RBUTTONUP, WM_LBUTTONUP:
@@ -673,6 +675,30 @@ func (t *winTray) addSeparatorMenuItem(menuItemId, parentId uint32) error {
 	return nil
 }
 
+func (t *winTray) removeMenuItem(menuItemId, parentId uint32) error {
+	if !wt.isReady() {
+		return ErrTrayNotReadyYet
+	}
+
+	const MF_BYCOMMAND = 0x00000000
+	const ERROR_SUCCESS syscall.Errno = 0
+
+	t.muMenus.RLock()
+	menu := uintptr(t.menus[parentId])
+	t.muMenus.RUnlock()
+	res, _, err := pDeleteMenu.Call(
+		menu,
+		uintptr(menuItemId),
+		MF_BYCOMMAND,
+	)
+	if res == 0 && err.(syscall.Errno) != ERROR_SUCCESS {
+		return err
+	}
+	t.delFromVisibleItems(parentId, menuItemId)
+
+	return nil
+}
+
 func (t *winTray) hideMenuItem(menuItemId, parentId uint32) error {
 	if !wt.isReady() {
 		return ErrTrayNotReadyYet
@@ -926,6 +952,13 @@ func quit() {
 		0,
 		0,
 	)
+
+	wt.muNID.Lock()
+	if wt.nid != nil {
+		wt.nid.delete()
+	}
+	wt.muNID.Unlock()
+	runSystrayExit()
 }
 
 func setInternalLoop(bool) {
@@ -1035,8 +1068,8 @@ func (item *MenuItem) SetTemplateIcon(templateIconBytes []byte, regularIconBytes
 	item.SetIcon(regularIconBytes)
 }
 
-func addSeparator(id uint32) {
-	err := wt.addSeparatorMenuItem(id, 0)
+func addSeparator(id uint32, parent uint32) {
+	err := wt.addSeparatorMenuItem(id, parent)
 	if err != nil {
 		log.Printf("systray error: unable to addSeparator: %s\n", err)
 		return
@@ -1051,10 +1084,23 @@ func hideMenuItem(item *MenuItem) {
 	}
 }
 
+func removeMenuItem(item *MenuItem) {
+	err := wt.removeMenuItem(uint32(item.id), item.parentId())
+	if err != nil {
+		log.Printf("systray error: unable to removeMenuItem: %s\n", err)
+		return
+	}
+}
+
 func showMenuItem(item *MenuItem) {
 	addOrUpdateMenuItem(item)
 }
 
 func resetMenu() {
+	_, _, _ = pDestroyMenu.Call(uintptr(wt.menus[0]))
+	wt.visibleItems = make(map[uint32][]uint32)
+	wt.menus = make(map[uint32]windows.Handle)
+	wt.menuOf = make(map[uint32]windows.Handle)
+	wt.menuItemIcons = make(map[uint32]windows.Handle)
 	wt.createMenu()
 }

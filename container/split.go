@@ -125,8 +125,6 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	r.split.Trailing.Move(trailingPos)
 	r.split.Trailing.Resize(trailingSize)
 	canvas.Refresh(r.divider)
-	canvas.Refresh(r.split.Leading)
-	canvas.Refresh(r.split.Trailing)
 }
 
 func (r *splitContainerRenderer) MinSize() fyne.Size {

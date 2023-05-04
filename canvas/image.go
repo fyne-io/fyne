@@ -46,7 +46,7 @@ const (
 var _ fyne.CanvasObject = (*Image)(nil)
 
 // Image describes a drawable image area that can render in a Fyne canvas
-// The image may be a vector or a bitmap representation and it will fill the area.
+// The image may be a vector or a bitmap representation, it will fill the area.
 // The fill mode can be changed by setting FillMode to a different ImageFill.
 type Image struct {
 	baseObject
@@ -68,6 +68,25 @@ func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
 
+// Hide will set this image to not be visible
+func (i *Image) Hide() {
+	i.baseObject.Hide()
+
+	repaint(i)
+}
+
+// Move the image object to a new position, relative to its parent top, left corner.
+func (i *Image) Move(pos fyne.Position) {
+	i.baseObject.Move(pos)
+
+	repaint(i)
+}
+
+// Refresh causes this image to be redrawn with its configured state.
+func (i *Image) Refresh() {
+	Refresh(i)
+}
+
 // Resize on an image will scale the content or reposition it according to FillMode.
 // It will normally cause a Refresh to ensure the pixels are recalculated.
 func (i *Image) Resize(s fyne.Size) {
@@ -80,11 +99,6 @@ func (i *Image) Resize(s fyne.Size) {
 
 	i.baseObject.Resize(s)
 
-	Refresh(i)
-}
-
-// Refresh causes this object to be redrawn in it's current state
-func (i *Image) Refresh() {
 	Refresh(i)
 }
 
@@ -124,7 +138,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 }
 
 // NewImageFromReader creates a new image from a data stream.
-// The name parameter is required to uniquely identify this image (for caching etc).
+// The name parameter is required to uniquely identify this image (for caching etc.).
 // If the image in this io.Reader is an SVG, the name should end ".svg".
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.

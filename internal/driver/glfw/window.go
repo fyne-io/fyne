@@ -274,7 +274,7 @@ func (w *window) processClosed() {
 		return
 	}
 
-	w.Close()
+	go w.Close() // unsure which thread this comes from, so don't block
 }
 
 // destroy this window and, if it's the last window quit the app
@@ -760,7 +760,11 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 		// key repeat will fall through to TypedKey and TypedShortcut
 	}
 
-	if (keyName == fyne.KeyTab && !w.capturesTab(keyDesktopModifier)) || w.triggersShortcut(keyName, keyASCII, keyDesktopModifier) {
+	modifierOtherThanShift := (keyDesktopModifier & fyne.KeyModifierControl) |
+		(keyDesktopModifier & fyne.KeyModifierAlt) |
+		(keyDesktopModifier & fyne.KeyModifierSuper)
+	if (keyName == fyne.KeyTab && modifierOtherThanShift == 0 && !w.capturesTab(keyDesktopModifier)) ||
+		w.triggersShortcut(keyName, keyASCII, keyDesktopModifier) {
 		return
 	}
 

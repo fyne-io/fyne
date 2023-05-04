@@ -262,7 +262,8 @@ func (e *Entry) DragEnd() {
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InputBorderSize()))
 	if !e.selecting {
-		e.selectRow, e.selectColumn = e.getRowCol(pos)
+		startPos := pos.Subtract(d.Dragged)
+		e.selectRow, e.selectColumn = e.getRowCol(startPos)
 		e.selecting = true
 	}
 	e.updateMousePointer(pos, false)
@@ -438,6 +439,9 @@ func (e *Entry) SelectedText() string {
 	}
 
 	start, stop := e.selection()
+	if start == stop {
+		return ""
+	}
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
@@ -1683,7 +1687,7 @@ func (r *entryContentRenderer) ensureCursorVisible() {
 	}
 	if cy1 < offset.Y {
 		move.DY -= offset.Y - cy1
-	} else if cy2 >= offset.X+size.Height {
+	} else if cy2 >= offset.Y+size.Height {
 		move.DY += cy2 - (offset.Y + size.Height)
 	}
 	if r.content.scroll.Content != nil {

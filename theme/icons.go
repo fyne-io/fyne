@@ -462,10 +462,12 @@ var (
 		IconNameMenu:          NewThemedResource(menuIconRes),
 		IconNameMenuExpand:    NewThemedResource(menuexpandIconRes),
 
-		IconNameCheckButton:        NewThemedResource(checkboxblankIconRes),
-		IconNameCheckButtonChecked: NewThemedResource(checkboxIconRes),
+		IconNameCheckButton:        NewThemedResource(checkboxIconRes),
+		IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
+		"iconNameCheckButtonFill":  NewThemedResource(checkboxfillIconRes),
 		IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
 		IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
+		"iconNameRadioButtonFill":  NewThemedResource(radiobuttonfillIconRes),
 
 		IconNameContentAdd:    NewThemedResource(contentaddIconRes),
 		IconNameContentClear:  NewThemedResource(cancelIconRes),
@@ -587,7 +589,9 @@ func NewThemedResource(src fyne.Resource) *ThemedResource {
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
 	prefix := res.ColorName
-	if prefix != "" {
+	if prefix == "" {
+		prefix = "foreground_"
+	} else {
 		prefix += "_"
 	}
 

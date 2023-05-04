@@ -18,7 +18,21 @@ type Rectangle struct {
 	StrokeWidth float32     // The stroke width of the rectangle
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Hide will set this rectangle to not be visible
+func (r *Rectangle) Hide() {
+	r.baseObject.Hide()
+
+	repaint(r)
+}
+
+// Move the rectangle to a new position, relative to its parent / canvas
+func (r *Rectangle) Move(pos fyne.Position) {
+	r.baseObject.Move(pos)
+
+	repaint(r)
+}
+
+// Refresh causes this rectangle to be redrawn with its configured state.
 func (r *Rectangle) Refresh() {
 	Refresh(r)
 }

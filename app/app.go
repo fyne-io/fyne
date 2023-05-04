@@ -4,6 +4,7 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
+	"os"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -129,6 +130,10 @@ func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
 	if id != "" {
 		if pref, ok := p.(interface{ load() }); ok {
 			pref.load()
+		}
+		err := os.MkdirAll(s.a.storageRoot(), 0755) // make the space before anyone can use it
+		if err != nil {
+			fyne.LogError("Failed to create app storage space", err)
 		}
 
 		root, _ := s.docRootURI()

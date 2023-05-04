@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 	"math"
+
+	"fyne.io/fyne/v2"
 )
 
 // LinearGradient defines a Gradient travelling straight at a given angle.
@@ -57,7 +59,21 @@ func (g *LinearGradient) Generate(iw, ih int) image.Image {
 	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Hide will set this gradient to not be visible
+func (g *LinearGradient) Hide() {
+	g.baseObject.Hide()
+
+	repaint(g)
+}
+
+// Move the gradient to a new position, relative to its parent / canvas
+func (g *LinearGradient) Move(pos fyne.Position) {
+	g.baseObject.Move(pos)
+
+	repaint(g)
+}
+
+// Refresh causes this gradient to be redrawn with its configured state.
 func (g *LinearGradient) Refresh() {
 	Refresh(g)
 }
@@ -106,7 +122,21 @@ func (g *RadialGradient) Generate(iw, ih int) image.Image {
 	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Hide will set this gradient to not be visible
+func (g *RadialGradient) Hide() {
+	g.baseObject.Hide()
+
+	repaint(g)
+}
+
+// Move the gradient to a new position, relative to its parent / canvas
+func (g *RadialGradient) Move(pos fyne.Position) {
+	g.baseObject.Move(pos)
+
+	repaint(g)
+}
+
+// Refresh causes this gradient to be redrawn with its configured state.
 func (g *RadialGradient) Refresh() {
 	Refresh(g)
 }
@@ -161,7 +191,7 @@ func NewHorizontalGradient(start, end color.Color) *LinearGradient {
 	return g
 }
 
-// NewLinearGradient creates a linear gradient at a the specified angle.
+// NewLinearGradient creates a linear gradient at the specified angle.
 // The angle parameter is the degree angle along which the gradient is calculated.
 // A NewHorizontalGradient uses 270 degrees and NewVerticalGradient is 0 degrees.
 func NewLinearGradient(start, end color.Color, angle float64) *LinearGradient {

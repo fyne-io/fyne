@@ -13,13 +13,17 @@ type boxLayout struct {
 }
 
 // NewHBoxLayout returns a horizontal box layout for stacking a number of child
-// canvas objects or widgets left to right.
+// canvas objects or widgets left to right. The objects are always displayed
+// at their horizontal MinSize. Use a different layout if the objects are intended
+// to be larger then their horizontal MinSize.
 func NewHBoxLayout() fyne.Layout {
 	return &boxLayout{true}
 }
 
 // NewVBoxLayout returns a vertical box layout for stacking a number of child
-// canvas objects or widgets top to bottom.
+// canvas objects or widgets top to bottom. The objects are always displayed
+// at their vertical MinSize. Use a different layout if the objects are intended
+// to be larger then their vertical MinSize.
 func NewVBoxLayout() fyne.Layout {
 	return &boxLayout{false}
 }
@@ -57,7 +61,7 @@ func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
 // is full width but the height is the minimum required.
 // Any spacers added will pad the view, sharing the space if there are two or more.
 func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	spacers := make([]fyne.CanvasObject, 0)
+	spacers := 0
 	total := float32(0)
 	for _, child := range objects {
 		if !child.Visible() {
@@ -65,7 +69,7 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 
 		if g.isSpacer(child) {
-			spacers = append(spacers, child)
+			spacers++
 			continue
 		}
 		if g.horizontal {
@@ -78,13 +82,13 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	x, y := float32(0), float32(0)
 	var extra float32
 	if g.horizontal {
-		extra = size.Width - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
+		extra = size.Width - total - (theme.Padding() * float32(len(objects)-spacers-1))
 	} else {
-		extra = size.Height - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
+		extra = size.Height - total - (theme.Padding() * float32(len(objects)-spacers-1))
 	}
 	extraCell := float32(0)
-	if len(spacers) > 0 {
-		extraCell = extra / float32(len(spacers))
+	if spacers > 0 {
+		extraCell = extra / float32(spacers)
 	}
 
 	for _, child := range objects {
