@@ -738,7 +738,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 
 		offX = float32(math.Floor(float64(t.offset.X/paddedWidth))) * paddedWidth
 		minCol = int(math.Floor(float64(offX / paddedWidth)))
-		maxCol = int(math.Ceil(float64((t.offset.X+t.size.Width)/paddedWidth))) + 1
+		maxCol = int(math.Ceil(float64((t.offset.X + t.size.Width) / paddedWidth)))
 
 		if minCol > cols-1 {
 			minCol = cols - 1
@@ -838,7 +838,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 
 		offY = float32(math.Floor(float64(t.offset.Y/paddedHeight))) * paddedHeight
 		minRow = int(math.Floor(float64(offY / paddedHeight)))
-		maxRow = int(math.Ceil(float64((t.offset.Y+t.size.Height)/paddedHeight))) + 1
+		maxRow = int(math.Ceil(float64((t.offset.Y + t.size.Height) / paddedHeight)))
 
 		if minRow > rows-1 {
 			minRow = rows - 1
