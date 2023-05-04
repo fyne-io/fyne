@@ -63,6 +63,7 @@ func (p *Packager) packageWindows(tags []string) error {
 			CombinedVersion: p.combinedVersion(),
 		}
 		err := templates.ManifestWindows.Execute(manifestFile, tplData)
+		manifestFile.Close()
 		if err != nil {
 			return fmt.Errorf("failed to write manifest template: %w", err)
 		}
