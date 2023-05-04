@@ -64,8 +64,6 @@ func (c *Canvas) EnsureMinSize() bool {
 	if c.impl.Content() == nil {
 		return false
 	}
-	var lastParent fyne.CanvasObject
-
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
 	min := c.impl.MinSize()
@@ -77,6 +75,11 @@ func (c *Canvas) EnsureMinSize() bool {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl)
 
+		if node.needUpdateLayout {
+			c.updateLayout(obj)
+			node.needUpdateLayout = false
+		}
+
 		c.RUnlock()
 		if !obj.Visible() {
 			c.RLock()
@@ -87,10 +90,9 @@ func (c *Canvas) EnsureMinSize() bool {
 
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
-			objToLayout := obj
 			node.minSize = minSize
 			if node.parent != nil {
-				objToLayout = node.parent.obj
+				node.parent.needUpdateLayout = true
 			} else {
 				windowNeedsMinSizeUpdate = true
 				c.RUnlock()
@@ -98,16 +100,12 @@ func (c *Canvas) EnsureMinSize() bool {
 				c.RLock()
 				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != csize {
-					objToLayout = nil
 					c.RUnlock()
 					obj.Resize(expectedSize)
 					c.RLock()
+				} else {
+					c.updateLayout(obj)
 				}
-			}
-
-			if objToLayout != lastParent {
-				c.updateLayout(lastParent)
-				lastParent = objToLayout
 			}
 		}
 	}
@@ -118,10 +116,6 @@ func (c *Canvas) EnsureMinSize() bool {
 		c.RUnlock()
 		c.impl.Resize(csize.Max(min))
 		c.RLock()
-	}
-
-	if lastParent != nil {
-		c.updateLayout(lastParent)
 	}
 	return windowNeedsMinSizeUpdate
 }
@@ -515,6 +509,8 @@ type RenderCacheNode struct {
 	// it should free all associated resources when released
 	// i.e. it should not simply be a texture reference integer
 	painterData interface{}
+
+	needUpdateLayout bool
 }
 
 // Obj returns the node object.
