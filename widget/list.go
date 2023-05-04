@@ -31,10 +31,10 @@ type List struct {
 	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
-	ItemMin      fyne.Size
 
 	scroller      *widget.Scroll
 	selected      []ListItemID
+	itemMin       fyne.Size
 	itemHeights   map[ListItemID]float32
 	offsetY       float32
 	offsetUpdated func(fyne.Position)
@@ -75,8 +75,8 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
 	if f := l.CreateItem; f != nil {
-		if l.ItemMin.IsZero() {
-			l.ItemMin = newListItem(f(), nil).MinSize()
+		if l.itemMin.IsZero() {
+			l.itemMin = newListItem(f(), nil).MinSize()
 		}
 	}
 	layout := &fyne.Container{}
@@ -124,10 +124,10 @@ func (l *List) scrollTo(id ListItemID) {
 	separatorThickness := theme.Padding()
 	y := float32(0)
 	if l.itemHeights == nil || len(l.itemHeights) == 0 {
-		y = (float32(id) * l.ItemMin.Height) + (float32(id) * separatorThickness)
+		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
 	} else {
 		for i := 0; i < id; i++ {
-			height := l.ItemMin.Height
+			height := l.itemMin.Height
 			l.propertyLock.RLock()
 			if h, ok := l.itemHeights[i]; ok {
 				height = h
@@ -140,8 +140,8 @@ func (l *List) scrollTo(id ListItemID) {
 
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
-	} else if y+l.ItemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
-		l.scroller.Offset.Y = y + l.ItemMin.Height - l.scroller.Size().Height
+	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
+		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
 	}
 	l.offsetUpdated(l.scroller.Offset)
 }
@@ -311,12 +311,12 @@ func (l *listRenderer) Layout(size fyne.Size) {
 }
 
 func (l *listRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize().Max(l.list.ItemMin)
+	return l.scroller.MinSize().Max(l.list.itemMin)
 }
 
 func (l *listRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		l.list.ItemMin = newListItem(f(), nil).MinSize()
+		l.list.itemMin = newListItem(f(), nil).MinSize()
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
@@ -499,12 +499,12 @@ func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 
 	separatorThickness := theme.Padding()
 	if l.list.itemHeights == nil || len(l.list.itemHeights) == 0 {
-		return fyne.NewSize(l.list.ItemMin.Width,
-			(l.list.ItemMin.Height+separatorThickness)*float32(items)-separatorThickness)
+		return fyne.NewSize(l.list.itemMin.Width,
+			(l.list.itemMin.Height+separatorThickness)*float32(items)-separatorThickness)
 	}
 
 	height := float32(0)
-	templateHeight := l.list.ItemMin.Height
+	templateHeight := l.list.itemMin.Height
 	for item := 0; item < items; item++ {
 		itemHeight, ok := l.list.itemHeights[item]
 		if ok {
@@ -514,7 +514,7 @@ func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 		}
 	}
 
-	return fyne.NewSize(l.list.ItemMin.Width, height+separatorThickness*float32(items-1))
+	return fyne.NewSize(l.list.itemMin.Width, height+separatorThickness*float32(items-1))
 }
 
 func (l *listLayout) getItem() *listItem {
@@ -572,7 +572,7 @@ func (l *listLayout) updateList(refresh bool) {
 	cells := []fyne.CanvasObject{}
 
 	l.list.propertyLock.Lock()
-	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.ItemMin.Height, length)
+	visibleRowHeights, offY, minRow, maxRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
 	l.list.propertyLock.Unlock()
 	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		l.renderLock.Unlock() // user code should not be locked
