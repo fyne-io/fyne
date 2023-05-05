@@ -65,6 +65,7 @@ func (r *Runner) TickAnimations() {
 	now := time.Now()
 	for _, a := range currList {
 		if a.isStopped() || !r.tickAnimation(a, now) {
+			a.setStopped()
 			evictAnimations = true
 		}
 	}
@@ -72,7 +73,7 @@ func (r *Runner) TickAnimations() {
 	if evictAnimations {
 		newList := make([]*anim, 0, len(currList)+len(r.pendingAnimations))
 		for _, a := range currList {
-			if !a.isStopped() && a.repeatsLeft != 0 {
+			if !a.isStopped() {
 				newList = append(newList, a)
 			}
 		}
