@@ -65,7 +65,6 @@ func (r *Runner) TickAnimations() {
 	now := time.Now()
 	for _, a := range currList {
 		if a.isStopped() || !r.tickAnimation(a, now) {
-			a.setStopped()
 			evictAnimations = true
 		}
 	}
@@ -92,6 +91,7 @@ func (r *Runner) tickAnimation(a *anim, now time.Time) bool {
 		if a.reverse {
 			a.a.Tick(0.0)
 			if a.repeatsLeft == 0 {
+				a.setStopped()
 				return false
 			}
 			a.reverse = false
@@ -103,6 +103,7 @@ func (r *Runner) tickAnimation(a *anim, now time.Time) bool {
 		}
 		if !a.reverse {
 			if a.repeatsLeft == 0 {
+				a.setStopped()
 				return false
 			}
 			if a.repeatsLeft > 0 {
