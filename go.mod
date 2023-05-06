@@ -29,7 +29,7 @@ require (
 	golang.org/x/image v0.5.0
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
-	golang.org/x/sys v0.0.0-20220908164124-27713097b956
+	golang.org/x/sys v0.8.0
 	golang.org/x/tools v0.1.12
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )
