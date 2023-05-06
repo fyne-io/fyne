@@ -21,7 +21,7 @@ github.com/davecgh/go-spew/spew
 # github.com/fredbi/uri v0.1.0
 ## explicit; go 1.11
 github.com/fredbi/uri
-# github.com/fsnotify/fsnotify v1.5.4
+# github.com/fsnotify/fsnotify v1.6.0
 ## explicit; go 1.16
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
@@ -155,7 +155,7 @@ golang.org/x/mod/semver
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
+# golang.org/x/sys v0.0.0-20220908164124-27713097b956
 ## explicit; go 1.17
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
