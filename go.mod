@@ -28,9 +28,9 @@ require (
 	github.com/yuin/goldmark v1.4.13
 	golang.org/x/image v0.5.0
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
+	golang.org/x/mod v0.10.0
 	golang.org/x/sys v0.8.0
-	golang.org/x/tools v0.1.12
+	golang.org/x/tools v0.8.0
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )
 
@@ -43,7 +43,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/tevino/abool v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
