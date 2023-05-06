@@ -184,6 +184,7 @@ func (d *mobileDriver) Run() {
 					// make sure that we paint on the next frame
 					c.Content().Refresh()
 				case paint.Event:
+					d.animation.TickAnimations()
 					d.handlePaint(e, current)
 				case touch.Event:
 					switch e.Type {
@@ -260,7 +261,6 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 			w.Resize(newSize)
 		}
 
-		d.animation.TickAnimations()
 		d.paintWindow(w, newSize)
 		d.app.Publish()
 	}
