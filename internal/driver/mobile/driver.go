@@ -231,6 +231,7 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 			}
 
 			s := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+			d.animation.TickAnimations()
 			d.paintWindow(w, s)
 			d.app.Publish()
 		}
@@ -259,6 +260,7 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 			w.Resize(newSize)
 		}
 
+		d.animation.TickAnimations()
 		d.paintWindow(w, newSize)
 		d.app.Publish()
 	}

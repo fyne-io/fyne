@@ -177,7 +177,7 @@ func (d *gLDriver) runGL() {
 				newWindows = append(newWindows, win)
 
 				if drawOnMainThread {
-					d.TickAnimations()
+					d.animation.TickAnimations()
 					d.drawSingleFrame()
 				}
 			}
@@ -252,7 +252,7 @@ func (d *gLDriver) startDrawThread() {
 					go c.reloadScale()
 				})
 			case <-drawCh:
-				d.TickAnimations()
+				d.animation.TickAnimations()
 				d.drawSingleFrame()
 			}
 		}

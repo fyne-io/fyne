@@ -9,7 +9,3 @@ func (d *gLDriver) StartAnimation(a *fyne.Animation) {
 func (d *gLDriver) StopAnimation(a *fyne.Animation) {
 	d.animation.Stop(a)
 }
-
-func (d *gLDriver) TickAnimations() {
-	d.animation.TickAnimations()
-}
