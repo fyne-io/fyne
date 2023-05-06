@@ -487,7 +487,8 @@ func (t *Table) columnAt(pos fyne.Position) int {
 		pos.X += t.content.Offset.X
 		offX += t.stuckXOff
 	}
-	for x := offX; i < end; x += visibleColWidths[i-1] + theme.Padding() {
+	padding := theme.Padding()
+	for x := offX; i < end; x += visibleColWidths[i-1] + padding {
 		if pos.X < x {
 			return -i // the space between i-1 and i
 		} else if pos.X < x+visibleColWidths[i] {
@@ -511,9 +512,10 @@ func (t *Table) createHeader() fyne.CanvasObject {
 
 func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 	cellSize := t.templateSize()
+	padding := theme.Padding()
 	for i := 0; i <= col; i++ {
 		if cellWidth > 0 {
-			cellX += cellWidth + theme.Padding()
+			cellX += cellWidth + padding
 		}
 
 		width := cellSize.Width
@@ -527,9 +529,10 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 	cellSize := t.templateSize()
+	padding := theme.Padding()
 	for i := 0; i <= row; i++ {
 		if cellHeight > 0 {
-			cellY += cellHeight + theme.Padding()
+			cellY += cellHeight + padding
 		}
 
 		height := cellSize.Height
@@ -615,7 +618,8 @@ func (t *Table) rowAt(pos fyne.Position) int {
 		pos.Y += t.content.Offset.Y
 		offY += t.stuckYOff
 	}
-	for y := offY; i < end; y += visibleRowHeights[i-1] + theme.Padding() {
+	padding := theme.Padding()
+	for y := offY; i < end; y += visibleRowHeights[i-1] + padding {
 		if pos.Y < y {
 			return -i // the space between i-1 and i
 		} else if pos.Y >= y && pos.Y < y+visibleRowHeights[i] {
@@ -684,6 +688,37 @@ func (t *Table) updateHeader(id TableCellID, o fyne.CanvasObject) {
 	}
 }
 
+func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float32) {
+	if cols == 0 {
+		return []float32{}
+	}
+
+	max := t.StickyColumnCount
+	if max > cols {
+		max = cols
+	}
+
+	visible = make([]float32, max)
+
+	if len(t.columnWidths) == 0 {
+		for i := 0; i < max; i++ {
+			visible[i] = colWidth
+		}
+		return
+	}
+
+	for i := 0; i < max; i++ {
+		height := colWidth
+
+		if h, ok := t.columnWidths[i]; ok {
+			height = h
+		}
+
+		visible[i] = height
+	}
+	return
+}
+
 func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int]float32, offX float32, minCol, maxCol int) {
 	maxCol = cols
 	colOffset, headWidth := float32(0), float32(0)
@@ -694,14 +729,45 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		return
 	}
 
+	// theme.Padding is a slow call, so we cache it
+	padding := theme.Padding()
 	stick := t.StickyColumnCount
+
+	if len(t.columnWidths) == 0 {
+		paddedWidth := colWidth + padding
+
+		offX = float32(math.Floor(float64(t.offset.X/paddedWidth))) * paddedWidth
+		minCol = int(math.Floor(float64(offX / paddedWidth)))
+		maxCol = int(math.Ceil(float64((t.offset.X + t.size.Width) / paddedWidth)))
+
+		if minCol > cols-1 {
+			minCol = cols - 1
+		}
+		if minCol < 0 {
+			minCol = 0
+		}
+
+		if maxCol > cols {
+			maxCol = cols
+		}
+
+		visible = make(map[int]float32, maxCol-minCol+stick)
+		for i := minCol; i < maxCol; i++ {
+			visible[i] = colWidth
+		}
+		for i := 0; i < stick; i++ {
+			visible[i] = colWidth
+		}
+		return
+	}
+
 	for i := 0; i < cols; i++ {
 		width := colWidth
 		if w, ok := t.columnWidths[i]; ok {
 			width = w
 		}
 
-		if colOffset <= t.offset.X-width-theme.Padding() {
+		if colOffset <= t.offset.X-width-padding {
 			// before visible content
 		} else if colOffset <= headWidth || colOffset <= t.offset.X {
 			minCol = i
@@ -714,10 +780,41 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			break
 		}
 
-		colOffset += width + theme.Padding()
+		colOffset += width + padding
 		if isVisible || i < stick {
 			visible[i] = width
 		}
+	}
+	return
+}
+
+func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32) {
+	if rows == 0 {
+		return []float32{}
+	}
+
+	max := t.StickyRowCount
+	if max > rows {
+		max = rows
+	}
+
+	visible = make([]float32, max)
+
+	if len(t.rowHeights) == 0 {
+		for i := 0; i < max; i++ {
+			visible[i] = rowHeight
+		}
+		return
+	}
+
+	for i := 0; i < max; i++ {
+		height := rowHeight
+
+		if h, ok := t.rowHeights[i]; ok {
+			height = h
+		}
+
+		visible[i] = height
 	}
 	return
 }
@@ -732,14 +829,45 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		return
 	}
 
+	// theme.Padding is a slow call, so we cache it
+	padding := theme.Padding()
 	stick := t.StickyRowCount
+
+	if len(t.rowHeights) == 0 {
+		paddedHeight := rowHeight + padding
+
+		offY = float32(math.Floor(float64(t.offset.Y/paddedHeight))) * paddedHeight
+		minRow = int(math.Floor(float64(offY / paddedHeight)))
+		maxRow = int(math.Ceil(float64((t.offset.Y + t.size.Height) / paddedHeight)))
+
+		if minRow > rows-1 {
+			minRow = rows - 1
+		}
+		if minRow < 0 {
+			minRow = 0
+		}
+
+		if maxRow > rows {
+			maxRow = rows
+		}
+
+		visible = make(map[int]float32, maxRow-minRow+stick)
+		for i := minRow; i < maxRow; i++ {
+			visible[i] = rowHeight
+		}
+		for i := 0; i < stick; i++ {
+			visible[i] = rowHeight
+		}
+		return
+	}
+
 	for i := 0; i < rows; i++ {
 		height := rowHeight
 		if h, ok := t.rowHeights[i]; ok {
 			height = h
 		}
 
-		if rowOffset <= t.offset.Y-height-theme.Padding() {
+		if rowOffset <= t.offset.Y-height-padding {
 			// before visible content
 		} else if rowOffset <= headHeight || rowOffset <= t.offset.Y {
 			minRow = i
@@ -752,7 +880,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			break
 		}
 
-		rowOffset += height + theme.Padding()
+		rowOffset += height + padding
 		if isVisible || i < stick {
 			visible[i] = height
 		}
@@ -851,17 +979,17 @@ func (t *tableRenderer) calculateHeaderSizes() {
 	}
 
 	separatorThickness := theme.Padding()
-	visibleColWidths, _, _, _ := t.t.visibleColumnWidths(t.t.cellSize.Width, t.t.StickyColumnCount)
-	visibleRowHeights, _, _, _ := t.t.visibleRowHeights(t.t.cellSize.Height, t.t.StickyRowCount)
+	stickyColWidths := t.t.stickyColumnWidths(t.t.cellSize.Width, t.t.StickyColumnCount)
+	stickyRowHeights := t.t.stickyRowHeights(t.t.cellSize.Height, t.t.StickyRowCount)
 
 	var stuckHeight float32
-	for row := 0; row < t.t.StickyRowCount; row++ {
-		stuckHeight += visibleRowHeights[row] + separatorThickness
+	for _, rowHeight := range stickyRowHeights {
+		stuckHeight += rowHeight + separatorThickness
 	}
 	t.t.stuckHeight = stuckHeight
 	var stuckWidth float32
-	for col := 0; col < t.t.StickyColumnCount; col++ {
-		stuckWidth += visibleColWidths[col] + separatorThickness
+	for _, colWidth := range stickyColWidths {
+		stuckWidth += colWidth + separatorThickness
 	}
 	t.t.stuckWidth = stuckWidth
 }
@@ -1118,7 +1246,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.t.cellSize.Width, cols)
 	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.t.cellSize.Height, rows)
 	separatorThickness := theme.SeparatorThicknessSize()
-	dividerOff := (theme.Padding() - separatorThickness) / 2
+	padding := theme.Padding()
+	dividerOff := (padding - separatorThickness) / 2
 
 	stickRows := r.cells.t.StickyRowCount
 	stickCols := r.cells.t.StickyColumnCount
@@ -1169,7 +1298,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 	divs := 0
 	i := 0
 	if stickCols > 0 {
-		for x := r.cells.t.stuckXOff + visibleColWidths[i]; i < stickCols && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
+		for x := r.cells.t.stuckXOff + visibleColWidths[i]; i < stickCols && divs < colDivs; x += visibleColWidths[i] + padding {
 			i++
 
 			xPos := x + dividerOff
@@ -1180,7 +1309,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minCol + stickCols
-	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol-1 && divs < colDivs; x += visibleColWidths[i] + theme.Padding() {
+	for x := offX + r.cells.t.stuckWidth + visibleColWidths[i]; i < maxCol-1 && divs < colDivs; x += visibleColWidths[i] + padding {
 		i++
 
 		xPos := x - r.cells.t.content.Offset.X + dividerOff
@@ -1192,7 +1321,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 
 	i = 0
 	if stickRows > 0 {
-		for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs-colDivs < rowDivs; y += visibleRowHeights[i] + theme.Padding() {
+		for y := r.cells.t.stuckYOff + visibleRowHeights[i]; i < stickRows && divs-colDivs < rowDivs; y += visibleRowHeights[i] + padding {
 			i++
 
 			yPos := y + dividerOff
@@ -1203,7 +1332,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		}
 	}
 	i = minRow + stickRows
-	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow-1 && divs-colDivs < rowDivs; y += visibleRowHeights[i] + theme.Padding() {
+	for y := offY + r.cells.t.stuckHeight + visibleRowHeights[i]; i < maxRow-1 && divs-colDivs < rowDivs; y += visibleRowHeights[i] + padding {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
@@ -1236,9 +1365,11 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 		minCol = 0
 	}
 
+	padding := theme.Padding()
+
 	for i := minCol; i < col; i++ {
 		xPos += widths[i]
-		xPos += theme.Padding()
+		xPos += padding
 	}
 	x1 := xPos
 	if col >= stickCols {
@@ -1258,7 +1389,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	for i := minRow; i < row; i++ {
 		yPos += heights[i]
-		yPos += theme.Padding()
+		yPos += padding
 	}
 	y1 := yPos
 	if row >= stickRows {
