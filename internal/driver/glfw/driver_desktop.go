@@ -125,12 +125,7 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	systray.ResetMenu()
 	d.refreshSystrayMenu(m, nil)
 
-	systray.AddSeparator()
-	quit := systray.AddMenuItem("Quit", "Quit application")
-	go func() {
-		<-quit.ClickedCh
-		d.Quit()
-	}()
+	addMissingQuitForMenu(m, d)
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
@@ -181,5 +176,27 @@ func catchTerm(d *gLDriver) {
 	for range terminateSignals {
 		d.Quit()
 		break
+	}
+}
+
+func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
+	var lastItem *fyne.MenuItem
+	if len(menu.Items) > 0 {
+		lastItem = menu.Items[len(menu.Items)-1]
+		if lastItem.Label == "Quit" {
+			lastItem.IsQuit = true
+		}
+	}
+	if lastItem == nil || !lastItem.IsQuit { // make sure the menu always has a quit option
+		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem.IsQuit = true
+		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
+	}
+	for _, item := range menu.Items {
+		if item.IsQuit && item.Action == nil {
+			item.Action = func() {
+				d.Quit()
+			}
+		}
 	}
 }
