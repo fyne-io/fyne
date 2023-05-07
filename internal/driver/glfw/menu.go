@@ -10,11 +10,11 @@ func buildMenuOverlay(menus *fyne.MainMenu, w *window) fyne.CanvasObject {
 		return nil
 	}
 
-	menus = addMissingQuit(menus, w)
+	menus = addMissingQuitForMainMenu(menus, w)
 	return NewMenuBar(menus, w.canvas)
 }
 
-func addMissingQuit(menus *fyne.MainMenu, w *window) *fyne.MainMenu {
+func addMissingQuitForMainMenu(menus *fyne.MainMenu, w *window) *fyne.MainMenu {
 	var lastItem *fyne.MenuItem
 	if len(menus.Items[0].Items) > 0 {
 		lastItem = menus.Items[0].Items[len(menus.Items[0].Items)-1]
