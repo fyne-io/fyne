@@ -1720,6 +1720,12 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 }
 
+func TestWindow_ClosedBeforeShow(t *testing.T) {
+	w := createWindow("Test").(*window)
+	// viewport will be nil if window is closed before show
+	assert.NotPanics(t, func() { w.closed(nil) })
+}
+
 func TestWindow_SetContent_Twice(t *testing.T) {
 	w := createWindow("Test").(*window)
 
