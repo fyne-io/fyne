@@ -18,11 +18,11 @@ The tif_lzw.c file in the libtiff C library has this comment:
 
 ----
 The 5.0 spec describes a different algorithm than Aldus
-implements.  Specifically, Aldus does code length transitions
+implements. Specifically, Aldus does code length transitions
 one code earlier than should be done (for real LZW).
 Earlier versions of this library implemented the correct
 LZW algorithm, but emitted codes in a bit order opposite
-to the TIFF spec.  Thus, to maintain compatibility w/ Aldus
+to the TIFF spec. Thus, to maintain compatibility w/ Aldus
 we interpret MSB-LSB ordered codes to be images written w/
 old versions of this library, but otherwise adhere to the
 Aldus "off by one" algorithm.
