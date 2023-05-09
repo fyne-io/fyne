@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"sync"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
@@ -14,6 +16,8 @@ type Label struct {
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the label text
 	provider  *RichText
+
+	refreshLocker sync.Mutex // refresh lock
 
 	binder basicBinder
 }
@@ -90,6 +94,9 @@ func (l *Label) MinSize() fyne.Size {
 //
 // Implements: fyne.Widget
 func (l *Label) Refresh() {
+	l.refreshLocker.Lock()
+	defer l.refreshLocker.Unlock()
+
 	if l.provider == nil { // not created until visible
 		return
 	}
