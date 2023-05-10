@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"image"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -9,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
+	"fyne.io/fyne/v2/test"
 )
 
 func Test_calculateExeName(t *testing.T) {
@@ -67,6 +70,23 @@ func Test_combinedVersion(t *testing.T) {
 		comb := p.combinedVersion()
 		assert.Equal(t, tt.comb, comb)
 	}
+}
+
+func Test_processMacOSIcon(t *testing.T) {
+	f, err := os.Open("testdata/icon.png")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer f.Close()
+	icon, _, err := image.Decode(f)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	processed := processMacOSIcon(icon)
+
+	test.AssertImageMatches(t, "icon-darwin.png", processed)
 }
 
 func Test_MergeMetata(t *testing.T) {
