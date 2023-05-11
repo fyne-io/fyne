@@ -53,6 +53,12 @@ const (
 	// Since: 2.0
 	ColorNameButton fyne.ThemeColorName = "button"
 
+	// ColorNameButtonBorder is button border color
+	ColorNameButtonBorder fyne.ThemeColorName = "buttonBorder"
+
+	// ColorNameButtonFocusedBorder is button focused border color
+	ColorNameButtonFocusedBorder fyne.ThemeColorName = "buttonFocusedBorder"
+
 	// ColorNameDisabledButton is the name of theme lookup for disabled button color.
 	//
 	// Since: 2.0
@@ -230,6 +236,16 @@ func BackgroundColor() color.Color {
 // ButtonColor returns the theme's standard button color.
 func ButtonColor() color.Color {
 	return safeColorLookup(ColorNameButton, currentVariant())
+}
+
+// ButtonBorderColor returns the theme's button border color.
+func ButtonBorderColor() color.Color {
+	return safeColorLookup(ColorNameButtonBorder, currentVariant())
+}
+
+// ButtonFocusedBorderColor returns the theme's button focused border color.
+func ButtonFocusedBorderColor() color.Color {
+	return safeColorLookup(ColorNameButtonFocusedBorder, currentVariant())
 }
 
 // CaptionTextSize returns the size for caption text.
@@ -669,6 +685,10 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0x14, G: 0x14, B: 0x15, A: 0xff}
 	case ColorNameButton:
 		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+	case ColorNameButtonBorder:
+		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+	case ColorNameButtonFocusedBorder:
+		return color.NRGBA{R: 0xe0, G: 0xe0, B: 0xe1, A: 0xff}
 	case ColorNameDisabled:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	case ColorNameDisabledButton:
@@ -735,6 +755,10 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	case ColorNameButton:
 		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	case ColorNameButtonBorder:
+		return color.NRGBA{R: 0xe0, G: 0xe0, B: 0xe1, A: 0xff}
+	case ColorNameButtonFocusedBorder:
+		return color.NRGBA{R: 0x00, G: 0xb6, B: 0x64, A: 0xff}
 	case ColorNameDisabled:
 		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	case ColorNameDisabledButton:

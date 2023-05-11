@@ -116,7 +116,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 
 	b.background = canvas.NewRectangle(theme.ButtonColor())
-	b.background.StrokeColor = color.NRGBA{R: 0xe0, G: 0xe0, B: 0xe1, A: 0xFF}
+	b.background.StrokeColor = theme.ButtonBorderColor()
 	b.background.StrokeWidth = 1
 
 	tapBG := canvas.NewRectangle(color.Transparent)
@@ -148,12 +148,14 @@ func (b *Button) Cursor() desktop.Cursor {
 // FocusGained is a hook called by the focus handling logic after this object gained the focus.
 func (b *Button) FocusGained() {
 	b.focused = true
+	b.background.StrokeColor = theme.ButtonFocusedBorderColor()
 	b.Refresh()
 }
 
 // FocusLost is a hook called by the focus handling logic after this object lost the focus.
 func (b *Button) FocusLost() {
 	b.focused = false
+	b.background.StrokeColor = theme.ButtonBorderColor()
 	b.Refresh()
 }
 
@@ -237,7 +239,18 @@ func (b *Button) buttonColor() color.Color {
 		}
 		return theme.DisabledButtonColor()
 	case b.focused:
-		return blendColor(theme.ButtonColor(), theme.FocusColor())
+		bg := theme.ButtonColor()
+		if b.Importance == HighImportance {
+			bg = theme.PrimaryColor()
+		} else if b.Importance == DangerImportance {
+			bg = theme.ErrorColor()
+		} else if b.Importance == WarningImportance {
+			bg = theme.WarningColor()
+		} else if b.BackgroundColor != nil {
+			bg = b.BackgroundColor
+		}
+
+		return blendColor(bg, theme.FocusColor())
 	case b.hovered:
 		bg := theme.ButtonColor()
 		if b.Importance == HighImportance {
