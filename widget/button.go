@@ -76,6 +76,7 @@ type Button struct {
 
 	OnTapped func() `json:"-"`
 
+	BorderColor     color.Color         // border color
 	BackgroundColor color.Color         // background color
 	TextColorName   fyne.ThemeColorName // text color name
 
@@ -116,7 +117,11 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
 
 	b.background = canvas.NewRectangle(theme.ButtonColor())
-	b.background.StrokeColor = theme.ButtonBorderColor()
+	if b.BorderColor != nil {
+		b.background.StrokeColor = b.BorderColor
+	} else {
+		b.background.StrokeColor = theme.ButtonBorderColor()
+	}
 	b.background.StrokeWidth = 1
 
 	tapBG := canvas.NewRectangle(color.Transparent)
@@ -155,7 +160,11 @@ func (b *Button) FocusGained() {
 // FocusLost is a hook called by the focus handling logic after this object lost the focus.
 func (b *Button) FocusLost() {
 	b.focused = false
-	b.background.StrokeColor = theme.ButtonBorderColor()
+	if b.BorderColor != nil {
+		b.background.StrokeColor = b.BorderColor
+	} else {
+		b.background.StrokeColor = theme.ButtonBorderColor()
+	}
 	b.Refresh()
 }
 
