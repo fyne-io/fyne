@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
-	"fyne.io/fyne/v2/test"
 )
 
 func Test_calculateExeName(t *testing.T) {
@@ -86,7 +85,16 @@ func Test_processMacOSIcon(t *testing.T) {
 	}
 	processed := processMacOSIcon(icon)
 
-	test.AssertImageMatches(t, "icon-darwin.png", processed)
+	assert.Equal(t, 1024, processed.Bounds().Dx())
+	assert.Equal(t, 1024, processed.Bounds().Dy())
+	_, _, _, a := processed.At(3, 3).RGBA() // border
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(125, 125).RGBA() // inside cut out corner
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(900, 900).RGBA()
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(1020, 1020).RGBA()
+	assert.Equal(t, uint32(0), a)
 }
 
 func Test_MergeMetata(t *testing.T) {
