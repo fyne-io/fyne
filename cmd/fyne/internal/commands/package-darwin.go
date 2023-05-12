@@ -72,7 +72,10 @@ func (p *Packager) packageDarwin() (err error) {
 			err = r
 		}
 	}()
-	if err := icns.Encode(dest, processMacOSIcon(srcImg)); err != nil {
+	if !p.rawIcon {
+		srcImg = processMacOSIcon(srcImg)
+	}
+	if err := icns.Encode(dest, srcImg); err != nil {
 		return fmt.Errorf("failed to encode icns: %w", err)
 	}
 

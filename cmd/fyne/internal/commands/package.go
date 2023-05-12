@@ -83,6 +83,12 @@ func Package() *cli.Command {
 				Value:       "",
 				Destination: &p.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &p.rawIcon,
+			},
 			&cli.StringFlag{
 				Name:        "appID",
 				Aliases:     []string{"id"},
