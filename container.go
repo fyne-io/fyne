@@ -12,6 +12,8 @@ type Container struct {
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
 
+	refreshLocker sync.Mutex // refresh lock
+
 	Layout  Layout // The Layout algorithm for arranging child CanvasObjects
 	lock    sync.Mutex
 	Objects []CanvasObject // The set of CanvasObjects this container holds
@@ -111,6 +113,9 @@ func (c *Container) Position() Position {
 
 // Refresh causes this object to be redrawn in it's current state
 func (c *Container) Refresh() {
+	c.refreshLocker.Lock()
+	defer c.refreshLocker.Unlock()
+
 	c.layout()
 
 	for _, child := range c.Objects {
