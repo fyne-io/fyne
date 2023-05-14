@@ -109,7 +109,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	openSettings := func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
-		w.Resize(fyne.NewSize(480, 480))
+		w.Resize(fyne.NewSize(440, 520))
 		w.Show()
 	}
 	settingsItem := fyne.NewMenuItem("Settings", openSettings)

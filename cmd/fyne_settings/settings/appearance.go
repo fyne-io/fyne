@@ -74,12 +74,18 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	scale := s.makeScaleGroup(w.Canvas().Scale())
 	box := container.NewVBox(scale)
 
+	animations := widget.NewCheck("Animate widgets", func(on bool) {
+		s.fyneSettings.DisableAnimations = !on
+	})
+	animations.Checked = !s.fyneSettings.DisableAnimations
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)
 	}
 	swatch := container.NewGridWithColumns(len(s.colors), s.colors...)
-	appearance := widget.NewForm(widget.NewFormItem("Main Color", swatch),
+	appearance := widget.NewForm(
+		widget.NewFormItem("Animations", animations),
+		widget.NewFormItem("Main Color", swatch),
 		widget.NewFormItem("Theme", themes))
 
 	box.Add(widget.NewCard("Appearance", "", appearance))
@@ -234,7 +240,7 @@ func (c *colorRenderer) Layout(s fyne.Size) {
 }
 
 func (c *colorRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(20, 20)
+	return fyne.NewSize(20, 32)
 }
 
 func (c *colorRenderer) Refresh() {
