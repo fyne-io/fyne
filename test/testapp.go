@@ -208,7 +208,7 @@ func (s *testSettings) SetTheme(theme fyne.Theme) {
 }
 
 func (s *testSettings) ShowAnimations() bool {
-	return false
+	return true
 }
 
 func (s *testSettings) Theme() fyne.Theme {
