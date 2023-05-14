@@ -10,6 +10,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var noAnimations bool // set to true at compile time if no_animations tag is passed
+
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
@@ -72,7 +74,7 @@ func (s *settings) SetTheme(theme fyne.Theme) {
 }
 
 func (s *settings) ShowAnimations() bool {
-	return !s.schema.DisableAnimations
+	return !s.schema.DisableAnimations && !noAnimations
 }
 
 func (s *settings) ThemeVariant() fyne.ThemeVariant {
