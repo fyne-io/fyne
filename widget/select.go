@@ -251,7 +251,10 @@ func (s *Select) tapAnimation() {
 		return
 	}
 	s.tapAnim.Stop()
-	s.tapAnim.Start()
+
+	if fyne.CurrentApp().Settings().ShowAnimations() {
+		s.tapAnim.Start()
+	}
 }
 
 func (s *Select) updateSelected(text string) {

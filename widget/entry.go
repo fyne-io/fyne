@@ -1560,6 +1560,9 @@ type entryContentRenderer struct {
 }
 
 func (r *entryContentRenderer) Destroy() {
+	if !fyne.CurrentApp().Settings().ShowAnimations() {
+		return
+	}
 	r.content.entry.cursorAnim.stop()
 }
 
@@ -1607,7 +1610,9 @@ func (r *entryContentRenderer) Refresh() {
 
 	if focusedAppearance {
 		r.cursor.Show()
-		r.content.entry.cursorAnim.start()
+		if fyne.CurrentApp().Settings().ShowAnimations() {
+			r.content.entry.cursorAnim.start()
+		}
 	} else {
 		r.content.entry.cursorAnim.stop()
 		r.cursor.Hide()

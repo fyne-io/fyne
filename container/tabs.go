@@ -412,7 +412,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 	r.lastIndicatorHidden = r.indicator.Hidden
 	r.lastIndicatorMutex.Unlock()
 
-	if animate {
+	if animate && fyne.CurrentApp().Settings().ShowAnimations() {
 		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
 			r.indicator.Move(p)
 			r.indicator.Refresh()

@@ -13,11 +13,12 @@ import (
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
-	ThemeName    string  `json:"theme"`
-	Scale        float32 `json:"scale"`
-	PrimaryColor string  `json:"primary_color"`
-	CloudName    string  `json:"cloud_name"`
-	CloudConfig  string  `json:"cloud_config"`
+	ThemeName         string  `json:"theme"`
+	Scale             float32 `json:"scale"`
+	PrimaryColor      string  `json:"primary_color"`
+	CloudName         string  `json:"cloud_name"`
+	CloudConfig       string  `json:"cloud_config"`
+	DisableAnimations bool    `json:"no_animations"`
 }
 
 // StoragePath returns the location of the settings storage
@@ -68,6 +69,10 @@ func (s *settings) Theme() fyne.Theme {
 func (s *settings) SetTheme(theme fyne.Theme) {
 	s.themeSpecified = true
 	s.applyTheme(theme, s.variant)
+}
+
+func (s *settings) ShowAnimations() bool {
+	return !s.schema.DisableAnimations
 }
 
 func (s *settings) ThemeVariant() fyne.ThemeVariant {
