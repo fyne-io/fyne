@@ -11,7 +11,7 @@ func TestNot(t *testing.T) {
 	var b bool = true
 
 	bb := BindBool(&b)
-	notbb := NewNot(bb)
+	notbb := Not(bb)
 
 	assert.NotNil(t, bb)
 	assert.NotNil(t, notbb)
@@ -34,7 +34,7 @@ func TestAnd(t *testing.T) {
 		bb = append(bb, BindBool(&b[idx]))
 	}
 
-	andbb := NewAnd(bb...)
+	andbb := And(bb...)
 	assert.NotNil(t, andbb)
 
 	setAtOffset := func(offset, value int) {
@@ -75,7 +75,7 @@ func TestOr(t *testing.T) {
 		bb = append(bb, BindBool(&b[idx]))
 	}
 
-	andbb := NewOr(bb...)
+	andbb := Or(bb...)
 	assert.NotNil(t, andbb)
 
 	setAtOffset := func(offset, value int) {
