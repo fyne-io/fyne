@@ -8,6 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ## Changed
 
 * Go 1.17 or later is now required.
+* Icons for macOS bundles are now padded and rounded, disable with "-use-raw-icon"
 
 ## 2.3.4 - 3 May 2023
 

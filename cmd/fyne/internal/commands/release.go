@@ -121,6 +121,12 @@ func Release() *cli.Command {
 				Value:       "",
 				Destination: &r.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &r.rawIcon,
+			},
 			&cli.GenericFlag{
 				Name:  "metadata",
 				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",

@@ -18,6 +18,9 @@ github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
+# github.com/fogleman/gg v1.3.0
+## explicit
+github.com/fogleman/gg
 # github.com/fredbi/uri v0.1.0
 ## explicit; go 1.11
 github.com/fredbi/uri
@@ -77,6 +80,10 @@ github.com/go-text/typesetting/unicodedata
 github.com/godbus/dbus/v5
 github.com/godbus/dbus/v5/introspect
 github.com/godbus/dbus/v5/prop
+# github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+## explicit
+github.com/golang/freetype/raster
+github.com/golang/freetype/truetype
 # github.com/gopherjs/gopherjs v1.17.2
 ## explicit; go 1.17
 github.com/gopherjs/gopherjs/js
@@ -136,6 +143,8 @@ github.com/yuin/goldmark/util
 golang.org/x/image/ccitt
 golang.org/x/image/colornames
 golang.org/x/image/draw
+golang.org/x/image/font
+golang.org/x/image/font/basicfont
 golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/tiff

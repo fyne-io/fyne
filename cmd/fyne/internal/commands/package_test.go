@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"image"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -67,6 +69,32 @@ func Test_combinedVersion(t *testing.T) {
 		comb := p.combinedVersion()
 		assert.Equal(t, tt.comb, comb)
 	}
+}
+
+func Test_processMacOSIcon(t *testing.T) {
+	f, err := os.Open("testdata/icon.png")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer f.Close()
+	icon, _, err := image.Decode(f)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	processed := processMacOSIcon(icon)
+
+	assert.Equal(t, 1024, processed.Bounds().Dx())
+	assert.Equal(t, 1024, processed.Bounds().Dy())
+	_, _, _, a := processed.At(3, 3).RGBA() // border
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(125, 125).RGBA() // inside cut out corner
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(900, 900).RGBA()
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(1020, 1020).RGBA()
+	assert.Equal(t, uint32(0), a)
 }
 
 func Test_MergeMetata(t *testing.T) {
