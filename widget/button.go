@@ -66,6 +66,9 @@ var _ fyne.Focusable = (*Button)(nil)
 type Button struct {
 	DisableableWidget
 	Text string
+	// Icon specifies an icon resource to display in the button. SVG resources will automatically
+	// update their appearance according to the theme and disabled state of the button.
+	// Raster icons are supported but do not change appearance.
 	Icon fyne.Resource
 	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
 	//
