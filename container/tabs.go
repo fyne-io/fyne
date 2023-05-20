@@ -374,9 +374,11 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 
 	switch t.tabLocation() {
 	case TabLocationLeading, TabLocationTrailing:
-		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(), contentMin.Height)
+		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(),
+			fyne.Max(contentMin.Height, barMin.Height))
 	default:
-		return fyne.NewSize(contentMin.Width, barMin.Height+contentMin.Height+theme.Padding())
+		return fyne.NewSize(fyne.Max(contentMin.Width, barMin.Height),
+			barMin.Height+contentMin.Height+theme.Padding())
 	}
 }
 
