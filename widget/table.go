@@ -362,10 +362,7 @@ func (t *Table) ScrollTo(id TableCellID) {
 		if cellX < scrollPos.X {
 			scrollPos.X = cellX
 		} else if cellX+cellWidth > scrollPos.X+t.content.Size().Width {
-			scrollPos.X = cellX + cellWidth - t.content.Size().Width
-			if scrollPos.X < 0 {
-				scrollPos.X = 0
-			}
+			scrollPos.X = fyne.Max(0, cellX + cellWidth - t.content.Size().Width)
 		}
 	}
 
@@ -382,10 +379,7 @@ func (t *Table) ScrollTo(id TableCellID) {
 		if cellY < scrollPos.Y {
 			scrollPos.Y = cellY
 		} else if cellY+cellHeight > scrollPos.Y+t.content.Size().Height {
-			scrollPos.Y = cellY + cellHeight - t.content.Size().Height
-			if scrollPos.Y < 0 {
-				scrollPos.Y = 0
-			}
+			scrollPos.Y = fyne.Max(0, cellY + cellHeight - t.content.Size().Height)
 		}
 	}
 
@@ -405,11 +399,8 @@ func (t *Table) ScrollToBottom() {
 
 	rows, _ := t.Length()
 	cellY, cellHeight := t.findY(rows - 1)
-	y := cellY + cellHeight - t.content.Size().Height
+	y := fyne.Max(0, cellY + cellHeight - t.content.Size().Height)
 
-	if y < 0 {
-		y = 0
-	}
 	t.content.Offset.Y = y
 	t.offset.Y = y
 	t.finishScroll()
@@ -451,11 +442,8 @@ func (t *Table) ScrollToTrailing() {
 
 	_, cols := t.Length()
 	cellX, cellWidth := t.findX(cols - 1)
-	scrollX := cellX + cellWidth - t.content.Size().Width
+	scrollX := fyne.Max(0, cellX + cellWidth - t.content.Size().Width)
 
-	if scrollX < 0 {
-		scrollX = 0
-	}
 	t.content.Offset.X = scrollX
 	t.offset.X = scrollX
 	t.finishScroll()
