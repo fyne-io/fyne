@@ -10,14 +10,24 @@ import (
 )
 
 var (
-	systrayReady  func()
-	systrayExit   func()
-	menuItems     = make(map[uint32]*MenuItem)
-	menuItemsLock sync.RWMutex
+	systrayReady      func()
+	systrayExit       func()
+	systrayExitCalled bool
+	menuItems         = make(map[uint32]*MenuItem)
+	menuItemsLock     sync.RWMutex
 
 	currentID = uint32(0)
 	quitOnce  sync.Once
 )
+
+// This helper function allows us to call systrayExit only once,
+// without accidentally calling it twice in the same lifetime.
+func runSystrayExit() {
+	if !systrayExitCalled {
+		systrayExitCalled = true
+		systrayExit()
+	}
+}
 
 func init() {
 	runtime.LockOSThread()
@@ -80,7 +90,10 @@ func Run(onReady, onExit func()) {
 func RunWithExternalLoop(onReady, onExit func()) (start, end func()) {
 	Register(onReady, onExit)
 
-	return nativeStart, nativeEnd
+	return nativeStart, func() {
+		nativeEnd()
+		Quit()
+	}
 }
 
 // Register initializes GUI and registers the callbacks but relies on the
@@ -108,6 +121,7 @@ func Register(onReady func(), onExit func()) {
 		onExit = func() {}
 	}
 	systrayExit = onExit
+	systrayExitCalled = false
 	registerSystray()
 }
 
@@ -143,7 +157,12 @@ func AddMenuItemCheckbox(title string, tooltip string, checked bool) *MenuItem {
 
 // AddSeparator adds a separator bar to the menu
 func AddSeparator() {
-	addSeparator(atomic.AddUint32(&currentID, 1))
+	addSeparator(atomic.AddUint32(&currentID, 1), 0)
+}
+
+// AddSeparator adds a separator bar to the submenu
+func (item *MenuItem) AddSeparator() {
+	addSeparator(atomic.AddUint32(&currentID, 1), item.id)
 }
 
 // AddSubMenuItem adds a nested sub-menu item with the designated title and tooltip.
@@ -200,6 +219,14 @@ func (item *MenuItem) Hide() {
 	hideMenuItem(item)
 }
 
+// Remove removes a menu item
+func (item *MenuItem) Remove() {
+	removeMenuItem(item)
+	menuItemsLock.Lock()
+	delete(menuItems, item.id)
+	menuItemsLock.Unlock()
+}
+
 // Show shows a previously hidden menu item
 func (item *MenuItem) Show() {
 	showMenuItem(item)
@@ -230,7 +257,7 @@ func (item *MenuItem) update() {
 	addOrUpdateMenuItem(item)
 }
 
-func systrayMenuItemSelected(id uint32) { //nolint:deadcode,unused // TODO: Function is not being used.
+func systrayMenuItemSelected(id uint32) {
 	menuItemsLock.RLock()
 	item, ok := menuItems[id]
 	menuItemsLock.RUnlock()

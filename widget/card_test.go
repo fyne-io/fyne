@@ -18,7 +18,7 @@ func TestCard_SetImage(t *testing.T) {
 	r := test.WidgetRenderer(c)
 	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
 
-	c.SetImage(canvas.NewImageFromResource(theme.FyneLogo()))
+	c.SetImage(canvas.NewImageFromResource(theme.ComputerIcon()))
 	assert.Equal(t, 5, len(r.Objects()))
 }
 
@@ -62,13 +62,13 @@ func TestCard_Layout(t *testing.T) {
 		"titles_image": {
 			title:    "Title",
 			subtitle: "Subtitle",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  nil,
 		},
 		"just_image": {
 			title:    "",
 			subtitle: "",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  nil,
 		},
 		"just_content": {
@@ -86,13 +86,13 @@ func TestCard_Layout(t *testing.T) {
 		"image_content": {
 			title:    "",
 			subtitle: "",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  newContentRect(),
 		},
 		"all_items": {
 			title:    "Longer title",
 			subtitle: "subtitle with length",
-			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			icon:     canvas.NewImageFromResource(theme.ComputerIcon()),
 			content:  newContentRect(),
 		},
 	} {
@@ -106,7 +106,7 @@ func TestCard_Layout(t *testing.T) {
 
 			window := test.NewWindow(card)
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
-			window.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+			window.Resize(size.Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 			if tt.content != nil {
 				assert.Equal(t, float32(10), tt.content.Size().Height)
 			}
@@ -121,8 +121,19 @@ func TestCard_MinSize(t *testing.T) {
 	content := widget.NewLabel("simple")
 	card := &widget.Card{Content: content}
 
-	inner := card.MinSize().Subtract(fyne.NewSize(theme.Padding()*3, theme.Padding()*3)) // shadow + content pad
+	inner := card.MinSize().Subtract(fyne.NewSize(theme.InnerPadding()+theme.Padding(), theme.InnerPadding()+theme.Padding())) // shadow + content pad
 	assert.Equal(t, content.MinSize(), inner)
+}
+
+func TestCard_Refresh(t *testing.T) {
+	text := widget.NewLabel("Test")
+	card := widget.NewCard("", "", text)
+	w := test.NewWindow(card)
+	test.AssertRendersToMarkup(t, "card/content_label.xml", w.Canvas())
+
+	text.Text = "Changed"
+	card.Refresh()
+	test.AssertRendersToMarkup(t, "card/content_label_changed.xml", w.Canvas())
 }
 
 func newContentRect() *canvas.Rectangle {

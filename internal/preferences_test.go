@@ -141,7 +141,11 @@ func TestInMemoryPreferences_OnChange(t *testing.T) {
 
 	p.SetString("dummy", "another")
 	time.Sleep(time.Millisecond * 100)
+	assert.True(t, called)
 
+	called = false
+	p.RemoveValue("dummy")
+	time.Sleep(time.Millisecond * 100)
 	assert.True(t, called)
 }
 

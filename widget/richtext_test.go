@@ -324,6 +324,16 @@ func TestText_DeleteFromTo_Segments(t *testing.T) {
 	}
 }
 
+func TestText_Multiline(t *testing.T) {
+	text := NewRichText(
+		&TextSegment{Text: "line1\nli", Style: RichTextStyleStrong},
+		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline})
+
+	w := test.NewWindow(text)
+	w.Resize(fyne.NewSize(64, 90))
+	test.AssertImageMatches(t, "richtext/richtext_multiline.png", w.Canvas().Capture())
+}
+
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
@@ -360,6 +370,9 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	fullSize := provider.lineSizeToColumn(4, 0)
 	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
 	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+
+	out := provider.lineSizeToColumn(-1, -1)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0))
 }
 
 func TestText_splitLines(t *testing.T) {
@@ -800,7 +813,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 50, 50, measurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 46, 46, measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -810,7 +823,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 }
 
 func TestText_binarySearch(t *testing.T) {
-	maxWidth := float32(50)
+	maxWidth := float32(46)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
 	measurer := func(text []rune) float32 {
@@ -882,6 +895,10 @@ func TestText_findSpaceIndex(t *testing.T) {
 		"many_spaces": {
 			text: "ww wwww www wwwww",
 			want: 11,
+		},
+		"space beginning": {
+			text: " ww",
+			want: 0,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

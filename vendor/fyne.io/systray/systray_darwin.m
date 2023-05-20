@@ -170,8 +170,15 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   return NULL;
 };
 
-- (void) add_separator:(NSNumber*) menuId
+- (void) add_separator:(NSNumber*) parentMenuId
 {
+  if (parentMenuId.integerValue != 0) {
+    NSMenuItem* menuItem = find_menu_item(menu, parentMenuId);
+    if (menuItem != NULL) {
+      [menuItem.submenu addItem: [NSMenuItem separatorItem]];
+      return;
+    }
+  }
   [menu addItem: [NSMenuItem separatorItem]];
 }
 
@@ -200,6 +207,14 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   NSMenuItem* menuItem = find_menu_item(menu, menuId);
   if (menuItem != NULL) {
     [menuItem setHidden:FALSE];
+  }
+}
+
+- (void) remove_menu_item:(NSNumber*) menuId
+{
+  NSMenuItem* menuItem = find_menu_item(menu, menuId);
+  if (menuItem != NULL) {
+    [menuItem.menu removeItem:menuItem];     
   }
 }
 
@@ -266,19 +281,23 @@ void runInMainThread(SEL method, id object) {
 
 void setIcon(const char* iconBytes, int length, bool template) {
   NSData* buffer = [NSData dataWithBytes: iconBytes length:length];
-  NSImage *image = [[NSImage alloc] initWithData:buffer];
-  [image setSize:NSMakeSize(16, 16)];
-  image.template = template;
-  runInMainThread(@selector(setIcon:), (id)image);
+  @autoreleasepool {
+    NSImage *image = [[NSImage alloc] initWithData:buffer];
+    [image setSize:NSMakeSize(16, 16)];
+    image.template = template;
+    runInMainThread(@selector(setIcon:), (id)image);
+  }
 }
 
 void setMenuItemIcon(const char* iconBytes, int length, int menuId, bool template) {
   NSData* buffer = [NSData dataWithBytes: iconBytes length:length];
-  NSImage *image = [[NSImage alloc] initWithData:buffer];
-  [image setSize:NSMakeSize(16, 16)];
-  image.template = template;
-  NSNumber *mId = [NSNumber numberWithInt:menuId];
-  runInMainThread(@selector(setMenuItemIcon:), @[image, (id)mId]);
+  @autoreleasepool {
+    NSImage *image = [[NSImage alloc] initWithData:buffer];
+    [image setSize:NSMakeSize(16, 16)];
+    image.template = template;
+    NSNumber *mId = [NSNumber numberWithInt:menuId];
+    runInMainThread(@selector(setMenuItemIcon:), @[image, (id)mId]);
+  }
 }
 
 void setTitle(char* ctitle) {
@@ -302,14 +321,19 @@ void add_or_update_menu_item(int menuId, int parentMenuId, char* title, char* to
   runInMainThread(@selector(add_or_update_menu_item:), (id)item);
 }
 
-void add_separator(int menuId) {
-  NSNumber *mId = [NSNumber numberWithInt:menuId];
-  runInMainThread(@selector(add_separator:), (id)mId);
+void add_separator(int menuId, int parentId) {
+  NSNumber *pId = [NSNumber numberWithInt:parentId];
+  runInMainThread(@selector(add_separator:), (id)pId);
 }
 
 void hide_menu_item(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(hide_menu_item:), (id)mId);
+}
+
+void remove_menu_item(int menuId) {
+  NSNumber *mId = [NSNumber numberWithInt:menuId];
+  runInMainThread(@selector(remove_menu_item:), (id)mId);
 }
 
 void show_menu_item(int menuId) {

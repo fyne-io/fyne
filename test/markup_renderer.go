@@ -137,7 +137,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	}
 
 	var variant string
-	switch rsc.(type) {
+	switch t := rsc.(type) {
 	case *theme.DisabledResource:
 		variant = "disabled"
 	case *theme.ErrorThemedResource:
@@ -147,7 +147,10 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.PrimaryThemedResource:
 		variant = "primary"
 	case *theme.ThemedResource:
-		variant = "default"
+		variant = string(t.ColorName)
+		if variant == "" {
+			variant = "default"
+		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
@@ -290,7 +293,9 @@ func (r *markupRenderer) writeIndent() {
 func (r *markupRenderer) writeImage(i *canvas.Image, attrs map[string]*string) {
 	r.setStringAttr(attrs, "file", i.File)
 	r.setResourceAttr(attrs, "rsc", i.Resource)
-	r.setBoolAttr(attrs, "img", i.Image != nil)
+	if i.File == "" && i.Resource == nil {
+		r.setBoolAttr(attrs, "img", i.Image != nil)
+	}
 	r.setFloatAttr(attrs, "translucency", i.Translucency)
 	r.setFillModeAttr(attrs, "fillMode", i.FillMode)
 	r.setScaleModeAttr(attrs, "scaleMode", i.ScaleMode)
@@ -329,6 +334,7 @@ func (r *markupRenderer) writeRectangle(rct *canvas.Rectangle, attrs map[string]
 	r.setColorAttr(attrs, "fillColor", rct.FillColor)
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
 	r.writeTag("rectangle", true, attrs)
 }
 
@@ -384,19 +390,23 @@ func nrgbaColor(c color.Color) color.NRGBA {
 
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		nrgbaColor(theme.BackgroundColor()):     "background",
-		nrgbaColor(theme.ButtonColor()):         "button",
-		nrgbaColor(theme.DisabledButtonColor()): "disabled button",
-		nrgbaColor(theme.DisabledColor()):       "disabled",
-		nrgbaColor(theme.ErrorColor()):          "error",
-		nrgbaColor(theme.FocusColor()):          "focus",
-		nrgbaColor(theme.ForegroundColor()):     "foreground",
-		nrgbaColor(theme.HoverColor()):          "hover",
-		nrgbaColor(theme.PlaceHolderColor()):    "placeholder",
-		nrgbaColor(theme.PrimaryColor()):        "primary",
-		nrgbaColor(theme.ScrollBarColor()):      "scrollbar",
-		nrgbaColor(theme.SelectionColor()):      "selection",
-		nrgbaColor(theme.ShadowColor()):         "shadow",
+		nrgbaColor(theme.BackgroundColor()):        "background",
+		nrgbaColor(theme.ButtonColor()):            "button",
+		nrgbaColor(theme.DisabledButtonColor()):    "disabled button",
+		nrgbaColor(theme.DisabledColor()):          "disabled",
+		nrgbaColor(theme.ErrorColor()):             "error",
+		nrgbaColor(theme.FocusColor()):             "focus",
+		nrgbaColor(theme.ForegroundColor()):        "foreground",
+		nrgbaColor(theme.HoverColor()):             "hover",
+		nrgbaColor(theme.InputBackgroundColor()):   "inputBackground",
+		nrgbaColor(theme.InputBorderColor()):       "inputBorder",
+		nrgbaColor(theme.MenuBackgroundColor()):    "menuBackground",
+		nrgbaColor(theme.OverlayBackgroundColor()): "overlayBackground",
+		nrgbaColor(theme.PlaceHolderColor()):       "placeholder",
+		nrgbaColor(theme.PrimaryColor()):           "primary",
+		nrgbaColor(theme.ScrollBarColor()):         "scrollbar",
+		nrgbaColor(theme.SelectionColor()):         "selection",
+		nrgbaColor(theme.ShadowColor()):            "shadow",
 	}[nrgbaColor(c)]
 }
 

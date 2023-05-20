@@ -290,7 +290,7 @@ func showOverlay(c fyne.Canvas) {
 	content.Resize(content.MinSize())
 	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
-	over := container.NewMax(
+	over := container.NewStack(
 		canvas.NewRectangle(theme.ShadowColor()), container.NewCenter(wrap),
 	)
 

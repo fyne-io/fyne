@@ -1,11 +1,14 @@
 package dialog
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -101,4 +104,19 @@ func TestConfirmDialog_Resize(t *testing.T) {
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width)
 	expectedHeight = theDialog.win.Content.MinSize().Height
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height)
+}
+
+func TestConfirm_Importance(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	d := NewConfirm("Delete me?", "This is dangerous!", nil, w)
+	d.SetConfirmImportance(widget.DangerImportance)
+
+	test.ApplyTheme(t, test.Theme())
+	d.Show()
+	test.AssertRendersToImage(t, "dialog-confirm-importance.png", w.Canvas())
 }

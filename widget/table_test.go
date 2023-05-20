@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -17,8 +18,8 @@ func TestTable_Empty(t *testing.T) {
 	table := &Table{}
 	table.Resize(fyne.NewSize(120, 120))
 
-	renderer := test.WidgetRenderer(table).(*tableRenderer)
-	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	table.CreateRenderer()
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
 	cellRenderer.Refresh() // let's not crash :)
 }
 
@@ -37,17 +38,16 @@ func TestTable_Cache(t *testing.T) {
 	c.SetPadded(false)
 	c.Resize(fyne.NewSize(120, 148))
 
-	renderer := test.WidgetRenderer(table).(*tableRenderer)
-	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 6, len(cellRenderer.Objects()))
+	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
 	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
 	objRef := cellRenderer.Objects()[0].(*Label)
 
 	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
-	assert.Equal(t, float32(0), renderer.scroll.Offset.Y) // we didn't scroll as data shorter
-	assert.Equal(t, float32(150), renderer.scroll.Offset.X)
-	assert.Equal(t, 6, len(cellRenderer.Objects()))
+	assert.Equal(t, float32(0), table.content.Offset.Y) // we didn't scroll as data shorter
+	assert.Equal(t, float32(150), table.content.Offset.X)
+	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
 	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
 	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
 }
@@ -65,7 +65,10 @@ func TestTable_ChangeTheme(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
-	content := test.WidgetRenderer(test.WidgetRenderer(table).(*tableRenderer).scroll.Content.(*tableCells)).(*tableCellsRenderer)
+	table.CreateRenderer()
+
+	table.Resize(fyne.NewSize(50, 30))
+	content := test.WidgetRenderer(table.content.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
@@ -98,25 +101,146 @@ func TestTable_Filled(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
+	w.Content().Refresh()
 	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
+}
+
+func TestTable_Headers(t *testing.T) {
+	table := NewTableWithHeaders(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("text")
+		},
+		func(_ TableCellID, _ fyne.CanvasObject) {
+		})
+	table.Resize(fyne.NewSize(120, 120))
+
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
+	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "A"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "B"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "1"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "2"))
+}
+
+func TestTable_JustHeaders(t *testing.T) {
+
+	test.NewApp()
+	defer test.NewApp()
+
+	table := NewTableWithHeaders(
+		func() (int, int) { return 0, 9 },
+		func() fyne.CanvasObject {
+			return NewLabel("text")
+		},
+		func(_ TableCellID, _ fyne.CanvasObject) {
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120, 120))
+
+	test.AssertRendersToMarkup(t, "table/just_headers.xml", w.Canvas())
+}
+
+func TestTable_Sticky(t *testing.T) {
+	table := NewTableWithHeaders(
+		func() (int, int) { return 25, 25 },
+		func() fyne.CanvasObject {
+			return NewLabel("text")
+		},
+		func(i TableCellID, o fyne.CanvasObject) {
+			o.(*Label).SetText(fmt.Sprintf("text %d,%d", i.Row, i.Col))
+		})
+	table.Resize(fyne.NewSize(120, 120))
+
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells)).(*tableCellsRenderer)
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 0,0"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 1,0"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 2,1"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "A"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "B"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "1"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "2"))
+
+	table.ScrollTo(TableCellID{Row: 7, Col: 2})
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,1"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,2"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "C"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "D"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "7"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "8"))
+
+	table.StickyRowCount = 1
+	table.StickyColumnCount = 1
+	table.Refresh()
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,2"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,4"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
+	// stuck cells
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "text 0,3"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "text 7,0"))
+	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "C"))
+	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "8"))
+	assert.True(t, areaContainsLabel(table.corner.Content.(*fyne.Container).Objects, "A"))
+	assert.True(t, areaContainsLabel(table.corner.Content.(*fyne.Container).Objects, "1"))
+	assert.True(t, areaContainsLabel(table.corner.Content.(*fyne.Container).Objects, "text 0,0"))
 }
 
 func TestTable_MinSize(t *testing.T) {
 	for name, tt := range map[string]struct {
-		cellSize        fyne.Size
-		expectedMinSize fyne.Size
+		cellSize             fyne.Size
+		expectedMinSize      fyne.Size
+		headRow, headCol     bool
+		stickRows, stickCols int
 	}{
 		"small": {
 			fyne.NewSize(1, 1),
 			fyne.NewSize(float32(32), float32(32)),
+			false, false,
+			0, 0,
 		},
 		"large": {
 			fyne.NewSize(100, 100),
 			fyne.NewSize(100, 100),
+			false, false,
+			0, 0,
+		},
+		"sticky": {
+			fyne.NewSize(40, 40),
+			fyne.NewSize(84, 84),
+			false, false,
+			1, 1,
+		},
+		"headerrow": {
+			fyne.NewSize(1, 1),
+			fyne.NewSize(float32(32), float32(46)),
+			true, false,
+			0, 0,
+		},
+		"headercol": {
+			fyne.NewSize(1, 1),
+			fyne.NewSize(float32(46), float32(32)),
+			false, true,
+			0, 0,
+		},
+		"headers": {
+			fyne.NewSize(1, 1),
+			fyne.NewSize(float32(46), float32(46)),
+			true, true,
+			0, 0,
+		},
+		"stickyandheaders": {
+			fyne.NewSize(40, 40),
+			fyne.NewSize(98, 98),
+			true, true,
+			1, 1,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.expectedMinSize, NewTable(
+			table := NewTable(
 				func() (int, int) { return 5, 5 },
 				func() fyne.CanvasObject {
 					r := canvas.NewRectangle(color.Black)
@@ -124,9 +248,34 @@ func TestTable_MinSize(t *testing.T) {
 					r.Resize(tt.cellSize)
 					return r
 				},
-				func(TableCellID, fyne.CanvasObject) {}).MinSize())
+				func(TableCellID, fyne.CanvasObject) {})
+			table.ShowHeaderRow = tt.headRow
+			table.ShowHeaderColumn = tt.headCol
+			table.CreateHeader = func() fyne.CanvasObject {
+				r := canvas.NewRectangle(color.White)
+				r.SetMinSize(fyne.NewSize(10, 10))
+				r.Resize(fyne.NewSize(10, 10))
+				return r
+			}
+			table.StickyRowCount = tt.stickRows
+			table.StickyColumnCount = tt.stickCols
+
+			assert.Equal(t, tt.expectedMinSize, table.MinSize())
 		})
 	}
+}
+
+func TestTable_Resize(t *testing.T) {
+	table := NewTable(
+		func() (int, int) { return 2, 2 },
+		func() fyne.CanvasObject {
+			return NewLabel("abc")
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	w.Resize(fyne.NewSize(100, 100))
+	test.AssertImageMatches(t, "table/resize.png", w.Canvas().Capture())
 }
 
 func TestTable_Unselect(t *testing.T) {
@@ -180,8 +329,7 @@ func TestTable_Refresh(t *testing.T) {
 		})
 	table.Resize(fyne.NewSize(120, 120))
 
-	renderer := test.WidgetRenderer(table).(*tableRenderer)
-	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
 	assert.Equal(t, "placeholder", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
 
 	displayText = "replaced"
@@ -194,7 +342,7 @@ func TestTable_ScrollTo(t *testing.T) {
 	defer test.NewApp()
 
 	// for this test the separator thickness is 0
-	test.ApplyTheme(t, &separatorThicknessZeroTheme{test.Theme()})
+	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
 
 	// we will test a 20 row x 5 column table where each cell is 50x50
 	const (
@@ -281,7 +429,7 @@ func TestTable_ScrollTo(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			table.ScrollTo(tc.in)
 			assert.Equal(t, tc.want, table.offset)
-			assert.Equal(t, tc.want, table.scroll.Offset)
+			assert.Equal(t, tc.want, table.content.Offset)
 		})
 	}
 }
@@ -318,7 +466,7 @@ func TestTable_ScrollToBottom(t *testing.T) {
 	table.ScrollToBottom()
 
 	assert.Equal(t, want, table.offset)
-	assert.Equal(t, want, table.scroll.Offset)
+	assert.Equal(t, want, table.content.Offset)
 }
 
 func TestTable_ScrollToLeading(t *testing.T) {
@@ -344,7 +492,7 @@ func TestTable_ScrollToLeading(t *testing.T) {
 
 	want := fyne.Position{X: 0, Y: prev.Y}
 	assert.Equal(t, want, table.offset)
-	assert.Equal(t, want, table.scroll.Offset)
+	assert.Equal(t, want, table.content.Offset)
 }
 
 func TestTable_ScrollToTop(t *testing.T) {
@@ -376,7 +524,7 @@ func TestTable_ScrollToTop(t *testing.T) {
 
 	want := fyne.Position{X: prev.X, Y: 0}
 	assert.Equal(t, want, table.offset)
-	assert.Equal(t, want, table.scroll.Offset)
+	assert.Equal(t, want, table.content.Offset)
 }
 
 func TestTable_ScrollToTrailing(t *testing.T) {
@@ -405,7 +553,7 @@ func TestTable_ScrollToTrailing(t *testing.T) {
 	table.ScrollToTrailing()
 
 	assert.Equal(t, want, table.offset)
-	assert.Equal(t, want, table.scroll.Offset)
+	assert.Equal(t, want, table.content.Offset)
 }
 
 func TestTable_Selection(t *testing.T) {
@@ -511,22 +659,142 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	table.Resize(fyne.NewSize(120, 120))
 	table.Select(TableCellID{1, 0})
 
-	renderer := test.WidgetRenderer(table).(*tableRenderer)
-	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 10, len(cellRenderer.Objects()))
+	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
-	cell1Offset := theme.SeparatorThicknessSize()
+	cell1Offset := theme.Padding()
 	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
 
-	table.SetColumnWidth(0, 16)
-	assert.Equal(t, float32(16), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
-	assert.Equal(t, float32(16)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
+	table.SetColumnWidth(0, 24)
+	assert.Equal(t, float32(24), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
+	assert.Equal(t, float32(24)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
 
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
 	test.AssertImageMatches(t, "table/col_size.png", w.Canvas().Capture())
+}
+
+func TestTable_SetColumnWidth_Dragged(t *testing.T) {
+	test.NewApp()
+
+	table := NewTableWithHeaders(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+		})
+	table.ShowHeaderColumn = false
+	table.StickyColumnCount = 0
+	table.Refresh()
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(table)
+	c.Resize(fyne.NewSize(120, 120))
+
+	dragPos := fyne.NewPos(table.cellSize.Width*2+theme.Padding()+2, 2) // gap between col 1 and 2
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	test.Drag(c, dragPos.AddXY(5, 0), 5, 0) // expanded column 5.0
+
+	assert.Equal(t, table.cellSize.Width+5, table.columnWidths[1])
+
+	dragPos = dragPos.AddXY(5, 0)
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.Dragged(&fyne.DragEvent{ // reduce less than min width
+		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(25, 0)},
+		Dragged:    fyne.Delta{DX: -25, DY: 0}})
+
+	assert.Equal(t, table.cellSize.Width, table.columnWidths[1])
+
+	dragPos = dragPos.SubtractXY(25, 0)
+	test.Drag(c, dragPos.AddXY(25, 0), 25, 0) // return to before-min-drag
+
+	assert.Equal(t, table.cellSize.Width+5, table.columnWidths[1])
+}
+
+func TestTable_SetRowHeight(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("place\nholder")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+			if id.Row == 0 {
+				obj.(*Label).Text = "p"
+			} else {
+				obj.(*Label).Text = "place\nholder"
+			}
+			obj.Refresh()
+		})
+	table.SetRowHeight(0, 48)
+	table.Resize(fyne.NewSize(120, 120))
+	table.Select(TableCellID{0, 1})
+
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer.Refresh()
+	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Equal(t, float32(48), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
+	cell1Offset := theme.Padding()
+	assert.Equal(t, float32(48)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
+
+	table.SetRowHeight(0, 32)
+	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
+	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
+	test.AssertImageMatches(t, "table/row_size.png", w.Canvas().Capture())
+}
+
+func TestTable_SetRowHeight_Dragged(t *testing.T) {
+	test.NewApp()
+
+	table := NewTableWithHeaders(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+		})
+	table.ShowHeaderRow = false
+	table.StickyRowCount = 0
+	table.Refresh()
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(table)
+	c.Resize(fyne.NewSize(120, 150))
+
+	dragPos := fyne.NewPos(2, table.cellSize.Height*3+theme.Padding()*2+1) // gap between row 2 and 3
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	test.Drag(c, dragPos.AddXY(0, 5), 0, 5) // expanded row 5.0
+
+	assert.Equal(t, table.cellSize.Height+5, table.rowHeights[2])
+
+	dragPos = dragPos.AddXY(0, 5)
+	table.MouseMoved(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
+	table.Dragged(&fyne.DragEvent{ // reduce less than min height
+		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(0, 25)},
+		Dragged:    fyne.Delta{DX: 0, DY: -25}})
+
+	assert.Equal(t, table.cellSize.Height, table.rowHeights[2])
+
+	dragPos = dragPos.SubtractXY(0, 25)
+	test.Drag(c, dragPos.AddXY(0, 25), 0, 25) // return to before-min-drag
+
+	assert.Equal(t, table.cellSize.Height+5, table.rowHeights[2])
 }
 
 func TestTable_ShowVisible(t *testing.T) {
@@ -538,17 +806,16 @@ func TestTable_ShowVisible(t *testing.T) {
 		func(TableCellID, fyne.CanvasObject) {})
 	table.Resize(fyne.NewSize(120, 120))
 
-	renderer := test.WidgetRenderer(table).(*tableRenderer)
-	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 10, len(cellRenderer.Objects()))
+	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
 }
 
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	test.ApplyTheme(t, &separatorThicknessZeroTheme{test.Theme()})
+	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
 
 	table := NewTable(
 		func() (int, int) { return 500, 150 },
@@ -562,13 +829,26 @@ func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
 	})
 }
 
-type separatorThicknessZeroTheme struct {
+type paddingZeroTheme struct {
 	fyne.Theme
 }
 
-func (t *separatorThicknessZeroTheme) Size(n fyne.ThemeSizeName) float32 {
-	if n == theme.SizeNameSeparatorThickness {
+func (t *paddingZeroTheme) Size(n fyne.ThemeSizeName) float32 {
+	if n == theme.SizeNamePadding {
 		return 0
 	}
 	return t.Theme.Size(n)
+}
+
+func areaContainsLabel(list []fyne.CanvasObject, text string) bool {
+	for _, o := range list {
+		l, ok := o.(*Label)
+		if !ok {
+			continue
+		}
+		if l.Text == text {
+			return true
+		}
+	}
+	return false
 }

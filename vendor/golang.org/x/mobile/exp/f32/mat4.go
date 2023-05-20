@@ -92,6 +92,7 @@ func (m *Mat4) Perspective(fov Radian, aspect, near, far float32) {
 
 // Scale sets m to be a scale followed by p.
 // It is equivalent to
+//
 //	m.Mul(p, &Mat4{
 //		{x, 0, 0, 0},
 //		{0, y, 0, 0},
@@ -119,6 +120,7 @@ func (m *Mat4) Scale(p *Mat4, x, y, z float32) {
 
 // Translate sets m to be a translation followed by p.
 // It is equivalent to
+//
 //	m.Mul(p, &Mat4{
 //		{1, 0, 0, x},
 //		{0, 1, 0, y},

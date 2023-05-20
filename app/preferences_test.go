@@ -16,6 +16,23 @@ func loadPreferences(id string) *preferences {
 	return p
 }
 
+func TestPreferences_Remove(t *testing.T) {
+	p := loadPreferences("dummy")
+	p.WriteValues(func(val map[string]interface{}) {
+		val["keyString"] = "value"
+		val["keyInt"] = 4
+	})
+
+	p.RemoveValue("keyString")
+	err := p.saveToFile(p.storagePath())
+	assert.Nil(t, err)
+
+	// check it doesn't write values that were removed
+	p = loadPreferences("dummy")
+	assert.Equal(t, 4, p.Int("keyInt"))
+	assert.Equal(t, "missing", p.StringWithFallback("keyString", "missing"))
+}
+
 func TestPreferences_Save(t *testing.T) {
 	p := loadPreferences("dummy")
 	p.WriteValues(func(val map[string]interface{}) {
@@ -25,9 +42,10 @@ func TestPreferences_Save(t *testing.T) {
 		val["keyBool"] = true
 	})
 
-	path := filepath.Join(os.TempDir(), "fynePrefs.json")
+	path := p.storagePath()
 	defer os.Remove(path)
-	p.saveToFile(path)
+	err := p.saveToFile(path)
+	assert.Nil(t, err)
 
 	expected, err := ioutil.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {
@@ -38,6 +56,10 @@ func TestPreferences_Save(t *testing.T) {
 		assert.Fail(t, "Failed to load, %v", err)
 	}
 	assert.JSONEq(t, string(expected), string(content))
+
+	// check it reads the saved output
+	p = loadPreferences("dummy")
+	assert.Equal(t, "value", p.String("keyString"))
 }
 
 func TestPreferences_Save_OverwriteFast(t *testing.T) {

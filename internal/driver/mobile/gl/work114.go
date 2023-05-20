@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build (darwin || linux || openbsd || freebsd) && !go115
+//go:build (darwin || linux || openbsd || freebsd) && !go1.15
 // +build darwin linux openbsd freebsd
-// +build !go115
+// +build !go1.15
 
 package gl
 
@@ -15,7 +15,7 @@ package gl
 #cgo darwin,arm64       LDFLAGS: -framework OpenGLES
 #cgo linux              LDFLAGS: -lGLESv2
 #cgo openbsd            LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
-#cgo freebsd            LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
+#cgo freebsd            LDFLAGS: -L/usr/local/lib/ -lGLESv2
 
 #cgo android            CFLAGS: -Dos_android
 #cgo ios                CFLAGS: -Dos_ios
@@ -27,7 +27,7 @@ package gl
 #cgo openbsd      CFLAGS: -Dos_openbsd
 #cgo freebsd      CFLAGS: -Dos_freebsd
 #cgo openbsd      CFLAGS: -I/usr/X11R6/include/
-#cgo freebsd      CFLAGS: -I/usr/local/X11R6/include/
+#cgo freebsd      CFLAGS: -I/usr/local/include/
 
 #include <stdint.h>
 #include "work.h"

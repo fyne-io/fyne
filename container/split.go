@@ -95,7 +95,7 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerSize, leadingSize, trailingSize fyne.Size
 
 	if r.split.Horizontal {
-		lw, tw := r.computeSplitLengths(size.Width, r.split.Leading.MinSize().Width, r.split.Trailing.MinSize().Width)
+		lw, tw := r.computeSplitLengths(size.Width, r.minLeadingWidth(), r.minTrailingWidth())
 		leadingPos.X = 0
 		leadingSize.Width = lw
 		leadingSize.Height = size.Height
@@ -106,7 +106,7 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 		trailingSize.Width = tw
 		trailingSize.Height = size.Height
 	} else {
-		lh, th := r.computeSplitLengths(size.Height, r.split.Leading.MinSize().Height, r.split.Trailing.MinSize().Height)
+		lh, th := r.computeSplitLengths(size.Height, r.minLeadingHeight(), r.minTrailingHeight())
 		leadingPos.Y = 0
 		leadingSize.Width = size.Width
 		leadingSize.Height = lh
@@ -125,8 +125,6 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	r.split.Trailing.Move(trailingPos)
 	r.split.Trailing.Resize(trailingSize)
 	canvas.Refresh(r.divider)
-	canvas.Refresh(r.split.Leading)
-	canvas.Refresh(r.split.Trailing)
 }
 
 func (r *splitContainerRenderer) MinSize() fyne.Size {
@@ -183,6 +181,34 @@ func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) 
 	return float32(ld), float32(tr)
 }
 
+func (r *splitContainerRenderer) minLeadingWidth() float32 {
+	if r.split.Leading.Visible() {
+		return r.split.Leading.MinSize().Width
+	}
+	return 0
+}
+
+func (r *splitContainerRenderer) minLeadingHeight() float32 {
+	if r.split.Leading.Visible() {
+		return r.split.Leading.MinSize().Height
+	}
+	return 0
+}
+
+func (r *splitContainerRenderer) minTrailingWidth() float32 {
+	if r.split.Trailing.Visible() {
+		return r.split.Trailing.MinSize().Width
+	}
+	return 0
+}
+
+func (r *splitContainerRenderer) minTrailingHeight() float32 {
+	if r.split.Trailing.Visible() {
+		return r.split.Trailing.MinSize().Height
+	}
+	return 0
+}
+
 // Declare conformity with interfaces
 var _ fyne.CanvasObject = (*divider)(nil)
 var _ fyne.Draggable = (*divider)(nil)
@@ -191,8 +217,10 @@ var _ desktop.Hoverable = (*divider)(nil)
 
 type divider struct {
 	widget.BaseWidget
-	split   *Split
-	hovered bool
+	split          *Split
+	hovered        bool
+	startDragOff   *fyne.Position
+	currentDragPos fyne.Position
 }
 
 func newDivider(split *Split) *divider {
@@ -224,26 +252,37 @@ func (d *divider) Cursor() desktop.Cursor {
 }
 
 func (d *divider) DragEnd() {
+	d.startDragOff = nil
 }
 
-func (d *divider) Dragged(event *fyne.DragEvent) {
-	offset := d.split.Offset
-	if d.split.Horizontal {
-		if leadingRatio := float64(d.split.Leading.Size().Width) / float64(d.split.Size().Width); offset < leadingRatio {
-			offset = leadingRatio
-		}
-		if trailingRatio := 1. - (float64(d.split.Trailing.Size().Width) / float64(d.split.Size().Width)); offset > trailingRatio {
-			offset = trailingRatio
-		}
-		offset += float64(event.Dragged.DX) / float64(d.split.Size().Width)
+func (d *divider) Dragged(e *fyne.DragEvent) {
+	if d.startDragOff == nil {
+		d.currentDragPos = d.Position().Add(e.Position)
+		start := e.Position.Subtract(e.Dragged)
+		d.startDragOff = &start
 	} else {
-		if leadingRatio := float64(d.split.Leading.Size().Height) / float64(d.split.Size().Height); offset < leadingRatio {
-			offset = leadingRatio
-		}
-		if trailingRatio := 1. - (float64(d.split.Trailing.Size().Height) / float64(d.split.Size().Height)); offset > trailingRatio {
-			offset = trailingRatio
-		}
-		offset += float64(event.Dragged.DY) / float64(d.split.Size().Height)
+		d.currentDragPos = d.currentDragPos.Add(e.Dragged)
+	}
+
+	x, y := d.currentDragPos.Components()
+	var offset, leadingRatio, trailingRatio float64
+	if d.split.Horizontal {
+		widthFree := float64(d.split.Size().Width - dividerThickness())
+		leadingRatio = float64(d.split.Leading.MinSize().Width) / widthFree
+		trailingRatio = 1. - (float64(d.split.Trailing.MinSize().Width) / widthFree)
+		offset = float64(x-d.startDragOff.X) / widthFree
+	} else {
+		heightFree := float64(d.split.Size().Height - dividerThickness())
+		leadingRatio = float64(d.split.Leading.MinSize().Height) / heightFree
+		trailingRatio = 1. - (float64(d.split.Trailing.MinSize().Height) / heightFree)
+		offset = float64(y-d.startDragOff.Y) / heightFree
+	}
+
+	if offset < leadingRatio {
+		offset = leadingRatio
+	}
+	if offset > trailingRatio {
+		offset = trailingRatio
 	}
 	d.split.SetOffset(offset)
 }

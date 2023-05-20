@@ -124,11 +124,14 @@ func newPreferences(app *fyneApp) *preferences {
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
 	// don't load or watch if not setup
-	if app.uniqueID == "" {
+	if app.uniqueID == "" && app.Metadata().ID == "" {
 		return p
 	}
 
 	p.AddChangeListener(func() {
+		if p != app.prefs {
+			return
+		}
 		p.prefLock.Lock()
 		shouldIgnoreChange := p.savedRecently || p.loadingInProgress
 		if p.savedRecently && !p.loadingInProgress {

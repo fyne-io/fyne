@@ -5,9 +5,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	_ "fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 
 	"golang.org/x/sys/execabs"
 )
@@ -29,6 +30,11 @@ func TestFyneApp_UniqueID(t *testing.T) {
 	app := NewWithID(appID)
 
 	assert.Equal(t, appID, app.UniqueID())
+
+	meta.ID = "fakedInject"
+	app = New()
+
+	assert.Equal(t, meta.ID, app.UniqueID())
 }
 
 func TestFyneApp_OpenURL(t *testing.T) {

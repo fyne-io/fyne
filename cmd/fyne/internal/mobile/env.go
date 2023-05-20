@@ -342,6 +342,9 @@ func archNDK() string {
 			arch = "x86_64"
 			break
 		}
+		if runtime.GOOS == "android" { // termux
+			return "linux-aarch64"
+		}
 		fallthrough
 	default:
 		panic("unsupported GOARCH: " + runtime.GOARCH)
@@ -357,24 +360,37 @@ type ndkToolchain struct {
 	clangPrefix string
 }
 
-func (tc *ndkToolchain) ClangPrefix() string {
-	if buildAndroidAPI < tc.minAPI {
+func (tc *ndkToolchain) ClangPrefix(api int) string {
+	if api < tc.minAPI {
 		return fmt.Sprintf("%s%d", tc.clangPrefix, tc.minAPI)
 	}
-	return fmt.Sprintf("%s%d", tc.clangPrefix, buildAndroidAPI)
+	return fmt.Sprintf("%s%d", tc.clangPrefix, api)
 }
 
 func (tc *ndkToolchain) Path(ndkRoot, toolName string) string {
-	var pref string
-	switch toolName {
-	case "clang", "clang++":
-		pref = tc.ClangPrefix()
-	case "nm":
-		pref = "llvm"
-	default:
-		pref = tc.toolPrefix
+	for api := buildAndroidAPI; api < 99; api++ {
+		var pref string
+		switch toolName {
+		case "clang", "clang++":
+			pref = tc.ClangPrefix(api)
+		case "nm":
+			pref = "llvm"
+		default:
+			pref = tc.toolPrefix
+		}
+
+		toolPath := filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin", pref+"-"+toolName)
+		if util.Exists(toolPath) {
+			return toolPath
+		} else if runtime.GOOS == "windows" {
+			// On windows some of the NDK executable have a .exe extension and some don't, so try both.
+			toolPath += ".exe"
+			if util.Exists(toolPath) {
+				return toolPath
+			}
+		}
 	}
-	return filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin", pref+"-"+toolName)
+	return ""
 }
 
 type ndkConfig map[string]ndkToolchain // map: GOOS->androidConfig.

@@ -18,7 +18,7 @@
 // It is safe to use the destination address as the left-hand side,
 // that is, dst *= rhs is dst.Mul(dst, rhs).
 //
-// WARNING
+// # WARNING
 //
 // The interface to this package is not stable. It will change considerably.
 // Only use functions that provide package documentation. Semantics are

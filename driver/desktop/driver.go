@@ -7,4 +7,9 @@ import "fyne.io/fyne/v2"
 type Driver interface {
 	// Create a new borderless window that is centered on screen
 	CreateSplashWindow() fyne.Window
+
+	// Gets the set of key modifiers that are currently active
+	//
+	// Since: 2.4
+	CurrentKeyModifiers() fyne.KeyModifier
 }

@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
 	"fyne.io/fyne/v2/container"
@@ -22,7 +23,7 @@ var topWindow fyne.Window
 
 func main() {
 	a := app.NewWithID("io.fyne.demo")
-	a.SetIcon(theme.FyneLogo())
+	a.SetIcon(data.FyneLogo)
 	makeTray(a)
 	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")
@@ -31,7 +32,7 @@ func main() {
 	w.SetMainMenu(makeMenu(a, w))
 	w.SetMaster()
 
-	content := container.NewMax()
+	content := container.NewStack()
 	title := widget.NewLabel("Component name")
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord
@@ -176,6 +177,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 func makeTray(a fyne.App) {
 	if desk, ok := a.(desktop.App); ok {
 		h := fyne.NewMenuItem("Hello", func() {})
+		h.Icon = theme.HomeIcon()
 		menu := fyne.NewMenu("Hello World", h)
 		h.Action = func() {
 			log.Println("System tray menu tapped")

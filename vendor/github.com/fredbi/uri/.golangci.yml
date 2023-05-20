@@ -1,20 +1,39 @@
 linters-settings:
   govet:
     check-shadowing: true
-  golint:
-    min-confidence: 0
-  gocyclo:
-    min-complexity: 40
   maligned:
     suggest-new: true
   dupl:
-    threshold: 100
+    threshold: 200
   goconst:
-    min-len: 2
-    min-occurrences: 4
+    min-len: 3
+    min-occurrences: 2
+  forbidigo:
+    forbid:
+      - ^print.*$
+      - 'fmt\.Print.*'
+  gocognit:
+    min-complexity: 65 # This is super high value. We should gradually lower it to 30-40.
+
 linters:
-  enable-all: true
+  enable:
+    - gofmt
+    - goimports
+    - bodyclose
+    - dupl
+    - forbidigo
+    - gocognit
+    - gocritic
+    - goimports
+    - gosec
+    - nakedret
+     #- nolintlint
+    - revive
+    - stylecheck
+    - unconvert
+    - unparam
   disable:
     - maligned
     - lll
+    - gochecknoinits
     - gochecknoglobals

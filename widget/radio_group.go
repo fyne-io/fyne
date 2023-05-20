@@ -28,9 +28,8 @@ var _ fyne.Widget = (*RadioGroup)(nil)
 // Since: 1.4
 func NewRadioGroup(options []string, changed func(string)) *RadioGroup {
 	r := &RadioGroup{
-		DisableableWidget: DisableableWidget{},
-		Options:           options,
-		OnChanged:         changed,
+		Options:   options,
+		OnChanged: changed,
 	}
 	r.ExtendBaseWidget(r)
 	r.update()
@@ -173,13 +172,15 @@ func (r *radioGroupRenderer) MinSize() fyne.Size {
 	height := float32(0)
 	for _, item := range r.items {
 		itemMin := item.MinSize()
-		if r.radio.Horizontal {
-			height = fyne.Max(height, itemMin.Height)
-			width += itemMin.Width
-		} else {
-			width = fyne.Max(width, itemMin.Width)
-			height += itemMin.Height
-		}
+
+		width = fyne.Max(width, itemMin.Width)
+		height = fyne.Max(height, itemMin.Height)
+	}
+
+	if r.radio.Horizontal {
+		width = width * float32(len(r.items))
+	} else {
+		height = height * float32(len(r.items))
 	}
 
 	return fyne.NewSize(width, height)

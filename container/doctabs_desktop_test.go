@@ -29,10 +29,10 @@ func TestDocTabs_ApplyTheme(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 150))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "doctabs/desktop/single_initial.png", c.Capture())
+	test.AssertRendersToImage(t, "doctabs/desktop/single_initial.png", c)
 
 	test.ApplyTheme(t, test.NewTheme())
-	test.AssertImageMatches(t, "doctabs/desktop/single_custom_theme.png", c.Capture())
+	test.AssertRendersToImage(t, "doctabs/desktop/single_custom_theme.png", c)
 }
 
 func TestDocTabs_ChangeItemContent(t *testing.T) {
@@ -105,6 +105,12 @@ func TestDocTabs_ChangeItemText(t *testing.T) {
 	item2.Text = "New 2"
 	tabs.Refresh()
 	test.AssertRendersToMarkup(t, "doctabs/desktop/change_label_change_unselected.xml", c)
+
+	// use bigger window to have indicator be based on tab size
+	w.Resize(fyne.NewSize(500, 150))
+	item1.Text = "New longer text 1"
+	tabs.Refresh()
+	test.AssertRendersToMarkup(t, "doctabs/desktop/change_label_to_longer_text_selected.xml", c)
 }
 
 func TestDocTabs_DynamicTabs(t *testing.T) {

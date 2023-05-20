@@ -20,6 +20,12 @@ var (
 	// FyneMetadataInit is the metadata injecting file for fyne metadata
 	FyneMetadataInit = template.Must(template.New("fyne_metadata_init.got").Parse(string(resourceFynemetadatainitGot.StaticContent)))
 
+	// FynePprofInit is the file injected to support pprof
+	FynePprofInit = template.Must(template.New("fyne_pprof_init.got").Parse(string(resourceFynepprofGot.StaticContent)))
+
+	// ManifestAndroid is the default manifest for building an Android application
+	ManifestAndroid = template.Must(template.New("AndroidManifest").Parse(string(resourceAndroidManifestXml.StaticContent)))
+
 	// ManifestWindows is the manifest file for windows packaging
 	ManifestWindows = template.Must(template.New("Manifest").Parse(string(resourceAppManifest.StaticContent)))
 

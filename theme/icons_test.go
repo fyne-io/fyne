@@ -72,7 +72,7 @@ func TestNewDisabledResource(t *testing.T) {
 func TestThemedResource_Invert(t *testing.T) {
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	inverted := NewInvertedThemedResource(staticResource)
-	assert.Equal(t, "inverted-"+staticResource.Name(), inverted.Name())
+	assert.Equal(t, "inverted_"+staticResource.Name(), inverted.Name())
 }
 
 func TestThemedResource_Name(t *testing.T) {
@@ -80,7 +80,7 @@ func TestThemedResource_Name(t *testing.T) {
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
-	assert.Equal(t, staticResource.Name(), themedResource.Name())
+	assert.Equal(t, "foreground_"+staticResource.Name(), themedResource.Name())
 }
 
 func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
@@ -129,6 +129,26 @@ func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
+func TestThemedResource_Success(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewThemedResource(source)
+	custom.ColorName = ColorNameSuccess
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("success_%v", source.Name()))
+}
+
+func TestThemedResource_Warning(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewThemedResource(source)
+	custom.ColorName = ColorNameWarning
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("warning_%v", source.Name()))
+}
+
 func TestDisabledResource_Name(t *testing.T) {
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	disabledResource := &DisabledResource{
@@ -154,260 +174,265 @@ func Test_FyneLogo_FileSource(t *testing.T) {
 
 func Test_CancelIcon_FileSource(t *testing.T) {
 	result := CancelIcon().Name()
-	assert.Equal(t, "cancel.svg", result)
+	assert.Equal(t, "foreground_cancel.svg", result)
 }
 
 func Test_ConfirmIcon_FileSource(t *testing.T) {
 	result := ConfirmIcon().Name()
-	assert.Equal(t, "check.svg", result)
+	assert.Equal(t, "foreground_check.svg", result)
 }
 
 func Test_DeleteIcon_FileSource(t *testing.T) {
 	result := DeleteIcon().Name()
-	assert.Equal(t, "delete.svg", result)
+	assert.Equal(t, "foreground_delete.svg", result)
 }
 
 func Test_SearchIcon_FileSource(t *testing.T) {
 	result := SearchIcon().Name()
-	assert.Equal(t, "search.svg", result)
+	assert.Equal(t, "foreground_search.svg", result)
 }
 
 func Test_SearchReplaceIcon_FileSource(t *testing.T) {
 	result := SearchReplaceIcon().Name()
-	assert.Equal(t, "search-replace.svg", result)
+	assert.Equal(t, "foreground_search-replace.svg", result)
 }
 
 func Test_CheckButtonIcon_FileSource(t *testing.T) {
 	result := CheckButtonIcon().Name()
-	assert.Equal(t, "check-box-blank.svg", result)
+	assert.Equal(t, "foreground_check-box.svg", result)
 }
 
 func Test_CheckButtonCheckedIcon_FileSource(t *testing.T) {
 	result := CheckButtonCheckedIcon().Name()
-	assert.Equal(t, "check-box.svg", result)
+	assert.Equal(t, "foreground_check-box-checked.svg", result)
 }
 
 func Test_RadioButtonIcon_FileSource(t *testing.T) {
 	result := RadioButtonIcon().Name()
-	assert.Equal(t, "radio-button.svg", result)
+	assert.Equal(t, "foreground_radio-button.svg", result)
 }
 
 func Test_RadioButtonCheckedIcon_FileSource(t *testing.T) {
 	result := RadioButtonCheckedIcon().Name()
-	assert.Equal(t, "radio-button-checked.svg", result)
+	assert.Equal(t, "foreground_radio-button-checked.svg", result)
 }
 
 func Test_ContentAddIcon_FileSource(t *testing.T) {
 	result := ContentAddIcon().Name()
-	assert.Equal(t, "content-add.svg", result)
+	assert.Equal(t, "foreground_content-add.svg", result)
 }
 
 func Test_ContentRemoveIcon_FileSource(t *testing.T) {
 	result := ContentRemoveIcon().Name()
-	assert.Equal(t, "content-remove.svg", result)
+	assert.Equal(t, "foreground_content-remove.svg", result)
 }
 
 func Test_ContentClearIcon_FileSource(t *testing.T) {
 	result := ContentClearIcon().Name()
-	assert.Equal(t, "cancel.svg", result)
+	assert.Equal(t, "foreground_cancel.svg", result)
 }
 
 func Test_ContentCutIcon_FileSource(t *testing.T) {
 	result := ContentCutIcon().Name()
-	assert.Equal(t, "content-cut.svg", result)
+	assert.Equal(t, "foreground_content-cut.svg", result)
 }
 
 func Test_ContentCopyIcon_FileSource(t *testing.T) {
 	result := ContentCopyIcon().Name()
-	assert.Equal(t, "content-copy.svg", result)
+	assert.Equal(t, "foreground_content-copy.svg", result)
 }
 
 func Test_ContentPasteIcon_FileSource(t *testing.T) {
 	result := ContentPasteIcon().Name()
-	assert.Equal(t, "content-paste.svg", result)
+	assert.Equal(t, "foreground_content-paste.svg", result)
 }
 
 func Test_ContentRedoIcon_FileSource(t *testing.T) {
 	result := ContentRedoIcon().Name()
-	assert.Equal(t, "content-redo.svg", result)
+	assert.Equal(t, "foreground_content-redo.svg", result)
 }
 
 func Test_ContentUndoIcon_FileSource(t *testing.T) {
 	result := ContentUndoIcon().Name()
-	assert.Equal(t, "content-undo.svg", result)
+	assert.Equal(t, "foreground_content-undo.svg", result)
 }
 
 func Test_DocumentCreateIcon_FileSource(t *testing.T) {
 	result := DocumentCreateIcon().Name()
-	assert.Equal(t, "document-create.svg", result)
+	assert.Equal(t, "foreground_document-create.svg", result)
 }
 
 func Test_DocumentPrintIcon_FileSource(t *testing.T) {
 	result := DocumentPrintIcon().Name()
-	assert.Equal(t, "document-print.svg", result)
+	assert.Equal(t, "foreground_document-print.svg", result)
 }
 
 func Test_DocumentSaveIcon_FileSource(t *testing.T) {
 	result := DocumentSaveIcon().Name()
-	assert.Equal(t, "document-save.svg", result)
+	assert.Equal(t, "foreground_document-save.svg", result)
 }
 
 func Test_InfoIcon_FileSource(t *testing.T) {
 	result := InfoIcon().Name()
-	assert.Equal(t, "info.svg", result)
+	assert.Equal(t, "foreground_info.svg", result)
 }
 
 func Test_QuestionIcon_FileSource(t *testing.T) {
 	result := QuestionIcon().Name()
-	assert.Equal(t, "question.svg", result)
+	assert.Equal(t, "foreground_question.svg", result)
 }
 
 func Test_WarningIcon_FileSource(t *testing.T) {
 	result := WarningIcon().Name()
-	assert.Equal(t, "warning.svg", result)
+	assert.Equal(t, "foreground_warning.svg", result)
+}
+
+func Test_BrokenImageIcon_FileSource(t *testing.T) {
+	result := BrokenImageIcon().Name()
+	assert.Equal(t, "foreground_broken-image.svg", result)
 }
 
 func Test_FolderIcon_FileSource(t *testing.T) {
 	result := FolderIcon().Name()
-	assert.Equal(t, "folder.svg", result)
+	assert.Equal(t, "foreground_folder.svg", result)
 }
 
 func Test_FolderNewIcon_FileSource(t *testing.T) {
 	result := FolderNewIcon().Name()
-	assert.Equal(t, "folder-new.svg", result)
+	assert.Equal(t, "foreground_folder-new.svg", result)
 }
 
 func Test_FolderOpenIcon_FileSource(t *testing.T) {
 	result := FolderOpenIcon().Name()
-	assert.Equal(t, "folder-open.svg", result)
+	assert.Equal(t, "foreground_folder-open.svg", result)
 }
 
 func Test_HelpIcon_FileSource(t *testing.T) {
 	result := HelpIcon().Name()
-	assert.Equal(t, "help.svg", result)
+	assert.Equal(t, "foreground_help.svg", result)
 }
 
 func Test_HomeIcon_FileSource(t *testing.T) {
 	result := HomeIcon().Name()
-	assert.Equal(t, "home.svg", result)
+	assert.Equal(t, "foreground_home.svg", result)
 }
 
 func Test_SettingsIcon_FileSource(t *testing.T) {
 	result := SettingsIcon().Name()
-	assert.Equal(t, "settings.svg", result)
+	assert.Equal(t, "foreground_settings.svg", result)
 }
 
 func Test_MailAttachmentIcon_FileSource(t *testing.T) {
 	result := MailAttachmentIcon().Name()
-	assert.Equal(t, "mail-attachment.svg", result)
+	assert.Equal(t, "foreground_mail-attachment.svg", result)
 }
 
 func Test_MailComposeIcon_FileSource(t *testing.T) {
 	result := MailComposeIcon().Name()
-	assert.Equal(t, "mail-compose.svg", result)
+	assert.Equal(t, "foreground_mail-compose.svg", result)
 }
 
 func Test_MailForwardIcon_FileSource(t *testing.T) {
 	result := MailForwardIcon().Name()
-	assert.Equal(t, "mail-forward.svg", result)
+	assert.Equal(t, "foreground_mail-forward.svg", result)
 }
 
 func Test_MailReplyIcon_FileSource(t *testing.T) {
 	result := MailReplyIcon().Name()
-	assert.Equal(t, "mail-reply.svg", result)
+	assert.Equal(t, "foreground_mail-reply.svg", result)
 }
 
 func Test_MailReplyAllIcon_FileSource(t *testing.T) {
 	result := MailReplyAllIcon().Name()
-	assert.Equal(t, "mail-reply_all.svg", result)
+	assert.Equal(t, "foreground_mail-reply_all.svg", result)
 }
 
 func Test_MailSendIcon_FileSource(t *testing.T) {
 	result := MailSendIcon().Name()
-	assert.Equal(t, "mail-send.svg", result)
+	assert.Equal(t, "foreground_mail-send.svg", result)
 }
 
 func Test_MoveDownIcon_FileSource(t *testing.T) {
 	result := MoveDownIcon().Name()
-	assert.Equal(t, "arrow-down.svg", result)
+	assert.Equal(t, "foreground_arrow-down.svg", result)
 }
 
 func Test_MoveUpIcon_FileSource(t *testing.T) {
 	result := MoveUpIcon().Name()
-	assert.Equal(t, "arrow-up.svg", result)
+	assert.Equal(t, "foreground_arrow-up.svg", result)
 }
 
 func Test_NavigateBackIcon_FileSource(t *testing.T) {
 	result := NavigateBackIcon().Name()
-	assert.Equal(t, "arrow-back.svg", result)
+	assert.Equal(t, "foreground_arrow-back.svg", result)
 }
 
 func Test_NavigateNextIcon_FileSource(t *testing.T) {
 	result := NavigateNextIcon().Name()
-	assert.Equal(t, "arrow-forward.svg", result)
+	assert.Equal(t, "foreground_arrow-forward.svg", result)
 }
 
 func Test_ViewFullScreenIcon_FileSource(t *testing.T) {
 	result := ViewFullScreenIcon().Name()
-	assert.Equal(t, "view-fullscreen.svg", result)
+	assert.Equal(t, "foreground_view-fullscreen.svg", result)
 }
 
 func Test_ViewRestoreIcon_FileSource(t *testing.T) {
 	result := ViewRestoreIcon().Name()
-	assert.Equal(t, "view-zoom-fit.svg", result)
+	assert.Equal(t, "foreground_view-zoom-fit.svg", result)
 }
 
 func Test_ViewRefreshIcon_FileSource(t *testing.T) {
 	result := ViewRefreshIcon().Name()
-	assert.Equal(t, "view-refresh.svg", result)
+	assert.Equal(t, "foreground_view-refresh.svg", result)
 }
 
 func Test_ZoomFitIcon_FileSource(t *testing.T) {
 	result := ZoomFitIcon().Name()
-	assert.Equal(t, "view-zoom-fit.svg", result)
+	assert.Equal(t, "foreground_view-zoom-fit.svg", result)
 }
 
 func Test_ZoomInIcon_FileSource(t *testing.T) {
 	result := ZoomInIcon().Name()
-	assert.Equal(t, "view-zoom-in.svg", result)
+	assert.Equal(t, "foreground_view-zoom-in.svg", result)
 }
 
 func Test_ZoomOutIcon_FileSource(t *testing.T) {
 	result := ZoomOutIcon().Name()
-	assert.Equal(t, "view-zoom-out.svg", result)
+	assert.Equal(t, "foreground_view-zoom-out.svg", result)
 }
 
 func Test_VisibilityIcon_FileSource(t *testing.T) {
 	result := VisibilityIcon().Name()
-	assert.Equal(t, "visibility.svg", result)
+	assert.Equal(t, "foreground_visibility.svg", result)
 }
 
 func Test_VisibilityOffIcon_FileSource(t *testing.T) {
 	result := VisibilityOffIcon().Name()
-	assert.Equal(t, "visibility-off.svg", result)
+	assert.Equal(t, "foreground_visibility-off.svg", result)
 }
 
 func Test_AccountIcon_FileSource(t *testing.T) {
 	result := AccountIcon().Name()
-	assert.Equal(t, "account.svg", result)
+	assert.Equal(t, "foreground_account.svg", result)
 }
 
 func Test_LoginIcon_FileSource(t *testing.T) {
 	result := LoginIcon().Name()
-	assert.Equal(t, "login.svg", result)
+	assert.Equal(t, "foreground_login.svg", result)
 }
 
 func Test_LogoutIcon_FileSource(t *testing.T) {
 	result := LogoutIcon().Name()
-	assert.Equal(t, "logout.svg", result)
+	assert.Equal(t, "foreground_logout.svg", result)
 }
 
 func Test_ListIcon_FileSource(t *testing.T) {
 	result := ListIcon().Name()
-	assert.Equal(t, "list.svg", result)
+	assert.Equal(t, "foreground_list.svg", result)
 }
 
 func Test_GridIcon_FileSource(t *testing.T) {
 	result := GridIcon().Name()
-	assert.Equal(t, "grid.svg", result)
+	assert.Equal(t, "foreground_grid.svg", result)
 }

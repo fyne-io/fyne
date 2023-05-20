@@ -409,7 +409,7 @@ func (w *Window) SetInputMode(mode InputMode, value int) {
 //
 // This function must only be called from the main thread.
 func RawMouseMotionSupported() bool {
-	return int(C.glfwRawMouseMotionSupported()) == int(True)
+	return int(C.glfwRawMouseMotionSupported()) == True
 }
 
 // GetKeyScancode function returns the platform-specific scancode of the

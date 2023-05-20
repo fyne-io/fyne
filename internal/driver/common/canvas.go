@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
@@ -63,39 +64,50 @@ func (c *Canvas) EnsureMinSize() bool {
 	if c.impl.Content() == nil {
 		return false
 	}
-	var lastParent fyne.CanvasObject
-
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
 	min := c.impl.MinSize()
+
+	c.RLock()
+	defer c.RUnlock()
+
+	var parentNeedingUpdate *RenderCacheNode
 
 	ensureMinSize := func(node *RenderCacheNode) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl)
 
+		if parentNeedingUpdate == node {
+			c.updateLayout(obj)
+			parentNeedingUpdate = nil
+		}
+
+		c.RUnlock()
 		if !obj.Visible() {
+			c.RLock()
 			return
 		}
 		minSize := obj.MinSize()
+		c.RLock()
+
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
-			objToLayout := obj
 			node.minSize = minSize
 			if node.parent != nil {
-				objToLayout = node.parent.obj
+				parentNeedingUpdate = node.parent
 			} else {
 				windowNeedsMinSizeUpdate = true
+				c.RUnlock()
 				size := obj.Size()
+				c.RLock()
 				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != csize {
-					objToLayout = nil
+					c.RUnlock()
 					obj.Resize(expectedSize)
+					c.RLock()
+				} else {
+					c.updateLayout(obj)
 				}
-			}
-
-			if objToLayout != lastParent {
-				updateLayout(lastParent)
-				lastParent = objToLayout
 			}
 		}
 	}
@@ -103,13 +115,9 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
 	if shouldResize {
-		c.impl.Resize(csize.Max(min))
-	}
-
-	if lastParent != nil {
-		c.RLock()
-		updateLayout(lastParent)
 		c.RUnlock()
+		c.impl.Resize(csize.Max(min))
+		c.RLock()
 	}
 	return windowNeedsMinSizeUpdate
 }
@@ -196,12 +204,25 @@ func (c *Canvas) FocusPrevious() {
 func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 	freeObject := func(object fyne.CanvasObject) {
 		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+			// No image refresh while recursing to avoid double texture upload.
+			if _, ok := obj.(*canvas.Image); ok {
+				return false
+			}
 			if c.painter != nil {
 				c.painter.Free(obj)
 			}
 			return false
 		}
-		driver.WalkCompleteObjectTree(object, freeWalked, nil)
+
+		// Image.Refresh will trigger a refresh specific to the object, while recursing on parent widget would just lead to
+		// a double texture upload.
+		if img, ok := object.(*canvas.Image); ok {
+			if c.painter != nil {
+				c.painter.Free(img)
+			}
+		} else {
+			driver.WalkCompleteObjectTree(object, freeWalked, nil)
+		}
 	}
 
 	// Within a frame, refresh tasks are requested from the Refresh method,
@@ -288,6 +309,23 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
+	walkNeeded := false
+	switch obj.(type) {
+	case *fyne.Container:
+		walkNeeded = true
+	case fyne.Widget:
+		walkNeeded = true
+	}
+
+	if walkNeeded {
+		driver.WalkCompleteObjectTree(obj, func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
+			if i, ok := co.(*canvas.Image); ok {
+				i.Refresh()
+			}
+			return false
+		}, nil)
+	}
+
 	c.refreshQueue.In(obj)
 	c.SetDirty()
 }
@@ -525,13 +563,20 @@ type renderCacheTree struct {
 	root *RenderCacheNode
 }
 
-func updateLayout(objToLayout fyne.CanvasObject) {
+func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 	switch cont := objToLayout.(type) {
 	case *fyne.Container:
 		if cont.Layout != nil {
-			cont.Layout.Layout(cont.Objects, cont.Size())
+			layout := cont.Layout
+			objects := cont.Objects
+			c.RUnlock()
+			layout.Layout(objects, cont.Size())
+			c.RLock()
 		}
 	case fyne.Widget:
-		cache.Renderer(cont).Layout(cont.Size())
+		renderer := cache.Renderer(cont)
+		c.RUnlock()
+		renderer.Layout(cont.Size())
+		c.RLock()
 	}
 }

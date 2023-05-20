@@ -1,5 +1,7 @@
 package fyne
 
+import "sync"
+
 // Declare conformity to CanvasObject
 var _ CanvasObject = (*Container)(nil)
 
@@ -10,7 +12,8 @@ type Container struct {
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
 
-	Layout  Layout         // The Layout algorithm for arranging child CanvasObjects
+	Layout  Layout // The Layout algorithm for arranging child CanvasObjects
+	lock    sync.Mutex
 	Objects []CanvasObject // The set of CanvasObjects this container holds
 }
 
@@ -57,6 +60,8 @@ func (c *Container) Add(add CanvasObject) {
 		return
 	}
 
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.Objects = append(c.Objects, add)
 	c.layout()
 }
@@ -75,6 +80,7 @@ func (c *Container) Hide() {
 	}
 
 	c.Hidden = true
+	repaint(c)
 }
 
 // MinSize calculates the minimum size of a Container.
@@ -95,6 +101,7 @@ func (c *Container) MinSize() Size {
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
 	c.position = pos
+	repaint(c)
 }
 
 // Position gets the current position of this Container, relative to its parent.
@@ -126,6 +133,8 @@ func (c *Container) Remove(rem CanvasObject) {
 		return
 	}
 
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	for i, o := range c.Objects {
 		if o != rem {
 			continue
@@ -184,4 +193,19 @@ func (c *Container) layout() {
 	}
 
 	c.Layout.Layout(c.Objects, c.size)
+}
+
+// repaint instructs the containing canvas to redraw, even if nothing changed.
+// This method is a duplicate of what is in `canvas/canvas.go` to avoid a dependency loop or public API.
+func repaint(obj *Container) {
+	if CurrentApp() == nil || CurrentApp().Driver() == nil {
+		return
+	}
+
+	c := CurrentApp().Driver().CanvasForObject(obj)
+	if c != nil {
+		if paint, ok := c.(interface{ SetDirty() }); ok {
+			paint.SetDirty()
+		}
+	}
 }

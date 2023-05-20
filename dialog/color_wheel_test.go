@@ -16,7 +16,7 @@ func Test_colorWheel_Layout(t *testing.T) {
 	window := test.NewWindow(wheel)
 	window.Resize(wheel.MinSize().Max(fyne.NewSize(100, 100)))
 
-	test.AssertImageMatches(t, "color/wheel_layout.png", window.Canvas().Capture())
+	test.AssertRendersToImage(t, "color/wheel_layout.png", window.Canvas())
 	test.AssertRendersToMarkup(t, "color/wheel_layout.xml", window.Canvas())
 
 	window.Close()

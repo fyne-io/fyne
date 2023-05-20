@@ -69,6 +69,12 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
+	buildStatus, ok := fyne.CurrentApp().Metadata().Custom["HelperText"]
+	if !ok {
+		buildStatus = "No helper text provided at compile time."
+	}
+	labelBuildStatus := widget.NewLabel(buildStatus)
+
 	return container.NewHBox(
 		container.NewVBox(screen,
 			widget.NewButton("Custom Theme", func() {
@@ -78,7 +84,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 				win.SetFullScreen(!win.FullScreen())
 			}),
 		),
-		container.NewBorder(label, nil, nil, nil,
+		container.NewBorder(label, labelBuildStatus, nil, nil,
 			container.NewGridWithColumns(2, genericCard, deskCard),
 		),
 	)

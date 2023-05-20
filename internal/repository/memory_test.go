@@ -33,6 +33,22 @@ func TestInMemoryRepositoryRegistration(t *testing.T) {
 	assert.Equal(t, m2, repo)
 }
 
+func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
+	m := NewInMemoryRepository("000")
+	repository.Register("dht", m)
+
+	foo, err := storage.ParseURI("dht:?00000")
+	assert.Nil(t, err)
+
+	canList, err := storage.CanList(foo)
+	assert.NotNil(t, err)
+	assert.Equal(t, canList, false)
+
+	listing, err := storage.List(foo)
+	assert.Nil(t, err)
+	assert.Equal(t, len(listing), 0)
+}
+
 func TestInMemoryRepositoryParsing(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")

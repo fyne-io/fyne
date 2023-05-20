@@ -105,8 +105,13 @@ func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
+	// This might not be the ideal solution, but it effectively avoid the first frame to be blurry due to the
+	// rounding of the size to the loower integer when scale == 1. It does not affect the other cases as far as we tested.
+	// This can easily be seen with fyne/cmd/hello and a scale == 1 as the text will happear blurry without the following line.
+	nearestSize := fyne.NewSize(float32(math.Ceil(float64(size.Width))), float32(math.Ceil(float64(size.Height))))
+
 	c.Lock()
-	c.size = size
+	c.size = nearestSize
 	c.Unlock()
 
 	for _, overlay := range c.Overlays().List() {
@@ -115,19 +120,25 @@ func (c *glCanvas) Resize(size fyne.Size) {
 			// “Notifies” the PopUp of the canvas size change.
 			p.Refresh()
 		} else {
-			overlay.Resize(size)
+			overlay.Resize(nearestSize)
 		}
 	}
 
 	c.RLock()
-	c.content.Resize(c.contentSize(size))
-	c.content.Move(c.contentPos())
-
-	if c.menu != nil {
-		c.menu.Refresh()
-		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
-	}
+	content := c.content
+	contentSize := c.contentSize(nearestSize)
+	contentPos := c.contentPos()
+	menu := c.menu
+	menuHeight := c.menuHeight()
 	c.RUnlock()
+
+	content.Resize(contentSize)
+	content.Move(contentPos)
+
+	if menu != nil {
+		menu.Refresh()
+		menu.Resize(fyne.NewSize(nearestSize.Width, menuHeight))
+	}
 }
 
 func (c *glCanvas) Scale() float32 {
@@ -275,6 +286,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 		if _, ok := obj.(fyne.Scrollable); ok {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
+		}
+		if size.Width <= 0 || size.Height <= 0 { // iconifying on Windows can do bad things
+			return
 		}
 		c.Painter().Paint(obj, pos, size)
 	}

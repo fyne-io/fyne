@@ -121,6 +121,17 @@ func Release() *cli.Command {
 				Value:       "",
 				Destination: &r.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &r.rawIcon,
+			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &r.customMetadata,
+			},
 		},
 		Action: r.releaseAction,
 	}
@@ -175,6 +186,8 @@ func (r *Releaser) Run(params []string) {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
 	}
+
+	r.Packager.distribution = true
 	r.Packager.release = true
 
 	if err := r.beforePackage(); err != nil {
@@ -192,13 +205,14 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
+	r.Packager.distribution = true
 	r.Packager.release = true
+
 	if err := r.beforePackage(); err != nil {
 		return err
 	}
 
-	err := r.Packager.packageWithoutValidate()
-	if err != nil {
+	if err := r.Packager.packageWithoutValidate(); err != nil {
 		return err
 	}
 
@@ -343,9 +357,9 @@ func (r *Releaser) packageWindowsRelease(outFile string) error {
 	manifestData := struct{ AppID, Developer, DeveloperName, Name, Version string }{
 		AppID: r.AppID,
 		// TODO read this info
-		Developer:     r.developer,
-		DeveloperName: r.nameFromCertInfo(r.developer),
-		Name:          r.Name,
+		Developer:     encodeXMLString(r.developer),
+		DeveloperName: encodeXMLString(r.nameFromCertInfo(r.developer)),
+		Name:          encodeXMLString(r.Name),
 		Version:       r.combinedVersion(),
 	}
 	err = templates.AppxManifestWindows.Execute(manifest, manifestData)

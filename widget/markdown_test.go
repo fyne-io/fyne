@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/storage"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
@@ -58,12 +60,12 @@ func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {
 }
 
 func TestRichTextMarkdown_Emphasis(t *testing.T) {
-	r := NewRichTextFromMarkdown("*a*.")
+	r := NewRichTextFromMarkdown("*a*")
 
-	assert.Equal(t, 2, len(r.Segments))
+	assert.Equal(t, 1, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "a", text.Text)
-		assert.Equal(t, RichTextStyleEmphasis, text.Style)
+		assert.True(t, text.Style.TextStyle.Italic)
 	} else {
 		t.Error("Segment should be text")
 	}
@@ -73,7 +75,7 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "b", text.Text)
-		assert.Equal(t, RichTextStyleStrong, text.Style)
+		assert.True(t, text.Style.TextStyle.Bold)
 	} else {
 		t.Error("Segment should be text")
 	}
@@ -109,8 +111,8 @@ func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
 
 	assert.Equal(t, 1, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "#", text.Text)
-		assert.Equal(t, RichTextStyleParagraph, text.Style)
+		assert.Equal(t, "", text.Text)
+		assert.Equal(t, RichTextStyleHeading, text.Style)
 	} else {
 		t.Error("Segment should be Text")
 	}
@@ -135,6 +137,26 @@ func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 		assert.Equal(t, "fyne.io", link.URL.Host)
 	} else {
 		t.Error("Segment should be a Hyperlink")
+	}
+}
+
+func TestRichTextMarkdown_Image(t *testing.T) {
+	r := NewRichTextFromMarkdown("![title](../../theme/icons/fyne.png)")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if img, ok := r.Segments[0].(*ImageSegment); ok {
+		assert.Equal(t, storage.NewFileURI("../../theme/icons/fyne.png"), img.Source)
+	} else {
+		t.Error("Segment should be a Image")
+	}
+
+	r = NewRichTextFromMarkdown("![](../../theme/icons/fyne.png)")
+
+	assert.Equal(t, 1, len(r.Segments))
+	if img, ok := r.Segments[0].(*ImageSegment); ok {
+		assert.Equal(t, storage.NewFileURI("../../theme/icons/fyne.png"), img.Source)
+	} else {
+		t.Error("Segment should be a Image")
 	}
 }
 

@@ -1,17 +1,17 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.AppTabs">
-			<container size="150x80">
-				<container size="150x80">
-					<widget size="150x81" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,52" size="142x20">Text1</text>
+			<container size="150x79">
+				<container size="150x79">
+					<widget size="150x79" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="4,52" size="142x19">Text1</text>
 						<image pos="55,8" rsc="cancelIcon" size="40x40" themed="primary"/>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,80" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,80" size="150x4"/>
-			<circle fillColor="background" pos="0,84" size="150x65"/>
+			<rectangle fillColor="shadow" pos="0,79" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,79" size="150x4"/>
+			<circle fillColor="background" pos="0,83" size="150x66"/>
 		</widget>
 	</content>
 </canvas>

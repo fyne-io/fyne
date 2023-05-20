@@ -1,17 +1,20 @@
 package commands
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	version "github.com/mcuadros/go-version"
+	"github.com/urfave/cli/v2"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
-	version "github.com/mcuadros/go-version"
-	"github.com/urfave/cli/v2"
 )
 
 // Builder generate the executables.
@@ -20,8 +23,12 @@ type Builder struct {
 	os, srcdir, target string
 	goPackage          string
 	release            bool
+	pprof              bool
+	pprofPort          int
 	tags               []string
 	tagsToParse        string
+
+	customMetadata keyValueFlag
 
 	runner runner
 }
@@ -62,6 +69,22 @@ func Build() *cli.Command {
 				Usage:       "Specify a name for the output file, default is based on the current directory.",
 				Destination: &b.target,
 			},
+			&cli.BoolFlag{
+				Name:        "pprof",
+				Usage:       "Enable pprof profiling.",
+				Destination: &b.pprof,
+			},
+			&cli.IntFlag{
+				Name:        "pprof-port",
+				Usage:       "Specify the port to use for pprof profiling.",
+				Value:       6060,
+				Destination: &b.pprofPort,
+			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &b.customMetadata,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			argCount := ctx.Args().Len()
@@ -80,6 +103,7 @@ func Build() *cli.Command {
 // Build parse the tags and start building
 func (b *Builder) Build() error {
 	if b.srcdir != "" {
+		b.srcdir = util.EnsureAbsPath(b.srcdir)
 		dirStat, err := os.Stat(b.srcdir)
 		if err != nil {
 			return err
@@ -91,6 +115,8 @@ func (b *Builder) Build() error {
 	if b.tagsToParse != "" {
 		b.tags = strings.Split(b.tagsToParse, ",")
 	}
+	b.appData.Release = b.release
+	b.appData.CustomMetadata = b.customMetadata.m
 
 	return b.build()
 }
@@ -128,6 +154,41 @@ func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) e
 	return checkVersion(string(goVersion), versionConstraint)
 }
 
+type goModEdit struct {
+	Module struct {
+		Path string
+	}
+	Require []struct {
+		Path    string
+		Version string
+	}
+}
+
+func getFyneGoModVersion(runner runner) (string, error) {
+	dependenciesOutput, err := runner.runOutput("mod", "edit", "-json")
+	if err != nil {
+		return "", err
+	}
+
+	var parsed goModEdit
+	err = json.Unmarshal(dependenciesOutput, &parsed)
+	if err != nil {
+		return "", err
+	}
+
+	if parsed.Module.Path == "fyne.io/fyne/v2" {
+		return "master", nil
+	}
+
+	for _, dep := range parsed.Require {
+		if dep.Path == "fyne.io/fyne/v2" {
+			return dep.Version, nil
+		}
+	}
+
+	return "", fmt.Errorf("fyne version not found")
+}
+
 func (b *Builder) build() error {
 	var versionConstraint *version.ConstraintGroup
 
@@ -136,55 +197,59 @@ func (b *Builder) build() error {
 		goos = targetOS()
 	}
 
-	if b.runner == nil {
-		if goos != "gopherjs" {
-			b.runner = newCommand("go")
-		} else {
-			b.runner = newCommand("gopherjs")
+	if goos == "gopherjs" && runtime.GOOS == "windows" {
+		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
+	}
+
+	fyneGoModRunner := b.updateAndGetGoExecutable(goos)
+
+	srcdir, err := b.computeSrcDir(fyneGoModRunner)
+	if err != nil {
+		return err
+	}
+
+	b.updateToDefaultIconIfNotSet(srcdir)
+
+	if b.pprof {
+		close, err := injectPprofFile(fyneGoModRunner, srcdir, b.pprofPort)
+		if err != nil {
+			fyne.LogError("Failed to inject pprof file, omitting pprof", err)
+		} else if close != nil {
+			defer close()
 		}
+	}
+
+	close, err := injectMetadataIfPossible(fyneGoModRunner, srcdir, b.appData, createMetadataInitFile)
+	if err != nil {
+		fyne.LogError("Failed to inject metadata init file, omitting metadata", err)
+	} else if close != nil {
+		defer close()
 	}
 
 	args := []string{"build"}
 	env := os.Environ()
 
 	if goos == "darwin" {
-		env = append(env, "CGO_CFLAGS=-mmacosx-version-min=10.11", "CGO_LDFLAGS=-mmacosx-version-min=10.11")
+		appendEnv(&env, "CGO_CFLAGS", "-mmacosx-version-min=10.11")
+		appendEnv(&env, "CGO_LDFLAGS", "-mmacosx-version-min=10.11")
 	}
 
-	data, err := metadata.LoadStandard(b.srcdir)
-	if err == nil {
-		mergeMetadata(b.appData, data)
-	}
-
-	metadataInitFilePath := filepath.Join(b.srcdir, "fyne_metadata_init.go")
-	metadataInitFile, err := os.Create(metadataInitFilePath)
-	if err != nil {
-		fyne.LogError("Failed to make metadata init file, omitting metadata", err)
-	}
-	defer os.Remove(metadataInitFilePath)
-
-	err = templates.FyneMetadataInit.Execute(metadataInitFile, b.appData)
-	if err != nil {
-		fyne.LogError("Failed to generate metadata init, omitting metadata", err)
-	} else {
-		if b.icon != "" {
-			writeResource(b.icon, "fyneMetadataIcon", metadataInitFile)
-		}
-	}
-	metadataInitFile.Close()
-
+	ldFlags := extractLdflagsFromGoFlags()
 	if !isWeb(goos) {
 		env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
 
-		if goos == "windows" {
-			if b.release {
-				args = append(args, "-ldflags", "-s -w -H=windowsgui ")
-			} else {
-				args = append(args, "-ldflags", "-H=windowsgui ")
-			}
-		} else if b.release {
-			args = append(args, "-ldflags", "-s -w ")
+		if b.release {
+			ldFlags += " -s -w"
+			args = append(args, "-trimpath")
 		}
+
+		if goos == "windows" {
+			ldFlags += " -H=windowsgui"
+		}
+	}
+
+	if len(ldFlags) > 0 {
+		args = append(args, "-ldflags", strings.TrimSpace(ldFlags))
 	}
 
 	if b.target != "" {
@@ -236,6 +301,133 @@ func (b *Builder) build() error {
 	return err
 }
 
+func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
+	if b.goPackage == "" || b.goPackage == "." {
+		return b.srcdir, nil
+	}
+
+	srcdir := b.srcdir
+	if strings.HasPrefix(b.goPackage, "."+string(os.PathSeparator)) ||
+		strings.HasPrefix(b.goPackage, ".."+string(os.PathSeparator)) {
+		srcdir = filepath.Join(srcdir, b.goPackage)
+	} else if strings.HasPrefix(b.goPackage, string(os.PathSeparator)) {
+		srcdir = b.goPackage
+	} else {
+		return "", fmt.Errorf("unrecognized go package: %s", b.goPackage)
+	}
+	return srcdir, nil
+}
+
+func (b *Builder) updateToDefaultIconIfNotSet(srcdir string) {
+	if b.icon == "" {
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
+		if util.Exists(defaultIcon) {
+			b.icon = defaultIcon
+		}
+	}
+}
+
+func injectPprofFile(runner runner, srcdir string, port int) (func(), error) {
+	pprofInitFilePath := filepath.Join(srcdir, "fyne_pprof.go")
+	pprofInitFile, err := os.Create(pprofInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer pprofInitFile.Close()
+
+	pprofInfo := struct {
+		Port int
+	}{
+		Port: port,
+	}
+
+	err = templates.FynePprofInit.Execute(pprofInitFile, pprofInfo)
+	if err != nil {
+		os.Remove(pprofInitFilePath)
+		return func() {}, err
+	}
+
+	return func() { os.Remove(pprofInitFilePath) }, nil
+}
+
+func (b *Builder) updateAndGetGoExecutable(goos string) runner {
+	fyneGoModRunner := b.runner
+	if b.runner == nil {
+		fyneGoModRunner = newCommand("go")
+		goBin := os.Getenv("GO")
+		if goBin != "" {
+			fyneGoModRunner = newCommand(goBin)
+			b.runner = fyneGoModRunner
+		} else {
+			if goos != "gopherjs" {
+				b.runner = newCommand("go")
+			} else {
+				b.runner = newCommand("gopherjs")
+			}
+		}
+	}
+	return fyneGoModRunner
+}
+
+func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
+	data, err := metadata.LoadStandard(srcdir)
+	if err == nil {
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		if data.Details.Icon != "" {
+			data.Details.Icon = util.MakePathRelativeTo(srcdir, data.Details.Icon)
+		}
+
+		app.mergeMetadata(data)
+	}
+
+	metadataInitFilePath := filepath.Join(srcdir, "fyne_metadata_init.go")
+	metadataInitFile, err := os.Create(metadataInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer metadataInitFile.Close()
+
+	app.ResGoString = "nil"
+	if app.icon != "" {
+		res, err := fyne.LoadResourceFromPath(app.icon)
+		if err != nil {
+			fyne.LogError("Unable to load medadata icon file "+app.icon, err)
+			return func() { os.Remove(metadataInitFilePath) }, err
+		}
+
+		// The return type of fyne.LoadResourceFromPath is always a *fyne.StaticResource.
+		app.ResGoString = res.(*fyne.StaticResource).GoString()
+	}
+
+	err = templates.FyneMetadataInit.Execute(metadataInitFile, app)
+	if err != nil {
+		fyne.LogError("Error executing metadata template", err)
+	}
+
+	return func() { os.Remove(metadataInitFilePath) }, err
+}
+
+func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
+	createMetadataInitFile func(srcdir string, app *appData) (func(), error)) (func(), error) {
+	fyneGoModVersion, err := getFyneGoModVersion(runner)
+	if err != nil {
+		return nil, err
+	}
+
+	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+		return nil, nil
+	}
+
+	fyneGoModVersionAtLeast2_3 := version.NewConstrainGroupFromString(">=2.3")
+	if fyneGoModVersionAtLeast2_3.Match(fyneGoModVersionNormalized) {
+		app.VersionAtLeast2_3 = true
+	}
+
+	return createMetadataInitFile(srcdir, app)
+}
+
 func targetOS() string {
 	osEnv, ok := os.LookupEnv("GOOS")
 	if ok {
@@ -243,4 +435,53 @@ func targetOS() string {
 	}
 
 	return runtime.GOOS
+}
+
+func appendEnv(env *[]string, varName, value string) {
+	for i := range *env {
+		keyValue := strings.SplitN((*env)[i], "=", 2)
+
+		if keyValue[0] == varName {
+			(*env)[i] += " " + value
+			return
+		}
+	}
+
+	*env = append(*env, varName+"="+value)
+}
+
+func extractLdflagsFromGoFlags() string {
+	goFlags := os.Getenv("GOFLAGS")
+
+	ldFlags, goFlags := extractLdFlags(goFlags)
+	if goFlags != "" {
+		os.Setenv("GOFLAGS", goFlags)
+	} else {
+		os.Unsetenv("GOFLAGS")
+	}
+
+	return ldFlags
+}
+
+func extractLdFlags(goFlags string) (string, string) {
+	if goFlags == "" {
+		return "", ""
+	}
+
+	flags := strings.Fields(goFlags)
+	ldflags := ""
+	newGoFlags := ""
+
+	for _, flag := range flags {
+		if strings.HasPrefix(flag, "-ldflags=") {
+			ldflags += strings.TrimPrefix(flag, "-ldflags=") + " "
+		} else {
+			newGoFlags += flag + " "
+		}
+	}
+
+	ldflags = strings.TrimSpace(ldflags)
+	newGoFlags = strings.TrimSpace(newGoFlags)
+
+	return ldflags, newGoFlags
 }

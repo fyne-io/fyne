@@ -3,7 +3,6 @@ package dialog
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -46,15 +45,9 @@ func (d *formDialog) validateItems(err error) {
 //
 // Since: 2.0
 func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool), parent fyne.Window) Dialog {
-	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
-	for i, item := range items {
-		itemObjects[i*2] = widget.NewLabel(item.Text)
-		itemObjects[i*2+1] = item.Widget
-	}
-	content := container.New(layout.NewFormLayout(), itemObjects...)
+	form := widget.NewForm(items...)
 
-	d := &dialog{content: content, callback: callback, title: title, parent: parent}
-	d.layout = &dialogLayout{d: d}
+	d := &dialog{content: form, callback: callback, title: title, parent: parent}
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
@@ -70,12 +63,9 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 
 	formDialog.validateItems(nil)
 
-	for _, item := range items {
-		if validatable, ok := item.Widget.(fyne.Validatable); ok {
-			validatable.SetOnValidationChanged(formDialog.validateItems)
-		}
-	}
-	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
+	form.SetOnValidationChanged(formDialog.validateItems)
+
+	d.create(container.NewGridWithColumns(2, d.dismiss, confirmBtn))
 	return formDialog
 }
 

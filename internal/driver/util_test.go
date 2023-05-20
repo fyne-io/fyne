@@ -304,6 +304,9 @@ func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
 		),
 	)
 
+	// We are not in a window. Resize the container to a default size.
+	base.Resize(base.MinSize())
+
 	var scClipPos, scrollableClipPos fyne.Position
 	var scClipSize, scrollableClipSize fyne.Size
 
@@ -371,6 +374,9 @@ func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 			&scrollable{},
 		),
 	)
+
+	// We are not in a window. Resize the container to a default size.
+	base.Resize(base.MinSize())
 
 	var scClipPos, scrollableClipPos fyne.Position
 	var scClipSize, scrollableClipSize fyne.Size

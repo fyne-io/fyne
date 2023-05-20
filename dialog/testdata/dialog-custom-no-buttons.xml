@@ -1,0 +1,35 @@
+<canvas padded size="200x300">
+	<content>
+		<rectangle pos="4,4" size="192x292"/>
+	</content>
+	<overlay>
+		<widget size="200x300" type="*widget.PopUp">
+			<widget pos="19,92" size="161x114" type="*widget.Shadow">
+				<radialGradient centerOffset="0.5,0.5" pos="-24,-24" size="24x24" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="0,-24" size="161x24"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="161,-24" size="24x24" startColor="shadow"/>
+				<linearGradient angle="270" pos="161,0" size="24x114" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="161,114" size="24x24" startColor="shadow"/>
+				<linearGradient pos="0,114" size="161x24" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-24,114" size="24x24" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-24,0" size="24x114"/>
+			</widget>
+			<rectangle fillColor="shadow" size="200x300"/>
+			<rectangle fillColor="overlayBackground" pos="19,92" size="161x114"/>
+			<container pos="23,96" size="153x106">
+				<image pos="59,-4" size="98x98"/>
+				<widget size="153x106" type="*dialog.themedBackground">
+					<rectangle fillColor="rgba(34,34,34,230)" size="153x106"/>
+				</widget>
+				<widget pos="16,51" size="121x35" type="*widget.Label">
+					<text pos="8,8" size="105x19">Custom buttons</text>
+				</widget>
+				<container pos="76,90" size="0x0">
+				</container>
+				<widget size="0x0" type="*widget.Label">
+					<text bold pos="8,8" size="28x19">Test</text>
+				</widget>
+			</container>
+		</widget>
+	</overlay>
+</canvas>
