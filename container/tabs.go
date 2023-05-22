@@ -366,6 +366,9 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 
 func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 	barMin := r.bar.MinSize()
+	if scroll, ok := r.bar.Objects[0].(*Scroll); ok && len(scroll.Content.(*fyne.Container).Objects) == 0 {
+		barMin.Width = 0 // scroller forces 32 where we don't need any space
+	}
 
 	contentMin := fyne.NewSize(0, 0)
 	for _, content := range t.items() {
@@ -377,7 +380,7 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(),
 			fyne.Max(contentMin.Height, barMin.Height))
 	default:
-		return fyne.NewSize(fyne.Max(contentMin.Width, barMin.Height),
+		return fyne.NewSize(fyne.Max(contentMin.Width, barMin.Width),
 			barMin.Height+contentMin.Height+theme.Padding())
 	}
 }
