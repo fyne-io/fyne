@@ -1607,7 +1607,9 @@ func (r *entryContentRenderer) Refresh() {
 
 	if focusedAppearance {
 		r.cursor.Show()
-		r.content.entry.cursorAnim.start()
+		if fyne.CurrentApp().Settings().ShowAnimations() {
+			r.content.entry.cursorAnim.start()
+		}
 	} else {
 		r.content.entry.cursorAnim.stop()
 		r.cursor.Hide()

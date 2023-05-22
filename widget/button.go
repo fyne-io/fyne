@@ -261,7 +261,10 @@ func (b *Button) tapAnimation() {
 		return
 	}
 	b.tapAnim.Stop()
-	b.tapAnim.Start()
+
+	if fyne.CurrentApp().Settings().ShowAnimations() {
+		b.tapAnim.Start()
+	}
 }
 
 type buttonRenderer struct {
