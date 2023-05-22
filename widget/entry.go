@@ -1560,9 +1560,6 @@ type entryContentRenderer struct {
 }
 
 func (r *entryContentRenderer) Destroy() {
-	if !fyne.CurrentApp().Settings().ShowAnimations() {
-		return
-	}
 	r.content.entry.cursorAnim.stop()
 }
 
