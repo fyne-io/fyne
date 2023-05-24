@@ -70,7 +70,7 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 	assert.Equal(t, "primary_"+icon.Name(), render.icon.Resource.Name())
 
 	radio.Disable()
-	assert.Equal(t, fmt.Sprintf("background_%v", icon.Name()), render.icon.Resource.Name())
+	assert.Equal(t, fmt.Sprintf("disabled_%v", icon.Name()), render.icon.Resource.Name())
 }
 
 func TestRadioGroup_DisableWhenNotSelected(t *testing.T) {
