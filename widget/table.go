@@ -363,9 +363,6 @@ func (t *Table) ScrollTo(id TableCellID) {
 			scrollPos.X = cellX
 		} else if cellX+cellWidth > scrollPos.X+t.content.Size().Width {
 			scrollPos.X = cellX + cellWidth - t.content.Size().Width
-			if scrollPos.X < 0 {
-				scrollPos.X = 0
-			}
 		}
 	}
 
@@ -383,9 +380,6 @@ func (t *Table) ScrollTo(id TableCellID) {
 			scrollPos.Y = cellY
 		} else if cellY+cellHeight > scrollPos.Y+t.content.Size().Height {
 			scrollPos.Y = cellY + cellHeight - t.content.Size().Height
-			if scrollPos.Y < 0 {
-				scrollPos.Y = 0
-			}
 		}
 	}
 
