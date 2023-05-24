@@ -291,13 +291,17 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 		}
 		c.Painter().Paint(obj, pos, size)
 	}
-	afterDraw := func(node *common.RenderCacheNode) {
+	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		if _, ok := node.Obj().(fyne.Scrollable); ok {
 			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
 				c.Painter().StartClipping(top.Rect())
 			}
+		}
+
+		if c.debug {
+			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
 

@@ -161,7 +161,7 @@ func (w *window) Close() {
 		w.canvas.Painter().Free(obj)
 	})
 
-	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}
