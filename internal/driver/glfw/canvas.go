@@ -20,10 +20,10 @@ var _ fyne.Canvas = (*glCanvas)(nil)
 type glCanvas struct {
 	common.Canvas
 
-	content fyne.CanvasObject
-	menu    fyne.CanvasObject
-	padded  bool
-	size    fyne.Size
+	content       fyne.CanvasObject
+	menu          fyne.CanvasObject
+	padded, debug bool
+	size          fyne.Size
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -292,7 +292,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 		c.Painter().Paint(obj, pos, size)
 	}
-	afterPaint := func(node *common.RenderCacheNode) {
+	afterPaint := func(node *common.RenderCacheNode, pos fyne.Position) {
 		if _, ok := node.Obj().(fyne.Scrollable); ok {
 			clips.Pop()
 			if top := clips.Top(); top != nil {
@@ -300,6 +300,10 @@ func (c *glCanvas) paint(size fyne.Size) {
 			} else {
 				c.Painter().StopClipping()
 			}
+		}
+
+		if c.debug {
+			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
 	c.WalkTrees(paint, afterPaint)
@@ -340,5 +344,6 @@ func newCanvas() *glCanvas {
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.padded = true
+	c.debug = fyne.CurrentApp().Settings().BuildType() == fyne.BuildDebug
 	return c
 }

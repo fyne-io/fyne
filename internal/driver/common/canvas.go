@@ -1,6 +1,8 @@
 package common
 
 import (
+	"image/color"
+	"reflect"
 	"sync"
 	"sync/atomic"
 
@@ -57,6 +59,27 @@ func (c *Canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
+func (c *Canvas) DrawDebugOverlay(obj fyne.CanvasObject, pos fyne.Position, size fyne.Size) {
+	switch obj.(type) {
+	case fyne.Widget:
+		r := canvas.NewRectangle(color.Transparent)
+		r.StrokeColor = color.NRGBA{R: 0xcc, G: 0x33, B: 0x33, A: 0xff}
+		r.StrokeWidth = 1
+		r.Resize(obj.Size())
+		c.Painter().Paint(r, pos, size)
+
+		t := canvas.NewText(reflect.ValueOf(obj).Elem().Type().Name(), r.StrokeColor)
+		t.TextSize = 10
+		c.Painter().Paint(t, pos.AddXY(2, 2), size)
+	case *fyne.Container:
+		r := canvas.NewRectangle(color.Transparent)
+		r.StrokeColor = color.NRGBA{R: 0x33, G: 0x33, B: 0xcc, A: 0xff}
+		r.StrokeWidth = 1
+		r.Resize(obj.Size())
+		c.Painter().Paint(r, pos, size)
+	}
+}
+
 // EnsureMinSize ensure canvas min size.
 //
 // This function uses lock.
@@ -73,7 +96,7 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	var parentNeedingUpdate *RenderCacheNode
 
-	ensureMinSize := func(node *RenderCacheNode) {
+	ensureMinSize := func(node *RenderCacheNode, pos fyne.Position) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl)
 
@@ -404,7 +427,7 @@ func (c *Canvas) Unfocus() {
 // WalkTrees walks over the trees.
 func (c *Canvas) WalkTrees(
 	beforeChildren func(*RenderCacheNode, fyne.Position),
-	afterChildren func(*RenderCacheNode),
+	afterChildren func(*RenderCacheNode, fyne.Position),
 ) {
 	c.walkTree(c.contentTree, beforeChildren, afterChildren)
 	if c.mWindowHeadTree != nil && c.mWindowHeadTree.root.obj != nil {
@@ -446,7 +469,7 @@ func (c *Canvas) isMenuActive() bool {
 func (c *Canvas) walkTree(
 	tree *renderCacheTree,
 	beforeChildren func(*RenderCacheNode, fyne.Position),
-	afterChildren func(*RenderCacheNode),
+	afterChildren func(*RenderCacheNode, fyne.Position),
 ) {
 	tree.Lock()
 	defer tree.Unlock()
@@ -480,7 +503,7 @@ func (c *Canvas) walkTree(
 		node = parent.firstChild
 		return false
 	}
-	ac := func(obj fyne.CanvasObject, _ fyne.CanvasObject) {
+	ac := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
 		node = parent
 		parent = node.parent
 		if prev != nil && prev.parent != parent {
@@ -488,7 +511,7 @@ func (c *Canvas) walkTree(
 		}
 
 		if afterChildren != nil {
-			afterChildren(node)
+			afterChildren(node, pos)
 		}
 
 		prev = node
