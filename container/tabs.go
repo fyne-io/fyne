@@ -365,7 +365,23 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 }
 
 func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
+	pad := theme.Padding()
+	buttonPad := pad
 	barMin := r.bar.MinSize()
+	tabsMin := r.bar.Objects[0].MinSize()
+	accessory := r.bar.Objects[1]
+	accessoryMin := accessory.MinSize()
+	if scroll, ok := r.bar.Objects[0].(*Scroll); ok && len(scroll.Content.(*fyne.Container).Objects) == 0 {
+		tabsMin = fyne.Size{} // scroller forces 32 where we don't need any space
+		buttonPad = 0
+	} else if group, ok := r.bar.Objects[0].(*fyne.Container); ok && len(group.Objects) > 0 {
+		tabsMin = group.Objects[0].MinSize()
+		buttonPad = 0
+	}
+	if !accessory.Visible() || accessoryMin.Width == 0 {
+		buttonPad = 0
+		accessoryMin = fyne.Size{}
+	}
 
 	contentMin := fyne.NewSize(0, 0)
 	for _, content := range t.items() {
@@ -374,9 +390,11 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 
 	switch t.tabLocation() {
 	case TabLocationLeading, TabLocationTrailing:
-		return fyne.NewSize(barMin.Width+contentMin.Width+theme.Padding(), contentMin.Height)
+		return fyne.NewSize(barMin.Width+contentMin.Width+pad,
+			fyne.Max(contentMin.Height, accessoryMin.Height+buttonPad+tabsMin.Height))
 	default:
-		return fyne.NewSize(contentMin.Width, barMin.Height+contentMin.Height+theme.Padding())
+		return fyne.NewSize(fyne.Max(contentMin.Width, accessoryMin.Width+buttonPad+tabsMin.Width),
+			barMin.Height+contentMin.Height+pad)
 	}
 }
 
