@@ -13,6 +13,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Using `canvas.ImageScaleFastest` not working on arm64 (#3891)
 * Disabled password Entry should also disable the ActionItem (#3908)
 * Disabled RadioGroup does not display status (#3882)
+* Negative TableCellID Row (#2857)
+* Make sure we have sufficient space for the bar as well if content is tiny (#3898)
 
 
 ## 2.3.4 - 3 May 2023
