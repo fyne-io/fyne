@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
-	dragMoveThreshold      = 2   // how far can we move before it is a drag
-	windowIconSize         = 256
+	doubleClickDelay  = 300 // ms (maximum interval between clicks for double click detection)
+	dragMoveThreshold = 2   // how far can we move before it is a drag
+	windowIconSize    = 256
 )
 
 func (w *window) Title() string {
