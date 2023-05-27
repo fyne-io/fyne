@@ -17,9 +17,6 @@ import (
 )
 
 const (
-	scrollAccelerateRate   = float64(5)
-	scrollAccelerateCutoff = float64(5)
-	scrollSpeed            = float32(10)
 	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
 	dragMoveThreshold      = 2   // how far can we move before it is a drag
 	windowIconSize         = 256
