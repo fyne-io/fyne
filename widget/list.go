@@ -75,11 +75,10 @@ func NewListWithData(data binding.DataList, createItem func() fyne.CanvasObject,
 func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
-	if f := l.CreateItem; f != nil {
-		if l.itemMin.IsZero() {
-			l.itemMin = newListItem(f(), nil).MinSize()
-		}
+	if f := l.CreateItem; f != nil && l.itemMin.IsZero() {
+		l.itemMin = f().MinSize()
 	}
+
 	layout := &fyne.Container{Layout: newListLayout(l)}
 	l.scroller = widget.NewVScroll(layout)
 	layout.Resize(layout.MinSize())
@@ -339,7 +338,7 @@ func (l *listRenderer) MinSize() fyne.Size {
 
 func (l *listRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		l.list.itemMin = newListItem(f(), nil).MinSize()
+		l.list.itemMin = f().MinSize()
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
