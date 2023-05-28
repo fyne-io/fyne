@@ -352,14 +352,16 @@ func (t *RichText) updateRowBounds() {
 	maxWidth := t.size.Width - 2*innerPadding + 2*t.inset.Width
 	wrapWidth := maxWidth
 
+	var currentBound *rowBoundary
 	var iterateSegments func(segList []RichTextSegment)
 	iterateSegments = func(segList []RichTextSegment) {
-		var currentBound *rowBoundary
 		for _, seg := range segList {
 			if parent, ok := seg.(RichTextBlock); ok {
-				iterateSegments(parent.Segments())
-				if !seg.Inline() {
+				segs := parent.Segments()
+				iterateSegments(segs)
+				if len(segs) > 0 && !segs[len(segs)-1].Inline() {
 					wrapWidth = maxWidth
+					currentBound = nil
 				}
 				continue
 			}
@@ -464,7 +466,8 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	innerPadding := theme.InnerPadding()
 	lineSpacing := theme.LineSpacing()
 
-	left := innerPadding - r.obj.inset.Width
+	xInset := innerPadding - r.obj.inset.Width
+	left := xInset
 	yPos := innerPadding - r.obj.inset.Height
 	lineWidth := size.Width - left*2
 	var rowItems []fyne.CanvasObject
@@ -483,12 +486,14 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				if len(rowItems) != 0 {
 					width, _ := r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
 					left += width
+					rowItems = nil
 				}
 				height := obj.MinSize().Height
 
 				obj.Move(fyne.NewPos(left, yPos))
 				obj.Resize(fyne.NewSize(lineWidth, height))
-				yPos += height + lineSpacing
+				yPos += height
+				left = xInset
 				continue
 			}
 			rowItems = append(rowItems, obj)
