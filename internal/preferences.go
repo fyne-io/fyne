@@ -176,6 +176,19 @@ func (p *InMemoryPreferences) String(key string) string {
 	return p.StringWithFallback(key, "")
 }
 
+func (p *InMemoryPreferences) StringList(key string) []string {
+	return p.StringListWithFallback(key, []string{})
+}
+
+func (p *InMemoryPreferences) StringListWithFallback(key string, fallback []string) []string {
+	value, ok := p.get(key)
+	if !ok {
+		return fallback
+	}
+
+	return value.([]string)
+}
+
 // StringWithFallback looks up a string value and returns the given fallback if not found
 func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 	value, ok := p.get(key)
@@ -188,6 +201,10 @@ func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 
 // SetString saves a string value for the given key
 func (p *InMemoryPreferences) SetString(key string, value string) {
+	p.set(key, value)
+}
+
+func (p *InMemoryPreferences) SetStringList(key string, value []string) {
 	p.set(key, value)
 }
 

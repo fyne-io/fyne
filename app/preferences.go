@@ -109,6 +109,10 @@ func (p *preferences) loadFromFile(path string) (err error) {
 
 	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
 		err = decode.Decode(&values)
+		if err != nil {
+			return
+		}
+		convertStringLists(values)
 	})
 
 	p.prefLock.Lock()
@@ -150,4 +154,16 @@ func newPreferences(app *fyneApp) *preferences {
 	})
 	p.watch()
 	return p
+}
+
+func convertStringLists(values map[string]interface{}) {
+	for k, v := range values {
+		if items, ok := v.([]interface{}); ok {
+			strings := make([]string, len(items))
+			for i, item := range items {
+				strings[i] = item.(string)
+			}
+			values[k] = strings
+		}
+	}
 }

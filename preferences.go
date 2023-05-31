@@ -30,6 +30,19 @@ type Preferences interface {
 	// SetString saves a string value for the given key
 	SetString(key string, value string)
 
+	// StringList looks up a list of string values for the key
+	//
+	// Since: 2.4
+	StringList(key string) []string
+	// StringListWithFallback looks up a list of string values and returns the given fallback if not found
+	//
+	// Since: 2.4
+	StringListWithFallback(key string, fallback []string) []string
+	// SetStringList saves a list of string values for the given key
+	//
+	// Since: 2.4
+	SetStringList(key string, value []string)
+
 	// RemoveValue removes a value for the given key (not currently supported on iOS)
 	RemoveValue(key string)
 
