@@ -49,52 +49,6 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 	p.fireChange()
 }
 
-func (p *InMemoryPreferences) set(key string, value interface{}) {
-	p.lock.Lock()
-
-	if stored, ok := p.values[key]; ok && stored == value {
-		p.lock.Unlock()
-		return
-	}
-
-	p.values[key] = value
-	p.lock.Unlock()
-
-	p.fireChange()
-}
-
-func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-
-	v, err := p.values[key]
-	return v, err
-}
-
-func (p *InMemoryPreferences) remove(key string) {
-	p.lock.Lock()
-	delete(p.values, key)
-	p.lock.Unlock()
-
-	p.fireChange()
-}
-
-func (p *InMemoryPreferences) fireChange() {
-	p.lock.RLock()
-	listeners := p.changeListeners
-	p.lock.RUnlock()
-
-	for _, l := range listeners {
-		p.wg.Add(1)
-		go func(listener func()) {
-			defer p.wg.Done()
-			listener()
-		}(l)
-	}
-
-	p.wg.Wait()
-}
-
 // Bool looks up a boolean value for the key
 func (p *InMemoryPreferences) Bool(key string) bool {
 	return p.BoolWithFallback(key, false)
@@ -279,4 +233,50 @@ func NewInMemoryPreferences() *InMemoryPreferences {
 		values: make(map[string]interface{}),
 		wg:     &sync.WaitGroup{},
 	}
+}
+
+func (p *InMemoryPreferences) fireChange() {
+	p.lock.RLock()
+	listeners := p.changeListeners
+	p.lock.RUnlock()
+
+	for _, l := range listeners {
+		p.wg.Add(1)
+		go func(listener func()) {
+			defer p.wg.Done()
+			listener()
+		}(l)
+	}
+
+	p.wg.Wait()
+}
+
+func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+
+	v, err := p.values[key]
+	return v, err
+}
+
+func (p *InMemoryPreferences) remove(key string) {
+	p.lock.Lock()
+	delete(p.values, key)
+	p.lock.Unlock()
+
+	p.fireChange()
+}
+
+func (p *InMemoryPreferences) set(key string, value interface{}) {
+	p.lock.Lock()
+
+	if stored, ok := p.values[key]; ok && stored == value {
+		p.lock.Unlock()
+		return
+	}
+
+	p.values[key] = value
+	p.lock.Unlock()
+
+	p.fireChange()
 }
