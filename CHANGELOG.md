@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.5 - In Progress
+## 2.3.5 - 5 June 2023
 
 ### Fixed
 
@@ -15,6 +15,10 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Disabled RadioGroup does not display status (#3882)
 * Negative TableCellID Row (#2857)
 * Make sure we have sufficient space for the bar as well if content is tiny (#3898)
+* Leak in image painter when replacing image.Image source regularly
+* Links in Markdown/Rich Text lists breaks formatting (#2911)
+* Crash when reducing window to taskbar with popup opened (#3877)
+* RichText vertical scroll will truncate long content with horizontal lines (#3929)
 
 
 ## 2.3.4 - 3 May 2023
