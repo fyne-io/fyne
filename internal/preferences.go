@@ -100,6 +100,19 @@ func (p *InMemoryPreferences) Bool(key string) bool {
 	return p.BoolWithFallback(key, false)
 }
 
+func (p *InMemoryPreferences) BoolList(key string) []bool {
+	return p.BoolListWithFallback(key, []bool{})
+}
+
+func (p *InMemoryPreferences) BoolListWithFallback(key string, fallback []bool) []bool {
+	value, ok := p.get(key)
+	if !ok {
+		return fallback
+	}
+
+	return value.([]bool)
+}
+
 // BoolWithFallback looks up a boolean value and returns the given fallback if not found
 func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
 	value, ok := p.get(key)
@@ -119,9 +132,26 @@ func (p *InMemoryPreferences) SetBool(key string, value bool) {
 	p.set(key, value)
 }
 
+func (p *InMemoryPreferences) SetBoolList(key string, value []bool) {
+	p.set(key, value)
+}
+
 // Float looks up a float64 value for the key
 func (p *InMemoryPreferences) Float(key string) float64 {
 	return p.FloatWithFallback(key, 0.0)
+}
+
+func (p *InMemoryPreferences) FloatList(key string) []float64 {
+	return p.FloatListWithFallback(key, []float64{})
+}
+
+func (p *InMemoryPreferences) FloatListWithFallback(key string, fallback []float64) []float64 {
+	value, ok := p.get(key)
+	if !ok {
+		return fallback
+	}
+
+	return value.([]float64)
 }
 
 // FloatWithFallback looks up a float64 value and returns the given fallback if not found
@@ -143,9 +173,35 @@ func (p *InMemoryPreferences) SetFloat(key string, value float64) {
 	p.set(key, value)
 }
 
+func (p *InMemoryPreferences) SetFloatList(key string, value []float64) {
+	p.set(key, value)
+}
+
 // Int looks up an integer value for the key
 func (p *InMemoryPreferences) Int(key string) int {
 	return p.IntWithFallback(key, 0)
+}
+
+func (p *InMemoryPreferences) IntList(key string) []int {
+	return p.IntListWithFallback(key, []int{})
+}
+
+func (p *InMemoryPreferences) IntListWithFallback(key string, fallback []int) []int {
+	value, ok := p.get(key)
+	if !ok {
+		return fallback
+	}
+
+	// integers can be de-serialised as floats, so support both
+	if intVal, ok := value.([]int); ok {
+		return intVal
+	}
+
+	ints := make([]int, len(value.([]float64)))
+	for i, f := range value.([]float64) {
+		ints[i] = int(f)
+	}
+	return ints
 }
 
 // IntWithFallback looks up an integer value and returns the given fallback if not found
@@ -168,6 +224,10 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 
 // SetInt saves an integer value for the given key
 func (p *InMemoryPreferences) SetInt(key string, value int) {
+	p.set(key, value)
+}
+
+func (p *InMemoryPreferences) SetIntList(key string, value []int) {
 	p.set(key, value)
 }
 
