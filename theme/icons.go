@@ -381,15 +381,15 @@ const (
 	// Since: 2.0
 	IconNameViewZoomFit fyne.ThemeIconName = "viewZoomFit"
 
-	// IconNameViewZoomIn is the name of theme lookup for view zoom in icon.
+	// IconNameZoomIn is the name of theme lookup for view zoom in icon.
 	//
 	// Since: 2.0
-	IconNameViewZoomIn fyne.ThemeIconName = "viewZoomIn"
+	IconNameZoomIn fyne.ThemeIconName = "zoomIn"
 
-	// IconNameViewZoomOut is the name of theme lookup for view zoom out icon.
+	// IconNameZoomOut is the name of theme lookup for view zoom out icon.
 	//
 	// Since: 2.0
-	IconNameViewZoomOut fyne.ThemeIconName = "viewZoomOut"
+	IconNameZoomOut fyne.ThemeIconName = "zoomOut"
 
 	// IconNameViewRestore is the name of theme lookup for view restore icon.
 	//
@@ -546,8 +546,8 @@ var (
 		IconNameViewRefresh:    NewThemedResource(viewrefreshIconRes),
 		IconNameViewRestore:    NewThemedResource(viewzoomfitIconRes),
 		IconNameViewZoomFit:    NewThemedResource(viewzoomfitIconRes),
-		IconNameViewZoomIn:     NewThemedResource(viewzoominIconRes),
-		IconNameViewZoomOut:    NewThemedResource(viewzoomoutIconRes),
+		IconNameZoomIn:         NewThemedResource(zoominIconRes),
+		IconNameZoomOut:        NewThemedResource(zoomoutIconRes),
 
 		IconNameVisibility:    NewThemedResource(visibilityIconRes),
 		IconNameVisibilityOff: NewThemedResource(visibilityoffIconRes),
@@ -1111,12 +1111,12 @@ func ZoomFitIcon() fyne.Resource {
 
 // ZoomInIcon returns a resource containing the standard zoom in icon for the current theme
 func ZoomInIcon() fyne.Resource {
-	return safeIconLookup(IconNameViewZoomIn)
+	return safeIconLookup(IconNameZoomIn)
 }
 
 // ZoomOutIcon returns a resource containing the standard zoom out icon for the current theme
 func ZoomOutIcon() fyne.Resource {
-	return safeIconLookup(IconNameViewZoomOut)
+	return safeIconLookup(IconNameZoomOut)
 }
 
 // VisibilityIcon returns a resource containing the standard visibility icon for the current theme

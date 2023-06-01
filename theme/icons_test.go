@@ -394,12 +394,12 @@ func Test_ZoomFitIcon_FileSource(t *testing.T) {
 
 func Test_ZoomInIcon_FileSource(t *testing.T) {
 	result := ZoomInIcon().Name()
-	assert.Equal(t, "foreground_view-zoom-in.svg", result)
+	assert.Equal(t, "foreground_zoom-in.svg", result)
 }
 
 func Test_ZoomOutIcon_FileSource(t *testing.T) {
 	result := ZoomOutIcon().Name()
-	assert.Equal(t, "foreground_view-zoom-out.svg", result)
+	assert.Equal(t, "foreground_zoom-out.svg", result)
 }
 
 func Test_VisibilityIcon_FileSource(t *testing.T) {

@@ -164,8 +164,8 @@ func main() {
 	bundleIcon("view-fullscreen", f)
 	bundleIcon("view-refresh", f)
 	bundleIcon("view-zoom-fit", f)
-	bundleIcon("view-zoom-in", f)
-	bundleIcon("view-zoom-out", f)
+	bundleIcon("zoom-in", f)
+	bundleIcon("zoom-out", f)
 
 	bundleIcon("volume-down", f)
 	bundleIcon("volume-mute", f)
