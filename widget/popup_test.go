@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -60,6 +61,24 @@ func TestShowPopUpAtPosition(t *testing.T) {
 		assert.True(t, pop.Visible())
 		assert.Equal(t, 1, len(c.Overlays().List()))
 		assert.Equal(t, pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())), pop.(*PopUp).Content.Position())
+	}
+}
+
+func TestShowPopUpAtRelativePosition(t *testing.T) {
+	pos := fyne.NewPos(6, 9)
+	label := NewLabel("Hi")
+	parent1 := NewLabel("Parent1")
+	parent2 := NewLabel("Parent2")
+	w := test.NewWindow(
+		&fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}})
+	w.Resize(fyne.NewSize(100, 200))
+
+	ShowPopUpAtRelativePosition(label, w.Canvas(), pos, parent2)
+	pop := w.Canvas().Overlays().Top()
+	if assert.NotNil(t, pop) {
+		assert.True(t, pop.Visible())
+		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
+		assert.Equal(t, pos.Add(parent2.Position()).Add(fyne.NewPos(theme.Padding()*2, theme.Padding()*2)), pop.(*PopUp).Content.Position())
 	}
 }
 
