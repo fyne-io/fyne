@@ -31,7 +31,7 @@ Using the standard go tools you can install Fyne's core library using:
 
     go get fyne.io/fyne/v2
 
-Run the following if there are any issues with the installation of dependencies:
+After importing a new module, run the following command before compiling the code for the first time. Avoid running it before writing code that uses the module to prevent accidental removal of dependencies:
 
     go mod tidy
 
