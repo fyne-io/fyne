@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.3.5 - 5 June 2023
+## 2.3.5 - 6 June 2023
 
 ### Fixed
 
@@ -19,6 +19,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Links in Markdown/Rich Text lists breaks formatting (#2911)
 * Crash when reducing window to taskbar with popup opened (#3877)
 * RichText vertical scroll will truncate long content with horizontal lines (#3929)
+* Custom metadata would not apply with `fyne release` command
+* Horizontal CheckGroup overlap when having long text (#3005)
 
 
 ## 2.3.4 - 3 May 2023
