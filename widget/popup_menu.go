@@ -109,9 +109,7 @@ func (p *PopUpMenu) ShowAtPosition(pos fyne.Position) {
 //
 // Since 2.4
 func (p *PopUpMenu) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) {
-	withRelativePosition(rel, to, func(pos fyne.Position) {
-		p.ShowAtPosition(pos)
-	})
+	withRelativePosition(rel, to, p.ShowAtPosition)
 }
 
 // TypedKey handles key events. It allows keyboard control of the pop-up menu.

@@ -73,9 +73,7 @@ func (p *PopUp) ShowAtPosition(pos fyne.Position) {
 //
 // Since 2.4
 func (p *PopUp) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) {
-	withRelativePosition(rel, to, func(pos fyne.Position) {
-		p.ShowAtPosition(pos)
-	})
+	withRelativePosition(rel, to, p.ShowAtPosition)
 }
 
 // Tapped is called when the user taps the popUp background - if not modal then dismiss this widget
