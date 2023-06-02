@@ -71,13 +71,13 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	background := &canvas.Rectangle{}
-	line := canvas.NewRectangle(theme.ShadowColor())
 	tapBG := canvas.NewRectangle(color.Transparent)
 	s.tapAnim = newButtonTapAnimation(tapBG, s)
 	s.tapAnim.Curve = fyne.AnimationEaseOut
-	objects := []fyne.CanvasObject{background, line, tapBG, txtProv, icon}
-	r := &selectRenderer{icon, txtProv, background, line, objects, s}
-	background.FillColor, line.FillColor = r.bgLineColor()
+	objects := []fyne.CanvasObject{background, tapBG, txtProv, icon}
+	r := &selectRenderer{icon, txtProv, background, objects, s}
+	background.FillColor = r.bgColor()
+	background.CornerRadius = theme.InputRadiusSize()
 	r.updateIcon()
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
 	r.updateLabel()
@@ -268,9 +268,9 @@ func (s *Select) updateSelected(text string) {
 }
 
 type selectRenderer struct {
-	icon             *Icon
-	label            *RichText
-	background, line *canvas.Rectangle
+	icon       *Icon
+	label      *RichText
+	background *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	combo   *Select
@@ -284,10 +284,7 @@ func (s *selectRenderer) Destroy() {}
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
-	s.line.Resize(fyne.NewSize(size.Width, theme.InputBorderSize()))
-	s.line.Move(fyne.NewPos(0, size.Height-theme.InputBorderSize()))
-	s.background.Resize(fyne.NewSize(size.Width, size.Height-theme.InputBorderSize()*2))
-	s.background.Move(fyne.NewPos(0, theme.InputBorderSize()))
+	s.background.Resize(fyne.NewSize(size.Width, size.Height))
 	s.label.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 
 	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.InnerPadding(), (size.Height-theme.IconInlineSize())/2)
@@ -317,7 +314,8 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RLock()
 	s.updateLabel()
 	s.updateIcon()
-	s.background.FillColor, s.line.FillColor = s.bgLineColor()
+	s.background.FillColor = s.bgColor()
+	s.background.CornerRadius = theme.InputRadiusSize()
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
@@ -331,17 +329,17 @@ func (s *selectRenderer) Refresh() {
 	canvas.Refresh(s.combo.super())
 }
 
-func (s *selectRenderer) bgLineColor() (bg color.Color, line color.Color) {
+func (s *selectRenderer) bgColor() color.Color {
 	if s.combo.disabled {
-		return theme.InputBackgroundColor(), theme.DisabledColor()
+		return theme.DisabledButtonColor()
 	}
 	if s.combo.focused {
-		return theme.FocusColor(), theme.PrimaryColor()
+		return theme.FocusColor()
 	}
 	if s.combo.hovered {
-		return theme.HoverColor(), theme.ShadowColor()
+		return theme.HoverColor()
 	}
-	return theme.InputBackgroundColor(), theme.ShadowColor()
+	return theme.InputBackgroundColor()
 }
 
 func (s *selectRenderer) updateIcon() {
