@@ -116,12 +116,12 @@ func TestCheckGroup_Layout(t *testing.T) {
 		},
 		"multiple_horizontal": {
 			horizontal: true,
-			options:    []string{"Foo", "Bar"},
+			options:    []string{"Foo", "Barley"},
 		},
 		"multiple_horizontal_disabled": {
 			disabled:   true,
 			horizontal: true,
-			options:    []string{"Foo", "Bar"},
+			options:    []string{"Foo", "Barley"},
 		},
 		"multiple_selected": {
 			options:  []string{"Foo", "Bar"},
