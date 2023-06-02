@@ -760,7 +760,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameScrollBar:
 		return color.NRGBA{A: 0x99}
 	case ColorNameSeparator:
-		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	case ColorNameShadow:
 		return color.NRGBA{A: 0x33}
 	case ColorNameSuccess:
