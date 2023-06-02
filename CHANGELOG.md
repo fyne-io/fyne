@@ -21,6 +21,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * RichText vertical scroll will truncate long content with horizontal lines (#3929)
 * Custom metadata would not apply with `fyne release` command
 * Horizontal CheckGroup overlap when having long text (#3005)
+* Fix focused colour of coloured buttons (#3462)
+* Menu separator not visible with light theme (#3814)
 
 
 ## 2.3.4 - 3 May 2023
