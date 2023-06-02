@@ -39,7 +39,7 @@ body:
     label: Example code
     description: |
       Add a short code snippet to help explain and simplify reproduction of the problem.
-      Please refrain from adding screenshots of code, links to other projects or very long code examples.
+      Please refrain from adding screenshots of code, links to other projects, attached `.zip` files containing source files, or very long code examples.
       A good code example should be runnable and contain no more code than is necessary to reproduce the bug.
     placeholder: |
       Please write the code inside a code block with Go syntax highlighting enabled, like this:
