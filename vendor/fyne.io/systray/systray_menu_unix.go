@@ -319,7 +319,7 @@ func refresh() {
 	dbusErr := instance.menuProps.Set("com.canonical.dbusmenu", "Version",
 		dbus.MakeVariant(instance.menuVersion))
 	if dbusErr != nil {
-		log.Printf("systray error: failed to update menu version: %s\n", dbusErr)
+		log.Printf("systray error: failed to update menu version: %v\n", dbusErr)
 		return
 	}
 	err := menu.Emit(instance.conn, &menu.Dbusmenu_LayoutUpdatedSignal{
@@ -329,7 +329,7 @@ func refresh() {
 		},
 	})
 	if err != nil {
-		log.Printf("systray error: failed to emit layout updated signal: %s\n", err)
+		log.Printf("systray error: failed to emit layout updated signal: %v\n", err)
 	}
 
 }
