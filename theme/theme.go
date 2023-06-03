@@ -664,13 +664,13 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameLineSpacing:
 		return 4
 	case SizeNamePadding:
-		return 6
+		return 4
 	case SizeNameScrollBar:
 		return 16
 	case SizeNameScrollBarSmall:
 		return 3
 	case SizeNameText:
-		return 13
+		return 14
 	case SizeNameHeadingText:
 		return 24
 	case SizeNameSubHeadingText:
