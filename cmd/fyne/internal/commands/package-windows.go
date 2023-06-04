@@ -132,7 +132,7 @@ func (p *Packager) packageWindows(tags []string) error {
 	return nil
 }
 
-func runAsAdminWindows(args ...string) error {
+func escapePowerShellArguments(args ...string) string {
 	cmd := "\"/c\""
 
 	for idx, arg := range args {
@@ -145,6 +145,12 @@ func runAsAdminWindows(args ...string) error {
 	if len(args) != 0 {
 		cmd += "'"
 	}
+
+	return cmd
+}
+
+func runAsAdminWindows(args ...string) error {
+	cmd := escapePowerShellArguments(args...)
 
 	return execabs.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }
