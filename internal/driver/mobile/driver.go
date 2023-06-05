@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
@@ -125,6 +126,10 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 		}
 	}
 	return pos.Subtract(inset)
+}
+
+func (d *mobileDriver) GoBack() {
+	app.GoBack()
 }
 
 func (d *mobileDriver) Quit() {
@@ -454,6 +459,8 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeBackslash:          fyne.KeyBackslash,
 	key.CodeRightSquareBracket: fyne.KeyRightBracket,
 	key.CodeGraveAccent:        fyne.KeyBackTick,
+
+	key.CodeBackButton: mobile.KeyBack,
 }
 
 func keyToName(code key.Code) fyne.KeyName {

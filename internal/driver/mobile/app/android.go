@@ -48,6 +48,7 @@ void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
+void finish(JNIEnv* env, jobject ctx);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -75,6 +76,18 @@ import (
 // mimeMap contains standard mime entries that are missing on Android
 var mimeMap = map[string]string{
 	".txt": "text/plain",
+}
+
+// GoBack asks the OS to go to the previous app / activity
+func GoBack() {
+	err := RunOnJVM(func(_, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+		C.finish(env, C.jobject(ctx))
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("app: %v", err)
+	}
 }
 
 // RunOnJVM runs fn on a new goroutine locked to an OS thread with a JNIEnv.
@@ -137,6 +150,19 @@ func onPause(activity *C.ANativeActivity) {
 
 //export onStop
 func onStop(activity *C.ANativeActivity) {
+}
+
+//export onBackPressed
+func onBackPressed() {
+	k := key.Event{
+		Code:      key.CodeBackButton,
+		Direction: key.DirPress,
+	}
+	log.Println("Logging key event back")
+	theApp.events.In() <- k
+
+	k.Direction = key.DirRelease
+	theApp.events.In() <- k
 }
 
 //export onCreate
