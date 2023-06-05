@@ -14,7 +14,7 @@ body:
 - type: textarea
   attributes:
     label: Describe the bug
-    description: A clear and concise description about the bug. Please include the stack trace in the case of a crash.
+    description: A clear and concise description about the bug. Please include the full stack trace in the case of a crash.
   validations:
     required: true
 - type: textarea
