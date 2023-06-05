@@ -80,6 +80,10 @@ func main(f func(App)) {
 	}
 }
 
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
+}
+
 //export onResize
 func onResize(w, h int) {
 	// TODO(nigeltao): don't assume 72 DPI. DisplayWidth and DisplayWidthMM
