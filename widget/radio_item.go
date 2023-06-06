@@ -205,7 +205,11 @@ func (r *radioItemRenderer) update() {
 		out.ColorName = theme.ColorNameForeground
 	}
 	if r.item.Disabled() {
-		in.ColorName = theme.ColorNameBackground
+		if r.item.Selected {
+			in.ColorName = theme.ColorNameDisabled
+		} else {
+			in.ColorName = theme.ColorNameBackground
+		}
 		out.ColorName = theme.ColorNameDisabled
 	}
 	r.icon.Resource = in

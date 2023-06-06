@@ -226,16 +226,10 @@ func (l *ListSegment) Segments() []RichTextSegment {
 			txt = strconv.Itoa(i+1) + "."
 		}
 		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
-		if para, ok := in.(*ParagraphSegment); ok {
-			seg := &ParagraphSegment{Texts: []RichTextSegment{bullet}}
-			seg.Texts = append(seg.Texts, para.Texts...)
-			out[i] = seg
-		} else {
-			out[i] = &ParagraphSegment{Texts: []RichTextSegment{
-				bullet,
-				in,
-			}}
-		}
+		out[i] = &ParagraphSegment{Texts: []RichTextSegment{
+			bullet,
+			in,
+		}}
 	}
 	return out
 }

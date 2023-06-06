@@ -231,7 +231,16 @@ func (b *Button) buttonColor() color.Color {
 		}
 		return theme.DisabledButtonColor()
 	case b.focused:
-		return blendColor(theme.ButtonColor(), theme.FocusColor())
+		bg := theme.ButtonColor()
+		if b.Importance == HighImportance {
+			bg = theme.PrimaryColor()
+		} else if b.Importance == DangerImportance {
+			bg = theme.ErrorColor()
+		} else if b.Importance == WarningImportance {
+			bg = theme.WarningColor()
+		}
+
+		return blendColor(bg, theme.FocusColor())
 	case b.hovered:
 		bg := theme.ButtonColor()
 		if b.Importance == HighImportance {
@@ -356,7 +365,11 @@ func (r *buttonRenderer) applyTheme() {
 	case r.button.disabled:
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance:
-		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
+		if r.button.focused {
+			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
+		} else {
+			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
+		}
 	}
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {

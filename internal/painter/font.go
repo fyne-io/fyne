@@ -84,18 +84,33 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) (fon
 		switch {
 		case style.Monospace:
 			measureFace = loadMeasureFont(theme.TextMonospaceFont())
+			if measureFace == nil {
+				measureFace = loadMeasureFont(theme.DefaultTextMonospaceFont())
+			}
 		case style.Bold:
 			if style.Italic {
 				measureFace = loadMeasureFont(theme.TextBoldItalicFont())
+				if measureFace == nil {
+					measureFace = loadMeasureFont(theme.DefaultTextBoldItalicFont())
+				}
 			} else {
 				measureFace = loadMeasureFont(theme.TextBoldFont())
+				if measureFace == nil {
+					measureFace = loadMeasureFont(theme.DefaultTextBoldFont())
+				}
 			}
 		case style.Italic:
 			measureFace = loadMeasureFont(theme.TextItalicFont())
+			if measureFace == nil {
+				measureFace = loadMeasureFont(theme.DefaultTextItalicFont())
+			}
 		case style.Symbol:
 			measureFace = loadMeasureFont(theme.DefaultSymbolFont())
 		default:
 			measureFace = loadMeasureFont(theme.TextFont())
+			if measureFace == nil {
+				measureFace = loadMeasureFont(theme.DefaultTextFont())
+			}
 		}
 
 		comp.facesMutex.Lock()
@@ -148,6 +163,7 @@ func loadMeasureFont(data fyne.Resource) gotext.Face {
 	loaded, err := gotext.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
+		return nil
 	}
 
 	return loaded

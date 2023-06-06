@@ -40,6 +40,10 @@ func (r *passwordRevealer) Cursor() desktop.Cursor {
 }
 
 func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
+	if r.entry.Disabled() {
+		return
+	}
+
 	r.entry.setFieldsAndRefresh(func() {
 		r.entry.Password = !r.entry.Password
 	})
@@ -70,6 +74,10 @@ func (r *passwordRevealerRenderer) Refresh() {
 		r.icon.Resource = theme.VisibilityIcon()
 	} else {
 		r.icon.Resource = theme.VisibilityOffIcon()
+	}
+
+	if r.entry.disabled {
+		r.icon.Resource = theme.NewDisabledResource(r.icon.Resource)
 	}
 	canvas.Refresh(r.icon)
 }

@@ -121,6 +121,11 @@ func Release() *cli.Command {
 				Value:       "",
 				Destination: &r.icon,
 			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &r.customMetadata,
+			},
 		},
 		Action: r.releaseAction,
 	}
