@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build ignore
-// +build ignore
+//go:build gendex
+// +build gendex
 
 // Gendex generates a dex file used by Go apps created with gomobile.
 //
@@ -73,8 +73,8 @@ func gendex() error {
 	}
 	cmd := execabs.Command(
 		"javac",
-		"-source", "1.7",
-		"-target", "1.7",
+		"-source", "1.8",
+		"-target", "1.8",
 		"-bootclasspath", platform+"/android.jar",
 		"-d", tmpdir+"/work",
 	)
