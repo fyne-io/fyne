@@ -89,41 +89,50 @@ func (f *Face) Metrics() font.Metrics {
 func (f *Face) Glyph(dot fixed.Point26_6, r rune) (
 	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
 
-loop:
-	for _, rr := range [2]rune{r, '\ufffd'} {
-		for _, rng := range f.Ranges {
-			if rr < rng.Low || rng.High <= rr {
-				continue
-			}
-			maskp.Y = (int(rr-rng.Low) + rng.Offset) * (f.Ascent + f.Descent)
-			ok = true
-			break loop
+	if found, rng := f.find(r); rng != nil {
+		maskp.Y = (int(found-rng.Low) + rng.Offset) * (f.Ascent + f.Descent)
+		x := int(dot.X+32)>>6 + f.Left
+		y := int(dot.Y+32) >> 6
+		dr = image.Rectangle{
+			Min: image.Point{
+				X: x,
+				Y: y - f.Ascent,
+			},
+			Max: image.Point{
+				X: x + f.Width,
+				Y: y + f.Descent,
+			},
 		}
-	}
-	if !ok {
-		return image.Rectangle{}, nil, image.Point{}, 0, false
-	}
 
-	x := int(dot.X+32)>>6 + f.Left
-	y := int(dot.Y+32) >> 6
-	dr = image.Rectangle{
-		Min: image.Point{
-			X: x,
-			Y: y - f.Ascent,
-		},
-		Max: image.Point{
-			X: x + f.Width,
-			Y: y + f.Descent,
-		},
+		return dr, f.Mask, maskp, fixed.I(f.Advance), r == found
 	}
-
-	return dr, f.Mask, maskp, fixed.I(f.Advance), true
+	return image.Rectangle{}, nil, image.Point{}, 0, false
 }
 
 func (f *Face) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {
-	return fixed.R(0, -f.Ascent, f.Width, +f.Descent), fixed.I(f.Advance), true
+	if found, rng := f.find(r); rng != nil {
+		return fixed.R(0, -f.Ascent, f.Width, +f.Descent), fixed.I(f.Advance), r == found
+	}
+	return fixed.Rectangle26_6{}, 0, false
 }
 
 func (f *Face) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
-	return fixed.I(f.Advance), true
+	if found, rng := f.find(r); rng != nil {
+		return fixed.I(f.Advance), r == found
+	}
+	return 0, false
+}
+
+func (f *Face) find(r rune) (rune, *Range) {
+	for {
+		for i, rng := range f.Ranges {
+			if (rng.Low <= r) && (r < rng.High) {
+				return r, &f.Ranges[i]
+			}
+		}
+		if r == '\ufffd' {
+			return 0, nil
+		}
+		r = '\ufffd'
+	}
 }

@@ -38,7 +38,10 @@ type Face interface {
 	// glyph at the sub-pixel destination location dot, and that glyph's
 	// advance width.
 	//
-	// It returns !ok if the face does not contain a glyph for r.
+	// It returns !ok if the face does not contain a glyph for r. This includes
+	// returning !ok for a fallback glyph (such as substituting a U+FFFD glyph
+	// or OpenType's .notdef glyph), in which case the other return values may
+	// still be non-zero.
 	//
 	// The contents of the mask image returned by one Glyph call may change
 	// after the next Glyph call. Callers that want to cache the mask must make
@@ -49,7 +52,10 @@ type Face interface {
 	// GlyphBounds returns the bounding box of r's glyph, drawn at a dot equal
 	// to the origin, and that glyph's advance width.
 	//
-	// It returns !ok if the face does not contain a glyph for r.
+	// It returns !ok if the face does not contain a glyph for r. This includes
+	// returning !ok for a fallback glyph (such as substituting a U+FFFD glyph
+	// or OpenType's .notdef glyph), in which case the other return values may
+	// still be non-zero.
 	//
 	// The glyph's ascent and descent are equal to -bounds.Min.Y and
 	// +bounds.Max.Y. The glyph's left-side and right-side bearings are equal
@@ -60,7 +66,10 @@ type Face interface {
 
 	// GlyphAdvance returns the advance width of r's glyph.
 	//
-	// It returns !ok if the face does not contain a glyph for r.
+	// It returns !ok if the face does not contain a glyph for r. This includes
+	// returning !ok for a fallback glyph (such as substituting a U+FFFD glyph
+	// or OpenType's .notdef glyph), in which case the other return values may
+	// still be non-zero.
 	GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool)
 
 	// Kern returns the horizontal adjustment for the kerning pair (r0, r1). A
@@ -150,14 +159,10 @@ func (d *Drawer) DrawBytes(s []byte) {
 		if prevC >= 0 {
 			d.Dot.X += d.Face.Kern(prevC, c)
 		}
-		dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
+		dr, mask, maskp, advance, _ := d.Face.Glyph(d.Dot, c)
+		if !dr.Empty() {
+			draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
 		}
-		draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
 		d.Dot.X += advance
 		prevC = c
 	}
@@ -170,14 +175,10 @@ func (d *Drawer) DrawString(s string) {
 		if prevC >= 0 {
 			d.Dot.X += d.Face.Kern(prevC, c)
 		}
-		dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
+		dr, mask, maskp, advance, _ := d.Face.Glyph(d.Dot, c)
+		if !dr.Empty() {
+			draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
 		}
-		draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
 		d.Dot.X += advance
 		prevC = c
 	}
@@ -227,16 +228,12 @@ func BoundBytes(f Face, s []byte) (bounds fixed.Rectangle26_6, advance fixed.Int
 		if prevC >= 0 {
 			advance += f.Kern(prevC, c)
 		}
-		b, a, ok := f.GlyphBounds(c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
+		b, a, _ := f.GlyphBounds(c)
+		if !b.Empty() {
+			b.Min.X += advance
+			b.Max.X += advance
+			bounds = bounds.Union(b)
 		}
-		b.Min.X += advance
-		b.Max.X += advance
-		bounds = bounds.Union(b)
 		advance += a
 		prevC = c
 	}
@@ -251,16 +248,12 @@ func BoundString(f Face, s string) (bounds fixed.Rectangle26_6, advance fixed.In
 		if prevC >= 0 {
 			advance += f.Kern(prevC, c)
 		}
-		b, a, ok := f.GlyphBounds(c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
+		b, a, _ := f.GlyphBounds(c)
+		if !b.Empty() {
+			b.Min.X += advance
+			b.Max.X += advance
+			bounds = bounds.Union(b)
 		}
-		b.Min.X += advance
-		b.Max.X += advance
-		bounds = bounds.Union(b)
 		advance += a
 		prevC = c
 	}
@@ -278,13 +271,7 @@ func MeasureBytes(f Face, s []byte) (advance fixed.Int26_6) {
 		if prevC >= 0 {
 			advance += f.Kern(prevC, c)
 		}
-		a, ok := f.GlyphAdvance(c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
-		}
+		a, _ := f.GlyphAdvance(c)
 		advance += a
 		prevC = c
 	}
@@ -298,13 +285,7 @@ func MeasureString(f Face, s string) (advance fixed.Int26_6) {
 		if prevC >= 0 {
 			advance += f.Kern(prevC, c)
 		}
-		a, ok := f.GlyphAdvance(c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
-		}
+		a, _ := f.GlyphAdvance(c)
 		advance += a
 		prevC = c
 	}
