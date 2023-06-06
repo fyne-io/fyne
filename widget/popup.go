@@ -69,6 +69,13 @@ func (p *PopUp) ShowAtPosition(pos fyne.Position) {
 	p.Show()
 }
 
+// ShowAtRelativePosition shows this pop-up at the given position relative to stated object.
+//
+// Since 2.4
+func (p *PopUp) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) {
+	withRelativePosition(rel, to, p.ShowAtPosition)
+}
+
 // Tapped is called when the user taps the popUp background - if not modal then dismiss this widget
 func (p *PopUp) Tapped(_ *fyne.PointEvent) {
 	if !p.modal {
@@ -113,6 +120,16 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 // It will then display the popup on the passed canvas.
 func ShowPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) {
 	newPopUp(content, canvas).ShowAtPosition(pos)
+}
+
+// ShowPopUpAtRelativePosition shows a new popUp for the specified content at the given position relative to stated object.
+// It will then display the popup on the passed canvas.
+//
+// Since 2.4
+func ShowPopUpAtRelativePosition(content fyne.CanvasObject, canvas fyne.Canvas, rel fyne.Position, to fyne.CanvasObject) {
+	withRelativePosition(rel, to, func(pos fyne.Position) {
+		ShowPopUpAtPosition(content, canvas, pos)
+	})
 }
 
 func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
@@ -255,4 +272,17 @@ func (r *modalPopUpRenderer) Refresh() {
 	}
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
+}
+
+func withRelativePosition(rel fyne.Position, to fyne.CanvasObject, f func(position fyne.Position)) {
+	d := fyne.CurrentApp().Driver()
+	c := d.CanvasForObject(to)
+	if c == nil {
+		fyne.LogError("Could not locate parent object to display relative to", nil)
+		f(rel)
+		return
+	}
+
+	pos := d.AbsolutePositionForObject(to).Add(rel)
+	f(pos)
 }
