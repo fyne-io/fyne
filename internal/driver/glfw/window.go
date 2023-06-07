@@ -14,6 +14,8 @@ import (
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/storage"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
@@ -108,6 +110,21 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 
 func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
+}
+
+func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
+	runOnDraw(w, func() {
+		glfw.GetCurrentContext().SetDropCallback(func(win *glfw.Window, names []string) {
+			if dropped != nil {
+				uris := make([]fyne.URI, len(names))
+				for i, name := range names {
+					uris[i] = storage.NewFileURI(name)
+				}
+
+				dropped(w.mousePos, uris)
+			}
+		})
+	})
 }
 
 func (w *window) SetCloseIntercept(callback func()) {

@@ -101,6 +101,10 @@ func (w *window) SetCloseIntercept(callback func()) {
 	w.onCloseIntercepted = callback
 }
 
+func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
+	// not implemented yet
+}
+
 func (w *window) Show() {
 	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
 	menuButton := w.newMenuButton(menu)
