@@ -23,7 +23,7 @@ var resourceMakefile = &fyne.StaticResource{
 var resourceAppDesktop = &fyne.StaticResource{
 	StaticName: "app.desktop",
 	StaticContent: []byte(
-		"[Desktop Entry]\nType=Application\nName={{.Name}}\nExec={{.Exec}}\nIcon={{.Name}}\n"),
+		"[Desktop Entry]\nType=Application\nName={{.Name}}\n{{if ne .GenericName \"\"}}GenericName={{.GenericName}}{{end}}\nExec={{.Exec}}\nIcon={{.Name}}\n{{if ne .Comment \"\"}}Comment={{.Comment}}{{end}}\n{{if ne .Categories \"\"}}Categories={{.Categories}}{{end}}\n{{if ne .Keywords \"\"}}Keywords={{.Keywords}}{{else}}Keywords=fyne;{{end}}"),
 }
 var resourceAppManifest = &fyne.StaticResource{
 	StaticName: "app.manifest",
