@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 
 	"golang.org/x/sys/execabs"
@@ -57,22 +56,15 @@ func (p *Packager) packageUNIX() error {
 	desktop := filepath.Join(appsDir, p.Name+".desktop")
 	deskFile, _ := os.Create(desktop)
 
-	data, err := metadata.LoadStandard(p.srcDir)
-	if err != nil {
-		return fmt.Errorf("failed to load data from FyneApp.toml: %w", err)
-	}
-
-	fmt.Println(data.LinuxAndBSD)
-
 	tplData := unixData{
 		Name:        p.Name,
 		Exec:        filepath.Base(p.exe),
 		Icon:        p.Name + filepath.Ext(p.icon),
 		Local:       local,
-		GenericName: data.LinuxAndBSD.GenericName,
-		Keywords:    data.LinuxAndBSD.Keywords,
-		Comment:     data.LinuxAndBSD.Comment,
-		Categories:  data.LinuxAndBSD.Categories,
+		GenericName: p.linuxAndBSDMetadata.GenericName,
+		Keywords:    p.linuxAndBSDMetadata.Keywords,
+		Comment:     p.linuxAndBSDMetadata.Comment,
+		Categories:  p.linuxAndBSDMetadata.Categories,
 	}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
