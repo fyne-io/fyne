@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name={{.Name}}
-{{if ne .GenericName ""}}GenericName={{.GenericName}}{{end}}
+{{if ne .GenericName ""}}GenericName={{.GenericName}}{{end -}}
 Exec={{.Exec}}
 Icon={{.Name}}
-{{if ne .Comment ""}}Comment={{.Comment}}{{end}}
-{{if ne .Categories ""}}Categories={{.Categories}}{{end}}
-{{if ne .Keywords ""}}Keywords={{.Keywords}}{{else}}Keywords=fyne;{{end}}
+{{if ne .Comment ""}}Comment={{.Comment}}{{end -}}
+{{if ne .Categories ""}}Categories={{.Categories}}{{end -}}
+{{if ne .Keywords ""}}Keywords={{.Keywords}}{{else}}Keywords=fyne;{{end -}}
