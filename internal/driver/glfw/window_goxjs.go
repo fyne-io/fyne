@@ -107,6 +107,10 @@ func (w *window) CenterOnScreen() {
 	w.centered = true
 }
 
+func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
+	// FIXME: not implemented yet
+}
+
 func (w *window) doCenterOnScreen() {
 	// FIXME: no meaning for defining center on screen in WebGL
 }
