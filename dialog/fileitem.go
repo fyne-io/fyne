@@ -49,6 +49,7 @@ func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(nil)
+	background.CornerRadius = theme.InputRadiusSize()
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
 	icon := widget.NewFileIcon(i.location)
@@ -133,6 +134,8 @@ func (s fileItemRenderer) Refresh() {
 	} else {
 		s.background.FillColor = nil
 	}
+
+	s.background.CornerRadius = theme.InputRadiusSize()
 
 	s.background.Refresh()
 	canvas.Refresh(s.item)
