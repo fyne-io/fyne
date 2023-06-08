@@ -4,6 +4,7 @@ package theme // import "fyne.io/fyne/v2/theme"
 import (
 	"image/color"
 	"os"
+	"reflect"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -610,6 +611,18 @@ func (t *builtinTheme) initFonts() {
 	font = os.Getenv("FYNE_FONT_SYMBOL")
 	if font != "" {
 		t.symbol = loadCustomFont(font, "Regular", symbol)
+	}
+
+	// after applying custom fonts, prevent them from being overwritten
+	if fyne.CurrentApp() != nil && !reflect.ValueOf(fyne.CurrentApp().Settings()).IsNil()  && fyne.CurrentApp().Settings().Theme() != nil {
+		currentFont := current().Font(fyne.TextStyle{})
+		if currentFont != nil {
+			t.regular = currentFont
+			t.bold = currentFont
+			t.italic = currentFont
+			t.boldItalic = currentFont
+			t.monospace = currentFont
+		}
 	}
 }
 
