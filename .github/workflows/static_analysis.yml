@@ -25,9 +25,6 @@ jobs:
         go install honnef.co/go/tools/cmd/staticcheck@v0.4.2
         go install github.com/mattn/goveralls@latest
 
-    - name: Cleanup repository
-      run: rm -rf vendor/
-
     - name: Vet
       run: go vet -tags ci ./...
 
