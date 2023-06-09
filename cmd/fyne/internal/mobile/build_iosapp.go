@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -221,7 +222,7 @@ func iosCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 	if err != nil {
 		return err
 	}
-	return filepath.Walk(srcAssets, func(path string, info os.FileInfo, err error) error {
+	return filepath.WalkDir(srcAssets, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
