@@ -1,7 +1,6 @@
 package app
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -51,11 +50,11 @@ func TestPreferences_Save(t *testing.T) {
 	err := p.saveToFile(path)
 	assert.Nil(t, err)
 
-	expected, err := ioutil.ReadFile(filepath.Join("testdata", "preferences.json"))
+	expected, err := os.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {
 		assert.Fail(t, "Failed to load, %v", err)
 	}
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		assert.Fail(t, "Failed to load, %v", err)
 	}

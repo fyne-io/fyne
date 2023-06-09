@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
-	"io/ioutil"
+	"io"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -171,7 +171,7 @@ func fileSaved(f fyne.URIWriteCloser, w fyne.Window) {
 }
 
 func loadImage(f fyne.URIReadCloser) *canvas.Image {
-	data, err := ioutil.ReadAll(f)
+	data, err := io.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load image data", err)
 		return nil

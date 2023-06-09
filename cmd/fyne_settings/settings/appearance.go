@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"image"
 	"image/color"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -191,7 +190,7 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0644)
 }
 
 type colorButton struct {
