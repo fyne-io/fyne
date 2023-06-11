@@ -17,11 +17,15 @@ import (
 var _ fyne.Widget = (*GridWrap)(nil)
 
 // GridWrapItemID is the ID of an individual item in the GridWrap widget.
+//
+// Since: 2.4
 type GridWrapItemID = int
 
 // GridWrap is a widget with an API very similar to widget.List,
 // that lays out items in a scrollable wrapping grid similar to container.NewGridWrap.
 // It caches and reuses widgets for performance.
+//
+// Since: 2.4
 type GridWrap struct {
 	BaseWidget
 
@@ -40,6 +44,8 @@ type GridWrap struct {
 
 // NewGridWrap creates and returns a GridWrap widget for displaying items in
 // a wrapping grid layout with scrolling and caching for performance.
+//
+// Since: 2.4
 func NewGridWrap(length func() int, createItem func() fyne.CanvasObject, updateItem func(GridWrapItemID, fyne.CanvasObject)) *GridWrap {
 	gwList := &GridWrap{Length: length, CreateItem: createItem, UpdateItem: updateItem}
 	gwList.ExtendBaseWidget(gwList)
@@ -47,6 +53,8 @@ func NewGridWrap(length func() int, createItem func() fyne.CanvasObject, updateI
 }
 
 // NewGridWrapWithData creates a new GridWrap widget that will display the contents of the provided data.
+//
+// Since: 2.4
 func NewGridWrapWithData(data binding.DataList, createItem func() fyne.CanvasObject, updateItem func(binding.DataItem, fyne.CanvasObject)) *GridWrap {
 	gwList := NewGridWrap(
 		data.Length,
@@ -65,6 +73,8 @@ func NewGridWrapWithData(data binding.DataList, createItem func() fyne.CanvasObj
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
+//
+// Since: 2.4
 func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
@@ -80,6 +90,8 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MinSize returns the size that this widget should not shrink below.
+//
+// Since: 2.4
 func (l *GridWrap) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 
@@ -101,6 +113,8 @@ func (l *GridWrap) scrollTo(id GridWrapItemID) {
 }
 
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
+//
+// Since: 2.4
 func (l *GridWrap) Resize(s fyne.Size) {
 	l.BaseWidget.Resize(s)
 	l.offsetUpdated(l.scroller.Offset)
@@ -108,6 +122,8 @@ func (l *GridWrap) Resize(s fyne.Size) {
 }
 
 // Select adds the item identified by the given ID to the selection.
+//
+// Since: 2.4
 func (l *GridWrap) Select(id GridWrapItemID) {
 	if len(l.selected) > 0 && id == l.selected[0] {
 		return
@@ -134,6 +150,8 @@ func (l *GridWrap) Select(id GridWrapItemID) {
 }
 
 // ScrollTo scrolls to the item represented by id
+//
+// Since: 2.4
 func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 	length := 0
 	if f := l.Length; f != nil {
@@ -147,6 +165,8 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 }
 
 // ScrollToBottom scrolls to the end of the list
+//
+// Since: 2.4
 func (l *GridWrap) ScrollToBottom() {
 	length := 0
 	if f := l.Length; f != nil {
@@ -160,23 +180,31 @@ func (l *GridWrap) ScrollToBottom() {
 }
 
 // ScrollToTop scrolls to the start of the list
+//
+// Since: 2.4
 func (l *GridWrap) ScrollToTop() {
 	l.scrollTo(0)
 	l.Refresh()
 }
 
 // ScrollToOffset scrolls the list to the given offset position
+//
+// Since: 2.4
 func (l *GridWrap) ScrollToOffset(offset float32) {
 	l.scroller.Offset.Y = offset
 	l.offsetUpdated(l.scroller.Offset)
 }
 
 // GetScrollOffset returns the current scroll offset position
+//
+// Since: 2.4
 func (l *GridWrap) GetScrollOffset() float32 {
 	return l.offsetY
 }
 
 // Unselect removes the item identified by the given ID from the selection.
+//
+// Since: 2.4
 func (l *GridWrap) Unselect(id GridWrapItemID) {
 	if len(l.selected) == 0 || l.selected[0] != id {
 		return
@@ -190,6 +218,8 @@ func (l *GridWrap) Unselect(id GridWrapItemID) {
 }
 
 // UnselectAll removes all items from the selection.
+//
+// Since: 2.4
 func (l *GridWrap) UnselectAll() {
 	if len(l.selected) == 0 {
 		return
