@@ -2,7 +2,6 @@ package test_test
 
 import (
 	"image/color"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -230,7 +229,7 @@ func TestScroll(t *testing.T) {
 }
 
 func readMarkup(t *testing.T, path string) string {
-	raw, err := ioutil.ReadFile(path)
+	raw, err := os.ReadFile(path)
 	require.NoError(t, err)
 	return string(raw)
 }

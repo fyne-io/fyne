@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"go/format"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -266,5 +265,5 @@ func writeFile(filename string, contents []byte) error {
 		return err
 	}
 	_, dirname, _, _ := runtime.Caller(0)
-	return ioutil.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
+	return os.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
 }

@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -88,7 +87,7 @@ func (d *directory) List() ([]fyne.URI, error) {
 	}
 
 	path := d.String()[len(d.Scheme())+3 : len(d.String())]
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}

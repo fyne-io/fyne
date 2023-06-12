@@ -2,7 +2,6 @@ package commands
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -31,7 +30,7 @@ func TestSanitiseName_Special(t *testing.T) {
 }
 
 func TestWriteResource(t *testing.T) {
-	f, err := ioutil.TempFile("", "*.go")
+	f, err := os.CreateTemp("", "*.go")
 	if err != nil {
 		t.Fatal("Unable to create temp file:", err)
 	}
@@ -52,7 +51,7 @@ func TestWriteResource(t *testing.T) {
 		t.Fatal("Unable to seek temp file:", err)
 	}
 
-	content, err := ioutil.ReadAll(f)
+	content, err := io.ReadAll(f)
 	if err != nil {
 		t.Fatal("Unable to read temp file:", err)
 	}
@@ -63,7 +62,7 @@ func TestWriteResource(t *testing.T) {
 func BenchmarkWriteResource(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		f, _ := ioutil.TempFile("", "*.go")
+		f, _ := os.CreateTemp("", "*.go")
 		b.StartTimer()
 
 		writeHeader("test", f)

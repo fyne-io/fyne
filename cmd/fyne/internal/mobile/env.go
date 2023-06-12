@@ -3,7 +3,6 @@ package mobile
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -69,7 +68,7 @@ func buildEnvInit() (cleanup func(), err error) {
 		tmpdir = "$WORK"
 		cleanupFn = func() {}
 	} else {
-		tmpdir, err = ioutil.TempDir("", "fyne-work-")
+		tmpdir, err = os.MkdirTemp("", "fyne-work-")
 		if err != nil {
 			return nil, err
 		}

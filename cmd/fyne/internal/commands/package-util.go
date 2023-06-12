@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"io/ioutil"
+	"os"
 
 	realUtil "fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
@@ -38,7 +38,7 @@ func (d defaultUtil) CopyExeFile(src, tgt string) error {
 }
 
 func (d defaultUtil) WriteFile(target string, data []byte) error {
-	return ioutil.WriteFile(target, data, 0644)
+	return os.WriteFile(target, data, 0644)
 }
 
 func (d defaultUtil) EnsureSubDir(parent, name string) string {

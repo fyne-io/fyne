@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -41,7 +41,7 @@ func TestFileRepositoryRegistration(t *testing.T) {
 }
 
 func TestFileRepositoryExists(t *testing.T) {
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestFileRepositoryExists(t *testing.T) {
 	existsPath := path.Join(dir, "exists")
 	notExistsPath := path.Join(dir, "notExists")
 
-	err = ioutil.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
+	err = os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestFileRepositoryExists(t *testing.T) {
 
 func TestFileRepositoryReader(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,11 +76,11 @@ func TestFileRepositoryReader(t *testing.T) {
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err = ioutil.WriteFile(fooPath, []byte{}, 0755)
+	err = os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = ioutil.WriteFile(barPath, []byte{1, 2, 3}, 0755)
+	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,14 +97,14 @@ func TestFileRepositoryReader(t *testing.T) {
 	// Make sure we can read the empty file.
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
 	assert.Nil(t, err)
 
 	// Make sure we can read the file with data.
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
 	assert.Nil(t, err)
 
@@ -128,7 +128,7 @@ func TestFileRepositoryReader(t *testing.T) {
 
 func TestFileRepositoryWriter(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,11 +139,11 @@ func TestFileRepositoryWriter(t *testing.T) {
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
 	spamHamPath := path.Join(dir, "spam", "ham")
-	err = ioutil.WriteFile(fooPath, []byte{}, 0755)
+	err = os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = ioutil.WriteFile(barPath, []byte{1, 2, 3}, 0755)
+	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,19 +201,19 @@ func TestFileRepositoryWriter(t *testing.T) {
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
 	assert.Nil(t, err)
 
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
 	assert.Nil(t, err)
 
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
-	bazData, err := ioutil.ReadAll(bazReader)
+	bazData, err := io.ReadAll(bazReader)
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
 	assert.Nil(t, err)
 
@@ -248,7 +248,7 @@ func TestFileRepositoryWriter(t *testing.T) {
 
 func TestFileRepositoryCanWrite(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,11 +258,11 @@ func TestFileRepositoryCanWrite(t *testing.T) {
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err = ioutil.WriteFile(fooPath, []byte{}, 0755)
+	err = os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = ioutil.WriteFile(barPath, []byte{1, 2, 3}, 0755)
+	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -366,7 +366,7 @@ func TestFileRepositoryChild(t *testing.T) {
 
 func TestFileRepositoryCopy(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -375,7 +375,7 @@ func TestFileRepositoryCopy(t *testing.T) {
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err = ioutil.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err = os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -386,10 +386,10 @@ func TestFileRepositoryCopy(t *testing.T) {
 	err = storage.Copy(foo, bar)
 	assert.Nil(t, err)
 
-	fooData, err := ioutil.ReadFile(fooPath)
+	fooData, err := os.ReadFile(fooPath)
 	assert.Nil(t, err)
 
-	barData, err := ioutil.ReadFile(barPath)
+	barData, err := os.ReadFile(barPath)
 	assert.Nil(t, err)
 
 	assert.Equal(t, fooData, barData)
@@ -397,7 +397,7 @@ func TestFileRepositoryCopy(t *testing.T) {
 
 func TestFileRepositoryMove(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -406,7 +406,7 @@ func TestFileRepositoryMove(t *testing.T) {
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err = ioutil.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err = os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,7 +417,7 @@ func TestFileRepositoryMove(t *testing.T) {
 	err = storage.Move(foo, bar)
 	assert.Nil(t, err)
 
-	barData, err := ioutil.ReadFile(barPath)
+	barData, err := os.ReadFile(barPath)
 	assert.Nil(t, err)
 
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, barData)
@@ -430,7 +430,7 @@ func TestFileRepositoryMove(t *testing.T) {
 
 func TestFileRepositoryListing(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -467,7 +467,7 @@ func TestFileRepositoryListing(t *testing.T) {
 
 func TestFileRepositoryCreateListable(t *testing.T) {
 	// Set up a temporary directory.
-	dir, err := ioutil.TempDir("", "FyneInternalRepositoryFileTest")
+	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
 	if err != nil {
 		t.Fatal(err)
 	}
