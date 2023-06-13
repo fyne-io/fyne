@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build (darwin || linux || openbsd || freebsd) && go1.15
+//go:build darwin || linux || openbsd || freebsd
 // +build darwin linux openbsd freebsd
-// +build go1.15
 
 package gl
 
