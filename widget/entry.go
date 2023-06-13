@@ -1393,6 +1393,9 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (r *entryRenderer) MinSize() fyne.Size {
+	if rend := cache.Renderer(r.entry.content); rend != nil {
+		rend.(*entryContentRenderer).updateScrollDirections()
+	}
 	if r.scroll.Direction == widget.ScrollNone {
 		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
 	}
