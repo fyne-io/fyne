@@ -188,3 +188,24 @@ func TestPrefs_SetSameValue(t *testing.T) {
 
 	assert.Equal(t, 2, called)
 }
+
+func TestPrefs_SetSameSliceValue(t *testing.T) {
+	p := NewInMemoryPreferences()
+	called := 0
+	p.AddChangeListener(func() {
+		called++
+	})
+
+	// We should not fire change when it hasn't changed.
+	for i := 0; i < 2; i++ {
+		p.SetStringList("items", []string{"1", "2"})
+		time.Sleep(time.Millisecond * 100)
+
+		assert.Equal(t, 1, called)
+	}
+
+	p.SetStringList("items", []string{"3", "4"})
+	time.Sleep(time.Millisecond * 100)
+
+	assert.Equal(t, 2, called)
+}
