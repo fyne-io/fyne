@@ -277,7 +277,7 @@ func (p *InMemoryPreferences) set(key string, value interface{}) {
 		if p.values[key] != nil && s.Len() == old.Len() {
 			changed := false
 			for i := 0; i < s.Len(); i++ {
-				if !s.Index(i).Equal(old.Index(i)) {
+				if s.Index(i).Interface() != old.Index(i).Interface() {
 					changed = true
 				}
 			}
