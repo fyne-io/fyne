@@ -143,19 +143,17 @@ func (w *window) CenterOnScreen() {
 }
 
 func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
-	runOnDraw(w, func() {
-		glfw.GetCurrentContext().SetDropCallback(func(win *glfw.Window, names []string) {
-			if dropped == nil {
-				return
-			}
+	w.viewport.SetDropCallback(func(win *glfw.Window, names []string) {
+		if dropped == nil {
+			return
+		}
 
-			uris := make([]fyne.URI, len(names))
-			for i, name := range names {
-				uris[i] = storage.NewFileURI(name)
-			}
+		uris := make([]fyne.URI, len(names))
+		for i, name := range names {
+			uris[i] = storage.NewFileURI(name)
+		}
 
-			dropped(w.mousePos, uris)
-		})
+		dropped(w.mousePos, uris)
 	})
 }
 

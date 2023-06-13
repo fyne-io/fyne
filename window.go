@@ -70,7 +70,7 @@ type Window interface {
 	// Since: 1.4
 	SetCloseIntercept(func())
 
-	// SetOnDropped allows setting a window-wide callback to intercept dropped items.
+	// SetOnDropped allows setting a window-wide callback to receive dropped items.
 	//
 	// Since 2.4
 	SetOnDropped(func(Position, []URI))
