@@ -5,7 +5,7 @@ import (
 	"encoding/xml"
 	"image"
 	"image/color"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -137,7 +137,7 @@ func TestColorize(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			bytes, err := ioutil.ReadFile(filepath.Join("testdata", tt.svgFile))
+			bytes, err := os.ReadFile(filepath.Join("testdata", tt.svgFile))
 			require.NoError(t, err)
 			got := helperDrawSVG(t, Colorize(bytes, tt.color))
 			test.AssertImageMatches(t, tt.wantImage, got)
@@ -146,7 +146,7 @@ func TestColorize(t *testing.T) {
 }
 
 func TestSVG_ReplaceFillColor(t *testing.T) {
-	src, err := ioutil.ReadFile("testdata/cancel_Paths.svg")
+	src, err := os.ReadFile("testdata/cancel_Paths.svg")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +168,7 @@ func TestSVG_ReplaceFillColor(t *testing.T) {
 }
 
 func TestSVG_ReplaceFillColor_Ellipse(t *testing.T) {
-	src, err := ioutil.ReadFile("testdata/ellipse.svg")
+	src, err := os.ReadFile("testdata/ellipse.svg")
 	if err != nil {
 		t.Fatal(err)
 	}

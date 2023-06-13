@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -27,7 +26,7 @@ func (p *Packager) packageIOS(target string, tags []string) error {
 
 	assetDir := util.EnsureSubDir(p.dir, "Images.xcassets")
 	defer os.RemoveAll(assetDir)
-	err = ioutil.WriteFile(filepath.Join(assetDir, "Contents.json"), []byte(`{
+	err = os.WriteFile(filepath.Join(assetDir, "Contents.json"), []byte(`{
   "info" : {
     "author" : "xcode",
     "version" : 1

@@ -13,7 +13,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -48,7 +47,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	dir := filepath.Dir(pkg.GoFiles[0])
 
 	manifestPath := filepath.Join(dir, "AndroidManifest.xml")
-	manifestData, err := ioutil.ReadFile(filepath.Clean(manifestPath))
+	manifestData, err := os.ReadFile(filepath.Clean(manifestPath))
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
@@ -314,7 +313,7 @@ func apkwCreate(name string, apkw *Writer) (io.Writer, error) {
 		fmt.Fprintf(os.Stderr, "apk: %s\n", name)
 	}
 	if buildN {
-		return ioutil.Discard, nil
+		return io.Discard, nil
 	}
 	return apkw.Create(name)
 }

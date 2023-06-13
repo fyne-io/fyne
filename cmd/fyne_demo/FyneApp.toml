@@ -6,7 +6,7 @@
   Build = 10
 
 [Development]
-  HelperText = "This binary was build with debug symbol"
+  HelperText = "This binary was built with debug symbol"
 
 [Release]
-  HelperText = "This binary was build without debug symbol"
+  HelperText = "This binary was built without debug symbol"

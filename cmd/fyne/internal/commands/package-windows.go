@@ -109,19 +109,23 @@ func (p *Packager) packageWindows(tags []string) error {
 		return fmt.Errorf("failed to rebuild after adding metadata: %w", err)
 	}
 
-	appPath := p.exe
 	appName := filepath.Base(p.exe)
 	if filepath.Base(p.exe) != p.Name {
 		appName = p.Name
 		if filepath.Ext(p.Name) != ".exe" {
 			appName = appName + ".exe"
 		}
-		appPath = filepath.Join(p.dir, appName)
 		os.Rename(filepath.Base(p.exe), appName)
 	}
 
 	if p.install {
-		err := runAsAdminWindows("copy", "\"\""+appPath+"\"\"", "\"\""+filepath.Join(p.dir, appName)+"\"\"")
+		wd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("failed to locate current working directory")
+		}
+		appPath := filepath.Join(wd, appName)
+
+		err = runAsAdminWindows("copy", appPath, filepath.Join(p.dir, appName))
 		if err != nil {
 			return fmt.Errorf("failed to run as administrator: %w", err)
 		}
@@ -129,12 +133,25 @@ func (p *Packager) packageWindows(tags []string) error {
 	return nil
 }
 
-func runAsAdminWindows(args ...string) error {
+func escapePowerShellArguments(args ...string) string {
 	cmd := "\"/c\""
 
-	for _, arg := range args {
-		cmd += ",\"" + arg + "\""
+	for idx, arg := range args {
+		if idx == 0 {
+			cmd += ",'" + arg
+		} else {
+			cmd += " \"" + arg + "\""
+		}
 	}
+	if len(args) != 0 {
+		cmd += "'"
+	}
+
+	return cmd
+}
+
+func runAsAdminWindows(args ...string) error {
+	cmd := escapePowerShellArguments(args...)
 
 	return execabs.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }

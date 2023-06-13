@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"io/ioutil"
+	"io"
 
 	"fyne.io/fyne/v2"
 )
@@ -16,7 +16,7 @@ func LoadResourceFromURI(u fyne.URI) (fyne.Resource, error) {
 	}
 
 	defer read.Close()
-	bytes, err := ioutil.ReadAll(read)
+	bytes, err := io.ReadAll(read)
 	if err != nil {
 		return nil, err
 	}

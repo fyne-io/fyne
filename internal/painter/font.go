@@ -24,8 +24,6 @@ const (
 	DefaultTabWidth = 4
 
 	fontTabSpaceSize = 10
-
-	textDPIRatio = 78.0 / 72.0 // We (historically) had text at 78 DPI but the go-text/render uses 72
 )
 
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
@@ -75,7 +73,7 @@ func ClearFontCache() {
 // DrawString draws a string into an image.
 func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, fontSize, scale float32, tabWidth int) {
 	r := render.Renderer{
-		FontSize: fontSize * textDPIRatio,
+		FontSize: fontSize,
 		PixScale: scale,
 		Color:    color,
 	}
