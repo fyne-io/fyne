@@ -100,6 +100,7 @@ type window struct {
 
 	onClosed           func()
 	onCloseIntercepted func()
+	onDropped          func(fyne.Position, []fyne.URI)
 
 	menuTogglePending       fyne.KeyName
 	menuDeactivationPending fyne.KeyName
@@ -143,17 +144,19 @@ func (w *window) CenterOnScreen() {
 }
 
 func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
-	w.viewport.SetDropCallback(func(win *glfw.Window, names []string) {
-		if dropped == nil {
-			return
-		}
+	w.runOnMainWhenCreated(func() {
+		w.viewport.SetDropCallback(func(win *glfw.Window, names []string) {
+			if dropped == nil {
+				return
+			}
 
-		uris := make([]fyne.URI, len(names))
-		for i, name := range names {
-			uris[i] = storage.NewFileURI(name)
-		}
+			uris := make([]fyne.URI, len(names))
+			for i, name := range names {
+				uris[i] = storage.NewFileURI(name)
+			}
 
-		dropped(w.mousePos, uris)
+			dropped(w.mousePos, uris)
+		})
 	})
 }
 
