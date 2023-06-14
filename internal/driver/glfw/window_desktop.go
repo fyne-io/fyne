@@ -100,7 +100,6 @@ type window struct {
 
 	onClosed           func()
 	onCloseIntercepted func()
-	onDropped          func(fyne.Position, []fyne.URI)
 
 	menuTogglePending       fyne.KeyName
 	menuDeactivationPending fyne.KeyName
