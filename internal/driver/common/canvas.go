@@ -98,7 +98,11 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	ensureMinSize := func(node *RenderCacheNode, pos fyne.Position) {
 		obj := node.obj
-		cache.SetCanvasForObject(obj, c.impl)
+		cache.SetCanvasForObject(obj, c.impl, func() {
+			if img, ok := obj.(*canvas.Image); ok {
+				img.Refresh() // this may now have a different texScale
+			}
+		})
 
 		if parentNeedingUpdate == node {
 			c.updateLayout(obj)
