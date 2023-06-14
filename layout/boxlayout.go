@@ -79,12 +79,13 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 	}
 
+	padding := theme.Padding()
 	x, y := float32(0), float32(0)
 	var extra float32
 	if g.horizontal {
-		extra = size.Width - total - (theme.Padding() * float32(len(objects)-spacers-1))
+		extra = size.Width - total - (padding * float32(len(objects)-spacers-1))
 	} else {
-		extra = size.Height - total - (theme.Padding() * float32(len(objects)-spacers-1))
+		extra = size.Height - total - (padding * float32(len(objects)-spacers-1))
 	}
 	extraCell := float32(0)
 	if spacers > 0 {
@@ -110,10 +111,10 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		child.Move(fyne.NewPos(x, y))
 
 		if g.horizontal {
-			x += theme.Padding() + width
+			x += padding + width
 			child.Resize(fyne.NewSize(width, size.Height))
 		} else {
-			y += theme.Padding() + height
+			y += padding + height
 			child.Resize(fyne.NewSize(size.Width, height))
 		}
 	}
@@ -125,6 +126,7 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	addPadding := false
+	padding := theme.Padding()
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
@@ -138,13 +140,13 @@ func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			minSize.Height = fyne.Max(child.MinSize().Height, minSize.Height)
 			minSize.Width += child.MinSize().Width
 			if addPadding {
-				minSize.Width += theme.Padding()
+				minSize.Width += padding
 			}
 		} else {
 			minSize.Width = fyne.Max(child.MinSize().Width, minSize.Width)
 			minSize.Height += child.MinSize().Height
 			if addPadding {
-				minSize.Height += theme.Padding()
+				minSize.Height += padding
 			}
 		}
 		addPadding = true
