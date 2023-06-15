@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -189,7 +190,7 @@ func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target i
 		if err != nil {
 			return err
 		}
-		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
+		err = filepath.WalkDir(assetsDir, func(path string, info fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
