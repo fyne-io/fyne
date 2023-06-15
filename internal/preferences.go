@@ -279,6 +279,7 @@ func (p *InMemoryPreferences) set(key string, value interface{}) {
 			for i := 0; i < s.Len(); i++ {
 				if s.Index(i).Interface() != old.Index(i).Interface() {
 					changed = true
+					break
 				}
 			}
 			if !changed {
