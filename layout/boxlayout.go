@@ -28,32 +28,21 @@ func NewVBoxLayout() fyne.Layout {
 	return &boxLayout{false}
 }
 
-func isVerticalSpacer(obj fyne.CanvasObject) bool {
-	if spacer, ok := obj.(SpacerObject); ok {
-		return spacer.ExpandVertical()
-	}
-
-	return false
-}
-
-func isHorizontalSpacer(obj fyne.CanvasObject) bool {
-	if spacer, ok := obj.(SpacerObject); ok {
-		return spacer.ExpandHorizontal()
-	}
-
-	return false
-}
-
 func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
-	// invisible spacers don't impact layout
 	if !obj.Visible() {
+		return false // invisible spacers don't impact layout
+	}
+
+	spacer, ok := obj.(SpacerObject)
+	if !ok {
 		return false
 	}
 
 	if g.horizontal {
-		return isHorizontalSpacer(obj)
+		return spacer.ExpandHorizontal()
 	}
-	return isVerticalSpacer(obj)
+
+	return spacer.ExpandVertical()
 }
 
 // Layout is called to pack all child objects into a specified size.
@@ -80,7 +69,6 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 
 	padding := theme.Padding()
-	x, y := float32(0), float32(0)
 	var extra float32
 	if g.horizontal {
 		extra = size.Width - total - (padding * float32(len(objects)-spacers-1))
@@ -92,6 +80,7 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		extraCell = extra / float32(spacers)
 	}
 
+	x, y := float32(0), float32(0)
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
@@ -127,11 +116,7 @@ func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	addPadding := false
 	padding := theme.Padding()
 	for _, child := range objects {
-		if !child.Visible() {
-			continue
-		}
-
-		if g.isSpacer(child) {
+		if !child.Visible() || g.isSpacer(child) {
 			continue
 		}
 
