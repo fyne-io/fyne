@@ -19,8 +19,8 @@ type AppDetails struct {
 
 // LinuxAndBSD describes specific metadata for desktop files on Linux and BSD.
 type LinuxAndBSD struct {
-	GenericName string `toml:",omitempty"`
-	Categories  string `toml:",omitempty"`
-	Comment     string `toml:",omitempty"`
-	Keywords    string `toml:",omitempty"`
+	GenericName string   `toml:",omitempty"`
+	Categories  []string `toml:",omitempty"`
+	Comment     string   `toml:",omitempty"`
+	Keywords    []string `toml:",omitempty"`
 }

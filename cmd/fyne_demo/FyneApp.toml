@@ -13,6 +13,6 @@
 
 [LinuxAndBSD]
   GenericName = "Fyne Demo"
-  Categories = "Development;"
+  Categories = ["Development"]
   Comment = "A demo of Fyne and its capabilities."
-  Keywords = "demo;fyne;"
+  Keywords = ["demo", "fyne"]

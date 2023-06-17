@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 
@@ -62,9 +63,9 @@ func (p *Packager) packageUNIX() error {
 		Icon:        p.Name + filepath.Ext(p.icon),
 		Local:       local,
 		GenericName: p.linuxAndBSDMetadata.GenericName,
-		Keywords:    p.linuxAndBSDMetadata.Keywords,
+		Keywords:    formatDesktopFileList(p.linuxAndBSDMetadata.Keywords),
 		Comment:     p.linuxAndBSDMetadata.Comment,
-		Categories:  p.linuxAndBSDMetadata.Categories,
+		Categories:  formatDesktopFileList(p.linuxAndBSDMetadata.Categories),
 	}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
@@ -89,4 +90,12 @@ func (p *Packager) packageUNIX() error {
 	}
 
 	return nil
+}
+
+func formatDesktopFileList(items []string) string {
+	if len(items) == 0 {
+		return ""
+	}
+
+	return strings.Join(items, ";") + ";"
 }
