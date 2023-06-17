@@ -796,11 +796,11 @@ type iconPaddingLayout struct {
 }
 
 func (i *iconPaddingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	padding := theme.Padding()
+	padding := theme.Padding() * 2
 	objects[0].Move(fyne.NewPos(padding, 0))
 	objects[0].Resize(size.SubtractWidthHeight(padding, 0))
 }
 
 func (i *iconPaddingLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return objects[0].MinSize().AddWidthHeight(theme.Padding(), 0)
+	return objects[0].MinSize().AddWidthHeight(theme.Padding()*2, 0)
 }
