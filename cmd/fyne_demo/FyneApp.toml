@@ -6,10 +6,10 @@
   Build = 11
 
 [Development]
-  HelperText = "This binary was build with debug symbol"
+  HelperText = "This binary was built with debug symbols"
 
 [Release]
-  HelperText = "This binary was build without debug symbol"
+  HelperText = "This binary was built without debug symbols"
 
 [LinuxAndBSD]
   GenericName = "Fyne Demo"

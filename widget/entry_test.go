@@ -1771,6 +1771,8 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
+	test.AssertRendersToMarkup(t, "password_entry/initial.xml", window.Canvas())
+
 	entry.SetPlaceHolder("Password")
 	test.AssertRendersToMarkup(t, "password_entry/placeholder_initial.xml", c)
 
@@ -1965,8 +1967,6 @@ func setupPasswordTest(t *testing.T) (*widget.Entry, fyne.Window) {
 
 	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
 	entry.Move(fyne.NewPos(entryOffset, entryOffset))
-
-	test.AssertRendersToMarkup(t, "password_entry/initial.xml", w.Canvas())
 
 	return entry, w
 }

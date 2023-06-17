@@ -1,8 +1,9 @@
 package fyne
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
@@ -47,7 +48,7 @@ func NewStaticResource(name string, content []byte) *StaticResource {
 
 // LoadResourceFromPath creates a new StaticResource in memory using the contents of the specified file.
 func LoadResourceFromPath(path string) (Resource, error) {
-	bytes, err := ioutil.ReadFile(filepath.Clean(path))
+	bytes, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +65,7 @@ func LoadResourceFromURLString(urlStr string) (Resource, error) {
 	}
 	defer res.Body.Close()
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

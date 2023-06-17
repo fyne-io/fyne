@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/color"
 	"io"
-	"io/ioutil"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -286,7 +285,7 @@ func (s *svg) replaceFillColor(color color.Color) error {
 
 func svgFromXML(reader io.Reader) (*svg, error) {
 	var s svg
-	bSlice, err := ioutil.ReadAll(reader)
+	bSlice, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

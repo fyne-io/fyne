@@ -78,8 +78,9 @@ func getTrailing(size float64, offset int) float32 {
 func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	rows := g.countRows(objects)
 
-	padWidth := float32(g.Cols-1) * theme.Padding()
-	padHeight := float32(rows-1) * theme.Padding()
+	padding := theme.Padding()
+	padWidth := float32(g.Cols-1) * padding
+	padHeight := float32(rows-1) * padding
 	cellWidth := float64(size.Width-padWidth) / float64(g.Cols)
 	cellHeight := float64(size.Height-padHeight) / float64(rows)
 

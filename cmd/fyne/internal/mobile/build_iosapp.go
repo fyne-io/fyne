@@ -9,7 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -76,7 +76,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 			printcmd("echo \"%s\" > %s", file.contents, file.name)
 		}
 		if !buildN {
-			if err := ioutil.WriteFile(file.name, file.contents, 0600); err != nil {
+			if err := os.WriteFile(file.name, file.contents, 0600); err != nil {
 				return nil, err
 			}
 		}
@@ -222,7 +222,7 @@ func iosCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 	if err != nil {
 		return err
 	}
-	return filepath.Walk(srcAssets, func(path string, info os.FileInfo, err error) error {
+	return filepath.WalkDir(srcAssets, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

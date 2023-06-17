@@ -1,7 +1,6 @@
 package canvas_test
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -83,11 +82,11 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
-	f, _ := ioutil.ReadFile(path)
+	f, _ := os.ReadFile(path)
 
 	// start a test server to test http calls
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		f, err := ioutil.ReadFile(path)
+		f, err := os.ReadFile(path)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
