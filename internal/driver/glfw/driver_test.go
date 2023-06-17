@@ -54,6 +54,11 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	ovl := widget.NewModalPopUp(ovlContent, c)
 	ovl.Show()
 
+	// This helps to detect size changes which might happen when the font size or rendering are changed.
+	// It gives also a hint on the expected offset for the overlay components.
+	assert.InDelta(t, 112, ovlContent.Size().Width, 1)
+	assert.InDelta(t, 113, ovlContent.Size().Height, 1)
+
 	repaintWindow(w)
 	// accessing the menu bar's actual CanvasObjects isn't straight forward
 	// 0 is the shadow
@@ -97,12 +102,12 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 		"an overlay item": {
 			object: ovli2,
 			wantX:  81,
-			wantY:  56,
+			wantY:  81,
 		},
 		"the overlay content": {
 			object: ovlContent,
 			wantX:  81,
-			wantY:  17,
+			wantY:  42,
 		},
 		"the overlay": {
 			object: ovl,
