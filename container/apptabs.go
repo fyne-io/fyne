@@ -277,7 +277,7 @@ type appTabsRenderer struct {
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
 	// Try render as many tabs as will fit, others will appear in the overflow
-	for i := len(r.appTabs.Items); i > 0; i-- {
+	for i := len(r.appTabs.Items); i >= 0; i-- {
 		r.updateTabs(i)
 		barMin := r.bar.MinSize()
 		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
@@ -389,8 +389,12 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 
 func (r *appTabsRenderer) updateIndicator(animate bool) {
 	if r.appTabs.current < 0 {
+		r.divider.Hide()
 		r.indicator.Hide()
 		return
+	}else {
+		r.divider.Show()
+		r.indicator.Show()
 	}
 
 	var selectedPos fyne.Position
