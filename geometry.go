@@ -42,6 +42,11 @@ func NewPos(x float32, y float32) Position {
 	return Position{x, y}
 }
 
+// NewSquarePos returns a newly allocated Position with the same x and y position.
+func NewSquarePos(length float32) Position {
+	return Position{length, length}
+}
+
 // Add returns a new Position that is the result of offsetting the current
 // position by p2 X and Y.
 func (p Position) Add(v Vector2) Position {
@@ -85,6 +90,11 @@ type Size struct {
 // NewSize returns a newly allocated Size of the specified dimensions.
 func NewSize(w float32, h float32) Size {
 	return Size{w, h}
+}
+
+// NewSquareSize returns a newly allocated Size with the same width and height.
+func NewSquareSize(side float32) Size {
+	return Size{side, side}
 }
 
 // Add returns a new Size that is the result of increasing the current size by
