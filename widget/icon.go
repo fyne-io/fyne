@@ -15,8 +15,7 @@ type iconRenderer struct {
 }
 
 func (i *iconRenderer) MinSize() fyne.Size {
-	size := theme.IconInlineSize()
-	return fyne.NewSize(size, size)
+	return fyne.NewSquareSize(theme.IconInlineSize())
 }
 
 func (i *iconRenderer) Layout(size fyne.Size) {

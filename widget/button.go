@@ -110,7 +110,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
-	text.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
+	text.inset = fyne.NewSquareSize(theme.InnerPadding())
 
 	b.background = canvas.NewRectangle(theme.ButtonColor())
 	b.background.CornerRadius = theme.InputRadiusSize()
@@ -299,7 +299,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 		// Nothing to layout
 		return
 	}
-	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
 	labelSize := r.label.MinSize()
 	padding := r.padding()
 	if hasLabel {
@@ -336,7 +336,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 func (r *buttonRenderer) MinSize() (size fyne.Size) {
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
-	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
 	labelSize := r.label.MinSize()
 	if hasLabel {
 		size.Width = labelSize.Width
@@ -394,7 +394,7 @@ func (r *buttonRenderer) applyTheme() {
 }
 
 func (r *buttonRenderer) padding() fyne.Size {
-	return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2)
+	return fyne.NewSquareSize(theme.InnerPadding() * 2)
 }
 
 func (r *buttonRenderer) updateIconAndText() {
