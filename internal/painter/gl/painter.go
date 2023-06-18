@@ -188,5 +188,5 @@ func (p *painter) createProgram(shaderFilename string) Program {
 }
 
 func (p *painter) logError() {
-	logGLError(p.ctx.GetError())
+	logGLError(p.ctx.GetError)
 }
