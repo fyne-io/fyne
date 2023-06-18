@@ -1,5 +1,5 @@
-//go:build !ci
-// +build !ci
+//go:build !no_bench
+// +build !no_bench
 
 package fyne_test
 
