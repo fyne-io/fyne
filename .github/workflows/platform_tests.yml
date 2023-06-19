@@ -16,6 +16,8 @@ jobs:
             runner: xvfb-run
           - os: windows-latest
             tags: no_glfw
+          - os: macos-latest
+            tags: no_glfw
 
     steps:
     - uses: actions/checkout@v3
