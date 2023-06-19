@@ -45,7 +45,8 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	c.setMenuOverlay(movl)
 	c.Unlock()
 	w.SetContent(content)
-	w.Resize(fyne.NewSize(200, 199))
+	w.Resize(fyne.NewSize(300, 200))
+	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
 
 	ovli1 := widget.NewLabel("Overlay Item 1")
 	ovli2 := widget.NewLabel("Overlay Item 2")
@@ -60,6 +61,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	assert.InDelta(t, 113, ovlContent.Size().Height, 1)
 
 	repaintWindow(w)
+	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
 	// accessing the menu bar's actual CanvasObjects isn't straight forward
 	// 0 is the shadow
 	// 1 is the menu bar’s underlay
@@ -101,13 +103,13 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 		"an overlay item": {
 			object: ovli2,
-			wantX:  81,
-			wantY:  81,
+			wantX:  93,
+			wantY:  82,
 		},
 		"the overlay content": {
 			object: ovlContent,
-			wantX:  81,
-			wantY:  42,
+			wantX:  93,
+			wantY:  43,
 		},
 		"the overlay": {
 			object: ovl,

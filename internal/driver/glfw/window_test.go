@@ -84,18 +84,18 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 func TestWindow_MinSize_Fixed(t *testing.T) {
 	w := createWindow("Test").(*window)
 	r := canvas.NewRectangle(color.White)
-	r.SetMinSize(fyne.NewSize(100, 100))
+	minSize := fyne.NewSize(100, 100)
+	minSizePlusPadding := minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2)
+	r.SetMinSize(minSize)
 	w.SetContent(r)
 	w.SetFixedSize(true)
-
-	assert.Equal(t, float32(100)+theme.Padding()*2, w.Canvas().Size().Width)
+	assertCanvasSize(t, w, minSizePlusPadding)
 
 	w = createWindow("Test").(*window)
 	r.SetMinSize(fyne.NewSize(100, 100))
 	w.SetFixedSize(true)
 	w.SetContent(r)
-
-	assert.Equal(t, float32(100)+theme.Padding()*2, w.Canvas().Size().Width)
+	assertCanvasSize(t, w, minSizePlusPadding)
 }
 
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
@@ -238,6 +238,8 @@ func TestWindow_Cursor(t *testing.T) {
 	b := widget.NewButton("Test", nil)
 
 	w.SetContent(container.NewVBox(e, h, b))
+	repaintWindow(w)
+	ensureCanvasSize(t, w, fyne.NewSize(72, 123))
 
 	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
 	textCursor := desktop.TextCursor
@@ -308,7 +310,10 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	l.Resize(fyne.NewSize(200, 300))
 	w.SetContent(l)
 	w.SetFixedSize(true)
+	ensureCanvasSize(t, w, fyne.NewSize(45, 44))
 	w.Resize(fyne.NewSize(200, 300))
+	repaintWindow(w)
+	ensureCanvasSize(t, w, fyne.NewSize(200, 300))
 	repaintWindow(w)
 
 	w.mouseMoved(w.viewport, 15, 48)
@@ -1066,8 +1071,10 @@ func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 func TestWindow_Scrolled(t *testing.T) {
 	w := createWindow("Test").(*window)
 	o := &scrollable{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
+	minSize := fyne.NewSize(100, 100)
+	o.SetMinSize(minSize)
 	w.SetContent(o)
+	ensureCanvasSize(t, w, minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2))
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseScrolled(w.viewport, 10, 10)
@@ -1123,6 +1130,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 		tapped = true
 	})
 	w.SetContent(o)
+	ensureCanvasSize(t, w, fyne.NewSize(53, 44))
 
 	w.mousePos = fyne.NewPos(10, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -1156,6 +1164,7 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	base := container.New(layout.NewGridLayout(1), rect, scroll)
 	w.SetContent(base)
 	refreshWindow(w) // ensure any async resize is done
+	ensureCanvasSize(t, w, fyne.NewSize(108, 212))
 
 	w.mousePos = fyne.NewPos(10, 80)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -1248,8 +1257,11 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	w := createWindow("Test").(*window)
 	m := &mouseableObject{Rectangle: canvas.NewRectangle(color.White)}
-	m.SetMinSize(fyne.NewSize(20, 20))
+	minSize := fyne.NewSize(20, 20)
+	m.SetMinSize(minSize)
 	w.SetContent(m)
+	repaintWindow(w)
+	ensureCanvasSize(t, w, minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2))
 
 	w.mouseMoved(w.viewport, 7, 7)
 	w.WaitForEvents()
@@ -1443,6 +1455,7 @@ func TestWindow_SetPadded(t *testing.T) {
 			w.SetContent(content)
 			oldCanvasSize := fyne.NewSize(100, 100)
 			w.Resize(oldCanvasSize)
+			ensureCanvasSize(t, w, oldCanvasSize)
 
 			repaintWindow(w)
 			contentSize := content.Size()
