@@ -135,7 +135,8 @@ type Packager struct {
 	tags, category                 string
 	tempDir                        string
 
-	customMetadata keyValueFlag
+	customMetadata      keyValueFlag
+	linuxAndBSDMetadata metadata.LinuxAndBSD
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -378,6 +379,7 @@ func (p *Packager) validate() (err error) {
 
 		p.appData.Release = p.release
 		p.appData.mergeMetadata(data)
+		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
