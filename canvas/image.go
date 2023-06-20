@@ -337,8 +337,8 @@ func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(i)
 	screenWidth, screenHeight := int(width), int(height)
 	if c != nil {
-		screenWidth = scale.ToScreenCoordinate(c, width)
-		screenHeight = scale.ToScreenCoordinate(c, height)
+		// We want real output pixel count not just the screen coordinate space (i.e. macOS Retina)
+		screenWidth, screenHeight = c.PixelCoordinateForPosition(fyne.Position{X: width, Y: height})
 	}
 
 	tex := cache.GetSvg(i.name(), screenWidth, screenHeight)

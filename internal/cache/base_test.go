@@ -29,7 +29,7 @@ func TestCacheClean(t *testing.T) {
 			Renderer(&dummyWidget{onDestroy: func() {
 				destroyedRenderersCnt++
 			}})
-			SetCanvasForObject(&dummyWidget{}, &dummyCanvas{})
+			SetCanvasForObject(&dummyWidget{}, &dummyCanvas{}, nil)
 		}
 	}
 
@@ -148,7 +148,7 @@ func TestCleanCanvas(t *testing.T) {
 			destroyedRenderersCnt++
 		}}
 		Renderer(dwidget)
-		SetCanvasForObject(dwidget, dcanvas1)
+		SetCanvasForObject(dwidget, dcanvas1, nil)
 	}
 
 	for i := 0; i < 22; i++ {
@@ -156,7 +156,7 @@ func TestCleanCanvas(t *testing.T) {
 			destroyedRenderersCnt++
 		}}
 		Renderer(dwidget)
-		SetCanvasForObject(dwidget, dcanvas2)
+		SetCanvasForObject(dwidget, dcanvas2, nil)
 	}
 
 	assert.Len(t, renderers, 42)

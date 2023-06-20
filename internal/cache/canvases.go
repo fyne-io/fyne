@@ -22,12 +22,18 @@ func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 }
 
 // SetCanvasForObject sets the canvas for the specified object.
-func SetCanvasForObject(obj fyne.CanvasObject, canvas fyne.Canvas) {
-	cinfo := &canvasInfo{canvas: canvas}
+// The passed function will be called if the item was not previously attached to this canvas
+func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
+	cinfo := &canvasInfo{canvas: c}
 	cinfo.setAlive()
 	canvasesLock.Lock()
+	old, found := canvases[obj]
 	canvases[obj] = cinfo
 	canvasesLock.Unlock()
+
+	if (!found || old.canvas != c) && setup != nil {
+		setup()
+	}
 }
 
 type canvasInfo struct {
