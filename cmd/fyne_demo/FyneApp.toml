@@ -12,7 +12,7 @@
   HelperText = "This binary was built without debug symbols"
 
 [LinuxAndBSD]
-  GenericName = "Fyne Demo"
+  GenericName = "Toolkit Demo"
   Categories = ["Development"]
   Comment = "A demo of Fyne and its capabilities."
   Keywords = ["demo", "fyne"]
