@@ -69,7 +69,7 @@ func TestDrawString(t *testing.T) {
 			color:    color.Black,
 			style:    fyne.TextStyle{},
 			size:     40,
-			string:   "Missing: ↩",
+			string:   "Missing: स",
 			tabWidth: 4,
 			want:     "missing_glyph.png",
 		},

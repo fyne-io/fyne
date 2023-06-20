@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	paint "fyne.io/fyne/v2/internal/painter"
-	"fyne.io/fyne/v2/theme"
 )
 
 func (p *painter) createBuffer(points []float32) Buffer {
@@ -180,11 +179,6 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 
 	if containerSize.Height > size.Height {
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
-	}
-
-	color := text.Color
-	if color == nil {
-		color = theme.ForegroundColor()
 	}
 
 	// text size is sensitive to position on screen
