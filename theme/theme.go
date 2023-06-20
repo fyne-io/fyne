@@ -257,6 +257,13 @@ func DarkTheme() fyne.Theme {
 	return theme
 }
 
+// DefaultEmojiFont returns the font resource for the built-in emoji font.
+//
+// Since: 2.4
+func DefaultEmojiFont() fyne.Resource {
+	return emoji
+}
+
 // DefaultTextBoldFont returns the font resource for the built-in bold font style.
 func DefaultTextBoldFont() fyne.Resource {
 	return bold

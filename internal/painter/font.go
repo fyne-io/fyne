@@ -57,7 +57,8 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 		if f1 == nil {
 			f1 = f2
 		}
-		val = &FontCacheItem{Fonts: []font.Face{f1, f2}}
+		emoji := loadMeasureFont(theme.DefaultEmojiFont())
+		val = &FontCacheItem{Fonts: []font.Face{f1, f2, emoji}}
 		fontCache.Store(style, val)
 	}
 

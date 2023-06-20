@@ -64,6 +64,7 @@ func main() {
 	bundleFont(fontFace+"-Italic.ttf", "italic", f)
 	bundleFont(fontFace+"-BoldItalic.ttf", "bolditalic", f)
 	bundleFont("DejaVuSansMono-Powerline.ttf", "monospace", f)
+	bundleFont("EmojiOneColor.otf", "emoji", f)
 	bundleFont(symbolFont, "symbol", f)
 
 	err = writeFile("bundled-fonts.go", f.Bytes())
