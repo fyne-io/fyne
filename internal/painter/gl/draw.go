@@ -190,37 +190,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	// text size is sensitive to position on screen
 	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
-	p.drawSingleChannelTexture(text, p.newGlTextTexture, pos, size, frame, color, 0)
-}
-
-func (p *painter) drawSingleChannelTexture(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
-	pos fyne.Position, size, frame fyne.Size, c color.Color, pad float32) {
-	texture, err := p.getTexture(o, creator)
-	if err != nil {
-		return
-	}
-
-	points := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0, pad)
-	p.ctx.UseProgram(p.grayProgram)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray(p.grayProgram, "vert", 3, 5, 0)
-	p.defineVertexArray(p.grayProgram, "vertTexCoord", 2, 5, 3)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-
-	shaderColor := p.ctx.GetUniformLocation(p.grayProgram, "color")
-	r, g, b, a := getFragmentColor(c)
-	p.ctx.Uniform4f(shaderColor, r, g, b, a)
-
-	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, texture)
-	p.logError()
-
-	p.ctx.DrawArrays(triangleStrip, 0, 4)
-	p.logError()
-	p.freeBuffer(vbo)
-
+	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,

@@ -20,10 +20,6 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
 	case "simple_es":
 		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
-	case "gray":
-		return shaderSimpleVert.StaticContent, shaderGrayFrag.StaticContent
-	case "gray_es":
-		return shaderSimpleesVert.StaticContent, shaderGrayesFrag.StaticContent
 	case "rectangle":
 		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
 	case "round_rectangle":
@@ -71,7 +67,6 @@ type painter struct {
 	ctx                   context
 	contextProvider       driver.WithContext
 	program               Program
-	grayProgram           Program
 	lineProgram           Program
 	rectangleProgram      Program
 	roundRectangleProgram Program

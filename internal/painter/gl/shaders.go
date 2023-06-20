@@ -5,16 +5,6 @@ package gl
 
 import "fyne.io/fyne/v2"
 
-var shaderGrayFrag = &fyne.StaticResource{
-	StaticName: "gray.frag",
-	StaticContent: []byte(
-		"#version 110\n\nuniform vec4 color;\n\nuniform sampler2D tex;\nvarying vec2 fragTexCoord;\n\nvoid main()\n{\n    gl_FragColor = vec4(color.r, color.g, color.b, texture2D(tex, fragTexCoord).r*color.a);\n}\n"),
-}
-var shaderGrayesFrag = &fyne.StaticResource{
-	StaticName: "gray_es.frag",
-	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform vec4 color;\n\nuniform sampler2D tex;\nvarying vec2 fragTexCoord;\n\nvoid main()\n{\n    gl_FragColor = vec4(color.r, color.g, color.b, texture2D(tex, fragTexCoord).r*color.a);\n}\n"),
-}
 var shaderLineFrag = &fyne.StaticResource{
 	StaticName: "line.frag",
 	StaticContent: []byte(
