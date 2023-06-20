@@ -186,7 +186,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 				if pending {
 					in.RunEnd = i
 					out = shaper.Shape(in)
-					x = shapeCallback(shaper, in, out, x, cb)
+					x = shapeCallback(shaper, in, out, x, scale, cb)
 				}
 				x = tabStop(spacew, x, tabWidth)
 
@@ -198,7 +198,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 			}
 		}
 
-		x = shapeCallback(shaper, in, out, x, cb)
+		x = shapeCallback(shaper, in, out, x, scale, cb)
 	}
 
 	*advance = x
@@ -206,7 +206,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 		fixed266ToFloat32(out.LineBounds.Ascent)
 }
 
-func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, x float32, cb func(shaping.Output, float32)) float32 {
+func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, x, scale float32, cb func(shaping.Output, float32)) float32 {
 	out = shaper.Shape(in)
 	glyphs := out.Glyphs
 	start := 0
@@ -217,13 +217,13 @@ func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, 
 			if pending {
 				out.Glyphs = glyphs[start:i]
 				cb(out, x)
-				x += fixed266ToFloat32(adv)
+				x += fixed266ToFloat32(adv) * scale
 				adv = 0
 			}
 
 			out.Glyphs = glyphs[i : i+1]
 			cb(out, x)
-			x += fixed266ToFloat32(glyphs[i].XAdvance)
+			x += fixed266ToFloat32(glyphs[i].XAdvance) * scale
 			adv = 0
 
 			start = i + 1
@@ -237,10 +237,10 @@ func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, 
 	if pending {
 		out.Glyphs = glyphs[start:]
 		cb(out, x)
-		x += fixed266ToFloat32(adv)
+		x += fixed266ToFloat32(adv) * scale
 		adv = 0
 	}
-	return x + fixed266ToFloat32(adv)
+	return x + fixed266ToFloat32(adv)*scale
 }
 
 type FontCacheItem struct {
