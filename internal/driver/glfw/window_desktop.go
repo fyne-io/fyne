@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/storage"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -139,6 +140,23 @@ func (w *window) CenterOnScreen() {
 	if w.view() != nil {
 		runOnMain(w.doCenterOnScreen)
 	}
+}
+
+func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
+	w.runOnMainWhenCreated(func() {
+		w.viewport.SetDropCallback(func(win *glfw.Window, names []string) {
+			if dropped == nil {
+				return
+			}
+
+			uris := make([]fyne.URI, len(names))
+			for i, name := range names {
+				uris[i] = storage.NewFileURI(name)
+			}
+
+			dropped(w.mousePos, uris)
+		})
+	})
 }
 
 func (w *window) doCenterOnScreen() {
