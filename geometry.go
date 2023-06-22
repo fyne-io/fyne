@@ -42,8 +42,8 @@ func NewPos(x float32, y float32) Position {
 	return Position{x, y}
 }
 
-// NewSquarePos returns a newly allocated Position with the same x and y position.
-func NewSquarePos(length float32) Position {
+// NewSquareOffsetPos returns a newly allocated Position with the same x and y position.
+func NewSquareOffsetPos(length float32) Position {
 	return Position{length, length}
 }
 

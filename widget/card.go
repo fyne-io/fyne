@@ -101,7 +101,7 @@ const (
 // Layout the components of the card container.
 func (c *cardRenderer) Layout(size fyne.Size) {
 	padding := theme.Padding()
-	pos := fyne.NewSquarePos(padding / 2)
+	pos := fyne.NewSquareOffsetPos(padding / 2)
 	size = size.Subtract(fyne.NewSquareSize(padding))
 	c.LayoutShadow(size, pos)
 

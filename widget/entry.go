@@ -1332,9 +1332,9 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	// 0.5 is removed so on low DPI it rounds down on the trailing edge
 	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize()-.5, size.Height-theme.InputBorderSize()-.5))
 	r.border.StrokeWidth = theme.InputBorderSize()
-	r.border.Move(fyne.NewSquarePos(theme.InputBorderSize() / 2))
+	r.border.Move(fyne.NewSquareOffsetPos(theme.InputBorderSize() / 2))
 	r.box.Resize(size.Subtract(fyne.NewSquareSize(theme.InputBorderSize() * 2)))
-	r.box.Move(fyne.NewSquarePos(theme.InputBorderSize()))
+	r.box.Move(fyne.NewSquareOffsetPos(theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {

@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSquarePosition(t *testing.T) {
-	pos := fyne.NewSquarePos(10)
+func TestNewSquareOffsetPosition(t *testing.T) {
+	pos := fyne.NewSquareOffsetPos(10)
 	assert.Equal(t, pos.X, pos.Y)
 }
 
