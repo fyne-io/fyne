@@ -119,7 +119,7 @@ func TestFormDialog_Hints(t *testing.T) {
 	assert.Equal(t, formDialogCancel, result, "Expected cancel result")
 }
 
-func TestFormDialog_HideWithSubmit(t *testing.T) {
+func TestFormDialog_Submit(t *testing.T) {
 	validatingEntry := widget.NewEntry()
 	validatingEntry.Validator = func(input string) error {
 		if input != "abc" {
@@ -140,7 +140,7 @@ func TestFormDialog_HideWithSubmit(t *testing.T) {
 	assert.Equal(t, false, confirmed)
 	form.Show()
 
-	form.HideWithSubmit()
+	form.Submit()
 	assert.Equal(t, false, confirmed)
 	form.Show()
 
@@ -150,7 +150,7 @@ func TestFormDialog_HideWithSubmit(t *testing.T) {
 	assert.Equal(t, false, confirmed)
 	form.Show()
 
-	form.HideWithSubmit()
+	form.Submit()
 	assert.Equal(t, true, confirmed)
 }
 
