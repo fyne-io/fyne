@@ -13,6 +13,9 @@ import (
 func TestAppTabs_tabButtonRenderer_SetText(t *testing.T) {
 	item := &TabItem{Text: "Test", Content: widget.NewLabel("Content")}
 	tabs := NewAppTabs(item)
+	// bug report #3980 : buttons will be rendered while already empty tabs. after fixed it, there has another logic that
+	// buttons will not be rendered while there has not enough space, so we add a resize logic here to make it render the button.
+	tabs.Resize(fyne.NewSize(300,200))
 	tabRenderer := cache.Renderer(tabs).(*appTabsRenderer)
 	button := tabRenderer.bar.Objects[0].(*fyne.Container).Objects[0].(*tabButton)
 	renderer := cache.Renderer(button).(*tabButtonRenderer)
