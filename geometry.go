@@ -43,6 +43,8 @@ func NewPos(x float32, y float32) Position {
 }
 
 // NewSquareOffsetPos returns a newly allocated Position with the same x and y position.
+//
+// Since: 2.4
 func NewSquareOffsetPos(length float32) Position {
 	return Position{length, length}
 }
@@ -93,6 +95,8 @@ func NewSize(w float32, h float32) Size {
 }
 
 // NewSquareSize returns a newly allocated Size with the same width and height.
+//
+// Since: 2.4
 func NewSquareSize(side float32) Size {
 	return Size{side, side}
 }
