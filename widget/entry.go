@@ -1332,13 +1332,13 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	// 0.5 is removed so on low DPI it rounds down on the trailing edge
 	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize()-.5, size.Height-theme.InputBorderSize()-.5))
 	r.border.StrokeWidth = theme.InputBorderSize()
-	r.border.Move(fyne.NewPos(theme.InputBorderSize()/2, theme.InputBorderSize()/2))
-	r.box.Resize(size.Subtract(fyne.NewSize(theme.InputBorderSize()*2, theme.InputBorderSize()*2)))
-	r.box.Move(fyne.NewPos(theme.InputBorderSize(), theme.InputBorderSize()))
+	r.border.Move(fyne.NewSquareOffsetPos(theme.InputBorderSize() / 2))
+	r.box.Resize(size.Subtract(fyne.NewSquareSize(theme.InputBorderSize() * 2)))
+	r.box.Move(fyne.NewSquareOffsetPos(theme.InputBorderSize()))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
-		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		actionIconSize = fyne.NewSquareSize(theme.IconInlineSize())
 
 		r.entry.ActionItem.Resize(actionIconSize)
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.InnerPadding(), theme.InnerPadding()))
@@ -1346,7 +1346,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 	validatorIconSize := fyne.NewSize(0, 0)
 	if r.entry.Validator != nil {
-		validatorIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		validatorIconSize = fyne.NewSquareSize(theme.IconInlineSize())
 
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Resize(validatorIconSize)
@@ -1401,7 +1401,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	}
 
 	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle)
-	minSize := charMin.Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding()))
+	minSize := charMin.Add(fyne.NewSquareSize(theme.InnerPadding()))
 
 	if r.entry.MultiLine {
 		count := r.entry.multiLineRows
