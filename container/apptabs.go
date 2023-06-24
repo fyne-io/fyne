@@ -279,7 +279,7 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 	// Try render as many tabs as will fit, others will appear in the overflow
 	if len(r.appTabs.Items) == 0 {
 		r.updateTabs(0)
-	}else {
+	} else {
 		for i := len(r.appTabs.Items); i > 0; i-- {
 			r.updateTabs(i)
 			barMin := r.bar.MinSize()
@@ -396,7 +396,7 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 		r.divider.Hide()
 		r.indicator.Hide()
 		return
-	}else {
+	} else {
 		r.divider.Show()
 		r.indicator.Show()
 	}

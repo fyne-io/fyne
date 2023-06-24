@@ -53,7 +53,7 @@ func Test_tabButtonRenderer_EmptyDeleteAdd(t *testing.T) {
 	tabs := NewAppTabs()
 
 	//cause tab button was build with enough space, without enough space, btns will not created.
-	tabs.Resize(fyne.NewSize(300,200))
+	tabs.Resize(fyne.NewSize(300, 200))
 
 	tabRenderer := cache.Renderer(tabs).(*appTabsRenderer)
 	indicator := tabRenderer.indicator
