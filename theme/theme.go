@@ -258,6 +258,7 @@ func DarkTheme() fyne.Theme {
 }
 
 // DefaultEmojiFont returns the font resource for the built-in emoji font.
+// This may return nil if the application was packaged without an emoji font.
 //
 // Since: 2.4
 func DefaultEmojiFont() fyne.Resource {
