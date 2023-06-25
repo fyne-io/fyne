@@ -136,22 +136,18 @@ func TestFormDialog_Submit(t *testing.T) {
 		confirmed = confirm
 	}, test.NewWindow(nil))
 
-	form.Hide()
-	assert.Equal(t, false, confirmed)
 	form.Show()
+	validatingEntry.SetText("cba")
 
 	form.Submit()
 	assert.Equal(t, false, confirmed)
-	form.Show()
+	assert.Equal(t, false, form.win.Hidden)
 
 	validatingEntry.SetText("abc")
 
-	form.Hide()
-	assert.Equal(t, false, confirmed)
-	form.Show()
-
 	form.Submit()
 	assert.Equal(t, true, confirmed)
+	assert.Equal(t, true, form.win.Hidden)
 }
 
 func validatingFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {

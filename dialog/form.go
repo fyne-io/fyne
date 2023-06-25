@@ -17,12 +17,15 @@ type FormDialog struct {
 	cancel  *widget.Button
 }
 
-// Submit tries to submit the form if validation passes and then hides the dialog.
-// Hiding with validation not passing is equivalent to calling .Hide().
+// Submit will submit the form and then hide the dialog if validation passes.
 //
 // Since: 2.4
 func (d *FormDialog) Submit() {
-	d.hideWithResponse(!d.confirm.Disabled())
+	if d.confirm.Disabled() {
+		return
+	}
+
+	d.hideWithResponse(true)
 }
 
 // validateItems acts as a validation edge state handler that will respond to an individual widget's validation
