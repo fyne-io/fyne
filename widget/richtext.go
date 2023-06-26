@@ -10,9 +10,13 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	paint "fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
+	"github.com/go-text/typesetting/di"
+	"github.com/go-text/typesetting/shaping"
+	"golang.org/x/image/math/fixed"
 )
 
 const (
@@ -634,6 +638,10 @@ func (r *textRenderer) Refresh() {
 			} else if i == len(bound.segments)-1 && len(bound.segments) > 1 {
 				txt.Text = string(runes[:bound.end])
 			}
+			if bound.ellipsis && i == len(bound.segments)-1 {
+				txt.Text = txt.Text + "…"
+			}
+
 			if concealed(seg) {
 				txt.Text = strings.Repeat(passwordChar, len(runes))
 			}
@@ -812,6 +820,10 @@ func findSpaceIndex(text []rune, fallback int) int {
 	return curIndex
 }
 
+func float32ToFixed266(f float32) fixed.Int26_6 {
+	return fixed.Int26_6(float64(f) * (1 << 6))
+}
+
 // lineBounds accepts a slice of Segments, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
@@ -840,12 +852,17 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 		switch wrap {
 		case fyne.TextTruncate:
 			high = binarySearch(checker, low, high)
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
+			reuse++
+		case fyne.TextTruncateEllipsis:
+			end, full := truncateLimit(seg.Text, seg.Visual().(*canvas.Text), int(firstWidth), []rune{'…'})
+			high = end
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
 			reuse++
 		case fyne.TextWrapBreak:
 			for low < high {
 				if measurer(text[low:high]) <= measureWidth {
-					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
+					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 					reuse++
 					low = high
 					high = l.end
@@ -853,7 +870,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 				} else {
 					newHigh := binarySearch(checker, low, high)
 					if newHigh <= low {
-						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1})
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false})
 						reuse++
 						low++
 					} else {
@@ -866,7 +883,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 				sub := text[low:high]
 				subWidth := measurer(sub)
 				if subWidth <= measureWidth {
-					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high})
+					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 					reuse++
 					low = high
 					high = l.end
@@ -880,7 +897,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 					fallback := binarySearch(checker, low, last) - low
 
 					if fallback < 1 { // even a character won't fit
-						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1})
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false})
 						low++
 						high = low + 1
 						reuse++
@@ -897,7 +914,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 						high = low + spaceIndex
 					}
 					if high == fallback && subWidth <= maxWidth { // add a newline as there is more space on next
-						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low})
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false})
 						reuse++
 						high = oldHigh
 						measureWidth = maxWidth
@@ -934,15 +951,52 @@ func splitLines(seg *TextSegment) []rowBoundary {
 	for i := 0; i < length; i++ {
 		if text[i] == '\n' {
 			high = i
-			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high})
+			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false})
 			low = i + 1
 		}
 	}
-	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length})
+	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false})
+}
+
+func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int, bool) {
+	s = strings.ReplaceAll(s, "\r", "")
+	face := paint.CachedFontFace(text.TextStyle, text.TextSize, 1.0)
+
+	runes := []rune(s)
+	in := shaping.Input{
+		Text:      ellipsis,
+		RunStart:  0,
+		RunEnd:    len(ellipsis),
+		Direction: di.DirectionLTR,
+		Face:      face.Fonts[0],
+		Size:      float32ToFixed266(text.TextSize),
+	}
+	shaper := &shaping.HarfbuzzShaper{}
+
+	conf := shaping.WrapConfig{}
+	conf = conf.WithTruncator(shaper, in)
+	conf.BreakPolicy = shaping.WhenNecessary
+	conf.TruncateAfterLines = 1
+	l := shaping.LineWrapper{}
+
+	in.Text = runes
+	in.RunEnd = len(runes)
+	out := shaper.Shape(in)
+
+	l.Prepare(conf, runes, shaping.NewSliceIterator([]shaping.Output{out}))
+	finalLine, _, done := l.WrapNextLine(limit)
+
+	count := finalLine[0].Runes.Count
+	full := done && count == len(runes)
+	if !full && len(ellipsis) > 0 {
+		count--
+	}
+	return count, full
 }
 
 type rowBoundary struct {
 	segments          []RichTextSegment
 	firstSegmentReuse int
 	begin, end        int
+	ellipsis          bool
 }
