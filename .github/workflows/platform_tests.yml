@@ -11,6 +11,13 @@ jobs:
       matrix:
         go-version: ['1.17.x', '1.20.x']
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            runner: xvfb-run
+          - os: windows-latest
+            tags: no_glfw
+          - os: macos-latest
+            tags: no_glfw
 
     steps:
     - uses: actions/checkout@v3
@@ -21,12 +28,22 @@ jobs:
         go-version: ${{ matrix.go-version }}
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libx11-dev xorg-dev libwayland-dev libxkbcommon-dev bc
+      run: >-
+        sudo apt-get update &&
+        sudo apt-get install
+        bc
+        gcc
+        libgl1-mesa-dev
+        libwayland-dev
+        libx11-dev
+        libxkbcommon-dev
+        xorg-dev
+        xvfb
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
-      run: go test -tags ci ./...
+      run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags "${{ matrix.tags }}" ./...
 
     - name: Wayland Tests
-      run: go test -tags ci,wayland ./...
+      run: go test -tags no_bench,no_glfw,ci,wayland ./...
       if: ${{ runner.os == 'Linux' }}
