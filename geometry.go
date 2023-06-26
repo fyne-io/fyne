@@ -52,6 +52,7 @@ func NewSquareOffsetPos(length float32) Position {
 // Add returns a new Position that is the result of offsetting the current
 // position by p2 X and Y.
 func (p Position) Add(v Vector2) Position {
+	// NOTE: Do not simplify to `return p.AddXY(v.Components())`, it prevents inlining.
 	x, y := v.Components()
 	return Position{p.X + x, p.Y + y}
 }
@@ -74,6 +75,7 @@ func (p Position) IsZero() bool {
 // Subtract returns a new Position that is the result of offsetting the current
 // position by p2 -X and -Y.
 func (p Position) Subtract(v Vector2) Position {
+	// NOTE: Do not simplify to `return p.SubtractXY(v.Components())`, it prevents inlining.
 	x, y := v.Components()
 	return Position{p.X - x, p.Y - y}
 }
@@ -104,6 +106,7 @@ func NewSquareSize(side float32) Size {
 // Add returns a new Size that is the result of increasing the current size by
 // s2 Width and Height.
 func (s Size) Add(v Vector2) Size {
+	// NOTE: Do not simplify to `return s.AddXY(v.Components())`, it prevents inlining.
 	w, h := v.Components()
 	return Size{s.Width + w, s.Height + h}
 }
@@ -146,6 +149,7 @@ func (s Size) Components() (float32, float32) {
 // Subtract returns a new Size that is the result of decreasing the current size
 // by s2 Width and Height.
 func (s Size) Subtract(v Vector2) Size {
+	// NOTE: Do not simplify to `return s.SubtractXY(v.Components())`, it prevents inlining.
 	w, h := v.Components()
 	return Size{s.Width - w, s.Height - h}
 }
