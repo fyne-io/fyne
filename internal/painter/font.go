@@ -156,9 +156,7 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 
 func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *float32, scale float32,
 	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
-	if strings.Contains(s, "\r") {
-		s = strings.ReplaceAll(s, "\r", "")
-	}
+	s = strings.ReplaceAll(s, "\r", "")
 
 	runes := []rune(s)
 	in := shaping.Input{
