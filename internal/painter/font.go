@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
-	"strings"
 	"sync"
 
 	"github.com/go-text/render"
@@ -156,7 +155,6 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 
 func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *float32, scale float32,
 	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
-	s = strings.ReplaceAll(s, "\r", "")
 
 	runes := []rune(s)
 	in := shaping.Input{
@@ -182,13 +180,23 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 
 		pending := false
 		for i, r := range in.Text[in.RunStart:in.RunEnd] {
-			if r == '\t' {
+			if r == '\t' { // move forward to next tabstop
 				if pending {
 					in.RunEnd = i
 					out = shaper.Shape(in)
 					x = shapeCallback(shaper, in, out, x, cb)
 				}
 				x = tabStop(spacew, x, tabWidth)
+
+				in.RunStart = i + 1
+				in.RunEnd = inEnd
+				pending = false
+			} else if r == '\r' { // ignore carriage return
+				if pending {
+					in.RunEnd = i
+					out = shaper.Shape(in)
+					x = shapeCallback(shaper, in, out, x, cb)
+				}
 
 				in.RunStart = i + 1
 				in.RunEnd = inEnd
