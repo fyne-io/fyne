@@ -393,12 +393,8 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 
 func (r *appTabsRenderer) updateIndicator(animate bool) {
 	if r.appTabs.current < 0 {
-		r.divider.Hide()
 		r.indicator.Hide()
 		return
-	} else {
-		r.divider.Show()
-		r.indicator.Show()
 	}
 
 	var selectedPos fyne.Position
