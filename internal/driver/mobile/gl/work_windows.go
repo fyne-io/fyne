@@ -237,10 +237,6 @@ var glfnMap = map[glfn]func(c call) (ret uintptr){
 		ret, _, _ = syscall.Syscall(glGetUniformLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
 		return ret
 	},
-	glfnPixelStorei: func(c call) (ret uintptr) {
-		syscall.Syscall(glPixelStorei.Addr(), 2, c.args.a0, c.args.a1, 0)
-		return
-	},
 	glfnLinkProgram: func(c call) (ret uintptr) {
 		syscall.Syscall(glLinkProgram.Addr(), 1, c.args.a0, 0, 0)
 		return
