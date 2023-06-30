@@ -695,11 +695,16 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 }
 
 func current() fyne.Theme {
-	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
+	app := fyne.CurrentApp()
+	if app == nil {
+		return DarkTheme()
+	}
+	currentTheme := app.Settings().Theme()
+	if currentTheme == nil {
 		return DarkTheme()
 	}
 
-	return fyne.CurrentApp().Settings().Theme()
+	return currentTheme
 }
 
 func currentVariant() fyne.ThemeVariant {
