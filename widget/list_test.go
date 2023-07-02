@@ -578,3 +578,13 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 	test.AssertRendersToMarkup(t, "list/initial.xml", w.Canvas())
 	return list, w
 }
+
+func TestList_LimitUpdateItem(t *testing.T) {
+	updateItemCalls := 0
+	list := createList(20)
+	list.UpdateItem = func(id ListItemID, item fyne.CanvasObject) {
+		updateItemCalls++
+	}
+	assert.Equal(t, 1, updateItemCalls)
+
+}
