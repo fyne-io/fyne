@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -96,14 +95,7 @@ func (l *List) MinSize() fyne.Size {
 
 func (l *List) Refresh() {
 	if l.scroller != nil {
-		impl := l.super()
-		if impl == nil {
-			return
-		}
-
-		render := cache.Renderer(impl)
-		render.Refresh()
-
+		l.BaseWidget.Refresh()
 		lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
 		visible := lo.visible
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(lo.list)
