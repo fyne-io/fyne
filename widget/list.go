@@ -559,7 +559,7 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 	l.updateList(false)
 }
 
-func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
+func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool, update bool) {
 	previousIndicator := li.selected
 	li.selected = false
 	for _, s := range l.list.selected {
@@ -575,7 +575,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		li.hovered = false
 		li.Refresh()
 	}
-	if f := l.list.UpdateItem; f != nil {
+	if f := l.list.UpdateItem; f != nil && update {
 		f(id, li.child)
 	}
 	li.onTapped = func() {
@@ -654,8 +654,9 @@ func (l *listLayout) updateList(refresh bool) {
 	l.list.scroller.Content.(*fyne.Container).Objects = objects
 	l.renderLock.Unlock() // user code should not be locked
 
-	for row, obj := range visible {
-		l.setupListItem(obj, row, focused == obj)
+	for cId, vItem := range visible {
+		_, wasVisible := wasVisible[cId]
+		l.setupListItem(vItem, cId, focused == vItem, !wasVisible)
 	}
 }
 
