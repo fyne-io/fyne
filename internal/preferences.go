@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -183,7 +184,7 @@ func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 		return fallback
 	}
 
-	return value.(string)
+	return fmt.Sprint(value)
 }
 
 // SetString saves a string value for the given key
