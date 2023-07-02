@@ -580,11 +580,25 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 }
 
 func TestList_LimitUpdateItem(t *testing.T) {
+	app := test.NewApp()
+	w := app.NewWindow("")
+	w.Resize(fyne.NewSize(500, 500))
 	updateItemCalls := 0
-	list := createList(20)
-	list.UpdateItem = func(id ListItemID, item fyne.CanvasObject) {
-		updateItemCalls++
-	}
-	assert.Equal(t, 1, updateItemCalls)
-
+	list := NewList(
+		func() int {
+			return 20
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			updateItemCalls++
+		},
+	)
+	w.SetContent(list)
+	w.ShowAndRun()
+	list.scrollTo(10)
+	list.scrollTo(20)
+	time.Sleep(2 * time.Second)
+	assert.Equal(t, 3, updateItemCalls)
 }
