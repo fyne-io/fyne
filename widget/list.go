@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -91,6 +92,29 @@ func (l *List) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 
 	return l.BaseWidget.MinSize()
+}
+
+func (l *List) Refresh() {
+	if l.scroller != nil {
+		impl := l.super()
+		if impl == nil {
+			return
+		}
+
+		render := cache.Renderer(impl)
+		render.Refresh()
+
+		lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
+		visible := lo.visible
+		canvas := fyne.CurrentApp().Driver().CanvasForObject(lo.list)
+		var focused fyne.Focusable
+		if canvas != nil {
+			focused = canvas.Focused()
+		}
+		for id, item := range visible {
+			lo.setupListItem(item, id, focused == item, true)
+		}
+	}
 }
 
 // SetItemHeight supports changing the height of the specified list item. Items normally take the height of the template
