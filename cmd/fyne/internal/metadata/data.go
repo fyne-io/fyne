@@ -23,4 +23,5 @@ type LinuxAndBSD struct {
 	Categories  []string `toml:",omitempty"`
 	Comment     string   `toml:",omitempty"`
 	Keywords    []string `toml:",omitempty"`
+	ExecParams  string   `toml:",omitempty"`
 }

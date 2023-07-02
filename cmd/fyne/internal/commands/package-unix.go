@@ -19,6 +19,7 @@ type unixData struct {
 	Categories       string
 	Comment          string
 	Keywords         string
+	ExecParams       string
 }
 
 func (p *Packager) packageUNIX() error {
@@ -66,6 +67,7 @@ func (p *Packager) packageUNIX() error {
 		Keywords:    formatDesktopFileList(p.linuxAndBSDMetadata.Keywords),
 		Comment:     p.linuxAndBSDMetadata.Comment,
 		Categories:  formatDesktopFileList(p.linuxAndBSDMetadata.Categories),
+		ExecParams:  p.linuxAndBSDMetadata.ExecParams,
 	}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
