@@ -209,7 +209,7 @@ func selectItem(t baseTabs, item *TabItem) {
 }
 
 func setItems(t baseTabs, items []*TabItem) {
-	if mismatchedTabItems(items) {
+	if internal.HintsEnabled && mismatchedTabItems(items) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
 	t.setItems(items)
@@ -313,39 +313,40 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 
 	barMin := r.bar.MinSize()
 
+	padding := theme.Padding()
 	switch t.tabLocation() {
 	case TabLocationTop:
 		barHeight := barMin.Height
 		barPos = fyne.NewPos(0, 0)
 		barSize = fyne.NewSize(size.Width, barHeight)
 		dividerPos = fyne.NewPos(0, barHeight)
-		dividerSize = fyne.NewSize(size.Width, theme.Padding())
-		contentPos = fyne.NewPos(0, barHeight+theme.Padding())
-		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-theme.Padding())
+		dividerSize = fyne.NewSize(size.Width, padding)
+		contentPos = fyne.NewPos(0, barHeight+padding)
+		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-padding)
 	case TabLocationLeading:
 		barWidth := barMin.Width
 		barPos = fyne.NewPos(0, 0)
 		barSize = fyne.NewSize(barWidth, size.Height)
 		dividerPos = fyne.NewPos(barWidth, 0)
-		dividerSize = fyne.NewSize(theme.Padding(), size.Height)
+		dividerSize = fyne.NewSize(padding, size.Height)
 		contentPos = fyne.NewPos(barWidth+theme.Padding(), 0)
-		contentSize = fyne.NewSize(size.Width-barWidth-theme.Padding(), size.Height)
+		contentSize = fyne.NewSize(size.Width-barWidth-padding, size.Height)
 	case TabLocationBottom:
 		barHeight := barMin.Height
 		barPos = fyne.NewPos(0, size.Height-barHeight)
 		barSize = fyne.NewSize(size.Width, barHeight)
-		dividerPos = fyne.NewPos(0, size.Height-barHeight-theme.Padding())
-		dividerSize = fyne.NewSize(size.Width, theme.Padding())
+		dividerPos = fyne.NewPos(0, size.Height-barHeight-padding)
+		dividerSize = fyne.NewSize(size.Width, padding)
 		contentPos = fyne.NewPos(0, 0)
-		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-theme.Padding())
+		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-padding)
 	case TabLocationTrailing:
 		barWidth := barMin.Width
 		barPos = fyne.NewPos(size.Width-barWidth, 0)
 		barSize = fyne.NewSize(barWidth, size.Height)
-		dividerPos = fyne.NewPos(size.Width-barWidth-theme.Padding(), 0)
-		dividerSize = fyne.NewSize(theme.Padding(), size.Height)
+		dividerPos = fyne.NewPos(size.Width-barWidth-padding, 0)
+		dividerSize = fyne.NewSize(padding, size.Height)
 		contentPos = fyne.NewPos(0, 0)
-		contentSize = fyne.NewSize(size.Width-barWidth-theme.Padding(), size.Height)
+		contentSize = fyne.NewSize(size.Width-barWidth-padding, size.Height)
 	}
 
 	r.bar.Move(barPos)
@@ -577,15 +578,16 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
 	labelShift := float32(0)
 	if r.icon.Visible() {
+		iconSize := r.iconSize()
 		var iconOffset fyne.Position
 		if r.button.iconPosition == buttonIconTop {
-			iconOffset = fyne.NewPos((innerSize.Width-r.iconSize())/2, 0)
+			iconOffset = fyne.NewPos((innerSize.Width-iconSize)/2, 0)
 		} else {
-			iconOffset = fyne.NewPos(0, (innerSize.Height-r.iconSize())/2)
+			iconOffset = fyne.NewPos(0, (innerSize.Height-iconSize)/2)
 		}
-		r.icon.Resize(fyne.NewSize(r.iconSize(), r.iconSize()))
+		r.icon.Resize(fyne.NewSquareSize(iconSize))
 		r.icon.Move(innerOffset.Add(iconOffset))
-		labelShift = r.iconSize() + theme.Padding()
+		labelShift = iconSize + theme.Padding()
 	}
 	if r.label.Text != "" {
 		var labelOffset fyne.Position
@@ -600,39 +602,43 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		r.label.Resize(labelSize)
 		r.label.Move(innerOffset.Add(labelOffset))
 	}
-	r.close.Move(fyne.NewPos(size.Width-theme.IconInlineSize()-theme.Padding(), (size.Height-theme.IconInlineSize())/2))
-	r.close.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	inlineIconSize := theme.IconInlineSize()
+	r.close.Move(fyne.NewPos(size.Width-inlineIconSize-theme.Padding(), (size.Height-inlineIconSize)/2))
+	r.close.Resize(fyne.NewSquareSize(inlineIconSize))
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
 	var contentWidth, contentHeight float32
 	textSize := r.label.MinSize()
+	iconSize := r.iconSize()
+	padding := theme.Padding()
 	if r.button.iconPosition == buttonIconTop {
-		contentWidth = fyne.Max(textSize.Width, r.iconSize())
+		contentWidth = fyne.Max(textSize.Width, iconSize)
 		if r.icon.Visible() {
-			contentHeight += r.iconSize()
+			contentHeight += iconSize
 		}
 		if r.label.Text != "" {
 			if r.icon.Visible() {
-				contentHeight += theme.Padding()
+				contentHeight += padding
 			}
 			contentHeight += textSize.Height
 		}
 	} else {
-		contentHeight = fyne.Max(textSize.Height, r.iconSize())
+		contentHeight = fyne.Max(textSize.Height, iconSize)
 		if r.icon.Visible() {
-			contentWidth += r.iconSize()
+			contentWidth += iconSize
 		}
 		if r.label.Text != "" {
 			if r.icon.Visible() {
-				contentWidth += theme.Padding()
+				contentWidth += padding
 			}
 			contentWidth += textSize.Width
 		}
 	}
 	if r.button.onClosed != nil {
-		contentWidth += theme.IconInlineSize() + theme.Padding()
-		contentHeight = fyne.Max(contentHeight, theme.IconInlineSize())
+		inlineIconSize := theme.IconInlineSize()
+		contentWidth += inlineIconSize + padding
+		contentHeight = fyne.Max(contentHeight, inlineIconSize)
 	}
 	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
 }
@@ -698,19 +704,19 @@ func (r *tabButtonRenderer) Refresh() {
 }
 
 func (r *tabButtonRenderer) iconSize() float32 {
-	switch r.button.iconPosition {
-	case buttonIconTop:
+	if r.button.iconPosition == buttonIconTop {
 		return 2 * theme.IconInlineSize()
-	default:
-		return theme.IconInlineSize()
 	}
+
+	return theme.IconInlineSize()
 }
 
 func (r *tabButtonRenderer) padding() fyne.Size {
+	padding := theme.InnerPadding()
 	if r.label.Text != "" && r.button.iconPosition == buttonIconInline {
-		return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2)
+		return fyne.NewSquareSize(padding * 2)
 	}
-	return fyne.NewSize(theme.InnerPadding(), theme.InnerPadding()*2)
+	return fyne.NewSize(padding, padding*2)
 }
 
 var _ fyne.Widget = (*tabCloseButton)(nil)
@@ -778,7 +784,7 @@ func (r *tabCloseButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *tabCloseButtonRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	return fyne.NewSquareSize(theme.IconInlineSize())
 }
 
 func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
