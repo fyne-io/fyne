@@ -499,18 +499,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		}
 
 		// If this is not the first item, add a separator
-		if y > 0 {
-			var separator fyne.CanvasObject
-			if separatorCount < len(r.separators) {
-				separator = r.separators[separatorCount]
-			} else {
-				separator = NewSeparator()
-				r.separators = append(r.separators, separator)
-			}
-			separator.Move(fyne.NewPos(0, y+separatorOff))
-			separator.Resize(separatorSize)
-			separator.Show()
-			r.objects = append(r.objects, separator)
+		addSeparator := y > 0
+		if addSeparator {
 			y += theme.Padding()
 			separatorCount++
 		}
@@ -525,6 +515,22 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			// Node is below viewport and not visible
 		} else {
 			// Node is in viewport
+
+			if addSeparator {
+				var separator fyne.CanvasObject
+				if separatorCount < len(r.separators) {
+					separator = r.separators[separatorCount]
+				} else {
+					separator = NewSeparator()
+					r.separators = append(r.separators, separator)
+				}
+				separator.Move(fyne.NewPos(0, y-separatorOff))
+				separator.Resize(separatorSize)
+				separator.Show()
+				r.objects = append(r.objects, separator)
+				separatorCount++
+			}
+
 			var n fyne.CanvasObject
 			if isBranch {
 				b, ok := r.branches[uid]
