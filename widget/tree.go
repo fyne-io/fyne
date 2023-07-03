@@ -526,7 +526,6 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				}
 				separator.Move(fyne.NewPos(0, y-separatorOff))
 				separator.Resize(separatorSize)
-				separator.Show()
 				r.objects = append(r.objects, separator)
 				separatorCount++
 			}
@@ -573,13 +572,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	// Release any nodes that haven't been reused
 	for uid, b := range r.branches {
 		if _, ok := branches[uid]; !ok {
-			b.Hide()
 			r.branchPool.Release(b)
 		}
 	}
 	for uid, l := range r.leaves {
 		if _, ok := leaves[uid]; !ok {
-			l.Hide()
 			r.leafPool.Release(l)
 		}
 	}
