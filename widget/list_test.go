@@ -588,7 +588,7 @@ func TestList_LimitUpdateItem(t *testing.T) {
 			return 5
 		},
 		func() fyne.CanvasObject {
-			return NewLabel("Test")
+			return NewLabel("")
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			printOut += fmt.Sprintf("%d.", id)
