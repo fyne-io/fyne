@@ -221,7 +221,6 @@ func (t *AppTabs) SetTabLocation(l TabLocation) {
 func (t *AppTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)
-	t.Refresh()
 }
 
 func (t *AppTabs) onUnselected() func(*TabItem) {
