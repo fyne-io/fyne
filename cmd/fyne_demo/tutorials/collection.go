@@ -84,7 +84,7 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
 	data := map[string][]string{
 		"":  {"A"},
-		"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V"},
+		"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V", "Z"},
 		"B": {"C"},
 		"C": {"abc"},
 		"D": {"E"},
@@ -103,9 +103,16 @@ func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
 		"V": {"W"},
 		"W": {"X"},
 		"X": {"Y"},
-		"Y": {"Z"},
-		"Z": {"avwxyz"},
+		"Y": {"zzz"},
+		"Z": {},
 	}
+
+	childlen := 10000
+	z := make([]string, childlen)
+	for i := 0; i < childlen; i++ {
+		z[i] = strconv.Itoa(i)
+	}
+	data["Z"] = z
 
 	tree := widget.NewTreeWithStrings(data)
 	tree.OnSelected = func(id string) {
