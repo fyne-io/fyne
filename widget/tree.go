@@ -486,7 +486,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	separatorCount := 0
 	separatorThickness := theme.SeparatorThicknessSize()
 	separatorSize := fyne.NewSize(width, separatorThickness)
-	separatorOff := (pad - separatorThickness) / 2
+	separatorOff := (pad + separatorThickness)/2
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
@@ -502,7 +502,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		// If this is not the first item, add a separator
 		addSeparator := y > 0
 		if addSeparator {
-			y += theme.Padding()
+			y += pad
 			separatorCount++
 		}
 
