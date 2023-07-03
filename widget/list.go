@@ -93,7 +93,7 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *List) RefreshBase() (*listLayout, map[int]*listItem, fyne.Focusable) {
+func (l *List) refreshBase() (*listLayout, map[int]*listItem, fyne.Focusable) {
 	if l.scroller != nil {
 		l.BaseWidget.Refresh()
 		lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
@@ -109,7 +109,7 @@ func (l *List) RefreshBase() (*listLayout, map[int]*listItem, fyne.Focusable) {
 }
 
 func (l *List) Refresh() {
-	lo, visible, focused := l.RefreshBase()
+	lo, visible, focused := l.refreshBase()
 	for id, item := range visible {
 		item.updated = false
 		lo.setupListItem(item, id, focused == item)
@@ -117,7 +117,7 @@ func (l *List) Refresh() {
 }
 
 func (l *List) RefreshItem(id ListItemID) {
-	lo, visible, focused := l.RefreshBase()
+	lo, visible, focused := l.refreshBase()
 	if item, ok := visible[id]; ok {
 		lo.setupListItem(item, id, focused == item)
 	}
