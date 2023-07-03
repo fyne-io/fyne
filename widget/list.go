@@ -93,7 +93,7 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *List) Refresh() {
+func (l *List) RefreshBase() (*listLayout, map[int]*listItem, fyne.Focusable) {
 	if l.scroller != nil {
 		l.BaseWidget.Refresh()
 		lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
@@ -103,7 +103,22 @@ func (l *List) Refresh() {
 		if canvas != nil {
 			focused = canvas.Focused()
 		}
-		for id, item := range visible {
+		return lo, visible, focused
+	}
+	return nil, nil, nil
+}
+
+func (l *List) Refresh() {
+	lo, visible, focused := l.RefreshBase()
+	for id, item := range visible {
+		lo.setupListItem(item, id, focused == item, true)
+	}
+}
+
+func (l *List) RefreshItem(id ListItemID) {
+	lo, visible, focused := l.RefreshBase()
+	for vId, item := range visible {
+		if id == vId {
 			lo.setupListItem(item, id, focused == item, true)
 		}
 	}
@@ -126,7 +141,7 @@ func (l *List) SetItemHeight(id ListItemID, height float32) {
 	l.propertyLock.Unlock()
 
 	if refresh {
-		l.Refresh()
+		l.RefreshItem(id)
 	}
 }
 
@@ -389,6 +404,10 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 	return li
 }
 
+func (li *listItem) Refresh() {
+	return
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
@@ -524,7 +543,7 @@ func newListLayout(list *List) fyne.Layout {
 }
 
 func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
-	l.updateList(true)
+	l.updateList(false)
 }
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
