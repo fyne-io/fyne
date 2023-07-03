@@ -479,13 +479,14 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
 
+	pad := theme.Padding()
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
 	separatorCount := 0
 	separatorThickness := theme.SeparatorThicknessSize()
 	separatorSize := fyne.NewSize(width, separatorThickness)
-	separatorOff := (theme.Padding() - separatorThickness) / 2
+	separatorOff := (pad - separatorThickness) / 2
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
