@@ -118,10 +118,8 @@ func (l *List) Refresh() {
 
 func (l *List) RefreshItem(id ListItemID) {
 	lo, visible, focused := l.RefreshBase()
-	for vId, item := range visible {
-		if id == vId {
-			lo.setupListItem(item, id, focused == item)
-		}
+	if item, ok := visible[id]; ok {
+		lo.setupListItem(item, id, focused == item)
 	}
 }
 
