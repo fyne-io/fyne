@@ -178,7 +178,6 @@ func (t *DocTabs) SetTabLocation(l TabLocation) {
 func (t *DocTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)
-	t.Refresh()
 }
 
 func (t *DocTabs) close(item *TabItem) {
