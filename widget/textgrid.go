@@ -337,6 +337,7 @@ type textGridRenderer struct {
 
 	cellSize fyne.Size
 	objects  []fyne.CanvasObject
+	current  fyne.Canvas
 }
 
 func (t *textGridRenderer) appendTextCell(str rune) {
@@ -369,9 +370,12 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
-	text.Text = string(str)
-	text.Color = fg
-	canvas.Refresh(text)
+	newStr := string(str)
+	if text.Text != newStr || text.Color != fg {
+		text.Text = newStr
+		text.Color = fg
+		canvas.Refresh(text)
+	}
 
 	rect := t.objects[pos*2].(*canvas.Rectangle)
 	bg := color.Color(color.Transparent)
@@ -380,8 +384,10 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	} else if rowStyle != nil && rowStyle.BackgroundColor() != nil {
 		bg = rowStyle.BackgroundColor()
 	}
-	rect.FillColor = bg
-	canvas.Refresh(rect)
+	if rect.FillColor != bg {
+		rect.FillColor = bg
+		canvas.Refresh(rect)
+	}
 }
 
 func (t *textGridRenderer) addCellsIfRequired() {
