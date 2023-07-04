@@ -1027,8 +1027,10 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		e.eraseSelection()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
-		// clear the selection -- return unhandled to add the newline
-		e.eraseSelection()
+		if e.MultiLine {
+			// clear the selection -- return unhandled to add the newline
+			e.eraseSelection()
+		}
 		return false
 	}
 
