@@ -32,3 +32,19 @@ func TestFyneApp_UniqueID(t *testing.T) {
 
 	assert.Equal(t, meta.ID, app.UniqueID())
 }
+
+func TestFyneApp_SetIcon(t *testing.T) {
+	app := NewWithID("io.fyne.test")
+
+	metaIcon := &fyne.StaticResource{StaticName: "Metadata"}
+	SetMetadata(fyne.AppMetadata{
+		Icon: metaIcon,
+	})
+
+	assert.Equal(t, metaIcon, app.Icon())
+
+	setIcon := &fyne.StaticResource{StaticName: "Test"}
+	app.SetIcon(setIcon)
+
+	assert.Equal(t, setIcon, app.Icon())
+}
