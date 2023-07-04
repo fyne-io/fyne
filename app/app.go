@@ -14,8 +14,6 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
-
-	"golang.org/x/sys/execabs"
 )
 
 // Declare conformity with App interface
@@ -33,7 +31,6 @@ type fyneApp struct {
 	prefs     fyne.Preferences
 
 	running uint32 // atomic, 1 == running, 0 == stopped
-	exec    func(name string, arg ...string) *execabs.Cmd
 }
 
 func (a *fyneApp) CloudProvider() fyne.CloudProvider {
@@ -144,7 +141,7 @@ func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
+	newApp := &fyneApp{uniqueID: id, driver: d, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()

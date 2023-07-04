@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/sys/windows/registry"
 
 	"fyne.io/fyne/v2"
@@ -63,7 +64,7 @@ func rootConfigDir() string {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("rundll32", "url.dll,FileProtocolHandler", url.String())
+	cmd := execabs.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
