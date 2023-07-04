@@ -16,8 +16,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
-
-	"golang.org/x/sys/execabs"
 )
 
 const notificationTemplate = `$title = "%s"
