@@ -374,7 +374,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	if text.Text != newStr || text.Color != fg {
 		text.Text = newStr
 		text.Color = fg
-		canvas.Refresh(text)
+		t.refresh(text)
 	}
 
 	rect := t.objects[pos*2].(*canvas.Rectangle)
@@ -386,7 +386,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	}
 	if rect.FillColor != bg {
 		rect.FillColor = bg
-		canvas.Refresh(rect)
+		t.refresh(rect)
 	}
 }
 
@@ -527,6 +527,11 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRenderer) Refresh() {
+	// we may be on a new canvas, so just update it to be sure
+	if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
+		t.current = fyne.CurrentApp().Driver().CanvasForObject(t.text)
+	}
+
 	// theme could change text size
 	t.updateCellSize()
 
@@ -543,6 +548,21 @@ func (t *textGridRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (t *textGridRenderer) Destroy() {
+}
+
+func (t *textGridRenderer) refresh(obj fyne.CanvasObject) {
+	if t.current == nil {
+		if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
+			// cache canvas for this widget, so we don't look it up many times for every cell/row refresh!
+			t.current = fyne.CurrentApp().Driver().CanvasForObject(t.text)
+		}
+
+		if t.current == nil {
+			return // not yet set up perhaps?
+		}
+	}
+
+	t.current.Refresh(obj)
 }
 
 func (t *textGridRenderer) updateCellSize() {
