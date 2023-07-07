@@ -313,6 +313,19 @@ func TestList_DataChange(t *testing.T) {
 	test.AssertRendersToMarkup(t, "list/new_data.xml", w.Canvas())
 }
 
+func TestList_ItemDataChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	list, _ := setupList(t)
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
+	changeData(list)
+	list.RefreshItem(0)
+	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "a")
+}
+
 func TestList_ThemeChange(t *testing.T) {
 	defer test.NewApp()
 	list, w := setupList(t)
