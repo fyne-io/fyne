@@ -66,6 +66,7 @@ func (p *Packager) packageWindows() error {
 		if err != nil {
 			return fmt.Errorf("failed to write manifest template: %w", err)
 		}
+		manifestFile.Close()
 	}
 
 	// launch rsrc to generate the object file

@@ -388,9 +388,12 @@ func (r *buttonRenderer) applyTheme() {
 	switch {
 	case r.button.disabled:
 		labelColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance ||
-		r.button.BackgroundColor != nil:
-		labelColorName = theme.ColorNameBackground
+	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.BackgroundColor != nil:
+		if r.button.focused {
+			labelColorName = theme.ColorNameForeground
+		} else {
+			labelColorName = theme.ColorNameBackground
+		}
 	}
 
 	// customize text color

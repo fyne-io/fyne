@@ -31,6 +31,10 @@ Using the standard go tools you can install Fyne's core library using:
 
     go get fyne.io/fyne/v2
 
+After importing a new module, run the following command before compiling the code for the first time. Avoid running it before writing code that uses the module to prevent accidental removal of dependencies:
+
+    go mod tidy
+
 # Widget demo
 
 To run a showcase of the features of Fyne execute the following:
@@ -177,10 +181,10 @@ However, if looking to support Fyne in a bigger way on your operating system the
 
 It is recommended that you install the following additional apps:
 
-| app | go install | description |
-| --- | ------ | ----------- |
-| fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings` | A GUI for managing your global Fyne settings like theme and scaling |
-| apps | `github.com/fyne-io/apps` | A graphical installer for the Fyne apps listed at https://apps.fyne.io |
+| app           | go install                          | description                                                            |
+| ------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| fyne_settings | `fyne.io/fyne/v2/cmd/fyne_settings` | A GUI for managing your global Fyne settings like theme and scaling    |
+| apps          | `github.com/fyne-io/apps`           | A graphical installer for the Fyne apps listed at https://apps.fyne.io |
 
 These are optional applications but can help to create a more complete desktop experience.
 

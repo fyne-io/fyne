@@ -1694,6 +1694,19 @@ func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
 }
 
+func TestPasswordEntry_Disabled(t *testing.T) {
+	entry, window := setupPasswordTest(t)
+	defer teardownImageTest(window)
+	entry.Disable()
+
+	test.Tap(entry.ActionItem.(fyne.Tappable))
+	assert.True(t, entry.Password)
+
+	entry.Enable()
+	test.Tap(entry.ActionItem.(fyne.Tappable))
+	assert.False(t, entry.Password)
+}
+
 func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 	entry := widget.NewPasswordEntry()
 	entry.SetText("test")
