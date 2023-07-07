@@ -288,6 +288,10 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
+
+		if size.Width <= 0 || size.Height <= 0 { // iconifying on Windows can do bad things
+			return
+		}
 		c.Painter().Paint(obj, pos, size)
 	}
 	afterDraw := func(node *common.RenderCacheNode) {
