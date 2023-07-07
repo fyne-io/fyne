@@ -93,7 +93,7 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *List) refreshBase() (*listLayout, map[int]*listItem, fyne.Focusable) {
+func (l *List) RefreshItem(id ListItemID) {
 	if l.scroller != nil {
 		l.BaseWidget.Refresh()
 		lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
@@ -103,23 +103,9 @@ func (l *List) refreshBase() (*listLayout, map[int]*listItem, fyne.Focusable) {
 		if canvas != nil {
 			focused = canvas.Focused()
 		}
-		return lo, visible, focused
-	}
-	return nil, nil, nil
-}
-
-func (l *List) Refresh() {
-	lo, visible, focused := l.refreshBase()
-	for id, item := range visible {
-		item.updated = false
-		lo.setupListItem(item, id, focused == item)
-	}
-}
-
-func (l *List) RefreshItem(id ListItemID) {
-	lo, visible, focused := l.refreshBase()
-	if item, ok := visible[id]; ok {
-		lo.setupListItem(item, id, focused == item)
+		if item, ok := visible[id]; ok {
+			lo.setupListItem(item, id, focused == item)
+		}
 	}
 }
 
@@ -182,7 +168,7 @@ func (l *List) Resize(s fyne.Size) {
 	}
 
 	l.offsetUpdated(l.scroller.Offset)
-	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(true)
+	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(false)
 }
 
 // Select add the item identified by the given ID to the selection.
@@ -374,7 +360,7 @@ func (l *listRenderer) Refresh() {
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
-	l.layout.Layout.(*listLayout).updateList(true)
+	l.layout.Layout.(*listLayout).updateList(false)
 	canvas.Refresh(l.list.super())
 }
 
@@ -391,14 +377,12 @@ type listItem struct {
 	background        *canvas.Rectangle
 	child             fyne.CanvasObject
 	hovered, selected bool
-	updated           bool
 }
 
 func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 	li := &listItem{
 		child:    child,
 		onTapped: tapped,
-		updated:  false,
 	}
 
 	li.ExtendBaseWidget(li)
@@ -588,7 +572,7 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 		return
 	}
 	l.list.offsetY = pos.Y
-	l.updateList(false)
+	l.updateList(true)
 }
 
 func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
@@ -607,18 +591,15 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		li.hovered = false
 		li.Refresh()
 	}
-	if _, ok := l.visible[id]; ok {
-		if f := l.list.UpdateItem; f != nil && !l.visible[id].updated {
-			l.visible[id].updated = true
-			f(id, li.child)
-		}
+	if f := l.list.UpdateItem; f != nil {
+		f(id, li.child)
 	}
 	li.onTapped = func() {
 		l.list.Select(id)
 	}
 }
 
-func (l *listLayout) updateList(refresh bool) {
+func (l *listLayout) updateList(newOnly bool) {
 	l.renderLock.Lock()
 	separatorThickness := theme.Padding()
 	width := l.list.Size().Width
@@ -674,7 +655,6 @@ func (l *listLayout) updateList(refresh bool) {
 	}
 	for id, old := range wasVisible {
 		if _, ok := l.visible[id]; !ok {
-			wasVisible[id].updated = false
 			if focused == old {
 				canvas.Focus(nil)
 			}
@@ -690,8 +670,16 @@ func (l *listLayout) updateList(refresh bool) {
 	l.list.scroller.Content.(*fyne.Container).Objects = objects
 	l.renderLock.Unlock() // user code should not be locked
 
-	for cId, vItem := range visible {
-		l.setupListItem(vItem, cId, focused == vItem)
+	if newOnly {
+		for nId, nItem := range visible {
+			if _, ok := wasVisible[nId]; !ok {
+				l.setupListItem(nItem, nId, focused == nItem)
+			}
+		}
+	} else {
+		for row, obj := range visible {
+			l.setupListItem(obj, row, focused == obj)
+		}
 	}
 }
 
