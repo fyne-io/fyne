@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 
@@ -37,34 +38,30 @@ func (p *InMemoryPreferences) BoolList(key string) []bool {
 }
 
 func (p *InMemoryPreferences) BoolListWithFallback(key string, fallback []bool) []bool {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.Array:
-		val, ok := value.([]bool)
-		if !ok {
-			return fallback
-		}
-		return val
-	default:
+	value, ok := p.get(key)
+	if !ok {
 		return fallback
 	}
-
+	val, ok := value.([]bool)
+	if !ok {
+		val = fallback
+	}
+	return val
 }
 
 // BoolWithFallback looks up a boolean value and returns the given fallback if not found
 func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.String:
-		val, ok := value.(bool)
-		if !ok {
-			return false
-		}
-		return val
-	default:
+	value, ok := p.get(key)
+	if !ok {
 		return fallback
 	}
-
+	val, ok := value.(bool)
+	if !ok {
+		val = fallback
+		fmt.Println("b2 ", val)
+	}
+	fmt.Println("b3 ", val)
+	return val
 }
 
 // ChangeListeners returns the list of listeners registered for this set of preferences.
@@ -82,32 +79,41 @@ func (p *InMemoryPreferences) FloatList(key string) []float64 {
 }
 
 func (p *InMemoryPreferences) FloatListWithFallback(key string, fallback []float64) []float64 {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.Array:
-		val, ok := value.([]float64)
-		if !ok {
-			return fallback
-		}
-		return val
-	default:
+	value, ok := p.get(key)
+	if !ok {
 		return fallback
 	}
+	val, ok := value.([]float64)
+	if ok {
+		return val
+	}
+	_, okf := value.([]int)
+	if okf {
+		flts := make([]float64, len(value.([]int)))
+		for i, f := range value.([]int) {
+			flts[i] = float64(f)
+		}
+		return flts
+	}
+	return fallback
 }
 
 // FloatWithFallback looks up a float64 value and returns the given fallback if not found
 func (p *InMemoryPreferences) FloatWithFallback(key string, fallback float64) float64 {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.Float64:
-		val, ok := value.(float64)
-		if !ok {
-			return fallback
-		}
-		return val
-	default:
+	value, ok := p.get(key)
+
+	if !ok {
 		return fallback
 	}
+	val, ok := value.(float64)
+	if ok {
+		return val
+	}
+	vali, oki := value.(int)
+	if oki {
+		return float64(vali)
+	}
+	return fallback
 }
 
 // Int looks up an integer value for the key
@@ -120,40 +126,41 @@ func (p *InMemoryPreferences) IntList(key string) []int {
 }
 
 func (p *InMemoryPreferences) IntListWithFallback(key string, fallback []int) []int {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.Array:
-		// integers can be de-serialised as floats, so support both
-		if intVal, ok := value.([]int); ok {
-			return intVal
-		}
+	value, ok := p.get(key)
+	if !ok {
+		return fallback
+	}
+	val, ok := value.([]int)
+	if ok {
+		return val
+	}
+	_, okf := value.([]float64)
+	if okf {
 		ints := make([]int, len(value.([]float64)))
 		for i, f := range value.([]float64) {
 			ints[i] = int(f)
 		}
 		return ints
-	default:
-		return fallback
 	}
+	return fallback
 }
 
 // IntWithFallback looks up an integer value and returns the given fallback if not found
 func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.Int, reflect.Float64:
-		// integers can be de-serialised as floats, so support both
-		if intVal, ok := value.(int); ok {
-			return intVal
-		}
-		val, ok := value.(float64)
-		if !ok {
-			return fallback
-		}
-		return int(val)
-	default:
+	value, ok := p.get(key)
+	if !ok {
 		return fallback
 	}
+	val, ok := value.(int)
+	if ok {
+		return value.(int)
+	}
+	valf, ok := value.(float64)
+	if !ok {
+		return fallback
+	}
+	val = int(valf)
+	return val
 }
 
 // ReadValues provides read access to the underlying value map - for internal use only...
@@ -215,24 +222,28 @@ func (p *InMemoryPreferences) StringList(key string) []string {
 }
 
 func (p *InMemoryPreferences) StringListWithFallback(key string, fallback []string) []string {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.Array:
-		return value.([]string)
-	default:
+	value, ok := p.get(key)
+	if !ok {
 		return fallback
 	}
+	val, ok := value.([]string)
+	if !ok {
+		val = fallback
+	}
+	return val
 }
 
 // StringWithFallback looks up a string value and returns the given fallback if not found
 func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
-	value, _ := p.get(key)
-	switch v := reflect.ValueOf(value); v.Kind() {
-	case reflect.String:
-		return value.(string)
-	default:
+	value, ok := p.get(key)
+	if !ok {
 		return fallback
 	}
+	val, ok := value.(string)
+	if !ok {
+		val = fallback
+	}
+	return val
 }
 
 // WriteValues provides write access to the underlying value map - for internal use only...
