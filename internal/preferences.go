@@ -41,11 +41,11 @@ func (p *InMemoryPreferences) BoolListWithFallback(key string, fallback []bool) 
 	if !ok {
 		return fallback
 	}
-	val, ok := value.([]bool)
-	if !ok {
-		val = fallback
+	_, ok1 := value.([]bool)
+	if !ok1 {
+		return fallback
 	}
-	return val
+	return value.([]bool)
 }
 
 // BoolWithFallback looks up a boolean value and returns the given fallback if not found
@@ -54,11 +54,11 @@ func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
 	if !ok {
 		return fallback
 	}
-	val, ok := value.(bool)
-	if !ok {
-		val = fallback
+	_, ok1 := value.(bool)
+	if !ok1 {
+		return fallback
 	}
-	return val
+	return value.(bool)
 }
 
 // ChangeListeners returns the list of listeners registered for this set of preferences.
@@ -80,12 +80,12 @@ func (p *InMemoryPreferences) FloatListWithFallback(key string, fallback []float
 	if !ok {
 		return fallback
 	}
-	val, ok := value.([]float64)
-	if ok {
-		return val
+	_, ok1 := value.([]float64)
+	if ok1 {
+		return value.([]float64)
 	}
-	_, okf := value.([]int)
-	if okf {
+	_, ok2 := value.([]int)
+	if ok2 {
 		flts := make([]float64, len(value.([]int)))
 		for i, f := range value.([]int) {
 			flts[i] = float64(f)
@@ -102,12 +102,12 @@ func (p *InMemoryPreferences) FloatWithFallback(key string, fallback float64) fl
 	if !ok {
 		return fallback
 	}
-	val, ok := value.(float64)
-	if ok {
-		return val
+	_, ok1 := value.(float64)
+	if ok1 {
+		return value.(float64)
 	}
-	vali, oki := value.(int)
-	if oki {
+	vali, ok2 := value.(int)
+	if ok2 {
 		return float64(vali)
 	}
 	return fallback
@@ -127,12 +127,12 @@ func (p *InMemoryPreferences) IntListWithFallback(key string, fallback []int) []
 	if !ok {
 		return fallback
 	}
-	val, ok := value.([]int)
-	if ok {
-		return val
+	_, ok1 := value.([]int)
+	if ok1 {
+		return value.([]int)
 	}
-	_, okf := value.([]float64)
-	if okf {
+	_, ok2 := value.([]float64)
+	if ok2 {
 		ints := make([]int, len(value.([]float64)))
 		for i, f := range value.([]float64) {
 			ints[i] = int(f)
@@ -148,16 +148,16 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 	if !ok {
 		return fallback
 	}
-	val, ok := value.(int)
-	if ok {
+	_, ok1 := value.(int)
+	if ok1 {
 		return value.(int)
 	}
-	valf, ok := value.(float64)
-	if !ok {
+	valf, ok2 := value.(float64)
+	if !ok2 {
 		return fallback
 	}
-	val = int(valf)
-	return val
+	return int(valf)
+
 }
 
 // ReadValues provides read access to the underlying value map - for internal use only...
@@ -223,11 +223,11 @@ func (p *InMemoryPreferences) StringListWithFallback(key string, fallback []stri
 	if !ok {
 		return fallback
 	}
-	val, ok := value.([]string)
-	if !ok {
-		val = fallback
+	_, ok1 := value.([]string)
+	if !ok1 {
+		return fallback
 	}
-	return val
+	return value.([]string)
 }
 
 // StringWithFallback looks up a string value and returns the given fallback if not found
@@ -236,11 +236,11 @@ func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 	if !ok {
 		return fallback
 	}
-	val, ok := value.(string)
-	if !ok {
-		val = fallback
+	_, ok1 := value.(string)
+	if !ok1 {
+		return fallback
 	}
-	return val
+	return value.(string)
 }
 
 // WriteValues provides write access to the underlying value map - for internal use only...
