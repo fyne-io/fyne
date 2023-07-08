@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 
@@ -58,9 +57,7 @@ func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
 	val, ok := value.(bool)
 	if !ok {
 		val = fallback
-		fmt.Println("b2 ", val)
 	}
-	fmt.Println("b3 ", val)
 	return val
 }
 
