@@ -95,7 +95,7 @@ func (l *List) MinSize() fyne.Size {
 
 // RefreshItem refreshes a single item, specified by the item ID passed in.
 //
-// Since 2.4
+// Since: 2.4
 func (l *List) RefreshItem(id ListItemID) {
 	if l.scroller == nil {
 		return
