@@ -19,11 +19,24 @@ type preferences struct {
 	savedRecently       bool
 	changedDuringSaving bool
 
-	app *fyneApp
+	app                 *fyneApp
+	needsSaveBeforeExit bool
 }
 
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
+
+// forceImmediateSave writes preferences to file immediately, ignoring the debouncing
+// logic in the change listener. Does nothing if preferences are not backed with a file.
+func (p *preferences) forceImmediateSave() {
+	if !p.needsSaveBeforeExit {
+		return
+	}
+	err := p.save()
+	if err != nil {
+		fyne.LogError("Failed on force saving preferences", err)
+	}
+}
 
 func (p *preferences) resetSavedRecently() {
 	go func() {
@@ -49,6 +62,7 @@ func (p *preferences) saveToFile(path string) error {
 	p.savedRecently = true
 	p.prefLock.Unlock()
 	defer p.resetSavedRecently()
+
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err
@@ -132,6 +146,7 @@ func newPreferences(app *fyneApp) *preferences {
 		return p
 	}
 
+	p.needsSaveBeforeExit = true
 	p.AddChangeListener(func() {
 		if p != app.prefs {
 			return
