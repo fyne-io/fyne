@@ -93,19 +93,23 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
+// RefreshItem refreshes a single item, specified by the item ID passed in.
+//
+// Since 2.4
 func (l *List) RefreshItem(id ListItemID) {
 	if l.scroller != nil {
-		l.BaseWidget.Refresh()
-		lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-		visible := lo.visible
-		canvas := fyne.CurrentApp().Driver().CanvasForObject(lo.list)
-		var focused fyne.Focusable
-		if canvas != nil {
-			focused = canvas.Focused()
-		}
-		if item, ok := visible[id]; ok {
-			lo.setupListItem(item, id, focused == item)
-		}
+		return
+	}
+	l.BaseWidget.Refresh()
+	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
+	visible := lo.visible
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(lo.list)
+	var focused fyne.Focusable
+	if canvas != nil {
+		focused = canvas.Focused()
+	}
+	if item, ok := visible[id]; ok {
+		lo.setupListItem(item, id, focused == item)
 	}
 }
 
@@ -671,9 +675,9 @@ func (l *listLayout) updateList(newOnly bool) {
 	l.renderLock.Unlock() // user code should not be locked
 
 	if newOnly {
-		for nId, nItem := range visible {
-			if _, ok := wasVisible[nId]; !ok {
-				l.setupListItem(nItem, nId, focused == nItem)
+		for row, obj := range visible {
+			if _, ok := wasVisible[row]; !ok {
+				l.setupListItem(obj, row, focused == obj)
 			}
 		}
 	} else {
