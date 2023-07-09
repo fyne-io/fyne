@@ -130,6 +130,7 @@ func (p *InMemoryPreferences) IntListWithFallback(key string, fallback []int) []
 	if ok {
 		return vali
 	}
+	// integers can be de-serialised as floats, so support both
 	valf, ok := value.([]float64)
 	if ok {
 		ints := make([]int, len(valf))
@@ -151,6 +152,7 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 	if ok {
 		return vali
 	}
+	// integers can be de-serialised as floats, so support both
 	valf, ok := value.(float64)
 	if !ok {
 		return fallback
