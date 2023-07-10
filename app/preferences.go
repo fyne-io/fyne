@@ -62,7 +62,6 @@ func (p *preferences) saveToFile(path string) error {
 	p.savedRecently = true
 	p.prefLock.Unlock()
 	defer p.resetSavedRecently()
-
 	err := os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil { // this is not an exists error according to docs
 		return err

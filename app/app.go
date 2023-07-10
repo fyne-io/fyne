@@ -148,7 +148,7 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
-	newApp.lifecycle.(*app.Lifecycle).SetAfterStopped(func() {
+	newApp.lifecycle.(*app.Lifecycle).SetOnStoppedHookExecuted(func() {
 		if prefs, ok := newApp.prefs.(*preferences); ok {
 			prefs.forceImmediateSave()
 		}
