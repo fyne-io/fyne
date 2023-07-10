@@ -4,16 +4,34 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/theme"
+)
+
+// TextImportance represents how colored the text should appear
+type TextImportance int
+
+const (
+	// TextImportanceNormal applies a standard appearance.
+	TextImportanceNormal TextImportance = iota
+	// TextImportanceSuccess applies a success color.
+	TextImportanceSuccess
+	// TextImportanceWarning applies a warning color.
+	TextImportanceWarning
+	// TextImportanceError applies an error color.
+	TextImportanceError
+	// TextImportanceDisabled applies a disabled color.
+	TextImportanceDisabled
 )
 
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
 	BaseWidget
-	Text      string
-	Alignment fyne.TextAlign // The alignment of the Text
-	Wrapping  fyne.TextWrap  // The wrapping of the Text
-	TextStyle fyne.TextStyle // The style of the label text
-	provider  *RichText
+	Text       string
+	Alignment  fyne.TextAlign // The alignment of the Text
+	Wrapping   fyne.TextWrap  // The wrapping of the Text
+	TextStyle  fyne.TextStyle // The style of the label text
+	provider   *RichText
+	Importance TextImportance
 
 	binder basicBinder
 }
@@ -124,9 +142,24 @@ func (l *Label) Unbind() {
 }
 
 func (l *Label) syncSegments() {
+	var color fyne.ThemeColorName
+	switch l.Importance {
+	case TextImportanceSuccess:
+		color = theme.ColorNameSuccess
+	case TextImportanceWarning:
+		color = theme.ColorNameWarning
+	case TextImportanceError:
+		color = theme.ColorNameError
+	case TextImportanceDisabled:
+		color = theme.ColorNameDisabled
+	default:
+		color = theme.ColorNameForeground
+	}
+
 	l.provider.Wrapping = l.Wrapping
 	l.provider.Segments[0].(*TextSegment).Style = RichTextStyle{
 		Alignment: l.Alignment,
+		ColorName: color,
 		Inline:    true,
 		TextStyle: l.TextStyle,
 	}
