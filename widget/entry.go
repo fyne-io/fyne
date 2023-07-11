@@ -144,11 +144,6 @@ func (e *Entry) Bind(data binding.String) {
 	e.Validator = func(string) error {
 		return e.conversionError
 	}
-
-	e.OnChanged = func(_ string) {
-		e.binder.CallWithData(e.writeData)
-		e.Validate()
-	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -764,7 +759,6 @@ func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 //
 // Since: 2.0
 func (e *Entry) Unbind() {
-	e.OnChanged = nil
 	e.Validator = nil
 	e.binder.Unbind()
 }
@@ -1197,6 +1191,10 @@ func (e *Entry) updateText(text string) {
 
 		if changed {
 			callback = e.OnChanged
+
+			if e.binder.dataListenerPair.listener != nil {
+				e.binder.CallWithData(e.writeData)
+			}
 		}
 	})
 
