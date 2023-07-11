@@ -1865,6 +1865,26 @@ func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
 	checkNewlineIgnored(t, entry)
 }
 
+func TestSingleLineEntry_SelectionSubmitted(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("abc")
+	assert.Equal(t, "", entry.SelectedText())
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+	assert.Equal(t, "abc", entry.SelectedText())
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	assert.Equal(t, entry.Text, "abc")
+}
+
+func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("abc")
+	assert.Equal(t, "", entry.SelectedText())
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+	assert.Equal(t, "abc", entry.SelectedText())
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	assert.Equal(t, entry.Text, "\n")
+}
+
 func TestEntry_CarriageReturn(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapOff
