@@ -262,8 +262,8 @@ func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 	total := fyne.NewSize(0, 0)
 	counted := 0
 	last := false
-	if bound == nil || bound.segments == nil {
-		return fyne.Size{}
+	if bound == nil {
+		return t.charMinSize(false, fyne.TextStyle{})
 	}
 	for i, seg := range bound.segments {
 		var size fyne.Size
