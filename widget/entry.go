@@ -414,10 +414,10 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 //
 // Implements: desktop.Mouseable
 func (e *Entry) MouseUp(m *desktop.MouseEvent) {
-	start, _ := e.selection()
-
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
+
+	start, _ := e.selection()
 	if start == -1 && e.selecting && !e.selectKeyDown {
 		e.selecting = false
 	}
@@ -427,9 +427,9 @@ func (e *Entry) MouseUp(m *desktop.MouseEvent) {
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
 	e.propertyLock.RLock()
-	selecting := e.selecting
-	e.propertyLock.RUnlock()
-	if !selecting {
+	defer e.propertyLock.RUnlock()
+
+	if !e.selecting {
 		return ""
 	}
 
@@ -437,8 +437,6 @@ func (e *Entry) SelectedText() string {
 	if start == stop {
 		return ""
 	}
-	e.propertyLock.RLock()
-	defer e.propertyLock.RUnlock()
 	r := ([]rune)(e.textProvider().String())
 	return string(r[start:stop])
 }
@@ -466,7 +464,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.updateText(text)
+	e.updateTextAndRefresh(text)
 
 	e.updateCursorAndSelection()
 }
@@ -646,7 +644,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
-	e.updateText(provider.String())
+	e.updateTextAndRefresh(provider.String())
 }
 
 func (e *Entry) typedKeyUp(provider *RichText, multiLine bool) {
@@ -722,18 +720,14 @@ func (e *Entry) TypedRune(r rune) {
 		e.popUp.Hide()
 	}
 
-	selecting := e.selecting
-	e.propertyLock.Unlock()
-
 	// if we've typed a character and we're selecting then replace the selection with the character
-	if selecting {
+	if e.selecting {
 		cb := e.OnChanged
 		e.OnChanged = nil // don't propagate this change to binding etc
 		e.eraseSelection()
 		e.OnChanged = cb // the change later will then trigger callback
 	}
 
-	e.propertyLock.Lock()
 	provider := e.textProvider()
 	e.selecting = false
 
@@ -743,8 +737,8 @@ func (e *Entry) TypedRune(r rune) {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
 	content := provider.String()
-	e.propertyLock.Unlock()
 	e.updateText(content)
+	e.propertyLock.Unlock()
 }
 
 // TypedShortcut implements the Shortcutable interface
@@ -797,7 +791,7 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	e.copyToClipboard(clipboard)
-	e.eraseSelection()
+	e.setFieldsAndRefresh(e.eraseSelection)
 }
 
 // eraseSelection removes the current selected region and moves the cursor
@@ -813,12 +807,10 @@ func (e *Entry) eraseSelection() {
 		return
 	}
 
-	e.propertyLock.Lock()
 	provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
-	e.propertyLock.Unlock()
 	e.updateText(provider.String())
 }
 
@@ -845,7 +837,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	if e.selecting {
-		e.eraseSelection()
+		e.setFieldsAndRefresh(e.eraseSelection)
 	}
 	text := clipboard.Content()
 	if !e.MultiLine {
@@ -858,8 +850,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	provider.insertAt(pos, text)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-	e.updateText(provider.String())
-	e.Refresh()
+	e.updateTextAndRefresh(provider.String())
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
@@ -970,11 +961,11 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
-		e.eraseSelection()
+		e.setFieldsAndRefresh(e.eraseSelection)
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		// clear the selection -- return unhandled to add the newline
-		e.eraseSelection()
+		e.setFieldsAndRefresh(e.eraseSelection)
 		return false
 	}
 
@@ -982,8 +973,8 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		switch key.Name {
 		case fyne.KeyLeft:
 			// seek to the start of the selection -- return handled
-			selectStart, _ := e.selection()
 			e.propertyLock.Lock()
+			selectStart, _ := e.selection()
 			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
 			e.selecting = false
 			e.propertyLock.Unlock()
@@ -1015,16 +1006,12 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 //	"T  e  s_[t  i] n  g" == 3, 5
 //	"T  e_[s  t  i] n  g" == 2, 5
 func (e *Entry) selection() (int, int) {
-	e.propertyLock.RLock()
 	noSelection := !e.selecting || (e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn)
-	e.propertyLock.RUnlock()
 
 	if noSelection {
 		return -1, -1
 	}
 
-	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
 	// Find the selection start
 	rowA, colA := e.CursorRow, e.CursorColumn
 	rowB, colB := e.selectRow, e.selectColumn
@@ -1176,25 +1163,37 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 	}
 }
 
-// updateText updates the internal text to the given value
-func (e *Entry) updateText(text string) {
+// updateText updates the internal text to the given value.
+// It assumes that a lock exists on the widget.
+func (e *Entry) updateText(text string) bool {
+	changed := e.Text != text
+	e.Text = text
+	e.syncSegments()
+	e.text.updateRowBounds()
+
+	if e.Text != "" {
+		e.dirty = true
+	}
+
+	if changed {
+		if e.binder.dataListenerPair.listener != nil {
+			e.binder.SetCallback(nil)
+			e.binder.CallWithData(e.writeData)
+			e.binder.SetCallback(e.updateFromData)
+		}
+	}
+	return changed
+}
+
+// updateTextAndRefresh updates the internal text to the given value then refreshes it.
+// This should not be called under a property lock
+func (e *Entry) updateTextAndRefresh(text string) {
 	var callback func(string)
 	e.setFieldsAndRefresh(func() {
-		changed := e.Text != text
-		e.Text = text
-		e.syncSegments()
-		e.text.updateRowBounds()
-
-		if e.Text != "" {
-			e.dirty = true
-		}
+		changed := e.updateText(text)
 
 		if changed {
 			callback = e.OnChanged
-
-			if e.binder.dataListenerPair.listener != nil {
-				e.binder.CallWithData(e.writeData)
-			}
 		}
 	})
 
@@ -1240,11 +1239,11 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		onSubmitted(text)
 		return
 	}
-	e.propertyLock.Lock()
-	provider.insertAt(e.cursorTextPos(), "\n")
-	e.CursorColumn = 0
-	e.CursorRow++
-	e.propertyLock.Unlock()
+	e.setFieldsAndRefresh(func() {
+		provider.insertAt(e.cursorTextPos(), "\n")
+		e.CursorColumn = 0
+		e.CursorRow++
+	})
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
