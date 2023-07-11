@@ -233,11 +233,12 @@ func (t *RichText) insertAt(pos int, runes string) {
 		return
 	}
 	r := ([]rune)(into.Text)
+	if pos > len(r) { // safety in case position is out of bounds for the segment
+		pos = len(r)
+	}
 	r2 := append(r[:pos], append([]rune(runes), r[pos:]...)...)
 	into.Text = string(r2)
 	t.Segments[index] = into
-
-	t.Refresh()
 }
 
 // Len returns the text widget buffer length
@@ -261,6 +262,9 @@ func (t *RichText) lineSizeToColumn(col, row int) fyne.Size {
 	total := fyne.NewSize(0, 0)
 	counted := 0
 	last := false
+	if bound == nil || bound.segments == nil {
+		return fyne.Size{}
+	}
 	for i, seg := range bound.segments {
 		var size fyne.Size
 		if text, ok := seg.(*TextSegment); ok {
