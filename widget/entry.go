@@ -739,6 +739,7 @@ func (e *Entry) TypedRune(r rune) {
 	content := provider.String()
 	e.updateText(content)
 	e.propertyLock.Unlock()
+	e.Refresh()
 }
 
 // TypedShortcut implements the Shortcutable interface
