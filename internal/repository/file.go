@@ -246,7 +246,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	info, err := os.Stat(p)
 
 	if err != nil {
-		if os.IsNotExist(err) {
+		if os.IsNotExist(p) {
 			return false, nil
 		}
 		return false, err
