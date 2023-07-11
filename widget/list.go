@@ -93,6 +93,26 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
+// RefreshItem refreshes a single item, specified by the item ID passed in.
+//
+// Since: 2.4
+func (l *List) RefreshItem(id ListItemID) {
+	if l.scroller == nil {
+		return
+	}
+	l.BaseWidget.Refresh()
+	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
+	visible := lo.visible
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(lo.list)
+	var focused fyne.Focusable
+	if canvas != nil {
+		focused = canvas.Focused()
+	}
+	if item, ok := visible[id]; ok {
+		lo.setupListItem(item, id, focused == item)
+	}
+}
+
 // SetItemHeight supports changing the height of the specified list item. Items normally take the height of the template
 // returned from the CreateItem callback. The height parameter uses the same units as a fyne.Size type and refers
 // to the internal content height not including the divider size.
@@ -110,7 +130,7 @@ func (l *List) SetItemHeight(id ListItemID, height float32) {
 	l.propertyLock.Unlock()
 
 	if refresh {
-		l.Refresh()
+		l.RefreshItem(id)
 	}
 }
 
@@ -152,7 +172,7 @@ func (l *List) Resize(s fyne.Size) {
 	}
 
 	l.offsetUpdated(l.scroller.Offset)
-	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(true)
+	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(false)
 }
 
 // Select add the item identified by the given ID to the selection.
@@ -344,7 +364,7 @@ func (l *listRenderer) Refresh() {
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
-	l.layout.Layout.(*listLayout).updateList(true)
+	l.layout.Layout.(*listLayout).updateList(false)
 	canvas.Refresh(l.list.super())
 }
 
@@ -556,7 +576,7 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 		return
 	}
 	l.list.offsetY = pos.Y
-	l.updateList(false)
+	l.updateList(true)
 }
 
 func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
@@ -583,7 +603,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	}
 }
 
-func (l *listLayout) updateList(refresh bool) {
+func (l *listLayout) updateList(newOnly bool) {
 	l.renderLock.Lock()
 	separatorThickness := theme.Padding()
 	width := l.list.Size().Width
@@ -654,8 +674,16 @@ func (l *listLayout) updateList(refresh bool) {
 	l.list.scroller.Content.(*fyne.Container).Objects = objects
 	l.renderLock.Unlock() // user code should not be locked
 
-	for row, obj := range visible {
-		l.setupListItem(obj, row, focused == obj)
+	if newOnly {
+		for row, obj := range visible {
+			if _, ok := wasVisible[row]; !ok {
+				l.setupListItem(obj, row, focused == obj)
+			}
+		}
+	} else {
+		for row, obj := range visible {
+			l.setupListItem(obj, row, focused == obj)
+		}
 	}
 }
 

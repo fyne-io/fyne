@@ -313,6 +313,19 @@ func TestList_DataChange(t *testing.T) {
 	test.AssertRendersToMarkup(t, "list/new_data.xml", w.Canvas())
 }
 
+func TestList_ItemDataChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	list, _ := setupList(t)
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
+	changeData(list)
+	list.RefreshItem(0)
+	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "a")
+}
+
 func TestList_ThemeChange(t *testing.T) {
 	defer test.NewApp()
 	list, w := setupList(t)
@@ -577,4 +590,51 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 	w.Resize(fyne.NewSize(200, 400))
 	test.AssertRendersToMarkup(t, "list/initial.xml", w.Canvas())
 	return list, w
+}
+
+func TestList_LimitUpdateItem(t *testing.T) {
+	app := test.NewApp()
+	w := app.NewWindow("")
+	printOut := ""
+	list := NewList(
+		func() int {
+			return 5
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			printOut += fmt.Sprintf("%d.", id)
+		},
+	)
+	w.SetContent(list)
+	w.ShowAndRun()
+	assert.Equal(t, "0.0.", printOut)
+	list.scrollTo(1)
+	assert.Equal(t, "0.0.1.", printOut)
+	list.scrollTo(2)
+	assert.Equal(t, "0.0.1.2.", printOut)
+}
+
+func TestList_RefreshUpdatesAllItems(t *testing.T) {
+	app := test.NewApp()
+	w := app.NewWindow("")
+	printOut := ""
+	list := NewList(
+		func() int {
+			return 1
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("Test")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			printOut += fmt.Sprintf("%d.", id)
+		},
+	)
+	w.SetContent(list)
+	w.ShowAndRun()
+	assert.Equal(t, "0.", printOut)
+
+	list.Refresh()
+	assert.Equal(t, "0.0.", printOut)
 }
