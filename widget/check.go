@@ -285,6 +285,8 @@ func (c *Check) TypedRune(r rune) {
 func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 
 // SetText sets the text of the Check
+//
+// Since: 2.4
 func (c *Check) SetText(text string) {
 	c.Text = text
 	c.Refresh()
