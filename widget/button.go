@@ -79,6 +79,7 @@ type Button struct {
 	BorderColor     color.Color         // border color
 	BackgroundColor color.Color         // background color
 	TextColorName   fyne.ThemeColorName // text color name
+	RichTextStyle   *RichTextStyle      // rich text style
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
@@ -111,7 +112,11 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
+	richTextStyle := RichTextStyleStrong
+	if b.RichTextStyle != nil {
+		richTextStyle = *b.RichTextStyle
+	}
+	seg := &TextSegment{Text: b.Text, Style: richTextStyle}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
 	text.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
