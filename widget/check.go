@@ -284,6 +284,14 @@ func (c *Check) TypedRune(r rune) {
 // TypedKey receives key input events when the Check is focused.
 func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 
+// SetText sets the text of the Check
+//
+// Since: 2.4
+func (c *Check) SetText(text string) {
+	c.Text = text
+	c.Refresh()
+}
+
 // Unbind disconnects any configured data source from this Check.
 // The current value will remain at the last value of the data source.
 //
