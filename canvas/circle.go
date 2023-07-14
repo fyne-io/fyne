@@ -2,6 +2,7 @@ package canvas
 
 import (
 	"image/color"
+	"math"
 
 	"fyne.io/fyne/v2"
 )
@@ -79,7 +80,8 @@ func (c *Circle) Show() {
 
 // Size returns the current size of bounding box for this circle object
 func (c *Circle) Size() fyne.Size {
-	return fyne.NewSize(c.Position2.X-c.Position1.X, c.Position2.Y-c.Position1.Y)
+	return fyne.NewSize(float32(math.Abs(float64(c.Position2.X)-float64(c.Position1.X))),
+		float32(math.Abs(float64(c.Position2.Y)-float64(c.Position1.Y))))
 }
 
 // Visible returns true if this circle is visible, false otherwise

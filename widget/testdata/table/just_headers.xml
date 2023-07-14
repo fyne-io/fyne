@@ -1,0 +1,53 @@
+<canvas padded size="120x120">
+	<content>
+		<widget pos="4,4" size="112x112" type="*widget.Table">
+			<widget pos="32,0" size="79x35" type="*widget.clip">
+				<container size="0x0">
+					<rectangle fillColor="overlayBackground" size="112x35"/>
+					<widget size="41x35" type="*widget.Label">
+						<text alignment="center" bold pos="15,8" size="9x19">A</text>
+					</widget>
+					<widget pos="45,0" size="41x35" type="*widget.Label">
+						<text alignment="center" bold pos="15,8" size="9x19">B</text>
+					</widget>
+					<widget pos="90,0" size="41x35" type="*widget.Label">
+						<text alignment="center" bold pos="16,8" size="8x19">C</text>
+					</widget>
+				</container>
+			</widget>
+			<widget pos="0,35" size="32x76" type="*widget.clip">
+				<container size="0x0">
+					<rectangle fillColor="overlayBackground" size="32x112"/>
+				</container>
+			</widget>
+			<widget size="32x35" type="*widget.clip">
+				<container size="0x0">
+					<rectangle fillColor="overlayBackground" size="32x35"/>
+					<rectangle fillColor="overlayBackground" size="32x35"/>
+				</container>
+			</widget>
+			<widget size="112x112" type="*widget.clip">
+				<container size="0x0">
+					<widget pos="74,0" size="1x112" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="1x112"/>
+					</widget>
+					<widget pos="119,0" size="1x112" type="*widget.Separator">
+						<rectangle fillColor="disabled" size="1x112"/>
+					</widget>
+				</container>
+			</widget>
+			<widget pos="32,35" size="79x76" type="*widget.Scroll">
+				<widget size="402x76" type="*widget.tableCells">
+				</widget>
+				<widget pos="79,0" size="0x76" type="*widget.Shadow">
+					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x76"/>
+				</widget>
+				<widget pos="0,70" size="79x6" type="*widget.scrollBarArea">
+					<widget pos="0,3" size="16x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" size="16x3"/>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+</canvas>

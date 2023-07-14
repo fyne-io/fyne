@@ -7,7 +7,7 @@ type appData struct {
 	AppID, AppVersion string
 	AppBuild          int
 	ResGoString       string
-	Release           bool
+	Release, rawIcon  bool
 	CustomMetadata    map[string]string
 	VersionAtLeast2_3 bool
 }

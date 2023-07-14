@@ -13,7 +13,7 @@
 			</widget>
 			<text bold pos="10,138" size="60x32" textSize="23">Title</text>
 			<text pos="10,174" size="60x19">Subtitle</text>
-			<image pos="2,2" rsc="fyneLogo" size="76x128"/>
+			<image pos="2,2" rsc="computerIcon" size="76x128"/>
 		</widget>
 	</content>
 </canvas>

@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"github.com/godbus/dbus/v5"
+	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -27,7 +28,7 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("xdg-open", url.String())
+	cmd := execabs.Command("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
@@ -58,13 +59,19 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 		return theme.VariantDark
 	}
 
+	// See: https://github.com/flatpak/xdg-desktop-portal/blob/1.16.0/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
+	// 0: No preference
+	// 1: Prefer dark appearance
+	// 2: Prefer light appearance
 	switch value {
-	case 0:
+	case 2:
 		return theme.VariantLight
-	default:
+	case 1:
 		return theme.VariantDark
+	default:
+		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
+		return theme.VariantLight
 	}
-
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {

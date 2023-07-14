@@ -1,5 +1,5 @@
-//go:build !ci && !mobile
-// +build !ci,!mobile
+//go:build !no_glfw && !mobile
+// +build !no_glfw,!mobile
 
 package glfw
 
@@ -45,7 +45,8 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	c.setMenuOverlay(movl)
 	c.Unlock()
 	w.SetContent(content)
-	w.Resize(fyne.NewSize(200, 199))
+	w.Resize(fyne.NewSize(300, 200))
+	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
 
 	ovli1 := widget.NewLabel("Overlay Item 1")
 	ovli2 := widget.NewLabel("Overlay Item 2")
@@ -54,7 +55,13 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	ovl := widget.NewModalPopUp(ovlContent, c)
 	ovl.Show()
 
+	// This helps to detect size changes which might happen when the font size or rendering are changed.
+	// It gives also a hint on the expected offset for the overlay components.
+	assert.InDelta(t, 112, ovlContent.Size().Width, 1)
+	assert.InDelta(t, 113, ovlContent.Size().Height, 1)
+
 	repaintWindow(w)
+	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
 	// accessing the menu bar's actual CanvasObjects isn't straight forward
 	// 0 is the shadow
 	// 1 is the menu bar’s underlay
@@ -69,17 +76,17 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	}{
 		"a cell": {
 			object: cr1c3,
-			wantX:  180,
+			wantX:  184,
 			wantY:  31,
 		},
 		"a row": {
 			object: cr2,
-			wantX:  6,
-			wantY:  71,
+			wantX:  4,
+			wantY:  70,
 		},
 		"the window content": {
 			object: content,
-			wantX:  6,
+			wantX:  4,
 			wantY:  31,
 		},
 		"a hidden element": {
@@ -90,19 +97,19 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 		"a menu": {
 			object: m2,
-			wantX:  76,
+			wantX:  77,
 			wantY:  0,
 		},
 
 		"an overlay item": {
 			object: ovli2,
-			wantX:  81,
+			wantX:  93,
 			wantY:  82,
 		},
 		"the overlay content": {
 			object: ovlContent,
-			wantX:  81,
-			wantY:  42,
+			wantX:  93,
+			wantY:  43,
 		},
 		"the overlay": {
 			object: ovl,

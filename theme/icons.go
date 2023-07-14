@@ -136,6 +136,11 @@ const (
 	// Since: 2.0
 	IconNameError fyne.ThemeIconName = "error"
 
+	// IconNameBrokenImage is the name of the theme lookup for broken-image icon.
+	//
+	// Since: 2.4
+	IconNameBrokenImage fyne.ThemeIconName = "broken-image"
+
 	// IconNameDocument is the name of theme lookup for document icon.
 	//
 	// Since: 2.0
@@ -490,10 +495,11 @@ var (
 		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
 		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
 
-		IconNameInfo:     NewThemedResource(infoIconRes),
-		IconNameQuestion: NewThemedResource(questionIconRes),
-		IconNameWarning:  NewThemedResource(warningIconRes),
-		IconNameError:    NewThemedResource(errorIconRes),
+		IconNameInfo:        NewThemedResource(infoIconRes),
+		IconNameQuestion:    NewThemedResource(questionIconRes),
+		IconNameWarning:     NewThemedResource(warningIconRes),
+		IconNameError:       NewThemedResource(errorIconRes),
+		IconNameBrokenImage: NewThemedResource(brokenimageIconRes),
 
 		IconNameMailAttachment: NewThemedResource(mailattachmentIconRes),
 		IconNameMailCompose:    NewThemedResource(mailcomposeIconRes),
@@ -718,7 +724,9 @@ func NewDisabledResource(res fyne.Resource) *DisabledResource {
 	}
 }
 
-// FyneLogo returns a resource containing the Fyne logo
+// FyneLogo returns a resource containing the Fyne logo.
+//
+// Deprecated: Applications should use their own icon in most cases.
 func FyneLogo() fyne.Resource {
 	return fynelogo
 }
@@ -881,6 +889,13 @@ func WarningIcon() fyne.Resource {
 // ErrorIcon returns a resource containing the standard dialog error icon for the current theme
 func ErrorIcon() fyne.Resource {
 	return safeIconLookup(IconNameError)
+}
+
+// BrokenImageIconreturns a resource containing an icon to specify a broken or missing image
+//
+// Since: 2.4
+func BrokenImageIcon() fyne.Resource {
+	return safeIconLookup(IconNameBrokenImage)
 }
 
 // FileIcon returns a resource containing the appropriate file icon for the current theme

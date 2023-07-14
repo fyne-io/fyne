@@ -2,7 +2,6 @@ package util
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +14,7 @@ func AndroidBuildToolsPath() string {
 	dir := filepath.Join(env, "build-tools")
 
 	// this may contain a version subdir
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return dir
 	}

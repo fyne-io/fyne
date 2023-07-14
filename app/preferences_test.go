@@ -1,7 +1,6 @@
 package app
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -37,9 +36,13 @@ func TestPreferences_Save(t *testing.T) {
 	p := loadPreferences("dummy")
 	p.WriteValues(func(val map[string]interface{}) {
 		val["keyString"] = "value"
+		val["keyStringList"] = []string{"1", "2", "3"}
 		val["keyInt"] = 4
+		val["keyIntList"] = []int{1, 2, 3}
 		val["keyFloat"] = 3.5
+		val["keyFloatList"] = []float64{1.1, 2.2, 3.3}
 		val["keyBool"] = true
+		val["keyBoolList"] = []bool{true, false, true}
 	})
 
 	path := p.storagePath()
@@ -47,11 +50,11 @@ func TestPreferences_Save(t *testing.T) {
 	err := p.saveToFile(path)
 	assert.Nil(t, err)
 
-	expected, err := ioutil.ReadFile(filepath.Join("testdata", "preferences.json"))
+	expected, err := os.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {
 		assert.Fail(t, "Failed to load, %v", err)
 	}
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		assert.Fail(t, "Failed to load, %v", err)
 	}
@@ -60,6 +63,7 @@ func TestPreferences_Save(t *testing.T) {
 	// check it reads the saved output
 	p = loadPreferences("dummy")
 	assert.Equal(t, "value", p.String("keyString"))
+	assert.Equal(t, 3, len(p.StringList("keyStringList")))
 }
 
 func TestPreferences_Save_OverwriteFast(t *testing.T) {
@@ -87,7 +91,11 @@ func TestPreferences_Load(t *testing.T) {
 	p.loadFromFile(filepath.Join("testdata", "preferences.json"))
 
 	assert.Equal(t, "value", p.String("keyString"))
+	assert.Equal(t, []string{"1", "2", "3"}, p.StringList("keyStringList"))
 	assert.Equal(t, 4, p.Int("keyInt"))
+	assert.Equal(t, []int{1, 2, 3}, p.IntList("keyIntList"))
 	assert.Equal(t, 3.5, p.Float("keyFloat"))
+	assert.Equal(t, []float64{1.1, 2.2, 3.3}, p.FloatList("keyFloatList"))
 	assert.Equal(t, true, p.Bool("keyBool"))
+	assert.Equal(t, []bool{true, false, true}, p.BoolList("keyBoolList"))
 }

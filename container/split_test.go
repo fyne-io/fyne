@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -288,31 +289,69 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
 		split := NewHSplit(objA, objB)
-		split.Resize(fyne.NewSize(100, 100))
-		divider := newDivider(split)
+		split.Resize(fyne.NewSize(108, 108))
+		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
 		assert.Equal(t, 0.5, split.Offset)
 
 		divider.Dragged(&fyne.DragEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(20, 9)},
-			Dragged:    fyne.NewDelta(10, -1),
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(13, 9)},
+			Dragged:    fyne.NewDelta(10, 0),
 		})
 		assert.Equal(t, 0.6, split.Offset)
 
 		divider.DragEnd()
 		assert.Equal(t, 0.6, split.Offset)
+
+		// test max limit
+		divider.Dragged(&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(53, 9)},
+			Dragged:    fyne.NewDelta(54, 0),
+		})
+		divider.Dragged(&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(53, 9)},
+			Dragged:    fyne.NewDelta(54, 0),
+		})
+		assert.Equal(t, 0.9, split.Offset)
+
+		// test returns to position after over-drag
+		divider.Dragged(&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(-97, 9)},
+			Dragged:    fyne.NewDelta(-108, 0),
+		})
+		divider.DragEnd()
+		assert.Equal(t, 0.6, split.Offset)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		split := NewVSplit(objA, objB)
-		split.Resize(fyne.NewSize(100, 100))
-		divider := newDivider(split)
+		split.Resize(fyne.NewSize(108, 108))
+		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
 		assert.Equal(t, 0.5, split.Offset)
 
 		divider.Dragged(&fyne.DragEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, 20)},
-			Dragged:    fyne.NewDelta(-1, 10),
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(13, 9)},
+			Dragged:    fyne.NewDelta(0, 10),
 		})
 		assert.Equal(t, 0.6, split.Offset)
 
+		divider.DragEnd()
+		assert.Equal(t, 0.6, split.Offset)
+
+		// test max limit
+		divider.Dragged(&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, 53)},
+			Dragged:    fyne.NewDelta(0, 54),
+		})
+		divider.Dragged(&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, 53)},
+			Dragged:    fyne.NewDelta(0, 54),
+		})
+		assert.Equal(t, 0.9, split.Offset)
+
+		// test returns to position after over-drag
+		divider.Dragged(&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, -97)},
+			Dragged:    fyne.NewDelta(0, -108),
+		})
 		divider.DragEnd()
 		assert.Equal(t, 0.6, split.Offset)
 	})
@@ -326,8 +365,8 @@ func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
 		split := NewHSplit(objA, objB)
-		split.Resize(fyne.NewSize(100, 100))
-		divider := newDivider(split)
+		split.Resize(fyne.NewSize(108, 108))
+		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
 		t.Run("Leading", func(t *testing.T) {
 			split.SetOffset(0.1)
 
@@ -351,8 +390,8 @@ func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		split := NewVSplit(objA, objB)
-		split.Resize(fyne.NewSize(100, 100))
-		divider := newDivider(split)
+		split.Resize(fyne.NewSize(108, 108))
+		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
 		t.Run("Leading", func(t *testing.T) {
 			split.SetOffset(0.1)
 

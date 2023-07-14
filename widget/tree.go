@@ -479,13 +479,14 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
 
+	pad := theme.Padding()
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
 	separatorCount := 0
 	separatorThickness := theme.SeparatorThicknessSize()
 	separatorSize := fyne.NewSize(width, separatorThickness)
-	separatorOff := (theme.Padding() - separatorThickness) / 2
+	separatorOff := (pad + separatorThickness) / 2
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
@@ -499,19 +500,9 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		}
 
 		// If this is not the first item, add a separator
-		if y > 0 {
-			var separator fyne.CanvasObject
-			if separatorCount < len(r.separators) {
-				separator = r.separators[separatorCount]
-			} else {
-				separator = NewSeparator()
-				r.separators = append(r.separators, separator)
-			}
-			separator.Move(fyne.NewPos(0, y+separatorOff))
-			separator.Resize(separatorSize)
-			separator.Show()
-			r.objects = append(r.objects, separator)
-			y += theme.Padding()
+		addSeparator := y > 0
+		if addSeparator {
+			y += pad
 			separatorCount++
 		}
 
@@ -525,6 +516,21 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			// Node is below viewport and not visible
 		} else {
 			// Node is in viewport
+
+			if addSeparator {
+				var separator fyne.CanvasObject
+				if separatorCount < len(r.separators) {
+					separator = r.separators[separatorCount]
+				} else {
+					separator = NewSeparator()
+					r.separators = append(r.separators, separator)
+				}
+				separator.Move(fyne.NewPos(0, y-separatorOff))
+				separator.Resize(separatorSize)
+				r.objects = append(r.objects, separator)
+				separatorCount++
+			}
+
 			var n fyne.CanvasObject
 			if isBranch {
 				b, ok := r.branches[uid]
@@ -567,13 +573,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	// Release any nodes that haven't been reused
 	for uid, b := range r.branches {
 		if _, ok := branches[uid]; !ok {
-			b.Hide()
 			r.branchPool.Release(b)
 		}
 	}
 	for uid, l := range r.leaves {
 		if _, ok := leaves[uid]; !ok {
-			l.Hide()
 			r.leafPool.Release(l)
 		}
 	}

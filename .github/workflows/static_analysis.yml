@@ -10,25 +10,34 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1.7.0
+    - uses: WillAbides/setup-go-faster@v1.8.0
       with:
-        go-version: '1.19.x'
+        go-version: '1.20.x'
 
     - name: Get dependencies
+      run: >-
+        sudo apt-get update &&
+        sudo apt-get install
+        gcc
+        libegl1-mesa-dev
+        libgl1-mesa-dev
+        libgles2-mesa-dev
+        libx11-dev
+        xorg-dev
+        xvfb
+
+    - name: Install analysis tools
       run: |
-        sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
         go install golang.org/x/tools/cmd/goimports@latest
         go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-        go install honnef.co/go/tools/cmd/staticcheck@v0.4.0
-
-    - name: Cleanup repository
-      run: rm -rf vendor/
+        go install honnef.co/go/tools/cmd/staticcheck@v0.4.2
+        go install github.com/mattn/goveralls@latest
 
     - name: Vet
-      run: go vet -tags ci ./...
+      run: go vet ./...
 
     - name: Goimports
       run: test -z "$(goimports -e -d . | tee /dev/stderr)"
@@ -38,3 +47,15 @@ jobs:
 
     - name: Staticcheck
       run: staticcheck ./...
+
+    - name: Update coverage
+      run: |
+        set -e
+        xvfb-run go test -covermode=atomic -coverprofile=coverage.out ./...
+        coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
+        if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
+
+    - name: Update PR Coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: coverage.out

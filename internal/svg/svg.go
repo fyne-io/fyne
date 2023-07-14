@@ -9,8 +9,9 @@ import (
 	"image"
 	"image/color"
 	"io"
-	"io/ioutil"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
@@ -39,40 +40,79 @@ func Colorize(src []byte, clr color.Color) []byte {
 	return colorized
 }
 
-// ToImage reads an SVG from an io.Reader and renders it into an image.NRGBA using the requested width and height.
-// The optional `validateSize` callback can be used to cancel the rendering depending on the SVG’s original size.
-// In this case `nil` is returned.
-func ToImage(file io.Reader, width, height int, validateSize func(origW, origH int) bool) (*image.NRGBA, error) {
-	icon, err := oksvg.ReadIconStream(file)
+type Decoder struct {
+	icon *oksvg.SvgIcon
+}
+
+type Config struct {
+	Width  int
+	Height int
+	Aspect float32
+}
+
+func NewDecoder(stream io.Reader) (*Decoder, error) {
+	icon, err := oksvg.ReadIconStream(stream)
 	if err != nil {
-		return nil, fmt.Errorf("SVG Load error: %w", err)
+		return nil, err
 	}
 
-	origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
-	if validateSize != nil && !validateSize(origW, origH) {
-		return nil, nil
-	}
+	return &Decoder{
+		icon: icon,
+	}, nil
+}
 
-	aspect := float32(origW) / float32(origH)
+func (d *Decoder) Config() Config {
+	return Config{
+		int(d.icon.ViewBox.W),
+		int(d.icon.ViewBox.H),
+		float32(d.icon.ViewBox.W / d.icon.ViewBox.H),
+	}
+}
+
+func (d *Decoder) Draw(width, height int) (*image.NRGBA, error) {
+	config := d.Config()
+
 	viewAspect := float32(width) / float32(height)
 	imgW, imgH := width, height
-	if viewAspect > aspect {
-		imgW = int(float32(height) * aspect)
-	} else if viewAspect < aspect {
-		imgH = int(float32(width) / aspect)
+	if viewAspect > config.Aspect {
+		imgW = int(float32(height) * config.Aspect)
+	} else if viewAspect < config.Aspect {
+		imgH = int(float32(width) / config.Aspect)
 	}
-	icon.SetTarget(0, 0, float64(imgW), float64(imgH))
+
+	d.icon.SetTarget(0, 0, float64(imgW), float64(imgH))
 
 	img := image.NewNRGBA(image.Rect(0, 0, imgW, imgH))
-	scanner := rasterx.NewScannerGV(origW, origH, img, img.Bounds())
+	scanner := rasterx.NewScannerGV(config.Width, config.Height, img, img.Bounds())
 	raster := rasterx.NewDasher(width, height, scanner)
 
-	err = drawSVGSafely(icon, raster)
+	err := drawSVGSafely(d.icon, raster)
 	if err != nil {
 		err = fmt.Errorf("SVG render error: %w", err)
 		return nil, err
 	}
 	return img, nil
+}
+
+func IsFileSVG(path string) bool {
+	return strings.ToLower(filepath.Ext(path)) == ".svg"
+}
+
+// IsResourceSVG checks if the resource is an SVG or not.
+func IsResourceSVG(res fyne.Resource) bool {
+	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
+		return true
+	}
+
+	if len(res.Content()) < 5 {
+		return false
+	}
+
+	switch strings.ToLower(string(res.Content()[:5])) {
+	case "<!doc", "<?xml", "<svg ":
+		return true
+	}
+	return false
 }
 
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
@@ -245,7 +285,7 @@ func (s *svg) replaceFillColor(color color.Color) error {
 
 func svgFromXML(reader io.Reader) (*svg, error) {
 	var s svg
-	bSlice, err := ioutil.ReadAll(reader)
+	bSlice, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

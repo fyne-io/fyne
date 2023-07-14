@@ -287,6 +287,11 @@ func Test_WarningIcon_FileSource(t *testing.T) {
 	assert.Equal(t, "foreground_warning.svg", result)
 }
 
+func Test_BrokenImageIcon_FileSource(t *testing.T) {
+	result := BrokenImageIcon().Name()
+	assert.Equal(t, "foreground_broken-image.svg", result)
+}
+
 func Test_FolderIcon_FileSource(t *testing.T) {
 	result := FolderIcon().Name()
 	assert.Equal(t, "foreground_folder.svg", result)

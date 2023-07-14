@@ -9,54 +9,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: [1.14, 1.17]
+        go-version: ['1.17.x', '1.20.x']
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            runner: xvfb-run
+          - os: windows-latest
+            tags: no_glfw
+          - os: macos-latest
+            tags: no_glfw
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1.7.0
+    - uses: WillAbides/setup-go-faster@v1.8.0
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libx11-dev xorg-dev libwayland-dev libxkbcommon-dev bc
+      run: >-
+        sudo apt-get update &&
+        sudo apt-get install
+        bc
+        gcc
+        libgl1-mesa-dev
+        libwayland-dev
+        libx11-dev
+        libxkbcommon-dev
+        xorg-dev
+        xvfb
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
-      run: go test -tags ci ./...
+      run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags "${{ matrix.tags }}" ./...
 
     - name: Wayland Tests
-      run: go test -tags ci,wayland ./...
+      run: go test -tags no_glfw,ci,wayland ./...
       if: ${{ runner.os == 'Linux' }}
-
-    - name: Update coverage
-      run: |
-        GO111MODULE=off go get github.com/mattn/goveralls
-        set -e
-        go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-        coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-        if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
-      if: ${{ runner.os == 'Linux' }}
-
-    - name: Update PR Coverage
-      uses: shogo82148/actions-goveralls@v1
-      with:
-        path-to-profile: coverage.out
-      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.17' }}
-
-    - name: Build WebAssembly binary
-      env:
-        GOOS: js
-        GOARCH: wasm
-      working-directory: cmd/fyne_demo
-      run: go build
-      if: ${{ matrix.go-version == '1.17' }}
-
-    - name: Build GopherJS and Wasm full website
-      run: |
-        go install github.com/gopherjs/gopherjs@latest
-        go install ./cmd/fyne
-        cd cmd/fyne_demo && fyne package --target=web
-      if: ${{ matrix.go-version == '1.17' && runner.os == 'Linux' }}

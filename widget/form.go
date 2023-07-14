@@ -160,7 +160,8 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	text.Move(fyne.NewPos(theme.InnerPadding(), theme.InputBorderSize()))
 	item.helperOutput = text
 	f.updateHelperText(item)
-	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(), item.Widget, fyne.NewContainerWithoutLayout(text))
+	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{text}}
+	return &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
 func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
@@ -353,7 +354,8 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
-	renderer := NewSimpleRenderer(fyne.NewContainerWithLayout(layout.NewVBoxLayout(), f.itemGrid, f.buttonBox))
+	content := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{f.itemGrid, f.buttonBox}}
+	renderer := NewSimpleRenderer(content)
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()

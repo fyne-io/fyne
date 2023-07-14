@@ -5,17 +5,18 @@ import (
 	"image/color"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCachedFontFace(t *testing.T) {
 	for name, tt := range map[string]struct {
-		style      fyne.TextStyle
-		wantGlyphs string
+		style fyne.TextStyle
+		runes string
 	}{
 		"symbol font": {
 			fyne.TextStyle{
@@ -25,10 +26,10 @@ func TestCachedFontFace(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got, _ := painter.CachedFontFace(tt.style, 14, 1)
-			for _, r := range tt.wantGlyphs {
-				_, ok := got.GlyphAdvance(r)
-				assert.True(t, ok, "symbol font should include: %c", r)
+			got := painter.CachedFontFace(tt.style, 14, 1)
+			for _, r := range tt.runes {
+				_, ok := got.Fonts[0].NominalGlyph(r)
+				assert.True(t, ok, "symbol Font should include: %c", r)
 			}
 		})
 	}
@@ -44,7 +45,6 @@ func TestDrawString(t *testing.T) {
 		color    color.Color
 		style    fyne.TextStyle
 		size     float32
-		height   int
 		string   string
 		tabWidth int
 		want     string
@@ -53,7 +53,6 @@ func TestDrawString(t *testing.T) {
 			color:    color.Black,
 			style:    fyne.TextStyle{},
 			size:     40,
-			height:   50,
 			string:   "Hello\tworld!",
 			tabWidth: 7,
 			want:     "hello_TAB_world_regular_size_40_height_50_tab_width_7.png",
@@ -62,7 +61,6 @@ func TestDrawString(t *testing.T) {
 			color:    color.NRGBA{R: 255, A: 255},
 			style:    fyne.TextStyle{Bold: true, Italic: true},
 			size:     27.42,
-			height:   42,
 			string:   "Hello\tworld!",
 			tabWidth: 3,
 			want:     "hello_TAB_world_bold_italic_size_27.42_height_42_tab_width_3.png",
@@ -71,16 +69,15 @@ func TestDrawString(t *testing.T) {
 			color:    color.Black,
 			style:    fyne.TextStyle{},
 			size:     40,
-			height:   50,
-			string:   "Missing: ↩",
+			string:   "Missing: स",
 			tabWidth: 4,
 			want:     "missing_glyph.png",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
-			f, face := painter.CachedFontFace(tt.style, tt.size, 1)
-			painter.DrawString(img, tt.string, tt.color, f, face, tt.size, 1, tt.height, tt.tabWidth)
+			f := painter.CachedFontFace(tt.style, tt.size, 1)
+			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, tt.tabWidth)
 			test.AssertImageMatches(t, "font/"+tt.want, img)
 		})
 	}
@@ -111,14 +108,14 @@ func TestMeasureString(t *testing.T) {
 		"missing glyph": {
 			style:    fyne.TextStyle{},
 			size:     40,
-			string:   "Missing: ↩",
+			string:   "Missing: स",
 			tabWidth: 4,
-			want:     189.65625,
+			want:     213.65625,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			_, face := painter.CachedFontFace(tt.style, tt.size, 1)
-			got, _ := painter.MeasureString(face, tt.string, tt.size, tt.tabWidth)
+			face := painter.CachedFontFace(tt.style, tt.size, 1)
+			got, _ := painter.MeasureString(face.Fonts, tt.string, tt.size, tt.tabWidth)
 			assert.Equal(t, tt.want, got.Width)
 		})
 	}

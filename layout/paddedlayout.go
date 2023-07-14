@@ -14,8 +14,9 @@ type paddedLayout struct {
 // Layout is called to pack all child objects into a specified size.
 // For PaddedLayout this sets all children to the full size passed minus padding all around.
 func (l *paddedLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	pos := fyne.NewPos(theme.Padding(), theme.Padding())
-	siz := fyne.NewSize(size.Width-2*theme.Padding(), size.Height-2*theme.Padding())
+	padding := theme.Padding()
+	pos := fyne.NewPos(padding, padding)
+	siz := fyne.NewSize(size.Width-2*padding, size.Height-2*padding)
 	for _, child := range objects {
 		child.Resize(siz)
 		child.Move(pos)
@@ -32,7 +33,7 @@ func (l *paddedLayout) MinSize(objects []fyne.CanvasObject) (min fyne.Size) {
 
 		min = min.Max(child.MinSize())
 	}
-	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
+	min = min.Add(fyne.NewSquareSize(2 * theme.Padding()))
 	return
 }
 

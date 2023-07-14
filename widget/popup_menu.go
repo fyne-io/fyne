@@ -41,6 +41,16 @@ func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) 
 	m.ShowAtPosition(pos)
 }
 
+// ShowPopUpMenuAtRelativePosition creates a PopUp menu populated with meny items from the passed menu structure.
+// It will automatically be positioned at the given position relative to stated object and shown as an overlay on the specified canvas.
+//
+// Since 2.4
+func ShowPopUpMenuAtRelativePosition(menu *fyne.Menu, c fyne.Canvas, rel fyne.Position, to fyne.CanvasObject) {
+	withRelativePosition(rel, to, func(pos fyne.Position) {
+		ShowPopUpMenuAtPosition(menu, c, pos)
+	})
+}
+
 // FocusGained is triggered when the object gained focus. For the pop-up menu it does nothing.
 //
 // Implements: fyne.Focusable
@@ -93,6 +103,13 @@ func (p *PopUpMenu) Show() {
 func (p *PopUpMenu) ShowAtPosition(pos fyne.Position) {
 	p.Move(pos)
 	p.Show()
+}
+
+// ShowAtRelativePosition shows the pop-up menu at the position relative to given object.
+//
+// Since 2.4
+func (p *PopUpMenu) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) {
+	withRelativePosition(rel, to, p.ShowAtPosition)
 }
 
 // TypedKey handles key events. It allows keyboard control of the pop-up menu.

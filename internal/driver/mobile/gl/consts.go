@@ -44,14 +44,12 @@ const (
 	DepthTest        = 0x0B71
 	Blend            = 0x0BE2
 	ScissorTest      = 0x0C11
-	UnpackAlignment  = 0x0CF5
 	Texture2D        = 0x0DE1
 
 	UnsignedByte = 0x1401
 	Float        = 0x1406
 	RED          = 0x1903
 	RGBA         = 0x1908
-	LUMINANCE    = 0x1909
 
 	Nearest          = 0x2600
 	Linear           = 0x2601

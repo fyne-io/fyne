@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -109,6 +109,11 @@ type HyperlinkSegment struct {
 	Alignment fyne.TextAlign
 	Text      string
 	URL       *url.URL
+
+	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
+	//
+	// Since: 2.4
+	OnTapped func()
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -125,6 +130,7 @@ func (h *HyperlinkSegment) Textual() string {
 func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
 	link.Alignment = h.Alignment
+	link.OnTapped = h.OnTapped
 	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{link}}
 }
 
@@ -134,6 +140,7 @@ func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 	link.Text = h.Text
 	link.URL = h.URL
 	link.Alignment = h.Alignment
+	link.OnTapped = h.OnTapped
 	link.Refresh()
 }
 
@@ -469,8 +476,8 @@ func (r *richImage) MinSize() fyne.Size {
 	}
 
 	// unscale the image so it is not varying based on canvas
-	w := internal.ScaleInt(c, orig.Width)
-	h := internal.ScaleInt(c, orig.Height)
+	w := scale.ToScreenCoordinate(c, orig.Width)
+	h := scale.ToScreenCoordinate(c, orig.Height)
 	// we return size / 2 as this assumes a HiDPI / 2x image scaling
 	return fyne.NewSize(float32(w)/2, float32(h)/2)
 }

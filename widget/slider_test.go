@@ -143,6 +143,69 @@ func TestSlider_OnChanged(t *testing.T) {
 	drag.PointEvent.Position = fyne.NewPos(50, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
+
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 3, changes)
+
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 3, changes)
+
+	tap.Position = fyne.NewPos(50, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 4, changes)
+
+	slider.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, 5, changes)
+}
+
+func TestSlider_OnChangeEnded(t *testing.T) {
+	slider := NewSlider(0, 2)
+	slider.Resize(slider.MinSize())
+	assert.Empty(t, slider.OnChangeEnded)
+
+	changes := 0
+
+	slider.OnChangeEnded = func(_ float64) {
+		changes++
+	}
+
+	assert.Equal(t, 0, changes)
+
+	slider.SetValue(0.5)
+	assert.Equal(t, 0, changes)
+
+	drag := &fyne.DragEvent{}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 0, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 0, changes)
+
+	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	slider.Dragged(drag)
+	slider.DragEnd()
+	assert.Equal(t, 1, changes)
+
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 2, changes)
+
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 2, changes)
+
+	tap.Position = fyne.NewPos(50, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 3, changes)
+
+	slider.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, 4, changes)
 }
 
 func TestSlider_OnChanged_Float(t *testing.T) {
@@ -175,8 +238,21 @@ func TestSlider_OnChanged_Float(t *testing.T) {
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 3, changes)
+
+	tap.Position = fyne.NewPos(25, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 3, changes)
+
+	tap.Position = fyne.NewPos(50, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 4, changes)
+
 	slider.SetValue(0.9)
-	assert.Equal(t, 2, changes)
+	assert.Equal(t, 4, changes)
 }
 
 func TestSlider_SetValue(t *testing.T) {
@@ -188,4 +264,49 @@ func TestSlider_SetValue(t *testing.T) {
 
 	slider.SetValue(2.0)
 	assert.Equal(t, 2.0, slider.Value)
+}
+
+func TestSlider_Focus(t *testing.T) {
+	slider := NewSlider(0, 5)
+
+	slider.FocusGained()
+	assert.True(t, slider.focused)
+
+	slider.FocusLost()
+	assert.False(t, slider.focused)
+
+	slider.MouseIn(nil)
+	assert.True(t, slider.hovered)
+
+	slider.MouseOut()
+	assert.False(t, slider.hovered)
+
+	left := &fyne.KeyEvent{Name: fyne.KeyLeft}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+
+	for i := 1; i <= int(slider.Max); i++ {
+		slider.TypedKey(right)
+		assert.Equal(t, float64(i), slider.Value)
+	}
+
+	slider.TypedKey(right)
+	assert.Equal(t, slider.Max, slider.Value)
+
+	for i := 4; i >= int(slider.Min); i-- {
+		slider.TypedKey(left)
+		assert.Equal(t, float64(i), slider.Value)
+	}
+
+	slider.TypedKey(left)
+	assert.Equal(t, slider.Min, slider.Value)
+
+	slider.Orientation = Vertical
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+
+	slider.TypedKey(up)
+	assert.Equal(t, slider.Min+1, slider.Value)
+
+	slider.TypedKey(down)
+	assert.Equal(t, slider.Min, slider.Value)
 }

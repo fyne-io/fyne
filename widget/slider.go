@@ -2,11 +2,13 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -21,6 +23,9 @@ const (
 )
 
 var _ fyne.Draggable = (*Slider)(nil)
+var _ fyne.Focusable = (*Slider)(nil)
+var _ desktop.Hoverable = (*Slider)(nil)
+var _ fyne.Tappable = (*Slider)(nil)
 
 // Slider is a widget that can slide between two fixed values.
 type Slider struct {
@@ -34,7 +39,13 @@ type Slider struct {
 	Orientation Orientation
 	OnChanged   func(float64)
 
-	binder basicBinder
+	// Since: 2.4
+	OnChangeEnded func(float64)
+
+	binder        basicBinder
+	hovered       bool
+	focused       bool
+	pendingChange bool // true if value changed since last OnChangeEnded
 }
 
 // NewSlider returns a basic slider.
@@ -74,31 +85,131 @@ func (s *Slider) Bind(data binding.Float) {
 	}
 }
 
-// DragEnd function.
+// DragEnd is called when the drag ends.
 func (s *Slider) DragEnd() {
+	s.fireChangeEnded()
 }
 
-// Dragged function.
+// DragEnd is called when a drag event occurs.
 func (s *Slider) Dragged(e *fyne.DragEvent) {
-	ratio := s.getRatio(&(e.PointEvent))
-
+	ratio := s.getRatio(&e.PointEvent)
 	lastValue := s.Value
 
 	s.updateValue(ratio)
+	s.positionChanged(lastValue, s.Value)
+}
 
-	if s.almostEqual(lastValue, s.Value) {
+// Tapped is called when a pointer tapped event is captured.
+//
+// Since: 2.4
+func (s *Slider) Tapped(e *fyne.PointEvent) {
+	driver := fyne.CurrentApp().Driver()
+	if !s.focused && !driver.Device().IsMobile() {
+		impl := s.super()
+
+		if c := driver.CanvasForObject(impl); c != nil {
+			c.Focus(impl.(fyne.Focusable))
+		}
+	}
+
+	ratio := s.getRatio(e)
+	lastValue := s.Value
+
+	s.updateValue(ratio)
+	s.positionChanged(lastValue, s.Value)
+	s.fireChangeEnded()
+}
+
+func (s *Slider) positionChanged(lastValue, currentValue float64) {
+	if s.almostEqual(lastValue, currentValue) {
 		return
 	}
 
 	s.Refresh()
 
+	s.pendingChange = true
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
 }
 
+func (s *Slider) fireChangeEnded() {
+	if !s.pendingChange {
+		return
+	}
+	s.pendingChange = false
+	if s.OnChangeEnded != nil {
+		s.OnChangeEnded(s.Value)
+	}
+}
+
+// FocusGained is called when this item gained the focus.
+//
+// Since: 2.4
+func (s *Slider) FocusGained() {
+	s.focused = true
+	s.Refresh()
+}
+
+// FocusLost is called when this item lost the focus.
+//
+// Since: 2.4
+func (s *Slider) FocusLost() {
+	s.focused = false
+	s.Refresh()
+}
+
+// MouseIn is called when a desktop pointer enters the widget.
+//
+// Since: 2.4
+func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
+	s.hovered = true
+	s.Refresh()
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget.
+//
+// Since: 2.4
+func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
+}
+
+// MouseOut is called when a desktop pointer exits the widget
+//
+// Since: 2.4
+func (s *Slider) MouseOut() {
+	s.hovered = false
+	s.Refresh()
+}
+
+// TypedKey is called when this item receives a key event.
+//
+// Since: 2.4
+func (s *Slider) TypedKey(key *fyne.KeyEvent) {
+	if s.Orientation == Vertical {
+		switch key.Name {
+		case fyne.KeyUp:
+			s.SetValue(s.Value + s.Step)
+		case fyne.KeyDown:
+			s.SetValue(s.Value - s.Step)
+		}
+	} else {
+		switch key.Name {
+		case fyne.KeyLeft:
+			s.SetValue(s.Value - s.Step)
+		case fyne.KeyRight:
+			s.SetValue(s.Value + s.Step)
+		}
+	}
+}
+
+// TypedRune is called when this item receives a char event.
+//
+// Since: 2.4
+func (s *Slider) TypedRune(_ rune) {
+}
+
 func (s *Slider) buttonDiameter() float32 {
-	return theme.IconInlineSize() - 3.5 // match radio icons
+	return theme.IconInlineSize() - 4 // match radio icons
 }
 
 func (s *Slider) endOffset() float32 {
@@ -169,19 +280,11 @@ func (s *Slider) SetValue(value float64) {
 	}
 
 	lastValue := s.Value
-
 	s.Value = value
+
 	s.clampValueToRange()
-
-	if s.almostEqual(lastValue, s.Value) {
-		return
-	}
-
-	if s.OnChanged != nil {
-		s.OnChanged(s.Value)
-	}
-
-	s.Refresh()
+	s.positionChanged(lastValue, s.Value)
+	s.fireChangeEnded()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -196,10 +299,11 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	track := canvas.NewRectangle(theme.InputBackgroundColor())
 	active := canvas.NewRectangle(theme.ForegroundColor())
 	thumb := &canvas.Circle{FillColor: theme.ForegroundColor()}
+	focusIndicator := &canvas.Circle{FillColor: color.Transparent}
 
-	objects := []fyne.CanvasObject{track, active, thumb}
+	objects := []fyne.CanvasObject{track, active, thumb, focusIndicator}
 
-	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
+	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, focusIndicator, s}
 	slide.Refresh() // prepare for first draw
 	return slide
 }
@@ -255,16 +359,15 @@ func (s *Slider) Unbind() {
 	s.binder.Unbind()
 }
 
-const (
-	minLongSide = float32(34) // added to button diameter
-)
+const minLongSide = float32(34) // added to button diameter
 
 type sliderRenderer struct {
 	widget.BaseRenderer
-	track  *canvas.Rectangle
-	active *canvas.Rectangle
-	thumb  *canvas.Circle
-	slider *Slider
+	track          *canvas.Rectangle
+	active         *canvas.Rectangle
+	thumb          *canvas.Circle
+	focusIndicator *canvas.Circle
+	slider         *Slider
 }
 
 // Refresh updates the widget state for drawing.
@@ -272,6 +375,16 @@ func (s *sliderRenderer) Refresh() {
 	s.track.FillColor = theme.InputBackgroundColor()
 	s.thumb.FillColor = theme.ForegroundColor()
 	s.active.FillColor = theme.ForegroundColor()
+
+	if s.slider.focused {
+		s.focusIndicator.FillColor = theme.FocusColor()
+	} else if s.slider.hovered {
+		s.focusIndicator.FillColor = theme.HoverColor()
+	} else {
+		s.focusIndicator.FillColor = color.Transparent
+	}
+
+	s.focusIndicator.Refresh()
 
 	s.slider.clampValueToRange()
 	s.Layout(s.slider.Size())
@@ -321,6 +434,11 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
+
+	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
+	delta := (focusIndicatorSize.Width - diameter) / 2
+	s.focusIndicator.Resize(focusIndicatorSize)
+	s.focusIndicator.Move(thumbPos.SubtractXY(delta, delta))
 }
 
 // MinSize calculates the minimum size of a widget.

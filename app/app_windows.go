@@ -5,19 +5,17 @@ package app
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
 
+	"golang.org/x/sys/execabs"
 	"golang.org/x/sys/windows/registry"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
-
-	"golang.org/x/sys/execabs"
 )
 
 const notificationTemplate = `$title = "%s"
@@ -64,7 +62,7 @@ func rootConfigDir() string {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("rundll32", "url.dll,FileProtocolHandler", url.String())
+	cmd := execabs.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
@@ -106,7 +104,7 @@ func runScript(name, script string) {
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
-	err := ioutil.WriteFile(tmpFilePath, []byte(script), 0600)
+	err := os.WriteFile(tmpFilePath, []byte(script), 0600)
 	if err != nil {
 		fyne.LogError("Could not write script to show notification", err)
 		return

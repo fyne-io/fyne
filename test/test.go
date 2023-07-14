@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"image"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -116,7 +115,7 @@ func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, m
 		return false
 	}
 
-	raw, err := ioutil.ReadFile(masterPath)
+	raw, err := os.ReadFile(masterPath)
 	require.NoError(t, err)
 	master := strings.ReplaceAll(string(raw), "\r", "")
 
@@ -368,5 +367,5 @@ func writeMarkup(path string, markup string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, []byte(markup), 0644)
+	return os.WriteFile(path, []byte(markup), 0644)
 }

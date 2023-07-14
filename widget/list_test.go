@@ -19,7 +19,11 @@ import (
 func TestNewList(t *testing.T) {
 	list := createList(1000)
 
-	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
+	content := &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+		NewIcon(theme.DocumentIcon()),
+		NewLabel("Template Object")},
+	}
+	template := newListItem(content, nil)
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
@@ -309,6 +313,19 @@ func TestList_DataChange(t *testing.T) {
 	test.AssertRendersToMarkup(t, "list/new_data.xml", w.Canvas())
 }
 
+func TestList_ItemDataChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	list, _ := setupList(t)
+	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
+	changeData(list)
+	list.RefreshItem(0)
+	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
+	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "a")
+}
+
 func TestList_ThemeChange(t *testing.T) {
 	defer test.NewApp()
 	list, w := setupList(t)
@@ -334,7 +351,10 @@ func TestList_SmallList(t *testing.T) {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+			return &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+				NewIcon(theme.DocumentIcon()),
+				NewLabel("Template Object")},
+			}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
@@ -382,7 +402,10 @@ func TestList_RemoveItem(t *testing.T) {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+			return &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+				NewIcon(theme.DocumentIcon()),
+				NewLabel("Template Object")},
+			}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
@@ -540,7 +563,7 @@ func createList(items int) *List {
 		},
 		func() fyne.CanvasObject {
 			icon := NewIcon(theme.DocumentIcon())
-			return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, icon, nil), icon, NewLabel("Template Object"))
+			return &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, icon, nil), Objects: []fyne.CanvasObject{icon, NewLabel("Template Object")}}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
@@ -567,4 +590,51 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 	w.Resize(fyne.NewSize(200, 400))
 	test.AssertRendersToMarkup(t, "list/initial.xml", w.Canvas())
 	return list, w
+}
+
+func TestList_LimitUpdateItem(t *testing.T) {
+	app := test.NewApp()
+	w := app.NewWindow("")
+	printOut := ""
+	list := NewList(
+		func() int {
+			return 5
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			printOut += fmt.Sprintf("%d.", id)
+		},
+	)
+	w.SetContent(list)
+	w.ShowAndRun()
+	assert.Equal(t, "0.0.", printOut)
+	list.scrollTo(1)
+	assert.Equal(t, "0.0.1.", printOut)
+	list.scrollTo(2)
+	assert.Equal(t, "0.0.1.2.", printOut)
+}
+
+func TestList_RefreshUpdatesAllItems(t *testing.T) {
+	app := test.NewApp()
+	w := app.NewWindow("")
+	printOut := ""
+	list := NewList(
+		func() int {
+			return 1
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("Test")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			printOut += fmt.Sprintf("%d.", id)
+		},
+	)
+	w.SetContent(list)
+	w.ShowAndRun()
+	assert.Equal(t, "0.", printOut)
+
+	list.Refresh()
+	assert.Equal(t, "0.0.", printOut)
 }

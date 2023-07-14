@@ -20,11 +20,12 @@ func RenderCanvas(c fyne.Canvas, t fyne.Theme) image.Image {
 // The returned image will be set to the object's minimum size.
 // Use the theme.LightTheme() or theme.DarkTheme() to access the builtin themes.
 func Render(obj fyne.CanvasObject, t fyne.Theme) image.Image {
+	fyne.CurrentApp().Settings().SetTheme(t)
+
 	c := NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(obj)
 
-	fyne.CurrentApp().Settings().SetTheme(t)
 	app.ApplyThemeTo(obj, c)
 	return c.Capture()
 }

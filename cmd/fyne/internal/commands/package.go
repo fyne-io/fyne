@@ -7,7 +7,6 @@ import (
 	"image"
 	_ "image/jpeg" // import image encodings
 	"image/png"    // import image encodings
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -83,6 +82,12 @@ func Package() *cli.Command {
 				Value:       "",
 				Destination: &p.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &p.rawIcon,
+			},
 			&cli.StringFlag{
 				Name:        "appID",
 				Aliases:     []string{"id"},
@@ -130,7 +135,8 @@ type Packager struct {
 	tags, category                 string
 	tempDir                        string
 
-	customMetadata keyValueFlag
+	customMetadata      keyValueFlag
+	linuxAndBSDMetadata metadata.LinuxAndBSD
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -199,11 +205,7 @@ func (p *Packager) packageWithoutValidate() error {
 	return metadata.SaveStandard(data, p.srcDir)
 }
 
-func (p *Packager) buildPackage(runner runner) ([]string, error) {
-	var tags []string
-	if p.tags != "" {
-		tags = strings.Split(p.tags, ",")
-	}
+func (p *Packager) buildPackage(runner runner, tags []string) ([]string, error) {
 	if p.os != "web" {
 		b := &Builder{
 			os:      p.os,
@@ -278,8 +280,13 @@ func (p *Packager) doPackage(runner runner) error {
 	}
 	defer os.RemoveAll(p.tempDir)
 
+	var tags []string
+	if p.tags != "" {
+		tags = strings.Split(p.tags, ",")
+	}
+
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		files, err := p.buildPackage(runner)
+		files, err := p.buildPackage(runner, tags)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}
@@ -307,11 +314,11 @@ func (p *Packager) doPackage(runner runner) error {
 	case "linux", "openbsd", "freebsd", "netbsd":
 		return p.packageUNIX()
 	case "windows":
-		return p.packageWindows()
+		return p.packageWindows(tags)
 	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
-		return p.packageAndroid(p.os)
+		return p.packageAndroid(p.os, tags)
 	case "ios", "iossimulator":
-		return p.packageIOS(p.os)
+		return p.packageIOS(p.os, tags)
 	case "wasm":
 		return p.packageWasm()
 	case "gopherjs":
@@ -333,7 +340,7 @@ func (p *Packager) removeBuild(files []string) {
 }
 
 func (p *Packager) validate() (err error) {
-	p.tempDir, err = ioutil.TempDir("", "fyne-package-*")
+	p.tempDir, err = os.MkdirTemp("", "fyne-package-*")
 	defer func() {
 		if err != nil {
 			_ = os.RemoveAll(p.tempDir)
@@ -372,6 +379,7 @@ func (p *Packager) validate() (err error) {
 
 		p.appData.Release = p.release
 		p.appData.mergeMetadata(data)
+		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -414,10 +422,10 @@ func (p *Packager) validate() (err error) {
 	return nil
 }
 
-func calculateExeName(sourceDir, os string) string {
+func calculateExeName(sourceDir, osys string) string {
 	exeName := filepath.Base(sourceDir)
 	/* #nosec */
-	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
+	if data, err := os.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
 		modulePath := modfile.ModulePath(data)
 		moduleName, _, ok := module.SplitPathVersion(modulePath)
 		if ok {
@@ -429,7 +437,7 @@ func calculateExeName(sourceDir, os string) string {
 		}
 	}
 
-	if os == "windows" {
+	if osys == "windows" {
 		exeName = exeName + ".exe"
 	}
 
@@ -464,7 +472,7 @@ func (p *Packager) normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	out, err := ioutil.TempFile(p.tempDir, "fyne-ico-*.png")
+	out, err := os.CreateTemp(p.tempDir, "fyne-ico-*.png")
 	if err != nil {
 		return "", fmt.Errorf("failed to open image output file: %w", err)
 	}

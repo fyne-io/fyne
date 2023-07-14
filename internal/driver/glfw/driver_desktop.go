@@ -6,11 +6,15 @@ package glfw
 import (
 	"bytes"
 	"image/png"
+	"os"
+	"os/signal"
 	"runtime"
 	"sync"
+	"syscall"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
@@ -39,7 +43,7 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 			} else if fyne.CurrentApp().Icon() != nil {
 				d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
 			} else {
-				d.SetSystemTrayIcon(theme.FyneLogo())
+				d.SetSystemTrayIcon(theme.BrokenImageIcon())
 			}
 
 			// it must be refreshed after init, so an earlier call would have been ineffective
@@ -91,7 +95,7 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	}
 	if i.Icon != nil {
 		data := i.Icon.Content()
-		if painter.IsResourceSVG(i.Icon) {
+		if svg.IsResourceSVG(i.Icon) {
 			b := &bytes.Buffer{}
 			res := i.Icon
 			if runtime.GOOS == "windows" && isDark() { // windows menus don't match dark mode so invert icons
@@ -159,6 +163,20 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
+}
+
+func (d *gLDriver) CurrentKeyModifiers() fyne.KeyModifier {
+	return d.currentKeyModifiers
+}
+
+func catchTerm(d *gLDriver) {
+	terminateSignals := make(chan os.Signal, 1)
+	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
+
+	for range terminateSignals {
+		d.Quit()
+		break
+	}
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {

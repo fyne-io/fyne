@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 
@@ -14,6 +15,11 @@ import (
 type unixData struct {
 	Name, Exec, Icon string
 	Local            string
+	GenericName      string
+	Categories       string
+	Comment          string
+	Keywords         string
+	ExecParams       string
 }
 
 func (p *Packager) packageUNIX() error {
@@ -52,7 +58,17 @@ func (p *Packager) packageUNIX() error {
 	desktop := filepath.Join(appsDir, p.Name+".desktop")
 	deskFile, _ := os.Create(desktop)
 
-	tplData := unixData{Name: p.Name, Exec: filepath.Base(p.exe), Icon: p.Name + filepath.Ext(p.icon), Local: local}
+	tplData := unixData{
+		Name:        p.Name,
+		Exec:        filepath.Base(p.exe),
+		Icon:        p.Name + filepath.Ext(p.icon),
+		Local:       local,
+		GenericName: p.linuxAndBSDMetadata.GenericName,
+		Keywords:    formatDesktopFileList(p.linuxAndBSDMetadata.Keywords),
+		Comment:     p.linuxAndBSDMetadata.Comment,
+		Categories:  formatDesktopFileList(p.linuxAndBSDMetadata.Categories),
+		ExecParams:  p.linuxAndBSDMetadata.ExecParams,
+	}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
 		return fmt.Errorf("failed to write desktop entry string: %w", err)
@@ -76,4 +92,12 @@ func (p *Packager) packageUNIX() error {
 	}
 
 	return nil
+}
+
+func formatDesktopFileList(items []string) string {
+	if len(items) == 0 {
+		return ""
+	}
+
+	return strings.Join(items, ";") + ";"
 }

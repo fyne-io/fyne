@@ -3,6 +3,14 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.0 - Unreleased
+
+## Changed
+
+* Go 1.17 or later is now required.
+* Icons for macOS bundles are now padded and rounded, disable with "-use-raw-icon"
+
+
 ## 2.3.5 - 6 June 2023
 
 ### Fixed
@@ -39,7 +47,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Minor graphic glitch with checkbox (#3792)
 * VBox and HBox using heap memory that was not required
 * Menu hover is slow on long menus
-
 
 ## 2.3.3 - 24 March 2023
 

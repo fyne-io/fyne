@@ -17,7 +17,6 @@ const (
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
 	colorFormatRGBA       = gl.RGBA
-	colorFormatR          = gl.RED
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
@@ -39,7 +38,6 @@ const (
 	textureWrapT          = gl.TEXTURE_WRAP_T
 	triangles             = gl.TRIANGLES
 	triangleStrip         = gl.TRIANGLE_STRIP
-	unpackAlignment       = gl.UNPACK_ALIGNMENT
 	unsignedByte          = gl.UNSIGNED_BYTE
 	vertexShader          = gl.VERTEX_SHADER
 )
@@ -74,8 +72,9 @@ func (p *painter) Init() {
 	gl.Enable(gl.BLEND)
 	p.logError()
 	p.program = p.createProgram("simple")
-	p.singleChannelProgram = p.createProgram("single_channel")
 	p.lineProgram = p.createProgram("line")
+	p.rectangleProgram = p.createProgram("rectangle")
+	p.roundRectangleProgram = p.createProgram("round_rectangle")
 }
 
 type coreContext struct{}
@@ -211,10 +210,6 @@ func (c *coreContext) LinkProgram(program Program) {
 	gl.LinkProgram(uint32(program))
 }
 
-func (c *coreContext) PixelStorei(pname uint32, param int32) {
-	gl.PixelStorei(pname, param)
-}
-
 func (c *coreContext) ReadBuffer(src uint32) {
 	gl.ReadBuffer(src)
 }
@@ -253,6 +248,10 @@ func (c *coreContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *coreContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
+}
+
+func (c *coreContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+	gl.Uniform2f(int32(uniform), v0, v1)
 }
 
 func (c *coreContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

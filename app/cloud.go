@@ -33,7 +33,7 @@ func (a *fyneApp) transitionCloud(p fyne.CloudProvider) {
 		a.storage = cloud.CloudStorage(a)
 	} else {
 		store := &store{a: a}
-		store.Docs = makeStoreDocs(a.uniqueID, a.prefs, store)
+		store.Docs = makeStoreDocs(a.uniqueID, store)
 		a.storage = store
 	}
 

@@ -47,3 +47,20 @@ func Test_tabButtonRenderer_DeleteAdd(t *testing.T) {
 	tabs.SelectTab(item2)
 	assert.Equal(t, pos, indicator.Position())
 }
+
+func Test_tabButtonRenderer_EmptyDeleteAdd(t *testing.T) {
+	item1 := &TabItem{Text: "Test", Content: widget.NewLabel("Content")}
+	tabs := NewAppTabs()
+
+	// ensure enough space for buttons to be created.
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	tabRenderer := cache.Renderer(tabs).(*appTabsRenderer)
+	assert.Equal(t, 0, len(tabRenderer.bar.Objects[0].(*fyne.Container).Objects))
+
+	tabs.Append(item1)
+	assert.Equal(t, 1, len(tabRenderer.bar.Objects[0].(*fyne.Container).Objects))
+
+	tabs.Remove(item1)
+	assert.Equal(t, 0, len(tabRenderer.bar.Objects[0].(*fyne.Container).Objects))
+}

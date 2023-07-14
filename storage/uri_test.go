@@ -1,7 +1,7 @@
 package storage_test
 
 import (
-	"io/ioutil"
+	"io"
 	"runtime"
 	"testing"
 
@@ -273,19 +273,19 @@ func TestWriteAndDelete(t *testing.T) {
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
 	assert.Nil(t, err)
 
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
 	assert.Nil(t, err)
 
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
-	bazData, err := ioutil.ReadAll(bazReader)
+	bazData, err := io.ReadAll(bazReader)
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
 	assert.Nil(t, err)
 

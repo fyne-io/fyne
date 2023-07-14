@@ -221,7 +221,6 @@ func (t *AppTabs) SetTabLocation(l TabLocation) {
 func (t *AppTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)
-	t.Refresh()
 }
 
 func (t *AppTabs) onUnselected() func(*TabItem) {
@@ -277,18 +276,22 @@ type appTabsRenderer struct {
 
 func (r *appTabsRenderer) Layout(size fyne.Size) {
 	// Try render as many tabs as will fit, others will appear in the overflow
-	for i := len(r.appTabs.Items); i > 0; i-- {
-		r.updateTabs(i)
-		barMin := r.bar.MinSize()
-		if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
-			if barMin.Height <= size.Height {
-				// Tab bar is short enough to fit
-				break
-			}
-		} else {
-			if barMin.Width <= size.Width {
-				// Tab bar is thin enough to fit
-				break
+	if len(r.appTabs.Items) == 0 {
+		r.updateTabs(0)
+	} else {
+		for i := len(r.appTabs.Items); i > 0; i-- {
+			r.updateTabs(i)
+			barMin := r.bar.MinSize()
+			if r.appTabs.location == TabLocationLeading || r.appTabs.location == TabLocationTrailing {
+				if barMin.Height <= size.Height {
+					// Tab bar is short enough to fit
+					break
+				}
+			} else {
+				if barMin.Width <= size.Width {
+					// Tab bar is thin enough to fit
+					break
+				}
 			}
 		}
 	}
@@ -435,7 +438,7 @@ func (r *appTabsRenderer) updateTabs(max int) {
 	// Set overflow action
 	if tabCount <= max {
 		r.action.Hide()
-		r.bar.Layout = layout.NewMaxLayout()
+		r.bar.Layout = layout.NewStackLayout()
 	} else {
 		tabCount = max
 		r.action.Show()

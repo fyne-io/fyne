@@ -1,6 +1,10 @@
 {
   "keyString": "value",
+  "keyStringList": ["1", "2", "3"],
   "keyInt": 4,
+  "keyIntList": [1, 2, 3],
   "keyFloat": 3.5,
-  "keyBool": true
+  "keyFloatList": [1.1, 2.2, 3.3],
+  "keyBool": true,
+  "keyBoolList": [true, false, true]
 }

@@ -30,6 +30,7 @@ func Theme() fyne.Theme {
 				theme.ColorNameFocus:             color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0xff},
 				theme.ColorNameForeground:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 				theme.ColorNameHover:             color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},
+				theme.ColorNameHeaderBackground:  color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
 				theme.ColorNameInputBackground:   color.NRGBA{R: 0x66, G: 0x66, B: 0x66, A: 0xff},
 				theme.ColorNameInputBorder:       color.NRGBA{R: 0x86, G: 0x86, B: 0x86, A: 0xff},
 				theme.ColorNameMenuBackground:    color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff},
@@ -62,6 +63,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameSubHeadingText:     float32(18),
 				theme.SizeNameCaptionText:        float32(11),
 				theme.SizeNameInputBorder:        float32(2),
+				theme.SizeNameInputRadius:        float32(4),
 			},
 		}
 	}

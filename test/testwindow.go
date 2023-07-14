@@ -117,6 +117,10 @@ func (w *testWindow) SetCloseIntercept(callback func()) {
 	w.onCloseIntercepted = callback
 }
 
+func (w *testWindow) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
+
+}
+
 func (w *testWindow) SetPadded(padded bool) {
 	w.canvas.SetPadded(padded)
 }
