@@ -645,11 +645,12 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	e.propertyLock.Lock()
+	e.updateText(provider.String())
 	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
-	e.updateTextAndRefresh(provider.String())
+	e.Refresh()
 }
 
 func (e *Entry) typedKeyUp(provider *RichText, multiLine bool) {
@@ -739,10 +740,10 @@ func (e *Entry) TypedRune(r rune) {
 	runes := []rune{r}
 	pos := e.cursorTextPos()
 	provider.insertAt(pos, string(runes))
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
 	content := provider.String()
 	e.updateText(content)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.propertyLock.Unlock()
 	e.Refresh()
 }
@@ -854,9 +855,9 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	runes := []rune(text)
 	pos := e.cursorTextPos()
 	provider.insertAt(pos, text)
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
 	e.updateTextAndRefresh(provider.String())
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
