@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"math"
 	"strings"
+	"time"
 	"unicode"
 
 	"fyne.io/fyne/v2"
@@ -17,6 +18,7 @@ import (
 )
 
 const (
+	bindIgnoreDelay          = time.Millisecond * 100 // ignore incoming DataItem fire after we have called Set
 	multiLineRows            = 3
 	doubleClickWordSeperator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
@@ -88,6 +90,7 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
+	lastChange      time.Time
 	multiLineRows   int // override global default number of visible lines
 }
 
@@ -1110,7 +1113,7 @@ func (e *Entry) updateCursorAndSelection() {
 }
 
 func (e *Entry) updateFromData(data binding.DataItem) {
-	if data == nil {
+	if data == nil || e.lastChange.After(time.Now().Add(-bindIgnoreDelay)) {
 		return
 	}
 	textSource, ok := data.(binding.String)
@@ -1176,6 +1179,7 @@ func (e *Entry) updateText(text string) bool {
 		e.dirty = true
 	}
 
+	e.lastChange = time.Now()
 	if changed {
 		if e.binder.dataListenerPair.listener != nil {
 			e.binder.SetCallback(nil)
