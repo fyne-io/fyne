@@ -727,8 +727,8 @@ func (e *Entry) TypedRune(r rune) {
 	}
 
 	// if we've typed a character and we're selecting then replace the selection with the character
+	cb := e.OnChanged
 	if e.selecting {
-		cb := e.OnChanged
 		e.OnChanged = nil // don't propagate this change to binding etc
 		e.eraseSelection()
 		e.OnChanged = cb // the change later will then trigger callback
@@ -745,6 +745,11 @@ func (e *Entry) TypedRune(r rune) {
 	e.updateText(content)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.propertyLock.Unlock()
+
+	e.Validate()
+	if cb != nil {
+		cb(content)
+	}
 	e.Refresh()
 }
 
@@ -1295,11 +1300,11 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		onSubmitted(text)
 		return
 	}
-	e.setFieldsAndRefresh(func() {
-		provider.insertAt(e.cursorTextPos(), "\n")
-		e.CursorColumn = 0
-		e.CursorRow++
-	})
+	e.propertyLock.Lock()
+	provider.insertAt(e.cursorTextPos(), "\n")
+	e.CursorColumn = 0
+	e.CursorRow++
+	e.propertyLock.Unlock()
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
