@@ -21,7 +21,8 @@ type ButtonIconPlacement int
 // ButtonImportance represents how prominent the button should appear
 //
 // Since: 1.4
-type ButtonImportance int
+// Deprecated: Use widget.Importance instead
+type ButtonImportance Importance
 
 // ButtonStyle determines the behaviour and rendering of a button.
 type ButtonStyle int
@@ -42,24 +43,6 @@ const (
 	ButtonIconTrailingText
 )
 
-const (
-	// MediumImportance applies a standard appearance.
-	MediumImportance ButtonImportance = iota
-	// HighImportance applies a prominent appearance.
-	HighImportance
-	// LowImportance applies a subtle appearance.
-	LowImportance
-
-	// DangerImportance applies an error theme to the button.
-	//
-	// Since 2.3
-	DangerImportance
-	// WarningImportance applies an error theme to the button.
-	//
-	// Since 2.3
-	WarningImportance
-)
-
 var _ fyne.Focusable = (*Button)(nil)
 
 // Button widget has a text label and triggers an event func when clicked
@@ -70,7 +53,7 @@ type Button struct {
 	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
 	//
 	// Since: 1.4
-	Importance    ButtonImportance
+	Importance    Importance
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
