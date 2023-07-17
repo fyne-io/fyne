@@ -1169,7 +1169,7 @@ func (e *Entry) updateCursorAndSelection() {
 }
 
 func (e *Entry) updateFromData(data binding.DataItem) {
-	if data == nil || e.lastChange.After(time.Now().Add(-bindIgnoreDelay)) {
+	if data == nil || e.lastChange.After(time.Now().Sub(bindIgnoreDelay)) {
 		return
 	}
 	textSource, ok := data.(binding.String)
