@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	version "github.com/mcuadros/go-version"
+	"github.com/mcuadros/go-version"
 	"github.com/urfave/cli/v2"
 
 	"fyne.io/fyne/v2"
@@ -414,14 +414,14 @@ func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
 		return nil, err
 	}
 
-	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersion = normaliseVersion(fyneGoModVersion)
 	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
-	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersion) {
 		return nil, nil
 	}
 
 	fyneGoModVersionAtLeast2_3 := version.NewConstrainGroupFromString(">=2.3")
-	if fyneGoModVersionAtLeast2_3.Match(fyneGoModVersionNormalized) {
+	if fyneGoModVersionAtLeast2_3.Match(fyneGoModVersion) {
 		app.VersionAtLeast2_3 = true
 	}
 
@@ -484,4 +484,15 @@ func extractLdFlags(goFlags string) (string, string) {
 	newGoFlags = strings.TrimSpace(newGoFlags)
 
 	return ldflags, newGoFlags
+}
+
+func normaliseVersion(str string) string {
+	if str == "master" {
+		return str
+	}
+
+	if pos := strings.Index(str, "-0.20"); pos != -1 {
+		str = str[:pos] + "-dev"
+	}
+	return version.Normalize(str)
 }

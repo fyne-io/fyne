@@ -334,3 +334,10 @@ func Test_ExtractLdFlags(t *testing.T) {
 		assert.Equal(t, test.wantGoFlags, goFlags)
 	}
 }
+
+func Test_NormaliseVersion(t *testing.T) {
+	assert.Equal(t, "master", normaliseVersion("master"))
+	assert.Equal(t, "2.3.0.0", normaliseVersion("v2.3"))
+	assert.Equal(t, "2.4.0.0", normaliseVersion("v2.4.0"))
+	assert.Equal(t, "2.3.6.0-dev", normaliseVersion("v2.3.6-0.20230711180435-d4b95e1cb1eb"))
+}
