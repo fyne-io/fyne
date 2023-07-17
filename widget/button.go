@@ -21,8 +21,9 @@ type ButtonIconPlacement int
 // ButtonImportance represents how prominent the button should appear
 //
 // Since: 1.4
+//
 // Deprecated: Use widget.Importance instead
-type ButtonImportance Importance
+type ButtonImportance = Importance
 
 // ButtonStyle determines the behaviour and rendering of a button.
 type ButtonStyle int
