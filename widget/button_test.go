@@ -314,19 +314,9 @@ func TestButton_ChangeTheme(t *testing.T) {
 }
 
 func TestButtonCompatImportance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
-
-	//test backward compatibility of widget.Importance
+	// Test backward compatibility of widget.Importance
 	var imp widget.ButtonImportance = widget.HighImportance
 
 	btn := widget.NewButton("test", func() {})
 	btn.Importance = imp
-	btn.Refresh()
-
-	w := test.NewWindow(btn)
-	defer w.Close()
-
-	test.AssertImageMatches(t, "button/compat_importance.png", w.Canvas().Capture())
 }

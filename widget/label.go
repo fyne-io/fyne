@@ -38,10 +38,9 @@ func NewLabelWithData(data binding.String) *Label {
 // NewLabelWithStyle creates a new label widget with the set text content
 func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
 	l := &Label{
-		Text:       text,
-		Alignment:  alignment,
-		TextStyle:  style,
-		Importance: MediumImportance,
+		Text:      text,
+		Alignment: alignment,
+		TextStyle: style,
 	}
 
 	l.ExtendBaseWidget(l)
