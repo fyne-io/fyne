@@ -214,6 +214,8 @@ func TestLabelImportance(t *testing.T) {
 	w := test.NewWindow(lbl)
 	defer w.Close()
 
+	test.AssertImageMatches(t, "label/label_importance_medium.png", w.Canvas().Capture())
+
 	lbl.Importance = LowImportance
 	lbl.Refresh()
 	test.AssertImageMatches(t, "label/label_importance_low.png", w.Canvas().Capture())
