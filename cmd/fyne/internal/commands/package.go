@@ -136,7 +136,7 @@ type Packager struct {
 	tempDir                        string
 
 	customMetadata      keyValueFlag
-	linuxAndBSDMetadata metadata.LinuxAndBSD
+	linuxAndBSDMetadata *metadata.LinuxAndBSD
 }
 
 // AddFlags adds the flags for interacting with the package command.
