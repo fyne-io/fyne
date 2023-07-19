@@ -6,7 +6,7 @@ type FyneApp struct {
 	Details     AppDetails
 	Development map[string]string `toml:",omitempty"`
 	Release     map[string]string `toml:",omitempty"`
-	LinuxAndBSD LinuxAndBSD
+	LinuxAndBSD *LinuxAndBSD      `toml:",omitempty"`
 }
 
 // AppDetails describes the build information, this group may be OS or arch specific

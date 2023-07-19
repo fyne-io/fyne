@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 
 	"golang.org/x/sys/execabs"
@@ -58,16 +59,20 @@ func (p *Packager) packageUNIX() error {
 	desktop := filepath.Join(appsDir, p.Name+".desktop")
 	deskFile, _ := os.Create(desktop)
 
+	linuxBSD := metadata.LinuxAndBSD{}
+	if p.linuxAndBSDMetadata != nil {
+		linuxBSD = *p.linuxAndBSDMetadata
+	}
 	tplData := unixData{
 		Name:        p.Name,
 		Exec:        filepath.Base(p.exe),
 		Icon:        p.Name + filepath.Ext(p.icon),
 		Local:       local,
-		GenericName: p.linuxAndBSDMetadata.GenericName,
-		Keywords:    formatDesktopFileList(p.linuxAndBSDMetadata.Keywords),
-		Comment:     p.linuxAndBSDMetadata.Comment,
-		Categories:  formatDesktopFileList(p.linuxAndBSDMetadata.Categories),
-		ExecParams:  p.linuxAndBSDMetadata.ExecParams,
+		GenericName: linuxBSD.GenericName,
+		Keywords:    formatDesktopFileList(linuxBSD.Keywords),
+		Comment:     linuxBSD.Comment,
+		Categories:  formatDesktopFileList(linuxBSD.Categories),
+		ExecParams:  linuxBSD.ExecParams,
 	}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
