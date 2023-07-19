@@ -165,6 +165,14 @@ func (s *Select) SelectedIndex() int {
 	return -1 // not selected/found
 }
 
+// SetOptions updates the list of options available and refreshes the widget
+//
+// Since: 2.4
+func (s *Select) SetOptions(options []string) {
+	s.Options = options
+	s.Refresh()
+}
+
 // SetSelected sets the current option of the select widget
 func (s *Select) SetSelected(text string) {
 	for _, option := range s.Options {
