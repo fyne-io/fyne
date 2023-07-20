@@ -31,7 +31,7 @@ user-install:
 	install -Dm00644 usr/{{.Local}}share/applications/$(Name).desktop $(DESTDIR)$(HOME)/.local/share/applications/$(Name).desktop
 	install -Dm00755 usr/{{.Local}}bin/$(Exec) $(DESTDIR)$(HOME)/.local/bin/$(Exec)
 	install -Dm00644 usr/{{.Local}}share/pixmaps/$(Icon) $(DESTDIR)$(HOME)/.local/share/icons/$(Icon)
-	sed -i -e "s,Exec=.*,Exec=$(DESTDIR)$(HOME)/.local/bin/$(Exec),g" $(DESTDIR)$(HOME)/.local/share/applications/$(Name).desktop
+	sed -i -e "s,Exec=$(Exec),Exec=$(DESTDIR)$(HOME)/.local/bin/$(Exec),g" $(DESTDIR)$(HOME)/.local/share/applications/$(Name).desktop
 
 user-uninstall:
 	-rm $(DESTDIR)$(HOME)/.local/share/applications/$(Name).desktop
