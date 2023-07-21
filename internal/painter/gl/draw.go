@@ -158,7 +158,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.logError()
 	// Fragment: END
 
-	p.ctx.DrawArrays(triangles, 0, 6)
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 	p.freeBuffer(vbo)
 }
