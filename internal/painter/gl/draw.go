@@ -106,7 +106,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	}
 
 	// Vertex: BEG
-	points := p.vecRectCoords(pos, rect, frame)
+	bounds, points := p.vecRectCoords(pos, rect, frame)
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -122,7 +122,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
 
 	rectCoordsUniform := p.ctx.GetUniformLocation(program, "rect_coords")
-	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(points[0], points[4], points[1], points[9])
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
@@ -337,7 +337,7 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return size, pos
 }
 
-func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size) []float32 {
+func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size) ([4]float32, []float32) {
 	size := rect.Size()
 	pos1 := rect.Position()
 
@@ -350,21 +350,21 @@ func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame
 
 	x1Pos := pos1.X
 	x1Norm := -1 + x1Pos*2/frame.Width
-	x2Pos := (pos1.X + size.Width)
+	x2Pos := pos1.X + size.Width
 	x2Norm := -1 + x2Pos*2/frame.Width
 	y1Pos := pos1.Y
 	y1Norm := 1 - y1Pos*2/frame.Height
-	y2Pos := (pos1.Y + size.Height)
+	y2Pos := pos1.Y + size.Height
 	y2Norm := 1 - y2Pos*2/frame.Height
-	coords := []float32{
-		x1Pos, y1Pos, x1Norm, y1Norm, // 1. triangle
-		x2Pos, y1Pos, x2Norm, y1Norm,
-		x1Pos, y2Pos, x1Norm, y2Norm,
-		x1Pos, y2Pos, x1Norm, y2Norm, // 2. triangle
-		x2Pos, y1Pos, x2Norm, y1Norm,
-		x2Pos, y2Pos, x2Norm, y2Norm}
 
-	return coords
+	// output a norm for the fill and the vert is unused, but we pass 0 to avoid optimisation issues
+	coords := []float32{
+		0, 0, x1Norm, y1Norm, // first triangle
+		0, 0, x2Norm, y1Norm, // second triangle
+		0, 0, x1Norm, y2Norm,
+		0, 0, x2Norm, y2Norm}
+
+	return [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}, coords
 }
 
 func roundToPixel(v float32, pixScale float32) float32 {
