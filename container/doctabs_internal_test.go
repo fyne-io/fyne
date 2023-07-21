@@ -36,7 +36,7 @@ func TestDocTabs_tabButtonRenderer_Remove(t *testing.T) {
 		{Text: "2", Content: widget.NewLabel("Content2")},
 		{Text: "3", Content: widget.NewLabel("Content3")}}
 	tabs := NewDocTabs(items...)
-	tabs.Resize(fyne.NewSize(100, 100))
+	tabs.Resize(fyne.NewSize(160, 160))
 	tabRenderer := cache.Renderer(tabs).(*docTabsRenderer)
 
 	tabs.SelectIndex(1)
