@@ -229,7 +229,6 @@ func TestPrefs_SetSameSliceValue(t *testing.T) {
 
 	// We should not fire change when it hasn't changed.
 	for i := 0; i < 2; i++ {
-
 		p.SetStringList("items", []string{"1", "2"})
 		time.Sleep(time.Millisecond * 100)
 
