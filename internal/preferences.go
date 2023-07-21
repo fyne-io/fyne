@@ -158,7 +158,6 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 		return fallback
 	}
 	return int(valf)
-
 }
 
 // ReadValues provides read access to the underlying value map - for internal use only...
