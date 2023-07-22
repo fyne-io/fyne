@@ -21,4 +21,9 @@ const (
 	//
 	// Since 2.3
 	WarningImportance
+
+	// SuccessImportance applies a success theme to the widget.
+	//
+	// Since 2.4
+	SuccessImportance
 )

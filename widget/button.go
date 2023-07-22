@@ -224,6 +224,8 @@ func (b *Button) buttonColor() color.Color {
 			bg = theme.ErrorColor()
 		} else if b.Importance == WarningImportance {
 			bg = theme.WarningColor()
+		} else if b.Importance == SuccessImportance {
+			bg = theme.SuccessColor()
 		}
 
 		return blendColor(bg, theme.FocusColor())
@@ -235,6 +237,8 @@ func (b *Button) buttonColor() color.Color {
 			bg = theme.ErrorColor()
 		} else if b.Importance == WarningImportance {
 			bg = theme.WarningColor()
+		} else if b.Importance == SuccessImportance {
+			bg = theme.SuccessColor()
 		}
 
 		return blendColor(bg, theme.HoverColor())
@@ -246,6 +250,8 @@ func (b *Button) buttonColor() color.Color {
 		return theme.ErrorColor()
 	case b.Importance == WarningImportance:
 		return theme.WarningColor()
+	case b.Importance == SuccessImportance:
+		return theme.SuccessColor()
 	default:
 		return theme.ButtonColor()
 	}
@@ -353,7 +359,7 @@ func (r *buttonRenderer) applyTheme() {
 	switch {
 	case r.button.disabled:
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance:
+	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance:
 		if r.button.focused {
 			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 		} else {
@@ -364,12 +370,12 @@ func (r *buttonRenderer) applyTheme() {
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance {
+			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
 				r.icon.Resource = theme.NewInvertedThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
-			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance {
+			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}
