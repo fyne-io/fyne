@@ -490,7 +490,7 @@ type tabButton struct {
 	hovered       bool
 	icon          fyne.Resource
 	iconPosition  buttonIconPosition
-	importance    widget.ButtonImportance
+	importance    widget.Importance
 	onTapped      func()
 	onClosed      func()
 	text          string

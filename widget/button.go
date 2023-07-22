@@ -21,7 +21,9 @@ type ButtonIconPlacement int
 // ButtonImportance represents how prominent the button should appear
 //
 // Since: 1.4
-type ButtonImportance int
+//
+// Deprecated: Use widget.Importance instead
+type ButtonImportance = Importance
 
 // ButtonStyle determines the behaviour and rendering of a button.
 type ButtonStyle int
@@ -42,24 +44,6 @@ const (
 	ButtonIconTrailingText
 )
 
-const (
-	// MediumImportance applies a standard appearance.
-	MediumImportance ButtonImportance = iota
-	// HighImportance applies a prominent appearance.
-	HighImportance
-	// LowImportance applies a subtle appearance.
-	LowImportance
-
-	// DangerImportance applies an error theme to the button.
-	//
-	// Since 2.3
-	DangerImportance
-	// WarningImportance applies an error theme to the button.
-	//
-	// Since 2.3
-	WarningImportance
-)
-
 var _ fyne.Focusable = (*Button)(nil)
 
 // Button widget has a text label and triggers an event func when clicked
@@ -70,7 +54,7 @@ type Button struct {
 	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
 	//
 	// Since: 1.4
-	Importance    ButtonImportance
+	Importance    Importance
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
@@ -240,6 +224,8 @@ func (b *Button) buttonColor() color.Color {
 			bg = theme.ErrorColor()
 		} else if b.Importance == WarningImportance {
 			bg = theme.WarningColor()
+		} else if b.Importance == SuccessImportance {
+			bg = theme.SuccessColor()
 		}
 
 		return blendColor(bg, theme.FocusColor())
@@ -251,6 +237,8 @@ func (b *Button) buttonColor() color.Color {
 			bg = theme.ErrorColor()
 		} else if b.Importance == WarningImportance {
 			bg = theme.WarningColor()
+		} else if b.Importance == SuccessImportance {
+			bg = theme.SuccessColor()
 		}
 
 		return blendColor(bg, theme.HoverColor())
@@ -262,6 +250,8 @@ func (b *Button) buttonColor() color.Color {
 		return theme.ErrorColor()
 	case b.Importance == WarningImportance:
 		return theme.WarningColor()
+	case b.Importance == SuccessImportance:
+		return theme.SuccessColor()
 	default:
 		return theme.ButtonColor()
 	}
@@ -369,7 +359,7 @@ func (r *buttonRenderer) applyTheme() {
 	switch {
 	case r.button.disabled:
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance:
+	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance:
 		if r.button.focused {
 			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 		} else {
@@ -380,12 +370,12 @@ func (r *buttonRenderer) applyTheme() {
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance {
+			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
 				r.icon.Resource = theme.NewInvertedThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
-			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance {
+			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}
