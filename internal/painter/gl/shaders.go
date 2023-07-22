@@ -33,7 +33,7 @@ var shaderRectangleFrag = &fyne.StaticResource{
 var shaderRectangleVert = &fyne.StaticResource{
 	StaticName: "rectangle.vert",
 	StaticContent: []byte(
-		"#version 110\n\nattribute vec2 vert;\nattribute vec2 normal;\n\nvoid main() {\n    gl_Position = vec4(normal, 0, 1);\n}\n"),
+		"#version 110\n\nattribute vec2 vert;\nattribute vec2 normal;\n\nvoid main() {\n    gl_Position = vec4(vert+normal, 0, 1);\n}\n"),
 }
 var shaderRectangleesFrag = &fyne.StaticResource{
 	StaticName: "rectangle_es.frag",
@@ -43,7 +43,7 @@ var shaderRectangleesFrag = &fyne.StaticResource{
 var shaderRectangleesVert = &fyne.StaticResource{
 	StaticName: "rectangle_es.vert",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec2 vert;\nattribute vec2 normal;\n\nvoid main() {\n    vert;  //Workaround, because WebGL optimizes away attributes unused\n    gl_Position = vec4(normal, 0, 1);\n}\n"),
+		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec2 vert;\nattribute vec2 normal;\n\nvoid main() {\n    gl_Position = vec4(vert+normal, 0, 1);\n}\n"),
 }
 var shaderRoundrectangleFrag = &fyne.StaticResource{
 	StaticName: "round_rectangle.frag",
