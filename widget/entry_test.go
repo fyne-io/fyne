@@ -197,6 +197,21 @@ func TestEntry_Control_Word(t *testing.T) {
 	// unselect when no shift press
 	entry.TypedShortcut(nextWord)
 	assert.Equal(t, "", entry.SelectedText())
+
+	// delete word when pressing backspace
+	deleteWord := &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.SetText("word1 word2 word3")
+	entry.TypedShortcut(deleteWord)
+	assert.Equal(t, "word1 word2 ", entry.Text)
+	entry.TypedShortcut(deleteWord)
+	assert.Equal(t, "word1 ", entry.Text)
+	entry.TypedShortcut(deleteWord)
+	assert.Equal(t, "", entry.Text)
+
+	// Deleting with nothing to delete does nothing
+	entry.TypedShortcut(deleteWord)
+	assert.Equal(t, "", entry.Text)
+
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
