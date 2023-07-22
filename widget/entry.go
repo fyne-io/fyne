@@ -941,10 +941,27 @@ func (e *Entry) registerShortcut() {
 		e.selecting = false
 		moveWord(se)
 	}
+	removeWord := func(se fyne.Shortcut) {
+		row := e.textProvider().row(e.CursorRow)
+		start, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
+		if start == -1 || end == -1 {
+			return
+		}
+
+		e.propertyLock.Lock()
+		pos := e.cursorTextPos()
+		e.textProvider().deleteFromTo(start, pos)
+		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
+		e.propertyLock.Unlock()
+
+		e.updateTextAndRefresh(e.textProvider().String())
+	}
+
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}, removeWord)
 }
 
 func (e *Entry) requestFocus() {
