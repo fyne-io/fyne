@@ -198,18 +198,34 @@ func TestEntry_Control_Word(t *testing.T) {
 	entry.TypedShortcut(nextWord)
 	assert.Equal(t, "", entry.SelectedText())
 
-	// delete word when pressing backspace
-	deleteWord := &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}
+	// delete word to the left when pressing backspace
+	deleteWordLeft := &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}
 	entry.SetText("word1 word2 word3")
-	entry.TypedShortcut(deleteWord)
+	entry.TypedShortcut(deleteWordLeft)
 	assert.Equal(t, "word1 word2 ", entry.Text)
-	entry.TypedShortcut(deleteWord)
+	entry.TypedShortcut(deleteWordLeft)
 	assert.Equal(t, "word1 ", entry.Text)
-	entry.TypedShortcut(deleteWord)
+	entry.TypedShortcut(deleteWordLeft)
 	assert.Equal(t, "", entry.Text)
 
 	// Deleting with nothing to delete does nothing
-	entry.TypedShortcut(deleteWord)
+	entry.TypedShortcut(deleteWordLeft)
+	assert.Equal(t, "", entry.Text)
+
+	// delete word to the left when pressing backspace
+	deleteWordRight := &desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: fyne.KeyModifierShortcutDefault}
+	entry.SetText("word1 word2 word3")
+	entry.CursorRow = 0
+	entry.CursorColumn = 0
+	entry.TypedShortcut(deleteWordRight)
+	assert.Equal(t, " word2 word3", entry.Text)
+	entry.TypedShortcut(deleteWordRight)
+	assert.Equal(t, " word3", entry.Text)
+	entry.TypedShortcut(deleteWordRight)
+	assert.Equal(t, "", entry.Text)
+
+	// Deleting with nothing to delete does nothing
+	entry.TypedShortcut(deleteWordRight)
 	assert.Equal(t, "", entry.Text)
 
 }
