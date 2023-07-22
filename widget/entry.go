@@ -944,8 +944,8 @@ func (e *Entry) registerShortcut() {
 	}
 	removeWordLeft := func(_ fyne.Shortcut) {
 		row := e.textProvider().row(e.CursorRow)
-		start, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
-		if start == -1 || end == -1 {
+		start, _ := getTextWhitespaceRegion(row, e.CursorColumn, true)
+		if start == -1 {
 			return
 		}
 
@@ -959,8 +959,8 @@ func (e *Entry) registerShortcut() {
 	}
 	removeWordRight := func(_ fyne.Shortcut) {
 		row := e.textProvider().row(e.CursorRow)
-		start, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
-		if start == -1 || end == -1 {
+		_, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
+		if end == -1 {
 			return
 		}
 
