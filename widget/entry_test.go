@@ -2,6 +2,7 @@ package widget_test
 
 import (
 	"image/color"
+	"runtime"
 	"testing"
 	"time"
 
@@ -198,8 +199,14 @@ func TestEntry_Control_Word(t *testing.T) {
 	entry.TypedShortcut(nextWord)
 	assert.Equal(t, "", entry.SelectedText())
 
+	// Modifer is Alt on macOS
+	deleteModifier := fyne.KeyModifierControl
+	if runtime.GOOS == "darwin" {
+		deleteModifier = fyne.KeyModifierAlt
+	}
+
 	// delete word to the left when pressing backspace
-	deleteWordLeft := &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}
+	deleteWordLeft := &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: deleteModifier}
 	entry.SetText("word1 word2 word3")
 	entry.TypedShortcut(deleteWordLeft)
 	assert.Equal(t, "word1 word2 ", entry.Text)
@@ -213,7 +220,7 @@ func TestEntry_Control_Word(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 
 	// delete word to the left when pressing backspace
-	deleteWordRight := &desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: fyne.KeyModifierShortcutDefault}
+	deleteWordRight := &desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: deleteModifier}
 	entry.SetText("word1 word2 word3")
 	entry.CursorRow = 0
 	entry.CursorColumn = 0

@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"math"
+	"runtime"
 	"strings"
 	"time"
 	"unicode"
@@ -977,8 +978,13 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}, unselectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}, selectMoveWord)
 
-	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}, removeWordLeft)
-	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: fyne.KeyModifierShortcutDefault}, removeWordRight)
+	deleteModifier := fyne.KeyModifierControl
+	if runtime.GOOS == "darwin" {
+		deleteModifier = fyne.KeyModifierAlt
+	}
+
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: deleteModifier}, removeWordLeft)
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: deleteModifier}, removeWordRight)
 }
 
 func (e *Entry) requestFocus() {
