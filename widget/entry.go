@@ -474,6 +474,28 @@ func (e *Entry) SetText(text string) {
 	e.updateCursorAndSelection()
 }
 
+// AppendLine appends the text to the end of the entry adding a new line if the entry isn't empty,
+// or a space if multiline isn't enabled
+//
+// Since: 2.4
+func (e *Entry) AppendLine(text string) {
+	e.propertyLock.RLock()
+	ml := e.MultiLine
+	st := e.Text
+	e.propertyLock.RUnlock()
+
+	delim := "\n"
+	if !ml {
+		delim = " "
+	}
+	if st != "" {
+		st += delim
+	}
+	st += text
+
+	e.SetText(st)
+}
+
 // Tapped is called when this entry has been tapped. We update the cursor position in
 // device-specific callbacks (MouseDown() and TouchDown()).
 //
