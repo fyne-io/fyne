@@ -104,6 +104,7 @@ func Package() *cli.Command {
 				Name:        "profile",
 				Usage:       "iOS/macOS: name of the provisioning profile for this build",
 				Destination: &p.profile,
+				Value:       "XCWildcard",
 			},
 			&cli.BoolFlag{
 				Name:        "release",
