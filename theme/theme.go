@@ -88,6 +88,11 @@ const (
 	// Since: 2.0
 	ColorNameHover fyne.ThemeColorName = "hover"
 
+	// ColorNameHyperlink is the name of theme lookup for hyperlink color.
+	//
+	// Since: 2.4
+	ColorNameHyperlink fyne.ThemeColorName = "hyperlink"
+
 	// ColorNameInputBackground is the name of theme lookup for background color of an input field.
 	//
 	// Since: 2.0
@@ -356,6 +361,11 @@ func HeaderBackgroundColor() color.Color {
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
 func HoverColor() color.Color {
 	return safeColorLookup(ColorNameHover, currentVariant())
+}
+
+// HyperlinkColor returns the color used for the Hyperlink widget and hyperlink text elements.
+func HyperlinkColor() color.Color {
+	return safeColorLookup(ColorNameHyperlink, currentVariant())
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
@@ -627,7 +637,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	}
 
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
-	if n == ColorNamePrimary {
+	if n == ColorNamePrimary || n == ColorNameHyperlink {
 		return primaryColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)

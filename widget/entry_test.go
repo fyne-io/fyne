@@ -21,6 +21,7 @@ func TestEntry_Binding(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("Init")
 	assert.Equal(t, "Init", entry.Text)
+	waitForBinding() // this time it is the de-echo before binding
 
 	str := binding.NewString()
 	entry.Bind(str)

@@ -12,7 +12,6 @@ type InMemoryPreferences struct {
 	values          map[string]interface{}
 	lock            sync.RWMutex
 	changeListeners []func()
-	wg              *sync.WaitGroup
 }
 
 // Declare conformity with Preferences interface
@@ -230,10 +229,7 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 
 // NewInMemoryPreferences creates a new preferences implementation stored in memory
 func NewInMemoryPreferences() *InMemoryPreferences {
-	return &InMemoryPreferences{
-		values: make(map[string]interface{}),
-		wg:     &sync.WaitGroup{},
-	}
+	return &InMemoryPreferences{values: make(map[string]interface{})}
 }
 
 func (p *InMemoryPreferences) fireChange() {
@@ -241,15 +237,17 @@ func (p *InMemoryPreferences) fireChange() {
 	listeners := p.changeListeners
 	p.lock.RUnlock()
 
+	var wg sync.WaitGroup
+
 	for _, l := range listeners {
-		p.wg.Add(1)
+		wg.Add(1)
 		go func(listener func()) {
-			defer p.wg.Done()
+			defer wg.Done()
 			listener()
 		}(l)
 	}
 
-	p.wg.Wait()
+	wg.Wait()
 }
 
 func (p *InMemoryPreferences) get(key string) (interface{}, bool) {

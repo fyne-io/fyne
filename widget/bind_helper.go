@@ -20,8 +20,8 @@ type basicBinder struct {
 func (binder *basicBinder) Bind(data binding.DataItem) {
 	listener := binding.NewDataListener(func() { // NB: listener captures `data` but always calls the up-to-date callback
 		f := binder.callback.Load()
-		if f != nil {
-			f.(func(binding.DataItem))(data)
+		if fn, ok := f.(func(binding.DataItem)); ok && fn != nil {
+			fn(data)
 		}
 	})
 	data.AddListener(listener)

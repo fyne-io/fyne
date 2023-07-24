@@ -141,6 +141,11 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
+	newApp.lifecycle.(*app.Lifecycle).SetOnStoppedHookExecuted(func() {
+		if prefs, ok := newApp.prefs.(*preferences); ok {
+			prefs.forceImmediateSave()
+		}
+	})
 	newApp.settings = loadSettings()
 	store := &store{a: newApp}
 	store.Docs = makeStoreDocs(id, store)

@@ -30,3 +30,19 @@ func TestDocTabs_tabButtonRenderer_SetText(t *testing.T) {
 	renderer = cache.Renderer(button).(*tabButtonRenderer)
 	assert.Equal(t, "Replace", renderer.label.Text)
 }
+
+func TestDocTabs_tabButtonRenderer_Remove(t *testing.T) {
+	items := []*TabItem{{Text: "1", Content: widget.NewLabel("Content1")},
+		{Text: "2", Content: widget.NewLabel("Content2")},
+		{Text: "3", Content: widget.NewLabel("Content3")}}
+	tabs := NewDocTabs(items...)
+	tabs.Resize(fyne.NewSize(160, 160))
+	tabRenderer := cache.Renderer(tabs).(*docTabsRenderer)
+
+	tabs.SelectIndex(1)
+	pos := tabRenderer.indicator.Position()
+	tabs.RemoveIndex(0)
+	assert.Equal(t, 0, tabs.SelectedIndex())
+
+	assert.Less(t, tabRenderer.indicator.Position().X, pos.X)
+}
