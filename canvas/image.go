@@ -175,7 +175,9 @@ func (i *Image) Resize(s fyne.Size) {
 	if s == i.Size() {
 		return
 	}
-	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // don't refresh original scale images after first draw
+	i.baseObject.Resize(s)
+	if i.FillMode == ImageFillOriginal && i.size.Height > 2 { // we can just ask for a GPU redraw to align
+		Refresh(i)
 		return
 	}
 
