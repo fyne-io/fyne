@@ -180,7 +180,7 @@ func (i *Image) Resize(s fyne.Size) {
 	}
 
 	i.baseObject.Resize(s)
-	if i.isSVG {
+	if i.isSVG || i.Image == nil {
 		i.Refresh() // we need to rasterise at the new size
 	} else {
 		Refresh(i) // just re-size using GPU scaling
