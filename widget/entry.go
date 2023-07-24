@@ -605,13 +605,13 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyTab:
 		e.TypedRune('\t')
 	case fyne.KeyUp:
-		e.typedKeyUp(provider, multiLine)
+		e.typedKeyUp(provider)
 	case fyne.KeyDown:
-		e.typedKeyDown(provider, multiLine)
+		e.typedKeyDown(provider)
 	case fyne.KeyLeft:
-		e.typedKeyLeft(provider, multiLine)
+		e.typedKeyLeft(provider)
 	case fyne.KeyRight:
-		e.typedKeyRight(provider, multiLine)
+		e.typedKeyRight(provider)
 	case fyne.KeyEnd:
 		e.propertyLock.Lock()
 		if e.MultiLine {
@@ -653,7 +653,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	e.Refresh()
 }
 
-func (e *Entry) typedKeyUp(provider *RichText, multiLine bool) {
+func (e *Entry) typedKeyUp(provider *RichText) {
 	e.propertyLock.Lock()
 
 	if e.CursorRow > 0 {
@@ -669,7 +669,7 @@ func (e *Entry) typedKeyUp(provider *RichText, multiLine bool) {
 	e.propertyLock.Unlock()
 }
 
-func (e *Entry) typedKeyDown(provider *RichText, multiLine bool) {
+func (e *Entry) typedKeyDown(provider *RichText) {
 	e.propertyLock.Lock()
 	rowLength := provider.rowLength(e.CursorRow)
 
@@ -686,7 +686,7 @@ func (e *Entry) typedKeyDown(provider *RichText, multiLine bool) {
 	e.propertyLock.Unlock()
 }
 
-func (e *Entry) typedKeyLeft(provider *RichText, multiLine bool) {
+func (e *Entry) typedKeyLeft(provider *RichText) {
 	e.propertyLock.Lock()
 	if e.CursorColumn > 0 {
 		e.CursorColumn--
@@ -697,7 +697,7 @@ func (e *Entry) typedKeyLeft(provider *RichText, multiLine bool) {
 	e.propertyLock.Unlock()
 }
 
-func (e *Entry) typedKeyRight(provider *RichText, multiLine bool) {
+func (e *Entry) typedKeyRight(provider *RichText) {
 	e.propertyLock.Lock()
 	if e.MultiLine {
 		rowLength := provider.rowLength(e.CursorRow)
