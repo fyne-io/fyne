@@ -69,7 +69,7 @@ func NewTreeWithData(data binding.DataTree, createItem func(bool) fyne.CanvasObj
 		func(i TreeNodeID, branch bool, o fyne.CanvasObject) {
 			item, err := data.GetItem(i)
 			if err != nil {
-				fyne.LogError(fmt.Sprintf("Error getting data item %d", i), err)
+				fyne.LogError(fmt.Sprintf("Error getting data item %s", i), err)
 				return
 			}
 			updateItem(item, branch, o)
