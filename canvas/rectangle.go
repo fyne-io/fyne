@@ -16,9 +16,27 @@ type Rectangle struct {
 	FillColor   color.Color // The rectangle fill color
 	StrokeColor color.Color // The rectangle stroke color
 	StrokeWidth float32     // The stroke width of the rectangle
+	// The radius of the rectangle corners
+	//
+	// Since: 2.4
+	CornerRadius float32
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Hide will set this rectangle to not be visible
+func (r *Rectangle) Hide() {
+	r.baseObject.Hide()
+
+	repaint(r)
+}
+
+// Move the rectangle to a new position, relative to its parent / canvas
+func (r *Rectangle) Move(pos fyne.Position) {
+	r.baseObject.Move(pos)
+
+	repaint(r)
+}
+
+// Refresh causes this rectangle to be redrawn with its configured state.
 func (r *Rectangle) Refresh() {
 	Refresh(r)
 }

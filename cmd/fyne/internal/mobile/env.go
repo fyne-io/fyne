@@ -3,7 +3,6 @@ package mobile
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -69,7 +68,7 @@ func buildEnvInit() (cleanup func(), err error) {
 		tmpdir = "$WORK"
 		cleanupFn = func() {}
 	} else {
-		tmpdir, err = ioutil.TempDir("", "fyne-work-")
+		tmpdir, err = os.MkdirTemp("", "fyne-work-")
 		if err != nil {
 			return nil, err
 		}
@@ -342,6 +341,9 @@ func archNDK() string {
 			arch = "x86_64"
 			break
 		}
+		if runtime.GOOS == "android" { // termux
+			return "linux-aarch64"
+		}
 		fallthrough
 	default:
 		panic("unsupported GOARCH: " + runtime.GOARCH)
@@ -379,6 +381,12 @@ func (tc *ndkToolchain) Path(ndkRoot, toolName string) string {
 		toolPath := filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin", pref+"-"+toolName)
 		if util.Exists(toolPath) {
 			return toolPath
+		} else if runtime.GOOS == "windows" {
+			// On windows some of the NDK executable have a .exe extension and some don't, so try both.
+			toolPath += ".exe"
+			if util.Exists(toolPath) {
+				return toolPath
+			}
 		}
 	}
 	return ""

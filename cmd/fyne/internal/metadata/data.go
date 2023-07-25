@@ -6,6 +6,7 @@ type FyneApp struct {
 	Details     AppDetails
 	Development map[string]string `toml:",omitempty"`
 	Release     map[string]string `toml:",omitempty"`
+	LinuxAndBSD *LinuxAndBSD      `toml:",omitempty"`
 }
 
 // AppDetails describes the build information, this group may be OS or arch specific
@@ -14,4 +15,13 @@ type AppDetails struct {
 	Name, ID string `toml:",omitempty"`
 	Version  string `toml:",omitempty"`
 	Build    int    `toml:",omitempty"`
+}
+
+// LinuxAndBSD describes specific metadata for desktop files on Linux and BSD.
+type LinuxAndBSD struct {
+	GenericName string   `toml:",omitempty"`
+	Categories  []string `toml:",omitempty"`
+	Comment     string   `toml:",omitempty"`
+	Keywords    []string `toml:",omitempty"`
+	ExecParams  string   `toml:",omitempty"`
 }

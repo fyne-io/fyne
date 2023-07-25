@@ -156,6 +156,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnUniform1f:
 		glUniform1f((GLint)args->a0, *(GLfloat*)&args->a1);
 		break;
+	case glfnUniform2f:
+		glUniform2f((GLint)args->a0, *(GLfloat*)&args->a1, *(GLfloat*)&args->a2);
+		break;
 	case glfnUniform4f:
 		glUniform4f((GLint)args->a0, *(GLfloat*)&args->a1, *(GLfloat*)&args->a2, *(GLfloat*)&args->a3, *(GLfloat*)&args->a4);
 		break;

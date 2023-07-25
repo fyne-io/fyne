@@ -3,11 +3,14 @@ package commands
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
+	"github.com/fogleman/gg"
+	"github.com/nfnt/resize"
 
 	"github.com/jackmordaunt/icns/v2"
 )
@@ -69,9 +72,33 @@ func (p *Packager) packageDarwin() (err error) {
 			err = r
 		}
 	}()
+	if !p.rawIcon {
+		srcImg = processMacOSIcon(srcImg)
+	}
 	if err := icns.Encode(dest, srcImg); err != nil {
 		return fmt.Errorf("failed to encode icns: %w", err)
 	}
 
 	return nil
+}
+
+func processMacOSIcon(in image.Image) image.Image {
+	size := 1024
+	border := 100
+	radius := 185.4
+
+	innerSize := int(float64(size) - float64(border*2)) // how many pixels inside border
+	sized := resize.Resize(uint(innerSize), uint(innerSize), in, resize.Lanczos3)
+
+	dc := gg.NewContext(size, size)
+	dc.DrawRoundedRectangle(float64(border), float64(border), float64(innerSize), float64(innerSize), radius)
+	dc.SetColor(color.Black)
+	dc.Fill()
+	mask := dc.AsMask()
+
+	dc = gg.NewContext(size, size)
+	_ = dc.SetMask(mask) // ignore error if size was not equal, as it is
+	dc.DrawImage(sized, border, border)
+
+	return dc.Image()
 }

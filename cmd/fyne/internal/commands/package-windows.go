@@ -21,7 +21,7 @@ type windowsData struct {
 	CombinedVersion string
 }
 
-func (p *Packager) packageWindows() error {
+func (p *Packager) packageWindows(tags []string) error {
 	exePath := filepath.Dir(p.exe)
 
 	// convert icon
@@ -35,7 +35,7 @@ func (p *Packager) packageWindows() error {
 		return fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	icoPath := filepath.Join(exePath, p.Name+".ico")
+	icoPath := filepath.Join(exePath, "FyneApp.ico")
 	file, err := os.Create(icoPath)
 	if err != nil {
 		return fmt.Errorf("failed to open image file: %w", err)
@@ -59,13 +59,14 @@ func (p *Packager) packageWindows() error {
 		manifestFile, _ := os.Create(manifest)
 
 		tplData := windowsData{
-			Name:            p.Name,
+			Name:            encodeXMLString(p.Name),
 			CombinedVersion: p.combinedVersion(),
 		}
 		err := templates.ManifestWindows.Execute(manifestFile, tplData)
 		if err != nil {
 			return fmt.Errorf("failed to write manifest template: %w", err)
 		}
+		manifestFile.Close()
 	}
 
 	// launch rsrc to generate the object file
@@ -76,6 +77,7 @@ func (p *Packager) packageWindows() error {
 	vi.IconPath = icoPath
 	vi.ManifestPath = manifest
 	vi.StringFileInfo.ProductVersion = p.combinedVersion()
+	vi.StringFileInfo.FileDescription = p.Name
 	vi.FixedFileInfo.FileVersion = fixedVersionInfo(p.combinedVersion())
 
 	vi.Build()
@@ -102,24 +104,28 @@ func (p *Packager) packageWindows() error {
 		}
 	}
 
-	_, err = p.buildPackage(nil)
+	_, err = p.buildPackage(nil, tags)
 	if err != nil {
 		return fmt.Errorf("failed to rebuild after adding metadata: %w", err)
 	}
 
-	appPath := p.exe
 	appName := filepath.Base(p.exe)
 	if filepath.Base(p.exe) != p.Name {
 		appName = p.Name
 		if filepath.Ext(p.Name) != ".exe" {
 			appName = appName + ".exe"
 		}
-		appPath = filepath.Join(filepath.Dir(p.exe), appName)
 		os.Rename(filepath.Base(p.exe), appName)
 	}
 
 	if p.install {
-		err := runAsAdminWindows("copy", "\"\""+appPath+"\"\"", "\"\""+filepath.Join(p.dir, appName)+"\"\"")
+		wd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("failed to locate current working directory")
+		}
+		appPath := filepath.Join(wd, appName)
+
+		err = runAsAdminWindows("copy", appPath, filepath.Join(p.dir, appName))
 		if err != nil {
 			return fmt.Errorf("failed to run as administrator: %w", err)
 		}
@@ -127,12 +133,25 @@ func (p *Packager) packageWindows() error {
 	return nil
 }
 
-func runAsAdminWindows(args ...string) error {
+func escapePowerShellArguments(args ...string) string {
 	cmd := "\"/c\""
 
-	for _, arg := range args {
-		cmd += ",\"" + arg + "\""
+	for idx, arg := range args {
+		if idx == 0 {
+			cmd += ",'" + arg
+		} else {
+			cmd += " \"" + arg + "\""
+		}
 	}
+	if len(args) != 0 {
+		cmd += "'"
+	}
+
+	return cmd
+}
+
+func runAsAdminWindows(args ...string) error {
+	cmd := escapePowerShellArguments(args...)
 
 	return execabs.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }

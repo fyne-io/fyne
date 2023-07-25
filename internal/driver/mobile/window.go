@@ -101,6 +101,10 @@ func (w *window) SetCloseIntercept(callback func()) {
 	w.onCloseIntercepted = callback
 }
 
+func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
+	// not implemented yet
+}
+
 func (w *window) Show() {
 	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
 	menuButton := w.newMenuButton(menu)
@@ -161,7 +165,7 @@ func (w *window) Close() {
 		w.canvas.Painter().Free(obj)
 	})
 
-	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}

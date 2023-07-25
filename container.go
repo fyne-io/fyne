@@ -80,6 +80,7 @@ func (c *Container) Hide() {
 	}
 
 	c.Hidden = true
+	repaint(c)
 }
 
 // MinSize calculates the minimum size of a Container.
@@ -100,6 +101,7 @@ func (c *Container) MinSize() Size {
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
 	c.position = pos
+	repaint(c)
 }
 
 // Position gets the current position of this Container, relative to its parent.
@@ -191,4 +193,19 @@ func (c *Container) layout() {
 	}
 
 	c.Layout.Layout(c.Objects, c.size)
+}
+
+// repaint instructs the containing canvas to redraw, even if nothing changed.
+// This method is a duplicate of what is in `canvas/canvas.go` to avoid a dependency loop or public API.
+func repaint(obj *Container) {
+	if CurrentApp() == nil || CurrentApp().Driver() == nil {
+		return
+	}
+
+	c := CurrentApp().Driver().CanvasForObject(obj)
+	if c != nil {
+		if paint, ok := c.(interface{ SetDirty() }); ok {
+			paint.SetDirty()
+		}
+	}
 }

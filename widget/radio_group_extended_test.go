@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -135,16 +136,16 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 			render2 := cache.Renderer(radio.items[1]).(*radioItemRenderer)
 
 			assert.False(t, item1.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Hi")
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Another")
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseIn(&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{
@@ -153,12 +154,12 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 			})
 			assert.True(t, item1.hovered)
 			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseOut()
 			assert.False(t, item1.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 		})
 	}
 }

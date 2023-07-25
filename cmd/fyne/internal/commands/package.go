@@ -7,7 +7,6 @@ import (
 	"image"
 	_ "image/jpeg" // import image encodings
 	"image/png"    // import image encodings
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,11 +14,12 @@ import (
 	"strconv"
 	"strings"
 
-	"fyne.io/fyne/v2"
 	_ "github.com/fyne-io/image/ico" // import image encodings
 	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
+
+	"fyne.io/fyne/v2"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 )
@@ -28,16 +28,6 @@ const (
 	defaultAppBuild   = 1
 	defaultAppVersion = "0.0.1"
 )
-
-type appData struct {
-	icon, Name        string
-	AppID, AppVersion string
-	AppBuild          int
-	ResGoString       string
-	Release           bool
-	CustomMetadata    map[string]string
-	VersionAtLeast2_3 bool
-}
 
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
@@ -92,6 +82,12 @@ func Package() *cli.Command {
 				Value:       "",
 				Destination: &p.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &p.rawIcon,
+			},
 			&cli.StringFlag{
 				Name:        "appID",
 				Aliases:     []string{"id"},
@@ -108,6 +104,7 @@ func Package() *cli.Command {
 				Name:        "profile",
 				Usage:       "iOS/macOS: name of the provisioning profile for this build",
 				Destination: &p.profile,
+				Value:       "XCWildcard",
 			},
 			&cli.BoolFlag{
 				Name:        "release",
@@ -140,7 +137,8 @@ type Packager struct {
 	tags, category                 string
 	tempDir                        string
 
-	customMetadata keyValueFlag
+	customMetadata      keyValueFlag
+	linuxAndBSDMetadata *metadata.LinuxAndBSD
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -209,11 +207,7 @@ func (p *Packager) packageWithoutValidate() error {
 	return metadata.SaveStandard(data, p.srcDir)
 }
 
-func (p *Packager) buildPackage(runner runner) ([]string, error) {
-	var tags []string
-	if p.tags != "" {
-		tags = strings.Split(p.tags, ",")
-	}
+func (p *Packager) buildPackage(runner runner, tags []string) ([]string, error) {
 	if p.os != "web" {
 		b := &Builder{
 			os:      p.os,
@@ -269,7 +263,13 @@ func (p *Packager) buildPackage(runner runner) ([]string, error) {
 }
 
 func (p *Packager) combinedVersion() string {
-	return fmt.Sprintf("%s.%d", p.AppVersion, p.AppBuild)
+	versions := strings.Split(p.AppVersion, ".")
+	for len(versions) < 3 {
+		versions = append(versions, "0")
+	}
+	appVersion := strings.Join(versions, ".")
+
+	return fmt.Sprintf("%s.%d", appVersion, p.AppBuild)
 }
 
 func (p *Packager) doPackage(runner runner) error {
@@ -282,8 +282,13 @@ func (p *Packager) doPackage(runner runner) error {
 	}
 	defer os.RemoveAll(p.tempDir)
 
+	var tags []string
+	if p.tags != "" {
+		tags = strings.Split(p.tags, ",")
+	}
+
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		files, err := p.buildPackage(runner)
+		files, err := p.buildPackage(runner, tags)
 		if err != nil {
 			return fmt.Errorf("error building application: %w", err)
 		}
@@ -311,11 +316,11 @@ func (p *Packager) doPackage(runner runner) error {
 	case "linux", "openbsd", "freebsd", "netbsd":
 		return p.packageUNIX()
 	case "windows":
-		return p.packageWindows()
+		return p.packageWindows(tags)
 	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
-		return p.packageAndroid(p.os)
+		return p.packageAndroid(p.os, tags)
 	case "ios", "iossimulator":
-		return p.packageIOS(p.os)
+		return p.packageIOS(p.os, tags)
 	case "wasm":
 		return p.packageWasm()
 	case "gopherjs":
@@ -337,7 +342,7 @@ func (p *Packager) removeBuild(files []string) {
 }
 
 func (p *Packager) validate() (err error) {
-	p.tempDir, err = ioutil.TempDir("", "fyne-package-*")
+	p.tempDir, err = os.MkdirTemp("", "fyne-package-*")
 	defer func() {
 		if err != nil {
 			_ = os.RemoveAll(p.tempDir)
@@ -356,9 +361,12 @@ func (p *Packager) validate() (err error) {
 	}
 	if p.srcDir == "" {
 		p.srcDir = baseDir
-	} else if p.os == "ios" || p.os == "android" {
-		return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
-			"Change directory to the main package and try again")
+	} else {
+		if p.os == "ios" || p.os == "android" {
+			return errors.New("parameter -sourceDir is currently not supported for mobile builds. " +
+				"Change directory to the main package and try again")
+		}
+		p.srcDir = util.EnsureAbsPath(p.srcDir)
 	}
 	os.Chdir(p.srcDir)
 
@@ -366,8 +374,14 @@ func (p *Packager) validate() (err error) {
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
+		// When icon path specified in metadata file, we should make it relative to metadata file
+		if data.Details.Icon != "" {
+			data.Details.Icon = util.MakePathRelativeTo(p.srcDir, data.Details.Icon)
+		}
+
 		p.appData.Release = p.release
-		mergeMetadata(p.appData, data)
+		p.appData.mergeMetadata(data)
+		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -410,10 +424,10 @@ func (p *Packager) validate() (err error) {
 	return nil
 }
 
-func calculateExeName(sourceDir, os string) string {
+func calculateExeName(sourceDir, osys string) string {
 	exeName := filepath.Base(sourceDir)
 	/* #nosec */
-	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
+	if data, err := os.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
 		modulePath := modfile.ModulePath(data)
 		moduleName, _, ok := module.SplitPathVersion(modulePath)
 		if ok {
@@ -425,7 +439,7 @@ func calculateExeName(sourceDir, os string) string {
 		}
 	}
 
-	if os == "windows" {
+	if osys == "windows" {
 		exeName = exeName + ".exe"
 	}
 
@@ -445,39 +459,6 @@ func isValidVersion(ver string) bool {
 	return true
 }
 
-func appendCustomMetadata(customMetadata *map[string]string, fromFile map[string]string) {
-	for key, value := range fromFile {
-		_, ok := (*customMetadata)[key]
-		if ok {
-			continue
-		}
-		(*customMetadata)[key] = value
-	}
-}
-
-func mergeMetadata(p *appData, data *metadata.FyneApp) {
-	if p.icon == "" {
-		p.icon = data.Details.Icon
-	}
-	if p.Name == "" {
-		p.Name = data.Details.Name
-	}
-	if p.AppID == "" {
-		p.AppID = data.Details.ID
-	}
-	if p.AppVersion == "" {
-		p.AppVersion = data.Details.Version
-	}
-	if p.AppBuild == 0 {
-		p.AppBuild = data.Details.Build
-	}
-	if p.Release {
-		appendCustomMetadata(&p.CustomMetadata, data.Release)
-	} else {
-		appendCustomMetadata(&p.CustomMetadata, data.Development)
-	}
-}
-
 // normaliseIcon takes a non-png image file and converts it to PNG for use in packaging.
 // Successful conversion will return a path to the new file.
 // Any errors that occur will be returned with an empty string for new path.
@@ -493,7 +474,7 @@ func (p *Packager) normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	out, err := ioutil.TempFile(p.tempDir, "fyne-ico-*.png")
+	out, err := os.CreateTemp(p.tempDir, "fyne-ico-*.png")
 	if err != nil {
 		return "", fmt.Errorf("failed to open image output file: %w", err)
 	}

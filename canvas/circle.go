@@ -2,6 +2,7 @@ package canvas
 
 import (
 	"image/color"
+	"math"
 
 	"fyne.io/fyne/v2"
 )
@@ -31,7 +32,7 @@ func NewCircle(color color.Color) *Circle {
 func (c *Circle) Hide() {
 	c.Hidden = true
 
-	c.Refresh()
+	repaint(c)
 }
 
 // MinSize for a Circle simply returns Size{1, 1} as there is no
@@ -45,6 +46,7 @@ func (c *Circle) Move(pos fyne.Position) {
 	size := c.Size()
 	c.Position1 = pos
 	c.Position2 = fyne.NewPos(c.Position1.X+size.Width, c.Position1.Y+size.Height)
+	repaint(c)
 }
 
 // Position gets the current top-left position of this circle object, relative to its parent / canvas
@@ -52,7 +54,7 @@ func (c *Circle) Position() fyne.Position {
 	return c.Position1
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this object to be redrawn with its configured state.
 func (c *Circle) Refresh() {
 	Refresh(c)
 }
@@ -78,7 +80,8 @@ func (c *Circle) Show() {
 
 // Size returns the current size of bounding box for this circle object
 func (c *Circle) Size() fyne.Size {
-	return fyne.NewSize(c.Position2.X-c.Position1.X, c.Position2.Y-c.Position1.Y)
+	return fyne.NewSize(float32(math.Abs(float64(c.Position2.X)-float64(c.Position1.X))),
+		float32(math.Abs(float64(c.Position2.Y)-float64(c.Position1.Y))))
 }
 
 // Visible returns true if this circle is visible, false otherwise

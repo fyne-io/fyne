@@ -8,6 +8,7 @@
 	<activity android:name="org.golang.app.GoNativeActivity"
 		android:label="{{.Name}}"
 		android:configChanges="orientation|keyboardHidden|uiMode"
+		android:exported="true"
 		android:theme="@android:style/Theme">
 		<meta-data android:name="android.app.lib_name" android:value="{{.LibName}}" />
 		<intent-filter>

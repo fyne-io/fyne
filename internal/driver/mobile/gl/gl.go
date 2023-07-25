@@ -45,6 +45,7 @@ func (ctx *context) BindBuffer(target Enum, b Buffer) {
 		},
 	})
 }
+
 func (ctx *context) BindTexture(target Enum, t Texture) {
 	ctx.enqueue(call{
 		args: fnargs{
@@ -181,6 +182,7 @@ func (ctx *context) CreateVertexArray() VertexArray {
 		blocking: true,
 	}))}
 }
+
 func (ctx *context) DeleteBuffer(v Buffer) {
 	ctx.enqueue(call{
 		args: fnargs{
@@ -218,6 +220,7 @@ func (ctx *context) DrawArrays(mode Enum, first, count int) {
 		},
 	})
 }
+
 func (ctx *context) Enable(cap Enum) {
 	ctx.enqueue(call{
 		args: fnargs{
@@ -424,6 +427,7 @@ func (ctx *context) ShaderSource(s Shader, src string) {
 		blocking: true,
 	})
 }
+
 func (ctx *context) TexImage2D(target Enum, level int, internalFormat int, width, height int, format Enum, ty Enum, data []byte) {
 	// It is common to pass TexImage2D a nil data, indicating that a
 	// bound GL buffer is being used as the source. In that case, it
@@ -470,6 +474,18 @@ func (ctx *context) Uniform1f(dst Uniform, v float32) {
 		},
 	})
 }
+
+func (ctx *context) Uniform2f(dst Uniform, v0, v1 float32) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnUniform2f,
+			a0: dst.c(),
+			a1: uintptr(math.Float32bits(v0)),
+			a2: uintptr(math.Float32bits(v1)),
+		},
+	})
+}
+
 func (ctx *context) Uniform4f(dst Uniform, v0, v1, v2, v3 float32) {
 	ctx.enqueue(call{
 		args: fnargs{

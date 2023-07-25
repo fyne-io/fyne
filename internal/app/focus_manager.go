@@ -39,7 +39,7 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 				}
 				return false
 			},
-			func(object, _ fyne.CanvasObject) {
+			func(object fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
 				if hiddenAncestor == object {
 					hiddenAncestor = nil
 				}
@@ -158,5 +158,5 @@ func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 type walkerFunc func(
 	fyne.CanvasObject,
 	func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	func(fyne.CanvasObject, fyne.CanvasObject),
+	func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool

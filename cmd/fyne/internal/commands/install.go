@@ -43,6 +43,12 @@ func Install() *cli.Command {
 				Value:       "",
 				Destination: &i.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &i.rawIcon,
+			},
 			&cli.StringFlag{
 				Name:        "appID",
 				Aliases:     []string{"id"},
@@ -152,7 +158,7 @@ func (i *Installer) install() error {
 				dirName = p.Name[:len(p.Name)-4]
 			}
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), dirName)
-			err := runAsAdminWindows("mkdir", "\"\""+i.installDir+"\"\"")
+			err := runAsAdminWindows("mkdir", i.installDir)
 			if err != nil {
 				fyne.LogError("Failed to run as windows administrator", err)
 				return err

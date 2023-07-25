@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,19 +14,19 @@ import (
 	"golang.org/x/sys/execabs"
 )
 
-func (p *Packager) packageAndroid(arch string) error {
-	return mobile.RunNewBuild(arch, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, "", "", p.tags, p.verbose)
+func (p *Packager) packageAndroid(arch string, tags []string) error {
+	return mobile.RunNewBuild(arch, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, "", "", tags, p.verbose)
 }
 
-func (p *Packager) packageIOS(target string) error {
-	err := mobile.RunNewBuild(target, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, p.certificate, p.profile, p.tags, p.verbose)
+func (p *Packager) packageIOS(target string, tags []string) error {
+	err := mobile.RunNewBuild(target, p.AppID, p.icon, p.Name, p.AppVersion, p.AppBuild, p.release, p.distribution, p.certificate, p.profile, tags, p.verbose)
 	if err != nil {
 		return err
 	}
 
 	assetDir := util.EnsureSubDir(p.dir, "Images.xcassets")
 	defer os.RemoveAll(assetDir)
-	err = ioutil.WriteFile(filepath.Join(assetDir, "Contents.json"), []byte(`{
+	err = os.WriteFile(filepath.Join(assetDir, "Contents.json"), []byte(`{
   "info" : {
     "author" : "xcode",
     "version" : 1

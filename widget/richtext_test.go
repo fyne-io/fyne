@@ -370,6 +370,9 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	fullSize := provider.lineSizeToColumn(4, 0)
 	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
 	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+
+	out := provider.lineSizeToColumn(-1, -1)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0))
 }
 
 func TestText_splitLines(t *testing.T) {
@@ -422,8 +425,8 @@ func TestText_splitLines(t *testing.T) {
 }
 
 func TestText_lineBounds(t *testing.T) {
-	mockMeasurer := func(text []rune) float32 {
-		return float32(len(text))
+	measurer := func(text []rune) float32 {
+		return fyne.MeasureText(string(text), 14, fyne.TextStyle{}).Width
 	}
 	tests := []struct {
 		name string
@@ -480,6 +483,14 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
+			name: "Single_Short_TruncateEllipsis",
+			text: "foobar",
+			wrap: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 6},
+			},
+		},
+		{
 			name: "Single_Short_WrapBreak",
 			text: "foobar",
 			wrap: fyne.TextWrapBreak,
@@ -507,6 +518,14 @@ func TestText_lineBounds(t *testing.T) {
 			name: "Single_Long_Truncate",
 			text: "foobar foobar",
 			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 10},
+			},
+		},
+		{
+			name: "Single_Long_TruncateEllipsis",
+			text: "foobar fo…",
+			wrap: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 10},
 			},
@@ -750,7 +769,7 @@ func TestText_lineBounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 10, 10, mockMeasurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, 76, 76, measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -892,6 +911,10 @@ func TestText_findSpaceIndex(t *testing.T) {
 		"many_spaces": {
 			text: "ww wwww www wwwww",
 			want: 11,
+		},
+		"space beginning": {
+			text: " ww",
+			want: 0,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

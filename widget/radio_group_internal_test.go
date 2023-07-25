@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -65,16 +66,16 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
 	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
-	assert.Equal(t, "primary_"+theme.RadioButtonCheckedIcon().Name(), render.icon.Resource.Name())
+	icon := fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill")
+	assert.Equal(t, "primary_"+icon.Name(), render.icon.Resource.Name())
 
 	radio.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.RadioButtonCheckedIcon().Name()), render.icon.Resource.Name())
+	assert.Equal(t, fmt.Sprintf("disabled_%v", icon.Name()), render.icon.Resource.Name())
 }
 
 func TestRadioGroup_DisableWhenNotSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
-	assert.True(t, render.icon.Hidden)
 
 	radio.Disable()
 	resName := render.over.Resource.Name()
@@ -232,16 +233,16 @@ func TestRadioGroup_Hovered(t *testing.T) {
 			render2 := cache.Renderer(radio.items[1]).(*radioItemRenderer)
 
 			assert.False(t, item1.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Hi")
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Another")
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseIn(&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{
@@ -250,12 +251,12 @@ func TestRadioGroup_Hovered(t *testing.T) {
 			})
 			assert.True(t, item1.hovered)
 			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseOut()
 			assert.False(t, item1.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
+			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 		})
 	}
 }

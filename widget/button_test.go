@@ -312,3 +312,26 @@ func TestButton_ChangeTheme(t *testing.T) {
 		test.AssertImageMatches(t, "button/theme_changed.png", w.Canvas().Capture())
 	})
 }
+
+func TestButtonCompatImportance(t *testing.T) {
+	// Test backward compatibility of widget.Importance
+	var imp widget.ButtonImportance = widget.HighImportance
+
+	btn := widget.NewButton("test", func() {})
+	btn.Importance = imp
+}
+
+func TestButtonSuccess(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
+	w := test.NewWindow(b)
+	defer w.Close()
+
+	b.Importance = widget.SuccessImportance
+	b.Refresh()
+
+	test.AssertImageMatches(t, "button/success_importance.png", w.Canvas().Capture())
+}

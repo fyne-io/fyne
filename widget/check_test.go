@@ -72,7 +72,7 @@ func TestCheck_Layout(t *testing.T) {
 				check.Disable()
 			}
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), check))
+			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{check}})
 			window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "check/layout_"+name+".xml", window.Canvas())
@@ -95,4 +95,11 @@ func TestNewCheckWithData(t *testing.T) {
 	v, err := val.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, false, v)
+}
+
+func TestCheck_SetText(t *testing.T) {
+	check := &widget.Check{Text: "Test"}
+	check.SetText("New")
+
+	assert.Equal(t, "New", check.Text)
 }

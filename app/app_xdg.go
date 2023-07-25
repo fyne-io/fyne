@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"github.com/godbus/dbus/v5"
+	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -23,13 +24,54 @@ import (
 var once sync.Once
 
 func defaultVariant() fyne.ThemeVariant {
-	return theme.VariantDark
+	return findFreedestktopColorScheme()
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("xdg-open", url.String())
+	cmd := execabs.Command("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
+}
+
+// fetch color variant from dbus portal desktop settings.
+func findFreedestktopColorScheme() fyne.ThemeVariant {
+	dbusConn, err := dbus.SessionBus()
+	if err != nil {
+		fyne.LogError("Unable to connect to session D-Bus", err)
+		return theme.VariantDark
+	}
+
+	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
+	call := dbusObj.Call(
+		"org.freedesktop.portal.Settings.Read",
+		dbus.FlagNoAutoStart,
+		"org.freedesktop.appearance",
+		"color-scheme",
+	)
+	if call.Err != nil {
+		// many desktops don't have this exported yet
+		return theme.VariantDark
+	}
+
+	var value uint8
+	if err = call.Store(&value); err != nil {
+		fyne.LogError("failed to read theme variant from D-Bus", err)
+		return theme.VariantDark
+	}
+
+	// See: https://github.com/flatpak/xdg-desktop-portal/blob/1.16.0/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
+	// 0: No preference
+	// 1: Prefer dark appearance
+	// 2: Prefer light appearance
+	switch value {
+	case 2:
+		return theme.VariantLight
+	case 1:
+		return theme.VariantDark
+	default:
+		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
+		return theme.VariantLight
+	}
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
@@ -92,19 +134,22 @@ func (a *fyneApp) cachedIconPath() string {
 	})
 
 	return filePath
-
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
 // By default this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
-	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
+	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
+		desk.SetSystemTrayMenu(menu)
+	}
 }
 
 // SetSystemTrayIcon sets a custom image for the system tray icon.
 // You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
 func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
-	a.Driver().(systrayDriver).SetSystemTrayIcon(icon)
+	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
+		desk.SetSystemTrayIcon(icon)
+	}
 }
 
 func rootConfigDir() string {
@@ -118,5 +163,40 @@ func rootCacheDir() string {
 }
 
 func watchTheme() {
-	// no-op, not able to read linux theme in a standard way
+	go watchFreedekstopThemeChange()
+}
+
+func themeChanged() {
+	fyne.CurrentApp().Settings().(*settings).setupTheme()
+}
+
+// connect to dbus to detect color-schem theme changes in portal settings.
+func watchFreedekstopThemeChange() {
+	conn, err := dbus.SessionBus()
+	if err != nil {
+		fyne.LogError("Unable to connect to session D-Bus", err)
+		return
+	}
+
+	if err := conn.AddMatchSignal(
+		dbus.WithMatchObjectPath("/org/freedesktop/portal/desktop"),
+		dbus.WithMatchInterface("org.freedesktop.portal.Settings"),
+		dbus.WithMatchMember("SettingChanged"),
+	); err != nil {
+		fyne.LogError("D-Bus signal match failed", err)
+		return
+	}
+	defer conn.Close()
+
+	dbusChan := make(chan *dbus.Signal)
+	conn.Signal(dbusChan)
+
+	for sig := range dbusChan {
+		for _, v := range sig.Body {
+			if v == "color-scheme" {
+				themeChanged()
+				break
+			}
+		}
+	}
 }

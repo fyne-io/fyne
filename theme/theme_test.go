@@ -134,6 +134,13 @@ func Test_TextMonospaceFont(t *testing.T) {
 	assert.Equal(t, expect, result, "wrong monospace font")
 }
 
+func Test_TextSymbolFont(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	expect := "InterSymbols-Regular.ttf"
+	result := SymbolFont().Name()
+	assert.Equal(t, expect, result, "wrong symbol font")
+}
+
 func Test_Padding(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	assert.Equal(t, DarkTheme().Size(SizeNamePadding), Padding(), "wrong padding")

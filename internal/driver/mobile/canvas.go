@@ -29,8 +29,8 @@ type mobileCanvas struct {
 	scale            float32
 	size             fyne.Size
 
-	touched map[int]mobile.Touchable
-	padded  bool
+	touched       map[int]mobile.Touchable
+	padded, debug bool
 
 	onTypedRune func(rune)
 	onTypedKey  func(event *fyne.KeyEvent)
@@ -49,6 +49,7 @@ type mobileCanvas struct {
 // NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
 func NewCanvas() fyne.Canvas {
 	ret := &mobileCanvas{padded: true}
+	ret.debug = fyne.CurrentApp().Settings().BuildType() == fyne.BuildDebug
 	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)

@@ -35,7 +35,9 @@ func SetSvg(name string, pix *image.NRGBA, w int, h int) {
 }
 
 type svgInfo struct {
-	expiringCacheNoLock
+	// An svgInfo can be accessed from different goroutines, e.g., systray.
+	// Use expiringCache instead of expiringCacheNoLock.
+	expiringCache
 	pix  *image.NRGBA
 	w, h int
 }

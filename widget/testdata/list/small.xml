@@ -19,7 +19,7 @@
 								<image fillMode="contain" rsc="documentIcon" size="20x35"/>
 							</widget>
 							<widget pos="24,0" size="123x35" type="*widget.Label">
-								<text pos="8,8" size="107x19">Test Item 1</text>
+								<text pos="8,8" size="72x19">Test Item 1</text>
 							</widget>
 						</container>
 					</widget>

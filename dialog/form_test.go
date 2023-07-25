@@ -6,8 +6,10 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // formDialogResult is the result of the test form dialog callback.
@@ -81,7 +83,74 @@ func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 	assert.Equal(t, formDialogCancel, result, "Expected cancel result")
 }
 
-func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
+func TestFormDialog_Hints(t *testing.T) {
+
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+	w := test.NewWindow(nil)
+	w.SetFullScreen(true)
+
+	var result formDialogResult
+	fd := hintsFormDialog(&result, w)
+	w.Resize(fd.MinSize())
+	fd.Show()
+	assert.False(t, fd.win.Hidden)
+
+	assert.True(t, fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
+
+	test.AssertImageMatches(t, "form/hint_initial.png", w.Canvas().Capture())
+
+	validatingEntry, ok := fd.items[0].Widget.(*widget.Entry)
+	require.True(t, ok, "First item's widget should be an Entry (check hintsFormDialog)")
+
+	validatingEntry.SetText("n")
+	test.AssertImageMatches(t, "form/hint_invalid.png", w.Canvas().Capture())
+	assert.True(t, fd.confirm.Disabled())
+
+	validatingEntry.SetText("abc")
+	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
+	assert.False(t, fd.confirm.Disabled())
+
+	test.Tap(fd.confirm)
+	assert.Equal(t, formDialogConfirm, result, "Valid form should be able to be confirmed")
+
+	test.Tap(fd.dismiss)
+	assert.Equal(t, formDialogCancel, result, "Expected cancel result")
+}
+
+func TestFormDialog_Submit(t *testing.T) {
+	validatingEntry := widget.NewEntry()
+	validatingEntry.Validator = func(input string) error {
+		if input != "abc" {
+			return errors.New("only accepts 'abc'")
+		}
+		return nil
+	}
+	validatingItem := &widget.FormItem{Widget: validatingEntry}
+
+	confirmed := false
+
+	items := []*widget.FormItem{validatingItem}
+	form := NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
+		confirmed = confirm
+	}, test.NewWindow(nil))
+
+	form.Show()
+	validatingEntry.SetText("cba")
+
+	form.Submit()
+	assert.Equal(t, false, confirmed)
+	assert.Equal(t, false, form.win.Hidden)
+
+	validatingEntry.SetText("abc")
+
+	form.Submit()
+	assert.Equal(t, true, confirmed)
+	assert.Equal(t, true, form.win.Hidden)
+}
+
+func validatingFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	validatingEntry := widget.NewEntry()
 	validatingEntry.Validator = func(input string) error {
 		if input != "abc" {
@@ -106,10 +175,10 @@ func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDia
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent).(*formDialog)
+	}, parent)
 }
 
-func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
+func controlFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	controlEntry := widget.NewEntry()
 	controlItem := &widget.FormItem{
 		Text:   "I accept anything",
@@ -127,5 +196,29 @@ func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent).(*formDialog)
+	}, parent)
+}
+
+func hintsFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
+	validatingEntry := widget.NewEntry()
+	validatingEntry.Validator = func(input string) error {
+		if input != "abc" {
+			return errors.New("only accepts 'abc'")
+		}
+		return nil
+	}
+	validatingItem := &widget.FormItem{
+		Text:     "Only accepts 'abc'",
+		Widget:   validatingEntry,
+		HintText: "Type abc",
+	}
+
+	items := []*widget.FormItem{validatingItem}
+	return NewForm("Validating Form Dialog With Hints", "Submit", "Cancel", items, func(confirm bool) {
+		if confirm {
+			*result = formDialogConfirm
+		} else {
+			*result = formDialogCancel
+		}
+	}, parent)
 }

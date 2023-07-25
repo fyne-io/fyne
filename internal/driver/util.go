@@ -86,13 +86,13 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 // - the obj's children are traversed by calling walkObjects on each of the visible items
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediately, the after function
-//   will not be called for the obj where the walk stopped, however, it will be called for all its
-//   parents
+//   - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//     will not be called for the obj where the walk stopped, however, it will be called for all its
+//     parents
 func ReverseWalkVisibleObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
 	return walkObjectTree(obj, true, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
@@ -104,13 +104,13 @@ func ReverseWalkVisibleObjectTree(
 // - the obj's children are traversed by calling walkObjects on each of the items
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediately, the after function
-//   will not be called for the obj where the walk stopped, however, it will be called for all its
-//   parents
+//   - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//     will not be called for the obj where the walk stopped, however, it will be called for all its
+//     parents
 func WalkCompleteObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
 	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, false)
@@ -122,13 +122,13 @@ func WalkCompleteObjectTree(
 // - the obj's children are traversed by calling walkObjects on each of the visible items
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediately, the after function
-//   will not be called for the obj where the walk stopped, however, it will be called for all its
-//   parents
+//   - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//     will not be called for the obj where the walk stopped, however, it will be called for all its
+//     parents
 func WalkVisibleObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
 	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
@@ -141,7 +141,7 @@ func walkObjectTree(
 	offset, clipPos fyne.Position,
 	clipSize fyne.Size,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 	requireVisible bool,
 ) bool {
 	if obj == nil {
@@ -194,7 +194,7 @@ func walkObjectTree(
 	}
 
 	if afterChildren != nil {
-		afterChildren(obj, parent)
+		afterChildren(obj, pos, parent)
 	}
 	return cancelled
 }

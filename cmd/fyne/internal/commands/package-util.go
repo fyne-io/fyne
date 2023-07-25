@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"io/ioutil"
+	"os"
 
 	realUtil "fyne.io/fyne/v2/cmd/fyne/internal/util"
 )
@@ -12,6 +12,8 @@ type packagerUtil interface {
 	CopyExeFile(src, tgt string) error
 	WriteFile(target string, data []byte) error
 	EnsureSubDir(parent, name string) string
+	EnsureAbsPath(path string) string
+	MakePathRelativeTo(root, path string) string
 
 	RequireAndroidSDK() error
 	AndroidBuildToolsPath() string
@@ -36,11 +38,19 @@ func (d defaultUtil) CopyExeFile(src, tgt string) error {
 }
 
 func (d defaultUtil) WriteFile(target string, data []byte) error {
-	return ioutil.WriteFile(target, data, 0644)
+	return os.WriteFile(target, data, 0644)
 }
 
 func (d defaultUtil) EnsureSubDir(parent, name string) string {
 	return realUtil.EnsureSubDir(parent, name)
+}
+
+func (d defaultUtil) EnsureAbsPath(path string) string {
+	return realUtil.EnsureAbsPath(path)
+}
+
+func (d defaultUtil) MakePathRelativeTo(root, path string) string {
+	return realUtil.MakePathRelativeTo(root, path)
 }
 
 func (d defaultUtil) RequireAndroidSDK() error {

@@ -9,12 +9,12 @@ import (
 //
 // Since: 2.0
 func New(layout fyne.Layout, objects ...fyne.CanvasObject) *fyne.Container {
-	return fyne.NewContainerWithLayout(layout, objects...)
+	return &fyne.Container{Layout: layout, Objects: objects}
 }
 
 // NewWithoutLayout returns a new Container instance holding the specified CanvasObjects that are manually arranged.
 //
 // Since: 2.0
 func NewWithoutLayout(objects ...fyne.CanvasObject) *fyne.Container {
-	return fyne.NewContainerWithoutLayout(objects...)
+	return &fyne.Container{Objects: objects}
 }

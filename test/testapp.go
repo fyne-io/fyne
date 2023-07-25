@@ -207,6 +207,10 @@ func (s *testSettings) SetTheme(theme fyne.Theme) {
 	s.apply()
 }
 
+func (s *testSettings) ShowAnimations() bool {
+	return true
+}
+
 func (s *testSettings) Theme() fyne.Theme {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()

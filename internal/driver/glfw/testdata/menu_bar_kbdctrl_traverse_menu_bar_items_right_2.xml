@@ -43,10 +43,10 @@
 					</widget>
 					<widget size="50x35" type="*widget.Scroll">
 						<widget size="50x35" type="*widget.menuBox">
-							<rectangle fillColor="menuBackground" size="50x43"/>
-							<container pos="0,4" size="50x43">
-								<widget size="50x27" type="*widget.menuItem">
-									<text pos="8,4" size="34x19">Help!</text>
+							<rectangle fillColor="menuBackground" size="50x35"/>
+							<container size="50x35">
+								<widget size="50x35" type="*widget.menuItem">
+									<text pos="8,8" size="34x19">Help!</text>
 								</widget>
 							</container>
 						</widget>

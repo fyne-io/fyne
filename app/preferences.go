@@ -19,11 +19,24 @@ type preferences struct {
 	savedRecently       bool
 	changedDuringSaving bool
 
-	app *fyneApp
+	app                 *fyneApp
+	needsSaveBeforeExit bool
 }
 
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
+
+// forceImmediateSave writes preferences to file immediately, ignoring the debouncing
+// logic in the change listener. Does nothing if preferences are not backed with a file.
+func (p *preferences) forceImmediateSave() {
+	if !p.needsSaveBeforeExit {
+		return
+	}
+	err := p.save()
+	if err != nil {
+		fyne.LogError("Failed on force saving preferences", err)
+	}
+}
 
 func (p *preferences) resetSavedRecently() {
 	go func() {
@@ -109,6 +122,10 @@ func (p *preferences) loadFromFile(path string) (err error) {
 
 	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
 		err = decode.Decode(&values)
+		if err != nil {
+			return
+		}
+		convertLists(values)
 	})
 
 	p.prefLock.Lock()
@@ -128,6 +145,7 @@ func newPreferences(app *fyneApp) *preferences {
 		return p
 	}
 
+	p.needsSaveBeforeExit = true
 	p.AddChangeListener(func() {
 		if p != app.prefs {
 			return
@@ -150,4 +168,41 @@ func newPreferences(app *fyneApp) *preferences {
 	})
 	p.watch()
 	return p
+}
+
+func convertLists(values map[string]interface{}) {
+	for k, v := range values {
+		if items, ok := v.([]interface{}); ok {
+			if len(items) == 0 {
+				continue
+			}
+
+			switch items[0].(type) {
+			case bool:
+				bools := make([]bool, len(items))
+				for i, item := range items {
+					bools[i] = item.(bool)
+				}
+				values[k] = bools
+			case float64:
+				floats := make([]float64, len(items))
+				for i, item := range items {
+					floats[i] = item.(float64)
+				}
+				values[k] = floats
+			case int:
+				ints := make([]int, len(items))
+				for i, item := range items {
+					ints[i] = item.(int)
+				}
+				values[k] = ints
+			case string:
+				strings := make([]string, len(items))
+				for i, item := range items {
+					strings[i] = item.(string)
+				}
+				values[k] = strings
+			}
+		}
+	}
 }

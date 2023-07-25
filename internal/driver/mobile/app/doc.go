@@ -18,7 +18,7 @@ OpenGL, audio, and other Android NDK-like APIs. An all-Go app should
 use this app package to initialize the app, manage its lifecycle, and
 receive events.
 
-Building apps
+# Building apps
 
 Apps written entirely in Go have a main function, and can be built
 with `gomobile build`, which directly produces runnable output for
@@ -30,7 +30,7 @@ https://golang.org/x/mobile/cmd/gomobile.
 For detailed instructions and documentation, see
 https://golang.org/wiki/Mobile.
 
-Event processing in Native Apps
+# Event processing in Native Apps
 
 The Go runtime is initialized on Android when NativeActivity onCreate is
 called, and on iOS when the process starts. In both cases, Go init functions
@@ -69,17 +69,20 @@ goroutine as other code that calls OpenGL.
 An event is represented by the empty interface type interface{}. Any value can
 be an event. Commonly used types include Event types defined by the following
 packages:
-	- golang.org/x/mobile/event/lifecycle
-	- golang.org/x/mobile/event/mouse
-	- golang.org/x/mobile/event/paint
-	- golang.org/x/mobile/event/size
-	- golang.org/x/mobile/event/touch
+  - golang.org/x/mobile/event/lifecycle
+  - golang.org/x/mobile/event/mouse
+  - golang.org/x/mobile/event/paint
+  - golang.org/x/mobile/event/size
+  - golang.org/x/mobile/event/touch
+
 For example, touch.Event is the type that represents touch events. Other
 packages may define their own events, and send them on an app's event channel.
 
 Other packages can also register event filters, e.g. to manage resources in
 response to lifecycle events. Such packages should call:
+
 	app.RegisterFilter(etc)
+
 in an init function inside that package.
 */
 package app // import "fyne.io/fyne/v2/internal/driver/mobile/app"

@@ -9,7 +9,7 @@ import (
 //
 // Deprecated: Use dialog.NewFormDialog() or dialog.ShowFormDialog() with a widget.Entry inside instead.
 type EntryDialog struct {
-	*formDialog
+	*FormDialog
 
 	entry *widget.Entry
 
@@ -49,7 +49,7 @@ func (i *EntryDialog) SetOnClosed(callback func()) {
 func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) *EntryDialog {
 	i := &EntryDialog{entry: widget.NewEntry()}
 	items := []*widget.FormItem{widget.NewFormItem(message, i.entry)}
-	i.formDialog = NewForm(title, "Ok", "Cancel", items, func(ok bool) {
+	i.FormDialog = NewForm(title, "Ok", "Cancel", items, func(ok bool) {
 		// User has confirmed and entered an input
 		if ok && onConfirm != nil {
 			onConfirm(i.entry.Text)
@@ -61,7 +61,7 @@ func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.W
 
 		i.entry.Text = ""
 		i.win.Hide() // Close directly without executing the callback. This is the callback.
-	}, parent).(*formDialog)
+	}, parent)
 
 	return i
 }

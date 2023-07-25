@@ -1,9 +1,11 @@
 package software
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -48,4 +50,16 @@ func TestRenderCanvas(t *testing.T) {
 	} else {
 		test.AssertImageMatches(t, "canvas.png", RenderCanvas(c, theme.LightTheme()))
 	}
+}
+
+func TestRender_ImageSize(t *testing.T) {
+	image := canvas.NewImageFromFile("../../theme/icons/fyne.png")
+	image.FillMode = canvas.ImageFillOriginal
+	bg := canvas.NewCircle(color.NRGBA{255, 0, 0, 128})
+	bg.StrokeColor = color.White
+	bg.StrokeWidth = 5
+
+	c := container.NewStack(image, bg)
+
+	test.AssertImageMatches(t, "image_size.png", Render(c, theme.LightTheme()))
 }

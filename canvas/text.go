@@ -22,18 +22,42 @@ type Text struct {
 	TextStyle fyne.TextStyle // The style of the text content
 }
 
+// Hide will set this text to not be visible
+func (t *Text) Hide() {
+	t.baseObject.Hide()
+
+	repaint(t)
+}
+
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
 	return fyne.MeasureText(t.Text, t.TextSize, t.TextStyle)
 }
 
+// Move the text to a new position, relative to its parent / canvas
+func (t *Text) Move(pos fyne.Position) {
+	t.baseObject.Move(pos)
+
+	repaint(t)
+}
+
+// Resize on a text updates the new size of this object, which may not result in a visual change, depending on alignment.
+func (t *Text) Resize(s fyne.Size) {
+	if s == t.Size() {
+		return
+	}
+
+	t.baseObject.Resize(s)
+	Refresh(t)
+}
+
 // SetMinSize has no effect as the smallest size this canvas object can be is based on its font size and content.
-func (t *Text) SetMinSize(size fyne.Size) {
+func (t *Text) SetMinSize(fyne.Size) {
 	// no-op
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this text to be redrawn with its configured state.
 func (t *Text) Refresh() {
 	Refresh(t)
 }

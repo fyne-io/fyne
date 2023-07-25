@@ -1,5 +1,12 @@
 [Desktop Entry]
 Type=Application
 Name={{.Name}}
-Exec={{.Exec}}
+{{- if ne .GenericName ""}}
+GenericName={{.GenericName}}{{end}}
+Exec={{.Exec}} {{.ExecParams}}
 Icon={{.Name}}
+{{- if ne .Comment ""}}
+Comment={{.Comment}}{{end}}
+{{- if ne .Categories ""}}
+Categories={{.Categories}}{{end}}
+{{if ne .Keywords ""}}Keywords={{.Keywords}}{{else}}Keywords=fyne;{{end}}

@@ -4,6 +4,7 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
+	"os"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -13,8 +14,6 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
-
-	"golang.org/x/sys/execabs"
 )
 
 // Declare conformity with App interface
@@ -32,7 +31,6 @@ type fyneApp struct {
 	prefs     fyne.Preferences
 
 	running uint32 // atomic, 1 == running, 0 == stopped
-	exec    func(name string, arg ...string) *execabs.Cmd
 }
 
 func (a *fyneApp) CloudProvider() fyne.CloudProvider {
@@ -71,7 +69,6 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 func (a *fyneApp) Run() {
 	if atomic.CompareAndSwapUint32(&a.running, 0, 1) {
 		a.driver.Run()
-		return
 	}
 }
 
@@ -109,10 +106,10 @@ func (a *fyneApp) Lifecycle() fyne.Lifecycle {
 	return a.lifecycle
 }
 
-func (a *fyneApp) newDefaultPreferences() fyne.Preferences {
-	p := fyne.Preferences(newPreferences(a))
-	if pref, ok := p.(interface{ load() }); ok && a.uniqueID != "" {
-		pref.load()
+func (a *fyneApp) newDefaultPreferences() *preferences {
+	p := newPreferences(a)
+	if a.uniqueID != "" {
+		p.load()
 	}
 	return p
 }
@@ -125,10 +122,11 @@ func New() fyne.App {
 	return NewWithID(meta.ID)
 }
 
-func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
+func makeStoreDocs(id string, s *store) *internal.Docs {
 	if id != "" {
-		if pref, ok := p.(interface{ load() }); ok {
-			pref.load()
+		err := os.MkdirAll(s.a.storageRoot(), 0755) // make the space before anyone can use it
+		if err != nil {
+			fyne.LogError("Failed to create app storage space", err)
 		}
 
 		root, _ := s.docRootURI()
@@ -139,21 +137,27 @@ func makeStoreDocs(id string, p fyne.Preferences, s *store) *internal.Docs {
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	newApp := &fyneApp{uniqueID: id, driver: d, exec: execabs.Command, lifecycle: &app.Lifecycle{}}
+	newApp := &fyneApp{uniqueID: id, driver: d, lifecycle: &app.Lifecycle{}}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
+	newApp.lifecycle.(*app.Lifecycle).SetOnStoppedHookExecuted(func() {
+		if prefs, ok := newApp.prefs.(*preferences); ok {
+			prefs.forceImmediateSave()
+		}
+	})
 	newApp.settings = loadSettings()
 	store := &store{a: newApp}
-	store.Docs = makeStoreDocs(id, newApp.prefs, store)
+	store.Docs = makeStoreDocs(id, store)
 	newApp.storage = store
 
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
 	}
 
-	repository.Register("http", intRepo.NewHTTPRepository())
-	repository.Register("https", intRepo.NewHTTPRepository())
+	httpHandler := intRepo.NewHTTPRepository()
+	repository.Register("http", httpHandler)
+	repository.Register("https", httpHandler)
 
 	return newApp
 }

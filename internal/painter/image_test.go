@@ -19,8 +19,8 @@ func TestPaintImage_MinSize(t *testing.T) {
 	c.SetContent(img)
 
 	// check fallback min
-	assert.Equal(t, float32(1), img.MinSize().Width)
-	assert.Equal(t, float32(1), img.MinSize().Height)
+	assert.Equal(t, float32(480), img.MinSize().Width)
+	assert.Equal(t, float32(240), img.MinSize().Height)
 
 	// render it with original will set min
 	painter.PaintImage(img, c, 100, 100)
@@ -84,4 +84,11 @@ func TestPaintImage_SVG(t *testing.T) {
 			test.AssertImageMatches(t, "svg-stroke-"+name+".png", c.Capture())
 		})
 	}
+}
+
+func TestPaintImage_Direct(t *testing.T) {
+	img := canvas.NewImageFromFile("testdata/stroke.svg")
+	pix := painter.PaintImage(img, nil, 480, 240)
+
+	test.AssertImageMatches(t, "svg-stroke-direct.png", pix)
 }

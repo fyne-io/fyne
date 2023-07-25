@@ -2,11 +2,10 @@
 	<content>
 		<container pos="4,4" size="142x192">
 			<widget pos="21,78" size="98x35" type="*widget.Select">
-				<rectangle fillColor="inputBackground" pos="0,2" size="98x31"/>
-				<rectangle fillColor="shadow" pos="0,33" size="98x2"/>
-				<rectangle fillColor="rgba(0,0,0,0)" size="94x35"/>
+				<rectangle fillColor="inputBackground" radius="4" size="98x35"/>
+				<rectangle fillColor="rgba(0,0,0,0)" size="98x35"/>
 				<widget pos="4,4" size="66x27" type="*widget.RichText">
-					<text pos="4,4" size="58x19">(Pick 1)</text>
+					<text pos="4,4" size="46x19">(Pick 1)</text>
 				</widget>
 				<widget pos="70,7" size="20x20" type="*widget.Icon">
 					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
@@ -29,10 +28,10 @@
 				</widget>
 				<widget size="98x35" type="*widget.Scroll">
 					<widget size="98x35" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="98x43"/>
-						<container pos="0,4" size="98x43">
-							<widget size="98x27" type="*widget.menuItem">
-								<text pos="8,4" size="82x19">Test</text>
+						<rectangle fillColor="menuBackground" size="98x35"/>
+						<container size="98x35">
+							<widget size="98x35" type="*widget.menuItem">
+								<text pos="8,8" size="82x19">Test</text>
 							</widget>
 						</container>
 					</widget>

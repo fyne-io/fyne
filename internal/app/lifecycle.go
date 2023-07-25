@@ -16,6 +16,14 @@ type Lifecycle struct {
 	onBackground atomic.Value // func()
 	onStarted    atomic.Value // func()
 	onStopped    atomic.Value // func()
+
+	onStoppedHookExecuted func()
+}
+
+// SetOnStoppedHookExecuted is an internal function that lets Fyne schedule a clean-up after
+// the user-provided stopped hook. It should only be called once during an application start-up.
+func (l *Lifecycle) SetOnStoppedHookExecuted(f func()) {
+	l.onStoppedHookExecuted = f
 }
 
 // SetOnEnteredForeground hooks into the the app becoming foreground.
@@ -64,10 +72,14 @@ func (l *Lifecycle) TriggerStarted() {
 	}
 }
 
-// TriggerStopped will call the stopped hook, if one is registered.
+// TriggerStopped will call the stopped hook, if one is registered,
+// and an internal stopped hook after that.
 func (l *Lifecycle) TriggerStopped() {
 	f := l.onStopped.Load()
 	if ff, ok := f.(func()); ok && ff != nil {
 		ff()
+	}
+	if l.onStoppedHookExecuted != nil {
+		l.onStoppedHookExecuted()
 	}
 }

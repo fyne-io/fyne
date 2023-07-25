@@ -20,8 +20,15 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
 	case "simple_es":
 		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
+	case "rectangle":
+		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
+	case "round_rectangle":
+		return shaderRectangleVert.StaticContent, shaderRoundrectangleFrag.StaticContent
+	case "rectangle_es":
+		return shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent
+	case "round_rectangle_es":
+		return shaderRectangleesVert.StaticContent, shaderRoundrectangleesFrag.StaticContent
 	}
-
 	return nil, nil
 }
 
@@ -56,13 +63,15 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas          fyne.Canvas
-	ctx             context
-	contextProvider driver.WithContext
-	program         Program
-	lineProgram     Program
-	texScale        float32
-	pixScale        float32 // pre-calculate scale*texScale for each draw
+	canvas                fyne.Canvas
+	ctx                   context
+	contextProvider       driver.WithContext
+	program               Program
+	lineProgram           Program
+	rectangleProgram      Program
+	roundRectangleProgram Program
+	texScale              float32
+	pixScale              float32 // pre-calculate scale*texScale for each draw
 }
 
 // Declare conformity to Painter interface
@@ -124,8 +133,8 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 	}
 
 	// The info is probably a null terminated string.
-	// An empty info has been seen as "\x00".
-	if len(info) > 0 && info != "\x00" {
+	// An empty info has been seen as "\x00" or "\x00\x00".
+	if len(info) > 0 && info != "\x00" && info != "\x00\x00" {
 		fmt.Printf("OpenGL shader compilation output:\n%s\n>>> SHADER SOURCE\n%s\n<<< SHADER SOURCE\n", info, source)
 	}
 
@@ -161,8 +170,8 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	// The info is probably a null terminated string.
-	// An empty info has been seen as "\x00".
-	if len(info) > 0 && info != "\x00" {
+	// An empty info has been seen as "\x00" or "\x00\x00".
+	if len(info) > 0 && info != "\x00" && info != "\x00\x00" {
 		fmt.Printf("OpenGL program linking output:\n%s\n", info)
 	}
 
@@ -174,5 +183,5 @@ func (p *painter) createProgram(shaderFilename string) Program {
 }
 
 func (p *painter) logError() {
-	logGLError(p.ctx.GetError())
+	logGLError(p.ctx.GetError)
 }

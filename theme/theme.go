@@ -78,10 +78,20 @@ const (
 	// Since: 2.0
 	ColorNameForeground fyne.ThemeColorName = "foreground"
 
+	// ColorNameHeaderBackground is the name of theme lookup for background color of a collection header.
+	//
+	// Since: 2.4
+	ColorNameHeaderBackground fyne.ThemeColorName = "headerBackground"
+
 	// ColorNameHover is the name of theme lookup for hover color.
 	//
 	// Since: 2.0
 	ColorNameHover fyne.ThemeColorName = "hover"
+
+	// ColorNameHyperlink is the name of theme lookup for hyperlink color.
+	//
+	// Since: 2.4
+	ColorNameHyperlink fyne.ThemeColorName = "hyperlink"
 
 	// ColorNameInputBackground is the name of theme lookup for background color of an input field.
 	//
@@ -208,6 +218,11 @@ const (
 	// Since: 2.0
 	SizeNameInputBorder fyne.ThemeSizeName = "inputBorder"
 
+	// SizeNameInputRadius is the name of theme lookup for input corner radius.
+	//
+	// Since: 2.0
+	SizeNameInputRadius fyne.ThemeSizeName = "inputRadius"
+
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since: 2.0
@@ -245,6 +260,14 @@ func DarkTheme() fyne.Theme {
 
 	theme.initFonts()
 	return theme
+}
+
+// DefaultEmojiFont returns the font resource for the built-in emoji font.
+// This may return nil if the application was packaged without an emoji font.
+//
+// Since: 2.4
+func DefaultEmojiFont() fyne.Resource {
+	return emoji
 }
 
 // DefaultTextBoldFont returns the font resource for the built-in bold font style.
@@ -328,9 +351,21 @@ func ForegroundColor() color.Color {
 	return safeColorLookup(ColorNameForeground, currentVariant())
 }
 
+// HeaderBackgroundColor returns the color used to draw underneath collection headers.
+//
+// Since: 2.4
+func HeaderBackgroundColor() color.Color {
+	return current().Color(ColorNameHeaderBackground, currentVariant())
+}
+
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
 func HoverColor() color.Color {
 	return safeColorLookup(ColorNameHover, currentVariant())
+}
+
+// HyperlinkColor returns the color used for the Hyperlink widget and hyperlink text elements.
+func HyperlinkColor() color.Color {
+	return safeColorLookup(ColorNameHyperlink, currentVariant())
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
@@ -362,6 +397,13 @@ func InputBorderColor() color.Color {
 // Since: 2.0
 func InputBorderSize() float32 {
 	return current().Size(SizeNameInputBorder)
+}
+
+// InputRadiusSize returns the input radius size.
+//
+// Since: 2.4
+func InputRadiusSize() float32 {
+	return current().Size(SizeNameInputRadius)
 }
 
 // LightTheme defines the built-in light theme colors and sizes.
@@ -530,6 +572,13 @@ func TextSubHeadingSize() float32 {
 	return current().Size(SizeNameSubHeadingText)
 }
 
+// SymbolFont returns the font resource for the symbol font style.
+//
+// Since: 2.4
+func SymbolFont() fyne.Resource {
+	return safeFontLookup(fyne.TextStyle{Symbol: true})
+}
+
 // WarningColor returns the theme's warning foreground color.
 //
 // Since: 2.3
@@ -548,7 +597,7 @@ var (
 type builtinTheme struct {
 	variant fyne.ThemeVariant
 
-	regular, bold, italic, boldItalic, monospace fyne.Resource
+	regular, bold, italic, boldItalic, monospace, symbol fyne.Resource
 }
 
 func (t *builtinTheme) initFonts() {
@@ -557,6 +606,7 @@ func (t *builtinTheme) initFonts() {
 	t.italic = italic
 	t.boldItalic = bolditalic
 	t.monospace = monospace
+	t.symbol = symbol
 
 	font := os.Getenv("FYNE_FONT")
 	if font != "" {
@@ -575,6 +625,10 @@ func (t *builtinTheme) initFonts() {
 	if font != "" {
 		t.monospace = loadCustomFont(font, "Regular", monospace)
 	}
+	font = os.Getenv("FYNE_FONT_SYMBOL")
+	if font != "" {
+		t.symbol = loadCustomFont(font, "Regular", symbol)
+	}
 }
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
@@ -583,7 +637,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	}
 
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
-	if n == ColorNamePrimary {
+	if n == ColorNamePrimary || n == ColorNameHyperlink {
 		return primaryColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
@@ -611,6 +665,9 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	if style.Italic {
 		return t.italic
 	}
+	if style.Symbol {
+		return t.symbol
+	}
 	return t.regular
 }
 
@@ -625,13 +682,13 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameLineSpacing:
 		return 4
 	case SizeNamePadding:
-		return 6
+		return 4
 	case SizeNameScrollBar:
 		return 16
 	case SizeNameScrollBarSmall:
 		return 3
 	case SizeNameText:
-		return 13
+		return 14
 	case SizeNameHeadingText:
 		return 24
 	case SizeNameSubHeadingText:
@@ -640,17 +697,24 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 11
 	case SizeNameInputBorder:
 		return 1
+	case SizeNameInputRadius:
+		return 5
 	default:
 		return 0
 	}
 }
 
 func current() fyne.Theme {
-	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
+	app := fyne.CurrentApp()
+	if app == nil {
+		return DarkTheme()
+	}
+	currentTheme := app.Settings().Theme()
+	if currentTheme == nil {
 		return DarkTheme()
 	}
 
-	return fyne.CurrentApp().Settings().Theme()
+	return currentTheme
 }
 
 func currentVariant() fyne.ThemeVariant {
@@ -679,8 +743,10 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameHover:
 		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
+	case ColorNameHeaderBackground:
+		return color.NRGBA{R: 0x1b, G: 0x1b, B: 0x1b, A: 0xff}
 	case ColorNameInputBackground:
-		return color.NRGBA{R: 0x24, G: 0x25, B: 0x29, A: 0xff}
+		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	case ColorNameInputBorder:
 		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	case ColorNameMenuBackground:
@@ -745,6 +811,8 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 		return color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
 	case ColorNameHover:
 		return color.NRGBA{A: 0x0f}
+	case ColorNameHeaderBackground:
+		return color.NRGBA{R: 0xf9, G: 0xf9, B: 0xf9, A: 0xff}
 	case ColorNameInputBackground:
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameInputBorder:
@@ -760,7 +828,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameScrollBar:
 		return color.NRGBA{A: 0x99}
 	case ColorNameSeparator:
-		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	case ColorNameShadow:
 		return color.NRGBA{A: 0x33}
 	case ColorNameSuccess:
@@ -835,6 +903,9 @@ func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	if s.Italic {
 		return DefaultTextItalicFont()
 	}
+	if s.Symbol {
+		return DefaultSymbolFont()
+	}
 
 	return DefaultTextFont()
 }
@@ -859,7 +930,7 @@ func selectionColorNamed(name string) color.NRGBA {
 
 	// We return the value for ColorBlue for every other value.
 	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
+	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x40}
 }
 
 func setupDefaultTheme() fyne.Theme {

@@ -206,10 +206,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			return len(f.favorites)
 		},
 		func() fyne.CanvasObject {
-			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			return container.NewHBox(container.New(&iconPaddingLayout{}, widget.NewIcon(theme.DocumentIcon())), widget.NewLabel("Template Object"))
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[0].(*widget.Icon).SetResource(f.favorites[id].locIcon)
+			item.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Icon).SetResource(f.favorites[id].locIcon)
 			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(f.favorites[id].locName)
 		},
 	)
@@ -497,12 +497,11 @@ func (f *fileDialog) setView(view viewLayout) {
 //
 // Order of precedence is:
 //
-// * file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
-//   URI scheme
-// * os.UserHomeDir()
-// * os.Getwd()
-// * "/" (should be filesystem root on all supported platforms)
-//
+//   - file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
+//     URI scheme
+//   - os.UserHomeDir()
+//   - os.Getwd()
+//   - "/" (should be filesystem root on all supported platforms)
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	if f.startingLocation != nil {
 		if f.startingLocation.Scheme() == "file" {
@@ -789,4 +788,19 @@ func hasAppFiles(a fyne.App) bool {
 func storageURI(a fyne.App) fyne.URI {
 	dir, _ := storage.Child(a.Storage().RootURI(), "Documents")
 	return dir
+}
+
+// iconPaddingLayout adds padding to the left of a widget.Icon().
+// NOTE: It assumes that the slice only contains one item.
+type iconPaddingLayout struct {
+}
+
+func (i *iconPaddingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	padding := theme.Padding() * 2
+	objects[0].Move(fyne.NewPos(padding, 0))
+	objects[0].Resize(size.SubtractWidthHeight(padding, 0))
+}
+
+func (i *iconPaddingLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return objects[0].MinSize().AddWidthHeight(theme.Padding()*2, 0)
 }

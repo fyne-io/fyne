@@ -48,6 +48,7 @@ const (
 
 	UnsignedByte = 0x1401
 	Float        = 0x1406
+	RED          = 0x1903
 	RGBA         = 0x1908
 
 	Nearest          = 0x2600

@@ -1,0 +1,6 @@
+[Details]
+  Icon = "../../theme/icons/fyne.png"
+  Name = "Fyne Hello"
+  ID = "io.fyne.hello"
+  Version = "2.3.0"
+  Build = 2

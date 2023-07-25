@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"fyne.io/fyne/v2/storage"
@@ -31,6 +31,22 @@ func TestInMemoryRepositoryRegistration(t *testing.T) {
 	repo, err = repository.ForURI(foo)
 	assert.Nil(t, err)
 	assert.Equal(t, m2, repo)
+}
+
+func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
+	m := NewInMemoryRepository("000")
+	repository.Register("dht", m)
+
+	foo, err := storage.ParseURI("dht:?00000")
+	assert.Nil(t, err)
+
+	canList, err := storage.CanList(foo)
+	assert.NotNil(t, err)
+	assert.Equal(t, canList, false)
+
+	listing, err := storage.List(foo)
+	assert.Nil(t, err)
+	assert.Equal(t, len(listing), 0)
 }
 
 func TestInMemoryRepositoryParsing(t *testing.T) {
@@ -93,13 +109,13 @@ func TestInMemoryRepositoryReader(t *testing.T) {
 
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
 	assert.Nil(t, err)
 
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
 	assert.Nil(t, err)
 
@@ -177,19 +193,19 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
 	assert.Nil(t, err)
 
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
 	assert.Nil(t, err)
 
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
-	bazData, err := ioutil.ReadAll(bazReader)
+	bazData, err := io.ReadAll(bazReader)
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
 	assert.Nil(t, err)
 

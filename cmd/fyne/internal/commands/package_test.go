@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"image"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -51,6 +53,50 @@ func Test_isValidVersion(t *testing.T) {
 	assert.False(t, isValidVersion("1..2"))
 }
 
+func Test_combinedVersion(t *testing.T) {
+	tests := []struct {
+		ver   string
+		build int
+		comb  string
+	}{
+		{"1.2.3", 4, "1.2.3.4"},
+		{"1.2", 4, "1.2.0.4"},
+		{"1", 4, "1.0.0.4"},
+	}
+
+	for _, tt := range tests {
+		p := &Packager{appData: &appData{AppVersion: tt.ver, AppBuild: tt.build}}
+		comb := p.combinedVersion()
+		assert.Equal(t, tt.comb, comb)
+	}
+}
+
+func Test_processMacOSIcon(t *testing.T) {
+	f, err := os.Open("testdata/icon.png")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer f.Close()
+	icon, _, err := image.Decode(f)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	processed := processMacOSIcon(icon)
+
+	assert.Equal(t, 1024, processed.Bounds().Dx())
+	assert.Equal(t, 1024, processed.Bounds().Dy())
+	_, _, _, a := processed.At(3, 3).RGBA() // border
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(125, 125).RGBA() // inside cut out corner
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(900, 900).RGBA()
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(1020, 1020).RGBA()
+	assert.Equal(t, uint32(0), a)
+}
+
 func Test_MergeMetata(t *testing.T) {
 	p := &Packager{appData: &appData{}}
 	p.AppVersion = "v0.1"
@@ -62,7 +108,7 @@ func Test_MergeMetata(t *testing.T) {
 		},
 	}
 
-	mergeMetadata(p.appData, data)
+	p.appData.mergeMetadata(data)
 	assert.Equal(t, "v0.1", p.AppVersion)
 	assert.Equal(t, 3, p.AppBuild)
 	assert.Equal(t, "test.png", p.icon)
@@ -144,7 +190,7 @@ func Test_buildPackageWasm(t *testing.T) {
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(wasmBuildTest)
+	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	assert.Equal(t, 1, len(files))
@@ -303,7 +349,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 		release: true,
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(wasmBuildTest)
+	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	assert.Equal(t, 1, len(files))
@@ -489,7 +535,7 @@ func Test_BuildPackageWeb(t *testing.T) {
 		exe:     "myTest",
 	}
 	webBuildTest := &testCommandRuns{runs: expected, t: t}
-	files, err := p.buildPackage(webBuildTest)
+	files, err := p.buildPackage(webBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
 	expectedFiles := 2
@@ -626,4 +672,19 @@ func Test_PackageWeb(t *testing.T) {
 	expectedTotalCount(t, len(expectedExistRuns.expected), expectedExistRuns.current)
 	expectedTotalCount(t, len(expectedWriteFileRuns.expected), expectedWriteFileRuns.current)
 	expectedTotalCount(t, len(expectedCopyFileRuns.expected), expectedCopyFileRuns.current)
+}
+
+func Test_PowerShellArguments(t *testing.T) {
+	tests := []struct {
+		expected string
+		args     []string
+	}{
+		{"\"/c\",'mkdir \"C:\\Program Files\\toto\"'", []string{"mkdir", "C:\\Program Files\\toto"}},
+		{"\"/c\",'copy \"C:\\Program Files\\toto\\titi.txt\" \"C:\\Program Files\\toto\\tata.txt\"'", []string{"copy", "C:\\Program Files\\toto\\titi.txt", "C:\\Program Files\\toto\\tata.txt"}},
+	}
+
+	for _, test := range tests {
+		result := escapePowerShellArguments(test.args...)
+		assert.Equal(t, test.expected, result)
+	}
 }

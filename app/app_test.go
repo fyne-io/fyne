@@ -1,16 +1,12 @@
 package app
 
 import (
-	"net/url"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
 	_ "fyne.io/fyne/v2/test"
-
-	"golang.org/x/sys/execabs"
 )
 
 func TestDummyApp(t *testing.T) {
@@ -37,21 +33,18 @@ func TestFyneApp_UniqueID(t *testing.T) {
 	assert.Equal(t, meta.ID, app.UniqueID())
 }
 
-func TestFyneApp_OpenURL(t *testing.T) {
-	opened := ""
+func TestFyneApp_SetIcon(t *testing.T) {
 	app := NewWithID("io.fyne.test")
-	app.(*fyneApp).exec = func(cmd string, arg ...string) *execabs.Cmd {
-		opened = arg[len(arg)-1]
-		return execabs.Command("")
-	}
 
-	urlStr := "https://fyne.io"
-	u, _ := url.Parse(urlStr)
-	err := app.OpenURL(u)
+	metaIcon := &fyne.StaticResource{StaticName: "Metadata"}
+	SetMetadata(fyne.AppMetadata{
+		Icon: metaIcon,
+	})
 
-	if err != nil && strings.Contains(err.Error(), "unknown operating system") {
-		return // when running in CI mode we don't actually open URLs...
-	}
+	assert.Equal(t, metaIcon, app.Icon())
 
-	assert.Equal(t, urlStr, opened)
+	setIcon := &fyne.StaticResource{StaticName: "Test"}
+	app.SetIcon(setIcon)
+
+	assert.Equal(t, setIcon, app.Icon())
 }

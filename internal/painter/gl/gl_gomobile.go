@@ -70,6 +70,8 @@ func (p *painter) Init() {
 	p.glctx().Enable(gl.Blend)
 	p.program = p.createProgram("simple_es")
 	p.lineProgram = p.createProgram("line_es")
+	p.rectangleProgram = p.createProgram("rectangle_es")
+	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
 }
 
 // f32Bytes returns the byte representation of float32 values in the given byte
@@ -255,6 +257,10 @@ func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+	c.glContext.Uniform2f(gl.Uniform(uniform), v0, v1)
 }
 
 func (c *mobileContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

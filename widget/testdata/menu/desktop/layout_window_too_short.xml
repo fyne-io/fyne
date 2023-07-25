@@ -16,28 +16,28 @@
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x40"/>
 				</widget>
 				<widget size="66x40" type="*widget.Scroll">
-					<widget size="66x138" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="66x146"/>
-						<container pos="0,4" size="66x146">
-							<widget size="66x27" type="*widget.menuItem">
-								<text pos="8,4" size="50x19">A</text>
+					<widget size="66x162" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="66x162"/>
+						<container size="66x162">
+							<widget size="66x35" type="*widget.menuItem">
+								<text pos="8,8" size="50x19">A</text>
 							</widget>
-							<widget pos="0,31" size="66x1" type="*widget.Separator">
+							<widget pos="0,39" size="66x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="66x1"/>
 							</widget>
-							<widget pos="0,36" size="66x27" type="*widget.menuItem">
-								<text pos="8,4" size="50x19">B (long)</text>
+							<widget pos="0,44" size="66x35" type="*widget.menuItem">
+								<text pos="8,8" size="50x19">B (long)</text>
 							</widget>
-							<widget pos="0,67" size="66x27" type="*widget.menuItem">
-								<text pos="8,4" size="30x19">C</text>
-								<image pos="46,3" rsc="menuExpandIcon" size="iconInlineSize"/>
+							<widget pos="0,83" size="66x35" type="*widget.menuItem">
+								<text pos="8,8" size="30x19">C</text>
+								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
-							<widget pos="0,98" size="66x1" type="*widget.Separator">
+							<widget pos="0,122" size="66x1" type="*widget.Separator">
 								<rectangle fillColor="disabled" size="66x1"/>
 							</widget>
-							<widget pos="0,103" size="66x27" type="*widget.menuItem">
-								<text pos="8,4" size="30x19">D</text>
-								<image pos="46,3" rsc="menuExpandIcon" size="iconInlineSize"/>
+							<widget pos="0,127" size="66x35" type="*widget.menuItem">
+								<text pos="8,8" size="30x19">D</text>
+								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 						</container>
 					</widget>

@@ -1,0 +1,56 @@
+<canvas padded size="200x300">
+	<content>
+		<rectangle pos="4,4" size="192x292"/>
+	</content>
+	<overlay>
+		<widget size="200x300" type="*widget.PopUp">
+			<widget pos="19,74" size="161x150" type="*widget.Shadow">
+				<radialGradient centerOffset="0.5,0.5" pos="-24,-24" size="24x24" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="0,-24" size="161x24"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="161,-24" size="24x24" startColor="shadow"/>
+				<linearGradient angle="270" pos="161,0" size="24x150" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="161,150" size="24x24" startColor="shadow"/>
+				<linearGradient pos="0,150" size="161x24" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-24,150" size="24x24" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-24,0" size="24x150"/>
+			</widget>
+			<rectangle fillColor="shadow" size="200x300"/>
+			<rectangle fillColor="overlayBackground" pos="19,74" size="161x150"/>
+			<container pos="23,78" size="153x142">
+				<image pos="59,-4" size="98x98"/>
+				<widget size="153x142" type="*dialog.themedBackground">
+					<rectangle fillColor="rgba(34,34,34,230)" size="153x142"/>
+				</widget>
+				<widget pos="16,51" size="121x35" type="*widget.Label">
+					<text pos="8,8" size="105x19">Custom buttons</text>
+				</widget>
+				<container pos="36,90" size="80x36">
+					<widget size="24x36" type="*widget.Button">
+						<rectangle fillColor="button" radius="4" size="24x36"/>
+						<rectangle size="0x0"/>
+						<widget pos="8,8" size="8x19" type="*widget.RichText">
+							<text alignment="center" bold size="8x19">1</text>
+						</widget>
+					</widget>
+					<widget pos="28,0" size="24x36" type="*widget.Button">
+						<rectangle fillColor="button" radius="4" size="24x36"/>
+						<rectangle size="0x0"/>
+						<widget pos="8,8" size="8x19" type="*widget.RichText">
+							<text alignment="center" bold size="8x19">2</text>
+						</widget>
+					</widget>
+					<widget pos="56,0" size="24x36" type="*widget.Button">
+						<rectangle fillColor="button" radius="4" size="24x36"/>
+						<rectangle size="0x0"/>
+						<widget pos="8,8" size="8x19" type="*widget.RichText">
+							<text alignment="center" bold size="8x19">3</text>
+						</widget>
+					</widget>
+				</container>
+				<widget size="0x0" type="*widget.Label">
+					<text bold pos="8,8" size="28x19">Test</text>
+				</widget>
+			</container>
+		</widget>
+	</overlay>
+</canvas>
