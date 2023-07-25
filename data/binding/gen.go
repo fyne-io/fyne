@@ -743,7 +743,7 @@ func (t *bound{{ .Name }}Tree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {

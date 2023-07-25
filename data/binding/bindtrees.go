@@ -147,7 +147,7 @@ func (t *boundBoolTree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
@@ -394,7 +394,7 @@ func (t *boundBytesTree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
@@ -641,7 +641,7 @@ func (t *boundFloatTree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
@@ -888,7 +888,7 @@ func (t *boundIntTree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
@@ -1135,7 +1135,7 @@ func (t *boundRuneTree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
@@ -1382,7 +1382,7 @@ func (t *boundStringTree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
@@ -1629,7 +1629,7 @@ func (t *boundURITree) doReload() (retErr error) {
 		fire = true
 	}
 
-	for id, _ := range t.items {
+	for id := range t.items {
 		remove := true
 		for _, done := range updated {
 			if done == id {
