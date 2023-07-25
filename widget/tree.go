@@ -1,8 +1,11 @@
 package widget
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
@@ -49,6 +52,30 @@ type Tree struct {
 func NewTree(childUIDs func(TreeNodeID) []TreeNodeID, isBranch func(TreeNodeID) bool, create func(bool) fyne.CanvasObject, update func(TreeNodeID, bool, fyne.CanvasObject)) *Tree {
 	t := &Tree{ChildUIDs: childUIDs, IsBranch: isBranch, CreateNode: create, UpdateNode: update}
 	t.ExtendBaseWidget(t)
+	return t
+}
+
+// NewTreeWithData creates a new tree widget that will display the contents of the provided data.
+//
+// Since: 2.4
+func NewTreeWithData(data binding.DataTree, createItem func(bool) fyne.CanvasObject, updateItem func(binding.DataItem, bool, fyne.CanvasObject)) *Tree {
+	t := NewTree(
+		data.ChildIDs,
+		func(id TreeNodeID) bool {
+			children := data.ChildIDs(id)
+			return len(children) > 0
+		},
+		createItem,
+		func(i TreeNodeID, branch bool, o fyne.CanvasObject) {
+			item, err := data.GetItem(i)
+			if err != nil {
+				fyne.LogError(fmt.Sprintf("Error getting data item %d", i), err)
+				return
+			}
+			updateItem(item, branch, o)
+		})
+
+	data.AddListener(binding.NewDataListener(t.Refresh))
 	return t
 }
 
