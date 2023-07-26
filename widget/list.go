@@ -89,7 +89,7 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	return newListRenderer(objects, l, l.scroller, layout)
 }
 
-// FocusGained is called after this listItem has gained focus.
+// FocusGained is called after this List has gained focus.
 //
 // Implements: fyne.Focusable
 func (l *List) FocusGained() {
@@ -98,7 +98,7 @@ func (l *List) FocusGained() {
 	l.RefreshItem(l.currentFocus)
 }
 
-// FocusLost is called after this listItem has lost focus.
+// FocusLost is called after this List has lost focus.
 //
 // Implements: fyne.Focusable
 func (l *List) FocusLost() {
@@ -254,7 +254,7 @@ func (l *List) ScrollToTop() {
 	l.Refresh()
 }
 
-// TypedKey is called if a key event happens while this listItem is focused.
+// TypedKey is called if a key event happens while this List is focused.
 //
 // Implements: fyne.Focusable
 func (l *List) TypedKey(event *fyne.KeyEvent) {
@@ -280,7 +280,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 	}
 }
 
-// TypedRune is called if a text event happens while this listItem is focused.
+// TypedRune is called if a text event happens while this List is focused.
 //
 // Implements: fyne.Focusable
 func (l *List) TypedRune(_ rune) {
