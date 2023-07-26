@@ -196,9 +196,8 @@ func (t *Table) DragEnd() {
 // Implements: fyne.Focusable
 func (t *Table) FocusGained() {
 	t.focused = true
-	t.hoveredCell = &t.currentFocus
 	t.ScrollTo(t.currentFocus)
-	t.Refresh() // TODO RefreshItem(t.currentFocus)
+	t.Refresh() // TODO t.RefreshItem(t.currentFocus)
 }
 
 // FocusLost is called after this Table has lost focus.
@@ -315,20 +314,18 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 				return
 			}
 		}
-		t.Refresh() //Item(t.currentFocus)
+		// TODO t.RefreshItem(t.currentFocus)
 		t.currentFocus.Row++
-		t.hoveredCell = &t.currentFocus
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
 	case fyne.KeyLeft:
 		if t.currentFocus.Col <= 0 {
 			return
 		}
-		t.Refresh() //Item(t.currentFocus)
+		// TODO t.RefreshItem(t.currentFocus)
 		t.currentFocus.Col--
-		t.hoveredCell = &t.currentFocus
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
 	case fyne.KeyRight:
 		if f := t.Length; f != nil {
 			_, cols := f()
@@ -336,20 +333,18 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 				return
 			}
 		}
-		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		// TODO t.RefreshItem(t.currentFocus)
 		t.currentFocus.Col++
-		t.hoveredCell = &t.currentFocus
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
 	case fyne.KeyUp:
 		if t.currentFocus.Row <= 0 {
 			return
 		}
-		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		// TODO t.RefreshItem(t.currentFocus)
 		t.currentFocus.Row--
-		t.hoveredCell = &t.currentFocus
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
 	}
 }
 
@@ -1347,8 +1342,10 @@ func (r *tableCellsRenderer) moveIndicators() {
 	} else {
 		r.moveMarker(r.marker, r.cells.t.selectedCell.Row, r.cells.t.selectedCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}
-	if r.cells.t.hoveredCell == nil {
+	if r.cells.t.hoveredCell == nil && !r.cells.t.focused {
 		r.moveMarker(r.hover, -1, -1, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
+	} else if r.cells.t.focused {
+		r.moveMarker(r.hover, r.cells.t.currentFocus.Row, r.cells.t.currentFocus.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	} else {
 		r.moveMarker(r.hover, r.cells.t.hoveredCell.Row, r.cells.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}

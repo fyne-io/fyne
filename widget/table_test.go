@@ -127,24 +127,23 @@ func TestTable_Focus(t *testing.T) {
 
 	canvas.FocusNext()
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, TableCellID{0, 0}, canvas.Focused().(*Table).currentFocus)
-
-	assert.Equal(t, &TableCellID{0, 0}, table.hoveredCell)
+	assert.Equal(t, table, canvas.Focused())
+	assert.Equal(t, TableCellID{0, 0}, table.currentFocus)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
-	assert.Equal(t, &TableCellID{1, 0}, table.hoveredCell)
+	assert.Equal(t, TableCellID{1, 0}, table.currentFocus)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, &TableCellID{1, 1}, table.hoveredCell)
+	assert.Equal(t, TableCellID{1, 1}, table.currentFocus)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
-	assert.Equal(t, &TableCellID{1, 0}, table.hoveredCell)
+	assert.Equal(t, TableCellID{1, 0}, table.currentFocus)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
-	assert.Equal(t, &TableCellID{0, 0}, table.hoveredCell)
+	assert.Equal(t, TableCellID{0, 0}, table.currentFocus)
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
-	assert.Equal(t, table.selectedCell, &TableCellID{0, 0})
+	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
 }
 
 func TestTable_Headers(t *testing.T) {
@@ -623,6 +622,7 @@ func TestTable_Selection(t *testing.T) {
 		selectedRow = id.Row
 	}
 	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 58))
+	w.Canvas().Unfocus() // don't include table focus in test
 	assert.Equal(t, 0, table.selectedCell.Col)
 	assert.Equal(t, 1, table.selectedCell.Row)
 	assert.Equal(t, 0, selectedCol)
