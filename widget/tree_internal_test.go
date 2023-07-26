@@ -54,7 +54,7 @@ func TestTree(t *testing.T) {
 	t.Run("Initializer_Empty", func(t *testing.T) {
 		tree := &Tree{}
 		var nodes []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
+		tree.walkAll(func(uid, _ string, branch bool, depth int) {
 			nodes = append(nodes, uid)
 		})
 		assert.Equal(t, 0, len(nodes))
@@ -82,7 +82,7 @@ func TestTree(t *testing.T) {
 		tree.OpenBranch("c")
 		var branches []string
 		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
+		tree.walkAll(func(uid, _ string, branch bool, depth int) {
 			if branch {
 				branches = append(branches, uid)
 			} else {
@@ -122,7 +122,7 @@ func TestTree(t *testing.T) {
 		tree.OpenBranch("c")
 		var branches []string
 		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
+		tree.walkAll(func(uid, _ string, branch bool, depth int) {
 			if branch {
 				branches = append(branches, uid)
 			} else {
@@ -146,7 +146,7 @@ func TestTree(t *testing.T) {
 		tree.OpenBranch("foo")
 		var branches []string
 		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
+		tree.walkAll(func(uid, _ string, branch bool, depth int) {
 			if branch {
 				branches = append(branches, uid)
 			} else {
@@ -624,7 +624,7 @@ func TestTree_Walk(t *testing.T) {
 		tree.OpenBranch("E")
 		var branches []string
 		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
+		tree.walkAll(func(uid, _ string, branch bool, depth int) {
 			if branch {
 				branches = append(branches, uid)
 			} else {
@@ -651,7 +651,7 @@ func TestTree_Walk(t *testing.T) {
 		tree := NewTreeWithStrings(data)
 		var branches []string
 		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
+		tree.walkAll(func(uid, _ string, branch bool, depth int) {
 			if branch {
 				branches = append(branches, uid)
 			} else {
