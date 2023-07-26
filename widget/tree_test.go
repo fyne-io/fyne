@@ -1,10 +1,12 @@
 package widget_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -15,6 +17,32 @@ import (
 var treeData = map[string][]string{
 	"":    {"foo"},
 	"foo": {"foobar"},
+}
+
+func TestNewTreeWithData(t *testing.T) {
+	data := binding.NewStringTree()
+	for i := 0; i < 1000; i++ {
+		data.Append("", fmt.Sprintf("%d", i), fmt.Sprintf("Test Item %d", i))
+	}
+
+	for i := 0; i < 10; i++ {
+		data.Append("1", fmt.Sprintf("%d", 1000+i), fmt.Sprintf("Child Item %d", i))
+	}
+
+	tree := widget.NewTreeWithData(data,
+		func(bool) fyne.CanvasObject {
+			return widget.NewLabel("Template Object")
+		},
+		func(data binding.DataItem, _ bool, item fyne.CanvasObject) {
+			item.(*widget.Label).Bind(data.(binding.String))
+		},
+	)
+
+	template := widget.NewLabel("Template Object")
+
+	assert.Equal(t, 1000, len(tree.ChildUIDs("")))
+	assert.Equal(t, 10, len(tree.ChildUIDs("1")))
+	assert.GreaterOrEqual(t, tree.MinSize().Width, template.MinSize().Width)
 }
 
 func TestTree_OpenClose(t *testing.T) {

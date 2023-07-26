@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -24,6 +25,29 @@ func TestNewList(t *testing.T) {
 		NewLabel("Template Object")},
 	}
 	template := newListItem(content, nil)
+
+	assert.Equal(t, 1000, list.Length())
+	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
+	assert.Equal(t, float32(0), list.offsetY)
+}
+
+func TestNewListWithData(t *testing.T) {
+	data := binding.NewStringList()
+	for i := 0; i < 1000; i++ {
+		data.Append(fmt.Sprintf("Test Item %d", i))
+	}
+
+	list := NewListWithData(data,
+		func() fyne.CanvasObject {
+			return NewLabel("Template Object")
+		},
+		func(data binding.DataItem, item fyne.CanvasObject) {
+			item.(*Label).Bind(data.(binding.String))
+		},
+	)
+
+	template := NewLabel("Template Object")
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
