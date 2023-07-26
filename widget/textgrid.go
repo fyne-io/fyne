@@ -364,6 +364,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	}
 
 	text := t.objects[pos*2+1].(*canvas.Text)
+	text.TextSize = theme.TextSize()
 	fg := theme.ForegroundColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
