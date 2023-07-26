@@ -11,7 +11,7 @@ import (
 
 // BoolTree supports binding a tree of bool values.
 //
-// Since: 2.0
+// Since: 2.4
 type BoolTree interface {
 	DataTree
 
@@ -23,12 +23,18 @@ type BoolTree interface {
 	SetValue(id string, value bool) error
 }
 
+// ExternalBoolTree supports binding a tree of bool values from an external variable.
+//
+// Since: 2.4
 type ExternalBoolTree interface {
 	BoolTree
 
 	Reload() error
 }
 
+// NewBoolTree returns a bindable tree of bool values.
+//
+// Since: 2.4
 func NewBoolTree() BoolTree {
 	t := &boundBoolTree{val: &map[string]bool{}}
 	t.ids = make(map[string][]string)
@@ -36,6 +42,11 @@ func NewBoolTree() BoolTree {
 	return t
 }
 
+// BindBoolTree returns a bound tree of bool values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindBoolTree(ids *map[string][]string, v *map[string]bool) ExternalBoolTree {
 	if v == nil {
 		return NewBoolTree().(ExternalBoolTree)
@@ -258,7 +269,7 @@ func (t *boundExternalBoolTreeItem) setIfChanged(val bool) error {
 
 // BytesTree supports binding a tree of []byte values.
 //
-// Since: 2.2
+// Since: 2.4
 type BytesTree interface {
 	DataTree
 
@@ -270,12 +281,18 @@ type BytesTree interface {
 	SetValue(id string, value []byte) error
 }
 
+// ExternalBytesTree supports binding a tree of []byte values from an external variable.
+//
+// Since: 2.4
 type ExternalBytesTree interface {
 	BytesTree
 
 	Reload() error
 }
 
+// NewBytesTree returns a bindable tree of []byte values.
+//
+// Since: 2.4
 func NewBytesTree() BytesTree {
 	t := &boundBytesTree{val: &map[string][]byte{}}
 	t.ids = make(map[string][]string)
@@ -283,6 +300,11 @@ func NewBytesTree() BytesTree {
 	return t
 }
 
+// BindBytesTree returns a bound tree of []byte values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindBytesTree(ids *map[string][]string, v *map[string][]byte) ExternalBytesTree {
 	if v == nil {
 		return NewBytesTree().(ExternalBytesTree)
@@ -505,7 +527,7 @@ func (t *boundExternalBytesTreeItem) setIfChanged(val []byte) error {
 
 // FloatTree supports binding a tree of float64 values.
 //
-// Since: 2.0
+// Since: 2.4
 type FloatTree interface {
 	DataTree
 
@@ -517,12 +539,18 @@ type FloatTree interface {
 	SetValue(id string, value float64) error
 }
 
+// ExternalFloatTree supports binding a tree of float64 values from an external variable.
+//
+// Since: 2.4
 type ExternalFloatTree interface {
 	FloatTree
 
 	Reload() error
 }
 
+// NewFloatTree returns a bindable tree of float64 values.
+//
+// Since: 2.4
 func NewFloatTree() FloatTree {
 	t := &boundFloatTree{val: &map[string]float64{}}
 	t.ids = make(map[string][]string)
@@ -530,6 +558,11 @@ func NewFloatTree() FloatTree {
 	return t
 }
 
+// BindFloatTree returns a bound tree of float64 values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindFloatTree(ids *map[string][]string, v *map[string]float64) ExternalFloatTree {
 	if v == nil {
 		return NewFloatTree().(ExternalFloatTree)
@@ -752,7 +785,7 @@ func (t *boundExternalFloatTreeItem) setIfChanged(val float64) error {
 
 // IntTree supports binding a tree of int values.
 //
-// Since: 2.0
+// Since: 2.4
 type IntTree interface {
 	DataTree
 
@@ -764,12 +797,18 @@ type IntTree interface {
 	SetValue(id string, value int) error
 }
 
+// ExternalIntTree supports binding a tree of int values from an external variable.
+//
+// Since: 2.4
 type ExternalIntTree interface {
 	IntTree
 
 	Reload() error
 }
 
+// NewIntTree returns a bindable tree of int values.
+//
+// Since: 2.4
 func NewIntTree() IntTree {
 	t := &boundIntTree{val: &map[string]int{}}
 	t.ids = make(map[string][]string)
@@ -777,6 +816,11 @@ func NewIntTree() IntTree {
 	return t
 }
 
+// BindIntTree returns a bound tree of int values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindIntTree(ids *map[string][]string, v *map[string]int) ExternalIntTree {
 	if v == nil {
 		return NewIntTree().(ExternalIntTree)
@@ -999,7 +1043,7 @@ func (t *boundExternalIntTreeItem) setIfChanged(val int) error {
 
 // RuneTree supports binding a tree of rune values.
 //
-// Since: 2.0
+// Since: 2.4
 type RuneTree interface {
 	DataTree
 
@@ -1011,12 +1055,18 @@ type RuneTree interface {
 	SetValue(id string, value rune) error
 }
 
+// ExternalRuneTree supports binding a tree of rune values from an external variable.
+//
+// Since: 2.4
 type ExternalRuneTree interface {
 	RuneTree
 
 	Reload() error
 }
 
+// NewRuneTree returns a bindable tree of rune values.
+//
+// Since: 2.4
 func NewRuneTree() RuneTree {
 	t := &boundRuneTree{val: &map[string]rune{}}
 	t.ids = make(map[string][]string)
@@ -1024,6 +1074,11 @@ func NewRuneTree() RuneTree {
 	return t
 }
 
+// BindRuneTree returns a bound tree of rune values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindRuneTree(ids *map[string][]string, v *map[string]rune) ExternalRuneTree {
 	if v == nil {
 		return NewRuneTree().(ExternalRuneTree)
@@ -1246,7 +1301,7 @@ func (t *boundExternalRuneTreeItem) setIfChanged(val rune) error {
 
 // StringTree supports binding a tree of string values.
 //
-// Since: 2.0
+// Since: 2.4
 type StringTree interface {
 	DataTree
 
@@ -1258,12 +1313,18 @@ type StringTree interface {
 	SetValue(id string, value string) error
 }
 
+// ExternalStringTree supports binding a tree of string values from an external variable.
+//
+// Since: 2.4
 type ExternalStringTree interface {
 	StringTree
 
 	Reload() error
 }
 
+// NewStringTree returns a bindable tree of string values.
+//
+// Since: 2.4
 func NewStringTree() StringTree {
 	t := &boundStringTree{val: &map[string]string{}}
 	t.ids = make(map[string][]string)
@@ -1271,6 +1332,11 @@ func NewStringTree() StringTree {
 	return t
 }
 
+// BindStringTree returns a bound tree of string values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindStringTree(ids *map[string][]string, v *map[string]string) ExternalStringTree {
 	if v == nil {
 		return NewStringTree().(ExternalStringTree)
@@ -1493,7 +1559,7 @@ func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
 
 // URITree supports binding a tree of fyne.URI values.
 //
-// Since: 2.1
+// Since: 2.4
 type URITree interface {
 	DataTree
 
@@ -1505,12 +1571,18 @@ type URITree interface {
 	SetValue(id string, value fyne.URI) error
 }
 
+// ExternalURITree supports binding a tree of fyne.URI values from an external variable.
+//
+// Since: 2.4
 type ExternalURITree interface {
 	URITree
 
 	Reload() error
 }
 
+// NewURITree returns a bindable tree of fyne.URI values.
+//
+// Since: 2.4
 func NewURITree() URITree {
 	t := &boundURITree{val: &map[string]fyne.URI{}}
 	t.ids = make(map[string][]string)
@@ -1518,6 +1590,11 @@ func NewURITree() URITree {
 	return t
 }
 
+// BindURITree returns a bound tree of fyne.URI values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalURITree {
 	if v == nil {
 		return NewURITree().(ExternalURITree)

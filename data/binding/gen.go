@@ -607,7 +607,7 @@ func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 const treeBindTemplate = `
 // {{ .Name }}Tree supports binding a tree of {{ .Type }} values.
 //
-// Since: {{ .Since }}
+// Since: 2.4
 type {{ .Name }}Tree interface {
 	DataTree
 
@@ -619,12 +619,18 @@ type {{ .Name }}Tree interface {
 	SetValue(id string, value {{ .Type }}) error
 }
 
+// External{{ .Name }}Tree supports binding a tree of {{ .Type }} values from an external variable.
+//
+// Since: 2.4
 type External{{ .Name }}Tree interface {
 	{{ .Name }}Tree
 
 	Reload() error
 }
 
+// New{{ .Name }}Tree returns a bindable tree of {{ .Type }} values.
+//
+// Since: 2.4
 func New{{ .Name }}Tree() {{ .Name }}Tree {
 	t := &bound{{ .Name }}Tree{val: &map[string]{{ .Type }}{}}
 	t.ids = make(map[string][]string)
@@ -632,6 +638,11 @@ func New{{ .Name }}Tree() {{ .Name }}Tree {
 	return t
 }
 
+// Bind{{ .Name }}Tree returns a bound tree of {{ .Type }} values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
 func Bind{{ .Name }}Tree(ids *map[string][]string, v *map[string]{{ .Type }}) External{{ .Name }}Tree {
 	if v == nil {
 		return New{{ .Name }}Tree().(External{{ .Name }}Tree)

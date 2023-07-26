@@ -1,5 +1,6 @@
 package binding
 
+// DataTreeRootID const is the value used as ID for the root of any tree binding.
 const DataTreeRootID = ""
 
 // DataTree is the base interface for all bindable data trees.
