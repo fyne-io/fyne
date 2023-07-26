@@ -14,19 +14,12 @@ import (
 
 const noCellMatch = math.MaxInt32 // TODO make this MaxInt once we move to newer Go version
 
-// Declare conformity with Cursorable interface.
+// Declare conformity with interfaces
 var _ desktop.Cursorable = (*Table)(nil)
-
-// Declare conformity with Draggable interface.
 var _ fyne.Draggable = (*Table)(nil)
-
-// Declare conformity with Hoverable interface.
+var _ fyne.Focusable = (*Table)(nil)
 var _ desktop.Hoverable = (*Table)(nil)
-
-// Declare conformity with Tappable interface.
 var _ fyne.Tappable = (*Table)(nil)
-
-// Declare conformity with Widget interface.
 var _ fyne.Widget = (*Table)(nil)
 
 // TableCellID is a type that represents a cell's position in a table based on its row and column location.
@@ -85,6 +78,8 @@ type Table struct {
 	// Since: 2.4
 	StickyColumnCount int
 
+	currentFocus              TableCellID
+	focused                   bool
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
 	columnWidths, rowHeights  map[int]float32
@@ -196,6 +191,24 @@ func (t *Table) DragEnd() {
 	t.dragRow = noCellMatch
 }
 
+// FocusGained is called after this table has gained focus.
+//
+// Implements: fyne.Focusable
+func (t *Table) FocusGained() {
+	t.focused = true
+	t.hoveredCell = &t.currentFocus
+	t.ScrollTo(t.currentFocus)
+	t.Refresh() // TODO RefreshItem(t.currentFocus)
+}
+
+// FocusLost is called after this Table has lost focus.
+//
+// Implements: fyne.Focusable
+func (t *Table) FocusLost() {
+	t.focused = false
+	t.Refresh() //Item(t.currentFocus)
+}
+
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
@@ -286,6 +299,65 @@ func (t *Table) TouchUp(*mobile.TouchEvent) {
 
 // TouchCancel response to mobile touch event
 func (t *Table) TouchCancel(*mobile.TouchEvent) {
+}
+
+// TypedKey is called if a key event happens while this Table is focused.
+//
+// Implements: fyne.Focusable
+func (t *Table) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace:
+		t.Select(t.currentFocus)
+	case fyne.KeyDown:
+		if f := t.Length; f != nil {
+			rows, _ := f()
+			if t.currentFocus.Row >= rows-1 {
+				return
+			}
+		}
+		t.Refresh() //Item(t.currentFocus)
+		t.currentFocus.Row++
+		t.hoveredCell = &t.currentFocus
+		t.ScrollTo(t.currentFocus)
+		t.Refresh() // TODO RefreshItem(t.currentFocus)
+	case fyne.KeyLeft:
+		if t.currentFocus.Col <= 0 {
+			return
+		}
+		t.Refresh() //Item(t.currentFocus)
+		t.currentFocus.Col--
+		t.hoveredCell = &t.currentFocus
+		t.ScrollTo(t.currentFocus)
+		t.Refresh() // TODO RefreshItem(t.currentFocus)
+	case fyne.KeyRight:
+		if f := t.Length; f != nil {
+			_, cols := f()
+			if t.currentFocus.Col >= cols-1 {
+				return
+			}
+		}
+		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		t.currentFocus.Col++
+		t.hoveredCell = &t.currentFocus
+		t.ScrollTo(t.currentFocus)
+		t.Refresh() // TODO RefreshItem(t.currentFocus)
+	case fyne.KeyUp:
+		if t.currentFocus.Row <= 0 {
+			return
+		}
+		t.Refresh() // TODO RefreshItem(t.currentFocus)
+		t.currentFocus.Row--
+		t.hoveredCell = &t.currentFocus
+		t.ScrollTo(t.currentFocus)
+		t.Refresh() // TODO RefreshItem(t.currentFocus)
+	}
+}
+
+// TypedRune is called if a text event happens while this Table is focused.
+//
+// Implements: fyne.Focusable
+func (t *Table) TypedRune(_ rune) {
+	// intentionally left blank
 }
 
 // Unselect will mark the cell provided by id as unselected.
@@ -471,6 +543,12 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 		return // out of row range
 	}
 	t.Select(TableCellID{row, col})
+
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
+	if canvas != nil {
+		canvas.Focus(t)
+	}
+	t.currentFocus = TableCellID{row, col}
 }
 
 // columnAt returns a positive integer (or 0) for the column that is found at the `pos` X position.
