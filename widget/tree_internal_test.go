@@ -161,6 +161,39 @@ func TestTree(t *testing.T) {
 	})
 }
 
+func TestTree_Focus(t *testing.T) {
+	var treeData = map[string][]string{
+		"":    {"foo", "bar"},
+		"foo": {"foobar", "barbar"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(tree.MinSize().Max(fyne.NewSize(150, 200)))
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	assert.Nil(t, canvas.Focused())
+
+	canvas.FocusNext()
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentFocus)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	assert.Equal(t, "bar", canvas.Focused().(*Tree).currentFocus)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentFocus)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, "foobar", canvas.Focused().(*Tree).currentFocus)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentFocus)
+
+	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.Equal(t, "foo", tree.selected[0])
+}
+
 func TestTree_Indentation(t *testing.T) {
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)

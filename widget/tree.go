@@ -134,6 +134,14 @@ func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 //
 // Implements: fyne.Focusable
 func (t *Tree) FocusGained() {
+	if t.currentFocus == "" {
+		if childUIDs := t.ChildUIDs; childUIDs != nil {
+			if ids := childUIDs(""); len(ids) > 0 {
+				t.currentFocus = ids[0]
+			}
+		}
+	}
+
 	t.focused = true
 	t.ScrollTo(t.currentFocus)
 	t.Refresh() // TODO RefreshItem(t.currentFocus)
