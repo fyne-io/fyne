@@ -13,8 +13,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Declare conformity with Widget interface.
+// Declare conformity with interfaces.
 var _ fyne.Widget = (*GridWrap)(nil)
+var _ fyne.Focusable = (*GridWrap)(nil)
 
 // GridWrapItemID is the ID of an individual item in the GridWrap widget.
 //
@@ -35,6 +36,8 @@ type GridWrap struct {
 	OnSelected   func(id GridWrapItemID)                         `json:"-"`
 	OnUnselected func(id GridWrapItemID)                         `json:"-"`
 
+	currentFocus  ListItemID
+	focused       bool
 	scroller      *widget.Scroll
 	selected      []GridWrapItemID
 	itemMin       fyne.Size
@@ -85,6 +88,23 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 	layout.Resize(layout.MinSize())
 
 	return newGridWrapRenderer([]fyne.CanvasObject{l.scroller}, l, l.scroller, layout)
+}
+
+// FocusGained is called after this GridWrap has gained focus.
+//
+// Implements: fyne.Focusable
+func (l *GridWrap) FocusGained() {
+	l.focused = true
+	l.scrollTo(l.currentFocus)
+	l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+}
+
+// FocusLost is called after this GridWrap has lost focus.
+//
+// Implements: fyne.Focusable
+func (l *GridWrap) FocusLost() {
+	l.focused = false
+	l.Refresh() // TODO l.RefreshItem(l.currentFocus)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -179,6 +199,70 @@ func (l *GridWrap) ScrollToOffset(offset float32) {
 	l.offsetUpdated(l.scroller.Offset)
 }
 
+// TypedKey is called if a key event happens while this GridWrap is focused.
+//
+// Implements: fyne.Focusable
+func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace:
+		l.Select(l.currentFocus)
+	case fyne.KeyDown:
+		count := 0
+		if f := l.Length; f != nil {
+			count = f()
+		}
+		// TODO l.RefreshItem(l.currentFocus)
+		l.currentFocus += l.getColCount()
+		if l.currentFocus >= count-1 {
+			l.currentFocus = count - 1
+		}
+		l.scrollTo(l.currentFocus)
+		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+	case fyne.KeyLeft:
+		if l.currentFocus <= 0 {
+			return
+		}
+		if l.currentFocus%l.getColCount() == 0 {
+			return
+		}
+
+		// TODO l.RefreshItem(l.currentFocus)
+		l.currentFocus--
+		l.scrollTo(l.currentFocus)
+		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+	case fyne.KeyRight:
+		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
+			return
+		}
+		if (l.currentFocus+1)%l.getColCount() == 0 {
+			return
+		}
+
+		// TODO l.RefreshItem(l.currentFocus)
+		l.currentFocus++
+		l.scrollTo(l.currentFocus)
+		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+	case fyne.KeyUp:
+		if l.currentFocus <= 0 {
+			return
+		}
+		// TODO l.RefreshItem(l.currentFocus)
+		l.currentFocus -= l.getColCount()
+		if l.currentFocus < 0 {
+			l.currentFocus = 0
+		}
+		l.scrollTo(l.currentFocus)
+		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+	}
+}
+
+// TypedRune is called if a text event happens while this GridWrap is focused.
+//
+// Implements: fyne.Focusable
+func (l *GridWrap) TypedRune(_ rune) {
+	// intentionally left blank
+}
+
 // GetScrollOffset returns the current scroll offset position
 func (l *GridWrap) GetScrollOffset() float32 {
 	return l.offsetY
@@ -256,7 +340,6 @@ func (l *gridWrapRenderer) Objects() []fyne.CanvasObject {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Focusable = (*gridWrapItem)(nil)
 var _ fyne.Widget = (*gridWrapItem)(nil)
 var _ fyne.Tappable = (*gridWrapItem)(nil)
 var _ desktop.Hoverable = (*gridWrapItem)(nil)
@@ -292,20 +375,6 @@ func (gw *gridWrapItem) CreateRenderer() fyne.WidgetRenderer {
 	return &gridWrapItemRenderer{widget.NewBaseRenderer(objects), gw}
 }
 
-// FocusGained is called after this listItem has gained focus.
-//
-// Implements: fyne.Focusable
-func (gw *gridWrapItem) FocusGained() {
-	gw.hovered = true
-	gw.Refresh()
-}
-
-// FocusLost is called after this listItem has lost focus.
-func (gw *gridWrapItem) FocusLost() {
-	gw.hovered = false
-	gw.Refresh()
-}
-
 // MinSize returns the size that this widget should not shrink below.
 func (gw *gridWrapItem) MinSize() fyne.Size {
 	gw.ExtendBaseWidget(gw)
@@ -335,23 +404,6 @@ func (gw *gridWrapItem) Tapped(*fyne.PointEvent) {
 		gw.Refresh()
 		gw.onTapped()
 	}
-}
-
-// TypedKey is called if a key event happens while this listItem is focused.
-func (gw *gridWrapItem) TypedKey(event *fyne.KeyEvent) {
-	switch event.Name {
-	case fyne.KeySpace:
-		gw.selected = true
-		gw.Refresh()
-		if gw.onTapped != nil {
-			gw.onTapped()
-		}
-	}
-}
-
-// TypedRune is called if a text event happens while this listItem is focused.
-func (gw *gridWrapItem) TypedRune(_ rune) {
-	// intentionally left blank
 }
 
 // Declare conformity with the WidgetRenderer interface.
@@ -459,7 +511,13 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 		f(id, li.child)
 	}
 	li.onTapped = func() {
+		canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+		if canvas != nil {
+			canvas.Focus(l.list)
+		}
+
 		l.list.Select(id)
+		l.list.currentFocus = id
 	}
 }
 
@@ -524,17 +582,8 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 		y += l.list.itemMin.Height + theme.Padding()
 	}
 
-	var focused fyne.Focusable
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
-	if canvas != nil {
-		focused = canvas.Focused()
-	}
-
 	for id, old := range wasVisible {
 		if _, ok := l.visible[id]; !ok {
-			if focused == old {
-				canvas.Focus(nil)
-			}
 			l.itemPool.Release(old)
 		}
 	}
@@ -545,6 +594,6 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 	l.renderLock.Unlock() // user code should not be locked
 
 	for row, obj := range l.visible {
-		l.setupGridItem(obj, row, focused == obj)
+		l.setupGridItem(obj, row, l.list.focused && l.list.currentFocus == row)
 	}
 }

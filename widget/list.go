@@ -16,7 +16,7 @@ import (
 // ListItemID uniquely identifies an item within a list.
 type ListItemID = int
 
-// Declare conformity with Widget interface.
+// Declare conformity with interfaces.
 var _ fyne.Widget = (*List)(nil)
 var _ fyne.Focusable = (*List)(nil)
 
