@@ -20,7 +20,7 @@
 						</widget>
 					</widget>
 					<widget pos="0,39" size="192x35" type="*widget.listItem">
-						<rectangle fillColor="hover" size="192x35"/>
+						<rectangle fillColor="hover" radius="3" size="192x35"/>
 						<widget size="192x35" type="*widget.Entry">
 							<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="190x33"/>
 							<rectangle radius="5" size="190x33" strokeColor="inputBorder" strokeWidth="1"/>

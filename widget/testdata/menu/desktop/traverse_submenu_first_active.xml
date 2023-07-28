@@ -23,7 +23,7 @@
 								<rectangle fillColor="disabled" size="58x1"/>
 							</widget>
 							<widget pos="0,44" size="58x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="58x35"/>
+								<rectangle fillColor="focus" radius="4" size="58x35"/>
 								<text pos="8,8" size="22x19">Bar</text>
 								<image pos="38,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
@@ -52,7 +52,7 @@
 							<rectangle fillColor="menuBackground" size="50x74"/>
 							<container size="50x74">
 								<widget size="50x35" type="*widget.menuItem">
-									<rectangle fillColor="focus" size="50x35"/>
+									<rectangle fillColor="focus" radius="4" size="50x35"/>
 									<text pos="8,8" size="34x19">SubA</text>
 								</widget>
 								<widget pos="0,39" size="50x35" type="*widget.menuItem">

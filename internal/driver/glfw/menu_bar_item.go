@@ -39,6 +39,7 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 // Implements: fyne.Widget
 func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	text := canvas.NewText(i.Menu.Label, theme.ForegroundColor())
 	objects := []fyne.CanvasObject{background, text}
@@ -160,6 +161,7 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuBarItemRenderer) Refresh() {
+	r.background.CornerRadius = theme.SelectionRadiusSize()
 	if r.i.active && r.i.Parent.active {
 		r.background.FillColor = theme.FocusColor()
 		r.background.Show()

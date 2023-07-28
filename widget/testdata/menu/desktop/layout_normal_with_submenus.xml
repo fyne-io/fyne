@@ -29,7 +29,7 @@
 								<text pos="8,8" size="50x19">B (long)</text>
 							</widget>
 							<widget pos="0,83" size="66x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="66x35"/>
+								<rectangle fillColor="focus" radius="4" size="66x35"/>
 								<text pos="8,8" size="30x19">C</text>
 								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
