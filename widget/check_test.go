@@ -96,3 +96,10 @@ func TestNewCheckWithData(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, false, v)
 }
+
+func TestCheck_SetText(t *testing.T) {
+	check := &widget.Check{Text: "Test"}
+	check.SetText("New")
+
+	assert.Equal(t, "New", check.Text)
+}

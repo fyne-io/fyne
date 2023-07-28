@@ -7,7 +7,6 @@ import (
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -134,7 +133,7 @@ func (i *Image) Refresh() {
 			fyne.LogError("Failed to load image", err)
 			return
 		}
-		rc = ioutil.NopCloser(r)
+		rc = io.NopCloser(r)
 	}
 
 	if i.File != "" || i.Resource != nil {
@@ -223,7 +222,7 @@ func NewImageFromURI(uri fyne.URI) *Image {
 //
 // Since: 2.0
 func NewImageFromReader(read io.Reader, name string) *Image {
-	data, err := ioutil.ReadAll(read)
+	data, err := io.ReadAll(read)
 	if err != nil {
 		fyne.LogError("Unable to read image data", err)
 		return nil
@@ -265,7 +264,7 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 	i.isSVG = false
 	if i.Resource != nil {
 		i.isSVG = svg.IsResourceSVG(i.Resource)
-		return ioutil.NopCloser(bytes.NewReader(i.Resource.Content())), nil
+		return io.NopCloser(bytes.NewReader(i.Resource.Content())), nil
 	} else if i.File != "" {
 		var err error
 
@@ -338,8 +337,8 @@ func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(i)
 	screenWidth, screenHeight := int(width), int(height)
 	if c != nil {
-		screenWidth = scale.ToScreenCoordinate(c, width)
-		screenHeight = scale.ToScreenCoordinate(c, height)
+		// We want real output pixel count not just the screen coordinate space (i.e. macOS Retina)
+		screenWidth, screenHeight = c.PixelCoordinateForPosition(fyne.Position{X: width, Y: height})
 	}
 
 	tex := cache.GetSvg(i.name(), screenWidth, screenHeight)

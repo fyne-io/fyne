@@ -9,7 +9,6 @@ import (
 	"encoding"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"sort"
@@ -59,7 +58,7 @@ func printrecurse(t *testing.T, pl *Pool, el *Element, ws string) {
 
 func TestBootstrap(t *testing.T) {
 	r := require.New(t)
-	bin, err := ioutil.ReadFile("testdata/bootstrap.bin")
+	bin, err := os.ReadFile("testdata/bootstrap.bin")
 	r.NoError(err)
 
 	// unmarshal binary xml and store byte indices of decoded resources.
@@ -158,7 +157,7 @@ func TestEncode(t *testing.T) {
 	bx, err := UnmarshalXML(f, false, 30)
 	r.NoError(err)
 
-	bin, err := ioutil.ReadFile("testdata/bootstrap.bin")
+	bin, err := os.ReadFile("testdata/bootstrap.bin")
 	r.NoError(err)
 
 	bxml := new(XML)

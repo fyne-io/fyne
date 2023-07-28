@@ -34,7 +34,7 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
+	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
 	c.focusIndicator.Resize(focusIndicatorSize)
 	c.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
 
@@ -44,7 +44,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 	c.label.Move(fyne.NewPos(xOff, 0))
 
 	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
-	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
 	c.bg.Move(iconPos)
 	c.bg.Resize(iconSize)
 	c.icon.Resize(iconSize)
@@ -283,6 +283,14 @@ func (c *Check) TypedRune(r rune) {
 
 // TypedKey receives key input events when the Check is focused.
 func (c *Check) TypedKey(key *fyne.KeyEvent) {}
+
+// SetText sets the text of the Check
+//
+// Since: 2.4
+func (c *Check) SetText(text string) {
+	c.Text = text
+	c.Refresh()
+}
 
 // Unbind disconnects any configured data source from this Check.
 // The current value will remain at the last value of the data source.

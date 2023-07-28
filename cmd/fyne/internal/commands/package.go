@@ -7,7 +7,6 @@ import (
 	"image"
 	_ "image/jpeg" // import image encodings
 	"image/png"    // import image encodings
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -105,6 +104,7 @@ func Package() *cli.Command {
 				Name:        "profile",
 				Usage:       "iOS/macOS: name of the provisioning profile for this build",
 				Destination: &p.profile,
+				Value:       "XCWildcard",
 			},
 			&cli.BoolFlag{
 				Name:        "release",
@@ -136,7 +136,8 @@ type Packager struct {
 	tags, category                 string
 	tempDir                        string
 
-	customMetadata keyValueFlag
+	customMetadata      keyValueFlag
+	linuxAndBSDMetadata *metadata.LinuxAndBSD
 }
 
 // AddFlags adds the flags for interacting with the package command.
@@ -340,7 +341,7 @@ func (p *Packager) removeBuild(files []string) {
 }
 
 func (p *Packager) validate() (err error) {
-	p.tempDir, err = ioutil.TempDir("", "fyne-package-*")
+	p.tempDir, err = os.MkdirTemp("", "fyne-package-*")
 	defer func() {
 		if err != nil {
 			_ = os.RemoveAll(p.tempDir)
@@ -379,6 +380,7 @@ func (p *Packager) validate() (err error) {
 
 		p.appData.Release = p.release
 		p.appData.mergeMetadata(data)
+		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
 
 	exeName := calculateExeName(p.srcDir, p.os)
@@ -421,10 +423,10 @@ func (p *Packager) validate() (err error) {
 	return nil
 }
 
-func calculateExeName(sourceDir, os string) string {
+func calculateExeName(sourceDir, osys string) string {
 	exeName := filepath.Base(sourceDir)
 	/* #nosec */
-	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
+	if data, err := os.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
 		modulePath := modfile.ModulePath(data)
 		moduleName, _, ok := module.SplitPathVersion(modulePath)
 		if ok {
@@ -436,7 +438,7 @@ func calculateExeName(sourceDir, os string) string {
 		}
 	}
 
-	if os == "windows" {
+	if osys == "windows" {
 		exeName = exeName + ".exe"
 	}
 
@@ -471,7 +473,7 @@ func (p *Packager) normaliseIcon(path string) (string, error) {
 		return "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 
-	out, err := ioutil.TempFile(p.tempDir, "fyne-ico-*.png")
+	out, err := os.CreateTemp(p.tempDir, "fyne-ico-*.png")
 	if err != nil {
 		return "", fmt.Errorf("failed to open image output file: %w", err)
 	}

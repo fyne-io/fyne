@@ -178,7 +178,6 @@ func (t *DocTabs) SetTabLocation(l TabLocation) {
 func (t *DocTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)
-	t.Refresh()
 }
 
 func (t *DocTabs) close(item *TabItem) {
@@ -245,7 +244,12 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.updateCreateTab()
 	r.updateTabs()
 	r.layout(r.docTabs, size)
+
+	// lay out buttons before updating indicator, which is relative to their position
+	buttons := r.scroller.Content.(*fyne.Container)
+	buttons.Layout.Layout(buttons.Objects, buttons.Size())
 	r.updateIndicator(r.docTabs.transitioning())
+
 	if r.docTabs.transitioning() {
 		r.docTabs.setTransitioning(false)
 	}

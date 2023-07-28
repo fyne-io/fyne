@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 
 	"golang.org/x/sys/execabs"
@@ -14,6 +16,11 @@ import (
 type unixData struct {
 	Name, Exec, Icon string
 	Local            string
+	GenericName      string
+	Categories       string
+	Comment          string
+	Keywords         string
+	ExecParams       string
 }
 
 func (p *Packager) packageUNIX() error {
@@ -52,7 +59,21 @@ func (p *Packager) packageUNIX() error {
 	desktop := filepath.Join(appsDir, p.Name+".desktop")
 	deskFile, _ := os.Create(desktop)
 
-	tplData := unixData{Name: p.Name, Exec: filepath.Base(p.exe), Icon: p.Name + filepath.Ext(p.icon), Local: local}
+	linuxBSD := metadata.LinuxAndBSD{}
+	if p.linuxAndBSDMetadata != nil {
+		linuxBSD = *p.linuxAndBSDMetadata
+	}
+	tplData := unixData{
+		Name:        p.Name,
+		Exec:        filepath.Base(p.exe),
+		Icon:        p.Name + filepath.Ext(p.icon),
+		Local:       local,
+		GenericName: linuxBSD.GenericName,
+		Keywords:    formatDesktopFileList(linuxBSD.Keywords),
+		Comment:     linuxBSD.Comment,
+		Categories:  formatDesktopFileList(linuxBSD.Categories),
+		ExecParams:  linuxBSD.ExecParams,
+	}
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
 		return fmt.Errorf("failed to write desktop entry string: %w", err)
@@ -76,4 +97,12 @@ func (p *Packager) packageUNIX() error {
 	}
 
 	return nil
+}
+
+func formatDesktopFileList(items []string) string {
+	if len(items) == 0 {
+		return ""
+	}
+
+	return strings.Join(items, ";") + ";"
 }

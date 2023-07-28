@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"reflect"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +12,6 @@ type InMemoryPreferences struct {
 	values          map[string]interface{}
 	lock            sync.RWMutex
 	changeListeners []func()
-	wg              *sync.WaitGroup
 }
 
 // Declare conformity with Preferences interface
@@ -40,8 +40,11 @@ func (p *InMemoryPreferences) BoolListWithFallback(key string, fallback []bool) 
 	if !ok {
 		return fallback
 	}
-
-	return value.([]bool)
+	valb, ok := value.([]bool)
+	if !ok {
+		return fallback
+	}
+	return valb
 }
 
 // BoolWithFallback looks up a boolean value and returns the given fallback if not found
@@ -50,12 +53,11 @@ func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
 	if !ok {
 		return fallback
 	}
-
-	val, ok := value.(bool)
+	valb, ok := value.(bool)
 	if !ok {
-		return false
+		return fallback
 	}
-	return val
+	return valb
 }
 
 // ChangeListeners returns the list of listeners registered for this set of preferences.
@@ -77,8 +79,19 @@ func (p *InMemoryPreferences) FloatListWithFallback(key string, fallback []float
 	if !ok {
 		return fallback
 	}
-
-	return value.([]float64)
+	valf, ok := value.([]float64)
+	if ok {
+		return valf
+	}
+	vali, ok := value.([]int)
+	if ok {
+		flts := make([]float64, len(vali))
+		for i, f := range vali {
+			flts[i] = float64(f)
+		}
+		return flts
+	}
+	return fallback
 }
 
 // FloatWithFallback looks up a float64 value and returns the given fallback if not found
@@ -87,12 +100,15 @@ func (p *InMemoryPreferences) FloatWithFallback(key string, fallback float64) fl
 	if !ok {
 		return fallback
 	}
-
-	val, ok := value.(float64)
-	if !ok {
-		return 0.0
+	valf, ok := value.(float64)
+	if ok {
+		return valf
 	}
-	return val
+	vali, ok := value.(int)
+	if ok {
+		return float64(vali)
+	}
+	return fallback
 }
 
 // Int looks up an integer value for the key
@@ -109,17 +125,20 @@ func (p *InMemoryPreferences) IntListWithFallback(key string, fallback []int) []
 	if !ok {
 		return fallback
 	}
-
+	vali, ok := value.([]int)
+	if ok {
+		return vali
+	}
 	// integers can be de-serialised as floats, so support both
-	if intVal, ok := value.([]int); ok {
-		return intVal
+	valf, ok := value.([]float64)
+	if ok {
+		ints := make([]int, len(valf))
+		for i, f := range valf {
+			ints[i] = int(f)
+		}
+		return ints
 	}
-
-	ints := make([]int, len(value.([]float64)))
-	for i, f := range value.([]float64) {
-		ints[i] = int(f)
-	}
-	return ints
+	return fallback
 }
 
 // IntWithFallback looks up an integer value and returns the given fallback if not found
@@ -128,16 +147,16 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 	if !ok {
 		return fallback
 	}
-
+	vali, ok := value.(int)
+	if ok {
+		return vali
+	}
 	// integers can be de-serialised as floats, so support both
-	if intVal, ok := value.(int); ok {
-		return intVal
-	}
-	val, ok := value.(float64)
+	valf, ok := value.(float64)
 	if !ok {
-		return 0
+		return fallback
 	}
-	return int(val)
+	return int(valf)
 }
 
 // ReadValues provides read access to the underlying value map - for internal use only...
@@ -203,8 +222,11 @@ func (p *InMemoryPreferences) StringListWithFallback(key string, fallback []stri
 	if !ok {
 		return fallback
 	}
-
-	return value.([]string)
+	vals, ok := value.([]string)
+	if !ok {
+		return fallback
+	}
+	return vals
 }
 
 // StringWithFallback looks up a string value and returns the given fallback if not found
@@ -213,8 +235,11 @@ func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 	if !ok {
 		return fallback
 	}
-
-	return value.(string)
+	vals, ok := value.(string)
+	if !ok {
+		return fallback
+	}
+	return vals
 }
 
 // WriteValues provides write access to the underlying value map - for internal use only...
@@ -229,10 +254,7 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 
 // NewInMemoryPreferences creates a new preferences implementation stored in memory
 func NewInMemoryPreferences() *InMemoryPreferences {
-	return &InMemoryPreferences{
-		values: make(map[string]interface{}),
-		wg:     &sync.WaitGroup{},
-	}
+	return &InMemoryPreferences{values: make(map[string]interface{})}
 }
 
 func (p *InMemoryPreferences) fireChange() {
@@ -240,15 +262,17 @@ func (p *InMemoryPreferences) fireChange() {
 	listeners := p.changeListeners
 	p.lock.RUnlock()
 
+	var wg sync.WaitGroup
+
 	for _, l := range listeners {
-		p.wg.Add(1)
+		wg.Add(1)
 		go func(listener func()) {
-			defer p.wg.Done()
+			defer wg.Done()
 			listener()
 		}(l)
 	}
 
-	p.wg.Wait()
+	wg.Wait()
 }
 
 func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
@@ -270,9 +294,27 @@ func (p *InMemoryPreferences) remove(key string) {
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
 
-	if stored, ok := p.values[key]; ok && stored == value {
-		p.lock.Unlock()
-		return
+	if reflect.TypeOf(value).Kind() == reflect.Slice {
+		s := reflect.ValueOf(value)
+		old := reflect.ValueOf(p.values[key])
+		if p.values[key] != nil && s.Len() == old.Len() {
+			changed := false
+			for i := 0; i < s.Len(); i++ {
+				if s.Index(i).Interface() != old.Index(i).Interface() {
+					changed = true
+					break
+				}
+			}
+			if !changed {
+				p.lock.Unlock()
+				return
+			}
+		}
+	} else {
+		if stored, ok := p.values[key]; ok && stored == value {
+			p.lock.Unlock()
+			return
+		}
 	}
 
 	p.values[key] = value

@@ -158,7 +158,7 @@ func (i *Installer) install() error {
 				dirName = p.Name[:len(p.Name)-4]
 			}
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), dirName)
-			err := runAsAdminWindows("mkdir", "\"\""+i.installDir+"\"\"")
+			err := runAsAdminWindows("mkdir", i.installDir)
 			if err != nil {
 				fyne.LogError("Failed to run as windows administrator", err)
 				return err

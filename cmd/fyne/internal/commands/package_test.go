@@ -673,3 +673,18 @@ func Test_PackageWeb(t *testing.T) {
 	expectedTotalCount(t, len(expectedWriteFileRuns.expected), expectedWriteFileRuns.current)
 	expectedTotalCount(t, len(expectedCopyFileRuns.expected), expectedCopyFileRuns.current)
 }
+
+func Test_PowerShellArguments(t *testing.T) {
+	tests := []struct {
+		expected string
+		args     []string
+	}{
+		{"\"/c\",'mkdir \"C:\\Program Files\\toto\"'", []string{"mkdir", "C:\\Program Files\\toto"}},
+		{"\"/c\",'copy \"C:\\Program Files\\toto\\titi.txt\" \"C:\\Program Files\\toto\\tata.txt\"'", []string{"copy", "C:\\Program Files\\toto\\titi.txt", "C:\\Program Files\\toto\\tata.txt"}},
+	}
+
+	for _, test := range tests {
+		result := escapePowerShellArguments(test.args...)
+		assert.Equal(t, test.expected, result)
+	}
+}

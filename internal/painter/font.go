@@ -24,8 +24,6 @@ const (
 	DefaultTabWidth = 4
 
 	fontTabSpaceSize = 10
-
-	textDPIRatio = 78.0 / 72.0 // We (historically) had text at 78 DPI but the go-text/render uses 72
 )
 
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
@@ -59,7 +57,11 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 		if f1 == nil {
 			f1 = f2
 		}
-		val = &FontCacheItem{Fonts: []font.Face{f1, f2}}
+		faces := []font.Face{f1, f2}
+		if emoji := theme.DefaultEmojiFont(); emoji != nil {
+			faces = append(faces, loadMeasureFont(emoji))
+		}
+		val = &FontCacheItem{Fonts: faces}
 		fontCache.Store(style, val)
 	}
 
@@ -75,7 +77,7 @@ func ClearFontCache() {
 // DrawString draws a string into an image.
 func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, fontSize, scale float32, tabWidth int) {
 	r := render.Renderer{
-		FontSize: fontSize * textDPIRatio,
+		FontSize: fontSize,
 		PixScale: scale,
 		Color:    color,
 	}
@@ -188,7 +190,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 				if pending {
 					in.RunEnd = i
 					out = shaper.Shape(in)
-					x = shapeCallback(shaper, in, out, x, cb)
+					x = shapeCallback(shaper, in, out, x, scale, cb)
 				}
 				x = tabStop(spacew, x, tabWidth)
 
@@ -200,7 +202,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 			}
 		}
 
-		x = shapeCallback(shaper, in, out, x, cb)
+		x = shapeCallback(shaper, in, out, x, scale, cb)
 	}
 
 	*advance = x
@@ -208,7 +210,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 		fixed266ToFloat32(out.LineBounds.Ascent)
 }
 
-func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, x float32, cb func(shaping.Output, float32)) float32 {
+func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, x, scale float32, cb func(shaping.Output, float32)) float32 {
 	out = shaper.Shape(in)
 	glyphs := out.Glyphs
 	start := 0
@@ -219,13 +221,13 @@ func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, 
 			if pending {
 				out.Glyphs = glyphs[start:i]
 				cb(out, x)
-				x += fixed266ToFloat32(adv)
+				x += fixed266ToFloat32(adv) * scale
 				adv = 0
 			}
 
 			out.Glyphs = glyphs[i : i+1]
 			cb(out, x)
-			x += fixed266ToFloat32(glyphs[i].XAdvance)
+			x += fixed266ToFloat32(glyphs[i].XAdvance) * scale
 			adv = 0
 
 			start = i + 1
@@ -239,10 +241,10 @@ func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, 
 	if pending {
 		out.Glyphs = glyphs[start:]
 		cb(out, x)
-		x += fixed266ToFloat32(adv)
+		x += fixed266ToFloat32(adv) * scale
 		adv = 0
 	}
-	return x + fixed266ToFloat32(adv)
+	return x + fixed266ToFloat32(adv)*scale
 }
 
 type FontCacheItem struct {

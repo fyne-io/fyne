@@ -119,7 +119,38 @@ func TestFormDialog_Hints(t *testing.T) {
 	assert.Equal(t, formDialogCancel, result, "Expected cancel result")
 }
 
-func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
+func TestFormDialog_Submit(t *testing.T) {
+	validatingEntry := widget.NewEntry()
+	validatingEntry.Validator = func(input string) error {
+		if input != "abc" {
+			return errors.New("only accepts 'abc'")
+		}
+		return nil
+	}
+	validatingItem := &widget.FormItem{Widget: validatingEntry}
+
+	confirmed := false
+
+	items := []*widget.FormItem{validatingItem}
+	form := NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
+		confirmed = confirm
+	}, test.NewWindow(nil))
+
+	form.Show()
+	validatingEntry.SetText("cba")
+
+	form.Submit()
+	assert.Equal(t, false, confirmed)
+	assert.Equal(t, false, form.win.Hidden)
+
+	validatingEntry.SetText("abc")
+
+	form.Submit()
+	assert.Equal(t, true, confirmed)
+	assert.Equal(t, true, form.win.Hidden)
+}
+
+func validatingFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	validatingEntry := widget.NewEntry()
 	validatingEntry.Validator = func(input string) error {
 		if input != "abc" {
@@ -144,10 +175,10 @@ func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDia
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent).(*formDialog)
+	}, parent)
 }
 
-func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
+func controlFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	controlEntry := widget.NewEntry()
 	controlItem := &widget.FormItem{
 		Text:   "I accept anything",
@@ -165,10 +196,10 @@ func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent).(*formDialog)
+	}, parent)
 }
 
-func hintsFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
+func hintsFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	validatingEntry := widget.NewEntry()
 	validatingEntry.Validator = func(input string) error {
 		if input != "abc" {
@@ -189,5 +220,5 @@ func hintsFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent).(*formDialog)
+	}, parent)
 }

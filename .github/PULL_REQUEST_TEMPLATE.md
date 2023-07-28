@@ -20,5 +20,4 @@ Fixes #(issue)
 
 - [ ] Public APIs match existing style and have Since: line.
 - [ ] Any breaking changes have a deprecation path or have been discussed.
-- [ ] Updated the vendor folder (using `go mod vendor`).
 - [ ] Check for binary size increases when importing new modules.

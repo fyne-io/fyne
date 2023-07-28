@@ -21,6 +21,7 @@ func TestEntry_Binding(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("Init")
 	assert.Equal(t, "Init", entry.Text)
+	waitForBinding() // this time it is the de-echo before binding
 
 	str := binding.NewString()
 	entry.Bind(str)
@@ -1771,6 +1772,8 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
+	test.AssertRendersToMarkup(t, "password_entry/initial.xml", window.Canvas())
+
 	entry.SetPlaceHolder("Password")
 	test.AssertRendersToMarkup(t, "password_entry/placeholder_initial.xml", c)
 
@@ -1861,6 +1864,26 @@ func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
 	entry.SetText("test")
 
 	checkNewlineIgnored(t, entry)
+}
+
+func TestSingleLineEntry_SelectionSubmitted(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("abc")
+	assert.Equal(t, "", entry.SelectedText())
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+	assert.Equal(t, "abc", entry.SelectedText())
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	assert.Equal(t, entry.Text, "abc")
+}
+
+func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("abc")
+	assert.Equal(t, "", entry.SelectedText())
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+	assert.Equal(t, "abc", entry.SelectedText())
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	assert.Equal(t, entry.Text, "\n")
 }
 
 func TestEntry_CarriageReturn(t *testing.T) {
@@ -1965,8 +1988,6 @@ func setupPasswordTest(t *testing.T) (*widget.Entry, fyne.Window) {
 
 	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
 	entry.Move(fyne.NewPos(entryOffset, entryOffset))
-
-	test.AssertRendersToMarkup(t, "password_entry/initial.xml", w.Canvas())
 
 	return entry, w
 }

@@ -88,6 +88,11 @@ const (
 	// Since: 2.0
 	ColorNameHover fyne.ThemeColorName = "hover"
 
+	// ColorNameHyperlink is the name of theme lookup for hyperlink color.
+	//
+	// Since: 2.4
+	ColorNameHyperlink fyne.ThemeColorName = "hyperlink"
+
 	// ColorNameInputBackground is the name of theme lookup for background color of an input field.
 	//
 	// Since: 2.0
@@ -257,6 +262,14 @@ func DarkTheme() fyne.Theme {
 	return theme
 }
 
+// DefaultEmojiFont returns the font resource for the built-in emoji font.
+// This may return nil if the application was packaged without an emoji font.
+//
+// Since: 2.4
+func DefaultEmojiFont() fyne.Resource {
+	return emoji
+}
+
 // DefaultTextBoldFont returns the font resource for the built-in bold font style.
 func DefaultTextBoldFont() fyne.Resource {
 	return bold
@@ -348,6 +361,11 @@ func HeaderBackgroundColor() color.Color {
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
 func HoverColor() color.Color {
 	return safeColorLookup(ColorNameHover, currentVariant())
+}
+
+// HyperlinkColor returns the color used for the Hyperlink widget and hyperlink text elements.
+func HyperlinkColor() color.Color {
+	return safeColorLookup(ColorNameHyperlink, currentVariant())
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
@@ -619,7 +637,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	}
 
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
-	if n == ColorNamePrimary {
+	if n == ColorNamePrimary || n == ColorNameHyperlink {
 		return primaryColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
@@ -664,13 +682,13 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameLineSpacing:
 		return 4
 	case SizeNamePadding:
-		return 6
+		return 4
 	case SizeNameScrollBar:
 		return 16
 	case SizeNameScrollBarSmall:
 		return 3
 	case SizeNameText:
-		return 13
+		return 14
 	case SizeNameHeadingText:
 		return 24
 	case SizeNameSubHeadingText:
@@ -687,11 +705,16 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 }
 
 func current() fyne.Theme {
-	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
+	app := fyne.CurrentApp()
+	if app == nil {
+		return DarkTheme()
+	}
+	currentTheme := app.Settings().Theme()
+	if currentTheme == nil {
 		return DarkTheme()
 	}
 
-	return fyne.CurrentApp().Settings().Theme()
+	return currentTheme
 }
 
 func currentVariant() fyne.ThemeVariant {
@@ -805,7 +828,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameScrollBar:
 		return color.NRGBA{A: 0x99}
 	case ColorNameSeparator:
-		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	case ColorNameShadow:
 		return color.NRGBA{A: 0x33}
 	case ColorNameSuccess:

@@ -15,7 +15,7 @@ func main() {
 	w.SetContent(container.NewVBox(
 		hello,
 		widget.NewButton("Hi!", func() {
-			hello.SetText("Welcome :)")
+			hello.SetText("Welcome 😀")
 		}),
 	))
 

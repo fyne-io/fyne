@@ -22,6 +22,11 @@ const (
 	// TextTruncate trims the text to the widget's width, no wrapping is applied.
 	// If an entry is asked to truncate it will provide scrolling capabilities.
 	TextTruncate
+	// TextTruncateEllipsis is like regular truncation except that an ellipses (…) will be inserted
+	// wherever text has been shortened to fit.
+	//
+	// Since: 2.4
+	TextTruncateEllipsis
 	// TextWrapBreak trims the line of characters to the widget's width adding the excess as new line.
 	// An Entry with text wrapping will scroll vertically if there is not enough space for all the text.
 	TextWrapBreak

@@ -7,12 +7,25 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// formDialog is a simple dialog window for displaying FormItems inside a form.
-type formDialog struct {
+// FormDialog is a simple dialog window for displaying FormItems inside a form.
+//
+// Since: 2.4
+type FormDialog struct {
 	*dialog
 	items   []*widget.FormItem
 	confirm *widget.Button
 	cancel  *widget.Button
+}
+
+// Submit will submit the form and then hide the dialog if validation passes.
+//
+// Since: 2.4
+func (d *FormDialog) Submit() {
+	if d.confirm.Disabled() {
+		return
+	}
+
+	d.hideWithResponse(true)
 }
 
 // validateItems acts as a validation edge state handler that will respond to an individual widget's validation
@@ -20,7 +33,7 @@ type formDialog struct {
 // confirm button will be disabled. If the error parameter is nil, then all other Validatable widgets in items are
 // checked as well to determine whether the confirm button should be disabled.
 // This method is passed to each Validatable widget's SetOnValidationChanged method in items by NewFormDialog.
-func (d *formDialog) validateItems(err error) {
+func (d *FormDialog) validateItems(err error) {
 	if err != nil {
 		d.confirm.Disable()
 		return
@@ -44,7 +57,7 @@ func (d *formDialog) validateItems(err error) {
 // validation state of the items added to the form dialog.
 //
 // Since: 2.0
-func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool), parent fyne.Window) Dialog {
+func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool), parent fyne.Window) *FormDialog {
 	form := widget.NewForm(items...)
 
 	d := &dialog{content: form, callback: callback, title: title, parent: parent}
@@ -54,7 +67,7 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 	confirmBtn := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() { d.hideWithResponse(true) },
 	}
-	formDialog := &formDialog{
+	formDialog := &FormDialog{
 		dialog:  d,
 		items:   items,
 		confirm: confirmBtn,

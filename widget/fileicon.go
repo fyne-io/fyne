@@ -140,8 +140,7 @@ type fileIconRenderer struct {
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
-	size := theme.IconInlineSize()
-	return fyne.NewSize(size, size)
+	return fyne.NewSquareSize(theme.IconInlineSize())
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {

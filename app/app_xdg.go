@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"github.com/godbus/dbus/v5"
+	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -27,7 +28,7 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("xdg-open", url.String())
+	cmd := execabs.Command("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }

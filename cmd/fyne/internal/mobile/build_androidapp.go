@@ -13,7 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -48,7 +48,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	dir := filepath.Dir(pkg.GoFiles[0])
 
 	manifestPath := filepath.Join(dir, "AndroidManifest.xml")
-	manifestData, err := ioutil.ReadFile(filepath.Clean(manifestPath))
+	manifestData, err := os.ReadFile(filepath.Clean(manifestPath))
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
@@ -190,7 +190,7 @@ func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target i
 		if err != nil {
 			return err
 		}
-		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
+		err = filepath.WalkDir(assetsDir, func(path string, info fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -314,7 +314,7 @@ func apkwCreate(name string, apkw *Writer) (io.Writer, error) {
 		fmt.Fprintf(os.Stderr, "apk: %s\n", name)
 	}
 	if buildN {
-		return ioutil.Discard, nil
+		return io.Discard, nil
 	}
 	return apkw.Create(name)
 }
