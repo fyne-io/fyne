@@ -814,12 +814,17 @@ func (n *treeNode) MouseOut() {
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
+	//if n.tree.currentFocus != "" {
+	//	n.tree.RefreshItem(n.tree.currentFocus)
+	//}
+
 	n.tree.Select(n.uid)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(n.tree)
 	if canvas != nil {
 		canvas.Focus(n.tree)
 	}
 	n.tree.currentFocus = n.uid
+	n.tree.Refresh() // TODO n.Refresh()
 }
 
 func (n *treeNode) partialRefresh() {
