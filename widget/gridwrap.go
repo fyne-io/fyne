@@ -285,6 +285,7 @@ func (gw *gridWrapItem) CreateRenderer() fyne.WidgetRenderer {
 	gw.ExtendBaseWidget(gw)
 
 	gw.background = canvas.NewRectangle(theme.HoverColor())
+	gw.background.CornerRadius = theme.SelectionRadiusSize()
 	gw.background.Hide()
 
 	objects := []fyne.CanvasObject{gw.background, gw.child}
@@ -376,6 +377,7 @@ func (gw *gridWrapItemRenderer) Layout(size fyne.Size) {
 }
 
 func (gw *gridWrapItemRenderer) Refresh() {
+	gw.item.background.CornerRadius = theme.SelectionRadiusSize()
 	if gw.item.selected {
 		gw.item.background.FillColor = theme.SelectionColor()
 		gw.item.background.Show()

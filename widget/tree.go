@@ -687,6 +687,7 @@ func (n *treeNode) Content() fyne.CanvasObject {
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
@@ -791,6 +792,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Refresh()
 	}
+	r.background.CornerRadius = theme.SelectionRadiusSize()
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
 		r.background.FillColor = theme.SelectionColor()
 		r.background.Show()

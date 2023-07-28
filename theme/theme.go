@@ -220,8 +220,13 @@ const (
 
 	// SizeNameInputRadius is the name of theme lookup for input corner radius.
 	//
-	// Since: 2.0
+	// Since: 2.4
 	SizeNameInputRadius fyne.ThemeSizeName = "inputRadius"
+
+	// SizeNameSelectionRadius is the name of theme lookup for selection corner radius.
+	//
+	// Since: 2.4
+	SizeNameSelectionRadius fyne.ThemeSizeName = "selectionRadius"
 
 	// VariantDark is the version of a theme that satisfies a user preference for a light look.
 	//
@@ -495,6 +500,13 @@ func SelectionColor() color.Color {
 	return safeColorLookup(ColorNameSelection, currentVariant())
 }
 
+// SelectionRadiusSize returns the selection highlight radius size.
+//
+// Since: 2.4
+func SelectionRadiusSize() float32 {
+	return current().Size(SizeNameSelectionRadius)
+}
+
 // SeparatorColor returns the color for the separator element.
 //
 // Since: 2.3
@@ -699,6 +711,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 1
 	case SizeNameInputRadius:
 		return 5
+	case SizeNameSelectionRadius:
+		return 3
 	default:
 		return 0
 	}
