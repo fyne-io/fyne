@@ -730,7 +730,7 @@ func currentVariant() fyne.ThemeVariant {
 func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
-		return color.NRGBA{R: 0x14, G: 0x14, B: 0x15, A: 0xff}
+		return color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
 	case ColorNameButton:
 		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNameDisabled:
