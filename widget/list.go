@@ -16,8 +16,9 @@ import (
 // ListItemID uniquely identifies an item within a list.
 type ListItemID = int
 
-// Declare conformity with Widget interface.
+// Declare conformity with interfaces.
 var _ fyne.Widget = (*List)(nil)
+var _ fyne.Focusable = (*List)(nil)
 
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
@@ -33,6 +34,8 @@ type List struct {
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
 
+	currentFocus  ListItemID
+	focused       bool
 	scroller      *widget.Scroll
 	selected      []ListItemID
 	itemMin       fyne.Size
@@ -86,6 +89,23 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	return newListRenderer(objects, l, l.scroller, layout)
 }
 
+// FocusGained is called after this List has gained focus.
+//
+// Implements: fyne.Focusable
+func (l *List) FocusGained() {
+	l.focused = true
+	l.scrollTo(l.currentFocus)
+	l.RefreshItem(l.currentFocus)
+}
+
+// FocusLost is called after this List has lost focus.
+//
+// Implements: fyne.Focusable
+func (l *List) FocusLost() {
+	l.focused = false
+	l.RefreshItem(l.currentFocus)
+}
+
 // MinSize returns the size that this widget should not shrink below.
 func (l *List) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
@@ -103,13 +123,8 @@ func (l *List) RefreshItem(id ListItemID) {
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
 	visible := lo.visible
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(lo.list)
-	var focused fyne.Focusable
-	if canvas != nil {
-		focused = canvas.Focused()
-	}
 	if item, ok := visible[id]; ok {
-		lo.setupListItem(item, id, focused == item)
+		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
 	}
 }
 
@@ -237,6 +252,39 @@ func (l *List) ScrollToBottom() {
 func (l *List) ScrollToTop() {
 	l.scrollTo(0)
 	l.Refresh()
+}
+
+// TypedKey is called if a key event happens while this List is focused.
+//
+// Implements: fyne.Focusable
+func (l *List) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace:
+		l.Select(l.currentFocus)
+	case fyne.KeyDown:
+		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
+			return
+		}
+		l.RefreshItem(l.currentFocus)
+		l.currentFocus++
+		l.scrollTo(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
+	case fyne.KeyUp:
+		if l.currentFocus <= 0 {
+			return
+		}
+		l.RefreshItem(l.currentFocus)
+		l.currentFocus--
+		l.scrollTo(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
+	}
+}
+
+// TypedRune is called if a text event happens while this List is focused.
+//
+// Implements: fyne.Focusable
+func (l *List) TypedRune(_ rune) {
+	// intentionally left blank
 }
 
 // Unselect removes the item identified by the given ID from the selection.
@@ -369,7 +417,6 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Focusable = (*listItem)(nil)
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
@@ -405,22 +452,6 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
 
-// FocusGained is called after this listItem has gained focus.
-//
-// Implements: fyne.Focusable
-func (li *listItem) FocusGained() {
-	li.hovered = true
-	li.Refresh()
-}
-
-// FocusLost is called after this listItem has lost focus.
-//
-// Implements: fyne.Focusable
-func (li *listItem) FocusLost() {
-	li.hovered = false
-	li.Refresh()
-}
-
 // MinSize returns the size that this widget should not shrink below.
 func (li *listItem) MinSize() fyne.Size {
 	li.ExtendBaseWidget(li)
@@ -450,27 +481,6 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.Refresh()
 		li.onTapped()
 	}
-}
-
-// TypedKey is called if a key event happens while this listItem is focused.
-//
-// Implements: fyne.Focusable
-func (li *listItem) TypedKey(event *fyne.KeyEvent) {
-	switch event.Name {
-	case fyne.KeySpace:
-		li.selected = true
-		li.Refresh()
-		if li.onTapped != nil {
-			li.onTapped()
-		}
-	}
-}
-
-// TypedRune is called if a text event happens while this listItem is focused.
-//
-// Implements: fyne.Focusable
-func (li *listItem) TypedRune(_ rune) {
-	// intentionally left blank
 }
 
 // Declare conformity with the WidgetRenderer interface.
@@ -599,6 +609,12 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		f(id, li.child)
 	}
 	li.onTapped = func() {
+		canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+		if canvas != nil {
+			canvas.Focus(l.list)
+		}
+
+		l.list.currentFocus = id
 		l.list.Select(id)
 	}
 }
@@ -652,16 +668,8 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	l.visible = visible
 
-	var focused fyne.Focusable
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
-	if canvas != nil {
-		focused = canvas.Focused()
-	}
 	for id, old := range wasVisible {
 		if _, ok := l.visible[id]; !ok {
-			if focused == old {
-				canvas.Focus(nil)
-			}
 			l.itemPool.Release(old)
 		}
 	}
@@ -677,12 +685,12 @@ func (l *listLayout) updateList(newOnly bool) {
 	if newOnly {
 		for row, obj := range visible {
 			if _, ok := wasVisible[row]; !ok {
-				l.setupListItem(obj, row, focused == obj)
+				l.setupListItem(obj, row, l.list.focused && l.list.currentFocus == row)
 			}
 		}
 	} else {
 		for row, obj := range visible {
-			l.setupListItem(obj, row, focused == obj)
+			l.setupListItem(obj, row, l.list.focused && l.list.currentFocus == row)
 		}
 	}
 }

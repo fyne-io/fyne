@@ -536,7 +536,20 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	}
 
 	if wid, ok := co.(fyne.Focusable); !ok || wid != w.canvas.Focused() {
-		w.canvas.Unfocus()
+		ignore := false
+		_, _, _ = w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+			switch object.(type) {
+			case fyne.Focusable:
+				ignore = true
+				return true
+			}
+
+			return false
+		})
+
+		if !ignore { // if a parent item under the mouse has focus then ignore this tap unfocus
+			w.canvas.Unfocus()
+		}
 	}
 
 	w.mouseLock.Lock()
