@@ -66,6 +66,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 static int main_running = 0;
 
+// ensure we refresh context on resume in case something has changed...
+void processOnResume(ANativeActivity *activity) {
+	JNIEnv* env = activity->env;
+	setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
+
+    onResume(activity);
+}
+
 // Entry point from our subclassed NativeActivity.
 //
 // By here, the Go runtime has been initialized (as we are running in
@@ -119,7 +127,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 	// Note that onNativeWindowResized is not called on resize. Avoid it.
 	// https://code.google.com/p/android/issues/detail?id=180645
 	activity->callbacks->onStart = onStart;
-	activity->callbacks->onResume = onResume;
+	activity->callbacks->onResume = processOnResume;
 	activity->callbacks->onSaveInstanceState = onSaveInstanceState;
 	activity->callbacks->onPause = onPause;
 	activity->callbacks->onStop = onStop;
