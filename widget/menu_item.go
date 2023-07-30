@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -240,11 +241,12 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	}
 
 	rightOffset -= theme.InnerPadding()
+	textHeight := r.text.MinSize().Height
 	for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
 		text := r.shortcutTexts[i]
 		text.Resize(text.MinSize())
 		rightOffset -= text.MinSize().Width
-		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()))
+		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()+(textHeight-text.Size().Height)))
 
 		if i == 0 {
 			rightOffset -= theme.InnerPadding()
@@ -261,7 +263,7 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		leftOffset += theme.InnerPadding()
 	}
 
-	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
+	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, textHeight))
 	r.text.Move(fyne.NewPos(leftOffset, theme.InnerPadding()))
 
 	r.background.Resize(size)
@@ -301,9 +303,9 @@ func (r *menuItemRenderer) Refresh() {
 	}
 	r.background.Refresh()
 	r.text.Alignment = r.i.alignment
-	r.refreshText(r.text)
+	r.refreshText(r.text, false)
 	for _, text := range r.shortcutTexts {
-		r.refreshText(text)
+		r.refreshText(text, true)
 	}
 
 	if r.i.Item.Checked {
@@ -343,14 +345,24 @@ func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
 	img.Refresh()
 }
 
-func (r *menuItemRenderer) refreshText(text *canvas.Text) {
+func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
 	text.TextSize = theme.TextSize()
 	if r.i.Item.Disabled {
 		text.Color = theme.DisabledColor()
 	} else {
-		text.Color = theme.ForegroundColor()
+		if shortcut {
+			text.Color = shortcutColor()
+		} else {
+			text.Color = theme.ForegroundColor()
+		}
 	}
 	text.Refresh()
+}
+
+func shortcutColor() color.Color {
+	r, g, b, a := theme.ForegroundColor().RGBA()
+	a = uint32(float32(a) * 0.95)
+	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
 func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
@@ -372,11 +384,14 @@ func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	if r != 0 {
 		b.WriteRune(r)
 	}
-	t := canvas.NewText(b.String(), theme.ForegroundColor())
+	shortColor := shortcutColor()
+	t := canvas.NewText(b.String(), shortColor)
 	t.TextStyle.Symbol = true
 	texts = append(texts, t)
 	if r == 0 {
-		texts = append(texts, canvas.NewText(string(s.Key()), theme.ForegroundColor()))
+		text := canvas.NewText(string(s.Key()), shortColor)
+		text.TextStyle.Monospace = true
+		texts = append(texts, text)
 	}
 	return
 }
