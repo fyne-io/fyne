@@ -107,7 +107,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		text:          text,
 		background:    background,
 	}
-	r.Refresh() // ensure text and icon resources match state
+	r.updateVisuals()
 	return r
 }
 
@@ -292,7 +292,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 	return r.minSize
 }
 
-func (r *menuItemRenderer) Refresh() {
+func (r *menuItemRenderer) updateVisuals() {
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {
@@ -313,9 +313,13 @@ func (r *menuItemRenderer) Refresh() {
 	} else {
 		r.checkIcon.Hide()
 	}
-	r.refreshIcon(r.checkIcon, theme.ConfirmIcon())
-	r.refreshIcon(r.expandIcon, theme.MenuExpandIcon())
-	r.refreshIcon(r.icon, r.i.Item.Icon)
+	r.updateIcon(r.checkIcon, theme.ConfirmIcon())
+	r.updateIcon(r.expandIcon, theme.MenuExpandIcon())
+	r.updateIcon(r.icon, r.i.Item.Icon)
+}
+
+func (r *menuItemRenderer) Refresh() {
+	r.updateVisuals()
 	canvas.Refresh(r.i)
 }
 
@@ -333,7 +337,7 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 		r.lastThemePadding == theme.InnerPadding()
 }
 
-func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
+func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
 	if img == nil {
 		return
 	}
@@ -342,7 +346,6 @@ func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
 	} else {
 		img.Resource = rsc
 	}
-	img.Refresh()
 }
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
