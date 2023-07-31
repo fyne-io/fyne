@@ -21,6 +21,44 @@ func collectionScreen(_ fyne.Window) fyne.CanvasObject {
 	return container.NewCenter(content)
 }
 
+func makeGridWrapTab(_ fyne.Window) fyne.CanvasObject {
+	data := make([]string, 1000)
+	for i := range data {
+		data[i] = "Test Item " + strconv.Itoa(i)
+	}
+
+	icon := widget.NewIcon(nil)
+	label := widget.NewLabel("Select An Item From The List")
+	vbox := container.NewVBox(icon, label)
+
+	grid := widget.NewGridWrap(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			text := widget.NewLabel("Template Object")
+			text.Alignment = fyne.TextAlignCenter
+			return container.NewVBox(container.NewPadded(widget.NewIcon(theme.DocumentIcon())), text)
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
+		},
+	)
+	grid.OnSelected = func(id widget.ListItemID) {
+		label.SetText(data[id])
+		icon.SetResource(theme.DocumentIcon())
+	}
+	grid.OnUnselected = func(id widget.ListItemID) {
+		label.SetText("Select An Item From The List")
+		icon.SetResource(nil)
+	}
+	grid.Select(15)
+
+	split := container.NewHSplit(grid, container.NewCenter(vbox))
+	split.Offset = 0.6
+	return split
+}
+
 func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	data := make([]string, 1000)
 	for i := range data {

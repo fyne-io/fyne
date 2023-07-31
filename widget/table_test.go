@@ -105,6 +105,47 @@ func TestTable_Filled(t *testing.T) {
 	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
 }
 
+func TestTable_Focus(t *testing.T) {
+	defer test.NewApp()
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.Black)
+			r.SetMinSize(fyne.NewSize(30, 20))
+			r.Resize(fyne.NewSize(30, 20))
+			return r
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	window := test.NewWindow(table)
+	defer window.Close()
+	window.Resize(table.MinSize().Max(fyne.NewSize(300, 200)))
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	assert.Nil(t, canvas.Focused())
+
+	canvas.FocusNext()
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, table, canvas.Focused())
+	assert.Equal(t, TableCellID{0, 0}, table.currentFocus)
+
+	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	assert.Equal(t, TableCellID{1, 0}, table.currentFocus)
+
+	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, TableCellID{1, 1}, table.currentFocus)
+
+	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, TableCellID{1, 0}, table.currentFocus)
+
+	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+	assert.Equal(t, TableCellID{0, 0}, table.currentFocus)
+
+	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
+}
+
 func TestTable_Headers(t *testing.T) {
 	table := NewTableWithHeaders(
 		func() (int, int) { return 5, 5 },
@@ -581,6 +622,7 @@ func TestTable_Selection(t *testing.T) {
 		selectedRow = id.Row
 	}
 	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 58))
+	w.Canvas().Unfocus() // don't include table focus in test
 	assert.Equal(t, 0, table.selectedCell.Col)
 	assert.Equal(t, 1, table.selectedCell.Row)
 	assert.Equal(t, 0, selectedCol)
