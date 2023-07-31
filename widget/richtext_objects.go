@@ -461,6 +461,7 @@ type richImage struct {
 	align      fyne.TextAlign
 	img        *canvas.Image
 	oldMin     fyne.Size
+	layout     *fyne.Container
 	pad1, pad2 fyne.CanvasObject
 }
 
@@ -474,10 +475,15 @@ func newRichImage(u fyne.URI, align fyne.TextAlign) *richImage {
 
 func (r *richImage) CreateRenderer() fyne.WidgetRenderer {
 	r.pad1 = layout.NewSpacer()
+	if r.align == fyne.TextAlignLeading {
+		r.pad1.Hide()
+	}
 	r.pad2 = layout.NewSpacer()
-	c := &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{r.pad1, r.img, r.pad2}}
-	r.setAlign(r.align)
-	return NewSimpleRenderer(c)
+	if r.align == fyne.TextAlignTrailing {
+		r.pad2.Hide()
+	}
+	r.layout = &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{r.pad1, r.img, r.pad2}}
+	return NewSimpleRenderer(r.layout)
 }
 
 func (r *richImage) MinSize() fyne.Size {
@@ -495,11 +501,19 @@ func (r *richImage) MinSize() fyne.Size {
 }
 
 func (r *richImage) setAlign(a fyne.TextAlign) {
-	if a == fyne.TextAlignLeading && r.pad1 != nil {
-		r.pad1.Hide()
-	}
-	if a == fyne.TextAlignTrailing && r.pad2 != nil {
-		r.pad2.Hide()
+	if r.layout != nil {
+		switch a {
+		case fyne.TextAlignLeading:
+			r.pad1.Hide()
+			r.pad2.Show()
+		case fyne.TextAlignTrailing:
+			r.pad1.Show()
+			r.pad2.Hide()
+		default:
+			r.pad1.Show()
+			r.pad2.Show()
+		}
+		r.layout.Refresh()
 	}
 	r.align = a
 }
