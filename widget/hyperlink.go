@@ -172,7 +172,7 @@ func (hl *Hyperlink) TypedRune(rune) {
 // TypedKey is a hook called by the input handling logic on key events if this object is focused.
 func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 	if ev.Name == fyne.KeySpace {
-		hl.openURL()
+		hl.Tapped(nil)
 	}
 }
 
