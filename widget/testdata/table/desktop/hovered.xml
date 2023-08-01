@@ -15,7 +15,7 @@
 			</widget>
 			<widget size="172x172" type="*widget.clip">
 				<container size="0x0">
-					<rectangle fillColor="hover" pos="0,39" size="93x35"/>
+					<rectangle fillColor="hover" pos="0,39" radius="4" size="93x35"/>
 					<widget pos="95,0" size="1x172" type="*widget.Separator">
 						<rectangle fillColor="disabled" size="1x172"/>
 					</widget>

@@ -64,6 +64,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameCaptionText:        float32(11),
 				theme.SizeNameInputBorder:        float32(2),
 				theme.SizeNameInputRadius:        float32(4),
+				theme.SizeNameSelectionRadius:    float32(4),
 			},
 		}
 	}

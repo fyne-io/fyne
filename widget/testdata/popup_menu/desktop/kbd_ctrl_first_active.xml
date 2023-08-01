@@ -20,7 +20,7 @@
 						<rectangle fillColor="menuBackground" size="94x74"/>
 						<container size="94x74">
 							<widget size="94x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="94x35"/>
+								<rectangle fillColor="focus" radius="4" size="94x35"/>
 								<text pos="8,8" size="78x19">Option A</text>
 							</widget>
 							<widget pos="0,39" size="94x35" type="*widget.menuItem">
