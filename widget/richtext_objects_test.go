@@ -4,11 +4,33 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 )
+
+func TestRichText_Image(t *testing.T) {
+	img := &ImageSegment{Title: "test", Source: storage.NewFileURI("./testdata/richtext/richtext_multiline.png")}
+	text := NewRichText(img)
+	texts := test.WidgetRenderer(text).Objects()
+	drawn := texts[0].(*richImage).img
+
+	text.Resize(fyne.NewSize(200, 200))
+	assert.Equal(t, float32(0), drawn.Position().X)
+
+	img.Alignment = fyne.TextAlignCenter
+	text.Refresh()
+	assert.Less(t, float32(0), drawn.Position().X)
+	assert.Less(t, drawn.Position().X, text.Size().Width/2)
+
+	img.Alignment = fyne.TextAlignTrailing
+	text.Refresh()
+	assert.Greater(t, float32(200), drawn.Position().X)
+	assert.Greater(t, drawn.Position().X, text.Size().Width/2)
+}
 
 func TestRichText_HyperLink(t *testing.T) {
 	text := NewRichText(&ParagraphSegment{Texts: []RichTextSegment{

@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -166,6 +167,10 @@ func (h *HyperlinkSegment) Unselect() {
 type ImageSegment struct {
 	Source fyne.URI
 	Title  string
+
+	// Alignment specifies the horizontal alignment of this image segment
+	// Since: 2.4
+	Alignment fyne.TextAlign
 }
 
 // Inline returns false as images in rich text are blocks.
@@ -180,7 +185,7 @@ func (i *ImageSegment) Textual() string {
 
 // Visual returns the image widget required to render this segment.
 func (i *ImageSegment) Visual() fyne.CanvasObject {
-	return newRichImage(i.Source)
+	return newRichImage(i.Source, i.Alignment)
 }
 
 // Update applies the current state of this image segment to an existing visual.
@@ -191,6 +196,7 @@ func (i *ImageSegment) Update(o fyne.CanvasObject) {
 	// one of the following will be used
 	img.img.File = newer.File
 	img.img.Resource = newer.Resource
+	img.setAlign(i.Alignment)
 
 	img.Refresh()
 }
@@ -452,20 +458,32 @@ func (t *TextSegment) size() float32 {
 
 type richImage struct {
 	BaseWidget
-	img    *canvas.Image
-	oldMin fyne.Size
+	align      fyne.TextAlign
+	img        *canvas.Image
+	oldMin     fyne.Size
+	layout     *fyne.Container
+	pad1, pad2 fyne.CanvasObject
 }
 
-func newRichImage(u fyne.URI) *richImage {
+func newRichImage(u fyne.URI, align fyne.TextAlign) *richImage {
 	img := canvas.NewImageFromURI(u)
 	img.FillMode = canvas.ImageFillOriginal
-	i := &richImage{img: img}
+	i := &richImage{img: img, align: align}
 	i.ExtendBaseWidget(i)
 	return i
 }
 
 func (r *richImage) CreateRenderer() fyne.WidgetRenderer {
-	return NewSimpleRenderer(r.img)
+	r.pad1 = layout.NewSpacer()
+	if r.align == fyne.TextAlignLeading {
+		r.pad1.Hide()
+	}
+	r.pad2 = layout.NewSpacer()
+	if r.align == fyne.TextAlignTrailing {
+		r.pad2.Hide()
+	}
+	r.layout = &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{r.pad1, r.img, r.pad2}}
+	return NewSimpleRenderer(r.layout)
 }
 
 func (r *richImage) MinSize() fyne.Size {
@@ -480,6 +498,24 @@ func (r *richImage) MinSize() fyne.Size {
 	h := scale.ToScreenCoordinate(c, orig.Height)
 	// we return size / 2 as this assumes a HiDPI / 2x image scaling
 	return fyne.NewSize(float32(w)/2, float32(h)/2)
+}
+
+func (r *richImage) setAlign(a fyne.TextAlign) {
+	if r.layout != nil {
+		switch a {
+		case fyne.TextAlignLeading:
+			r.pad1.Hide()
+			r.pad2.Show()
+		case fyne.TextAlignTrailing:
+			r.pad1.Show()
+			r.pad2.Hide()
+		default:
+			r.pad1.Show()
+			r.pad2.Show()
+		}
+		r.layout.Refresh()
+	}
+	r.align = a
 }
 
 type unpadTextWidgetLayout struct {
