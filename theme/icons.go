@@ -585,7 +585,20 @@ type ThemedResource struct {
 	ColorName fyne.ThemeColorName
 }
 
+// NewColoredResource creates a resource that adapts to the current theme setting using
+// the color named in the constructor.
+//
+// Since: 2.4
+func NewColoredResource(src fyne.Resource, name fyne.ThemeColorName) *ThemedResource {
+	return &ThemedResource{
+		source:    src,
+		ColorName: name,
+	}
+}
+
 // NewSuccessThemedResource creates a resource that adapts to the current theme success color.
+//
+// Since: 2.4
 func NewSuccessThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source:    src,
@@ -602,6 +615,8 @@ func NewThemedResource(src fyne.Resource) *ThemedResource {
 }
 
 // NewWarningThemedResource creates a resource that adapts to the current theme warning color.
+//
+// Since: 2.4
 func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source:    src,

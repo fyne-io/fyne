@@ -60,6 +60,18 @@ func TestNewThemedResource_StaticResourceSupport(t *testing.T) {
 	assert.Equal(t, name, custom.Name())
 }
 
+func TestNewColoredResource(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewColoredResource(source, ColorNameSuccess)
+
+	assert.Equal(t, ColorNameSuccess, custom.ColorName)
+	assert.Equal(t, custom.Name(), fmt.Sprintf("success_%v", source.Name()))
+
+	custom = NewColoredResource(source, ColorNamePrimary)
+	assert.Equal(t, custom.Name(), fmt.Sprintf("primary_%v", source.Name()))
+}
+
 func TestNewDisabledResource(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	source := helperNewStaticResource()
