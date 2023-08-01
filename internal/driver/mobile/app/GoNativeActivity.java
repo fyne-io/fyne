@@ -43,6 +43,7 @@ public class GoNativeActivity extends NativeActivity {
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
+    private native void backPressed();
     private native void setDarkMode(boolean dark);
 
 	private EditText mTextEdit;
@@ -311,6 +312,21 @@ public class GoNativeActivity extends NativeActivity {
 
         Uri uri = data.getData();
         filePickerReturned(uri.toString());
+    }
+
+    @Override
+    public void onBackPressed() {
+        // skip the default behaviour - we can call finishActivity if we want to go back
+        backPressed();
+    }
+
+    public void finishActivity() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                GoNativeActivity.super.onBackPressed();
+            }
+        });
     }
 
     @Override

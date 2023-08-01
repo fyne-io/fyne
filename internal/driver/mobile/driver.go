@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
@@ -125,6 +126,10 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 		}
 	}
 	return pos.Subtract(inset)
+}
+
+func (d *mobileDriver) GoBack() {
+	app.GoBack()
 }
 
 func (d *mobileDriver) Quit() {
@@ -458,6 +463,8 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeBackslash:          fyne.KeyBackslash,
 	key.CodeRightSquareBracket: fyne.KeyRightBracket,
 	key.CodeGraveAccent:        fyne.KeyBackTick,
+
+	key.CodeBackButton: mobile.KeyBack,
 }
 
 func keyToName(code key.Code) fyne.KeyName {
@@ -508,8 +515,12 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 			canvas.Focused().TypedRune(r)
 		}
 	} else {
-		if keyName != "" && canvas.onTypedKey != nil {
-			canvas.onTypedKey(keyEvent)
+		if keyName != "" {
+			if canvas.onTypedKey != nil {
+				canvas.onTypedKey(keyEvent)
+			} else if keyName == mobile.KeyBack {
+				d.GoBack()
+			}
 		}
 		if r > 0 && canvas.onTypedRune != nil {
 			canvas.onTypedRune(r)

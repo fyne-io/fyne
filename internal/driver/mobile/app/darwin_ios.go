@@ -82,6 +82,10 @@ var DisplayMetrics struct {
 	HeightPx int
 }
 
+func GoBack() {
+	// Apple do not permit apps to exit in any way other than user pressing home button / gesture
+}
+
 //export setDisplayMetrics
 func setDisplayMetrics(width, height int, scale int) {
 	DisplayMetrics.WidthPx = width

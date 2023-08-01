@@ -53,6 +53,7 @@ static jmethodID show_keyboard_method;
 static jmethodID hide_keyboard_method;
 static jmethodID show_file_open_method;
 static jmethodID show_file_save_method;
+static jmethodID finish_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
@@ -64,6 +65,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 }
 
 static int main_running = 0;
+
+// ensure we refresh context on resume in case something has changed...
+void processOnResume(ANativeActivity *activity) {
+	JNIEnv* env = activity->env;
+	setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
+
+    onResume(activity);
+}
 
 // Entry point from our subclassed NativeActivity.
 //
@@ -85,6 +94,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
+		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -117,7 +127,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 	// Note that onNativeWindowResized is not called on resize. Avoid it.
 	// https://code.google.com/p/android/issues/detail?id=180645
 	activity->callbacks->onStart = onStart;
-	activity->callbacks->onResume = onResume;
+	activity->callbacks->onResume = processOnResume;
 	activity->callbacks->onSaveInstanceState = onSaveInstanceState;
 	activity->callbacks->onPause = onPause;
 	activity->callbacks->onStop = onStop;
@@ -204,6 +214,13 @@ char* destroyEGLSurface() {
 	return NULL;
 }
 
+void finish(JNIEnv* env, jobject ctx) {
+    (*env)->CallVoidMethod(
+        env,
+        ctx,
+        finish_method);
+}
+
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e) {
 	return (int32_t)(*env)->CallStaticIntMethod(
 		env,
@@ -270,6 +287,10 @@ void Java_org_golang_app_GoNativeActivity_keyboardTyped(JNIEnv *env, jclass claz
 
 void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass clazz) {
     keyboardDelete();
+}
+
+void Java_org_golang_app_GoNativeActivity_backPressed(JNIEnv *env, jclass clazz) {
+    onBackPressed();
 }
 
 void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz, jboolean dark) {
