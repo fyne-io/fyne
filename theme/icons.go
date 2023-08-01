@@ -891,7 +891,7 @@ func ErrorIcon() fyne.Resource {
 	return safeIconLookup(IconNameError)
 }
 
-// BrokenImageIconreturns a resource containing an icon to specify a broken or missing image
+// BrokenImageIcon returns a resource containing an icon to specify a broken or missing image
 //
 // Since: 2.4
 func BrokenImageIcon() fyne.Resource {

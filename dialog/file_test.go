@@ -585,9 +585,9 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(folderDialogPopup)
 	assert.NotNil(t, folderDialogPopup)
 
-	folderDialogUi := folderDialogPopup.Content.(*fyne.Container)
+	folderDialogUI := folderDialogPopup.Content.(*fyne.Container)
 
-	createNewFolderButton := folderDialogUi.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	createNewFolderButton := folderDialogUI.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
 	assert.Equal(t, theme.FolderNewIcon(), createNewFolderButton.Icon)
 

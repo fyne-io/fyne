@@ -44,7 +44,7 @@ var (
 	// WebGLDebugJs is the content of https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/b42e702487d02d5278814e0fe2e2888d234893e6/src/debug/webgl-debug.js
 	WebGLDebugJs = resourceWebglDebugJs.StaticContent
 
-	// SpinnerLigth is a spinning gif of Fyne logo with a light background
+	// SpinnerLight is a spinning gif of Fyne logo with a light background
 	SpinnerLight = resourceSpinnerlightGif.StaticContent
 
 	// CSSLight is a CSS that define color for element on the web splash screen following the light theme
