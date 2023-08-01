@@ -585,10 +585,27 @@ type ThemedResource struct {
 	ColorName fyne.ThemeColorName
 }
 
+// NewSuccessThemedResource creates a resource that adapts to the current theme success color.
+func NewSuccessThemedResource(src fyne.Resource) *ThemedResource {
+	return &ThemedResource{
+		source:    src,
+		ColorName: ColorNameSuccess,
+	}
+}
+
 // NewThemedResource creates a resource that adapts to the current theme setting.
+// By default this will match the foreground color, but it can be changed using the `ColorName` field.
 func NewThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: src,
+	}
+}
+
+// NewWarningThemedResource creates a resource that adapts to the current theme warning color.
+func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
+	return &ThemedResource{
+		source:    src,
+		ColorName: ColorNameWarning,
 	}
 }
 
@@ -661,7 +678,7 @@ func NewErrorThemedResource(orig fyne.Resource) *ErrorThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ErrorThemedResource) Name() string {
-	return "error-" + res.source.Name()
+	return "error_" + res.source.Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
