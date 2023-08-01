@@ -72,6 +72,10 @@ void processOnResume(ANativeActivity *activity) {
 	setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 }
 
+void onStart(ANativeActivity *activity) {}
+void onPause(ANativeActivity *activity) {}
+void onStop(ANativeActivity *activity) {}
+
 // Entry point from our subclassed NativeActivity.
 //
 // By here, the Go runtime has been initialized (as we are running in
