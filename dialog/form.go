@@ -32,7 +32,7 @@ func (d *FormDialog) Submit() {
 // state before checking all others to determine the net validation state. If the error passed is not nil, then the
 // confirm button will be disabled. If the error parameter is nil, then all other Validatable widgets in items are
 // checked as well to determine whether the confirm button should be disabled.
-// This method is passed to each Validatable widget's SetOnValidationChanged method in items by NewFormDialog.
+// This method is passed to each Validatable widget's SetOnValidationChanged method in items by NewForm.
 func (d *FormDialog) validateItems(err error) {
 	if err != nil {
 		d.confirm.Disable()
