@@ -1483,6 +1483,22 @@ func TestEntry_SetTextStyle(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/set_text_style_italic.xml", c)
 }
 
+func TestEntry_Append(t *testing.T) {
+	entry := widget.NewEntry()
+
+	entry.Append("abc")
+	assert.Equal(t, entry.Text, "abc")
+	entry.Append(" def")
+	assert.Equal(t, entry.Text, "abc def")
+
+	entry.SetText("")
+	entry.MultiLine = true
+
+	entry.Append("first line")
+	entry.Append("\nsecond line")
+	assert.Equal(t, entry.Text, "first line\nsecond line")
+}
+
 func TestEntry_Submit(t *testing.T) {
 	t.Run("Callback", func(t *testing.T) {
 		var submission string

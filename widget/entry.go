@@ -474,6 +474,19 @@ func (e *Entry) SetText(text string) {
 	e.updateCursorAndSelection()
 }
 
+// Appends the text to the end of the entry
+//
+// Since: 2.4
+func (e *Entry) Append(text string) {
+	e.propertyLock.Lock()
+	provider := e.textProvider()
+	provider.insertAt(provider.len(), text)
+	e.updateText(provider.String())
+	e.propertyLock.Unlock()
+
+	e.Refresh()
+}
+
 // Tapped is called when this entry has been tapped. We update the cursor position in
 // device-specific callbacks (MouseDown() and TouchDown()).
 //
