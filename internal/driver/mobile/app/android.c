@@ -70,8 +70,6 @@ static int main_running = 0;
 void processOnResume(ANativeActivity *activity) {
 	JNIEnv* env = activity->env;
 	setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
-
-    onResume(activity);
 }
 
 // Entry point from our subclassed NativeActivity.
