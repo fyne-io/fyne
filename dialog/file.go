@@ -34,6 +34,12 @@ type favoriteItem struct {
 	loc     fyne.URI
 }
 
+type fileDialogPanel interface{
+	fyne.Widget
+
+	Unselect(int)
+}
+
 type fileDialog struct {
 	file             *FileDialog
 	fileName         textWidget
@@ -41,7 +47,7 @@ type fileDialog struct {
 	open             *widget.Button
 	breadcrumb       *fyne.Container
 	breadcrumbScroll *container.Scroll
-	files            fyne.Widget
+	files            fileDialogPanel
 	filesScroll      *container.Scroll
 	favorites        []favoriteItem
 	favoritesList    *widget.List
@@ -369,7 +375,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 
 func (f *fileDialog) setLocation(dir fyne.URI) error {
 	if f.selectedID > -1 {
-		f.files.(interface{ Unselect(int) }).Unselect(f.selectedID)
+		f.files.Unselect(f.selectedID)
 	}
 	if dir == nil {
 		return fmt.Errorf("failed to open nil directory")
@@ -479,32 +485,24 @@ func (f *fileDialog) setView(view viewLayout) {
 	template := func() fyne.CanvasObject {
 		return f.newFileItem(storage.NewFileURI("./tempfile"), true, false)
 	}
+	update := func(id widget.GridWrapItemID, o fyne.CanvasObject) {
+		dir := f.data[id]
+		parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
+		_, isDir := dir.(fyne.ListableURI)
+		o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
+	}
+	choose := func(id int) {
+		f.selectedID = id
+		f.setSelected(f.data[id], id)
+	}
 	if f.view == gridView {
-		f.files = widget.NewGridWrap(count, template,
-			func(id widget.GridWrapItemID, o fyne.CanvasObject) {
-				dir := f.data[id]
-				parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
-				_, isDir := dir.(fyne.ListableURI)
-				o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
-			},
-		)
-		f.files.(*widget.GridWrap).OnSelected = func(id widget.GridWrapItemID) {
-			f.selectedID = id
-			f.setSelected(f.data[id], id)
-		}
+		grid := widget.NewGridWrap(count, template, update)
+		grid.OnSelected = choose
+		f.files = grid
 	} else {
-		f.files = widget.NewList(count, template,
-			func(id widget.ListItemID, o fyne.CanvasObject) {
-				dir := f.data[id]
-				parent := id == 0 && dir != f.dir
-				_, isDir := dir.(fyne.ListableURI)
-				o.(*fileDialogItem).setLocation(dir, isDir, parent)
-			},
-		)
-		f.files.(*widget.List).OnSelected = func(id widget.ListItemID) {
-			f.selectedID = id
-			f.setSelected(f.data[id], id)
-		}
+		list := widget.NewList(count, template, update)
+		list.OnSelected = choose
+		f.files = list
 	}
 	if f.dir != nil {
 		f.refreshDir(f.dir)

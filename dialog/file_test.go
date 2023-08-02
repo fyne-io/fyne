@@ -352,7 +352,7 @@ func TestShowFileSave(t *testing.T) {
 		return
 	}
 
-	abs, err := filepath.Abs("./testdata/")
+	abs, _ := filepath.Abs("./testdata/")
 	dir, _ := storage.ListerForURI(storage.NewFileURI(abs))
 	saver.SetLocation(dir)
 	saver.dialog.files.(*widget.GridWrap).Select(id)

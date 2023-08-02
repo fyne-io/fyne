@@ -37,10 +37,6 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func (i *fileDialogItem) isDirectory() bool {
-	return i.dir
-}
-
 func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
 	i.dir = dir
 	i.location = l
