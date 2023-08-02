@@ -34,7 +34,7 @@ type favoriteItem struct {
 	loc     fyne.URI
 }
 
-type fileDialogPanel interface{
+type fileDialogPanel interface {
 	fyne.Widget
 
 	Unselect(int)
