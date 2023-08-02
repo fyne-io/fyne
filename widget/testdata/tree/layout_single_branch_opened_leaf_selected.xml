@@ -15,7 +15,7 @@
 						<rectangle fillColor="disabled" size="192x1"/>
 					</widget>
 					<widget pos="0,39" size="192x35" type="*widget.leaf">
-						<rectangle fillColor="selection" size="192x35"/>
+						<rectangle fillColor="selection" radius="4" size="192x35"/>
 						<widget pos="52,0" size="140x35" type="*widget.Label">
 							<text pos="8,8" size="40x19">11111</text>
 						</widget>

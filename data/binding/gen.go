@@ -604,6 +604,272 @@ func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 }
 `
 
+const treeBindTemplate = `
+// {{ .Name }}Tree supports binding a tree of {{ .Type }} values.
+//
+// Since: 2.4
+type {{ .Name }}Tree interface {
+	DataTree
+
+	Append(parent, id string, value {{ .Type }}) error
+	Get() (map[string][]string, map[string]{{ .Type }}, error)
+	GetValue(id string) ({{ .Type }}, error)
+	Prepend(parent, id string, value {{ .Type }}) error
+	Set(ids map[string][]string, values map[string]{{ .Type }}) error
+	SetValue(id string, value {{ .Type }}) error
+}
+
+// External{{ .Name }}Tree supports binding a tree of {{ .Type }} values from an external variable.
+//
+// Since: 2.4
+type External{{ .Name }}Tree interface {
+	{{ .Name }}Tree
+
+	Reload() error
+}
+
+// New{{ .Name }}Tree returns a bindable tree of {{ .Type }} values.
+//
+// Since: 2.4
+func New{{ .Name }}Tree() {{ .Name }}Tree {
+	t := &bound{{ .Name }}Tree{val: &map[string]{{ .Type }}{}}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+	return t
+}
+
+// Bind{{ .Name }}Tree returns a bound tree of {{ .Type }} values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
+func Bind{{ .Name }}Tree(ids *map[string][]string, v *map[string]{{ .Type }}) External{{ .Name }}Tree {
+	if v == nil {
+		return New{{ .Name }}Tree().(External{{ .Name }}Tree)
+	}
+
+	t := &bound{{ .Name }}Tree{val: v, updateExternal: true}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+
+	for parent, children := range *ids {
+		for _, leaf := range children {
+			t.appendItem(bind{{ .Name }}TreeItem(v, leaf, t.updateExternal), leaf, parent)
+		}
+	}
+
+	return t
+}
+
+type bound{{ .Name }}Tree struct {
+	treeBase
+
+	updateExternal bool
+	val            *map[string]{{ .Type }}
+}
+
+func (t *bound{{ .Name }}Tree) Append(parent, id string, val {{ .Type }}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append(ids, id)
+	v := *t.val
+	v[id] = val
+
+	return t.doReload()
+}
+
+func (t *bound{{ .Name }}Tree) Get() (map[string][]string, map[string]{{ .Type }}, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	return t.ids, *t.val, nil
+}
+
+func (t *bound{{ .Name }}Tree) GetValue(id string) ({{ .Type }}, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	if item, ok := (*t.val)[id]; ok {
+		return item, nil
+	}
+
+	return {{ .Default }}, errOutOfBounds
+}
+
+func (t *bound{{ .Name }}Tree) Prepend(parent, id string, val {{ .Type }}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append([]string{id}, ids...)
+	v := *t.val
+	v[id] = val
+
+	return t.doReload()
+}
+
+func (t *bound{{ .Name }}Tree) Reload() error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.doReload()
+}
+
+func (t *bound{{ .Name }}Tree) Set(ids map[string][]string, v map[string]{{ .Type }}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	t.ids = ids
+	*t.val = v
+
+	return t.doReload()
+}
+
+func (t *bound{{ .Name }}Tree) doReload() (retErr error) {
+	updated := []string{}
+	fire := false
+	for id := range *t.val {
+		found := false
+		for child := range t.items {
+			if child == id { // update existing
+				updated = append(updated, id)
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+
+		// append new
+		t.appendItem(bind{{ .Name }}TreeItem(t.val, id, t.updateExternal), id, parentIDFor(id, t.ids))
+		updated = append(updated, id)
+		fire = true
+	}
+
+	for id := range t.items {
+		remove := true
+		for _, done := range updated {
+			if done == id {
+				remove = false
+				break
+			}
+		}
+
+		if remove { // remove item no longer present
+			fire = true
+			t.deleteItem(id, parentIDFor(id, t.ids))
+		}
+	}
+	if fire {
+		t.trigger()
+	}
+
+	for id, item := range t.items {
+		var err error
+		if t.updateExternal {
+			item.(*boundExternal{{ .Name }}TreeItem).lock.Lock()
+			err = item.(*boundExternal{{ .Name }}TreeItem).setIfChanged((*t.val)[id])
+			item.(*boundExternal{{ .Name }}TreeItem).lock.Unlock()
+		} else {
+			item.(*bound{{ .Name }}TreeItem).lock.Lock()
+			err = item.(*bound{{ .Name }}TreeItem).doSet((*t.val)[id])
+			item.(*bound{{ .Name }}TreeItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (t *bound{{ .Name }}Tree) SetValue(id string, v {{ .Type }}) error {
+	t.lock.Lock()
+	(*t.val)[id] = v
+	t.lock.Unlock()
+
+	item, err := t.GetItem(id)
+	if err != nil {
+		return err
+	}
+	return item.({{ .Name }}).Set(v)
+}
+
+func bind{{ .Name }}TreeItem(v *map[string]{{ .Type }}, id string, external bool) {{ .Name }} {
+	if external {
+		ret := &boundExternal{{ .Name }}TreeItem{old: (*v)[id]}
+		ret.val = v
+		ret.id = id
+		return ret
+	}
+
+	return &bound{{ .Name }}TreeItem{id: id, val: v}
+}
+
+type bound{{ .Name }}TreeItem struct {
+	base
+
+	val *map[string]{{ .Type }}
+	id  string
+}
+
+func (t *bound{{ .Name }}TreeItem) Get() ({{ .Type }}, error) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	v := *t.val
+	if item, ok := v[t.id]; ok {
+		return item, nil
+	}
+
+	return {{ .Default }}, errOutOfBounds
+}
+
+func (t *bound{{ .Name }}TreeItem) Set(val {{ .Type }}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.doSet(val)
+}
+
+func (t *bound{{ .Name }}TreeItem) doSet(val {{ .Type }}) error {
+	(*t.val)[t.id] = val
+
+	t.trigger()
+	return nil
+}
+
+type boundExternal{{ .Name }}TreeItem struct {
+	bound{{ .Name }}TreeItem
+
+	old {{ .Type }}
+}
+
+func (t *boundExternal{{ .Name }}TreeItem) setIfChanged(val {{ .Type }}) error {
+	{{- if eq .Comparator "" }}
+	if val == t.old {
+		return nil
+	}
+	{{- else }}
+	if {{ .Comparator }}(val, t.old) {
+		return nil
+	}
+	{{- end }}
+	(*t.val)[t.id] = val
+	t.old = val
+
+	t.trigger()
+	return nil
+}
+`
+
 type bindValues struct {
 	Name, Type, Default  string
 	Format, Since        string
@@ -689,11 +955,25 @@ import (
 )
 `)
 
+	treeFile, err := newFile("bindtrees")
+	if err != nil {
+		return
+	}
+	defer treeFile.Close()
+	treeFile.WriteString(`
+import (
+	"bytes"
+
+	"fyne.io/fyne/v2"
+)
+`)
+
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	list := template.Must(template.New("list").Parse(listBindTemplate))
+	tree := template.Must(template.New("tree").Parse(treeBindTemplate))
 	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		bindValues{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
@@ -711,6 +991,11 @@ import (
 		}
 
 		writeFile(listFile, list, b)
+		if b.Name == "Untyped" {
+			continue // interface{} is special, we have it in binding.go instead
+		}
+
+		writeFile(treeFile, tree, b)
 		if b.Name == "Untyped" {
 			continue // interface{} is special, we have it in binding.go instead
 		}

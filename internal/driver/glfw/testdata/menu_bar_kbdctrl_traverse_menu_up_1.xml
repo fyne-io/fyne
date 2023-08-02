@@ -20,7 +20,7 @@
 				<rectangle fillColor="background" size="300x27"/>
 				<container pos="8,0" size="284x27">
 					<widget size="38x27" type="*glfw.menuBarItem">
-						<rectangle fillColor="focus" size="38x27"/>
+						<rectangle fillColor="focus" radius="4" size="38x27"/>
 						<text pos="8,4" size="22x19">File</text>
 					</widget>
 					<widget pos="42,0" size="41x27" type="*glfw.menuBarItem">
@@ -49,7 +49,7 @@
 									<text pos="8,8" size="64x19">New</text>
 								</widget>
 								<widget pos="0,39" size="80x35" type="*widget.menuItem">
-									<rectangle fillColor="focus" size="80x35"/>
+									<rectangle fillColor="focus" radius="4" size="80x35"/>
 									<text pos="8,8" size="64x19">Open</text>
 								</widget>
 								<widget pos="0,78" size="80x35" type="*widget.menuItem">

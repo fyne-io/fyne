@@ -70,6 +70,7 @@ func (i *menuItem) Child() *Menu {
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
 	text.Alignment = i.alignment
@@ -293,6 +294,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuItemRenderer) updateVisuals() {
+	r.background.CornerRadius = theme.SelectionRadiusSize()
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {

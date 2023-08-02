@@ -23,7 +23,7 @@
 						<rectangle fillColor="disabled" size="199x1"/>
 					</widget>
 					<widget pos="0,78" size="199x35" type="*widget.branch">
-						<rectangle fillColor="selection" size="199x35"/>
+						<rectangle fillColor="selection" radius="4" size="199x35"/>
 						<widget pos="28,0" size="171x35" type="*widget.Label">
 							<text pos="8,8" size="9x19">B</text>
 						</widget>

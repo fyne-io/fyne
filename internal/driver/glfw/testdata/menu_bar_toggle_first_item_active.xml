@@ -17,7 +17,7 @@
 				<rectangle fillColor="background" size="300x27"/>
 				<container pos="8,0" size="284x27">
 					<widget size="38x27" type="*glfw.menuBarItem">
-						<rectangle fillColor="focus" size="38x27"/>
+						<rectangle fillColor="focus" radius="4" size="38x27"/>
 						<text pos="8,4" size="22x19">File</text>
 					</widget>
 					<widget pos="42,0" size="41x27" type="*glfw.menuBarItem">
