@@ -45,6 +45,7 @@ func Clean(canvasRefreshed bool) {
 		return
 	}
 	destroyExpiredSvgs(now)
+	destroyExpiredFontMetrics(now)
 	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
 		destroyExpiredRenderers(now)
