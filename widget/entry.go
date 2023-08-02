@@ -481,9 +481,13 @@ func (e *Entry) Append(text string) {
 	e.propertyLock.Lock()
 	provider := e.textProvider()
 	provider.insertAt(provider.len(), text)
-	e.updateText(provider.String())
+	changed := e.updateText(provider.String())
 	e.propertyLock.Unlock()
 
+	e.Validate()
+	if changed && e.OnChanged != nil {
+		e.OnChanged(provider.String())
+	}
 	e.Refresh()
 }
 
@@ -658,11 +662,15 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	e.propertyLock.Lock()
-	e.updateText(provider.String())
+	changed := e.updateText(provider.String())
 	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
+	e.Validate()
+	if changed && e.OnChanged != nil {
+		e.OnChanged(provider.String())
+	}
 	e.Refresh()
 }
 
@@ -836,7 +844,12 @@ func (e *Entry) eraseSelection() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
-	e.updateText(provider.String())
+	changed := e.updateText(provider.String())
+
+	e.Validate()
+	if changed && e.OnChanged != nil {
+		e.OnChanged(provider.String())
+	}
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
