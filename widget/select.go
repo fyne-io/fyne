@@ -252,6 +252,10 @@ func (s *Select) showPopUp() {
 	s.popUp.alignment = s.Alignment
 	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+	s.popUp.OnDismiss = func() {
+		s.popUp.Hide()
+		s.popUp = nil
+	}
 }
 
 func (s *Select) tapAnimation() {
