@@ -11,7 +11,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -466,12 +465,11 @@ func TestView(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
-
-	listLayout := layout.NewVBoxLayout()
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a grid
-	assert.NotEqual(t, listLayout, files.Layout)
+	_, isGrid := panel.(*widget.GridWrap)
+	assert.True(t, isGrid)
 	// toggleViewButton should reflect to what it will do (change to a list view).
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
@@ -479,10 +477,11 @@ func TestView(t *testing.T) {
 	// toggle view
 	test.Tap(toggleViewButton)
 	// reload files container
-	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a list
-	assert.Equal(t, listLayout, files.Layout)
+	_, isList := panel.(*widget.List)
+	assert.True(t, isList)
 	// toggleViewButton should reflect to what it will do (change to a grid view).
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
@@ -490,10 +489,11 @@ func TestView(t *testing.T) {
 	// toggle view
 	test.Tap(toggleViewButton)
 	// reload files container
-	files = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a grid again
-	assert.NotEqual(t, listLayout, files.Layout)
+	_, isGrid = panel.(*widget.GridWrap)
+	assert.True(t, isGrid)
 	// toggleViewButton should reflect to what it will do (change to a list view).
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
