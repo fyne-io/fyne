@@ -62,8 +62,6 @@ func TestEffectiveStartingDir(t *testing.T) {
 	}
 
 	parent, err := storage.ListerForURI(parentURI)
-	t.Log(parentURI)
-	t.Log(parent)
 	if err != nil {
 		t.Skipf("Could not get lister for parent of working directory: %s", err)
 	}
@@ -215,21 +213,26 @@ func TestShowFileOpen(t *testing.T) {
 		}
 	}
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Greater(t, len(files.Objects), 0)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	assert.Greater(t, len(objects), 0)
 
-	fileName := files.Objects[0].(*fileDialogItem).name
+	fileName := test.WidgetRenderer(objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, open.Disabled())
 
 	var target *fileDialogItem
-	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).dir == false {
-			target = icon.(*fileDialogItem)
+	id := 0
+	for i, icon := range objects {
+		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		if item.dir == false {
+			target = item
+			id = i
+			break
 		}
 	}
 	assert.NotNil(t, target, "Failed to find file in testdata")
-	test.Tap(target)
+	d.dialog.files.(*widget.GridWrap).Select(id)
 	assert.Equal(t, target.location.Name(), nameLabel.Text)
 	assert.False(t, open.Disabled())
 
@@ -279,13 +282,15 @@ func TestHiddenFiles(t *testing.T) {
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Greater(t, len(files.Objects), 0)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	assert.Greater(t, len(objects), 0)
 
 	var target *fileDialogItem
-	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).name == ".hidden" {
-			target = icon.(*fileDialogItem)
+	for _, icon := range objects {
+		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		if item.name == ".hidden" {
+			target = item
 		}
 	}
 	assert.Nil(t, target, "Failed, .hidden found in testdata")
@@ -293,9 +298,10 @@ func TestHiddenFiles(t *testing.T) {
 	d.dialog.showHidden = true
 	d.dialog.refreshDir(d.dialog.dir)
 
-	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).name == ".hidden" {
-			target = icon.(*fileDialogItem)
+	for _, icon := range objects {
+		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		if item.name == ".hidden" {
+			target = item
 		}
 	}
 	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
@@ -305,10 +311,11 @@ func TestShowFileSave(t *testing.T) {
 	var chosen fyne.URIWriteCloser
 	var saveErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileSave(func(file fyne.URIWriteCloser, err error) {
+	saver := NewFileSave(func(file fyne.URIWriteCloser, err error) {
 		chosen = file
 		saveErr = err
 	}, win)
+	saver.Show()
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
@@ -322,17 +329,22 @@ func TestShowFileSave(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	save := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Greater(t, len(files.Objects), 0)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	assert.Greater(t, len(objects), 0)
 
-	fileName := files.Objects[0].(*fileDialogItem).name
-	assert.Equal(t, "(Parent)", fileName)
+	item := test.WidgetRenderer(objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
+	assert.Equal(t, "(Parent)", item.name)
 	assert.True(t, save.Disabled())
 
 	var target *fileDialogItem
-	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).dir == false {
-			target = icon.(*fileDialogItem)
+	id := -1
+	for i, icon := range objects {
+		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		if item.dir == false {
+			target = item
+			id = i
+			break
 		}
 	}
 
@@ -341,9 +353,10 @@ func TestShowFileSave(t *testing.T) {
 		return
 	}
 
-	// This will only execute if we have a file in the home path.
-	// Until we have a way to set the directory of an open file dialog.
-	test.Tap(target)
+	abs, err := filepath.Abs("./testdata/")
+	dir, _ := storage.ListerForURI(storage.NewFileURI(abs))
+	saver.SetLocation(dir)
+	saver.dialog.files.(*widget.GridWrap).Select(id)
 	assert.Equal(t, target.location.Name(), nameEntry.Text)
 	assert.False(t, save.Disabled())
 
@@ -394,9 +407,9 @@ func TestFileFilters(t *testing.T) {
 	f.dialog.setLocation(testDataLister)
 
 	count := 0
-	for _, icon := range f.dialog.files.Objects {
-		if icon.(*fileDialogItem).dir == false {
-			uri := icon.(*fileDialogItem).location
+	for _, uri := range f.dialog.data {
+		ok, _ := storage.CanList(uri)
+		if !ok {
 			assert.Equal(t, uri.Extension(), ".png")
 			count++
 		}
@@ -408,9 +421,9 @@ func TestFileFilters(t *testing.T) {
 	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/jpeg"}))
 
 	count = 0
-	for _, icon := range f.dialog.files.Objects {
-		if icon.(*fileDialogItem).dir == false {
-			uri := icon.(*fileDialogItem).location
+	for _, uri := range f.dialog.data {
+		ok, _ := storage.CanList(uri)
+		if !ok {
 			assert.Equal(t, uri.MimeType(), "image/jpeg")
 			count++
 		}
@@ -422,9 +435,9 @@ func TestFileFilters(t *testing.T) {
 	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/*"}))
 
 	count = 0
-	for _, icon := range f.dialog.files.Objects {
-		if icon.(*fileDialogItem).dir == false {
-			uri := icon.(*fileDialogItem).location
+	for _, uri := range f.dialog.data {
+		ok, _ := storage.CanList(uri)
+		if !ok {
 			mimeType := strings.Split(uri.MimeType(), "/")[0]
 			assert.Equal(t, mimeType, "image")
 			count++

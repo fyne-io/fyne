@@ -4,8 +4,6 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -19,47 +17,23 @@ const (
 
 type fileDialogItem struct {
 	widget.BaseWidget
-	picker    *fileDialog
-	isCurrent bool
+	picker *fileDialog
 
 	name     string
 	location fyne.URI
 	dir      bool
-
-	hovered bool
-}
-
-func (i *fileDialogItem) MouseIn(*desktop.MouseEvent) {
-	i.hovered = true
-	i.Refresh()
-}
-
-func (i *fileDialogItem) MouseMoved(*desktop.MouseEvent) {
-}
-
-func (i *fileDialogItem) MouseOut() {
-	i.hovered = false
-	i.Refresh()
-}
-
-func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
-	i.picker.setSelected(i)
-	i.Refresh()
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(nil)
-	background.CornerRadius = theme.InputRadiusSize()
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
 	icon := widget.NewFileIcon(i.location)
 
 	return &fileItemRenderer{
-		item:       i,
-		background: background,
-		icon:       icon,
-		text:       text,
-		objects:    []fyne.CanvasObject{background, icon, text},
+		item:    i,
+		icon:    icon,
+		text:    text,
+		objects: []fyne.CanvasObject{icon, text},
 	}
 }
 
@@ -67,7 +41,24 @@ func (i *fileDialogItem) isDirectory() bool {
 	return i.dir
 }
 
-func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
+func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
+	i.dir = dir
+	i.location = l
+	i.name = l.Name()
+
+	if i.picker.view == gridView {
+		ext := filepath.Ext(i.name[1:])
+		i.name = i.name[:len(i.name)-len(ext)]
+	}
+
+	if up {
+		i.name = "(Parent)"
+	}
+
+	i.Refresh()
+}
+
+func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogItem {
 	item := &fileDialogItem{
 		picker:   f,
 		location: location,
@@ -80,6 +71,10 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
 		item.name = item.name[:len(item.name)-len(ext)]
 	}
 
+	if up {
+		item.name = "(Parent)"
+	}
+
 	item.ExtendBaseWidget(item)
 	return item
 }
@@ -87,15 +82,12 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
 type fileItemRenderer struct {
 	item *fileDialogItem
 
-	background *canvas.Rectangle
-	icon       *widget.FileIcon
-	text       *widget.Label
-	objects    []fyne.CanvasObject
+	icon    *widget.FileIcon
+	text    *widget.Label
+	objects []fyne.CanvasObject
 }
 
 func (s fileItemRenderer) Layout(size fyne.Size) {
-	s.background.Resize(size)
-
 	if s.item.picker.view == gridView {
 		s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
@@ -127,18 +119,8 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 }
 
 func (s fileItemRenderer) Refresh() {
-	if s.item.isCurrent {
-		s.background.FillColor = theme.SelectionColor()
-	} else if s.item.hovered {
-		s.background.FillColor = theme.HoverColor()
-	} else {
-		s.background.FillColor = nil
-	}
-
-	s.background.CornerRadius = theme.InputRadiusSize()
-
-	s.background.Refresh()
-	canvas.Refresh(s.item)
+	s.text.SetText(s.item.name)
+	s.icon.SetURI(s.item.location)
 }
 
 func (s fileItemRenderer) Objects() []fyne.CanvasObject {
