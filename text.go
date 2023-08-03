@@ -20,7 +20,10 @@ const (
 type TextTruncation int
 
 const (
+	// TextTruncateOff means no truncation will be applied, it is the default.
+	// This means that the minimum size of a text block will be the space required to display it fully.
 	TextTruncateOff TextTruncation = iota
+	// TextTruncateClip will truncate text when it reaches the end of the available space.
 	TextTruncateClip
 	// TextTruncateEllipsis is like regular truncation except that an ellipses (…) will be inserted
 	// wherever text has been shortened to fit.
