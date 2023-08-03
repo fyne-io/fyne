@@ -28,9 +28,10 @@ const (
 // Since: 2.1
 type RichText struct {
 	BaseWidget
-	Segments []RichTextSegment
-	Wrapping fyne.TextWrap
-	Scroll   widget.ScrollDirection
+	Segments   []RichTextSegment
+	Wrapping   fyne.TextWrap
+	Scroll     widget.ScrollDirection
+	Truncation fyne.TextTruncation
 
 	inset     fyne.Size     // this varies due to how the widget works (entry with scroller vs others with padding)
 	rowBounds []rowBoundary // cache for boundaries
@@ -397,7 +398,7 @@ func (t *RichText) updateRowBounds() {
 			if textSeg.Style == RichTextStyleBlockquote {
 				leftPad = innerPadding * 2
 			}
-			retBounds := lineBounds(textSeg, t.Wrapping, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
+			retBounds := lineBounds(textSeg, t.Wrapping, t.Truncation, wrapWidth-leftPad, maxWidth, func(text []rune) float32 {
 				return fyne.MeasureText(string(text), textSize, textStyle).Width
 			})
 			if currentBound != nil {
@@ -830,8 +831,13 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 
 // lineBounds accepts a slice of Segments, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
-func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
+func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth, maxWidth float32, measurer func([]rune) float32) []rowBoundary {
 	lines := splitLines(seg)
+
+	if trunc != fyne.TextTruncateOff {
+		wrap = fyne.TextTruncate
+	}
+
 	if maxWidth < 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
@@ -855,14 +861,16 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, firstWidth, maxWidth float
 		}
 		switch wrap {
 		case fyne.TextTruncate:
-			high = binarySearch(checker, low, high)
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
-			reuse++
-		case fyne.TextTruncateEllipsis:
-			end, full := truncateLimit(seg.Text, seg.Visual().(*canvas.Text), int(firstWidth), []rune{'…'})
-			high = end
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
-			reuse++
+			if trunc == fyne.TextTruncateEllipsis {
+				end, full := truncateLimit(seg.Text, seg.Visual().(*canvas.Text), int(firstWidth), []rune{'…'})
+				high = end
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
+				reuse++
+			} else {
+				high = binarySearch(checker, low, high)
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
+				reuse++
+			}
 		case fyne.TextWrapBreak:
 			for low < high {
 				if measurer(text[low:high]) <= measureWidth {
