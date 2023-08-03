@@ -2,6 +2,7 @@ package widget_test
 
 import (
 	"image/color"
+	"runtime"
 	"testing"
 	"time"
 
@@ -163,8 +164,13 @@ func TestEntry_Control_Word(t *testing.T) {
 	entry.CursorRow = 0
 	entry.CursorColumn = 0
 
+	moveWordModifier := fyne.KeyModifierShortcutDefault
+	if runtime.GOOS == "darwin" {
+		moveWordModifier = fyne.KeyModifierAlt
+	}
+
 	// ctrl-right to move on
-	nextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault}
+	nextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier}
 	entry.TypedShortcut(nextWord)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
@@ -176,7 +182,7 @@ func TestEntry_Control_Word(t *testing.T) {
 	assert.Equal(t, 2, entry.CursorColumn)
 
 	// ctrl-left to move back
-	prevWord := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault}
+	prevWord := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: moveWordModifier}
 	entry.TypedShortcut(prevWord)
 	assert.Equal(t, 1, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
@@ -188,7 +194,7 @@ func TestEntry_Control_Word(t *testing.T) {
 	entry.SetText("word1 word2 word3")
 	entry.CursorRow = 0
 	entry.CursorColumn = 3
-	selectNextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
+	selectNextWord := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier | fyne.KeyModifierShift}
 	entry.TypedShortcut(selectNextWord)
 	assert.Equal(t, "d1", entry.SelectedText())
 	entry.TypedShortcut(selectNextWord)
