@@ -481,12 +481,13 @@ func (e *Entry) Append(text string) {
 	e.propertyLock.Lock()
 	provider := e.textProvider()
 	provider.insertAt(provider.len(), text)
-	changed := e.updateText(provider.String())
+	content := provider.String()
+	changed := e.updateText(content)
 	e.propertyLock.Unlock()
 
 	e.Validate()
 	if changed && e.OnChanged != nil {
-		e.OnChanged(provider.String())
+		e.OnChanged(content)
 	}
 	e.Refresh()
 }
@@ -662,14 +663,15 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	e.propertyLock.Lock()
-	changed := e.updateText(provider.String())
+	content := provider.String()
+	changed := e.updateText(content)
 	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
 	e.Validate()
 	if changed && e.OnChanged != nil {
-		e.OnChanged(provider.String())
+		e.OnChanged(content)
 	}
 	e.Refresh()
 }
@@ -844,11 +846,12 @@ func (e *Entry) eraseSelection() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
-	changed := e.updateText(provider.String())
+	content := provider.String()
+	changed := e.updateText(content)
 
 	e.Validate()
 	if changed && e.OnChanged != nil {
-		e.OnChanged(provider.String())
+		e.OnChanged(content)
 	}
 }
 
