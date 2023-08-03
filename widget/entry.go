@@ -970,6 +970,7 @@ func (e *Entry) registerShortcut() {
 
 		// Cmd+left, Cmd+right shortcuts behave like Home and End keys on Mac OS
 		shortcutHomeEnd := func(s fyne.Shortcut) {
+			e.selecting = false
 			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
 				e.typedKeyHome()
 			} else {
