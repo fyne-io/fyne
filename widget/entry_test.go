@@ -744,7 +744,7 @@ func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_HomeEnd(t *testing.T) {
-	entry := &widget.Entry{}
+	entry := widget.NewEntry()
 	entry.SetText("Hi")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
@@ -758,6 +758,18 @@ func TestEntry_OnKeyDown_HomeEnd(t *testing.T) {
 	entry.TypedKey(home)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
+
+	if runtime.GOOS == "darwin" {
+		endShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierSuper}
+		entry.TypedShortcut(endShortcut)
+		assert.Equal(t, 0, entry.CursorRow)
+		assert.Equal(t, 2, entry.CursorColumn)
+
+		homeShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierSuper}
+		entry.TypedShortcut(homeShortcut)
+		assert.Equal(t, 0, entry.CursorRow)
+		assert.Equal(t, 0, entry.CursorColumn)
+	}
 }
 
 func TestEntry_OnKeyDown_Insert(t *testing.T) {

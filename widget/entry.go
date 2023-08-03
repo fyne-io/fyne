@@ -627,17 +627,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyRight:
 		e.typedKeyRight(provider)
 	case fyne.KeyEnd:
-		e.propertyLock.Lock()
-		if e.MultiLine {
-			e.CursorColumn = provider.rowLength(e.CursorRow)
-		} else {
-			e.CursorColumn = provider.len()
-		}
-		e.propertyLock.Unlock()
+		e.typedKeyEnd(provider)
 	case fyne.KeyHome:
-		e.propertyLock.Lock()
-		e.CursorColumn = 0
-		e.propertyLock.Unlock()
+		e.typedKeyHome()
 	case fyne.KeyPageUp:
 		e.propertyLock.Lock()
 		if e.MultiLine {
@@ -723,6 +715,22 @@ func (e *Entry) typedKeyRight(provider *RichText) {
 		}
 	} else if e.CursorColumn < provider.len() {
 		e.CursorColumn++
+	}
+	e.propertyLock.Unlock()
+}
+
+func (e *Entry) typedKeyHome() {
+	e.propertyLock.Lock()
+	e.CursorColumn = 0
+	e.propertyLock.Unlock()
+}
+
+func (e *Entry) typedKeyEnd(provider *RichText) {
+	e.propertyLock.Lock()
+	if e.MultiLine {
+		e.CursorColumn = provider.rowLength(e.CursorRow)
+	} else {
+		e.CursorColumn = provider.len()
 	}
 	e.propertyLock.Unlock()
 }
@@ -959,7 +967,23 @@ func (e *Entry) registerShortcut() {
 	moveWordModifier := fyne.KeyModifierShortcutDefault
 	if runtime.GOOS == "darwin" {
 		moveWordModifier = fyne.KeyModifierAlt
+
+		// Cmd+left, Cmd+right shortcuts behave like Home and End keys on Mac OS
+		shortcutHomeEnd := func(s fyne.Shortcut) {
+			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
+				e.typedKeyHome()
+			} else {
+				e.propertyLock.RLock()
+				provider := e.textProvider()
+				e.propertyLock.RUnlock()
+				e.typedKeyEnd(provider)
+			}
+			e.Refresh()
+		}
+		e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierSuper}, shortcutHomeEnd)
+		e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierSuper}, shortcutHomeEnd)
 	}
+
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: moveWordModifier}, unselectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: moveWordModifier | fyne.KeyModifierShift}, selectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier}, unselectMoveWord)
