@@ -485,9 +485,11 @@ func (e *Entry) Append(text string) {
 	changed := e.updateText(content)
 	e.propertyLock.Unlock()
 
-	e.Validate()
-	if changed && e.OnChanged != nil {
-		e.OnChanged(content)
+	if changed {
+		e.Validate()
+		if e.OnChanged != nil {
+			e.OnChanged(content)
+		}
 	}
 	e.Refresh()
 }
@@ -669,9 +671,11 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
-	e.Validate()
-	if changed && e.OnChanged != nil {
-		e.OnChanged(content)
+	if changed {
+		e.Validate()
+		if e.OnChanged != nil {
+			e.OnChanged(content)
+		}
 	}
 	e.Refresh()
 }
@@ -849,9 +853,11 @@ func (e *Entry) eraseSelection() {
 	content := provider.String()
 	changed := e.updateText(content)
 
-	e.Validate()
-	if changed && e.OnChanged != nil {
-		e.OnChanged(content)
+	if changed {
+		e.Validate()
+		if e.OnChanged != nil {
+			e.OnChanged(content)
+		}
 	}
 }
 
