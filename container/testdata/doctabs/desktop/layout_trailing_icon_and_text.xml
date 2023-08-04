@@ -19,7 +19,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="74,0" size="4x150"/>
-			<rectangle fillColor="primary" pos="74,0" size="4x79"/>
+			<rectangle fillColor="primary" pos="74,0" radius="4" size="4x79"/>
 			<circle fillColor="background" size="74x150"/>
 		</widget>
 	</content>
