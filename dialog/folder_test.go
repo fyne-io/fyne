@@ -41,30 +41,34 @@ func TestShowFolderOpen(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Greater(t, len(files.Objects), 0)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	assert.Greater(t, len(d.dialog.data), 0)
 
-	fileName := files.Objects[0].(*fileDialogItem).name
+	item := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	fileName := test.WidgetRenderer(item.(fyne.Widget)).Objects()[1].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.False(t, open.Disabled())
 
-	var target *fileDialogItem
-	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).dir {
-			target = icon.(*fileDialogItem)
+	var target *fyne.URI
+	id := -1
+	for i, uri := range d.dialog.data {
+		ok, _ := storage.CanList(uri)
+		if ok {
+			target = &uri
+			id = i
 		} else {
 			t.Error("Folder dialog should not list files")
 		}
 	}
 
 	assert.NotNil(t, target, "Failed to find folder in testdata")
-	test.Tap(target)
-	assert.Equal(t, target.location.Name(), nameLabel.Text)
+	d.dialog.files.(*widget.GridWrap).Select(id)
+	assert.Equal(t, (*target).Name(), nameLabel.Text)
 	assert.False(t, open.Disabled())
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
 
-	assert.Equal(t, target.location.String(), chosen.String())
+	assert.Equal(t, (*target).String(), chosen.String())
 }
