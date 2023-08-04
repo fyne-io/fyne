@@ -418,6 +418,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
+	r.indicator.FillColor = theme.PrimaryColor()
 	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
 		r.indicator.Resize(siz)
@@ -735,6 +736,7 @@ type tabCloseButton struct {
 func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	icon := canvas.NewImageFromResource(theme.CancelIcon())
 
@@ -796,6 +798,7 @@ func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *tabCloseButtonRenderer) Refresh() {
 	if r.button.hovered {
 		r.background.FillColor = theme.HoverColor()
+		r.background.CornerRadius = theme.SelectionRadiusSize()
 		r.background.Show()
 	} else {
 		r.background.Hide()
