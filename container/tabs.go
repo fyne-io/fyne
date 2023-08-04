@@ -303,6 +303,7 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	}
 	r.divider.FillColor = theme.ShadowColor()
 	r.indicator.FillColor = theme.PrimaryColor()
+	r.indicator.CornerRadius = theme.SelectionRadiusSize()
 }
 
 func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
@@ -417,7 +418,6 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
-	r.indicator.FillColor = theme.PrimaryColor()
 	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
 		r.indicator.Resize(siz)
@@ -500,6 +500,7 @@ type tabButton struct {
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	icon := canvas.NewImageFromResource(b.icon)
 	if b.icon == nil {
@@ -650,6 +651,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *tabButtonRenderer) Refresh() {
 	if r.button.hovered && !r.button.Disabled() {
 		r.background.FillColor = theme.HoverColor()
+		r.background.CornerRadius = theme.SelectionRadiusSize()
 		r.background.Show()
 	} else {
 		r.background.Hide()
