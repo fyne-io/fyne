@@ -4,7 +4,7 @@
 			<container size="150x36">
 				<container size="150x36">
 					<widget size="52x36" type="*container.tabButton">
-						<rectangle fillColor="hover" size="52x36"/>
+						<rectangle fillColor="hover" radius="4" size="52x36"/>
 						<text alignment="center" bold color="primary" pos="8,8" size="36x20">Test1</text>
 					</widget>
 					<widget pos="56,0" size="52x36" type="*container.tabButton">
@@ -13,7 +13,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="52x4"/>
+			<rectangle fillColor="primary" pos="0,36" radius="4" size="52x4"/>
 			<widget pos="0,40" size="150x110" type="*widget.Label">
 				<text pos="8,8" size="34x19">Text1</text>
 			</widget>

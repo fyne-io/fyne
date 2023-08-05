@@ -303,6 +303,7 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	}
 	r.divider.FillColor = theme.ShadowColor()
 	r.indicator.FillColor = theme.PrimaryColor()
+	r.indicator.CornerRadius = theme.SelectionRadiusSize()
 }
 
 func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
@@ -500,6 +501,7 @@ type tabButton struct {
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	icon := canvas.NewImageFromResource(b.icon)
 	if b.icon == nil {
@@ -650,6 +652,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *tabButtonRenderer) Refresh() {
 	if r.button.hovered && !r.button.Disabled() {
 		r.background.FillColor = theme.HoverColor()
+		r.background.CornerRadius = theme.SelectionRadiusSize()
 		r.background.Show()
 	} else {
 		r.background.Hide()
@@ -733,6 +736,7 @@ type tabCloseButton struct {
 func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	icon := canvas.NewImageFromResource(theme.CancelIcon())
 
@@ -794,6 +798,7 @@ func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *tabCloseButtonRenderer) Refresh() {
 	if r.button.hovered {
 		r.background.FillColor = theme.HoverColor()
+		r.background.CornerRadius = theme.SelectionRadiusSize()
 		r.background.Show()
 	} else {
 		r.background.Hide()

@@ -9,7 +9,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,90" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,90" size="150x4"/>
+			<rectangle fillColor="primary" pos="0,90" radius="4" size="150x4"/>
 			<circle fillColor="background" size="150x90"/>
 		</widget>
 	</content>
