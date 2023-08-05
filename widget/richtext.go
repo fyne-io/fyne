@@ -110,7 +110,7 @@ func (t *RichText) Resize(size fyne.Size) {
 	t.propertyLock.RLock()
 	baseSize := t.size
 	segments := t.Segments
-	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff
+	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff && t.Truncation == fyne.TextTruncateOff
 	t.propertyLock.RUnlock()
 	if baseSize == size {
 		return
@@ -537,6 +537,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 	r.obj.propertyLock.RLock()
 	bounds := r.obj.rowBounds
 	wrap := r.obj.Wrapping
+	trunc := r.obj.Truncation
 	scroll := r.obj.Scroll
 	objs := r.Objects()
 	if r.obj.scr != nil {
@@ -572,7 +573,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 			rowWidth += min.Width
 		}
 
-		if wrap == fyne.TextWrapOff {
+		if wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
 			width = fyne.Max(width, rowWidth)
 		}
 		height += rowHeight
