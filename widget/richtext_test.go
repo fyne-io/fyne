@@ -601,6 +601,15 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
+			name:  "Multiple_Short_TruncateEllipsis",
+			text:  "foo\nbar",
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
 			name: "Multiple_Short_WrapBreak",
 			text: "foo\nbar",
 			wrap: fyne.TextWrapBreak,
@@ -640,6 +649,16 @@ func TestText_lineBounds(t *testing.T) {
 		},
 		{
 			name:  "Multiple_Long_TruncateClip",
+			text:  "foobar\nfoobar foobar foobar\nfoobar foobar",
+			trunc: fyne.TextTruncateClip,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{28, 38},
+			},
+		},
+		{
+			name:  "Multiple_Long_TruncateEllipsis",
 			text:  "foobar\nfoobar foobar foobar\nfoobar foobar",
 			trunc: fyne.TextTruncateClip,
 			want: [][2]int{
@@ -707,6 +726,17 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
+			name:  "Multiple_Contiguous_Long_TruncateEllipsis",
+			text:  "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 6},
+				{7, 14},
+				{26, 33},
+				{39, 39},
+			},
+		},
+		{
 			name: "Multiple_Contiguous_Long_WrapBreak",
 			text: "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
 			wrap: fyne.TextWrapBreak,
@@ -763,6 +793,16 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
+			name:  "Multiple_Trailing_Short_TruncateEllipsis",
+			text:  "foo\nbar\n",
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+				{8, 8},
+			},
+		},
+		{
 			name: "Multiple_Trailing_Short_WrapBreak",
 			text: "foo\nbar\n",
 			wrap: fyne.TextWrapBreak,
@@ -812,6 +852,17 @@ func TestText_lineBounds(t *testing.T) {
 				{0, 6},
 				{7, 17},
 				{28, 38},
+				{42, 42},
+			},
+		},
+		{
+			name:  "Multiple_Trailing_Long_TruncateEllipsis",
+			text:  "foobar\nfoobar foobar foobar\nfoobar foobar\n",
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 6},
+				{7, 15},
+				{28, 36},
 				{42, 42},
 			},
 		},
@@ -879,11 +930,19 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 			},
 		},
 		{
-			name:  "IM_Truncate",
+			name:  "IM_TruncateClip",
 			text:  "iiiiiiiiiimmmmmmmmmm",
 			trunc: fyne.TextTruncateClip,
 			want: [][2]int{
 				{0, 12},
+			},
+		},
+		{
+			name:  "IM_TruncateEllipsis",
+			text:  "iiiiiiiiiimmmmmmmmmm",
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 8},
 			},
 		},
 		{
