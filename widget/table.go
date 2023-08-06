@@ -15,6 +15,9 @@ import (
 
 const noCellMatch = math.MaxInt32 // TODO make this MaxInt once we move to newer Go version
 
+// allTableCellsID represents all table cells when refreshing requested cells
+var allTableCellsID = TableCellID{-1, -1}
+
 // Declare conformity with interfaces
 var _ desktop.Cursorable = (*Table)(nil)
 var _ fyne.Draggable = (*Table)(nil)
@@ -1195,7 +1198,7 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
-	r.refreshForID(TableCellID{-1, -1})
+	r.refreshForID(allTableCellsID)
 }
 
 func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
@@ -1327,7 +1330,7 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 
 	if updateCell != nil {
 		for id, cell := range visible {
-			if (toDraw.Row != -1 || toDraw.Col != -1) && toDraw != id {
+			if toDraw != allTableCellsID && toDraw != id {
 				continue
 			}
 

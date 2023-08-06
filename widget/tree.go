@@ -12,6 +12,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// allTreeNodesID represents all tree nodes when refreshing requested nodes
+const allTreeNodesID = "_ALLNODES"
+
 // TreeNodeID represents the unique id of a tree node.
 type TreeNodeID = string
 
@@ -761,7 +764,7 @@ func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *treeContentRenderer) Refresh() {
-	r.refreshForID("_ALLNODES")
+	r.refreshForID(allTreeNodesID)
 }
 
 func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
@@ -773,14 +776,14 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	}
 	r.treeContent.propertyLock.RLock()
 	for id, b := range r.branches {
-		if toDraw != "_ALLNODES" && id != toDraw {
+		if toDraw != allTreeNodesID && id != toDraw {
 			continue
 		}
 
 		b.Refresh()
 	}
 	for id, l := range r.leaves {
-		if toDraw != "_ALLNODES" && id != toDraw {
+		if toDraw != allTreeNodesID && id != toDraw {
 			continue
 		}
 
