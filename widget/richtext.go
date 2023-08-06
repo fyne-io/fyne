@@ -896,7 +896,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 		case fyne.TextWrapBreak:
 			for low < high {
 				measured := measurer(text[low:high])
-				if yPos+measured.Height > max.Height {
+				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
 					return bounds
 				}
 
@@ -925,7 +925,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 			for low < high {
 				sub := text[low:high]
 				measured := measurer(sub)
-				if yPos+measured.Height > max.Height {
+				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
 					return bounds
 				}
 
