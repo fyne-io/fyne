@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -197,7 +198,7 @@ func (t *Table) DragEnd() {
 func (t *Table) FocusGained() {
 	t.focused = true
 	t.ScrollTo(t.currentFocus)
-	t.Refresh() // TODO t.RefreshItem(t.currentFocus)
+	t.RefreshItem(t.currentFocus)
 }
 
 // FocusLost is called after this Table has lost focus.
@@ -227,6 +228,21 @@ func (t *Table) MouseOut() {
 
 // MouseUp response to desktop mouse event
 func (t *Table) MouseUp(*desktop.MouseEvent) {
+}
+
+// RefreshItem refreshes a single item, specified by the item ID passed in.
+//
+// Since: 2.4
+func (t *Table) RefreshItem(id TableCellID) {
+	if t.cells == nil {
+		return
+	}
+	r := cache.Renderer(t.cells).(*tableCellsRenderer)
+	if r == nil {
+		return
+	}
+
+	r.refreshForID(id)
 }
 
 // Select will mark the specified cell as selected.
@@ -314,18 +330,18 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 				return
 			}
 		}
-		// TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 		t.currentFocus.Row++
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 	case fyne.KeyLeft:
 		if t.currentFocus.Col <= 0 {
 			return
 		}
-		// TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 		t.currentFocus.Col--
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 	case fyne.KeyRight:
 		if f := t.Length; f != nil {
 			_, cols := f()
@@ -333,18 +349,18 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 				return
 			}
 		}
-		// TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 		t.currentFocus.Col++
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 	case fyne.KeyUp:
 		if t.currentFocus.Row <= 0 {
 			return
 		}
-		// TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 		t.currentFocus.Row--
 		t.ScrollTo(t.currentFocus)
-		t.Refresh() // TODO t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentFocus)
 	}
 }
 
@@ -539,13 +555,13 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	}
 	t.Select(TableCellID{row, col})
 
-	// TODO t.RefreshItem(t.currentFocus)
+	t.RefreshItem(t.currentFocus)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
 	if canvas != nil {
 		canvas.Focus(t)
 	}
 	t.currentFocus = TableCellID{row, col}
-	t.Refresh() // TODO t.RefreshItem(t.currentFocus)
+	t.RefreshItem(t.currentFocus)
 }
 
 // columnAt returns a positive integer (or 0) for the column that is found at the `pos` X position.
@@ -1179,6 +1195,10 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
+	r.refreshForID(TableCellID{-1, -1})
+}
+
+func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	r.cells.propertyLock.Lock()
 	separatorThickness := theme.Padding()
 	dataRows, dataCols := 0, 0
@@ -1307,6 +1327,10 @@ func (r *tableCellsRenderer) Refresh() {
 
 	if updateCell != nil {
 		for id, cell := range visible {
+			if (toDraw.Row != -1 || toDraw.Col != -1) && toDraw != id {
+				continue
+			}
+
 			updateCell(id, cell)
 		}
 	}
