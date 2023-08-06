@@ -552,20 +552,24 @@ func (r *textRenderer) MinSize() fyne.Size {
 	r.obj.propertyLock.RUnlock()
 
 	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{})
-	if trunc != fyne.TextTruncateOff && r.obj.Scroll == widget.ScrollNone {
-		minBounds := charMinSize.Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2).Subtract(r.obj.inset).Subtract(r.obj.inset))
-		if trunc == fyne.TextTruncateClip {
-			return minBounds
-		} else if trunc == fyne.TextTruncateEllipsis {
-			return minBounds.AddWidthHeight(charMinSize.Width, 0) // TODO avoid this approximation?
-		}
-	}
-
 	min := r.obj.prop.MinSize()
 	if min.Height < 2 { // prop (Rectangle) defaults to 1 min
 		min = r.calculateMin(bounds, wrap, objs, charMinSize)
 		if r.obj.scr != nil {
 			r.obj.prop.SetMinSize(min)
+		}
+	}
+
+	if trunc != fyne.TextTruncateOff && r.obj.Scroll == widget.ScrollNone {
+		minBounds := charMinSize
+		if wrap == fyne.TextWrapOff {
+			minBounds.Height = min.Height
+		}
+		minBounds = minBounds.Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2).Subtract(r.obj.inset).Subtract(r.obj.inset))
+		if trunc == fyne.TextTruncateClip {
+			return minBounds
+		} else if trunc == fyne.TextTruncateEllipsis {
+			return minBounds.AddWidthHeight(charMinSize.Width, 0) // TODO avoid this approximation?
 		}
 	}
 
@@ -987,7 +991,6 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 				reuse++
 			}
-			return bounds
 		}
 	}
 	return bounds
