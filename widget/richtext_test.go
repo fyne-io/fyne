@@ -425,8 +425,8 @@ func TestText_splitLines(t *testing.T) {
 }
 
 func TestText_lineBounds(t *testing.T) {
-	measurer := func(text []rune) float32 {
-		return fyne.MeasureText(string(text), 14, fyne.TextStyle{}).Width
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
 	}
 	tests := []struct {
 		name  string
@@ -896,7 +896,7 @@ func TestText_lineBounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, 76, measurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 84), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -968,12 +968,12 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) float32 {
-		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 46, 46, measurer)
+			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 46, fyne.NewSize(46, 84), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)

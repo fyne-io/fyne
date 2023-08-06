@@ -982,7 +982,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				high = low + end
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
 				reuse++
-			} else {
+			} else if trunc == fyne.TextTruncateClip {
 				high = binarySearch(widthChecker, low, high)
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 				reuse++
