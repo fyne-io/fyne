@@ -738,6 +738,38 @@ func TestTreeNode_Hovered(t *testing.T) {
 	})
 }
 
+func TestTree_RefreshItem(t *testing.T) {
+	var data = map[string][]string{
+		"":    {"foo"},
+		"foo": {"foobar1", "foobar2", "foobar3"},
+	}
+
+	value := "Leaf"
+	tree := NewTreeWithStrings(data)
+	tree.UpdateNode = func(uid TreeNodeID, branch bool, node fyne.CanvasObject) {
+		if uid == "foobar1" || uid == "foobar2" || uid == "foobar3" {
+			node.(*Label).SetText(value)
+			assert.False(t, branch)
+		} else {
+			node.(*Label).SetText(uid)
+			assert.True(t, branch)
+		}
+	}
+	tree.OpenBranch("foo")
+
+	c := test.NewWindow(tree)
+	c.Resize(fyne.NewSize(100, 100))
+
+	r := test.WidgetRenderer(tree.scroller.Content.(*treeContent)).(*treeContentRenderer)
+
+	assert.Equal(t, "Leaf", r.leaves["foobar1"].content.(*Label).Text)
+
+	value = "Replaced"
+	tree.RefreshItem("foobar1")
+	assert.Equal(t, "Replaced", r.leaves["foobar1"].content.(*Label).Text)
+	assert.Equal(t, "Leaf", r.leaves["foobar2"].content.(*Label).Text)
+}
+
 func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	data := make(map[string][]string)
 	addTreePath(data, "A", "B")

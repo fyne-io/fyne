@@ -237,12 +237,12 @@ func (t *Table) RefreshItem(id TableCellID) {
 	if t.cells == nil {
 		return
 	}
-	r := cache.Renderer(t.cells).(*tableCellsRenderer)
+	r := cache.Renderer(t.cells)
 	if r == nil {
 		return
 	}
 
-	r.refreshForID(id)
+	r.(*tableCellsRenderer).refreshForID(id)
 }
 
 // Select will mark the specified cell as selected.
