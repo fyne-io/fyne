@@ -89,6 +89,12 @@ type Untyped interface {
 	Set(interface{}) error
 }
 
+type Typed[E any] interface {
+	DataItem
+	Get() (E, error)
+	Set(E) error
+}
+
 // NewUntyped returns a bindable interface{} value that is managed internally.
 //
 // Since: 2.1

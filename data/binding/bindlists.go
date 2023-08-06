@@ -1355,6 +1355,17 @@ type UntypedList interface {
 	SetValue(index int, value interface{}) error
 }
 
+type List[E any] interface {
+	DataList
+
+	Append(value E) error
+	Get() ([]E, error)
+	GetValue(index int) (E, error)
+	Prepend(value E) error
+	Set(list []E) error
+	SetValue(index int, value E) error
+}
+
 // ExternalUntypedList supports binding a list of interface{} values from an external variable.
 //
 // Since: 2.1
@@ -1364,11 +1375,21 @@ type ExternalUntypedList interface {
 	Reload() error
 }
 
+type ExternalList[E any] interface {
+	List[E]
+
+	Reload() error
+}
+
 // NewUntypedList returns a bindable list of interface{} values.
 //
 // Since: 2.1
 func NewUntypedList() UntypedList {
-	return &boundUntypedList{val: &[]interface{}{}}
+	return NewList[any]()
+}
+
+func NewList[E comparable]() List[E] {
+	return &boundList[E]{val: &[]E{}}
 }
 
 // BindUntypedList returns a bound list of interface{} values, based on the contents of the passed slice.
@@ -1376,27 +1397,31 @@ func NewUntypedList() UntypedList {
 //
 // Since: 2.1
 func BindUntypedList(v *[]interface{}) ExternalUntypedList {
+	return BindList(v)
+}
+
+func BindList[E comparable](v *[]E) ExternalList[E] {
 	if v == nil {
-		return NewUntypedList().(ExternalUntypedList)
+		return NewList[E]().(ExternalList[E])
 	}
 
-	b := &boundUntypedList{val: v, updateExternal: true}
+	b := &boundList[E]{val: v, updateExternal: true}
 
 	for i := range *v {
-		b.appendItem(bindUntypedListItem(v, i, b.updateExternal))
+		b.appendItem(bindListItem(v, i, b.updateExternal))
 	}
 
 	return b
 }
 
-type boundUntypedList struct {
+type boundList[E comparable] struct {
 	listBase
 
 	updateExternal bool
-	val            *[]interface{}
+	val            *[]E
 }
 
-func (l *boundUntypedList) Append(val interface{}) error {
+func (l *boundList[E]) Append(val E) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
@@ -1405,40 +1430,40 @@ func (l *boundUntypedList) Append(val interface{}) error {
 	return l.doReload()
 }
 
-func (l *boundUntypedList) Get() ([]interface{}, error) {
+func (l *boundList[E]) Get() ([]E, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
 }
 
-func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
+func (l *boundList[E]) GetValue(i int) (E, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	if i < 0 || i >= l.Length() {
-		return nil, errOutOfBounds
+		return *new(E), errOutOfBounds
 	}
 
 	return (*l.val)[i], nil
 }
 
-func (l *boundUntypedList) Prepend(val interface{}) error {
+func (l *boundList[E]) Prepend(val E) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	*l.val = append([]interface{}{val}, *l.val...)
+	*l.val = append([]E{val}, *l.val...)
 
 	return l.doReload()
 }
 
-func (l *boundUntypedList) Reload() error {
+func (l *boundList[E]) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
 	return l.doReload()
 }
 
-func (l *boundUntypedList) Set(v []interface{}) error {
+func (l *boundList[E]) Set(v []E) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = v
@@ -1446,7 +1471,7 @@ func (l *boundUntypedList) Set(v []interface{}) error {
 	return l.doReload()
 }
 
-func (l *boundUntypedList) doReload() (retErr error) {
+func (l *boundList[E]) doReload() (retErr error) {
 	oldLen := len(l.items)
 	newLen := len(*l.val)
 	if oldLen > newLen {
@@ -1456,7 +1481,7 @@ func (l *boundUntypedList) doReload() (retErr error) {
 		l.trigger()
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			l.appendItem(bindUntypedListItem(l.val, i, l.updateExternal))
+			l.appendItem(bindListItem(l.val, i, l.updateExternal))
 		}
 		l.trigger()
 	}
@@ -1468,13 +1493,13 @@ func (l *boundUntypedList) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
-			item.(*boundExternalUntypedListItem).lock.Lock()
-			err = item.(*boundExternalUntypedListItem).setIfChanged((*l.val)[i])
-			item.(*boundExternalUntypedListItem).lock.Unlock()
+			item.(*boundExternalListItem[E]).lock.Lock()
+			err = item.(*boundExternalListItem[E]).setIfChanged((*l.val)[i])
+			item.(*boundExternalListItem[E]).lock.Unlock()
 		} else {
-			item.(*boundUntypedListItem).lock.Lock()
-			err = item.(*boundUntypedListItem).doSet((*l.val)[i])
-			item.(*boundUntypedListItem).lock.Unlock()
+			item.(*boundListItem[E]).lock.Lock()
+			err = item.(*boundListItem[E]).doSet((*l.val)[i])
+			item.(*boundListItem[E]).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -1483,7 +1508,7 @@ func (l *boundUntypedList) doReload() (retErr error) {
 	return
 }
 
-func (l *boundUntypedList) SetValue(i int, v interface{}) error {
+func (l *boundList[E]) SetValue(i int, v E) error {
 	l.lock.RLock()
 	len := l.Length()
 	l.lock.RUnlock()
@@ -1503,56 +1528,56 @@ func (l *boundUntypedList) SetValue(i int, v interface{}) error {
 	return item.(Untyped).Set(v)
 }
 
-func bindUntypedListItem(v *[]interface{}, i int, external bool) Untyped {
+func bindListItem[E comparable](v *[]E, i int, external bool) Typed[E] {
 	if external {
-		ret := &boundExternalUntypedListItem{old: (*v)[i]}
+		ret := &boundExternalListItem[E]{old: (*v)[i]}
 		ret.val = v
 		ret.index = i
 		return ret
 	}
 
-	return &boundUntypedListItem{val: v, index: i}
+	return &boundListItem[E]{val: v, index: i}
 }
 
-type boundUntypedListItem struct {
+type boundListItem[E any] struct {
 	base
 
-	val   *[]interface{}
+	val   *[]E
 	index int
 }
 
-func (b *boundUntypedListItem) Get() (interface{}, error) {
+func (b *boundListItem[E]) Get() (E, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	if b.index < 0 || b.index >= len(*b.val) {
-		return nil, errOutOfBounds
+		return *new(E), errOutOfBounds
 	}
 
 	return (*b.val)[b.index], nil
 }
 
-func (b *boundUntypedListItem) Set(val interface{}) error {
+func (b *boundListItem[E]) Set(val E) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
 }
 
-func (b *boundUntypedListItem) doSet(val interface{}) error {
+func (b *boundListItem[E]) doSet(val E) error {
 	(*b.val)[b.index] = val
 
 	b.trigger()
 	return nil
 }
 
-type boundExternalUntypedListItem struct {
-	boundUntypedListItem
+type boundExternalListItem[E comparable] struct {
+	boundListItem[E]
 
-	old interface{}
+	old E
 }
 
-func (b *boundExternalUntypedListItem) setIfChanged(val interface{}) error {
+func (b *boundExternalListItem[E]) setIfChanged(val E) error {
 	if val == b.old {
 		return nil
 	}
