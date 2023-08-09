@@ -356,6 +356,21 @@ func TestCanvas_walkTree(t *testing.T) {
 	assert.Nil(t, nodes[6].nextSibling)
 }
 
+func TestCanvas_OverlayStack(t *testing.T) {
+	o := &overlayStack{}
+	a := canvas.NewRectangle(color.Black)
+	b := canvas.NewCircle(color.Black)
+	c := canvas.NewRectangle(color.White)
+	o.Add(a)
+	o.Add(b)
+	o.Add(c)
+	assert.Equal(t, 3, len(o.List()))
+	o.Remove(c)
+	assert.Equal(t, 2, len(o.List()))
+	o.Remove(a)
+	assert.Equal(t, 0, len(o.List()))
+}
+
 func deleteAt(c *fyne.Container, index int) {
 	if index < len(c.Objects)-1 {
 		c.Objects = append(c.Objects[:index], c.Objects[index+1:]...)

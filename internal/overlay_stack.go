@@ -75,13 +75,23 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
 
+	overlayIdx := -1
 	for i, o := range s.overlays {
 		if o == overlay {
-			s.overlays = s.overlays[:i]
-			s.focusManagers = s.focusManagers[:i]
+			overlayIdx = i
 			break
 		}
 	}
+	if overlayIdx == -1 {
+		return
+	}
+	// set removed elements in backing array to nil to release memory references
+	for i := overlayIdx; i < len(s.overlays); i++ {
+		s.overlays[i] = nil
+		s.focusManagers[i] = nil
+	}
+	s.overlays = s.overlays[:overlayIdx]
+	s.focusManagers = s.focusManagers[:overlayIdx]
 }
 
 // Top returns the top-most overlay of the stack.
