@@ -3,11 +3,10 @@ package widget
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGridWrap_Focus(t *testing.T) {
@@ -158,6 +157,34 @@ func TestGridWrap_IndexIsInt(t *testing.T) {
 	// It allows the same update item function to be shared between both widgets if necessary.
 	gw.UpdateItem = func(id GridWrapItemID, item fyne.CanvasObject) {}
 	gw.UpdateItem = func(id int, item fyne.CanvasObject) {}
+}
+
+func TestGridWrap_RefreshItem(t *testing.T) {
+	data := make([]string, 5)
+	for i := 0; i < 5; i++ {
+		data[i] = "Text"
+	}
+
+	list := NewGridWrap(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			icon := NewLabel("dummy")
+			return icon
+		},
+		func(id GridWrapItemID, item fyne.CanvasObject) {
+			item.(*Label).SetText(data[id])
+		},
+	)
+	list.Resize(fyne.NewSize(50, 100))
+
+	data[2] = "Replace"
+	list.RefreshItem(2)
+
+	children := list.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).children
+	assert.Equal(t, children[1].(*gridWrapItem).child.(*Label).Text, "Text")
+	assert.Equal(t, children[2].(*gridWrapItem).child.(*Label).Text, "Replace")
 }
 
 func TestGridWrap_Selection(t *testing.T) {

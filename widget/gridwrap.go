@@ -96,7 +96,7 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 func (l *GridWrap) FocusGained() {
 	l.focused = true
 	l.scrollTo(l.currentFocus)
-	l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+	l.RefreshItem(l.currentFocus)
 }
 
 // FocusLost is called after this GridWrap has lost focus.
@@ -104,7 +104,7 @@ func (l *GridWrap) FocusGained() {
 // Implements: fyne.Focusable
 func (l *GridWrap) FocusLost() {
 	l.focused = false
-	l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+	l.RefreshItem(l.currentFocus)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -126,6 +126,21 @@ func (l *GridWrap) scrollTo(id GridWrapItemID) {
 		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
 	}
 	l.offsetUpdated(l.scroller.Offset)
+}
+
+// RefreshItem refreshes a single item, specified by the item ID passed in.
+//
+// Since: 2.4
+func (l *GridWrap) RefreshItem(id GridWrapItemID) {
+	if l.scroller == nil {
+		return
+	}
+	l.BaseWidget.Refresh()
+	lo := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
+	visible := lo.visible
+	if item, ok := visible[id]; ok {
+		lo.setupGridItem(item, id, l.focused && l.currentFocus == id)
+	}
 }
 
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
@@ -211,13 +226,13 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if f := l.Length; f != nil {
 			count = f()
 		}
-		// TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 		l.currentFocus += l.getColCount()
 		if l.currentFocus >= count-1 {
 			l.currentFocus = count - 1
 		}
 		l.scrollTo(l.currentFocus)
-		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 	case fyne.KeyLeft:
 		if l.currentFocus <= 0 {
 			return
@@ -226,10 +241,10 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 			return
 		}
 
-		// TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 		l.currentFocus--
 		l.scrollTo(l.currentFocus)
-		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 	case fyne.KeyRight:
 		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
 			return
@@ -238,21 +253,21 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 			return
 		}
 
-		// TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 		l.currentFocus++
 		l.scrollTo(l.currentFocus)
-		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 	case fyne.KeyUp:
 		if l.currentFocus <= 0 {
 			return
 		}
-		// TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 		l.currentFocus -= l.getColCount()
 		if l.currentFocus < 0 {
 			l.currentFocus = 0
 		}
 		l.scrollTo(l.currentFocus)
-		l.Refresh() // TODO l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentFocus)
 	}
 }
 
@@ -513,7 +528,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 		f(id, li.child)
 	}
 	li.onTapped = func() {
-		// TODO l.list.RefreshItem(t.currentFocus)
+		l.list.RefreshItem(l.list.currentFocus)
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
 		if canvas != nil {
 			canvas.Focus(l.list)

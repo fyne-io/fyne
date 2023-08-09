@@ -376,6 +376,11 @@ func TestTable_Refresh(t *testing.T) {
 	displayText = "replaced"
 	table.Refresh()
 	assert.Equal(t, "replaced", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
+
+	displayText = "only"
+	table.RefreshItem(TableCellID{2, 1})
+	assert.Equal(t, "only", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
+	assert.Equal(t, "replaced", cellRenderer.(*tableCellsRenderer).Objects()[6].(*Label).Text)
 }
 
 func TestTable_ScrollTo(t *testing.T) {
