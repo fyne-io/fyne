@@ -376,6 +376,113 @@ func (t *TextGrid) refreshCell(row, col int) {
 	r.refreshCell(row, col)
 }
 
+// ForRangeFn calls back for each cell and row in the selection
+func (t *TextGrid) ForRangeFn(blockMode bool, startRow, startCol, endRow, endCol int, eachCell func(cell *TextGridCell), eachRow func(row *TextGridRow)) {
+	if startRow >= len(t.Rows) || endRow < 0 {
+		return
+	}
+	if startRow < 0 {
+		startRow = 0
+		startCol = 0
+	}
+	if endRow >= len(t.Rows) {
+		endRow = len(t.Rows) - 1
+		endCol = len(t.Rows[endRow].Cells) - 1
+	}
+
+	if startRow == endRow {
+		if len(t.Rows[startRow].Cells)-1 < endCol {
+			endCol = len(t.Rows[startRow].Cells) - 1
+		}
+		for col := startCol; col <= endCol; col++ {
+			eachCell(&t.Rows[startRow].Cells[col])
+		}
+		return
+	}
+
+	if blockMode {
+		// Iterate through the rows
+		for rowNum := startRow; rowNum <= endRow; rowNum++ {
+			row := &t.Rows[rowNum]
+			if rowNum != startRow {
+				eachRow(row)
+			}
+
+			// Apply the cell function for the cells in the given column range
+			for col := startCol; col <= endCol && col < len(row.Cells); col++ {
+				eachCell(&row.Cells[col])
+			}
+		}
+		return
+	}
+
+	// first row
+	for col := startCol; col < len(t.Rows[startRow].Cells); col++ {
+		eachCell(&t.Rows[startRow].Cells[col])
+	}
+
+	// possible middle rows
+	for rowNum := startRow + 1; rowNum < endRow; rowNum++ {
+		eachRow(&t.Rows[rowNum])
+		for col := 0; col < len(t.Rows[rowNum].Cells); col++ {
+			eachCell(&t.Rows[rowNum].Cells[col])
+		}
+	}
+
+	if len(t.Rows[endRow].Cells)-1 < endCol {
+		endCol = len(t.Rows[endRow].Cells) - 1
+	}
+	eachRow(&t.Rows[endRow])
+	// last row
+	for col := 0; col <= endCol; col++ {
+		eachCell(&t.Rows[endRow].Cells[col])
+	}
+}
+
+// HighlightRange apply's the highlight options to the given range
+// if highlighting has previously been applied it is enabled
+func (t *TextGrid) HighlightRange(blockMode bool, startRow, startCol, endRow, endCol int, o ...HighlightOption) {
+	applyHighlight := func(cell *TextGridCell) {
+		// Check if already highlighted
+		if h, ok := cell.Style.(*HighlightedTextGridStyle); !ok {
+			highlightedStyle := &HighlightedTextGridStyle{OriginalStyle: cell.Style, Highlighted: true}
+			highlightedStyle.With(o...)
+			cell.Style = highlightedStyle
+		} else {
+			h.Highlighted = true
+		}
+	}
+
+	t.ForRangeFn(blockMode, startRow, startCol, endRow, endCol, applyHighlight, func(row *TextGridRow) {
+	})
+}
+
+// ClearHighlightRange disables the highlight style for the given range
+func (t *TextGrid) ClearHighlightRange(blockMode bool, startRow, startCol, endRow, endCol int) {
+	clearHighlight := func(cell *TextGridCell) {
+		// Check if already highlighted
+		if h, ok := cell.Style.(*HighlightedTextGridStyle); ok {
+			h.Highlighted = false
+		}
+	}
+	t.ForRangeFn(blockMode, startRow, startCol, endRow, endCol, clearHighlight, func(row *TextGridRow) {
+	})
+}
+
+// GetTextRange returns a string from the TextGrid given the start and end row and column.
+// If the range is out of bounds, it returns an empty string.
+func (t *TextGrid) GetTextRange(blockMode bool, startRow, startCol, endRow, endCol int) string {
+	var result []rune
+
+	t.ForRangeFn(blockMode, startRow, startCol, endRow, endCol, func(cell *TextGridCell) {
+		result = append(result, cell.Rune)
+	}, func(row *TextGridRow) {
+		result = append(result, '\n')
+	})
+
+	return string(result)
+}
+
 // NewTextGrid creates a new empty TextGrid widget.
 func NewTextGrid() *TextGrid {
 	grid := &TextGrid{}
