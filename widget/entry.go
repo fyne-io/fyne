@@ -831,6 +831,11 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 
 	e.copyToClipboard(clipboard)
 	e.setFieldsAndRefresh(e.eraseSelection)
+	e.propertyLock.Lock()
+	content := e.textProvider().String()
+	e.OnChanged(content)
+	e.propertyLock.Unlock()
+	e.Validate()
 }
 
 // eraseSelection removes the current selected region and moves the cursor
@@ -850,15 +855,7 @@ func (e *Entry) eraseSelection() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
-	content := provider.String()
-	changed := e.updateText(content)
-
-	if changed {
-		e.Validate()
-		if e.OnChanged != nil {
-			e.OnChanged(content)
-		}
-	}
+	e.updateText(provider.String())
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
@@ -1055,6 +1052,11 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
 		e.setFieldsAndRefresh(e.eraseSelection)
+		e.propertyLock.Lock()
+		content := e.textProvider().String()
+		e.OnChanged(content)
+		e.propertyLock.Unlock()
+		e.Validate()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
