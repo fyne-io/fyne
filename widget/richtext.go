@@ -852,6 +852,27 @@ func concealed(seg RichTextSegment) bool {
 	return false
 }
 
+func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width float32, measurer func([]rune) fyne.Size) []rowBoundary {
+	if trunc != fyne.TextTruncateEllipsis {
+		return bounds
+	}
+
+	prior := bounds[len(bounds)-1]
+	seg := prior.segments[0].(*TextSegment)
+	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+
+	widthChecker := func(low int, high int) bool {
+		return measurer([]rune(seg.Text)[low:high]).Width <= width-ellipsisSize.Width
+	}
+
+	limit := binarySearch(widthChecker, prior.begin, prior.end)
+	prior.end = limit
+
+	prior.ellipsis = true
+	bounds[len(bounds)-1] = prior
+	return bounds
+}
+
 // findSpaceIndex accepts a slice of runes and a fallback index
 // findSpaceIndex returns the index of the last space in the text, or fallback if there are no spaces
 func findSpaceIndex(text []rune, fallback int) int {
@@ -913,18 +934,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 			for low < high {
 				measured := measurer(text[low:high])
 				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
-					if trunc == fyne.TextTruncateEllipsis {
-						prior := bounds[len(bounds)-1]
-						ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
-						measureWidth -= ellipsisSize.Width
-						limit := binarySearch(widthChecker, prior.begin, prior.end)
-						prior.end = limit
-
-						prior.ellipsis = true
-						bounds[len(bounds)-1] = prior
-					}
-
-					return bounds, yPos
+					return ellipsisPriorBound(bounds, trunc, measureWidth, measurer), yPos
 				}
 
 				if measured.Width <= measureWidth {
@@ -953,17 +963,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				sub := text[low:high]
 				measured := measurer(sub)
 				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
-					if trunc == fyne.TextTruncateEllipsis {
-						prior := bounds[len(bounds)-1]
-						ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
-						measureWidth -= ellipsisSize.Width
-						limit := binarySearch(widthChecker, prior.begin, prior.end)
-						prior.end = limit
-
-						prior.ellipsis = true
-						bounds[len(bounds)-1] = prior
-					}
-					return bounds, yPos
+					return ellipsisPriorBound(bounds, trunc, measureWidth, measurer), yPos
 				}
 
 				subWidth := measured.Width
