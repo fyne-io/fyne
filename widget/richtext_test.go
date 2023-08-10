@@ -542,7 +542,7 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
-			name:  "Single_Long_Truncate",
+			name:  "Single_Long_TruncateClip",
 			text:  "foobar foobar",
 			trunc: fyne.TextTruncateClip,
 			want: [][2]int{
@@ -554,7 +554,7 @@ func TestText_lineBounds(t *testing.T) {
 			text:  "foobar foobar",
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
-				{0, 9},
+				{0, 8},
 			},
 			ellipses: 1,
 		},
@@ -667,8 +667,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 16},
-				{28, 37},
+				{7, 15},
+				{28, 36},
 			},
 			ellipses: 2,
 		},
@@ -736,8 +736,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 16},
-				{26, 35},
+				{7, 14},
+				{26, 33},
 				{39, 39},
 			},
 			ellipses: 2,
@@ -839,6 +839,17 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
+			name:  "Multiple_Trailing_Short_WrapTruncateEllipsis",
+			text:  "foo\nbar\nbaz",
+			wrap:  fyne.TextWrapBreak,
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+			ellipses: 0,
+		},
+		{
 			name: "Multiple_Trailing_Long_WrapOff",
 			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
 			wrap: fyne.TextWrapOff,
@@ -877,8 +888,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 16},
-				{28, 37},
+				{7, 15},
+				{28, 36},
 				{42, 42},
 			},
 			ellipses: 2,
@@ -920,11 +931,35 @@ func TestText_lineBounds(t *testing.T) {
 				{4, 14},
 			},
 		},
+		{
+			name:  "Multiple_Trailing_Long_WrapTruncateEllipsis",
+			text:  "foo\nfoobar foobar foobar\nbazzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+			wrap:  fyne.TextWrapBreak,
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 3},
+				{4, 14},
+				{14, 23},
+			},
+			ellipses: 1,
+		},
+		{
+			name:  "Multiple_Trailing_Long_WrapWordTruncateEllipsis",
+			text:  "foo\nfoobar foobar foobar\nbaz",
+			wrap:  fyne.TextWrapWord,
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 3},
+				{4, 10},
+				{11, 17},
+			},
+			ellipses: 1,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ellipses := 0
-			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 84), measurer)
+			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 64), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)

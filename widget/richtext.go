@@ -913,6 +913,17 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 			for low < high {
 				measured := measurer(text[low:high])
 				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
+					if trunc == fyne.TextTruncateEllipsis {
+						prior := bounds[len(bounds)-1]
+						ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+						measureWidth -= ellipsisSize.Width
+						limit := binarySearch(widthChecker, prior.begin, prior.end)
+						prior.end = limit
+
+						prior.ellipsis = true
+						bounds[len(bounds)-1] = prior
+					}
+
 					return bounds, yPos
 				}
 
@@ -942,6 +953,16 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				sub := text[low:high]
 				measured := measurer(sub)
 				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
+					if trunc == fyne.TextTruncateEllipsis {
+						prior := bounds[len(bounds)-1]
+						ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+						measureWidth -= ellipsisSize.Width
+						limit := binarySearch(widthChecker, prior.begin, prior.end)
+						prior.end = limit
+
+						prior.ellipsis = true
+						bounds[len(bounds)-1] = prior
+					}
 					return bounds, yPos
 				}
 
@@ -963,7 +984,13 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 					fallback := binarySearch(widthChecker, low, last) - low
 
 					if fallback < 1 { // even a character won't fit
-						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false})
+						include := 1
+						ellipsis := false
+						if trunc == fyne.TextTruncateEllipsis {
+							include = 0
+							ellipsis = true
+						}
+						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + include, ellipsis})
 						low++
 						high = low + 1
 						reuse++
