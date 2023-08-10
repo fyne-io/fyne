@@ -20,7 +20,7 @@ require (
 	github.com/gopherjs/gopherjs v1.17.2
 	github.com/jackmordaunt/icns/v2 v2.2.6
 	github.com/josephspurrier/goversioninfo v1.4.0
-	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
+	github.com/lucor/goinfo v0.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
