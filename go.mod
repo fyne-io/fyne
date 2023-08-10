@@ -18,7 +18,7 @@ require (
 	github.com/go-text/typesetting v0.0.0-20230616162802-9c17dd34aa4a
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gopherjs/gopherjs v1.17.2
-	github.com/jackmordaunt/icns/v2 v2.2.1
+	github.com/jackmordaunt/icns/v2 v2.2.6
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
