@@ -577,7 +577,8 @@ func (r *textRenderer) MinSize() fyne.Size {
 		if trunc == fyne.TextTruncateClip {
 			return minBounds
 		} else if trunc == fyne.TextTruncateEllipsis {
-			return minBounds.AddWidthHeight(charMinSize.Width, 0) // TODO avoid this approximation?
+			ellipsisSize := fyne.MeasureText("…", theme.TextSize(), fyne.TextStyle{})
+			return minBounds.AddWidthHeight(ellipsisSize.Width, 0)
 		}
 	}
 
