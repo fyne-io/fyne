@@ -388,11 +388,14 @@ func (t *RichText) updateRowBounds() {
 				} else {
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
 				}
+
+				itemMin := t.cachedSegmentVisual(seg, 0).MinSize()
 				if seg.Inline() {
-					wrapWidth -= t.cachedSegmentVisual(seg, 0).MinSize().Width
+					wrapWidth -= itemMin.Width
 				} else {
 					wrapWidth = maxWidth
 					currentBound = nil
+					fitSize.Height -= itemMin.Height + theme.LineSpacing()
 				}
 				continue
 			}
@@ -404,7 +407,7 @@ func (t *RichText) updateRowBounds() {
 			if textSeg.Style == RichTextStyleBlockquote {
 				leftPad = innerPadding * 2
 			}
-			retBounds := lineBounds(textSeg, t.Wrapping, t.Truncation, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
+			retBounds, height := lineBounds(textSeg, t.Wrapping, t.Truncation, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
 				return fyne.MeasureText(string(text), textSize, textStyle)
 			})
 			if currentBound != nil {
@@ -412,9 +415,13 @@ func (t *RichText) updateRowBounds() {
 					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
 					bounds = append(bounds, retBounds[1:]...)
+
+					fitSize.Height -= height
 				}
 			} else {
 				bounds = append(bounds, retBounds...)
+
+				fitSize.Height -= height
 			}
 			currentBound = &bounds[len(bounds)-1]
 			if seg.Inline() {
@@ -433,7 +440,8 @@ func (t *RichText) updateRowBounds() {
 					end = len(runes)
 				}
 				text := string(runes[begin:end])
-				lastWidth := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle).Width
+				measured := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle)
+				lastWidth := measured.Width
 				if len(retBounds) == 1 {
 					wrapWidth -= lastWidth
 				} else {
@@ -861,9 +869,11 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 	return fixed.Int26_6(float64(f) * (1 << 6))
 }
 
-// lineBounds accepts a slice of Segments, a wrapping mode, a maximum line width and a function to measure line width.
-// lineBounds returns a slice containing the boundary metadata of each line with the given wrapping applied.
-func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) []rowBoundary {
+// lineBounds accepts a slice of Segments, a wrapping mode, a maximum size available to display and a function to
+// measure text size.
+// It will return a slice containing the boundary metadata of each line with the given wrapping applied and the
+// total height required to render the boundaries at the given width/height constraints
+func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
 	lines := splitLines(seg)
 
 	if wrap == fyne.TextTruncate {
@@ -874,7 +884,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 	}
 
 	if max.Width < 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
-		return lines
+		return lines, 0 // don't bother returning a calculated height, our MinSize is going to cover it
 	}
 
 	measureWidth := float32(math.Min(float64(firstWidth), float64(max.Width)))
@@ -901,7 +911,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 			for low < high {
 				measured := measurer(text[low:high])
 				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
-					return bounds
+					return bounds, yPos
 				}
 
 				if measured.Width <= measureWidth {
@@ -930,7 +940,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				sub := text[low:high]
 				measured := measurer(sub)
 				if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
-					return bounds
+					return bounds, yPos
 				}
 
 				subWidth := measured.Width
@@ -958,7 +968,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 
 						yPos += measured.Height
 						if high > l.end {
-							return bounds
+							return bounds, yPos
 						}
 					} else {
 						spaceIndex := findSpaceIndex(sub, fallback)
@@ -993,7 +1003,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 			}
 		}
 	}
-	return bounds
+	return bounds, yPos
 }
 
 func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {

@@ -823,6 +823,16 @@ func TestText_lineBounds(t *testing.T) {
 			},
 		},
 		{
+			name:  "Multiple_Trailing_Short_WrapTruncateClip",
+			text:  "foo\nbar\nbaz",
+			wrap:  fyne.TextWrapBreak,
+			trunc: fyne.TextTruncateClip,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
 			name: "Multiple_Trailing_Long_WrapOff",
 			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
 			wrap: fyne.TextWrapOff,
@@ -893,10 +903,20 @@ func TestText_lineBounds(t *testing.T) {
 				{42, 42},
 			},
 		},
+		{
+			name:  "Multiple_Trailing_Long_WrapTruncateClip",
+			text:  "foo\nfoobar foobar foobar\nbaz",
+			wrap:  fyne.TextWrapBreak,
+			trunc: fyne.TextTruncateClip,
+			want: [][2]int{
+				{0, 3},
+				{4, 14},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 84), measurer)
+			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 84), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -973,7 +993,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 46, fyne.NewSize(46, 84), measurer)
+			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 46, fyne.NewSize(46, 184), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
