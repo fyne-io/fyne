@@ -429,11 +429,12 @@ func TestText_lineBounds(t *testing.T) {
 		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
 	}
 	tests := []struct {
-		name  string
-		text  string
-		wrap  fyne.TextWrap
-		trunc fyne.TextTruncation
-		want  [][2]int
+		name     string
+		text     string
+		wrap     fyne.TextWrap
+		trunc    fyne.TextTruncation
+		want     [][2]int
+		ellipses int
 	}{
 		{
 			name: "Empty_WrapOff",
@@ -506,6 +507,7 @@ func TestText_lineBounds(t *testing.T) {
 			want: [][2]int{
 				{0, 6},
 			},
+			ellipses: 0, // too short to cut
 		},
 		{
 			name: "Single_Short_WrapBreak",
@@ -549,11 +551,12 @@ func TestText_lineBounds(t *testing.T) {
 		},
 		{
 			name:  "Single_Long_TruncateEllipsis",
-			text:  "foobar fo…",
+			text:  "foobar foobar",
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
-				{0, 10},
+				{0, 9},
 			},
+			ellipses: 1,
 		},
 		{
 			name: "Single_Long_WrapBreak",
@@ -608,6 +611,7 @@ func TestText_lineBounds(t *testing.T) {
 				{0, 3},
 				{4, 7},
 			},
+			ellipses: 0, // too wide
 		},
 		{
 			name: "Multiple_Short_WrapBreak",
@@ -660,12 +664,13 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name:  "Multiple_Long_TruncateEllipsis",
 			text:  "foobar\nfoobar foobar foobar\nfoobar foobar",
-			trunc: fyne.TextTruncateClip,
+			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 17},
-				{28, 38},
+				{7, 16},
+				{28, 37},
 			},
+			ellipses: 2,
 		},
 		{
 			name: "Multiple_Long_WrapBreak",
@@ -731,10 +736,11 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 14},
-				{26, 33},
+				{7, 16},
+				{26, 35},
 				{39, 39},
 			},
+			ellipses: 2,
 		},
 		{
 			name: "Multiple_Contiguous_Long_WrapBreak",
@@ -871,10 +877,11 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 15},
-				{28, 36},
+				{7, 16},
+				{28, 37},
 				{42, 42},
 			},
+			ellipses: 2,
 		},
 		{
 			name: "Multiple_Trailing_Long_WrapBreak",
@@ -916,11 +923,17 @@ func TestText_lineBounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			ellipses := 0
 			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 84), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
+
+				if got[i].ellipsis {
+					ellipses++
+				}
 			}
+			assert.Equal(t, tt.ellipses, ellipses)
 		})
 	}
 }
