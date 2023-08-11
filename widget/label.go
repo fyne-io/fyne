@@ -11,9 +11,10 @@ import (
 type Label struct {
 	BaseWidget
 	Text       string
-	Alignment  fyne.TextAlign // The alignment of the Text
-	Wrapping   fyne.TextWrap  // The wrapping of the Text
-	TextStyle  fyne.TextStyle // The style of the label text
+	Alignment  fyne.TextAlign      // The alignment of the text
+	Wrapping   fyne.TextWrap       // The wrapping of the text
+	TextStyle  fyne.TextStyle      // The style of the label text
+	Truncation fyne.TextTruncation // The truncation mode of the text
 	provider   *RichText
 	Importance Importance
 
@@ -145,6 +146,7 @@ func (l *Label) syncSegments() {
 	}
 
 	l.provider.Wrapping = l.Wrapping
+	l.provider.Truncation = l.Truncation
 	l.provider.Segments[0].(*TextSegment).Style = RichTextStyle{
 		Alignment: l.Alignment,
 		ColorName: color,
