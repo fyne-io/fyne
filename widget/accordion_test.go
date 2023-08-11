@@ -208,7 +208,7 @@ func TestAccordion_Layout(t *testing.T) {
 			}
 
 			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
-			window.Resize(accordion.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+			window.Resize(accordion.MinSize().Add(fyne.NewSquareSize(theme.Padding()*2)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
 
