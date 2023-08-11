@@ -10,6 +10,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Go 1.17 or later is now required.
 * Icons for macOS bundles are now padded and rounded, disable with "-use-raw-icon"
 * Focus handling for List/Tree/Table are now at the parent widget not child elements
+* Accordion widget now fills available space - put it inside a `VBox` container for old behavior
 
 
 ## 2.3.5 - 6 June 2023

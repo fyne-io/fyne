@@ -1,7 +1,7 @@
-<canvas padded size="150x200">
+<canvas padded size="104x84">
 	<content>
-		<container pos="4,4" size="142x192">
-			<widget pos="22,58" size="96x76" type="*widget.Accordion">
+		<container pos="4,4" size="96x76">
+			<widget size="96x76" type="*widget.Accordion">
 				<widget size="96x36" type="*widget.Button">
 					<rectangle radius="4" size="96x36"/>
 					<rectangle size="0x0"/>
