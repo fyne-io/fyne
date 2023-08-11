@@ -386,5 +386,5 @@ func (f formItemLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
 	min1 := objs[1].MinSize()
 
 	minWidth := fyne.Max(min0.Width, min1.Width)
-	return fyne.NewSize(minWidth, min0.Height+min1.Height).AddWidthHeight(0, theme.InnerPadding())
+	return fyne.NewSize(minWidth, min0.Height+min1.Height+theme.InnerPadding())
 }
