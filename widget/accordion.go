@@ -118,7 +118,8 @@ type accordionRenderer struct {
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
-	dividerOff := (theme.Padding() + theme.SeparatorThicknessSize()) / 2
+	pad := theme.Padding()
+	dividerOff := (pad + theme.SeparatorThicknessSize()) / 2
 	x := float32(0)
 	y := float32(0)
 	hasOpen := 0
@@ -128,11 +129,11 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		y += min
 
 		if ai.Open {
-			y += theme.Padding()
+			y += pad
 			hasOpen++
 		}
 		if i < len(r.container.Items)-1 {
-			y += theme.Padding()
+			y += pad
 		}
 	}
 
@@ -160,15 +161,16 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			y += openSize
 		}
 		if i < len(r.container.Items)-1 {
-			y += theme.Padding()
+			y += pad
 		}
 	}
 }
 
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
+	pad := theme.Padding()
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			size.Height += theme.Padding()
+			size.Height += pad
 		}
 		min := r.headers[i].MinSize()
 		size.Width = fyne.Max(size.Width, min.Width)
@@ -177,7 +179,7 @@ func (r *accordionRenderer) MinSize() (size fyne.Size) {
 		size.Width = fyne.Max(size.Width, min.Width)
 		if ai.Open {
 			size.Height += min.Height
-			size.Height += theme.Padding()
+			size.Height += pad
 		}
 	}
 	return
