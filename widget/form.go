@@ -157,11 +157,10 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 
 	text := canvas.NewText(item.HintText, theme.PlaceHolderColor())
 	text.TextSize = theme.CaptionTextSize()
-	text.Move(fyne.NewPos(theme.InnerPadding(), theme.InputBorderSize()))
 	item.helperOutput = text
 	f.updateHelperText(item)
 	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{text}}
-	return &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{item.Widget, textContainer}}
+	return &fyne.Container{Layout: formItemLayout{}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
 func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
@@ -370,4 +369,22 @@ func NewForm(items ...*FormItem) *Form {
 	form.ExtendBaseWidget(form)
 
 	return form
+}
+
+type formItemLayout struct{}
+
+func (f formItemLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
+	itemHeight := objs[0].MinSize().Height
+	objs[0].Resize(fyne.NewSize(size.Width, itemHeight))
+
+	objs[1].Move(fyne.NewPos(theme.InnerPadding(), itemHeight+theme.InnerPadding()/2))
+	objs[1].Resize(fyne.NewSize(size.Width, objs[1].MinSize().Width))
+}
+
+func (f formItemLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
+	min0 := objs[0].MinSize()
+	min1 := objs[1].MinSize()
+
+	minWidth := fyne.Max(min0.Width, min1.Width)
+	return fyne.NewSize(minWidth, min0.Height+min1.Height+theme.InnerPadding())
 }
