@@ -208,7 +208,125 @@ func TestAccordion_Layout(t *testing.T) {
 			}
 
 			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
-			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 200)))
+			window.Resize(accordion.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
+
+			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
+
+			window.Close()
+		})
+	}
+}
+
+func TestAccordion_Layout_Expanded(t *testing.T) {
+	test.NewApp()
+
+	for name, tt := range map[string]struct {
+		multiOpen bool
+		items     []*widget.AccordionItem
+		opened    []int
+	}{
+		"expanded_single_open_one_item": {
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+			},
+		},
+		"expanded_single_open_one_item_opened": {
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+			},
+			opened: []int{0},
+		},
+		"expanded_single_open_multiple_items": {
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+				{
+					Title:  "B",
+					Detail: widget.NewLabel("2222222222"),
+				},
+			},
+		},
+		"expanded_single_open_multiple_items_opened": {
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+				{
+					Title:  "B",
+					Detail: widget.NewLabel("2222222222"),
+				},
+			},
+			opened: []int{0, 1},
+		},
+		"expanded_multiple_open_one_item": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+			},
+		},
+		"expanded_multiple_open_one_item_opened": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+			},
+			opened: []int{0},
+		},
+		"expanded_multiple_open_multiple_items": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+				{
+					Title:  "B",
+					Detail: widget.NewLabel("2222222222"),
+				},
+			},
+		},
+		"expanded_multiple_open_multiple_items_opened": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				{
+					Title:  "A",
+					Detail: widget.NewLabel("11111"),
+				},
+				{
+					Title:  "B",
+					Detail: widget.NewLabel("2222222222"),
+				},
+			},
+			opened: []int{0, 1},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			accordion := &widget.Accordion{
+				MultiOpen: tt.multiOpen,
+			}
+			for _, ai := range tt.items {
+				accordion.Append(ai)
+			}
+			for _, o := range tt.opened {
+				accordion.Open(o)
+			}
+
+			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
+			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 280)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
 
