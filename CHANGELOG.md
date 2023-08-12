@@ -20,7 +20,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add `Window.SetOnDropped` to handle window-wide item drop on desktop
 * Add lists to the types supported by preferences API
 * Keyboard focus handling for all collection widgets
-* dd APIs for refreshing individual items in collections (#3826)
+* Add APIs for refreshing individual items in collections (#3826)
 * Tapping slider moves it to that position (#3650)
 * Add `OnChangeEnded` callback to `Slider` (#3652)
 * Add `NewWarningThemedResource` and `NewSuccessThemedResource` along with `NewColoredResource` (#4040)
@@ -78,6 +78,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Setting Position1 of canvas.Circle higher than its Position2 causes panic. (#3949)
 * Enhance scroll wheel/touchpad scroll on desktop (#3492)
 * Possible build issue on Windows with app metadata
+* form hint text has confusing padding to next widget (#4137)
 
 
 ## 2.3.5 - 6 June 2023
