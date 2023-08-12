@@ -573,7 +573,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 		if wrap == fyne.TextWrapOff {
 			minBounds.Height = min.Height
 		} else {
-			minBounds = minBounds.Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2).Subtract(r.obj.inset).Subtract(r.obj.inset))
+			minBounds = minBounds.Add(fyne.NewSquareSize(theme.InnerPadding() * 2).Subtract(r.obj.inset).Subtract(r.obj.inset))
 		}
 		if trunc == fyne.TextTruncateClip {
 			return minBounds
@@ -647,7 +647,7 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 		height = charMinSize.Height
 	}
 	return fyne.NewSize(width, height).
-		Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()*2).Subtract(r.obj.inset).Subtract(r.obj.inset))
+		Add(fyne.NewSquareSize(theme.InnerPadding() * 2).Subtract(r.obj.inset).Subtract(r.obj.inset))
 }
 
 func (r *textRenderer) Refresh() {
