@@ -833,7 +833,9 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	e.setFieldsAndRefresh(e.eraseSelection)
 	e.propertyLock.Lock()
 	content := e.textProvider().String()
-	e.OnChanged(content)
+	if e.OnChanged != nil {
+		e.OnChanged(content)
+	}
 	e.propertyLock.Unlock()
 	e.Validate()
 }
@@ -1054,7 +1056,9 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		e.setFieldsAndRefresh(e.eraseSelection)
 		e.propertyLock.Lock()
 		content := e.textProvider().String()
-		e.OnChanged(content)
+		if e.OnChanged != nil {
+			e.OnChanged(content)
+		}
 		e.propertyLock.Unlock()
 		e.Validate()
 		return true
