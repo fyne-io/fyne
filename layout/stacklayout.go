@@ -11,6 +11,7 @@ type stackLayout struct {
 
 // NewStackLayout returns a new StackLayout instance. Objects are stacked
 // on top of each other with later objects on top of those before.
+// Using this layout with a single object is a no-op.
 //
 // Since: 2.4
 func NewStackLayout() fyne.Layout {

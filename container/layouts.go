@@ -102,6 +102,7 @@ func NewPadded(objects ...fyne.CanvasObject) *fyne.Container {
 
 // NewStack returns a new container that stacks objects on top of each other.
 // Objects at the end of the container will be stacked on top of objects before.
+// A stack with a single object does not change the size or position of that object.
 //
 // Since: 2.4
 func NewStack(objects ...fyne.CanvasObject) *fyne.Container {
