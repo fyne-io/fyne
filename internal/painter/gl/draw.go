@@ -389,6 +389,9 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 
 // Returns FragmentColor(red,green,blue,alpha) from fyne.Color
 func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
+	if col == nil {
+		return 0, 0, 0, 0
+	}
 	r, g, b, a := col.RGBA()
 	if a == 0 {
 		return 0, 0, 0, 0
