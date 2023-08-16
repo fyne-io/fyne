@@ -79,9 +79,9 @@ func (p *painter) Init() {
 		compiled = programs
 	}
 	p.program = compiled[0]
-	p.lineProgram = compiled[0]
-	p.rectangleProgram = compiled[0]
-	p.roundRectangleProgram = compiled[0]
+	p.lineProgram = compiled[1]
+	p.rectangleProgram = compiled[2]
+	p.roundRectangleProgram = compiled[3]
 }
 
 // f32Bytes returns the byte representation of float32 values in the given byte
