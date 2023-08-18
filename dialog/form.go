@@ -28,24 +28,14 @@ func (d *FormDialog) Submit() {
 	d.hideWithResponse(true)
 }
 
-// validateItems acts as a validation edge state handler that will respond to an individual widget's validation
-// state before checking all others to determine the net validation state. If the error passed is not nil, then the
-// confirm button will be disabled. If the error parameter is nil, then all other Validatable widgets in items are
-// checked as well to determine whether the confirm button should be disabled.
-// This method is passed to each Validatable widget's SetOnValidationChanged method in items by NewForm.
-func (d *FormDialog) validateItems(err error) {
+// setSubmitState is intended to run when the form validation changes to
+// enable/disable the submit button accordingly.
+func (d *FormDialog) setSubmitState(err error) {
 	if err != nil {
 		d.confirm.Disable()
 		return
 	}
-	for _, item := range d.items {
-		if validatable, ok := item.Widget.(fyne.Validatable); ok {
-			if err := validatable.Validate(); err != nil {
-				d.confirm.Disable()
-				return
-			}
-		}
-	}
+
 	d.confirm.Enable()
 }
 
@@ -74,9 +64,8 @@ func NewForm(title, confirm, dismiss string, items []*widget.FormItem, callback 
 		cancel:  d.dismiss,
 	}
 
-	formDialog.validateItems(nil)
-
-	form.SetOnValidationChanged(formDialog.validateItems)
+	formDialog.setSubmitState(form.Validate())
+	form.SetOnValidationChanged(formDialog.setSubmitState)
 
 	d.create(container.NewGridWithColumns(2, d.dismiss, confirmBtn))
 	return formDialog
