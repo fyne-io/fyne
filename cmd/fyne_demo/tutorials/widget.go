@@ -195,14 +195,14 @@ This styled row should also wrap as expected, but only *when required*.
 	rich.Scroll = container.ScrollBoth
 	rich.Segments[2].(*widget.ImageSegment).Alignment = fyne.TextAlignTrailing
 
-	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
+	radioAlign := widget.NewRadioGroup([]string{"Leading", "Center", "Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
-		case "Text Alignment Leading":
+		case "Leading":
 			align = fyne.TextAlignLeading
-		case "Text Alignment Center":
+		case "Center":
 			align = fyne.TextAlignCenter
-		case "Text Alignment Trailing":
+		case "Trailing":
 			align = fyne.TextAlignTrailing
 		}
 
@@ -221,18 +221,19 @@ This styled row should also wrap as expected, but only *when required*.
 		hyperlink.Refresh()
 		rich.Refresh()
 	})
-	radioAlign.SetSelected("Text Alignment Leading")
+	radioAlign.Horizontal = true
+	radioAlign.SetSelected("Leading")
 
-	radioWrap := widget.NewRadioGroup([]string{"Text Wrapping Off", "Text Wrapping Truncate", "Text Wrapping Break", "Text Wrapping Word"}, func(s string) {
+	radioWrap := widget.NewRadioGroup([]string{"Off", "Truncate", "Break", "Word"}, func(s string) {
 		var wrap fyne.TextWrap
 		switch s {
-		case "Text Wrapping Off":
+		case "Off":
 			wrap = fyne.TextWrapOff
-		case "Text Wrapping Truncate":
+		case "Truncate":
 			wrap = fyne.TextTruncate
-		case "Text Wrapping Break":
+		case "Break":
 			wrap = fyne.TextWrapBreak
-		case "Text Wrapping Word":
+		case "Word":
 			wrap = fyne.TextWrapWord
 		}
 
@@ -246,14 +247,13 @@ This styled row should also wrap as expected, but only *when required*.
 		entryLoremIpsum.Refresh()
 		rich.Refresh()
 	})
-	radioWrap.SetSelected("Text Wrapping Word")
+	radioWrap.Horizontal = true
+	radioWrap.SetSelected("Word")
 
 	fixed := container.NewVBox(
-		container.NewHBox(
-			radioAlign,
-			layout.NewSpacer(),
-			radioWrap,
-		),
+		widget.NewForm(
+			widget.NewFormItem("Text Alignment", radioAlign),
+			widget.NewFormItem("Wrapping", radioWrap)),
 		label,
 		hyperlink,
 	)
