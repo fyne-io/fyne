@@ -50,7 +50,11 @@ type Entry struct {
 	Password    bool
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
-	Scroll      widget.ScrollDirection
+
+	// Scroll can be used to turn off the scrolling of our entry when Wrapping is WrapNone.
+	//
+	// Since: 2.4
+	Scroll widget.ScrollDirection
 
 	// Set a validator that this entry will check against
 	// Since: 1.4
