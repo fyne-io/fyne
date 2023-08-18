@@ -1936,6 +1936,7 @@ func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
 func TestEntry_CarriageReturn(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = container.ScrollNone
 	entry.SetText("\r\n\r")
 	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(64, 64))
