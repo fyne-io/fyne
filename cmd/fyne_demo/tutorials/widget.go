@@ -224,13 +224,15 @@ This styled row should also wrap as expected, but only *when required*.
 	radioAlign.Horizontal = true
 	radioAlign.SetSelected("Leading")
 
-	radioWrap := widget.NewRadioGroup([]string{"Off", "Truncate", "Break", "Word"}, func(s string) {
+	radioWrap := widget.NewRadioGroup([]string{"Off", "Scroll", "Break", "Word"}, func(s string) {
 		var wrap fyne.TextWrap
+		scroll := container.ScrollBoth
 		switch s {
 		case "Off":
 			wrap = fyne.TextWrapOff
-		case "Truncate":
-			wrap = fyne.TextTruncate
+			scroll = container.ScrollNone
+		case "Scroll":
+			wrap = fyne.TextWrapOff
 		case "Break":
 			wrap = fyne.TextWrapBreak
 		case "Word":
@@ -240,6 +242,7 @@ This styled row should also wrap as expected, but only *when required*.
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		entryLoremIpsum.Wrapping = wrap
+		entryLoremIpsum.Scroll = scroll
 		rich.Wrapping = wrap
 
 		label.Refresh()
@@ -250,10 +253,33 @@ This styled row should also wrap as expected, but only *when required*.
 	radioWrap.Horizontal = true
 	radioWrap.SetSelected("Word")
 
+	radioTrunc := widget.NewRadioGroup([]string{"Off", "Clip", "Ellipsis"}, func(s string) {
+		var trunc fyne.TextTruncation
+		switch s {
+		case "Off":
+			trunc = fyne.TextTruncateOff
+		case "Clip":
+			trunc = fyne.TextTruncateClip
+		case "Ellipsis":
+			trunc = fyne.TextTruncateEllipsis
+		}
+
+		label.Truncation = trunc
+		rich.Truncation = trunc
+
+		label.Refresh()
+		hyperlink.Refresh()
+		entryLoremIpsum.Refresh()
+		rich.Refresh()
+	})
+	radioTrunc.Horizontal = true
+	radioTrunc.SetSelected("Off")
+
 	fixed := container.NewVBox(
 		widget.NewForm(
 			widget.NewFormItem("Text Alignment", radioAlign),
-			widget.NewFormItem("Wrapping", radioWrap)),
+			widget.NewFormItem("Wrapping", radioWrap),
+			widget.NewFormItem("Truncation", radioTrunc)),
 		label,
 		hyperlink,
 	)
