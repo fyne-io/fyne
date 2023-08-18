@@ -853,7 +853,7 @@ func concealed(seg RichTextSegment) bool {
 }
 
 func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width float32, measurer func([]rune) fyne.Size) []rowBoundary {
-	if trunc != fyne.TextTruncateEllipsis {
+	if trunc != fyne.TextTruncateEllipsis || len(bounds) == 0 {
 		return bounds
 	}
 
