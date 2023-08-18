@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/driver"
@@ -431,6 +432,7 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = container.ScrollNone
 	entry.Refresh()
 	assert.Greater(t, entry.MinSize().Width, min.Width)
 
@@ -450,6 +452,7 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = container.ScrollNone
 	entry.Refresh()
 	assert.Greater(t, entry.MinSize().Width, min.Width)
 
@@ -987,7 +990,7 @@ func TestEntry_PasteUnicode(t *testing.T) {
 }
 
 func TestEntry_Placeholder(t *testing.T) {
-	entry := &widget.Entry{}
+	entry := &widget.Entry{Scroll: container.ScrollNone}
 	entry.Text = "Text"
 	entry.PlaceHolder = "Placehold"
 
@@ -1654,27 +1657,35 @@ func TestEntry_TappedSecondary(t *testing.T) {
 func TestEntry_TextWrap(t *testing.T) {
 	for name, tt := range map[string]struct {
 		multiLine bool
+		scroll    container.ScrollDirection
 		want      string
 		wrap      fyne.TextWrap
 	}{
 		"single line WrapOff": {
-			want: "entry/wrap_single_line_off.xml",
+			scroll: container.ScrollNone,
+			want:   "entry/wrap_single_line_off.xml",
 		},
 		"single line Truncate": {
 			wrap: fyne.TextTruncate,
 			want: "entry/wrap_single_line_truncate.xml",
 		},
-		// Disallowed - fallback to TextWrapTruncate (horizontal)
+		"single line Scroll": {
+			scroll: container.ScrollHorizontalOnly,
+			wrap:   fyne.TextWrapOff,
+			want:   "entry/wrap_single_line_truncate.xml",
+		},
+		// Disallowed - fallback to Scrollling (horizontal)
 		"single line WrapBreak": {
 			wrap: fyne.TextWrapBreak,
 			want: "entry/wrap_single_line_truncate.xml",
 		},
-		// Disallowed - fallback to TextWrapTruncate (horizontal)
+		// Disallowed - fallback to Scrolling (horizontal)
 		"single line WrapWord": {
 			wrap: fyne.TextWrapWord,
 			want: "entry/wrap_single_line_truncate.xml",
 		},
 		"multi line WrapOff": {
+			scroll:    container.ScrollNone,
 			multiLine: true,
 			want:      "entry/wrap_multi_line_off.xml",
 		},
@@ -1702,6 +1713,7 @@ func TestEntry_TextWrap(t *testing.T) {
 
 			c.Focus(e)
 			e.Wrapping = tt.wrap
+			e.Scroll = tt.scroll
 			if tt.multiLine {
 				e.SetText("A long text on short words w/o NLs or LFs.")
 			} else {
@@ -1719,6 +1731,7 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 
 	c.Focus(e)
 	e.Wrapping = fyne.TextWrapOff
+	e.Scroll = container.ScrollNone
 	e.SetText("Testing Wrapping")
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 
@@ -1990,9 +2003,9 @@ func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 
 	var entry *widget.Entry
 	if multiLine {
-		entry = &widget.Entry{MultiLine: true, Wrapping: fyne.TextWrapWord}
+		entry = &widget.Entry{MultiLine: true, Wrapping: fyne.TextWrapWord, Scroll: container.ScrollNone}
 	} else {
-		entry = &widget.Entry{Wrapping: fyne.TextWrapOff}
+		entry = &widget.Entry{Wrapping: fyne.TextWrapOff, Scroll: container.ScrollNone}
 	}
 	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 200))
