@@ -130,6 +130,10 @@ func (w *window) Show() {
 
 func (w *window) doShow() {
 	if w.view() != nil {
+		runOnDraw(w, func() {
+			w.driver.repaintWindow(w)
+		})
+
 		w.doShowAgain()
 		return
 	}
