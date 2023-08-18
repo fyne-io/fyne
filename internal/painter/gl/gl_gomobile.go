@@ -70,13 +70,11 @@ func (p *painter) Init() {
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	if compiled == nil {
-		programs := make([]Program, 4)
-		programs[0] = p.createProgram("simple_es")
-		programs[1] = p.createProgram("line_es")
-		programs[2] = p.createProgram("rectangle_es")
-		programs[3] = p.createProgram("round_rectangle_es")
-
-		compiled = programs
+		compiled = []Program{
+			p.createProgram("simple_es"),
+			p.createProgram("line_es"),
+			p.createProgram("rectangle_es"),
+			p.createProgram("round_rectangle_es")}
 	}
 	p.program = compiled[0]
 	p.lineProgram = compiled[1]
