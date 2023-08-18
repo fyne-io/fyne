@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
+	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -31,6 +32,7 @@ func TestEntry_Cursor(t *testing.T) {
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = intWidget.ScrollNone
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
 	entry.Resize(entry.MinSize())
 
@@ -80,6 +82,7 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 func TestEntry_DragSelect(t *testing.T) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = intWidget.ScrollNone
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
 	entry.Resize(entry.MinSize())
 
@@ -104,6 +107,7 @@ func TestEntry_DragSelect(t *testing.T) {
 func TestEntry_DragSelectLargeStep(t *testing.T) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = intWidget.ScrollNone
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
 	entry.Resize(entry.MinSize())
 
