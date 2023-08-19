@@ -895,6 +895,7 @@ func (e *Entry) placeholderProvider() *RichText {
 
 	style := RichTextStyleInline
 	style.ColorName = theme.ColorNamePlaceHolder
+	style.TextStyle = e.TextStyle
 	text := NewRichText(&TextSegment{
 		Style: style,
 		Text:  e.PlaceHolder,
