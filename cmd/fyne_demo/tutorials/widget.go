@@ -195,14 +195,14 @@ This styled row should also wrap as expected, but only *when required*.
 	rich.Scroll = container.ScrollBoth
 	rich.Segments[2].(*widget.ImageSegment).Alignment = fyne.TextAlignTrailing
 
-	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
+	radioAlign := widget.NewRadioGroup([]string{"Leading", "Center", "Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
-		case "Text Alignment Leading":
+		case "Leading":
 			align = fyne.TextAlignLeading
-		case "Text Alignment Center":
+		case "Center":
 			align = fyne.TextAlignCenter
-		case "Text Alignment Trailing":
+		case "Trailing":
 			align = fyne.TextAlignTrailing
 		}
 
@@ -221,24 +221,28 @@ This styled row should also wrap as expected, but only *when required*.
 		hyperlink.Refresh()
 		rich.Refresh()
 	})
-	radioAlign.SetSelected("Text Alignment Leading")
+	radioAlign.Horizontal = true
+	radioAlign.SetSelected("Leading")
 
-	radioWrap := widget.NewRadioGroup([]string{"Text Wrapping Off", "Text Wrapping Truncate", "Text Wrapping Break", "Text Wrapping Word"}, func(s string) {
+	radioWrap := widget.NewRadioGroup([]string{"Off", "Scroll", "Break", "Word"}, func(s string) {
 		var wrap fyne.TextWrap
+		scroll := container.ScrollBoth
 		switch s {
-		case "Text Wrapping Off":
+		case "Off":
 			wrap = fyne.TextWrapOff
-		case "Text Wrapping Truncate":
-			wrap = fyne.TextTruncate
-		case "Text Wrapping Break":
+			scroll = container.ScrollNone
+		case "Scroll":
+			wrap = fyne.TextWrapOff
+		case "Break":
 			wrap = fyne.TextWrapBreak
-		case "Text Wrapping Word":
+		case "Word":
 			wrap = fyne.TextWrapWord
 		}
 
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		entryLoremIpsum.Wrapping = wrap
+		entryLoremIpsum.Scroll = scroll
 		rich.Wrapping = wrap
 
 		label.Refresh()
@@ -246,14 +250,36 @@ This styled row should also wrap as expected, but only *when required*.
 		entryLoremIpsum.Refresh()
 		rich.Refresh()
 	})
-	radioWrap.SetSelected("Text Wrapping Word")
+	radioWrap.Horizontal = true
+	radioWrap.SetSelected("Word")
+
+	radioTrunc := widget.NewRadioGroup([]string{"Off", "Clip", "Ellipsis"}, func(s string) {
+		var trunc fyne.TextTruncation
+		switch s {
+		case "Off":
+			trunc = fyne.TextTruncateOff
+		case "Clip":
+			trunc = fyne.TextTruncateClip
+		case "Ellipsis":
+			trunc = fyne.TextTruncateEllipsis
+		}
+
+		label.Truncation = trunc
+		rich.Truncation = trunc
+
+		label.Refresh()
+		hyperlink.Refresh()
+		entryLoremIpsum.Refresh()
+		rich.Refresh()
+	})
+	radioTrunc.Horizontal = true
+	radioTrunc.SetSelected("Off")
 
 	fixed := container.NewVBox(
-		container.NewHBox(
-			radioAlign,
-			layout.NewSpacer(),
-			radioWrap,
-		),
+		widget.NewForm(
+			widget.NewFormItem("Text Alignment", radioAlign),
+			widget.NewFormItem("Wrapping", radioWrap),
+			widget.NewFormItem("Truncation", radioTrunc)),
 		label,
 		hyperlink,
 	)

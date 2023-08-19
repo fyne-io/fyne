@@ -51,6 +51,11 @@ type Entry struct {
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
 
+	// Scroll can be used to turn off the scrolling of our entry when Wrapping is WrapNone.
+	//
+	// Since: 2.4
+	Scroll widget.ScrollDirection
+
 	// Set a validator that this entry will check against
 	// Since: 1.4
 	Validator           fyne.StringValidator `json:"-"`
@@ -173,7 +178,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.content = &entryContent{entry: e}
 	e.scroll = widget.NewScroll(nil)
 	objects := []fyne.CanvasObject{box, border}
-	if e.Wrapping != fyne.TextWrapOff {
+	if e.Wrapping != fyne.TextWrapOff || e.Scroll != widget.ScrollNone {
 		e.scroll.Content = e.content
 		objects = append(objects, e.scroll)
 	} else {
@@ -1201,6 +1206,7 @@ func (e *Entry) textWrap() fyne.TextWrap {
 	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
 		fyne.LogError("Entry cannot wrap single line", nil)
 		e.Wrapping = fyne.TextTruncate
+		return fyne.TextWrapOff
 	}
 	return e.Wrapping
 }
@@ -1421,7 +1427,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	textPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
 	selectPos := r.entry.textPosFromRowCol(r.entry.selectRow, r.entry.selectColumn)
 	r.entry.propertyLock.Unlock()
-	if r.entry.Wrapping == fyne.TextWrapOff {
+	if r.entry.Wrapping == fyne.TextWrapOff && r.entry.Scroll == widget.ScrollNone {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
 	} else {
@@ -1481,6 +1487,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	content := r.entry.content
 	focusedAppearance := r.entry.focused && !r.entry.disabled
+	scroll := r.entry.Scroll
 	size := r.entry.size
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
@@ -1493,7 +1500,7 @@ func (r *entryRenderer) Refresh() {
 
 	// correct our scroll wrappers if the wrap mode changed
 	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
-	if wrapping == fyne.TextWrapOff && r.scroll.Content != nil {
+	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
 		content.Move(fyne.NewPos(0, theme.InputBorderSize()))
@@ -1505,7 +1512,7 @@ func (r *entryRenderer) Refresh() {
 				break
 			}
 		}
-	} else if wrapping != fyne.TextWrapOff && r.scroll.Content == nil {
+	} else if (wrapping != fyne.TextWrapOff || scroll != widget.ScrollNone) && r.scroll.Content == nil {
 		r.scroll.Content = content
 		content.Move(fyne.NewPos(0, 0))
 		r.scroll.Move(fyne.NewPos(0, theme.InputBorderSize()))
@@ -1836,7 +1843,7 @@ func (r *entryContentRenderer) updateScrollDirections() {
 
 	switch r.content.entry.Wrapping {
 	case fyne.TextWrapOff:
-		r.content.scroll.Direction = widget.ScrollNone
+		r.content.scroll.Direction = r.content.entry.Scroll
 	case fyne.TextTruncate: // this is now the default - but we scroll
 		r.content.scroll.Direction = widget.ScrollBoth
 	default: // fyne.TextWrapBreak, fyne.TextWrapWord
