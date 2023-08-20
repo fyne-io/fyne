@@ -5,7 +5,6 @@ package glfw
 
 import (
 	"fmt"
-	"runtime"
 
 	"fyne.io/fyne/v2"
 
@@ -14,10 +13,6 @@ import (
 
 func (d *gLDriver) initGLFW() {
 	initOnce.Do(func() {
-		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-			drawOnMainThread = true
-		}
-
 		err := glfw.Init()
 		if err != nil {
 			fyne.LogError("failed to initialise GLFW", err)

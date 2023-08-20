@@ -27,15 +27,13 @@ import (
 // influence of a garbage collector.
 var mainGoroutineID uint64
 
-var (
-	curWindow *window
-	isWayland = false
-)
+var curWindow *window
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
 
-var drawOnMainThread bool // A workaround on Apple M1, just use 1 thread until fixed upstream
+// A workaround on Apple M1/M2, just use 1 thread until fixed upstream.
+const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
 
 type gLDriver struct {
 	windowLock sync.RWMutex
