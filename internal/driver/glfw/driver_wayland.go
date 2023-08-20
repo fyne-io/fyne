@@ -3,6 +3,4 @@
 
 package glfw
 
-func init() {
-	isWayland = true
-}
+const isWayland = true
