@@ -535,6 +535,15 @@ func TestEntry_Notify(t *testing.T) {
 	entry.SetText("Test")
 
 	assert.True(t, changed)
+
+	changed = false
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDelete})
+	assert.True(t, changed)
+
+	changed = false
+	entry.CursorColumn = 1
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.True(t, changed)
 }
 
 func TestEntry_OnCopy(t *testing.T) {
