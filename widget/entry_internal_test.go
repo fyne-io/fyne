@@ -366,6 +366,17 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 	assert.Equal(t, 7, entry.CursorColumn)
 }
 
+func TestEntry_PlaceholderTextStyle(t *testing.T) {
+	e := NewEntry()
+	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
+
+	w := test.NewWindow(e)
+	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+
+	w.Canvas().Focus(e)
+	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+}
+
 func TestEntry_Tab(t *testing.T) {
 	e := NewEntry()
 	e.TextStyle.Monospace = true
