@@ -24,16 +24,22 @@ func (d *gLDriver) initGLFW() {
 	})
 }
 
-func (d *gLDriver) tryPollEvents() {
+func (d *gLDriver) waitForEvents() {
 	defer func() {
 		if r := recover(); r != nil {
 			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
 		}
 	}()
 
-	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
+	glfw.WaitEvents()
 }
 
 func (d *gLDriver) Terminate() {
 	glfw.Terminate()
+}
+
+// PostEmptyEvent posts an event to the GLFW event queue.
+// This is used to signal execution to continue from glfw.WaitEvents().
+func PostEmptyEvent() {
+	glfw.PostEmptyEvent()
 }

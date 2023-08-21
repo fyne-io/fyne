@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"sync"
+	"sync/atomic"
 
 	"github.com/fyne-io/image/ico"
 
@@ -39,7 +40,7 @@ type gLDriver struct {
 	windowLock sync.RWMutex
 	windows    []fyne.Window
 	device     *glDevice
-	done       chan interface{}
+	mainDone   uint32
 	drawDone   chan interface{}
 
 	animation *animation.Runner
@@ -102,10 +103,9 @@ func (d *gLDriver) Quit() {
 		}
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
-	defer func() {
-		recover() // we could be called twice - no safe way to check if d.done is closed
-	}()
-	close(d.done)
+
+	atomic.StoreUint32(&d.mainDone, 1)
+	PostEmptyEvent()
 }
 
 func (d *gLDriver) addWindow(w *window) {
@@ -173,7 +173,6 @@ func NewGLDriver() fyne.Driver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:      make(chan interface{}),
 		drawDone:  make(chan interface{}),
 		animation: &animation.Runner{},
 	}

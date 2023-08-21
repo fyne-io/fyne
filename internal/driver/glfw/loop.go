@@ -3,6 +3,7 @@ package glfw
 import (
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -58,6 +59,7 @@ func runOnMain(f func()) {
 		defer donePool.Put(done)
 
 		funcQueue <- funcData{f: f, done: done}
+		PostEmptyEvent()
 
 		<-done
 	}
@@ -112,74 +114,81 @@ func (d *gLDriver) runGL() {
 	if d.trayStart != nil {
 		d.trayStart()
 	}
+
 	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
-	for {
-		select {
-		case <-d.done:
-			eventTick.Stop()
-			d.drawDone <- nil // wait for draw thread to stop
+
+	// Post empty event to not get stuck in the loop on first iteration.
+	PostEmptyEvent()
+
+	for range eventTick.C {
+		d.waitForEvents()
+
+		// Check if we are done with execution.
+		if atomic.LoadUint32(&d.mainDone) == 1 {
+			d.drawDone <- nil // Wait for draw thread to stop.
 			d.Terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
+		}
+
+		select {
 		case f := <-funcQueue:
 			f.f()
-			if f.done != nil {
-				f.done <- struct{}{}
+			f.done <- struct{}{}
+		default: // Don't get stuck waiting for event.
+		}
+
+		newWindows := []fyne.Window{}
+		reassign := false
+		for _, win := range d.windowList() {
+			w := win.(*window)
+			if w.viewport == nil {
+				continue
 			}
-		case <-eventTick.C:
-			d.tryPollEvents()
-			newWindows := []fyne.Window{}
-			reassign := false
-			for _, win := range d.windowList() {
-				w := win.(*window)
-				if w.viewport == nil {
-					continue
-				}
 
-				if w.viewport.ShouldClose() {
-					reassign = true
-					w.viewLock.Lock()
-					w.visible = false
-					v := w.viewport
-					w.viewLock.Unlock()
+			if w.viewport.ShouldClose() {
+				reassign = true
+				w.viewLock.Lock()
+				w.visible = false
+				v := w.viewport
+				w.viewLock.Unlock()
 
-					// remove window from window list
-					v.Destroy()
-					w.destroy(d)
-					continue
-				}
+				// remove window from window list
+				v.Destroy()
+				w.destroy(d)
+				continue
+			}
 
-				w.viewLock.RLock()
-				expand := w.shouldExpand
-				fullScreen := w.fullScreen
-				w.viewLock.RUnlock()
+			w.viewLock.RLock()
+			expand := w.shouldExpand
+			fullScreen := w.fullScreen
+			w.viewLock.RUnlock()
 
-				if expand && !fullScreen {
-					w.fitContent()
-					w.viewLock.Lock()
-					shouldExpand := w.shouldExpand
-					w.shouldExpand = false
-					view := w.viewport
-					w.viewLock.Unlock()
-					if shouldExpand {
-						view.SetSize(w.shouldWidth, w.shouldHeight)
-					}
-				}
-
-				newWindows = append(newWindows, win)
-
-				if drawOnMainThread {
-					d.drawSingleFrame()
+			if expand && !fullScreen {
+				w.fitContent()
+				w.viewLock.Lock()
+				shouldExpand := w.shouldExpand
+				w.shouldExpand = false
+				view := w.viewport
+				w.viewLock.Unlock()
+				if shouldExpand {
+					view.SetSize(w.shouldWidth, w.shouldHeight)
 				}
 			}
-			if reassign {
-				d.windowLock.Lock()
-				d.windows = newWindows
-				d.windowLock.Unlock()
 
-				if len(newWindows) == 0 {
-					d.Quit()
-				}
+			newWindows = append(newWindows, win)
+
+			if drawOnMainThread {
+				d.drawSingleFrame()
+			}
+		}
+		if reassign {
+			d.windowLock.Lock()
+			d.windows = newWindows
+			d.windowLock.Unlock()
+
+			if len(newWindows) == 0 {
+				d.Quit()
 			}
 		}
 	}

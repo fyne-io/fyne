@@ -171,7 +171,7 @@ func (d *gLDriver) CurrentKeyModifiers() fyne.KeyModifier {
 
 func catchTerm(d *gLDriver) {
 	terminateSignals := make(chan os.Signal, 1)
-	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 
 	for range terminateSignals {
 		d.Quit()
