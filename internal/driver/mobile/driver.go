@@ -546,9 +546,10 @@ func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	d := new(mobileDriver)
-	d.theme = fyne.ThemeVariant(2) // unspecified
-	d.animation = &animation.Runner{}
+	d := &mobileDriver{
+		theme:     fyne.ThemeVariant(2), // unspecified
+		animation: &animation.Runner{},
+	}
 
 	registerRepository(d)
 	return d

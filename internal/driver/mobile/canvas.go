@@ -293,7 +293,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 		}
 	}
 
-	ev := new(fyne.DragEvent)
+	ev := &fyne.DragEvent{}
 	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
 	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
@@ -345,9 +345,10 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 		c.touched[tapID] = nil
 	}
 
-	ev := new(fyne.PointEvent)
-	ev.Position = objPos
-	ev.AbsolutePosition = pos
+	ev := &fyne.PointEvent{
+		Position:         objPos,
+		AbsolutePosition: pos,
+	}
 
 	if duration < tapSecondaryDelay {
 		_, doubleTap := co.(fyne.DoubleTappable)
