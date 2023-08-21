@@ -148,12 +148,13 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	logError(msg, err)
 
-	run.Lock()
-	if !run.flag {
-		run.Unlock()
+	run.L.Lock()
+	running := !run.flag
+	run.L.Unlock()
+
+	if running {
 		d.Quit()
 	} else {
-		run.Unlock()
 		os.Exit(1)
 	}
 }

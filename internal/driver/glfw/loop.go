@@ -24,45 +24,36 @@ type drawData struct {
 }
 
 type runFlag struct {
-	sync.Mutex
+	sync.Cond
 	flag bool
-	cond *sync.Cond
 }
 
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var run *runFlag
+var run = &runFlag{Cond: sync.Cond{L: &sync.Mutex{}}}
 var initOnce = &sync.Once{}
 var donePool = &sync.Pool{New: func() interface{} {
 	return make(chan struct{})
 }}
 
-func newRun() *runFlag {
-	r := runFlag{}
-	r.cond = sync.NewCond(&r)
-	return &r
-}
-
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
 	mainGoroutineID = goroutineID()
-
-	run = newRun()
 }
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	run.Lock()
-	if !run.flag {
-		f()
-		run.Unlock()
-	} else {
-		run.Unlock()
+	run.L.Lock()
+	running := !run.flag
+	run.L.Unlock()
 
+	if running {
+		f()
+	} else {
 		done := donePool.Get().(chan struct{})
 		defer donePool.Put(done)
 
@@ -111,10 +102,11 @@ func (d *gLDriver) drawSingleFrame() {
 
 func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(time.Second / 60)
-	run.Lock()
+
+	run.L.Lock()
 	run.flag = true
-	run.Unlock()
-	run.cond.Broadcast()
+	run.L.Unlock()
+	run.Broadcast()
 
 	d.initGLFW()
 	if d.trayStart != nil {
