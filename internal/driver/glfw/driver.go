@@ -170,12 +170,11 @@ func (d *gLDriver) Run() {
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
 func NewGLDriver() fyne.Driver {
-	d := new(gLDriver)
-	d.done = make(chan interface{})
-	d.drawDone = make(chan interface{})
-	d.animation = &animation.Runner{}
-
 	repository.Register("file", intRepo.NewFileRepository())
 
-	return d
+	return &gLDriver{
+		done:      make(chan interface{}),
+		drawDone:  make(chan interface{}),
+		animation: &animation.Runner{},
+	}
 }
