@@ -801,10 +801,6 @@ func (w *window) processCharInput(char rune) {
 
 func (w *window) processFocused(focus bool) {
 	if focus {
-		// On Mac OS, hidden windows can be re-shown from the dock icon, which issues
-		// a GLFW window focus callback. We need to make sure the run loop is re-activated.
-		go w.doShow()
-
 		if curWindow == nil {
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerEnteredForeground()
 		}
