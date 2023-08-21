@@ -148,12 +148,13 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	logError(msg, err)
 
-	run.Lock()
-	if !run.flag {
-		run.Unlock()
+	run.L.Lock()
+	running := !run.flag
+	run.L.Unlock()
+
+	if running {
 		d.Quit()
 	} else {
-		run.Unlock()
 		os.Exit(1)
 	}
 }
@@ -169,12 +170,11 @@ func (d *gLDriver) Run() {
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
 func NewGLDriver() fyne.Driver {
-	d := new(gLDriver)
-	d.done = make(chan interface{})
-	d.drawDone = make(chan interface{})
-	d.animation = &animation.Runner{}
-
 	repository.Register("file", intRepo.NewFileRepository())
 
-	return d
+	return &gLDriver{
+		done:      make(chan interface{}),
+		drawDone:  make(chan interface{}),
+		animation: &animation.Runner{},
+	}
 }

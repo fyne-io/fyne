@@ -134,11 +134,11 @@ func (w *window) doShow() {
 		return
 	}
 
-	run.Lock()
+	run.L.Lock()
 	for !run.flag {
-		run.cond.Wait()
+		run.Wait()
 	}
-	run.Unlock()
+	run.L.Unlock()
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {
