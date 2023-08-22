@@ -38,14 +38,14 @@ func (w *Window) RunEventQueue() {
 
 // WaitForEvents wait for all the events.
 func (w *Window) WaitForEvents() {
-	done := donePool.Get().(chan struct{})
-	defer donePool.Put(done)
+	done := DonePool.Get().(chan struct{})
+	defer DonePool.Put(done)
 
 	w.eventQueue.In() <- func() { done <- struct{}{} }
 	<-done
 }
 
-var donePool = sync.Pool{
+var DonePool = sync.Pool{
 	New: func() interface{} {
 		return make(chan struct{})
 	},
