@@ -56,6 +56,7 @@ type (
 	Uniform gl.Uniform
 )
 
+var compiled []Program // avoid multiple compilations with the re-used mobile GUI context
 var noBuffer = Buffer{}
 var noShader = Shader{}
 var textureFilterToGL = []int32{gl.Linear, gl.Nearest}
@@ -68,10 +69,17 @@ func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
-	p.program = p.createProgram("simple_es")
-	p.lineProgram = p.createProgram("line_es")
-	p.rectangleProgram = p.createProgram("rectangle_es")
-	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
+	if compiled == nil {
+		compiled = []Program{
+			p.createProgram("simple_es"),
+			p.createProgram("line_es"),
+			p.createProgram("rectangle_es"),
+			p.createProgram("round_rectangle_es")}
+	}
+	p.program = compiled[0]
+	p.lineProgram = compiled[1]
+	p.rectangleProgram = compiled[2]
+	p.roundRectangleProgram = compiled[3]
 }
 
 // f32Bytes returns the byte representation of float32 values in the given byte
