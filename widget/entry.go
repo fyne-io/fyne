@@ -1495,9 +1495,8 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		if count <= 0 {
 			count = multiLineRows
 		}
-		// ensure multiline height is at least charMinSize * multilineRows
-		rowHeight := charMin.Height * float32(count)
-		minSize.Height = fyne.Max(minSize.Height, rowHeight+float32(count-1)*theme.LineSpacing())
+
+		minSize.Height = charMin.Height*float32(count) + theme.InnerPadding()
 	}
 
 	return minSize.Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()))
