@@ -407,10 +407,9 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	isMouseOverDragged := w.objIsDragged(mouseOver)
 	w.mouseLock.RUnlock()
 	if obj != nil && !isObjDragged {
-		ev := new(desktop.MouseEvent)
+		ev := &desktop.MouseEvent{Button: mouseButton}
 		ev.AbsolutePosition = mousePos
 		ev.Position = pos
-		ev.Button = mouseButton
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
 			if hovered == mouseOver {
@@ -447,7 +446,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	if mouseDragged != nil && mouseButton != desktop.MouseButtonSecondary {
 		if w.mouseButton > 0 {
 			draggedObjDelta := mouseDraggedObjStart.Subtract(mouseDragged.(fyne.CanvasObject).Position())
-			ev := new(fyne.DragEvent)
+			ev := &fyne.DragEvent{}
 			ev.AbsolutePosition = mousePos
 			ev.Position = mousePos.Subtract(mouseDraggedOffset).Add(draggedObjDelta)
 			ev.Dragged = fyne.NewDelta(mousePos.X-mouseDragPos.X, mousePos.Y-mouseDragPos.Y)
@@ -521,17 +520,19 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 
 		return false
 	})
-	ev := new(fyne.PointEvent)
-	ev.Position = pos
-	ev.AbsolutePosition = mousePos
+	ev := &fyne.PointEvent{
+		Position:         pos,
+		AbsolutePosition: mousePos,
+	}
 
 	coMouse := co
 	if wid, ok := co.(desktop.Mouseable); ok {
-		mev := new(desktop.MouseEvent)
+		mev := &desktop.MouseEvent{
+			Button:   button,
+			Modifier: modifiers,
+		}
 		mev.Position = ev.Position
 		mev.AbsolutePosition = mousePos
-		mev.Button = button
-		mev.Modifier = modifiers
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
