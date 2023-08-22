@@ -583,7 +583,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	}
 
 	_, tap := co.(fyne.Tappable)
-	_, altTap := co.(fyne.SecondaryTappable)
+	secondary, altTap := co.(fyne.SecondaryTappable)
 	if tap || altTap {
 		if action == press {
 			w.mouseLock.Lock()
@@ -592,7 +592,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		} else if action == release {
 			if co == mousePressed {
 				if button == desktop.MouseButtonSecondary && altTap {
-					w.QueueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
+					w.QueueEvent(func() { secondary.TappedSecondary(ev) })
 				}
 			}
 		}
@@ -921,9 +921,7 @@ func (w *window) RunWithContext(f func()) {
 }
 
 func (w *window) RescaleContext() {
-	runOnMain(func() {
-		w.rescaleOnMain()
-	})
+	runOnMain(w.rescaleOnMain)
 }
 
 func (w *window) Context() interface{} {
