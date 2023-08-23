@@ -1487,8 +1487,9 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
 	}
 
+	innerPadding := theme.InnerPadding()
 	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle)
-	minSize := charMin.Add(fyne.NewSquareSize(theme.InnerPadding()))
+	minSize := charMin.Add(fyne.NewSquareSize(innerPadding))
 
 	if r.entry.MultiLine {
 		count := r.entry.multiLineRows
@@ -1496,10 +1497,10 @@ func (r *entryRenderer) MinSize() fyne.Size {
 			count = multiLineRows
 		}
 
-		minSize.Height = charMin.Height*float32(count) + theme.InnerPadding()
+		minSize.Height = charMin.Height*float32(count) + innerPadding
 	}
 
-	return minSize.Add(fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding()))
+	return minSize.Add(fyne.NewSize(innerPadding*2, innerPadding))
 }
 
 func (r *entryRenderer) Objects() []fyne.CanvasObject {
