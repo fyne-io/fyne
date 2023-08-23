@@ -197,7 +197,7 @@ func (c *glCanvas) reloadScale() {
 	}
 
 	c.Lock()
-	c.scale = c.context.(*window).calculatedScale()
+	c.scale = w.calculatedScale()
 	c.Unlock()
 	c.SetDirty()
 
@@ -237,8 +237,7 @@ func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
 func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 	canvasSize := contentSize.Add(fyne.NewSize(0, c.menuHeight()))
 	if c.Padded() {
-		pad := theme.Padding() * 2
-		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
+		return canvasSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
 	}
 	return canvasSize
 }
@@ -246,7 +245,7 @@ func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 func (c *glCanvas) contentPos() fyne.Position {
 	contentPos := fyne.NewPos(0, c.menuHeight())
 	if c.Padded() {
-		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+		return contentPos.Add(fyne.NewSquareOffsetPos(theme.Padding()))
 	}
 	return contentPos
 }
@@ -254,20 +253,17 @@ func (c *glCanvas) contentPos() fyne.Position {
 func (c *glCanvas) contentSize(canvasSize fyne.Size) fyne.Size {
 	contentSize := fyne.NewSize(canvasSize.Width, canvasSize.Height-c.menuHeight())
 	if c.Padded() {
-		pad := theme.Padding() * 2
-		contentSize = contentSize.Subtract(fyne.NewSize(pad, pad))
+		return contentSize.Subtract(fyne.NewSquareSize(theme.Padding() * 2))
 	}
 	return contentSize
 }
 
 func (c *glCanvas) menuHeight() float32 {
-	switch c.menu {
-	case nil:
-		// no menu or native menu -> does not consume space on the canvas
-		return 0
-	default:
-		return c.menu.MinSize().Height
+	if c.menu == nil {
+		return 0 // no menu or native menu -> does not consume space on the canvas
 	}
+
+	return c.menu.MinSize().Height
 }
 
 func (c *glCanvas) overlayChanged() {
@@ -340,10 +336,9 @@ func (c *glCanvas) applyThemeOutOfTreeObjects() {
 }
 
 func newCanvas() *glCanvas {
-	c := &glCanvas{scale: 1.0, texScale: 1.0}
+	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
-	c.padded = true
 	c.debug = fyne.CurrentApp().Settings().BuildType() == fyne.BuildDebug
 	return c
 }
