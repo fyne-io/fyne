@@ -76,6 +76,7 @@ func (p *progressRenderer) Refresh() {
 	p.updateBar()
 	p.background.Refresh()
 	p.bar.Refresh()
+	p.label.Refresh()
 	canvas.Refresh(p.progress.super())
 }
 
@@ -127,7 +128,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	background.CornerRadius = theme.InputRadiusSize()
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	bar.CornerRadius = theme.InputRadiusSize()
-	label := canvas.NewText("0%", theme.ForegroundColor())
+	label := canvas.NewText("0%", theme.BackgroundColor())
 	label.Alignment = fyne.TextAlignCenter
 	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{background, bar, label}), background, bar, label, p}
 }

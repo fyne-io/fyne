@@ -97,6 +97,11 @@ func TestProgressRenderer_ApplyTheme(t *testing.T) {
 	bar := NewProgressBar()
 	render := test.WidgetRenderer(bar).(*progressRenderer)
 
+	oldLabelColor := render.label.Color
+	render.Refresh()
+	newLabelColor := render.label.Color
+	assert.Equal(t, oldLabelColor, newLabelColor)
+
 	textSize := render.label.TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
