@@ -68,9 +68,7 @@ func (b *MenuBar) Toggle() {
 }
 
 func (b *MenuBar) activateChild(item *menuBarItem) {
-	if !b.active {
-		b.active = true
-	}
+	b.active = true
 	if item.Child() != nil {
 		item.Child().DeactivateChild()
 	}
@@ -142,13 +140,14 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 	} else {
 		r.underlay.Resize(fyne.NewSize(0, 0))
 	}
-	r.cont.Resize(fyne.NewSize(size.Width-2*theme.InnerPadding(), size.Height))
-	r.cont.Move(fyne.NewPos(theme.InnerPadding(), 0))
+	innerPadding := theme.InnerPadding()
+	r.cont.Resize(fyne.NewSize(size.Width-2*innerPadding, size.Height))
+	r.cont.Move(fyne.NewPos(innerPadding, 0))
 	if item := r.b.activeItem; item != nil {
 		if item.Child().Size().IsZero() {
 			item.Child().Resize(item.Child().MinSize())
 		}
-		item.Child().Move(fyne.NewPos(item.Position().X+theme.InnerPadding(), item.Size().Height))
+		item.Child().Move(fyne.NewPos(item.Position().X+innerPadding, item.Size().Height))
 	}
 	r.background.Resize(size)
 }

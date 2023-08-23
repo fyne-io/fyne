@@ -186,7 +186,7 @@ func (d *gLDriver) runGL() {
 func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
-		if w.canvas.EnsureMinSize() {
+		if canvas.EnsureMinSize() {
 			w.viewLock.Lock()
 			w.shouldExpand = true
 			w.viewLock.Unlock()

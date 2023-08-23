@@ -164,7 +164,7 @@ func (d *gLDriver) Run() {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
 
-	go catchTerm(d)
+	go d.catchTerm()
 	d.runGL()
 }
 

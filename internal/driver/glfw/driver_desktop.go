@@ -55,12 +55,8 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 		// the only way we know the app was asked to quit is if this window is asked to close...
 		w := d.CreateWindow("SystrayMonitor")
 		w.(*window).create()
-		w.SetCloseIntercept(func() {
-			d.Quit()
-		})
-		w.SetOnClosed(func() {
-			systray.Quit()
-		})
+		w.SetCloseIntercept(d.Quit)
+		w.SetOnClosed(systray.Quit)
 	})
 
 	d.refreshSystray(m)
@@ -169,14 +165,12 @@ func (d *gLDriver) CurrentKeyModifiers() fyne.KeyModifier {
 	return d.currentKeyModifiers
 }
 
-func catchTerm(d *gLDriver) {
-	terminateSignals := make(chan os.Signal, 1)
-	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGTERM)
+func (d *gLDriver) catchTerm() {
+	terminateSignal := make(chan os.Signal, 1)
+	signal.Notify(terminateSignal, syscall.SIGINT, syscall.SIGTERM)
 
-	for range terminateSignals {
-		d.Quit()
-		break
-	}
+	<-terminateSignal
+	d.Quit()
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
@@ -194,9 +188,7 @@ func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
 	}
 	for _, item := range menu.Items {
 		if item.IsQuit && item.Action == nil {
-			item.Action = func() {
-				d.Quit()
-			}
+			item.Action = d.Quit
 		}
 	}
 }
