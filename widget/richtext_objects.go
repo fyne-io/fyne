@@ -322,10 +322,7 @@ func (p *ParagraphSegment) Unselect() {
 // SeparatorSegment includes a horizontal separator in a rich text widget.
 //
 // Since: 2.1
-type SeparatorSegment struct {
-	//lint:ignore U1000 This is required due to language design.
-	dummy uint8 // without this a pointer to SeparatorSegment will always be the same
-}
+type SeparatorSegment struct{}
 
 // Inline returns false as a separator should be full width.
 func (s *SeparatorSegment) Inline() bool {
