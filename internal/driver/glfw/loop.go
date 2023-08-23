@@ -139,8 +139,7 @@ func (d *gLDriver) runGL() {
 			}
 		case <-eventTick.C:
 			d.tryPollEvents()
-			newWindows := []fyne.Window{}
-			reassign := false
+			windowsToRemove := 0
 			for _, win := range d.windowList() {
 				w := win.(*window)
 				if w.viewport == nil {
@@ -148,15 +147,7 @@ func (d *gLDriver) runGL() {
 				}
 
 				if w.viewport.ShouldClose() {
-					reassign = true
-					w.viewLock.Lock()
-					w.visible = false
-					v := w.viewport
-					w.viewLock.Unlock()
-
-					// remove window from window list
-					v.Destroy()
-					w.destroy(d)
+					windowsToRemove++
 					continue
 				}
 
@@ -177,20 +168,38 @@ func (d *gLDriver) runGL() {
 					}
 				}
 
-				newWindows = append(newWindows, win)
-
 				if drawOnMainThread {
 					d.drawSingleFrame()
 				}
 			}
-			if reassign {
+			if windowsToRemove > 0 {
+				oldWindows := d.windowList()
+				newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
+
+				for _, win := range oldWindows {
+					w := win.(*window)
+					if w.viewport == nil {
+						continue
+					}
+
+					if w.viewport.ShouldClose() {
+						w.viewLock.Lock()
+						w.visible = false
+						v := w.viewport
+						w.viewLock.Unlock()
+
+						// remove window from window list
+						v.Destroy()
+						w.destroy(d)
+						continue
+					}
+
+					newWindows = append(newWindows, win)
+				}
+
 				d.windowLock.Lock()
 				d.windows = newWindows
 				d.windowLock.Unlock()
-
-				if len(newWindows) == 0 {
-					d.Quit()
-				}
 			}
 		}
 	}
