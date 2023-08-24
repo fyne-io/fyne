@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.4.0 - Unreleased
+## 2.4.0 - 30 August 2023
 
 ## Added
 
@@ -48,6 +48,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * The `Max` container and layout have been renamed `Stack` for clarity
 * Refreshing an image will now happen in app-thread not render process, apps may wish to add async image load
 * Icons for macOS bundles are now padded and rounded, disable with "-use-raw-icon" (#3752)
+* Update Android target SDK to 33 for Play Store releases
 * Focus handling for List/Tree/Table are now at the parent widget not child elements
 * Accordion widget now fills available space - put it inside a `VBox` container for old behavior (#4126))
 * Deprecated theme.FyneLogo() for later removal (#3296)
@@ -79,6 +80,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Enhance scroll wheel/touchpad scroll on desktop (#3492)
 * Possible build issue on Windows with app metadata
 * form hint text has confusing padding to next widget (#4137)
+* Entry Placeholder Style Only Applied On Click (#4035)
+* Backspace and Delete key Do not Fire OnChanged Event (#4117)
+* Fix progressbar text having the wrong color sometimes
+* Window doesn't render when called for the first time from system tray and the last window was closed (#4163)
+* Various vulnerabilities resolved through updating dependencies 
 
 
 ## 2.3.5 - 6 June 2023
