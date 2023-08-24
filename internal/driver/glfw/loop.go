@@ -114,9 +114,7 @@ func (d *gLDriver) runGL() {
 			return
 		case f := <-funcQueue:
 			f.f()
-			if f.done != nil {
-				f.done <- struct{}{}
-			}
+			f.done <- struct{}{}
 		case <-eventTick.C:
 			d.tryPollEvents()
 			newWindows := []fyne.Window{}
@@ -219,9 +217,7 @@ func (d *gLDriver) startDrawThread() {
 				return
 			case f := <-drawFuncQueue:
 				f.win.RunWithContext(f.f)
-				if f.done != nil {
-					f.done <- struct{}{}
-				}
+				f.done <- struct{}{}
 			case set := <-settingsChange:
 				painter.ClearFontCache()
 				cache.ResetThemeCaches()
