@@ -92,8 +92,6 @@ func (d *gLDriver) drawSingleFrame() {
 }
 
 func (d *gLDriver) runGL() {
-	eventTick := time.NewTicker(time.Second / 60)
-
 	if !atomic.CompareAndSwapUint32(&running, 0, 1) {
 		return // Run was called twice.
 	}
@@ -104,6 +102,7 @@ func (d *gLDriver) runGL() {
 		d.trayStart()
 	}
 	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
+	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {
 		case <-d.done:
