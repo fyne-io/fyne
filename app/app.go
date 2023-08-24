@@ -6,7 +6,6 @@ package app // import "fyne.io/fyne/v2/app"
 import (
 	"os"
 	"strconv"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -29,8 +28,6 @@ type fyneApp struct {
 	settings  *settings
 	storage   fyne.Storage
 	prefs     fyne.Preferences
-
-	running uint32 // atomic, 1 == running, 0 == stopped
 }
 
 func (a *fyneApp) CloudProvider() fyne.CloudProvider {
@@ -67,9 +64,7 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (a *fyneApp) Run() {
-	if atomic.CompareAndSwapUint32(&a.running, 0, 1) {
-		a.driver.Run()
-	}
+	a.driver.Run()
 }
 
 func (a *fyneApp) Quit() {
@@ -79,7 +74,6 @@ func (a *fyneApp) Quit() {
 
 	a.driver.Quit()
 	a.settings.stopWatching()
-	atomic.StoreUint32(&a.running, 0)
 }
 
 func (a *fyneApp) Driver() fyne.Driver {
