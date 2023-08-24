@@ -36,11 +36,11 @@ func init() {
 // TestMain makes sure that our driver is running on the main thread.
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
-	d.(*gLDriver).initGLFW()
+	d.initGLFW()
 	go func() {
 		// Wait for GLFW loop to be running.
 		// If we try to create windows before the context is created, this will fail with an exception.
-		<-d.(*gLDriver).waitForStart
+		<-d.waitForStart
 
 		initMainMenu()
 		os.Exit(m.Run())
@@ -68,9 +68,14 @@ func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
-	d := NewGLDriver().(desktop.Driver)
+	d := NewGLDriver()
 	w := d.CreateSplashWindow().(*window)
 	w.create()
+
+	// Verify that the glfw driver implements desktop.Driver.
+	var driver fyne.Driver = d
+	_, ok := driver.(desktop.Driver)
+	assert.True(t, ok)
 
 	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
 	assert.False(t, w.Padded())
@@ -1678,7 +1683,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	// Note: The #Close() is run asynchronously when the window is notified about the viewport close.
 	// Therefore, we have to wait some time before checking its state via the onClosed callback.
 
-	d := NewGLDriver().(*gLDriver)
+	d := NewGLDriver()
 	t.Run("when closing window with #Close()", func(t *testing.T) {
 		w := d.CreateWindow("test").(*window)
 		w.create()

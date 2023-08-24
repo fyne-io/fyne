@@ -38,7 +38,7 @@ func repaintWindow(w *window) {
 	<-w.driver.waitForStart
 
 	runOnDraw(w, func() {
-		d.(*gLDriver).repaintWindow(w)
+		d.repaintWindow(w)
 	})
 
 	time.Sleep(time.Millisecond * 150) // wait for the frames to be rendered... o
