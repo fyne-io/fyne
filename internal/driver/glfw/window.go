@@ -170,6 +170,10 @@ func (w *window) doShow() {
 	// show top canvas element
 	if w.canvas.Content() != nil {
 		w.canvas.Content().Show()
+
+		runOnDraw(w, func() {
+			w.driver.repaintWindow(w)
+		})
 	}
 }
 
@@ -967,9 +971,6 @@ func (w *window) doShowAgain() {
 		return
 	}
 
-	runOnDraw(w, func() {
-		w.driver.repaintWindow(w)
-	})
 	runOnMain(func() {
 		// show top canvas element
 		if w.canvas.Content() != nil {
