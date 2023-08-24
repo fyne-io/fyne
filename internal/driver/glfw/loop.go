@@ -33,6 +33,7 @@ type runFlag struct {
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
 var run = &runFlag{Cond: sync.Cond{L: &sync.Mutex{}}}
+var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -105,6 +106,7 @@ func (d *gLDriver) runGL() {
 	run.L.Unlock()
 	run.Broadcast()
 
+	d.initGLFW()
 	if d.trayStart != nil {
 		d.trayStart()
 	}

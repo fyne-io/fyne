@@ -172,11 +172,9 @@ func (d *gLDriver) Run() {
 func NewGLDriver() fyne.Driver {
 	repository.Register("file", intRepo.NewFileRepository())
 
-	d := &gLDriver{
+	return &gLDriver{
 		done:      make(chan interface{}),
 		drawDone:  make(chan interface{}),
 		animation: &animation.Runner{},
 	}
-	d.initGLFW()
-	return d
 }

@@ -947,6 +947,8 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		title = defaultTitle
 	}
 	runOnMain(func() {
+		d.initGLFW()
+
 		ret = &window{title: title, decorate: decorate, driver: d}
 		// This queue is destroyed when the window is closed.
 		ret.InitEventQueue()
