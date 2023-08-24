@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"sync"
+	"sync/atomic"
 
 	"github.com/fyne-io/image/ico"
 
@@ -36,11 +37,12 @@ var _ fyne.Driver = (*gLDriver)(nil)
 const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
 
 type gLDriver struct {
-	windowLock sync.RWMutex
-	windows    []fyne.Window
-	device     *glDevice
-	done       chan interface{}
-	drawDone   chan interface{}
+	windowLock   sync.RWMutex
+	windows      []fyne.Window
+	device       *glDevice
+	done         chan interface{}
+	drawDone     chan interface{}
+	waitForStart chan struct{}
 
 	animation *animation.Runner
 
@@ -148,11 +150,8 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	logError(msg, err)
 
-	run.L.Lock()
-	running := !run.flag
-	run.L.Unlock()
-
-	if running {
+	onMain := atomic.LoadUint32(&running) == 0
+	if onMain {
 		d.Quit()
 	} else {
 		os.Exit(1)
@@ -173,8 +172,9 @@ func NewGLDriver() fyne.Driver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:      make(chan interface{}),
-		drawDone:  make(chan interface{}),
-		animation: &animation.Runner{},
+		done:         make(chan interface{}),
+		drawDone:     make(chan interface{}),
+		waitForStart: make(chan struct{}),
+		animation:    &animation.Runner{},
 	}
 }

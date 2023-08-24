@@ -40,11 +40,7 @@ func TestMain(m *testing.M) {
 	go func() {
 		// Wait for GLFW loop to be running.
 		// If we try to create windows before the context is created, this will fail with an exception.
-		run.L.Lock()
-		for !run.flag {
-			run.Wait()
-		}
-		run.L.Unlock()
+		<-d.(*gLDriver).waitForStart
 
 		initMainMenu()
 		os.Exit(m.Run())
