@@ -108,7 +108,7 @@ func (d *gLDriver) runGL() {
 		select {
 		case <-d.done:
 			eventTick.Stop()
-			d.drawDone <- nil // wait for draw thread to stop
+			d.drawDone <- struct{}{} // wait for draw thread to stop
 			d.Terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return

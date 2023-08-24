@@ -40,8 +40,8 @@ type gLDriver struct {
 	windowLock   sync.RWMutex
 	windows      []fyne.Window
 	device       *glDevice
-	done         chan interface{}
-	drawDone     chan interface{}
+	done         chan struct{}
+	drawDone     chan struct{}
 	waitForStart chan struct{}
 
 	animation *animation.Runner
@@ -172,8 +172,8 @@ func NewGLDriver() fyne.Driver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:         make(chan interface{}),
-		drawDone:     make(chan interface{}),
+		done:         make(chan struct{}),
+		drawDone:     make(chan struct{}),
 		waitForStart: make(chan struct{}),
 		animation:    &animation.Runner{},
 	}
