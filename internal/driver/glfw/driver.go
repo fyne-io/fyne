@@ -104,10 +104,11 @@ func (d *gLDriver) Quit() {
 		}
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
-	defer func() {
-		recover() // we could be called twice - no safe way to check if d.done is closed
-	}()
-	close(d.done)
+
+	// Only call close once to avoid panic.
+	if atomic.LoadUint32(&running) == 1 {
+		close(d.done)
+	}
 }
 
 func (d *gLDriver) addWindow(w *window) {
