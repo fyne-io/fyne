@@ -5,7 +5,6 @@ import (
 	_ "image/png" // for the icon
 	"math"
 	"runtime"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -135,9 +134,7 @@ func (w *window) doShow() {
 		return
 	}
 
-	if atomic.LoadUint32(&running) == 0 {
-		<-w.driver.waitForStart
-	}
+	<-w.driver.waitForStart
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {
