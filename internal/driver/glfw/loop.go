@@ -41,17 +41,17 @@ func init() {
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	onMain := atomic.LoadUint32(&running) == 0
-	if onMain {
+	if onMain := atomic.LoadUint32(&running) == 0; onMain {
 		f()
-	} else {
-		done := common.DonePool.Get().(chan struct{})
-		defer common.DonePool.Put(done)
-
-		funcQueue <- funcData{f: f, done: done}
-
-		<-done
+		return
 	}
+
+	done := common.DonePool.Get().(chan struct{})
+	defer common.DonePool.Put(done)
+
+	funcQueue <- funcData{f: f, done: done}
+
+	<-done
 }
 
 // force a function f to run on the draw thread
