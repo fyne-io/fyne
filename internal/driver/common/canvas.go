@@ -100,7 +100,9 @@ func (c *Canvas) EnsureMinSize() bool {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl, func() {
 			if img, ok := obj.(*canvas.Image); ok {
+				c.RUnlock()
 				img.Refresh() // this may now have a different texScale
+				c.RLock()
 			}
 		})
 
