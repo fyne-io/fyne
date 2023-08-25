@@ -23,21 +23,24 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add APIs for refreshing individual items in collections (#3826)
 * Tapping slider moves it to that position (#3650)
 * Add `OnChangeEnded` callback to `Slider` (#3652)
+* Added keyboard controls to `Slider`
 * Add `NewWarningThemedResource` and `NewSuccessThemedResource` along with `NewColoredResource` (#4040)
 * Custom hyperlink callback for rich text hyperlinks (#3335)
-* Added `dialog.NewCustomWithoutButtons`, with `SetConfirmImportance` and `SetButtons` (#2127, #2782)
+* Added `dialog.NewCustomWithoutButtons`, with a `SetButtons` method (#2127, #2782)
+* Added `SetConfirmImportance` to `dialog.ConfirmDialog`.
+* Added `FormDialog.Submit()` to close and submit the dialog if validation passes
 * Rich Text image alignment (#3810)
-* Bring back theme.HyperlinkColor (#3867)
-* Added Importance field on Label to color the text
+* Bring back `theme.HyperlinkColor` (#3867)
+* Added `Importance` field on `Label` to color the text
 * Navigating in entry quickly with ctrl key (#2462)
-* Support desktop icon metadata for Linux and BSD
+* Support `.desktop` file metadata in `FyneApp.toml` for Linux and BSD
 * Support mobile simulator on FreeBSD
 * Add data binding boolean operators `Not`, `And` and `Or`
 * Added `Entry.Append`, `Select.SetOptions`, `Check.SetText`, `FormDialog.Submit`
 * Add `ShowPopUpAtRelativePosition` and `PopUp.ShowAtRelativePosition`
 * Add desktop support to get key modifiers with `CurrentKeyModifiers`
 * Add geometry helpers `NewSquareSize` and `NewSquareOffsetPos`
-* Add --pprof option to fyne build commands to enable profiling
+* Add `--pprof` option to fyne build commands to enable profiling
 * Support compiling from Android (termux)
 
 ## Changed
@@ -50,40 +53,42 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Icons for macOS bundles are now padded and rounded, disable with "-use-raw-icon" (#3752)
 * Update Android target SDK to 33 for Play Store releases
 * Focus handling for List/Tree/Table are now at the parent widget not child elements
-* Accordion widget now fills available space - put it inside a `VBox` container for old behavior (#4126))
+* Accordion widget now fills available space - put it inside a `VBox` container for old behavior (#4126)
 * Deprecated theme.FyneLogo() for later removal (#3296)
 * Improve look of menu shortcuts (#2722)
 * iOS and macOS packages now default to using "XCWildcard" provisioning profile
 * Improving performance of lookup for theme data
+* Improved application startup time
 
 ## Fixed
 
 * Rendering performance enhancements
-* dialog.NewProgressInfinite is deprecated, but dialog.NewCustom isn't equivalent
+* `dialog.NewProgressInfinite` is deprecated, but dialog.NewCustom isn't equivalent
 * Mouse cursor desync with Split handle when dragging (#3791)
 * Minor graphic glitch with checkbox (#3792)
 * binding.String===>Quick refresh *b.val will appear with new data reset by a call to OnChange (#3774)
 * Fyne window becomes unresponsive when in background for a while (#2791)
-* Hangs on repeated calls to SetSelected in table. (#3684)
-* Select has wrong height, padding and border (#4142)
-* widget.ImageSegment can't be aligned. (#3505)
+* Hangs on repeated calls to `Selct.SetSelected` in table. (#3684)
+* `Select` has wrong height, padding and border (#4142)
+* `widget.ImageSegment` can't be aligned. (#3505)
 * Memory leak in font metrics cache (#4108)
 * Don't panic when loading preferences with wrong type (#4039)
 * Button with icon has wrong padding on right (#4124)
-* Preferences don't all save when written in CloseIntercept (#3170)
+* Preferences don't all save when written in `CloseIntercept` (#3170)
 * Text size does not update in Refresh for TextGrid
 * DocTab selection underline not updated when deleting an Item (#3905)
 * Single line Entry throws away selected text on submission (#4026)
 * Significantly improve performance of large `TextGrid` and `Tree` widgets
-* list.ScrollToBottom not scrolling to show the totality of the last Item (#3829)
-* Setting Position1 of canvas.Circle higher than its Position2 causes panic. (#3949)
-* Enhance scroll wheel/touchpad scroll on desktop (#3492)
+* `List.ScrollToBottom` not scrolling to show the totality of the last Item (#3829)
+* Setting `Position1` of canvas.Circle higher than `Position2` causes panic. (#3949)
+* Enhance scroll wheel/touchpad scroll speed on desktop (#3492)
 * Possible build issue on Windows with app metadata
-* form hint text has confusing padding to next widget (#4137)
-* Entry Placeholder Style Only Applied On Click (#4035)
+* `Form` hint text has confusing padding to next widget (#4137)
+* `Entry` Placeholder Style Only Applied On Click (#4035)
 * Backspace and Delete key Do not Fire OnChanged Event (#4117)
-* Fix progressbar text having the wrong color sometimes
+* Fix `ProgressBar` text having the wrong color sometimes
 * Window doesn't render when called for the first time from system tray and the last window was closed (#4163)
+* Possible race condition in preference change listeners
 * Various vulnerabilities resolved through updating dependencies 
 
 
