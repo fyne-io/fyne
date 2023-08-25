@@ -68,7 +68,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Minor graphic glitch with checkbox (#3792)
 * binding.String===>Quick refresh *b.val will appear with new data reset by a call to OnChange (#3774)
 * Fyne window becomes unresponsive when in background for a while (#2791)
-* Hangs on repeated calls to `Selct.SetSelected` in table. (#3684)
+* Hangs on repeated calls to `Select.SetSelected` in table. (#3684)
 * `Select` has wrong height, padding and border (#4142)
 * `widget.ImageSegment` can't be aligned. (#3505)
 * Memory leak in font metrics cache (#4108)
