@@ -70,7 +70,8 @@ func TestFocusManager_Focus(t *testing.T) {
 
 	t.Run("focus visible inside hidden", func(t *testing.T) {
 		manager, entry1, _, visibleInsideHidden, _, _, _ := setupFocusManager(t)
-		itBehavesLikeDoingNothing(t, manager, visibleInsideHidden, entry1, true)
+		// visible items hidden inside hidden widgets may not be discovered in traversal
+		itBehavesLikeDoingNothing(t, manager, visibleInsideHidden, entry1, false)
 	})
 
 	t.Run("focus foreign", func(t *testing.T) {
@@ -182,6 +183,7 @@ func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, visib
 	hidden = &focusable{
 		child: visibleInsideHidden,
 	}
+	hidden.Refresh()
 	hidden.Hide()
 	entry2 = &focusable{}
 	disabled = &focusable{}
