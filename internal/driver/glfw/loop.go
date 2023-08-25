@@ -108,7 +108,6 @@ func (d *gLDriver) runGL() {
 		case <-d.done:
 			eventTick.Stop()
 			d.drawDone <- struct{}{} // wait for draw thread to stop
-			atomic.StoreUint32(&running, 0)
 			d.Terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return

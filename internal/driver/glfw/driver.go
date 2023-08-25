@@ -106,7 +106,7 @@ func (d *gLDriver) Quit() {
 	}
 
 	// Only call close once to avoid panic.
-	if atomic.LoadUint32(&running) == 1 {
+	if atomic.CompareAndSwapUint32(&running, 1, 0) {
 		close(d.done)
 	}
 }
